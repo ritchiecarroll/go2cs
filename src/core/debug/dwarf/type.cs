@@ -31,9 +31,9 @@ partial struct CommonType {
 
 } partial class dwarf_package {
 
-internal static ж<CommonType> Commonᴍ(ж<CommonType> Ꮡc) { return Ꮡc; }
+[GoMethodBody("Common")] internal static ж<CommonType> Commonᴍ(ж<CommonType> Ꮡc) { return Ꮡc; }
 
-internal static int64 Sizeᴍ(ref CommonType c) { return c.ByteSize; }
+[GoMethodBody("Size")] internal static int64 Sizeᴍ(ref CommonType c) { return c.ByteSize; }
 
 } partial class dwarf_package {
 
@@ -52,9 +52,9 @@ partial struct BasicType {
 
 } partial class dwarf_package {
 
-internal static ж<BasicType> Basicᴍ(ж<BasicType> Ꮡb) { return Ꮡb; }
+[GoMethodBody("Basic")] internal static ж<BasicType> Basicᴍ(ж<BasicType> Ꮡb) { return Ꮡb; }
 
-internal static @string Stringᴍ(ref BasicType t) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref BasicType t) {
     if (t.Name != ""u8) {
         return t.Name;
     }
@@ -119,9 +119,9 @@ partial struct QualType {
 
 } partial class dwarf_package {
 
-internal static @string Stringᴍ(ref QualType t) { return t.Qual + " "u8 + t.Type.String(); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ref QualType t) { return t.Qual + " "u8 + t.Type.String(); }
 
-internal static int64 Sizeᴍ(ref QualType t) { return t.Type.Size(); }
+[GoMethodBody("Size")] internal static int64 Sizeᴍ(ref QualType t) { return t.Type.Size(); }
 
 } partial class dwarf_package {
 
@@ -135,11 +135,11 @@ partial struct ArrayType {
 
 } partial class dwarf_package {
 
-internal static @string Stringᴍ(ref ArrayType t) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref ArrayType t) {
     return "["u8 + strconv.FormatInt(t.Count, 10) + "]"u8 + t.Type.String();
 }
 
-internal static int64 Sizeᴍ(ref ArrayType t) {
+[GoMethodBody("Size")] internal static int64 Sizeᴍ(ref ArrayType t) {
     if (t.Count == -1) {
         return 0;
     }
@@ -159,7 +159,7 @@ partial struct VoidType {
 internal static ref readonly @string voidˢᴍVoidType => ref voidˢᵇᴍVoidType;
 private static readonly @string voidˢᵇᴍVoidType = "void"u8;
 
-internal static @string Stringᴍ(ref VoidType t) { return voidˢᴍVoidType; }
+[GoMethodBody("String")] internal static @string Stringᴍ(ref VoidType t) { return voidˢᴍVoidType; }
 
 } partial class dwarf_package {
 
@@ -171,7 +171,7 @@ partial struct PtrType {
 
 } partial class dwarf_package {
 
-internal static @string Stringᴍ(ref PtrType t) { return "*"u8 + t.Type.String(); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ref PtrType t) { return "*"u8 + t.Type.String(); }
 
 } partial class dwarf_package {
 
@@ -269,7 +269,7 @@ partial struct StructField {
 
 } partial class dwarf_package {
 
-internal static @string Stringᴍ(ref StructType t) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref StructType t) {
     if (t.StructName != ""u8) {
         return t.Kind + " "u8 + t.StructName;
     }
@@ -278,7 +278,7 @@ internal static @string Stringᴍ(ref StructType t) {
 
 } partial class dwarf_package {
 
-internal static int64 bitOffsetᴍ(ref StructField f) {
+[GoMethodBody("bitOffset")] internal static int64 bitOffsetᴍ(ref StructField f) {
     if (f.BitOffset != 0) {
         return f.BitOffset;
     }
@@ -287,7 +287,7 @@ internal static int64 bitOffsetᴍ(ref StructField f) {
 
 } partial class dwarf_package {
 
-internal static @string Defnᴍ(ref StructType t) {
+[GoMethodBody("Defn")] internal static @string Defnᴍ(ref StructType t) {
     @string s = t.Kind;
     if (t.StructName != ""u8) {
         s += " "u8 + t.StructName;
@@ -335,7 +335,7 @@ partial struct EnumValue {
 internal static ref readonly @string enumˢᴍEnumType => ref enumˢᵇᴍEnumType;
 private static readonly @string enumˢᵇᴍEnumType = "enum"u8;
 
-internal static @string Stringᴍ(ref EnumType t) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref EnumType t) {
     @string s = enumˢᴍEnumType;
     if (t.EnumName != ""u8) {
         s += " "u8 + t.EnumName;
@@ -366,7 +366,7 @@ partial struct FuncType {
 internal static ref readonly @string funcˢᴍFuncType => ref funcˢᵇᴍFuncType;
 private static readonly @string funcˢᵇᴍFuncType = "func("u8;
 
-internal static @string Stringᴍ(ref FuncType t) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref FuncType t) {
     @string s = funcˢᴍFuncType;
     foreach (var (i, tΔ1) in range(t.ParamType)) {
         if (i > 0) {
@@ -390,7 +390,7 @@ partial struct DotDotDotType {
 
 } partial class dwarf_package {
 
-internal static @string Stringᴍ(ref DotDotDotType t) { return "..."; }
+[GoMethodBody("String")] internal static @string Stringᴍ(ref DotDotDotType t) { return "..."; }
 
 } partial class dwarf_package {
 
@@ -402,9 +402,9 @@ partial struct TypedefType {
 
 } partial class dwarf_package {
 
-internal static @string Stringᴍ(ref TypedefType t) { return t.Name; }
+[GoMethodBody("String")] internal static @string Stringᴍ(ref TypedefType t) { return t.Name; }
 
-internal static int64 Sizeᴍ(ref TypedefType t) { return t.Type.Size(); }
+[GoMethodBody("Size")] internal static int64 Sizeᴍ(ref TypedefType t) { return t.Type.Size(); }
 
 } partial class dwarf_package {
 
@@ -417,7 +417,7 @@ partial struct UnsupportedType {
 
 } partial class dwarf_package {
 
-internal static @string Stringᴍ(ref UnsupportedType t) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref UnsupportedType t) {
     if (t.Name != ""u8) {
         return t.Name;
     }
@@ -441,7 +441,7 @@ partial interface typeReader {
 } partial class dwarf_package {
 
 // Type reads the type at off in the DWARF “info” section.
-internal static (Type, error) Typeᴍ(ж<Data> Ꮡd, Offset off) {
+[GoMethodBody("Type")] internal static (Type, error) Typeᴍ(ж<Data> Ꮡd, Offset off) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     return Ꮡd.readType(infoˢᴍData, new ReaderжtypeReader(Ꮡd.Reader()), off, d.typeCache, nil);
@@ -456,7 +456,7 @@ partial struct typeFixer {
 
 } partial class dwarf_package {
 
-internal static void recordArrayTypeᴍ(ref typeFixer tf, ж<Type> Ꮡt) {
+[GoMethodBody("recordArrayType")] internal static void recordArrayTypeᴍ(ref typeFixer tf, ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt == nil) {
@@ -468,7 +468,7 @@ internal static void recordArrayTypeᴍ(ref typeFixer tf, ж<Type> Ꮡt) {
     }
 }
 
-internal static void applyᴍ(ref typeFixer tf) {
+[GoMethodBody("apply")] internal static void applyᴍ(ref typeFixer tf) {
     foreach (var (_, t) in range(tf.typedefs)) {
         t.of(TypedefType.ᏑCommonType).Common().ByteSize = t.Type.Size();
     }
@@ -509,7 +509,7 @@ private static readonly @string volatileˢᵇᴍData = "volatile"u8;
 // type cache, appends new typedef types to typedefs, and computes the
 // sizes of types. Callers should pass nil for typedefs; this is used
 // for internal recursion.
-internal static (Type, error) readTypeᴍ(ж<Data> Ꮡd, @string name, typeReader r, Offset off, map<Offset, Type> typeCache, ж<typeFixer> Ꮡfixups) {
+[GoMethodBody("readType")] internal static (Type, error) readTypeᴍ(ж<Data> Ꮡd, @string name, typeReader r, Offset off, map<Offset, Type> typeCache, ж<typeFixer> Ꮡfixups) {
     GoFrame ᒐ = default;
     try {
         ref var fixups = ref Ꮡfixups.DerefOrNull();
@@ -1047,59 +1047,3 @@ internal static void zeroArray(ref Type t) {
 }
 
 } // end dwarf_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class dwarfᴛCommonType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<CommonType> Common(this ж<CommonType> Ꮡc) => dwarf_package.Commonᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Size(this ref CommonType c) => dwarf_package.Sizeᴍ(ref c);
-}
-partial class dwarfᴛBasicType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<BasicType> Basic(this ж<BasicType> Ꮡb) => dwarf_package.Basicᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref BasicType t) => dwarf_package.Stringᴍ(ref t);
-}
-partial class dwarfᴛQualType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref QualType t) => dwarf_package.Stringᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Size(this ref QualType t) => dwarf_package.Sizeᴍ(ref t);
-}
-partial class dwarfᴛArrayType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref ArrayType t) => dwarf_package.Stringᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Size(this ref ArrayType t) => dwarf_package.Sizeᴍ(ref t);
-}
-partial class dwarfᴛVoidType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref VoidType t) => dwarf_package.Stringᴍ(ref t);
-}
-partial class dwarfᴛPtrType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref PtrType t) => dwarf_package.Stringᴍ(ref t);
-}
-partial class dwarfᴛStructType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref StructType t) => dwarf_package.Stringᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Defn(this ref StructType t) => dwarf_package.Defnᴍ(ref t);
-}
-partial class dwarfᴛStructField {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 bitOffset(this ref StructField f) => dwarf_package.bitOffsetᴍ(ref f);
-}
-partial class dwarfᴛEnumType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref EnumType t) => dwarf_package.Stringᴍ(ref t);
-}
-partial class dwarfᴛFuncType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref FuncType t) => dwarf_package.Stringᴍ(ref t);
-}
-partial class dwarfᴛDotDotDotType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref DotDotDotType t) => dwarf_package.Stringᴍ(ref t);
-}
-partial class dwarfᴛTypedefType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref TypedefType t) => dwarf_package.Stringᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Size(this ref TypedefType t) => dwarf_package.Sizeᴍ(ref t);
-}
-partial class dwarfᴛUnsupportedType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref UnsupportedType t) => dwarf_package.Stringᴍ(ref t);
-}
-partial class dwarfᴛData {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Type, error) Type(this ж<Data> Ꮡd, Offset off) => dwarf_package.Typeᴍ(Ꮡd, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Type, error) readType(this ж<Data> Ꮡd, @string name, typeReader r, Offset off, map<Offset, Type> typeCache, ж<typeFixer> Ꮡfixups) => dwarf_package.readTypeᴍ(Ꮡd, name, r, off, typeCache, Ꮡfixups);
-}
-partial class dwarfᴛtypeFixer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordArrayType(this ref typeFixer tf, ж<Type> Ꮡt) => dwarf_package.recordArrayTypeᴍ(ref tf, Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void apply(this ref typeFixer tf) => dwarf_package.applyᴍ(ref tf);
-}
-// </GlyphForwarders>

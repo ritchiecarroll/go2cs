@@ -99,7 +99,7 @@ partial struct neverEnding /*num:byte*/;
 
 } partial class cgi_package {
 
-internal static (nint n, error err) Readᴍ(neverEnding b, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(neverEnding b, slice<byte> p) {
     foreach (var i in range(len(p))) {
         p[i] = (byte)b;
     }
@@ -182,9 +182,3 @@ internal static void childCGIProcess() {
 }
 
 } // end cgi_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class cgiᴛneverEnding {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) => cgi_package.Readᴍ(b, p);
-}
-// </GlyphForwarders>

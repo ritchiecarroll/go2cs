@@ -22,7 +22,7 @@ partial struct DecodingError {
 
 } partial class hpack_package {
 
-internal static @string Errorᴍ(DecodingError de) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(DecodingError de) {
     return fmt.Sprintf("decoding error: %v"u8, de.Err);
 }
 
@@ -34,7 +34,7 @@ partial struct InvalidIndexError /*num:nint*/;
 
 } partial class hpack_package {
 
-internal static @string Errorᴍ(InvalidIndexError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(InvalidIndexError e) {
     return fmt.Sprintf("invalid indexed representation index %d"u8, (nint)e);
 }
 
@@ -55,7 +55,7 @@ partial struct HeaderField {
 // That is, it reports whether it starts with a colon.
 // It is not otherwise guaranteed to be a valid pseudo header field,
 // though.
-internal static bool IsPseudoᴍ(HeaderField hf) {
+[GoMethodBody("IsPseudo")] internal static bool IsPseudoᴍ(HeaderField hf) {
     return len(hf.Name) != 0 && hf.Name[0] == ':';
 }
 
@@ -63,7 +63,7 @@ internal static bool IsPseudoᴍ(HeaderField hf) {
 private static ref readonly @string sensitiveˢᴍHeaderField => ref sensitiveˢᵇᴍHeaderField;
 private static readonly @string sensitiveˢᵇᴍHeaderField = " (sensitive)"u8;
 
-internal static @string Stringᴍ(HeaderField hf) {
+[GoMethodBody("String")] internal static @string Stringᴍ(HeaderField hf) {
     @string suffix = default;
     if (hf.Sensitive) {
         suffix = sensitiveˢᴍHeaderField;
@@ -72,7 +72,7 @@ internal static @string Stringᴍ(HeaderField hf) {
 }
 
 // Size returns the size of an entry per RFC 7541 section 4.1.
-internal static uint32 Sizeᴍ(HeaderField hf) {
+[GoMethodBody("Size")] internal static uint32 Sizeᴍ(HeaderField hf) {
     // https://httpwg.org/specs/rfc7541.html#rfc.section.4.1
     // "The size of the dynamic table is the sum of the size of
     // its entries. The size of an entry is the sum of its name's
@@ -133,14 +133,14 @@ public static error ErrStringLength = errors.New("hpack: string too long");
 // value string. If a string exceeds this length (even after any
 // decompression), Write will return ErrStringLength.
 // A value of 0 means unlimited and is the default from NewDecoder.
-internal static void SetMaxStringLengthᴍ(ref Decoder d, nint n) {
+[GoMethodBody("SetMaxStringLength")] internal static void SetMaxStringLengthᴍ(ref Decoder d, nint n) {
     d.maxStrLen = n;
 }
 
 // SetEmitFunc changes the callback used when new header fields
 // are decoded.
 // It must be non-nil. It does not affect EmitEnabled.
-internal static void SetEmitFuncᴍ(ref Decoder d, Action<HeaderField> emitFunc) {
+[GoMethodBody("SetEmitFunc")] internal static void SetEmitFuncᴍ(ref Decoder d, Action<HeaderField> emitFunc) {
     d.emit = emitFunc;
 }
 
@@ -151,22 +151,22 @@ internal static void SetEmitFuncᴍ(ref Decoder d, Action<HeaderField> emitFunc)
 // while still decoding and keeping in-sync with decoder state, but
 // without doing unnecessary decompression or generating unnecessary
 // garbage for header fields past the limit.
-internal static void SetEmitEnabledᴍ(ref Decoder d, bool v) { d.emitEnabled = v; }
+[GoMethodBody("SetEmitEnabled")] internal static void SetEmitEnabledᴍ(ref Decoder d, bool v) { d.emitEnabled = v; }
 
 // EmitEnabled reports whether calls to the emitFunc provided to NewDecoder
 // are currently enabled. The default is true.
-internal static bool EmitEnabledᴍ(ref Decoder d) { return d.emitEnabled; }
+[GoMethodBody("EmitEnabled")] internal static bool EmitEnabledᴍ(ref Decoder d) { return d.emitEnabled; }
 
 // TODO: add method *Decoder.Reset(maxSize, emitFunc) to let callers re-use Decoders and their
 // underlying buffers for garbage reasons.
-internal static void SetMaxDynamicTableSizeᴍ(ref Decoder d, uint32 v) {
+[GoMethodBody("SetMaxDynamicTableSize")] internal static void SetMaxDynamicTableSizeᴍ(ref Decoder d, uint32 v) {
     d.dynTab.setMaxSize(v);
 }
 
 // SetAllowedMaxDynamicTableSize sets the upper bound that the encoded
 // stream (via dynamic table size updates) may set the maximum size
 // to.
-internal static void SetAllowedMaxDynamicTableSizeᴍ(ref Decoder d, uint32 v) {
+[GoMethodBody("SetAllowedMaxDynamicTableSize")] internal static void SetAllowedMaxDynamicTableSizeᴍ(ref Decoder d, uint32 v) {
     d.dynTab.allowedMaxSize = v;
 }
 
@@ -182,19 +182,19 @@ partial struct dynamicTable {
 
 } partial class hpack_package {
 
-internal static void setMaxSizeᴍ(ref dynamicTable dt, uint32 v) {
+[GoMethodBody("setMaxSize")] internal static void setMaxSizeᴍ(ref dynamicTable dt, uint32 v) {
     dt.maxSize = v;
     dt.evict();
 }
 
-internal static void addᴍ(ref dynamicTable dt, HeaderField f) {
+[GoMethodBody("add")] internal static void addᴍ(ref dynamicTable dt, HeaderField f) {
     dt.table.addEntry(f);
     dt.size += f.Size();
     dt.evict();
 }
 
 // If we're too big, evict old stuff.
-internal static void evictᴍ(ref dynamicTable dt) {
+[GoMethodBody("evict")] internal static void evictᴍ(ref dynamicTable dt) {
     nint n = default;
     while (dt.size > dt.maxSize && n < dt.table.len()) {
         dt.size -= dt.table.ents[n].Size();
@@ -205,14 +205,14 @@ internal static void evictᴍ(ref dynamicTable dt) {
 
 } partial class hpack_package {
 
-internal static nint maxTableIndexᴍ(ref Decoder d) {
+[GoMethodBody("maxTableIndex")] internal static nint maxTableIndexᴍ(ref Decoder d) {
     // This should never overflow. RFC 7540 Section 6.5.2 limits the size of
     // the dynamic table to 2^32 bytes, where each entry will occupy more than
     // one byte. Further, the staticTable has a fixed, small length.
     return d.dynTab.table.len() + staticTable.len();
 }
 
-internal static (HeaderField hf, bool ok) atᴍ(ref Decoder d, uint64 i) {
+[GoMethodBody("at")] internal static (HeaderField hf, bool ok) atᴍ(ref Decoder d, uint64 i) {
     HeaderField hf = default;
     bool ok = default;
 
@@ -237,7 +237,7 @@ internal static (HeaderField hf, bool ok) atᴍ(ref Decoder d, uint64 i) {
 //
 // TODO: remove this method and make it incremental later? This is
 // easier for debugging now.
-internal static (slice<HeaderField>, error) DecodeFullᴍ(ж<Decoder> Ꮡd, slice<byte> p) {
+[GoMethodBody("DecodeFull")] internal static (slice<HeaderField>, error) DecodeFullᴍ(ж<Decoder> Ꮡd, slice<byte> p) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -274,7 +274,7 @@ private static readonly @string truncatedHeadersˢᵇᴍDecoder = "truncated hea
 // Close declares that the decoding is complete and resets the Decoder
 // to be reused again for a new header block. If there is any remaining
 // data in the decoder's buffer, Close returns an error.
-internal static error Closeᴍ(ref Decoder d) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref Decoder d) {
     if (d.saveBuf.Len() > 0) {
         d.saveBuf.Reset();
         return new DecodingError(errors.New(truncatedHeadersˢᴍDecoder));
@@ -283,7 +283,7 @@ internal static error Closeᴍ(ref Decoder d) {
     return default;
 }
 
-internal static (nint n, error err) Writeᴍ(ref Decoder d, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref Decoder d, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -341,8 +341,8 @@ internal static indexType indexedNever => 2;
 
 } partial class hpack_package {
 
-internal static bool indexedᴍ(indexType v) { return v == indexedTrue; }
-internal static bool sensitiveᴍ(indexType v) { return v == indexedNever; }
+[GoMethodBody("indexed")] internal static bool indexedᴍ(indexType v) { return v == indexedTrue; }
+[GoMethodBody("sensitive")] internal static bool sensitiveᴍ(indexType v) { return v == indexedNever; }
 
 } partial class hpack_package {
 
@@ -354,7 +354,7 @@ private static readonly @string invalidEncodingˢᵇᴍDecoder = "invalid encodi
 // any other error is fatal.
 // consumes d.buf iff it returns nil.
 // precondition: must be called with len(d.buf) > 0
-internal static error parseHeaderFieldReprᴍ(ref Decoder d) {
+[GoMethodBody("parseHeaderFieldRepr")] internal static error parseHeaderFieldReprᴍ(ref Decoder d) {
     var b = d.buf[0];
     switch (ᐧ) {
     case {} when (byte)(b & 128) != 0: {
@@ -392,7 +392,7 @@ internal static error parseHeaderFieldReprᴍ(ref Decoder d) {
 }
 
 // (same invariants and behavior as parseHeaderFieldRepr)
-internal static error parseFieldIndexedᴍ(ref Decoder d) {
+[GoMethodBody("parseFieldIndexed")] internal static error parseFieldIndexedᴍ(ref Decoder d) {
     var buf = d.buf;
     (var idx, buf, var err) = readVarInt(7, buf);
     if (err != nil) {
@@ -407,7 +407,7 @@ internal static error parseFieldIndexedᴍ(ref Decoder d) {
 }
 
 // (same invariants and behavior as parseHeaderFieldRepr)
-internal static error parseFieldLiteralᴍ(ref Decoder d, uint8 n, indexType it) {
+[GoMethodBody("parseFieldLiteral")] internal static error parseFieldLiteralᴍ(ref Decoder d, uint8 n, indexType it) {
     var buf = d.buf;
     (var nameIdx, buf, var err) = readVarInt(n, buf);
     if (err != nil) {
@@ -453,7 +453,7 @@ internal static error parseFieldLiteralᴍ(ref Decoder d, uint8 n, indexType it)
     return d.callEmit(hf);
 }
 
-internal static error callEmitᴍ(ref Decoder d, HeaderField hf) {
+[GoMethodBody("callEmit")] internal static error callEmitᴍ(ref Decoder d, HeaderField hf) {
     if (d.maxStrLen != 0) {
         if (len(hf.Name) > d.maxStrLen || len(hf.Value) > d.maxStrLen) {
             return ErrStringLength;
@@ -472,7 +472,7 @@ private static ref readonly @string dynamicTableSizeUpdateˢ2ᴍDecoder => ref d
 private static readonly @string dynamicTableSizeUpdateˢ2ᵇᴍDecoder = "dynamic table size update too large"u8;
 
 // (same invariants and behavior as parseHeaderFieldRepr)
-internal static error parseDynamicTableSizeUpdateᴍ(ref Decoder d) {
+[GoMethodBody("parseDynamicTableSizeUpdate")] internal static error parseDynamicTableSizeUpdateᴍ(ref Decoder d) {
     // RFC 7541, sec 4.2: This dynamic table size update MUST occur at the
     // beginning of the first header block following the change to the dynamic table size.
     if (!d.firstField && d.dynTab.size > 0) {
@@ -545,7 +545,7 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
 //
 // It returns a reference to the encoded string data to permit deferring decode costs
 // until after the caller verifies all data is present.
-internal static (undecodedString u, slice<byte> remain, error err) readStringᴍ(ref Decoder d, slice<byte> p) {
+[GoMethodBody("readString")] internal static (undecodedString u, slice<byte> remain, error err) readStringᴍ(ref Decoder d, slice<byte> p) {
     undecodedString u = default;
     error err = default;
 
@@ -582,7 +582,7 @@ partial struct undecodedString {
 
 } partial class hpack_package {
 
-internal static (@string, error) decodeStringᴍ(ref Decoder d, undecodedString u) {
+[GoMethodBody("decodeString")] internal static (@string, error) decodeStringᴍ(ref Decoder d, undecodedString u) {
     if (!u.isHuff) {
         return ((@string)u.b, default);
     }
@@ -599,46 +599,3 @@ internal static (@string, error) decodeStringᴍ(ref Decoder d, undecodedString 
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class hpackᴛDecodingError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this DecodingError de) => hpack_package.Errorᴍ(de);
-}
-partial class hpackᴛInvalidIndexError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this InvalidIndexError e) => hpack_package.Errorᴍ(e);
-}
-partial class hpackᴛHeaderField {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsPseudo(this HeaderField hf) => hpack_package.IsPseudoᴍ(hf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this HeaderField hf) => hpack_package.Stringᴍ(hf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Size(this HeaderField hf) => hpack_package.Sizeᴍ(hf);
-}
-partial class hpackᴛDecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetMaxStringLength(this ref Decoder d, nint n) => hpack_package.SetMaxStringLengthᴍ(ref d, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetEmitFunc(this ref Decoder d, Action<HeaderField> emitFunc) => hpack_package.SetEmitFuncᴍ(ref d, emitFunc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetEmitEnabled(this ref Decoder d, bool v) => hpack_package.SetEmitEnabledᴍ(ref d, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool EmitEnabled(this ref Decoder d) => hpack_package.EmitEnabledᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetMaxDynamicTableSize(this ref Decoder d, uint32 v) => hpack_package.SetMaxDynamicTableSizeᴍ(ref d, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetAllowedMaxDynamicTableSize(this ref Decoder d, uint32 v) => hpack_package.SetAllowedMaxDynamicTableSizeᴍ(ref d, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint maxTableIndex(this ref Decoder d) => hpack_package.maxTableIndexᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (HeaderField hf, bool ok) at(this ref Decoder d, uint64 i) => hpack_package.atᴍ(ref d, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<HeaderField>, error) DecodeFull(this ж<Decoder> Ꮡd, slice<byte> p) => hpack_package.DecodeFullᴍ(Ꮡd, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Decoder d) => hpack_package.Closeᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ref Decoder d, slice<byte> p) => hpack_package.Writeᴍ(ref d, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseHeaderFieldRepr(this ref Decoder d) => hpack_package.parseHeaderFieldReprᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseFieldIndexed(this ref Decoder d) => hpack_package.parseFieldIndexedᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseFieldLiteral(this ref Decoder d, uint8 n, indexType it) => hpack_package.parseFieldLiteralᴍ(ref d, n, it);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error callEmit(this ref Decoder d, HeaderField hf) => hpack_package.callEmitᴍ(ref d, hf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseDynamicTableSizeUpdate(this ref Decoder d) => hpack_package.parseDynamicTableSizeUpdateᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (undecodedString u, slice<byte> remain, error err) readString(this ref Decoder d, slice<byte> p) => hpack_package.readStringᴍ(ref d, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) decodeString(this ref Decoder d, undecodedString u) => hpack_package.decodeStringᴍ(ref d, u);
-}
-partial class hpackᴛdynamicTable {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setMaxSize(this ref dynamicTable dt, uint32 v) => hpack_package.setMaxSizeᴍ(ref dt, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ref dynamicTable dt, HeaderField f) => hpack_package.addᴍ(ref dt, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void evict(this ref dynamicTable dt) => hpack_package.evictᴍ(ref dt);
-}
-partial class hpackᴛindexType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool indexed(this indexType v) => hpack_package.indexedᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool sensitive(this indexType v) => hpack_package.sensitiveᴍ(v);
-}
-// </GlyphForwarders>

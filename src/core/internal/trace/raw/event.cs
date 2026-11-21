@@ -37,7 +37,7 @@ private static readonly @string dataˢᵇᴍEvent = "\n\tdata="u8;
 //
 // This format is the same format that is parsed by the TextReader
 // and emitted by the TextWriter.
-internal static @string Stringᴍ(ref Event e) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref Event e) {
     var spec = e.Version.Specs()[e.Ev];
 
     ref var s = ref heap(new strings.Builder(), out var Ꮡs);
@@ -69,7 +69,7 @@ internal static @string Stringᴍ(ref Event e) {
 }
 
 // EncodedSize returns the canonical encoded size of an event.
-internal static nint EncodedSizeᴍ(ref Event e) {
+[GoMethodBody("EncodedSize")] internal static nint EncodedSizeᴍ(ref Event e) {
     nint size = 1;
     array<byte> buf = new(10); /* binary.MaxVarintLen64 */
     foreach (var (_, arg) in range(e.Args)) {
@@ -84,10 +84,3 @@ internal static nint EncodedSizeᴍ(ref Event e) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class rawᴛEvent {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Event e) => raw_package.Stringᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint EncodedSize(this ref Event e) => raw_package.EncodedSizeᴍ(ref e);
-}
-// </GlyphForwarders>

@@ -49,7 +49,7 @@ partial struct chunkedReader {
 internal static ref readonly @string chunkedEncodingContainsˢᴍchunkedReader => ref chunkedEncodingContainsˢᵇᴍchunkedReader;
 private static readonly @string chunkedEncodingContainsˢᵇᴍchunkedReader = "chunked encoding contains too much non-data"u8;
 
-internal static void beginChunkᴍ(ref chunkedReader cr) {
+[GoMethodBody("beginChunk")] internal static void beginChunkᴍ(ref chunkedReader cr) {
     // chunk-size CRLF
     slice<byte> line = default;
     (line, cr.err) = readChunkLine(cr.r);
@@ -91,7 +91,7 @@ internal static void beginChunkᴍ(ref chunkedReader cr) {
     }
 }
 
-internal static bool chunkHeaderAvailableᴍ(ref chunkedReader cr) {
+[GoMethodBody("chunkHeaderAvailable")] internal static bool chunkHeaderAvailableᴍ(ref chunkedReader cr) {
     nint n = cr.r.Buffered();
     if (n > 0) {
         var (peek, _) = cr.r.Peek(n);
@@ -104,7 +104,7 @@ internal static bool chunkHeaderAvailableᴍ(ref chunkedReader cr) {
 internal static ref readonly @string malformedChunkedEncodingˢᴍchunkedReader => ref malformedChunkedEncodingˢᵇᴍchunkedReader;
 private static readonly @string malformedChunkedEncodingˢᵇᴍchunkedReader = "malformed chunked encoding"u8;
 
-internal static (nint n, error err) Readᴍ(ref chunkedReader cr, slice<uint8> b) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref chunkedReader cr, slice<uint8> b) {
     nint n = default;
 
     while (cr.err == nil) {
@@ -259,7 +259,7 @@ partial struct chunkedWriter {
 // Write the contents of data as one chunk to Wire.
 // NOTE: Note that the corresponding chunk-writing procedure in Conn.Write has
 // a bug since it does not check for success of [io.WriteString]
-internal static (nint n, error err) Writeᴍ(ref chunkedWriter cw, slice<byte> data) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref chunkedWriter cw, slice<byte> data) {
     nint n = default;
     error err = default;
 
@@ -287,7 +287,7 @@ internal static (nint n, error err) Writeᴍ(ref chunkedWriter cw, slice<byte> d
     return (n, err);
 }
 
-internal static error Closeᴍ(ref chunkedWriter cw) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref chunkedWriter cw) {
     var (_, err) = io.WriteString(cw.Wire, "0\r\n");
     return err;
 }
@@ -347,15 +347,3 @@ internal static (uint64 n, error err) parseHexUint(slice<byte> v) {
 }
 
 } // end internal_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class internalᴛchunkedReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void beginChunk(this ref chunkedReader cr) => internal_package.beginChunkᴍ(ref cr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool chunkHeaderAvailable(this ref chunkedReader cr) => internal_package.chunkHeaderAvailableᴍ(ref cr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref chunkedReader cr, slice<uint8> b) => internal_package.Readᴍ(ref cr, b);
-}
-partial class internalᴛchunkedWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref chunkedWriter cw, slice<byte> data) => internal_package.Writeᴍ(ref cw, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref chunkedWriter cw) => internal_package.Closeᴍ(ref cw);
-}
-// </GlyphForwarders>

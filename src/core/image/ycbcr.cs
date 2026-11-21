@@ -35,7 +35,7 @@ private static readonly @string yCbCrSubsampleRatio411ˢᵇᴍYCbCrSubsampleRati
 internal static ref readonly @string yCbCrSubsampleRatio410ˢᴍYCbCrSubsampleRatio => ref yCbCrSubsampleRatio410ˢᵇᴍYCbCrSubsampleRatio;
 private static readonly @string yCbCrSubsampleRatio410ˢᵇᴍYCbCrSubsampleRatio = "YCbCrSubsampleRatio410"u8;
 
-internal static @string Stringᴍ(YCbCrSubsampleRatio s) {
+[GoMethodBody("String")] internal static @string Stringᴍ(YCbCrSubsampleRatio s) {
     switch (s) {
     case var ᴛ when ᴛ == YCbCrSubsampleRatio444: {
         return yCbCrSubsampleRatio444ˢᴍYCbCrSubsampleRatio;
@@ -84,24 +84,24 @@ partial struct YCbCr {
 
 } partial class image_package {
 
-internal static color.Model ColorModelᴍ(ref YCbCr p) {
+[GoMethodBody("ColorModel")] internal static color.Model ColorModelᴍ(ref YCbCr p) {
     return color.YCbCrModel;
 }
 
-internal static Rectangle Boundsᴍ(ref YCbCr p) {
+[GoMethodBody("Bounds")] internal static Rectangle Boundsᴍ(ref YCbCr p) {
     return p.Rect;
 }
 
-internal static color.Color Atᴍ(ref YCbCr p, nint x, nint y) {
+[GoMethodBody("At")] internal static color.Color Atᴍ(ref YCbCr p, nint x, nint y) {
     return p.YCbCrAt(x, y);
 }
 
-internal static color.RGBA64 RGBA64Atᴍ(ref YCbCr p, nint x, nint y) {
+[GoMethodBody("RGBA64At")] internal static color.RGBA64 RGBA64Atᴍ(ref YCbCr p, nint x, nint y) {
     var (r, g, b, a) = p.YCbCrAt(x, y).RGBA();
     return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
-internal static color.YCbCr YCbCrAtᴍ(ref YCbCr p, nint x, nint y) {
+[GoMethodBody("YCbCrAt")] internal static color.YCbCr YCbCrAtᴍ(ref YCbCr p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.YCbCr();
     }
@@ -116,13 +116,13 @@ internal static color.YCbCr YCbCrAtᴍ(ref YCbCr p, nint x, nint y) {
 
 // YOffset returns the index of the first element of Y that corresponds to
 // the pixel at (x, y).
-internal static nint YOffsetᴍ(ref YCbCr p, nint x, nint y) {
+[GoMethodBody("YOffset")] internal static nint YOffsetᴍ(ref YCbCr p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.YStride + (x - p.Rect.Min.X);
 }
 
 // COffset returns the index of the first element of Cb or Cr that corresponds
 // to the pixel at (x, y).
-internal static nint COffsetᴍ(ref YCbCr p, nint x, nint y) {
+[GoMethodBody("COffset")] internal static nint COffsetᴍ(ref YCbCr p, nint x, nint y) {
     switch (p.SubsampleRatio) {
     case var ᴛ when ᴛ == YCbCrSubsampleRatio422: {
         return (y - p.Rect.Min.Y) * p.CStride + (x / 2 - p.Rect.Min.X / 2);
@@ -145,7 +145,7 @@ internal static nint COffsetᴍ(ref YCbCr p, nint x, nint y) {
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-internal static Image SubImageᴍ(ref YCbCr p, Rectangle r) {
+[GoMethodBody("SubImage")] internal static Image SubImageᴍ(ref YCbCr p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -168,7 +168,7 @@ internal static Image SubImageᴍ(ref YCbCr p, Rectangle r) {
     )));
 }
 
-internal static bool Opaqueᴍ(ref YCbCr p) {
+[GoMethodBody("Opaque")] internal static bool Opaqueᴍ(ref YCbCr p) {
     return true;
 }
 
@@ -257,20 +257,20 @@ partial struct NYCbCrA {
 
 } partial class image_package {
 
-internal static color.Model ColorModelᴍ(ref NYCbCrA p) {
+[GoMethodBody("ColorModel")] internal static color.Model ColorModelᴍ(ref NYCbCrA p) {
     return color.NYCbCrAModel;
 }
 
-internal static color.Color Atᴍ(ref NYCbCrA p, nint x, nint y) {
+[GoMethodBody("At")] internal static color.Color Atᴍ(ref NYCbCrA p, nint x, nint y) {
     return p.NYCbCrAAt(x, y);
 }
 
-internal static color.RGBA64 RGBA64Atᴍ(ref NYCbCrA p, nint x, nint y) {
+[GoMethodBody("RGBA64At")] internal static color.RGBA64 RGBA64Atᴍ(ref NYCbCrA p, nint x, nint y) {
     var (r, g, b, a) = p.NYCbCrAAt(x, y).RGBA();
     return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
-internal static color.NYCbCrA NYCbCrAAtᴍ(ref NYCbCrA p, nint x, nint y) {
+[GoMethodBody("NYCbCrAAt")] internal static color.NYCbCrA NYCbCrAAtᴍ(ref NYCbCrA p, nint x, nint y) {
     if (!(new Point(X: x, Y: y).In(p.Rect))) {
         return new color.NYCbCrA();
     }
@@ -289,13 +289,13 @@ internal static color.NYCbCrA NYCbCrAAtᴍ(ref NYCbCrA p, nint x, nint y) {
 
 // AOffset returns the index of the first element of A that corresponds to the
 // pixel at (x, y).
-internal static nint AOffsetᴍ(ref NYCbCrA p, nint x, nint y) {
+[GoMethodBody("AOffset")] internal static nint AOffsetᴍ(ref NYCbCrA p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.AStride + (x - p.Rect.Min.X);
 }
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-internal static Image SubImageᴍ(ref NYCbCrA p, Rectangle r) {
+[GoMethodBody("SubImage")] internal static Image SubImageᴍ(ref NYCbCrA p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -326,7 +326,7 @@ internal static Image SubImageᴍ(ref NYCbCrA p, Rectangle r) {
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-internal static bool Opaqueᴍ(ref NYCbCrA p) {
+[GoMethodBody("Opaque")] internal static bool Opaqueᴍ(ref NYCbCrA p) {
     if (p.Rect.Empty()) {
         return true;
     }
@@ -381,29 +381,3 @@ public static ж<NYCbCrA> NewNYCbCrA(Rectangle r, YCbCrSubsampleRatio subsampleR
 }
 
 } // end image_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class imageᴛYCbCrSubsampleRatio {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this YCbCrSubsampleRatio s) => image_package.Stringᴍ(s);
-}
-partial class imageᴛYCbCr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static color.Model ColorModel(this ref YCbCr p) => image_package.ColorModelᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Rectangle Bounds(this ref YCbCr p) => image_package.Boundsᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static color.Color At(this ref YCbCr p, nint x, nint y) => image_package.Atᴍ(ref p, x, y);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static color.RGBA64 RGBA64At(this ref YCbCr p, nint x, nint y) => image_package.RGBA64Atᴍ(ref p, x, y);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static color.YCbCr YCbCrAt(this ref YCbCr p, nint x, nint y) => image_package.YCbCrAtᴍ(ref p, x, y);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint YOffset(this ref YCbCr p, nint x, nint y) => image_package.YOffsetᴍ(ref p, x, y);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint COffset(this ref YCbCr p, nint x, nint y) => image_package.COffsetᴍ(ref p, x, y);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Image SubImage(this ref YCbCr p, Rectangle r) => image_package.SubImageᴍ(ref p, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Opaque(this ref YCbCr p) => image_package.Opaqueᴍ(ref p);
-}
-partial class imageᴛNYCbCrA {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static color.Model ColorModel(this ref NYCbCrA p) => image_package.ColorModelᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static color.Color At(this ref NYCbCrA p, nint x, nint y) => image_package.Atᴍ(ref p, x, y);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static color.RGBA64 RGBA64At(this ref NYCbCrA p, nint x, nint y) => image_package.RGBA64Atᴍ(ref p, x, y);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static color.NYCbCrA NYCbCrAAt(this ref NYCbCrA p, nint x, nint y) => image_package.NYCbCrAAtᴍ(ref p, x, y);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint AOffset(this ref NYCbCrA p, nint x, nint y) => image_package.AOffsetᴍ(ref p, x, y);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Image SubImage(this ref NYCbCrA p, Rectangle r) => image_package.SubImageᴍ(ref p, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Opaque(this ref NYCbCrA p) => image_package.Opaqueᴍ(ref p);
-}
-// </GlyphForwarders>

@@ -21,7 +21,7 @@ partial struct gTraceState {
 } partial class runtime_package {
 
 // reset resets the gTraceState for a new goroutine.
-internal static void resetᴍ(ref gTraceState s) {
+[GoMethodBody("reset")] internal static void resetᴍ(ref gTraceState s) {
     s.seq.Assign(new uint64[]{}.array(2));
     // N.B. s.statusTraced is managed and cleared separately.
 }
@@ -246,7 +246,7 @@ internal static traceLocker traceAcquireEnabled() {
 // nosplit because it's called on the syscall path when stack movement is forbidden.
 //
 //go:nosplit
-internal static bool okᴍ(traceLocker tl) {
+[GoMethodBody("ok")] internal static bool okᴍ(traceLocker tl) {
     return tl.gen != 0;
 }
 
@@ -281,14 +281,14 @@ internal static void traceExitedSyscall() {
 } partial class runtime_package {
 
 // Gomaxprocs emits a ProcsChange event.
-internal static void Gomaxprocsᴍ(traceLocker tl, int32 procs) {
+[GoMethodBody("Gomaxprocs")] internal static void Gomaxprocsᴍ(traceLocker tl, int32 procs) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvProcsChange, (traceArg)(uint64)procs, tl.stack(1));
 }
 
 // ProcStart traces a ProcStart event.
 //
 // Must be called with a valid P.
-internal static void ProcStartᴍ(traceLocker tl) {
+[GoMethodBody("ProcStart")] internal static void ProcStartᴍ(traceLocker tl) {
     var pp = (~tl.mp).p.ptr();
     // Procs are typically started within the scheduler when there is no user goroutine. If there is a user goroutine,
     // it must be in _Gsyscall because the only time a goroutine is allowed to have its Proc moved around from under it
@@ -297,7 +297,7 @@ internal static void ProcStartᴍ(traceLocker tl) {
 }
 
 // ProcStop traces a ProcStop event.
-internal static void ProcStopᴍ(traceLocker tl, ж<p> pp) {
+[GoMethodBody("ProcStop")] internal static void ProcStopᴍ(traceLocker tl, ж<p> pp) {
     // The only time a goroutine is allowed to have its Proc moved around
     // from under it is during a syscall.
     tl.eventWriter(tracev2.GoSyscall, tracev2.ProcRunning).@event(tracev2.EvProcStop);
@@ -307,7 +307,7 @@ internal static void ProcStopᴍ(traceLocker tl, ж<p> pp) {
 //
 // Must be emitted by an actively running goroutine on an active P. This restriction can be changed
 // easily and only depends on where it's currently called.
-internal static void GCActiveᴍ(traceLocker tl) {
+[GoMethodBody("GCActive")] internal static void GCActiveᴍ(traceLocker tl) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGCActive, (traceArg)trace.seqGC);
     // N.B. Only one GC can be running at a time, so this is naturally
     // serialized by the caller.
@@ -318,7 +318,7 @@ internal static void GCActiveᴍ(traceLocker tl) {
 //
 // Must be emitted by an actively running goroutine on an active P. This restriction can be changed
 // easily and only depends on where it's currently called.
-internal static void GCStartᴍ(traceLocker tl) {
+[GoMethodBody("GCStart")] internal static void GCStartᴍ(traceLocker tl) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGCBegin, (traceArg)trace.seqGC, tl.stack(3));
     // N.B. Only one GC can be running at a time, so this is naturally
     // serialized by the caller.
@@ -329,7 +329,7 @@ internal static void GCStartᴍ(traceLocker tl) {
 //
 // Must be emitted by an actively running goroutine on an active P. This restriction can be changed
 // easily and only depends on where it's currently called.
-internal static void GCDoneᴍ(traceLocker tl) {
+[GoMethodBody("GCDone")] internal static void GCDoneᴍ(traceLocker tl) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGCEnd, (traceArg)trace.seqGC);
     // N.B. Only one GC can be running at a time, so this is naturally
     // serialized by the caller.
@@ -337,14 +337,14 @@ internal static void GCDoneᴍ(traceLocker tl) {
 }
 
 // STWStart traces a STWBegin event.
-internal static void STWStartᴍ(traceLocker tl, stwReason reason) {
+[GoMethodBody("STWStart")] internal static void STWStartᴍ(traceLocker tl, stwReason reason) {
     // Although the current P may be in _Pgcstop here, we model the P as running during the STW. This deviates from the
     // runtime's state tracking, but it's more accurate and doesn't result in any loss of information.
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSTWBegin, tl.@string(reason.String()), tl.stack(2));
 }
 
 // STWDone traces a STWEnd event.
-internal static void STWDoneᴍ(traceLocker tl) {
+[GoMethodBody("STWDone")] internal static void STWDoneᴍ(traceLocker tl) {
     // Although the current P may be in _Pgcstop here, we model the P as running during the STW. This deviates from the
     // runtime's state tracking, but it's more accurate and doesn't result in any loss of information.
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvSTWEnd);
@@ -361,7 +361,7 @@ private static readonly @string doubleTraceGCSweepStartˢᵇᴍtraceLocker = "do
 // must be no preemption points between these two calls.
 //
 // Must be called with a valid P.
-internal static void GCSweepStartᴍ(traceLocker tl) {
+[GoMethodBody("GCSweepStart")] internal static void GCSweepStartᴍ(traceLocker tl) {
     // Delay the actual GCSweepBegin event until the first span
     // sweep. If we don't sweep anything, don't emit any events.
     var pp = (~tl.mp).p.ptr();
@@ -379,7 +379,7 @@ internal static void GCSweepStartᴍ(traceLocker tl) {
 // pair; however, it will not emit any trace events in this case.
 //
 // Must be called with a valid P.
-internal static void GCSweepSpanᴍ(traceLocker tl, uintptr bytesSwept) {
+[GoMethodBody("GCSweepSpan")] internal static void GCSweepSpanᴍ(traceLocker tl, uintptr bytesSwept) {
     var pp = (~tl.mp).p.ptr();
     if ((~pp).trace.maySweep) {
         if ((~pp).trace.swept == 0) {
@@ -399,7 +399,7 @@ private static readonly @string missingTraceGCSweepStartˢᵇᴍtraceLocker = "m
 // a GCSweepEnd event.
 //
 // Must be called with a valid P.
-internal static void GCSweepDoneᴍ(traceLocker tl) {
+[GoMethodBody("GCSweepDone")] internal static void GCSweepDoneᴍ(traceLocker tl) {
     var pp = (~tl.mp).p.ptr();
     if (!(~pp).trace.maySweep) {
         @throw(missingTraceGCSweepStartˢᴍtraceLocker);
@@ -412,17 +412,17 @@ internal static void GCSweepDoneᴍ(traceLocker tl) {
 }
 
 // GCMarkAssistStart emits a MarkAssistBegin event.
-internal static void GCMarkAssistStartᴍ(traceLocker tl) {
+[GoMethodBody("GCMarkAssistStart")] internal static void GCMarkAssistStartᴍ(traceLocker tl) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGCMarkAssistBegin, tl.stack(1));
 }
 
 // GCMarkAssistDone emits a MarkAssistEnd event.
-internal static void GCMarkAssistDoneᴍ(traceLocker tl) {
+[GoMethodBody("GCMarkAssistDone")] internal static void GCMarkAssistDoneᴍ(traceLocker tl) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGCMarkAssistEnd);
 }
 
 // GoCreate emits a GoCreate event.
-internal static void GoCreateᴍ(traceLocker tl, ж<g> Ꮡnewg, uintptr pc, bool blocked) {
+[GoMethodBody("GoCreate")] internal static void GoCreateᴍ(traceLocker tl, ж<g> Ꮡnewg, uintptr pc, bool blocked) {
     ref var newg = ref Ꮡnewg.DerefOrNull();
 
     Ꮡnewg.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).setStatusTraced(tl.gen);
@@ -436,7 +436,7 @@ internal static void GoCreateᴍ(traceLocker tl, ж<g> Ꮡnewg, uintptr pc, bool
 // GoStart emits a GoStart event.
 //
 // Must be called with a valid P.
-internal static void GoStartᴍ(traceLocker tl) {
+[GoMethodBody("GoStart")] internal static void GoStartᴍ(traceLocker tl) {
     var gp = getg().Value.m.Value.curg;
     var pp = gp.Value.m.Value.p;
     var w = tl.eventWriter(tracev2.GoRunnable, tracev2.ProcRunning);
@@ -449,22 +449,22 @@ internal static void GoStartᴍ(traceLocker tl) {
 // GoEnd emits a GoDestroy event.
 //
 // TODO(mknyszek): Rename this to GoDestroy.
-internal static void GoEndᴍ(traceLocker tl) {
+[GoMethodBody("GoEnd")] internal static void GoEndᴍ(traceLocker tl) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGoDestroy);
 }
 
 // GoSched emits a GoStop event with a GoSched reason.
-internal static void GoSchedᴍ(traceLocker tl) {
+[GoMethodBody("GoSched")] internal static void GoSchedᴍ(traceLocker tl) {
     tl.GoStop(traceGoStopGoSched);
 }
 
 // GoPreempt emits a GoStop event with a GoPreempted reason.
-internal static void GoPreemptᴍ(traceLocker tl) {
+[GoMethodBody("GoPreempt")] internal static void GoPreemptᴍ(traceLocker tl) {
     tl.GoStop(traceGoStopPreempted);
 }
 
 // GoStop emits a GoStop event with the provided reason.
-internal static void GoStopᴍ(traceLocker tl, traceGoStopReason reason) {
+[GoMethodBody("GoStop")] internal static void GoStopᴍ(traceLocker tl, traceGoStopReason reason) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGoStop, trace.goStopReasons[tl.gen % 2][reason], tl.stack(0));
 }
 
@@ -472,12 +472,12 @@ internal static void GoStopᴍ(traceLocker tl, traceGoStopReason reason) {
 //
 // TODO(mknyszek): Replace traceBlockReason with waitReason. It's silly
 // that we have both, and waitReason is way more descriptive.
-internal static void GoParkᴍ(traceLocker tl, traceBlockReason reason, nint skip) {
+[GoMethodBody("GoPark")] internal static void GoParkᴍ(traceLocker tl, traceBlockReason reason, nint skip) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvGoBlock, trace.goBlockReasons[tl.gen % 2][reason], tl.stack(skip));
 }
 
 // GoUnpark emits a GoUnblock event.
-internal static void GoUnparkᴍ(traceLocker tl, ж<g> Ꮡgp, nint skip) {
+[GoMethodBody("GoUnpark")] internal static void GoUnparkᴍ(traceLocker tl, ж<g> Ꮡgp, nint skip) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // Emit a GoWaiting status if necessary for the unblocked goroutine.
@@ -487,7 +487,7 @@ internal static void GoUnparkᴍ(traceLocker tl, ж<g> Ꮡgp, nint skip) {
 
 // GoSwitch emits a GoSwitch event. If destroy is true, the calling goroutine
 // is simultaneously being destroyed.
-internal static void GoSwitchᴍ(traceLocker tl, ж<g> Ꮡnextg, bool destroy) {
+[GoMethodBody("GoSwitch")] internal static void GoSwitchᴍ(traceLocker tl, ж<g> Ꮡnextg, bool destroy) {
     ref var nextg = ref Ꮡnextg.DerefOrNull();
 
     // Emit a GoWaiting status if necessary for the unblocked goroutine.
@@ -502,7 +502,7 @@ internal static void GoSwitchᴍ(traceLocker tl, ж<g> Ꮡnextg, bool destroy) {
 
 // emitUnblockStatus emits a GoStatus GoWaiting event for a goroutine about to be
 // unblocked to the trace writer.
-internal static void emitUnblockStatusᴍ(traceLocker tl, ж<g> Ꮡgp, uintptr gen) {
+[GoMethodBody("emitUnblockStatus")] internal static void emitUnblockStatusᴍ(traceLocker tl, ж<g> Ꮡgp, uintptr gen) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     if (!Ꮡgp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).statusWasTraced(gen) && Ꮡgp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).acquireStatus(gen)) {
@@ -516,7 +516,7 @@ internal static void emitUnblockStatusᴍ(traceLocker tl, ж<g> Ꮡgp, uintptr g
 // GoSysCall emits a GoSyscallBegin event.
 //
 // Must be called with a valid P.
-internal static void GoSysCallᴍ(traceLocker tl) {
+[GoMethodBody("GoSysCall")] internal static void GoSysCallᴍ(traceLocker tl) {
     // Scribble down the M that the P is currently attached to.
     var pp = (~tl.mp).p.ptr();
     pp.Value.trace.mSyscallID = (int64)(~tl.mp).procid;
@@ -532,7 +532,7 @@ internal static void GoSysCallᴍ(traceLocker tl) {
 // - The goroutine lost its P, it ran some other code, and then got it back. It's now running with that P.
 // - The goroutine lost its P and was unable to reacquire it, and is now running without a P.
 // - The goroutine lost its P and acquired a different one, and is now running with that P.
-internal static void GoSysExitᴍ(traceLocker tl, bool lostP) {
+[GoMethodBody("GoSysExit")] internal static void GoSysExitᴍ(traceLocker tl, bool lostP) {
     var ev = tracev2.EvGoSyscallEnd;
     var procStatus = tracev2.ProcSyscall; // Procs implicitly enter tracev2.ProcSyscall on GoSyscallBegin.
     if (lostP) {
@@ -547,7 +547,7 @@ internal static void GoSysExitᴍ(traceLocker tl, bool lostP) {
 // ProcSteal indicates that our current M stole a P from another M.
 //
 // The caller must have ownership of pp.
-internal static void ProcStealᴍ(traceLocker tl, ж<p> Ꮡpp) {
+[GoMethodBody("ProcSteal")] internal static void ProcStealᴍ(traceLocker tl, ж<p> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     // Grab the M ID we stole from.
@@ -581,12 +581,12 @@ internal static void ProcStealᴍ(traceLocker tl, ж<p> Ꮡpp) {
 }
 
 // HeapAlloc emits a HeapAlloc event.
-internal static void HeapAllocᴍ(traceLocker tl, uint64 live) {
+[GoMethodBody("HeapAlloc")] internal static void HeapAllocᴍ(traceLocker tl, uint64 live) {
     tl.eventWriter(tracev2.GoRunning, tracev2.ProcRunning).@event(tracev2.EvHeapAlloc, (traceArg)live);
 }
 
 // HeapGoal reads the current heap goal and emits a HeapGoal event.
-internal static void HeapGoalᴍ(traceLocker tl) {
+[GoMethodBody("HeapGoal")] internal static void HeapGoalᴍ(traceLocker tl) {
     var heapGoal = ᏑgcController.heapGoal();
     // The heapGoal calculations will result in strange numbers if the GC if off. See go.dev/issue/63864.
     // Check gcPercent before using the heapGoal in the trace.
@@ -603,7 +603,7 @@ internal static void HeapGoalᴍ(traceLocker tl) {
 //
 // This occurs when C code calls into Go. On pthread platforms it occurs only when
 // a C thread calls into Go code for the first time.
-internal static void GoCreateSyscallᴍ(traceLocker tl, ж<g> Ꮡgp) {
+[GoMethodBody("GoCreateSyscall")] internal static void GoCreateSyscallᴍ(traceLocker tl, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // N.B. We should never trace a status for this goroutine (which we're currently running on),
@@ -620,7 +620,7 @@ internal static void GoCreateSyscallᴍ(traceLocker tl, ж<g> Ꮡgp) {
 //
 // This occurs when Go code returns back to C. On pthread platforms it occurs only when
 // the C thread is destroyed.
-internal static void GoDestroySyscallᴍ(traceLocker tl) {
+[GoMethodBody("GoDestroySyscall")] internal static void GoDestroySyscallᴍ(traceLocker tl) {
     // Write the status for the goroutine if necessary.
     var gp = tl.mp.Value.curg; if (gp != nil && !gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).statusWasTraced(tl.gen) && gp.of(g.Ꮡtrace).of(gTraceState.ᏑtraceSchedResourceState).acquireStatus(tl.gen)) {
         tl.writer().writeGoStatus((~gp).goid, (int64)(~tl.mp).procid, tracev2.GoSyscall, false, 0 /* no stack */).end();
@@ -747,42 +747,3 @@ internal static void traceThreadDestroy(ж<m> mp) {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛgTraceState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref gTraceState s) => runtime_package.resetᴍ(ref s);
-}
-partial class runtimeᴛtraceLocker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool ok(this traceLocker tl) => runtime_package.okᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Gomaxprocs(this traceLocker tl, int32 procs) => runtime_package.Gomaxprocsᴍ(tl, procs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ProcStart(this traceLocker tl) => runtime_package.ProcStartᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ProcStop(this traceLocker tl, ж<p> pp) => runtime_package.ProcStopᴍ(tl, pp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GCActive(this traceLocker tl) => runtime_package.GCActiveᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GCStart(this traceLocker tl) => runtime_package.GCStartᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GCDone(this traceLocker tl) => runtime_package.GCDoneᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void STWStart(this traceLocker tl, stwReason reason) => runtime_package.STWStartᴍ(tl, reason);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void STWDone(this traceLocker tl) => runtime_package.STWDoneᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GCSweepStart(this traceLocker tl) => runtime_package.GCSweepStartᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GCSweepSpan(this traceLocker tl, uintptr bytesSwept) => runtime_package.GCSweepSpanᴍ(tl, bytesSwept);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GCSweepDone(this traceLocker tl) => runtime_package.GCSweepDoneᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GCMarkAssistStart(this traceLocker tl) => runtime_package.GCMarkAssistStartᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GCMarkAssistDone(this traceLocker tl) => runtime_package.GCMarkAssistDoneᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoCreate(this traceLocker tl, ж<g> Ꮡnewg, uintptr pc, bool blocked) => runtime_package.GoCreateᴍ(tl, Ꮡnewg, pc, blocked);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoStart(this traceLocker tl) => runtime_package.GoStartᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoEnd(this traceLocker tl) => runtime_package.GoEndᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoSched(this traceLocker tl) => runtime_package.GoSchedᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoPreempt(this traceLocker tl) => runtime_package.GoPreemptᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoStop(this traceLocker tl, traceGoStopReason reason) => runtime_package.GoStopᴍ(tl, reason);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoPark(this traceLocker tl, traceBlockReason reason, nint skip) => runtime_package.GoParkᴍ(tl, reason, skip);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoUnpark(this traceLocker tl, ж<g> Ꮡgp, nint skip) => runtime_package.GoUnparkᴍ(tl, Ꮡgp, skip);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoSwitch(this traceLocker tl, ж<g> Ꮡnextg, bool destroy) => runtime_package.GoSwitchᴍ(tl, Ꮡnextg, destroy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void emitUnblockStatus(this traceLocker tl, ж<g> Ꮡgp, uintptr gen) => runtime_package.emitUnblockStatusᴍ(tl, Ꮡgp, gen);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoSysCall(this traceLocker tl) => runtime_package.GoSysCallᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoSysExit(this traceLocker tl, bool lostP) => runtime_package.GoSysExitᴍ(tl, lostP);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ProcSteal(this traceLocker tl, ж<p> Ꮡpp) => runtime_package.ProcStealᴍ(tl, Ꮡpp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void HeapAlloc(this traceLocker tl, uint64 live) => runtime_package.HeapAllocᴍ(tl, live);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void HeapGoal(this traceLocker tl) => runtime_package.HeapGoalᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoCreateSyscall(this traceLocker tl, ж<g> Ꮡgp) => runtime_package.GoCreateSyscallᴍ(tl, Ꮡgp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void GoDestroySyscall(this traceLocker tl) => runtime_package.GoDestroySyscallᴍ(tl);
-}
-// </GlyphForwarders>

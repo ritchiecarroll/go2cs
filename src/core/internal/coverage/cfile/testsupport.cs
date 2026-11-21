@@ -143,7 +143,7 @@ partial struct tstate {
 } partial class cfile_package {
 
 // processPod reads coverage counter data for a specific pod.
-internal static error processPodᴍ(ж<tstate> Ꮡts, pods.Pod p, map<@string, EmptyStruct> importpaths) {
+[GoMethodBody("processPod")] internal static error processPodᴍ(ж<tstate> Ꮡts, pods.Pod p, map<@string, EmptyStruct> importpaths) {
     GoFrame ᒐ = default;
     try {
         ref var ts = ref Ꮡts.DerefOrNull();
@@ -274,7 +274,7 @@ partial struct pkfunc {
 
 } partial class cfile_package {
 
-internal static error readAuxMetaFilesᴍ(ж<tstate> Ꮡts, @string metafiles, map<@string, EmptyStruct> importpaths) {
+[GoMethodBody("readAuxMetaFiles")] internal static error readAuxMetaFilesᴍ(ж<tstate> Ꮡts, @string metafiles, map<@string, EmptyStruct> importpaths) {
     // Unmarshal the information on available aux metafiles into
     // a MetaFileCollection struct.
     ref var mfc = ref heap(new coverage.MetaFileCollection(), out var Ꮡmfc);
@@ -354,7 +354,7 @@ public static float64 Snapshot() {
 
 } // end cfile_package
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+// <GlyphForwarders> (scratch prototype: placed here, an alias of this file conflicts in package_info.cs)
 partial class cfileᴛtstate {
 [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string, EmptyStruct> importpaths) => cfile_package.processPodᴍ(Ꮡts, p, importpaths);
 [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles, map<@string, EmptyStruct> importpaths) => cfile_package.readAuxMetaFilesᴍ(Ꮡts, metafiles, importpaths);

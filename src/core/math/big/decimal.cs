@@ -34,7 +34,7 @@ partial struct @decimal {
 } partial class big_package {
 
 // at returns the i'th mantissa digit, starting with the most significant digit at 0.
-internal static byte atᴍ(ref @decimal d, nint i) {
+[GoMethodBody("at")] internal static byte atᴍ(ref @decimal d, nint i) {
     if (0 <= i && i < len(d.mant)) {
         return d.mant[i];
     }
@@ -59,7 +59,7 @@ internal static UntypedInt maxShift => /* _W - 4 */ 60;
 
 // Init initializes x to the decimal representation of m << shift (for
 // shift >= 0), or m >> -shift (for shift < 0).
-internal static void initᴍ(ж<@decimal> Ꮡx, nat m, nint shift) {
+[GoMethodBody("init")] internal static void initᴍ(ж<@decimal> Ꮡx, nat m, nint shift) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // special case 0
@@ -170,7 +170,7 @@ internal static void rsh(ref @decimal x, nuint s) {
 
 } partial class big_package {
 
-internal static @string Stringᴍ(ref @decimal x) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref @decimal x) {
     var bufᴷ = new stackAppend<byte>();
 
     if (len(x.mant) == 0) {
@@ -237,7 +237,7 @@ internal static bool shouldRoundUp(ref @decimal x, nint n) {
 // round sets x to (at most) n mantissa digits by rounding it
 // to the nearest even value with n (or fever) mantissa digits.
 // If n < 0, x remains unchanged.
-internal static void roundᴍ(ж<@decimal> Ꮡx, nint n) {
+[GoMethodBody("round")] internal static void roundᴍ(ж<@decimal> Ꮡx, nint n) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (n < 0 || n >= len(x.mant)) {
@@ -251,7 +251,7 @@ internal static void roundᴍ(ж<@decimal> Ꮡx, nint n) {
     }
 }
 
-internal static void roundUpᴍ(ref @decimal x, nint n) {
+[GoMethodBody("roundUp")] internal static void roundUpᴍ(ref @decimal x, nint n) {
     if (n < 0 || n >= len(x.mant)) {
         return; // nothing to do
     }
@@ -276,7 +276,7 @@ internal static void roundUpᴍ(ref @decimal x, nint n) {
     // x already trimmed
 }
 
-internal static void roundDownᴍ(ж<@decimal> Ꮡx, nint n) {
+[GoMethodBody("roundDown")] internal static void roundDownᴍ(ж<@decimal> Ꮡx, nint n) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (n < 0 || n >= len(x.mant)) {
@@ -302,14 +302,3 @@ internal static void trim(ref @decimal x) {
 }
 
 } // end big_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class bigᴛdecimal {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte at(this ref @decimal d, nint i) => big_package.atᴍ(ref d, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<@decimal> Ꮡx, nat m, nint shift) => big_package.initᴍ(Ꮡx, m, shift);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref @decimal x) => big_package.Stringᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void round(this ж<@decimal> Ꮡx, nint n) => big_package.roundᴍ(Ꮡx, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void roundUp(this ref @decimal x, nint n) => big_package.roundUpᴍ(ref x, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void roundDown(this ж<@decimal> Ꮡx, nint n) => big_package.roundDownᴍ(Ꮡx, n);
-}
-// </GlyphForwarders>

@@ -22,7 +22,7 @@ partial struct PublicKey {
 
 // Size returns the modulus size in bytes. Raw signatures and ciphertexts
 // for or by this public key will have the same size.
-internal static nint Sizeᴍ(ref PublicKey pub) {
+[GoMethodBody("Size")] internal static nint Sizeᴍ(ref PublicKey pub) {
     return (pub.N.BitLen() + 7) / 8;
 }
 
@@ -49,7 +49,7 @@ partial struct PrivateKey {
 
 } partial class rsa_package {
 
-internal static ж<PublicKey> PublicKeyᴍ(ж<PrivateKey> Ꮡpriv) {
+[GoMethodBody("PublicKey")] internal static ж<PublicKey> PublicKeyᴍ(ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.Ꮡpub;
 }
 
@@ -194,7 +194,7 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithoutCRT(slice<byte> N, nin
 //
 // P, Q, dP, dQ, and qInv may be nil if the key was created with
 // NewPrivateKeyWithoutCRT.
-internal static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) Exportᴍ(ref PrivateKey priv) {
+[GoMethodBody("Export")] internal static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) Exportᴍ(ref PrivateKey priv) {
     slice<byte> N = default;
     nint e = default;
     slice<byte> d = default;
@@ -516,13 +516,3 @@ internal static (slice<byte>, error) decrypt(ref PrivateKey priv, slice<byte> ci
 }
 
 } // end rsa_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class rsaᴛPublicKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Size(this ref PublicKey pub) => rsa_package.Sizeᴍ(ref pub);
-}
-partial class rsaᴛPrivateKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => rsa_package.PublicKeyᴍ(Ꮡpriv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) Export(this ref PrivateKey priv) => rsa_package.Exportᴍ(ref priv);
-}
-// </GlyphForwarders>

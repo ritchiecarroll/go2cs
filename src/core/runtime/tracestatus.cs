@@ -24,7 +24,7 @@ private static readonly @string attemptedToTraceABadˢᵇᴍtraceWriter = "attem
 // have any stack growth.
 //
 //go:nosplit
-internal static traceWriter writeGoStatusᴍ(traceWriter w, uint64 goid, int64 mid, tracev2.GoStatus status, bool markAssist, uint64 stackID) {
+[GoMethodBody("writeGoStatus")] internal static traceWriter writeGoStatusᴍ(traceWriter w, uint64 goid, int64 mid, tracev2.GoStatus status, bool markAssist, uint64 stackID) {
     // The status should never be bad. Some invariant must have been violated.
     if (status == tracev2.GoBad) {
         print((@string)"runtime: goid=", goid, (@string)"\n");
@@ -58,7 +58,7 @@ private static readonly @string attemptToTraceInvalidOrˢᵇᴍtraceWriter = "at
 // have any stack growth.
 //
 //go:nosplit
-internal static traceWriter writeProcStatusForPᴍ(traceWriter w, ж<p> Ꮡpp, bool inSTW) {
+[GoMethodBody("writeProcStatusForP")] internal static traceWriter writeProcStatusForPᴍ(traceWriter w, ж<p> Ꮡpp, bool inSTW) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     if (!Ꮡpp.of(p.Ꮡtrace).of(pTraceState.ᏑtraceSchedResourceState).acquireStatus(w.gen)) {
@@ -108,7 +108,7 @@ private static readonly @string attemptedToTraceABadˢ2ᵇᴍtraceWriter = "atte
 // have any stack growth.
 //
 //go:nosplit
-internal static traceWriter writeProcStatusᴍ(traceWriter w, uint64 pid, tracev2.ProcStatus status, bool inSweep) {
+[GoMethodBody("writeProcStatus")] internal static traceWriter writeProcStatusᴍ(traceWriter w, uint64 pid, tracev2.ProcStatus status, bool inSweep) {
     // The status should never be bad. Some invariant must have been violated.
     if (status == tracev2.ProcBad) {
         print((@string)"runtime: pid=", pid, (@string)"\n");
@@ -210,7 +210,7 @@ partial struct traceSchedResourceState {
 // have any stack growth.
 //
 //go:nosplit
-internal static bool acquireStatusᴍ(ref traceSchedResourceState r, uintptr gen) {
+[GoMethodBody("acquireStatus")] internal static bool acquireStatusᴍ(ref traceSchedResourceState r, uintptr gen) {
     if (!Ꮡ(r.statusTraced, gen % 3).CompareAndSwap(0, 1)) {
         return false;
     }
@@ -219,42 +219,27 @@ internal static bool acquireStatusᴍ(ref traceSchedResourceState r, uintptr gen
 }
 
 // readyNextGen readies r for the generation following gen.
-internal static void readyNextGenᴍ(ref traceSchedResourceState r, uintptr gen) {
+[GoMethodBody("readyNextGen")] internal static void readyNextGenᴍ(ref traceSchedResourceState r, uintptr gen) {
     var nextGen = traceNextGen(gen);
     r.seq[nextGen % 2] = 0;
     Ꮡ(r.statusTraced, nextGen % 3).Store(0);
 }
 
 // statusWasTraced returns true if the sched resource's status was already acquired for tracing.
-internal static bool statusWasTracedᴍ(ref traceSchedResourceState r, uintptr gen) {
+[GoMethodBody("statusWasTraced")] internal static bool statusWasTracedᴍ(ref traceSchedResourceState r, uintptr gen) {
     return Ꮡ(r.statusTraced, gen % 3).Load() != 0;
 }
 
 // setStatusTraced indicates that the resource's status was already traced, for example
 // when a goroutine is created.
-internal static void setStatusTracedᴍ(ref traceSchedResourceState r, uintptr gen) {
+[GoMethodBody("setStatusTraced")] internal static void setStatusTracedᴍ(ref traceSchedResourceState r, uintptr gen) {
     Ꮡ(r.statusTraced, gen % 3).Store(1);
 }
 
 // nextSeq returns the next sequence number for the resource.
-internal static traceArg nextSeqᴍ(ref traceSchedResourceState r, uintptr gen) {
+[GoMethodBody("nextSeq")] internal static traceArg nextSeqᴍ(ref traceSchedResourceState r, uintptr gen) {
     r.seq[gen % 2]++;
     return (traceArg)r.seq[gen % 2];
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛtraceWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceWriter writeGoStatus(this traceWriter w, uint64 goid, int64 mid, tracev2.GoStatus status, bool markAssist, uint64 stackID) => runtime_package.writeGoStatusᴍ(w, goid, mid, status, markAssist, stackID);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceWriter writeProcStatusForP(this traceWriter w, ж<p> Ꮡpp, bool inSTW) => runtime_package.writeProcStatusForPᴍ(w, Ꮡpp, inSTW);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceWriter writeProcStatus(this traceWriter w, uint64 pid, tracev2.ProcStatus status, bool inSweep) => runtime_package.writeProcStatusᴍ(w, pid, status, inSweep);
-}
-partial class runtimeᴛtraceSchedResourceState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool acquireStatus(this ref traceSchedResourceState r, uintptr gen) => runtime_package.acquireStatusᴍ(ref r, gen);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readyNextGen(this ref traceSchedResourceState r, uintptr gen) => runtime_package.readyNextGenᴍ(ref r, gen);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool statusWasTraced(this ref traceSchedResourceState r, uintptr gen) => runtime_package.statusWasTracedᴍ(ref r, gen);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setStatusTraced(this ref traceSchedResourceState r, uintptr gen) => runtime_package.setStatusTracedᴍ(ref r, gen);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceArg nextSeq(this ref traceSchedResourceState r, uintptr gen) => runtime_package.nextSeqᴍ(ref r, gen);
-}
-// </GlyphForwarders>

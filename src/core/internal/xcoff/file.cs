@@ -108,7 +108,7 @@ public static (ж<File>, error) Open(@string name) {
 // Close closes the File.
 // If the File was created using NewFile directly instead of Open,
 // Close has no effect.
-internal static error Closeᴍ(ref File f) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref File f) {
     error err = default;
     if (f.closer != nil) {
         err = f.closer.Close();
@@ -121,7 +121,7 @@ internal static error Closeᴍ(ref File f) {
 // section exists.
 // Xcoff have section's name limited to 8 bytes. Some sections like .gosymtab
 // can be trunked but this method will still find them.
-internal static ж<Section> Sectionᴍ(ref File f, @string name) {
+[GoMethodBody("Section")] internal static ж<Section> Sectionᴍ(ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name || (len(name) > 8 && s.Name == name[..8])) {
             return s;
@@ -132,7 +132,7 @@ internal static ж<Section> Sectionᴍ(ref File f, @string name) {
 
 // SectionByType returns the first section in f with the
 // given type, or nil if there is no such section.
-internal static ж<Section> SectionByTypeᴍ(ref File f, uint32 typ) {
+[GoMethodBody("SectionByType")] internal static ж<Section> SectionByTypeᴍ(ref File f, uint32 typ) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Type == typ) {
             return s;
@@ -526,14 +526,14 @@ partial struct nobitsSectionReader {
 internal static ref readonly @string unexpectedReadFromˢᴍnobitsSectionReader => ref unexpectedReadFromˢᵇᴍnobitsSectionReader;
 private static readonly @string unexpectedReadFromˢᵇᴍnobitsSectionReader = "unexpected read from section with uninitialized data"u8;
 
-internal static (nint n, error err) ReadAtᴍ(ref nobitsSectionReader _, slice<byte> p, int64 off) {
+[GoMethodBody("ReadAt")] internal static (nint n, error err) ReadAtᴍ(ref nobitsSectionReader _, slice<byte> p, int64 off) {
     return (0, errors.New(unexpectedReadFromˢᴍnobitsSectionReader));
 }
 
 } partial class xcoff_package {
 
 // Data reads and returns the contents of the XCOFF section s.
-internal static (slice<byte>, error) Dataᴍ(ref Section s) {
+[GoMethodBody("Data")] internal static (slice<byte>, error) Dataᴍ(ref Section s) {
     var dat = new slice<byte>((nint)(s.sr.Size()));
     var (n, err) = s.sr.ReadAt(dat, 0);
     if (n == len(dat)) {
@@ -545,7 +545,7 @@ internal static (slice<byte>, error) Dataᴍ(ref Section s) {
 } partial class xcoff_package {
 
 // CSect reads and returns the contents of a csect.
-internal static slice<byte> CSectᴍ(ref File f, @string name) {
+[GoMethodBody("CSect")] internal static slice<byte> CSectᴍ(ref File f, @string name) {
     foreach (var (_, sym) in range(f.Symbols)) {
         if (sym.Name == name && sym.AuxCSect.SymbolType == XTY_SD) {
             nint i = sym.SectionNumber - 1; if (0 <= i && i < len(f.Sections)) {
@@ -565,7 +565,7 @@ internal static slice<byte> CSectᴍ(ref File f, @string name) {
     return default;
 }
 
-internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
+[GoMethodBody("DWARF")] internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
     // There are many other DWARF sections, but these
     // are the ones the debug/dwarf package uses.
     // Don't bother loading others.
@@ -588,7 +588,7 @@ internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
 
 // readImportID returns the import file IDs stored inside the .loader section.
 // Library name pattern is either path/base/member or base/member
-internal static (slice<@string>, error) readImportIDsᴍ(ref File f, ж<Section> Ꮡs) {
+[GoMethodBody("readImportIDs")] internal static (slice<@string>, error) readImportIDsᴍ(ref File f, ж<Section> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Read loader header
@@ -668,7 +668,7 @@ internal static (slice<@string>, error) readImportIDsᴍ(ref File f, ж<Section>
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
 // It does not return weak symbols.
-internal static (slice<ImportedSymbol>, error) ImportedSymbolsᴍ(ref File f) {
+[GoMethodBody("ImportedSymbols")] internal static (slice<ImportedSymbol>, error) ImportedSymbolsᴍ(ref File f) {
     var s = f.SectionByType(STYP_LOADER);
     if (s == nil) {
         return (default, default);
@@ -780,7 +780,7 @@ internal static (slice<ImportedSymbol>, error) ImportedSymbolsᴍ(ref File f) {
 // ImportedLibraries returns the names of all libraries
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
-internal static (slice<@string>, error) ImportedLibrariesᴍ(ref File f) {
+[GoMethodBody("ImportedLibraries")] internal static (slice<@string>, error) ImportedLibrariesᴍ(ref File f) {
     var s = f.SectionByType(STYP_LOADER);
     if (s == nil) {
         return (default, default);
@@ -790,22 +790,3 @@ internal static (slice<@string>, error) ImportedLibrariesᴍ(ref File f) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class xcoffᴛFile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref File f) => xcoff_package.Closeᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Section> Section(this ref File f, @string name) => xcoff_package.Sectionᴍ(ref f, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Section> SectionByType(this ref File f, uint32 typ) => xcoff_package.SectionByTypeᴍ(ref f, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> CSect(this ref File f, @string name) => xcoff_package.CSectᴍ(ref f, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<dwarf.Data>, error) DWARF(this ref File f) => xcoff_package.DWARFᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<@string>, error) readImportIDs(this ref File f, ж<Section> Ꮡs) => xcoff_package.readImportIDsᴍ(ref f, Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) => xcoff_package.ImportedSymbolsᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) ImportedLibraries(this ref File f) => xcoff_package.ImportedLibrariesᴍ(ref f);
-}
-partial class xcoffᴛnobitsSectionReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) => xcoff_package.ReadAtᴍ(ref _, p, off);
-}
-partial class xcoffᴛSection {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Data(this ref Section s) => xcoff_package.Dataᴍ(ref s);
-}
-// </GlyphForwarders>

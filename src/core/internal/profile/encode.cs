@@ -12,14 +12,14 @@ partial class profile_package {
 
 } partial class profile_package {
 
-internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Profile p) {
+[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Profile p) {
     return profileDecoder;
 }
 
 // preEncode populates the unexported fields to be used by encode
 // (with suffix X) from the corresponding exported fields. The
 // exported fields are cleared up to facilitate testing.
-internal static void preEncodeᴍ(ref Profile p) {
+[GoMethodBody("preEncode")] internal static void preEncodeᴍ(ref Profile p) {
     var keysᴷ = new stackAppend<@string>();
     var numKeysᴷ = new stackAppend<@string>();
 
@@ -108,7 +108,7 @@ internal static void preEncodeᴍ(ref Profile p) {
     }
 }
 
-internal static void encodeᴍ(ref Profile p, ж<buffer> b) {
+[GoMethodBody("encode")] internal static void encodeᴍ(ref Profile p, ж<buffer> b) {
     foreach (var (_, x) in range(p.SampleType)) {
         encodeMessage(b, 1, new ValueTypeжmessage(x));
     }
@@ -213,7 +213,7 @@ internal static void encodeᴍ(ref Profile p, ж<buffer> b) {
 // postDecode takes the unexported fields populated by decode (with
 // suffix X) and populates the corresponding exported fields.
 // The unexported fields are cleared up to facilitate testing.
-internal static error postDecodeᴍ(ж<Profile> Ꮡp) {
+[GoMethodBody("postDecode")] internal static error postDecodeᴍ(ж<Profile> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     error err = default;
@@ -314,11 +314,11 @@ internal static error postDecodeᴍ(ж<Profile> Ꮡp) {
 
 } partial class profile_package {
 
-internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref ValueType p) {
+[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref ValueType p) {
     return valueTypeDecoder;
 }
 
-internal static void encodeᴍ(ref ValueType p, ж<buffer> b) {
+[GoMethodBody("encode")] internal static void encodeᴍ(ref ValueType p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 1, p.typeX);
     encodeInt64Opt(ref (b).DerefOrNull(), 2, p.unitX);
 }
@@ -335,11 +335,11 @@ internal static void encodeᴍ(ref ValueType p, ж<buffer> b) {
 
 } partial class profile_package {
 
-internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Sample p) {
+[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Sample p) {
     return sampleDecoder;
 }
 
-internal static void encodeᴍ(ref Sample p, ж<buffer> b) {
+[GoMethodBody("encode")] internal static void encodeᴍ(ref Sample p, ж<buffer> b) {
     encodeUint64s(ref (b).DerefOrNull(), 1, p.locationIDX);
     foreach (var (_, x) in range(p.Value)) {
         encodeInt64(ref (b).DerefOrNull(), 2, x);
@@ -368,11 +368,11 @@ internal static void encodeᴍ(ref Sample p, ж<buffer> b) {
 
 } partial class profile_package {
 
-internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(Label p) {
+[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(Label p) {
     return labelDecoder;
 }
 
-internal static void encodeᴍ(Label p, ж<buffer> b) {
+[GoMethodBody("encode")] internal static void encodeᴍ(Label p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 1, p.keyX);
     encodeInt64Opt(ref (b).DerefOrNull(), 2, p.strX);
     encodeInt64Opt(ref (b).DerefOrNull(), 3, p.numX);
@@ -392,11 +392,11 @@ internal static void encodeᴍ(Label p, ж<buffer> b) {
 
 } partial class profile_package {
 
-internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Mapping p) {
+[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Mapping p) {
     return mappingDecoder;
 }
 
-internal static void encodeᴍ(ref Mapping p, ж<buffer> b) {
+[GoMethodBody("encode")] internal static void encodeᴍ(ref Mapping p, ж<buffer> b) {
     encodeUint64Opt(ref (b).DerefOrNull(), 1, p.ID);
     encodeUint64Opt(ref (b).DerefOrNull(), 2, p.Start);
     encodeUint64Opt(ref (b).DerefOrNull(), 3, p.Limit);
@@ -427,11 +427,11 @@ internal static void encodeᴍ(ref Mapping p, ж<buffer> b) {
 
 } partial class profile_package {
 
-internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Location p) {
+[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Location p) {
     return locationDecoder;
 }
 
-internal static void encodeᴍ(ref Location p, ж<buffer> b) {
+[GoMethodBody("encode")] internal static void encodeᴍ(ref Location p, ж<buffer> b) {
     encodeUint64Opt(ref (b).DerefOrNull(), 1, p.ID);
     encodeUint64Opt(ref (b).DerefOrNull(), 2, p.mappingIDX);
     encodeUint64Opt(ref (b).DerefOrNull(), 3, p.Address);
@@ -457,11 +457,11 @@ internal static void encodeᴍ(ref Location p, ж<buffer> b) {
 
 } partial class profile_package {
 
-internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Line p) {
+[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Line p) {
     return lineDecoder;
 }
 
-internal static void encodeᴍ(ref Line p, ж<buffer> b) {
+[GoMethodBody("encode")] internal static void encodeᴍ(ref Line p, ж<buffer> b) {
     encodeUint64Opt(ref (b).DerefOrNull(), 1, p.functionIDX);
     encodeInt64Opt(ref (b).DerefOrNull(), 2, p.ΔLine);
 }
@@ -478,11 +478,11 @@ internal static void encodeᴍ(ref Line p, ж<buffer> b) {
 
 } partial class profile_package {
 
-internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Function p) {
+[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Function p) {
     return functionDecoder;
 }
 
-internal static void encodeᴍ(ref Function p, ж<buffer> b) {
+[GoMethodBody("encode")] internal static void encodeᴍ(ref Function p, ж<buffer> b) {
     encodeUint64Opt(ref (b).DerefOrNull(), 1, p.ID);
     encodeInt64Opt(ref (b).DerefOrNull(), 2, p.nameX);
     encodeInt64Opt(ref (b).DerefOrNull(), 3, p.systemNameX);
@@ -528,40 +528,3 @@ internal static (@string, error) getString(slice<@string> strings, ref int64 str
 }
 
 } // end profile_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class profileᴛProfile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Profile p) => profile_package.decoderᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void preEncode(this ref Profile p) => profile_package.preEncodeᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this ref Profile p, ж<buffer> b) => profile_package.encodeᴍ(ref p, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error postDecode(this ж<Profile> Ꮡp) => profile_package.postDecodeᴍ(Ꮡp);
-}
-partial class profileᴛValueType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref ValueType p) => profile_package.decoderᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this ref ValueType p, ж<buffer> b) => profile_package.encodeᴍ(ref p, b);
-}
-partial class profileᴛSample {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Sample p) => profile_package.decoderᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this ref Sample p, ж<buffer> b) => profile_package.encodeᴍ(ref p, b);
-}
-partial class profileᴛLabel {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this Label p) => profile_package.decoderᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this Label p, ж<buffer> b) => profile_package.encodeᴍ(p, b);
-}
-partial class profileᴛMapping {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Mapping p) => profile_package.decoderᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this ref Mapping p, ж<buffer> b) => profile_package.encodeᴍ(ref p, b);
-}
-partial class profileᴛLocation {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Location p) => profile_package.decoderᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this ref Location p, ж<buffer> b) => profile_package.encodeᴍ(ref p, b);
-}
-partial class profileᴛLine {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Line p) => profile_package.decoderᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this ref Line p, ж<buffer> b) => profile_package.encodeᴍ(ref p, b);
-}
-partial class profileᴛFunction {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Func<ж<buffer>, message, error>> decoder(this ref Function p) => profile_package.decoderᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this ref Function p, ж<buffer> b) => profile_package.encodeᴍ(ref p, b);
-}
-// </GlyphForwarders>

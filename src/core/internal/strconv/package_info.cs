@@ -79,6 +79,10 @@ using static go.@internal.strconv_package;
 
 namespace go.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using static strconv_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("strconv")]
 public static partial class strconv_package
 {
@@ -118,3 +122,22 @@ public static partial class strconv_package
 [GoMethodHost(typeof(strconv_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class strconvᴛError;
 [GoMethodHost(typeof(strconv_package.@decimal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class strconvᴛdecimal;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class strconvᴛdecimal {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*ok*/ set(this ref @decimal b, @string s) => strconv_package.setᴍ(ref b, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64 b, bool overflow) floatBits(this ж<@decimal> Ꮡd, ж<floatInfo> Ꮡflt) => strconv_package.floatBitsᴍ(Ꮡd, Ꮡflt);
+}
+partial class strconvᴛError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this Error e) => strconv_package.Errorᴍ(e);
+}
+partial class strconvᴛdecimal {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref @decimal a) => strconv_package.Stringᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Assign(this ж<@decimal> Ꮡa, uint64 v) => strconv_package.Assignᴍ(Ꮡa, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Shift(this ж<@decimal> Ꮡa, nint k) => strconv_package.Shiftᴍ(Ꮡa, k);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Round(this ж<@decimal> Ꮡa, nint nd) => strconv_package.Roundᴍ(Ꮡa, nd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RoundDown(this ж<@decimal> Ꮡa, nint nd) => strconv_package.RoundDownᴍ(Ꮡa, nd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RoundUp(this ref @decimal a, nint nd) => strconv_package.RoundUpᴍ(ref a, nd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 RoundedInteger(this ж<@decimal> Ꮡa) => strconv_package.RoundedIntegerᴍ(Ꮡa);
+}
+// </GlyphForwarders>

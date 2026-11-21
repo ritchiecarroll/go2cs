@@ -53,26 +53,26 @@ partial struct Digest {
 } partial class sha3_package {
 
 // BlockSize returns the rate of sponge underlying this hash function.
-internal static nint BlockSizeᴍ(ref Digest d) { return d.rate; }
+[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref Digest d) { return d.rate; }
 
 // Size returns the output size of the hash function in bytes.
-internal static nint Sizeᴍ(ref Digest d) { return d.outputLen; }
+[GoMethodBody("Size")] internal static nint Sizeᴍ(ref Digest d) { return d.outputLen; }
 
 // Reset resets the Digest to its initial state.
-internal static void Resetᴍ(ref Digest d) {
+[GoMethodBody("Reset")] internal static void Resetᴍ(ref Digest d) {
     // Zero the permutation's state.
     clear(d.a[..]);
     d.state = spongeAbsorbing;
     d.n = 0;
 }
 
-internal static ж<Digest> Cloneᴍ(ref Digest d) {
+[GoMethodBody("Clone")] internal static ж<Digest> Cloneᴍ(ref Digest d) {
     ref var ret = ref heap<Digest>(d.ΔClone(), out var Ꮡret);
     return Ꮡret;
 }
 
 // permute applies the KeccakF-1600 permutation.
-internal static void permuteᴍ(ж<Digest> Ꮡd) {
+[GoMethodBody("permute")] internal static void permuteᴍ(ж<Digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     keccakF1600(Ꮡd.Ꮡa);
@@ -81,7 +81,7 @@ internal static void permuteᴍ(ж<Digest> Ꮡd) {
 
 // padAndPermute appends the domain separation bits in dsbyte, applies
 // the multi-bitrate 10..1 padding rule, and permutes the state.
-internal static void padAndPermuteᴍ(ж<Digest> Ꮡd) {
+[GoMethodBody("padAndPermute")] internal static void padAndPermuteᴍ(ж<Digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Pad with this instance's domain-separator bits. We know that there's
@@ -99,8 +99,8 @@ internal static void padAndPermuteᴍ(ж<Digest> Ꮡd) {
 }
 
 // Write absorbs more data into the hash's state.
-internal static (nint n, error err) Writeᴍ(ж<Digest> Ꮡd, slice<byte> p) { return Ꮡd.write(p); }
-internal static (nint n, error err) writeGenericᴍ(ж<Digest> Ꮡd, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<Digest> Ꮡd, slice<byte> p) { return Ꮡd.write(p); }
+[GoMethodBody("writeGeneric")] internal static (nint n, error err) writeGenericᴍ(ж<Digest> Ꮡd, slice<byte> p) {
     nint n = default;
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
@@ -126,7 +126,7 @@ internal static (nint n, error err) writeGenericᴍ(ж<Digest> Ꮡd, slice<byte>
 }
 
 // read squeezes an arbitrary number of bytes from the sponge.
-internal static (nint n, error err) readGenericᴍ(ж<Digest> Ꮡd, slice<byte> @out) {
+[GoMethodBody("readGeneric")] internal static (nint n, error err) readGenericᴍ(ж<Digest> Ꮡd, slice<byte> @out) {
     nint n = default;
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
@@ -155,7 +155,7 @@ internal static (nint n, error err) readGenericᴍ(ж<Digest> Ꮡd, slice<byte> 
 
 // Sum appends the current hash to b and returns the resulting slice.
 // It does not change the underlying hash state.
-internal static slice<byte> Sumᴍ(ref Digest d, slice<byte> b) {
+[GoMethodBody("Sum")] internal static slice<byte> Sumᴍ(ref Digest d, slice<byte> b) {
     if (d.dsbyte == dsbyteKeccak) {
         fips140.RecordNonApproved();
     } else {
@@ -164,7 +164,7 @@ internal static slice<byte> Sumᴍ(ref Digest d, slice<byte> b) {
     return d.sum(b);
 }
 
-internal static slice<byte> sumGenericᴍ(ref Digest d, slice<byte> b) {
+[GoMethodBody("sumGeneric")] internal static slice<byte> sumGenericᴍ(ref Digest d, slice<byte> b) {
     if (d.state != spongeAbsorbing) {
         throw panic("sha3: Sum after Read");
     }
@@ -192,11 +192,11 @@ internal const nint marshaledSize = /* len(magicSHA3) + 1 + 200 + 1 + 1 */ 207;
 
 } partial class sha3_package {
 
-internal static (slice<byte>, error) MarshalBinaryᴍ(ref Digest d) {
+[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(ref Digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
-internal static (slice<byte>, error) AppendBinaryᴍ(ref Digest d, slice<byte> b) {
+[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ref Digest d, slice<byte> b) {
     switch (d.dsbyte) {
     case var ᴛ when ᴛ == dsbyteSHA3: {
         b = append(b, magicSHA3.ꓸꓸꓸ);
@@ -233,7 +233,7 @@ private static readonly @string sha3InvalidHashStateˢ2ᵇᴍDigest = "sha3: inv
 private static ref readonly @string sha3InvalidHashStateˢ3ᴍDigest => ref sha3InvalidHashStateˢ3ᵇᴍDigest;
 private static readonly @string sha3InvalidHashStateˢ3ᵇᴍDigest = "sha3: invalid hash state function"u8;
 
-internal static error UnmarshalBinaryᴍ(ref Digest d, slice<byte> b) {
+[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref Digest d, slice<byte> b) {
     if (len(b) != marshaledSize) {
         return errors.New(sha3InvalidHashStateˢᴍDigest);
     }
@@ -281,22 +281,3 @@ internal static error UnmarshalBinaryᴍ(ref Digest d, slice<byte> b) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class sha3ᴛDigest {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint BlockSize(this ref Digest d) => sha3_package.BlockSizeᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Size(this ref Digest d) => sha3_package.Sizeᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Digest d) => sha3_package.Resetᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Digest> Clone(this ref Digest d) => sha3_package.Cloneᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void permute(this ж<Digest> Ꮡd) => sha3_package.permuteᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void padAndPermute(this ж<Digest> Ꮡd) => sha3_package.padAndPermuteᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) => sha3_package.Writeᴍ(Ꮡd, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) writeGeneric(this ж<Digest> Ꮡd, slice<byte> p) => sha3_package.writeGenericᴍ(Ꮡd, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) readGeneric(this ж<Digest> Ꮡd, slice<byte> @out) => sha3_package.readGenericᴍ(Ꮡd, @out);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Sum(this ref Digest d, slice<byte> b) => sha3_package.Sumᴍ(ref d, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> sumGeneric(this ref Digest d, slice<byte> b) => sha3_package.sumGenericᴍ(ref d, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this ref Digest d) => sha3_package.MarshalBinaryᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b) => sha3_package.AppendBinaryᴍ(ref d, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalBinary(this ref Digest d, slice<byte> b) => sha3_package.UnmarshalBinaryᴍ(ref d, b);
-}
-// </GlyphForwarders>

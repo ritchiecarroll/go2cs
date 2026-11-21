@@ -29,7 +29,7 @@ partial struct Interface {
 } partial class types_package {
 
 // typeSet returns the type set for interface t.
-internal static ж<_TypeSet> typeSetᴍ(ж<Interface> Ꮡt) {
+[GoMethodBody("typeSet")] internal static ж<_TypeSet> typeSetᴍ(ж<Interface> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     return computeInterfaceTypeSet(t.check, nopos, Ꮡt);
@@ -87,7 +87,7 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<Type
 } partial class types_package {
 
 // check may be nil
-internal static ж<Interface> newInterfaceᴍ(ж<Checker> Ꮡcheck) {
+[GoMethodBody("newInterface")] internal static ж<Interface> newInterfaceᴍ(ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var typ = Ꮡ(new Interface(check: Ꮡcheck));
@@ -103,48 +103,48 @@ internal static ж<Interface> newInterfaceᴍ(ж<Checker> Ꮡcheck) {
 // corresponds to a constraint literal such as ~T or A|B without explicit
 // interface embedding. MarkImplicit should be called before any concurrent use
 // of implicit interfaces.
-internal static void MarkImplicitᴍ(ref Interface t) {
+[GoMethodBody("MarkImplicit")] internal static void MarkImplicitᴍ(ref Interface t) {
     t.@implicit = true;
 }
 
 // NumExplicitMethods returns the number of explicitly declared methods of interface t.
-internal static nint NumExplicitMethodsᴍ(ref Interface t) { return len(t.methods); }
+[GoMethodBody("NumExplicitMethods")] internal static nint NumExplicitMethodsᴍ(ref Interface t) { return len(t.methods); }
 
 // ExplicitMethod returns the i'th explicitly declared method of interface t for 0 <= i < t.NumExplicitMethods().
 // The methods are ordered by their unique [Id].
-internal static ж<Func> ExplicitMethodᴍ(ref Interface t, nint i) { return t.methods[i]; }
+[GoMethodBody("ExplicitMethod")] internal static ж<Func> ExplicitMethodᴍ(ref Interface t, nint i) { return t.methods[i]; }
 
 // NumEmbeddeds returns the number of embedded types in interface t.
-internal static nint NumEmbeddedsᴍ(ref Interface t) { return len(t.embeddeds); }
+[GoMethodBody("NumEmbeddeds")] internal static nint NumEmbeddedsᴍ(ref Interface t) { return len(t.embeddeds); }
 
 // Embedded returns the i'th embedded defined (*[Named]) type of interface t for 0 <= i < t.NumEmbeddeds().
 // The result is nil if the i'th embedded type is not a defined type.
 //
 // Deprecated: Use [Interface.EmbeddedType] which is not restricted to defined (*[Named]) types.
-internal static ж<Named> Embeddedᴍ(ref Interface t, nint i) { return asNamed(t.embeddeds[i]); }
+[GoMethodBody("Embedded")] internal static ж<Named> Embeddedᴍ(ref Interface t, nint i) { return asNamed(t.embeddeds[i]); }
 
 // EmbeddedType returns the i'th embedded type of interface t for 0 <= i < t.NumEmbeddeds().
-internal static Type EmbeddedTypeᴍ(ref Interface t, nint i) { return t.embeddeds[i]; }
+[GoMethodBody("EmbeddedType")] internal static Type EmbeddedTypeᴍ(ref Interface t, nint i) { return t.embeddeds[i]; }
 
 // NumMethods returns the total number of methods of interface t.
-internal static nint NumMethodsᴍ(ж<Interface> Ꮡt) { return Ꮡt.typeSet().NumMethods(); }
+[GoMethodBody("NumMethods")] internal static nint NumMethodsᴍ(ж<Interface> Ꮡt) { return Ꮡt.typeSet().NumMethods(); }
 
 // Method returns the i'th method of interface t for 0 <= i < t.NumMethods().
 // The methods are ordered by their unique Id.
-internal static ж<Func> Methodᴍ(ж<Interface> Ꮡt, nint i) { return Ꮡt.typeSet().Method(i); }
+[GoMethodBody("Method")] internal static ж<Func> Methodᴍ(ж<Interface> Ꮡt, nint i) { return Ꮡt.typeSet().Method(i); }
 
 // Empty reports whether t is the empty interface.
-internal static bool Emptyᴍ(ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsAll(); }
+[GoMethodBody("Empty")] internal static bool Emptyᴍ(ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsAll(); }
 
 // IsComparable reports whether each type in interface t's type set is comparable.
-internal static bool IsComparableᴍ(ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsComparable(default); }
+[GoMethodBody("IsComparable")] internal static bool IsComparableᴍ(ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsComparable(default); }
 
 // IsMethodSet reports whether the interface t is fully described by its method
 // set.
-internal static bool IsMethodSetᴍ(ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsMethodSet(); }
+[GoMethodBody("IsMethodSet")] internal static bool IsMethodSetᴍ(ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsMethodSet(); }
 
 // IsImplicit reports whether the interface t is a wrapper for a type set literal.
-internal static bool IsImplicitᴍ(ref Interface t) { return t.@implicit; }
+[GoMethodBody("IsImplicit")] internal static bool IsImplicitᴍ(ref Interface t) { return t.@implicit; }
 
 // Complete computes the interface's type set. It must be called by users of
 // [NewInterfaceType] and [NewInterface] after the interface's embedded types are
@@ -153,7 +153,7 @@ internal static bool IsImplicitᴍ(ref Interface t) { return t.@implicit; }
 // panic occurs. Complete returns the receiver.
 //
 // Interface types that have been completed are safe for concurrent use.
-internal static ж<Interface> Completeᴍ(ж<Interface> Ꮡt) {
+[GoMethodBody("Complete")] internal static ж<Interface> Completeᴍ(ж<Interface> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!t.complete) {
@@ -163,12 +163,12 @@ internal static ж<Interface> Completeᴍ(ж<Interface> Ꮡt) {
     return Ꮡt;
 }
 
-internal static Type Underlyingᴍ(ж<Interface> Ꮡt) { return new InterfaceжType(Ꮡt); }
-internal static @string Stringᴍ(ж<Interface> Ꮡt) { return TypeString(new InterfaceжType(Ꮡt), default); }
+[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Interface> Ꮡt) { return new InterfaceжType(Ꮡt); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<Interface> Ꮡt) { return TypeString(new InterfaceжType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
-internal static void cleanupᴍ(ж<Interface> Ꮡt) {
+[GoMethodBody("cleanup")] internal static void cleanupᴍ(ж<Interface> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.typeSet(); // any interface that escapes type checking must be safe for concurrent use
@@ -184,7 +184,7 @@ private static readonly @string methodsMustHaveAUniqueˢᵇᴍChecker = "methods
 internal static ref readonly @string methodsCannotHaveTypeˢᴍChecker => ref methodsCannotHaveTypeˢᵇᴍChecker;
 private static readonly @string methodsCannotHaveTypeˢᵇᴍChecker = "methods cannot have type parameters"u8;
 
-internal static void interfaceTypeᴍ(ж<Checker> Ꮡcheck, ж<Interface> Ꮡityp, ж<ast.InterfaceType> Ꮡiface, ж<TypeName> Ꮡdef) {
+[GoMethodBody("interfaceType")] internal static void interfaceTypeᴍ(ж<Checker> Ꮡcheck, ж<Interface> Ꮡityp, ж<ast.InterfaceType> Ꮡiface, ж<TypeName> Ꮡdef) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var ityp = ref Ꮡityp.DerefOrNull();
     ref var iface = ref Ꮡiface.DerefOrNull();
@@ -267,29 +267,3 @@ internal static void interfaceTypeᴍ(ж<Checker> Ꮡcheck, ж<Interface> Ꮡity
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛInterface {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<_TypeSet> typeSet(this ж<Interface> Ꮡt) => types_package.typeSetᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void MarkImplicit(this ref Interface t) => types_package.MarkImplicitᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumExplicitMethods(this ref Interface t) => types_package.NumExplicitMethodsᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Func> ExplicitMethod(this ref Interface t, nint i) => types_package.ExplicitMethodᴍ(ref t, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumEmbeddeds(this ref Interface t) => types_package.NumEmbeddedsᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Named> Embedded(this ref Interface t, nint i) => types_package.Embeddedᴍ(ref t, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type EmbeddedType(this ref Interface t, nint i) => types_package.EmbeddedTypeᴍ(ref t, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumMethods(this ж<Interface> Ꮡt) => types_package.NumMethodsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Func> Method(this ж<Interface> Ꮡt, nint i) => types_package.Methodᴍ(Ꮡt, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Empty(this ж<Interface> Ꮡt) => types_package.Emptyᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsComparable(this ж<Interface> Ꮡt) => types_package.IsComparableᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsMethodSet(this ж<Interface> Ꮡt) => types_package.IsMethodSetᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsImplicit(this ref Interface t) => types_package.IsImplicitᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Interface> Complete(this ж<Interface> Ꮡt) => types_package.Completeᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Underlying(this ж<Interface> Ꮡt) => types_package.Underlyingᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Interface> Ꮡt) => types_package.Stringᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cleanup(this ж<Interface> Ꮡt) => types_package.cleanupᴍ(Ꮡt);
-}
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Interface> newInterface(this ж<Checker> Ꮡcheck) => types_package.newInterfaceᴍ(Ꮡcheck);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡityp, ж<ast.InterfaceType> Ꮡiface, ж<TypeName> Ꮡdef) => types_package.interfaceTypeᴍ(Ꮡcheck, Ꮡityp, Ꮡiface, Ꮡdef);
-}
-// </GlyphForwarders>

@@ -510,7 +510,7 @@ partial struct http2clientConnPool {
 
 } partial class http_package {
 
-internal static (ж<http2ClientConn>, error) GetClientConnᴍ(ж<http2clientConnPool> Ꮡp, ж<Request> req, @string addr) {
+[GoMethodBody("GetClientConn")] internal static (ж<http2ClientConn>, error) GetClientConnᴍ(ж<http2clientConnPool> Ꮡp, ж<Request> req, @string addr) {
     return Ꮡp.getClientConn(req, addr, http2dialOnMiss);
 }
 
@@ -521,7 +521,7 @@ internal const bool http2noDialOnMiss = false;
 
 } partial class http_package {
 
-internal static (ж<http2ClientConn>, error) getClientConnᴍ(ж<http2clientConnPool> Ꮡp, ж<Request> Ꮡreq, @string addr, bool dialOnMiss) {
+[GoMethodBody("getClientConn")] internal static (ж<http2ClientConn>, error) getClientConnᴍ(ж<http2clientConnPool> Ꮡp, ж<Request> Ꮡreq, @string addr, bool dialOnMiss) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
@@ -589,7 +589,7 @@ partial struct http2dialCall {
 } partial class http_package {
 
 // requires p.mu is held.
-internal static partial ж<http2dialCall> getStartDialLockedᴍ(ж<http2clientConnPool> Ꮡp, context.Context ctx, @string addr) {
+[GoMethodBody("getStartDialLocked")] internal static partial ж<http2dialCall> getStartDialLockedᴍ(ж<http2clientConnPool> Ꮡp, context.Context ctx, @string addr) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var (callΔ1, ok) = p.dialing[addr, ꟷ]; if (ok) {
@@ -609,7 +609,7 @@ internal static partial ж<http2dialCall> getStartDialLockedᴍ(ж<http2clientCo
 } partial class http_package {
 
 // run in its own goroutine.
-internal static void dialᴍ(ref http2dialCall c, context.Context ctx, @string addr) {
+[GoMethodBody("dial")] internal static void dialᴍ(ref http2dialCall c, context.Context ctx, @string addr) {
     const bool singleUse = false; // shared conn
     (c.res, c.err) = c.p.t.dialClientConn(ctx, addr, singleUse);
 
@@ -633,7 +633,7 @@ internal static void dialᴍ(ref http2dialCall c, context.Context ctx, @string a
 // This code decides which ones live or die.
 // The return value used is whether c was used.
 // c is never closed.
-internal static partial (bool used, error err) addConnIfNeededᴍ(ж<http2clientConnPool> Ꮡp, @string key, ж<http2Transport> t, net.Conn c) {
+[GoMethodBody("addConnIfNeeded")] internal static partial (bool used, error err) addConnIfNeededᴍ(ж<http2clientConnPool> Ꮡp, @string key, ж<http2Transport> t, net.Conn c) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.mu.Lock();
@@ -676,7 +676,7 @@ partial struct http2addConnCall {
 
 } partial class http_package {
 
-internal static void runᴍ(ref http2addConnCall c, ж<http2Transport> t, @string key, net.Conn nc) {
+[GoMethodBody("run")] internal static void runᴍ(ref http2addConnCall c, ж<http2Transport> t, @string key, net.Conn nc) {
     var (cc, err) = t.NewClientConn(nc);
 
     var p = c.p;
@@ -695,7 +695,7 @@ internal static void runᴍ(ref http2addConnCall c, ж<http2Transport> t, @strin
 } partial class http_package {
 
 // p.mu must be held
-internal static void addConnLockedᴍ(ref http2clientConnPool p, @string key, ж<http2ClientConn> cc) {
+[GoMethodBody("addConnLocked")] internal static void addConnLockedᴍ(ref http2clientConnPool p, @string key, ж<http2ClientConn> cc) {
     foreach (var (_, v) in range(p.conns[key])) {
         if (v == cc) {
             return;
@@ -711,7 +711,7 @@ internal static void addConnLockedᴍ(ref http2clientConnPool p, @string key, ж
     p.keys[cc] = append(p.keys[cc], key);
 }
 
-internal static void MarkDeadᴍ(ж<http2clientConnPool> Ꮡp, ж<http2ClientConn> cc) {
+[GoMethodBody("MarkDead")] internal static void MarkDeadᴍ(ж<http2clientConnPool> Ꮡp, ж<http2ClientConn> cc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -737,7 +737,7 @@ internal static void MarkDeadᴍ(ж<http2clientConnPool> Ꮡp, ж<http2ClientCon
     finally { if (ᒐd1) Ꮡp.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void closeIdleConnectionsᴍ(ж<http2clientConnPool> Ꮡp) {
+[GoMethodBody("closeIdleConnections")] internal static void closeIdleConnectionsᴍ(ж<http2clientConnPool> Ꮡp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -787,7 +787,7 @@ partial struct http2noDialClientConnPool {
 
 } partial class http_package {
 
-internal static (ж<http2ClientConn>, error) GetClientConnᴍ(http2noDialClientConnPool p, ж<Request> req, @string addr) {
+[GoMethodBody("GetClientConn")] internal static (ж<http2ClientConn>, error) GetClientConnᴍ(http2noDialClientConnPool p, ж<Request> req, @string addr) {
     return p.getClientConn(req, addr, http2noDialOnMiss);
 }
 
@@ -1071,7 +1071,7 @@ internal static error http2errReadEmpty = errors.New("read from empty dataBuffer
 
 // Read copies bytes from the buffer into p.
 // It is an error to read when no data is available.
-internal static (nint, error) Readᴍ(ref http2dataBuffer b, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref http2dataBuffer b, slice<byte> p) {
     if (b.size == 0) {
         return (0, http2errReadEmpty);
     }
@@ -1096,7 +1096,7 @@ internal static (nint, error) Readᴍ(ref http2dataBuffer b, slice<byte> p) {
     return (ntotal, default);
 }
 
-internal static slice<byte> bytesFromFirstChunkᴍ(ref http2dataBuffer b) {
+[GoMethodBody("bytesFromFirstChunk")] internal static slice<byte> bytesFromFirstChunkᴍ(ref http2dataBuffer b) {
     if (len(b.chunks) == 1) {
         return b.chunks[0].slice(b.r, b.w);
     }
@@ -1104,12 +1104,12 @@ internal static slice<byte> bytesFromFirstChunkᴍ(ref http2dataBuffer b) {
 }
 
 // Len returns the number of bytes of the unread portion of the buffer.
-internal static nint Lenᴍ(ref http2dataBuffer b) {
+[GoMethodBody("Len")] internal static nint Lenᴍ(ref http2dataBuffer b) {
     return b.size;
 }
 
 // Write appends p to the buffer.
-internal static (nint, error) Writeᴍ(ref http2dataBuffer b, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ref http2dataBuffer b, slice<byte> p) {
     nint ntotal = len(p);
     while (len(p) > 0) {
         // If the last chunk is empty, allocate a new chunk. Try to allocate
@@ -1129,7 +1129,7 @@ internal static (nint, error) Writeᴍ(ref http2dataBuffer b, slice<byte> p) {
     return (ntotal, default);
 }
 
-internal static slice<byte> lastChunkOrAllocᴍ(ref http2dataBuffer b, int64 want) {
+[GoMethodBody("lastChunkOrAlloc")] internal static slice<byte> lastChunkOrAllocᴍ(ref http2dataBuffer b, int64 want) {
     if (len(b.chunks) != 0) {
         var last = b.chunks[len(b.chunks) - 1];
         if (b.w < len(last)) {
@@ -1181,14 +1181,14 @@ internal static http2ErrCode http2ErrCodeHTTP11Required => 0xd;
 
 } partial class http_package {
 
-internal static @string Stringᴍ(http2ErrCode e) {
+[GoMethodBody("String")] internal static @string Stringᴍ(http2ErrCode e) {
     var (s, ok) = http2errCodeName[e, ꟷ]; if (ok) {
         return s;
     }
     return fmt.Sprintf("unknown error code 0x%x"u8, (uint32)e);
 }
 
-internal static @string stringTokenᴍ(http2ErrCode e) {
+[GoMethodBody("stringToken")] internal static @string stringTokenᴍ(http2ErrCode e) {
     var (s, ok) = http2errCodeName[e, ꟷ]; if (ok) {
         return s;
     }
@@ -1203,7 +1203,7 @@ partial struct http2ConnectionError /*num:uint32*/;
 
 } partial class http_package {
 
-internal static @string Errorᴍ(http2ConnectionError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(http2ConnectionError e) {
     return fmt.Sprintf("connection error: %s"u8, (http2ErrCode)(uint32)e);
 }
 
@@ -1228,7 +1228,7 @@ internal static http2StreamError http2streamError(uint32 id, http2ErrCode code) 
 
 } partial class http_package {
 
-internal static @string Errorᴍ(http2StreamError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(http2StreamError e) {
     if (e.Cause != nil) {
         return fmt.Sprintf("stream error: stream ID %d; %v; %v"u8, e.StreamID, e.Code, e.Cause);
     }
@@ -1251,7 +1251,7 @@ partial struct http2goAwayFlowError {
 internal static ref readonly @string connectionExceededFlowˢᴍhttp2goAwayFlowError => ref connectionExceededFlowˢᵇᴍhttp2goAwayFlowError;
 private static readonly @string connectionExceededFlowˢᵇᴍhttp2goAwayFlowError = "connection exceeded flow control window size"u8;
 
-internal static @string Errorᴍ(http2goAwayFlowError _) { return connectionExceededFlowˢᴍhttp2goAwayFlowError; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(http2goAwayFlowError _) { return connectionExceededFlowˢᴍhttp2goAwayFlowError; }
 
 } partial class http_package {
 
@@ -1269,7 +1269,7 @@ partial struct http2connError {
 
 } partial class http_package {
 
-internal static @string Errorᴍ(http2connError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(http2connError e) {
     return fmt.Sprintf("http2: connection error: %v: %v"u8, e.Code, e.Reason);
 }
 
@@ -1279,7 +1279,7 @@ partial struct http2pseudoHeaderError /*@string*/;
 
 } partial class http_package {
 
-internal static @string Errorᴍ(http2pseudoHeaderError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(http2pseudoHeaderError e) {
     return fmt.Sprintf("invalid pseudo-header %q"u8, (@string)e);
 }
 
@@ -1289,7 +1289,7 @@ partial struct http2duplicatePseudoHeaderError /*@string*/;
 
 } partial class http_package {
 
-internal static @string Errorᴍ(http2duplicatePseudoHeaderError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(http2duplicatePseudoHeaderError e) {
     return fmt.Sprintf("duplicate pseudo-header %q"u8, (@string)e);
 }
 
@@ -1299,7 +1299,7 @@ partial struct http2headerFieldNameError /*@string*/;
 
 } partial class http_package {
 
-internal static @string Errorᴍ(http2headerFieldNameError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(http2headerFieldNameError e) {
     return fmt.Sprintf("invalid header field name %q"u8, (@string)e);
 }
 
@@ -1309,7 +1309,7 @@ partial struct http2headerFieldValueError /*@string*/;
 
 } partial class http_package {
 
-internal static @string Errorᴍ(http2headerFieldValueError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(http2headerFieldValueError e) {
     return fmt.Sprintf("invalid header field value for %q"u8, (@string)e);
 }
 
@@ -1336,7 +1336,7 @@ partial struct http2inflow {
 } partial class http_package {
 
 // init sets the initial window.
-internal static void initᴍ(ref http2inflow f, int32 n) {
+[GoMethodBody("init")] internal static void initᴍ(ref http2inflow f, int32 n) {
     f.avail = n;
 }
 
@@ -1347,7 +1347,7 @@ internal static void initᴍ(ref http2inflow f, int32 n) {
 // It returns the number of bytes to send in a WINDOW_UPDATE frame to the peer.
 // Window updates are accumulated and sent when the unsent capacity
 // is at least inflowMinRefresh or will at least double the peer's available window.
-internal static int32 /*connAdd*/ addᴍ(ref http2inflow f, nint n) {
+[GoMethodBody("add")] internal static int32 /*connAdd*/ addᴍ(ref http2inflow f, nint n) {
     if (n < 0) {
         throw panic("negative update");
     }
@@ -1371,7 +1371,7 @@ internal static int32 /*connAdd*/ addᴍ(ref http2inflow f, nint n) {
 
 // take attempts to take n bytes from the peer's flow control window.
 // It reports whether the window has available capacity.
-internal static bool takeᴍ(ref http2inflow f, uint32 n) {
+[GoMethodBody("take")] internal static bool takeᴍ(ref http2inflow f, uint32 n) {
     if (n > (uint32)f.avail) {
         return false;
     }
@@ -1402,12 +1402,12 @@ partial struct http2connOutflow {
 
 } partial class http_package {
 
-internal static void initᴍ(ref http2connOutflow f) {
+[GoMethodBody("init")] internal static void initᴍ(ref http2connOutflow f) {
     f.initial = http2initialWindowSize; // initial stream window size
     f.n = http2initialWindowSize;       // current connection window size
 }
 
-internal static bool changeInitialWindowSizeᴍ(ref http2connOutflow f, int64 size) {
+[GoMethodBody("changeInitialWindowSize")] internal static bool changeInitialWindowSizeᴍ(ref http2connOutflow f, int64 size) {
     if (size > http2maxFlowWindow) {
         f.flowErr = true;
         return false;
@@ -1416,7 +1416,7 @@ internal static bool changeInitialWindowSizeᴍ(ref http2connOutflow f, int64 si
     return true;
 }
 
-internal static bool addᴍ(ref http2connOutflow f, int32 n) {
+[GoMethodBody("add")] internal static bool addᴍ(ref http2connOutflow f, int32 n) {
     var sum = (int64)f.n + (int64)n;
     if (sum > http2maxFlowWindow) {
         f.flowErr = true;
@@ -1444,7 +1444,7 @@ partial struct http2outflow {
 
 } partial class http_package {
 
-internal static (int32, bool) availableᴍ(ref http2outflow f) {
+[GoMethodBody("available")] internal static (int32, bool) availableᴍ(ref http2outflow f) {
     if (f.conn == nil) {
         return (http2maxFlowWindow, true); // only happens in tests
     }
@@ -1460,7 +1460,7 @@ internal static (int32, bool) availableᴍ(ref http2outflow f) {
     return (min((int32)n, f.conn.n), true);
 }
 
-internal static void takeᴍ(ref http2outflow f, int32 n) {
+[GoMethodBody("take")] internal static void takeᴍ(ref http2outflow f, int32 n) {
     if (f.conn == nil) {
         return; // only happens in tests
     }
@@ -1474,7 +1474,7 @@ internal static void takeᴍ(ref http2outflow f, int32 n) {
 
 // add adds n bytes (positive or negative) to the flow control window.
 // It returns false if the sum would exceed 2^31-1.
-internal static bool addᴍ(ref http2outflow f, int32 n) {
+[GoMethodBody("add")] internal static bool addᴍ(ref http2outflow f, int32 n) {
     if (f.conn == nil) {
         return true; // only happens in tests
     }
@@ -1530,7 +1530,7 @@ internal static http2FrameType http2FrameContinuation => 0x9;
 
 } partial class http_package {
 
-internal static @string Stringᴍ(http2FrameType t) {
+[GoMethodBody("String")] internal static @string Stringᴍ(http2FrameType t) {
     if ((nint)t < len(http2frameNames)) {
         return http2frameNames[t];
     }
@@ -1546,7 +1546,7 @@ public partial struct http2Flags /*num:uint8*/;
 } partial class http_package {
 
 // Has reports whether f contains all (0 or more) flags in v.
-internal static bool Hasᴍ(http2Flags f, http2Flags v) {
+[GoMethodBody("Has")] internal static bool Hasᴍ(http2Flags f, http2Flags v) {
     return ((http2Flags)(f & v)) == v;
 }
 
@@ -1645,13 +1645,13 @@ partial struct http2FrameHeader {
 
 // Header returns h. It exists so FrameHeaders can be embedded in other
 // specific frame types and implement the Frame interface.
-internal static http2FrameHeader Headerᴍ(http2FrameHeader h) { return h; }
+[GoMethodBody("Header")] internal static http2FrameHeader Headerᴍ(http2FrameHeader h) { return h; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string frameHeaderˢᴍhttp2FrameHeader => ref frameHeaderˢᵇᴍhttp2FrameHeader;
 private static readonly @string frameHeaderˢᵇᴍhttp2FrameHeader = "[FrameHeader "u8;
 
-internal static @string Stringᴍ(http2FrameHeader h) {
+[GoMethodBody("String")] internal static @string Stringᴍ(http2FrameHeader h) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     buf.WriteString(frameHeaderˢᴍhttp2FrameHeader);
     h.writeDebug(Ꮡbuf);
@@ -1663,7 +1663,7 @@ internal static @string Stringᴍ(http2FrameHeader h) {
 internal static ref readonly @string flagsˢᴍhttp2FrameHeader => ref flagsˢᵇᴍhttp2FrameHeader;
 private static readonly @string flagsˢᵇᴍhttp2FrameHeader = " flags="u8;
 
-internal static void writeDebugᴍ(http2FrameHeader h, ж<bytes.Buffer> Ꮡbuf) {
+[GoMethodBody("writeDebug")] internal static void writeDebugᴍ(http2FrameHeader h, ж<bytes.Buffer> Ꮡbuf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     buf.WriteString(h.Type.String());
@@ -1692,13 +1692,13 @@ internal static void writeDebugᴍ(http2FrameHeader h, ж<bytes.Buffer> Ꮡbuf) 
     fmt.Fprintf(new bytes_BufferжWriter(Ꮡbuf), " len=%d"u8, h.Length);
 }
 
-internal static void checkValidᴍ(ref http2FrameHeader h) {
+[GoMethodBody("checkValid")] internal static void checkValidᴍ(ref http2FrameHeader h) {
     if (!h.valid) {
         throw panic("Frame accessor called on non-owned Frame");
     }
 }
 
-internal static void invalidateᴍ(ref http2FrameHeader h) { h.valid = false; }
+[GoMethodBody("invalidate")] internal static void invalidateᴍ(ref http2FrameHeader h) { h.valid = false; }
 
 } partial class http_package {
 
@@ -1822,14 +1822,14 @@ partial struct http2Framer {
 
 } partial class http_package {
 
-internal static uint32 maxHeaderListSizeᴍ(ref http2Framer fr) {
+[GoMethodBody("maxHeaderListSize")] internal static uint32 maxHeaderListSizeᴍ(ref http2Framer fr) {
     if (fr.MaxHeaderListSize == 0) {
         return (uint32)16 << 20; // sane default, per docs
     }
     return fr.MaxHeaderListSize;
 }
 
-internal static void startWriteᴍ(ref http2Framer f, http2FrameType ftype, http2Flags flags, uint32 streamID) {
+[GoMethodBody("startWrite")] internal static void startWriteᴍ(ref http2Framer f, http2FrameType ftype, http2Flags flags, uint32 streamID) {
     // Write the FrameHeader.
     f.wbuf = append(f.wbuf[..0],
         (byte)0, // 3 bytes of length, filled in endWrite
@@ -1843,7 +1843,7 @@ internal static void startWriteᴍ(ref http2Framer f, http2FrameType ftype, http
         (byte)streamID);
 }
 
-internal static error endWriteᴍ(ж<http2Framer> Ꮡf) {
+[GoMethodBody("endWrite")] internal static error endWriteᴍ(ж<http2Framer> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     // Now that we know the final size, fill in the FrameHeader in
@@ -1867,7 +1867,7 @@ internal static error endWriteᴍ(ж<http2Framer> Ꮡf) {
     return err;
 }
 
-internal static void logWriteᴍ(ж<http2Framer> Ꮡf) {
+[GoMethodBody("logWrite")] internal static void logWriteᴍ(ж<http2Framer> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (f.debugFramer == nil) {
@@ -1887,13 +1887,13 @@ internal static void logWriteᴍ(ж<http2Framer> Ꮡf) {
     f.debugWriteLoggerf("http2: Framer %p: wrote %v", Ꮡf.OrTypedNil(), http2summarizeFrame(fr));
 }
 
-internal static void writeByteᴍ(ref http2Framer f, byte v) { f.wbuf = append(f.wbuf, v); }
+[GoMethodBody("writeByte")] internal static void writeByteᴍ(ref http2Framer f, byte v) { f.wbuf = append(f.wbuf, v); }
 
-internal static void writeBytesᴍ(ref http2Framer f, slice<byte> v) { f.wbuf = appendꓸꓸꓸ(f.wbuf, v); }
+[GoMethodBody("writeBytes")] internal static void writeBytesᴍ(ref http2Framer f, slice<byte> v) { f.wbuf = appendꓸꓸꓸ(f.wbuf, v); }
 
-internal static void writeUint16ᴍ(ref http2Framer f, uint16 v) { f.wbuf = append(f.wbuf, (byte)(v >> 8), (byte)v); }
+[GoMethodBody("writeUint16")] internal static void writeUint16ᴍ(ref http2Framer f, uint16 v) { f.wbuf = append(f.wbuf, (byte)(v >> 8), (byte)v); }
 
-internal static void writeUint32ᴍ(ref http2Framer f, uint32 v) {
+[GoMethodBody("writeUint32")] internal static void writeUint32ᴍ(ref http2Framer f, uint32 v) {
     f.wbuf = append(f.wbuf, (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
 }
 
@@ -1907,7 +1907,7 @@ internal static UntypedInt http2maxFrameSize => /* 1<<24 - 1 */ 16777215;
 // SetReuseFrames allows the Framer to reuse Frames.
 // If called on a Framer, Frames returned by calls to ReadFrame are only
 // valid until the next call to ReadFrame.
-internal static void SetReuseFramesᴍ(ref http2Framer fr) {
+[GoMethodBody("SetReuseFrames")] internal static void SetReuseFramesᴍ(ref http2Framer fr) {
     if (fr.frameCache != nil) {
         return;
     }
@@ -1922,7 +1922,7 @@ partial struct http2frameCache {
 
 } partial class http_package {
 
-internal static ж<http2DataFrame> getDataFrameᴍ(ж<http2frameCache> Ꮡfc) {
+[GoMethodBody("getDataFrame")] internal static ж<http2DataFrame> getDataFrameᴍ(ж<http2frameCache> Ꮡfc) {
     if (Ꮡfc == nil) {
         return Ꮡ(new http2DataFrame());
     }
@@ -1961,7 +1961,7 @@ internal static ж<http2Framer> http2NewFramer(io.Writer w, io.Reader r) {
 // that will be read by a subsequent call to ReadFrame.
 // It is the caller's responsibility to advertise this
 // limit with a SETTINGS frame.
-internal static void SetMaxReadFrameSizeᴍ(ref http2Framer fr, uint32 v) {
+[GoMethodBody("SetMaxReadFrameSize")] internal static void SetMaxReadFrameSizeᴍ(ref http2Framer fr, uint32 v) {
     if (v > http2maxFrameSize) {
         v = http2maxFrameSize;
     }
@@ -1975,7 +1975,7 @@ internal static void SetMaxReadFrameSizeᴍ(ref http2Framer fr, uint32 v) {
 // to return a non-nil value and like the rest of the http2 package,
 // its return value is not protected by an API compatibility promise.
 // ErrorDetail is reset after the next call to ReadFrame.
-internal static error ErrorDetailᴍ(ref http2Framer fr) {
+[GoMethodBody("ErrorDetail")] internal static error ErrorDetailᴍ(ref http2Framer fr) {
     return fr.errDetail;
 }
 
@@ -2006,7 +2006,7 @@ internal static bool http2terminalReadFrameError(error err) {
 //
 // If the returned FrameHeader.StreamID is non-zero, it indicates the stream
 // responsible for the error.
-internal static (http2FrameHeader, error) ReadFrameHeaderᴍ(ref http2Framer fr) {
+[GoMethodBody("ReadFrameHeader")] internal static (http2FrameHeader, error) ReadFrameHeaderᴍ(ref http2Framer fr) {
     fr.errDetail = default;
     var (fh, err) = http2readFrameHeader(fr.headerBuf[..], fr.r);
     if (err != nil) {
@@ -2028,7 +2028,7 @@ internal static (http2FrameHeader, error) ReadFrameHeaderᴍ(ref http2Framer fr)
 //
 // It behaves identically to ReadFrame, other than not checking the maximum
 // frame size.
-internal static (http2Frame, error) ReadFrameForHeaderᴍ(ж<http2Framer> Ꮡfr, http2FrameHeader fh) {
+[GoMethodBody("ReadFrameForHeader")] internal static (http2Frame, error) ReadFrameForHeaderᴍ(ж<http2Framer> Ꮡfr, http2FrameHeader fh) {
     ref var fr = ref Ꮡfr.DerefOrNull();
 
     if (fr.lastFrame != nil) {
@@ -2068,7 +2068,7 @@ internal static (http2Frame, error) ReadFrameForHeaderᴍ(ж<http2Framer> Ꮡfr,
 //
 // If ReadFrame returns an error and a non-nil Frame, the Frame's StreamID
 // indicates the stream responsible for the error.
-internal static (http2Frame, error) ReadFrameᴍ(ж<http2Framer> Ꮡfr) {
+[GoMethodBody("ReadFrame")] internal static (http2Frame, error) ReadFrameᴍ(ж<http2Framer> Ꮡfr) {
     ref var fr = ref Ꮡfr.DerefOrNull();
 
     var (fh, err) = fr.ReadFrameHeader();
@@ -2082,7 +2082,7 @@ internal static (http2Frame, error) ReadFrameᴍ(ж<http2Framer> Ꮡfr) {
 // stashes away a public reason to the caller can optionally relay it
 // to the peer before hanging up on them. This might help others debug
 // their implementations.
-internal static error connErrorᴍ(ref http2Framer fr, http2ErrCode code, @string reason) {
+[GoMethodBody("connError")] internal static error connErrorᴍ(ref http2Framer fr, http2ErrCode code, @string reason) {
     fr.errDetail = errors.New(reason);
     return ((http2ConnectionError)(uint32)code);
 }
@@ -2090,7 +2090,7 @@ internal static error connErrorᴍ(ref http2Framer fr, http2ErrCode code, @strin
 // checkFrameOrder reports an error if f is an invalid frame to return
 // next from ReadFrame. Mostly it checks whether HEADERS and
 // CONTINUATION frames are contiguous.
-internal static error checkFrameOrderᴍ(ref http2Framer fr, http2FrameHeader fh) {
+[GoMethodBody("checkFrameOrder")] internal static error checkFrameOrderᴍ(ref http2Framer fr, http2FrameHeader fh) {
     var lastType = fr.lastFrameType;
     fr.lastFrameType = fh.Type;
     if (fr.AllowIllegalReads) {
@@ -2138,7 +2138,7 @@ partial struct http2DataFrame {
 
 } partial class http_package {
 
-internal static bool StreamEndedᴍ(ref http2DataFrame f) {
+[GoMethodBody("StreamEnded")] internal static bool StreamEndedᴍ(ref http2DataFrame f) {
     return f.http2FrameHeader.Flags.Has(http2FlagDataEndStream);
 }
 
@@ -2146,7 +2146,7 @@ internal static bool StreamEndedᴍ(ref http2DataFrame f) {
 // size byte or padding suffix bytes.
 // The caller must not retain the returned memory past the next
 // call to ReadFrame.
-internal static slice<byte> Dataᴍ(ref http2DataFrame f) {
+[GoMethodBody("Data")] internal static slice<byte> Dataᴍ(ref http2DataFrame f) {
     f.http2FrameHeader.checkValid();
     return f.data;
 }
@@ -2215,7 +2215,7 @@ internal static bool http2validStreamID(uint32 streamID) {
 // It will perform exactly one Write to the underlying Writer.
 // It is the caller's responsibility not to violate the maximum frame size
 // and to not call other Write methods concurrently.
-internal static error WriteDataᴍ(ж<http2Framer> Ꮡf, uint32 streamID, bool endStream, slice<byte> data) {
+[GoMethodBody("WriteData")] internal static error WriteDataᴍ(ж<http2Framer> Ꮡf, uint32 streamID, bool endStream, slice<byte> data) {
     return Ꮡf.WriteDataPadded(streamID, endStream, data, default);
 }
 
@@ -2228,7 +2228,7 @@ internal static error WriteDataᴍ(ж<http2Framer> Ꮡf, uint32 streamID, bool e
 // It will perform exactly one Write to the underlying Writer.
 // It is the caller's responsibility not to violate the maximum frame size
 // and to not call other Write methods concurrently.
-internal static error WriteDataPaddedᴍ(ж<http2Framer> Ꮡf, uint32 streamID, bool endStream, slice<byte> data, slice<byte> pad) {
+[GoMethodBody("WriteDataPadded")] internal static error WriteDataPaddedᴍ(ж<http2Framer> Ꮡf, uint32 streamID, bool endStream, slice<byte> data, slice<byte> pad) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var err = f.startWriteDataPadded(streamID, endStream, data, pad); if (err != nil) {
@@ -2239,7 +2239,7 @@ internal static error WriteDataPaddedᴍ(ж<http2Framer> Ꮡf, uint32 streamID, 
 
 // startWriteDataPadded is WriteDataPadded, but only writes the frame to the Framer's internal buffer.
 // The caller should call endWrite to flush the frame to the underlying writer.
-internal static error startWriteDataPaddedᴍ(ref http2Framer f, uint32 streamID, bool endStream, slice<byte> data, slice<byte> pad) {
+[GoMethodBody("startWriteDataPadded")] internal static error startWriteDataPaddedᴍ(ref http2Framer f, uint32 streamID, bool endStream, slice<byte> data, slice<byte> pad) {
     if (!http2validStreamID(streamID) && !f.AllowIllegalWrites) {
         return http2errStreamID;
     }
@@ -2334,11 +2334,11 @@ internal static (http2Frame, error) http2parseSettingsFrame(ж<http2frameCache> 
 
 } partial class http_package {
 
-internal static bool IsAckᴍ(ref http2SettingsFrame f) {
+[GoMethodBody("IsAck")] internal static bool IsAckᴍ(ref http2SettingsFrame f) {
     return f.http2FrameHeader.Flags.Has(http2FlagSettingsAck);
 }
 
-internal static (uint32 v, bool ok) Valueᴍ(ref http2SettingsFrame f, http2SettingID id) {
+[GoMethodBody("Value")] internal static (uint32 v, bool ok) Valueᴍ(ref http2SettingsFrame f, http2SettingID id) {
     f.http2FrameHeader.checkValid();
     for (nint i = 0; i < f.NumSettings(); i++) {
         var s = f.Setting(i); if (s.ID == id) {
@@ -2350,7 +2350,7 @@ internal static (uint32 v, bool ok) Valueᴍ(ref http2SettingsFrame f, http2Sett
 
 // Setting returns the setting from the frame at the given 0-based index.
 // The index must be >= 0 and less than f.NumSettings().
-internal static http2Setting Settingᴍ(ref http2SettingsFrame f, nint i) {
+[GoMethodBody("Setting")] internal static http2Setting Settingᴍ(ref http2SettingsFrame f, nint i) {
     var buf = f.p;
     return new http2Setting(
         ID: ((http2SettingID)binary.BigEndian.Uint16(buf.slice(i * 6, i * 6 + 2))),
@@ -2358,10 +2358,10 @@ internal static http2Setting Settingᴍ(ref http2SettingsFrame f, nint i) {
     );
 }
 
-internal static nint NumSettingsᴍ(ref http2SettingsFrame f) { return len(f.p) / 6; }
+[GoMethodBody("NumSettings")] internal static nint NumSettingsᴍ(ref http2SettingsFrame f) { return len(f.p) / 6; }
 
 // HasDuplicates reports whether f contains any duplicate setting IDs.
-internal static bool HasDuplicatesᴍ(ref http2SettingsFrame f) {
+[GoMethodBody("HasDuplicates")] internal static bool HasDuplicatesᴍ(ref http2SettingsFrame f) {
     nint num = f.NumSettings();
     if (num == 0) {
         return false;
@@ -2393,7 +2393,7 @@ internal static bool HasDuplicatesᴍ(ref http2SettingsFrame f) {
 
 // ForeachSetting runs fn for each setting.
 // It stops and returns the first error.
-internal static error ForeachSettingᴍ(ref http2SettingsFrame f, Func<http2Setting, error> fn) {
+[GoMethodBody("ForeachSetting")] internal static error ForeachSettingᴍ(ref http2SettingsFrame f, Func<http2Setting, error> fn) {
     f.http2FrameHeader.checkValid();
     for (nint i = 0; i < f.NumSettings(); i++) {
         var err = fn(f.Setting(i)); if (err != nil) {
@@ -2410,7 +2410,7 @@ internal static error ForeachSettingᴍ(ref http2SettingsFrame f, Func<http2Sett
 //
 // It will perform exactly one Write to the underlying Writer.
 // It is the caller's responsibility to not call other Write methods concurrently.
-internal static error WriteSettingsᴍ(ж<http2Framer> Ꮡf, params ꓸꓸꓸhttp2Setting settingsʗp) {
+[GoMethodBody("WriteSettings")] internal static error WriteSettingsᴍ(ж<http2Framer> Ꮡf, params ꓸꓸꓸhttp2Setting settingsʗp) {
     var settings = settingsʗp.sslice();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -2426,7 +2426,7 @@ internal static error WriteSettingsᴍ(ж<http2Framer> Ꮡf, params ꓸꓸꓸhtt
 //
 // It will perform exactly one Write to the underlying Writer.
 // It is the caller's responsibility to not call other Write methods concurrently.
-internal static error WriteSettingsAckᴍ(ж<http2Framer> Ꮡf) {
+[GoMethodBody("WriteSettingsAck")] internal static error WriteSettingsAckᴍ(ж<http2Framer> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.startWrite(http2FrameSettings, http2FlagSettingsAck, 0);
@@ -2446,7 +2446,7 @@ partial struct http2PingFrame {
 
 } partial class http_package {
 
-internal static bool IsAckᴍ(ref http2PingFrame f) { return f.Flags.Has(http2FlagPingAck); }
+[GoMethodBody("IsAck")] internal static bool IsAckᴍ(ref http2PingFrame f) { return f.Flags.Has(http2FlagPingAck); }
 
 } partial class http_package {
 
@@ -2472,7 +2472,7 @@ internal static (http2Frame, error) http2parsePingFrame(ж<http2frameCache> _, h
 
 } partial class http_package {
 
-internal static error WritePingᴍ(ж<http2Framer> Ꮡf, bool ack, /*[8]*/ array<byte> data) {
+[GoMethodBody("WritePing")] internal static error WritePingᴍ(ж<http2Framer> Ꮡf, bool ack, /*[8]*/ array<byte> data) {
     data = data.Clone();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -2502,7 +2502,7 @@ partial struct http2GoAwayFrame {
 // are not defined.
 // The caller must not retain the returned memory past the next
 // call to ReadFrame.
-internal static slice<byte> DebugDataᴍ(ref http2GoAwayFrame f) {
+[GoMethodBody("DebugData")] internal static slice<byte> DebugDataᴍ(ref http2GoAwayFrame f) {
     f.http2FrameHeader.checkValid();
     return f.debugData;
 }
@@ -2534,7 +2534,7 @@ internal static (http2Frame, error) http2parseGoAwayFrame(ж<http2frameCache> _,
 
 } partial class http_package {
 
-internal static error WriteGoAwayᴍ(ж<http2Framer> Ꮡf, uint32 maxStreamID, http2ErrCode code, slice<byte> debugData) {
+[GoMethodBody("WriteGoAway")] internal static error WriteGoAwayᴍ(ж<http2Framer> Ꮡf, uint32 maxStreamID, http2ErrCode code, slice<byte> debugData) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.startWrite(http2FrameGoAway, 0, 0);
@@ -2560,7 +2560,7 @@ partial struct http2UnknownFrame {
 // Framer.ReadFrame, nor is it valid to retain the returned slice.
 // The memory is owned by the Framer and is invalidated when the next
 // frame is read.
-internal static slice<byte> Payloadᴍ(ref http2UnknownFrame f) {
+[GoMethodBody("Payload")] internal static slice<byte> Payloadᴍ(ref http2UnknownFrame f) {
     f.http2FrameHeader.checkValid();
     return f.p;
 }
@@ -2622,7 +2622,7 @@ private static readonly @string illegalWindowIncrementˢᵇᴍhttp2Framer = "ill
 // The increment value must be between 1 and 2,147,483,647, inclusive.
 // If the Stream ID is zero, the window update applies to the
 // connection as a whole.
-internal static error WriteWindowUpdateᴍ(ж<http2Framer> Ꮡf, uint32 streamID, uint32 incr) {
+[GoMethodBody("WriteWindowUpdate")] internal static error WriteWindowUpdateᴍ(ж<http2Framer> Ꮡf, uint32 streamID, uint32 incr) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     // "The legal range for the increment to the flow control window is 1 to 2^31-1 (2,147,483,647) octets."
@@ -2647,20 +2647,20 @@ partial struct http2HeadersFrame {
 
 } partial class http_package {
 
-internal static slice<byte> HeaderBlockFragmentᴍ(ref http2HeadersFrame f) {
+[GoMethodBody("HeaderBlockFragment")] internal static slice<byte> HeaderBlockFragmentᴍ(ref http2HeadersFrame f) {
     f.http2FrameHeader.checkValid();
     return f.headerFragBuf;
 }
 
-internal static bool HeadersEndedᴍ(ref http2HeadersFrame f) {
+[GoMethodBody("HeadersEnded")] internal static bool HeadersEndedᴍ(ref http2HeadersFrame f) {
     return f.http2FrameHeader.Flags.Has(http2FlagHeadersEndHeaders);
 }
 
-internal static bool StreamEndedᴍ(ref http2HeadersFrame f) {
+[GoMethodBody("StreamEnded")] internal static bool StreamEndedᴍ(ref http2HeadersFrame f) {
     return f.http2FrameHeader.Flags.Has(http2FlagHeadersEndStream);
 }
 
-internal static bool HasPriorityᴍ(ref http2HeadersFrame f) {
+[GoMethodBody("HasPriority")] internal static bool HasPriorityᴍ(ref http2HeadersFrame f) {
     return f.http2FrameHeader.Flags.Has(http2FlagHeadersPriority);
 }
 
@@ -2755,7 +2755,7 @@ partial struct http2HeadersFrameParam {
 //
 // It will perform exactly one Write to the underlying Writer.
 // It is the caller's responsibility to not call other Write methods concurrently.
-internal static error WriteHeadersᴍ(ж<http2Framer> Ꮡf, http2HeadersFrameParam p) {
+[GoMethodBody("WriteHeaders")] internal static error WriteHeadersᴍ(ж<http2Framer> Ꮡf, http2HeadersFrameParam p) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (!http2validStreamID(p.StreamID) && !f.AllowIllegalWrites) {
@@ -2841,7 +2841,7 @@ public partial struct http2PriorityParam {
 
 } partial class http_package {
 
-internal static bool IsZeroᴍ(http2PriorityParam p) {
+[GoMethodBody("IsZero")] internal static bool IsZeroᴍ(http2PriorityParam p) {
     return p == new http2PriorityParam();
 }
 
@@ -2880,7 +2880,7 @@ internal static (http2Frame, error) http2parsePriorityFrame(ж<http2frameCache> 
 //
 // It will perform exactly one Write to the underlying Writer.
 // It is the caller's responsibility to not call other Write methods concurrently.
-internal static error WritePriorityᴍ(ж<http2Framer> Ꮡf, uint32 streamID, http2PriorityParam p) {
+[GoMethodBody("WritePriority")] internal static error WritePriorityᴍ(ж<http2Framer> Ꮡf, uint32 streamID, http2PriorityParam p) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (!http2validStreamID(streamID) && !f.AllowIllegalWrites) {
@@ -2932,7 +2932,7 @@ internal static (http2Frame, error) http2parseRSTStreamFrame(ж<http2frameCache>
 //
 // It will perform exactly one Write to the underlying Writer.
 // It is the caller's responsibility to not call other Write methods concurrently.
-internal static error WriteRSTStreamᴍ(ж<http2Framer> Ꮡf, uint32 streamID, http2ErrCode code) {
+[GoMethodBody("WriteRSTStream")] internal static error WriteRSTStreamᴍ(ж<http2Framer> Ꮡf, uint32 streamID, http2ErrCode code) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (!http2validStreamID(streamID) && !f.AllowIllegalWrites) {
@@ -2966,12 +2966,12 @@ internal static (http2Frame, error) http2parseContinuationFrame(ж<http2frameCac
 
 } partial class http_package {
 
-internal static slice<byte> HeaderBlockFragmentᴍ(ref http2ContinuationFrame f) {
+[GoMethodBody("HeaderBlockFragment")] internal static slice<byte> HeaderBlockFragmentᴍ(ref http2ContinuationFrame f) {
     f.http2FrameHeader.checkValid();
     return f.headerFragBuf;
 }
 
-internal static bool HeadersEndedᴍ(ref http2ContinuationFrame f) {
+[GoMethodBody("HeadersEnded")] internal static bool HeadersEndedᴍ(ref http2ContinuationFrame f) {
     return f.http2FrameHeader.Flags.Has(http2FlagContinuationEndHeaders);
 }
 
@@ -2981,7 +2981,7 @@ internal static bool HeadersEndedᴍ(ref http2ContinuationFrame f) {
 //
 // It will perform exactly one Write to the underlying Writer.
 // It is the caller's responsibility to not call other Write methods concurrently.
-internal static error WriteContinuationᴍ(ж<http2Framer> Ꮡf, uint32 streamID, bool endHeaders, slice<byte> headerBlockFragment) {
+[GoMethodBody("WriteContinuation")] internal static error WriteContinuationᴍ(ж<http2Framer> Ꮡf, uint32 streamID, bool endHeaders, slice<byte> headerBlockFragment) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (!http2validStreamID(streamID) && !f.AllowIllegalWrites) {
@@ -3008,12 +3008,12 @@ partial struct http2PushPromiseFrame {
 
 } partial class http_package {
 
-internal static slice<byte> HeaderBlockFragmentᴍ(ref http2PushPromiseFrame f) {
+[GoMethodBody("HeaderBlockFragment")] internal static slice<byte> HeaderBlockFragmentᴍ(ref http2PushPromiseFrame f) {
     f.http2FrameHeader.checkValid();
     return f.headerFragBuf;
 }
 
-internal static bool HeadersEndedᴍ(ref http2PushPromiseFrame f) {
+[GoMethodBody("HeadersEnded")] internal static bool HeadersEndedᴍ(ref http2PushPromiseFrame f) {
     return f.http2FrameHeader.Flags.Has(http2FlagPushPromiseEndHeaders);
 }
 
@@ -3098,7 +3098,7 @@ partial struct http2PushPromiseParam {
 //
 // It will perform exactly one Write to the underlying Writer.
 // It is the caller's responsibility to not call other Write methods concurrently.
-internal static error WritePushPromiseᴍ(ж<http2Framer> Ꮡf, http2PushPromiseParam p) {
+[GoMethodBody("WritePushPromise")] internal static error WritePushPromiseᴍ(ж<http2Framer> Ꮡf, http2PushPromiseParam p) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (!http2validStreamID(p.StreamID) && !f.AllowIllegalWrites) {
@@ -3126,7 +3126,7 @@ internal static error WritePushPromiseᴍ(ж<http2Framer> Ꮡf, http2PushPromise
 
 // WriteRawFrame writes a raw frame. This can be used to write
 // extension frames unknown to this package.
-internal static error WriteRawFrameᴍ(ж<http2Framer> Ꮡf, http2FrameType t, http2Flags flags, uint32 streamID, slice<byte> payload) {
+[GoMethodBody("WriteRawFrame")] internal static error WriteRawFrameᴍ(ж<http2Framer> Ꮡf, http2FrameType t, http2Flags flags, uint32 streamID, slice<byte> payload) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.startWrite(t, flags, streamID);
@@ -3193,7 +3193,7 @@ partial struct http2MetaHeadersFrame {
 
 // PseudoValue returns the given pseudo header field's value.
 // The provided pseudo field should not contain the leading colon.
-internal static @string PseudoValueᴍ(ref http2MetaHeadersFrame mh, @string pseudo) {
+[GoMethodBody("PseudoValue")] internal static @string PseudoValueᴍ(ref http2MetaHeadersFrame mh, @string pseudo) {
     foreach (var (_, hf) in range(mh.Fields)) {
         if (!hf.IsPseudo()) {
             return ""u8;
@@ -3207,7 +3207,7 @@ internal static @string PseudoValueᴍ(ref http2MetaHeadersFrame mh, @string pse
 
 // RegularFields returns the regular (non-pseudo) header fields of mh.
 // The caller does not own the returned slice.
-internal static slice<hpack.HeaderField> RegularFieldsᴍ(ref http2MetaHeadersFrame mh) {
+[GoMethodBody("RegularFields")] internal static slice<hpack.HeaderField> RegularFieldsᴍ(ref http2MetaHeadersFrame mh) {
     foreach (var (i, hf) in range(mh.Fields)) {
         if (!hf.IsPseudo()) {
             return mh.Fields.slice(i);
@@ -3218,7 +3218,7 @@ internal static slice<hpack.HeaderField> RegularFieldsᴍ(ref http2MetaHeadersFr
 
 // PseudoFields returns the pseudo header fields of mh.
 // The caller does not own the returned slice.
-internal static slice<hpack.HeaderField> PseudoFieldsᴍ(ref http2MetaHeadersFrame mh) {
+[GoMethodBody("PseudoFields")] internal static slice<hpack.HeaderField> PseudoFieldsᴍ(ref http2MetaHeadersFrame mh) {
     foreach (var (i, hf) in range(mh.Fields)) {
         if (!hf.IsPseudo()) {
             return mh.Fields.slice(0, i);
@@ -3227,7 +3227,7 @@ internal static slice<hpack.HeaderField> PseudoFieldsᴍ(ref http2MetaHeadersFra
     return mh.Fields;
 }
 
-internal static error checkPseudosᴍ(ref http2MetaHeadersFrame mh) {
+[GoMethodBody("checkPseudos")] internal static error checkPseudosᴍ(ref http2MetaHeadersFrame mh) {
     bool isRequest = default;
     bool isResponse = default;
     var pf = mh.PseudoFields();
@@ -3262,7 +3262,7 @@ internal static error checkPseudosᴍ(ref http2MetaHeadersFrame mh) {
 
 } partial class http_package {
 
-internal static nint maxHeaderStringLenᴍ(ref http2Framer fr) {
+[GoMethodBody("maxHeaderStringLen")] internal static nint maxHeaderStringLenᴍ(ref http2Framer fr) {
     nint v = (nint)fr.maxHeaderListSize();
     if (v < 0) {
         // If maxHeaderListSize overflows an int, use no limit (0).
@@ -3278,7 +3278,7 @@ private static readonly @string illegalUseOfˢᵇᴍhttp2Framer = "illegal use o
 // readMetaFrame returns 0 or more CONTINUATION frames from fr and
 // merge them into the provided hf and returns a MetaHeadersFrame
 // with the decoded hpack values.
-internal static (http2Frame, error) readMetaFrameᴍ(ж<http2Framer> Ꮡfr, ж<http2HeadersFrame> hf) {
+[GoMethodBody("readMetaFrame")] internal static (http2Frame, error) readMetaFrameᴍ(ж<http2Framer> Ꮡfr, ж<http2HeadersFrame> hf) {
     GoFrame ᒐ = default;
     try {
         ref var fr = ref Ꮡfr.DerefOrNull();
@@ -3526,7 +3526,7 @@ internal static http2goroutineLock http2newGoroutineLock() {
 
 } partial class http_package {
 
-internal static void checkᴍ(http2goroutineLock g) {
+[GoMethodBody("check")] internal static void checkᴍ(http2goroutineLock g) {
     if (!http2DebugGoroutines || Ꮡhttp2disableDebugGoroutines.Load()) {
         return;
     }
@@ -3535,7 +3535,7 @@ internal static void checkᴍ(http2goroutineLock g) {
     }
 }
 
-internal static void checkNotOnᴍ(http2goroutineLock g) {
+[GoMethodBody("checkNotOn")] internal static void checkNotOnᴍ(http2goroutineLock g) {
     if (!http2DebugGoroutines || Ꮡhttp2disableDebugGoroutines.Load()) {
         return;
     }
@@ -3776,7 +3776,7 @@ internal static array<@string> http2stateName = new golib.SparseArray<@string>{
 
 } partial class http_package {
 
-internal static @string Stringᴍ(http2streamState st) {
+[GoMethodBody("String")] internal static @string Stringᴍ(http2streamState st) {
     return http2stateName[st];
 }
 
@@ -3793,12 +3793,12 @@ partial struct http2Setting {
 
 } partial class http_package {
 
-internal static @string Stringᴍ(http2Setting s) {
+[GoMethodBody("String")] internal static @string Stringᴍ(http2Setting s) {
     return fmt.Sprintf("[%v = %d]"u8, s.ID, s.Val);
 }
 
 // Valid reports whether the setting is valid.
-internal static error Validᴍ(http2Setting s) {
+[GoMethodBody("Valid")] internal static error Validᴍ(http2Setting s) {
     // Limits and error codes from 6.5.2 Defined SETTINGS Parameters
     switch (s.ID) {
     case var ᴛ when ᴛ == http2SettingEnablePush: {
@@ -3854,7 +3854,7 @@ internal static http2SettingID http2SettingEnableConnectProtocol => 0x8;
 
 } partial class http_package {
 
-internal static @string Stringᴍ(http2SettingID s) {
+[GoMethodBody("String")] internal static @string Stringᴍ(http2SettingID s) {
     var (v, ok) = http2settingName[s, ꟷ]; if (ok) {
         return v;
     }
@@ -3912,17 +3912,17 @@ partial struct http2closeWaiter /*chan EmptyStruct*/;
 // It exists because so a closeWaiter value can be placed inside a
 // larger struct and have the Mutex and Cond's memory in the same
 // allocation.
-internal static void Initᴍ(ref http2closeWaiter cw) {
+[GoMethodBody("Init")] internal static void Initᴍ(ref http2closeWaiter cw) {
     cw = new channel<EmptyStruct>(0);
 }
 
 // Close marks the closeWaiter as closed and unblocks any waiters.
-internal static void Closeᴍ(http2closeWaiter cw) {
+[GoMethodBody("Close")] internal static void Closeᴍ(http2closeWaiter cw) {
     close<EmptyStruct>(cw);
 }
 
 // Wait waits for the closeWaiter to become closed.
-internal static void Waitᴍ(http2closeWaiter cw) {
+[GoMethodBody("Wait")] internal static void Waitᴍ(http2closeWaiter cw) {
     ᐸꟷ<EmptyStruct>(cw);
 }
 
@@ -3960,14 +3960,14 @@ internal static ref sync.Pool http2bufWriterPool => ref ((StaticBox<sync.Pool>)�
 
 } partial class http_package {
 
-internal static nint Availableᴍ(ref http2bufferedWriter w) {
+[GoMethodBody("Available")] internal static nint Availableᴍ(ref http2bufferedWriter w) {
     if (w.bw == nil) {
         return http2bufWriterPoolBufferSize;
     }
     return w.bw.Available();
 }
 
-internal static (nint n, error err) Writeᴍ(ж<http2bufferedWriter> Ꮡw, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<http2bufferedWriter> Ꮡw, slice<byte> p) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.bw == nil) {
@@ -3978,7 +3978,7 @@ internal static (nint n, error err) Writeᴍ(ж<http2bufferedWriter> Ꮡw, slice
     return w.bw.Write(p);
 }
 
-internal static error Flushᴍ(ref http2bufferedWriter w) {
+[GoMethodBody("Flush")] internal static error Flushᴍ(ref http2bufferedWriter w) {
     var bw = w.bw;
     if (bw == nil) {
         return default;
@@ -3996,7 +3996,7 @@ partial struct http2bufferedWriterTimeoutWriter /*http2bufferedWriter*/;
 
 } partial class http_package {
 
-internal static (nint n, error err) Writeᴍ(ref http2bufferedWriterTimeoutWriter w, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref http2bufferedWriterTimeoutWriter w, slice<byte> p) {
     return http2writeWithByteTimeout(w.conn, w.byteTimeout, p);
 }
 
@@ -4055,11 +4055,11 @@ partial struct http2httpError {
 
 } partial class http_package {
 
-internal static @string Errorᴍ(ref http2httpError e) { return e.msg; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref http2httpError e) { return e.msg; }
 
-internal static bool Timeoutᴍ(ref http2httpError e) { return e.timeout; }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref http2httpError e) { return e.timeout; }
 
-internal static bool Temporaryᴍ(ref http2httpError e) { return true; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref http2httpError e) { return true; }
 
 } partial class http_package {
 
@@ -4078,17 +4078,17 @@ partial struct http2sorter {
 
 } partial class http_package {
 
-internal static nint Lenᴍ(ref http2sorter s) { return len(s.v); }
+[GoMethodBody("Len")] internal static nint Lenᴍ(ref http2sorter s) { return len(s.v); }
 
-internal static void Swapᴍ(ref http2sorter s, nint i, nint j) { (s.v[i], s.v[j]) = (s.v[j], s.v[i]); }
+[GoMethodBody("Swap")] internal static void Swapᴍ(ref http2sorter s, nint i, nint j) { (s.v[i], s.v[j]) = (s.v[j], s.v[i]); }
 
-internal static bool Lessᴍ(ref http2sorter s, nint i, nint j) { return s.v[i] < s.v[j]; }
+[GoMethodBody("Less")] internal static bool Lessᴍ(ref http2sorter s, nint i, nint j) { return s.v[i] < s.v[j]; }
 
 // Keys returns the sorted keys of h.
 //
 // The returned slice is only valid until s used again or returned to
 // its pool.
-internal static slice<@string> Keysᴍ(ж<http2sorter> Ꮡs, Header h) {
+[GoMethodBody("Keys")] internal static slice<@string> Keysᴍ(ж<http2sorter> Ꮡs, Header h) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var keys = s.v[..0];
@@ -4100,7 +4100,7 @@ internal static slice<@string> Keysᴍ(ж<http2sorter> Ꮡs, Header h) {
     return keys;
 }
 
-internal static void SortStringsᴍ(ж<http2sorter> Ꮡs, slice<@string> ss) {
+[GoMethodBody("SortStrings")] internal static void SortStringsᴍ(ж<http2sorter> Ꮡs, slice<@string> ss) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Our sorter works on s.v, which sorter owns, so
@@ -4144,7 +4144,7 @@ partial interface http2pipeBuffer :
 
 // setBuffer initializes the pipe buffer.
 // It has no effect if the pipe is already closed.
-internal static void setBufferᴍ(ж<http2pipe> Ꮡp, http2pipeBuffer b) {
+[GoMethodBody("setBuffer")] internal static void setBufferᴍ(ж<http2pipe> Ꮡp, http2pipeBuffer b) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4161,7 +4161,7 @@ internal static void setBufferᴍ(ж<http2pipe> Ꮡp, http2pipeBuffer b) {
     finally { if (ᒐd1) Ꮡp.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static nint Lenᴍ(ж<http2pipe> Ꮡp) {
+[GoMethodBody("Len")] internal static nint Lenᴍ(ж<http2pipe> Ꮡp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4180,7 +4180,7 @@ internal static nint Lenᴍ(ж<http2pipe> Ꮡp) {
 
 // Read waits until data is available and copies bytes
 // from the buffer into p.
-internal static (nint n, error err) Readᴍ(ж<http2pipe> Ꮡp, slice<byte> d) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ж<http2pipe> Ꮡp, slice<byte> d) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -4224,7 +4224,7 @@ internal static error http2errUninitializedPipeWrite = errors.New("write on unin
 
 // Write copies bytes from p into the buffer and wakes a reader.
 // It is an error to write more data than the buffer can hold.
-internal static (nint n, error err) Writeᴍ(ж<http2pipe> Ꮡp, slice<byte> d) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<http2pipe> Ꮡp, slice<byte> d) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -4258,18 +4258,18 @@ internal static (nint n, error err) Writeᴍ(ж<http2pipe> Ꮡp, slice<byte> d) 
 // read.
 //
 // The error must be non-nil.
-internal static void CloseWithErrorᴍ(ж<http2pipe> Ꮡp, error err) { Ꮡp.closeWithError(Ꮡp.Ꮡerr, err, default); }
+[GoMethodBody("CloseWithError")] internal static void CloseWithErrorᴍ(ж<http2pipe> Ꮡp, error err) { Ꮡp.closeWithError(Ꮡp.Ꮡerr, err, default); }
 
 // BreakWithError causes the next Read (waking up a current blocked
 // Read if needed) to return the provided err immediately, without
 // waiting for unread data.
-internal static void BreakWithErrorᴍ(ж<http2pipe> Ꮡp, error err) { Ꮡp.closeWithError(Ꮡp.ᏑbreakErr, err, default); }
+[GoMethodBody("BreakWithError")] internal static void BreakWithErrorᴍ(ж<http2pipe> Ꮡp, error err) { Ꮡp.closeWithError(Ꮡp.ᏑbreakErr, err, default); }
 
 // closeWithErrorAndCode is like CloseWithError but also sets some code to run
 // in the caller's goroutine before returning the error.
-internal static void closeWithErrorAndCodeᴍ(ж<http2pipe> Ꮡp, error err, Action fn) { Ꮡp.closeWithError(Ꮡp.Ꮡerr, err, fn); }
+[GoMethodBody("closeWithErrorAndCode")] internal static void closeWithErrorAndCodeᴍ(ж<http2pipe> Ꮡp, error err, Action fn) { Ꮡp.closeWithError(Ꮡp.Ꮡerr, err, fn); }
 
-internal static void closeWithErrorᴍ(ж<http2pipe> Ꮡp, ж<error> Ꮡdst, error err, Action fn) {
+[GoMethodBody("closeWithError")] internal static void closeWithErrorᴍ(ж<http2pipe> Ꮡp, ж<error> Ꮡdst, error err, Action fn) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     bool ᒐd2 = false;
@@ -4305,7 +4305,7 @@ internal static void closeWithErrorᴍ(ж<http2pipe> Ꮡp, ж<error> Ꮡdst, err
 }
 
 // requires p.mu be held.
-internal static void closeDoneLockedᴍ(ref http2pipe p) {
+[GoMethodBody("closeDoneLocked")] internal static void closeDoneLockedᴍ(ref http2pipe p) {
     if (p.donec == nil) {
         return;
     }
@@ -4323,7 +4323,7 @@ internal static void closeDoneLockedᴍ(ref http2pipe p) {
 }
 
 // Err returns the error (if any) first set by BreakWithError or CloseWithError.
-internal static error Errᴍ(ж<http2pipe> Ꮡp) {
+[GoMethodBody("Err")] internal static error Errᴍ(ж<http2pipe> Ꮡp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4342,7 +4342,7 @@ internal static error Errᴍ(ж<http2pipe> Ꮡp) {
 
 // Done returns a channel which is closed if and when this pipe is closed
 // with CloseWithError.
-internal static /*<-*/channel<EmptyStruct> Doneᴍ(ж<http2pipe> Ꮡp) {
+[GoMethodBody("Done")] internal static /*<-*/channel<EmptyStruct> Doneᴍ(ж<http2pipe> Ꮡp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4481,7 +4481,7 @@ partial struct http2serverInternalState {
 
 } partial class http_package {
 
-internal static void registerConnᴍ(ж<http2serverInternalState> Ꮡs, ж<http2serverConn> sc) {
+[GoMethodBody("registerConn")] internal static void registerConnᴍ(ж<http2serverInternalState> Ꮡs, ж<http2serverConn> sc) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (Ꮡs == nil) {
@@ -4492,7 +4492,7 @@ internal static void registerConnᴍ(ж<http2serverInternalState> Ꮡs, ж<http2
     s.mu.Unlock();
 }
 
-internal static void unregisterConnᴍ(ж<http2serverInternalState> Ꮡs, ж<http2serverConn> sc) {
+[GoMethodBody("unregisterConn")] internal static void unregisterConnᴍ(ж<http2serverInternalState> Ꮡs, ж<http2serverConn> sc) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (Ꮡs == nil) {
@@ -4503,7 +4503,7 @@ internal static void unregisterConnᴍ(ж<http2serverInternalState> Ꮡs, ж<htt
     s.mu.Unlock();
 }
 
-internal static void startGracefulShutdownᴍ(ж<http2serverInternalState> Ꮡs) {
+[GoMethodBody("startGracefulShutdown")] internal static void startGracefulShutdownᴍ(ж<http2serverInternalState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (Ꮡs == nil) {
@@ -4527,14 +4527,14 @@ internal static ref sync.Pool http2errChanPool => ref ((StaticBox<sync.Pool>)Ꮡ
 
 } partial class http_package {
 
-internal static channel<error> getErrChanᴍ(ж<http2serverInternalState> Ꮡs) {
+[GoMethodBody("getErrChan")] internal static channel<error> getErrChanᴍ(ж<http2serverInternalState> Ꮡs) {
     if (Ꮡs == nil) {
         return Ꮡhttp2errChanPool.Get()._<channel<error>>(); // Server used without calling ConfigureServer
     }
     return Ꮡs.ᏑerrChanPool.Get()._<channel<error>>();
 }
 
-internal static void putErrChanᴍ(ж<http2serverInternalState> Ꮡs, channel<error> ch) {
+[GoMethodBody("putErrChan")] internal static void putErrChanᴍ(ж<http2serverInternalState> Ꮡs, channel<error> ch) {
     if (Ꮡs == nil) {
         Ꮡhttp2errChanPool.Put(ch); // Server used without calling ConfigureServer
         return;
@@ -4691,7 +4691,7 @@ partial struct http2ServeConnOpts {
 
 } partial class http_package {
 
-internal static context.Context contextᴍ(ж<http2ServeConnOpts> Ꮡo) {
+[GoMethodBody("context")] internal static context.Context contextᴍ(ж<http2ServeConnOpts> Ꮡo) {
     ref var o = ref Ꮡo.DerefOrNull();
 
     if (Ꮡo != nil && o.Context != nil) {
@@ -4700,7 +4700,7 @@ internal static context.Context contextᴍ(ж<http2ServeConnOpts> Ꮡo) {
     return context_package.Background();
 }
 
-internal static ж<Server> baseConfigᴍ(ж<http2ServeConnOpts> Ꮡo) {
+[GoMethodBody("baseConfig")] internal static ж<Server> baseConfigᴍ(ж<http2ServeConnOpts> Ꮡo) {
     ref var o = ref Ꮡo.DerefOrNull();
 
     if (Ꮡo != nil && o.BaseConfig != nil) {
@@ -4709,7 +4709,7 @@ internal static ж<Server> baseConfigᴍ(ж<http2ServeConnOpts> Ꮡo) {
     return @new<Server>();
 }
 
-internal static Handler handlerᴍ(ж<http2ServeConnOpts> Ꮡo) {
+[GoMethodBody("handler")] internal static Handler handlerᴍ(ж<http2ServeConnOpts> Ꮡo) {
     ref var o = ref Ꮡo.DerefOrNull();
 
     if (Ꮡo != nil) {
@@ -4739,7 +4739,7 @@ internal static Handler handlerᴍ(ж<http2ServeConnOpts> Ꮡo) {
 // implemented in terms of providing a suitably-behaving net.Conn.
 //
 // The opts parameter is optional. If nil, default values are used.
-internal static void ServeConnᴍ(ж<http2Server> Ꮡs, net.Conn c, ж<http2ServeConnOpts> Ꮡopts) {
+[GoMethodBody("ServeConn")] internal static void ServeConnᴍ(ж<http2Server> Ꮡs, net.Conn c, ж<http2ServeConnOpts> Ꮡopts) {
     ref var opts = ref Ꮡopts.DerefOrNull();
 
     if (Ꮡopts == nil) {
@@ -4754,7 +4754,7 @@ private static readonly @string tlsVersionTooLowˢᵇᴍhttp2Server = "TLS versi
 internal static ref readonly @string invalidSettingsˢᴍhttp2Server => ref invalidSettingsˢᵇᴍhttp2Server;
 private static readonly @string invalidSettingsˢᵇᴍhttp2Server = "invalid settings"u8;
 
-internal static void serveConnᴍ(ж<http2Server> Ꮡs, net.Conn c, ж<http2ServeConnOpts> Ꮡopts, Action<ж<http2serverConn>> newf) {
+[GoMethodBody("serveConn")] internal static void serveConnᴍ(ж<http2Server> Ꮡs, net.Conn c, ж<http2ServeConnOpts> Ꮡopts, Action<ж<http2serverConn>> newf) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -4921,7 +4921,7 @@ internal static (context.Context ctx, Action cancel) http2serverConnBaseContext(
 
 } partial class http_package {
 
-internal static void rejectConnᴍ(ref http2serverConn sc, http2ErrCode err, @string debug) {
+[GoMethodBody("rejectConn")] internal static void rejectConnᴍ(ref http2serverConn sc, http2ErrCode err, @string debug) {
     sc.vlogf("http2: server rejecting conn: %v, %s", err, debug);
     // ignoring errors. hanging up anyway.
     sc.framer.WriteGoAway(0, err, slice<byte>(debug));
@@ -5000,7 +5000,7 @@ partial struct http2serverConn {
 
 } partial class http_package {
 
-internal static uint32 maxHeaderListSizeᴍ(ref http2serverConn sc) {
+[GoMethodBody("maxHeaderListSize")] internal static uint32 maxHeaderListSizeᴍ(ref http2serverConn sc) {
     nint n = sc.hs.MaxHeaderBytes;
     if (n <= 0) {
         n = DefaultMaxHeaderBytes;
@@ -5008,7 +5008,7 @@ internal static uint32 maxHeaderListSizeᴍ(ref http2serverConn sc) {
     return (uint32)http2adjustHTTP1MaxHeaderSize((int64)n);
 }
 
-internal static uint32 curOpenStreamsᴍ(ref http2serverConn sc) {
+[GoMethodBody("curOpenStreams")] internal static uint32 curOpenStreamsᴍ(ref http2serverConn sc) {
     sc.serveG.check();
     return sc.curClientStreams + sc.curPushedStreams;
 }
@@ -5049,19 +5049,19 @@ partial struct http2stream {
 
 } partial class http_package {
 
-internal static ж<http2Framer> Framerᴍ(ref http2serverConn sc) { return sc.framer; }
+[GoMethodBody("Framer")] internal static ж<http2Framer> Framerᴍ(ref http2serverConn sc) { return sc.framer; }
 
-internal static error CloseConnᴍ(ref http2serverConn sc) { return sc.conn.Close(); }
+[GoMethodBody("CloseConn")] internal static error CloseConnᴍ(ref http2serverConn sc) { return sc.conn.Close(); }
 
-internal static error Flushᴍ(ref http2serverConn sc) { return sc.bw.Flush(); }
+[GoMethodBody("Flush")] internal static error Flushᴍ(ref http2serverConn sc) { return sc.bw.Flush(); }
 
-internal static (ж<hpack.Encoder>, ж<bytes.Buffer>) HeaderEncoderᴍ(ж<http2serverConn> Ꮡsc) {
+[GoMethodBody("HeaderEncoder")] internal static (ж<hpack.Encoder>, ж<bytes.Buffer>) HeaderEncoderᴍ(ж<http2serverConn> Ꮡsc) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     return (sc.hpackEncoder, Ꮡsc.ᏑheaderWriteBuf);
 }
 
-internal static (http2streamState, ж<http2stream>) stateᴍ(ref http2serverConn sc, uint32 streamID) {
+[GoMethodBody("state")] internal static (http2streamState, ж<http2stream>) stateᴍ(ref http2serverConn sc, uint32 streamID) {
     sc.serveG.check();
     // http://tools.ietf.org/html/rfc7540#section-5.1
     var (st, ok) = sc.streams[streamID, ꟷ]; if (ok) {
@@ -5088,13 +5088,13 @@ internal static (http2streamState, ж<http2stream>) stateᴍ(ref http2serverConn
 // setConnState calls the net/http ConnState hook for this connection, if configured.
 // Note that the net/http package does StateNew and StateClosed for us.
 // There is currently no plan for StateHijacked or hijacking HTTP/2 connections.
-internal static void setConnStateᴍ(ref http2serverConn sc, ConnState state) {
+[GoMethodBody("setConnState")] internal static void setConnStateᴍ(ref http2serverConn sc, ConnState state) {
     if (sc.hs.ConnState != nil) {
         sc.hs.ConnState(sc.conn, state);
     }
 }
 
-internal static void vlogfᴍ(ref http2serverConn sc, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("vlogf")] internal static void vlogfᴍ(ref http2serverConn sc, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     if (http2VerboseLogs) {
@@ -5102,7 +5102,7 @@ internal static void vlogfᴍ(ref http2serverConn sc, @string format, params ꓸ
     }
 }
 
-internal static void logfᴍ(ref http2serverConn sc, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("logf")] internal static void logfᴍ(ref http2serverConn sc, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var lg = sc.hs.ErrorLog; if (lg != nil) {
@@ -5156,7 +5156,7 @@ internal static bool http2isClosedConnError(error err) {
 
 } partial class http_package {
 
-internal static void condlogfᴍ(ref http2serverConn sc, error err, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("condlogf")] internal static void condlogfᴍ(ref http2serverConn sc, error err, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     if (err == nil) {
@@ -5181,7 +5181,7 @@ internal static UntypedInt http2maxCachedCanonicalHeadersKeysSize => 2048;
 
 } partial class http_package {
 
-internal static @string canonicalHeaderᴍ(ref http2serverConn sc, @string v) {
+[GoMethodBody("canonicalHeader")] internal static @string canonicalHeaderᴍ(ref http2serverConn sc, @string v) {
     sc.serveG.check();
     var (cv, ok) = httpcommon.CachedCanonicalHeader(v);
     if (ok) {
@@ -5220,7 +5220,7 @@ partial struct http2readFrameResult {
 // It takes care to only read one frame at a time, blocking until the
 // consumer is done with the frame.
 // It's run on its own goroutine.
-internal static void readFramesᴍ(ref http2serverConn sc) {
+[GoMethodBody("readFrames")] internal static void readFramesᴍ(ref http2serverConn sc) {
     var gate = new channel<EmptyStruct>(0);
     var gateʗ1 = gate;
     var gateDone = () => {
@@ -5267,7 +5267,7 @@ partial struct http2frameWriteResult {
 // and then reports when it's done.
 // At most one goroutine can be running writeFrameAsync at a time per
 // serverConn.
-internal static void writeFrameAsyncᴍ(ж<http2serverConn> Ꮡsc, http2FrameWriteRequest wr, ж<http2writeData> wd) {
+[GoMethodBody("writeFrameAsync")] internal static void writeFrameAsyncᴍ(ж<http2serverConn> Ꮡsc, http2FrameWriteRequest wr, ж<http2writeData> wd) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     error err = default;
@@ -5279,7 +5279,7 @@ internal static void writeFrameAsyncᴍ(ж<http2serverConn> Ꮡsc, http2FrameWri
     sc.wroteFrameCh.ᐸꟷ(new http2frameWriteResult(wr: wr, err: err));
 }
 
-internal static void closeAllStreamsOnConnCloseᴍ(ж<http2serverConn> Ꮡsc) {
+[GoMethodBody("closeAllStreamsOnConnClose")] internal static void closeAllStreamsOnConnCloseᴍ(ж<http2serverConn> Ꮡsc) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -5288,14 +5288,14 @@ internal static void closeAllStreamsOnConnCloseᴍ(ж<http2serverConn> Ꮡsc) {
     }
 }
 
-internal static void stopShutdownTimerᴍ(ref http2serverConn sc) {
+[GoMethodBody("stopShutdownTimer")] internal static void stopShutdownTimerᴍ(ref http2serverConn sc) {
     sc.serveG.check();
     var t = sc.shutdownTimer; if (t != nil) {
         t.Stop();
     }
 }
 
-internal static void notePanicᴍ(ж<http2serverConn> Ꮡsc) {
+[GoMethodBody("notePanic")] internal static void notePanicᴍ(ж<http2serverConn> Ꮡsc) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
@@ -5317,7 +5317,7 @@ internal static void notePanicᴍ(ж<http2serverConn> Ꮡsc) {
     finally { ᒐ.Run(); }
 }
 
-internal static partial void serveᴍ(ж<http2serverConn> Ꮡsc, http2http2Config conf) {
+[GoMethodBody("serve")] internal static partial void serveᴍ(ж<http2serverConn> Ꮡsc, http2http2Config conf) {
     GoFrame ᒐ = default;
     try {
         ref var sc = ref Ꮡsc.DerefOrNull();
@@ -5514,7 +5514,7 @@ internal static partial void serveᴍ(ж<http2serverConn> Ꮡsc, http2http2Confi
 internal static ref readonly @string connCloseLostPingˢᴍhttp2serverConn => ref connCloseLostPingˢᵇᴍhttp2serverConn;
 private static readonly @string connCloseLostPingˢᵇᴍhttp2serverConn = "conn_close_lost_ping"u8;
 
-internal static void handlePingTimerᴍ(ж<http2serverConn> Ꮡsc, time.Time lastFrameReadTime) {
+[GoMethodBody("handlePingTimer")] internal static void handlePingTimerᴍ(ж<http2serverConn> Ꮡsc, time.Time lastFrameReadTime) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     if (sc.pingSent) {
@@ -5559,15 +5559,15 @@ internal static ж<http2serverMessage> http2handlerDoneMsg = @new<http2serverMes
 
 } partial class http_package {
 
-internal static void onSettingsTimerᴍ(ref http2serverConn sc) { sc.sendServeMsg(http2settingsTimerMsg.OrTypedNil()); }
+[GoMethodBody("onSettingsTimer")] internal static void onSettingsTimerᴍ(ref http2serverConn sc) { sc.sendServeMsg(http2settingsTimerMsg.OrTypedNil()); }
 
-internal static void onIdleTimerᴍ(ref http2serverConn sc) { sc.sendServeMsg(http2idleTimerMsg.OrTypedNil()); }
+[GoMethodBody("onIdleTimer")] internal static void onIdleTimerᴍ(ref http2serverConn sc) { sc.sendServeMsg(http2idleTimerMsg.OrTypedNil()); }
 
-internal static void onReadIdleTimerᴍ(ref http2serverConn sc) { sc.sendServeMsg(http2readIdleTimerMsg.OrTypedNil()); }
+[GoMethodBody("onReadIdleTimer")] internal static void onReadIdleTimerᴍ(ref http2serverConn sc) { sc.sendServeMsg(http2readIdleTimerMsg.OrTypedNil()); }
 
-internal static void onShutdownTimerᴍ(ref http2serverConn sc) { sc.sendServeMsg(http2shutdownTimerMsg.OrTypedNil()); }
+[GoMethodBody("onShutdownTimer")] internal static void onShutdownTimerᴍ(ref http2serverConn sc) { sc.sendServeMsg(http2shutdownTimerMsg.OrTypedNil()); }
 
-internal static void sendServeMsgᴍ(ref http2serverConn sc, any msg) {
+[GoMethodBody("sendServeMsg")] internal static void sendServeMsgᴍ(ref http2serverConn sc, any msg) {
     sc.serveG.checkNotOn(); // NOT
     var selᴛ18 = sc.serveMsgCh.ᐸꟷ(msg, ꓸꓸꓸ);
     var selᴛ19 = sc.doneServing;
@@ -5589,7 +5589,7 @@ internal static error http2errPrefaceTimeout = errors.New("timeout waiting for c
 // readPreface reads the ClientPreface greeting from the peer or
 // returns errPrefaceTimeout on timeout, or an error if the greeting
 // is invalid.
-internal static partial error readPrefaceᴍ(ж<http2serverConn> Ꮡsc) {
+[GoMethodBody("readPreface")] internal static partial error readPrefaceᴍ(ж<http2serverConn> Ꮡsc) {
     GoFrame ᒐ = default;
     try {
         ref var sc = ref Ꮡsc.DerefOrNull();
@@ -5644,7 +5644,7 @@ internal static ref sync.Pool http2writeDataPool => ref ((StaticBox<sync.Pool>)�
 
 // writeDataFromHandler writes DATA response frames from a handler on
 // the given stream.
-internal static error writeDataFromHandlerᴍ(ref http2serverConn sc, ж<http2stream> Ꮡstream, slice<byte> data, bool endStream) {
+[GoMethodBody("writeDataFromHandler")] internal static error writeDataFromHandlerᴍ(ref http2serverConn sc, ж<http2stream> Ꮡstream, slice<byte> data, bool endStream) {
     ref var stream = ref Ꮡstream.DerefOrNull();
 
     var ch = sc.srv.state.getErrChan();
@@ -5703,7 +5703,7 @@ internal static error writeDataFromHandlerᴍ(ref http2serverConn sc, ж<http2st
 // deadlock writing to sc.wantWriteFrameCh (which is only mildly
 // buffered and is read by serve itself). If you're on the serve
 // goroutine, call writeFrame instead.
-internal static error writeFrameFromHandlerᴍ(ref http2serverConn sc, http2FrameWriteRequest wr) {
+[GoMethodBody("writeFrameFromHandler")] internal static error writeFrameFromHandlerᴍ(ref http2serverConn sc, http2FrameWriteRequest wr) {
     sc.serveG.checkNotOn(); // NOT
     var selᴛ26 = sc.wantWriteFrameCh.ᐸꟷ(wr, ꓸꓸꓸ);
     var selᴛ27 = sc.doneServing;
@@ -5727,7 +5727,7 @@ internal static error writeFrameFromHandlerᴍ(ref http2serverConn sc, http2Fram
 // make it onto the wire
 //
 // If you're not on the serve goroutine, use writeFrameFromHandler instead.
-internal static void writeFrameᴍ(ж<http2serverConn> Ꮡsc, http2FrameWriteRequest wr) {
+[GoMethodBody("writeFrame")] internal static void writeFrameᴍ(ж<http2serverConn> Ꮡsc, http2FrameWriteRequest wr) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -5796,7 +5796,7 @@ internal static void writeFrameᴍ(ж<http2serverConn> Ꮡsc, http2FrameWriteReq
 // startFrameWrite starts a goroutine to write wr (in a separate
 // goroutine since that might block on the network), and updates the
 // serve goroutine's state about the world, updated from info in wr.
-internal static partial void startFrameWriteᴍ(ж<http2serverConn> Ꮡsc, http2FrameWriteRequest wr) {
+[GoMethodBody("startFrameWrite")] internal static partial void startFrameWriteᴍ(ж<http2serverConn> Ꮡsc, http2FrameWriteRequest wr) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -5877,7 +5877,7 @@ internal static error http2errHandlerPanicked = errors.New("http2: handler panic
 
 // wroteFrame is called on the serve goroutine with the result of
 // whatever happened on writeFrameAsync.
-internal static void wroteFrameᴍ(ж<http2serverConn> Ꮡsc, http2frameWriteResult res) {
+[GoMethodBody("wroteFrame")] internal static void wroteFrameᴍ(ж<http2serverConn> Ꮡsc, http2frameWriteResult res) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -5953,7 +5953,7 @@ internal static void wroteFrameᴍ(ж<http2serverConn> Ꮡsc, http2frameWriteRes
 //
 // If a frame isn't being written and there's nothing else to send, we
 // flush the write buffer.
-internal static void scheduleFrameWriteᴍ(ж<http2serverConn> Ꮡsc) {
+[GoMethodBody("scheduleFrameWrite")] internal static void scheduleFrameWriteᴍ(ж<http2serverConn> Ꮡsc) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -6011,7 +6011,7 @@ internal static void scheduleFrameWriteᴍ(ж<http2serverConn> Ꮡsc) {
 //
 // startGracefulShutdown returns immediately; it does not wait until
 // the connection has shut down.
-internal static void startGracefulShutdownᴍ(ж<http2serverConn> Ꮡsc) {
+[GoMethodBody("startGracefulShutdown")] internal static void startGracefulShutdownᴍ(ж<http2serverConn> Ꮡsc) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.checkNotOn(); // NOT
@@ -6042,11 +6042,11 @@ internal static time.Duration http2goAwayTimeout = 1 * time.Second;
 
 } partial class http_package {
 
-internal static void startGracefulShutdownInternalᴍ(ж<http2serverConn> Ꮡsc) {
+[GoMethodBody("startGracefulShutdownInternal")] internal static void startGracefulShutdownInternalᴍ(ж<http2serverConn> Ꮡsc) {
     Ꮡsc.goAway(http2ErrCodeNo);
 }
 
-internal static void goAwayᴍ(ж<http2serverConn> Ꮡsc, http2ErrCode code) {
+[GoMethodBody("goAway")] internal static void goAwayᴍ(ж<http2serverConn> Ꮡsc, http2ErrCode code) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -6062,14 +6062,14 @@ internal static void goAwayᴍ(ж<http2serverConn> Ꮡsc, http2ErrCode code) {
     Ꮡsc.scheduleFrameWrite();
 }
 
-internal static void shutDownInᴍ(ж<http2serverConn> Ꮡsc, time.Duration d) {
+[GoMethodBody("shutDownIn")] internal static void shutDownInᴍ(ж<http2serverConn> Ꮡsc, time.Duration d) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
     sc.shutdownTimer = time.AfterFunc(d, Ꮡsc.onShutdownTimer);
 }
 
-internal static void resetStreamᴍ(ж<http2serverConn> Ꮡsc, http2StreamError se) {
+[GoMethodBody("resetStream")] internal static void resetStreamᴍ(ж<http2serverConn> Ꮡsc, http2StreamError se) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -6082,7 +6082,7 @@ internal static void resetStreamᴍ(ж<http2serverConn> Ꮡsc, http2StreamError 
 // processFrameFromReader processes the serve loop's read from readFrameCh from the
 // frame-reading goroutine.
 // processFrameFromReader returns whether the connection should be kept open.
-internal static bool processFrameFromReaderᴍ(ж<http2serverConn> Ꮡsc, http2readFrameResult res) {
+[GoMethodBody("processFrameFromReader")] internal static bool processFrameFromReaderᴍ(ж<http2serverConn> Ꮡsc, http2readFrameResult res) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -6153,7 +6153,7 @@ private static readonly @string dataFlowˢᵇᴍhttp2serverConn = "data_flow"u8;
 internal static ref readonly @string pushPromiseˢᴍhttp2serverConn => ref pushPromiseˢᵇᴍhttp2serverConn;
 private static readonly @string pushPromiseˢᵇᴍhttp2serverConn = "push_promise"u8;
 
-internal static error processFrameᴍ(ж<http2serverConn> Ꮡsc, http2Frame f) {
+[GoMethodBody("processFrame")] internal static error processFrameᴍ(ж<http2serverConn> Ꮡsc, http2Frame f) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -6221,7 +6221,7 @@ internal static error processFrameᴍ(ж<http2serverConn> Ꮡsc, http2Frame f) {
 internal static ref readonly @string pingOnStreamˢᴍhttp2serverConn => ref pingOnStreamˢᵇᴍhttp2serverConn;
 private static readonly @string pingOnStreamˢᵇᴍhttp2serverConn = "ping_on_stream"u8;
 
-internal static error processPingᴍ(ж<http2serverConn> Ꮡsc, ж<http2PingFrame> Ꮡf) {
+[GoMethodBody("processPing")] internal static error processPingᴍ(ж<http2serverConn> Ꮡsc, ж<http2PingFrame> Ꮡf) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -6254,7 +6254,7 @@ private static readonly @string streamIdleˢᵇᴍhttp2serverConn = "stream_idle
 internal static ref readonly @string badFlowˢᴍhttp2serverConn => ref badFlowˢᵇᴍhttp2serverConn;
 private static readonly @string badFlowˢᵇᴍhttp2serverConn = "bad_flow"u8;
 
-internal static error processWindowUpdateᴍ(ж<http2serverConn> Ꮡsc, ж<http2WindowUpdateFrame> Ꮡf) {
+[GoMethodBody("processWindowUpdate")] internal static error processWindowUpdateᴍ(ж<http2serverConn> Ꮡsc, ж<http2WindowUpdateFrame> Ꮡf) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -6300,7 +6300,7 @@ internal static error processWindowUpdateᴍ(ж<http2serverConn> Ꮡsc, ж<http2
 internal static ref readonly @string resetIdleStreamˢᴍhttp2serverConn => ref resetIdleStreamˢᵇᴍhttp2serverConn;
 private static readonly @string resetIdleStreamˢᵇᴍhttp2serverConn = "reset_idle_stream"u8;
 
-internal static error processResetStreamᴍ(ж<http2serverConn> Ꮡsc, ж<http2RSTStreamFrame> Ꮡf) {
+[GoMethodBody("processResetStream")] internal static error processResetStreamᴍ(ж<http2serverConn> Ꮡsc, ж<http2RSTStreamFrame> Ꮡf) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -6322,7 +6322,7 @@ internal static error processResetStreamᴍ(ж<http2serverConn> Ꮡsc, ж<http2R
     return default;
 }
 
-internal static void closeStreamᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, error err) {
+[GoMethodBody("closeStream")] internal static void closeStreamᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, error err) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var st = ref Ꮡst.DerefOrNull();
 
@@ -6374,7 +6374,7 @@ private static readonly @string ackMysteryˢᵇᴍhttp2serverConn = "ack_mystery
 internal static ref readonly @string settingsBigOrDupsˢᴍhttp2serverConn => ref settingsBigOrDupsˢᵇᴍhttp2serverConn;
 private static readonly @string settingsBigOrDupsˢᵇᴍhttp2serverConn = "settings_big_or_dups"u8;
 
-internal static error processSettingsᴍ(ж<http2serverConn> Ꮡsc, ж<http2SettingsFrame> Ꮡf) {
+[GoMethodBody("processSettings")] internal static error processSettingsᴍ(ж<http2serverConn> Ꮡsc, ж<http2SettingsFrame> Ꮡf) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -6407,7 +6407,7 @@ internal static error processSettingsᴍ(ж<http2serverConn> Ꮡsc, ж<http2Sett
     return default;
 }
 
-internal static error processSettingᴍ(ж<http2serverConn> Ꮡsc, http2Setting s) {
+[GoMethodBody("processSetting")] internal static error processSettingᴍ(ж<http2serverConn> Ꮡsc, http2Setting s) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -6467,7 +6467,7 @@ internal static error processSettingᴍ(ж<http2serverConn> Ꮡsc, http2Setting 
 internal static ref readonly @string settingWinSizeˢᴍhttp2serverConn => ref settingWinSizeˢᵇᴍhttp2serverConn;
 private static readonly @string settingWinSizeˢᵇᴍhttp2serverConn = "setting_win_size"u8;
 
-internal static error processSettingInitialWindowSizeᴍ(ж<http2serverConn> Ꮡsc, uint32 val) {
+[GoMethodBody("processSettingInitialWindowSize")] internal static error processSettingInitialWindowSizeᴍ(ж<http2serverConn> Ꮡsc, uint32 val) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -6493,7 +6493,7 @@ private static readonly @string sendTooMuchˢᵇᴍhttp2serverConn = "send_too_m
 internal static ref readonly @string flowOnDataLengthˢᴍhttp2serverConn => ref flowOnDataLengthˢᵇᴍhttp2serverConn;
 private static readonly @string flowOnDataLengthˢᵇᴍhttp2serverConn = "flow_on_data_length"u8;
 
-internal static error processDataᴍ(ж<http2serverConn> Ꮡsc, ж<http2DataFrame> Ꮡf) {
+[GoMethodBody("processData")] internal static error processDataᴍ(ж<http2serverConn> Ꮡsc, ж<http2DataFrame> Ꮡf) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -6593,7 +6593,7 @@ internal static error processDataᴍ(ж<http2serverConn> Ꮡsc, ж<http2DataFram
     return default;
 }
 
-internal static error processGoAwayᴍ(ж<http2serverConn> Ꮡsc, ж<http2GoAwayFrame> Ꮡf) {
+[GoMethodBody("processGoAway")] internal static error processGoAwayᴍ(ж<http2serverConn> Ꮡsc, ж<http2GoAwayFrame> Ꮡf) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -6613,13 +6613,13 @@ internal static error processGoAwayᴍ(ж<http2serverConn> Ꮡsc, ж<http2GoAway
 } partial class http_package {
 
 // isPushed reports whether the stream is server-initiated.
-internal static bool isPushedᴍ(ref http2stream st) {
+[GoMethodBody("isPushed")] internal static bool isPushedᴍ(ref http2stream st) {
     return st.id % 2 == 0;
 }
 
 // endStream closes a Request.Body's pipe. It is called when a DATA
 // frame says a request body is over (or after trailers).
-internal static void endStreamᴍ(ж<http2stream> Ꮡst) {
+[GoMethodBody("endStream")] internal static void endStreamᴍ(ж<http2stream> Ꮡst) {
     ref var st = ref Ꮡst.DerefOrNull();
 
     var sc = st.sc;
@@ -6637,7 +6637,7 @@ internal static void endStreamᴍ(ж<http2stream> Ꮡst) {
 
 // copyTrailersToHandlerRequest is run in the Handler's goroutine in
 // its Request.Body.Read just before it gets io.EOF.
-internal static void copyTrailersToHandlerRequestᴍ(ref http2stream st) {
+[GoMethodBody("copyTrailersToHandlerRequest")] internal static void copyTrailersToHandlerRequestᴍ(ref http2stream st) {
     foreach (var (k, vv) in st.trailer) {
         var (_, ok) = st.reqTrailer[k, ꟷ]; if (ok) {
             // Only copy it over it was pre-declared.
@@ -6648,7 +6648,7 @@ internal static void copyTrailersToHandlerRequestᴍ(ref http2stream st) {
 
 // onReadTimeout is run on its own goroutine (from time.AfterFunc)
 // when the stream's ReadTimeout has fired.
-internal static void onReadTimeoutᴍ(ref http2stream st) {
+[GoMethodBody("onReadTimeout")] internal static void onReadTimeoutᴍ(ref http2stream st) {
     if (st.body != nil) {
         // Wrap the ErrDeadlineExceeded to avoid callers depending on us
         // returning the bare error.
@@ -6658,7 +6658,7 @@ internal static void onReadTimeoutᴍ(ref http2stream st) {
 
 // onWriteTimeout is run on its own goroutine (from time.AfterFunc)
 // when the stream's WriteTimeout has fired.
-internal static void onWriteTimeoutᴍ(ref http2stream st) {
+[GoMethodBody("onWriteTimeout")] internal static void onWriteTimeoutᴍ(ref http2stream st) {
     st.sc.writeFrameFromHandler(new http2FrameWriteRequest(write: new http2StreamError(
         StreamID: st.id,
         Code: http2ErrCodeInternal,
@@ -6681,7 +6681,7 @@ private static readonly @string overMaxStreamsˢᵇᴍhttp2serverConn = "over_ma
 internal static ref readonly @string overMaxStreamsRaceˢᴍhttp2serverConn => ref overMaxStreamsRaceˢᵇᴍhttp2serverConn;
 private static readonly @string overMaxStreamsRaceˢᵇᴍhttp2serverConn = "over_max_streams_race"u8;
 
-internal static error processHeadersᴍ(ж<http2serverConn> Ꮡsc, ж<http2MetaHeadersFrame> Ꮡf) {
+[GoMethodBody("processHeaders")] internal static error processHeadersᴍ(ж<http2serverConn> Ꮡsc, ж<http2MetaHeadersFrame> Ꮡf) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -6795,7 +6795,7 @@ internal static error processHeadersᴍ(ж<http2serverConn> Ꮡsc, ж<http2MetaH
     return Ꮡsc.scheduleHandler(st, rw, req, NilSafeDelegateConversion<Action<ResponseWriter, ж<Request>>, HandlerFunc>(handler));
 }
 
-internal static partial void upgradeRequestᴍ(ж<http2serverConn> Ꮡsc, ж<Request> Ꮡreq) {
+[GoMethodBody("upgradeRequest")] internal static partial void upgradeRequestᴍ(ж<http2serverConn> Ꮡsc, ж<Request> Ꮡreq) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
@@ -6834,7 +6834,7 @@ private static readonly @string trailersPseudoˢᵇᴍhttp2stream = "trailers_ps
 internal static ref readonly @string trailersBogusˢᴍhttp2stream => ref trailersBogusˢᵇᴍhttp2stream;
 private static readonly @string trailersBogusˢᵇᴍhttp2stream = "trailers_bogus"u8;
 
-internal static error processTrailerHeadersᴍ(ж<http2stream> Ꮡst, ж<http2MetaHeadersFrame> Ꮡf) {
+[GoMethodBody("processTrailerHeaders")] internal static error processTrailerHeadersᴍ(ж<http2stream> Ꮡst, ж<http2MetaHeadersFrame> Ꮡf) {
     ref var st = ref Ꮡst.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -6873,7 +6873,7 @@ internal static error processTrailerHeadersᴍ(ж<http2stream> Ꮡst, ж<http2Me
 internal static ref readonly @string priorityˢᴍhttp2serverConn => ref priorityˢᵇᴍhttp2serverConn;
 private static readonly @string priorityˢᵇᴍhttp2serverConn = "priority"u8;
 
-internal static error checkPriorityᴍ(ж<http2serverConn> Ꮡsc, uint32 streamID, http2PriorityParam p) {
+[GoMethodBody("checkPriority")] internal static error checkPriorityᴍ(ж<http2serverConn> Ꮡsc, uint32 streamID, http2PriorityParam p) {
     if (streamID == p.StreamDep) {
         // Section 5.3.1: "A stream cannot depend on itself. An endpoint MUST treat
         // this as a stream error (Section 5.4.2) of type PROTOCOL_ERROR."
@@ -6884,7 +6884,7 @@ internal static error checkPriorityᴍ(ж<http2serverConn> Ꮡsc, uint32 streamI
     return default;
 }
 
-internal static error processPriorityᴍ(ж<http2serverConn> Ꮡsc, ж<http2PriorityFrame> Ꮡf) {
+[GoMethodBody("processPriority")] internal static error processPriorityᴍ(ж<http2serverConn> Ꮡsc, ж<http2PriorityFrame> Ꮡf) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -6895,7 +6895,7 @@ internal static error processPriorityᴍ(ж<http2serverConn> Ꮡsc, ж<http2Prio
     return default;
 }
 
-internal static ж<http2stream> newStreamᴍ(ж<http2serverConn> Ꮡsc, uint32 id, uint32 pusherID, http2streamState state) {
+[GoMethodBody("newStream")] internal static ж<http2stream> newStreamᴍ(ж<http2serverConn> Ꮡsc, uint32 id, uint32 pusherID, http2streamState state) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -6954,7 +6954,7 @@ private static readonly @string protocolˢ2ᵇᴍhttp2serverConn = ":protocol"u8
 internal static ref readonly @string contentLengthˢᴍhttp2serverConn => ref contentLengthˢᵇᴍhttp2serverConn;
 private static readonly @string contentLengthˢᵇᴍhttp2serverConn = "Content-Length"u8;
 
-internal static (ж<http2responseWriter>, ж<Request>, error) newWriterAndRequestᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, ж<http2MetaHeadersFrame> Ꮡf) {
+[GoMethodBody("newWriterAndRequest")] internal static (ж<http2responseWriter>, ж<Request>, error) newWriterAndRequestᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, ж<http2MetaHeadersFrame> Ꮡf) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var st = ref Ꮡst.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
@@ -7027,7 +7027,7 @@ internal static (ж<http2responseWriter>, ж<Request>, error) newWriterAndReques
     return (rw, req, default);
 }
 
-internal static (ж<http2responseWriter>, ж<Request>, error) newWriterAndRequestNoBodyᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, httpcommon.ServerRequestParam rp) {
+[GoMethodBody("newWriterAndRequestNoBody")] internal static (ж<http2responseWriter>, ж<Request>, error) newWriterAndRequestNoBodyᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, httpcommon.ServerRequestParam rp) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var st = ref Ꮡst.DerefOrNull();
 
@@ -7066,7 +7066,7 @@ internal static (ж<http2responseWriter>, ж<Request>, error) newWriterAndReques
     return (rw, req, default);
 }
 
-internal static ж<http2responseWriter> newResponseWriterᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> st, ж<Request> Ꮡreq) {
+[GoMethodBody("newResponseWriter")] internal static ж<http2responseWriter> newResponseWriterᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> st, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var rws = Ꮡhttp2responseWriterStatePool.Get()._<ж<http2responseWriterState>>();
@@ -7098,7 +7098,7 @@ private static readonly @string tooManyEarlyResetsˢᵇᴍhttp2serverConn = "too
 
 // scheduleHandler starts a handler goroutine,
 // or schedules one to start as soon as an existing handler finishes.
-internal static partial error scheduleHandlerᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, ж<http2responseWriter> rw, ж<Request> req, Action<ResponseWriter, ж<Request>> handler) {
+[GoMethodBody("scheduleHandler")] internal static partial error scheduleHandlerᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, ж<http2responseWriter> rw, ж<Request> req, Action<ResponseWriter, ж<Request>> handler) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var st = ref Ꮡst.DerefOrNull();
 
@@ -7122,7 +7122,7 @@ internal static partial error scheduleHandlerᴍ(ж<http2serverConn> Ꮡsc, ж<h
     return default;
 }
 
-internal static partial void handlerDoneᴍ(ж<http2serverConn> Ꮡsc) {
+[GoMethodBody("handlerDone")] internal static partial void handlerDoneᴍ(ж<http2serverConn> Ꮡsc) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     sc.serveG.check();
@@ -7153,7 +7153,7 @@ internal static partial void handlerDoneᴍ(ж<http2serverConn> Ꮡsc) {
 }
 
 // Run on its own goroutine.
-internal static void runHandlerᴍ(ж<http2serverConn> Ꮡsc, ж<http2responseWriter> rw, ж<Request> req, Action<ResponseWriter, ж<Request>> handler) {
+[GoMethodBody("runHandler")] internal static void runHandlerᴍ(ж<http2serverConn> Ꮡsc, ж<http2responseWriter> rw, ж<Request> req, Action<ResponseWriter, ж<Request>> handler) {
     GoFrame ᒐ = default;
     try {
         defer(Ꮡsc.sendServeMsg, http2handlerDoneMsg.OrTypedNil(), ref ᒐ);
@@ -7213,7 +7213,7 @@ internal static void http2handleHeaderListTooLong(ResponseWriter w, ж<Request> 
 
 // called from handler goroutines.
 // h may be nil.
-internal static error writeHeadersᴍ(ref http2serverConn sc, ж<http2stream> Ꮡst, ж<http2writeResHeaders> ᏑheaderData) {
+[GoMethodBody("writeHeaders")] internal static error writeHeadersᴍ(ref http2serverConn sc, ж<http2stream> Ꮡst, ж<http2writeResHeaders> ᏑheaderData) {
     ref var st = ref Ꮡst.DerefOrNull();
     ref var headerData = ref ᏑheaderData.DerefOrNull();
 
@@ -7256,7 +7256,7 @@ internal static error writeHeadersᴍ(ref http2serverConn sc, ж<http2stream> �
 }
 
 // called from handler goroutines.
-internal static void write100ContinueHeadersᴍ(ref http2serverConn sc, ж<http2stream> Ꮡst) {
+[GoMethodBody("write100ContinueHeaders")] internal static void write100ContinueHeadersᴍ(ref http2serverConn sc, ж<http2stream> Ꮡst) {
     ref var st = ref Ꮡst.DerefOrNull();
 
     sc.writeFrameFromHandler(new http2FrameWriteRequest(
@@ -7279,7 +7279,7 @@ partial struct http2bodyReadMsg {
 // called from handler goroutines.
 // Notes that the handler for the given stream ID read n bytes of its body
 // and schedules flow control tokens to be sent.
-internal static void noteBodyReadFromHandlerᴍ(ref http2serverConn sc, ж<http2stream> st, nint n, error err) {
+[GoMethodBody("noteBodyReadFromHandler")] internal static void noteBodyReadFromHandlerᴍ(ref http2serverConn sc, ж<http2stream> st, nint n, error err) {
     sc.serveG.checkNotOn(); // NOT on
     if (n > 0) {
         var selᴛ31 = sc.bodyReadCh.ᐸꟷ(new http2bodyReadMsg(st, n), ꓸꓸꓸ);
@@ -7294,7 +7294,7 @@ internal static void noteBodyReadFromHandlerᴍ(ref http2serverConn sc, ж<http2
     }
 }
 
-internal static void noteBodyReadᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, nint n) {
+[GoMethodBody("noteBodyRead")] internal static void noteBodyReadᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, nint n) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var st = ref Ꮡst.DerefOrNull();
 
@@ -7308,12 +7308,12 @@ internal static void noteBodyReadᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> 
 }
 
 // st may be nil for conn-level
-internal static void sendWindowUpdate32ᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> st, int32 n) {
+[GoMethodBody("sendWindowUpdate32")] internal static void sendWindowUpdate32ᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> st, int32 n) {
     Ꮡsc.sendWindowUpdate(st, (nint)n);
 }
 
 // st may be nil for conn-level
-internal static void sendWindowUpdateᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, nint n) {
+[GoMethodBody("sendWindowUpdate")] internal static void sendWindowUpdateᴍ(ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, nint n) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var st = ref Ꮡst.DerefOrNull();
 
@@ -7351,7 +7351,7 @@ partial struct http2requestBody {
 
 } partial class http_package {
 
-internal static error Closeᴍ(ж<http2requestBody> Ꮡb) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<http2requestBody> Ꮡb) {
     Ꮡb.ᏑcloseOnce.Do(() => {
         if (Ꮡb.Value.pipe != nil) {
             Ꮡb.Value.pipe.BreakWithError(http2errClosedBody);
@@ -7363,7 +7363,7 @@ internal static error Closeᴍ(ж<http2requestBody> Ꮡb) {
     return default;
 }
 
-internal static (nint n, error err) Readᴍ(ref http2requestBody b, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref http2requestBody b, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -7426,7 +7426,7 @@ partial struct http2chunkWriter {
 
 } partial class http_package {
 
-internal static (nint n, error err) Writeᴍ(http2chunkWriter cw, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(http2chunkWriter cw, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -7441,9 +7441,9 @@ internal static (nint n, error err) Writeᴍ(http2chunkWriter cw, slice<byte> p)
 
 } partial class http_package {
 
-internal static bool hasTrailersᴍ(ref http2responseWriterState rws) { return len(rws.trailers) > 0; }
+[GoMethodBody("hasTrailers")] internal static bool hasTrailersᴍ(ref http2responseWriterState rws) { return len(rws.trailers) > 0; }
 
-internal static bool hasNonemptyTrailersᴍ(ref http2responseWriterState rws) {
+[GoMethodBody("hasNonemptyTrailers")] internal static bool hasNonemptyTrailersᴍ(ref http2responseWriterState rws) {
     foreach (var (_, trailer) in range(rws.trailers)) {
         var (_, ok) = rws.handlerHeader[trailer, ꟷ]; if (ok) {
             return true;
@@ -7455,7 +7455,7 @@ internal static bool hasNonemptyTrailersᴍ(ref http2responseWriterState rws) {
 // declareTrailer is called for each Trailer header when the
 // response header is written. It notes that a header will need to be
 // written in the trailers at the end of the response.
-internal static void declareTrailerᴍ(ref http2responseWriterState rws, @string k) {
+[GoMethodBody("declareTrailer")] internal static void declareTrailerᴍ(ref http2responseWriterState rws, @string k) {
     k = CanonicalHeaderKey(k);
     if (!httpguts.ValidTrailerHeader(k)) {
         // Forbidden by RFC 7230, section 4.1.2.
@@ -7487,7 +7487,7 @@ private static readonly @string connectionˢᵇᴍhttp2responseWriterState = "Co
 //
 // writeChunk is also responsible (on the first chunk) for sending the
 // HEADER response.
-internal static (nint n, error err) writeChunkᴍ(ж<http2responseWriterState> Ꮡrws, slice<byte> p) {
+[GoMethodBody("writeChunk")] internal static (nint n, error err) writeChunkᴍ(ж<http2responseWriterState> Ꮡrws, slice<byte> p) {
     error err = default;
     ref var rws = ref Ꮡrws.DerefOrNull();
 
@@ -7635,7 +7635,7 @@ private static readonly @string http2TrailerPrefixᵇ = "Trailer:"u8;
 //
 // This method runs after the Handler is done and promotes any Header
 // fields to be trailers.
-internal static void promoteUndeclaredTrailersᴍ(ref http2responseWriterState rws) {
+[GoMethodBody("promoteUndeclaredTrailers")] internal static void promoteUndeclaredTrailersᴍ(ref http2responseWriterState rws) {
     foreach (var (k, vv) in rws.handlerHeader) {
         if (!strings.HasPrefix(k, http2TrailerPrefix)) {
             continue;
@@ -7654,7 +7654,7 @@ internal static void promoteUndeclaredTrailersᴍ(ref http2responseWriterState r
 
 } partial class http_package {
 
-internal static error SetReadDeadlineᴍ(ref http2responseWriter w, time.Time deadline) {
+[GoMethodBody("SetReadDeadline")] internal static error SetReadDeadlineᴍ(ref http2responseWriter w, time.Time deadline) {
     var st = w.rws.stream;
     if (!deadline.IsZero() && deadline.Before(time.Now())) {
         // If we're setting a deadline in the past, reset the stream immediately
@@ -7682,7 +7682,7 @@ internal static error SetReadDeadlineᴍ(ref http2responseWriter w, time.Time de
     return default;
 }
 
-internal static error SetWriteDeadlineᴍ(ref http2responseWriter w, time.Time deadline) {
+[GoMethodBody("SetWriteDeadline")] internal static error SetWriteDeadlineᴍ(ref http2responseWriter w, time.Time deadline) {
     var st = w.rws.stream;
     if (!deadline.IsZero() && deadline.Before(time.Now())) {
         // If we're setting a deadline in the past, reset the stream immediately
@@ -7710,16 +7710,16 @@ internal static error SetWriteDeadlineᴍ(ref http2responseWriter w, time.Time d
     return default;
 }
 
-internal static error EnableFullDuplexᴍ(ref http2responseWriter w) {
+[GoMethodBody("EnableFullDuplex")] internal static error EnableFullDuplexᴍ(ref http2responseWriter w) {
     // We always support full duplex responses, so this is a no-op.
     return default;
 }
 
-internal static void Flushᴍ(ref http2responseWriter w) {
+[GoMethodBody("Flush")] internal static void Flushᴍ(ref http2responseWriter w) {
     w.FlushError();
 }
 
-internal static error FlushErrorᴍ(ref http2responseWriter w) {
+[GoMethodBody("FlushError")] internal static error FlushErrorᴍ(ref http2responseWriter w) {
     var rws = w.rws;
     if (rws == nil) {
         throw panic("Header called after Handler finished");
@@ -7748,7 +7748,7 @@ internal static error FlushErrorᴍ(ref http2responseWriter w) {
     return err;
 }
 
-internal static partial /*<-*/channel<bool> CloseNotifyᴍ(ref http2responseWriter w) {
+[GoMethodBody("CloseNotify")] internal static partial /*<-*/channel<bool> CloseNotifyᴍ(ref http2responseWriter w) {
     var rws = w.rws;
     if (rws == nil) {
         throw panic("CloseNotify called after Handler finished");
@@ -7770,7 +7770,7 @@ internal static partial /*<-*/channel<bool> CloseNotifyᴍ(ref http2responseWrit
     return ch.AsRecvOnly();
 }
 
-internal static Header Headerᴍ(ref http2responseWriter w) {
+[GoMethodBody("Header")] internal static Header Headerᴍ(ref http2responseWriter w) {
     var rws = w.rws;
     if (rws == nil) {
         throw panic("Header called after Handler finished");
@@ -7802,7 +7802,7 @@ internal static void http2checkWriteHeaderCode(nint code) {
 
 } partial class http_package {
 
-internal static void WriteHeaderᴍ(ref http2responseWriter w, nint code) {
+[GoMethodBody("WriteHeader")] internal static void WriteHeaderᴍ(ref http2responseWriter w, nint code) {
     var rws = w.rws;
     if (rws == nil) {
         throw panic("WriteHeader called after Handler finished");
@@ -7816,7 +7816,7 @@ internal static void WriteHeaderᴍ(ref http2responseWriter w, nint code) {
 internal static ref readonly @string transferEncodingˢᴍhttp2responseWriterState => ref transferEncodingˢᵇᴍhttp2responseWriterState;
 private static readonly @string transferEncodingˢᵇᴍhttp2responseWriterState = "Transfer-Encoding"u8;
 
-internal static void writeHeaderᴍ(ref http2responseWriterState rws, nint code) {
+[GoMethodBody("writeHeader")] internal static void writeHeaderᴍ(ref http2responseWriterState rws, nint code) {
     if (rws.wroteHeader) {
         return;
     }
@@ -7875,11 +7875,11 @@ internal static Header http2cloneHeader(Header h) {
 // * -> chunkWriter{rws}
 // * -> responseWriterState.writeChunk(p []byte)
 // * -> responseWriterState.writeChunk (most of the magic; see comment there)
-internal static (nint n, error err) Writeᴍ(ref http2responseWriter w, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref http2responseWriter w, slice<byte> p) {
     return w.write(len(p), p, ""u8);
 }
 
-internal static (nint n, error err) WriteStringᴍ(ref http2responseWriter w, @string s) {
+[GoMethodBody("WriteString")] internal static (nint n, error err) WriteStringᴍ(ref http2responseWriter w, @string s) {
     return w.write(len(s), default, s);
 }
 
@@ -7888,7 +7888,7 @@ internal static ref readonly @string http2HandlerWroteMoreˢᴍhttp2responseWrit
 private static readonly @string http2HandlerWroteMoreˢᵇᴍhttp2responseWriter = "http2: handler wrote more than declared Content-Length"u8;
 
 // either dataB or dataS is non-zero.
-internal static (nint n, error err) writeᴍ(ref http2responseWriter w, nint lenData, slice<byte> dataB, @string dataS) {
+[GoMethodBody("write")] internal static (nint n, error err) writeᴍ(ref http2responseWriter w, nint lenData, slice<byte> dataB, @string dataS) {
     var rws = w.rws;
     if (rws == nil) {
         throw panic("Write called after Handler finished");
@@ -7912,7 +7912,7 @@ internal static (nint n, error err) writeᴍ(ref http2responseWriter w, nint len
     }
 }
 
-internal static void handlerDoneᴍ(ref http2responseWriter w) {
+[GoMethodBody("handlerDone")] internal static void handlerDoneᴍ(ref http2responseWriter w) {
     var rws = w.rws;
     rws.handlerDone = true;
     w.Flush();
@@ -7950,7 +7950,7 @@ private static readonly @string expectˢᵇᴍhttp2responseWriter = "expect"u8;
 internal static ref readonly @string hostˢ2ᴍhttp2responseWriter => ref hostˢ2ᵇᴍhttp2responseWriter;
 private static readonly @string hostˢ2ᵇᴍhttp2responseWriter = "host"u8;
 
-internal static error Pushᴍ(ref http2responseWriter w, @string target, ж<PushOptions> Ꮡopts) {
+[GoMethodBody("Push")] internal static error Pushᴍ(ref http2responseWriter w, @string target, ж<PushOptions> Ꮡopts) {
     ref var opts = ref Ꮡopts.DerefOrNull();
 
     var st = w.rws.stream;
@@ -8072,7 +8072,7 @@ partial struct http2startPushRequest {
 
 } partial class http_package {
 
-internal static void startPushᴍ(ж<http2serverConn> Ꮡsc, ж<http2startPushRequest> Ꮡmsg) {
+[GoMethodBody("startPush")] internal static void startPushᴍ(ж<http2serverConn> Ꮡsc, ж<http2startPushRequest> Ꮡmsg) {
     ref var sc = ref Ꮡsc.DerefOrNull();
     ref var msg = ref Ꮡmsg.DerefOrNull();
 
@@ -8236,7 +8236,7 @@ private static readonly @string connˢ2ᵇᴍhttp2serverConn = "conn"u8;
 internal static ref readonly @string streamˢᴍhttp2serverConn => ref streamˢᵇᴍhttp2serverConn;
 private static readonly @string streamˢᵇᴍhttp2serverConn = "stream"u8;
 
-internal static error countErrorᴍ(ж<http2serverConn> Ꮡsc, @string name, error err) {
+[GoMethodBody("countError")] internal static error countErrorᴍ(ж<http2serverConn> Ꮡsc, @string name, error err) {
     ref var sc = ref Ꮡsc.DerefOrNull();
 
     if (Ꮡsc == nil || sc.srv == nil) {
@@ -8413,7 +8413,7 @@ partial struct http2transportTestHooks {
 
 } partial class http_package {
 
-internal static uint32 maxHeaderListSizeᴍ(ref http2Transport t) {
+[GoMethodBody("maxHeaderListSize")] internal static uint32 maxHeaderListSizeᴍ(ref http2Transport t) {
     var n = (int64)t.MaxHeaderListSize;
     if (t.t1 != nil && t.t1.MaxResponseHeaderBytes != 0) {
         n = t.t1.MaxResponseHeaderBytes;
@@ -8430,7 +8430,7 @@ internal static uint32 maxHeaderListSizeᴍ(ref http2Transport t) {
     return (uint32)n;
 }
 
-internal static bool disableCompressionᴍ(ref http2Transport t) {
+[GoMethodBody("disableCompression")] internal static bool disableCompressionᴍ(ref http2Transport t) {
     return t.DisableCompression || (t.t1 != nil && t.t1.DisableCompression);
 }
 
@@ -8526,20 +8526,20 @@ partial struct http2unencryptedTransport /*http2Transport*/;
 
 } partial class http_package {
 
-internal static (ж<Response>, error) RoundTripᴍ(ж<http2unencryptedTransport> Ꮡt, ж<Request> req) {
+[GoMethodBody("RoundTrip")] internal static (ж<Response>, error) RoundTripᴍ(ж<http2unencryptedTransport> Ꮡt, ж<Request> req) {
     return (Ꮡt.Reinterpret<http2unencryptedTransport, http2Transport>()).RoundTripOpt(req, new http2RoundTripOpt(allowHTTP: true));
 }
 
 } partial class http_package {
 
-internal static http2ClientConnPool connPoolᴍ(ж<http2Transport> Ꮡt) {
+[GoMethodBody("connPool")] internal static http2ClientConnPool connPoolᴍ(ж<http2Transport> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.ᏑconnPoolOnce.Do(Ꮡt.initConnPool);
     return t.connPoolOrDef;
 }
 
-internal static void initConnPoolᴍ(ж<http2Transport> Ꮡt) {
+[GoMethodBody("initConnPool")] internal static void initConnPoolᴍ(ж<http2Transport> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.ConnPool != nil) {
@@ -8685,14 +8685,14 @@ internal static Func<nint, textproto.MIMEHeader, error> http2got1xxFuncForTests;
 
 // get1xxTraceFunc returns the value of request's httptrace.ClientTrace.Got1xxResponse func,
 // if any. It returns nil if not set or if the Go version is too old.
-internal static Func<nint, textproto.MIMEHeader, error> get1xxTraceFuncᴍ(ref http2clientStream cs) {
+[GoMethodBody("get1xxTraceFunc")] internal static Func<nint, textproto.MIMEHeader, error> get1xxTraceFuncᴍ(ref http2clientStream cs) {
     var fn = http2got1xxFuncForTests; if (fn != nil) {
         return fn;
     }
     return http2traceGot1xxResponseFunc(cs.trace);
 }
 
-internal static void abortStreamᴍ(ж<http2clientStream> Ꮡcs, error err) {
+[GoMethodBody("abortStream")] internal static void abortStreamᴍ(ж<http2clientStream> Ꮡcs, error err) {
     GoFrame ᒐ = default;
     try {
         ref var cs = ref Ꮡcs.DerefOrNull();
@@ -8705,7 +8705,7 @@ internal static void abortStreamᴍ(ж<http2clientStream> Ꮡcs, error err) {
     finally { ᒐ.Run(); }
 }
 
-internal static void abortStreamLockedᴍ(ж<http2clientStream> Ꮡcs, error err) {
+[GoMethodBody("abortStreamLocked")] internal static void abortStreamLockedᴍ(ж<http2clientStream> Ꮡcs, error err) {
     ref var cs = ref Ꮡcs.DerefOrNull();
 
     Ꮡcs.ᏑabortOnce.Do(() => {
@@ -8722,7 +8722,7 @@ internal static void abortStreamLockedᴍ(ж<http2clientStream> Ꮡcs, error err
     }
 }
 
-internal static void abortRequestBodyWriteᴍ(ж<http2clientStream> Ꮡcs) {
+[GoMethodBody("abortRequestBodyWrite")] internal static void abortRequestBodyWriteᴍ(ж<http2clientStream> Ꮡcs) {
     GoFrame ᒐ = default;
     try {
         ref var cs = ref Ꮡcs.DerefOrNull();
@@ -8740,7 +8740,7 @@ internal static void abortRequestBodyWriteᴍ(ж<http2clientStream> Ꮡcs) {
     finally { ᒐ.Run(); }
 }
 
-internal static partial void closeReqBodyLockedᴍ(ж<http2clientStream> Ꮡcs) {
+[GoMethodBody("closeReqBodyLocked")] internal static partial void closeReqBodyLockedᴍ(ж<http2clientStream> Ꮡcs) {
     ref var cs = ref Ꮡcs.DerefOrNull();
 
     if (cs.reqBodyClosed != nil) {
@@ -8765,7 +8765,7 @@ partial struct http2stickyErrWriter {
 
 } partial class http_package {
 
-internal static (nint n, error err) Writeᴍ(http2stickyErrWriter sew, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(http2stickyErrWriter sew, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -8790,13 +8790,13 @@ partial struct http2noCachedConnError {
 
 } partial class http_package {
 
-internal static void IsHTTP2NoCachedConnErrorᴍ(http2noCachedConnError _) { }
+[GoMethodBody("IsHTTP2NoCachedConnError")] internal static void IsHTTP2NoCachedConnErrorᴍ(http2noCachedConnError _) { }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string http2NoCachedConnectionˢᴍhttp2noCachedConnError => ref http2NoCachedConnectionˢᵇᴍhttp2noCachedConnError;
 private static readonly @string http2NoCachedConnectionˢᵇᴍhttp2noCachedConnError = "http2: no cached connection was available"u8;
 
-internal static @string Errorᴍ(http2noCachedConnError _) { return http2NoCachedConnectionˢᴍhttp2noCachedConnError; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(http2noCachedConnError _) { return http2NoCachedConnectionˢᴍhttp2noCachedConnError; }
 
 } partial class http_package {
 
@@ -8826,7 +8826,7 @@ partial struct http2RoundTripOpt {
 
 } partial class http_package {
 
-internal static (ж<Response>, error) RoundTripᴍ(ж<http2Transport> Ꮡt, ж<Request> req) {
+[GoMethodBody("RoundTrip")] internal static (ж<Response>, error) RoundTripᴍ(ж<http2Transport> Ꮡt, ж<Request> req) {
     return Ꮡt.RoundTripOpt(req, new http2RoundTripOpt());
 }
 
@@ -8865,7 +8865,7 @@ internal static ref readonly @string http2UnsupportedSchemeˢᴍhttp2Transport =
 private static readonly @string http2UnsupportedSchemeˢᵇᴍhttp2Transport = "http2: unsupported scheme"u8;
 
 // RoundTripOpt is like RoundTrip, but takes options.
-internal static (ж<Response>, error) RoundTripOptᴍ(ж<http2Transport> Ꮡt, ж<Request> Ꮡreq, http2RoundTripOpt opt) {
+[GoMethodBody("RoundTripOpt")] internal static (ж<Response>, error) RoundTripOptᴍ(ж<http2Transport> Ꮡt, ж<Request> Ꮡreq, http2RoundTripOpt opt) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
@@ -8951,7 +8951,7 @@ internal static (ж<Response>, error) RoundTripOptᴍ(ж<http2Transport> Ꮡt, �
 // CloseIdleConnections closes any connections which were previously
 // connected from previous requests but are now sitting idle.
 // It does not interrupt any connections currently in use.
-internal static void CloseIdleConnectionsᴍ(ж<http2Transport> Ꮡt) {
+[GoMethodBody("CloseIdleConnections")] internal static void CloseIdleConnectionsᴍ(ж<http2Transport> Ꮡt) {
     var (cp, ok) = Ꮡt.connPool()._<http2clientConnPoolIdleCloser>(ᐧ); if (ok) {
         cp.closeIdleConnections();
     }
@@ -9023,7 +9023,7 @@ internal static bool http2canRetryError(error err) {
 internal static ref readonly @string tcpˢᴍhttp2Transport => ref tcpˢᵇᴍhttp2Transport;
 private static readonly @string tcpˢᵇᴍhttp2Transport = "tcp"u8;
 
-internal static (ж<http2ClientConn>, error) dialClientConnᴍ(ж<http2Transport> Ꮡt, context.Context ctx, @string addr, bool singleUse) {
+[GoMethodBody("dialClientConn")] internal static (ж<http2ClientConn>, error) dialClientConnᴍ(ж<http2Transport> Ꮡt, context.Context ctx, @string addr, bool singleUse) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.http2transportTestHooks != nil) {
@@ -9040,7 +9040,7 @@ internal static (ж<http2ClientConn>, error) dialClientConnᴍ(ж<http2Transport
     return Ꮡt.newClientConn(tconn, singleUse, default);
 }
 
-internal static ж<tls.Config> newTLSConfigᴍ(ref http2Transport t, @string host) {
+[GoMethodBody("newTLSConfig")] internal static ж<tls.Config> newTLSConfigᴍ(ref http2Transport t, @string host) {
     var cfg = @new<tls.Config>();
     if (t.TLSClientConfig != nil) {
         cfg.Value.AssignFrom(t.TLSClientConfig.Clone().Value);
@@ -9058,7 +9058,7 @@ internal static ж<tls.Config> newTLSConfigᴍ(ref http2Transport t, @string hos
 internal static ref readonly @string http2CouldNotNegotiateˢᴍhttp2Transport => ref http2CouldNotNegotiateˢᵇᴍhttp2Transport;
 private static readonly @string http2CouldNotNegotiateˢᵇᴍhttp2Transport = "http2: could not negotiate protocol mutually"u8;
 
-internal static (net.Conn, error) dialTLSᴍ(ref http2Transport t, context.Context ctx, @string network, @string addr, ж<tls.Config> tlsCfg) {
+[GoMethodBody("dialTLS")] internal static (net.Conn, error) dialTLSᴍ(ref http2Transport t, context.Context ctx, @string network, @string addr, ж<tls.Config> tlsCfg) {
     if (t.DialTLSContext != nil) {
         return t.DialTLSContext(ctx, network, addr, tlsCfg);
     } else if (t.DialTLS != nil) {
@@ -9081,24 +9081,24 @@ internal static (net.Conn, error) dialTLSᴍ(ref http2Transport t, context.Conte
 
 // disableKeepAlives reports whether connections should be closed as
 // soon as possible after handling the first request.
-internal static bool disableKeepAlivesᴍ(ref http2Transport t) {
+[GoMethodBody("disableKeepAlives")] internal static bool disableKeepAlivesᴍ(ref http2Transport t) {
     return t.t1 != nil && t.t1.DisableKeepAlives;
 }
 
-internal static time.Duration expectContinueTimeoutᴍ(ref http2Transport t) {
+[GoMethodBody("expectContinueTimeout")] internal static time.Duration expectContinueTimeoutᴍ(ref http2Transport t) {
     if (t.t1 == nil) {
         return 0;
     }
     return t.t1.ExpectContinueTimeout;
 }
 
-internal static (ж<http2ClientConn>, error) NewClientConnᴍ(ж<http2Transport> Ꮡt, net.Conn c) {
+[GoMethodBody("NewClientConn")] internal static (ж<http2ClientConn>, error) NewClientConnᴍ(ж<http2Transport> Ꮡt, net.Conn c) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     return Ꮡt.newClientConn(c, t.disableKeepAlives(), default);
 }
 
-internal static partial (ж<http2ClientConn>, error) newClientConnᴍ(ж<http2Transport> Ꮡt, net.Conn c, bool singleUse, Action internalStateHook) {
+[GoMethodBody("newClientConn")] internal static partial (ж<http2ClientConn>, error) newClientConnᴍ(ж<http2Transport> Ꮡt, net.Conn c, bool singleUse, Action internalStateHook) {
     ref var t = ref Ꮡt.DerefOrNull();
     var initialSettingsᴷ = new stackAppend<http2Setting>();
 
@@ -9198,7 +9198,7 @@ internal static partial (ж<http2ClientConn>, error) newClientConnᴍ(ж<http2Tr
 
 } partial class http_package {
 
-internal static void healthCheckᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("healthCheck")] internal static void healthCheckᴍ(ж<http2ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     try {
         ref var cc = ref Ꮡcc.DerefOrNull();
@@ -9223,7 +9223,7 @@ internal static void healthCheckᴍ(ж<http2ClientConn> Ꮡcc) {
 }
 
 // SetDoNotReuse marks cc as not reusable for future HTTP requests.
-internal static void SetDoNotReuseᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("SetDoNotReuse")] internal static void SetDoNotReuseᴍ(ж<http2ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -9237,7 +9237,7 @@ internal static void SetDoNotReuseᴍ(ж<http2ClientConn> Ꮡcc) {
     finally { if (ᒐd1) Ꮡcc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void setGoAwayᴍ(ж<http2ClientConn> Ꮡcc, ж<http2GoAwayFrame> Ꮡf) {
+[GoMethodBody("setGoAway")] internal static void setGoAwayᴍ(ж<http2ClientConn> Ꮡcc, ж<http2GoAwayFrame> Ꮡf) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -9286,7 +9286,7 @@ internal static void setGoAwayᴍ(ж<http2ClientConn> Ꮡcc, ж<http2GoAwayFrame
 //
 // If the caller is going to immediately make a new request on this
 // connection, use ReserveNewRequest instead.
-internal static bool CanTakeNewRequestᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("CanTakeNewRequest")] internal static bool CanTakeNewRequestᴍ(ж<http2ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -9303,7 +9303,7 @@ internal static bool CanTakeNewRequestᴍ(ж<http2ClientConn> Ꮡcc) {
 // ReserveNewRequest is like CanTakeNewRequest but also reserves a
 // concurrent stream in cc. The reservation is decremented on the
 // next call to RoundTrip.
-internal static bool ReserveNewRequestᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("ReserveNewRequest")] internal static bool ReserveNewRequestᴍ(ж<http2ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -9353,7 +9353,7 @@ public partial struct http2ClientConnState {
 } partial class http_package {
 
 // State returns a snapshot of cc's state.
-internal static http2ClientConnState Stateᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("State")] internal static http2ClientConnState Stateᴍ(ж<http2ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -9392,7 +9392,7 @@ partial struct http2clientConnIdleState {
 
 } partial class http_package {
 
-internal static http2clientConnIdleState idleStateᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("idleState")] internal static http2clientConnIdleState idleStateᴍ(ж<http2ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -9406,7 +9406,7 @@ internal static http2clientConnIdleState idleStateᴍ(ж<http2ClientConn> Ꮡcc)
     finally { if (ᒐd1) Ꮡcc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static http2clientConnIdleState /*st*/ idleStateLockedᴍ(ref http2ClientConn cc) {
+[GoMethodBody("idleStateLocked")] internal static http2clientConnIdleState /*st*/ idleStateLockedᴍ(ref http2ClientConn cc) {
     http2clientConnIdleState st = default;
 
     if (cc.singleUse && cc.nextStreamID > 1) {
@@ -9445,7 +9445,7 @@ internal static http2clientConnIdleState /*st*/ idleStateLockedᴍ(ref http2Clie
     return st;
 }
 
-internal static bool isUsableLockedᴍ(ref http2ClientConn cc) {
+[GoMethodBody("isUsableLocked")] internal static bool isUsableLockedᴍ(ref http2ClientConn cc) {
     return cc.goAway == nil && !cc.closed && !cc.closing && !cc.doNotReuse && (int64)cc.nextStreamID + 2 * (int64)cc.pendingRequests < math.MaxInt32 && !cc.tooIdleLocked();
 }
 
@@ -9455,7 +9455,7 @@ internal static bool isUsableLockedᴍ(ref http2ClientConn cc) {
 // We only permit reservations up to the conn's concurrency limit.
 // This differs from ClientConn.ReserveNewRequest, which permits reservations
 // past the limit when StrictMaxConcurrentStreams is set.
-internal static bool canReserveLockedᴍ(ref http2ClientConn cc) {
+[GoMethodBody("canReserveLocked")] internal static bool canReserveLockedᴍ(ref http2ClientConn cc) {
     if (cc.currentRequestCountLocked() >= (nint)cc.maxConcurrentStreams) {
         return false;
     }
@@ -9467,17 +9467,17 @@ internal static bool canReserveLockedᴍ(ref http2ClientConn cc) {
 
 // currentRequestCountLocked reports the number of concurrency slots currently in use,
 // including active streams, reserved slots, and reset streams waiting for acknowledgement.
-internal static nint currentRequestCountLockedᴍ(ref http2ClientConn cc) {
+[GoMethodBody("currentRequestCountLocked")] internal static nint currentRequestCountLockedᴍ(ref http2ClientConn cc) {
     return len(cc.streams) + cc.streamsReserved + cc.pendingResets;
 }
 
-internal static bool canTakeNewRequestLockedᴍ(ref http2ClientConn cc) {
+[GoMethodBody("canTakeNewRequestLocked")] internal static bool canTakeNewRequestLockedᴍ(ref http2ClientConn cc) {
     var st = cc.idleStateLocked();
     return st.canTakeNewRequest;
 }
 
 // availableLocked reports the number of concurrency slots available.
-internal static nint availableLockedᴍ(ref http2ClientConn cc) {
+[GoMethodBody("availableLocked")] internal static nint availableLockedᴍ(ref http2ClientConn cc) {
     if (!cc.canTakeNewRequestLocked()) {
         return 0;
     }
@@ -9486,7 +9486,7 @@ internal static nint availableLockedᴍ(ref http2ClientConn cc) {
 
 // tooIdleLocked reports whether this connection has been been sitting idle
 // for too much wall time.
-internal static bool tooIdleLockedᴍ(ref http2ClientConn cc) {
+[GoMethodBody("tooIdleLocked")] internal static bool tooIdleLockedᴍ(ref http2ClientConn cc) {
     // The Round(0) strips the monontonic clock reading so the
     // times are compared based on their wall time. We don't want
     // to reuse a connection that's been sitting idle during
@@ -9500,11 +9500,11 @@ internal static bool tooIdleLockedᴍ(ref http2ClientConn cc) {
 // so this simply calls the synchronized closeIfIdle to shut down this
 // connection. The timer could just call closeIfIdle, but this is more
 // clear.
-internal static void onIdleTimeoutᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("onIdleTimeout")] internal static void onIdleTimeoutᴍ(ж<http2ClientConn> Ꮡcc) {
     Ꮡcc.closeIfIdle();
 }
 
-internal static void closeConnᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("closeConn")] internal static void closeConnᴍ(ж<http2ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     try {
         ref var cc = ref Ꮡcc.DerefOrNull();
@@ -9521,7 +9521,7 @@ internal static void closeConnᴍ(ж<http2ClientConn> Ꮡcc) {
 
 // A tls.Conn.Close can hang for a long time if the peer is unresponsive.
 // Try to shut it down more aggressively.
-internal static void forceCloseConnᴍ(ref http2ClientConn cc) {
+[GoMethodBody("forceCloseConn")] internal static void forceCloseConnᴍ(ref http2ClientConn cc) {
     var (tc, ok) = cc.tconn._<ж<tls.Conn>>(ᐧ);
     if (!ok) {
         return;
@@ -9531,7 +9531,7 @@ internal static void forceCloseConnᴍ(ref http2ClientConn cc) {
     }
 }
 
-internal static void closeIfIdleᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("closeIfIdle")] internal static void closeIfIdleᴍ(ж<http2ClientConn> Ꮡcc) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
     cc.mu.Lock();
@@ -9551,7 +9551,7 @@ internal static void closeIfIdleᴍ(ж<http2ClientConn> Ꮡcc) {
     Ꮡcc.closeConn();
 }
 
-internal static bool isDoNotReuseAndIdleᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("isDoNotReuseAndIdle")] internal static bool isDoNotReuseAndIdleᴍ(ж<http2ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -9573,7 +9573,7 @@ internal static Action http2shutdownEnterWaitStateHook = () => {
 } partial class http_package {
 
 // Shutdown gracefully closes the client connection, waiting for running streams to complete.
-internal static partial error Shutdownᴍ(ж<http2ClientConn> Ꮡcc, context.Context ctx) {
+[GoMethodBody("Shutdown")] internal static partial error Shutdownᴍ(ж<http2ClientConn> Ꮡcc, context.Context ctx) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
     var err = Ꮡcc.sendGoAway(); if (err != nil) {
@@ -9622,7 +9622,7 @@ internal static partial error Shutdownᴍ(ж<http2ClientConn> Ꮡcc, context.Con
     return default;
 }
 
-internal static error sendGoAwayᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("sendGoAway")] internal static error sendGoAwayᴍ(ж<http2ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -9658,7 +9658,7 @@ internal static error sendGoAwayᴍ(ж<http2ClientConn> Ꮡcc) {
     finally { if (ᒐd1) Ꮡcc.DerefOrNull().wmu.Unlock(); ᒐ.Run(); }
 }
 
-internal static partial void goAwayAndCloseᴍ(ж<http2ClientConn> Ꮡcc, http2ErrCode code) {
+[GoMethodBody("goAwayAndClose")] internal static partial void goAwayAndCloseᴍ(ж<http2ClientConn> Ꮡcc, http2ErrCode code) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
     cc.mu.Lock();
@@ -9700,7 +9700,7 @@ internal static partial void goAwayAndCloseᴍ(ж<http2ClientConn> Ꮡcc, http2E
 
 // closes the client connection immediately. In-flight requests are interrupted.
 // err is sent to streams.
-internal static void closeForErrorᴍ(ж<http2ClientConn> Ꮡcc, error err) {
+[GoMethodBody("closeForError")] internal static void closeForErrorᴍ(ж<http2ClientConn> Ꮡcc, error err) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
     cc.mu.Lock();
@@ -9716,7 +9716,7 @@ internal static void closeForErrorᴍ(ж<http2ClientConn> Ꮡcc, error err) {
 // Close closes the client connection immediately.
 //
 // In-flight requests are interrupted. For a graceful shutdown, use Shutdown instead.
-internal static error Closeᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<http2ClientConn> Ꮡcc) {
     Ꮡcc.closeForError(http2errClientConnForceClosed);
     return default;
 }
@@ -9728,7 +9728,7 @@ internal static ref readonly @string connCloseLostPingˢᴍhttp2ClientConn => re
 private static readonly @string connCloseLostPingˢᵇᴍhttp2ClientConn = "conn_close_lost_ping"u8;
 
 // closes the client connection immediately. In-flight requests are interrupted.
-internal static void closeForLostPingᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("closeForLostPing")] internal static void closeForLostPingᴍ(ж<http2ClientConn> Ꮡcc) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
     var err = errors.New(http2ClientConnectionˢᴍhttp2ClientConn);
@@ -9746,7 +9746,7 @@ internal static error http2errRequestCanceled = errors.New("net/http: request ca
 
 } partial class http_package {
 
-internal static time.Duration responseHeaderTimeoutᴍ(ref http2ClientConn cc) {
+[GoMethodBody("responseHeaderTimeout")] internal static time.Duration responseHeaderTimeoutᴍ(ref http2ClientConn cc) {
     if (cc.t.t1 != nil) {
         return cc.t.t1.ResponseHeaderTimeout;
     }
@@ -9774,7 +9774,7 @@ internal static int64 http2actualContentLength(ref Request req) {
 
 } partial class http_package {
 
-internal static void decrStreamReservationsᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("decrStreamReservations")] internal static void decrStreamReservationsᴍ(ж<http2ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -9788,17 +9788,17 @@ internal static void decrStreamReservationsᴍ(ж<http2ClientConn> Ꮡcc) {
     finally { if (ᒐd1) Ꮡcc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void decrStreamReservationsLockedᴍ(ref http2ClientConn cc) {
+[GoMethodBody("decrStreamReservationsLocked")] internal static void decrStreamReservationsLockedᴍ(ref http2ClientConn cc) {
     if (cc.streamsReserved > 0) {
         cc.streamsReserved--;
     }
 }
 
-internal static (ж<Response>, error) RoundTripᴍ(ж<http2ClientConn> Ꮡcc, ж<Request> req) {
+[GoMethodBody("RoundTrip")] internal static (ж<Response>, error) RoundTripᴍ(ж<http2ClientConn> Ꮡcc, ж<Request> req) {
     return Ꮡcc.roundTrip(req, default);
 }
 
-internal static partial (ж<Response>, error) roundTripᴍ(ж<http2ClientConn> Ꮡcc, ж<Request> Ꮡreq, Action<ж<http2clientStream>> streamf) {
+[GoMethodBody("roundTrip")] internal static partial (ж<Response>, error) roundTripᴍ(ж<http2ClientConn> Ꮡcc, ж<Request> Ꮡreq, Action<ж<http2clientStream>> streamf) {
     ref var cc = ref Ꮡcc.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
@@ -9935,7 +9935,7 @@ internal static partial (ж<Response>, error) roundTripᴍ(ж<http2ClientConn> �
 // doRequest runs for the duration of the request lifetime.
 //
 // It sends the request and performs post-request cleanup (closing Request.Body, etc.).
-internal static void doRequestᴍ(ж<http2clientStream> Ꮡcs, ж<Request> req, Action<ж<http2clientStream>> streamf) {
+[GoMethodBody("doRequest")] internal static void doRequestᴍ(ж<http2clientStream> Ꮡcs, ж<Request> req, Action<ж<http2clientStream>> streamf) {
     var err = Ꮡcs.writeRequest(req, streamf);
     Ꮡcs.cleanupWriteRequest(err);
 }
@@ -9961,7 +9961,7 @@ private static readonly @string continueˢᵇᴍhttp2clientStream = "100-continu
 //
 // It returns non-nil if the request ends otherwise.
 // If the returned error is StreamError, the error Code may be used in resetting the stream.
-internal static error /*err*/ writeRequestᴍ(ж<http2clientStream> Ꮡcs, ж<Request> Ꮡreq, Action<ж<http2clientStream>> streamf) {
+[GoMethodBody("writeRequest")] internal static error /*err*/ writeRequestᴍ(ж<http2clientStream> Ꮡcs, ж<Request> Ꮡreq, Action<ж<http2clientStream>> streamf) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -10156,7 +10156,7 @@ internal static error /*err*/ writeRequestᴍ(ж<http2clientStream> Ꮡcs, ж<Re
     ᒐdone: return err;
 }
 
-internal static error encodeAndWriteHeadersᴍ(ж<http2clientStream> Ꮡcs, ж<Request> req) {
+[GoMethodBody("encodeAndWriteHeaders")] internal static error encodeAndWriteHeadersᴍ(ж<http2clientStream> Ꮡcs, ж<Request> req) {
     GoFrame ᒐ = default;
     try {
         ref var cs = ref Ꮡcs.DerefOrNull();
@@ -10238,7 +10238,7 @@ internal static (httpcommon.EncodeHeadersResult, error) http2encodeRequestHeader
 //
 // If err (the result of writeRequest) is non-nil and the stream is not closed,
 // cleanupWriteRequest will send a reset to the peer.
-internal static void cleanupWriteRequestᴍ(ж<http2clientStream> Ꮡcs, error err) {
+[GoMethodBody("cleanupWriteRequest")] internal static void cleanupWriteRequestᴍ(ж<http2clientStream> Ꮡcs, error err) {
     ref var cs = ref Ꮡcs.DerefOrNull();
 
     var cc = cs.cc;
@@ -10354,7 +10354,7 @@ internal static void cleanupWriteRequestᴍ(ж<http2clientStream> Ꮡcs, error e
 
 // awaitOpenSlotForStreamLocked waits until len(streams) < maxConcurrentStreams.
 // Must hold cc.mu.
-internal static error awaitOpenSlotForStreamLockedᴍ(ref http2ClientConn cc, ж<http2clientStream> Ꮡcs) {
+[GoMethodBody("awaitOpenSlotForStreamLocked")] internal static error awaitOpenSlotForStreamLockedᴍ(ref http2ClientConn cc, ж<http2clientStream> Ꮡcs) {
     ref var cs = ref Ꮡcs.DerefOrNull();
 
     for (;;) {
@@ -10386,7 +10386,7 @@ internal static error awaitOpenSlotForStreamLockedᴍ(ref http2ClientConn cc, ж
 }
 
 // requires cc.wmu be held
-internal static error writeHeadersᴍ(ref http2ClientConn cc, uint32 streamID, bool endStream, nint maxFrameSize, slice<byte> hdrs) {
+[GoMethodBody("writeHeaders")] internal static error writeHeadersᴍ(ref http2ClientConn cc, uint32 streamID, bool endStream, nint maxFrameSize, slice<byte> hdrs) {
     var first = true; // first frame written (HEADERS is first, then CONTINUATION)
     while (len(hdrs) > 0 && cc.werr == nil) {
         var chunk = hdrs;
@@ -10429,7 +10429,7 @@ internal static error http2errReqBodyTooLong = errors.New("http2: request body l
 //
 // It returns max(1, min(peer's advertised max frame size,
 // Request.ContentLength+1, 512KB)).
-internal static nint frameScratchBufferLenᴍ(ref http2clientStream cs, nint maxFrameSize) {
+[GoMethodBody("frameScratchBufferLen")] internal static nint frameScratchBufferLenᴍ(ref http2clientStream cs, nint maxFrameSize) {
     const int64 max = /* 512 << 10 */ 524288;
     var n = (int64)maxFrameSize;
     if (n > max) {
@@ -10476,7 +10476,7 @@ internal static nint http2bufPoolIndex(nint size) {
 
 } partial class http_package {
 
-internal static error /*err*/ writeRequestBodyᴍ(ж<http2clientStream> Ꮡcs, ж<Request> Ꮡreq) {
+[GoMethodBody("writeRequestBody")] internal static error /*err*/ writeRequestBodyᴍ(ж<http2clientStream> Ꮡcs, ж<Request> Ꮡreq) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -10627,7 +10627,7 @@ internal static error /*err*/ writeRequestBodyᴍ(ж<http2clientStream> Ꮡcs, �
 // control tokens from the server.
 // It returns either the non-zero number of tokens taken or an error
 // if the stream is dead.
-internal static (int32 taken, error err) awaitFlowControlᴍ(ж<http2clientStream> Ꮡcs, nint maxBytes) {
+[GoMethodBody("awaitFlowControl")] internal static (int32 taken, error err) awaitFlowControlᴍ(ж<http2clientStream> Ꮡcs, nint maxBytes) {
     int32 taken = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -10688,7 +10688,7 @@ internal static (int32 taken, error err) awaitFlowControlᴍ(ж<http2clientStrea
 } partial class http_package {
 
 // requires cc.wmu be held.
-internal static (slice<byte>, error) encodeTrailersᴍ(ref http2ClientConn cc, Header trailer) {
+[GoMethodBody("encodeTrailers")] internal static (slice<byte>, error) encodeTrailersᴍ(ref http2ClientConn cc, Header trailer) {
     cc.hbuf.Reset();
 
     var hlSize = (uint64)0;
@@ -10718,7 +10718,7 @@ internal static (slice<byte>, error) encodeTrailersᴍ(ref http2ClientConn cc, H
     return (cc.hbuf.Bytes(), default);
 }
 
-internal static void writeHeaderᴍ(ref http2ClientConn cc, @string name, @string value) {
+[GoMethodBody("writeHeader")] internal static void writeHeaderᴍ(ref http2ClientConn cc, @string name, @string value) {
     if (http2VerboseLogs) {
         log.Printf("http2: Transport encoding header %q = %q", name, value);
     }
@@ -10736,7 +10736,7 @@ partial struct http2resAndError {
 } partial class http_package {
 
 // requires cc.mu be held.
-internal static void addStreamLockedᴍ(ж<http2ClientConn> Ꮡcc, ж<http2clientStream> Ꮡcs) {
+[GoMethodBody("addStreamLocked")] internal static void addStreamLockedᴍ(ж<http2ClientConn> Ꮡcc, ж<http2clientStream> Ꮡcs) {
     ref var cc = ref Ꮡcc.DerefOrNull();
     ref var cs = ref Ꮡcs.DerefOrNull();
 
@@ -10750,7 +10750,7 @@ internal static void addStreamLockedᴍ(ж<http2ClientConn> Ꮡcc, ж<http2clien
     }
 }
 
-internal static void forgetStreamIDᴍ(ж<http2ClientConn> Ꮡcc, uint32 id) {
+[GoMethodBody("forgetStreamID")] internal static void forgetStreamIDᴍ(ж<http2ClientConn> Ꮡcc, uint32 id) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -10797,7 +10797,7 @@ partial struct http2clientConnReadLoop {
 } partial class http_package {
 
 // readLoop runs in its own goroutine and reads and dispatches frames.
-internal static void readLoopᴍ(ж<http2ClientConn> Ꮡcc) {
+[GoMethodBody("readLoop")] internal static void readLoopᴍ(ж<http2ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     try {
         ref var cc = ref Ꮡcc.DerefOrNull();
@@ -10828,7 +10828,7 @@ partial struct http2GoAwayError {
 
 } partial class http_package {
 
-internal static @string Errorᴍ(http2GoAwayError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(http2GoAwayError e) {
     return fmt.Sprintf("http2: server sent GOAWAY and closed the connection; LastStreamID=%v, ErrCode=%v, debug=%q"u8,
         e.LastStreamID, e.ErrCode, e.DebugData);
 }
@@ -10845,7 +10845,7 @@ internal static bool http2isEOFOrNetReadError(error err) {
 
 } partial class http_package {
 
-internal static void cleanupᴍ(ж<http2clientConnReadLoop> Ꮡrl) {
+[GoMethodBody("cleanup")] internal static void cleanupᴍ(ж<http2clientConnReadLoop> Ꮡrl) {
     GoFrame ᒐ = default;
     try {
         ref var rl = ref Ꮡrl.DerefOrNull();
@@ -10938,7 +10938,7 @@ private static readonly @string readFrameOtherˢᵇᴍhttp2ClientConn = "read_fr
 
 // countReadFrameError calls Transport.CountError with a string
 // representing err.
-internal static void countReadFrameErrorᴍ(ref http2ClientConn cc, error err) {
+[GoMethodBody("countReadFrameError")] internal static void countReadFrameErrorᴍ(ref http2ClientConn cc, error err) {
     var f = cc.t.CountError;
     if (f == nil || err == nil) {
         return;
@@ -10965,7 +10965,7 @@ internal static void countReadFrameErrorᴍ(ref http2ClientConn cc, error err) {
 
 } partial class http_package {
 
-internal static error runᴍ(ж<http2clientConnReadLoop> Ꮡrl) {
+[GoMethodBody("run")] internal static error runᴍ(ж<http2clientConnReadLoop> Ꮡrl) {
     ref var rl = ref Ꮡrl.DerefOrNull();
 
     var cc = rl.cc;
@@ -11057,7 +11057,7 @@ internal static error runᴍ(ж<http2clientConnReadLoop> Ꮡrl) {
 internal static ref readonly @string protocolErrorHeadersˢᴍhttp2clientConnReadLoop => ref protocolErrorHeadersˢᵇᴍhttp2clientConnReadLoop;
 private static readonly @string protocolErrorHeadersˢᵇᴍhttp2clientConnReadLoop = "protocol error: headers after END_STREAM"u8;
 
-internal static error processHeadersᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2MetaHeadersFrame> Ꮡf) {
+[GoMethodBody("processHeaders")] internal static error processHeadersᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2MetaHeadersFrame> Ꮡf) {
     ref var rl = ref Ꮡrl.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -11142,7 +11142,7 @@ private static readonly @string gzipˢᵇᴍhttp2clientConnReadLoop = "gzip"u8;
 //
 // As a special case, handleResponse may return (nil, nil) to skip the
 // frame (currently only used for 1xx responses).
-internal static (ж<Response>, error) handleResponseᴍ(ref http2clientConnReadLoop rl, ж<http2clientStream> Ꮡcs, ж<http2MetaHeadersFrame> Ꮡf) {
+[GoMethodBody("handleResponse")] internal static (ж<Response>, error) handleResponseᴍ(ref http2clientConnReadLoop rl, ж<http2clientStream> Ꮡcs, ж<http2MetaHeadersFrame> Ꮡf) {
     ref var cs = ref Ꮡcs.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -11313,7 +11313,7 @@ internal static (ж<Response>, error) handleResponseᴍ(ref http2clientConnReadL
     return (res, default);
 }
 
-internal static error processTrailersᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2clientStream> Ꮡcs, ж<http2MetaHeadersFrame> Ꮡf) {
+[GoMethodBody("processTrailers")] internal static error processTrailersᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2clientStream> Ꮡcs, ж<http2MetaHeadersFrame> Ꮡf) {
     ref var cs = ref Ꮡcs.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -11358,7 +11358,7 @@ partial struct http2transportResponseBody {
 internal static ref readonly @string netHttpServerRepliedWithˢᴍhttp2transportResponseBody => ref netHttpServerRepliedWithˢᵇᴍhttp2transportResponseBody;
 private static readonly @string netHttpServerRepliedWithˢᵇᴍhttp2transportResponseBody = "net/http: server replied with more than declared Content-Length; truncated"u8;
 
-internal static (nint n, error err) Readᴍ(http2transportResponseBody b, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(http2transportResponseBody b, slice<byte> p) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -11424,7 +11424,7 @@ internal static error http2errClosedResponseBody = errors.New("http2: response b
 
 } partial class http_package {
 
-internal static error Closeᴍ(http2transportResponseBody b) {
+[GoMethodBody("Close")] internal static error Closeᴍ(http2transportResponseBody b) {
     var cs = b.cs;
     var cc = cs.cc;
 
@@ -11470,7 +11470,7 @@ internal static error Closeᴍ(http2transportResponseBody b) {
 
 } partial class http_package {
 
-internal static error processDataᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2DataFrame> Ꮡf) {
+[GoMethodBody("processData")] internal static error processDataᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2DataFrame> Ꮡf) {
     ref var rl = ref Ꮡrl.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -11589,7 +11589,7 @@ internal static error processDataᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2
     return default;
 }
 
-internal static void endStreamᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2clientStream> Ꮡcs) {
+[GoMethodBody("endStream")] internal static void endStreamᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2clientStream> Ꮡcs) {
     GoFrame ᒐ = default;
     try {
         ref var rl = ref Ꮡrl.DerefOrNull();
@@ -11613,14 +11613,14 @@ internal static void endStreamᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2cli
     finally { ᒐ.Run(); }
 }
 
-internal static void endStreamErrorᴍ(ref http2clientConnReadLoop rl, ж<http2clientStream> Ꮡcs, error err) {
+[GoMethodBody("endStreamError")] internal static void endStreamErrorᴍ(ref http2clientConnReadLoop rl, ж<http2clientStream> Ꮡcs, error err) {
     ref var cs = ref Ꮡcs.DerefOrNull();
 
     cs.readAborted = true;
     Ꮡcs.abortStream(err);
 }
 
-internal static void endStreamErrorLockedᴍ(ref http2clientConnReadLoop rl, ж<http2clientStream> Ꮡcs, error err) {
+[GoMethodBody("endStreamErrorLocked")] internal static void endStreamErrorLockedᴍ(ref http2clientConnReadLoop rl, ж<http2clientStream> Ꮡcs, error err) {
     ref var cs = ref Ꮡcs.DerefOrNull();
 
     cs.readAborted = true;
@@ -11637,7 +11637,7 @@ internal const bool http2notHeaderOrDataFrame = false;
 
 // streamByID returns the stream with the given id, or nil if no stream has that id.
 // If headerOrData is true, it clears rst.StreamPingsBlocked.
-internal static ж<http2clientStream> streamByIDᴍ(ж<http2clientConnReadLoop> Ꮡrl, uint32 id, bool headerOrData) {
+[GoMethodBody("streamByID")] internal static ж<http2clientStream> streamByIDᴍ(ж<http2clientConnReadLoop> Ꮡrl, uint32 id, bool headerOrData) {
     GoFrame ᒐ = default;
     try {
         ref var rl = ref Ꮡrl.DerefOrNull();
@@ -11650,7 +11650,7 @@ internal static ж<http2clientStream> streamByIDᴍ(ж<http2clientConnReadLoop> 
     finally { ᒐ.Run(); }
 }
 
-internal static ж<http2clientStream> streamByIDLockedᴍ(ref http2clientConnReadLoop rl, uint32 id, bool headerOrData) {
+[GoMethodBody("streamByIDLocked")] internal static ж<http2clientStream> streamByIDLockedᴍ(ref http2clientConnReadLoop rl, uint32 id, bool headerOrData) {
     if (headerOrData) {
         // Work around an unfortunate gRPC behavior.
         // See comment on ClientConn.rstStreamPingsBlocked for details.
@@ -11666,7 +11666,7 @@ internal static ж<http2clientStream> streamByIDLockedᴍ(ref http2clientConnRea
 
 } partial class http_package {
 
-internal static void copyTrailersᴍ(ref http2clientStream cs) {
+[GoMethodBody("copyTrailers")] internal static void copyTrailersᴍ(ref http2clientStream cs) {
     foreach (var (k, vv) in cs.trailer) {
         var t = cs.resTrailer;
         if (t.ValueSlot == nil) {
@@ -11678,7 +11678,7 @@ internal static void copyTrailersᴍ(ref http2clientStream cs) {
 
 } partial class http_package {
 
-internal static error processGoAwayᴍ(ref http2clientConnReadLoop rl, ж<http2GoAwayFrame> Ꮡf) {
+[GoMethodBody("processGoAway")] internal static error processGoAwayᴍ(ref http2clientConnReadLoop rl, ж<http2GoAwayFrame> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var cc = rl.cc;
@@ -11694,7 +11694,7 @@ internal static error processGoAwayᴍ(ref http2clientConnReadLoop rl, ж<http2G
     return default;
 }
 
-internal static error processSettingsᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2SettingsFrame> Ꮡf) {
+[GoMethodBody("processSettings")] internal static error processSettingsᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2SettingsFrame> Ꮡf) {
     GoFrame ᒐ = default;
     try {
         ref var rl = ref Ꮡrl.DerefOrNull();
@@ -11720,7 +11720,7 @@ internal static error processSettingsᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<h
     finally { ᒐ.Run(); }
 }
 
-internal static error processSettingsNoWriteᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2SettingsFrame> Ꮡf) {
+[GoMethodBody("processSettingsNoWrite")] internal static error processSettingsNoWriteᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2SettingsFrame> Ꮡf) {
     GoFrame ᒐ = default;
     try {
         ref var rl = ref Ꮡrl.DerefOrNull();
@@ -11815,7 +11815,7 @@ internal static error processSettingsNoWriteᴍ(ж<http2clientConnReadLoop> Ꮡr
     finally { ᒐ.Run(); }
 }
 
-internal static error processWindowUpdateᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2WindowUpdateFrame> Ꮡf) {
+[GoMethodBody("processWindowUpdate")] internal static error processWindowUpdateᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2WindowUpdateFrame> Ꮡf) {
     GoFrame ᒐ = default;
     try {
         ref var rl = ref Ꮡrl.DerefOrNull();
@@ -11855,7 +11855,7 @@ internal static error processWindowUpdateᴍ(ж<http2clientConnReadLoop> Ꮡrl, 
     finally { ᒐ.Run(); }
 }
 
-internal static error processResetStreamᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2RSTStreamFrame> Ꮡf) {
+[GoMethodBody("processResetStream")] internal static error processResetStreamᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2RSTStreamFrame> Ꮡf) {
     ref var rl = ref Ꮡrl.DerefOrNull();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -11881,7 +11881,7 @@ internal static error processResetStreamᴍ(ж<http2clientConnReadLoop> Ꮡrl, �
 } partial class http_package {
 
 // Ping sends a PING frame to the server and waits for the ack.
-internal static partial error Pingᴍ(ж<http2ClientConn> Ꮡcc, context.Context ctx) {
+[GoMethodBody("Ping")] internal static partial error Pingᴍ(ж<http2ClientConn> Ꮡcc, context.Context ctx) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
     var c = new channel<EmptyStruct>(0);
@@ -11944,7 +11944,7 @@ internal static partial error Pingᴍ(ж<http2ClientConn> Ꮡcc, context.Context
 
 } partial class http_package {
 
-internal static error processPingᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2PingFrame> Ꮡf) {
+[GoMethodBody("processPing")] internal static error processPingᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2PingFrame> Ꮡf) {
     GoFrame ᒐ = default;
     try {
         ref var rl = ref Ꮡrl.DerefOrNull();
@@ -11983,7 +11983,7 @@ internal static error processPingᴍ(ж<http2clientConnReadLoop> Ꮡrl, ж<http2
     finally { ᒐ.Run(); }
 }
 
-internal static error processPushPromiseᴍ(ref http2clientConnReadLoop rl, ж<http2PushPromiseFrame> f) {
+[GoMethodBody("processPushPromise")] internal static error processPushPromiseᴍ(ref http2clientConnReadLoop rl, ж<http2PushPromiseFrame> f) {
     // We told the peer we don't want them.
     // Spec says:
     // "PUSH_PROMISE MUST NOT be sent if the SETTINGS_ENABLE_PUSH
@@ -11998,7 +11998,7 @@ internal static error processPushPromiseᴍ(ref http2clientConnReadLoop rl, ж<h
 
 // writeStreamReset sends a RST_STREAM frame.
 // When ping is true, it also sends a PING frame with a random payload.
-internal static void writeStreamResetᴍ(ж<http2ClientConn> Ꮡcc, uint32 streamID, http2ErrCode code, bool ping, error err) {
+[GoMethodBody("writeStreamReset")] internal static void writeStreamResetᴍ(ж<http2ClientConn> Ꮡcc, uint32 streamID, http2ErrCode code, bool ping, error err) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
     // TODO: map err to more interesting error codes, once the
@@ -12023,13 +12023,13 @@ internal static error http2errRequestHeaderListSize = httpcommon.ErrRequestHeade
 
 } partial class http_package {
 
-internal static void logfᴍ(ref http2ClientConn cc, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("logf")] internal static void logfᴍ(ref http2ClientConn cc, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     cc.t.logf(format, args.ꓸꓸꓸ);
 }
 
-internal static void vlogfᴍ(ref http2ClientConn cc, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("vlogf")] internal static void vlogfᴍ(ref http2ClientConn cc, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     cc.t.vlogf(format, args.ꓸꓸꓸ);
@@ -12037,7 +12037,7 @@ internal static void vlogfᴍ(ref http2ClientConn cc, @string format, params ꓸ
 
 } partial class http_package {
 
-internal static void vlogfᴍ(ref http2Transport t, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("vlogf")] internal static void vlogfᴍ(ref http2Transport t, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     if (http2VerboseLogs) {
@@ -12045,7 +12045,7 @@ internal static void vlogfᴍ(ref http2Transport t, @string format, params ꓸ�
     }
 }
 
-internal static void logfᴍ(ref http2Transport t, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("logf")] internal static void logfᴍ(ref http2Transport t, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     log.Printf(format, args.ꓸꓸꓸ);
@@ -12060,9 +12060,9 @@ partial struct http2noBodyReader {
 
 } partial class http_package {
 
-internal static error Closeᴍ(http2noBodyReader _) { return default; }
+[GoMethodBody("Close")] internal static error Closeᴍ(http2noBodyReader _) { return default; }
 
-internal static (nint, error) Readᴍ(http2noBodyReader _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(http2noBodyReader _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
 
 } partial class http_package {
 
@@ -12071,9 +12071,9 @@ partial struct http2missingBody {
 
 } partial class http_package {
 
-internal static error Closeᴍ(http2missingBody _) { return default; }
+[GoMethodBody("Close")] internal static error Closeᴍ(http2missingBody _) { return default; }
 
-internal static (nint, error) Readᴍ(http2missingBody _Δp0, slice<byte> _Δp1) { return (0, io.ErrUnexpectedEOF); }
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(http2missingBody _Δp0, slice<byte> _Δp1) { return (0, io.ErrUnexpectedEOF); }
 
 } partial class http_package {
 
@@ -12092,9 +12092,9 @@ partial struct http2erringRoundTripper {
 
 } partial class http_package {
 
-internal static error RoundTripErrᴍ(http2erringRoundTripper rt) { return rt.err; }
+[GoMethodBody("RoundTripErr")] internal static error RoundTripErrᴍ(http2erringRoundTripper rt) { return rt.err; }
 
-internal static (ж<Response>, error) RoundTripᴍ(http2erringRoundTripper rt, ж<Request> _) { return (default, rt.err); }
+[GoMethodBody("RoundTrip")] internal static (ж<Response>, error) RoundTripᴍ(http2erringRoundTripper rt, ж<Request> _) { return (default, rt.err); }
 
 } partial class http_package {
 
@@ -12117,9 +12117,9 @@ partial struct http2eofReader {
 
 } partial class http_package {
 
-internal static (nint, error) Readᴍ(http2eofReader _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(http2eofReader _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
 
-internal static (byte, error) ReadByteᴍ(http2eofReader _) { return (0, io.EOF); }
+[GoMethodBody("ReadByte")] internal static (byte, error) ReadByteᴍ(http2eofReader _) { return (0, io.EOF); }
 
 } partial class http_package {
 
@@ -12151,7 +12151,7 @@ internal static void http2gzipPoolPut(ж<gzip.Reader> Ꮡzr) {
 
 // acquire returns a gzip.Reader for reading response body.
 // The reader must be released after use.
-internal static (ж<gzip.Reader>, error) acquireᴍ(ж<http2gzipReader> Ꮡgz) {
+[GoMethodBody("acquire")] internal static (ж<gzip.Reader>, error) acquireᴍ(ж<http2gzipReader> Ꮡgz) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -12177,7 +12177,7 @@ internal static (ж<gzip.Reader>, error) acquireᴍ(ж<http2gzipReader> Ꮡgz) {
 }
 
 // release returns the gzip.Reader to the pool if Close was called during Read.
-internal static void releaseᴍ(ж<http2gzipReader> Ꮡgz, ж<gzip.Reader> Ꮡzr) {
+[GoMethodBody("release")] internal static void releaseᴍ(ж<http2gzipReader> Ꮡgz, ж<gzip.Reader> Ꮡzr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -12198,7 +12198,7 @@ internal static void releaseᴍ(ж<http2gzipReader> Ꮡgz, ж<gzip.Reader> Ꮡzr
 
 // close returns the gzip.Reader to the pool immediately or
 // signals release to do so after Read completes.
-internal static void closeᴍ(ж<http2gzipReader> Ꮡgz) {
+[GoMethodBody("close")] internal static void closeᴍ(ж<http2gzipReader> Ꮡgz) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -12216,7 +12216,7 @@ internal static void closeᴍ(ж<http2gzipReader> Ꮡgz) {
     finally { if (ᒐd1) Ꮡgz.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static (nint n, error err) Readᴍ(ж<http2gzipReader> Ꮡgz, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ж<http2gzipReader> Ꮡgz, slice<byte> p) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -12234,7 +12234,7 @@ internal static (nint n, error err) Readᴍ(ж<http2gzipReader> Ꮡgz, slice<byt
     ᒐdone: return (n, err);
 }
 
-internal static error Closeᴍ(ж<http2gzipReader> Ꮡgz) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<http2gzipReader> Ꮡgz) {
     ref var gz = ref Ꮡgz.DerefOrNull();
 
     Ꮡgz.close();
@@ -12250,7 +12250,7 @@ partial struct http2errorReader {
 
 } partial class http_package {
 
-internal static (nint, error) Readᴍ(http2errorReader r, slice<byte> p) { return (0, r.err); }
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(http2errorReader r, slice<byte> p) { return (0, r.err); }
 
 } partial class http_package {
 
@@ -12299,7 +12299,7 @@ partial struct http2noDialH2RoundTripper {
 
 } partial class http_package {
 
-internal static (ж<Response>, error) RoundTripᴍ(http2noDialH2RoundTripper rt, ж<Request> req) {
+[GoMethodBody("RoundTrip")] internal static (ж<Response>, error) RoundTripᴍ(http2noDialH2RoundTripper rt, ж<Request> req) {
     var (res, err) = rt.http2Transport.RoundTrip(req);
     if (http2isNoCachedConnError(err)) {
         return (default, ErrSkipAltProtocol);
@@ -12307,7 +12307,7 @@ internal static (ж<Response>, error) RoundTripᴍ(http2noDialH2RoundTripper rt,
     return (res, err);
 }
 
-internal static (RoundTripper, error) NewClientConnᴍ(http2noDialH2RoundTripper rt, net.Conn conn, Action internalStateHook) {
+[GoMethodBody("NewClientConn")] internal static (RoundTripper, error) NewClientConnᴍ(http2noDialH2RoundTripper rt, net.Conn conn, Action internalStateHook) {
     var tr = rt.http2Transport;
     var (cc, err) = tr.newClientConn(conn, tr.disableKeepAlives(), internalStateHook);
     if (err != nil) {
@@ -12331,11 +12331,11 @@ partial struct http2netHTTPClientConn {
 
 } partial class http_package {
 
-internal static (ж<Response>, error) RoundTripᴍ(http2netHTTPClientConn cc, ж<Request> req) {
+[GoMethodBody("RoundTrip")] internal static (ж<Response>, error) RoundTripᴍ(http2netHTTPClientConn cc, ж<Request> req) {
     return cc.cc.RoundTrip(req);
 }
 
-internal static error Closeᴍ(http2netHTTPClientConn cc) {
+[GoMethodBody("Close")] internal static error Closeᴍ(http2netHTTPClientConn cc) {
     return cc.cc.Close();
 }
 
@@ -12343,7 +12343,7 @@ internal static error Closeᴍ(http2netHTTPClientConn cc) {
 internal static ref readonly @string connectionClosedˢᴍhttp2netHTTPClientConn => ref connectionClosedˢᵇᴍhttp2netHTTPClientConn;
 private static readonly @string connectionClosedˢᵇᴍhttp2netHTTPClientConn = "connection closed"u8;
 
-internal static error Errᴍ(http2netHTTPClientConn cc) {
+[GoMethodBody("Err")] internal static error Errᴍ(http2netHTTPClientConn cc) {
     GoFrame ᒐ = default;
     try {
         cc.cc.Ꮡmu.Lock();
@@ -12362,7 +12362,7 @@ internal static error Errᴍ(http2netHTTPClientConn cc) {
 internal static ref readonly @string connectionIsUnavailableˢᴍhttp2netHTTPClientConn => ref connectionIsUnavailableˢᵇᴍhttp2netHTTPClientConn;
 private static readonly @string connectionIsUnavailableˢᵇᴍhttp2netHTTPClientConn = "connection is unavailable"u8;
 
-internal static error Reserveᴍ(http2netHTTPClientConn cc) {
+[GoMethodBody("Reserve")] internal static error Reserveᴍ(http2netHTTPClientConn cc) {
     GoFrame ᒐ = default;
     try {
         var ccʗ1 = cc;
@@ -12380,7 +12380,7 @@ internal static error Reserveᴍ(http2netHTTPClientConn cc) {
     finally { ᒐ.Run(); }
 }
 
-internal static void Releaseᴍ(http2netHTTPClientConn cc) {
+[GoMethodBody("Release")] internal static void Releaseᴍ(http2netHTTPClientConn cc) {
     GoFrame ᒐ = default;
     try {
         var ccʗ1 = cc;
@@ -12400,7 +12400,7 @@ internal static void Releaseᴍ(http2netHTTPClientConn cc) {
     finally { ᒐ.Run(); }
 }
 
-internal static nint Availableᴍ(http2netHTTPClientConn cc) {
+[GoMethodBody("Available")] internal static nint Availableᴍ(http2netHTTPClientConn cc) {
     GoFrame ᒐ = default;
     try {
         cc.cc.Ꮡmu.Lock();
@@ -12412,7 +12412,7 @@ internal static nint Availableᴍ(http2netHTTPClientConn cc) {
     finally { ᒐ.Run(); }
 }
 
-internal static nint InFlightᴍ(http2netHTTPClientConn cc) {
+[GoMethodBody("InFlight")] internal static nint InFlightᴍ(http2netHTTPClientConn cc) {
     GoFrame ᒐ = default;
     try {
         cc.cc.Ꮡmu.Lock();
@@ -12426,7 +12426,7 @@ internal static nint InFlightᴍ(http2netHTTPClientConn cc) {
 
 } partial class http_package {
 
-internal static void maybeCallStateHookᴍ(ref http2ClientConn cc) {
+[GoMethodBody("maybeCallStateHook")] internal static void maybeCallStateHookᴍ(ref http2ClientConn cc) {
     if (cc.internalStateHook != nil) {
         cc.internalStateHook();
     }
@@ -12434,7 +12434,7 @@ internal static void maybeCallStateHookᴍ(ref http2ClientConn cc) {
 
 } partial class http_package {
 
-internal static time.Duration idleConnTimeoutᴍ(ref http2Transport t) {
+[GoMethodBody("idleConnTimeout")] internal static time.Duration idleConnTimeoutᴍ(ref http2Transport t) {
     // to keep things backwards compatible, we use non-zero values of
     // IdleConnTimeout, followed by using the IdleConnTimeout on the underlying
     // http1 transport, followed by 0
@@ -12534,7 +12534,7 @@ internal static Func<nint, textproto.MIMEHeader, error> http2traceGot1xxResponse
 
 // dialTLSWithContext uses tls.Dialer, added in Go 1.15, to open a TLS
 // connection.
-internal static (ж<tls.Conn>, error) dialTLSWithContextᴍ(ref http2Transport t, context.Context ctx, @string network, @string addr, ж<tls.Config> cfg) {
+[GoMethodBody("dialTLSWithContext")] internal static (ж<tls.Conn>, error) dialTLSWithContextᴍ(ref http2Transport t, context.Context ctx, @string network, @string addr, ж<tls.Config> cfg) {
     var dialer = Ꮡ(new tls.Dialer(
         Config: cfg
     ));
@@ -12632,11 +12632,11 @@ partial struct http2flushFrameWriter {
 
 } partial class http_package {
 
-internal static error writeFrameᴍ(http2flushFrameWriter _, http2writeContext ctx) {
+[GoMethodBody("writeFrame")] internal static error writeFrameᴍ(http2flushFrameWriter _, http2writeContext ctx) {
     return ctx.Flush();
 }
 
-internal static bool staysWithinBufferᴍ(http2flushFrameWriter _, nint max) { return false; }
+[GoMethodBody("staysWithinBuffer")] internal static bool staysWithinBufferᴍ(http2flushFrameWriter _, nint max) { return false; }
 
 } partial class http_package {
 
@@ -12644,12 +12644,12 @@ partial struct http2writeSettings /*[]http2Setting*/;
 
 } partial class http_package {
 
-internal static bool staysWithinBufferᴍ(http2writeSettings s, nint max) {
+[GoMethodBody("staysWithinBuffer")] internal static bool staysWithinBufferᴍ(http2writeSettings s, nint max) {
     const nint settingSize = 6; // uint16 + uint32
     return (nint)http2frameHeaderLen + settingSize * len(s) <= max;
 }
 
-internal static error writeFrameᴍ(http2writeSettings s, http2writeContext ctx) {
+[GoMethodBody("writeFrame")] internal static error writeFrameᴍ(http2writeSettings s, http2writeContext ctx) {
     return ctx.Framer().WriteSettings(((slice<http2Setting>)s).ꓸꓸꓸ);
 }
 
@@ -12662,13 +12662,13 @@ partial struct http2writeGoAway {
 
 } partial class http_package {
 
-internal static error writeFrameᴍ(ref http2writeGoAway p, http2writeContext ctx) {
+[GoMethodBody("writeFrame")] internal static error writeFrameᴍ(ref http2writeGoAway p, http2writeContext ctx) {
     var err = ctx.Framer().WriteGoAway(p.maxStreamID, p.code, default);
     ctx.Flush(); // ignore error: we're hanging up on them anyway
     return err;
 }
 
-internal static bool staysWithinBufferᴍ(ref http2writeGoAway _, nint max) { return false; } // flushes
+[GoMethodBody("staysWithinBuffer")] internal static bool staysWithinBufferᴍ(ref http2writeGoAway _, nint max) { return false; } // flushes
 
 } partial class http_package {
 
@@ -12680,15 +12680,15 @@ partial struct http2writeData {
 
 } partial class http_package {
 
-internal static @string Stringᴍ(ref http2writeData w) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref http2writeData w) {
     return fmt.Sprintf("writeData(stream=%d, p=%d, endStream=%v)"u8, w.streamID, len(w.p), w.endStream);
 }
 
-internal static error writeFrameᴍ(ref http2writeData w, http2writeContext ctx) {
+[GoMethodBody("writeFrame")] internal static error writeFrameᴍ(ref http2writeData w, http2writeContext ctx) {
     return ctx.Framer().WriteData(w.streamID, w.endStream, w.p);
 }
 
-internal static bool staysWithinBufferᴍ(ref http2writeData w, nint max) {
+[GoMethodBody("staysWithinBuffer")] internal static bool staysWithinBufferᴍ(ref http2writeData w, nint max) {
     return (nint)http2frameHeaderLen + len(w.p) <= max;
 }
 
@@ -12702,19 +12702,19 @@ partial struct http2handlerPanicRST {
 
 } partial class http_package {
 
-internal static error writeFrameᴍ(http2handlerPanicRST hp, http2writeContext ctx) {
+[GoMethodBody("writeFrame")] internal static error writeFrameᴍ(http2handlerPanicRST hp, http2writeContext ctx) {
     return ctx.Framer().WriteRSTStream(hp.StreamID, http2ErrCodeInternal);
 }
 
-internal static bool staysWithinBufferᴍ(http2handlerPanicRST hp, nint max) { return (nint)(http2frameHeaderLen + 4) <= max; }
+[GoMethodBody("staysWithinBuffer")] internal static bool staysWithinBufferᴍ(http2handlerPanicRST hp, nint max) { return (nint)(http2frameHeaderLen + 4) <= max; }
 
 } partial class http_package {
 
-internal static error writeFrameᴍ(http2StreamError se, http2writeContext ctx) {
+[GoMethodBody("writeFrame")] internal static error writeFrameᴍ(http2StreamError se, http2writeContext ctx) {
     return ctx.Framer().WriteRSTStream(se.StreamID, se.Code);
 }
 
-internal static bool staysWithinBufferᴍ(http2StreamError se, nint max) { return (nint)(http2frameHeaderLen + 4) <= max; }
+[GoMethodBody("staysWithinBuffer")] internal static bool staysWithinBufferᴍ(http2StreamError se, nint max) { return (nint)(http2frameHeaderLen + 4) <= max; }
 
 } partial class http_package {
 
@@ -12724,13 +12724,13 @@ partial struct http2writePing {
 
 } partial class http_package {
 
-internal static error writeFrameᴍ(http2writePing w, http2writeContext ctx) {
+[GoMethodBody("writeFrame")] internal static error writeFrameᴍ(http2writePing w, http2writeContext ctx) {
     w = w.ΔClone();
 
     return ctx.Framer().WritePing(false, w.data);
 }
 
-internal static bool staysWithinBufferᴍ(http2writePing w, nint max) {
+[GoMethodBody("staysWithinBuffer")] internal static bool staysWithinBufferᴍ(http2writePing w, nint max) {
     w = w.ΔClone();
 
     return (nint)((nint)http2frameHeaderLen + len(w.data)) <= max;
@@ -12744,11 +12744,11 @@ partial struct http2writePingAck {
 
 } partial class http_package {
 
-internal static error writeFrameᴍ(http2writePingAck w, http2writeContext ctx) {
+[GoMethodBody("writeFrame")] internal static error writeFrameᴍ(http2writePingAck w, http2writeContext ctx) {
     return ctx.Framer().WritePing(true, w.pf.Data);
 }
 
-internal static bool staysWithinBufferᴍ(http2writePingAck w, nint max) {
+[GoMethodBody("staysWithinBuffer")] internal static bool staysWithinBufferᴍ(http2writePingAck w, nint max) {
     return (nint)((nint)http2frameHeaderLen + len(w.pf.Data)) <= max;
 }
 
@@ -12759,11 +12759,11 @@ partial struct http2writeSettingsAck {
 
 } partial class http_package {
 
-internal static error writeFrameᴍ(http2writeSettingsAck _, http2writeContext ctx) {
+[GoMethodBody("writeFrame")] internal static error writeFrameᴍ(http2writeSettingsAck _, http2writeContext ctx) {
     return ctx.Framer().WriteSettingsAck();
 }
 
-internal static bool staysWithinBufferᴍ(http2writeSettingsAck _, nint max) { return http2frameHeaderLen <= max; }
+[GoMethodBody("staysWithinBuffer")] internal static bool staysWithinBufferᴍ(http2writeSettingsAck _, nint max) { return http2frameHeaderLen <= max; }
 
 } partial class http_package {
 
@@ -12816,7 +12816,7 @@ internal static void http2encKV(ж<hpack.Encoder> enc, @string k, @string v) {
 
 } partial class http_package {
 
-internal static bool staysWithinBufferᴍ(ref http2writeResHeaders w, nint max) {
+[GoMethodBody("staysWithinBuffer")] internal static bool staysWithinBufferᴍ(ref http2writeResHeaders w, nint max) {
     // TODO: this is a common one. It'd be nice to return true
     // here and get into the fast path if we could be clever and
     // calculate the size fast enough, or at least a conservative
@@ -12837,7 +12837,7 @@ private static readonly @string contentLengthˢ2ᵇᴍhttp2writeResHeaders = "co
 internal static ref readonly @string dateˢ2ᴍhttp2writeResHeaders => ref dateˢ2ᵇᴍhttp2writeResHeaders;
 private static readonly @string dateˢ2ᵇᴍhttp2writeResHeaders = "date"u8;
 
-internal static error writeFrameᴍ(ж<http2writeResHeaders> Ꮡw, http2writeContext ctx) {
+[GoMethodBody("writeFrame")] internal static error writeFrameᴍ(ж<http2writeResHeaders> Ꮡw, http2writeContext ctx) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     var (enc, buf) = ctx.HeaderEncoder();
@@ -12867,7 +12867,7 @@ internal static error writeFrameᴍ(ж<http2writeResHeaders> Ꮡw, http2writeCon
     return http2splitHeaderBlock(ctx, headerBlock, Ꮡw.writeHeaderBlock);
 }
 
-internal static error writeHeaderBlockᴍ(ref http2writeResHeaders w, http2writeContext ctx, slice<byte> frag, bool firstFrag, bool lastFrag) {
+[GoMethodBody("writeHeaderBlock")] internal static error writeHeaderBlockᴍ(ref http2writeResHeaders w, http2writeContext ctx, slice<byte> frag, bool firstFrag, bool lastFrag) {
     if (firstFrag) {
         return ctx.Framer().WriteHeaders(new http2HeadersFrameParam(
             StreamID: w.streamID,
@@ -12896,7 +12896,7 @@ partial struct http2writePushPromise {
 
 } partial class http_package {
 
-internal static bool staysWithinBufferᴍ(ref http2writePushPromise w, nint max) {
+[GoMethodBody("staysWithinBuffer")] internal static bool staysWithinBufferᴍ(ref http2writePushPromise w, nint max) {
     // TODO: see writeResHeaders.staysWithinBuffer
     return false;
 }
@@ -12911,7 +12911,7 @@ private static readonly @string authorityˢ2ᵇᴍhttp2writePushPromise = ":auth
 internal static ref readonly @string pathˢ3ᴍhttp2writePushPromise => ref pathˢ3ᵇᴍhttp2writePushPromise;
 private static readonly @string pathˢ3ᵇᴍhttp2writePushPromise = ":path"u8;
 
-internal static error writeFrameᴍ(ж<http2writePushPromise> Ꮡw, http2writeContext ctx) {
+[GoMethodBody("writeFrame")] internal static error writeFrameᴍ(ж<http2writePushPromise> Ꮡw, http2writeContext ctx) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     var (enc, buf) = ctx.HeaderEncoder();
@@ -12931,7 +12931,7 @@ internal static error writeFrameᴍ(ж<http2writePushPromise> Ꮡw, http2writeCo
     return http2splitHeaderBlock(ctx, headerBlock, Ꮡw.writeHeaderBlock);
 }
 
-internal static error writeHeaderBlockᴍ(ref http2writePushPromise w, http2writeContext ctx, slice<byte> frag, bool firstFrag, bool lastFrag) {
+[GoMethodBody("writeHeaderBlock")] internal static error writeHeaderBlockᴍ(ref http2writePushPromise w, http2writeContext ctx, slice<byte> frag, bool firstFrag, bool lastFrag) {
     if (firstFrag) {
         return ctx.Framer().WritePushPromise(new http2PushPromiseParam(
             StreamID: w.streamID,
@@ -12956,7 +12956,7 @@ partial struct http2write100ContinueHeadersFrame {
 internal static ref readonly @string statusˢ2ᴍhttp2write100ContinueHeadersFrame => ref statusˢ2ᵇᴍhttp2write100ContinueHeadersFrame;
 private static readonly @string statusˢ2ᵇᴍhttp2write100ContinueHeadersFrame = ":status"u8;
 
-internal static error writeFrameᴍ(http2write100ContinueHeadersFrame w, http2writeContext ctx) {
+[GoMethodBody("writeFrame")] internal static error writeFrameᴍ(http2write100ContinueHeadersFrame w, http2writeContext ctx) {
     var (enc, buf) = ctx.HeaderEncoder();
     buf.Reset();
     http2encKV(enc, statusˢ2ᴍhttp2write100ContinueHeadersFrame, "100");
@@ -12968,7 +12968,7 @@ internal static error writeFrameᴍ(http2write100ContinueHeadersFrame w, http2wr
     ));
 }
 
-internal static bool staysWithinBufferᴍ(http2write100ContinueHeadersFrame w, nint max) {
+[GoMethodBody("staysWithinBuffer")] internal static bool staysWithinBufferᴍ(http2write100ContinueHeadersFrame w, nint max) {
     // Sloppy but conservative:
     return 9 + 2 * (len(":status") + len("100")) <= max;
 }
@@ -12982,9 +12982,9 @@ partial struct http2writeWindowUpdate {
 
 } partial class http_package {
 
-internal static bool staysWithinBufferᴍ(http2writeWindowUpdate wu, nint max) { return (nint)(http2frameHeaderLen + 4) <= max; }
+[GoMethodBody("staysWithinBuffer")] internal static bool staysWithinBufferᴍ(http2writeWindowUpdate wu, nint max) { return (nint)(http2frameHeaderLen + 4) <= max; }
 
-internal static error writeFrameᴍ(http2writeWindowUpdate wu, http2writeContext ctx) {
+[GoMethodBody("writeFrame")] internal static error writeFrameᴍ(http2writeWindowUpdate wu, http2writeContext ctx) {
     return ctx.Framer().WriteWindowUpdate(wu.streamID, wu.n);
 }
 
@@ -13092,7 +13092,7 @@ public partial struct http2FrameWriteRequest {
 
 // StreamID returns the id of the stream this frame will be written to.
 // 0 is used for non-stream frames such as PING and SETTINGS.
-internal static uint32 StreamIDᴍ(http2FrameWriteRequest wr) {
+[GoMethodBody("StreamID")] internal static uint32 StreamIDᴍ(http2FrameWriteRequest wr) {
     if (wr.stream == nil) {
         var (se, ok) = wr.write._<http2StreamError>(ᐧ); if (ok) {
             // (*serverConn).resetStream doesn't set
@@ -13108,13 +13108,13 @@ internal static uint32 StreamIDᴍ(http2FrameWriteRequest wr) {
 
 // isControl reports whether wr is a control frame for MaxQueuedControlFrames
 // purposes. That includes non-stream frames and RST_STREAM frames.
-internal static bool isControlᴍ(http2FrameWriteRequest wr) {
+[GoMethodBody("isControl")] internal static bool isControlᴍ(http2FrameWriteRequest wr) {
     return wr.stream == nil;
 }
 
 // DataSize returns the number of flow control bytes that must be consumed
 // to write this entire frame. This is 0 for non-DATA frames.
-internal static nint DataSizeᴍ(http2FrameWriteRequest wr) {
+[GoMethodBody("DataSize")] internal static nint DataSizeᴍ(http2FrameWriteRequest wr) {
     var (wd, ok) = wr.write._<ж<http2writeData>>(ᐧ); if (ok) {
         return len(wd.p);
     }
@@ -13131,7 +13131,7 @@ internal static nint DataSizeᴍ(http2FrameWriteRequest wr) {
 // returns (consumed, rest, 2), where 'consumed' contains the consumed bytes and
 // 'rest' contains the remaining bytes. The consumed bytes are deducted from the
 // underlying stream's flow control budget.
-internal static (http2FrameWriteRequest, http2FrameWriteRequest, nint) Consumeᴍ(http2FrameWriteRequest wr, int32 n) {
+[GoMethodBody("Consume")] internal static (http2FrameWriteRequest, http2FrameWriteRequest, nint) Consumeᴍ(http2FrameWriteRequest wr, int32 n) {
     http2FrameWriteRequest empty = default;
 
     // Non-DATA frames are always consumed whole.
@@ -13187,7 +13187,7 @@ internal static (http2FrameWriteRequest, http2FrameWriteRequest, nint) Consume�
 }
 
 // String is for debugging only.
-internal static @string Stringᴍ(http2FrameWriteRequest wr) {
+[GoMethodBody("String")] internal static @string Stringᴍ(http2FrameWriteRequest wr) {
     @string des = default;
     var (s, ok) = wr.write._<fmt.Stringer>(ᐧ); if (ok) {
         des = s.String();
@@ -13199,7 +13199,7 @@ internal static @string Stringᴍ(http2FrameWriteRequest wr) {
 
 // replyToWriter sends err to wr.done and panics if the send must block
 // This does nothing if wr.done is nil.
-internal static void replyToWriterᴍ(ref http2FrameWriteRequest wr, error err) {
+[GoMethodBody("replyToWriter")] internal static void replyToWriterᴍ(ref http2FrameWriteRequest wr, error err) {
     if (wr.done == nil) {
         return;
     }
@@ -13241,15 +13241,15 @@ partial struct http2writeQueue {
 
 } partial class http_package {
 
-internal static bool emptyᴍ(ref http2writeQueue q) {
+[GoMethodBody("empty")] internal static bool emptyᴍ(ref http2writeQueue q) {
     return (len(q.currQueue) - q.currPos + len(q.nextQueue)) == 0;
 }
 
-internal static void pushᴍ(ref http2writeQueue q, http2FrameWriteRequest wr) {
+[GoMethodBody("push")] internal static void pushᴍ(ref http2writeQueue q, http2FrameWriteRequest wr) {
     q.nextQueue = append(q.nextQueue, wr);
 }
 
-internal static http2FrameWriteRequest shiftᴍ(ref http2writeQueue q) {
+[GoMethodBody("shift")] internal static http2FrameWriteRequest shiftᴍ(ref http2writeQueue q) {
     if (q.empty()) {
         throw panic("invalid use of queue");
     }
@@ -13262,7 +13262,7 @@ internal static http2FrameWriteRequest shiftᴍ(ref http2writeQueue q) {
     return wr;
 }
 
-internal static ж<http2FrameWriteRequest> peekᴍ(ref http2writeQueue q) {
+[GoMethodBody("peek")] internal static ж<http2FrameWriteRequest> peekᴍ(ref http2writeQueue q) {
     if (q.currPos < len(q.currQueue)) {
         return Ꮡ(q.currQueue, q.currPos);
     }
@@ -13276,7 +13276,7 @@ internal static ж<http2FrameWriteRequest> peekᴍ(ref http2writeQueue q) {
 // entirely consumed, it is removed from the queue. If the frame
 // is partially consumed, the frame is kept with the consumed
 // bytes removed. Returns true iff any bytes were consumed.
-internal static (http2FrameWriteRequest, bool) consumeᴍ(ref http2writeQueue q, int32 n) {
+[GoMethodBody("consume")] internal static (http2FrameWriteRequest, bool) consumeᴍ(ref http2writeQueue q, int32 n) {
     if (q.empty()) {
         return (new http2FrameWriteRequest(), false);
     }
@@ -13305,7 +13305,7 @@ partial struct http2writeQueuePool /*[]ж<http2writeQueue>*/;
 // put inserts an unused writeQueue into the pool.
 
 // put inserts an unused writeQueue into the pool.
-internal static void putᴍ(ref http2writeQueuePool p, ж<http2writeQueue> Ꮡq) {
+[GoMethodBody("put")] internal static void putᴍ(ref http2writeQueuePool p, ж<http2writeQueue> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     foreach (var i in range(len(q.currQueue))) {
@@ -13321,7 +13321,7 @@ internal static void putᴍ(ref http2writeQueuePool p, ж<http2writeQueue> Ꮡq)
 }
 
 // get returns an empty writeQueue.
-internal static ж<http2writeQueue> getᴍ(ref http2writeQueuePool p) {
+[GoMethodBody("get")] internal static ж<http2writeQueue> getᴍ(ref http2writeQueuePool p) {
     nint ln = len(p);
     if (ln == 0) {
         return @new<http2writeQueue>();
@@ -13430,7 +13430,7 @@ partial struct http2priorityNodeRFC7540 {
 
 } partial class http_package {
 
-internal static void setParentᴍ(ж<http2priorityNodeRFC7540> Ꮡn, ж<http2priorityNodeRFC7540> Ꮡparent) {
+[GoMethodBody("setParent")] internal static void setParentᴍ(ж<http2priorityNodeRFC7540> Ꮡn, ж<http2priorityNodeRFC7540> Ꮡparent) {
     ref var n = ref Ꮡn.DerefOrNull();
     ref var parent = ref Ꮡparent.DerefOrNull();
 
@@ -13468,7 +13468,7 @@ internal static void setParentᴍ(ж<http2priorityNodeRFC7540> Ꮡn, ж<http2pri
     }
 }
 
-internal static void addBytesᴍ(ж<http2priorityNodeRFC7540> Ꮡn, int64 b) {
+[GoMethodBody("addBytes")] internal static void addBytesᴍ(ж<http2priorityNodeRFC7540> Ꮡn, int64 b) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     n.bytes += b;
@@ -13483,7 +13483,7 @@ internal static void addBytesᴍ(ж<http2priorityNodeRFC7540> Ꮡn, int64 b) {
 //
 // f(n, openParent) takes two arguments: the node to visit, n, and a bool that is true
 // if any ancestor p of n is still open (ignoring the root node).
-internal static bool walkReadyInOrderᴍ(ж<http2priorityNodeRFC7540> Ꮡn, bool openParent, ж<slice<ж<http2priorityNodeRFC7540>>> Ꮡtmp, Func<ж<http2priorityNodeRFC7540>, bool, bool> f) {
+[GoMethodBody("walkReadyInOrder")] internal static bool walkReadyInOrderᴍ(ж<http2priorityNodeRFC7540> Ꮡn, bool openParent, ж<slice<ж<http2priorityNodeRFC7540>>> Ꮡtmp, Func<ж<http2priorityNodeRFC7540>, bool, bool> f) {
     ref var n = ref Ꮡn.DerefOrNull();
     ref var tmp = ref Ꮡtmp.DerefOrNull();
 
@@ -13545,11 +13545,11 @@ partial struct http2sortPriorityNodeSiblingsRFC7540 /*[]ж<http2priorityNodeRFC7
 
 } partial class http_package {
 
-internal static nint Lenᴍ(http2sortPriorityNodeSiblingsRFC7540 z) { return len(z); }
+[GoMethodBody("Len")] internal static nint Lenᴍ(http2sortPriorityNodeSiblingsRFC7540 z) { return len(z); }
 
-internal static void Swapᴍ(http2sortPriorityNodeSiblingsRFC7540 z, nint i, nint k) { (z[i], z[k]) = (z[k], z[i]); }
+[GoMethodBody("Swap")] internal static void Swapᴍ(http2sortPriorityNodeSiblingsRFC7540 z, nint i, nint k) { (z[i], z[k]) = (z[k], z[i]); }
 
-internal static bool Lessᴍ(http2sortPriorityNodeSiblingsRFC7540 z, nint i, nint k) {
+[GoMethodBody("Less")] internal static bool Lessᴍ(http2sortPriorityNodeSiblingsRFC7540 z, nint i, nint k) {
     // Prefer the subtree that has sent fewer bytes relative to its weight.
     // See sections 5.3.2 and 5.3.4.
     var (wi, bi) = ((float64)z[i].weight + 1D, (float64)z[i].subtreeBytes);
@@ -13590,7 +13590,7 @@ partial struct http2priorityWriteSchedulerRFC7540 {
 
 } partial class http_package {
 
-internal static void OpenStreamᴍ(ж<http2priorityWriteSchedulerRFC7540> Ꮡws, uint32 streamID, http2OpenStreamOptions options) {
+[GoMethodBody("OpenStream")] internal static void OpenStreamᴍ(ж<http2priorityWriteSchedulerRFC7540> Ꮡws, uint32 streamID, http2OpenStreamOptions options) {
     ref var ws = ref Ꮡws.DerefOrNull();
 
     // The stream may be currently idle but cannot be opened or closed.
@@ -13623,7 +13623,7 @@ internal static void OpenStreamᴍ(ж<http2priorityWriteSchedulerRFC7540> Ꮡws,
     }
 }
 
-internal static void CloseStreamᴍ(ж<http2priorityWriteSchedulerRFC7540> Ꮡws, uint32 streamID) {
+[GoMethodBody("CloseStream")] internal static void CloseStreamᴍ(ж<http2priorityWriteSchedulerRFC7540> Ꮡws, uint32 streamID) {
     ref var ws = ref Ꮡws.DerefOrNull();
 
     if (streamID == 0) {
@@ -13649,7 +13649,7 @@ internal static void CloseStreamᴍ(ж<http2priorityWriteSchedulerRFC7540> Ꮡws
     }
 }
 
-internal static void AdjustStreamᴍ(ж<http2priorityWriteSchedulerRFC7540> Ꮡws, uint32 streamID, http2PriorityParam priority) {
+[GoMethodBody("AdjustStream")] internal static void AdjustStreamᴍ(ж<http2priorityWriteSchedulerRFC7540> Ꮡws, uint32 streamID, http2PriorityParam priority) {
     ref var ws = ref Ꮡws.DerefOrNull();
 
     if (streamID == 0) {
@@ -13722,7 +13722,7 @@ internal static void AdjustStreamᴍ(ж<http2priorityWriteSchedulerRFC7540> Ꮡw
     n.weight = priority.Weight;
 }
 
-internal static void Pushᴍ(ж<http2priorityWriteSchedulerRFC7540> Ꮡws, http2FrameWriteRequest wr) {
+[GoMethodBody("Push")] internal static void Pushᴍ(ж<http2priorityWriteSchedulerRFC7540> Ꮡws, http2FrameWriteRequest wr) {
     ref var ws = ref Ꮡws.DerefOrNull();
 
     ж<http2priorityNodeRFC7540> n = default;
@@ -13744,7 +13744,7 @@ internal static void Pushᴍ(ж<http2priorityWriteSchedulerRFC7540> Ꮡws, http2
     n.Ꮡq.push(wr);
 }
 
-internal static (http2FrameWriteRequest wr, bool ok) Popᴍ(ж<http2priorityWriteSchedulerRFC7540> Ꮡws) {
+[GoMethodBody("Pop")] internal static (http2FrameWriteRequest wr, bool ok) Popᴍ(ж<http2priorityWriteSchedulerRFC7540> Ꮡws) {
     http2FrameWriteRequest wr = default;
     bool ok = default;
 
@@ -13774,7 +13774,7 @@ internal static (http2FrameWriteRequest wr, bool ok) Popᴍ(ж<http2priorityWrit
     return (wr, ok);
 }
 
-internal static void addClosedOrIdleNodeᴍ(ref http2priorityWriteSchedulerRFC7540 ws, ж<slice<ж<http2priorityNodeRFC7540>>> Ꮡlist, nint maxSize, ж<http2priorityNodeRFC7540> n) {
+[GoMethodBody("addClosedOrIdleNode")] internal static void addClosedOrIdleNodeᴍ(ref http2priorityWriteSchedulerRFC7540 ws, ж<slice<ж<http2priorityNodeRFC7540>>> Ꮡlist, nint maxSize, ж<http2priorityNodeRFC7540> n) {
     ref var list = ref Ꮡlist.DerefOrNull();
 
     if (maxSize == 0) {
@@ -13790,7 +13790,7 @@ internal static void addClosedOrIdleNodeᴍ(ref http2priorityWriteSchedulerRFC75
     list = append(list, n);
 }
 
-internal static void removeNodeᴍ(ref http2priorityWriteSchedulerRFC7540 ws, ж<http2priorityNodeRFC7540> Ꮡn) {
+[GoMethodBody("removeNode")] internal static void removeNodeᴍ(ref http2priorityWriteSchedulerRFC7540 ws, ж<http2priorityNodeRFC7540> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     while (n.kids != nil) {
@@ -13837,7 +13837,7 @@ internal static http2WriteScheduler http2newPriorityWriteSchedulerRFC9218() {
 
 } partial class http_package {
 
-internal static void OpenStreamᴍ(ref http2priorityWriteSchedulerRFC9218 ws, uint32 streamID, http2OpenStreamOptions opt) {
+[GoMethodBody("OpenStream")] internal static void OpenStreamᴍ(ref http2priorityWriteSchedulerRFC9218 ws, uint32 streamID, http2OpenStreamOptions opt) {
     if (ws.streams[streamID].location != nil) {
         throw panic(fmt.Errorf("stream %d already opened"u8, streamID));
     }
@@ -13862,7 +13862,7 @@ internal static void OpenStreamᴍ(ref http2priorityWriteSchedulerRFC9218 ws, ui
     }
 }
 
-internal static void CloseStreamᴍ(ref http2priorityWriteSchedulerRFC9218 ws, uint32 streamID) {
+[GoMethodBody("CloseStream")] internal static void CloseStreamᴍ(ref http2priorityWriteSchedulerRFC9218 ws, uint32 streamID) {
     var metadata = ws.streams[streamID];
     var (q, u, i) = (metadata.location, metadata.priority.urgency, metadata.priority.incremental);
     if (q == nil) {
@@ -13882,7 +13882,7 @@ internal static void CloseStreamᴍ(ref http2priorityWriteSchedulerRFC9218 ws, u
     ws.queuePool.put(q);
 }
 
-internal static void AdjustStreamᴍ(ref http2priorityWriteSchedulerRFC9218 ws, uint32 streamID, http2PriorityParam priority) {
+[GoMethodBody("AdjustStream")] internal static void AdjustStreamᴍ(ref http2priorityWriteSchedulerRFC9218 ws, uint32 streamID, http2PriorityParam priority) {
     var metadata = ws.streams[streamID];
     var (q, u, i) = (metadata.location, metadata.priority.urgency, metadata.priority.incremental);
     if (q == nil) {
@@ -13923,7 +13923,7 @@ internal static void AdjustStreamᴍ(ref http2priorityWriteSchedulerRFC9218 ws, 
     );
 }
 
-internal static void Pushᴍ(ref http2priorityWriteSchedulerRFC9218 ws, http2FrameWriteRequest wr) {
+[GoMethodBody("Push")] internal static void Pushᴍ(ref http2priorityWriteSchedulerRFC9218 ws, http2FrameWriteRequest wr) {
     if (wr.isControl()) {
         ws.control.push(wr);
         return;
@@ -13942,7 +13942,7 @@ internal static void Pushᴍ(ref http2priorityWriteSchedulerRFC9218 ws, http2Fra
     q.push(wr);
 }
 
-internal static (http2FrameWriteRequest, bool) Popᴍ(ref http2priorityWriteSchedulerRFC9218 ws) {
+[GoMethodBody("Pop")] internal static (http2FrameWriteRequest, bool) Popᴍ(ref http2priorityWriteSchedulerRFC9218 ws) {
     // Control and RST_STREAM frames first.
     if (!ws.control.empty()) {
         return (ws.control.shift(), true);
@@ -14022,11 +14022,11 @@ partial struct http2randomWriteScheduler {
 
 } partial class http_package {
 
-internal static void OpenStreamᴍ(ref http2randomWriteScheduler ws, uint32 streamID, http2OpenStreamOptions options) {
+[GoMethodBody("OpenStream")] internal static void OpenStreamᴍ(ref http2randomWriteScheduler ws, uint32 streamID, http2OpenStreamOptions options) {
     // no-op: idle streams are not tracked
 }
 
-internal static void CloseStreamᴍ(ref http2randomWriteScheduler ws, uint32 streamID) {
+[GoMethodBody("CloseStream")] internal static void CloseStreamᴍ(ref http2randomWriteScheduler ws, uint32 streamID) {
     var (q, ok) = ws.sq[streamID, ꟷ];
     if (!ok) {
         return;
@@ -14035,11 +14035,11 @@ internal static void CloseStreamᴍ(ref http2randomWriteScheduler ws, uint32 str
     ws.queuePool.put(q);
 }
 
-internal static void AdjustStreamᴍ(ref http2randomWriteScheduler ws, uint32 streamID, http2PriorityParam priority) {
+[GoMethodBody("AdjustStream")] internal static void AdjustStreamᴍ(ref http2randomWriteScheduler ws, uint32 streamID, http2PriorityParam priority) {
     // no-op: priorities are ignored
 }
 
-internal static void Pushᴍ(ref http2randomWriteScheduler ws, http2FrameWriteRequest wr) {
+[GoMethodBody("Push")] internal static void Pushᴍ(ref http2randomWriteScheduler ws, http2FrameWriteRequest wr) {
     if (wr.isControl()) {
         ws.zero.push(wr);
         return;
@@ -14053,7 +14053,7 @@ internal static void Pushᴍ(ref http2randomWriteScheduler ws, http2FrameWriteRe
     q.push(wr);
 }
 
-internal static (http2FrameWriteRequest, bool) Popᴍ(ref http2randomWriteScheduler ws) {
+[GoMethodBody("Pop")] internal static (http2FrameWriteRequest, bool) Popᴍ(ref http2randomWriteScheduler ws) {
     // Control and RST_STREAM frames first.
     if (!ws.zero.empty()) {
         return (ws.zero.shift(), true);
@@ -14099,7 +14099,7 @@ internal static http2WriteScheduler http2newRoundRobinWriteScheduler() {
 
 } partial class http_package {
 
-internal static void OpenStreamᴍ(ref http2roundRobinWriteScheduler ws, uint32 streamID, http2OpenStreamOptions options) {
+[GoMethodBody("OpenStream")] internal static void OpenStreamᴍ(ref http2roundRobinWriteScheduler ws, uint32 streamID, http2OpenStreamOptions options) {
     if (ws.streams[streamID] != nil) {
         throw panic(fmt.Errorf("stream %d already opened"u8, streamID));
     }
@@ -14119,7 +14119,7 @@ internal static void OpenStreamᴍ(ref http2roundRobinWriteScheduler ws, uint32 
     }
 }
 
-internal static void CloseStreamᴍ(ref http2roundRobinWriteScheduler ws, uint32 streamID) {
+[GoMethodBody("CloseStream")] internal static void CloseStreamᴍ(ref http2roundRobinWriteScheduler ws, uint32 streamID) {
     var q = ws.streams[streamID];
     if (q == nil) {
         return;
@@ -14138,9 +14138,9 @@ internal static void CloseStreamᴍ(ref http2roundRobinWriteScheduler ws, uint32
     ws.queuePool.put(q);
 }
 
-internal static void AdjustStreamᴍ(ref http2roundRobinWriteScheduler ws, uint32 streamID, http2PriorityParam priority) { }
+[GoMethodBody("AdjustStream")] internal static void AdjustStreamᴍ(ref http2roundRobinWriteScheduler ws, uint32 streamID, http2PriorityParam priority) { }
 
-internal static void Pushᴍ(ref http2roundRobinWriteScheduler ws, http2FrameWriteRequest wr) {
+[GoMethodBody("Push")] internal static void Pushᴍ(ref http2roundRobinWriteScheduler ws, http2FrameWriteRequest wr) {
     if (wr.isControl()) {
         ws.control.push(wr);
         return;
@@ -14159,7 +14159,7 @@ internal static void Pushᴍ(ref http2roundRobinWriteScheduler ws, http2FrameWri
     q.push(wr);
 }
 
-internal static (http2FrameWriteRequest, bool) Popᴍ(ref http2roundRobinWriteScheduler ws) {
+[GoMethodBody("Pop")] internal static (http2FrameWriteRequest, bool) Popᴍ(ref http2roundRobinWriteScheduler ws) {
     // Control and RST_STREAM frames first.
     if (!ws.control.empty()) {
         return (ws.control.shift(), true);
@@ -14182,611 +14182,3 @@ internal static (http2FrameWriteRequest, bool) Popᴍ(ref http2roundRobinWriteSc
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httpᴛhttp2clientConnPool {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<http2ClientConn>, error) GetClientConn(this ж<http2clientConnPool> Ꮡp, ж<Request> req, @string addr) => http_package.GetClientConnᴍ(Ꮡp, req, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<http2ClientConn>, error) getClientConn(this ж<http2clientConnPool> Ꮡp, ж<Request> Ꮡreq, @string addr, bool dialOnMiss) => http_package.getClientConnᴍ(Ꮡp, Ꮡreq, addr, dialOnMiss);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<http2dialCall> getStartDialLocked(this ж<http2clientConnPool> Ꮡp, context.Context ctx, @string addr) => http_package.getStartDialLockedᴍ(Ꮡp, ctx, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool used, error err) addConnIfNeeded(this ж<http2clientConnPool> Ꮡp, @string key, ж<http2Transport> t, net.Conn c) => http_package.addConnIfNeededᴍ(Ꮡp, key, t, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addConnLocked(this ref http2clientConnPool p, @string key, ж<http2ClientConn> cc) => http_package.addConnLockedᴍ(ref p, key, cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void MarkDead(this ж<http2clientConnPool> Ꮡp, ж<http2ClientConn> cc) => http_package.MarkDeadᴍ(Ꮡp, cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeIdleConnections(this ж<http2clientConnPool> Ꮡp) => http_package.closeIdleConnectionsᴍ(Ꮡp);
-}
-partial class httpᴛhttp2dialCall {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void dial(this ref http2dialCall c, context.Context ctx, @string addr) => http_package.dialᴍ(ref c, ctx, addr);
-}
-partial class httpᴛhttp2addConnCall {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void run(this ref http2addConnCall c, ж<http2Transport> t, @string key, net.Conn nc) => http_package.runᴍ(ref c, t, key, nc);
-}
-partial class httpᴛhttp2noDialClientConnPool {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<http2ClientConn>, error) GetClientConn(this http2noDialClientConnPool p, ж<Request> req, @string addr) => http_package.GetClientConnᴍ(p, req, addr);
-}
-partial class httpᴛhttp2dataBuffer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref http2dataBuffer b, slice<byte> p) => http_package.Readᴍ(ref b, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytesFromFirstChunk(this ref http2dataBuffer b) => http_package.bytesFromFirstChunkᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this ref http2dataBuffer b) => http_package.Lenᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this ref http2dataBuffer b, slice<byte> p) => http_package.Writeᴍ(ref b, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> lastChunkOrAlloc(this ref http2dataBuffer b, int64 want) => http_package.lastChunkOrAllocᴍ(ref b, want);
-}
-partial class httpᴛhttp2ErrCode {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this http2ErrCode e) => http_package.Stringᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string stringToken(this http2ErrCode e) => http_package.stringTokenᴍ(e);
-}
-partial class httpᴛhttp2ConnectionError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this http2ConnectionError e) => http_package.Errorᴍ(e);
-}
-partial class httpᴛhttp2StreamError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this http2StreamError e) => http_package.Errorᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFrame(this http2StreamError se, http2writeContext ctx) => http_package.writeFrameᴍ(se, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool staysWithinBuffer(this http2StreamError se, nint max) => http_package.staysWithinBufferᴍ(se, max);
-}
-partial class httpᴛhttp2goAwayFlowError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this http2goAwayFlowError _) => http_package.Errorᴍ(_);
-}
-partial class httpᴛhttp2connError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this http2connError e) => http_package.Errorᴍ(e);
-}
-partial class httpᴛhttp2pseudoHeaderError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this http2pseudoHeaderError e) => http_package.Errorᴍ(e);
-}
-partial class httpᴛhttp2duplicatePseudoHeaderError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this http2duplicatePseudoHeaderError e) => http_package.Errorᴍ(e);
-}
-partial class httpᴛhttp2headerFieldNameError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this http2headerFieldNameError e) => http_package.Errorᴍ(e);
-}
-partial class httpᴛhttp2headerFieldValueError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this http2headerFieldValueError e) => http_package.Errorᴍ(e);
-}
-partial class httpᴛhttp2inflow {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref http2inflow f, int32 n) => http_package.initᴍ(ref f, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int32 /*connAdd*/ add(this ref http2inflow f, nint n) => http_package.addᴍ(ref f, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool take(this ref http2inflow f, uint32 n) => http_package.takeᴍ(ref f, n);
-}
-partial class httpᴛhttp2connOutflow {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref http2connOutflow f) => http_package.initᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool changeInitialWindowSize(this ref http2connOutflow f, int64 size) => http_package.changeInitialWindowSizeᴍ(ref f, size);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool add(this ref http2connOutflow f, int32 n) => http_package.addᴍ(ref f, n);
-}
-partial class httpᴛhttp2outflow {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int32, bool) available(this ref http2outflow f) => http_package.availableᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void take(this ref http2outflow f, int32 n) => http_package.takeᴍ(ref f, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool add(this ref http2outflow f, int32 n) => http_package.addᴍ(ref f, n);
-}
-partial class httpᴛhttp2FrameType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this http2FrameType t) => http_package.Stringᴍ(t);
-}
-partial class httpᴛhttp2Flags {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Has(this http2Flags f, http2Flags v) => http_package.Hasᴍ(f, v);
-}
-partial class httpᴛhttp2FrameHeader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static http2FrameHeader Header(this http2FrameHeader h) => http_package.Headerᴍ(h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this http2FrameHeader h) => http_package.Stringᴍ(h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeDebug(this http2FrameHeader h, ж<bytes.Buffer> Ꮡbuf) => http_package.writeDebugᴍ(h, Ꮡbuf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkValid(this ref http2FrameHeader h) => http_package.checkValidᴍ(ref h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void invalidate(this ref http2FrameHeader h) => http_package.invalidateᴍ(ref h);
-}
-partial class httpᴛhttp2Framer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 maxHeaderListSize(this ref http2Framer fr) => http_package.maxHeaderListSizeᴍ(ref fr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void startWrite(this ref http2Framer f, http2FrameType ftype, http2Flags flags, uint32 streamID) => http_package.startWriteᴍ(ref f, ftype, flags, streamID);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error endWrite(this ж<http2Framer> Ꮡf) => http_package.endWriteᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void logWrite(this ж<http2Framer> Ꮡf) => http_package.logWriteᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeByte(this ref http2Framer f, byte v) => http_package.writeByteᴍ(ref f, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeBytes(this ref http2Framer f, slice<byte> v) => http_package.writeBytesᴍ(ref f, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeUint16(this ref http2Framer f, uint16 v) => http_package.writeUint16ᴍ(ref f, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeUint32(this ref http2Framer f, uint32 v) => http_package.writeUint32ᴍ(ref f, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SetReuseFrames(this ref http2Framer fr) => http_package.SetReuseFramesᴍ(ref fr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SetMaxReadFrameSize(this ref http2Framer fr, uint32 v) => http_package.SetMaxReadFrameSizeᴍ(ref fr, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ErrorDetail(this ref http2Framer fr) => http_package.ErrorDetailᴍ(ref fr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (http2FrameHeader, error) ReadFrameHeader(this ref http2Framer fr) => http_package.ReadFrameHeaderᴍ(ref fr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (http2Frame, error) ReadFrameForHeader(this ж<http2Framer> Ꮡfr, http2FrameHeader fh) => http_package.ReadFrameForHeaderᴍ(Ꮡfr, fh);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (http2Frame, error) ReadFrame(this ж<http2Framer> Ꮡfr) => http_package.ReadFrameᴍ(Ꮡfr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error connError(this ref http2Framer fr, http2ErrCode code, @string reason) => http_package.connErrorᴍ(ref fr, code, reason);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error checkFrameOrder(this ref http2Framer fr, http2FrameHeader fh) => http_package.checkFrameOrderᴍ(ref fr, fh);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteData(this ж<http2Framer> Ꮡf, uint32 streamID, bool endStream, slice<byte> data) => http_package.WriteDataᴍ(Ꮡf, streamID, endStream, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteDataPadded(this ж<http2Framer> Ꮡf, uint32 streamID, bool endStream, slice<byte> data, slice<byte> pad) => http_package.WriteDataPaddedᴍ(Ꮡf, streamID, endStream, data, pad);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error startWriteDataPadded(this ref http2Framer f, uint32 streamID, bool endStream, slice<byte> data, slice<byte> pad) => http_package.startWriteDataPaddedᴍ(ref f, streamID, endStream, data, pad);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteSettings(this ж<http2Framer> Ꮡf, params ꓸꓸꓸhttp2Setting settingsʗp) => http_package.WriteSettingsᴍ(Ꮡf, settingsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteSettingsAck(this ж<http2Framer> Ꮡf) => http_package.WriteSettingsAckᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WritePing(this ж<http2Framer> Ꮡf, bool ack, /*[8]*/ array<byte> data) => http_package.WritePingᴍ(Ꮡf, ack, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteGoAway(this ж<http2Framer> Ꮡf, uint32 maxStreamID, http2ErrCode code, slice<byte> debugData) => http_package.WriteGoAwayᴍ(Ꮡf, maxStreamID, code, debugData);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteWindowUpdate(this ж<http2Framer> Ꮡf, uint32 streamID, uint32 incr) => http_package.WriteWindowUpdateᴍ(Ꮡf, streamID, incr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteHeaders(this ж<http2Framer> Ꮡf, http2HeadersFrameParam p) => http_package.WriteHeadersᴍ(Ꮡf, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WritePriority(this ж<http2Framer> Ꮡf, uint32 streamID, http2PriorityParam p) => http_package.WritePriorityᴍ(Ꮡf, streamID, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteRSTStream(this ж<http2Framer> Ꮡf, uint32 streamID, http2ErrCode code) => http_package.WriteRSTStreamᴍ(Ꮡf, streamID, code);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteContinuation(this ж<http2Framer> Ꮡf, uint32 streamID, bool endHeaders, slice<byte> headerBlockFragment) => http_package.WriteContinuationᴍ(Ꮡf, streamID, endHeaders, headerBlockFragment);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WritePushPromise(this ж<http2Framer> Ꮡf, http2PushPromiseParam p) => http_package.WritePushPromiseᴍ(Ꮡf, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteRawFrame(this ж<http2Framer> Ꮡf, http2FrameType t, http2Flags flags, uint32 streamID, slice<byte> payload) => http_package.WriteRawFrameᴍ(Ꮡf, t, flags, streamID, payload);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint maxHeaderStringLen(this ref http2Framer fr) => http_package.maxHeaderStringLenᴍ(ref fr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (http2Frame, error) readMetaFrame(this ж<http2Framer> Ꮡfr, ж<http2HeadersFrame> hf) => http_package.readMetaFrameᴍ(Ꮡfr, hf);
-}
-partial class httpᴛhttp2frameCache {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<http2DataFrame> getDataFrame(this ж<http2frameCache> Ꮡfc) => http_package.getDataFrameᴍ(Ꮡfc);
-}
-partial class httpᴛhttp2DataFrame {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool StreamEnded(this ref http2DataFrame f) => http_package.StreamEndedᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Data(this ref http2DataFrame f) => http_package.Dataᴍ(ref f);
-}
-partial class httpᴛhttp2SettingsFrame {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsAck(this ref http2SettingsFrame f) => http_package.IsAckᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint32 v, bool ok) Value(this ref http2SettingsFrame f, http2SettingID id) => http_package.Valueᴍ(ref f, id);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static http2Setting Setting(this ref http2SettingsFrame f, nint i) => http_package.Settingᴍ(ref f, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NumSettings(this ref http2SettingsFrame f) => http_package.NumSettingsᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool HasDuplicates(this ref http2SettingsFrame f) => http_package.HasDuplicatesᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ForeachSetting(this ref http2SettingsFrame f, Func<http2Setting, error> fn) => http_package.ForeachSettingᴍ(ref f, fn);
-}
-partial class httpᴛhttp2PingFrame {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsAck(this ref http2PingFrame f) => http_package.IsAckᴍ(ref f);
-}
-partial class httpᴛhttp2GoAwayFrame {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> DebugData(this ref http2GoAwayFrame f) => http_package.DebugDataᴍ(ref f);
-}
-partial class httpᴛhttp2UnknownFrame {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Payload(this ref http2UnknownFrame f) => http_package.Payloadᴍ(ref f);
-}
-partial class httpᴛhttp2HeadersFrame {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> HeaderBlockFragment(this ref http2HeadersFrame f) => http_package.HeaderBlockFragmentᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool HeadersEnded(this ref http2HeadersFrame f) => http_package.HeadersEndedᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool StreamEnded(this ref http2HeadersFrame f) => http_package.StreamEndedᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool HasPriority(this ref http2HeadersFrame f) => http_package.HasPriorityᴍ(ref f);
-}
-partial class httpᴛhttp2PriorityParam {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsZero(this http2PriorityParam p) => http_package.IsZeroᴍ(p);
-}
-partial class httpᴛhttp2ContinuationFrame {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> HeaderBlockFragment(this ref http2ContinuationFrame f) => http_package.HeaderBlockFragmentᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool HeadersEnded(this ref http2ContinuationFrame f) => http_package.HeadersEndedᴍ(ref f);
-}
-partial class httpᴛhttp2PushPromiseFrame {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> HeaderBlockFragment(this ref http2PushPromiseFrame f) => http_package.HeaderBlockFragmentᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool HeadersEnded(this ref http2PushPromiseFrame f) => http_package.HeadersEndedᴍ(ref f);
-}
-partial class httpᴛhttp2MetaHeadersFrame {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string PseudoValue(this ref http2MetaHeadersFrame mh, @string pseudo) => http_package.PseudoValueᴍ(ref mh, pseudo);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<hpack.HeaderField> RegularFields(this ref http2MetaHeadersFrame mh) => http_package.RegularFieldsᴍ(ref mh);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<hpack.HeaderField> PseudoFields(this ref http2MetaHeadersFrame mh) => http_package.PseudoFieldsᴍ(ref mh);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error checkPseudos(this ref http2MetaHeadersFrame mh) => http_package.checkPseudosᴍ(ref mh);
-}
-partial class httpᴛhttp2goroutineLock {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void check(this http2goroutineLock g) => http_package.checkᴍ(g);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkNotOn(this http2goroutineLock g) => http_package.checkNotOnᴍ(g);
-}
-partial class httpᴛhttp2streamState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this http2streamState st) => http_package.Stringᴍ(st);
-}
-partial class httpᴛhttp2Setting {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this http2Setting s) => http_package.Stringᴍ(s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Valid(this http2Setting s) => http_package.Validᴍ(s);
-}
-partial class httpᴛhttp2SettingID {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this http2SettingID s) => http_package.Stringᴍ(s);
-}
-partial class httpᴛhttp2closeWaiter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Init(this ref http2closeWaiter cw) => http_package.Initᴍ(ref cw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Close(this http2closeWaiter cw) => http_package.Closeᴍ(cw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Wait(this http2closeWaiter cw) => http_package.Waitᴍ(cw);
-}
-partial class httpᴛhttp2bufferedWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Available(this ref http2bufferedWriter w) => http_package.Availableᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ж<http2bufferedWriter> Ꮡw, slice<byte> p) => http_package.Writeᴍ(Ꮡw, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Flush(this ref http2bufferedWriter w) => http_package.Flushᴍ(ref w);
-}
-partial class httpᴛhttp2bufferedWriterTimeoutWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref http2bufferedWriterTimeoutWriter w, slice<byte> p) => http_package.Writeᴍ(ref w, p);
-}
-partial class httpᴛhttp2httpError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref http2httpError e) => http_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Timeout(this ref http2httpError e) => http_package.Timeoutᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Temporary(this ref http2httpError e) => http_package.Temporaryᴍ(ref e);
-}
-partial class httpᴛhttp2sorter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this ref http2sorter s) => http_package.Lenᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Swap(this ref http2sorter s, nint i, nint j) => http_package.Swapᴍ(ref s, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this ref http2sorter s, nint i, nint j) => http_package.Lessᴍ(ref s, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<@string> Keys(this ж<http2sorter> Ꮡs, Header h) => http_package.Keysᴍ(Ꮡs, h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SortStrings(this ж<http2sorter> Ꮡs, slice<@string> ss) => http_package.SortStringsᴍ(Ꮡs, ss);
-}
-partial class httpᴛhttp2pipe {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setBuffer(this ж<http2pipe> Ꮡp, http2pipeBuffer b) => http_package.setBufferᴍ(Ꮡp, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this ж<http2pipe> Ꮡp) => http_package.Lenᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ж<http2pipe> Ꮡp, slice<byte> d) => http_package.Readᴍ(Ꮡp, d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ж<http2pipe> Ꮡp, slice<byte> d) => http_package.Writeᴍ(Ꮡp, d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void CloseWithError(this ж<http2pipe> Ꮡp, error err) => http_package.CloseWithErrorᴍ(Ꮡp, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void BreakWithError(this ж<http2pipe> Ꮡp, error err) => http_package.BreakWithErrorᴍ(Ꮡp, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeWithErrorAndCode(this ж<http2pipe> Ꮡp, error err, Action fn) => http_package.closeWithErrorAndCodeᴍ(Ꮡp, err, fn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeWithError(this ж<http2pipe> Ꮡp, ж<error> Ꮡdst, error err, Action fn) => http_package.closeWithErrorᴍ(Ꮡp, Ꮡdst, err, fn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeDoneLocked(this ref http2pipe p) => http_package.closeDoneLockedᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Err(this ж<http2pipe> Ꮡp) => http_package.Errᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this ж<http2pipe> Ꮡp) => http_package.Doneᴍ(Ꮡp);
-}
-partial class httpᴛhttp2serverInternalState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void registerConn(this ж<http2serverInternalState> Ꮡs, ж<http2serverConn> sc) => http_package.registerConnᴍ(Ꮡs, sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unregisterConn(this ж<http2serverInternalState> Ꮡs, ж<http2serverConn> sc) => http_package.unregisterConnᴍ(Ꮡs, sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void startGracefulShutdown(this ж<http2serverInternalState> Ꮡs) => http_package.startGracefulShutdownᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static channel<error> getErrChan(this ж<http2serverInternalState> Ꮡs) => http_package.getErrChanᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void putErrChan(this ж<http2serverInternalState> Ꮡs, channel<error> ch) => http_package.putErrChanᴍ(Ꮡs, ch);
-}
-partial class httpᴛhttp2ServeConnOpts {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context.Context context(this ж<http2ServeConnOpts> Ꮡo) => http_package.contextᴍ(Ꮡo);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Server> baseConfig(this ж<http2ServeConnOpts> Ꮡo) => http_package.baseConfigᴍ(Ꮡo);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Handler handler(this ж<http2ServeConnOpts> Ꮡo) => http_package.handlerᴍ(Ꮡo);
-}
-partial class httpᴛhttp2Server {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ServeConn(this ж<http2Server> Ꮡs, net.Conn c, ж<http2ServeConnOpts> Ꮡopts) => http_package.ServeConnᴍ(Ꮡs, c, Ꮡopts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void serveConn(this ж<http2Server> Ꮡs, net.Conn c, ж<http2ServeConnOpts> Ꮡopts, Action<ж<http2serverConn>> newf) => http_package.serveConnᴍ(Ꮡs, c, Ꮡopts, newf);
-}
-partial class httpᴛhttp2serverConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void rejectConn(this ref http2serverConn sc, http2ErrCode err, @string debug) => http_package.rejectConnᴍ(ref sc, err, debug);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 maxHeaderListSize(this ref http2serverConn sc) => http_package.maxHeaderListSizeᴍ(ref sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 curOpenStreams(this ref http2serverConn sc) => http_package.curOpenStreamsᴍ(ref sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<http2Framer> Framer(this ref http2serverConn sc) => http_package.Framerᴍ(ref sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error CloseConn(this ref http2serverConn sc) => http_package.CloseConnᴍ(ref sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Flush(this ref http2serverConn sc) => http_package.Flushᴍ(ref sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<hpack.Encoder>, ж<bytes.Buffer>) HeaderEncoder(this ж<http2serverConn> Ꮡsc) => http_package.HeaderEncoderᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (http2streamState, ж<http2stream>) state(this ref http2serverConn sc, uint32 streamID) => http_package.stateᴍ(ref sc, streamID);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setConnState(this ref http2serverConn sc, ConnState state) => http_package.setConnStateᴍ(ref sc, state);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void vlogf(this ref http2serverConn sc, @string format, params ꓸꓸꓸany argsʗp) => http_package.vlogfᴍ(ref sc, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void logf(this ref http2serverConn sc, @string format, params ꓸꓸꓸany argsʗp) => http_package.logfᴍ(ref sc, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void condlogf(this ref http2serverConn sc, error err, @string format, params ꓸꓸꓸany argsʗp) => http_package.condlogfᴍ(ref sc, err, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string canonicalHeader(this ref http2serverConn sc, @string v) => http_package.canonicalHeaderᴍ(ref sc, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readFrames(this ref http2serverConn sc) => http_package.readFramesᴍ(ref sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeFrameAsync(this ж<http2serverConn> Ꮡsc, http2FrameWriteRequest wr, ж<http2writeData> wd) => http_package.writeFrameAsyncᴍ(Ꮡsc, wr, wd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeAllStreamsOnConnClose(this ж<http2serverConn> Ꮡsc) => http_package.closeAllStreamsOnConnCloseᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stopShutdownTimer(this ref http2serverConn sc) => http_package.stopShutdownTimerᴍ(ref sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void notePanic(this ж<http2serverConn> Ꮡsc) => http_package.notePanicᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void serve(this ж<http2serverConn> Ꮡsc, http2http2Config conf) => http_package.serveᴍ(Ꮡsc, conf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handlePingTimer(this ж<http2serverConn> Ꮡsc, time.Time lastFrameReadTime) => http_package.handlePingTimerᴍ(Ꮡsc, lastFrameReadTime);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void onSettingsTimer(this ref http2serverConn sc) => http_package.onSettingsTimerᴍ(ref sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void onIdleTimer(this ref http2serverConn sc) => http_package.onIdleTimerᴍ(ref sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void onReadIdleTimer(this ref http2serverConn sc) => http_package.onReadIdleTimerᴍ(ref sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void onShutdownTimer(this ref http2serverConn sc) => http_package.onShutdownTimerᴍ(ref sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sendServeMsg(this ref http2serverConn sc, any msg) => http_package.sendServeMsgᴍ(ref sc, msg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readPreface(this ж<http2serverConn> Ꮡsc) => http_package.readPrefaceᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeDataFromHandler(this ref http2serverConn sc, ж<http2stream> Ꮡstream, slice<byte> data, bool endStream) => http_package.writeDataFromHandlerᴍ(ref sc, Ꮡstream, data, endStream);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFrameFromHandler(this ref http2serverConn sc, http2FrameWriteRequest wr) => http_package.writeFrameFromHandlerᴍ(ref sc, wr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeFrame(this ж<http2serverConn> Ꮡsc, http2FrameWriteRequest wr) => http_package.writeFrameᴍ(Ꮡsc, wr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void startFrameWrite(this ж<http2serverConn> Ꮡsc, http2FrameWriteRequest wr) => http_package.startFrameWriteᴍ(Ꮡsc, wr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void wroteFrame(this ж<http2serverConn> Ꮡsc, http2frameWriteResult res) => http_package.wroteFrameᴍ(Ꮡsc, res);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void scheduleFrameWrite(this ж<http2serverConn> Ꮡsc) => http_package.scheduleFrameWriteᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void startGracefulShutdown(this ж<http2serverConn> Ꮡsc) => http_package.startGracefulShutdownᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void startGracefulShutdownInternal(this ж<http2serverConn> Ꮡsc) => http_package.startGracefulShutdownInternalᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void goAway(this ж<http2serverConn> Ꮡsc, http2ErrCode code) => http_package.goAwayᴍ(Ꮡsc, code);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void shutDownIn(this ж<http2serverConn> Ꮡsc, time.Duration d) => http_package.shutDownInᴍ(Ꮡsc, d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void resetStream(this ж<http2serverConn> Ꮡsc, http2StreamError se) => http_package.resetStreamᴍ(Ꮡsc, se);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool processFrameFromReader(this ж<http2serverConn> Ꮡsc, http2readFrameResult res) => http_package.processFrameFromReaderᴍ(Ꮡsc, res);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processFrame(this ж<http2serverConn> Ꮡsc, http2Frame f) => http_package.processFrameᴍ(Ꮡsc, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processPing(this ж<http2serverConn> Ꮡsc, ж<http2PingFrame> Ꮡf) => http_package.processPingᴍ(Ꮡsc, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processWindowUpdate(this ж<http2serverConn> Ꮡsc, ж<http2WindowUpdateFrame> Ꮡf) => http_package.processWindowUpdateᴍ(Ꮡsc, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processResetStream(this ж<http2serverConn> Ꮡsc, ж<http2RSTStreamFrame> Ꮡf) => http_package.processResetStreamᴍ(Ꮡsc, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeStream(this ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, error err) => http_package.closeStreamᴍ(Ꮡsc, Ꮡst, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processSettings(this ж<http2serverConn> Ꮡsc, ж<http2SettingsFrame> Ꮡf) => http_package.processSettingsᴍ(Ꮡsc, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processSetting(this ж<http2serverConn> Ꮡsc, http2Setting s) => http_package.processSettingᴍ(Ꮡsc, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processSettingInitialWindowSize(this ж<http2serverConn> Ꮡsc, uint32 val) => http_package.processSettingInitialWindowSizeᴍ(Ꮡsc, val);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processData(this ж<http2serverConn> Ꮡsc, ж<http2DataFrame> Ꮡf) => http_package.processDataᴍ(Ꮡsc, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processGoAway(this ж<http2serverConn> Ꮡsc, ж<http2GoAwayFrame> Ꮡf) => http_package.processGoAwayᴍ(Ꮡsc, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processHeaders(this ж<http2serverConn> Ꮡsc, ж<http2MetaHeadersFrame> Ꮡf) => http_package.processHeadersᴍ(Ꮡsc, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void upgradeRequest(this ж<http2serverConn> Ꮡsc, ж<Request> Ꮡreq) => http_package.upgradeRequestᴍ(Ꮡsc, Ꮡreq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error checkPriority(this ж<http2serverConn> Ꮡsc, uint32 streamID, http2PriorityParam p) => http_package.checkPriorityᴍ(Ꮡsc, streamID, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processPriority(this ж<http2serverConn> Ꮡsc, ж<http2PriorityFrame> Ꮡf) => http_package.processPriorityᴍ(Ꮡsc, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<http2stream> newStream(this ж<http2serverConn> Ꮡsc, uint32 id, uint32 pusherID, http2streamState state) => http_package.newStreamᴍ(Ꮡsc, id, pusherID, state);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<http2responseWriter>, ж<Request>, error) newWriterAndRequest(this ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, ж<http2MetaHeadersFrame> Ꮡf) => http_package.newWriterAndRequestᴍ(Ꮡsc, Ꮡst, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<http2responseWriter>, ж<Request>, error) newWriterAndRequestNoBody(this ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, httpcommon.ServerRequestParam rp) => http_package.newWriterAndRequestNoBodyᴍ(Ꮡsc, Ꮡst, rp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<http2responseWriter> newResponseWriter(this ж<http2serverConn> Ꮡsc, ж<http2stream> st, ж<Request> Ꮡreq) => http_package.newResponseWriterᴍ(Ꮡsc, st, Ꮡreq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error scheduleHandler(this ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, ж<http2responseWriter> rw, ж<Request> req, Action<ResponseWriter, ж<Request>> handler) => http_package.scheduleHandlerᴍ(Ꮡsc, Ꮡst, rw, req, handler);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handlerDone(this ж<http2serverConn> Ꮡsc) => http_package.handlerDoneᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void runHandler(this ж<http2serverConn> Ꮡsc, ж<http2responseWriter> rw, ж<Request> req, Action<ResponseWriter, ж<Request>> handler) => http_package.runHandlerᴍ(Ꮡsc, rw, req, handler);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeHeaders(this ref http2serverConn sc, ж<http2stream> Ꮡst, ж<http2writeResHeaders> ᏑheaderData) => http_package.writeHeadersᴍ(ref sc, Ꮡst, ᏑheaderData);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void write100ContinueHeaders(this ref http2serverConn sc, ж<http2stream> Ꮡst) => http_package.write100ContinueHeadersᴍ(ref sc, Ꮡst);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void noteBodyReadFromHandler(this ref http2serverConn sc, ж<http2stream> st, nint n, error err) => http_package.noteBodyReadFromHandlerᴍ(ref sc, st, n, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void noteBodyRead(this ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, nint n) => http_package.noteBodyReadᴍ(Ꮡsc, Ꮡst, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sendWindowUpdate32(this ж<http2serverConn> Ꮡsc, ж<http2stream> st, int32 n) => http_package.sendWindowUpdate32ᴍ(Ꮡsc, st, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sendWindowUpdate(this ж<http2serverConn> Ꮡsc, ж<http2stream> Ꮡst, nint n) => http_package.sendWindowUpdateᴍ(Ꮡsc, Ꮡst, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void startPush(this ж<http2serverConn> Ꮡsc, ж<http2startPushRequest> Ꮡmsg) => http_package.startPushᴍ(Ꮡsc, Ꮡmsg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error countError(this ж<http2serverConn> Ꮡsc, @string name, error err) => http_package.countErrorᴍ(Ꮡsc, name, err);
-}
-partial class httpᴛhttp2stream {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isPushed(this ref http2stream st) => http_package.isPushedᴍ(ref st);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void endStream(this ж<http2stream> Ꮡst) => http_package.endStreamᴍ(Ꮡst);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void copyTrailersToHandlerRequest(this ref http2stream st) => http_package.copyTrailersToHandlerRequestᴍ(ref st);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void onReadTimeout(this ref http2stream st) => http_package.onReadTimeoutᴍ(ref st);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void onWriteTimeout(this ref http2stream st) => http_package.onWriteTimeoutᴍ(ref st);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processTrailerHeaders(this ж<http2stream> Ꮡst, ж<http2MetaHeadersFrame> Ꮡf) => http_package.processTrailerHeadersᴍ(Ꮡst, Ꮡf);
-}
-partial class httpᴛhttp2requestBody {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<http2requestBody> Ꮡb) => http_package.Closeᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref http2requestBody b, slice<byte> p) => http_package.Readᴍ(ref b, p);
-}
-partial class httpᴛhttp2chunkWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this http2chunkWriter cw, slice<byte> p) => http_package.Writeᴍ(cw, p);
-}
-partial class httpᴛhttp2responseWriterState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasTrailers(this ref http2responseWriterState rws) => http_package.hasTrailersᴍ(ref rws);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasNonemptyTrailers(this ref http2responseWriterState rws) => http_package.hasNonemptyTrailersᴍ(ref rws);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void declareTrailer(this ref http2responseWriterState rws, @string k) => http_package.declareTrailerᴍ(ref rws, k);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) writeChunk(this ж<http2responseWriterState> Ꮡrws, slice<byte> p) => http_package.writeChunkᴍ(Ꮡrws, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void promoteUndeclaredTrailers(this ref http2responseWriterState rws) => http_package.promoteUndeclaredTrailersᴍ(ref rws);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeHeader(this ref http2responseWriterState rws, nint code) => http_package.writeHeaderᴍ(ref rws, code);
-}
-partial class httpᴛhttp2responseWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetReadDeadline(this ref http2responseWriter w, time.Time deadline) => http_package.SetReadDeadlineᴍ(ref w, deadline);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetWriteDeadline(this ref http2responseWriter w, time.Time deadline) => http_package.SetWriteDeadlineᴍ(ref w, deadline);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error EnableFullDuplex(this ref http2responseWriter w) => http_package.EnableFullDuplexᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Flush(this ref http2responseWriter w) => http_package.Flushᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error FlushError(this ref http2responseWriter w) => http_package.FlushErrorᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static /*<-*/channel<bool> CloseNotify(this ref http2responseWriter w) => http_package.CloseNotifyᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Header Header(this ref http2responseWriter w) => http_package.Headerᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void WriteHeader(this ref http2responseWriter w, nint code) => http_package.WriteHeaderᴍ(ref w, code);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref http2responseWriter w, slice<byte> p) => http_package.Writeᴍ(ref w, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref http2responseWriter w, @string s) => http_package.WriteStringᴍ(ref w, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) write(this ref http2responseWriter w, nint lenData, slice<byte> dataB, @string dataS) => http_package.writeᴍ(ref w, lenData, dataB, dataS);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handlerDone(this ref http2responseWriter w) => http_package.handlerDoneᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Push(this ref http2responseWriter w, @string target, ж<PushOptions> Ꮡopts) => http_package.Pushᴍ(ref w, target, Ꮡopts);
-}
-partial class httpᴛhttp2Transport {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 maxHeaderListSize(this ref http2Transport t) => http_package.maxHeaderListSizeᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool disableCompression(this ref http2Transport t) => http_package.disableCompressionᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static http2ClientConnPool connPool(this ж<http2Transport> Ꮡt) => http_package.connPoolᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initConnPool(this ж<http2Transport> Ꮡt) => http_package.initConnPoolᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response>, error) RoundTrip(this ж<http2Transport> Ꮡt, ж<Request> req) => http_package.RoundTripᴍ(Ꮡt, req);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response>, error) RoundTripOpt(this ж<http2Transport> Ꮡt, ж<Request> Ꮡreq, http2RoundTripOpt opt) => http_package.RoundTripOptᴍ(Ꮡt, Ꮡreq, opt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void CloseIdleConnections(this ж<http2Transport> Ꮡt) => http_package.CloseIdleConnectionsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<http2ClientConn>, error) dialClientConn(this ж<http2Transport> Ꮡt, context.Context ctx, @string addr, bool singleUse) => http_package.dialClientConnᴍ(Ꮡt, ctx, addr, singleUse);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<tls.Config> newTLSConfig(this ref http2Transport t, @string host) => http_package.newTLSConfigᴍ(ref t, host);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (net.Conn, error) dialTLS(this ref http2Transport t, context.Context ctx, @string network, @string addr, ж<tls.Config> tlsCfg) => http_package.dialTLSᴍ(ref t, ctx, network, addr, tlsCfg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool disableKeepAlives(this ref http2Transport t) => http_package.disableKeepAlivesᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Duration expectContinueTimeout(this ref http2Transport t) => http_package.expectContinueTimeoutᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<http2ClientConn>, error) NewClientConn(this ж<http2Transport> Ꮡt, net.Conn c) => http_package.NewClientConnᴍ(Ꮡt, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<http2ClientConn>, error) newClientConn(this ж<http2Transport> Ꮡt, net.Conn c, bool singleUse, Action internalStateHook) => http_package.newClientConnᴍ(Ꮡt, c, singleUse, internalStateHook);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void vlogf(this ref http2Transport t, @string format, params ꓸꓸꓸany argsʗp) => http_package.vlogfᴍ(ref t, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void logf(this ref http2Transport t, @string format, params ꓸꓸꓸany argsʗp) => http_package.logfᴍ(ref t, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Duration idleConnTimeout(this ref http2Transport t) => http_package.idleConnTimeoutᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<tls.Conn>, error) dialTLSWithContext(this ref http2Transport t, context.Context ctx, @string network, @string addr, ж<tls.Config> cfg) => http_package.dialTLSWithContextᴍ(ref t, ctx, network, addr, cfg);
-}
-partial class httpᴛhttp2unencryptedTransport {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response>, error) RoundTrip(this ж<http2unencryptedTransport> Ꮡt, ж<Request> req) => http_package.RoundTripᴍ(Ꮡt, req);
-}
-partial class httpᴛhttp2clientStream {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Func<nint, textproto.MIMEHeader, error> get1xxTraceFunc(this ref http2clientStream cs) => http_package.get1xxTraceFuncᴍ(ref cs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void abortStream(this ж<http2clientStream> Ꮡcs, error err) => http_package.abortStreamᴍ(Ꮡcs, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void abortStreamLocked(this ж<http2clientStream> Ꮡcs, error err) => http_package.abortStreamLockedᴍ(Ꮡcs, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void abortRequestBodyWrite(this ж<http2clientStream> Ꮡcs) => http_package.abortRequestBodyWriteᴍ(Ꮡcs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeReqBodyLocked(this ж<http2clientStream> Ꮡcs) => http_package.closeReqBodyLockedᴍ(Ꮡcs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void doRequest(this ж<http2clientStream> Ꮡcs, ж<Request> req, Action<ж<http2clientStream>> streamf) => http_package.doRequestᴍ(Ꮡcs, req, streamf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ writeRequest(this ж<http2clientStream> Ꮡcs, ж<Request> Ꮡreq, Action<ж<http2clientStream>> streamf) => http_package.writeRequestᴍ(Ꮡcs, Ꮡreq, streamf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error encodeAndWriteHeaders(this ж<http2clientStream> Ꮡcs, ж<Request> req) => http_package.encodeAndWriteHeadersᴍ(Ꮡcs, req);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cleanupWriteRequest(this ж<http2clientStream> Ꮡcs, error err) => http_package.cleanupWriteRequestᴍ(Ꮡcs, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint frameScratchBufferLen(this ref http2clientStream cs, nint maxFrameSize) => http_package.frameScratchBufferLenᴍ(ref cs, maxFrameSize);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ writeRequestBody(this ж<http2clientStream> Ꮡcs, ж<Request> Ꮡreq) => http_package.writeRequestBodyᴍ(Ꮡcs, Ꮡreq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int32 taken, error err) awaitFlowControl(this ж<http2clientStream> Ꮡcs, nint maxBytes) => http_package.awaitFlowControlᴍ(Ꮡcs, maxBytes);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void copyTrailers(this ref http2clientStream cs) => http_package.copyTrailersᴍ(ref cs);
-}
-partial class httpᴛhttp2stickyErrWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this http2stickyErrWriter sew, slice<byte> p) => http_package.Writeᴍ(sew, p);
-}
-partial class httpᴛhttp2noCachedConnError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void IsHTTP2NoCachedConnError(this http2noCachedConnError _) => http_package.IsHTTP2NoCachedConnErrorᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this http2noCachedConnError _) => http_package.Errorᴍ(_);
-}
-partial class httpᴛhttp2ClientConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void healthCheck(this ж<http2ClientConn> Ꮡcc) => http_package.healthCheckᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetDoNotReuse(this ж<http2ClientConn> Ꮡcc) => http_package.SetDoNotReuseᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setGoAway(this ж<http2ClientConn> Ꮡcc, ж<http2GoAwayFrame> Ꮡf) => http_package.setGoAwayᴍ(Ꮡcc, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CanTakeNewRequest(this ж<http2ClientConn> Ꮡcc) => http_package.CanTakeNewRequestᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReserveNewRequest(this ж<http2ClientConn> Ꮡcc) => http_package.ReserveNewRequestᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static http2ClientConnState State(this ж<http2ClientConn> Ꮡcc) => http_package.Stateᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static http2clientConnIdleState idleState(this ж<http2ClientConn> Ꮡcc) => http_package.idleStateᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static http2clientConnIdleState /*st*/ idleStateLocked(this ref http2ClientConn cc) => http_package.idleStateLockedᴍ(ref cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isUsableLocked(this ref http2ClientConn cc) => http_package.isUsableLockedᴍ(ref cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool canReserveLocked(this ref http2ClientConn cc) => http_package.canReserveLockedᴍ(ref cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint currentRequestCountLocked(this ref http2ClientConn cc) => http_package.currentRequestCountLockedᴍ(ref cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool canTakeNewRequestLocked(this ref http2ClientConn cc) => http_package.canTakeNewRequestLockedᴍ(ref cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint availableLocked(this ref http2ClientConn cc) => http_package.availableLockedᴍ(ref cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool tooIdleLocked(this ref http2ClientConn cc) => http_package.tooIdleLockedᴍ(ref cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void onIdleTimeout(this ж<http2ClientConn> Ꮡcc) => http_package.onIdleTimeoutᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeConn(this ж<http2ClientConn> Ꮡcc) => http_package.closeConnᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void forceCloseConn(this ref http2ClientConn cc) => http_package.forceCloseConnᴍ(ref cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeIfIdle(this ж<http2ClientConn> Ꮡcc) => http_package.closeIfIdleᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isDoNotReuseAndIdle(this ж<http2ClientConn> Ꮡcc) => http_package.isDoNotReuseAndIdleᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Shutdown(this ж<http2ClientConn> Ꮡcc, context.Context ctx) => http_package.Shutdownᴍ(Ꮡcc, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error sendGoAway(this ж<http2ClientConn> Ꮡcc) => http_package.sendGoAwayᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void goAwayAndClose(this ж<http2ClientConn> Ꮡcc, http2ErrCode code) => http_package.goAwayAndCloseᴍ(Ꮡcc, code);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeForError(this ж<http2ClientConn> Ꮡcc, error err) => http_package.closeForErrorᴍ(Ꮡcc, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<http2ClientConn> Ꮡcc) => http_package.Closeᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeForLostPing(this ж<http2ClientConn> Ꮡcc) => http_package.closeForLostPingᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Duration responseHeaderTimeout(this ref http2ClientConn cc) => http_package.responseHeaderTimeoutᴍ(ref cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void decrStreamReservations(this ж<http2ClientConn> Ꮡcc) => http_package.decrStreamReservationsᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void decrStreamReservationsLocked(this ref http2ClientConn cc) => http_package.decrStreamReservationsLockedᴍ(ref cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Response>, error) RoundTrip(this ж<http2ClientConn> Ꮡcc, ж<Request> req) => http_package.RoundTripᴍ(Ꮡcc, req);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response>, error) roundTrip(this ж<http2ClientConn> Ꮡcc, ж<Request> Ꮡreq, Action<ж<http2clientStream>> streamf) => http_package.roundTripᴍ(Ꮡcc, Ꮡreq, streamf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error awaitOpenSlotForStreamLocked(this ref http2ClientConn cc, ж<http2clientStream> Ꮡcs) => http_package.awaitOpenSlotForStreamLockedᴍ(ref cc, Ꮡcs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeHeaders(this ref http2ClientConn cc, uint32 streamID, bool endStream, nint maxFrameSize, slice<byte> hdrs) => http_package.writeHeadersᴍ(ref cc, streamID, endStream, maxFrameSize, hdrs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) encodeTrailers(this ref http2ClientConn cc, Header trailer) => http_package.encodeTrailersᴍ(ref cc, trailer);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeHeader(this ref http2ClientConn cc, @string name, @string value) => http_package.writeHeaderᴍ(ref cc, name, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addStreamLocked(this ж<http2ClientConn> Ꮡcc, ж<http2clientStream> Ꮡcs) => http_package.addStreamLockedᴍ(Ꮡcc, Ꮡcs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void forgetStreamID(this ж<http2ClientConn> Ꮡcc, uint32 id) => http_package.forgetStreamIDᴍ(Ꮡcc, id);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readLoop(this ж<http2ClientConn> Ꮡcc) => http_package.readLoopᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void countReadFrameError(this ref http2ClientConn cc, error err) => http_package.countReadFrameErrorᴍ(ref cc, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Ping(this ж<http2ClientConn> Ꮡcc, context.Context ctx) => http_package.Pingᴍ(Ꮡcc, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeStreamReset(this ж<http2ClientConn> Ꮡcc, uint32 streamID, http2ErrCode code, bool ping, error err) => http_package.writeStreamResetᴍ(Ꮡcc, streamID, code, ping, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void logf(this ref http2ClientConn cc, @string format, params ꓸꓸꓸany argsʗp) => http_package.logfᴍ(ref cc, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void vlogf(this ref http2ClientConn cc, @string format, params ꓸꓸꓸany argsʗp) => http_package.vlogfᴍ(ref cc, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void maybeCallStateHook(this ref http2ClientConn cc) => http_package.maybeCallStateHookᴍ(ref cc);
-}
-partial class httpᴛhttp2GoAwayError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this http2GoAwayError e) => http_package.Errorᴍ(e);
-}
-partial class httpᴛhttp2clientConnReadLoop {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cleanup(this ж<http2clientConnReadLoop> Ꮡrl) => http_package.cleanupᴍ(Ꮡrl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error run(this ж<http2clientConnReadLoop> Ꮡrl) => http_package.runᴍ(Ꮡrl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processHeaders(this ж<http2clientConnReadLoop> Ꮡrl, ж<http2MetaHeadersFrame> Ꮡf) => http_package.processHeadersᴍ(Ꮡrl, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response>, error) handleResponse(this ref http2clientConnReadLoop rl, ж<http2clientStream> Ꮡcs, ж<http2MetaHeadersFrame> Ꮡf) => http_package.handleResponseᴍ(ref rl, Ꮡcs, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processTrailers(this ж<http2clientConnReadLoop> Ꮡrl, ж<http2clientStream> Ꮡcs, ж<http2MetaHeadersFrame> Ꮡf) => http_package.processTrailersᴍ(Ꮡrl, Ꮡcs, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processData(this ж<http2clientConnReadLoop> Ꮡrl, ж<http2DataFrame> Ꮡf) => http_package.processDataᴍ(Ꮡrl, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void endStream(this ж<http2clientConnReadLoop> Ꮡrl, ж<http2clientStream> Ꮡcs) => http_package.endStreamᴍ(Ꮡrl, Ꮡcs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void endStreamError(this ref http2clientConnReadLoop rl, ж<http2clientStream> Ꮡcs, error err) => http_package.endStreamErrorᴍ(ref rl, Ꮡcs, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void endStreamErrorLocked(this ref http2clientConnReadLoop rl, ж<http2clientStream> Ꮡcs, error err) => http_package.endStreamErrorLockedᴍ(ref rl, Ꮡcs, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<http2clientStream> streamByID(this ж<http2clientConnReadLoop> Ꮡrl, uint32 id, bool headerOrData) => http_package.streamByIDᴍ(Ꮡrl, id, headerOrData);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<http2clientStream> streamByIDLocked(this ref http2clientConnReadLoop rl, uint32 id, bool headerOrData) => http_package.streamByIDLockedᴍ(ref rl, id, headerOrData);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processGoAway(this ref http2clientConnReadLoop rl, ж<http2GoAwayFrame> Ꮡf) => http_package.processGoAwayᴍ(ref rl, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processSettings(this ж<http2clientConnReadLoop> Ꮡrl, ж<http2SettingsFrame> Ꮡf) => http_package.processSettingsᴍ(Ꮡrl, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processSettingsNoWrite(this ж<http2clientConnReadLoop> Ꮡrl, ж<http2SettingsFrame> Ꮡf) => http_package.processSettingsNoWriteᴍ(Ꮡrl, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processWindowUpdate(this ж<http2clientConnReadLoop> Ꮡrl, ж<http2WindowUpdateFrame> Ꮡf) => http_package.processWindowUpdateᴍ(Ꮡrl, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processResetStream(this ж<http2clientConnReadLoop> Ꮡrl, ж<http2RSTStreamFrame> Ꮡf) => http_package.processResetStreamᴍ(Ꮡrl, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processPing(this ж<http2clientConnReadLoop> Ꮡrl, ж<http2PingFrame> Ꮡf) => http_package.processPingᴍ(Ꮡrl, Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processPushPromise(this ref http2clientConnReadLoop rl, ж<http2PushPromiseFrame> f) => http_package.processPushPromiseᴍ(ref rl, f);
-}
-partial class httpᴛhttp2transportResponseBody {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this http2transportResponseBody b, slice<byte> p) => http_package.Readᴍ(b, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this http2transportResponseBody b) => http_package.Closeᴍ(b);
-}
-partial class httpᴛhttp2noBodyReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this http2noBodyReader _) => http_package.Closeᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this http2noBodyReader _Δp0, slice<byte> _Δp1) => http_package.Readᴍ(_Δp0, _Δp1);
-}
-partial class httpᴛhttp2missingBody {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this http2missingBody _) => http_package.Closeᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this http2missingBody _Δp0, slice<byte> _Δp1) => http_package.Readᴍ(_Δp0, _Δp1);
-}
-partial class httpᴛhttp2erringRoundTripper {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error RoundTripErr(this http2erringRoundTripper rt) => http_package.RoundTripErrᴍ(rt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response>, error) RoundTrip(this http2erringRoundTripper rt, ж<Request> _) => http_package.RoundTripᴍ(rt, _);
-}
-partial class httpᴛhttp2eofReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this http2eofReader _Δp0, slice<byte> _Δp1) => http_package.Readᴍ(_Δp0, _Δp1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte, error) ReadByte(this http2eofReader _) => http_package.ReadByteᴍ(_);
-}
-partial class httpᴛhttp2gzipReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<gzip.Reader>, error) acquire(this ж<http2gzipReader> Ꮡgz) => http_package.acquireᴍ(Ꮡgz);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void release(this ж<http2gzipReader> Ꮡgz, ж<gzip.Reader> Ꮡzr) => http_package.releaseᴍ(Ꮡgz, Ꮡzr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void close(this ж<http2gzipReader> Ꮡgz) => http_package.closeᴍ(Ꮡgz);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ж<http2gzipReader> Ꮡgz, slice<byte> p) => http_package.Readᴍ(Ꮡgz, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<http2gzipReader> Ꮡgz) => http_package.Closeᴍ(Ꮡgz);
-}
-partial class httpᴛhttp2errorReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this http2errorReader r, slice<byte> p) => http_package.Readᴍ(r, p);
-}
-partial class httpᴛhttp2noDialH2RoundTripper {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response>, error) RoundTrip(this http2noDialH2RoundTripper rt, ж<Request> req) => http_package.RoundTripᴍ(rt, req);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (RoundTripper, error) NewClientConn(this http2noDialH2RoundTripper rt, net.Conn conn, Action internalStateHook) => http_package.NewClientConnᴍ(rt, conn, internalStateHook);
-}
-partial class httpᴛhttp2netHTTPClientConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response>, error) RoundTrip(this http2netHTTPClientConn cc, ж<Request> req) => http_package.RoundTripᴍ(cc, req);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this http2netHTTPClientConn cc) => http_package.Closeᴍ(cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Err(this http2netHTTPClientConn cc) => http_package.Errᴍ(cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Reserve(this http2netHTTPClientConn cc) => http_package.Reserveᴍ(cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Release(this http2netHTTPClientConn cc) => http_package.Releaseᴍ(cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Available(this http2netHTTPClientConn cc) => http_package.Availableᴍ(cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint InFlight(this http2netHTTPClientConn cc) => http_package.InFlightᴍ(cc);
-}
-partial class httpᴛhttp2flushFrameWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFrame(this http2flushFrameWriter _, http2writeContext ctx) => http_package.writeFrameᴍ(_, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool staysWithinBuffer(this http2flushFrameWriter _, nint max) => http_package.staysWithinBufferᴍ(_, max);
-}
-partial class httpᴛhttp2writeSettings {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool staysWithinBuffer(this http2writeSettings s, nint max) => http_package.staysWithinBufferᴍ(s, max);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFrame(this http2writeSettings s, http2writeContext ctx) => http_package.writeFrameᴍ(s, ctx);
-}
-partial class httpᴛhttp2writeGoAway {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFrame(this ref http2writeGoAway p, http2writeContext ctx) => http_package.writeFrameᴍ(ref p, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool staysWithinBuffer(this ref http2writeGoAway _, nint max) => http_package.staysWithinBufferᴍ(ref _, max);
-}
-partial class httpᴛhttp2writeData {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref http2writeData w) => http_package.Stringᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFrame(this ref http2writeData w, http2writeContext ctx) => http_package.writeFrameᴍ(ref w, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool staysWithinBuffer(this ref http2writeData w, nint max) => http_package.staysWithinBufferᴍ(ref w, max);
-}
-partial class httpᴛhttp2handlerPanicRST {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFrame(this http2handlerPanicRST hp, http2writeContext ctx) => http_package.writeFrameᴍ(hp, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool staysWithinBuffer(this http2handlerPanicRST hp, nint max) => http_package.staysWithinBufferᴍ(hp, max);
-}
-partial class httpᴛhttp2writePing {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFrame(this http2writePing w, http2writeContext ctx) => http_package.writeFrameᴍ(w, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool staysWithinBuffer(this http2writePing w, nint max) => http_package.staysWithinBufferᴍ(w, max);
-}
-partial class httpᴛhttp2writePingAck {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFrame(this http2writePingAck w, http2writeContext ctx) => http_package.writeFrameᴍ(w, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool staysWithinBuffer(this http2writePingAck w, nint max) => http_package.staysWithinBufferᴍ(w, max);
-}
-partial class httpᴛhttp2writeSettingsAck {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFrame(this http2writeSettingsAck _, http2writeContext ctx) => http_package.writeFrameᴍ(_, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool staysWithinBuffer(this http2writeSettingsAck _, nint max) => http_package.staysWithinBufferᴍ(_, max);
-}
-partial class httpᴛhttp2writeResHeaders {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool staysWithinBuffer(this ref http2writeResHeaders w, nint max) => http_package.staysWithinBufferᴍ(ref w, max);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFrame(this ж<http2writeResHeaders> Ꮡw, http2writeContext ctx) => http_package.writeFrameᴍ(Ꮡw, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeHeaderBlock(this ref http2writeResHeaders w, http2writeContext ctx, slice<byte> frag, bool firstFrag, bool lastFrag) => http_package.writeHeaderBlockᴍ(ref w, ctx, frag, firstFrag, lastFrag);
-}
-partial class httpᴛhttp2writePushPromise {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool staysWithinBuffer(this ref http2writePushPromise w, nint max) => http_package.staysWithinBufferᴍ(ref w, max);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFrame(this ж<http2writePushPromise> Ꮡw, http2writeContext ctx) => http_package.writeFrameᴍ(Ꮡw, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeHeaderBlock(this ref http2writePushPromise w, http2writeContext ctx, slice<byte> frag, bool firstFrag, bool lastFrag) => http_package.writeHeaderBlockᴍ(ref w, ctx, frag, firstFrag, lastFrag);
-}
-partial class httpᴛhttp2write100ContinueHeadersFrame {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFrame(this http2write100ContinueHeadersFrame w, http2writeContext ctx) => http_package.writeFrameᴍ(w, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool staysWithinBuffer(this http2write100ContinueHeadersFrame w, nint max) => http_package.staysWithinBufferᴍ(w, max);
-}
-partial class httpᴛhttp2writeWindowUpdate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool staysWithinBuffer(this http2writeWindowUpdate wu, nint max) => http_package.staysWithinBufferᴍ(wu, max);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeFrame(this http2writeWindowUpdate wu, http2writeContext ctx) => http_package.writeFrameᴍ(wu, ctx);
-}
-partial class httpᴛhttp2FrameWriteRequest {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 StreamID(this http2FrameWriteRequest wr) => http_package.StreamIDᴍ(wr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isControl(this http2FrameWriteRequest wr) => http_package.isControlᴍ(wr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint DataSize(this http2FrameWriteRequest wr) => http_package.DataSizeᴍ(wr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (http2FrameWriteRequest, http2FrameWriteRequest, nint) Consume(this http2FrameWriteRequest wr, int32 n) => http_package.Consumeᴍ(wr, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this http2FrameWriteRequest wr) => http_package.Stringᴍ(wr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void replyToWriter(this ref http2FrameWriteRequest wr, error err) => http_package.replyToWriterᴍ(ref wr, err);
-}
-partial class httpᴛhttp2writeQueue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ref http2writeQueue q) => http_package.emptyᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void push(this ref http2writeQueue q, http2FrameWriteRequest wr) => http_package.pushᴍ(ref q, wr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static http2FrameWriteRequest shift(this ref http2writeQueue q) => http_package.shiftᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<http2FrameWriteRequest> peek(this ref http2writeQueue q) => http_package.peekᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (http2FrameWriteRequest, bool) consume(this ref http2writeQueue q, int32 n) => http_package.consumeᴍ(ref q, n);
-}
-partial class httpᴛhttp2writeQueuePool {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void put(this ref http2writeQueuePool p, ж<http2writeQueue> Ꮡq) => http_package.putᴍ(ref p, Ꮡq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<http2writeQueue> get(this ref http2writeQueuePool p) => http_package.getᴍ(ref p);
-}
-partial class httpᴛhttp2priorityNodeRFC7540 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setParent(this ж<http2priorityNodeRFC7540> Ꮡn, ж<http2priorityNodeRFC7540> Ꮡparent) => http_package.setParentᴍ(Ꮡn, Ꮡparent);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addBytes(this ж<http2priorityNodeRFC7540> Ꮡn, int64 b) => http_package.addBytesᴍ(Ꮡn, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool walkReadyInOrder(this ж<http2priorityNodeRFC7540> Ꮡn, bool openParent, ж<slice<ж<http2priorityNodeRFC7540>>> Ꮡtmp, Func<ж<http2priorityNodeRFC7540>, bool, bool> f) => http_package.walkReadyInOrderᴍ(Ꮡn, openParent, Ꮡtmp, f);
-}
-partial class httpᴛhttp2sortPriorityNodeSiblingsRFC7540 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this http2sortPriorityNodeSiblingsRFC7540 z) => http_package.Lenᴍ(z);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Swap(this http2sortPriorityNodeSiblingsRFC7540 z, nint i, nint k) => http_package.Swapᴍ(z, i, k);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this http2sortPriorityNodeSiblingsRFC7540 z, nint i, nint k) => http_package.Lessᴍ(z, i, k);
-}
-partial class httpᴛhttp2priorityWriteSchedulerRFC7540 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void OpenStream(this ж<http2priorityWriteSchedulerRFC7540> Ꮡws, uint32 streamID, http2OpenStreamOptions options) => http_package.OpenStreamᴍ(Ꮡws, streamID, options);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void CloseStream(this ж<http2priorityWriteSchedulerRFC7540> Ꮡws, uint32 streamID) => http_package.CloseStreamᴍ(Ꮡws, streamID);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void AdjustStream(this ж<http2priorityWriteSchedulerRFC7540> Ꮡws, uint32 streamID, http2PriorityParam priority) => http_package.AdjustStreamᴍ(Ꮡws, streamID, priority);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Push(this ж<http2priorityWriteSchedulerRFC7540> Ꮡws, http2FrameWriteRequest wr) => http_package.Pushᴍ(Ꮡws, wr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (http2FrameWriteRequest wr, bool ok) Pop(this ж<http2priorityWriteSchedulerRFC7540> Ꮡws) => http_package.Popᴍ(Ꮡws);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addClosedOrIdleNode(this ref http2priorityWriteSchedulerRFC7540 ws, ж<slice<ж<http2priorityNodeRFC7540>>> Ꮡlist, nint maxSize, ж<http2priorityNodeRFC7540> n) => http_package.addClosedOrIdleNodeᴍ(ref ws, Ꮡlist, maxSize, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void removeNode(this ref http2priorityWriteSchedulerRFC7540 ws, ж<http2priorityNodeRFC7540> Ꮡn) => http_package.removeNodeᴍ(ref ws, Ꮡn);
-}
-partial class httpᴛhttp2priorityWriteSchedulerRFC9218 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void OpenStream(this ref http2priorityWriteSchedulerRFC9218 ws, uint32 streamID, http2OpenStreamOptions opt) => http_package.OpenStreamᴍ(ref ws, streamID, opt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void CloseStream(this ref http2priorityWriteSchedulerRFC9218 ws, uint32 streamID) => http_package.CloseStreamᴍ(ref ws, streamID);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void AdjustStream(this ref http2priorityWriteSchedulerRFC9218 ws, uint32 streamID, http2PriorityParam priority) => http_package.AdjustStreamᴍ(ref ws, streamID, priority);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Push(this ref http2priorityWriteSchedulerRFC9218 ws, http2FrameWriteRequest wr) => http_package.Pushᴍ(ref ws, wr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (http2FrameWriteRequest, bool) Pop(this ref http2priorityWriteSchedulerRFC9218 ws) => http_package.Popᴍ(ref ws);
-}
-partial class httpᴛhttp2randomWriteScheduler {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void OpenStream(this ref http2randomWriteScheduler ws, uint32 streamID, http2OpenStreamOptions options) => http_package.OpenStreamᴍ(ref ws, streamID, options);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void CloseStream(this ref http2randomWriteScheduler ws, uint32 streamID) => http_package.CloseStreamᴍ(ref ws, streamID);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void AdjustStream(this ref http2randomWriteScheduler ws, uint32 streamID, http2PriorityParam priority) => http_package.AdjustStreamᴍ(ref ws, streamID, priority);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Push(this ref http2randomWriteScheduler ws, http2FrameWriteRequest wr) => http_package.Pushᴍ(ref ws, wr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (http2FrameWriteRequest, bool) Pop(this ref http2randomWriteScheduler ws) => http_package.Popᴍ(ref ws);
-}
-partial class httpᴛhttp2roundRobinWriteScheduler {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void OpenStream(this ref http2roundRobinWriteScheduler ws, uint32 streamID, http2OpenStreamOptions options) => http_package.OpenStreamᴍ(ref ws, streamID, options);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void CloseStream(this ref http2roundRobinWriteScheduler ws, uint32 streamID) => http_package.CloseStreamᴍ(ref ws, streamID);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void AdjustStream(this ref http2roundRobinWriteScheduler ws, uint32 streamID, http2PriorityParam priority) => http_package.AdjustStreamᴍ(ref ws, streamID, priority);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Push(this ref http2roundRobinWriteScheduler ws, http2FrameWriteRequest wr) => http_package.Pushᴍ(ref ws, wr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (http2FrameWriteRequest, bool) Pop(this ref http2roundRobinWriteScheduler ws) => http_package.Popᴍ(ref ws);
-}
-// </GlyphForwarders>

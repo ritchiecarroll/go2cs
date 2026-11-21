@@ -114,11 +114,11 @@ partial struct gcimports {
 
 } partial class importer_package {
 
-internal static (ж<types.Package>, error) Importᴍ(ref gcimports m, @string path) {
+[GoMethodBody("Import")] internal static (ж<types.Package>, error) Importᴍ(ref gcimports m, @string path) {
     return m.ImportFrom(path, ""u8, /* no vendoring */ 0);
 }
 
-internal static (ж<types.Package>, error) ImportFromᴍ(ref gcimports m, @string path, @string srcDir, types.ImportMode mode) {
+[GoMethodBody("ImportFrom")] internal static (ж<types.Package>, error) ImportFromᴍ(ref gcimports m, @string path, @string srcDir, types.ImportMode mode) {
     if (mode != 0) {
         throw panic("mode must be 0");
     }
@@ -136,11 +136,11 @@ partial struct gccgoimports {
 
 } partial class importer_package {
 
-internal static (ж<types.Package>, error) Importᴍ(ref gccgoimports m, @string path) {
+[GoMethodBody("Import")] internal static (ж<types.Package>, error) Importᴍ(ref gccgoimports m, @string path) {
     return m.ImportFrom(path, ""u8, /* no vendoring */ 0);
 }
 
-internal static (ж<types.Package>, error) ImportFromᴍ(ref gccgoimports m, @string path, @string srcDir, types.ImportMode mode) {
+[GoMethodBody("ImportFrom")] internal static (ж<types.Package>, error) ImportFromᴍ(ref gccgoimports m, @string path, @string srcDir, types.ImportMode mode) {
     if (mode != 0) {
         throw panic("mode must be 0");
     }
@@ -148,14 +148,3 @@ internal static (ж<types.Package>, error) ImportFromᴍ(ref gccgoimports m, @st
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class importerᴛgcimports {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package>, error) Import(this ref gcimports m, @string path) => importer_package.Importᴍ(ref m, path);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package>, error) ImportFrom(this ref gcimports m, @string path, @string srcDir, types.ImportMode mode) => importer_package.ImportFromᴍ(ref m, path, srcDir, mode);
-}
-partial class importerᴛgccgoimports {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package>, error) Import(this ref gccgoimports m, @string path) => importer_package.Importᴍ(ref m, path);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package>, error) ImportFrom(this ref gccgoimports m, @string path, @string srcDir, types.ImportMode mode) => importer_package.ImportFromᴍ(ref m, path, srcDir, mode);
-}
-// </GlyphForwarders>

@@ -77,7 +77,7 @@ partial struct lockedReader {
 
 } partial class cryptotest_package {
 
-internal static (nint n, error err) Readᴍ(ж<lockedReader> Ꮡlr, slice<byte> b) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ж<lockedReader> Ꮡlr, slice<byte> b) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -94,9 +94,3 @@ internal static (nint n, error err) Readᴍ(ж<lockedReader> Ꮡlr, slice<byte> 
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class cryptotestᴛlockedReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ж<lockedReader> Ꮡlr, slice<byte> b) => cryptotest_package.Readᴍ(Ꮡlr, b);
-}
-// </GlyphForwarders>

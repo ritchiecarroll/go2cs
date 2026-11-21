@@ -52,7 +52,7 @@ partial interface fileWriter :
 //
 // This is unnecessary as the next call to [Writer.WriteHeader] or [Writer.Close]
 // will implicitly flush out the file's padding.
-internal static error Flushᴍ(ref Writer tw) {
+[GoMethodBody("Flush")] internal static error Flushᴍ(ref Writer tw) {
     if (tw.err != nil) {
         return tw.err;
     }
@@ -70,7 +70,7 @@ internal static error Flushᴍ(ref Writer tw) {
 // The Header.Size determines how many bytes can be written for the next file.
 // If the current file is not fully written, then this returns an error.
 // This implicitly flushes any padding necessary before writing the header.
-internal static error WriteHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
+[GoMethodBody("WriteHeader")] internal static error WriteHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
     ref var tw = ref Ꮡtw.DerefOrNull();
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
@@ -119,7 +119,7 @@ internal static error WriteHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
     }}
 }
 
-internal static error writeUSTARHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
+[GoMethodBody("writeUSTARHeader")] internal static error writeUSTARHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
     ref var tw = ref Ꮡtw.DerefOrNull();
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
@@ -146,7 +146,7 @@ private static readonly @string globalHead00ˢᵇᴍWriter = "GlobalHead.0.0"u8;
 internal static ref readonly @string paxHeaders0ˢᴍWriter => ref paxHeaders0ˢᵇᴍWriter;
 private static readonly @string paxHeaders0ˢᵇᴍWriter = "PaxHeaders.0"u8;
 
-internal static error writePAXHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, map<@string, @string> paxHdrs) {
+[GoMethodBody("writePAXHeader")] internal static error writePAXHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, map<@string, @string> paxHdrs) {
     ref var tw = ref Ꮡtw.DerefOrNull();
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
@@ -260,7 +260,7 @@ internal static error writePAXHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, map
 internal static ref readonly @string longNameᶜᴍWriter => ref longNameᶜᵇᴍWriter;
 private static readonly @string longNameᶜᵇᴍWriter = "././@LongLink"u8;
 
-internal static error writeGNUHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
+[GoMethodBody("writeGNUHeader")] internal static error writeGNUHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
     ref var tw = ref Ꮡtw.DerefOrNull();
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
@@ -360,7 +360,7 @@ internal static error writeGNUHeaderᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) {
 //
 // The block returned is only valid until the next call to
 // templateV7Plus or writeRawFile.
-internal static ж<block> templateV7Plusᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, Action<slice<byte>, @string> fmtStr, Action<slice<byte>, int64> fmtNum) {
+[GoMethodBody("templateV7Plus")] internal static ж<block> templateV7Plusᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, Action<slice<byte>, @string> fmtStr, Action<slice<byte>, int64> fmtNum) {
     ref var tw = ref Ꮡtw.DerefOrNull();
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
@@ -393,7 +393,7 @@ internal static ж<block> templateV7Plusᴍ(ж<Writer> Ꮡtw, ж<Header> Ꮡhdr,
 // writeRawFile writes a minimal file with the given name and flag type.
 // It uses format to encode the header format and will write data as the body.
 // It uses default values for all of the other fields (as BSD and GNU tar does).
-internal static error writeRawFileᴍ(ж<Writer> Ꮡtw, @string name, @string data, byte flag, Format format) {
+[GoMethodBody("writeRawFile")] internal static error writeRawFileᴍ(ж<Writer> Ꮡtw, @string name, @string data, byte flag, Format format) {
     ref var tw = ref Ꮡtw.DerefOrNull();
 
     tw.blk.reset();
@@ -430,7 +430,7 @@ internal static error writeRawFileᴍ(ж<Writer> Ꮡtw, @string name, @string da
 // writeRawHeader writes the value of blk, regardless of its value.
 // It sets up the Writer such that it can accept a file of the given size.
 // If the flag is a special header-only flag, then the size is treated as zero.
-internal static error writeRawHeaderᴍ(ref Writer tw, ж<block> Ꮡblk, int64 size, byte flag) {
+[GoMethodBody("writeRawHeader")] internal static error writeRawHeaderᴍ(ref Writer tw, ж<block> Ꮡblk, int64 size, byte flag) {
     ref var blk = ref Ꮡblk.DerefOrNull();
 
     {
@@ -458,7 +458,7 @@ private static readonly @string tarCannotAddNonRegularˢᵇᴍWriter = "tar: can
 // AddFS adds the files from fs.FS to the archive.
 // It walks the directory tree starting at the root of the filesystem
 // adding each file to the tar archive while maintaining the directory structure.
-internal static error AddFSᴍ(ж<Writer> Ꮡtw, fs.FS fsys) {
+[GoMethodBody("AddFS")] internal static error AddFSᴍ(ж<Writer> Ꮡtw, fs.FS fsys) {
     return fs.WalkDir(fsys, ".", error (@string name, fs.DirEntry d, error err) => {
         GoFrame ᒐ = default;
         try {
@@ -542,7 +542,7 @@ internal static (@string prefix, @string suffix, bool ok) splitUSTARPath(@string
 // Calling Write on special types like [TypeLink], [TypeSymlink], [TypeChar],
 // [TypeBlock], [TypeDir], and [TypeFifo] returns (0, [ErrWriteTooLong]) regardless
 // of what the [Header.Size] claims.
-internal static (nint, error) Writeᴍ(ref Writer tw, slice<byte> b) {
+[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ref Writer tw, slice<byte> b) {
     if (tw.err != nil) {
         return (0, tw.err);
     }
@@ -563,7 +563,7 @@ internal static (nint, error) Writeᴍ(ref Writer tw, slice<byte> b) {
 //
 // TODO(dsnet): Re-export this when adding sparse file support.
 // See https://golang.org/issue/22735
-internal static (int64, error) readFromᴍ(ref Writer tw, io.Reader r) {
+[GoMethodBody("readFrom")] internal static (int64, error) readFromᴍ(ref Writer tw, io.Reader r) {
     if (tw.err != nil) {
         return (0, tw.err);
     }
@@ -577,7 +577,7 @@ internal static (int64, error) readFromᴍ(ref Writer tw, io.Reader r) {
 // Close closes the tar archive by flushing the padding, and writing the footer.
 // If the current file (from a prior call to [Writer.WriteHeader]) is not fully written,
 // then this returns an error.
-internal static error Closeᴍ(ref Writer tw) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref Writer tw) {
     if (AreEqual(tw.err, ErrWriteAfterClose)) {
         return default;
     }
@@ -606,7 +606,7 @@ partial struct regFileWriter {
 
 } partial class tar_package {
 
-internal static (nint n, error err) Writeᴍ(ref regFileWriter fw, slice<byte> b) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref regFileWriter fw, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -638,17 +638,17 @@ internal partial struct ReadFrom_dst /*dyn*/ {
 
 } partial class tar_package {
 
-internal static (int64, error) ReadFromᴍ(ж<regFileWriter> Ꮡfw, io.Reader r) {
+[GoMethodBody("ReadFrom")] internal static (int64, error) ReadFromᴍ(ж<regFileWriter> Ꮡfw, io.Reader r) {
     return io.Copy(new ReadFrom_dst(new regFileWriterжWriter(Ꮡfw)), r);
 }
 
 // logicalRemaining implements fileState.logicalRemaining.
-internal static int64 logicalRemainingᴍ(regFileWriter fw) {
+[GoMethodBody("logicalRemaining")] internal static int64 logicalRemainingᴍ(regFileWriter fw) {
     return fw.nb;
 }
 
 // physicalRemaining implements fileState.physicalRemaining.
-internal static int64 physicalRemainingᴍ(regFileWriter fw) {
+[GoMethodBody("physicalRemaining")] internal static int64 physicalRemainingᴍ(regFileWriter fw) {
     return fw.nb;
 }
 
@@ -663,7 +663,7 @@ partial struct sparseFileWriter {
 
 } partial class tar_package {
 
-internal static (nint n, error err) Writeᴍ(ж<sparseFileWriter> Ꮡsw, slice<byte> b) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<sparseFileWriter> Ꮡsw, slice<byte> b) {
     nint n = default;
     error err = default;
     ref var sw = ref Ꮡsw.DerefOrNull();
@@ -711,7 +711,7 @@ internal static (nint n, error err) Writeᴍ(ж<sparseFileWriter> Ꮡsw, slice<b
     }}
 }
 
-internal static (int64 n, error err) ReadFromᴍ(ж<sparseFileWriter> Ꮡsw, io.Reader r) {
+[GoMethodBody("ReadFrom")] internal static (int64 n, error err) ReadFromᴍ(ж<sparseFileWriter> Ꮡsw, io.Reader r) {
     int64 n = default;
     error err = default;
     ref var sw = ref Ꮡsw.DerefOrNull();
@@ -774,11 +774,11 @@ internal static (int64 n, error err) ReadFromᴍ(ж<sparseFileWriter> Ꮡsw, io.
     }}
 }
 
-internal static int64 logicalRemainingᴍ(sparseFileWriter sw) {
+[GoMethodBody("logicalRemaining")] internal static int64 logicalRemainingᴍ(sparseFileWriter sw) {
     return sw.sp[len(sw.sp) - 1].endOffset() - sw.pos;
 }
 
-internal static int64 physicalRemainingᴍ(sparseFileWriter sw) {
+[GoMethodBody("physicalRemaining")] internal static int64 physicalRemainingᴍ(sparseFileWriter sw) {
     return sw.fw.physicalRemaining();
 }
 
@@ -790,7 +790,7 @@ partial struct zeroWriter {
 
 } partial class tar_package {
 
-internal static (nint, error) Writeᴍ(zeroWriter _, slice<byte> b) {
+[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(zeroWriter _, slice<byte> b) {
     foreach (var (i, c) in range(b)) {
         if (c != 0) {
             return (i, errWriteHole);
@@ -817,35 +817,3 @@ internal static error ensureEOF(io.Reader r) {
 }
 
 } // end tar_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tarᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Flush(this ref Writer tw) => tar_package.Flushᴍ(ref tw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) => tar_package.WriteHeaderᴍ(Ꮡtw, Ꮡhdr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeUSTARHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) => tar_package.writeUSTARHeaderᴍ(Ꮡtw, Ꮡhdr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writePAXHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, map<@string, @string> paxHdrs) => tar_package.writePAXHeaderᴍ(Ꮡtw, Ꮡhdr, paxHdrs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeGNUHeader(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr) => tar_package.writeGNUHeaderᴍ(Ꮡtw, Ꮡhdr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<block> templateV7Plus(this ж<Writer> Ꮡtw, ж<Header> Ꮡhdr, Action<slice<byte>, @string> fmtStr, Action<slice<byte>, int64> fmtNum) => tar_package.templateV7Plusᴍ(Ꮡtw, Ꮡhdr, fmtStr, fmtNum);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeRawFile(this ж<Writer> Ꮡtw, @string name, @string data, byte flag, Format format) => tar_package.writeRawFileᴍ(Ꮡtw, name, data, flag, format);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeRawHeader(this ref Writer tw, ж<block> Ꮡblk, int64 size, byte flag) => tar_package.writeRawHeaderᴍ(ref tw, Ꮡblk, size, flag);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error AddFS(this ж<Writer> Ꮡtw, fs.FS fsys) => tar_package.AddFSᴍ(Ꮡtw, fsys);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Write(this ref Writer tw, slice<byte> b) => tar_package.Writeᴍ(ref tw, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) readFrom(this ref Writer tw, io.Reader r) => tar_package.readFromᴍ(ref tw, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Writer tw) => tar_package.Closeᴍ(ref tw);
-}
-partial class tarᴛregFileWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref regFileWriter fw, slice<byte> b) => tar_package.Writeᴍ(ref fw, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) ReadFrom(this ж<regFileWriter> Ꮡfw, io.Reader r) => tar_package.ReadFromᴍ(Ꮡfw, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 logicalRemaining(this regFileWriter fw) => tar_package.logicalRemainingᴍ(fw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 physicalRemaining(this regFileWriter fw) => tar_package.physicalRemainingᴍ(fw);
-}
-partial class tarᴛsparseFileWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ж<sparseFileWriter> Ꮡsw, slice<byte> b) => tar_package.Writeᴍ(Ꮡsw, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 n, error err) ReadFrom(this ж<sparseFileWriter> Ꮡsw, io.Reader r) => tar_package.ReadFromᴍ(Ꮡsw, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 logicalRemaining(this sparseFileWriter sw) => tar_package.logicalRemainingᴍ(sw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 physicalRemaining(this sparseFileWriter sw) => tar_package.physicalRemainingᴍ(sw);
-}
-partial class tarᴛzeroWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this zeroWriter _, slice<byte> b) => tar_package.Writeᴍ(_, b);
-}
-// </GlyphForwarders>

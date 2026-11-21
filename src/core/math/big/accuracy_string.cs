@@ -22,7 +22,7 @@ internal static array<uint8> _Accuracy_index = new uint8[]{0, 5, 10, 15}.array()
 
 } partial class big_package {
 
-internal static @string Stringᴍ(Accuracy i) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Accuracy i) {
     i -= (Accuracy)(-1);
     if (i < 0 || i >= ((Accuracy)(int8)(len(_Accuracy_index) - 1))) {
         return "Accuracy("u8 + strconv.FormatInt((int64)(i + -1), 10) + ")"u8;
@@ -31,9 +31,3 @@ internal static @string Stringᴍ(Accuracy i) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class bigᴛAccuracy {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Accuracy i) => big_package.Stringᴍ(i);
-}
-// </GlyphForwarders>

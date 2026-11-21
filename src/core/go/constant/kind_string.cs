@@ -25,7 +25,7 @@ internal static array<uint8> _Kind_index = new uint8[]{0, 7, 11, 17, 20, 25, 32}
 
 } partial class constant_package {
 
-internal static @string Stringᴍ(Kind i) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Kind i) {
     if (i < 0 || i >= ((Kind)(len(_Kind_index) - 1))) {
         return "Kind("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -33,9 +33,3 @@ internal static @string Stringᴍ(Kind i) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class constantᴛKind {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Kind i) => constant_package.Stringᴍ(i);
-}
-// </GlyphForwarders>

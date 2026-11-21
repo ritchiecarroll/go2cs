@@ -17,7 +17,7 @@ partial class types_package {
 // producing a cycle in the type graph.
 // (Cycles involving alias types, as in "type A = [10]A" are detected
 // earlier, via the objDecl cycle detection mechanism.)
-internal static void validTypeᴍ(ж<Checker> Ꮡcheck, ж<Named> typ) {
+[GoMethodBody("validType")] internal static void validTypeᴍ(ж<Checker> Ꮡcheck, ж<Named> typ) {
     Ꮡcheck.validType0(nopos, new NamedжType(typ), default, default);
 }
 
@@ -35,7 +35,7 @@ private static readonly @string validTypeSNestVPathVˢᵇᴍChecker = "validType
 // of) F in S, leading to the nest S->F. If a type appears in its own nest
 // (say S->F->S) we have an invalid recursive type. The path list is the full
 // path of named types in a cycle, it is only needed for error reporting.
-internal static bool validType0ᴍ(ж<Checker> Ꮡcheck, token.Pos pos, Type typ, slice<ж<Named>> nest, slice<ж<Named>> path) {
+[GoMethodBody("validType0")] internal static bool validType0ᴍ(ж<Checker> Ꮡcheck, token.Pos pos, Type typ, slice<ж<Named>> nest, slice<ж<Named>> path) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -312,10 +312,3 @@ internal static slice<Object> makeObjList(slice<ж<Named>> tlist) {
 // At this point we're done and A[A[string]] and is valid.
 
 } // end types_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void validType(this ж<Checker> Ꮡcheck, ж<Named> typ) => types_package.validTypeᴍ(Ꮡcheck, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool validType0(this ж<Checker> Ꮡcheck, token.Pos pos, Type typ, slice<ж<Named>> nest, slice<ж<Named>> path) => types_package.validType0ᴍ(Ꮡcheck, pos, typ, nest, path);
-}
-// </GlyphForwarders>

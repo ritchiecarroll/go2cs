@@ -32,7 +32,7 @@ partial struct UDPAddr {
 // If a.Port does not fit in a uint16, it's silently truncated.
 //
 // If a is nil, a zero value is returned.
-internal static netip.AddrPort AddrPortᴍ(ж<UDPAddr> Ꮡa) {
+[GoMethodBody("AddrPort")] internal static netip.AddrPort AddrPortᴍ(ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -48,13 +48,13 @@ internal static ref readonly @string udpˢᴍUDPAddr => ref udpˢᵇᴍUDPAddr;
 private static readonly @string udpˢᵇᴍUDPAddr = "udp"u8;
 
 // Network returns the address's network name, "udp".
-internal static @string Networkᴍ(ref UDPAddr a) { return udpˢᴍUDPAddr; }
+[GoMethodBody("Network")] internal static @string Networkᴍ(ref UDPAddr a) { return udpˢᴍUDPAddr; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢᴍUDPAddr => ref nilˢᵇᴍUDPAddr;
 private static readonly @string nilˢᵇᴍUDPAddr = "<nil>"u8;
 
-internal static @string Stringᴍ(ж<UDPAddr> Ꮡa) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -67,7 +67,7 @@ internal static @string Stringᴍ(ж<UDPAddr> Ꮡa) {
     return JoinHostPort(ip, strconv.Itoa(a.Port));
 }
 
-internal static bool isWildcardᴍ(ж<UDPAddr> Ꮡa) {
+[GoMethodBody("isWildcard")] internal static bool isWildcardᴍ(ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil || a.IP == nil) {
@@ -76,7 +76,7 @@ internal static bool isWildcardᴍ(ж<UDPAddr> Ꮡa) {
     return a.IP.IsUnspecified();
 }
 
-internal static Addr opAddrᴍ(ж<UDPAddr> Ꮡa) {
+[GoMethodBody("opAddr")] internal static Addr opAddrᴍ(ж<UDPAddr> Ꮡa) {
     if (Ꮡa == nil) {
         return default;
     }
@@ -141,7 +141,7 @@ partial struct addrPortUDPAddr {
 internal static ref readonly @string udpˢᴍaddrPortUDPAddr => ref udpˢᵇᴍaddrPortUDPAddr;
 private static readonly @string udpˢᵇᴍaddrPortUDPAddr = "udp"u8;
 
-internal static @string Networkᴍ(addrPortUDPAddr _) { return udpˢᴍaddrPortUDPAddr; }
+[GoMethodBody("Network")] internal static @string Networkᴍ(addrPortUDPAddr _) { return udpˢᴍaddrPortUDPAddr; }
 
 } partial class net_package {
 
@@ -155,7 +155,7 @@ partial struct UDPConn {
 
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
-internal static (syscall.RawConn, error) SyscallConnᴍ(ж<UDPConn> Ꮡc) {
+[GoMethodBody("SyscallConn")] internal static (syscall.RawConn, error) SyscallConnᴍ(ж<UDPConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
@@ -165,7 +165,7 @@ internal static (syscall.RawConn, error) SyscallConnᴍ(ж<UDPConn> Ꮡc) {
 }
 
 // ReadFromUDP acts like [UDPConn.ReadFrom] but returns a UDPAddr.
-internal static (nint n, ж<UDPAddr> addr, error err) ReadFromUDPᴍ(ж<UDPConn> Ꮡc, slice<byte> b) {
+[GoMethodBody("ReadFromUDP")] internal static (nint n, ж<UDPAddr> addr, error err) ReadFromUDPᴍ(ж<UDPConn> Ꮡc, slice<byte> b) {
     // This function is designed to allow the caller to control the lifetime
     // of the returned *UDPAddr and thereby prevent an allocation.
     // See https://blog.filippo.io/efficient-go-apis-with-the-inliner/.
@@ -174,7 +174,7 @@ internal static (nint n, ж<UDPAddr> addr, error err) ReadFromUDPᴍ(ж<UDPConn>
 }
 
 // readFromUDP implements ReadFromUDP.
-internal static (nint, ж<UDPAddr>, error) readFromUDPᴍ(ж<UDPConn> Ꮡc, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
+[GoMethodBody("readFromUDP")] internal static (nint, ж<UDPAddr>, error) readFromUDPᴍ(ж<UDPConn> Ꮡc, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
@@ -189,7 +189,7 @@ internal static (nint, ж<UDPAddr>, error) readFromUDPᴍ(ж<UDPConn> Ꮡc, slic
 }
 
 // ReadFrom implements the [PacketConn] ReadFrom method.
-internal static (nint, Addr, error) ReadFromᴍ(ж<UDPConn> Ꮡc, slice<byte> b) {
+[GoMethodBody("ReadFrom")] internal static (nint, Addr, error) ReadFromᴍ(ж<UDPConn> Ꮡc, slice<byte> b) {
     var (n, addr, err) = Ꮡc.readFromUDP(b, Ꮡ(new UDPAddr()));
     if (addr == nil) {
         // Return Addr(nil), not Addr(*UDPConn(nil)).
@@ -203,7 +203,7 @@ internal static (nint, Addr, error) ReadFromᴍ(ж<UDPConn> Ꮡc, slice<byte> b)
 // If c is bound to an unspecified address, the returned
 // netip.AddrPort's address might be an IPv4-mapped IPv6 address.
 // Use [netip.Addr.Unmap] to get the address without the IPv6 prefix.
-internal static (nint n, netip.AddrPort addr, error err) ReadFromUDPAddrPortᴍ(ж<UDPConn> Ꮡc, slice<byte> b) {
+[GoMethodBody("ReadFromUDPAddrPort")] internal static (nint n, netip.AddrPort addr, error err) ReadFromUDPAddrPortᴍ(ж<UDPConn> Ꮡc, slice<byte> b) {
     nint n = default;
     netip.AddrPort addr = default;
     error err = default;
@@ -226,7 +226,7 @@ internal static (nint n, netip.AddrPort addr, error err) ReadFromUDPAddrPortᴍ(
 //
 // The packages [golang.org/x/net/ipv4] and [golang.org/x/net/ipv6] can be
 // used to manipulate IP-level socket options in oob.
-internal static (nint n, nint oobn, nint flags, ж<UDPAddr> addr, error err) ReadMsgUDPᴍ(ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob) {
+[GoMethodBody("ReadMsgUDP")] internal static (nint n, nint oobn, nint flags, ж<UDPAddr> addr, error err) ReadMsgUDPᴍ(ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -242,7 +242,7 @@ internal static (nint n, nint oobn, nint flags, ж<UDPAddr> addr, error err) Rea
 }
 
 // ReadMsgUDPAddrPort is like [UDPConn.ReadMsgUDP] but returns an [netip.AddrPort] instead of a [UDPAddr].
-internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) ReadMsgUDPAddrPortᴍ(ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob) {
+[GoMethodBody("ReadMsgUDPAddrPort")] internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) ReadMsgUDPAddrPortᴍ(ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -261,7 +261,7 @@ internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) 
 }
 
 // WriteToUDP acts like [UDPConn.WriteTo] but takes a [UDPAddr].
-internal static (nint, error) WriteToUDPᴍ(ж<UDPConn> Ꮡc, slice<byte> b, ж<UDPAddr> addr) {
+[GoMethodBody("WriteToUDP")] internal static (nint, error) WriteToUDPᴍ(ж<UDPConn> Ꮡc, slice<byte> b, ж<UDPAddr> addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
@@ -275,7 +275,7 @@ internal static (nint, error) WriteToUDPᴍ(ж<UDPConn> Ꮡc, slice<byte> b, ж<
 }
 
 // WriteToUDPAddrPort acts like [UDPConn.WriteTo] but takes a [netip.AddrPort].
-internal static (nint, error) WriteToUDPAddrPortᴍ(ж<UDPConn> Ꮡc, slice<byte> b, netip.AddrPort addr) {
+[GoMethodBody("WriteToUDPAddrPort")] internal static (nint, error) WriteToUDPAddrPortᴍ(ж<UDPConn> Ꮡc, slice<byte> b, netip.AddrPort addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
@@ -289,7 +289,7 @@ internal static (nint, error) WriteToUDPAddrPortᴍ(ж<UDPConn> Ꮡc, slice<byte
 }
 
 // WriteTo implements the [PacketConn] WriteTo method.
-internal static (nint, error) WriteToᴍ(ж<UDPConn> Ꮡc, slice<byte> b, Addr addr) {
+[GoMethodBody("WriteTo")] internal static (nint, error) WriteToᴍ(ж<UDPConn> Ꮡc, slice<byte> b, Addr addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UDPConn.Ꮡconn).ok()) {
@@ -314,7 +314,7 @@ internal static (nint, error) WriteToᴍ(ж<UDPConn> Ꮡc, slice<byte> b, Addr a
 //
 // The packages [golang.org/x/net/ipv4] and [golang.org/x/net/ipv6] can be
 // used to manipulate IP-level socket options in oob.
-internal static (nint n, nint oobn, error err) WriteMsgUDPᴍ(ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<UDPAddr> addr) {
+[GoMethodBody("WriteMsgUDP")] internal static (nint n, nint oobn, error err) WriteMsgUDPᴍ(ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<UDPAddr> addr) {
     nint n = default;
     nint oobn = default;
     error err = default;
@@ -331,7 +331,7 @@ internal static (nint n, nint oobn, error err) WriteMsgUDPᴍ(ж<UDPConn> Ꮡc, 
 }
 
 // WriteMsgUDPAddrPort is like [UDPConn.WriteMsgUDP] but takes a [netip.AddrPort] instead of a [UDPAddr].
-internal static (nint n, nint oobn, error err) WriteMsgUDPAddrPortᴍ(ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob, netip.AddrPort addr) {
+[GoMethodBody("WriteMsgUDPAddrPort")] internal static (nint n, nint oobn, error err) WriteMsgUDPAddrPortᴍ(ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob, netip.AddrPort addr) {
     nint n = default;
     nint oobn = default;
     error err = default;
@@ -458,30 +458,3 @@ public static (ж<UDPConn>, error) ListenMulticastUDP(@string network, ж<Interf
 }
 
 } // end net_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛUDPAddr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static netip.AddrPort AddrPort(this ж<UDPAddr> Ꮡa) => net_package.AddrPortᴍ(Ꮡa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Network(this ref UDPAddr a) => net_package.Networkᴍ(ref a);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<UDPAddr> Ꮡa) => net_package.Stringᴍ(Ꮡa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isWildcard(this ж<UDPAddr> Ꮡa) => net_package.isWildcardᴍ(Ꮡa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Addr opAddr(this ж<UDPAddr> Ꮡa) => net_package.opAddrᴍ(Ꮡa);
-}
-partial class netᴛaddrPortUDPAddr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Network(this addrPortUDPAddr _) => net_package.Networkᴍ(_);
-}
-partial class netᴛUDPConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (syscall.RawConn, error) SyscallConn(this ж<UDPConn> Ꮡc) => net_package.SyscallConnᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, ж<UDPAddr> addr, error err) ReadFromUDP(this ж<UDPConn> Ꮡc, slice<byte> b) => net_package.ReadFromUDPᴍ(Ꮡc, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, ж<UDPAddr>, error) readFromUDP(this ж<UDPConn> Ꮡc, slice<byte> b, ж<UDPAddr> Ꮡaddr) => net_package.readFromUDPᴍ(Ꮡc, b, Ꮡaddr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, Addr, error) ReadFrom(this ж<UDPConn> Ꮡc, slice<byte> b) => net_package.ReadFromᴍ(Ꮡc, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, netip.AddrPort addr, error err) ReadFromUDPAddrPort(this ж<UDPConn> Ꮡc, slice<byte> b) => net_package.ReadFromUDPAddrPortᴍ(Ꮡc, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, nint oobn, nint flags, ж<UDPAddr> addr, error err) ReadMsgUDP(this ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob) => net_package.ReadMsgUDPᴍ(Ꮡc, b, oob);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) ReadMsgUDPAddrPort(this ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob) => net_package.ReadMsgUDPAddrPortᴍ(Ꮡc, b, oob);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteToUDP(this ж<UDPConn> Ꮡc, slice<byte> b, ж<UDPAddr> addr) => net_package.WriteToUDPᴍ(Ꮡc, b, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteToUDPAddrPort(this ж<UDPConn> Ꮡc, slice<byte> b, netip.AddrPort addr) => net_package.WriteToUDPAddrPortᴍ(Ꮡc, b, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteTo(this ж<UDPConn> Ꮡc, slice<byte> b, Addr addr) => net_package.WriteToᴍ(Ꮡc, b, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, nint oobn, error err) WriteMsgUDP(this ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<UDPAddr> addr) => net_package.WriteMsgUDPᴍ(Ꮡc, b, oob, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, nint oobn, error err) WriteMsgUDPAddrPort(this ж<UDPConn> Ꮡc, slice<byte> b, slice<byte> oob, netip.AddrPort addr) => net_package.WriteMsgUDPAddrPortᴍ(Ꮡc, b, oob, addr);
-}
-// </GlyphForwarders>

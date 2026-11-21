@@ -73,7 +73,7 @@ private static readonly @string ecdsaUnsupportedCurveByˢᵇᴍPublicKey = "ecds
 // ECDH returns k as a [ecdh.PublicKey]. It returns an error if the key is
 // invalid according to the definition of [ecdh.Curve.NewPublicKey], or if the
 // Curve is not supported by crypto/ecdh.
-internal static (ж<ecdh.PublicKey>, error) ECDHᴍ(ж<PublicKey> Ꮡpub) {
+[GoMethodBody("ECDH")] internal static (ж<ecdh.PublicKey>, error) ECDHᴍ(ж<PublicKey> Ꮡpub) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     var c = curveToECDH(pub.Curve);
@@ -92,7 +92,7 @@ internal static (ж<ecdh.PublicKey>, error) ECDHᴍ(ж<PublicKey> Ꮡpub) {
 // Two keys are only considered to have the same value if they have the same Curve value.
 // Note that for example [elliptic.P256] and elliptic.P256().Params() are different
 // values, as the latter is a generic not constant time implementation.
-internal static bool Equalᴍ(ref PublicKey pub, cryptoꓸPublicKey x) {
+[GoMethodBody("Equal")] internal static bool Equalᴍ(ref PublicKey pub, cryptoꓸPublicKey x) {
     var (xx, ok) = x._<ж<PublicKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -176,7 +176,7 @@ private static readonly @string ecdsaCurveNotSupportedByˢ2ᵇᴍPublicKey = "ec
 //
 // Note that public keys are more commonly encoded in DER (or PEM) format, which
 // can be generated with [crypto/x509.MarshalPKIXPublicKey] (and [encoding/pem]).
-internal static (slice<byte>, error) Bytesᴍ(ж<PublicKey> Ꮡpub) {
+[GoMethodBody("Bytes")] internal static (slice<byte>, error) Bytesᴍ(ж<PublicKey> Ꮡpub) {
     ref var pub = ref Ꮡpub.DerefOrNull();
 
     switch (pub.Curve) {
@@ -232,7 +232,7 @@ private static readonly @string ecdsaUnsupportedCurveByˢᵇᴍPrivateKey = "ecd
 // ECDH returns k as a [ecdh.PrivateKey]. It returns an error if the key is
 // invalid according to the definition of [ecdh.Curve.NewPrivateKey], or if the
 // Curve is not supported by [crypto/ecdh].
-internal static (ж<ecdh.PrivateKey>, error) ECDHᴍ(ж<PrivateKey> Ꮡpriv) {
+[GoMethodBody("ECDH")] internal static (ж<ecdh.PrivateKey>, error) ECDHᴍ(ж<PrivateKey> Ꮡpriv) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     var c = curveToECDH(priv.Curve);
@@ -267,14 +267,14 @@ internal static ecdh.Curve curveToECDH(elliptic.Curve c) {
 } partial class ecdsa_package {
 
 // Public returns the public key corresponding to priv.
-internal static cryptoꓸPublicKey Publicᴍ(ж<PrivateKey> Ꮡpriv) {
+[GoMethodBody("Public")] internal static cryptoꓸPublicKey Publicᴍ(ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.ᏑPublicKey;
 }
 
 // Equal reports whether priv and x have the same value.
 //
 // See [PublicKey.Equal] for details on how Curve is compared.
-internal static bool Equalᴍ(ref PrivateKey priv, cryptoꓸPrivateKey x) {
+[GoMethodBody("Equal")] internal static bool Equalᴍ(ref PrivateKey priv, cryptoꓸPrivateKey x) {
     var (xx, ok) = x._<ж<PrivateKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -362,7 +362,7 @@ private static readonly @string ecdsaCurveNotSupportedByˢ4ᵇᴍPrivateKey = "e
 // Note that private keys are more commonly encoded in ASN.1 or PKCS#8 format,
 // which can be generated with [crypto/x509.MarshalECPrivateKey] or
 // [crypto/x509.MarshalPKCS8PrivateKey] (and [encoding/pem]).
-internal static (slice<byte>, error) Bytesᴍ(ж<PrivateKey> Ꮡpriv) {
+[GoMethodBody("Bytes")] internal static (slice<byte>, error) Bytesᴍ(ж<PrivateKey> Ꮡpriv) {
     ref var priv = ref Ꮡpriv.DerefOrNull();
 
     switch (priv.Curve) {
@@ -412,7 +412,7 @@ internal static (slice<byte>, error) privateKeyBytes<P>(ж<ecdsa.Curve<P>> c, ж
 // 6979. When producing a deterministic signature, opts.HashFunc() must be the
 // function used to produce digest and priv.Curve must be one of
 // [elliptic.P224], [elliptic.P256], [elliptic.P384], or [elliptic.P521].
-internal static (slice<byte>, error) Signᴍ(ж<PrivateKey> Ꮡpriv, io.Reader random, slice<byte> digest, crypto.SignerOpts opts) {
+[GoMethodBody("Sign")] internal static (slice<byte>, error) Signᴍ(ж<PrivateKey> Ꮡpriv, io.Reader random, slice<byte> digest, crypto.SignerOpts opts) {
     if (random == nil) {
         return signRFC6979(Ꮡpriv, digest, opts);
     }
@@ -820,18 +820,3 @@ internal static (ж<big.Int> x, ж<big.Int> y, error err) pointToAffine(elliptic
 }
 
 } // end ecdsa_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class ecdsaᴛPublicKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<ecdh.PublicKey>, error) ECDH(this ж<PublicKey> Ꮡpub) => ecdsa_package.ECDHᴍ(Ꮡpub);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) => ecdsa_package.Equalᴍ(ref pub, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Bytes(this ж<PublicKey> Ꮡpub) => ecdsa_package.Bytesᴍ(Ꮡpub);
-}
-partial class ecdsaᴛPrivateKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<ecdh.PrivateKey>, error) ECDH(this ж<PrivateKey> Ꮡpriv) => ecdsa_package.ECDHᴍ(Ꮡpriv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡpriv) => ecdsa_package.Publicᴍ(Ꮡpriv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) => ecdsa_package.Equalᴍ(ref priv, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Bytes(this ж<PrivateKey> Ꮡpriv) => ecdsa_package.Bytesᴍ(Ꮡpriv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader random, slice<byte> digest, crypto.SignerOpts opts) => ecdsa_package.Signᴍ(Ꮡpriv, random, digest, opts);
-}
-// </GlyphForwarders>

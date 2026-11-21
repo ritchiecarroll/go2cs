@@ -60,6 +60,15 @@ using static go.@internal.coverage.stringtab_package;
 
 namespace go.@internal.coverage;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using fmt = fmt_package;
+using slicereader = go.@internal.coverage.slicereader_package;
+using uleb128 = go.@internal.coverage.uleb128_package;
+using io = io_package;
+using go.@internal.coverage;
+using static stringtab_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("stringtab")]
 public static partial class stringtab_package
 {
@@ -97,3 +106,19 @@ public static partial class stringtab_package
 [GoMethodHost(typeof(stringtab_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringtabᴛReader;
 [GoMethodHost(typeof(stringtab_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringtabᴛWriter;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class stringtabᴛWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void InitWriter(this ref Writer stw) => stringtab_package.InitWriterᴍ(ref stw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Nentries(this ref Writer stw) => stringtab_package.Nentriesᴍ(ref stw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Lookup(this ref Writer stw, @string s) => stringtab_package.Lookupᴍ(ref stw, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Size(this ref Writer stw) => stringtab_package.Sizeᴍ(ref stw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ж<Writer> Ꮡstw, io.Writer w) => stringtab_package.Writeᴍ(Ꮡstw, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Freeze(this ref Writer stw) => stringtab_package.Freezeᴍ(ref stw);
+}
+partial class stringtabᴛReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Read(this ref Reader str) => stringtab_package.Readᴍ(ref str);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Entries(this ref Reader str) => stringtab_package.Entriesᴍ(ref str);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Get(this ref Reader str, uint32 idx) => stringtab_package.Getᴍ(ref str, idx);
+}
+// </GlyphForwarders>

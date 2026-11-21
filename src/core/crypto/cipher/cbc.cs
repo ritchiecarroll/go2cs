@@ -76,9 +76,9 @@ internal static BlockMode newCBCGenericEncrypter(Block b, slice<byte> iv) {
 
 } partial class cipher_package {
 
-internal static nint BlockSizeᴍ(ref cbcEncrypter x) { return x.blockSize; }
+[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref cbcEncrypter x) { return x.blockSize; }
 
-internal static void CryptBlocksᴍ(ref cbcEncrypter x, slice<byte> dst, slice<byte> src) {
+[GoMethodBody("CryptBlocks")] internal static void CryptBlocksᴍ(ref cbcEncrypter x, slice<byte> dst, slice<byte> src) {
     if (len(src) % x.blockSize != 0) {
         throw panic("crypto/cipher: input not full blocks");
     }
@@ -109,7 +109,7 @@ internal static void CryptBlocksᴍ(ref cbcEncrypter x, slice<byte> dst, slice<b
     copy(x.iv, iv);
 }
 
-internal static void SetIVᴍ(ref cbcEncrypter x, slice<byte> iv) {
+[GoMethodBody("SetIV")] internal static void SetIVᴍ(ref cbcEncrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }
@@ -159,9 +159,9 @@ internal static BlockMode newCBCGenericDecrypter(Block b, slice<byte> iv) {
 
 } partial class cipher_package {
 
-internal static nint BlockSizeᴍ(ref cbcDecrypter x) { return x.blockSize; }
+[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref cbcDecrypter x) { return x.blockSize; }
 
-internal static void CryptBlocksᴍ(ref cbcDecrypter x, slice<byte> dst, slice<byte> src) {
+[GoMethodBody("CryptBlocks")] internal static void CryptBlocksᴍ(ref cbcDecrypter x, slice<byte> dst, slice<byte> src) {
     if (len(src) % x.blockSize != 0) {
         throw panic("crypto/cipher: input not full blocks");
     }
@@ -205,7 +205,7 @@ internal static void CryptBlocksᴍ(ref cbcDecrypter x, slice<byte> dst, slice<b
     (x.iv, x.tmp) = (x.tmp, x.iv);
 }
 
-internal static void SetIVᴍ(ref cbcDecrypter x, slice<byte> iv) {
+[GoMethodBody("SetIV")] internal static void SetIVᴍ(ref cbcDecrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }
@@ -213,16 +213,3 @@ internal static void SetIVᴍ(ref cbcDecrypter x, slice<byte> iv) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class cipherᴛcbcEncrypter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref cbcEncrypter x) => cipher_package.BlockSizeᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void CryptBlocks(this ref cbcEncrypter x, slice<byte> dst, slice<byte> src) => cipher_package.CryptBlocksᴍ(ref x, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SetIV(this ref cbcEncrypter x, slice<byte> iv) => cipher_package.SetIVᴍ(ref x, iv);
-}
-partial class cipherᴛcbcDecrypter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref cbcDecrypter x) => cipher_package.BlockSizeᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void CryptBlocks(this ref cbcDecrypter x, slice<byte> dst, slice<byte> src) => cipher_package.CryptBlocksᴍ(ref x, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SetIV(this ref cbcDecrypter x, slice<byte> iv) => cipher_package.SetIVᴍ(ref x, iv);
-}
-// </GlyphForwarders>

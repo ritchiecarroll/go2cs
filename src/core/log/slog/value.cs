@@ -76,7 +76,7 @@ internal static slice<@string> kindStrings = [
 internal static ref readonly @string unknownSlogKindˢᴍKind => ref unknownSlogKindˢᵇᴍKind;
 private static readonly @string unknownSlogKindˢᵇᴍKind = "<unknown slog.Kind>"u8;
 
-internal static @string Stringᴍ(Kind k) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Kind k) {
     if (k >= 0 && (nint)k < len(kindStrings)) {
         return kindStrings[k];
     }
@@ -92,7 +92,7 @@ partial struct kind /*num:nint*/;
 } partial class slog_package {
 
 // Kind returns v's Kind.
-internal static Kind Kindᴍ(Value v) {
+[GoMethodBody("Kind")] internal static Kind Kindᴍ(Value v) {
     switch (v.any.type()) {
     case Kind x: {
         return x;
@@ -310,7 +310,7 @@ public static Value AnyValue(any v) {
 //////////////// Accessors
 
 // Any returns v's value as an any.
-internal static any Anyᴍ(Value v) {
+[GoMethodBody("Any")] internal static any Anyᴍ(Value v) {
     switch (v.Kind()) {
     case var ᴛ when ᴛ == KindAny: {
         var (k, ok) = v.any._<kind>(ᐧ); if (ok) {
@@ -354,7 +354,7 @@ internal static any Anyᴍ(Value v) {
 // String returns Value's value as a string, formatted like [fmt.Sprint]. Unlike
 // the methods Int64, Float64, and so on, which panic if v is of the
 // wrong kind, String never panics.
-internal static @string Stringᴍ(Value v) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Value v) {
     var (sp, ok) = v.any._<stringptr>(ᐧ); if (ok) {
         return @unsafe.String(sp, v.num);
     }
@@ -362,13 +362,13 @@ internal static @string Stringᴍ(Value v) {
     return (@string)v.append(buf);
 }
 
-internal static @string strᴍ(Value v) {
+[GoMethodBody("str")] internal static @string strᴍ(Value v) {
     return @unsafe.String(v.any._<stringptr>(), v.num);
 }
 
 // Int64 returns v's value as an int64. It panics
 // if v is not a signed integer.
-internal static int64 Int64ᴍ(Value v) {
+[GoMethodBody("Int64")] internal static int64 Int64ᴍ(Value v) {
     Kind g = v.Kind();
     Kind w = KindInt64; if (g != w) {
         throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
@@ -378,7 +378,7 @@ internal static int64 Int64ᴍ(Value v) {
 
 // Uint64 returns v's value as a uint64. It panics
 // if v is not an unsigned integer.
-internal static uint64 Uint64ᴍ(Value v) {
+[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(Value v) {
     Kind g = v.Kind();
     Kind w = KindUint64; if (g != w) {
         throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
@@ -388,7 +388,7 @@ internal static uint64 Uint64ᴍ(Value v) {
 
 // Bool returns v's value as a bool. It panics
 // if v is not a bool.
-internal static bool Boolᴍ(Value v) {
+[GoMethodBody("Bool")] internal static bool Boolᴍ(Value v) {
     Kind g = v.Kind();
     Kind w = KindBool; if (g != w) {
         throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
@@ -396,13 +396,13 @@ internal static bool Boolᴍ(Value v) {
     return v.@bool();
 }
 
-internal static bool @boolᴍ(Value v) {
+[GoMethodBody("bool")] internal static bool @boolᴍ(Value v) {
     return v.num == 1;
 }
 
 // Duration returns v's value as a [time.Duration]. It panics
 // if v is not a time.Duration.
-internal static time.Duration Durationᴍ(Value v) {
+[GoMethodBody("Duration")] internal static time.Duration Durationᴍ(Value v) {
     Kind g = v.Kind();
     Kind w = KindDuration; if (g != w) {
         throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
@@ -411,13 +411,13 @@ internal static time.Duration Durationᴍ(Value v) {
     return v.duration();
 }
 
-internal static time.Duration durationᴍ(Value v) {
+[GoMethodBody("duration")] internal static time.Duration durationᴍ(Value v) {
     return (time.Duration)(int64)v.num;
 }
 
 // Float64 returns v's value as a float64. It panics
 // if v is not a float64.
-internal static float64 Float64ᴍ(Value v) {
+[GoMethodBody("Float64")] internal static float64 Float64ᴍ(Value v) {
     Kind g = v.Kind();
     Kind w = KindFloat64; if (g != w) {
         throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
@@ -426,13 +426,13 @@ internal static float64 Float64ᴍ(Value v) {
     return v.@float();
 }
 
-internal static float64 @floatᴍ(Value v) {
+[GoMethodBody("float")] internal static float64 @floatᴍ(Value v) {
     return math.Float64frombits(v.num);
 }
 
 // Time returns v's value as a [time.Time]. It panics
 // if v is not a time.Time.
-internal static time.Time Timeᴍ(Value v) {
+[GoMethodBody("Time")] internal static time.Time Timeᴍ(Value v) {
     Kind g = v.Kind();
     Kind w = KindTime; if (g != w) {
         throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
@@ -441,7 +441,7 @@ internal static time.Time Timeᴍ(Value v) {
 }
 
 // See TimeValue to understand how times are represented.
-internal static time.Time timeᴍ(Value v) {
+[GoMethodBody("time")] internal static time.Time timeᴍ(Value v) {
     switch (v.any.type()) {
     case timeLocation a: {
         if (a == nil) {
@@ -461,27 +461,27 @@ internal static time.Time timeᴍ(Value v) {
 
 // LogValuer returns v's value as a LogValuer. It panics
 // if v is not a LogValuer.
-internal static LogValuer LogValuerᴍ(Value v) {
+[GoMethodBody("LogValuer")] internal static LogValuer LogValuerᴍ(Value v) {
     return v.any._<LogValuer>();
 }
 
 // Group returns v's value as a []Attr.
 // It panics if v's [Kind] is not [KindGroup].
-internal static slice<Attr> Groupᴍ(Value v) {
+[GoMethodBody("Group")] internal static slice<Attr> Groupᴍ(Value v) {
     var (sp, ok) = v.any._<groupptr>(ᐧ); if (ok) {
         return @unsafe.Slice((ж<Attr>)(sp), v.num);
     }
     throw panic("Group: bad kind");
 }
 
-internal static slice<Attr> groupᴍ(Value v) {
+[GoMethodBody("group")] internal static slice<Attr> groupᴍ(Value v) {
     return @unsafe.Slice((ж<Attr>)(v.any._<groupptr>()), v.num);
 }
 
 //////////////// Other
 
 // Equal reports whether v and w represent the same Go value.
-internal static bool Equalᴍ(Value v, Value w) {
+[GoMethodBody("Equal")] internal static bool Equalᴍ(Value v, Value w) {
     Kind k1 = v.Kind();
     Kind k2 = w.Kind();
     if (k1 != k2) {
@@ -513,7 +513,7 @@ internal static bool Equalᴍ(Value v, Value w) {
 }
 
 // isEmptyGroup reports whether v is a group that has no attributes.
-internal static bool isEmptyGroupᴍ(Value v) {
+[GoMethodBody("isEmptyGroup")] internal static bool isEmptyGroupᴍ(Value v) {
     if (v.Kind() != KindGroup) {
         return false;
     }
@@ -525,7 +525,7 @@ internal static bool isEmptyGroupᴍ(Value v) {
 
 // append appends a text representation of v to dst.
 // v is formatted as with fmt.Sprint.
-internal static slice<byte> appendᴍ(Value v, slice<byte> dst) {
+[GoMethodBody("append")] internal static slice<byte> appendᴍ(Value v, slice<byte> dst) {
     switch (v.Kind()) {
     case var ᴛ when ᴛ == KindString: {
         return builtin.append(dst, v.str().ꓸꓸꓸ);
@@ -581,7 +581,7 @@ internal static UntypedInt maxLogValues => 100;
 // If the number of LogValue calls exceeds a threshold, a Value containing an
 // error is returned.
 // Resolve's return value is guaranteed not to be of Kind [KindLogValuer].
-internal static Value /*rv*/ Resolveᴍ(Value v) {
+[GoMethodBody("Resolve")] internal static Value /*rv*/ Resolveᴍ(Value v) {
     Value rv = default;
     GoFrame ᒐ = default;
     try {
@@ -637,32 +637,3 @@ internal static partial @string stack(nint skip, nint nFrames) {
 }
 
 } // end slog_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class slogᴛKind {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Kind k) => slog_package.Stringᴍ(k);
-}
-partial class slogᴛValue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Kind Kind(this Value v) => slog_package.Kindᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static any Any(this Value v) => slog_package.Anyᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Value v) => slog_package.Stringᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string str(this Value v) => slog_package.strᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Int64(this Value v) => slog_package.Int64ᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Uint64(this Value v) => slog_package.Uint64ᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Bool(this Value v) => slog_package.Boolᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool @bool(this Value v) => slog_package.@boolᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static time.Duration Duration(this Value v) => slog_package.Durationᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Duration duration(this Value v) => slog_package.durationᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 Float64(this Value v) => slog_package.Float64ᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static float64 @float(this Value v) => slog_package.@floatᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static time.Time Time(this Value v) => slog_package.Timeᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Time time(this Value v) => slog_package.timeᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static LogValuer LogValuer(this Value v) => slog_package.LogValuerᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<Attr> Group(this Value v) => slog_package.Groupᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Attr> group(this Value v) => slog_package.groupᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this Value v, Value w) => slog_package.Equalᴍ(v, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isEmptyGroup(this Value v) => slog_package.isEmptyGroupᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> append(this Value v, slice<byte> dst) => slog_package.appendᴍ(v, dst);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Value /*rv*/ Resolve(this Value v) => slog_package.Resolveᴍ(v);
-}
-// </GlyphForwarders>

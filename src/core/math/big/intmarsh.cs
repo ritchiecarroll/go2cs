@@ -17,7 +17,7 @@ internal const byte intGobVersion = 1;
 } partial class big_package {
 
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
-internal static (slice<byte>, error) GobEncodeᴍ(ж<Int> Ꮡx) {
+[GoMethodBody("GobEncode")] internal static (slice<byte>, error) GobEncodeᴍ(ж<Int> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
@@ -34,7 +34,7 @@ internal static (slice<byte>, error) GobEncodeᴍ(ж<Int> Ꮡx) {
 }
 
 // GobDecode implements the [encoding/gob.GobDecoder] interface.
-internal static error GobDecodeᴍ(ref Int z, slice<byte> buf) {
+[GoMethodBody("GobDecode")] internal static error GobDecodeᴍ(ref Int z, slice<byte> buf) {
     if (len(buf) == 0) {
         // Other side sent a nil or default value.
         z = new Int();
@@ -50,17 +50,17 @@ internal static error GobDecodeᴍ(ref Int z, slice<byte> buf) {
 }
 
 // AppendText implements the [encoding.TextAppender] interface.
-internal static (slice<byte> text, error err) AppendTextᴍ(ж<Int> Ꮡx, slice<byte> b) {
+[GoMethodBody("AppendText")] internal static (slice<byte> text, error err) AppendTextᴍ(ж<Int> Ꮡx, slice<byte> b) {
     return (Ꮡx.Append(b, 10), default);
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-internal static (slice<byte> text, error err) MarshalTextᴍ(ж<Int> Ꮡx) {
+[GoMethodBody("MarshalText")] internal static (slice<byte> text, error err) MarshalTextᴍ(ж<Int> Ꮡx) {
     return Ꮡx.AppendText(default);
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-internal static error UnmarshalTextᴍ(ж<Int> Ꮡz, slice<byte> text) {
+[GoMethodBody("UnmarshalText")] internal static error UnmarshalTextᴍ(ж<Int> Ꮡz, slice<byte> text) {
     var (_, ok) = Ꮡz.setFromScanner(new bytes_ReaderжByteScanner(bytes.NewReader(text)), 0); if (!ok) {
         return fmt.Errorf("math/big: cannot unmarshal %q into a *big.Int"u8, text);
     }
@@ -72,7 +72,7 @@ internal static error UnmarshalTextᴍ(ж<Int> Ꮡz, slice<byte> text) {
 // fine with the TextMarshaler only.
 
 // MarshalJSON implements the [encoding/json.Marshaler] interface.
-internal static (slice<byte>, error) MarshalJSONᴍ(ж<Int> Ꮡx) {
+[GoMethodBody("MarshalJSON")] internal static (slice<byte>, error) MarshalJSONᴍ(ж<Int> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
@@ -82,7 +82,7 @@ internal static (slice<byte>, error) MarshalJSONᴍ(ж<Int> Ꮡx) {
 }
 
 // UnmarshalJSON implements the [encoding/json.Unmarshaler] interface.
-internal static error UnmarshalJSONᴍ(ж<Int> Ꮡz, slice<byte> text) {
+[GoMethodBody("UnmarshalJSON")] internal static error UnmarshalJSONᴍ(ж<Int> Ꮡz, slice<byte> text) {
     // Ignore null, like in the main JSON package.
     if (((sstring)text) == "null"u8) {
         return default;
@@ -91,15 +91,3 @@ internal static error UnmarshalJSONᴍ(ж<Int> Ꮡz, slice<byte> text) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class bigᴛInt {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) GobEncode(this ж<Int> Ꮡx) => big_package.GobEncodeᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error GobDecode(this ref Int z, slice<byte> buf) => big_package.GobDecodeᴍ(ref z, buf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> text, error err) AppendText(this ж<Int> Ꮡx, slice<byte> b) => big_package.AppendTextᴍ(Ꮡx, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> text, error err) MarshalText(this ж<Int> Ꮡx) => big_package.MarshalTextᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalText(this ж<Int> Ꮡz, slice<byte> text) => big_package.UnmarshalTextᴍ(Ꮡz, text);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalJSON(this ж<Int> Ꮡx) => big_package.MarshalJSONᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalJSON(this ж<Int> Ꮡz, slice<byte> text) => big_package.UnmarshalJSONᴍ(Ꮡz, text);
-}
-// </GlyphForwarders>

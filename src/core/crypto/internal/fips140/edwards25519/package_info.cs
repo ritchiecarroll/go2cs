@@ -74,6 +74,21 @@ using static go.crypto.@internal.fips140.edwards25519_package;
 
 namespace go.crypto.@internal.fips140;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using field = go.crypto.@internal.fips140.edwards25519.field_package;
+using errors = errors_package;
+using go.crypto.@internal.fips140.edwards25519;
+using ꓸꓸꓸжPoint = Span<ж<edwards25519_package.Point>>;
+using static edwards25519_package;
+using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
+using bits = math.bits_package;
+using go.crypto.@internal.fips140deps;
+using math;
+using sync = sync_package;
+using constanttime = go.crypto.@internal.constanttime_package;
+using go.crypto.@internal;
+// </GlyphForwarderUsings>
+
 [GoPackage("edwards25519")]
 public static partial class edwards25519_package
 {
@@ -136,3 +151,80 @@ public static partial class edwards25519_package
 [GoMethodHost(typeof(edwards25519_package.projP1xP1)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛprojP1xP1;
 [GoMethodHost(typeof(edwards25519_package.projP2)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛprojP2;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class edwards25519ᴛprojP2 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<projP2> Zero(this ж<projP2> Ꮡv) => edwards25519_package.Zeroᴍ(Ꮡv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<projP2> FromP1xP1(this ж<projP2> Ꮡv, ж<projP1xP1> p) => edwards25519_package.FromP1xP1ᴍ(Ꮡv, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<projP2> FromP3(this ж<projP2> Ꮡv, ж<Point> p) => edwards25519_package.FromP3ᴍ(Ꮡv, p);
+}
+partial class edwards25519ᴛprojCached {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<projCached> Zero(this ж<projCached> Ꮡv) => edwards25519_package.Zeroᴍ(Ꮡv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<projCached> FromP3(this ж<projCached> Ꮡv, ж<Point> p) => edwards25519_package.FromP3ᴍ(Ꮡv, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<projCached> Select(this ж<projCached> Ꮡv, ж<projCached> a, ж<projCached> b, nint cond) => edwards25519_package.Selectᴍ(Ꮡv, a, b, cond);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<projCached> CondNeg(this ж<projCached> Ꮡv, nint cond) => edwards25519_package.CondNegᴍ(Ꮡv, cond);
+}
+partial class edwards25519ᴛaffineCached {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<affineCached> Zero(this ж<affineCached> Ꮡv) => edwards25519_package.Zeroᴍ(Ꮡv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<affineCached> FromP3(this ж<affineCached> Ꮡv, ж<Point> p) => edwards25519_package.FromP3ᴍ(Ꮡv, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<affineCached> Select(this ж<affineCached> Ꮡv, ж<affineCached> a, ж<affineCached> b, nint cond) => edwards25519_package.Selectᴍ(Ꮡv, a, b, cond);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<affineCached> CondNeg(this ж<affineCached> Ꮡv, nint cond) => edwards25519_package.CondNegᴍ(Ꮡv, cond);
+}
+partial class edwards25519ᴛPoint {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Point> Set(this ж<Point> Ꮡv, ж<Point> Ꮡu) => edwards25519_package.Setᴍ(Ꮡv, Ꮡu);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ж<Point> Ꮡv) => edwards25519_package.Bytesᴍ(Ꮡv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytes(this ж<Point> Ꮡv, /*[32]*/ ж<array<byte>> buf) => edwards25519_package.bytesᴍ(Ꮡv, buf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Point>, error) SetBytes(this ж<Point> Ꮡv, slice<byte> x) => edwards25519_package.SetBytesᴍ(Ꮡv, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Point> fromP1xP1(this ж<Point> Ꮡv, ж<projP1xP1> p) => edwards25519_package.fromP1xP1ᴍ(Ꮡv, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Point> fromP2(this ж<Point> Ꮡv, ж<projP2> p) => edwards25519_package.fromP2ᴍ(Ꮡv, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Point> Add(this ж<Point> Ꮡv, ж<Point> p, ж<Point> q) => edwards25519_package.Addᴍ(Ꮡv, p, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Point> Subtract(this ж<Point> Ꮡv, ж<Point> p, ж<Point> q) => edwards25519_package.Subtractᴍ(Ꮡv, p, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Point> Negate(this ж<Point> Ꮡv, ж<Point> p) => edwards25519_package.Negateᴍ(Ꮡv, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Equal(this ж<Point> Ꮡv, ж<Point> u) => edwards25519_package.Equalᴍ(Ꮡv, u);
+}
+partial class edwards25519ᴛprojP1xP1 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<projP1xP1> Add(this ж<projP1xP1> Ꮡv, ж<Point> p, ж<projCached> q) => edwards25519_package.Addᴍ(Ꮡv, p, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<projP1xP1> Sub(this ж<projP1xP1> Ꮡv, ж<Point> p, ж<projCached> q) => edwards25519_package.Subᴍ(Ꮡv, p, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<projP1xP1> AddAffine(this ж<projP1xP1> Ꮡv, ж<Point> p, ж<affineCached> q) => edwards25519_package.AddAffineᴍ(Ꮡv, p, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<projP1xP1> SubAffine(this ж<projP1xP1> Ꮡv, ж<Point> p, ж<affineCached> q) => edwards25519_package.SubAffineᴍ(Ꮡv, p, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<projP1xP1> Double(this ж<projP1xP1> Ꮡv, ж<projP2> p) => edwards25519_package.Doubleᴍ(Ꮡv, p);
+}
+partial class edwards25519ᴛScalar {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scalar> MultiplyAdd(this ж<Scalar> Ꮡs, ж<Scalar> x, ж<Scalar> y, ж<Scalar> z) => edwards25519_package.MultiplyAddᴍ(Ꮡs, x, y, z);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scalar> Add(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) => edwards25519_package.Addᴍ(Ꮡs, Ꮡx, Ꮡy);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scalar> Subtract(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) => edwards25519_package.Subtractᴍ(Ꮡs, Ꮡx, Ꮡy);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scalar> Negate(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) => edwards25519_package.Negateᴍ(Ꮡs, Ꮡx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scalar> Multiply(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) => edwards25519_package.Multiplyᴍ(Ꮡs, Ꮡx, Ꮡy);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scalar> Set(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) => edwards25519_package.Setᴍ(Ꮡs, Ꮡx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Scalar>, error) SetUniformBytes(this ж<Scalar> Ꮡs, slice<byte> x) => edwards25519_package.SetUniformBytesᴍ(Ꮡs, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Scalar> setShortBytes(this ж<Scalar> Ꮡs, slice<byte> x) => edwards25519_package.setShortBytesᴍ(Ꮡs, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Scalar>, error) SetCanonicalBytes(this ж<Scalar> Ꮡs, slice<byte> x) => edwards25519_package.SetCanonicalBytesᴍ(Ꮡs, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Scalar>, error) SetBytesWithClamping(this ж<Scalar> Ꮡs, slice<byte> x) => edwards25519_package.SetBytesWithClampingᴍ(Ꮡs, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ж<Scalar> Ꮡs) => edwards25519_package.Bytesᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytes(this ж<Scalar> Ꮡs, /*[32]*/ ж<array<byte>> Ꮡout) => edwards25519_package.bytesᴍ(Ꮡs, Ꮡout);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Equal(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡt) => edwards25519_package.Equalᴍ(Ꮡs, Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) => edwards25519_package.nonAdjacentFormᴍ(Ꮡs, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static array<int8> signedRadix16(this ж<Scalar> Ꮡs) => edwards25519_package.signedRadix16ᴍ(Ꮡs);
+}
+partial class edwards25519ᴛPoint {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> x) => edwards25519_package.ScalarBaseMultᴍ(Ꮡv, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Point> ScalarMult(this ж<Point> Ꮡv, ж<Scalar> x, ж<Point> q) => edwards25519_package.ScalarMultᴍ(Ꮡv, x, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> a, ж<Point> A, ж<Scalar> b) => edwards25519_package.VarTimeDoubleScalarBaseMultᴍ(Ꮡv, a, A, b);
+}
+partial class edwards25519ᴛprojLookupTable {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void FromP3(this ref projLookupTable v, ж<Point> q) => edwards25519_package.FromP3ᴍ(ref v, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SelectInto(this ref projLookupTable v, ж<projCached> dest, int8 x) => edwards25519_package.SelectIntoᴍ(ref v, dest, x);
+}
+partial class edwards25519ᴛaffineLookupTable {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void FromP3(this ref affineLookupTable v, ж<Point> q) => edwards25519_package.FromP3ᴍ(ref v, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SelectInto(this ref affineLookupTable v, ж<affineCached> dest, int8 x) => edwards25519_package.SelectIntoᴍ(ref v, dest, x);
+}
+partial class edwards25519ᴛnafLookupTable5 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void FromP3(this ref nafLookupTable5 v, ж<Point> q) => edwards25519_package.FromP3ᴍ(ref v, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SelectInto(this ref nafLookupTable5 v, ж<projCached> Ꮡdest, int8 x) => edwards25519_package.SelectIntoᴍ(ref v, Ꮡdest, x);
+}
+partial class edwards25519ᴛnafLookupTable8 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void FromP3(this ref nafLookupTable8 v, ж<Point> q) => edwards25519_package.FromP3ᴍ(ref v, q);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SelectInto(this ref nafLookupTable8 v, ж<affineCached> Ꮡdest, int8 x) => edwards25519_package.SelectIntoᴍ(ref v, Ꮡdest, x);
+}
+// </GlyphForwarders>

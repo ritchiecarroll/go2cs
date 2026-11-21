@@ -136,7 +136,7 @@ internal static ж<boolValue> newBoolValue(bool val, ж<bool> Ꮡp) {
 
 } partial class flag_package {
 
-internal static error Setᴍ(ref boolValue b, @string s) {
+[GoMethodBody("Set")] internal static error Setᴍ(ref boolValue b, @string s) {
     var (v, err) = strconv.ParseBool(s);
     if (err != nil) {
         err = errParse;
@@ -145,11 +145,11 @@ internal static error Setᴍ(ref boolValue b, @string s) {
     return err;
 }
 
-internal static any Getᴍ(ref boolValue b) { return (bool)(b); }
+[GoMethodBody("Get")] internal static any Getᴍ(ref boolValue b) { return (bool)(b); }
 
-internal static @string Stringᴍ(ref boolValue b) { return strconv.FormatBool((bool)(b)); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ref boolValue b) { return strconv.FormatBool((bool)(b)); }
 
-internal static bool IsBoolFlagᴍ(ref boolValue b) { return true; }
+[GoMethodBody("IsBoolFlag")] internal static bool IsBoolFlagᴍ(ref boolValue b) { return true; }
 
 } partial class flag_package {
 
@@ -173,7 +173,7 @@ internal static ж<intValue> newIntValue(nint val, ж<nint> Ꮡp) {
 
 } partial class flag_package {
 
-internal static error Setᴍ(ref intValue i, @string s) {
+[GoMethodBody("Set")] internal static error Setᴍ(ref intValue i, @string s) {
     var (v, err) = strconv.ParseInt(s, 0, strconv.IntSize);
     if (err != nil) {
         err = numError(err);
@@ -182,9 +182,9 @@ internal static error Setᴍ(ref intValue i, @string s) {
     return err;
 }
 
-internal static any Getᴍ(ref intValue i) { return (nint)(i); }
+[GoMethodBody("Get")] internal static any Getᴍ(ref intValue i) { return (nint)(i); }
 
-internal static @string Stringᴍ(ref intValue i) { return strconv.Itoa((nint)(i)); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ref intValue i) { return strconv.Itoa((nint)(i)); }
 
 } partial class flag_package {
 
@@ -200,7 +200,7 @@ internal static ж<int64Value> newInt64Value(int64 val, ж<int64> Ꮡp) {
 
 } partial class flag_package {
 
-internal static error Setᴍ(ref int64Value i, @string s) {
+[GoMethodBody("Set")] internal static error Setᴍ(ref int64Value i, @string s) {
     var (v, err) = strconv.ParseInt(s, 0, 64);
     if (err != nil) {
         err = numError(err);
@@ -209,9 +209,9 @@ internal static error Setᴍ(ref int64Value i, @string s) {
     return err;
 }
 
-internal static any Getᴍ(ref int64Value i) { return (int64)(i); }
+[GoMethodBody("Get")] internal static any Getᴍ(ref int64Value i) { return (int64)(i); }
 
-internal static @string Stringᴍ(ref int64Value i) { return strconv.FormatInt((int64)(i), 10); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ref int64Value i) { return strconv.FormatInt((int64)(i), 10); }
 
 } partial class flag_package {
 
@@ -227,7 +227,7 @@ internal static ж<uintValue> newUintValue(nuint val, ж<nuint> Ꮡp) {
 
 } partial class flag_package {
 
-internal static error Setᴍ(ref uintValue i, @string s) {
+[GoMethodBody("Set")] internal static error Setᴍ(ref uintValue i, @string s) {
     var (v, err) = strconv.ParseUint(s, 0, strconv.IntSize);
     if (err != nil) {
         err = numError(err);
@@ -236,9 +236,9 @@ internal static error Setᴍ(ref uintValue i, @string s) {
     return err;
 }
 
-internal static any Getᴍ(ref uintValue i) { return (nuint)(i); }
+[GoMethodBody("Get")] internal static any Getᴍ(ref uintValue i) { return (nuint)(i); }
 
-internal static @string Stringᴍ(ref uintValue i) { return strconv.FormatUint((uint64)(i), 10); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ref uintValue i) { return strconv.FormatUint((uint64)(i), 10); }
 
 } partial class flag_package {
 
@@ -254,7 +254,7 @@ internal static ж<uint64Value> newUint64Value(uint64 val, ж<uint64> Ꮡp) {
 
 } partial class flag_package {
 
-internal static error Setᴍ(ref uint64Value i, @string s) {
+[GoMethodBody("Set")] internal static error Setᴍ(ref uint64Value i, @string s) {
     var (v, err) = strconv.ParseUint(s, 0, 64);
     if (err != nil) {
         err = numError(err);
@@ -263,9 +263,9 @@ internal static error Setᴍ(ref uint64Value i, @string s) {
     return err;
 }
 
-internal static any Getᴍ(ref uint64Value i) { return (uint64)(i); }
+[GoMethodBody("Get")] internal static any Getᴍ(ref uint64Value i) { return (uint64)(i); }
 
-internal static @string Stringᴍ(ref uint64Value i) { return strconv.FormatUint((uint64)(i), 10); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ref uint64Value i) { return strconv.FormatUint((uint64)(i), 10); }
 
 } partial class flag_package {
 
@@ -281,14 +281,14 @@ internal static ж<stringValue> newStringValue(@string val, ж<@string> Ꮡp) {
 
 } partial class flag_package {
 
-internal static error Setᴍ(ref stringValue s, @string val) {
+[GoMethodBody("Set")] internal static error Setᴍ(ref stringValue s, @string val) {
     s = (stringValue)val;
     return default;
 }
 
-internal static any Getᴍ(ref stringValue s) { return (@string)(s); }
+[GoMethodBody("Get")] internal static any Getᴍ(ref stringValue s) { return (@string)(s); }
 
-internal static @string Stringᴍ(ref stringValue s) { return (@string)(s); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ref stringValue s) { return (@string)(s); }
 
 } partial class flag_package {
 
@@ -304,7 +304,7 @@ internal static ж<float64Value> newFloat64Value(float64 val, ж<float64> Ꮡp) 
 
 } partial class flag_package {
 
-internal static error Setᴍ(ref float64Value f, @string s) {
+[GoMethodBody("Set")] internal static error Setᴍ(ref float64Value f, @string s) {
     var (v, err) = strconv.ParseFloat(s, 64);
     if (err != nil) {
         err = numError(err);
@@ -313,9 +313,9 @@ internal static error Setᴍ(ref float64Value f, @string s) {
     return err;
 }
 
-internal static any Getᴍ(ref float64Value f) { return (float64)(f); }
+[GoMethodBody("Get")] internal static any Getᴍ(ref float64Value f) { return (float64)(f); }
 
-internal static @string Stringᴍ(ref float64Value f) { return strconv.FormatFloat((float64)(f), (byte)'g', -1, 64); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ref float64Value f) { return strconv.FormatFloat((float64)(f), (byte)'g', -1, 64); }
 
 } partial class flag_package {
 
@@ -331,7 +331,7 @@ internal static ж<durationValue> newDurationValue(time.Duration val, ж<time.Du
 
 } partial class flag_package {
 
-internal static error Setᴍ(ref durationValue d, @string s) {
+[GoMethodBody("Set")] internal static error Setᴍ(ref durationValue d, @string s) {
     var (v, err) = time.ParseDuration(s);
     if (err != nil) {
         err = errParse;
@@ -340,9 +340,9 @@ internal static error Setᴍ(ref durationValue d, @string s) {
     return err;
 }
 
-internal static any Getᴍ(ref durationValue d) { return (time.Duration)d; }
+[GoMethodBody("Get")] internal static any Getᴍ(ref durationValue d) { return (time.Duration)d; }
 
-internal static @string Stringᴍ(ж<durationValue> Ꮡd) { return (Ꮡd.Reinterpret<durationValue, time.Duration>()).Value.String(); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<durationValue> Ꮡd) { return (Ꮡd.Reinterpret<durationValue, time.Duration>()).Value.String(); }
 
 } partial class flag_package {
 
@@ -369,15 +369,15 @@ internal static textValue newTextValue(encoding.TextMarshaler val, encoding.Text
 
 } partial class flag_package {
 
-internal static error Setᴍ(textValue v, @string s) {
+[GoMethodBody("Set")] internal static error Setᴍ(textValue v, @string s) {
     return v.p.UnmarshalText(slice<byte>(s));
 }
 
-internal static any Getᴍ(textValue v) {
+[GoMethodBody("Get")] internal static any Getᴍ(textValue v) {
     return v.p;
 }
 
-internal static @string Stringᴍ(textValue v) {
+[GoMethodBody("String")] internal static @string Stringᴍ(textValue v) {
     var (m, ok) = v.p._<encoding.TextMarshaler>(ᐧ); if (ok) {
         var (b, err) = m.MarshalText(); if (err == nil) {
             return (@string)b;
@@ -393,9 +393,9 @@ internal delegate error funcValue(@string _);
 
 } partial class flag_package {
 
-internal static partial error Setᴍ(funcValue f, @string s) { return f(s); }
+[GoMethodBody("Set")] internal static partial error Setᴍ(funcValue f, @string s) { return f(s); }
 
-internal static @string Stringᴍ(funcValue f) { return ""u8; }
+[GoMethodBody("String")] internal static @string Stringᴍ(funcValue f) { return ""u8; }
 
 } partial class flag_package {
 
@@ -404,11 +404,11 @@ internal delegate error boolFuncValue(@string _);
 
 } partial class flag_package {
 
-internal static partial error Setᴍ(boolFuncValue f, @string s) { return f(s); }
+[GoMethodBody("Set")] internal static partial error Setᴍ(boolFuncValue f, @string s) { return f(s); }
 
-internal static @string Stringᴍ(boolFuncValue f) { return ""u8; }
+[GoMethodBody("String")] internal static @string Stringᴍ(boolFuncValue f) { return ""u8; }
 
-internal static bool IsBoolFlagᴍ(boolFuncValue f) { return true; }
+[GoMethodBody("IsBoolFlag")] internal static bool IsBoolFlagᴍ(boolFuncValue f) { return true; }
 
 } partial class flag_package {
 
@@ -492,7 +492,7 @@ internal static slice<ж<Flag>> sortFlags(map<@string, ж<Flag>> flags) {
 
 // Output returns the destination for usage and error messages. [os.Stderr] is returned if
 // output was not set or was set to nil.
-internal static Δio.Writer Outputᴍ(ref FlagSet f) {
+[GoMethodBody("Output")] internal static Δio.Writer Outputᴍ(ref FlagSet f) {
     if (f.output == nil) {
         return new os.FileжWriter(os.Stderr);
     }
@@ -500,24 +500,24 @@ internal static Δio.Writer Outputᴍ(ref FlagSet f) {
 }
 
 // Name returns the name of the flag set.
-internal static @string Nameᴍ(ref FlagSet f) {
+[GoMethodBody("Name")] internal static @string Nameᴍ(ref FlagSet f) {
     return f.name;
 }
 
 // ErrorHandling returns the error handling behavior of the flag set.
-internal static ErrorHandling ErrorHandlingᴍ(ref FlagSet f) {
+[GoMethodBody("ErrorHandling")] internal static ErrorHandling ErrorHandlingᴍ(ref FlagSet f) {
     return f.errorHandling;
 }
 
 // SetOutput sets the destination for usage and error messages.
 // If output is nil, [os.Stderr] is used.
-internal static void SetOutputᴍ(ref FlagSet f, Δio.Writer output) {
+[GoMethodBody("SetOutput")] internal static void SetOutputᴍ(ref FlagSet f, Δio.Writer output) {
     f.output = output;
 }
 
 // VisitAll visits the flags in lexicographical order, calling fn for each.
 // It visits all flags, even those not set.
-internal static void VisitAllᴍ(ref FlagSet f, Action<ж<Flag>> fn) {
+[GoMethodBody("VisitAll")] internal static void VisitAllᴍ(ref FlagSet f, Action<ж<Flag>> fn) {
     foreach (var (_, flag) in range(sortFlags(f.formal))) {
         fn(flag);
     }
@@ -535,7 +535,7 @@ public static void VisitAll(Action<ж<Flag>> fn) {
 
 // Visit visits the flags in lexicographical order, calling fn for each.
 // It visits only those flags that have been set.
-internal static void Visitᴍ(ref FlagSet f, Action<ж<Flag>> fn) {
+[GoMethodBody("Visit")] internal static void Visitᴍ(ref FlagSet f, Action<ж<Flag>> fn) {
     foreach (var (_, flag) in range(sortFlags(f.actual))) {
         fn(flag);
     }
@@ -552,7 +552,7 @@ public static void Visit(Action<ж<Flag>> fn) {
 } partial class flag_package {
 
 // Lookup returns the [Flag] structure of the named flag, returning nil if none exists.
-internal static ж<Flag> Lookupᴍ(ref FlagSet f, @string name) {
+[GoMethodBody("Lookup")] internal static ж<Flag> Lookupᴍ(ref FlagSet f, @string name) {
     return f.formal[name];
 }
 
@@ -567,10 +567,10 @@ public static ж<Flag> Lookup(@string name) {
 } partial class flag_package {
 
 // Set sets the value of the named flag.
-internal static partial error Setᴍ(ref FlagSet f, @string name, @string value) {
+[GoMethodBody("Set")] internal static partial error Setᴍ(ref FlagSet f, @string name, @string value) {
     return f.set(name, value);
 }
-internal static partial error setᴍ(ref FlagSet f, @string name, @string value) {
+[GoMethodBody("set")] internal static partial error setᴍ(ref FlagSet f, @string name, @string value) {
     var (flag, ok) = f.formal[name, ꟷ];
     if (!ok) {
         // Remember that a flag that isn't defined is being set.
@@ -727,7 +727,7 @@ public static (@string name, @string usage) UnquoteUsage(ж<Flag> Ꮡflag) {
 // PrintDefaults prints, to standard error unless configured otherwise, the
 // default values of all defined command-line flags in the set. See the
 // documentation for the global function PrintDefaults for more information.
-internal static void PrintDefaultsᴍ(ж<FlagSet> Ꮡf) {
+[GoMethodBody("PrintDefaults")] internal static void PrintDefaultsᴍ(ж<FlagSet> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     ref var isZeroValueErrs = ref heap<slice<error>>(out var ᏑisZeroValueErrs);
@@ -810,7 +810,7 @@ public static void PrintDefaults() {
 } partial class flag_package {
 
 // defaultUsage is the default function to print a usage message.
-internal static void defaultUsageᴍ(ж<FlagSet> Ꮡf) {
+[GoMethodBody("defaultUsage")] internal static void defaultUsageᴍ(ж<FlagSet> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (f.name == ""u8) {
@@ -845,7 +845,7 @@ public static ref Action Usage => ref ((StaticBox<Action>)ᏑUsage).ValueSlot;
 } partial class flag_package {
 
 // NFlag returns the number of flags that have been set.
-internal static nint NFlagᴍ(ref FlagSet f) { return len(f.actual); }
+[GoMethodBody("NFlag")] internal static nint NFlagᴍ(ref FlagSet f) { return len(f.actual); }
 
 } partial class flag_package {
 
@@ -857,7 +857,7 @@ public static nint NFlag() { return len(CommandLine.actual); }
 // Arg returns the i'th argument. Arg(0) is the first remaining argument
 // after flags have been processed. Arg returns an empty string if the
 // requested element does not exist.
-internal static @string Argᴍ(ref FlagSet f, nint i) {
+[GoMethodBody("Arg")] internal static @string Argᴍ(ref FlagSet f, nint i) {
     if (i < 0 || i >= len(f.args)) {
         return ""u8;
     }
@@ -876,7 +876,7 @@ public static @string Arg(nint i) {
 } partial class flag_package {
 
 // NArg is the number of arguments remaining after flags have been processed.
-internal static nint NArgᴍ(ref FlagSet f) { return len(f.args); }
+[GoMethodBody("NArg")] internal static nint NArgᴍ(ref FlagSet f) { return len(f.args); }
 
 } partial class flag_package {
 
@@ -886,7 +886,7 @@ public static nint NArg() { return len(CommandLine.args); }
 } partial class flag_package {
 
 // Args returns the non-flag arguments.
-internal static slice<@string> Argsᴍ(ref FlagSet f) { return f.args; }
+[GoMethodBody("Args")] internal static slice<@string> Argsᴍ(ref FlagSet f) { return f.args; }
 
 } partial class flag_package {
 
@@ -897,7 +897,7 @@ public static slice<@string> Args() { return CommandLine.args; }
 
 // BoolVar defines a bool flag with specified name, default value, and usage string.
 // The argument p points to a bool variable in which to store the value of the flag.
-internal static void BoolVarᴍ(ref FlagSet f, ж<bool> p, @string name, bool value, @string usage) {
+[GoMethodBody("BoolVar")] internal static void BoolVarᴍ(ref FlagSet f, ж<bool> p, @string name, bool value, @string usage) {
     f.Var(new boolValueжValue(newBoolValue(value, p)), name, usage);
 }
 
@@ -913,7 +913,7 @@ public static void BoolVar(ж<bool> p, @string name, bool value, @string usage) 
 
 // Bool defines a bool flag with specified name, default value, and usage string.
 // The return value is the address of a bool variable that stores the value of the flag.
-internal static ж<bool> Boolᴍ(ref FlagSet f, @string name, bool value, @string usage) {
+[GoMethodBody("Bool")] internal static ж<bool> Boolᴍ(ref FlagSet f, @string name, bool value, @string usage) {
     var p = @new<bool>();
     f.BoolVar(p, name, value, usage);
     return p;
@@ -931,7 +931,7 @@ public static ж<bool> Bool(@string name, bool value, @string usage) {
 
 // IntVar defines an int flag with specified name, default value, and usage string.
 // The argument p points to an int variable in which to store the value of the flag.
-internal static void IntVarᴍ(ref FlagSet f, ж<nint> p, @string name, nint value, @string usage) {
+[GoMethodBody("IntVar")] internal static void IntVarᴍ(ref FlagSet f, ж<nint> p, @string name, nint value, @string usage) {
     f.Var(new intValueжValue(newIntValue(value, p)), name, usage);
 }
 
@@ -947,7 +947,7 @@ public static void IntVar(ж<nint> p, @string name, nint value, @string usage) {
 
 // Int defines an int flag with specified name, default value, and usage string.
 // The return value is the address of an int variable that stores the value of the flag.
-internal static ж<nint> Intᴍ(ref FlagSet f, @string name, nint value, @string usage) {
+[GoMethodBody("Int")] internal static ж<nint> Intᴍ(ref FlagSet f, @string name, nint value, @string usage) {
     var p = @new<nint>();
     f.IntVar(p, name, value, usage);
     return p;
@@ -965,7 +965,7 @@ public static ж<nint> Int(@string name, nint value, @string usage) {
 
 // Int64Var defines an int64 flag with specified name, default value, and usage string.
 // The argument p points to an int64 variable in which to store the value of the flag.
-internal static void Int64Varᴍ(ref FlagSet f, ж<int64> p, @string name, int64 value, @string usage) {
+[GoMethodBody("Int64Var")] internal static void Int64Varᴍ(ref FlagSet f, ж<int64> p, @string name, int64 value, @string usage) {
     f.Var(new int64ValueжValue(newInt64Value(value, p)), name, usage);
 }
 
@@ -981,7 +981,7 @@ public static void Int64Var(ж<int64> p, @string name, int64 value, @string usag
 
 // Int64 defines an int64 flag with specified name, default value, and usage string.
 // The return value is the address of an int64 variable that stores the value of the flag.
-internal static ж<int64> Int64ᴍ(ref FlagSet f, @string name, int64 value, @string usage) {
+[GoMethodBody("Int64")] internal static ж<int64> Int64ᴍ(ref FlagSet f, @string name, int64 value, @string usage) {
     var p = @new<int64>();
     f.Int64Var(p, name, value, usage);
     return p;
@@ -999,7 +999,7 @@ public static ж<int64> Int64(@string name, int64 value, @string usage) {
 
 // UintVar defines a uint flag with specified name, default value, and usage string.
 // The argument p points to a uint variable in which to store the value of the flag.
-internal static void UintVarᴍ(ref FlagSet f, ж<nuint> p, @string name, nuint value, @string usage) {
+[GoMethodBody("UintVar")] internal static void UintVarᴍ(ref FlagSet f, ж<nuint> p, @string name, nuint value, @string usage) {
     f.Var(new uintValueжValue(newUintValue(value, p)), name, usage);
 }
 
@@ -1015,7 +1015,7 @@ public static void UintVar(ж<nuint> p, @string name, nuint value, @string usage
 
 // Uint defines a uint flag with specified name, default value, and usage string.
 // The return value is the address of a uint variable that stores the value of the flag.
-internal static ж<nuint> Uintᴍ(ref FlagSet f, @string name, nuint value, @string usage) {
+[GoMethodBody("Uint")] internal static ж<nuint> Uintᴍ(ref FlagSet f, @string name, nuint value, @string usage) {
     var p = @new<nuint>();
     f.UintVar(p, name, value, usage);
     return p;
@@ -1033,7 +1033,7 @@ public static ж<nuint> Uint(@string name, nuint value, @string usage) {
 
 // Uint64Var defines a uint64 flag with specified name, default value, and usage string.
 // The argument p points to a uint64 variable in which to store the value of the flag.
-internal static void Uint64Varᴍ(ref FlagSet f, ж<uint64> p, @string name, uint64 value, @string usage) {
+[GoMethodBody("Uint64Var")] internal static void Uint64Varᴍ(ref FlagSet f, ж<uint64> p, @string name, uint64 value, @string usage) {
     f.Var(new uint64ValueжValue(newUint64Value(value, p)), name, usage);
 }
 
@@ -1049,7 +1049,7 @@ public static void Uint64Var(ж<uint64> p, @string name, uint64 value, @string u
 
 // Uint64 defines a uint64 flag with specified name, default value, and usage string.
 // The return value is the address of a uint64 variable that stores the value of the flag.
-internal static ж<uint64> Uint64ᴍ(ref FlagSet f, @string name, uint64 value, @string usage) {
+[GoMethodBody("Uint64")] internal static ж<uint64> Uint64ᴍ(ref FlagSet f, @string name, uint64 value, @string usage) {
     var p = @new<uint64>();
     f.Uint64Var(p, name, value, usage);
     return p;
@@ -1067,7 +1067,7 @@ public static ж<uint64> Uint64(@string name, uint64 value, @string usage) {
 
 // StringVar defines a string flag with specified name, default value, and usage string.
 // The argument p points to a string variable in which to store the value of the flag.
-internal static void StringVarᴍ(ref FlagSet f, ж<@string> p, @string name, @string value, @string usage) {
+[GoMethodBody("StringVar")] internal static void StringVarᴍ(ref FlagSet f, ж<@string> p, @string name, @string value, @string usage) {
     f.Var(new stringValueжValue(newStringValue(value, p)), name, usage);
 }
 
@@ -1083,7 +1083,7 @@ public static void StringVar(ж<@string> p, @string name, @string value, @string
 
 // String defines a string flag with specified name, default value, and usage string.
 // The return value is the address of a string variable that stores the value of the flag.
-internal static ж<@string> Stringᴍ(ref FlagSet f, @string name, @string value, @string usage) {
+[GoMethodBody("String")] internal static ж<@string> Stringᴍ(ref FlagSet f, @string name, @string value, @string usage) {
     var p = @new<@string>();
     f.StringVar(p, name, value, usage);
     return p;
@@ -1101,7 +1101,7 @@ public static ж<@string> String(@string name, @string value, @string usage) {
 
 // Float64Var defines a float64 flag with specified name, default value, and usage string.
 // The argument p points to a float64 variable in which to store the value of the flag.
-internal static void Float64Varᴍ(ref FlagSet f, ж<float64> p, @string name, float64 value, @string usage) {
+[GoMethodBody("Float64Var")] internal static void Float64Varᴍ(ref FlagSet f, ж<float64> p, @string name, float64 value, @string usage) {
     f.Var(new float64ValueжValue(newFloat64Value(value, p)), name, usage);
 }
 
@@ -1117,7 +1117,7 @@ public static void Float64Var(ж<float64> p, @string name, float64 value, @strin
 
 // Float64 defines a float64 flag with specified name, default value, and usage string.
 // The return value is the address of a float64 variable that stores the value of the flag.
-internal static ж<float64> Float64ᴍ(ref FlagSet f, @string name, float64 value, @string usage) {
+[GoMethodBody("Float64")] internal static ж<float64> Float64ᴍ(ref FlagSet f, @string name, float64 value, @string usage) {
     var p = @new<float64>();
     f.Float64Var(p, name, value, usage);
     return p;
@@ -1136,7 +1136,7 @@ public static ж<float64> Float64(@string name, float64 value, @string usage) {
 // DurationVar defines a time.Duration flag with specified name, default value, and usage string.
 // The argument p points to a time.Duration variable in which to store the value of the flag.
 // The flag accepts a value acceptable to time.ParseDuration.
-internal static void DurationVarᴍ(ref FlagSet f, ж<time.Duration> p, @string name, time.Duration value, @string usage) {
+[GoMethodBody("DurationVar")] internal static void DurationVarᴍ(ref FlagSet f, ж<time.Duration> p, @string name, time.Duration value, @string usage) {
     f.Var(new durationValueжValue(newDurationValue(value, p)), name, usage);
 }
 
@@ -1154,7 +1154,7 @@ public static void DurationVar(ж<time.Duration> p, @string name, time.Duration 
 // Duration defines a time.Duration flag with specified name, default value, and usage string.
 // The return value is the address of a time.Duration variable that stores the value of the flag.
 // The flag accepts a value acceptable to time.ParseDuration.
-internal static ж<time.Duration> Durationᴍ(ref FlagSet f, @string name, time.Duration value, @string usage) {
+[GoMethodBody("Duration")] internal static ж<time.Duration> Durationᴍ(ref FlagSet f, @string name, time.Duration value, @string usage) {
     var p = @new<time.Duration>();
     f.DurationVar(p, name, value, usage);
     return p;
@@ -1176,7 +1176,7 @@ public static ж<time.Duration> Duration(@string name, time.Duration value, @str
 // of the flag, and p must implement encoding.TextUnmarshaler.
 // If the flag is used, the flag value will be passed to p's UnmarshalText method.
 // The type of the default value must be the same as the type of p.
-internal static void TextVarᴍ(ref FlagSet f, encoding.TextUnmarshaler p, @string name, encoding.TextMarshaler value, @string usage) {
+[GoMethodBody("TextVar")] internal static void TextVarᴍ(ref FlagSet f, encoding.TextUnmarshaler p, @string name, encoding.TextMarshaler value, @string usage) {
     f.Var(newTextValue(value, p), name, usage);
 }
 
@@ -1196,7 +1196,7 @@ public static void TextVar(encoding.TextUnmarshaler p, @string name, encoding.Te
 // Func defines a flag with the specified name and usage string.
 // Each time the flag is seen, fn is called with the value of the flag.
 // If fn returns a non-nil error, it will be treated as a flag value parsing error.
-internal static void Funcᴍ(ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
+[GoMethodBody("Func")] internal static void Funcᴍ(ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
     f.Var(new funcValueᴠValue(NilSafeDelegateConversion<funcValue, Func<@string, error>>(fn)), name, usage);
 }
 
@@ -1214,7 +1214,7 @@ public static void Func(@string name, @string usage, Func<@string, error> fn) {
 // BoolFunc defines a flag with the specified name and usage string without requiring values.
 // Each time the flag is seen, fn is called with the value of the flag.
 // If fn returns a non-nil error, it will be treated as a flag value parsing error.
-internal static void BoolFuncᴍ(ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
+[GoMethodBody("BoolFunc")] internal static void BoolFuncᴍ(ref FlagSet f, @string name, @string usage, Func<@string, error> fn) {
     f.Var(new boolFuncValueᴠValue(NilSafeDelegateConversion<boolFuncValue, Func<@string, error>>(fn)), name, usage);
 }
 
@@ -1235,7 +1235,7 @@ public static void BoolFunc(@string name, @string usage, Func<@string, error> fn
 // caller could create a flag that turns a comma-separated string into a slice
 // of strings by giving the slice the methods of [Value]; in particular, [Set] would
 // decompose the comma-separated string into the slice.
-internal static void Varᴍ(ref FlagSet f, Value value, @string name, @string usage) {
+[GoMethodBody("Var")] internal static void Varᴍ(ref FlagSet f, Value value, @string name, @string usage) {
     // Flag must not begin "-" or contain "=".
     if (strings.HasPrefix(name, "-")) {
         throw panic(f.sprintf("flag %q begins with -", name));
@@ -1279,7 +1279,7 @@ public static void Var(Value value, @string name, @string usage) {
 } partial class flag_package {
 
 // sprintf formats the message, prints it to output, and returns it.
-internal static @string sprintfᴍ(ref FlagSet f, @string format, params ꓸꓸꓸany aʗp) {
+[GoMethodBody("sprintf")] internal static @string sprintfᴍ(ref FlagSet f, @string format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
 
     @string msg = fmt.Sprintf(format, a.ꓸꓸꓸ);
@@ -1289,7 +1289,7 @@ internal static @string sprintfᴍ(ref FlagSet f, @string format, params ꓸꓸ�
 
 // failf prints to standard error a formatted error and usage message and
 // returns the error.
-internal static error failfᴍ(ж<FlagSet> Ꮡf, @string format, params ꓸꓸꓸany aʗp) {
+[GoMethodBody("failf")] internal static error failfᴍ(ж<FlagSet> Ꮡf, @string format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -1300,7 +1300,7 @@ internal static error failfᴍ(ж<FlagSet> Ꮡf, @string format, params ꓸꓸ�
 
 // usage calls the Usage method for the flag set if one is specified,
 // or the appropriate default usage function otherwise.
-internal static void usageᴍ(ж<FlagSet> Ꮡf) {
+[GoMethodBody("usage")] internal static void usageᴍ(ж<FlagSet> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (f.Usage == nil) {
@@ -1315,7 +1315,7 @@ internal static ref readonly @string trueˢᴍFlagSet => ref trueˢᵇᴍFlagSet
 private static readonly @string trueˢᵇᴍFlagSet = "true"u8;
 
 // parseOne parses one flag. It reports whether a flag was seen.
-internal static (bool, error) parseOneᴍ(ж<FlagSet> Ꮡf) {
+[GoMethodBody("parseOne")] internal static (bool, error) parseOneᴍ(ж<FlagSet> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (len(f.args) == 0) {
@@ -1395,7 +1395,7 @@ internal static (bool, error) parseOneᴍ(ж<FlagSet> Ꮡf) {
 // include the command name. Must be called after all flags in the [FlagSet]
 // are defined and before flags are accessed by the program.
 // The return value will be [ErrHelp] if -help or -h were set but not defined.
-internal static error Parseᴍ(ж<FlagSet> Ꮡf, slice<@string> arguments) {
+[GoMethodBody("Parse")] internal static error Parseᴍ(ж<FlagSet> Ꮡf, slice<@string> arguments) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.parsed = true;
@@ -1428,7 +1428,7 @@ internal static error Parseᴍ(ж<FlagSet> Ꮡf, slice<@string> arguments) {
 }
 
 // Parsed reports whether f.Parse has been called.
-internal static bool Parsedᴍ(ref FlagSet f) {
+[GoMethodBody("Parsed")] internal static bool Parsedᴍ(ref FlagSet f) {
     return f.parsed;
 }
 
@@ -1488,111 +1488,9 @@ public static ж<FlagSet> NewFlagSet(@string name, ErrorHandling errorHandling) 
 // Init sets the name and error handling property for a flag set.
 // By default, the zero [FlagSet] uses an empty name and the
 // [ContinueOnError] error handling policy.
-internal static void Initᴍ(ref FlagSet f, @string name, ErrorHandling errorHandling) {
+[GoMethodBody("Init")] internal static void Initᴍ(ref FlagSet f, @string name, ErrorHandling errorHandling) {
     f.name = name;
     f.errorHandling = errorHandling;
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class flagᴛboolValue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Set(this ref boolValue b, @string s) => flag_package.Setᴍ(ref b, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Get(this ref boolValue b) => flag_package.Getᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref boolValue b) => flag_package.Stringᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsBoolFlag(this ref boolValue b) => flag_package.IsBoolFlagᴍ(ref b);
-}
-partial class flagᴛintValue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Set(this ref intValue i, @string s) => flag_package.Setᴍ(ref i, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Get(this ref intValue i) => flag_package.Getᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref intValue i) => flag_package.Stringᴍ(ref i);
-}
-partial class flagᴛint64Value {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Set(this ref int64Value i, @string s) => flag_package.Setᴍ(ref i, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Get(this ref int64Value i) => flag_package.Getᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref int64Value i) => flag_package.Stringᴍ(ref i);
-}
-partial class flagᴛuintValue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Set(this ref uintValue i, @string s) => flag_package.Setᴍ(ref i, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Get(this ref uintValue i) => flag_package.Getᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref uintValue i) => flag_package.Stringᴍ(ref i);
-}
-partial class flagᴛuint64Value {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Set(this ref uint64Value i, @string s) => flag_package.Setᴍ(ref i, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Get(this ref uint64Value i) => flag_package.Getᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref uint64Value i) => flag_package.Stringᴍ(ref i);
-}
-partial class flagᴛstringValue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Set(this ref stringValue s, @string val) => flag_package.Setᴍ(ref s, val);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Get(this ref stringValue s) => flag_package.Getᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref stringValue s) => flag_package.Stringᴍ(ref s);
-}
-partial class flagᴛfloat64Value {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Set(this ref float64Value f, @string s) => flag_package.Setᴍ(ref f, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Get(this ref float64Value f) => flag_package.Getᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref float64Value f) => flag_package.Stringᴍ(ref f);
-}
-partial class flagᴛdurationValue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Set(this ref durationValue d, @string s) => flag_package.Setᴍ(ref d, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Get(this ref durationValue d) => flag_package.Getᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ж<durationValue> Ꮡd) => flag_package.Stringᴍ(Ꮡd);
-}
-partial class flagᴛtextValue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Set(this textValue v, @string s) => flag_package.Setᴍ(v, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Get(this textValue v) => flag_package.Getᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this textValue v) => flag_package.Stringᴍ(v);
-}
-partial class flagᴛfuncValue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Set(this funcValue f, @string s) => flag_package.Setᴍ(f, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this funcValue f) => flag_package.Stringᴍ(f);
-}
-partial class flagᴛboolFuncValue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Set(this boolFuncValue f, @string s) => flag_package.Setᴍ(f, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this boolFuncValue f) => flag_package.Stringᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsBoolFlag(this boolFuncValue f) => flag_package.IsBoolFlagᴍ(f);
-}
-partial class flagᴛFlagSet {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Δio.Writer Output(this ref FlagSet f) => flag_package.Outputᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Name(this ref FlagSet f) => flag_package.Nameᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ErrorHandling ErrorHandling(this ref FlagSet f) => flag_package.ErrorHandlingᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetOutput(this ref FlagSet f, Δio.Writer output) => flag_package.SetOutputᴍ(ref f, output);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void VisitAll(this ref FlagSet f, Action<ж<Flag>> fn) => flag_package.VisitAllᴍ(ref f, fn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Visit(this ref FlagSet f, Action<ж<Flag>> fn) => flag_package.Visitᴍ(ref f, fn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Flag> Lookup(this ref FlagSet f, @string name) => flag_package.Lookupᴍ(ref f, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Set(this ref FlagSet f, @string name, @string value) => flag_package.Setᴍ(ref f, name, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error set(this ref FlagSet f, @string name, @string value) => flag_package.setᴍ(ref f, name, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void PrintDefaults(this ж<FlagSet> Ꮡf) => flag_package.PrintDefaultsᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void defaultUsage(this ж<FlagSet> Ꮡf) => flag_package.defaultUsageᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NFlag(this ref FlagSet f) => flag_package.NFlagᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Arg(this ref FlagSet f, nint i) => flag_package.Argᴍ(ref f, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NArg(this ref FlagSet f) => flag_package.NArgᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> Args(this ref FlagSet f) => flag_package.Argsᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void BoolVar(this ref FlagSet f, ж<bool> p, @string name, bool value, @string usage) => flag_package.BoolVarᴍ(ref f, p, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<bool> Bool(this ref FlagSet f, @string name, bool value, @string usage) => flag_package.Boolᴍ(ref f, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void IntVar(this ref FlagSet f, ж<nint> p, @string name, nint value, @string usage) => flag_package.IntVarᴍ(ref f, p, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<nint> Int(this ref FlagSet f, @string name, nint value, @string usage) => flag_package.Intᴍ(ref f, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Int64Var(this ref FlagSet f, ж<int64> p, @string name, int64 value, @string usage) => flag_package.Int64Varᴍ(ref f, p, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<int64> Int64(this ref FlagSet f, @string name, int64 value, @string usage) => flag_package.Int64ᴍ(ref f, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void UintVar(this ref FlagSet f, ж<nuint> p, @string name, nuint value, @string usage) => flag_package.UintVarᴍ(ref f, p, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<nuint> Uint(this ref FlagSet f, @string name, nuint value, @string usage) => flag_package.Uintᴍ(ref f, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Uint64Var(this ref FlagSet f, ж<uint64> p, @string name, uint64 value, @string usage) => flag_package.Uint64Varᴍ(ref f, p, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<uint64> Uint64(this ref FlagSet f, @string name, uint64 value, @string usage) => flag_package.Uint64ᴍ(ref f, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StringVar(this ref FlagSet f, ж<@string> p, @string name, @string value, @string usage) => flag_package.StringVarᴍ(ref f, p, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<@string> String(this ref FlagSet f, @string name, @string value, @string usage) => flag_package.Stringᴍ(ref f, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Float64Var(this ref FlagSet f, ж<float64> p, @string name, float64 value, @string usage) => flag_package.Float64Varᴍ(ref f, p, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<float64> Float64(this ref FlagSet f, @string name, float64 value, @string usage) => flag_package.Float64ᴍ(ref f, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void DurationVar(this ref FlagSet f, ж<time.Duration> p, @string name, time.Duration value, @string usage) => flag_package.DurationVarᴍ(ref f, p, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<time.Duration> Duration(this ref FlagSet f, @string name, time.Duration value, @string usage) => flag_package.Durationᴍ(ref f, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void TextVar(this ref FlagSet f, encoding.TextUnmarshaler p, @string name, encoding.TextMarshaler value, @string usage) => flag_package.TextVarᴍ(ref f, p, name, value, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Func(this ref FlagSet f, @string name, @string usage, Func<@string, error> fn) => flag_package.Funcᴍ(ref f, name, usage, fn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void BoolFunc(this ref FlagSet f, @string name, @string usage, Func<@string, error> fn) => flag_package.BoolFuncᴍ(ref f, name, usage, fn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Var(this ref FlagSet f, Value value, @string name, @string usage) => flag_package.Varᴍ(ref f, value, name, usage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string sprintf(this ref FlagSet f, @string format, params ꓸꓸꓸany aʗp) => flag_package.sprintfᴍ(ref f, format, aʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error failf(this ж<FlagSet> Ꮡf, @string format, params ꓸꓸꓸany aʗp) => flag_package.failfᴍ(Ꮡf, format, aʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void usage(this ж<FlagSet> Ꮡf) => flag_package.usageᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool, error) parseOne(this ж<FlagSet> Ꮡf) => flag_package.parseOneᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Parse(this ж<FlagSet> Ꮡf, slice<@string> arguments) => flag_package.Parseᴍ(Ꮡf, arguments);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Parsed(this ref FlagSet f) => flag_package.Parsedᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Init(this ref FlagSet f, @string name, ErrorHandling errorHandling) => flag_package.Initᴍ(ref f, name, errorHandling);
-}
-// </GlyphForwarders>

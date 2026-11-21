@@ -597,7 +597,7 @@ partial struct sysMemStat /*num:uint64*/;
 // Must be nosplit as it is called in runtime initialization, e.g. newosproc0.
 //
 //go:nosplit
-internal static uint64 loadᴍ(ж<sysMemStat> Ꮡs) {
+[GoMethodBody("load")] internal static uint64 loadᴍ(ж<sysMemStat> Ꮡs) {
     return atomic.Load64(Ꮡs.Reinterpret<sysMemStat, uint64>());
 }
 
@@ -610,7 +610,7 @@ private static readonly @string sysMemStatOverflowˢᵇᴍsysMemStat = "sysMemSt
 // Must be nosplit as it is called in runtime initialization, e.g. newosproc0.
 //
 //go:nosplit
-internal static void addᴍ(ж<sysMemStat> Ꮡs, int64 n) {
+[GoMethodBody("add")] internal static void addᴍ(ж<sysMemStat> Ꮡs, int64 n) {
     var val = atomic.Xadd64(Ꮡs.Reinterpret<sysMemStat, uint64>(), n);
     if ((n > 0 && (int64)val < n) || (n < 0 && (int64)val + n < n)) {
         print((@string)"runtime: val=", val, (@string)" n=", n, (@string)"\n");
@@ -650,7 +650,7 @@ partial struct heapStatsDelta {
 // fields may be unaligned and fail on 32-bit platforms.
 
 // merge adds in the deltas from b into a.
-internal static void mergeᴍ(ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) {
+[GoMethodBody("merge")] internal static void mergeᴍ(ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     a.committed += b.committed;
@@ -738,7 +738,7 @@ private static readonly @string badSequenceNumberˢᵇᴍconsistentHeapStats = "
 // function.
 //
 //go:nosplit
-internal static ж<heapStatsDelta> acquireᴍ(ж<consistentHeapStats> Ꮡm) {
+[GoMethodBody("acquire")] internal static ж<heapStatsDelta> acquireᴍ(ж<consistentHeapStats> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
@@ -769,7 +769,7 @@ internal static ж<heapStatsDelta> acquireᴍ(ж<consistentHeapStats> Ꮡm) {
 // before this operation has completed.
 //
 //go:nosplit
-internal static void releaseᴍ(ж<consistentHeapStats> Ꮡm) {
+[GoMethodBody("release")] internal static void releaseᴍ(ж<consistentHeapStats> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
@@ -788,7 +788,7 @@ internal static void releaseᴍ(ж<consistentHeapStats> Ꮡm) {
 //
 // Unsafe because it does so without any synchronization. The
 // world must be stopped.
-internal static void unsafeReadᴍ(ref consistentHeapStats m, ж<heapStatsDelta> Ꮡout) {
+[GoMethodBody("unsafeRead")] internal static void unsafeReadᴍ(ref consistentHeapStats m, ж<heapStatsDelta> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     assertWorldStopped();
@@ -802,7 +802,7 @@ internal static void unsafeReadᴍ(ref consistentHeapStats m, ж<heapStatsDelta>
 //
 // Unsafe because the world must be stopped and values should
 // be donated elsewhere before clearing.
-internal static void unsafeClearᴍ(ref consistentHeapStats m) {
+[GoMethodBody("unsafeClear")] internal static void unsafeClearᴍ(ref consistentHeapStats m) {
     assertWorldStopped();
 
     clear(m.stats[..]);
@@ -836,7 +836,7 @@ partial struct cpuStats {
 // the actual time spent paused, for orthogonality. maxProcs should be GOMAXPROCS,
 // not work.stwprocs, since this number must be comparable to a total time computed
 // from GOMAXPROCS.
-internal static void accumulateGCPauseTimeᴍ(ref cpuStats s, int64 dt, int32 maxProcs) {
+[GoMethodBody("accumulateGCPauseTime")] internal static void accumulateGCPauseTimeᴍ(ref cpuStats s, int64 dt, int32 maxProcs) {
     var cpu = dt * (int64)maxProcs;
     s.GCPauseTime += cpu;
     s.GCTotalTime += cpu;
@@ -847,7 +847,7 @@ internal static void accumulateGCPauseTimeᴍ(ref cpuStats s, int64 dt, int32 ma
 //
 // gcMarkPhase indicates that we're in the mark phase and that certain counter
 // values should be used.
-internal static void accumulateᴍ(ref cpuStats s, int64 now, bool gcMarkPhase) {
+[GoMethodBody("accumulate")] internal static void accumulateᴍ(ref cpuStats s, int64 now, bool gcMarkPhase) {
     // N.B. Mark termination and sweep termination pauses are
     // accumulated in work.cpuStats at the end of their respective pauses.
     int64 markAssistCpu = default;
@@ -896,23 +896,3 @@ internal static void accumulateᴍ(ref cpuStats s, int64 now, bool gcMarkPhase) 
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛsysMemStat {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 load(this ж<sysMemStat> Ꮡs) => runtime_package.loadᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ж<sysMemStat> Ꮡs, int64 n) => runtime_package.addᴍ(Ꮡs, n);
-}
-partial class runtimeᴛheapStatsDelta {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void merge(this ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) => runtime_package.mergeᴍ(ref a, Ꮡb);
-}
-partial class runtimeᴛconsistentHeapStats {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<heapStatsDelta> acquire(this ж<consistentHeapStats> Ꮡm) => runtime_package.acquireᴍ(Ꮡm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void release(this ж<consistentHeapStats> Ꮡm) => runtime_package.releaseᴍ(Ꮡm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unsafeRead(this ref consistentHeapStats m, ж<heapStatsDelta> Ꮡout) => runtime_package.unsafeReadᴍ(ref m, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unsafeClear(this ref consistentHeapStats m) => runtime_package.unsafeClearᴍ(ref m);
-}
-partial class runtimeᴛcpuStats {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void accumulateGCPauseTime(this ref cpuStats s, int64 dt, int32 maxProcs) => runtime_package.accumulateGCPauseTimeᴍ(ref s, dt, maxProcs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void accumulate(this ref cpuStats s, int64 now, bool gcMarkPhase) => runtime_package.accumulateᴍ(ref s, now, gcMarkPhase);
-}
-// </GlyphForwarders>

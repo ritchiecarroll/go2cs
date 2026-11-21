@@ -90,7 +90,7 @@ partial struct formInfo {
 
 // BoundaryBefore returns true if this rune starts a new segment and
 // cannot combine with any rune on the left.
-internal static bool BoundaryBeforeᴍ(Properties p) {
+[GoMethodBody("BoundaryBefore")] internal static bool BoundaryBeforeᴍ(Properties p) {
     if (p.ccc == 0 && !p.combinesBackward()) {
         return true;
     }
@@ -102,7 +102,7 @@ internal static bool BoundaryBeforeᴍ(Properties p) {
 
 // BoundaryAfter returns true if runes cannot combine with or otherwise
 // interact with this or previous runes.
-internal static bool BoundaryAfterᴍ(Properties p) {
+[GoMethodBody("BoundaryAfter")] internal static bool BoundaryAfterᴍ(Properties p) {
     // TODO: loosen these conditions.
     return p.isInert();
 }
@@ -122,32 +122,32 @@ partial struct qcInfo /*num:uint8*/;
 
 } partial class norm_package {
 
-internal static bool isYesCᴍ(Properties p) { return (qcInfo)(p.flags & 0x10) == 0; }
-internal static bool isYesDᴍ(Properties p) { return (qcInfo)(p.flags & 0x4) == 0; }
+[GoMethodBody("isYesC")] internal static bool isYesCᴍ(Properties p) { return (qcInfo)(p.flags & 0x10) == 0; }
+[GoMethodBody("isYesD")] internal static bool isYesDᴍ(Properties p) { return (qcInfo)(p.flags & 0x4) == 0; }
 
-internal static bool combinesForwardᴍ(Properties p) { return (qcInfo)(p.flags & 0x20) != 0; }
-internal static bool combinesBackwardᴍ(Properties p) { return (qcInfo)(p.flags & 0x8) != 0; } // == isMaybe
-internal static bool hasDecompositionᴍ(Properties p) { return (qcInfo)(p.flags & 0x4) != 0; } // == isNoD
+[GoMethodBody("combinesForward")] internal static bool combinesForwardᴍ(Properties p) { return (qcInfo)(p.flags & 0x20) != 0; }
+[GoMethodBody("combinesBackward")] internal static bool combinesBackwardᴍ(Properties p) { return (qcInfo)(p.flags & 0x8) != 0; } // == isMaybe
+[GoMethodBody("hasDecomposition")] internal static bool hasDecompositionᴍ(Properties p) { return (qcInfo)(p.flags & 0x4) != 0; } // == isNoD
 
-internal static bool isInertᴍ(Properties p) {
+[GoMethodBody("isInert")] internal static bool isInertᴍ(Properties p) {
     return (qcInfo)(p.flags & (uint8)qcInfoMask) == 0 && p.ccc == 0;
 }
 
-internal static bool multiSegmentᴍ(Properties p) {
+[GoMethodBody("multiSegment")] internal static bool multiSegmentᴍ(Properties p) {
     return p.index >= firstMulti && p.index < endMulti;
 }
 
-internal static uint8 nLeadingNonStartersᴍ(Properties p) {
+[GoMethodBody("nLeadingNonStarters")] internal static uint8 nLeadingNonStartersᴍ(Properties p) {
     return p.nLead;
 }
 
-internal static uint8 nTrailingNonStartersᴍ(Properties p) {
+[GoMethodBody("nTrailingNonStarters")] internal static uint8 nTrailingNonStartersᴍ(Properties p) {
     return (uint8)((qcInfo)(p.flags & 0x03));
 }
 
 // Decomposition returns the decomposition for the underlying rune
 // or nil if there is none.
-internal static slice<byte> Decompositionᴍ(Properties p) {
+[GoMethodBody("Decomposition")] internal static slice<byte> Decompositionᴍ(Properties p) {
     // TODO: create the decomposition for Hangul?
     if (p.index == 0) {
         return default;
@@ -159,12 +159,12 @@ internal static slice<byte> Decompositionᴍ(Properties p) {
 }
 
 // Size returns the length of UTF-8 encoding of the rune.
-internal static nint Sizeᴍ(Properties p) {
+[GoMethodBody("Size")] internal static nint Sizeᴍ(Properties p) {
     return (nint)p.size;
 }
 
 // CCC returns the canonical combining class of the underlying rune.
-internal static uint8 CCCᴍ(Properties p) {
+[GoMethodBody("CCC")] internal static uint8 CCCᴍ(Properties p) {
     if (p.index >= firstCCCZeroExcept) {
         return 0;
     }
@@ -173,13 +173,13 @@ internal static uint8 CCCᴍ(Properties p) {
 
 // LeadCCC returns the CCC of the first rune in the decomposition.
 // If there is no decomposition, LeadCCC equals CCC.
-internal static uint8 LeadCCCᴍ(Properties p) {
+[GoMethodBody("LeadCCC")] internal static uint8 LeadCCCᴍ(Properties p) {
     return ccc[p.ccc];
 }
 
 // TrailCCC returns the CCC of the last rune in the decomposition.
 // If there is no decomposition, TrailCCC equals CCC.
-internal static uint8 TrailCCCᴍ(Properties p) {
+[GoMethodBody("TrailCCC")] internal static uint8 TrailCCCᴍ(Properties p) {
     return ccc[p.tccc];
 }
 
@@ -228,7 +228,7 @@ internal static Properties lookupInfoNFKC(input b, nint i) {
 } partial class norm_package {
 
 // Properties returns properties for the first rune in s.
-internal static Properties Propertiesᴍ(Form f, slice<byte> s) {
+[GoMethodBody("Properties")] internal static Properties Propertiesᴍ(Form f, slice<byte> s) {
     if (f == NFC || f == NFD) {
         var (ᴛ1, ᴛ2) = nfcData.lookup(s);
         return compInfo(ᴛ1, ᴛ2);
@@ -238,7 +238,7 @@ internal static Properties Propertiesᴍ(Form f, slice<byte> s) {
 }
 
 // PropertiesString returns properties for the first rune in s.
-internal static Properties PropertiesStringᴍ(Form f, @string s) {
+[GoMethodBody("PropertiesString")] internal static Properties PropertiesStringᴍ(Form f, @string s) {
     if (f == NFC || f == NFD) {
         var (ᴛ5, ᴛ6) = nfcData.lookupString(s);
         return compInfo(ᴛ5, ᴛ6);
@@ -291,28 +291,3 @@ internal static Properties compInfo(uint16 v, nint sz) {
 }
 
 } // end norm_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class normᴛProperties {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool BoundaryBefore(this Properties p) => norm_package.BoundaryBeforeᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool BoundaryAfter(this Properties p) => norm_package.BoundaryAfterᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isYesC(this Properties p) => norm_package.isYesCᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isYesD(this Properties p) => norm_package.isYesDᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool combinesForward(this Properties p) => norm_package.combinesForwardᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool combinesBackward(this Properties p) => norm_package.combinesBackwardᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasDecomposition(this Properties p) => norm_package.hasDecompositionᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isInert(this Properties p) => norm_package.isInertᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool multiSegment(this Properties p) => norm_package.multiSegmentᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint8 nLeadingNonStarters(this Properties p) => norm_package.nLeadingNonStartersᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint8 nTrailingNonStarters(this Properties p) => norm_package.nTrailingNonStartersᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Decomposition(this Properties p) => norm_package.Decompositionᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Size(this Properties p) => norm_package.Sizeᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint8 CCC(this Properties p) => norm_package.CCCᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint8 LeadCCC(this Properties p) => norm_package.LeadCCCᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint8 TrailCCC(this Properties p) => norm_package.TrailCCCᴍ(p);
-}
-partial class normᴛForm {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Properties Properties(this Form f, slice<byte> s) => norm_package.Propertiesᴍ(f, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Properties PropertiesString(this Form f, @string s) => norm_package.PropertiesStringᴍ(f, s);
-}
-// </GlyphForwarders>

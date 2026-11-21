@@ -72,6 +72,15 @@ using static go.image.draw_package;
 
 namespace go.image;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using image = image_package;
+using color = go.image.color_package;
+using imageutil = go.image.@internal.imageutil_package;
+using go.image;
+using go.image.@internal;
+using static draw_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("draw")]
 public static partial class draw_package
 {
@@ -113,3 +122,12 @@ public static partial class draw_package
 [GoMethodHost(typeof(draw_package.Op)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class drawᴛOp;
 [GoMethodHost(typeof(draw_package.floydSteinberg)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class drawᴛfloydSteinberg;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class drawᴛOp {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Draw(this Op op, Image dst, image.Rectangle r, image.Image src, image.Point sp) => draw_package.Drawᴍ(op, dst, r, src, sp);
+}
+partial class drawᴛfloydSteinberg {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Draw(this floydSteinberg _, Image dst, image.Rectangle rʗp, image.Image src, image.Point sp) => draw_package.Drawᴍ(_, dst, rʗp, src, sp);
+}
+// </GlyphForwarders>

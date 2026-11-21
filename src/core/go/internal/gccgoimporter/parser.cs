@@ -58,7 +58,7 @@ partial struct fixupRecord {
 
 } partial class gccgoimporter_package {
 
-internal static void initᴍ(ж<parser> Ꮡp, @string filename, io.Reader src, map<@string, ж<types.Package>> imports) {
+[GoMethodBody("init")] internal static void initᴍ(ж<parser> Ꮡp, @string filename, io.Reader src, map<@string, ж<types.Package>> imports) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.scanner = @new<scanner.Scanner>();
@@ -68,7 +68,7 @@ internal static void initᴍ(ж<parser> Ꮡp, @string filename, io.Reader src, m
     p.typeList = new slice<types.Type>(1, 16);
 }
 
-internal static void initScannerᴍ(ж<parser> Ꮡp, @string filename, io.Reader src) {
+[GoMethodBody("initScanner")] internal static void initScannerᴍ(ж<parser> Ꮡp, @string filename, io.Reader src) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.scanner.Init(src);
@@ -90,13 +90,13 @@ partial struct importError {
 
 } partial class gccgoimporter_package {
 
-internal static @string Errorᴍ(importError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(importError e) {
     return fmt.Sprintf("import error %s (byte offset = %d): %s"u8, e.pos, e.pos.Offset, e.err);
 }
 
 } partial class gccgoimporter_package {
 
-internal static void errorᴍ(ref parser p, any err) {
+[GoMethodBody("error")] internal static void errorᴍ(ref parser p, any err) {
     var (s, ok) = err._<@string>(ᐧ); if (ok) {
         err = errors.New(s);
     }
@@ -104,13 +104,13 @@ internal static void errorᴍ(ref parser p, any err) {
     throw panic(new importError(p.scanner.Pos(), err._<error>()));
 }
 
-internal static void errorfᴍ(ref parser p, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("errorf")] internal static void errorfᴍ(ref parser p, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     p.error(fmt.Errorf(format, args.ꓸꓸꓸ));
 }
 
-internal static @string expectᴍ(ref parser p, rune tok) {
+[GoMethodBody("expect")] internal static @string expectᴍ(ref parser p, rune tok) {
     @string lit = p.lit;
     if (p.tok != tok) {
         p.errorf("expected %s, got %s (%s)", scanner.TokenString(tok), scanner.TokenString(p.tok), lit);
@@ -119,21 +119,21 @@ internal static @string expectᴍ(ref parser p, rune tok) {
     return lit;
 }
 
-internal static void expectEOLᴍ(ref parser p) {
+[GoMethodBody("expectEOL")] internal static void expectEOLᴍ(ref parser p) {
     if (p.version == "v1"u8 || p.version == "v2"u8) {
         p.expect(';');
     }
     p.expect('\n');
 }
 
-internal static void expectKeywordᴍ(ref parser p, @string keyword) {
+[GoMethodBody("expectKeyword")] internal static void expectKeywordᴍ(ref parser p, @string keyword) {
     @string lit = p.expect(scanner.Ident);
     if (lit != keyword) {
         p.errorf("expected keyword %s, got %q", keyword, lit);
     }
 }
 
-internal static @string parseStringᴍ(ref parser p) {
+[GoMethodBody("parseString")] internal static @string parseStringᴍ(ref parser p) {
     var (str, err) = strconv.Unquote(p.expect(scanner.String));
     if (err != nil) {
         p.error(err);
@@ -146,7 +146,7 @@ internal static readonly object unexpectedEofˢᴍparser = (@string)"unexpected 
 
 // unquotedString     = { unquotedStringChar } .
 // unquotedStringChar = <neither a whitespace nor a ';' char> .
-internal static @string parseUnquotedStringᴍ(ref parser p) {
+[GoMethodBody("parseUnquotedString")] internal static @string parseUnquotedStringᴍ(ref parser p) {
     if (p.tok == scanner.EOF) {
         p.error(unexpectedEofˢᴍparser);
     }
@@ -162,7 +162,7 @@ internal static @string parseUnquotedStringᴍ(ref parser p) {
     return b.String();
 }
 
-internal static void nextᴍ(ref parser p) {
+[GoMethodBody("next")] internal static void nextᴍ(ref parser p) {
     p.tok = p.scanner.Scan();
     switch (p.tok) {
     case var ᴛ when ᴛ == scanner.Ident || ᴛ == scanner.Int || ᴛ == scanner.Float || ᴛ == scanner.String || ᴛ == '·': {
@@ -175,18 +175,18 @@ internal static void nextᴍ(ref parser p) {
     }}
 }
 
-internal static (@string path, @string name) parseQualifiedNameᴍ(ref parser p) {
+[GoMethodBody("parseQualifiedName")] internal static (@string path, @string name) parseQualifiedNameᴍ(ref parser p) {
     return p.parseQualifiedNameStr(p.parseString());
 }
 
-internal static (@string path, @string name) parseUnquotedQualifiedNameᴍ(ref parser p) {
+[GoMethodBody("parseUnquotedQualifiedName")] internal static (@string path, @string name) parseUnquotedQualifiedNameᴍ(ref parser p) {
     return p.parseQualifiedNameStr(p.parseUnquotedString());
 }
 
 // qualifiedName = [ ["."] unquotedString "." ] unquotedString .
 //
 // The above production uses greedy matching.
-internal static (@string pkgpath, @string name) parseQualifiedNameStrᴍ(ref parser p, @string unquotedName) {
+[GoMethodBody("parseQualifiedNameStr")] internal static (@string pkgpath, @string name) parseQualifiedNameStrᴍ(ref parser p, @string unquotedName) {
     @string pkgpath = default;
     @string name = default;
 
@@ -219,7 +219,7 @@ internal static (@string pkgpath, @string name) parseQualifiedNameStrᴍ(ref par
 // getPkg returns the package for a given path. If the package is
 // not found but we have a package name, create the package and
 // add it to the p.imports map.
-internal static ж<types.Package> getPkgᴍ(ref parser p, @string pkgpath, @string name) {
+[GoMethodBody("getPkg")] internal static ж<types.Package> getPkgᴍ(ref parser p, @string pkgpath, @string name) {
     // package unsafe is not in the imports map - handle explicitly
     if (pkgpath == "unsafe"u8) {
         return types.Unsafe;
@@ -236,7 +236,7 @@ internal static ж<types.Package> getPkgᴍ(ref parser p, @string pkgpath, @stri
 // the package path is resolved to an imported *types.Package.
 //
 // ExportedName = string [string] .
-internal static (ж<types.Package> pkg, @string name) parseExportedNameᴍ(ref parser p) {
+[GoMethodBody("parseExportedName")] internal static (ж<types.Package> pkg, @string name) parseExportedNameᴍ(ref parser p) {
     ж<types.Package> pkg = default;
     @string name = default;
 
@@ -253,7 +253,7 @@ internal static (ж<types.Package> pkg, @string name) parseExportedNameᴍ(ref p
 }
 
 // Name = QualifiedName | "?" .
-internal static @string parseNameᴍ(ref parser p) {
+[GoMethodBody("parseName")] internal static @string parseNameᴍ(ref parser p) {
     if (p.tok == '?') {
         // Anonymous.
         p.next();
@@ -279,7 +279,7 @@ internal static types.Type deref(types.Type typ) {
 internal static readonly object embeddedFieldExpectedˢᴍparser = (@string)"embedded field expected"u8;
 
 // Field = Name Type [string] .
-internal static (ж<types.Var> field, @string tag) parseFieldᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
+[GoMethodBody("parseField")] internal static (ж<types.Var> field, @string tag) parseFieldᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
     ж<types.Var> field = default;
     @string tag = default;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -324,7 +324,7 @@ internal static ref readonly @string escˢᴍparser => ref escˢᵇᴍparser;
 private static readonly @string escˢᵇᴍparser = "esc"u8;
 
 // Param = Name ["..."] Type .
-internal static (ж<types.Var> param, bool isVariadic) parseParamᴍ(ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> pkg) {
+[GoMethodBody("parseParam")] internal static (ж<types.Var> param, bool isVariadic) parseParamᴍ(ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> pkg) {
     ж<types.Var> param = default;
     bool isVariadic = default;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -358,7 +358,7 @@ internal static (ж<types.Var> param, bool isVariadic) parseParamᴍ(ж<parser> 
 }
 
 // Var = Name Type .
-internal static ж<types.Var> parseVarᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
+[GoMethodBody("parseVar")] internal static ж<types.Var> parseVarᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     @string name = p.parseName();
@@ -377,7 +377,7 @@ internal static ref readonly @string convertˢᴍparser => ref convertˢᵇᴍpa
 private static readonly @string convertˢᵇᴍparser = "convert"u8;
 
 // Conversion = "convert" "(" Type "," ConstValue ")" .
-internal static (constant.Value val, types.Type typ) parseConversionᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
+[GoMethodBody("parseConversion")] internal static (constant.Value val, types.Type typ) parseConversionᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
     constant.Value val = default;
     types.Type typ = default;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -399,7 +399,7 @@ internal static readonly object couldNotParseImagˢᴍparser = (@string)"could n
 
 // ConstValue     = string | "false" | "true" | ["-"] (int ["'"] | FloatOrComplex) | Conversion .
 // FloatOrComplex = float ["i" | ("+"|"-") float "i"] .
-internal static (constant.Value val, types.Type typ) parseConstValueᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
+[GoMethodBody("parseConstValue")] internal static (constant.Value val, types.Type typ) parseConstValueᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
     constant.Value val = default;
     types.Type typ = default;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -520,7 +520,7 @@ internal static (constant.Value val, types.Type typ) parseConstValueᴍ(ж<parse
 }
 
 // Const = Name [Type] "=" ConstValue .
-internal static ж<types.Const> parseConstᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
+[GoMethodBody("parseConst")] internal static ж<types.Const> parseConstᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     @string name = p.parseName();
@@ -551,7 +551,7 @@ internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
 } partial class gccgoimporter_package {
 
 // reserve reserves the type map entry n for future use.
-internal static void reserveᴍ(ref parser p, nint n) {
+[GoMethodBody("reserve")] internal static void reserveᴍ(ref parser p, nint n) {
     // Notes:
     // - for pre-V3 export data, the type numbers we see are
     //   guaranteed to be in increasing order, so we append a
@@ -577,7 +577,7 @@ internal static void reserveᴍ(ref parser p, nint n) {
 // used to resolve named types, or it can be a *types.Pointer,
 // used to resolve pointers to named types in case they are referenced
 // by embedded fields.
-internal static void updateᴍ(ref parser p, types.Type t, slice<any> nlist) {
+[GoMethodBody("update")] internal static void updateᴍ(ref parser p, types.Type t, slice<any> nlist) {
     if (AreEqual(t, reserved)) {
         p.errorf("internal error: update(%v) invoked on reserved", (any)(nlist));
     }
@@ -623,7 +623,7 @@ private static readonly @string funcˢᵇᴍparser = "func"u8;
 // NamedType = TypeName [ "=" ] Type { Method } .
 // TypeName  = ExportedName .
 // Method    = "func" "(" Param ")" Name ParamList ResultList [InlineBody] ";" .
-internal static types.Type parseNamedTypeᴍ(ж<parser> Ꮡp, slice<any> nlist) {
+[GoMethodBody("parseNamedType")] internal static types.Type parseNamedTypeᴍ(ж<parser> Ꮡp, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var (pkg, name) = p.parseExportedName();
@@ -723,7 +723,7 @@ internal static types.Type parseNamedTypeᴍ(ж<parser> Ꮡp, slice<any> nlist) 
     return new types.NamedжType(nt);
 }
 
-internal static int64 parseInt64ᴍ(ref parser p) {
+[GoMethodBody("parseInt64")] internal static int64 parseInt64ᴍ(ref parser p) {
     @string lit = p.expect(scanner.Int);
     var (n, err) = strconv.ParseInt(lit, 10, 64);
     if (err != nil) {
@@ -732,7 +732,7 @@ internal static int64 parseInt64ᴍ(ref parser p) {
     return n;
 }
 
-internal static nint parseIntᴍ(ref parser p) {
+[GoMethodBody("parseInt")] internal static nint parseIntᴍ(ref parser p) {
     @string lit = p.expect(scanner.Int);
     var (n, err) = strconv.ParseInt(lit, 10, 0 /* int */);
     if (err != nil) {
@@ -742,7 +742,7 @@ internal static nint parseIntᴍ(ref parser p) {
 }
 
 // ArrayOrSliceType = "[" [ int ] "]" Type .
-internal static types.Type parseArrayOrSliceTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+[GoMethodBody("parseArrayOrSliceType")] internal static types.Type parseArrayOrSliceTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expect('[');
@@ -771,7 +771,7 @@ internal static ref readonly @string mapˢᴍparser => ref mapˢᵇᴍparser;
 private static readonly @string mapˢᵇᴍparser = "map"u8;
 
 // MapType = "map" "[" Type "]" Type .
-internal static types.Type parseMapTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+[GoMethodBody("parseMapType")] internal static types.Type parseMapTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expectKeyword(mapˢᴍparser);
@@ -793,7 +793,7 @@ internal static ref readonly @string chanˢᴍparser => ref chanˢᵇᴍparser;
 private static readonly @string chanˢᵇᴍparser = "chan"u8;
 
 // ChanType = "chan" ["<-" | "-<"] Type .
-internal static types.Type parseChanTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+[GoMethodBody("parseChanType")] internal static types.Type parseChanTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expectKeyword(chanˢᴍparser);
@@ -828,7 +828,7 @@ internal static ref readonly @string structˢᴍparser => ref structˢᵇᴍpars
 private static readonly @string structˢᵇᴍparser = "struct"u8;
 
 // StructType = "struct" "{" { Field } "}" .
-internal static types.Type parseStructTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+[GoMethodBody("parseStructType")] internal static types.Type parseStructTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expectKeyword(structˢᴍparser);
@@ -856,7 +856,7 @@ internal static types.Type parseStructTypeᴍ(ж<parser> Ꮡp, ж<types.Package>
 internal static readonly object notOnFinalArgumentˢᴍparser = (@string)"... not on final argument"u8;
 
 // ParamList = "(" [ { Parameter "," } Parameter ] ")" .
-internal static (ж<types.Tuple>, bool) parseParamListᴍ(ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> pkg) {
+[GoMethodBody("parseParamList")] internal static (ж<types.Tuple>, bool) parseParamListᴍ(ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> pkg) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     slice<ж<types.Var>> list = default;
@@ -882,7 +882,7 @@ internal static (ж<types.Tuple>, bool) parseParamListᴍ(ж<parser> Ꮡp, types
 }
 
 // ResultList = Type | ParamList .
-internal static ж<types.Tuple> parseResultListᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
+[GoMethodBody("parseResultList")] internal static ж<types.Tuple> parseResultListᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (p.tok) {
@@ -906,7 +906,7 @@ internal static ж<types.Tuple> parseResultListᴍ(ж<parser> Ꮡp, ж<types.Pac
 }
 
 // FunctionType = ParamList ResultList .
-internal static ж<types.Signature> parseFunctionTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+[GoMethodBody("parseFunctionType")] internal static ж<types.Signature> parseFunctionTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var t = @new<types.Signature>();
@@ -920,7 +920,7 @@ internal static ж<types.Signature> parseFunctionTypeᴍ(ж<parser> Ꮡp, ж<typ
 }
 
 // Func = Name FunctionType [InlineBody] .
-internal static ж<types.Func> parseFuncᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
+[GoMethodBody("parseFunc")] internal static ж<types.Func> parseFuncᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (p.tok == '/') {
@@ -954,7 +954,7 @@ internal static ref readonly @string interfaceˢᴍparser => ref interfaceˢᵇ�
 private static readonly @string interfaceˢᵇᴍparser = "interface"u8;
 
 // InterfaceType = "interface" "{" { ("?" Type | Func) ";" } "}" .
-internal static types.Type parseInterfaceTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+[GoMethodBody("parseInterfaceType")] internal static types.Type parseInterfaceTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expectKeyword(interfaceˢᴍparser);
@@ -989,7 +989,7 @@ internal static ref readonly @string anyˢᴍparser => ref anyˢᵇᴍparser;
 private static readonly @string anyˢᵇᴍparser = "any"u8;
 
 // PointerType = "*" ("any" | Type) .
-internal static types.Type parsePointerTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+[GoMethodBody("parsePointerType")] internal static types.Type parsePointerTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.expect('*');
@@ -1009,7 +1009,7 @@ internal static types.Type parsePointerTypeᴍ(ж<parser> Ꮡp, ж<types.Package
 }
 
 // TypeSpec = NamedType | MapType | ChanType | StructType | InterfaceType | PointerType | ArrayOrSliceType | FunctionType .
-internal static types.Type parseTypeSpecᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
+[GoMethodBody("parseTypeSpec")] internal static types.Type parseTypeSpecᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (p.tok) {
@@ -1094,7 +1094,7 @@ internal static types.Type lookupBuiltinType(nint typ) {
 // Type = "<" "type" ( "-" int | int [ TypeSpec ] ) ">" .
 //
 // parseType updates the type map to t for all type numbers n.
-internal static types.Type parseTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
+[GoMethodBody("parseType")] internal static types.Type parseTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
     var n = nʗp.sslice();
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -1108,7 +1108,7 @@ internal static ref readonly @string typeˢᴍparser => ref typeˢᵇᴍparser;
 private static readonly @string typeˢᵇᴍparser = "type"u8;
 
 // (*parser).Type after reading the "<".
-internal static (types.Type t, nint n1) parseTypeAfterAngleᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
+[GoMethodBody("parseTypeAfterAngle")] internal static (types.Type t, nint n1) parseTypeAfterAngleᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
     types.Type t = default;
     nint n1 = default;
     var n = nʗp.slice();
@@ -1158,7 +1158,7 @@ internal static (types.Type t, nint n1) parseTypeAfterAngleᴍ(ж<parser> Ꮡp, 
 // parseTypeExtended is identical to parseType, but if the type in
 // question is a saved type, returns the index as well as the type
 // pointer (index returned is zero if we parsed a builtin).
-internal static (types.Type t, nint n1) parseTypeExtendedᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
+[GoMethodBody("parseTypeExtended")] internal static (types.Type t, nint n1) parseTypeExtendedᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) {
     types.Type t = default;
     nint n1 = default;
     var n = nʗp.sslice();
@@ -1175,7 +1175,7 @@ private static readonly @string inlˢᵇᴍparser = "inl"u8;
 
 // InlineBody = "<inl:NN>" .{NN}
 // Reports whether a body was skipped.
-internal static void skipInlineBodyᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("skipInlineBody")] internal static void skipInlineBodyᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1223,7 +1223,7 @@ internal partial struct parseTypes_typeOffset /*dyn*/ {
 } partial class gccgoimporter_package {
 
 // Types = "types" maxp1 exportedp1 (offset length)* .
-internal static void parseTypesᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
+[GoMethodBody("parseTypes")] internal static void parseTypesᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1274,7 +1274,7 @@ internal static void parseTypesᴍ(ж<parser> Ꮡp, ж<types.Package> pkg) {
 }
 
 // parseSavedType parses one saved type definition.
-internal static void parseSavedTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, nint i, slice<any> nlist) {
+[GoMethodBody("parseSavedType")] internal static void parseSavedTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, nint i, slice<any> nlist) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1308,7 +1308,7 @@ internal static void parseSavedTypeᴍ(ж<parser> Ꮡp, ж<types.Package> pkg, n
 }
 
 // PackageInit = unquotedString unquotedString int .
-internal static PackageInit parsePackageInitᴍ(ref parser p) {
+[GoMethodBody("parsePackageInit")] internal static PackageInit parsePackageInitᴍ(ref parser p) {
     @string name = p.parseUnquotedString();
     @string initfunc = p.parseUnquotedString();
     nint priority = -1;
@@ -1319,7 +1319,7 @@ internal static PackageInit parsePackageInitᴍ(ref parser p) {
 }
 
 // Create the package if we have parsed both the package path and package name.
-internal static void maybeCreatePackageᴍ(ref parser p) {
+[GoMethodBody("maybeCreatePackage")] internal static void maybeCreatePackageᴍ(ref parser p) {
     if (p.pkgname != ""u8 && p.pkgpath != ""u8) {
         p.pkg = p.getPkg(p.pkgpath, p.pkgname);
     }
@@ -1330,7 +1330,7 @@ internal static void maybeCreatePackageᴍ(ref parser p) {
 //	"priority" int ";" |
 //	"init" { PackageInit } ";" |
 //	"checksum" unquotedString ";" .
-internal static void parseInitDataDirectiveᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseInitDataDirective")] internal static void parseInitDataDirectiveᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1404,7 +1404,7 @@ internal static void parseInitDataDirectiveᴍ(ж<parser> Ꮡp) {
 //	"type" Type ";" |
 //	"var" Var ";" |
 //	"const" Const ";" .
-internal static void parseDirectiveᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseDirective")] internal static void parseDirectiveᴍ(ж<parser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (p.tok != scanner.Ident) {
@@ -1503,7 +1503,7 @@ internal static void parseDirectiveᴍ(ж<parser> Ꮡp) {
 }
 
 // Package = { Directive } .
-internal static ж<types.Package> parsePackageᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parsePackage")] internal static ж<types.Package> parsePackageᴍ(ж<parser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     while (p.tok != scanner.EOF) {
@@ -1526,60 +1526,3 @@ internal static ж<types.Package> parsePackageᴍ(ж<parser> Ꮡp) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class gccgoimporterᴛparser {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<parser> Ꮡp, @string filename, io.Reader src, map<@string, ж<types.Package>> imports) => gccgoimporter_package.initᴍ(Ꮡp, filename, src, imports);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initScanner(this ж<parser> Ꮡp, @string filename, io.Reader src) => gccgoimporter_package.initScannerᴍ(Ꮡp, filename, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void error(this ref parser p, any err) => gccgoimporter_package.errorᴍ(ref p, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void errorf(this ref parser p, @string format, params ꓸꓸꓸany argsʗp) => gccgoimporter_package.errorfᴍ(ref p, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string expect(this ref parser p, rune tok) => gccgoimporter_package.expectᴍ(ref p, tok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void expectEOL(this ref parser p) => gccgoimporter_package.expectEOLᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void expectKeyword(this ref parser p, @string keyword) => gccgoimporter_package.expectKeywordᴍ(ref p, keyword);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string parseString(this ref parser p) => gccgoimporter_package.parseStringᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string parseUnquotedString(this ref parser p) => gccgoimporter_package.parseUnquotedStringᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void next(this ref parser p) => gccgoimporter_package.nextᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string path, @string name) parseQualifiedName(this ref parser p) => gccgoimporter_package.parseQualifiedNameᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string path, @string name) parseUnquotedQualifiedName(this ref parser p) => gccgoimporter_package.parseUnquotedQualifiedNameᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string pkgpath, @string name) parseQualifiedNameStr(this ref parser p, @string unquotedName) => gccgoimporter_package.parseQualifiedNameStrᴍ(ref p, unquotedName);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Package> getPkg(this ref parser p, @string pkgpath, @string name) => gccgoimporter_package.getPkgᴍ(ref p, pkgpath, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package> pkg, @string name) parseExportedName(this ref parser p) => gccgoimporter_package.parseExportedNameᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string parseName(this ref parser p) => gccgoimporter_package.parseNameᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Var> field, @string tag) parseField(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseFieldᴍ(Ꮡp, pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Var> param, bool isVariadic) parseParam(this ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> pkg) => gccgoimporter_package.parseParamᴍ(Ꮡp, kind, pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Var> parseVar(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseVarᴍ(Ꮡp, pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (constant.Value val, types.Type typ) parseConversion(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseConversionᴍ(Ꮡp, pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (constant.Value val, types.Type typ) parseConstValue(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseConstValueᴍ(Ꮡp, pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Const> parseConst(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseConstᴍ(Ꮡp, pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reserve(this ref parser p, nint n) => gccgoimporter_package.reserveᴍ(ref p, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void update(this ref parser p, types.Type t, slice<any> nlist) => gccgoimporter_package.updateᴍ(ref p, t, nlist);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseNamedType(this ж<parser> Ꮡp, slice<any> nlist) => gccgoimporter_package.parseNamedTypeᴍ(Ꮡp, nlist);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 parseInt64(this ref parser p) => gccgoimporter_package.parseInt64ᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint parseInt(this ref parser p) => gccgoimporter_package.parseIntᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseArrayOrSliceType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parseArrayOrSliceTypeᴍ(Ꮡp, pkg, nlist);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseMapType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parseMapTypeᴍ(Ꮡp, pkg, nlist);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseChanType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parseChanTypeᴍ(Ꮡp, pkg, nlist);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseStructType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parseStructTypeᴍ(Ꮡp, pkg, nlist);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Tuple>, bool) parseParamList(this ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> pkg) => gccgoimporter_package.parseParamListᴍ(Ꮡp, kind, pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Tuple> parseResultList(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseResultListᴍ(Ꮡp, pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Signature> parseFunctionType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parseFunctionTypeᴍ(Ꮡp, pkg, nlist);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Func> parseFunc(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseFuncᴍ(Ꮡp, pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseInterfaceType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parseInterfaceTypeᴍ(Ꮡp, pkg, nlist);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parsePointerType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parsePointerTypeᴍ(Ꮡp, pkg, nlist);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseTypeSpec(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parseTypeSpecᴍ(Ꮡp, pkg, nlist);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseType(this ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) => gccgoimporter_package.parseTypeᴍ(Ꮡp, pkg, nʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (types.Type t, nint n1) parseTypeAfterAngle(this ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) => gccgoimporter_package.parseTypeAfterAngleᴍ(Ꮡp, pkg, nʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (types.Type t, nint n1) parseTypeExtended(this ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) => gccgoimporter_package.parseTypeExtendedᴍ(Ꮡp, pkg, nʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void skipInlineBody(this ж<parser> Ꮡp) => gccgoimporter_package.skipInlineBodyᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseTypesᴍ(Ꮡp, pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parseSavedType(this ж<parser> Ꮡp, ж<types.Package> pkg, nint i, slice<any> nlist) => gccgoimporter_package.parseSavedTypeᴍ(Ꮡp, pkg, i, nlist);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static PackageInit parsePackageInit(this ref parser p) => gccgoimporter_package.parsePackageInitᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void maybeCreatePackage(this ref parser p) => gccgoimporter_package.maybeCreatePackageᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parseInitDataDirective(this ж<parser> Ꮡp) => gccgoimporter_package.parseInitDataDirectiveᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parseDirective(this ж<parser> Ꮡp) => gccgoimporter_package.parseDirectiveᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Package> parsePackage(this ж<parser> Ꮡp) => gccgoimporter_package.parsePackageᴍ(Ꮡp);
-}
-partial class gccgoimporterᴛimportError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this importError e) => gccgoimporter_package.Errorᴍ(e);
-}
-// </GlyphForwarders>

@@ -57,7 +57,7 @@ public static Op Src => 1;
 
 // Draw implements the [Drawer] interface by calling the Draw function with this
 // [Op].
-internal static void Drawᴍ(Op op, Image dst, image.Rectangle r, image.Image src, image.Point sp) {
+[GoMethodBody("Draw")] internal static void Drawᴍ(Op op, Image dst, image.Rectangle r, image.Image src, image.Point sp) {
     DrawMask(dst, r, src, sp, default, new image.Point(), op);
 }
 
@@ -79,7 +79,7 @@ partial struct floydSteinberg {
 
 } partial class draw_package {
 
-internal static void Drawᴍ(floydSteinberg _, Image dst, image.Rectangle rʗp, image.Image src, image.Point sp) {
+[GoMethodBody("Draw")] internal static void Drawᴍ(floydSteinberg _, Image dst, image.Rectangle rʗp, image.Image src, image.Point sp) {
     ref var r = ref heap(rʗp, out var Ꮡr);
 
     clip(dst, Ꮡr, src, ref sp, default, nil);
@@ -1198,12 +1198,3 @@ internal static void drawPaletted(Image dst, image.Rectangle r, image.Image src,
 }
 
 } // end draw_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class drawᴛOp {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Draw(this Op op, Image dst, image.Rectangle r, image.Image src, image.Point sp) => draw_package.Drawᴍ(op, dst, r, src, sp);
-}
-partial class drawᴛfloydSteinberg {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Draw(this floydSteinberg _, Image dst, image.Rectangle rʗp, image.Image src, image.Point sp) => draw_package.Drawᴍ(_, dst, rʗp, src, sp);
-}
-// </GlyphForwarders>

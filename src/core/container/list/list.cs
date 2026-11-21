@@ -32,7 +32,7 @@ partial struct Element {
 } partial class list_package {
 
 // Next returns the next list element or nil.
-internal static ж<Element> Nextᴍ(ref Element e) {
+[GoMethodBody("Next")] internal static ж<Element> Nextᴍ(ref Element e) {
     var p = e.next; if (e.list != nil && p != e.list.Ꮡroot) {
         return p;
     }
@@ -40,7 +40,7 @@ internal static ж<Element> Nextᴍ(ref Element e) {
 }
 
 // Prev returns the previous list element or nil.
-internal static ж<Element> Prevᴍ(ref Element e) {
+[GoMethodBody("Prev")] internal static ж<Element> Prevᴍ(ref Element e) {
     var p = e.prev; if (e.list != nil && p != e.list.Ꮡroot) {
         return p;
     }
@@ -59,7 +59,7 @@ partial struct List {
 } partial class list_package {
 
 // Init initializes or clears list l.
-internal static ж<List> Initᴍ(ж<List> Ꮡl) {
+[GoMethodBody("Init")] internal static ж<List> Initᴍ(ж<List> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.root.next = Ꮡl.Ꮡroot;
@@ -77,10 +77,10 @@ public static ж<List> New() { return @new<List>().Init(); }
 
 // Len returns the number of elements of list l.
 // The complexity is O(1).
-internal static nint Lenᴍ(ref List l) { return l.len; }
+[GoMethodBody("Len")] internal static nint Lenᴍ(ref List l) { return l.len; }
 
 // Front returns the first element of list l or nil if the list is empty.
-internal static ж<Element> Frontᴍ(ref List l) {
+[GoMethodBody("Front")] internal static ж<Element> Frontᴍ(ref List l) {
     if (l.len == 0) {
         return default;
     }
@@ -88,7 +88,7 @@ internal static ж<Element> Frontᴍ(ref List l) {
 }
 
 // Back returns the last element of list l or nil if the list is empty.
-internal static ж<Element> Backᴍ(ref List l) {
+[GoMethodBody("Back")] internal static ж<Element> Backᴍ(ref List l) {
     if (l.len == 0) {
         return default;
     }
@@ -96,7 +96,7 @@ internal static ж<Element> Backᴍ(ref List l) {
 }
 
 // lazyInit lazily initializes a zero List value.
-internal static void lazyInitᴍ(ж<List> Ꮡl) {
+[GoMethodBody("lazyInit")] internal static void lazyInitᴍ(ж<List> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (l.root.next == nil) {
@@ -105,7 +105,7 @@ internal static void lazyInitᴍ(ж<List> Ꮡl) {
 }
 
 // insert inserts e after at, increments l.len, and returns e.
-internal static ж<Element> insertᴍ(ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡat) {
+[GoMethodBody("insert")] internal static ж<Element> insertᴍ(ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡat) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
     ref var at = ref Ꮡat.DerefOrNull();
@@ -120,12 +120,12 @@ internal static ж<Element> insertᴍ(ж<List> Ꮡl, ж<Element> Ꮡe, ж<Elemen
 }
 
 // insertValue is a convenience wrapper for insert(&Element{Value: v}, at).
-internal static ж<Element> insertValueᴍ(ж<List> Ꮡl, any v, ж<Element> at) {
+[GoMethodBody("insertValue")] internal static ж<Element> insertValueᴍ(ж<List> Ꮡl, any v, ж<Element> at) {
     return Ꮡl.insert(Ꮡ(new Element(Value: v)), at);
 }
 
 // remove removes e from its list, decrements l.len
-internal static void removeᴍ(ref List l, ж<Element> Ꮡe) {
+[GoMethodBody("remove")] internal static void removeᴍ(ref List l, ж<Element> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     e.prev.next = e.next;
@@ -137,7 +137,7 @@ internal static void removeᴍ(ref List l, ж<Element> Ꮡe) {
 }
 
 // move moves e to next to at.
-internal static void moveᴍ(ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) {
+[GoMethodBody("move")] internal static void moveᴍ(ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var at = ref Ꮡat.DerefOrNull();
 
@@ -156,7 +156,7 @@ internal static void moveᴍ(ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) {
 // Remove removes e from l if e is an element of list l.
 // It returns the element value e.Value.
 // The element must not be nil.
-internal static any Removeᴍ(ж<List> Ꮡl, ж<Element> Ꮡe) {
+[GoMethodBody("Remove")] internal static any Removeᴍ(ж<List> Ꮡl, ж<Element> Ꮡe) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -169,13 +169,13 @@ internal static any Removeᴍ(ж<List> Ꮡl, ж<Element> Ꮡe) {
 }
 
 // PushFront inserts a new element e with value v at the front of list l and returns e.
-internal static ж<Element> PushFrontᴍ(ж<List> Ꮡl, any v) {
+[GoMethodBody("PushFront")] internal static ж<Element> PushFrontᴍ(ж<List> Ꮡl, any v) {
     Ꮡl.lazyInit();
     return Ꮡl.insertValue(v, Ꮡl.Ꮡroot);
 }
 
 // PushBack inserts a new element e with value v at the back of list l and returns e.
-internal static ж<Element> PushBackᴍ(ж<List> Ꮡl, any v) {
+[GoMethodBody("PushBack")] internal static ж<Element> PushBackᴍ(ж<List> Ꮡl, any v) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     Ꮡl.lazyInit();
@@ -185,7 +185,7 @@ internal static ж<Element> PushBackᴍ(ж<List> Ꮡl, any v) {
 // InsertBefore inserts a new element e with value v immediately before mark and returns e.
 // If mark is not an element of l, the list is not modified.
 // The mark must not be nil.
-internal static ж<Element> InsertBeforeᴍ(ж<List> Ꮡl, any v, ж<Element> Ꮡmark) {
+[GoMethodBody("InsertBefore")] internal static ж<Element> InsertBeforeᴍ(ж<List> Ꮡl, any v, ж<Element> Ꮡmark) {
     ref var mark = ref Ꮡmark.DerefOrNull();
 
     if (mark.list != Ꮡl) {
@@ -198,7 +198,7 @@ internal static ж<Element> InsertBeforeᴍ(ж<List> Ꮡl, any v, ж<Element> �
 // InsertAfter inserts a new element e with value v immediately after mark and returns e.
 // If mark is not an element of l, the list is not modified.
 // The mark must not be nil.
-internal static ж<Element> InsertAfterᴍ(ж<List> Ꮡl, any v, ж<Element> Ꮡmark) {
+[GoMethodBody("InsertAfter")] internal static ж<Element> InsertAfterᴍ(ж<List> Ꮡl, any v, ж<Element> Ꮡmark) {
     ref var mark = ref Ꮡmark.DerefOrNull();
 
     if (mark.list != Ꮡl) {
@@ -211,7 +211,7 @@ internal static ж<Element> InsertAfterᴍ(ж<List> Ꮡl, any v, ж<Element> Ꮡ
 // MoveToFront moves element e to the front of list l.
 // If e is not an element of l, the list is not modified.
 // The element must not be nil.
-internal static void MoveToFrontᴍ(ж<List> Ꮡl, ж<Element> Ꮡe) {
+[GoMethodBody("MoveToFront")] internal static void MoveToFrontᴍ(ж<List> Ꮡl, ж<Element> Ꮡe) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -225,7 +225,7 @@ internal static void MoveToFrontᴍ(ж<List> Ꮡl, ж<Element> Ꮡe) {
 // MoveToBack moves element e to the back of list l.
 // If e is not an element of l, the list is not modified.
 // The element must not be nil.
-internal static void MoveToBackᴍ(ж<List> Ꮡl, ж<Element> Ꮡe) {
+[GoMethodBody("MoveToBack")] internal static void MoveToBackᴍ(ж<List> Ꮡl, ж<Element> Ꮡe) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -239,7 +239,7 @@ internal static void MoveToBackᴍ(ж<List> Ꮡl, ж<Element> Ꮡe) {
 // MoveBefore moves element e to its new position before mark.
 // If e or mark is not an element of l, or e == mark, the list is not modified.
 // The element and mark must not be nil.
-internal static void MoveBeforeᴍ(ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) {
+[GoMethodBody("MoveBefore")] internal static void MoveBeforeᴍ(ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
     ref var mark = ref Ꮡmark.DerefOrNull();
@@ -253,7 +253,7 @@ internal static void MoveBeforeᴍ(ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> 
 // MoveAfter moves element e to its new position after mark.
 // If e or mark is not an element of l, or e == mark, the list is not modified.
 // The element and mark must not be nil.
-internal static void MoveAfterᴍ(ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) {
+[GoMethodBody("MoveAfter")] internal static void MoveAfterᴍ(ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
     ref var mark = ref Ꮡmark.DerefOrNull();
@@ -266,7 +266,7 @@ internal static void MoveAfterᴍ(ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> �
 
 // PushBackList inserts a copy of another list at the back of list l.
 // The lists l and other may be the same. They must not be nil.
-internal static void PushBackListᴍ(ж<List> Ꮡl, ж<List> Ꮡother) {
+[GoMethodBody("PushBackList")] internal static void PushBackListᴍ(ж<List> Ꮡl, ж<List> Ꮡother) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var other = ref Ꮡother.DerefOrNull();
 
@@ -278,7 +278,7 @@ internal static void PushBackListᴍ(ж<List> Ꮡl, ж<List> Ꮡother) {
 
 // PushFrontList inserts a copy of another list at the front of list l.
 // The lists l and other may be the same. They must not be nil.
-internal static void PushFrontListᴍ(ж<List> Ꮡl, ж<List> Ꮡother) {
+[GoMethodBody("PushFrontList")] internal static void PushFrontListᴍ(ж<List> Ꮡl, ж<List> Ꮡother) {
     ref var other = ref Ꮡother.DerefOrNull();
 
     Ꮡl.lazyInit();
@@ -288,32 +288,3 @@ internal static void PushFrontListᴍ(ж<List> Ꮡl, ж<List> Ꮡother) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class listᴛElement {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Next(this ref Element e) => list_package.Nextᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Prev(this ref Element e) => list_package.Prevᴍ(ref e);
-}
-partial class listᴛList {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<List> Init(this ж<List> Ꮡl) => list_package.Initᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ref List l) => list_package.Lenᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Front(this ref List l) => list_package.Frontᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Back(this ref List l) => list_package.Backᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void lazyInit(this ж<List> Ꮡl) => list_package.lazyInitᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Element> insert(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡat) => list_package.insertᴍ(Ꮡl, Ꮡe, Ꮡat);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Element> insertValue(this ж<List> Ꮡl, any v, ж<Element> at) => list_package.insertValueᴍ(Ꮡl, v, at);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void remove(this ref List l, ж<Element> Ꮡe) => list_package.removeᴍ(ref l, Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void move(this ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) => list_package.moveᴍ(ref l, Ꮡe, Ꮡat);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static any Remove(this ж<List> Ꮡl, ж<Element> Ꮡe) => list_package.Removeᴍ(Ꮡl, Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> PushFront(this ж<List> Ꮡl, any v) => list_package.PushFrontᴍ(Ꮡl, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> PushBack(this ж<List> Ꮡl, any v) => list_package.PushBackᴍ(Ꮡl, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> InsertBefore(this ж<List> Ꮡl, any v, ж<Element> Ꮡmark) => list_package.InsertBeforeᴍ(Ꮡl, v, Ꮡmark);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> InsertAfter(this ж<List> Ꮡl, any v, ж<Element> Ꮡmark) => list_package.InsertAfterᴍ(Ꮡl, v, Ꮡmark);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void MoveToFront(this ж<List> Ꮡl, ж<Element> Ꮡe) => list_package.MoveToFrontᴍ(Ꮡl, Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void MoveToBack(this ж<List> Ꮡl, ж<Element> Ꮡe) => list_package.MoveToBackᴍ(Ꮡl, Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void MoveBefore(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) => list_package.MoveBeforeᴍ(Ꮡl, Ꮡe, Ꮡmark);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void MoveAfter(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) => list_package.MoveAfterᴍ(Ꮡl, Ꮡe, Ꮡmark);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void PushBackList(this ж<List> Ꮡl, ж<List> Ꮡother) => list_package.PushBackListᴍ(Ꮡl, Ꮡother);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void PushFrontList(this ж<List> Ꮡl, ж<List> Ꮡother) => list_package.PushFrontListᴍ(Ꮡl, Ꮡother);
-}
-// </GlyphForwarders>

@@ -79,6 +79,39 @@ using static go.go.@internal.gccgoimporter_package;
 
 namespace go.go.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using bytes = bytes_package;
+using elf = debug.elf_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using xcoff = global::go.@internal.xcoff_package;
+using io = io_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using debug;
+using global::go.@internal;
+using static gccgoimporter_package;
+using bufio = bufio_package;
+using types = global::go.go.types_package;
+using os = os_package;
+using exec = global::go.os.exec_package;
+using filepath = path.filepath_package;
+using fs = global::go.io.fs_package;
+using global::go.go;
+using global::go.io;
+using global::go.os;
+using path;
+using ꓸꓸꓸstring = Span<@string>;
+using gccgoimporter = gccgoimporter_package;
+using constant = global::go.go.constant_package;
+using token = global::go.go.token_package;
+using scanner = text.scanner_package;
+using utf8 = unicode.utf8_package;
+using text;
+using unicode;
+using ꓸꓸꓸany = Span<any>;
+// </GlyphForwarderUsings>
+
 [GoPackage("gccgoimporter")]
 public static partial class gccgoimporter_package
 {
@@ -140,3 +173,68 @@ public static partial class gccgoimporter_package
 [GoMethodHost(typeof(gccgoimporter_package.parser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gccgoimporterᴛparser;
 [GoMethodHost(typeof(gccgoimporter_package.seekerReadAt)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gccgoimporterᴛseekerReadAt;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class gccgoimporterᴛseekerReadAt {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) ReadAt(this seekerReadAt sra, slice<byte> p, int64 off) => gccgoimporter_package.ReadAtᴍ(sra, p, off);
+}
+partial class gccgoimporterᴛGccgoInstallation {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @string gccgoPath, params ꓸꓸꓸstring argsʗp) => gccgoimporter_package.InitFromDriverᴍ(ref inst, gccgoPath, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> /*paths*/ SearchPaths(this ref GccgoInstallation inst) => gccgoimporter_package.SearchPathsᴍ(ref inst);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> GetImporter(this ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) => gccgoimporter_package.GetImporterᴍ(ref inst, incpaths, initmap);
+}
+partial class gccgoimporterᴛparser {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<parser> Ꮡp, @string filename, io.Reader src, map<@string, ж<types.Package>> imports) => gccgoimporter_package.initᴍ(Ꮡp, filename, src, imports);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initScanner(this ж<parser> Ꮡp, @string filename, io.Reader src) => gccgoimporter_package.initScannerᴍ(Ꮡp, filename, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void error(this ref parser p, any err) => gccgoimporter_package.errorᴍ(ref p, err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void errorf(this ref parser p, @string format, params ꓸꓸꓸany argsʗp) => gccgoimporter_package.errorfᴍ(ref p, format, argsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string expect(this ref parser p, rune tok) => gccgoimporter_package.expectᴍ(ref p, tok);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void expectEOL(this ref parser p) => gccgoimporter_package.expectEOLᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void expectKeyword(this ref parser p, @string keyword) => gccgoimporter_package.expectKeywordᴍ(ref p, keyword);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string parseString(this ref parser p) => gccgoimporter_package.parseStringᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string parseUnquotedString(this ref parser p) => gccgoimporter_package.parseUnquotedStringᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void next(this ref parser p) => gccgoimporter_package.nextᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string path, @string name) parseQualifiedName(this ref parser p) => gccgoimporter_package.parseQualifiedNameᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string path, @string name) parseUnquotedQualifiedName(this ref parser p) => gccgoimporter_package.parseUnquotedQualifiedNameᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string pkgpath, @string name) parseQualifiedNameStr(this ref parser p, @string unquotedName) => gccgoimporter_package.parseQualifiedNameStrᴍ(ref p, unquotedName);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Package> getPkg(this ref parser p, @string pkgpath, @string name) => gccgoimporter_package.getPkgᴍ(ref p, pkgpath, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package> pkg, @string name) parseExportedName(this ref parser p) => gccgoimporter_package.parseExportedNameᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string parseName(this ref parser p) => gccgoimporter_package.parseNameᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Var> field, @string tag) parseField(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseFieldᴍ(Ꮡp, pkg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Var> param, bool isVariadic) parseParam(this ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> pkg) => gccgoimporter_package.parseParamᴍ(Ꮡp, kind, pkg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Var> parseVar(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseVarᴍ(Ꮡp, pkg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (constant.Value val, types.Type typ) parseConversion(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseConversionᴍ(Ꮡp, pkg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (constant.Value val, types.Type typ) parseConstValue(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseConstValueᴍ(Ꮡp, pkg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Const> parseConst(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseConstᴍ(Ꮡp, pkg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reserve(this ref parser p, nint n) => gccgoimporter_package.reserveᴍ(ref p, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void update(this ref parser p, types.Type t, slice<any> nlist) => gccgoimporter_package.updateᴍ(ref p, t, nlist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseNamedType(this ж<parser> Ꮡp, slice<any> nlist) => gccgoimporter_package.parseNamedTypeᴍ(Ꮡp, nlist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 parseInt64(this ref parser p) => gccgoimporter_package.parseInt64ᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint parseInt(this ref parser p) => gccgoimporter_package.parseIntᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseArrayOrSliceType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parseArrayOrSliceTypeᴍ(Ꮡp, pkg, nlist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseMapType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parseMapTypeᴍ(Ꮡp, pkg, nlist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseChanType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parseChanTypeᴍ(Ꮡp, pkg, nlist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseStructType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parseStructTypeᴍ(Ꮡp, pkg, nlist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Tuple>, bool) parseParamList(this ж<parser> Ꮡp, types.VarKind kind, ж<types.Package> pkg) => gccgoimporter_package.parseParamListᴍ(Ꮡp, kind, pkg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Tuple> parseResultList(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseResultListᴍ(Ꮡp, pkg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Signature> parseFunctionType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parseFunctionTypeᴍ(Ꮡp, pkg, nlist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Func> parseFunc(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseFuncᴍ(Ꮡp, pkg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseInterfaceType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parseInterfaceTypeᴍ(Ꮡp, pkg, nlist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parsePointerType(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parsePointerTypeᴍ(Ꮡp, pkg, nlist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseTypeSpec(this ж<parser> Ꮡp, ж<types.Package> pkg, slice<any> nlist) => gccgoimporter_package.parseTypeSpecᴍ(Ꮡp, pkg, nlist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type parseType(this ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) => gccgoimporter_package.parseTypeᴍ(Ꮡp, pkg, nʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (types.Type t, nint n1) parseTypeAfterAngle(this ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) => gccgoimporter_package.parseTypeAfterAngleᴍ(Ꮡp, pkg, nʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (types.Type t, nint n1) parseTypeExtended(this ж<parser> Ꮡp, ж<types.Package> pkg, params ꓸꓸꓸany nʗp) => gccgoimporter_package.parseTypeExtendedᴍ(Ꮡp, pkg, nʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void skipInlineBody(this ж<parser> Ꮡp) => gccgoimporter_package.skipInlineBodyᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parseTypes(this ж<parser> Ꮡp, ж<types.Package> pkg) => gccgoimporter_package.parseTypesᴍ(Ꮡp, pkg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parseSavedType(this ж<parser> Ꮡp, ж<types.Package> pkg, nint i, slice<any> nlist) => gccgoimporter_package.parseSavedTypeᴍ(Ꮡp, pkg, i, nlist);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static PackageInit parsePackageInit(this ref parser p) => gccgoimporter_package.parsePackageInitᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void maybeCreatePackage(this ref parser p) => gccgoimporter_package.maybeCreatePackageᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parseInitDataDirective(this ж<parser> Ꮡp) => gccgoimporter_package.parseInitDataDirectiveᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parseDirective(this ж<parser> Ꮡp) => gccgoimporter_package.parseDirectiveᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Package> parsePackage(this ж<parser> Ꮡp) => gccgoimporter_package.parsePackageᴍ(Ꮡp);
+}
+partial class gccgoimporterᴛimportError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this importError e) => gccgoimporter_package.Errorᴍ(e);
+}
+// </GlyphForwarders>

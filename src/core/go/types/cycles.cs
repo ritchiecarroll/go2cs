@@ -16,7 +16,7 @@ partial class types_package {
 
 // directCycles searches for direct cycles among package level type declarations.
 // See directCycle for details.
-internal static void directCyclesᴍ(ж<Checker> Ꮡcheck) {
+[GoMethodBody("directCycles")] internal static void directCyclesᴍ(ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var pathIdx = new map<ж<TypeName>, nint>();
@@ -50,7 +50,7 @@ private static readonly @string checkDirectCycleForSˢᵇᴍChecker = "-- check 
 // When directCycle returns, the pathIdx entries for all type names on the path
 // that starts at tname are marked black, regardless of whether there was a cycle.
 // This ensures that a type name is traversed only once.
-internal static void directCycleᴍ(ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtname, map<ж<TypeName>, nint> pathIdx) {
+[GoMethodBody("directCycle")] internal static void directCycleᴍ(ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtname, map<ж<TypeName>, nint> pathIdx) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var tname = ref Ꮡtname.DerefOrNull();
     var cycleᴷ = new stackAppend<Object>();
@@ -125,7 +125,7 @@ internal static void directCycleᴍ(ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtname,
 // TODO(markfreeman): Can the value cached on Named be used in validType / hasVarSize?
 
 // finiteSize returns whether a type has finite size.
-internal static bool finiteSizeᴍ(ж<Checker> Ꮡcheck, Type t) {
+[GoMethodBody("finiteSize")] internal static bool finiteSizeᴍ(ж<Checker> Ꮡcheck, Type t) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -179,11 +179,3 @@ internal static bool finiteSizeᴍ(ж<Checker> Ꮡcheck, Type t) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void directCycles(this ж<Checker> Ꮡcheck) => types_package.directCyclesᴍ(Ꮡcheck);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void directCycle(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtname, map<ж<TypeName>, nint> pathIdx) => types_package.directCycleᴍ(Ꮡcheck, Ꮡtname, pathIdx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool finiteSize(this ж<Checker> Ꮡcheck, Type t) => types_package.finiteSizeᴍ(Ꮡcheck, t);
-}
-// </GlyphForwarders>

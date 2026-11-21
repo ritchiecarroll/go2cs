@@ -67,7 +67,7 @@ private static readonly @string errorˢᵇᴍLevel = "ERROR"u8;
 //
 //	LevelWarn.String() => "WARN"
 //	(LevelInfo+2).String() => "INFO+2"
-internal static @string Stringᴍ(Level l) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Level l) {
     @string str(@string @base, Level val) {
         if (val == 0) {
             return @base;
@@ -96,7 +96,7 @@ internal static @string Stringᴍ(Level l) {
 
 // MarshalJSON implements [encoding/json.Marshaler]
 // by quoting the output of [Level.String].
-internal static (slice<byte>, error) MarshalJSONᴍ(Level l) {
+[GoMethodBody("MarshalJSON")] internal static (slice<byte>, error) MarshalJSONᴍ(Level l) {
     // AppendQuote is sufficient for JSON-encoding all Level strings.
     // They don't contain any runes that would produce invalid JSON
     // when escaped.
@@ -108,7 +108,7 @@ internal static (slice<byte>, error) MarshalJSONᴍ(Level l) {
 // ignoring case.
 // It also accepts numeric offsets that would result in a different string on
 // output. For example, "Error-8" would marshal as "INFO".
-internal static error UnmarshalJSONᴍ(ж<Level> Ꮡl, slice<byte> data) {
+[GoMethodBody("UnmarshalJSON")] internal static error UnmarshalJSONᴍ(ж<Level> Ꮡl, slice<byte> data) {
     var (s, err) = strconv.Unquote((@string)data);
     if (err != nil) {
         return err;
@@ -118,13 +118,13 @@ internal static error UnmarshalJSONᴍ(ж<Level> Ꮡl, slice<byte> data) {
 
 // AppendText implements [encoding.TextAppender]
 // by calling [Level.String].
-internal static (slice<byte>, error) AppendTextᴍ(Level l, slice<byte> b) {
+[GoMethodBody("AppendText")] internal static (slice<byte>, error) AppendTextᴍ(Level l, slice<byte> b) {
     return (append(b, l.String().ꓸꓸꓸ), default);
 }
 
 // MarshalText implements [encoding.TextMarshaler]
 // by calling [Level.AppendText].
-internal static (slice<byte>, error) MarshalTextᴍ(Level l) {
+[GoMethodBody("MarshalText")] internal static (slice<byte>, error) MarshalTextᴍ(Level l) {
     return l.AppendText(default);
 }
 
@@ -133,7 +133,7 @@ internal static (slice<byte>, error) MarshalTextᴍ(Level l) {
 // ignoring case.
 // It also accepts numeric offsets that would result in a different string on
 // output. For example, "Error-8" would marshal as "INFO".
-internal static error UnmarshalTextᴍ(ж<Level> Ꮡl, slice<byte> data) {
+[GoMethodBody("UnmarshalText")] internal static error UnmarshalTextᴍ(ж<Level> Ꮡl, slice<byte> data) {
     return Ꮡl.parse((@string)data);
 }
 
@@ -141,7 +141,7 @@ internal static error UnmarshalTextᴍ(ж<Level> Ꮡl, slice<byte> data) {
 internal static ref readonly @string unknownNameˢᴍLevel => ref unknownNameˢᵇᴍLevel;
 private static readonly @string unknownNameˢᵇᴍLevel = "unknown name"u8;
 
-internal static error /*err*/ parseᴍ(ж<Level> Ꮡl, @string s) {
+[GoMethodBody("parse")] internal static error /*err*/ parseᴍ(ж<Level> Ꮡl, @string s) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -193,7 +193,7 @@ internal static error /*err*/ parseᴍ(ж<Level> Ꮡl, @string s) {
 
 // Level returns the receiver.
 // It implements [Leveler].
-internal static Level Levelᴍ(Level l) { return l; }
+[GoMethodBody("Level")] internal static Level Levelᴍ(Level l) { return l; }
 
 } partial class slog_package {
 
@@ -209,34 +209,34 @@ partial struct LevelVar {
 } partial class slog_package {
 
 // Level returns v's level.
-internal static Level Levelᴍ(ж<LevelVar> Ꮡv) {
+[GoMethodBody("Level")] internal static Level Levelᴍ(ж<LevelVar> Ꮡv) {
     return (Level)(nint)Ꮡv.Ꮡval.Load();
 }
 
 // Set sets v's level to l.
-internal static void Setᴍ(ж<LevelVar> Ꮡv, Level l) {
+[GoMethodBody("Set")] internal static void Setᴍ(ж<LevelVar> Ꮡv, Level l) {
     Ꮡv.Ꮡval.Store((int64)l);
 }
 
-internal static @string Stringᴍ(ж<LevelVar> Ꮡv) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<LevelVar> Ꮡv) {
     return fmt.Sprintf("LevelVar(%s)"u8, Ꮡv.Level());
 }
 
 // AppendText implements [encoding.TextAppender]
 // by calling [Level.AppendText].
-internal static (slice<byte>, error) AppendTextᴍ(ж<LevelVar> Ꮡv, slice<byte> b) {
+[GoMethodBody("AppendText")] internal static (slice<byte>, error) AppendTextᴍ(ж<LevelVar> Ꮡv, slice<byte> b) {
     return Ꮡv.Level().AppendText(b);
 }
 
 // MarshalText implements [encoding.TextMarshaler]
 // by calling [LevelVar.AppendText].
-internal static (slice<byte>, error) MarshalTextᴍ(ж<LevelVar> Ꮡv) {
+[GoMethodBody("MarshalText")] internal static (slice<byte>, error) MarshalTextᴍ(ж<LevelVar> Ꮡv) {
     return Ꮡv.AppendText(default);
 }
 
 // UnmarshalText implements [encoding.TextUnmarshaler]
 // by calling [Level.UnmarshalText].
-internal static error UnmarshalTextᴍ(ж<LevelVar> Ꮡv, slice<byte> data) {
+[GoMethodBody("UnmarshalText")] internal static error UnmarshalTextᴍ(ж<LevelVar> Ꮡv, slice<byte> data) {
     ref var l = ref heap(new Level(), out var Ꮡl);
     var err = Ꮡl.UnmarshalText(data); if (err != nil) {
         return err;
@@ -258,24 +258,3 @@ partial interface Leveler {
 }
 
 } // end slog_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class slogᴛLevel {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Level l) => slog_package.Stringᴍ(l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalJSON(this Level l) => slog_package.MarshalJSONᴍ(l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalJSON(this ж<Level> Ꮡl, slice<byte> data) => slog_package.UnmarshalJSONᴍ(Ꮡl, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendText(this Level l, slice<byte> b) => slog_package.AppendTextᴍ(l, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalText(this Level l) => slog_package.MarshalTextᴍ(l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalText(this ж<Level> Ꮡl, slice<byte> data) => slog_package.UnmarshalTextᴍ(Ꮡl, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ parse(this ж<Level> Ꮡl, @string s) => slog_package.parseᴍ(Ꮡl, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Level Level(this Level l) => slog_package.Levelᴍ(l);
-}
-partial class slogᴛLevelVar {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Level Level(this ж<LevelVar> Ꮡv) => slog_package.Levelᴍ(Ꮡv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Set(this ж<LevelVar> Ꮡv, Level l) => slog_package.Setᴍ(Ꮡv, l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<LevelVar> Ꮡv) => slog_package.Stringᴍ(Ꮡv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendText(this ж<LevelVar> Ꮡv, slice<byte> b) => slog_package.AppendTextᴍ(Ꮡv, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalText(this ж<LevelVar> Ꮡv) => slog_package.MarshalTextᴍ(Ꮡv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalText(this ж<LevelVar> Ꮡv, slice<byte> data) => slog_package.UnmarshalTextᴍ(Ꮡv, data);
-}
-// </GlyphForwarders>

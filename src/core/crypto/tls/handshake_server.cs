@@ -46,7 +46,7 @@ partial struct serverHandshakeState {
 } partial class tls_package {
 
 // serverHandshake performs a TLS handshake as a server.
-internal static error serverHandshakeᴍ(ж<Conn> Ꮡc, context.Context ctx) {
+[GoMethodBody("serverHandshake")] internal static error serverHandshakeᴍ(ж<Conn> Ꮡc, context.Context ctx) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (clientHello, ech, err) = Ꮡc.readClientHello(ctx);
@@ -74,7 +74,7 @@ internal static error serverHandshakeᴍ(ж<Conn> Ꮡc, context.Context ctx) {
 
 } partial class tls_package {
 
-internal static error handshakeᴍ(ж<serverHandshakeState> Ꮡhs) {
+[GoMethodBody("handshake")] internal static error handshakeᴍ(ж<serverHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -180,7 +180,7 @@ internal static ref readonly @string tlsEncryptedClientHelloˢᴍConn => ref tls
 private static readonly @string tlsEncryptedClientHelloˢᵇᴍConn = "tls: Encrypted Client Hello cannot be used pre-TLS 1.3"u8;
 
 // readClientHello reads a ClientHello message and selects the protocol version.
-internal static (ж<clientHelloMsg>, ж<echServerContext>, error) readClientHelloᴍ(ж<Conn> Ꮡc, context.Context ctx) {
+[GoMethodBody("readClientHello")] internal static (ж<clientHelloMsg>, ж<echServerContext>, error) readClientHelloᴍ(ж<Conn> Ꮡc, context.Context ctx) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // clientHelloMsg is included in the transcript, but we haven't initialized
@@ -275,7 +275,7 @@ private static readonly @string tlsClientDoesNotSupportˢᵇᴍserverHandshakeSt
 internal static ref readonly @string tlsInitialHandshakeHadˢᴍserverHandshakeState => ref tlsInitialHandshakeHadˢᵇᴍserverHandshakeState;
 private static readonly @string tlsInitialHandshakeHadˢᵇᴍserverHandshakeState = "tls: initial handshake had non-empty renegotiation extension"u8;
 
-internal static error processClientHelloᴍ(ref serverHandshakeState hs) {
+[GoMethodBody("processClientHello")] internal static error processClientHelloᴍ(ref serverHandshakeState hs) {
     var c = hs.c;
 
     hs.hello = @new<serverHelloMsg>();
@@ -476,7 +476,7 @@ internal static (bool, error) supportsECDHE(ж<Config> c, uint16 version, slice<
 internal static ref readonly @string tlsClientUsingˢᴍserverHandshakeState => ref tlsClientUsingˢᵇᴍserverHandshakeState;
 private static readonly @string tlsClientUsingˢᵇᴍserverHandshakeState = "tls: client using inappropriate protocol fallback"u8;
 
-internal static error pickCipherSuiteᴍ(ж<serverHandshakeState> Ꮡhs) {
+[GoMethodBody("pickCipherSuite")] internal static error pickCipherSuiteᴍ(ж<serverHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -514,7 +514,7 @@ internal static error pickCipherSuiteᴍ(ж<serverHandshakeState> Ꮡhs) {
     return default;
 }
 
-internal static bool cipherSuiteOkᴍ(ref serverHandshakeState hs, ж<cipherSuite> Ꮡc) {
+[GoMethodBody("cipherSuiteOk")] internal static bool cipherSuiteOkᴍ(ref serverHandshakeState hs, ж<cipherSuite> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if ((c.flags & (nint)suiteECDHE) != 0) {
@@ -542,7 +542,7 @@ internal static ref readonly @string tlsSessionSupportedˢᴍserverHandshakeStat
 private static readonly @string tlsSessionSupportedˢᵇᴍserverHandshakeState = "tls: session supported extended_master_secret but client does not"u8;
 
 // checkForResumption reports whether we should perform resumption on this connection.
-internal static error checkForResumptionᴍ(ж<serverHandshakeState> Ꮡhs) {
+[GoMethodBody("checkForResumption")] internal static error checkForResumptionᴍ(ж<serverHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -654,7 +654,7 @@ internal static error checkForResumptionᴍ(ж<serverHandshakeState> Ꮡhs) {
     return default;
 }
 
-internal static error doResumeHandshakeᴍ(ж<serverHandshakeState> Ꮡhs) {
+[GoMethodBody("doResumeHandshake")] internal static error doResumeHandshakeᴍ(ж<serverHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -701,7 +701,7 @@ private static readonly @string tlsClientCertificateUsedˢᵇᴍserverHandshakeS
 internal static ref readonly @string tlsInternalErrorDidNotˢᴍserverHandshakeState => ref tlsInternalErrorDidNotˢᵇᴍserverHandshakeState;
 private static readonly @string tlsInternalErrorDidNotˢᵇᴍserverHandshakeState = "tls: internal error: did not keep handshake transcript for TLS 1.2"u8;
 
-internal static error doFullHandshakeᴍ(ж<serverHandshakeState> Ꮡhs) {
+[GoMethodBody("doFullHandshake")] internal static error doFullHandshakeᴍ(ж<serverHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -932,7 +932,7 @@ internal static error doFullHandshakeᴍ(ж<serverHandshakeState> Ꮡhs) {
     return default;
 }
 
-internal static error establishKeysᴍ(ref serverHandshakeState hs) {
+[GoMethodBody("establishKeys")] internal static error establishKeysᴍ(ref serverHandshakeState hs) {
     var c = hs.c;
 
     var (clientMAC, serverMAC, clientKey, serverKey, clientIV, serverIV) = keysFromMasterSecret(c.vers, ref (hs.suite).DerefOrNull(), hs.masterSecret, hs.clientHello.random, hs.hello.random, hs.suite.macLen, hs.suite.keyLen, hs.suite.ivLen);
@@ -962,7 +962,7 @@ internal static error establishKeysᴍ(ref serverHandshakeState hs) {
 internal static ref readonly @string tlsClientSFinishedˢᴍserverHandshakeState => ref tlsClientSFinishedˢᵇᴍserverHandshakeState;
 private static readonly @string tlsClientSFinishedˢᵇᴍserverHandshakeState = "tls: client's Finished message is incorrect"u8;
 
-internal static error readFinishedᴍ(ж<serverHandshakeState> Ꮡhs, slice<byte> @out) {
+[GoMethodBody("readFinished")] internal static error readFinishedᴍ(ж<serverHandshakeState> Ꮡhs, slice<byte> @out) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -998,7 +998,7 @@ internal static error readFinishedᴍ(ж<serverHandshakeState> Ꮡhs, slice<byte
     return default;
 }
 
-internal static error sendSessionTicketᴍ(ж<serverHandshakeState> Ꮡhs) {
+[GoMethodBody("sendSessionTicket")] internal static error sendSessionTicketᴍ(ж<serverHandshakeState> Ꮡhs) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     if (!hs.hello.ticketSupported) {
@@ -1041,7 +1041,7 @@ internal static error sendSessionTicketᴍ(ж<serverHandshakeState> Ꮡhs) {
     return default;
 }
 
-internal static error sendFinishedᴍ(ж<serverHandshakeState> Ꮡhs, slice<byte> @out) {
+[GoMethodBody("sendFinished")] internal static error sendFinishedᴍ(ж<serverHandshakeState> Ꮡhs, slice<byte> @out) {
     ref var hs = ref Ꮡhs.DerefOrNull();
 
     var c = hs.c;
@@ -1073,7 +1073,7 @@ private static readonly @string tlsClientDidnTProvideAˢᵇᴍConn = "tls: clien
 
 // processCertsFromClient takes a chain of client certificates either from a
 // certificateMsg message or a certificateMsgTLS13 message and verifies them.
-internal static error processCertsFromClientᴍ(ж<Conn> Ꮡc, Certificate certificate) {
+[GoMethodBody("processCertsFromClient")] internal static error processCertsFromClientᴍ(ж<Conn> Ꮡc, Certificate certificate) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var certificates = certificate.ΔCertificate;
@@ -1185,24 +1185,3 @@ internal static ж<ClientHelloInfo> clientHelloInfo(context.Context ctx, ref Con
 }
 
 } // end tls_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tlsᴛConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error serverHandshake(this ж<Conn> Ꮡc, context.Context ctx) => tls_package.serverHandshakeᴍ(Ꮡc, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<clientHelloMsg>, ж<echServerContext>, error) readClientHello(this ж<Conn> Ꮡc, context.Context ctx) => tls_package.readClientHelloᴍ(Ꮡc, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processCertsFromClient(this ж<Conn> Ꮡc, Certificate certificate) => tls_package.processCertsFromClientᴍ(Ꮡc, certificate);
-}
-partial class tlsᴛserverHandshakeState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error handshake(this ж<serverHandshakeState> Ꮡhs) => tls_package.handshakeᴍ(Ꮡhs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processClientHello(this ref serverHandshakeState hs) => tls_package.processClientHelloᴍ(ref hs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error pickCipherSuite(this ж<serverHandshakeState> Ꮡhs) => tls_package.pickCipherSuiteᴍ(Ꮡhs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool cipherSuiteOk(this ref serverHandshakeState hs, ж<cipherSuite> Ꮡc) => tls_package.cipherSuiteOkᴍ(ref hs, Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error checkForResumption(this ж<serverHandshakeState> Ꮡhs) => tls_package.checkForResumptionᴍ(Ꮡhs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error doResumeHandshake(this ж<serverHandshakeState> Ꮡhs) => tls_package.doResumeHandshakeᴍ(Ꮡhs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error doFullHandshake(this ж<serverHandshakeState> Ꮡhs) => tls_package.doFullHandshakeᴍ(Ꮡhs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error establishKeys(this ref serverHandshakeState hs) => tls_package.establishKeysᴍ(ref hs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readFinished(this ж<serverHandshakeState> Ꮡhs, slice<byte> @out) => tls_package.readFinishedᴍ(Ꮡhs, @out);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error sendSessionTicket(this ж<serverHandshakeState> Ꮡhs) => tls_package.sendSessionTicketᴍ(Ꮡhs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error sendFinished(this ж<serverHandshakeState> Ꮡhs, slice<byte> @out) => tls_package.sendFinishedᴍ(Ꮡhs, @out);
-}
-// </GlyphForwarders>

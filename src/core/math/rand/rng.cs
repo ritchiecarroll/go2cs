@@ -199,7 +199,7 @@ internal static int32 seedrand(int32 x) {
 } partial class rand_package {
 
 // Seed uses the provided seed value to initialize the generator to a deterministic state.
-internal static void Seedᴍ(ref rngSource rng, int64 seed) {
+[GoMethodBody("Seed")] internal static void Seedᴍ(ref rngSource rng, int64 seed) {
     rng.tap = 0;
     rng.feed = rngLen - rngTap;
 
@@ -228,12 +228,12 @@ internal static void Seedᴍ(ref rngSource rng, int64 seed) {
 }
 
 // Int63 returns a non-negative pseudo-random 63-bit integer as an int64.
-internal static int64 Int63ᴍ(ref rngSource rng) {
+[GoMethodBody("Int63")] internal static int64 Int63ᴍ(ref rngSource rng) {
     return (int64)(rng.Uint64() & (uint64)rngMask);
 }
 
 // Uint64 returns a non-negative pseudo-random 64-bit integer as a uint64.
-internal static uint64 Uint64ᴍ(ref rngSource rng) {
+[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(ref rngSource rng) {
     rng.tap--;
     if (rng.tap < 0) {
         rng.tap += rngLen;
@@ -250,11 +250,3 @@ internal static uint64 Uint64ᴍ(ref rngSource rng) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class randᴛrngSource {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Seed(this ref rngSource rng, int64 seed) => rand_package.Seedᴍ(ref rng, seed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 Int63(this ref rngSource rng) => rand_package.Int63ᴍ(ref rng);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 Uint64(this ref rngSource rng) => rand_package.Uint64ᴍ(ref rng);
-}
-// </GlyphForwarders>

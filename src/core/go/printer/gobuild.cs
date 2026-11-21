@@ -14,7 +14,7 @@ partial class printer_package {
 
 } partial class printer_package {
 
-internal static void fixGoBuildLinesᴍ(ref printer p) {
+[GoMethodBody("fixGoBuildLines")] internal static void fixGoBuildLinesᴍ(ref printer p) {
     var blockᴷ = new stackAppend<byte>();
 
     if (len(p.goBuild) + len(p.plusBuild) == 0) {
@@ -156,7 +156,7 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
 
 } partial class printer_package {
 
-internal static slice<byte> lineAtᴍ(ref printer p, nint start) {
+[GoMethodBody("lineAt")] internal static slice<byte> lineAtᴍ(ref printer p, nint start) {
     nint pos = start;
     while (pos < len(p.output) && !isNL(p.output[pos])) {
         pos++;
@@ -167,7 +167,7 @@ internal static slice<byte> lineAtᴍ(ref printer p, nint start) {
     return p.output.slice(start, pos);
 }
 
-internal static @string commentTextAtᴍ(ref printer p, nint start) {
+[GoMethodBody("commentTextAt")] internal static @string commentTextAtᴍ(ref printer p, nint start) {
     if (start < len(p.output) && p.output[start] == tabwriter.Escape) {
         start++;
     }
@@ -185,11 +185,3 @@ internal static bool isNL(byte b) {
 }
 
 } // end printer_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class printerᴛprinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fixGoBuildLines(this ref printer p) => printer_package.fixGoBuildLinesᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> lineAt(this ref printer p, nint start) => printer_package.lineAtᴍ(ref p, start);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string commentTextAt(this ref printer p, nint start) => printer_package.commentTextAtᴍ(ref p, start);
-}
-// </GlyphForwarders>

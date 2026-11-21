@@ -12,7 +12,7 @@ partial class socktest_package {
 } partial class socktest_package {
 
 // Socket wraps [syscall.Socket].
-internal static (nint s, error err) Socketᴍ(ж<Switch> Ꮡsw, nint family, nint sotype, nint proto) {
+[GoMethodBody("Socket")] internal static (nint s, error err) Socketᴍ(ж<Switch> Ꮡsw, nint family, nint sotype, nint proto) {
     nint s = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -54,7 +54,7 @@ internal static (nint s, error err) Socketᴍ(ж<Switch> Ꮡsw, nint family, nin
 }
 
 // Close wraps syscall.Close.
-internal static error /*err*/ Closeᴍ(ж<Switch> Ꮡsw, nint s) {
+[GoMethodBody("Close")] internal static error /*err*/ Closeᴍ(ж<Switch> Ꮡsw, nint s) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -93,7 +93,7 @@ internal static error /*err*/ Closeᴍ(ж<Switch> Ꮡsw, nint s) {
 }
 
 // Connect wraps syscall.Connect.
-internal static error /*err*/ Connectᴍ(ж<Switch> Ꮡsw, nint s, syscall.Sockaddr sa) {
+[GoMethodBody("Connect")] internal static error /*err*/ Connectᴍ(ж<Switch> Ꮡsw, nint s, syscall.Sockaddr sa) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -131,7 +131,7 @@ internal static error /*err*/ Connectᴍ(ж<Switch> Ꮡsw, nint s, syscall.Socka
 }
 
 // Listen wraps syscall.Listen.
-internal static error /*err*/ Listenᴍ(ж<Switch> Ꮡsw, nint s, nint backlog) {
+[GoMethodBody("Listen")] internal static error /*err*/ Listenᴍ(ж<Switch> Ꮡsw, nint s, nint backlog) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -169,7 +169,7 @@ internal static error /*err*/ Listenᴍ(ж<Switch> Ꮡsw, nint s, nint backlog) 
 }
 
 // Accept wraps syscall.Accept.
-internal static (nint ns, syscall.Sockaddr sa, error err) Acceptᴍ(ж<Switch> Ꮡsw, nint s) {
+[GoMethodBody("Accept")] internal static (nint ns, syscall.Sockaddr sa, error err) Acceptᴍ(ж<Switch> Ꮡsw, nint s) {
     nint ns = default;
     syscall.Sockaddr sa = default;
     error err = default;
@@ -213,7 +213,7 @@ internal static (nint ns, syscall.Sockaddr sa, error err) Acceptᴍ(ж<Switch> �
 }
 
 // GetsockoptInt wraps syscall.GetsockoptInt.
-internal static (nint soerr, error err) GetsockoptIntᴍ(ж<Switch> Ꮡsw, nint s, nint level, nint opt) {
+[GoMethodBody("GetsockoptInt")] internal static (nint soerr, error err) GetsockoptIntᴍ(ж<Switch> Ꮡsw, nint s, nint level, nint opt) {
     nint soerr = default;
     error err = default;
     ref var sw = ref Ꮡsw.DerefOrNull();
@@ -248,14 +248,3 @@ internal static (nint soerr, error err) GetsockoptIntᴍ(ж<Switch> Ꮡsw, nint 
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class socktestᴛSwitch {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint s, error err) Socket(this ж<Switch> Ꮡsw, nint family, nint sotype, nint proto) => socktest_package.Socketᴍ(Ꮡsw, family, sotype, proto);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error /*err*/ Close(this ж<Switch> Ꮡsw, nint s) => socktest_package.Closeᴍ(Ꮡsw, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error /*err*/ Connect(this ж<Switch> Ꮡsw, nint s, syscall.Sockaddr sa) => socktest_package.Connectᴍ(Ꮡsw, s, sa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error /*err*/ Listen(this ж<Switch> Ꮡsw, nint s, nint backlog) => socktest_package.Listenᴍ(Ꮡsw, s, backlog);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint ns, syscall.Sockaddr sa, error err) Accept(this ж<Switch> Ꮡsw, nint s) => socktest_package.Acceptᴍ(Ꮡsw, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint soerr, error err) GetsockoptInt(this ж<Switch> Ꮡsw, nint s, nint level, nint opt) => socktest_package.GetsockoptIntᴍ(Ꮡsw, s, level, opt);
-}
-// </GlyphForwarders>

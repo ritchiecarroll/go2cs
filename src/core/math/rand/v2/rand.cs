@@ -46,26 +46,26 @@ public static ж<Rand> New(Source src) {
 } partial class rand_package {
 
 // Int64 returns a non-negative pseudo-random 63-bit integer as an int64.
-internal static int64 Int64ᴍ(ref Rand r) { return (int64)((uint64)(r.src.Uint64() & ~((uint64)1 << 63))); }
+[GoMethodBody("Int64")] internal static int64 Int64ᴍ(ref Rand r) { return (int64)((uint64)(r.src.Uint64() & ~((uint64)1 << 63))); }
 
 // Uint32 returns a pseudo-random 32-bit value as a uint32.
-internal static uint32 Uint32ᴍ(ref Rand r) { return (uint32)(r.src.Uint64() >> 32); }
+[GoMethodBody("Uint32")] internal static uint32 Uint32ᴍ(ref Rand r) { return (uint32)(r.src.Uint64() >> 32); }
 
 // Uint64 returns a pseudo-random 64-bit value as a uint64.
-internal static uint64 Uint64ᴍ(ref Rand r) { return r.src.Uint64(); }
+[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(ref Rand r) { return r.src.Uint64(); }
 
 // Int32 returns a non-negative pseudo-random 31-bit integer as an int32.
-internal static int32 Int32ᴍ(ref Rand r) { return (int32)(r.src.Uint64() >> 33); }
+[GoMethodBody("Int32")] internal static int32 Int32ᴍ(ref Rand r) { return (int32)(r.src.Uint64() >> 33); }
 
 // Int returns a non-negative pseudo-random int.
-internal static nint Intᴍ(ref Rand r) { return (nint)(((nuint)r.src.Uint64() << 1) >> 1); }
+[GoMethodBody("Int")] internal static nint Intᴍ(ref Rand r) { return (nint)(((nuint)r.src.Uint64() << 1) >> 1); }
 
 // Uint returns a pseudo-random uint.
-internal static nuint Uintᴍ(ref Rand r) { return (nuint)r.src.Uint64(); }
+[GoMethodBody("Uint")] internal static nuint Uintᴍ(ref Rand r) { return (nuint)r.src.Uint64(); }
 
 // Int64N returns, as an int64, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n <= 0.
-internal static int64 Int64Nᴍ(ref Rand r, int64 n) {
+[GoMethodBody("Int64N")] internal static int64 Int64Nᴍ(ref Rand r, int64 n) {
     if (n <= 0) {
         throw panic("invalid argument to Int64N");
     }
@@ -74,7 +74,7 @@ internal static int64 Int64Nᴍ(ref Rand r, int64 n) {
 
 // Uint64N returns, as a uint64, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n == 0.
-internal static uint64 Uint64Nᴍ(ref Rand r, uint64 n) {
+[GoMethodBody("Uint64N")] internal static uint64 Uint64Nᴍ(ref Rand r, uint64 n) {
     if (n == 0) {
         throw panic("invalid argument to Uint64N");
     }
@@ -82,7 +82,7 @@ internal static uint64 Uint64Nᴍ(ref Rand r, uint64 n) {
 }
 
 // uint64n is the no-bounds-checks version of Uint64N.
-internal static uint64 uint64nᴍ(ref Rand r, uint64 n) {
+[GoMethodBody("uint64n")] internal static uint64 uint64nᴍ(ref Rand r, uint64 n) {
     if (is32bit && (uint64)(uint32)n == n) {
         return (uint64)r.uint32n((uint32)n);
     }
@@ -132,7 +132,7 @@ internal static uint64 uint64nᴍ(ref Rand r, uint64 n) {
 
 // uint32n is an identical computation to uint64n
 // but optimized for 32-bit systems.
-internal static uint32 uint32nᴍ(ref Rand r, uint32 n) {
+[GoMethodBody("uint32n")] internal static uint32 uint32nᴍ(ref Rand r, uint32 n) {
     if ((n & (n - 1)) == 0) { // n is power of two, can mask
         return (uint32)r.Uint64() & (n - 1);
     }
@@ -172,7 +172,7 @@ internal static uint32 uint32nᴍ(ref Rand r, uint32 n) {
 
 // Int32N returns, as an int32, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n <= 0.
-internal static int32 Int32Nᴍ(ref Rand r, int32 n) {
+[GoMethodBody("Int32N")] internal static int32 Int32Nᴍ(ref Rand r, int32 n) {
     if (n <= 0) {
         throw panic("invalid argument to Int32N");
     }
@@ -181,7 +181,7 @@ internal static int32 Int32Nᴍ(ref Rand r, int32 n) {
 
 // Uint32N returns, as a uint32, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n == 0.
-internal static uint32 Uint32Nᴍ(ref Rand r, uint32 n) {
+[GoMethodBody("Uint32N")] internal static uint32 Uint32Nᴍ(ref Rand r, uint32 n) {
     if (n == 0) {
         throw panic("invalid argument to Uint32N");
     }
@@ -196,7 +196,7 @@ internal const bool is32bit = /* ^uint(0)>>32 == 0 */ false;
 
 // IntN returns, as an int, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n <= 0.
-internal static nint IntNᴍ(ref Rand r, nint n) {
+[GoMethodBody("IntN")] internal static nint IntNᴍ(ref Rand r, nint n) {
     if (n <= 0) {
         throw panic("invalid argument to IntN");
     }
@@ -205,7 +205,7 @@ internal static nint IntNᴍ(ref Rand r, nint n) {
 
 // UintN returns, as a uint, a non-negative pseudo-random number in the half-open interval [0,n).
 // It panics if n == 0.
-internal static nuint UintNᴍ(ref Rand r, nuint n) {
+[GoMethodBody("UintN")] internal static nuint UintNᴍ(ref Rand r, nuint n) {
     if (n == 0) {
         throw panic("invalid argument to UintN");
     }
@@ -213,20 +213,20 @@ internal static nuint UintNᴍ(ref Rand r, nuint n) {
 }
 
 // Float64 returns, as a float64, a pseudo-random number in the half-open interval [0.0,1.0).
-internal static float64 Float64ᴍ(ref Rand r) {
+[GoMethodBody("Float64")] internal static float64 Float64ᴍ(ref Rand r) {
     // There are exactly 1<<53 float64s in [0,1). Use Intn(1<<53) / (1<<53).
     return (float64)((r.Uint64() << 11) >> 11) / (9007199254740992D);
 }
 
 // Float32 returns, as a float32, a pseudo-random number in the half-open interval [0.0,1.0).
-internal static float32 Float32ᴍ(ref Rand r) {
+[GoMethodBody("Float32")] internal static float32 Float32ᴍ(ref Rand r) {
     // There are exactly 1<<24 float32s in [0,1). Use Intn(1<<24) / (1<<24).
     return (float32)((r.Uint32() << 8) >> 8) / (1 << 24);
 }
 
 // Perm returns, as a slice of n ints, a pseudo-random permutation of the integers
 // in the half-open interval [0,n).
-internal static slice<nint> Permᴍ(ref Rand r, nint n) {
+[GoMethodBody("Perm")] internal static slice<nint> Permᴍ(ref Rand r, nint n) {
     var p = new slice<nint>(n);
     foreach (var i in range(len(p))) {
         p[i] = i;
@@ -241,7 +241,7 @@ internal static slice<nint> Permᴍ(ref Rand r, nint n) {
 // Shuffle pseudo-randomizes the order of elements.
 // n is the number of elements. Shuffle panics if n < 0.
 // swap swaps the elements with indexes i and j.
-internal static void Shuffleᴍ(ref Rand r, nint n, Action<nint, nint> swap) {
+[GoMethodBody("Shuffle")] internal static void Shuffleᴍ(ref Rand r, nint n, Action<nint, nint> swap) {
     if (n < 0) {
         throw panic("invalid argument to Shuffle");
     }
@@ -277,7 +277,7 @@ partial struct runtimeSource {
 
 } partial class rand_package {
 
-internal static uint64 Uint64ᴍ(runtimeSource _) {
+[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(runtimeSource _) {
     return runtime_rand();
 }
 
@@ -389,29 +389,3 @@ public static float64 NormFloat64() { return globalRand.NormFloat64(); }
 public static float64 ExpFloat64() { return globalRand.ExpFloat64(); }
 
 } // end rand_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class randᴛRand {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Int64(this ref Rand r) => rand_package.Int64ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Uint32(this ref Rand r) => rand_package.Uint32ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Uint64(this ref Rand r) => rand_package.Uint64ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int32 Int32(this ref Rand r) => rand_package.Int32ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Int(this ref Rand r) => rand_package.Intᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nuint Uint(this ref Rand r) => rand_package.Uintᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Int64N(this ref Rand r, int64 n) => rand_package.Int64Nᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Uint64N(this ref Rand r, uint64 n) => rand_package.Uint64Nᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 uint64n(this ref Rand r, uint64 n) => rand_package.uint64nᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 uint32n(this ref Rand r, uint32 n) => rand_package.uint32nᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int32 Int32N(this ref Rand r, int32 n) => rand_package.Int32Nᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Uint32N(this ref Rand r, uint32 n) => rand_package.Uint32Nᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint IntN(this ref Rand r, nint n) => rand_package.IntNᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nuint UintN(this ref Rand r, nuint n) => rand_package.UintNᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 Float64(this ref Rand r) => rand_package.Float64ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float32 Float32(this ref Rand r) => rand_package.Float32ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<nint> Perm(this ref Rand r, nint n) => rand_package.Permᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Shuffle(this ref Rand r, nint n, Action<nint, nint> swap) => rand_package.Shuffleᴍ(ref r, n, swap);
-}
-partial class randᴛruntimeSource {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 Uint64(this runtimeSource _) => rand_package.Uint64ᴍ(_);
-}
-// </GlyphForwarders>

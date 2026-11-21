@@ -22,7 +22,7 @@ partial struct reader {
 
 } partial class rand_package {
 
-internal static (nint n, error err) Readᴍ(reader r, slice<byte> b) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(reader r, slice<byte> b) {
     if (Δboring.Enabled) {
         var (_, errΔ1) = Δboring.RandReader.Read(b); if (errΔ1 != nil) {
             throw panic("crypto/rand: boring RandReader failed: " + errΔ1.Error());
@@ -80,9 +80,3 @@ public static bool IsDefaultReader(io.Reader r) {
 }
 
 } // end rand_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class randᴛreader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this reader r, slice<byte> b) => rand_package.Readᴍ(r, b);
-}
-// </GlyphForwarders>

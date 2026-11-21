@@ -42,21 +42,21 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 } partial class gob_package {
 
 // writer returns the innermost writer the encoder is using.
-internal static io.Writer writerᴍ(ref Encoder enc) {
+[GoMethodBody("writer")] internal static io.Writer writerᴍ(ref Encoder enc) {
     return enc.w[len(enc.w) - 1];
 }
 
 // pushWriter adds a writer to the encoder.
-internal static void pushWriterᴍ(ref Encoder enc, io.Writer w) {
+[GoMethodBody("pushWriter")] internal static void pushWriterᴍ(ref Encoder enc, io.Writer w) {
     enc.w = append(enc.w, w);
 }
 
 // popWriter pops the innermost writer.
-internal static void popWriterᴍ(ref Encoder enc) {
+[GoMethodBody("popWriter")] internal static void popWriterᴍ(ref Encoder enc) {
     enc.w = enc.w.slice(0, len(enc.w) - 1);
 }
 
-internal static void setErrorᴍ(ref Encoder enc, error err) {
+[GoMethodBody("setError")] internal static void setErrorᴍ(ref Encoder enc, error err) {
     if (enc.err == nil) { // remember the first.
         enc.err = err;
     }
@@ -67,7 +67,7 @@ internal static ref readonly @string gobEncoderMessageTooBigˢᴍEncoder => ref 
 private static readonly @string gobEncoderMessageTooBigˢᵇᴍEncoder = "gob: encoder: message too big"u8;
 
 // writeMessage sends the data item preceded by an unsigned count of its length.
-internal static void writeMessageᴍ(ref Encoder enc, io.Writer w, ж<encBuffer> Ꮡb) {
+[GoMethodBody("writeMessage")] internal static void writeMessageᴍ(ref Encoder enc, io.Writer w, ж<encBuffer> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Space has been reserved for the length at the head of the message.
@@ -98,7 +98,7 @@ internal static void writeMessageᴍ(ref Encoder enc, io.Writer w, ж<encBuffer>
 
 // sendActualType sends the requested type, without further investigation, unless
 // it's been sent before.
-internal static bool /*sent*/ sendActualTypeᴍ(ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut, reflect.Type actual) {
+[GoMethodBody("sendActualType")] internal static bool /*sent*/ sendActualTypeᴍ(ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut, reflect.Type actual) {
     bool sent = default;
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var state = ref Ꮡstate.DerefOrNull();
@@ -151,7 +151,7 @@ internal static bool /*sent*/ sendActualTypeᴍ(ж<Encoder> Ꮡenc, io.Writer w,
 }
 
 // sendType sends the type info to the other side, if necessary.
-internal static bool /*sent*/ sendTypeᴍ(ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> state, reflect.Type origt) {
+[GoMethodBody("sendType")] internal static bool /*sent*/ sendTypeᴍ(ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> state, reflect.Type origt) {
     bool sent = default;
 
     var ut = userType(origt);
@@ -203,14 +203,14 @@ internal static bool /*sent*/ sendTypeᴍ(ж<Encoder> Ꮡenc, io.Writer w, ж<en
 // Encode transmits the data item represented by the empty interface value,
 // guaranteeing that all necessary type information has been transmitted first.
 // Passing a nil pointer to Encoder will panic, as they cannot be transmitted by gob.
-internal static error Encodeᴍ(ж<Encoder> Ꮡenc, any e) {
+[GoMethodBody("Encode")] internal static error Encodeᴍ(ж<Encoder> Ꮡenc, any e) {
     return Ꮡenc.EncodeValue(reflect.ValueOf(e));
 }
 
 // sendTypeDescriptor makes sure the remote side knows about this type.
 // It will send a descriptor if this is the first time the type has been
 // sent.
-internal static void sendTypeDescriptorᴍ(ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> state, ж<userTypeInfo> Ꮡut) {
+[GoMethodBody("sendTypeDescriptor")] internal static void sendTypeDescriptorᴍ(ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> state, ж<userTypeInfo> Ꮡut) {
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var ut = ref Ꮡut.DerefOrNull();
 
@@ -241,7 +241,7 @@ internal static void sendTypeDescriptorᴍ(ж<Encoder> Ꮡenc, io.Writer w, ж<e
 }
 
 // sendTypeId sends the id, which must have already been defined.
-internal static void sendTypeIdᴍ(ref Encoder enc, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut) {
+[GoMethodBody("sendTypeId")] internal static void sendTypeIdᴍ(ref Encoder enc, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut) {
     ref var state = ref Ꮡstate.DerefOrNull();
     ref var ut = ref Ꮡut.DerefOrNull();
 
@@ -256,7 +256,7 @@ private static readonly @string gobCannotEncodeNilValueˢᵇᴍEncoder = "gob: c
 // EncodeValue transmits the data item represented by the reflection value,
 // guaranteeing that all necessary type information has been transmitted first.
 // Passing a nil pointer to EncodeValue will panic, as they cannot be transmitted by gob.
-internal static error EncodeValueᴍ(ж<Encoder> Ꮡenc, reflect.Value value) {
+[GoMethodBody("EncodeValue")] internal static error EncodeValueᴍ(ж<Encoder> Ꮡenc, reflect.Value value) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -307,19 +307,3 @@ internal static error EncodeValueᴍ(ж<Encoder> Ꮡenc, reflect.Value value) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class gobᴛEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static io.Writer writer(this ref Encoder enc) => gob_package.writerᴍ(ref enc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pushWriter(this ref Encoder enc, io.Writer w) => gob_package.pushWriterᴍ(ref enc, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void popWriter(this ref Encoder enc) => gob_package.popWriterᴍ(ref enc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setError(this ref Encoder enc, error err) => gob_package.setErrorᴍ(ref enc, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeMessage(this ref Encoder enc, io.Writer w, ж<encBuffer> Ꮡb) => gob_package.writeMessageᴍ(ref enc, w, Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*sent*/ sendActualType(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut, reflect.Type actual) => gob_package.sendActualTypeᴍ(Ꮡenc, w, Ꮡstate, Ꮡut, actual);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*sent*/ sendType(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> state, reflect.Type origt) => gob_package.sendTypeᴍ(Ꮡenc, w, state, origt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Encode(this ж<Encoder> Ꮡenc, any e) => gob_package.Encodeᴍ(Ꮡenc, e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sendTypeDescriptor(this ж<Encoder> Ꮡenc, io.Writer w, ж<encoderState> state, ж<userTypeInfo> Ꮡut) => gob_package.sendTypeDescriptorᴍ(Ꮡenc, w, state, Ꮡut);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sendTypeId(this ref Encoder enc, ж<encoderState> Ꮡstate, ж<userTypeInfo> Ꮡut) => gob_package.sendTypeIdᴍ(ref enc, Ꮡstate, Ꮡut);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error EncodeValue(this ж<Encoder> Ꮡenc, reflect.Value value) => gob_package.EncodeValueᴍ(Ꮡenc, value);
-}
-// </GlyphForwarders>

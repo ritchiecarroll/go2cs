@@ -60,6 +60,17 @@ using static go.crypto.x509.pkix_package;
 
 namespace go.crypto.x509;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using asn1 = encoding.asn1_package;
+using hex = encoding.hex_package;
+using fmt = fmt_package;
+using big = math.big_package;
+using time = time_package;
+using encoding;
+using math;
+using static pkix_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("pkix")]
 public static partial class pkix_package
 {
@@ -108,3 +119,18 @@ public static partial class pkix_package
 [GoMethodHost(typeof(pkix_package.Name)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkixᴛName;
 [GoMethodHost(typeof(pkix_package.RDNSequence)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkixᴛRDNSequence;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class pkixᴛRDNSequence {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this RDNSequence r) => pkix_package.Stringᴍ(r);
+}
+partial class pkixᴛName {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void FillFromRDNSequence(this ref Name n, ж<RDNSequence> Ꮡrdns) => pkix_package.FillFromRDNSequenceᴍ(ref n, Ꮡrdns);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static RDNSequence appendRDNs(this Name n, RDNSequence @in, slice<@string> values, asn1.ObjectIdentifier oid) => pkix_package.appendRDNsᴍ(n, @in, values, oid);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static RDNSequence /*ret*/ ToRDNSequence(this Name n) => pkix_package.ToRDNSequenceᴍ(n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Name n) => pkix_package.Stringᴍ(n);
+}
+partial class pkixᴛCertificateList {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HasExpired(this ref CertificateList certList, time.Time now) => pkix_package.HasExpiredᴍ(ref certList, now);
+}
+// </GlyphForwarders>

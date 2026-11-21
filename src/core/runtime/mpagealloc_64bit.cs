@@ -74,7 +74,7 @@ private static readonly @string failedToReservePageˢᵇᴍpageAlloc = "failed t
 // sysInit performs architecture-dependent initialization of fields
 // in pageAlloc. pageAlloc should be uninitialized except for sysStat
 // if any runtime statistic should be updated.
-internal static void sysInitᴍ(ref pageAlloc p, bool test) {
+[GoMethodBody("sysInit")] internal static void sysInitᴍ(ref pageAlloc p, bool test) {
     // Reserve memory for each level. This will get mapped in
     // as R/W by setArenas.
     foreach (var (l, shift) in range(levelShift.ΔRangeSnapshot())) {
@@ -109,7 +109,7 @@ private static readonly @string pageAllocˢᵇᴍpageAlloc = "page alloc"u8;
 // Both must be aligned to pallocChunkBytes.
 //
 // The caller must update p.start and p.end after calling sysGrow.
-internal static void sysGrowᴍ(ж<pageAlloc> Ꮡp, uintptr @base, uintptr limit) {
+[GoMethodBody("sysGrow")] internal static void sysGrowᴍ(ж<pageAlloc> Ꮡp, uintptr @base, uintptr limit) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (@base % (uintptr)pallocChunkBytes != 0 || limit % (uintptr)pallocChunkBytes != 0) {
@@ -209,7 +209,7 @@ private static readonly @string scavengeIndexˢᵇᴍscavengeIndex = "scavenge i
 // sysGrow increases the index's backing store in response to a heap growth.
 //
 // Returns the amount of memory added to sysStat.
-internal static uintptr sysGrowᴍ(ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> sysStat) {
+[GoMethodBody("sysGrow")] internal static uintptr sysGrowᴍ(ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> sysStat) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (@base % (uintptr)pallocChunkBytes != 0 || limit % (uintptr)pallocChunkBytes != 0) {
@@ -268,7 +268,7 @@ internal static uintptr sysGrowᴍ(ж<scavengeIndex> Ꮡs, uintptr @base, uintpt
 // sysInit initializes the scavengeIndex' chunks array.
 //
 // Returns the amount of memory added to sysStat.
-internal static uintptr sysInitᴍ(ref scavengeIndex s, bool test, ж<sysMemStat> sysStat) {
+[GoMethodBody("sysInit")] internal static uintptr sysInitᴍ(ref scavengeIndex s, bool test, ж<sysMemStat> sysStat) {
     var n = (uintptr)((uintptr)1 << (int)(heapAddrBits)) / (uintptr)pallocChunkBytes;
     var nbytes = n * /* unsafe.Sizeof(atomicScavChunkData{}) */ (uintptr)8;
     @unsafe.Pointer r = sysReserve(nil, nbytes, scavengeIndexˢᴍscavengeIndex);
@@ -278,14 +278,3 @@ internal static uintptr sysInitᴍ(ref scavengeIndex s, bool test, ж<sysMemStat
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛpageAlloc {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sysInit(this ref pageAlloc p, bool test) => runtime_package.sysInitᴍ(ref p, test);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sysGrow(this ж<pageAlloc> Ꮡp, uintptr @base, uintptr limit) => runtime_package.sysGrowᴍ(Ꮡp, @base, limit);
-}
-partial class runtimeᴛscavengeIndex {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr sysGrow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> sysStat) => runtime_package.sysGrowᴍ(Ꮡs, @base, limit, sysStat);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr sysInit(this ref scavengeIndex s, bool test, ж<sysMemStat> sysStat) => runtime_package.sysInitᴍ(ref s, test, sysStat);
-}
-// </GlyphForwarders>

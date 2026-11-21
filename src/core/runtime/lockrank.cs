@@ -171,7 +171,7 @@ private static readonly @string leafˢᵇᴍlockRank = "LEAF"u8;
 internal static ref readonly @string badRankˢᴍlockRank => ref badRankˢᵇᴍlockRank;
 private static readonly @string badRankˢᵇᴍlockRank = "BAD RANK"u8;
 
-internal static @string Stringᴍ(lockRank rank) {
+[GoMethodBody("String")] internal static @string Stringᴍ(lockRank rank) {
     if (rank == 0) {
         return unknownˢ2ᴍlockRank;
     }
@@ -261,9 +261,3 @@ internal static @string Stringᴍ(lockRank rank) {
 }.slice(); }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛlockRank {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this lockRank rank) => runtime_package.Stringᴍ(rank);
-}
-// </GlyphForwarders>

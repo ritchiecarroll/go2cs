@@ -13,7 +13,7 @@ partial class fiat_package {
 // Invert sets e = 1/x, and returns e.
 //
 // If x == 0, Invert returns e = 0.
-internal static ж<P224Element> Invertᴍ(ж<P224Element> Ꮡe, ж<P224Element> x) {
+[GoMethodBody("Invert")] internal static ж<P224Element> Invertᴍ(ж<P224Element> Ꮡe, ж<P224Element> x) {
     // Inversion is implemented as exponentiation with exponent p − 2.
     // The sequence of 11 multiplications and 223 squarings is derived from the
     // following addition chain generated with github.com/mmcloughlin/addchain v0.4.0.
@@ -91,9 +91,3 @@ internal static ж<P224Element> Invertᴍ(ж<P224Element> Ꮡe, ж<P224Element> 
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class fiatᴛP224Element {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P224Element> Invert(this ж<P224Element> Ꮡe, ж<P224Element> x) => fiat_package.Invertᴍ(Ꮡe, x);
-}
-// </GlyphForwarders>

@@ -23,7 +23,7 @@ private static readonly @string methodˢᵇᴍChecker = "method"u8;
 // lookupError returns a case-specific error when a lookup of selector sel in the
 // given type fails but an object with alternative spelling (case folding) is found.
 // If structLit is set, the error message is specifically for struct literal fields.
-internal static @string lookupErrorᴍ(ж<Checker> Ꮡcheck, Type typ, @string sel, Object obj, bool structLit) {
+[GoMethodBody("lookupError")] internal static @string lookupErrorᴍ(ж<Checker> Ꮡcheck, Type typ, @string sel, Object obj, bool structLit) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // Provide more detail if there is an unexported object, or one with different capitalization.
@@ -138,9 +138,3 @@ internal static @string tail(@string s) {
 }
 
 } // end types_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string lookupError(this ж<Checker> Ꮡcheck, Type typ, @string sel, Object obj, bool structLit) => types_package.lookupErrorᴍ(Ꮡcheck, typ, sel, obj, structLit);
-}
-// </GlyphForwarders>

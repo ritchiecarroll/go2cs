@@ -52,7 +52,7 @@ partial struct dnsConfig {
 // indices of servers in c.servers when making queries.
 // When the rotate option is enabled, this offset increases.
 // Otherwise it is always 0.
-internal static uint32 serverOffsetᴍ(ж<dnsConfig> Ꮡc) {
+[GoMethodBody("serverOffset")] internal static uint32 serverOffsetᴍ(ж<dnsConfig> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.rotate) {
@@ -62,9 +62,3 @@ internal static uint32 serverOffsetᴍ(ж<dnsConfig> Ꮡc) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛdnsConfig {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 serverOffset(this ж<dnsConfig> Ꮡc) => net_package.serverOffsetᴍ(Ꮡc);
-}
-// </GlyphForwarders>

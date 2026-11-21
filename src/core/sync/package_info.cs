@@ -80,6 +80,16 @@ using static go.sync_package;
 
 namespace go;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using atomic = go.sync.atomic_package;
+using @unsafe = unsafe_package;
+using go.sync;
+using static sync_package;
+using isync = @internal.sync_package;
+using @internal;
+using Δsync = @internal.sync_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("sync")]
 public static partial class sync_package
 {
@@ -132,3 +142,27 @@ public static partial class sync_package
 [GoMethodHost(typeof(sync_package.poolDequeue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛpoolDequeue;
 [GoMethodHost(typeof(sync_package.rlocker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛrlocker;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class syncᴛCond {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Wait(this ж<Cond> Ꮡc) => sync_package.Waitᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Signal(this ж<Cond> Ꮡc) => sync_package.Signalᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Broadcast(this ж<Cond> Ꮡc) => sync_package.Broadcastᴍ(Ꮡc);
+}
+partial class syncᴛnoCopy {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Lock(this ref noCopy _) => sync_package.Lockᴍ(ref _);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Unlock(this ref noCopy _) => sync_package.Unlockᴍ(ref _);
+}
+partial class syncᴛMap {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (any value, bool ok) Load(this ж<Map> Ꮡm, any key) => sync_package.Loadᴍ(Ꮡm, key);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Map> Ꮡm, any key, any value) => sync_package.Storeᴍ(Ꮡm, key, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Clear(this ж<Map> Ꮡm) => sync_package.Clearᴍ(Ꮡm);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (any actual, bool loaded) LoadOrStore(this ж<Map> Ꮡm, any key, any value) => sync_package.LoadOrStoreᴍ(Ꮡm, key, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (any value, bool loaded) LoadAndDelete(this ж<Map> Ꮡm, any key) => sync_package.LoadAndDeleteᴍ(Ꮡm, key);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Delete(this ж<Map> Ꮡm, any key) => sync_package.Deleteᴍ(Ꮡm, key);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (any previous, bool loaded) Swap(this ж<Map> Ꮡm, any key, any value) => sync_package.Swapᴍ(Ꮡm, key, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool /*swapped*/ CompareAndSwap(this ж<Map> Ꮡm, any key, any old, any @new) => sync_package.CompareAndSwapᴍ(Ꮡm, key, old, @new);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool /*deleted*/ CompareAndDelete(this ж<Map> Ꮡm, any key, any old) => sync_package.CompareAndDeleteᴍ(Ꮡm, key, old);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Range(this ж<Map> Ꮡm, Func<any, any, bool> f) => sync_package.Rangeᴍ(Ꮡm, f);
+}
+// </GlyphForwarders>

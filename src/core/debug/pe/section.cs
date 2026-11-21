@@ -33,7 +33,7 @@ partial struct SectionHeader32 {
 // fullName finds real name of section sh. Normally name is stored
 // in sh.Name, but if it is longer then 8 characters, it is stored
 // in COFF string table st instead.
-internal static (@string, error) fullNameᴍ(ref SectionHeader32 sh, StringTable st) {
+[GoMethodBody("fullName")] internal static (@string, error) fullNameᴍ(ref SectionHeader32 sh, StringTable st) {
     if (sh.Name[0] != '/') {
         return (cstring(sh.Name[..]), default);
     }
@@ -109,7 +109,7 @@ partial struct Section {
 //
 // If s.Offset is 0, the section has no contents,
 // and Data will always return a non-nil error.
-internal static (slice<byte>, error) Dataᴍ(ref Section s) {
+[GoMethodBody("Data")] internal static (slice<byte>, error) Dataᴍ(ref Section s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), (uint64)s.Size, 0);
 }
 
@@ -117,7 +117,7 @@ internal static (slice<byte>, error) Dataᴍ(ref Section s) {
 //
 // If s.Offset is 0, the section has no contents, and all calls
 // to the returned reader will return a non-nil error.
-internal static io.ReadSeeker Openᴍ(ref Section s) {
+[GoMethodBody("Open")] internal static io.ReadSeeker Openᴍ(ref Section s) {
     return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
 }
 
@@ -134,13 +134,3 @@ public static UntypedInt IMAGE_SCN_MEM_READ => 0x40000000;
 public static UntypedInt IMAGE_SCN_MEM_WRITE => 0x80000000;
 
 } // end pe_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class peᴛSectionHeader32 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) fullName(this ref SectionHeader32 sh, StringTable st) => pe_package.fullNameᴍ(ref sh, st);
-}
-partial class peᴛSection {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Data(this ref Section s) => pe_package.Dataᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.ReadSeeker Open(this ref Section s) => pe_package.Openᴍ(ref s);
-}
-// </GlyphForwarders>

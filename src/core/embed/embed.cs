@@ -219,31 +219,31 @@ internal static fs.DirEntry _ᴛ4ʗ = new fileжDirEntry(((ж<@file>)nil));
 
 } partial class embed_package {
 
-internal static @string Nameᴍ(ref @file f) {
+[GoMethodBody("Name")] internal static @string Nameᴍ(ref @file f) {
     var (_, elem, _) = split(f.name);
     return elem;
 }
 
-internal static int64 Sizeᴍ(ref @file f) { return (int64)len(f.data); }
-internal static time.Time ModTimeᴍ(ref @file f) { return new time.Time(); }
+[GoMethodBody("Size")] internal static int64 Sizeᴍ(ref @file f) { return (int64)len(f.data); }
+[GoMethodBody("ModTime")] internal static time.Time ModTimeᴍ(ref @file f) { return new time.Time(); }
 
-internal static bool IsDirᴍ(ref @file f) {
+[GoMethodBody("IsDir")] internal static bool IsDirᴍ(ref @file f) {
     var (_, _, isDir) = split(f.name);
     return isDir;
 }
 
-internal static any Sysᴍ(ref @file f) { return default; }
-internal static fs.FileMode Typeᴍ(ref @file f) { return f.Mode().Type(); }
-internal static (fs.FileInfo, error) Infoᴍ(ж<@file> Ꮡf) { return (new fileжFileInfo(Ꮡf), default); }
+[GoMethodBody("Sys")] internal static any Sysᴍ(ref @file f) { return default; }
+[GoMethodBody("Type")] internal static fs.FileMode Typeᴍ(ref @file f) { return f.Mode().Type(); }
+[GoMethodBody("Info")] internal static (fs.FileInfo, error) Infoᴍ(ж<@file> Ꮡf) { return (new fileжFileInfo(Ꮡf), default); }
 
-internal static fs.FileMode Modeᴍ(ref @file f) {
+[GoMethodBody("Mode")] internal static fs.FileMode Modeᴍ(ref @file f) {
     if (f.IsDir()) {
         return (fs.FileMode)(fs.ModeDir | 365);
     }
     return 292;
 }
 
-internal static @string Stringᴍ(ж<@file> Ꮡf) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<@file> Ꮡf) {
     return fs.FormatFileInfo(new fileжFileInfo(Ꮡf));
 }
 
@@ -256,7 +256,7 @@ internal static ж<@file> dotFile = Ꮡ(new @file(name: "./"));
 } partial class embed_package {
 
 // lookup returns the named file, or nil if it is not present.
-internal static ж<@file> lookupᴍ(FS f, @string name) {
+[GoMethodBody("lookup")] internal static ж<@file> lookupᴍ(FS f, @string name) {
     if (!fs.ValidPath(name)) {
         // The compiler should never emit a file with an invalid name,
         // so this check is not strictly necessary (if name is invalid,
@@ -286,7 +286,7 @@ internal static ж<@file> lookupᴍ(FS f, @string name) {
 }
 
 // readDir returns the list of files corresponding to the directory dir.
-internal static slice<@file> readDirᴍ(FS f, @string dir) {
+[GoMethodBody("readDir")] internal static slice<@file> readDirᴍ(FS f, @string dir) {
     if (f.files == nil) {
         return default;
     }
@@ -309,7 +309,7 @@ internal static slice<@file> readDirᴍ(FS f, @string dir) {
 // Open opens the named file for reading and returns it as an [fs.File].
 //
 // The returned file implements [io.Seeker] and [io.ReaderAt] when the file is not a directory.
-internal static (fs.File, error) Openᴍ(FS f, @string name) {
+[GoMethodBody("Open")] internal static (fs.File, error) Openᴍ(FS f, @string name) {
     var @file = f.lookup(name);
     if (@file == nil) {
         return (default, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "open", Path: name, Err: fs.ErrNotExist))));
@@ -325,7 +325,7 @@ private static ref readonly @string notADirectoryˢᴍFS => ref notADirectoryˢ�
 private static readonly @string notADirectoryˢᵇᴍFS = "not a directory"u8;
 
 // ReadDir reads and returns the entire named directory.
-internal static (slice<fs.DirEntry>, error) ReadDirᴍ(FS f, @string name) {
+[GoMethodBody("ReadDir")] internal static (slice<fs.DirEntry>, error) ReadDirᴍ(FS f, @string name) {
     var (@file, err) = f.Open(name);
     if (err != nil) {
         return (default, err);
@@ -346,7 +346,7 @@ private static ref readonly @string isADirectoryˢᴍFS => ref isADirectoryˢᵇ
 private static readonly @string isADirectoryˢᵇᴍFS = "is a directory"u8;
 
 // ReadFile reads and returns the content of the named file.
-internal static (slice<byte>, error) ReadFileᴍ(FS f, @string name) {
+[GoMethodBody("ReadFile")] internal static (slice<byte>, error) ReadFileᴍ(FS f, @string name) {
     var (@file, err) = f.Open(name);
     if (err != nil) {
         return (default, err);
@@ -371,10 +371,10 @@ internal static Δio.ReaderAt _ᴛ6ʗ = new openFileжReaderAt(((ж<openFile>)ni
 
 } partial class embed_package {
 
-internal static error Closeᴍ(ref openFile f) { return default; }
-internal static (fs.FileInfo, error) Statᴍ(ref openFile f) { return (new fileжFileInfo(f.f), default); }
+[GoMethodBody("Close")] internal static error Closeᴍ(ref openFile f) { return default; }
+[GoMethodBody("Stat")] internal static (fs.FileInfo, error) Statᴍ(ref openFile f) { return (new fileжFileInfo(f.f), default); }
 
-internal static (nint, error) Readᴍ(ref openFile f, slice<byte> b) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref openFile f, slice<byte> b) {
     if (f.offset >= (int64)len(f.f.data)) {
         return (0, Δio.EOF);
     }
@@ -386,7 +386,7 @@ internal static (nint, error) Readᴍ(ref openFile f, slice<byte> b) {
     return (n, default);
 }
 
-internal static (int64, error) Seekᴍ(ref openFile f, int64 offset, nint whence) {
+[GoMethodBody("Seek")] internal static (int64, error) Seekᴍ(ref openFile f, int64 offset, nint whence) {
     switch (whence) {
     case 0: {
         // offset += 0
@@ -407,7 +407,7 @@ internal static (int64, error) Seekᴍ(ref openFile f, int64 offset, nint whence
     return (offset, default);
 }
 
-internal static (nint, error) ReadAtᴍ(ref openFile f, slice<byte> b, int64 offset) {
+[GoMethodBody("ReadAt")] internal static (nint, error) ReadAtᴍ(ref openFile f, slice<byte> b, int64 offset) {
     if (offset < 0 || offset > (int64)len(f.f.data)) {
         return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: f.f.name, Err: fs.ErrInvalid))));
     }
@@ -429,18 +429,18 @@ partial struct openDir {
 
 } partial class embed_package {
 
-internal static error Closeᴍ(ref openDir d) { return default; }
-internal static (fs.FileInfo, error) Statᴍ(ref openDir d) { return (new fileжFileInfo(d.f), default); }
+[GoMethodBody("Close")] internal static error Closeᴍ(ref openDir d) { return default; }
+[GoMethodBody("Stat")] internal static (fs.FileInfo, error) Statᴍ(ref openDir d) { return (new fileжFileInfo(d.f), default); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static ref readonly @string isADirectoryˢᴍopenDir => ref isADirectoryˢᵇᴍopenDir;
 private static readonly @string isADirectoryˢᵇᴍopenDir = "is a directory"u8;
 
-internal static (nint, error) Readᴍ(ref openDir d, slice<byte> _) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref openDir d, slice<byte> _) {
     return (0, new fs.PathErrorжerror(Ꮡ(new fs.PathError(Op: "read", Path: d.f.name, Err: errors.New(isADirectoryˢᴍopenDir)))));
 }
 
-internal static (slice<fs.DirEntry>, error) ReadDirᴍ(ref openDir d, nint count) {
+[GoMethodBody("ReadDir")] internal static (slice<fs.DirEntry>, error) ReadDirᴍ(ref openDir d, nint count) {
     nint n = len(d.files) - d.offset;
     if (n == 0) {
         if (count <= 0) {
@@ -481,37 +481,3 @@ internal static nint sortSearch(nint n, Func<nint, bool> f) {
 }
 
 } // end embed_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class embedᴛfile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Name(this ref @file f) => embed_package.Nameᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 Size(this ref @file f) => embed_package.Sizeᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Time ModTime(this ref @file f) => embed_package.ModTimeᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsDir(this ref @file f) => embed_package.IsDirᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Sys(this ref @file f) => embed_package.Sysᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static fs.FileMode Type(this ref @file f) => embed_package.Typeᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fs.FileInfo, error) Info(this ж<@file> Ꮡf) => embed_package.Infoᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static fs.FileMode Mode(this ref @file f) => embed_package.Modeᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ж<@file> Ꮡf) => embed_package.Stringᴍ(Ꮡf);
-}
-partial class embedᴛFS {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<@file> lookup(this FS f, @string name) => embed_package.lookupᴍ(f, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<@file> readDir(this FS f, @string dir) => embed_package.readDirᴍ(f, dir);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (fs.File, error) Open(this FS f, @string name) => embed_package.Openᴍ(f, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<fs.DirEntry>, error) ReadDir(this FS f, @string name) => embed_package.ReadDirᴍ(f, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) ReadFile(this FS f, @string name) => embed_package.ReadFileᴍ(f, name);
-}
-partial class embedᴛopenFile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref openFile f) => embed_package.Closeᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fs.FileInfo, error) Stat(this ref openFile f) => embed_package.Statᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref openFile f, slice<byte> b) => embed_package.Readᴍ(ref f, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) Seek(this ref openFile f, int64 offset, nint whence) => embed_package.Seekᴍ(ref f, offset, whence);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) ReadAt(this ref openFile f, slice<byte> b, int64 offset) => embed_package.ReadAtᴍ(ref f, b, offset);
-}
-partial class embedᴛopenDir {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref openDir d) => embed_package.Closeᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fs.FileInfo, error) Stat(this ref openDir d) => embed_package.Statᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref openDir d, slice<byte> _) => embed_package.Readᴍ(ref d, _);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<fs.DirEntry>, error) ReadDir(this ref openDir d, nint count) => embed_package.ReadDirᴍ(ref d, count);
-}
-// </GlyphForwarders>

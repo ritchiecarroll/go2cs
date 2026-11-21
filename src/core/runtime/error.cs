@@ -44,13 +44,13 @@ partial struct TypeAssertionError {
 
 } partial class runtime_package {
 
-internal static void RuntimeErrorᴍ(ref TypeAssertionError _) { }
+[GoMethodBody("RuntimeError")] internal static void RuntimeErrorᴍ(ref TypeAssertionError _) { }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string interfaceˢᴍTypeAssertionError => ref interfaceˢᵇᴍTypeAssertionError;
 private static readonly @string interfaceˢᵇᴍTypeAssertionError = "interface"u8;
 
-internal static @string Errorᴍ(ref TypeAssertionError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref TypeAssertionError e) {
     @string inter = interfaceˢᴍTypeAssertionError;
     if (e._interface != nil) {
         inter = toRType(e._interface).@string();
@@ -98,9 +98,9 @@ partial struct errorString /*@string*/;
 
 } partial class runtime_package {
 
-internal static void RuntimeErrorᴍ(errorString e) { }
+[GoMethodBody("RuntimeError")] internal static void RuntimeErrorᴍ(errorString e) { }
 
-internal static @string Errorᴍ(errorString e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(errorString e) {
     return "runtime error: "u8 + ((@string)e);
 }
 
@@ -113,9 +113,9 @@ partial struct errorAddressString {
 
 } partial class runtime_package {
 
-internal static void RuntimeErrorᴍ(errorAddressString e) { }
+[GoMethodBody("RuntimeError")] internal static void RuntimeErrorᴍ(errorAddressString e) { }
 
-internal static @string Errorᴍ(errorAddressString e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(errorAddressString e) {
     return "runtime error: "u8 + e.msg;
 }
 
@@ -124,7 +124,7 @@ internal static @string Errorᴍ(errorAddressString e) {
 // The veracity of the result may depend on the platform.
 // Errors providing this method will only be returned as
 // a result of using [runtime/debug.SetPanicOnFault].
-internal static uintptr Addrᴍ(errorAddressString e) {
+[GoMethodBody("Addr")] internal static uintptr Addrᴍ(errorAddressString e) {
     return e.addr;
 }
 
@@ -137,9 +137,9 @@ partial struct plainError /*@string*/;
 
 } partial class runtime_package {
 
-internal static void RuntimeErrorᴍ(plainError e) { }
+[GoMethodBody("RuntimeError")] internal static void RuntimeErrorᴍ(plainError e) { }
 
-internal static @string Errorᴍ(plainError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(plainError e) {
     return (@string)e;
 }
 
@@ -186,7 +186,7 @@ partial struct boundsError {
 
 } partial class runtime_package {
 
-internal static void RuntimeErrorᴍ(boundsError e) { }
+[GoMethodBody("RuntimeError")] internal static void RuntimeErrorᴍ(boundsError e) { }
 
 } partial class runtime_package {
 
@@ -202,7 +202,7 @@ internal static slice<byte> appendIntStr(slice<byte> b, int64 v, bool signed) {
 
 } partial class runtime_package {
 
-internal static @string Errorᴍ(boundsError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(boundsError e) {
     var bᴷ = new stackAppend<byte>();
 
     @string fmt = boundsErrorFmts[e.code];
@@ -459,27 +459,3 @@ internal static void panicwrap() {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛTypeAssertionError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RuntimeError(this ref TypeAssertionError _) => runtime_package.RuntimeErrorᴍ(ref _);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref TypeAssertionError e) => runtime_package.Errorᴍ(ref e);
-}
-partial class runtimeᴛerrorString {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void RuntimeError(this errorString e) => runtime_package.RuntimeErrorᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this errorString e) => runtime_package.Errorᴍ(e);
-}
-partial class runtimeᴛerrorAddressString {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void RuntimeError(this errorAddressString e) => runtime_package.RuntimeErrorᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this errorAddressString e) => runtime_package.Errorᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr Addr(this errorAddressString e) => runtime_package.Addrᴍ(e);
-}
-partial class runtimeᴛplainError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void RuntimeError(this plainError e) => runtime_package.RuntimeErrorᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this plainError e) => runtime_package.Errorᴍ(e);
-}
-partial class runtimeᴛboundsError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void RuntimeError(this boundsError e) => runtime_package.RuntimeErrorᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this boundsError e) => runtime_package.Errorᴍ(e);
-}
-// </GlyphForwarders>

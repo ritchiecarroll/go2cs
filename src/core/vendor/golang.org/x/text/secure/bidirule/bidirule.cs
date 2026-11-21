@@ -195,17 +195,17 @@ partial struct Transformer {
 
 // A rule can only be violated for "Bidi Domain names", meaning if one of the
 // following categories has been observed.
-internal static bool isRTLᴍ(ref Transformer t) {
+[GoMethodBody("isRTL")] internal static bool isRTLᴍ(ref Transformer t) {
     const uint16 isRTL = /* 1<<bidi.R | 1<<bidi.AL | 1<<bidi.AN */ 8226;
     return (uint16)(t.seen & isRTL) != 0;
 }
 
 // Reset implements transform.Transformer.
-internal static void Resetᴍ(ref Transformer t) { t = new Transformer(); }
+[GoMethodBody("Reset")] internal static void Resetᴍ(ref Transformer t) { t = new Transformer(); }
 
 // Transform implements transform.Transformer. This Transformer has state and
 // needs to be reset between uses.
-internal static (nint nDst, nint nSrc, error err) Transformᴍ(ref Transformer t, slice<byte> dst, slice<byte> src, bool atEOF) {
+[GoMethodBody("Transform")] internal static (nint nDst, nint nSrc, error err) Transformᴍ(ref Transformer t, slice<byte> dst, slice<byte> src, bool atEOF) {
     error err = default;
 
     if (len(dst) < len(src)) {
@@ -222,7 +222,7 @@ internal static (nint nDst, nint nSrc, error err) Transformᴍ(ref Transformer t
 }
 
 // Span returns the first n bytes of src that conform to the Bidi rule.
-internal static (nint n, error err) Spanᴍ(ref Transformer t, slice<byte> src, bool atEOF) {
+[GoMethodBody("Span")] internal static (nint n, error err) Spanᴍ(ref Transformer t, slice<byte> src, bool atEOF) {
     nint n = default;
     error err = default;
 
@@ -265,7 +265,7 @@ internal static array<bidi.Properties> asciiTable = new(128);
 
 } partial class bidirule_package {
 
-internal static (nint n, bool ok) advanceᴍ(ref Transformer t, slice<byte> s) {
+[GoMethodBody("advance")] internal static (nint n, bool ok) advanceᴍ(ref Transformer t, slice<byte> s) {
     nint n = default;
 
     bidi.Properties e = default;
@@ -315,7 +315,7 @@ internal static (nint n, bool ok) advanceᴍ(ref Transformer t, slice<byte> s) {
     return (n, true);
 }
 
-internal static (nint n, bool ok) advanceStringᴍ(ref Transformer t, @string s) {
+[GoMethodBody("advanceString")] internal static (nint n, bool ok) advanceStringᴍ(ref Transformer t, @string s) {
     nint n = default;
 
     bidi.Properties e = default;
@@ -363,14 +363,3 @@ internal static (nint n, bool ok) advanceStringᴍ(ref Transformer t, @string s)
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class bidiruleᴛTransformer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isRTL(this ref Transformer t) => bidirule_package.isRTLᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Transformer t) => bidirule_package.Resetᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint nDst, nint nSrc, error err) Transform(this ref Transformer t, slice<byte> dst, slice<byte> src, bool atEOF) => bidirule_package.Transformᴍ(ref t, dst, src, atEOF);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Span(this ref Transformer t, slice<byte> src, bool atEOF) => bidirule_package.Spanᴍ(ref t, src, atEOF);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, bool ok) advance(this ref Transformer t, slice<byte> s) => bidirule_package.advanceᴍ(ref t, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, bool ok) advanceString(this ref Transformer t, @string s) => bidirule_package.advanceStringᴍ(ref t, s);
-}
-// </GlyphForwarders>

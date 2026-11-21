@@ -91,7 +91,7 @@ public static (io.ReadCloser, error) NewReaderDict(io.Reader r, slice<byte> dict
 
 } partial class zlib_package {
 
-internal static (nint, error) Readᴍ(ref reader z, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref reader z, slice<byte> p) {
     if (z.err != nil) {
         return (0, z.err);
     }
@@ -124,7 +124,7 @@ internal static (nint, error) Readᴍ(ref reader z, slice<byte> p) {
 // Calling Close does not close the wrapped [io.Reader] originally passed to [NewReader].
 // In order for the ZLIB checksum to be verified, the reader must be
 // fully consumed until the [io.EOF].
-internal static error Closeᴍ(ref reader z) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref reader z) {
     if (z.err != nil && !AreEqual(z.err, io.EOF)) {
         return z.err;
     }
@@ -132,7 +132,7 @@ internal static error Closeᴍ(ref reader z) {
     return z.err;
 }
 
-internal static error Resetᴍ(ref reader z, io.Reader r, slice<byte> dict) {
+[GoMethodBody("Reset")] internal static error Resetᴍ(ref reader z, io.Reader r, slice<byte> dict) {
     z.AssignFrom(new reader(decompressor: z.decompressor));
     var (fr, ok) = r._<flate.Reader>(ᐧ); if (ok) {
         z.r = fr;
@@ -183,11 +183,3 @@ internal static error Resetᴍ(ref reader z, io.Reader r, slice<byte> dict) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class zlibᴛreader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref reader z, slice<byte> p) => zlib_package.Readᴍ(ref z, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref reader z) => zlib_package.Closeᴍ(ref z);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) => zlib_package.Resetᴍ(ref z, r, dict);
-}
-// </GlyphForwarders>

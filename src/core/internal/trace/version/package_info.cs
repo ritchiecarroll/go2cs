@@ -60,6 +60,14 @@ using static go.@internal.trace.version_package;
 
 namespace go.@internal.trace;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using fmt = fmt_package;
+using io = io_package;
+using tracev2 = go.@internal.trace.tracev2_package;
+using go.@internal.trace;
+using static version_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("version")]
 public static partial class version_package
 {
@@ -95,3 +103,11 @@ public static partial class version_package
 // <MethodHolders>
 [GoMethodHost(typeof(version_package.Version)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class versionᴛVersion;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class versionᴛVersion {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<tracev2.EventSpec> Specs(this Version v) => version_package.Specsᴍ(v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string EventName(this Version v, tracev2.EventType typ) => version_package.EventNameᴍ(v, typ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Valid(this Version v) => version_package.Validᴍ(v);
+}
+// </GlyphForwarders>

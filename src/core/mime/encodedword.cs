@@ -32,7 +32,7 @@ internal static error errInvalidWord = errors.New("mime: invalid RFC 2047 encode
 // Encode returns the encoded-word form of s. If s is ASCII without special
 // characters, it is returned unchanged. The provided charset is the IANA
 // charset name of s. It is case insensitive.
-internal static @string Encodeᴍ(WordEncoder e, @string charset, @string s) {
+[GoMethodBody("Encode")] internal static @string Encodeᴍ(WordEncoder e, @string charset, @string s) {
     if (!needsEncoding(s)) {
         return s;
     }
@@ -53,7 +53,7 @@ internal static bool needsEncoding(@string s) {
 } partial class mime_package {
 
 // encodeWord encodes a string into an encoded-word.
-internal static @string encodeWordᴍ(WordEncoder e, @string charset, @string s) {
+[GoMethodBody("encodeWord")] internal static @string encodeWordᴍ(WordEncoder e, @string charset, @string s) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     // Could use a hint like len(s)*3, but that's not enough for cases
     // with word splits and too much for simpler inputs.
@@ -85,7 +85,7 @@ internal static nint maxBase64Len = base64.StdEncoding.DecodedLen(maxContentLen)
 } partial class mime_package {
 
 // bEncode encodes s using base64 encoding and writes it to buf.
-internal static void bEncodeᴍ(WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) {
+[GoMethodBody("bEncode")] internal static void bEncodeᴍ(WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) {
     var w = base64.NewEncoder(base64.StdEncoding, new strings_BuilderжWriter(buf));
     // If the charset is not UTF-8 or if the content is short, do not bother
     // splitting the encoded-word.
@@ -119,7 +119,7 @@ internal static void bEncodeᴍ(WordEncoder e, ж<strings.Builder> buf, @string 
 
 // qEncode encodes s using Q encoding and writes it to buf. It splits the
 // encoded-words when necessary.
-internal static void qEncodeᴍ(WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) {
+[GoMethodBody("qEncode")] internal static void qEncodeᴍ(WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) {
     // We only split encoded-words when the charset is UTF-8.
     if (!isUTF8(charset)) {
         writeQString(buf, s);
@@ -176,7 +176,7 @@ internal static void writeQString(ж<strings.Builder> buf, @string s) {
 } partial class mime_package {
 
 // openWord writes the beginning of an encoded-word into buf.
-internal static void openWordᴍ(WordEncoder e, ж<strings.Builder> buf, @string charset) {
+[GoMethodBody("openWord")] internal static void openWordᴍ(WordEncoder e, ж<strings.Builder> buf, @string charset) {
     buf.WriteString("=?");
     buf.WriteString(charset);
     buf.WriteByte((byte)'?');
@@ -194,7 +194,7 @@ internal static void closeWord(ж<strings.Builder> buf) {
 } partial class mime_package {
 
 // splitWord closes the current encoded-word and opens a new one.
-internal static void splitWordᴍ(WordEncoder e, ж<strings.Builder> buf, @string charset) {
+[GoMethodBody("splitWord")] internal static void splitWordᴍ(WordEncoder e, ж<strings.Builder> buf, @string charset) {
     closeWord(buf);
     buf.WriteByte((byte)' ');
     e.openWord(buf, charset);
@@ -227,7 +227,7 @@ partial struct WordDecoder {
 } partial class mime_package {
 
 // Decode decodes an RFC 2047 encoded-word.
-internal static (@string, error) Decodeᴍ(ref WordDecoder d, @string word) {
+[GoMethodBody("Decode")] internal static (@string, error) Decodeᴍ(ref WordDecoder d, @string word) {
     // See https://tools.ietf.org/html/rfc2047#section-2 for details.
     // Our decoder is permissive, we accept empty encoded-text.
     if (len(word) < 8 || !strings.HasPrefix(word, "=?") || !strings.HasSuffix(word, "?=") || strings.Count(word, "?") != 4) {
@@ -259,7 +259,7 @@ internal static (@string, error) Decodeᴍ(ref WordDecoder d, @string word) {
 
 // DecodeHeader decodes all encoded-words of the given string. It returns an
 // error if and only if [WordDecoder.CharsetReader] of d returns an error.
-internal static (@string, error) DecodeHeaderᴍ(ref WordDecoder d, @string header) {
+[GoMethodBody("DecodeHeader")] internal static (@string, error) DecodeHeaderᴍ(ref WordDecoder d, @string header) {
     // If there is no encoded-word, returns before creating a buffer.
     nint i = strings.Index(header, "=?");
     if (i == -1) {
@@ -358,7 +358,7 @@ private static readonly @string iso88591ˢᵇᴍWordDecoder = "iso-8859-1"u8;
 internal static ref readonly @string usAsciiˢᴍWordDecoder => ref usAsciiˢᵇᴍWordDecoder;
 private static readonly @string usAsciiˢᵇᴍWordDecoder = "us-ascii"u8;
 
-internal static error convertᴍ(ref WordDecoder d, ж<strings.Builder> buf, @string charset, slice<byte> content) {
+[GoMethodBody("convert")] internal static error convertᴍ(ref WordDecoder d, ж<strings.Builder> buf, @string charset, slice<byte> content) {
     switch (ᐧ) {
     case {} when strings.EqualFold(utf8ˢ2ᴍWordDecoder, charset): {
         buf.Write(content);
@@ -481,19 +481,3 @@ internal static (byte, error) fromHex(byte b) {
 }
 
 } // end mime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class mimeᴛWordEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Encode(this WordEncoder e, @string charset, @string s) => mime_package.Encodeᴍ(e, charset, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string encodeWord(this WordEncoder e, @string charset, @string s) => mime_package.encodeWordᴍ(e, charset, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void bEncode(this WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) => mime_package.bEncodeᴍ(e, buf, charset, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void qEncode(this WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) => mime_package.qEncodeᴍ(e, buf, charset, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void openWord(this WordEncoder e, ж<strings.Builder> buf, @string charset) => mime_package.openWordᴍ(e, buf, charset);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void splitWord(this WordEncoder e, ж<strings.Builder> buf, @string charset) => mime_package.splitWordᴍ(e, buf, charset);
-}
-partial class mimeᴛWordDecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) Decode(this ref WordDecoder d, @string word) => mime_package.Decodeᴍ(ref d, word);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) DecodeHeader(this ref WordDecoder d, @string header) => mime_package.DecodeHeaderᴍ(ref d, header);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error convert(this ref WordDecoder d, ж<strings.Builder> buf, @string charset, slice<byte> content) => mime_package.convertᴍ(ref d, buf, charset, content);
-}
-// </GlyphForwarders>

@@ -147,7 +147,7 @@ partial struct exactSig {
 
 } partial class http_package {
 
-internal static @string matchᴍ(ref exactSig e, slice<byte> data, nint firstNonWS) {
+[GoMethodBody("match")] internal static @string matchᴍ(ref exactSig e, slice<byte> data, nint firstNonWS) {
     if (bytes.HasPrefix(data, e.sig)) {
         return e.ct;
     }
@@ -164,7 +164,7 @@ partial struct maskedSig {
 
 } partial class http_package {
 
-internal static @string matchᴍ(ref maskedSig m, slice<byte> data, nint firstNonWS) {
+[GoMethodBody("match")] internal static @string matchᴍ(ref maskedSig m, slice<byte> data, nint firstNonWS) {
     // pattern matching algorithm section 6
     // https://mimesniff.spec.whatwg.org/#pattern-matching-algorithm
 
@@ -196,7 +196,7 @@ partial struct htmlSig /*[]byte*/;
 internal static ref readonly @string textHtmlCharsetUtf8ˢᴍhtmlSig => ref textHtmlCharsetUtf8ˢᵇᴍhtmlSig;
 private static readonly @string textHtmlCharsetUtf8ˢᵇᴍhtmlSig = "text/html; charset=utf-8"u8;
 
-internal static @string matchᴍ(htmlSig h, slice<byte> data, nint firstNonWS) {
+[GoMethodBody("match")] internal static @string matchᴍ(htmlSig h, slice<byte> data, nint firstNonWS) {
     data = data.slice(firstNonWS);
     if (len(data) < len(h) + 1) {
         return ""u8;
@@ -231,7 +231,7 @@ partial struct mp4Sig {
 internal static ref readonly @string videoMp4ˢᴍmp4Sig => ref videoMp4ˢᵇᴍmp4Sig;
 private static readonly @string videoMp4ˢᵇᴍmp4Sig = "video/mp4"u8;
 
-internal static @string matchᴍ(mp4Sig _, slice<byte> data, nint firstNonWS) {
+[GoMethodBody("match")] internal static @string matchᴍ(mp4Sig _, slice<byte> data, nint firstNonWS) {
     // https://mimesniff.spec.whatwg.org/#signature-for-mp4
     // c.f. section 6.2.1
     if (len(data) < 12) {
@@ -267,7 +267,7 @@ partial struct textSig {
 internal static ref readonly @string textPlainCharsetUtf8ˢᴍtextSig => ref textPlainCharsetUtf8ˢᵇᴍtextSig;
 private static readonly @string textPlainCharsetUtf8ˢᵇᴍtextSig = "text/plain; charset=utf-8"u8;
 
-internal static @string matchᴍ(textSig _, slice<byte> data, nint firstNonWS) {
+[GoMethodBody("match")] internal static @string matchᴍ(textSig _, slice<byte> data, nint firstNonWS) {
     // c.f. section 5, step 4.
     foreach (var (_, b) in range(data.slice(firstNonWS))) {
         switch (ᐧ) {
@@ -279,21 +279,3 @@ internal static @string matchᴍ(textSig _, slice<byte> data, nint firstNonWS) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httpᴛexactSig {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string match(this ref exactSig e, slice<byte> data, nint firstNonWS) => http_package.matchᴍ(ref e, data, firstNonWS);
-}
-partial class httpᴛmaskedSig {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string match(this ref maskedSig m, slice<byte> data, nint firstNonWS) => http_package.matchᴍ(ref m, data, firstNonWS);
-}
-partial class httpᴛhtmlSig {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string match(this htmlSig h, slice<byte> data, nint firstNonWS) => http_package.matchᴍ(h, data, firstNonWS);
-}
-partial class httpᴛmp4Sig {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string match(this mp4Sig _, slice<byte> data, nint firstNonWS) => http_package.matchᴍ(_, data, firstNonWS);
-}
-partial class httpᴛtextSig {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string match(this textSig _, slice<byte> data, nint firstNonWS) => http_package.matchᴍ(_, data, firstNonWS);
-}
-// </GlyphForwarders>

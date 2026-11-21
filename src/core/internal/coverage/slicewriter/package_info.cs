@@ -60,6 +60,12 @@ using static go.@internal.coverage.slicewriter_package;
 
 namespace go.@internal.coverage;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using fmt = fmt_package;
+using io = io_package;
+using static slicewriter_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("slicewriter")]
 public static partial class slicewriter_package
 {
@@ -94,3 +100,12 @@ public static partial class slicewriter_package
 // <MethodHolders>
 [GoMethodHost(typeof(slicewriter_package.WriteSeeker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class slicewriterᴛWriteSeeker;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class slicewriterᴛWriteSeeker {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ref WriteSeeker sws, slice<byte> p) => slicewriter_package.Writeᴍ(ref sws, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) Seek(this ref WriteSeeker sws, int64 offset, nint whence) => slicewriter_package.Seekᴍ(ref sws, offset, whence);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> BytesWritten(this ref WriteSeeker sws) => slicewriter_package.BytesWrittenᴍ(ref sws);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ref WriteSeeker sws, slice<byte> p) => slicewriter_package.Readᴍ(ref sws, p);
+}
+// </GlyphForwarders>

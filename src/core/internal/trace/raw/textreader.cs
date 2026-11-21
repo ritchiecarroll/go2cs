@@ -67,12 +67,12 @@ public static (ж<TextReader>, error) NewTextReader(io.Reader r) {
 } partial class raw_package {
 
 // Version returns the version of the trace that we're reading.
-internal static version.Version Versionᴍ(ref TextReader r) {
+[GoMethodBody("Version")] internal static version.Version Versionᴍ(ref TextReader r) {
     return r.v;
 }
 
 // ReadEvent reads and returns the next trace event in the text stream.
-internal static (Event, error) ReadEventᴍ(ref TextReader r) {
+[GoMethodBody("ReadEvent")] internal static (Event, error) ReadEventᴍ(ref TextReader r) {
     var (line, err) = r.nextLine();
     if (err != nil) {
         return (new Event(), err);
@@ -126,7 +126,7 @@ internal static (Event, error) ReadEventᴍ(ref TextReader r) {
     ), default);
 }
 
-internal static (@string, error) nextLineᴍ(ref TextReader r) {
+[GoMethodBody("nextLine")] internal static (@string, error) nextLineᴍ(ref TextReader r) {
     for (;;) {
         if (!r.s.Scan()) {
             var err = r.s.Err(); if (err != nil) {
@@ -233,11 +233,3 @@ internal static (slice<byte>, error) readData(@string line) {
 }
 
 } // end raw_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class rawᴛTextReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static version.Version Version(this ref TextReader r) => raw_package.Versionᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Event, error) ReadEvent(this ref TextReader r) => raw_package.ReadEventᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) nextLine(this ref TextReader r) => raw_package.nextLineᴍ(ref r);
-}
-// </GlyphForwarders>

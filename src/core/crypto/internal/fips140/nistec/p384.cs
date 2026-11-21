@@ -37,7 +37,7 @@ public static ж<P384Point> NewP384Point() {
 } partial class nistec_package {
 
 // SetGenerator sets p to the canonical generator and returns p.
-internal static ж<P384Point> SetGeneratorᴍ(ж<P384Point> Ꮡp) {
+[GoMethodBody("SetGenerator")] internal static ж<P384Point> SetGeneratorᴍ(ж<P384Point> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.x.SetBytes([0xaa, 0x87, 0xca, 0x22, 0xbe, 0x8b, 0x5, 0x37, 0x8e, 0xb1, 0xc7, 0x1e, 0xf3, 0x20, 0xad, 0x74, 0x6e, 0x1d, 0x3b, 0x62, 0x8b, 0xa7, 0x9b, 0x98, 0x59, 0xf7, 0x41, 0xe0, 0x82, 0x54, 0x2a, 0x38, 0x55, 0x2, 0xf2, 0x5d, 0xbf, 0x55, 0x29, 0x6c, 0x3a, 0x54, 0x5e, 0x38, 0x72, 0x76, 0xa, 0xb7]);
@@ -47,7 +47,7 @@ internal static ж<P384Point> SetGeneratorᴍ(ж<P384Point> Ꮡp) {
 }
 
 // Set sets p = q and returns p.
-internal static ж<P384Point> Setᴍ(ж<P384Point> Ꮡp, ж<P384Point> Ꮡq) {
+[GoMethodBody("Set")] internal static ж<P384Point> Setᴍ(ж<P384Point> Ꮡp, ж<P384Point> Ꮡq) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var q = ref Ꮡq.DerefOrNull();
 
@@ -67,7 +67,7 @@ private static readonly @string invalidP384PointEncodingˢᵇᴍP384Point = "inv
 // b, as specified in SEC 1, Version 2.0, Section 2.3.4. If the point is not on
 // the curve, it returns nil and an error, and the receiver is unchanged.
 // Otherwise, it returns p.
-internal static (ж<P384Point>, error) SetBytesᴍ(ж<P384Point> Ꮡp, slice<byte> b) {
+[GoMethodBody("SetBytes")] internal static (ж<P384Point>, error) SetBytesᴍ(ж<P384Point> Ꮡp, slice<byte> b) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (ᐧ) {
@@ -167,14 +167,14 @@ internal static error p384CheckOnCurve(ж<fiat.P384Element> x, ж<fiat.P384Eleme
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
 // infinity is shorter than all other encodings.
-internal static slice<byte> Bytesᴍ(ref P384Point p) {
+[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref P384Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(97), out var Ꮡout);
     return p.bytes(Ꮡout);
 }
 
-internal static slice<byte> bytesᴍ(ref P384Point p, /*[97]*/ ж<array<byte>> Ꮡout) {
+[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ref P384Point p, /*[97]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -193,7 +193,7 @@ internal static slice<byte> bytesᴍ(ref P384Point p, /*[97]*/ ж<array<byte>> �
 
 // BytesX returns the encoding of the x-coordinate of p, as specified in SEC 1,
 // Version 2.0, Section 2.3.5, or an error if p is the point at infinity.
-internal static (slice<byte>, error) BytesXᴍ(ref P384Point p) {
+[GoMethodBody("BytesX")] internal static (slice<byte>, error) BytesXᴍ(ref P384Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(48), out var Ꮡout);
@@ -204,7 +204,7 @@ internal static (slice<byte>, error) BytesXᴍ(ref P384Point p) {
 internal static ref readonly @string p384PointIsThePointAtˢᴍP384Point => ref p384PointIsThePointAtˢᵇᴍP384Point;
 private static readonly @string p384PointIsThePointAtˢᵇᴍP384Point = "P384 point is the point at infinity"u8;
 
-internal static (slice<byte>, error) bytesXᴍ(ref P384Point p, /*[48]*/ ж<array<byte>> Ꮡout) {
+[GoMethodBody("bytesX")] internal static (slice<byte>, error) bytesXᴍ(ref P384Point p, /*[48]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -220,14 +220,14 @@ internal static (slice<byte>, error) bytesXᴍ(ref P384Point p, /*[48]*/ ж<arra
 // BytesCompressed returns the compressed or infinity encoding of p, as
 // specified in SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the
 // point at infinity is shorter than all other encodings.
-internal static slice<byte> BytesCompressedᴍ(ref P384Point p) {
+[GoMethodBody("BytesCompressed")] internal static slice<byte> BytesCompressedᴍ(ref P384Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(49), out var Ꮡout);
     return p.bytesCompressed(Ꮡout);
 }
 
-internal static slice<byte> bytesCompressedᴍ(ref P384Point p, /*[49]*/ ж<array<byte>> Ꮡout) {
+[GoMethodBody("bytesCompressed")] internal static slice<byte> bytesCompressedᴍ(ref P384Point p, /*[49]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -247,7 +247,7 @@ internal static slice<byte> bytesCompressedᴍ(ref P384Point p, /*[49]*/ ж<arra
 }
 
 // Add sets q = p1 + p2, and returns q. The points may overlap.
-internal static ж<P384Point> Addᴍ(ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1, ж<P384Point> Ꮡp2) {
+[GoMethodBody("Add")] internal static ж<P384Point> Addᴍ(ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1, ж<P384Point> Ꮡp2) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -306,7 +306,7 @@ internal static ж<P384Point> Addᴍ(ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1, ж
 }
 
 // Double sets q = p + p, and returns q. The points may overlap.
-internal static ж<P384Point> Doubleᴍ(ж<P384Point> Ꮡq, ж<P384Point> Ꮡp) {
+[GoMethodBody("Double")] internal static ж<P384Point> Doubleᴍ(ж<P384Point> Ꮡq, ж<P384Point> Ꮡp) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -355,7 +355,7 @@ internal static ж<P384Point> Doubleᴍ(ж<P384Point> Ꮡq, ж<P384Point> Ꮡp) 
 }
 
 // Select sets q to p1 if cond == 1, and to p2 if cond == 0.
-internal static ж<P384Point> Selectᴍ(ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1, ж<P384Point> Ꮡp2, nint cond) {
+[GoMethodBody("Select")] internal static ж<P384Point> Selectᴍ(ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1, ж<P384Point> Ꮡp2, nint cond) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -377,7 +377,7 @@ partial struct p384Table /*[15]ж<P384Point>*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
-internal static void Selectᴍ(ref p384Table table, ж<P384Point> p, uint8 n) {
+[GoMethodBody("Select")] internal static void Selectᴍ(ref p384Table table, ж<P384Point> p, uint8 n) {
     if (n >= 16) {
         throw panic("nistec: internal error: p384Table called with out-of-bounds value");
     }
@@ -391,7 +391,7 @@ internal static void Selectᴍ(ref p384Table table, ж<P384Point> p, uint8 n) {
 } partial class nistec_package {
 
 // ScalarMult sets p = scalar * q, and returns p.
-internal static (ж<P384Point>, error) ScalarMultᴍ(ж<P384Point> Ꮡp, ж<P384Point> q, slice<byte> scalar) {
+[GoMethodBody("ScalarMult")] internal static (ж<P384Point>, error) ScalarMultᴍ(ж<P384Point> Ꮡp, ж<P384Point> q, slice<byte> scalar) {
     // Compute a p384Table for the base point q. The explicit NewP384Point
     // calls get inlined, letting the allocations live on the stack.
     p384Table table = new p384Table(new ж<P384Point>[]{NewP384Point(), NewP384Point(), NewP384Point(),
@@ -446,7 +446,7 @@ internal static ref sync.Once p384GeneratorTableOnce => ref ((StaticBox<sync.Onc
 // generatorTable returns a sequence of p384Tables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four
 // times.
-internal static ж<array<p384Table>> generatorTableᴍ(ref P384Point p) {
+[GoMethodBody("generatorTable")] internal static ж<array<p384Table>> generatorTableᴍ(ref P384Point p) {
     Ꮡp384GeneratorTableOnce.Do(() => {
         p384GeneratorTable = Ꮡ(new array<p384Table>(96));
         var @base = NewP384Point().SetGenerator();
@@ -470,7 +470,7 @@ private static readonly @string invalidScalarLengthˢᵇᴍP384Point = "invalid 
 
 // ScalarBaseMult sets p = scalar * B, where B is the canonical generator, and
 // returns p.
-internal static (ж<P384Point>, error) ScalarBaseMultᴍ(ж<P384Point> Ꮡp, slice<byte> scalar) {
+[GoMethodBody("ScalarBaseMult")] internal static (ж<P384Point>, error) ScalarBaseMultᴍ(ж<P384Point> Ꮡp, slice<byte> scalar) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (len(scalar) != p384ElementLength) {
@@ -605,26 +605,3 @@ internal static void p384SqrtCandidate(ж<fiat.P384Element> z, ж<fiat.P384Eleme
 }
 
 } // end nistec_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class nistecᴛP384Point {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P384Point> SetGenerator(this ж<P384Point> Ꮡp) => nistec_package.SetGeneratorᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P384Point> Set(this ж<P384Point> Ꮡp, ж<P384Point> Ꮡq) => nistec_package.Setᴍ(Ꮡp, Ꮡq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<P384Point>, error) SetBytes(this ж<P384Point> Ꮡp, slice<byte> b) => nistec_package.SetBytesᴍ(Ꮡp, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref P384Point p) => nistec_package.Bytesᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytes(this ref P384Point p, /*[97]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesᴍ(ref p, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) BytesX(this ref P384Point p) => nistec_package.BytesXᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) bytesX(this ref P384Point p, /*[48]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesXᴍ(ref p, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> BytesCompressed(this ref P384Point p) => nistec_package.BytesCompressedᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytesCompressed(this ref P384Point p, /*[49]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesCompressedᴍ(ref p, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P384Point> Add(this ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1, ж<P384Point> Ꮡp2) => nistec_package.Addᴍ(Ꮡq, Ꮡp1, Ꮡp2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P384Point> Double(this ж<P384Point> Ꮡq, ж<P384Point> Ꮡp) => nistec_package.Doubleᴍ(Ꮡq, Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P384Point> Select(this ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1, ж<P384Point> Ꮡp2, nint cond) => nistec_package.Selectᴍ(Ꮡq, Ꮡp1, Ꮡp2, cond);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<P384Point>, error) ScalarMult(this ж<P384Point> Ꮡp, ж<P384Point> q, slice<byte> scalar) => nistec_package.ScalarMultᴍ(Ꮡp, q, scalar);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<array<p384Table>> generatorTable(this ref P384Point p) => nistec_package.generatorTableᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<P384Point>, error) ScalarBaseMult(this ж<P384Point> Ꮡp, slice<byte> scalar) => nistec_package.ScalarBaseMultᴍ(Ꮡp, scalar);
-}
-partial class nistecᴛp384Table {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Select(this ref p384Table table, ж<P384Point> p, uint8 n) => nistec_package.Selectᴍ(ref table, p, n);
-}
-// </GlyphForwarders>

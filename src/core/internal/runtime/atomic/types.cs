@@ -25,14 +25,14 @@ partial class atomic_package {
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-internal static int32 Loadᴍ(ж<Int32> Ꮡi) {
+[GoMethodBody("Load")] internal static int32 Loadᴍ(ж<Int32> Ꮡi) {
     return Loadint32(Ꮡi.Ꮡvalue);
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-internal static void Storeᴍ(ж<Int32> Ꮡi, int32 value) {
+[GoMethodBody("Store")] internal static void Storeᴍ(ж<Int32> Ꮡi, int32 value) {
     Storeint32(Ꮡi.Ꮡvalue, value);
 }
 
@@ -41,7 +41,7 @@ internal static void Storeᴍ(ж<Int32> Ꮡi, int32 value) {
 // It reports whether the swap ran.
 //
 //go:nosplit
-internal static bool CompareAndSwapᴍ(ж<Int32> Ꮡi, int32 old, int32 @new) {
+[GoMethodBody("CompareAndSwap")] internal static bool CompareAndSwapᴍ(ж<Int32> Ꮡi, int32 old, int32 @new) {
     return Casint32(Ꮡi.Ꮡvalue, old, @new);
 }
 
@@ -49,7 +49,7 @@ internal static bool CompareAndSwapᴍ(ж<Int32> Ꮡi, int32 old, int32 @new) {
 // i's value before the replacement.
 //
 //go:nosplit
-internal static int32 Swapᴍ(ж<Int32> Ꮡi, int32 @new) {
+[GoMethodBody("Swap")] internal static int32 Swapᴍ(ж<Int32> Ꮡi, int32 @new) {
     return Xchgint32(Ꮡi.Ꮡvalue, @new);
 }
 
@@ -60,7 +60,7 @@ internal static int32 Swapᴍ(ж<Int32> Ꮡi, int32 @new) {
 // two's-complement way.
 //
 //go:nosplit
-internal static int32 Addᴍ(ж<Int32> Ꮡi, int32 delta) {
+[GoMethodBody("Add")] internal static int32 Addᴍ(ж<Int32> Ꮡi, int32 delta) {
     return Xaddint32(Ꮡi.Ꮡvalue, delta);
 }
 
@@ -82,14 +82,14 @@ internal static int32 Addᴍ(ж<Int32> Ꮡi, int32 delta) {
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-internal static int64 Loadᴍ(ж<Int64> Ꮡi) {
+[GoMethodBody("Load")] internal static int64 Loadᴍ(ж<Int64> Ꮡi) {
     return Loadint64(Ꮡi.Ꮡvalue);
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-internal static void Storeᴍ(ж<Int64> Ꮡi, int64 value) {
+[GoMethodBody("Store")] internal static void Storeᴍ(ж<Int64> Ꮡi, int64 value) {
     Storeint64(Ꮡi.Ꮡvalue, value);
 }
 
@@ -98,7 +98,7 @@ internal static void Storeᴍ(ж<Int64> Ꮡi, int64 value) {
 // It reports whether the swap ran.
 //
 //go:nosplit
-internal static bool CompareAndSwapᴍ(ж<Int64> Ꮡi, int64 old, int64 @new) {
+[GoMethodBody("CompareAndSwap")] internal static bool CompareAndSwapᴍ(ж<Int64> Ꮡi, int64 old, int64 @new) {
     return Casint64(Ꮡi.Ꮡvalue, old, @new);
 }
 
@@ -106,7 +106,7 @@ internal static bool CompareAndSwapᴍ(ж<Int64> Ꮡi, int64 old, int64 @new) {
 // i's value before the replacement.
 //
 //go:nosplit
-internal static int64 Swapᴍ(ж<Int64> Ꮡi, int64 @new) {
+[GoMethodBody("Swap")] internal static int64 Swapᴍ(ж<Int64> Ꮡi, int64 @new) {
     return Xchgint64(Ꮡi.Ꮡvalue, @new);
 }
 
@@ -117,7 +117,7 @@ internal static int64 Swapᴍ(ж<Int64> Ꮡi, int64 @new) {
 // two's-complement way.
 //
 //go:nosplit
-internal static int64 Addᴍ(ж<Int64> Ꮡi, int64 delta) {
+[GoMethodBody("Add")] internal static int64 Addᴍ(ж<Int64> Ꮡi, int64 delta) {
     return Xaddint64(Ꮡi.Ꮡvalue, delta);
 }
 
@@ -136,14 +136,14 @@ internal static int64 Addᴍ(ж<Int64> Ꮡi, int64 delta) {
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-internal static uint8 Loadᴍ(ж<Uint8> Ꮡu) {
+[GoMethodBody("Load")] internal static uint8 Loadᴍ(ж<Uint8> Ꮡu) {
     return Load8(Ꮡu.Ꮡvalue);
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-internal static void Storeᴍ(ж<Uint8> Ꮡu, uint8 value) {
+[GoMethodBody("Store")] internal static void Storeᴍ(ж<Uint8> Ꮡu, uint8 value) {
     Store8(Ꮡu.Ꮡvalue, value);
 }
 
@@ -154,7 +154,7 @@ internal static void Storeᴍ(ж<Uint8> Ꮡu, uint8 value) {
 // The full process is performed atomically.
 //
 //go:nosplit
-internal static void Andᴍ(ж<Uint8> Ꮡu, uint8 value) {
+[GoMethodBody("And")] internal static void Andᴍ(ж<Uint8> Ꮡu, uint8 value) {
     And8(Ꮡu.Ꮡvalue, value);
 }
 
@@ -165,7 +165,7 @@ internal static void Andᴍ(ж<Uint8> Ꮡu, uint8 value) {
 // The full process is performed atomically.
 //
 //go:nosplit
-internal static void Orᴍ(ж<Uint8> Ꮡu, uint8 value) {
+[GoMethodBody("Or")] internal static void Orᴍ(ж<Uint8> Ꮡu, uint8 value) {
     Or8(Ꮡu.Ꮡvalue, value);
 }
 
@@ -184,14 +184,14 @@ partial struct Bool {
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-internal static bool Loadᴍ(ж<Bool> Ꮡb) {
+[GoMethodBody("Load")] internal static bool Loadᴍ(ж<Bool> Ꮡb) {
     return Ꮡb.Ꮡu.Load() != 0;
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-internal static void Storeᴍ(ж<Bool> Ꮡb, bool value) {
+[GoMethodBody("Store")] internal static void Storeᴍ(ж<Bool> Ꮡb, bool value) {
     var s = (uint8)0;
     if (value) {
         s = 1;
@@ -214,7 +214,7 @@ internal static void Storeᴍ(ж<Bool> Ꮡb, bool value) {
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-internal static uint32 Loadᴍ(ж<Uint32> Ꮡu) {
+[GoMethodBody("Load")] internal static uint32 Loadᴍ(ж<Uint32> Ꮡu) {
     return atomic.Load(Ꮡu.Ꮡvalue);
 }
 
@@ -227,14 +227,14 @@ internal static uint32 Loadᴍ(ж<Uint32> Ꮡu) {
 // WARNING: Use sparingly and with great care.
 //
 //go:nosplit
-internal static uint32 LoadAcquireᴍ(ж<Uint32> Ꮡu) {
+[GoMethodBody("LoadAcquire")] internal static uint32 LoadAcquireᴍ(ж<Uint32> Ꮡu) {
     return LoadAcq(Ꮡu.Ꮡvalue);
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-internal static void Storeᴍ(ж<Uint32> Ꮡu, uint32 value) {
+[GoMethodBody("Store")] internal static void Storeᴍ(ж<Uint32> Ꮡu, uint32 value) {
     atomic.Store(Ꮡu.Ꮡvalue, value);
 }
 
@@ -247,7 +247,7 @@ internal static void Storeᴍ(ж<Uint32> Ꮡu, uint32 value) {
 // WARNING: Use sparingly and with great care.
 //
 //go:nosplit
-internal static void StoreReleaseᴍ(ж<Uint32> Ꮡu, uint32 value) {
+[GoMethodBody("StoreRelease")] internal static void StoreReleaseᴍ(ж<Uint32> Ꮡu, uint32 value) {
     StoreRel(Ꮡu.Ꮡvalue, value);
 }
 
@@ -256,7 +256,7 @@ internal static void StoreReleaseᴍ(ж<Uint32> Ꮡu, uint32 value) {
 // It reports whether the swap ran.
 //
 //go:nosplit
-internal static bool CompareAndSwapᴍ(ж<Uint32> Ꮡu, uint32 old, uint32 @new) {
+[GoMethodBody("CompareAndSwap")] internal static bool CompareAndSwapᴍ(ж<Uint32> Ꮡu, uint32 old, uint32 @new) {
     return Cas(Ꮡu.Ꮡvalue, old, @new);
 }
 
@@ -270,7 +270,7 @@ internal static bool CompareAndSwapᴍ(ж<Uint32> Ꮡu, uint32 old, uint32 @new)
 // WARNING: Use sparingly and with great care.
 //
 //go:nosplit
-internal static bool CompareAndSwapReleaseᴍ(ж<Uint32> Ꮡu, uint32 old, uint32 @new) {
+[GoMethodBody("CompareAndSwapRelease")] internal static bool CompareAndSwapReleaseᴍ(ж<Uint32> Ꮡu, uint32 old, uint32 @new) {
     return CasRel(Ꮡu.Ꮡvalue, old, @new);
 }
 
@@ -278,7 +278,7 @@ internal static bool CompareAndSwapReleaseᴍ(ж<Uint32> Ꮡu, uint32 old, uint3
 // u's value before the replacement.
 //
 //go:nosplit
-internal static uint32 Swapᴍ(ж<Uint32> Ꮡu, uint32 value) {
+[GoMethodBody("Swap")] internal static uint32 Swapᴍ(ж<Uint32> Ꮡu, uint32 value) {
     return Xchg(Ꮡu.Ꮡvalue, value);
 }
 
@@ -289,7 +289,7 @@ internal static uint32 Swapᴍ(ж<Uint32> Ꮡu, uint32 value) {
 // The full process is performed atomically.
 //
 //go:nosplit
-internal static void Andᴍ(ж<Uint32> Ꮡu, uint32 value) {
+[GoMethodBody("And")] internal static void Andᴍ(ж<Uint32> Ꮡu, uint32 value) {
     atomic.And(Ꮡu.Ꮡvalue, value);
 }
 
@@ -300,7 +300,7 @@ internal static void Andᴍ(ж<Uint32> Ꮡu, uint32 value) {
 // The full process is performed atomically.
 //
 //go:nosplit
-internal static void Orᴍ(ж<Uint32> Ꮡu, uint32 value) {
+[GoMethodBody("Or")] internal static void Orᴍ(ж<Uint32> Ꮡu, uint32 value) {
     atomic.Or(Ꮡu.Ꮡvalue, value);
 }
 
@@ -311,7 +311,7 @@ internal static void Orᴍ(ж<Uint32> Ꮡu, uint32 value) {
 // two's-complement way.
 //
 //go:nosplit
-internal static uint32 Addᴍ(ж<Uint32> Ꮡu, int32 delta) {
+[GoMethodBody("Add")] internal static uint32 Addᴍ(ж<Uint32> Ꮡu, int32 delta) {
     return Xadd(Ꮡu.Ꮡvalue, delta);
 }
 
@@ -333,14 +333,14 @@ internal static uint32 Addᴍ(ж<Uint32> Ꮡu, int32 delta) {
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-internal static uint64 Loadᴍ(ж<Uint64> Ꮡu) {
+[GoMethodBody("Load")] internal static uint64 Loadᴍ(ж<Uint64> Ꮡu) {
     return Load64(Ꮡu.Ꮡvalue);
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-internal static void Storeᴍ(ж<Uint64> Ꮡu, uint64 value) {
+[GoMethodBody("Store")] internal static void Storeᴍ(ж<Uint64> Ꮡu, uint64 value) {
     Store64(Ꮡu.Ꮡvalue, value);
 }
 
@@ -349,7 +349,7 @@ internal static void Storeᴍ(ж<Uint64> Ꮡu, uint64 value) {
 // It reports whether the swap ran.
 //
 //go:nosplit
-internal static bool CompareAndSwapᴍ(ж<Uint64> Ꮡu, uint64 old, uint64 @new) {
+[GoMethodBody("CompareAndSwap")] internal static bool CompareAndSwapᴍ(ж<Uint64> Ꮡu, uint64 old, uint64 @new) {
     return Cas64(Ꮡu.Ꮡvalue, old, @new);
 }
 
@@ -357,7 +357,7 @@ internal static bool CompareAndSwapᴍ(ж<Uint64> Ꮡu, uint64 old, uint64 @new)
 // u's value before the replacement.
 //
 //go:nosplit
-internal static uint64 Swapᴍ(ж<Uint64> Ꮡu, uint64 value) {
+[GoMethodBody("Swap")] internal static uint64 Swapᴍ(ж<Uint64> Ꮡu, uint64 value) {
     return Xchg64(Ꮡu.Ꮡvalue, value);
 }
 
@@ -368,7 +368,7 @@ internal static uint64 Swapᴍ(ж<Uint64> Ꮡu, uint64 value) {
 // two's-complement way.
 //
 //go:nosplit
-internal static uint64 Addᴍ(ж<Uint64> Ꮡu, int64 delta) {
+[GoMethodBody("Add")] internal static uint64 Addᴍ(ж<Uint64> Ꮡu, int64 delta) {
     return Xadd64(Ꮡu.Ꮡvalue, delta);
 }
 
@@ -387,7 +387,7 @@ internal static uint64 Addᴍ(ж<Uint64> Ꮡu, int64 delta) {
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-internal static uintptr Loadᴍ(ж<Uintptr> Ꮡu) {
+[GoMethodBody("Load")] internal static uintptr Loadᴍ(ж<Uintptr> Ꮡu) {
     return Loaduintptr(Ꮡu.Ꮡvalue);
 }
 
@@ -400,14 +400,14 @@ internal static uintptr Loadᴍ(ж<Uintptr> Ꮡu) {
 // WARNING: Use sparingly and with great care.
 //
 //go:nosplit
-internal static uintptr LoadAcquireᴍ(ж<Uintptr> Ꮡu) {
+[GoMethodBody("LoadAcquire")] internal static uintptr LoadAcquireᴍ(ж<Uintptr> Ꮡu) {
     return LoadAcquintptr(Ꮡu.Ꮡvalue);
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-internal static void Storeᴍ(ж<Uintptr> Ꮡu, uintptr value) {
+[GoMethodBody("Store")] internal static void Storeᴍ(ж<Uintptr> Ꮡu, uintptr value) {
     Storeuintptr(Ꮡu.Ꮡvalue, value);
 }
 
@@ -420,7 +420,7 @@ internal static void Storeᴍ(ж<Uintptr> Ꮡu, uintptr value) {
 // WARNING: Use sparingly and with great care.
 //
 //go:nosplit
-internal static void StoreReleaseᴍ(ж<Uintptr> Ꮡu, uintptr value) {
+[GoMethodBody("StoreRelease")] internal static void StoreReleaseᴍ(ж<Uintptr> Ꮡu, uintptr value) {
     StoreReluintptr(Ꮡu.Ꮡvalue, value);
 }
 
@@ -429,7 +429,7 @@ internal static void StoreReleaseᴍ(ж<Uintptr> Ꮡu, uintptr value) {
 // It reports whether the swap ran.
 //
 //go:nosplit
-internal static bool CompareAndSwapᴍ(ж<Uintptr> Ꮡu, uintptr old, uintptr @new) {
+[GoMethodBody("CompareAndSwap")] internal static bool CompareAndSwapᴍ(ж<Uintptr> Ꮡu, uintptr old, uintptr @new) {
     return Casuintptr(Ꮡu.Ꮡvalue, old, @new);
 }
 
@@ -437,7 +437,7 @@ internal static bool CompareAndSwapᴍ(ж<Uintptr> Ꮡu, uintptr old, uintptr @n
 // u's value before the replacement.
 //
 //go:nosplit
-internal static uintptr Swapᴍ(ж<Uintptr> Ꮡu, uintptr value) {
+[GoMethodBody("Swap")] internal static uintptr Swapᴍ(ж<Uintptr> Ꮡu, uintptr value) {
     return Xchguintptr(Ꮡu.Ꮡvalue, value);
 }
 
@@ -448,7 +448,7 @@ internal static uintptr Swapᴍ(ж<Uintptr> Ꮡu, uintptr value) {
 // two's-complement way.
 //
 //go:nosplit
-internal static uintptr Addᴍ(ж<Uintptr> Ꮡu, uintptr delta) {
+[GoMethodBody("Add")] internal static uintptr Addᴍ(ж<Uintptr> Ꮡu, uintptr delta) {
     return Xadduintptr(Ꮡu.Ꮡvalue, delta);
 }
 
@@ -469,7 +469,7 @@ partial struct Float64 {
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-internal static float64 Loadᴍ(ж<Float64> Ꮡf) {
+[GoMethodBody("Load")] internal static float64 Loadᴍ(ж<Float64> Ꮡf) {
     var r = Ꮡf.Ꮡu.Load();
     return bitcast<uint64, float64>(r);
 }
@@ -477,7 +477,7 @@ internal static float64 Loadᴍ(ж<Float64> Ꮡf) {
 // Store updates the value atomically.
 //
 //go:nosplit
-internal static void Storeᴍ(ж<Float64> Ꮡf, float64 value) {
+[GoMethodBody("Store")] internal static void Storeᴍ(ж<Float64> Ꮡf, float64 value) {
     Ꮡf.Ꮡu.Store(bitcast<float64, uint64>(value));
 }
 
@@ -502,7 +502,7 @@ partial struct UnsafePointer {
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-internal static @unsafe.Pointer Loadᴍ(ж<UnsafePointer> Ꮡu) {
+[GoMethodBody("Load")] internal static @unsafe.Pointer Loadᴍ(ж<UnsafePointer> Ꮡu) {
     return Loadp(@unsafe.Pointer.FromBox(Ꮡu.Ꮡvalue));
 }
 
@@ -515,12 +515,12 @@ internal static @unsafe.Pointer Loadᴍ(ж<UnsafePointer> Ꮡu) {
 // Prefer Store instead.
 //
 //go:nosplit
-internal static void StoreNoWBᴍ(ж<UnsafePointer> Ꮡu, @unsafe.Pointer value) {
+[GoMethodBody("StoreNoWB")] internal static void StoreNoWBᴍ(ж<UnsafePointer> Ꮡu, @unsafe.Pointer value) {
     StorepNoWB(@unsafe.Pointer.FromBox(Ꮡu.Ꮡvalue), value);
 }
 
 // Store updates the value atomically.
-internal static void Storeᴍ(ж<UnsafePointer> Ꮡu, @unsafe.Pointer value) {
+[GoMethodBody("Store")] internal static void Storeᴍ(ж<UnsafePointer> Ꮡu, @unsafe.Pointer value) {
     storePointer(Ꮡu.Ꮡvalue, value);
 }
 
@@ -545,14 +545,14 @@ internal static partial void storePointer(ж<@unsafe.Pointer> ptr, @unsafe.Point
 // Prefer CompareAndSwap instead.
 //
 //go:nosplit
-internal static bool CompareAndSwapNoWBᴍ(ж<UnsafePointer> Ꮡu, @unsafe.Pointer old, @unsafe.Pointer @new) {
+[GoMethodBody("CompareAndSwapNoWB")] internal static bool CompareAndSwapNoWBᴍ(ж<UnsafePointer> Ꮡu, @unsafe.Pointer old, @unsafe.Pointer @new) {
     return Casp1(Ꮡu.Ꮡvalue, old, @new);
 }
 
 // CompareAndSwap atomically compares u's value with old,
 // and if they're equal, swaps u's value with new.
 // It reports whether the swap ran.
-internal static bool CompareAndSwapᴍ(ж<UnsafePointer> Ꮡu, @unsafe.Pointer old, @unsafe.Pointer @new) {
+[GoMethodBody("CompareAndSwap")] internal static bool CompareAndSwapᴍ(ж<UnsafePointer> Ꮡu, @unsafe.Pointer old, @unsafe.Pointer @new) {
     return casPointer(Ꮡu.Ꮡvalue, old, @new);
 }
 
@@ -570,7 +570,7 @@ partial struct Pointer<T> {
 // Load accesses and returns the value atomically.
 //
 //go:nosplit
-internal static ж<T> Loadᴍ<T>(ж<Pointer<T>> Ꮡp) {
+[GoMethodBody("Load")] internal static ж<T> Loadᴍ<T>(ж<Pointer<T>> Ꮡp) {
     return @unsafe.Pointer.To<T>(Ꮡp.Ꮡu.Load());
 }
 
@@ -583,14 +583,14 @@ internal static ж<T> Loadᴍ<T>(ж<Pointer<T>> Ꮡp) {
 // Prefer Store instead.
 //
 //go:nosplit
-internal static void StoreNoWBᴍ<T>(ж<Pointer<T>> Ꮡp, ж<T> value) {
+[GoMethodBody("StoreNoWB")] internal static void StoreNoWBᴍ<T>(ж<Pointer<T>> Ꮡp, ж<T> value) {
     Ꮡp.Ꮡu.StoreNoWB(@unsafe.Pointer.FromPinnedBox(value));
 }
 
 // Store updates the value atomically.
 //
 //go:nosplit
-internal static void Storeᴍ<T>(ж<Pointer<T>> Ꮡp, ж<T> value) {
+[GoMethodBody("Store")] internal static void Storeᴍ<T>(ж<Pointer<T>> Ꮡp, ж<T> value) {
     Ꮡp.Ꮡu.Store(@unsafe.Pointer.FromPinnedBox(value));
 }
 
@@ -606,7 +606,7 @@ internal static void Storeᴍ<T>(ж<Pointer<T>> Ꮡp, ж<T> value) {
 // Prefer CompareAndSwap instead.
 //
 //go:nosplit
-internal static bool CompareAndSwapNoWBᴍ<T>(ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> @new) {
+[GoMethodBody("CompareAndSwapNoWB")] internal static bool CompareAndSwapNoWBᴍ<T>(ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> @new) {
     return Ꮡp.Ꮡu.CompareAndSwapNoWB(@unsafe.Pointer.FromPinnedBox(old), @unsafe.Pointer.FromPinnedBox(@new));
 }
 
@@ -614,7 +614,7 @@ internal static bool CompareAndSwapNoWBᴍ<T>(ж<Pointer<T>> Ꮡp, ж<T> old, ж
 // compares u's value with old, and if they're equal,
 // swaps u's value with new.
 // It reports whether the swap ran.
-internal static bool CompareAndSwapᴍ<T>(ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> @new) {
+[GoMethodBody("CompareAndSwap")] internal static bool CompareAndSwapᴍ<T>(ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> @new) {
     return Ꮡp.Ꮡu.CompareAndSwap(@unsafe.Pointer.FromPinnedBox(old), @unsafe.Pointer.FromPinnedBox(@new));
 }
 
@@ -631,8 +631,8 @@ partial struct noCopy {
 } partial class atomic_package {
 
 // Lock is a no-op used by -copylocks checker from `go vet`.
-internal static void Lockᴍ(ref noCopy _) { }
-internal static void Unlockᴍ(ref noCopy _) { }
+[GoMethodBody("Lock")] internal static void Lockᴍ(ref noCopy _) { }
+[GoMethodBody("Unlock")] internal static void Unlockᴍ(ref noCopy _) { }
 
 } partial class atomic_package {
 
@@ -643,80 +643,3 @@ partial struct align64 {
 }
 
 } // end atomic_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class atomicᴛInt32 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int32 Load(this ж<Int32> Ꮡi) => atomic_package.Loadᴍ(Ꮡi);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Int32> Ꮡi, int32 value) => atomic_package.Storeᴍ(Ꮡi, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwap(this ж<Int32> Ꮡi, int32 old, int32 @new) => atomic_package.CompareAndSwapᴍ(Ꮡi, old, @new);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int32 Swap(this ж<Int32> Ꮡi, int32 @new) => atomic_package.Swapᴍ(Ꮡi, @new);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int32 Add(this ж<Int32> Ꮡi, int32 delta) => atomic_package.Addᴍ(Ꮡi, delta);
-}
-partial class atomicᴛInt64 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Load(this ж<Int64> Ꮡi) => atomic_package.Loadᴍ(Ꮡi);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Int64> Ꮡi, int64 value) => atomic_package.Storeᴍ(Ꮡi, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwap(this ж<Int64> Ꮡi, int64 old, int64 @new) => atomic_package.CompareAndSwapᴍ(Ꮡi, old, @new);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Swap(this ж<Int64> Ꮡi, int64 @new) => atomic_package.Swapᴍ(Ꮡi, @new);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Add(this ж<Int64> Ꮡi, int64 delta) => atomic_package.Addᴍ(Ꮡi, delta);
-}
-partial class atomicᴛUint8 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint8 Load(this ж<Uint8> Ꮡu) => atomic_package.Loadᴍ(Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Uint8> Ꮡu, uint8 value) => atomic_package.Storeᴍ(Ꮡu, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void And(this ж<Uint8> Ꮡu, uint8 value) => atomic_package.Andᴍ(Ꮡu, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Or(this ж<Uint8> Ꮡu, uint8 value) => atomic_package.Orᴍ(Ꮡu, value);
-}
-partial class atomicᴛBool {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Load(this ж<Bool> Ꮡb) => atomic_package.Loadᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Bool> Ꮡb, bool value) => atomic_package.Storeᴍ(Ꮡb, value);
-}
-partial class atomicᴛUint32 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Load(this ж<Uint32> Ꮡu) => atomic_package.Loadᴍ(Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 LoadAcquire(this ж<Uint32> Ꮡu) => atomic_package.LoadAcquireᴍ(Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.Storeᴍ(Ꮡu, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StoreRelease(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.StoreReleaseᴍ(Ꮡu, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwap(this ж<Uint32> Ꮡu, uint32 old, uint32 @new) => atomic_package.CompareAndSwapᴍ(Ꮡu, old, @new);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwapRelease(this ж<Uint32> Ꮡu, uint32 old, uint32 @new) => atomic_package.CompareAndSwapReleaseᴍ(Ꮡu, old, @new);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Swap(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.Swapᴍ(Ꮡu, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void And(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.Andᴍ(Ꮡu, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Or(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.Orᴍ(Ꮡu, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Add(this ж<Uint32> Ꮡu, int32 delta) => atomic_package.Addᴍ(Ꮡu, delta);
-}
-partial class atomicᴛUint64 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Load(this ж<Uint64> Ꮡu) => atomic_package.Loadᴍ(Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Uint64> Ꮡu, uint64 value) => atomic_package.Storeᴍ(Ꮡu, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwap(this ж<Uint64> Ꮡu, uint64 old, uint64 @new) => atomic_package.CompareAndSwapᴍ(Ꮡu, old, @new);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Swap(this ж<Uint64> Ꮡu, uint64 value) => atomic_package.Swapᴍ(Ꮡu, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Add(this ж<Uint64> Ꮡu, int64 delta) => atomic_package.Addᴍ(Ꮡu, delta);
-}
-partial class atomicᴛUintptr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uintptr Load(this ж<Uintptr> Ꮡu) => atomic_package.Loadᴍ(Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uintptr LoadAcquire(this ж<Uintptr> Ꮡu) => atomic_package.LoadAcquireᴍ(Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Uintptr> Ꮡu, uintptr value) => atomic_package.Storeᴍ(Ꮡu, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StoreRelease(this ж<Uintptr> Ꮡu, uintptr value) => atomic_package.StoreReleaseᴍ(Ꮡu, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwap(this ж<Uintptr> Ꮡu, uintptr old, uintptr @new) => atomic_package.CompareAndSwapᴍ(Ꮡu, old, @new);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uintptr Swap(this ж<Uintptr> Ꮡu, uintptr value) => atomic_package.Swapᴍ(Ꮡu, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uintptr Add(this ж<Uintptr> Ꮡu, uintptr delta) => atomic_package.Addᴍ(Ꮡu, delta);
-}
-partial class atomicᴛFloat64 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 Load(this ж<Float64> Ꮡf) => atomic_package.Loadᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Float64> Ꮡf, float64 value) => atomic_package.Storeᴍ(Ꮡf, value);
-}
-partial class atomicᴛUnsafePointer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) => atomic_package.Loadᴍ(Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StoreNoWB(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer value) => atomic_package.StoreNoWBᴍ(Ꮡu, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer value) => atomic_package.Storeᴍ(Ꮡu, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwapNoWB(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer old, @unsafe.Pointer @new) => atomic_package.CompareAndSwapNoWBᴍ(Ꮡu, old, @new);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwap(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer old, @unsafe.Pointer @new) => atomic_package.CompareAndSwapᴍ(Ꮡu, old, @new);
-}
-partial class atomicᴛPointer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡp) => atomic_package.Loadᴍ<T>(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StoreNoWB<T>(this ж<Pointer<T>> Ꮡp, ж<T> value) => atomic_package.StoreNoWBᴍ<T>(Ꮡp, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store<T>(this ж<Pointer<T>> Ꮡp, ж<T> value) => atomic_package.Storeᴍ<T>(Ꮡp, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwapNoWB<T>(this ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> @new) => atomic_package.CompareAndSwapNoWBᴍ<T>(Ꮡp, old, @new);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwap<T>(this ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> @new) => atomic_package.CompareAndSwapᴍ<T>(Ꮡp, old, @new);
-}
-partial class atomicᴛnoCopy {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Lock(this ref noCopy _) => atomic_package.Lockᴍ(ref _);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Unlock(this ref noCopy _) => atomic_package.Unlockᴍ(ref _);
-}
-// </GlyphForwarders>

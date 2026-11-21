@@ -34,7 +34,7 @@ private static readonly @string noNewVariablesOnLeftSideˢᵇᴍChecker = "no ne
 // variables are assigned to only (=) or whether there is a short variable
 // declaration (:=). If the latter and there are no variables, an error is
 // reported at noNewVarPos.
-internal static void rangeStmtᴍ(ж<Checker> Ꮡcheck, stmtContext inner, ж<ast.RangeStmt> ᏑrangeStmt, positioner noNewVarPos, ast.Expr sKey, ast.Expr sValue, ast.Expr sExtra, ast.Expr rangeVar, bool isDef) {
+[GoMethodBody("rangeStmt")] internal static void rangeStmtᴍ(ж<Checker> Ꮡcheck, stmtContext inner, ж<ast.RangeStmt> ᏑrangeStmt, positioner noNewVarPos, ast.Expr sKey, ast.Expr sValue, ast.Expr sExtra, ast.Expr rangeVar, bool isDef) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -349,9 +349,3 @@ internal static (Type key, Type val, @string cause, bool ok) rangeKeyVal(ж<Chec
 }
 
 } // end types_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void rangeStmt(this ж<Checker> Ꮡcheck, stmtContext inner, ж<ast.RangeStmt> ᏑrangeStmt, positioner noNewVarPos, ast.Expr sKey, ast.Expr sValue, ast.Expr sExtra, ast.Expr rangeVar, bool isDef) => types_package.rangeStmtᴍ(Ꮡcheck, inner, ᏑrangeStmt, noNewVarPos, sKey, sValue, sExtra, rangeVar, isDef);
-}
-// </GlyphForwarders>

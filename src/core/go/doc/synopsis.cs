@@ -64,7 +64,7 @@ public static ref slice<@string> IllegalPrefixes => ref ((StaticBox<slice<@strin
 // The result string has no \n, \r, or \t characters and uses only single
 // spaces between words. If text starts with any of the [IllegalPrefixes],
 // the result is the empty string.
-internal static @string Synopsisᴍ(ж<Package> Ꮡp, @string text) {
+[GoMethodBody("Synopsis")] internal static @string Synopsisᴍ(ж<Package> Ꮡp, @string text) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     text = firstSentence(text);
@@ -88,9 +88,3 @@ internal static @string Synopsisᴍ(ж<Package> Ꮡp, @string text) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class docᴛPackage {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Synopsis(this ж<Package> Ꮡp, @string text) => doc_package.Synopsisᴍ(Ꮡp, text);
-}
-// </GlyphForwarders>

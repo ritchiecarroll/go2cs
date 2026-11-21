@@ -47,7 +47,7 @@ public static ж<TypeParam> NewTypeParam(ж<TypeName> obj, Type constraint) {
 } partial class types_package {
 
 // check may be nil
-internal static ж<TypeParam> newTypeParamᴍ(ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, Type constraint) {
+[GoMethodBody("newTypeParam")] internal static ж<TypeParam> newTypeParamᴍ(ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, Type constraint) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
 
@@ -74,16 +74,16 @@ internal static ж<TypeParam> newTypeParamᴍ(ж<Checker> Ꮡcheck, ж<TypeName>
 } partial class types_package {
 
 // Obj returns the type name for the type parameter t.
-internal static ж<TypeName> Objᴍ(ref TypeParam t) { return t.obj; }
+[GoMethodBody("Obj")] internal static ж<TypeName> Objᴍ(ref TypeParam t) { return t.obj; }
 
 // Index returns the index of the type param within its param list, or -1 if
 // the type parameter has not yet been bound to a type.
-internal static nint Indexᴍ(ref TypeParam t) {
+[GoMethodBody("Index")] internal static nint Indexᴍ(ref TypeParam t) {
     return t.index;
 }
 
 // Constraint returns the type constraint specified for t.
-internal static Type Constraintᴍ(ref TypeParam t) {
+[GoMethodBody("Constraint")] internal static Type Constraintᴍ(ref TypeParam t) {
     return t.bound;
 }
 
@@ -93,7 +93,7 @@ internal static Type Constraintᴍ(ref TypeParam t) {
 // fully defined, and before using the type parameter in any way other than to
 // form other types. Once SetConstraint returns the receiver, t is safe for
 // concurrent use.
-internal static void SetConstraintᴍ(ref TypeParam t, Type bound) {
+[GoMethodBody("SetConstraint")] internal static void SetConstraintᴍ(ref TypeParam t, Type bound) {
     if (bound == nil) {
         throw panic("nil constraint");
     }
@@ -107,21 +107,21 @@ internal static void SetConstraintᴍ(ref TypeParam t, Type bound) {
 // the underlying type of its constraint. This type is always an interface.
 //
 // [underlying type]: https://go.dev/ref/spec#Underlying_types.
-internal static Type Underlyingᴍ(ref TypeParam t) {
+[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ref TypeParam t) {
     return new InterfaceжType(t.iface());
 }
 
-internal static @string Stringᴍ(ж<TypeParam> Ꮡt) { return TypeString(new TypeParamжType(Ꮡt), default); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<TypeParam> Ꮡt) { return TypeString(new TypeParamжType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
-internal static void cleanupᴍ(ref TypeParam t) {
+[GoMethodBody("cleanup")] internal static void cleanupᴍ(ref TypeParam t) {
     t.iface();
     t.check = default;
 }
 
 // iface returns the constraint interface of t.
-internal static ж<Interface> ifaceᴍ(ref TypeParam t) {
+[GoMethodBody("iface")] internal static ж<Interface> ifaceᴍ(ref TypeParam t) {
     var bound = t.bound;
 
     // determine constraint interface
@@ -167,7 +167,7 @@ internal static ж<Interface> ifaceᴍ(ref TypeParam t) {
 // is calls f with the specific type terms of t's constraint and reports whether
 // all calls to f returned true. If there are no specific terms, is
 // returns the result of f(nil).
-internal static bool @isᴍ(ref TypeParam t, Func<ж<term>, bool> f) {
+[GoMethodBody("is")] internal static bool @isᴍ(ref TypeParam t, Func<ж<term>, bool> f) {
     return t.iface().typeSet().@is(f);
 }
 
@@ -175,26 +175,8 @@ internal static bool @isᴍ(ref TypeParam t, Func<ж<term>, bool> f) {
 // specific type terms of t's constraint.
 // If there are no specific terms, typeset returns f(nil, nil).
 // In any case, typeset is guaranteed to call f at least once.
-internal static bool typesetᴍ(ref TypeParam t, Func<Type, Type, bool> f) {
+[GoMethodBody("typeset")] internal static bool typesetᴍ(ref TypeParam t, Func<Type, Type, bool> f) {
     return t.iface().typeSet().all(f);
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<TypeParam> newTypeParam(this ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, Type constraint) => types_package.newTypeParamᴍ(Ꮡcheck, Ꮡobj, constraint);
-}
-partial class typesᴛTypeParam {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<TypeName> Obj(this ref TypeParam t) => types_package.Objᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Index(this ref TypeParam t) => types_package.Indexᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Constraint(this ref TypeParam t) => types_package.Constraintᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetConstraint(this ref TypeParam t, Type bound) => types_package.SetConstraintᴍ(ref t, bound);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Underlying(this ref TypeParam t) => types_package.Underlyingᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<TypeParam> Ꮡt) => types_package.Stringᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cleanup(this ref TypeParam t) => types_package.cleanupᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Interface> iface(this ref TypeParam t) => types_package.ifaceᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool @is(this ref TypeParam t, Func<ж<term>, bool> f) => types_package.@isᴍ(ref t, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool typeset(this ref TypeParam t, Func<Type, Type, bool> f) => types_package.typesetᴍ(ref t, f);
-}
-// </GlyphForwarders>

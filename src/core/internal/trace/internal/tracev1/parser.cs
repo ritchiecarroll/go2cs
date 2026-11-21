@@ -111,7 +111,7 @@ partial struct parser {
 
 } partial class tracev1_package {
 
-internal static bool discardᴍ(ref parser p, uint64 n) {
+[GoMethodBody("discard")] internal static bool discardᴍ(ref parser p, uint64 n) {
     if (n > math.MaxInt) {
         return false;
     }
@@ -182,7 +182,7 @@ internal static ref readonly @string noEvFrequencyEventˢᴍparser => ref noEvFr
 private static readonly @string noEvFrequencyEventˢᵇᴍparser = "no EvFrequency event"u8;
 
 // parse parses, post-processes and verifies the trace.
-internal static (Trace, error) parseᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parse")] internal static (Trace, error) parseᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -301,7 +301,7 @@ partial struct Events {
 
 // grow grows the slice by one and returns a pointer to the new element, without
 // overwriting it.
-internal static ж<Event> growᴍ(ref Events l) {
+[GoMethodBody("grow")] internal static ж<Event> growᴍ(ref Events l) {
     var (a, b) = l.index(l.n);
     if (a >= len(l.buckets)) {
         l.buckets = builtin.append(l.buckets, Ꮡ(new array<Event>(524288, () => new())));
@@ -312,7 +312,7 @@ internal static ж<Event> growᴍ(ref Events l) {
 }
 
 // append appends v to the slice and returns a pointer to the new element.
-internal static ж<Event> appendᴍ(ref Events l, Event v) {
+[GoMethodBody("append")] internal static ж<Event> appendᴍ(ref Events l, Event v) {
     v = v.ΔClone();
 
     var ptr = l.grow();
@@ -320,27 +320,27 @@ internal static ж<Event> appendᴍ(ref Events l, Event v) {
     return ptr;
 }
 
-internal static ж<Event> Ptrᴍ(ref Events l, nint i) {
+[GoMethodBody("Ptr")] internal static ж<Event> Ptrᴍ(ref Events l, nint i) {
     var (a, b) = l.index(i + l.off);
     return l.buckets[a].at<Event>(b);
 }
 
-internal static (nint, nint) indexᴍ(ref Events l, nint i) {
+[GoMethodBody("index")] internal static (nint, nint) indexᴍ(ref Events l, nint i) {
     // Doing the division on uint instead of int compiles this function to a
     // shift and an AND (for power of 2 bucket sizes), versus a whole bunch of
     // instructions for int.
     return ((nint)((nuint)i / (nuint)eventsBucketSize), (nint)((nuint)i % (nuint)eventsBucketSize));
 }
 
-internal static nint Lenᴍ(ref Events l) {
+[GoMethodBody("Len")] internal static nint Lenᴍ(ref Events l) {
     return l.n - l.off;
 }
 
-internal static bool Lessᴍ(ref Events l, nint i, nint j) {
+[GoMethodBody("Less")] internal static bool Lessᴍ(ref Events l, nint i, nint j) {
     return l.Ptr(i).Ts < l.Ptr(j).Ts;
 }
 
-internal static void Swapᴍ(ref Events l, nint i, nint j) {
+[GoMethodBody("Swap")] internal static void Swapᴍ(ref Events l, nint i, nint j) {
     ref var valᴛ1 = ref l.Ptr(i).Value;
     ref var valᴛ3 = ref l.Ptr(j).Value;
     (var valᴛ2, var valᴛ4) = (l.Ptr(j).Value.ΔClone(), l.Ptr(i).Value.ΔClone());
@@ -348,7 +348,7 @@ internal static void Swapᴍ(ref Events l, nint i, nint j) {
     valᴛ3.AssignFrom(valᴛ4);
 }
 
-internal static (ж<Event>, bool) Popᴍ(ref Events l) {
+[GoMethodBody("Pop")] internal static (ж<Event>, bool) Popᴍ(ref Events l) {
     if (l.off == l.n) {
         return (default, false);
     }
@@ -363,7 +363,7 @@ internal static (ж<Event>, bool) Popᴍ(ref Events l) {
     return (ptr, true);
 }
 
-internal static (ж<Event>, bool) Peekᴍ(ref Events l) {
+[GoMethodBody("Peek")] internal static (ж<Event>, bool) Peekᴍ(ref Events l) {
     if (l.off == l.n) {
         return (default, false);
     }
@@ -371,7 +371,7 @@ internal static (ж<Event>, bool) Peekᴍ(ref Events l) {
     return (l.buckets[a].at<Event>(b), true);
 }
 
-internal static Action<Func<ж<Event>, bool>> Allᴍ(ж<Events> Ꮡl) {
+[GoMethodBody("All")] internal static Action<Func<ж<Event>, bool>> Allᴍ(ж<Events> Ꮡl) {
     return (Func<ж<Event>, bool> yield) => {
         for (nint i = 0; i < Ꮡl.Value.Len(); i++) {
             var (a, b) = Ꮡl.Value.index(i + Ꮡl.Value.off);
@@ -394,7 +394,7 @@ internal static Action<Func<ж<Event>, bool>> Allᴍ(ж<Events> Ꮡl) {
 // Then we choose event with the lowest timestamp from the subset, merge it and
 // repeat. This approach ensures that we form a consistent stream even if
 // timestamps are incorrect (condition observed on some machines).
-internal static (Events, error) parseEventBatchesᴍ(ref parser p) {
+[GoMethodBody("parseEventBatches")] internal static (Events, error) parseEventBatchesᴍ(ref parser p) {
     var availableProcsᴷ = new stackAppend<ж<proc>>();
 
     // The ordering of CPU profile sample events in the data stream is based on
@@ -570,7 +570,7 @@ break_pidLoop:;
 }
 
 // collectBatchesAndCPUSamples records the offsets of batches and parses CPU samples.
-internal static error collectBatchesAndCPUSamplesᴍ(ref parser p) {
+[GoMethodBody("collectBatchesAndCPUSamples")] internal static error collectBatchesAndCPUSamplesᴍ(ref parser p) {
     // Read events.
     ref var raw = ref heap(new rawEvent(), out var Ꮡraw);
     int32 curP = default;
@@ -647,7 +647,7 @@ internal static UntypedInt skipStrings => 2;
 
 } partial class tracev1_package {
 
-internal static (byte, bool) readByteᴍ(ref parser p) {
+[GoMethodBody("readByte")] internal static (byte, bool) readByteᴍ(ref parser p) {
     if (p.off < len(p.data) && p.off >= 0) {
         var b = p.data[p.off];
         p.off++;
@@ -657,7 +657,7 @@ internal static (byte, bool) readByteᴍ(ref parser p) {
     }
 }
 
-internal static (slice<byte>, error) readFullᴍ(ref parser p, nint n) {
+[GoMethodBody("readFull")] internal static (slice<byte>, error) readFullᴍ(ref parser p, nint n) {
     if (p.off >= len(p.data) || p.off < 0 || p.off + n > len(p.data)) {
         // p.off < 0 is impossible but makes BCE happy.
         //
@@ -678,7 +678,7 @@ private static readonly @string stringHasInvalidLength0ˢᵇᴍparser = "string 
 
 // readRawEvent reads a raw event into ev. The slices in ev are only valid until
 // the next call to readRawEvent, even when storing to a different location.
-internal static error readRawEventᴍ(ref parser p, nuint flags, ж<rawEvent> Ꮡev) {
+[GoMethodBody("readRawEvent")] internal static error readRawEventᴍ(ref parser p, nuint flags, ж<rawEvent> Ꮡev) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // The number of arguments is encoded using two bits and can thus only
@@ -872,7 +872,7 @@ internal static error readRawEventᴍ(ref parser p, nuint flags, ж<rawEvent> �
 }
 
 // loadBatch loads the next batch for pid and appends its contents to events.
-internal static (slice<Event>, error) loadBatchᴍ(ref parser p, int32 pid, slice<Event> events) {
+[GoMethodBody("loadBatch")] internal static (slice<Event>, error) loadBatchᴍ(ref parser p, int32 pid, slice<Event> events) {
     var offsets = p.batchOffsets[pid];
     if (len(offsets) == 0) {
         return (default, io.EOF);
@@ -922,7 +922,7 @@ internal static (slice<Event>, error) loadBatchᴍ(ref parser p, int32 pid, slic
     return (events, default);
 }
 
-internal static (@string s, error err) readStrᴍ(ref parser p) {
+[GoMethodBody("readStr")] internal static (@string s, error err) readStrᴍ(ref parser p) {
     error err = default;
 
     (var sz, err) = p.readVal();
@@ -944,7 +944,7 @@ internal static (@string s, error err) readStrᴍ(ref parser p) {
 
 // parseEvent transforms raw events into events.
 // It does analyze and verify per-event-type arguments.
-internal static error parseEventᴍ(ref parser p, ж<rawEvent> Ꮡraw, ж<Event> Ꮡev) {
+[GoMethodBody("parseEvent")] internal static error parseEventᴍ(ref parser p, ж<rawEvent> Ꮡraw, ж<Event> Ꮡev) {
     ref var raw = ref Ꮡraw.DerefOrNull();
     ref var ev = ref Ꮡev.DerefOrNull();
 
@@ -1103,7 +1103,7 @@ internal partial struct postProcessTrace_pdesc /*dyn*/ {
 // The resulting trace is guaranteed to be consistent
 // (for example, a P does not run two Gs at the same time, or a G is indeed
 // blocked before an unblock event).
-internal static error postProcessTraceᴍ(ж<parser> Ꮡp, Events events) {
+[GoMethodBody("postProcessTrace")] internal static error postProcessTraceᴍ(ж<parser> Ꮡp, Events events) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     const nint gDead = iota;
@@ -1467,7 +1467,7 @@ internal static error errMalformedVarint = errors.New("malformatted base-128 var
 } partial class tracev1_package {
 
 // readVal reads unsigned base-128 value from r.
-internal static (uint64, error) readValᴍ(ref parser p) {
+[GoMethodBody("readVal")] internal static (uint64, error) readValᴍ(ref parser p) {
     var (v, n) = binary.Uvarint(p.data.slice(p.off));
     if (n <= 0) {
         return (0, errMalformedVarint);
@@ -1490,7 +1490,7 @@ internal static (uint64 v, slice<byte> rem, error err) readValFrom(slice<byte> b
 
 } partial class tracev1_package {
 
-internal static @string Stringᴍ(ref Event ev) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref Event ev) {
     var desc = ᏑEventDescriptions.at<EventDescriptionsᴛ1>((nint)(ev.Type));
     var w = @new<bytes.Buffer>();
     fmt.Fprintf(new bytes_BufferжWriter(w), "%d %s p=%d g=%d stk=%d"u8, ev.Ts, (~desc).Name, ev.P, ev.G, ev.StkID);
@@ -1504,7 +1504,7 @@ internal static @string Stringᴍ(ref Event ev) {
 
 // argNum returns total number of args for the event accounting for timestamps,
 // sequence numbers and differences between trace format versions.
-internal static nint argNumᴍ(ref rawEvent raw) {
+[GoMethodBody("argNum")] internal static nint argNumᴍ(ref rawEvent raw) {
     var desc = ᏑEventDescriptions.at<EventDescriptionsᴛ1>((nint)(raw.typ));
     if (raw.typ == EvStack) {
         return len(raw.args);
@@ -1643,7 +1643,7 @@ public static ref array<EventDescriptionsᴛ1> EventDescriptions => ref ((Static
 } partial class tracev1_package {
 
 //gcassert:inline
-internal static slice<uint64> allocateStackᴍ(ref parser p, uint64 size) {
+[GoMethodBody("allocateStack")] internal static slice<uint64> allocateStackᴍ(ref parser p, uint64 size) {
     if (size == 0) {
         return default;
     }
@@ -1662,7 +1662,7 @@ internal static slice<uint64> allocateStackᴍ(ref parser p, uint64 size) {
 
 } partial class tracev1_package {
 
-internal static STWReason STWReasonᴍ(ref Trace tr, uint64 kindID) {
+[GoMethodBody("STWReason")] internal static STWReason STWReasonᴍ(ref Trace tr, uint64 kindID) {
     if (tr.Version < 21) {
         if (kindID == 0 || kindID == 1) {
             return (STWReason)(nint)(kindID + 1);
@@ -1705,42 +1705,3 @@ public static STWReason STWResetDebugLog => 16;
 public static UntypedInt NumSTWReasons => 17;
 
 } // end tracev1_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tracev1ᴛparser {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool discard(this ref parser p, uint64 n) => tracev1_package.discardᴍ(ref p, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Trace, error) parse(this ж<parser> Ꮡp) => tracev1_package.parseᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Events, error) parseEventBatches(this ref parser p) => tracev1_package.parseEventBatchesᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error collectBatchesAndCPUSamples(this ref parser p) => tracev1_package.collectBatchesAndCPUSamplesᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte, bool) readByte(this ref parser p) => tracev1_package.readByteᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) readFull(this ref parser p, nint n) => tracev1_package.readFullᴍ(ref p, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> Ꮡev) => tracev1_package.readRawEventᴍ(ref p, flags, Ꮡev);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<Event>, error) loadBatch(this ref parser p, int32 pid, slice<Event> events) => tracev1_package.loadBatchᴍ(ref p, pid, events);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string s, error err) readStr(this ref parser p) => tracev1_package.readStrᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Event> Ꮡev) => tracev1_package.parseEventᴍ(ref p, Ꮡraw, Ꮡev);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) => tracev1_package.postProcessTraceᴍ(Ꮡp, events);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, error) readVal(this ref parser p) => tracev1_package.readValᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<uint64> allocateStack(this ref parser p, uint64 size) => tracev1_package.allocateStackᴍ(ref p, size);
-}
-partial class tracev1ᴛEvents {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Event> grow(this ref Events l) => tracev1_package.growᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Event> append(this ref Events l, Event v) => tracev1_package.appendᴍ(ref l, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Event> Ptr(this ref Events l, nint i) => tracev1_package.Ptrᴍ(ref l, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, nint) index(this ref Events l, nint i) => tracev1_package.indexᴍ(ref l, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ref Events l) => tracev1_package.Lenᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Less(this ref Events l, nint i, nint j) => tracev1_package.Lessᴍ(ref l, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Swap(this ref Events l, nint i, nint j) => tracev1_package.Swapᴍ(ref l, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Event>, bool) Pop(this ref Events l) => tracev1_package.Popᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Event>, bool) Peek(this ref Events l) => tracev1_package.Peekᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Action<Func<ж<Event>, bool>> All(this ж<Events> Ꮡl) => tracev1_package.Allᴍ(Ꮡl);
-}
-partial class tracev1ᴛEvent {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Event ev) => tracev1_package.Stringᴍ(ref ev);
-}
-partial class tracev1ᴛrawEvent {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint argNum(this ref rawEvent raw) => tracev1_package.argNumᴍ(ref raw);
-}
-partial class tracev1ᴛTrace {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static STWReason STWReason(this ref Trace tr, uint64 kindID) => tracev1_package.STWReasonᴍ(ref tr, kindID);
-}
-// </GlyphForwarders>

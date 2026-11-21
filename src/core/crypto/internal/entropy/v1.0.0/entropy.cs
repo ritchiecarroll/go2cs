@@ -137,7 +137,7 @@ internal static void touchMemory(ж<ScratchBuffer> memory, uint32 idx) {
 
 } partial class entropy_package {
 
-internal static uint8 Sampleᴍ(ref source s) {
+[GoMethodBody("Sample")] internal static uint8 Sampleᴍ(ref source s) {
     // Perform a few memory accesses in an unpredictable pattern to expose the
     // next measurement to as much system noise as possible.
     var (memory, lcgState) = (s.memory, s.lcgState);
@@ -232,9 +232,3 @@ public static error AdaptiveProportionTest(slice<uint8> samples) {
 }
 
 } // end entropy_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class entropyᴛsource {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint8 Sample(this ref source s) => entropy_package.Sampleᴍ(ref s);
-}
-// </GlyphForwarders>

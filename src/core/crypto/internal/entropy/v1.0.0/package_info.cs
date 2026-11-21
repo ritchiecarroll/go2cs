@@ -61,6 +61,16 @@ using static go.crypto.@internal.entropy.v1_0_0.entropy_package;
 
 namespace go.crypto.@internal.entropy.v1_0_0;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using time = go.crypto.@internal.fips140deps.time_package;
+using errors = errors_package;
+using atomic = sync.atomic_package;
+using @unsafe = unsafe_package;
+using go.crypto.@internal.fips140deps;
+using sync;
+using static entropy_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("entropy", ImportPath = "crypto/internal/entropy/v1.0.0")]
 public static partial class entropy_package
 {
@@ -98,3 +108,9 @@ public static partial class entropy_package
 // <MethodHolders>
 [GoMethodHost(typeof(entropy_package.source)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class entropyᴛsource;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class entropyᴛsource {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint8 Sample(this ref source s) => entropy_package.Sampleᴍ(ref s);
+}
+// </GlyphForwarders>

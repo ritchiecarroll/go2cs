@@ -20,17 +20,9 @@ public static ж<Pointer> NewPointer(Type elem) { return Ꮡ(new Pointer(@base: 
 } partial class types_package {
 
 // Elem returns the element type for the given pointer p.
-internal static Type Elemᴍ(ref Pointer p) { return p.@base; }
+[GoMethodBody("Elem")] internal static Type Elemᴍ(ref Pointer p) { return p.@base; }
 
-internal static Type Underlyingᴍ(ж<Pointer> Ꮡp) { return new PointerжType(Ꮡp); }
-internal static @string Stringᴍ(ж<Pointer> Ꮡp) { return TypeString(new PointerжType(Ꮡp), default); }
+[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Pointer> Ꮡp) { return new PointerжType(Ꮡp); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<Pointer> Ꮡp) { return TypeString(new PointerжType(Ꮡp), default); }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛPointer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Elem(this ref Pointer p) => types_package.Elemᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Underlying(this ж<Pointer> Ꮡp) => types_package.Underlyingᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Pointer> Ꮡp) => types_package.Stringᴍ(Ꮡp);
-}
-// </GlyphForwarders>

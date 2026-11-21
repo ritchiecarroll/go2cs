@@ -96,7 +96,7 @@ partial struct stringReader /*@string*/;
 
 } partial class fmt_package {
 
-internal static (nint n, error err) Readᴍ(ref stringReader r, slice<byte> b) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref stringReader r, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -221,11 +221,11 @@ private static readonly @string scanStateSReadShouldNotˢᵇᴍss = "ScanState's
 // The Read method is only in ScanState so that ScanState
 // satisfies io.Reader. It will never be called when used as
 // intended, so there is no need to make it actually work.
-internal static (nint n, error err) Readᴍ(ref ss s, slice<byte> buf) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref ss s, slice<byte> buf) {
     return (0, errors.New(scanStateSReadShouldNotˢᴍss));
 }
 
-internal static (rune r, nint size, error err) ReadRuneᴍ(ref ss s) {
+[GoMethodBody("ReadRune")] internal static (rune r, nint size, error err) ReadRuneᴍ(ref ss s) {
     rune r = default;
     nint size = default;
     error err = default;
@@ -247,7 +247,7 @@ internal static (rune r, nint size, error err) ReadRuneᴍ(ref ss s) {
     return (r, size, err);
 }
 
-internal static (nint wid, bool ok) Widthᴍ(ref ss s) {
+[GoMethodBody("Width")] internal static (nint wid, bool ok) Widthᴍ(ref ss s) {
     if (s.maxWid == hugeWid) {
         return (0, false);
     }
@@ -256,7 +256,7 @@ internal static (nint wid, bool ok) Widthᴍ(ref ss s) {
 
 // The public method returns an error; this private one panics.
 // If getRune reaches EOF, the return value is EOF (-1).
-internal static rune /*r*/ getRuneᴍ(ref ss s) {
+[GoMethodBody("getRune")] internal static rune /*r*/ getRuneᴍ(ref ss s) {
     rune r = default;
 
     (r, _, var err) = s.ReadRune();
@@ -272,7 +272,7 @@ internal static rune /*r*/ getRuneᴍ(ref ss s) {
 // mustReadRune turns io.EOF into a panic(io.ErrUnexpectedEOF).
 // It is called in cases such as string scanning where an EOF is a
 // syntax error.
-internal static rune /*r*/ mustReadRuneᴍ(ref ss s) {
+[GoMethodBody("mustReadRune")] internal static rune /*r*/ mustReadRuneᴍ(ref ss s) {
     rune r = default;
 
     r = s.getRune();
@@ -282,22 +282,22 @@ internal static rune /*r*/ mustReadRuneᴍ(ref ss s) {
     return r;
 }
 
-internal static error UnreadRuneᴍ(ref ss s) {
+[GoMethodBody("UnreadRune")] internal static error UnreadRuneᴍ(ref ss s) {
     s.rs.UnreadRune();
     s.atEOF = false;
     s.count--;
     return default;
 }
 
-internal static void errorᴍ(ref ss s, error err) {
+[GoMethodBody("error")] internal static void errorᴍ(ref ss s, error err) {
     throw panic(new scanError(err));
 }
 
-internal static void errorStringᴍ(ref ss s, @string err) {
+[GoMethodBody("errorString")] internal static void errorStringᴍ(ref ss s, @string err) {
     throw panic(new scanError(errors.New(err)));
 }
 
-internal static (slice<byte> tok, error err) Tokenᴍ(ж<ss> Ꮡs, bool skipSpace, Func<rune, bool> f) {
+[GoMethodBody("Token")] internal static (slice<byte> tok, error err) Tokenᴍ(ж<ss> Ꮡs, bool skipSpace, Func<rune, bool> f) {
     slice<byte> tok = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -380,7 +380,7 @@ partial struct readRune {
 
 // readByte returns the next byte from the input, which may be
 // left over from a previous read if the UTF-8 was ill-formed.
-internal static (byte b, error err) readByteᴍ(ref readRune r) {
+[GoMethodBody("readByte")] internal static (byte b, error err) readByteᴍ(ref readRune r) {
     byte b = default;
     error err = default;
 
@@ -399,7 +399,7 @@ internal static (byte b, error err) readByteᴍ(ref readRune r) {
 
 // ReadRune returns the next UTF-8 encoded code point from the
 // io.Reader inside r.
-internal static (rune rr, nint size, error err) ReadRuneᴍ(ref readRune r) {
+[GoMethodBody("ReadRune")] internal static (rune rr, nint size, error err) ReadRuneᴍ(ref readRune r) {
     rune rr = default;
     nint size = default;
     error err = default;
@@ -446,7 +446,7 @@ internal static (rune rr, nint size, error err) ReadRuneᴍ(ref readRune r) {
 internal static ref readonly @string fmtScanningCalledˢᴍreadRune => ref fmtScanningCalledˢᵇᴍreadRune;
 private static readonly @string fmtScanningCalledˢᵇᴍreadRune = "fmt: scanning called UnreadRune with no rune available"u8;
 
-internal static error UnreadRuneᴍ(ref readRune r) {
+[GoMethodBody("UnreadRune")] internal static error UnreadRuneᴍ(ref readRune r) {
     if (r.peekRune >= 0) {
         return errors.New(fmtScanningCalledˢᴍreadRune);
     }
@@ -487,7 +487,7 @@ internal static (ж<ss> s, ssave old) newScanState(Δio.Reader r, bool nlIsSpace
 } partial class fmt_package {
 
 // free saves used ss structs in ssFree; avoid an allocation per invocation.
-internal static void freeᴍ(ж<ss> Ꮡs, ssave old) {
+[GoMethodBody("free")] internal static void freeᴍ(ж<ss> Ꮡs, ssave old) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // If it was used recursively, just restore the old state.
@@ -511,7 +511,7 @@ private static readonly @string unexpectedNewlineˢᵇᴍss = "unexpected newlin
 // SkipSpace provides Scan methods the ability to skip space and newline
 // characters in keeping with the current scanning mode set by format strings
 // and [Scan]/[Scanln].
-internal static void SkipSpaceᴍ(ref ss s) {
+[GoMethodBody("SkipSpace")] internal static void SkipSpaceᴍ(ref ss s) {
     for (;;) {
         var r = s.getRune();
         if (r == eof) {
@@ -537,7 +537,7 @@ internal static void SkipSpaceᴍ(ref ss s) {
 // token returns the next space-delimited string from the input. It
 // skips white space. For Scanln, it stops at newlines. For Scan,
 // newlines are treated as spaces.
-internal static slice<byte> tokenᴍ(ref ss s, bool skipSpace, Func<rune, bool> f) {
+[GoMethodBody("token")] internal static slice<byte> tokenᴍ(ref ss s, bool skipSpace, Func<rune, bool> f) {
     if (skipSpace) {
         s.SkipSpace();
     }
@@ -574,7 +574,7 @@ internal static nint indexRune(sstring s, rune r) {
 
 // consume reads the next rune in the input and reports whether it is in the ok string.
 // If accept is true, it puts the character into the input token.
-internal static bool consumeᴍ(ref ss s, sstring ok, bool accept) {
+[GoMethodBody("consume")] internal static bool consumeᴍ(ref ss s, sstring ok, bool accept) {
     var r = s.getRune();
     if (r == eof) {
         return false;
@@ -592,7 +592,7 @@ internal static bool consumeᴍ(ref ss s, sstring ok, bool accept) {
 }
 
 // peek reports whether the next character is in the ok string, without consuming it.
-internal static bool peekᴍ(ref ss s, sstring ok) {
+[GoMethodBody("peek")] internal static bool peekᴍ(ref ss s, sstring ok) {
     var r = s.getRune();
     if (r != eof) {
         s.UnreadRune();
@@ -600,7 +600,7 @@ internal static bool peekᴍ(ref ss s, sstring ok) {
     return indexRune(ok, r) >= 0;
 }
 
-internal static void notEOFᴍ(ref ss s) {
+[GoMethodBody("notEOF")] internal static void notEOFᴍ(ref ss s) {
     // Guarantee there is data to be read.
     var r = s.getRune(); if (r == eof) {
         throw panic(Δio.EOF);
@@ -610,12 +610,12 @@ internal static void notEOFᴍ(ref ss s) {
 
 // accept checks the next rune in the input. If it's a byte (sic) in the string, it puts it in the
 // buffer and returns true. Otherwise it return false.
-internal static bool acceptᴍ(ref ss s, sstring ok) {
+[GoMethodBody("accept")] internal static bool acceptᴍ(ref ss s, sstring ok) {
     return s.consume(ok, true);
 }
 
 // okVerb verifies that the verb is present in the list, setting s.err appropriately if not.
-internal static bool okVerbᴍ(ref ss s, rune verb, sstring okVerbs, sstring typ) {
+[GoMethodBody("okVerb")] internal static bool okVerbᴍ(ref ss s, rune verb, sstring okVerbs, sstring typ) {
     foreach (var (_, v) in okVerbs) {
         if (v == verb) {
             return true;
@@ -630,7 +630,7 @@ internal static ref readonly @string booleanˢᴍss => ref booleanˢᵇᴍss;
 private static readonly @string booleanˢᵇᴍss = "boolean"u8;
 
 // scanBool returns the value of the boolean represented by the next token.
-internal static bool scanBoolᴍ(ref ss s, rune verb) {
+[GoMethodBody("scanBool")] internal static bool scanBoolᴍ(ref ss s, rune verb) {
     s.SkipSpace();
     s.notEOF();
     if (!s.okVerb(verb, "tv"u8, booleanˢᴍss)) {
@@ -686,7 +686,7 @@ internal static ref readonly @string integerˢᴍss => ref integerˢᵇᴍss;
 private static readonly @string integerˢᵇᴍss = "integer"u8;
 
 // getBase returns the numeric base represented by the verb and its digit string.
-internal static (nint @base, @string digits) getBaseᴍ(ref ss s, rune verb) {
+[GoMethodBody("getBase")] internal static (nint @base, @string digits) getBaseᴍ(ref ss s, rune verb) {
     nint @base = default;
     @string digits = default;
 
@@ -717,7 +717,7 @@ internal static ref readonly @string expectedIntegerˢᴍss => ref expectedInteg
 private static readonly @string expectedIntegerˢᵇᴍss = "expected integer"u8;
 
 // scanNumber returns the numerical string with specified digits starting here.
-internal static @string scanNumberᴍ(ref ss s, sstring digits, bool haveDigits) {
+[GoMethodBody("scanNumber")] internal static @string scanNumberᴍ(ref ss s, sstring digits, bool haveDigits) {
     if (!haveDigits) {
         s.notEOF();
         if (!s.accept(digits)) {
@@ -730,7 +730,7 @@ internal static @string scanNumberᴍ(ref ss s, sstring digits, bool haveDigits)
 }
 
 // scanRune returns the next rune value in the input.
-internal static int64 scanRuneᴍ(ref ss s, nint bitSize) {
+[GoMethodBody("scanRune")] internal static int64 scanRuneᴍ(ref ss s, nint bitSize) {
     s.notEOF();
     var r = s.getRune();
     nuint n = (nuint)bitSize;
@@ -744,7 +744,7 @@ internal static int64 scanRuneᴍ(ref ss s, nint bitSize) {
 // scanBasePrefix reports whether the integer begins with a base prefix
 // and returns the base, digit string, and whether a zero was found.
 // It is called only if the verb is %v.
-internal static (nint @base, @string digits, bool zeroFound) scanBasePrefixᴍ(ref ss s) {
+[GoMethodBody("scanBasePrefix")] internal static (nint @base, @string digits, bool zeroFound) scanBasePrefixᴍ(ref ss s) {
     if (!s.peek("0"u8)) {
         return (0, decimalDigits + "_", false);
     }
@@ -774,7 +774,7 @@ private static readonly @string badUnicodeFormatˢᵇᴍss = "bad unicode format
 
 // scanInt returns the value of the integer represented by the next
 // token, checking for overflow. Any error is stored in s.err.
-internal static int64 scanIntᴍ(ref ss s, rune verb, nint bitSize) {
+[GoMethodBody("scanInt")] internal static int64 scanIntᴍ(ref ss s, rune verb, nint bitSize) {
     if (verb == 'c') {
         return s.scanRune(bitSize);
     }
@@ -807,7 +807,7 @@ internal static int64 scanIntᴍ(ref ss s, rune verb, nint bitSize) {
 
 // scanUint returns the value of the unsigned integer represented
 // by the next token, checking for overflow. Any error is stored in s.err.
-internal static uint64 scanUintᴍ(ref ss s, rune verb, nint bitSize) {
+[GoMethodBody("scanUint")] internal static uint64 scanUintᴍ(ref ss s, rune verb, nint bitSize) {
     if (verb == 'c') {
         return (uint64)s.scanRune(bitSize);
     }
@@ -838,7 +838,7 @@ internal static uint64 scanUintᴍ(ref ss s, rune verb, nint bitSize) {
 // floatToken returns the floating-point number starting here, no longer than swid
 // if the width is specified. It's not rigorous about syntax because it doesn't check that
 // we have at least some digits, but Atof will do that.
-internal static @string floatTokenᴍ(ref ss s) {
+[GoMethodBody("floatToken")] internal static @string floatTokenᴍ(ref ss s) {
     s.buf = s.buf[..0];
     // NaN?
     if (s.accept("nN"u8) && s.accept("aA"u8) && s.accept("nN"u8)) {
@@ -879,7 +879,7 @@ internal static @string floatTokenᴍ(ref ss s) {
 // complexTokens returns the real and imaginary parts of the complex number starting here.
 // The number might be parenthesized and has the format (N+Ni) where N is a floating-point
 // number and there are no spaces within.
-internal static (@string real, @string imag) complexTokensᴍ(ref ss s) {
+[GoMethodBody("complexTokens")] internal static (@string real, @string imag) complexTokensᴍ(ref ss s) {
     @string real = default;
     @string imag = default;
 
@@ -917,7 +917,7 @@ internal static bool hasX(sstring s) {
 } partial class fmt_package {
 
 // convertFloat converts the string to a float64value.
-internal static float64 convertFloatᴍ(ref ss s, @string str, nint n) {
+[GoMethodBody("convertFloat")] internal static float64 convertFloatᴍ(ref ss s, @string str, nint n) {
     // strconv.ParseFloat will handle "+0x1.fp+2",
     // but we have to implement our non-standard
     // decimal+binary exponent mix (1.2p4) ourselves.
@@ -957,7 +957,7 @@ private static readonly @string complexˢᵇᴍss = "complex"u8;
 // The atof argument is a type-specific reader for the underlying type.
 // If we're reading complex64, atof will parse float32s and convert them
 // to float64's to avoid reproducing this code for each complex type.
-internal static complex128 scanComplexᴍ(ref ss s, rune verb, nint n) {
+[GoMethodBody("scanComplex")] internal static complex128 scanComplexᴍ(ref ss s, rune verb, nint n) {
     if (!s.okVerb(verb, floatVerbs, complexˢᴍss)) {
         return 0D;
     }
@@ -977,7 +977,7 @@ private static readonly @string stringˢ2ᵇᴍss = "string"u8;
 
 // convertString returns the string represented by the next input characters.
 // The format of the input is determined by the verb.
-internal static @string /*str*/ convertStringᴍ(ref ss s, rune verb) {
+[GoMethodBody("convertString")] internal static @string /*str*/ convertStringᴍ(ref ss s, rune verb) {
     @string str = default;
 
     if (!s.okVerb(verb, svqxXˢᴍss, stringˢ2ᴍss)) {
@@ -1006,7 +1006,7 @@ internal static ref readonly @string expectedQuotedStringˢᴍss => ref expected
 private static readonly @string expectedQuotedStringˢᵇᴍss = "expected quoted string"u8;
 
 // quotedString returns the double- or back-quoted string represented by the next input characters.
-internal static @string quotedStringᴍ(ref ss s) {
+[GoMethodBody("quotedString")] internal static @string quotedStringᴍ(ref ss s) {
     s.notEOF();
     var quote = s.getRune();
     switch (quote) {
@@ -1076,7 +1076,7 @@ private static readonly @string illegalHexDigitˢᵇᴍss = "illegal hex digit"u
 // hexByte returns the next hex-encoded (two-character) byte from the input.
 // It returns ok==false if the next bytes in the input do not encode a hex byte.
 // If the first byte is hex and the second is not, processing stops.
-internal static (byte b, bool ok) hexByteᴍ(ref ss s) {
+[GoMethodBody("hexByte")] internal static (byte b, bool ok) hexByteᴍ(ref ss s) {
     byte b = default;
     bool ok = default;
 
@@ -1102,7 +1102,7 @@ internal static ref readonly @string noHexDataForXStringˢᴍss => ref noHexData
 private static readonly @string noHexDataForXStringˢᵇᴍss = "no hex data for %x string"u8;
 
 // hexString returns the space-delimited hexpair-encoded string.
-internal static @string hexStringᴍ(ref ss s) {
+[GoMethodBody("hexString")] internal static @string hexStringᴍ(ref ss s) {
     s.notEOF();
     for (;;) {
         var (b, ok) = s.hexByte();
@@ -1135,7 +1135,7 @@ internal static ref readonly @string missingLiteralˢᴍss => ref missingLiteral
 private static readonly @string missingLiteralˢᵇᴍss = "missing literal %"u8;
 
 // scanPercent scans a literal percent character.
-internal static void scanPercentᴍ(ref ss s) {
+[GoMethodBody("scanPercent")] internal static void scanPercentᴍ(ref ss s) {
     s.SkipSpace();
     s.notEOF();
     if (!s.accept("%"u8)) {
@@ -1150,7 +1150,7 @@ internal static ref readonly @string float64ˢᴍss => ref float64ˢᵇᴍss;
 private static readonly @string float64ˢᵇᴍss = "float64"u8;
 
 // scanOne scans a single value, deriving the scanner from the type of the argument.
-internal static void scanOneᴍ(ж<ss> Ꮡs, rune verb, any arg) {
+[GoMethodBody("scanOne")] internal static void scanOneᴍ(ж<ss> Ꮡs, rune verb, any arg) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.buf = s.buf[..0];
@@ -1340,7 +1340,7 @@ internal static ref readonly @string expectedNewlineˢᴍss => ref expectedNewli
 private static readonly @string expectedNewlineˢᵇᴍss = "expected newline"u8;
 
 // doScan does the real work for scanning without a format string.
-internal static (nint numProcessed, error err) doScanᴍ(ж<ss> Ꮡs, slice<any> a) {
+[GoMethodBody("doScan")] internal static (nint numProcessed, error err) doScanᴍ(ж<ss> Ꮡs, slice<any> a) {
     nint numProcessed = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
@@ -1390,7 +1390,7 @@ private static readonly @string missingVerbAtEndOfFormatˢᵇᴍss = "missing ve
 // This routine also handles the %% case. If the return value is zero,
 // either format starts with a % (with no following %) or the input
 // is empty. If it is negative, the input did not match the string.
-internal static nint /*i*/ advanceᴍ(ref ss s, sstring format) {
+[GoMethodBody("advance")] internal static nint /*i*/ advanceᴍ(ref ss s, sstring format) {
     nint i = default;
 
     while (i < len(format)) {
@@ -1479,7 +1479,7 @@ private static readonly @string tooManyOperandsˢᵇᴍss = "too many operands"u
 
 // doScanf does the real work when scanning with a format string.
 // At the moment, it handles only pointers to basic types.
-internal static (nint numProcessed, error err) doScanfᴍ(ж<ss> Ꮡs, sstring format, slice<any> a) {
+[GoMethodBody("doScanf")] internal static (nint numProcessed, error err) doScanfᴍ(ж<ss> Ꮡs, sstring format, slice<any> a) {
     nint numProcessed = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
@@ -1549,53 +1549,3 @@ internal static (nint numProcessed, error err) doScanfᴍ(ж<ss> Ꮡs, sstring f
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class fmtᴛstringReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref stringReader r, slice<byte> b) => fmt_package.Readᴍ(ref r, b);
-}
-partial class fmtᴛss {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref ss s, slice<byte> buf) => fmt_package.Readᴍ(ref s, buf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (rune r, nint size, error err) ReadRune(this ref ss s) => fmt_package.ReadRuneᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint wid, bool ok) Width(this ref ss s) => fmt_package.Widthᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static rune /*r*/ getRune(this ref ss s) => fmt_package.getRuneᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static rune /*r*/ mustReadRune(this ref ss s) => fmt_package.mustReadRuneᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error UnreadRune(this ref ss s) => fmt_package.UnreadRuneᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void error(this ref ss s, error err) => fmt_package.errorᴍ(ref s, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void errorString(this ref ss s, @string err) => fmt_package.errorStringᴍ(ref s, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte> tok, error err) Token(this ж<ss> Ꮡs, bool skipSpace, Func<rune, bool> f) => fmt_package.Tokenᴍ(Ꮡs, skipSpace, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void free(this ж<ss> Ꮡs, ssave old) => fmt_package.freeᴍ(Ꮡs, old);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SkipSpace(this ref ss s) => fmt_package.SkipSpaceᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> token(this ref ss s, bool skipSpace, Func<rune, bool> f) => fmt_package.tokenᴍ(ref s, skipSpace, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool consume(this ref ss s, sstring ok, bool accept) => fmt_package.consumeᴍ(ref s, ok, accept);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool peek(this ref ss s, sstring ok) => fmt_package.peekᴍ(ref s, ok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void notEOF(this ref ss s) => fmt_package.notEOFᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool accept(this ref ss s, sstring ok) => fmt_package.acceptᴍ(ref s, ok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool okVerb(this ref ss s, rune verb, sstring okVerbs, sstring typ) => fmt_package.okVerbᴍ(ref s, verb, okVerbs, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool scanBool(this ref ss s, rune verb) => fmt_package.scanBoolᴍ(ref s, verb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint @base, @string digits) getBase(this ref ss s, rune verb) => fmt_package.getBaseᴍ(ref s, verb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string scanNumber(this ref ss s, sstring digits, bool haveDigits) => fmt_package.scanNumberᴍ(ref s, digits, haveDigits);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 scanRune(this ref ss s, nint bitSize) => fmt_package.scanRuneᴍ(ref s, bitSize);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint @base, @string digits, bool zeroFound) scanBasePrefix(this ref ss s) => fmt_package.scanBasePrefixᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 scanInt(this ref ss s, rune verb, nint bitSize) => fmt_package.scanIntᴍ(ref s, verb, bitSize);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 scanUint(this ref ss s, rune verb, nint bitSize) => fmt_package.scanUintᴍ(ref s, verb, bitSize);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string floatToken(this ref ss s) => fmt_package.floatTokenᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string real, @string imag) complexTokens(this ref ss s) => fmt_package.complexTokensᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static float64 convertFloat(this ref ss s, @string str, nint n) => fmt_package.convertFloatᴍ(ref s, str, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static complex128 scanComplex(this ref ss s, rune verb, nint n) => fmt_package.scanComplexᴍ(ref s, verb, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string /*str*/ convertString(this ref ss s, rune verb) => fmt_package.convertStringᴍ(ref s, verb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string quotedString(this ref ss s) => fmt_package.quotedStringᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte b, bool ok) hexByte(this ref ss s) => fmt_package.hexByteᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string hexString(this ref ss s) => fmt_package.hexStringᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void scanPercent(this ref ss s) => fmt_package.scanPercentᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void scanOne(this ж<ss> Ꮡs, rune verb, any arg) => fmt_package.scanOneᴍ(Ꮡs, verb, arg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint numProcessed, error err) doScan(this ж<ss> Ꮡs, slice<any> a) => fmt_package.doScanᴍ(Ꮡs, a);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*i*/ advance(this ref ss s, sstring format) => fmt_package.advanceᴍ(ref s, format);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint numProcessed, error err) doScanf(this ж<ss> Ꮡs, sstring format, slice<any> a) => fmt_package.doScanfᴍ(Ꮡs, format, a);
-}
-partial class fmtᴛreadRune {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte b, error err) readByte(this ref readRune r) => fmt_package.readByteᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (rune rr, nint size, error err) ReadRune(this ref readRune r) => fmt_package.ReadRuneᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error UnreadRune(this ref readRune r) => fmt_package.UnreadRuneᴍ(ref r);
-}
-// </GlyphForwarders>

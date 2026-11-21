@@ -117,7 +117,7 @@ partial struct Response {
 } partial class http_package {
 
 // Cookies parses and returns the cookies set in the Set-Cookie headers.
-internal static slice<ж<Cookie>> Cookiesᴍ(ref Response r) {
+[GoMethodBody("Cookies")] internal static slice<ж<Cookie>> Cookiesᴍ(ref Response r) {
     return readSetCookies(r.Header);
 }
 
@@ -137,7 +137,7 @@ private static readonly @string locationˢᵇᴍResponse = "Location"u8;
 // if present. Relative redirects are resolved relative to
 // [Response.Request]. [ErrNoLocation] is returned if no
 // Location header is present.
-internal static (ж<url.URL>, error) Locationᴍ(ref Response r) {
+[GoMethodBody("Location")] internal static (ж<url.URL>, error) Locationᴍ(ref Response r) {
     @string lv = r.Header.Get(locationˢᴍResponse);
     if (lv == ""u8) {
         return (default, ErrNoLocation);
@@ -240,7 +240,7 @@ internal static void fixPragmaCacheControl(Header header) {
 
 // ProtoAtLeast reports whether the HTTP protocol used
 // in the response is at least major.minor.
-internal static bool ProtoAtLeastᴍ(ref Response r, nint major, nint minor) {
+[GoMethodBody("ProtoAtLeast")] internal static bool ProtoAtLeastᴍ(ref Response r, nint major, nint minor) {
     return r.ProtoMajor > major || r.ProtoMajor == major && r.ProtoMinor >= minor;
 }
 
@@ -273,7 +273,7 @@ private static readonly @string contentLength0ˢᵇᴍResponse = "Content-Length
 //	Header, values for non-canonical keys will have unpredictable behavior
 //
 // The Response Body is closed after it is sent.
-internal static error Writeᴍ(ref Response r, io.Writer w) {
+[GoMethodBody("Write")] internal static error Writeᴍ(ref Response r, io.Writer w) {
     // Status line
     @string text = r.Status;
     if (text == ""u8) {
@@ -361,7 +361,7 @@ internal static error Writeᴍ(ref Response r, io.Writer w) {
     return default;
 }
 
-internal static void closeBodyᴍ(ref Response r) {
+[GoMethodBody("closeBody")] internal static void closeBodyᴍ(ref Response r) {
     if (r.Body != nil) {
         r.Body.Close();
     }
@@ -374,14 +374,14 @@ internal static void closeBodyᴍ(ref Response r) {
 // connection is done being managed from its perspective. Once we
 // return a writable response body to a user, the net/http package is
 // done managing that connection.
-internal static bool bodyIsWritableᴍ(ref Response r) {
+[GoMethodBody("bodyIsWritable")] internal static bool bodyIsWritableᴍ(ref Response r) {
     var (_, ok) = r.Body._<io.Writer>(ᐧ);
     return ok;
 }
 
 // isProtocolSwitch reports whether the response code and header
 // indicate a successful protocol upgrade response.
-internal static bool isProtocolSwitchᴍ(ref Response r) {
+[GoMethodBody("isProtocolSwitch")] internal static bool isProtocolSwitchᴍ(ref Response r) {
     return isProtocolSwitchResponse(r.StatusCode, r.Header);
 }
 
@@ -404,15 +404,3 @@ internal static bool isProtocolSwitchHeader(Header h) {
 }
 
 } // end http_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httpᴛResponse {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<ж<Cookie>> Cookies(this ref Response r) => http_package.Cookiesᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<url.URL>, error) Location(this ref Response r) => http_package.Locationᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ProtoAtLeast(this ref Response r, nint major, nint minor) => http_package.ProtoAtLeastᴍ(ref r, major, minor);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ref Response r, io.Writer w) => http_package.Writeᴍ(ref r, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeBody(this ref Response r) => http_package.closeBodyᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool bodyIsWritable(this ref Response r) => http_package.bodyIsWritableᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isProtocolSwitch(this ref Response r) => http_package.isProtocolSwitchᴍ(ref r);
-}
-// </GlyphForwarders>

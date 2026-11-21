@@ -65,7 +65,7 @@ public static ж<ServerConn> NewServerConn(net.Conn c, ж<bufio.Reader> Ꮡr) {
 // as the read-side bufio which may have some left over data. Hijack may be
 // called before Read has signaled the end of the keep-alive logic. The user
 // should not call Hijack while [ServerConn.Read] or [ServerConn.Write] is in progress.
-internal static (net.Conn, ж<bufio.Reader>) Hijackᴍ(ж<ServerConn> Ꮡsc) {
+[GoMethodBody("Hijack")] internal static (net.Conn, ж<bufio.Reader>) Hijackᴍ(ж<ServerConn> Ꮡsc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -84,7 +84,7 @@ internal static (net.Conn, ж<bufio.Reader>) Hijackᴍ(ж<ServerConn> Ꮡsc) {
 }
 
 // Close calls [ServerConn.Hijack] and then also closes the underlying connection.
-internal static error Closeᴍ(ж<ServerConn> Ꮡsc) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<ServerConn> Ꮡsc) {
     var (c, _) = Ꮡsc.Hijack();
     if (c != nil) {
         return c.Close();
@@ -96,7 +96,7 @@ internal static error Closeᴍ(ж<ServerConn> Ꮡsc) {
 // it is gracefully determined that there are no more requests (e.g. after the
 // first request on an HTTP/1.0 connection, or after a Connection:close on a
 // HTTP/1.1 connection).
-internal static (ж<http.Request>, error) Readᴍ(ж<ServerConn> Ꮡsc) {
+[GoMethodBody("Read")] internal static (ж<http.Request>, error) Readᴍ(ж<ServerConn> Ꮡsc) {
     GoFrame ᒐ = default;
     try {
         ref var sc = ref Ꮡsc.DerefOrNull();
@@ -181,7 +181,7 @@ internal static (ж<http.Request>, error) Readᴍ(ж<ServerConn> Ꮡsc) {
 
 // Pending returns the number of unanswered requests
 // that have been received on the connection.
-internal static nint Pendingᴍ(ж<ServerConn> Ꮡsc) {
+[GoMethodBody("Pending")] internal static nint Pendingᴍ(ж<ServerConn> Ꮡsc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -202,7 +202,7 @@ private static readonly @string persistServerPipeCountˢᵇᴍServerConn = "pers
 // Write writes resp in response to req. To close the connection gracefully, set the
 // Response.Close field to true. Write should be considered operational until
 // it returns an error, regardless of any errors returned on the [ServerConn.Read] side.
-internal static error Writeᴍ(ж<ServerConn> Ꮡsc, ж<http.Request> req, ж<http.Response> Ꮡresp) {
+[GoMethodBody("Write")] internal static error Writeᴍ(ж<ServerConn> Ꮡsc, ж<http.Request> req, ж<http.Response> Ꮡresp) {
     GoFrame ᒐ = default;
     try {
         ref var sc = ref Ꮡsc.DerefOrNull();
@@ -314,7 +314,7 @@ public static ж<ClientConn> NewProxyClientConn(net.Conn c, ж<bufio.Reader> r) 
 // as the read-side bufio which may have some left over data. Hijack may be
 // called before the user or Read have signaled the end of the keep-alive
 // logic. The user should not call Hijack while [ClientConn.Read] or ClientConn.Write is in progress.
-internal static (net.Conn c, ж<bufio.Reader> r) Hijackᴍ(ж<ClientConn> Ꮡcc) {
+[GoMethodBody("Hijack")] internal static (net.Conn c, ж<bufio.Reader> r) Hijackᴍ(ж<ClientConn> Ꮡcc) {
     net.Conn c = default;
     ж<bufio.Reader> r = default;
     GoFrame ᒐ = default;
@@ -334,7 +334,7 @@ internal static (net.Conn c, ж<bufio.Reader> r) Hijackᴍ(ж<ClientConn> Ꮡcc)
 }
 
 // Close calls [ClientConn.Hijack] and then also closes the underlying connection.
-internal static error Closeᴍ(ж<ClientConn> Ꮡcc) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<ClientConn> Ꮡcc) {
     var (c, _) = Ꮡcc.Hijack();
     if (c != nil) {
         return c.Close();
@@ -347,7 +347,7 @@ internal static error Closeᴍ(ж<ClientConn> Ꮡcc) {
 // keep-alive connection is logically closed after this request and the opposing
 // server is informed. An ErrUnexpectedEOF indicates the remote closed the
 // underlying TCP connection, which is usually considered as graceful close.
-internal static error Writeᴍ(ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) {
+[GoMethodBody("Write")] internal static error Writeᴍ(ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) {
     GoFrame ᒐ = default;
     try {
         ref var cc = ref Ꮡcc.DerefOrNull();
@@ -409,7 +409,7 @@ internal static error Writeᴍ(ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) {
 
 // Pending returns the number of unanswered requests
 // that have been sent on the connection.
-internal static nint Pendingᴍ(ж<ClientConn> Ꮡcc) {
+[GoMethodBody("Pending")] internal static nint Pendingᴍ(ж<ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -427,7 +427,7 @@ internal static nint Pendingᴍ(ж<ClientConn> Ꮡcc) {
 // returned together with an [ErrPersistEOF], which means that the remote
 // requested that this be the last request serviced. Read can be called
 // concurrently with [ClientConn.Write], but not with another Read.
-internal static (ж<http.Response> resp, error err) Readᴍ(ж<ClientConn> Ꮡcc, ж<http.Request> req) {
+[GoMethodBody("Read")] internal static (ж<http.Response> resp, error err) Readᴍ(ж<ClientConn> Ꮡcc, ж<http.Request> req) {
     ж<http.Response> resp = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -498,7 +498,7 @@ internal static (ж<http.Response> resp, error err) Readᴍ(ж<ClientConn> Ꮡcc
 }
 
 // Do is convenience method that writes a request and reads a response.
-internal static (ж<http.Response>, error) Doᴍ(ж<ClientConn> Ꮡcc, ж<http.Request> req) {
+[GoMethodBody("Do")] internal static (ж<http.Response>, error) Doᴍ(ж<ClientConn> Ꮡcc, ж<http.Request> req) {
     var err = Ꮡcc.Write(req);
     if (err != nil) {
         return (default, err);
@@ -507,21 +507,3 @@ internal static (ж<http.Response>, error) Doᴍ(ж<ClientConn> Ꮡcc, ж<http.R
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httputilᴛServerConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (net.Conn, ж<bufio.Reader>) Hijack(this ж<ServerConn> Ꮡsc) => httputil_package.Hijackᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<ServerConn> Ꮡsc) => httputil_package.Closeᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<http.Request>, error) Read(this ж<ServerConn> Ꮡsc) => httputil_package.Readᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Pending(this ж<ServerConn> Ꮡsc) => httputil_package.Pendingᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ж<ServerConn> Ꮡsc, ж<http.Request> req, ж<http.Response> Ꮡresp) => httputil_package.Writeᴍ(Ꮡsc, req, Ꮡresp);
-}
-partial class httputilᴛClientConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (net.Conn c, ж<bufio.Reader> r) Hijack(this ж<ClientConn> Ꮡcc) => httputil_package.Hijackᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<ClientConn> Ꮡcc) => httputil_package.Closeᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) => httputil_package.Writeᴍ(Ꮡcc, Ꮡreq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Pending(this ж<ClientConn> Ꮡcc) => httputil_package.Pendingᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<http.Response> resp, error err) Read(this ж<ClientConn> Ꮡcc, ж<http.Request> req) => httputil_package.Readᴍ(Ꮡcc, req);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<http.Response>, error) Do(this ж<ClientConn> Ꮡcc, ж<http.Request> req) => httputil_package.Doᴍ(Ꮡcc, req);
-}
-// </GlyphForwarders>

@@ -33,40 +33,40 @@ partial struct unit5 {
 } partial class dwarf_package {
 
 // Implement the dataFormat interface.
-internal static nint versionᴍ(ref unit u) {
+[GoMethodBody("version")] internal static nint versionᴍ(ref unit u) {
     return u.vers;
 }
 
-internal static (bool, bool) dwarf64ᴍ(ref unit u) {
+[GoMethodBody("dwarf64")] internal static (bool, bool) dwarf64ᴍ(ref unit u) {
     return (u.is64, true);
 }
 
-internal static nint addrsizeᴍ(ref unit u) {
+[GoMethodBody("addrsize")] internal static nint addrsizeᴍ(ref unit u) {
     return u.asize;
 }
 
-internal static uint64 addrBaseᴍ(ref unit u) {
+[GoMethodBody("addrBase")] internal static uint64 addrBaseᴍ(ref unit u) {
     if (u.unit5 != nil) {
         return u.unit5.addrBase;
     }
     return 0;
 }
 
-internal static uint64 strOffsetsBaseᴍ(ref unit u) {
+[GoMethodBody("strOffsetsBase")] internal static uint64 strOffsetsBaseᴍ(ref unit u) {
     if (u.unit5 != nil) {
         return u.unit5.strOffsetsBase;
     }
     return 0;
 }
 
-internal static uint64 rngListsBaseᴍ(ref unit u) {
+[GoMethodBody("rngListsBase")] internal static uint64 rngListsBaseᴍ(ref unit u) {
     if (u.unit5 != nil) {
         return u.unit5.rngListsBase;
     }
     return 0;
 }
 
-internal static uint64 locListsBaseᴍ(ref unit u) {
+[GoMethodBody("locListsBase")] internal static uint64 locListsBaseᴍ(ref unit u) {
     if (u.unit5 != nil) {
         return u.unit5.locListsBase;
     }
@@ -79,7 +79,7 @@ internal static uint64 locListsBaseᴍ(ref unit u) {
 internal static ref readonly @string unitLengthOverflowˢᴍData => ref unitLengthOverflowˢᵇᴍData;
 private static readonly @string unitLengthOverflowˢᵇᴍData = "unit length overflow"u8;
 
-internal static (slice<unit>, error) parseUnitsᴍ(ж<Data> Ꮡd) {
+[GoMethodBody("parseUnits")] internal static (slice<unit>, error) parseUnitsᴍ(ж<Data> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Count units.
@@ -168,7 +168,7 @@ internal static (slice<unit>, error) parseUnitsᴍ(ж<Data> Ꮡd) {
 
 // offsetToUnit returns the index of the unit containing offset off.
 // It returns -1 if no unit contains this offset.
-internal static nint offsetToUnitᴍ(ж<Data> Ꮡd, Offset off) {
+[GoMethodBody("offsetToUnit")] internal static nint offsetToUnitᴍ(ж<Data> Ꮡd, Offset off) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Find the unit after off
@@ -183,7 +183,7 @@ internal static nint offsetToUnitᴍ(ж<Data> Ꮡd, Offset off) {
     return -1;
 }
 
-internal static error collectDwarf5BaseOffsetsᴍ(ж<Data> Ꮡd, ж<unit> Ꮡu) {
+[GoMethodBody("collectDwarf5BaseOffsets")] internal static error collectDwarf5BaseOffsetsᴍ(ж<Data> Ꮡd, ж<unit> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     if (u.unit5 == nil) {
@@ -213,20 +213,3 @@ internal static error collectDwarf5BaseOffsetsᴍ(ж<Data> Ꮡd, ж<unit> Ꮡu) 
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class dwarfᴛunit {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint version(this ref unit u) => dwarf_package.versionᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool, bool) dwarf64(this ref unit u) => dwarf_package.dwarf64ᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint addrsize(this ref unit u) => dwarf_package.addrsizeᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 addrBase(this ref unit u) => dwarf_package.addrBaseᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 strOffsetsBase(this ref unit u) => dwarf_package.strOffsetsBaseᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 rngListsBase(this ref unit u) => dwarf_package.rngListsBaseᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 locListsBase(this ref unit u) => dwarf_package.locListsBaseᴍ(ref u);
-}
-partial class dwarfᴛData {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<unit>, error) parseUnits(this ж<Data> Ꮡd) => dwarf_package.parseUnitsᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint offsetToUnit(this ж<Data> Ꮡd, Offset off) => dwarf_package.offsetToUnitᴍ(Ꮡd, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error collectDwarf5BaseOffsets(this ж<Data> Ꮡd, ж<unit> Ꮡu) => dwarf_package.collectDwarf5BaseOffsetsᴍ(Ꮡd, Ꮡu);
-}
-// </GlyphForwarders>

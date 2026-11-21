@@ -70,6 +70,11 @@ using static go.unicode_package;
 
 namespace go;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using unicode = unicode_package;
+using static unicode_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("unicode")]
 public static partial class unicode_package
 {
@@ -108,3 +113,11 @@ public static partial class unicode_package
 // <MethodHolders>
 [GoMethodHost(typeof(unicode_package.SpecialCase)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class unicodeᴛSpecialCase;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class unicodeᴛSpecialCase {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static rune ToUpper(this SpecialCase special, rune r) => unicode_package.ToUpperᴍ(special, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static rune ToTitle(this SpecialCase special, rune r) => unicode_package.ToTitleᴍ(special, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static rune ToLower(this SpecialCase special, rune r) => unicode_package.ToLowerᴍ(special, r);
+}
+// </GlyphForwarders>

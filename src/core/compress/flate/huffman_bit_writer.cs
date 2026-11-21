@@ -106,12 +106,12 @@ internal static ж<huffmanBitWriter> newHuffmanBitWriter(io.Writer w) {
 
 } partial class flate_package {
 
-internal static void resetᴍ(ref huffmanBitWriter w, io.Writer writer) {
+[GoMethodBody("reset")] internal static void resetᴍ(ref huffmanBitWriter w, io.Writer writer) {
     w.writer = writer;
     (w.bits, w.nbits, w.nbytes, w.err) = (0, 0, 0, default);
 }
 
-internal static void flushᴍ(ref huffmanBitWriter w) {
+[GoMethodBody("flush")] internal static void flushᴍ(ref huffmanBitWriter w) {
     if (w.err != nil) {
         w.nbits = 0;
         return;
@@ -132,14 +132,14 @@ internal static void flushᴍ(ref huffmanBitWriter w) {
     w.nbytes = 0;
 }
 
-internal static void writeᴍ(ref huffmanBitWriter w, slice<byte> b) {
+[GoMethodBody("write")] internal static void writeᴍ(ref huffmanBitWriter w, slice<byte> b) {
     if (w.err != nil) {
         return;
     }
     (_, w.err) = w.writer.Write(b);
 }
 
-internal static void writeBitsᴍ(ref huffmanBitWriter w, int32 b, nuint nb) {
+[GoMethodBody("writeBits")] internal static void writeBitsᴍ(ref huffmanBitWriter w, int32 b, nuint nb) {
     if (w.err != nil) {
         return;
     }
@@ -170,7 +170,7 @@ internal static void writeBitsᴍ(ref huffmanBitWriter w, int32 b, nuint nb) {
 internal static ref readonly @string writeBytesWithUnfinishedˢᴍhuffmanBitWriter => ref writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter;
 private static readonly @string writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter = "writeBytes with unfinished bits"u8;
 
-internal static void writeBytesᴍ(ref huffmanBitWriter w, slice<byte> bytes) {
+[GoMethodBody("writeBytes")] internal static void writeBytesᴍ(ref huffmanBitWriter w, slice<byte> bytes) {
     if (w.err != nil) {
         return;
     }
@@ -204,7 +204,7 @@ internal static void writeBytesᴍ(ref huffmanBitWriter w, slice<byte> bytes) {
 //	numLiterals      The number of literals in literalEncoding
 //	numOffsets       The number of offsets in offsetEncoding
 //	litenc, offenc   The literal and offset encoder to use
-internal static void generateCodegenᴍ(ref huffmanBitWriter w, nint numLiterals, nint numOffsets, ж<huffmanEncoder> ᏑlitEnc, ж<huffmanEncoder> ᏑoffEnc) {
+[GoMethodBody("generateCodegen")] internal static void generateCodegenᴍ(ref huffmanBitWriter w, nint numLiterals, nint numOffsets, ж<huffmanEncoder> ᏑlitEnc, ж<huffmanEncoder> ᏑoffEnc) {
     ref var litEnc = ref ᏑlitEnc.DerefOrNull();
     ref var offEnc = ref ᏑoffEnc.DerefOrNull();
 
@@ -293,7 +293,7 @@ internal static void generateCodegenᴍ(ref huffmanBitWriter w, nint numLiterals
 }
 
 // dynamicSize returns the size of dynamically encoded data in bits.
-internal static (nint size, nint numCodegens) dynamicSizeᴍ(ref huffmanBitWriter w, ж<huffmanEncoder> ᏑlitEnc, ж<huffmanEncoder> ᏑoffEnc, nint extraBits) {
+[GoMethodBody("dynamicSize")] internal static (nint size, nint numCodegens) dynamicSizeᴍ(ref huffmanBitWriter w, ж<huffmanEncoder> ᏑlitEnc, ж<huffmanEncoder> ᏑoffEnc, nint extraBits) {
     nint size = default;
     nint numCodegens = default;
     ref var litEnc = ref ᏑlitEnc.DerefOrNull();
@@ -310,14 +310,14 @@ internal static (nint size, nint numCodegens) dynamicSizeᴍ(ref huffmanBitWrite
 }
 
 // fixedSize returns the size of dynamically encoded data in bits.
-internal static nint fixedSizeᴍ(ref huffmanBitWriter w, nint extraBits) {
+[GoMethodBody("fixedSize")] internal static nint fixedSizeᴍ(ref huffmanBitWriter w, nint extraBits) {
     return 3 + fixedLiteralEncoding.bitLength(w.literalFreq) + fixedOffsetEncoding.bitLength(w.offsetFreq) + extraBits;
 }
 
 // storedSize calculates the stored size, including header.
 // The function returns the size in bits and whether the block
 // fits inside a single block.
-internal static (nint, bool) storedSizeᴍ(ref huffmanBitWriter w, slice<byte> @in) {
+[GoMethodBody("storedSize")] internal static (nint, bool) storedSizeᴍ(ref huffmanBitWriter w, slice<byte> @in) {
     if (@in == nil) {
         return (0, false);
     }
@@ -327,7 +327,7 @@ internal static (nint, bool) storedSizeᴍ(ref huffmanBitWriter w, slice<byte> @
     return (0, false);
 }
 
-internal static void writeCodeᴍ(ref huffmanBitWriter w, hcode c) {
+[GoMethodBody("writeCode")] internal static void writeCodeᴍ(ref huffmanBitWriter w, hcode c) {
     if (w.err != nil) {
         return;
     }
@@ -359,7 +359,7 @@ internal static void writeCodeᴍ(ref huffmanBitWriter w, hcode c) {
 //	numLiterals  The number of literals specified in codegen
 //	numOffsets   The number of offsets specified in codegen
 //	numCodegens  The number of codegens used in codegen
-internal static void writeDynamicHeaderᴍ(ref huffmanBitWriter w, nint numLiterals, nint numOffsets, nint numCodegens, bool isEof) {
+[GoMethodBody("writeDynamicHeader")] internal static void writeDynamicHeaderᴍ(ref huffmanBitWriter w, nint numLiterals, nint numOffsets, nint numCodegens, bool isEof) {
     if (w.err != nil) {
         return;
     }
@@ -405,7 +405,7 @@ internal static void writeDynamicHeaderᴍ(ref huffmanBitWriter w, nint numLiter
     }
 }
 
-internal static void writeStoredHeaderᴍ(ref huffmanBitWriter w, nint length, bool isEof) {
+[GoMethodBody("writeStoredHeader")] internal static void writeStoredHeaderᴍ(ref huffmanBitWriter w, nint length, bool isEof) {
     if (w.err != nil) {
         return;
     }
@@ -419,7 +419,7 @@ internal static void writeStoredHeaderᴍ(ref huffmanBitWriter w, nint length, b
     w.writeBits((int32)(((uint16)(~(uint16)length))), 16);
 }
 
-internal static void writeFixedHeaderᴍ(ref huffmanBitWriter w, bool isEof) {
+[GoMethodBody("writeFixedHeader")] internal static void writeFixedHeaderᴍ(ref huffmanBitWriter w, bool isEof) {
     if (w.err != nil) {
         return;
     }
@@ -436,7 +436,7 @@ internal static void writeFixedHeaderᴍ(ref huffmanBitWriter w, bool isEof) {
 // is larger than the original bytes, the data will be written as a
 // stored block.
 // If the input is nil, the tokens will always be Huffman encoded.
-internal static void writeBlockᴍ(ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) {
+[GoMethodBody("writeBlock")] internal static void writeBlockᴍ(ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) {
     var tokensᴷ = new stackAppend<token>();
 
     if (w.err != nil) {
@@ -507,7 +507,7 @@ internal static void writeBlockᴍ(ref huffmanBitWriter w, slice<token> tokens, 
 // histogram distribution.
 // If input is supplied and the compression savings are below 1/16th of the
 // input size the block is stored.
-internal static void writeBlockDynamicᴍ(ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) {
+[GoMethodBody("writeBlockDynamic")] internal static void writeBlockDynamicᴍ(ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) {
     var tokensᴷ = new stackAppend<token>();
 
     if (w.err != nil) {
@@ -541,7 +541,7 @@ internal static void writeBlockDynamicᴍ(ref huffmanBitWriter w, slice<token> t
 // literalFreq and offsetFreq, and generates literalEncoding
 // and offsetEncoding.
 // The number of literal and offset tokens is returned.
-internal static (nint numLiterals, nint numOffsets) indexTokensᴍ(ref huffmanBitWriter w, slice<token> tokens) {
+[GoMethodBody("indexTokens")] internal static (nint numLiterals, nint numOffsets) indexTokensᴍ(ref huffmanBitWriter w, slice<token> tokens) {
     nint numLiterals = default;
     nint numOffsets = default;
 
@@ -582,7 +582,7 @@ internal static (nint numLiterals, nint numOffsets) indexTokensᴍ(ref huffmanBi
 
 // writeTokens writes a slice of tokens to the output.
 // codes for literal and offset encoding must be supplied.
-internal static void writeTokensᴍ(ref huffmanBitWriter w, slice<token> tokens, slice<hcode> leCodes, slice<hcode> oeCodes) {
+[GoMethodBody("writeTokens")] internal static void writeTokensᴍ(ref huffmanBitWriter w, slice<token> tokens, slice<hcode> leCodes, slice<hcode> oeCodes) {
     if (w.err != nil) {
         return;
     }
@@ -630,7 +630,7 @@ internal static ж<huffmanEncoder> huffOffset;
 // writeBlockHuff encodes a block of bytes as either
 // Huffman encoded literals or uncompressed bytes if the
 // results only gains very little from compression.
-internal static void writeBlockHuffᴍ(ref huffmanBitWriter w, bool eof, slice<byte> input) {
+[GoMethodBody("writeBlockHuff")] internal static void writeBlockHuffᴍ(ref huffmanBitWriter w, bool eof, slice<byte> input) {
     if (w.err != nil) {
         return;
     }
@@ -716,26 +716,3 @@ internal static void histogram(slice<byte> b, slice<int32> h) {
 }
 
 } // end flate_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class flateᴛhuffmanBitWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref huffmanBitWriter w, io.Writer writer) => flate_package.resetᴍ(ref w, writer);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void flush(this ref huffmanBitWriter w) => flate_package.flushᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void write(this ref huffmanBitWriter w, slice<byte> b) => flate_package.writeᴍ(ref w, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeBits(this ref huffmanBitWriter w, int32 b, nuint nb) => flate_package.writeBitsᴍ(ref w, b, nb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeBytes(this ref huffmanBitWriter w, slice<byte> bytes) => flate_package.writeBytesᴍ(ref w, bytes);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void generateCodegen(this ref huffmanBitWriter w, nint numLiterals, nint numOffsets, ж<huffmanEncoder> ᏑlitEnc, ж<huffmanEncoder> ᏑoffEnc) => flate_package.generateCodegenᴍ(ref w, numLiterals, numOffsets, ᏑlitEnc, ᏑoffEnc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint size, nint numCodegens) dynamicSize(this ref huffmanBitWriter w, ж<huffmanEncoder> ᏑlitEnc, ж<huffmanEncoder> ᏑoffEnc, nint extraBits) => flate_package.dynamicSizeᴍ(ref w, ᏑlitEnc, ᏑoffEnc, extraBits);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint fixedSize(this ref huffmanBitWriter w, nint extraBits) => flate_package.fixedSizeᴍ(ref w, extraBits);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, bool) storedSize(this ref huffmanBitWriter w, slice<byte> @in) => flate_package.storedSizeᴍ(ref w, @in);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeCode(this ref huffmanBitWriter w, hcode c) => flate_package.writeCodeᴍ(ref w, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeDynamicHeader(this ref huffmanBitWriter w, nint numLiterals, nint numOffsets, nint numCodegens, bool isEof) => flate_package.writeDynamicHeaderᴍ(ref w, numLiterals, numOffsets, numCodegens, isEof);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeStoredHeader(this ref huffmanBitWriter w, nint length, bool isEof) => flate_package.writeStoredHeaderᴍ(ref w, length, isEof);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeFixedHeader(this ref huffmanBitWriter w, bool isEof) => flate_package.writeFixedHeaderᴍ(ref w, isEof);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeBlock(this ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) => flate_package.writeBlockᴍ(ref w, tokens, eof, input);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeBlockDynamic(this ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) => flate_package.writeBlockDynamicᴍ(ref w, tokens, eof, input);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint numLiterals, nint numOffsets) indexTokens(this ref huffmanBitWriter w, slice<token> tokens) => flate_package.indexTokensᴍ(ref w, tokens);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeTokens(this ref huffmanBitWriter w, slice<token> tokens, slice<hcode> leCodes, slice<hcode> oeCodes) => flate_package.writeTokensᴍ(ref w, tokens, leCodes, oeCodes);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeBlockHuff(this ref huffmanBitWriter w, bool eof, slice<byte> input) => flate_package.writeBlockHuffᴍ(ref w, eof, input);
-}
-// </GlyphForwarders>

@@ -59,8 +59,8 @@ public static fs.FileMode ModePerm => /* fs.ModePerm */ 511; // Unix permission 
 
 } partial class os_package {
 
-internal static @string Nameᴍ(ref fileStat fs) { return fs.name; }
-internal static bool IsDirᴍ(ref fileStat fs) { return fs.Mode().IsDir(); }
+[GoMethodBody("Name")] internal static @string Nameᴍ(ref fileStat fs) { return fs.name; }
+[GoMethodBody("IsDir")] internal static bool IsDirᴍ(ref fileStat fs) { return fs.Mode().IsDir(); }
 
 } partial class os_package {
 
@@ -80,10 +80,3 @@ public static bool SameFile(FileInfo fi1, FileInfo fi2) {
 }
 
 } // end os_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class osᴛfileStat {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Name(this ref fileStat fs) => os_package.Nameᴍ(ref fs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsDir(this ref fileStat fs) => os_package.IsDirᴍ(ref fs);
-}
-// </GlyphForwarders>

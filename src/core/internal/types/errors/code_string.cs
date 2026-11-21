@@ -181,7 +181,7 @@ internal static array<uint8> _Code_index_5 = new uint8[]{0, 12, 24, 44, 50}.arra
 
 } partial class errors_package {
 
-internal static @string Stringᴍ(Code i) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Code i) {
     switch (ᐧ) {
     case {} when i == -1: {
         return _Code_name_0;
@@ -212,9 +212,3 @@ internal static @string Stringᴍ(Code i) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class errorsᴛCode {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Code i) => errors_package.Stringᴍ(i);
-}
-// </GlyphForwarders>

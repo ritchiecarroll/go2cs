@@ -42,11 +42,11 @@ partial struct rtype {
 
 // go2cs generated this placeholder — func string is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static ж<uncommontype> uncommonᴍ(rtype t) {
+[GoMethodBody("uncommon")] internal static ж<uncommontype> uncommonᴍ(rtype t) {
     return t.Type.Uncommon();
 }
 
-internal static @string nameᴍ(rtype t) {
+[GoMethodBody("name")] internal static @string nameᴍ(rtype t) {
     if ((abi.TFlag)(t.TFlag & abi.TFlagNamed) == 0) {
         return ""u8;
     }
@@ -72,7 +72,7 @@ internal static @string nameᴍ(rtype t) {
 // available. This is not the same as the reflect package's PkgPath
 // method, in that it returns the package path for struct and interface
 // types, not just named types.
-internal static @string pkgpathᴍ(rtype t) {
+[GoMethodBody("pkgpath")] internal static @string pkgpathᴍ(rtype t) {
     var u = t.uncommon(); if (u != nil) {
         return t.nameOff(u.PkgPath).Name();
     }
@@ -173,7 +173,7 @@ partial struct bitCursor {
 
 // Write to b cnt bits starting at bit 0 of data.
 // Requires cnt>0.
-internal static void writeᴍ(bitCursor b, ж<byte> Ꮡdata, uintptr cnt) {
+[GoMethodBody("write")] internal static void writeᴍ(bitCursor b, ж<byte> Ꮡdata, uintptr cnt) {
     ref var data = ref Ꮡdata.DerefOrNull();
 
     // Starting byte for writing.
@@ -212,7 +212,7 @@ internal static void writeᴍ(bitCursor b, ж<byte> Ꮡdata, uintptr cnt) {
     p.Value |= (byte)((byte)buf);
 }
 
-internal static bitCursor offsetᴍ(bitCursor b, uintptr cnt) {
+[GoMethodBody("offset")] internal static bitCursor offsetᴍ(bitCursor b, uintptr cnt) {
     return new bitCursor(ptr: b.ptr, n: b.n + cnt);
 }
 
@@ -369,7 +369,7 @@ internal static name resolveNameOff(@unsafe.Pointer ptrInModule, nameOff off) {
 
 } partial class runtime_package {
 
-internal static name nameOffᴍ(rtype t, nameOff off) {
+[GoMethodBody("nameOff")] internal static name nameOffᴍ(rtype t, nameOff off) {
     return resolveNameOff(@unsafe.Pointer.FromPinnedBox(t.Type), off);
 }
 
@@ -421,7 +421,7 @@ internal static ж<_type> resolveTypeOff(@unsafe.Pointer ptrInModule, typeOff of
 
 } partial class runtime_package {
 
-internal static ж<_type> typeOffᴍ(rtype t, typeOff off) {
+[GoMethodBody("typeOff")] internal static ж<_type> typeOffᴍ(rtype t, typeOff off) {
     return resolveTypeOff(@unsafe.Pointer.FromPinnedBox(t.Type), off);
 }
 
@@ -429,7 +429,7 @@ internal static ж<_type> typeOffᴍ(rtype t, typeOff off) {
 internal static ref readonly @string runtimeTextOffsetBaseˢᴍrtype => ref runtimeTextOffsetBaseˢᵇᴍrtype;
 private static readonly @string runtimeTextOffsetBaseˢᵇᴍrtype = "runtime: text offset base pointer out of range"u8;
 
-internal static @unsafe.Pointer textOffᴍ(rtype t, textOff off) {
+[GoMethodBody("textOff")] internal static @unsafe.Pointer textOffᴍ(rtype t, textOff off) {
     if (off == -1) {
         // -1 is the sentinel value for unreachable code.
         // See cmd/link/internal/ld/data.go:relocsym.
@@ -716,18 +716,3 @@ internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, E
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛrtype {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<uncommontype> uncommon(this rtype t) => runtime_package.uncommonᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string name(this rtype t) => runtime_package.nameᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string pkgpath(this rtype t) => runtime_package.pkgpathᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static name nameOff(this rtype t, nameOff off) => runtime_package.nameOffᴍ(t, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<_type> typeOff(this rtype t, typeOff off) => runtime_package.typeOffᴍ(t, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer textOff(this rtype t, textOff off) => runtime_package.textOffᴍ(t, off);
-}
-partial class runtimeᴛbitCursor {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void write(this bitCursor b, ж<byte> Ꮡdata, uintptr cnt) => runtime_package.writeᴍ(b, Ꮡdata, cnt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bitCursor offset(this bitCursor b, uintptr cnt) => runtime_package.offsetᴍ(b, cnt);
-}
-// </GlyphForwarders>

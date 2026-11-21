@@ -475,7 +475,7 @@ partial struct elfExe {
 
 } partial class buildinfo_package {
 
-internal static (io.ReaderAt, error) DataReaderᴍ(ref elfExe x, uint64 addr) {
+[GoMethodBody("DataReader")] internal static (io.ReaderAt, error) DataReaderᴍ(ref elfExe x, uint64 addr) {
     foreach (var (_, prog) in range(x.f.Progs)) {
         if (prog.Vaddr <= addr && addr <= prog.Vaddr + prog.Filesz - 1) {
             var remaining = prog.Vaddr + prog.Filesz - addr;
@@ -485,7 +485,7 @@ internal static (io.ReaderAt, error) DataReaderᴍ(ref elfExe x, uint64 addr) {
     return (default, errUnrecognizedFormat);
 }
 
-internal static (uint64, uint64) DataStartᴍ(ref elfExe x) {
+[GoMethodBody("DataStart")] internal static (uint64, uint64) DataStartᴍ(ref elfExe x) {
     foreach (var (_, s) in range(x.f.Sections)) {
         if (s.Name == ".go.buildinfo"u8) {
             return (s.Addr, s.Size);
@@ -508,7 +508,7 @@ partial struct peExe {
 
 } partial class buildinfo_package {
 
-internal static uint64 imageBaseᴍ(ref peExe x) {
+[GoMethodBody("imageBase")] internal static uint64 imageBaseᴍ(ref peExe x) {
     switch (x.f.OptionalHeader.type()) {
     case ж<pe.OptionalHeader32> oh: {
         return (uint64)oh.ImageBase;
@@ -519,7 +519,7 @@ internal static uint64 imageBaseᴍ(ref peExe x) {
     return 0;
 }
 
-internal static (io.ReaderAt, error) DataReaderᴍ(ref peExe x, uint64 addr) {
+[GoMethodBody("DataReader")] internal static (io.ReaderAt, error) DataReaderᴍ(ref peExe x, uint64 addr) {
     addr -= x.imageBase();
     foreach (var (_, sect) in range(x.f.Sections)) {
         if ((uint64)sect.VirtualAddress <= addr && addr <= (uint64)(sect.VirtualAddress + sect.Size - 1)) {
@@ -530,7 +530,7 @@ internal static (io.ReaderAt, error) DataReaderᴍ(ref peExe x, uint64 addr) {
     return (default, errUnrecognizedFormat);
 }
 
-internal static (uint64, uint64) DataStartᴍ(ref peExe x) {
+[GoMethodBody("DataStart")] internal static (uint64, uint64) DataStartᴍ(ref peExe x) {
     // Assume data is first writable section.
     UntypedInt IMAGE_SCN_CNT_CODE = 0x00000020;
     UntypedInt IMAGE_SCN_CNT_INITIALIZED_DATA = 0x00000040;
@@ -558,7 +558,7 @@ partial struct machoExe {
 
 } partial class buildinfo_package {
 
-internal static (io.ReaderAt, error) DataReaderᴍ(ref machoExe x, uint64 addr) {
+[GoMethodBody("DataReader")] internal static (io.ReaderAt, error) DataReaderᴍ(ref machoExe x, uint64 addr) {
     foreach (var (_, load) in range(x.f.Loads)) {
         var (seg, ok) = load._<ж<macho.Segment>>(ᐧ);
         if (!ok) {
@@ -575,7 +575,7 @@ internal static (io.ReaderAt, error) DataReaderᴍ(ref machoExe x, uint64 addr) 
     return (default, errUnrecognizedFormat);
 }
 
-internal static (uint64, uint64) DataStartᴍ(ref machoExe x) {
+[GoMethodBody("DataStart")] internal static (uint64, uint64) DataStartᴍ(ref machoExe x) {
     // Look for section named "__go_buildinfo".
     foreach (var (_, sec) in range(x.f.Sections)) {
         if (sec.Name == "__go_buildinfo"u8) {
@@ -606,7 +606,7 @@ partial struct xcoffExe {
 internal static ref readonly @string addressNotMappedˢᴍxcoffExe => ref addressNotMappedˢᵇᴍxcoffExe;
 private static readonly @string addressNotMappedˢᵇᴍxcoffExe = "address not mapped"u8;
 
-internal static (io.ReaderAt, error) DataReaderᴍ(ref xcoffExe x, uint64 addr) {
+[GoMethodBody("DataReader")] internal static (io.ReaderAt, error) DataReaderᴍ(ref xcoffExe x, uint64 addr) {
     foreach (var (_, sect) in range(x.f.Sections)) {
         if (sect.VirtualAddress <= addr && addr <= sect.VirtualAddress + sect.Size - 1) {
             var remaining = sect.VirtualAddress + sect.Size - addr;
@@ -616,7 +616,7 @@ internal static (io.ReaderAt, error) DataReaderᴍ(ref xcoffExe x, uint64 addr) 
     return (default, errors.New(addressNotMappedˢᴍxcoffExe));
 }
 
-internal static (uint64, uint64) DataStartᴍ(ref xcoffExe x) {
+[GoMethodBody("DataStart")] internal static (uint64, uint64) DataStartᴍ(ref xcoffExe x) {
     var s = x.f.SectionByType(xcoff.STYP_DATA); if (s != nil) {
         return (s.VirtualAddress, s.Size);
     }
@@ -636,7 +636,7 @@ partial struct plan9objExe {
 internal static ref readonly @string dataˢᴍplan9objExe => ref dataˢᵇᴍplan9objExe;
 private static readonly @string dataˢᵇᴍplan9objExe = "data"u8;
 
-internal static (uint64, uint64) DataStartᴍ(ref plan9objExe x) {
+[GoMethodBody("DataStart")] internal static (uint64, uint64) DataStartᴍ(ref plan9objExe x) {
     var s = x.f.Section(dataˢᴍplan9objExe); if (s != nil) {
         return ((uint64)s.Offset, (uint64)s.Size);
     }
@@ -647,7 +647,7 @@ internal static (uint64, uint64) DataStartᴍ(ref plan9objExe x) {
 internal static ref readonly @string addressNotMappedˢᴍplan9objExe => ref addressNotMappedˢᵇᴍplan9objExe;
 private static readonly @string addressNotMappedˢᵇᴍplan9objExe = "address not mapped"u8;
 
-internal static (io.ReaderAt, error) DataReaderᴍ(ref plan9objExe x, uint64 addr) {
+[GoMethodBody("DataReader")] internal static (io.ReaderAt, error) DataReaderᴍ(ref plan9objExe x, uint64 addr) {
     foreach (var (_, sect) in range(x.f.Sections)) {
         if ((uint64)sect.Offset <= addr && addr <= (uint64)(sect.Offset + sect.Size - 1)) {
             var remaining = (uint64)(sect.Offset + sect.Size) - addr;
@@ -658,27 +658,3 @@ internal static (io.ReaderAt, error) DataReaderᴍ(ref plan9objExe x, uint64 add
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class buildinfoᴛelfExe {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref elfExe x, uint64 addr) => buildinfo_package.DataReaderᴍ(ref x, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref elfExe x) => buildinfo_package.DataStartᴍ(ref x);
-}
-partial class buildinfoᴛpeExe {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 imageBase(this ref peExe x) => buildinfo_package.imageBaseᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref peExe x, uint64 addr) => buildinfo_package.DataReaderᴍ(ref x, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref peExe x) => buildinfo_package.DataStartᴍ(ref x);
-}
-partial class buildinfoᴛmachoExe {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref machoExe x, uint64 addr) => buildinfo_package.DataReaderᴍ(ref x, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref machoExe x) => buildinfo_package.DataStartᴍ(ref x);
-}
-partial class buildinfoᴛxcoffExe {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref xcoffExe x, uint64 addr) => buildinfo_package.DataReaderᴍ(ref x, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref xcoffExe x) => buildinfo_package.DataStartᴍ(ref x);
-}
-partial class buildinfoᴛplan9objExe {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref plan9objExe x) => buildinfo_package.DataStartᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref plan9objExe x, uint64 addr) => buildinfo_package.DataReaderᴍ(ref x, addr);
-}
-// </GlyphForwarders>

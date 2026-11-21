@@ -91,7 +91,7 @@ internal static ref Δsync.Once localOnce => ref ((StaticBox<Δsync.Once>)Ꮡloc
 
 } partial class time_package {
 
-internal static ж<Location> getᴍ(ж<Location> Ꮡl) {
+[GoMethodBody("get")] internal static ж<Location> getᴍ(ж<Location> Ꮡl) {
     if (Ꮡl == nil) {
         return ᏑutcLoc;
     }
@@ -103,7 +103,7 @@ internal static ж<Location> getᴍ(ж<Location> Ꮡl) {
 
 // String returns a descriptive name for the time zone information,
 // corresponding to the name argument to [LoadLocation] or [FixedZone].
-internal static @string Stringᴍ(ж<Location> Ꮡl) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<Location> Ꮡl) {
     return Ꮡl.get().name;
 }
 
@@ -158,7 +158,7 @@ private static readonly @string utcˢᵇᴍLocation = "UTC"u8;
 // the start and end times bracketing sec when that zone is in effect,
 // the offset in seconds east of UTC (such as -5*60*60), and whether
 // the daylight savings is being observed at that time.
-internal static (@string name, nint offset, int64 start, int64 end, bool isDST) lookupᴍ(ж<Location> Ꮡl, int64 sec) {
+[GoMethodBody("lookup")] internal static (@string name, nint offset, int64 start, int64 end, bool isDST) lookupᴍ(ж<Location> Ꮡl, int64 sec) {
     @string name = default;
     nint offset = default;
     int64 start = default;
@@ -249,7 +249,7 @@ internal static (@string name, nint offset, int64 start, int64 end, bool isDST) 
 //  3. Otherwise, use the first zone that is not daylight time, if
 //     there is one.
 //  4. Otherwise, use the first zone.
-internal static nint lookupFirstZoneᴍ(ref Location l) {
+[GoMethodBody("lookupFirstZone")] internal static nint lookupFirstZoneᴍ(ref Location l) {
     // Case 1.
     if (!l.firstZoneUsed()) {
         return 0;
@@ -277,7 +277,7 @@ internal static nint lookupFirstZoneᴍ(ref Location l) {
 
 // firstZoneUsed reports whether the first zone is used by some
 // transition.
-internal static bool firstZoneUsedᴍ(ref Location l) {
+[GoMethodBody("firstZoneUsed")] internal static bool firstZoneUsedᴍ(ref Location l) {
     foreach (var (_, tx) in range(l.tx)) {
         if (tx.index == 0) {
             return true;
@@ -642,7 +642,7 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
 // lookupName returns information about the time zone with
 // the given name (such as "EST") at the given pseudo-Unix time
 // (what the given time of day would be in UTC).
-internal static (nint offset, bool ok) lookupNameᴍ(ж<Location> Ꮡl, @string name, int64 unix) {
+[GoMethodBody("lookupName")] internal static (nint offset, bool ok) lookupNameᴍ(ж<Location> Ꮡl, @string name, int64 unix) {
     nint offset = default;
     bool ok = default;
     ref var l = ref Ꮡl.DerefOrNull();
@@ -758,14 +758,3 @@ internal static bool containsDotDot(@string s) {
 }
 
 } // end time_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class timeᴛLocation {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Location> get(this ж<Location> Ꮡl) => time_package.getᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Location> Ꮡl) => time_package.Stringᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string name, nint offset, int64 start, int64 end, bool isDST) lookup(this ж<Location> Ꮡl, int64 sec) => time_package.lookupᴍ(Ꮡl, sec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint lookupFirstZone(this ref Location l) => time_package.lookupFirstZoneᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool firstZoneUsed(this ref Location l) => time_package.firstZoneUsedᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint offset, bool ok) lookupName(this ж<Location> Ꮡl, @string name, int64 unix) => time_package.lookupNameᴍ(Ꮡl, name, unix);
-}
-// </GlyphForwarders>

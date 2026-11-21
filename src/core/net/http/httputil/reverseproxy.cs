@@ -63,7 +63,7 @@ partial struct ProxyRequest {
 //		r.SetURL(url)
 //		r.Out.Host = r.In.Host
 //	}
-internal static void SetURLᴍ(ref ProxyRequest r, ж<url.URL> target) {
+[GoMethodBody("SetURL")] internal static void SetURLᴍ(ref ProxyRequest r, ж<url.URL> target) {
     rewriteRequestURL(ref (r.Out).DerefOrNull(), target);
     r.Out.Host = ""u8;
 }
@@ -99,7 +99,7 @@ private static readonly @string httpsˢ2ᵇᴍProxyRequest = "https"u8;
 //		r.Out.Header["X-Forwarded-For"] = r.In.Header["X-Forwarded-For"]
 //		r.SetXForwarded()
 //	}
-internal static void SetXForwardedᴍ(ref ProxyRequest r) {
+[GoMethodBody("SetXForwarded")] internal static void SetXForwardedᴍ(ref ProxyRequest r) {
     var (clientIP, _, err) = net.SplitHostPort(r.In.RemoteAddr);
     if (err == nil) {
         var prior = r.Out.Header[xForwardedForˢᴍProxyRequest];
@@ -398,12 +398,12 @@ internal static slice<@string> hopHeaders = [
 
 } partial class httputil_package {
 
-internal static void defaultErrorHandlerᴍ(ref ReverseProxy p, http.ResponseWriter rw, ж<http.Request> req, error err) {
+[GoMethodBody("defaultErrorHandler")] internal static void defaultErrorHandlerᴍ(ref ReverseProxy p, http.ResponseWriter rw, ж<http.Request> req, error err) {
     p.logf("http: proxy error: %v", err);
     rw.WriteHeader(http.StatusBadGateway);
 }
 
-internal static Action<http.ResponseWriter, ж<http.Request>, error> getErrorHandlerᴍ(ж<ReverseProxy> Ꮡp) {
+[GoMethodBody("getErrorHandler")] internal static Action<http.ResponseWriter, ж<http.Request>, error> getErrorHandlerᴍ(ж<ReverseProxy> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (p.ErrorHandler != nil) {
@@ -414,7 +414,7 @@ internal static Action<http.ResponseWriter, ж<http.Request>, error> getErrorHan
 
 // modifyResponse conditionally runs the optional ModifyResponse hook
 // and reports whether the request should proceed.
-internal static bool modifyResponseᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Response> Ꮡres, ж<http.Request> req) {
+[GoMethodBody("modifyResponse")] internal static bool modifyResponseᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Response> Ꮡres, ж<http.Request> req) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var res = ref Ꮡres.DerefOrNull();
 
@@ -453,7 +453,7 @@ private static readonly @string userAgentˢᵇᴍReverseProxy = "User-Agent"u8;
 internal static ref readonly @string trailerˢᴍReverseProxy => ref trailerˢᵇᴍReverseProxy;
 private static readonly @string trailerˢᵇᴍReverseProxy = "Trailer"u8;
 
-internal static partial void ServeHTTPᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
+[GoMethodBody("ServeHTTP")] internal static partial void ServeHTTPᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -784,7 +784,7 @@ private static readonly @string contentTypeˢᵇᴍReverseProxy = "Content-Type"
 
 // flushInterval returns the p.FlushInterval value, conditionally
 // overriding its value for a specific request/response.
-internal static time.Duration flushIntervalᴍ(ref ReverseProxy p, ж<http.Response> Ꮡres) {
+[GoMethodBody("flushInterval")] internal static time.Duration flushIntervalᴍ(ref ReverseProxy p, ж<http.Response> Ꮡres) {
     ref var res = ref Ꮡres.DerefOrNull();
 
     @string resCT = res.Header.Get(contentTypeˢᴍReverseProxy);
@@ -803,7 +803,7 @@ internal static time.Duration flushIntervalᴍ(ref ReverseProxy p, ж<http.Respo
     return p.FlushInterval;
 }
 
-internal static error copyResponseᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWriter dst, io.Reader src, time.Duration flushInterval) {
+[GoMethodBody("copyResponse")] internal static error copyResponseᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWriter dst, io.Reader src, time.Duration flushInterval) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -840,7 +840,7 @@ internal static error copyResponseᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWriter
 
 // copyBuffer returns any write errors or non-EOF read errors, and the amount
 // of bytes written.
-internal static (int64, error) copyBufferᴍ(ref ReverseProxy p, io.Writer dst, io.Reader src, slice<byte> buf) {
+[GoMethodBody("copyBuffer")] internal static (int64, error) copyBufferᴍ(ref ReverseProxy p, io.Writer dst, io.Reader src, slice<byte> buf) {
     if (len(buf) == 0) {
         buf = new slice<byte>(32 * 1024);
     }
@@ -871,7 +871,7 @@ internal static (int64, error) copyBufferᴍ(ref ReverseProxy p, io.Writer dst, 
     }
 }
 
-internal static void logfᴍ(ref ReverseProxy p, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("logf")] internal static void logfᴍ(ref ReverseProxy p, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     if (p.ErrorLog != nil) {
@@ -894,7 +894,7 @@ partial struct maxLatencyWriter {
 
 } partial class httputil_package {
 
-internal static (nint n, error err) Writeᴍ(ж<maxLatencyWriter> Ꮡm, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<maxLatencyWriter> Ꮡm, slice<byte> p) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -923,7 +923,7 @@ internal static (nint n, error err) Writeᴍ(ж<maxLatencyWriter> Ꮡm, slice<by
     ᒐdone: return (n, err);
 }
 
-internal static void delayedFlushᴍ(ж<maxLatencyWriter> Ꮡm) {
+[GoMethodBody("delayedFlush")] internal static void delayedFlushᴍ(ж<maxLatencyWriter> Ꮡm) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -941,7 +941,7 @@ internal static void delayedFlushᴍ(ж<maxLatencyWriter> Ꮡm) {
     finally { if (ᒐd1) Ꮡm.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void stopᴍ(ж<maxLatencyWriter> Ꮡm) {
+[GoMethodBody("stop")] internal static void stopᴍ(ж<maxLatencyWriter> Ꮡm) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -973,7 +973,7 @@ internal static @string upgradeType(http.Header h) {
 
 } partial class httputil_package {
 
-internal static partial void handleUpgradeResponseᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡres) {
+[GoMethodBody("handleUpgradeResponse")] internal static partial void handleUpgradeResponseᴍ(ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡres) {
     GoFrame ᒐ = default;
     try {
         ref var req = ref Ꮡreq.DerefOrNull();
@@ -1075,7 +1075,7 @@ internal partial interface copyFromBackend_type /*dyn*/ {
 
 } partial class httputil_package {
 
-internal static void copyFromBackendᴍ(switchProtocolCopier c, channel/*<-*/<error> errc) {
+[GoMethodBody("copyFromBackend")] internal static void copyFromBackendᴍ(switchProtocolCopier c, channel/*<-*/<error> errc) {
     var (_, err) = io.Copy(c.user, c.backend); if (err != nil) {
         errc.ᐸꟷ(err);
         return;
@@ -1090,7 +1090,7 @@ internal static void copyFromBackendᴍ(switchProtocolCopier c, channel/*<-*/<er
     errc.ᐸꟷ(errCopyDone);
 }
 
-internal static void copyToBackendᴍ(switchProtocolCopier c, channel/*<-*/<error> errc) {
+[GoMethodBody("copyToBackend")] internal static void copyToBackendᴍ(switchProtocolCopier c, channel/*<-*/<error> errc) {
     var (_, err) = io.Copy(c.backend, c.user); if (err != nil) {
         errc.ᐸꟷ(err);
         return;
@@ -1166,7 +1166,7 @@ partial struct noopCloseReader {
 
 } partial class httputil_package {
 
-internal static error Closeᴍ(ж<noopCloseReader> Ꮡncr) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<noopCloseReader> Ꮡncr) {
     Ꮡncr.Ꮡclosed.Store(true);
     return default;
 }
@@ -1175,7 +1175,7 @@ internal static error Closeᴍ(ж<noopCloseReader> Ꮡncr) {
 internal static ref readonly @string reverseProxyDoesAnˢᴍnoopCloseReader => ref reverseProxyDoesAnˢᵇᴍnoopCloseReader;
 private static readonly @string reverseProxyDoesAnˢᵇᴍnoopCloseReader = "ReverseProxy does an invalid Read on closed Body"u8;
 
-internal static (nint, error) Readᴍ(ж<noopCloseReader> Ꮡncr, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ж<noopCloseReader> Ꮡncr, slice<byte> p) {
     ref var ncr = ref Ꮡncr.DerefOrNull();
 
     if (Ꮡncr.Ꮡclosed.Load()) {
@@ -1185,34 +1185,3 @@ internal static (nint, error) Readᴍ(ж<noopCloseReader> Ꮡncr, slice<byte> p)
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httputilᴛProxyRequest {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetURL(this ref ProxyRequest r, ж<url.URL> target) => httputil_package.SetURLᴍ(ref r, target);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetXForwarded(this ref ProxyRequest r) => httputil_package.SetXForwardedᴍ(ref r);
-}
-partial class httputilᴛReverseProxy {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void defaultErrorHandler(this ref ReverseProxy p, http.ResponseWriter rw, ж<http.Request> req, error err) => httputil_package.defaultErrorHandlerᴍ(ref p, rw, req, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Action<http.ResponseWriter, ж<http.Request>, error> getErrorHandler(this ж<ReverseProxy> Ꮡp) => httputil_package.getErrorHandlerᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool modifyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Response> Ꮡres, ж<http.Request> req) => httputil_package.modifyResponseᴍ(Ꮡp, rw, Ꮡres, req);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq) => httputil_package.ServeHTTPᴍ(Ꮡp, rw, Ꮡreq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Duration flushInterval(this ref ReverseProxy p, ж<http.Response> Ꮡres) => httputil_package.flushIntervalᴍ(ref p, Ꮡres);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error copyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter dst, io.Reader src, time.Duration flushInterval) => httputil_package.copyResponseᴍ(Ꮡp, dst, src, flushInterval);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) copyBuffer(this ref ReverseProxy p, io.Writer dst, io.Reader src, slice<byte> buf) => httputil_package.copyBufferᴍ(ref p, dst, src, buf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void logf(this ref ReverseProxy p, @string format, params ꓸꓸꓸany argsʗp) => httputil_package.logfᴍ(ref p, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡres) => httputil_package.handleUpgradeResponseᴍ(Ꮡp, rw, Ꮡreq, Ꮡres);
-}
-partial class httputilᴛmaxLatencyWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ж<maxLatencyWriter> Ꮡm, slice<byte> p) => httputil_package.Writeᴍ(Ꮡm, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void delayedFlush(this ж<maxLatencyWriter> Ꮡm) => httputil_package.delayedFlushᴍ(Ꮡm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stop(this ж<maxLatencyWriter> Ꮡm) => httputil_package.stopᴍ(Ꮡm);
-}
-partial class httputilᴛswitchProtocolCopier {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void copyFromBackend(this switchProtocolCopier c, channel/*<-*/<error> errc) => httputil_package.copyFromBackendᴍ(c, errc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void copyToBackend(this switchProtocolCopier c, channel/*<-*/<error> errc) => httputil_package.copyToBackendᴍ(c, errc);
-}
-partial class httputilᴛnoopCloseReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<noopCloseReader> Ꮡncr) => httputil_package.Closeᴍ(Ꮡncr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ж<noopCloseReader> Ꮡncr, slice<byte> p) => httputil_package.Readᴍ(Ꮡncr, p);
-}
-// </GlyphForwarders>

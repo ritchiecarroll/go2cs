@@ -21,7 +21,7 @@ partial class os_package {
 // On files that support [File.SetDeadline], any pending I/O operations will
 // be canceled and return immediately with an [ErrClosed] error.
 // Close will return an error if it has already been called.
-internal static error Closeᴍ(ж<File> Ꮡf) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf == nil) {
@@ -32,7 +32,7 @@ internal static error Closeᴍ(ж<File> Ꮡf) {
 
 // read reads up to len(b) bytes from the File.
 // It returns the number of bytes read and an error, if any.
-internal static (nint n, error err) readᴍ(ж<File> Ꮡf, slice<byte> b) {
+[GoMethodBody("read")] internal static (nint n, error err) readᴍ(ж<File> Ꮡf, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -44,7 +44,7 @@ internal static (nint n, error err) readᴍ(ж<File> Ꮡf, slice<byte> b) {
 // pread reads len(b) bytes from the File starting at byte offset off.
 // It returns the number of bytes read and the error, if any.
 // EOF is signaled by a zero count with err set to nil.
-internal static (nint n, error err) preadᴍ(ж<File> Ꮡf, slice<byte> b, int64 off) {
+[GoMethodBody("pread")] internal static (nint n, error err) preadᴍ(ж<File> Ꮡf, slice<byte> b, int64 off) {
     nint n = default;
     error err = default;
 
@@ -55,7 +55,7 @@ internal static (nint n, error err) preadᴍ(ж<File> Ꮡf, slice<byte> b, int64
 
 // write writes len(b) bytes to the File.
 // It returns the number of bytes written and an error, if any.
-internal static (nint n, error err) writeᴍ(ж<File> Ꮡf, slice<byte> b) {
+[GoMethodBody("write")] internal static (nint n, error err) writeᴍ(ж<File> Ꮡf, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -66,7 +66,7 @@ internal static (nint n, error err) writeᴍ(ж<File> Ꮡf, slice<byte> b) {
 
 // pwrite writes len(b) bytes to the File starting at byte offset off.
 // It returns the number of bytes written and an error, if any.
-internal static (nint n, error err) pwriteᴍ(ж<File> Ꮡf, slice<byte> b, int64 off) {
+[GoMethodBody("pwrite")] internal static (nint n, error err) pwriteᴍ(ж<File> Ꮡf, slice<byte> b, int64 off) {
     nint n = default;
     error err = default;
 
@@ -112,7 +112,7 @@ internal static ref readonly @string chmodˢᴍFile => ref chmodˢᵇᴍFile;
 private static readonly @string chmodˢᵇᴍFile = "chmod"u8;
 
 // See docs in file.go:(*File).Chmod.
-internal static error chmodᴍ(ж<File> Ꮡf, FileMode mode) {
+[GoMethodBody("chmod")] internal static error chmodᴍ(ж<File> Ꮡf, FileMode mode) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var err = Ꮡf.checkValid(chmodˢᴍFile); if (err != nil) {
@@ -166,7 +166,7 @@ private static readonly @string chownˢᵇᴍFile = "chown"u8;
 //
 // On Windows, it always returns the [syscall.EWINDOWS] error, wrapped
 // in [*PathError].
-internal static error Chownᴍ(ж<File> Ꮡf, nint uid, nint gid) {
+[GoMethodBody("Chown")] internal static error Chownᴍ(ж<File> Ꮡf, nint uid, nint gid) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var err = Ꮡf.checkValid(chownˢᴍFile); if (err != nil) {
@@ -185,7 +185,7 @@ private static readonly @string truncateˢᵇᴍFile = "truncate"u8;
 // Truncate changes the size of the file.
 // It does not change the I/O offset.
 // If there is an error, it will be of type [*PathError].
-internal static error Truncateᴍ(ж<File> Ꮡf, int64 size) {
+[GoMethodBody("Truncate")] internal static error Truncateᴍ(ж<File> Ꮡf, int64 size) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var err = Ꮡf.checkValid(truncateˢᴍFile); if (err != nil) {
@@ -204,7 +204,7 @@ private static readonly @string syncˢᵇᴍFile = "sync"u8;
 // Sync commits the current contents of the file to stable storage.
 // Typically, this means flushing the file system's in-memory copy
 // of recently written data to disk.
-internal static error Syncᴍ(ж<File> Ꮡf) {
+[GoMethodBody("Sync")] internal static error Syncᴍ(ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var err = Ꮡf.checkValid(syncˢᴍFile); if (err != nil) {
@@ -256,7 +256,7 @@ private static readonly @string chdirˢᵇᴍFile = "chdir"u8;
 // Chdir changes the current working directory to the file,
 // which must be a directory.
 // If there is an error, it will be of type [*PathError].
-internal static error Chdirᴍ(ж<File> Ꮡf) {
+[GoMethodBody("Chdir")] internal static error Chdirᴍ(ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     {
@@ -281,7 +281,7 @@ internal static ref readonly @string setDeadlineˢᴍFile => ref setDeadlineˢ�
 private static readonly @string setDeadlineˢᵇᴍFile = "SetDeadline"u8;
 
 // setDeadline sets the read and write deadline.
-internal static error setDeadlineᴍ(ж<File> Ꮡf, time.Time t) {
+[GoMethodBody("setDeadline")] internal static error setDeadlineᴍ(ж<File> Ꮡf, time.Time t) {
     var err = Ꮡf.checkValid(setDeadlineˢᴍFile); if (err != nil) {
         return err;
     }
@@ -293,7 +293,7 @@ internal static ref readonly @string setReadDeadlineˢᴍFile => ref setReadDead
 private static readonly @string setReadDeadlineˢᵇᴍFile = "SetReadDeadline"u8;
 
 // setReadDeadline sets the read deadline.
-internal static error setReadDeadlineᴍ(ж<File> Ꮡf, time.Time t) {
+[GoMethodBody("setReadDeadline")] internal static error setReadDeadlineᴍ(ж<File> Ꮡf, time.Time t) {
     var err = Ꮡf.checkValid(setReadDeadlineˢᴍFile); if (err != nil) {
         return err;
     }
@@ -305,7 +305,7 @@ internal static ref readonly @string setWriteDeadlineˢᴍFile => ref setWriteDe
 private static readonly @string setWriteDeadlineˢᵇᴍFile = "SetWriteDeadline"u8;
 
 // setWriteDeadline sets the write deadline.
-internal static error setWriteDeadlineᴍ(ж<File> Ꮡf, time.Time t) {
+[GoMethodBody("setWriteDeadline")] internal static error setWriteDeadlineᴍ(ж<File> Ꮡf, time.Time t) {
     var err = Ꮡf.checkValid(setWriteDeadlineˢᴍFile); if (err != nil) {
         return err;
     }
@@ -314,7 +314,7 @@ internal static error setWriteDeadlineᴍ(ж<File> Ꮡf, time.Time t) {
 
 // checkValid checks whether f is valid for use.
 // If not, it returns an appropriate error, perhaps incorporating the operation name op.
-internal static error checkValidᴍ(ж<File> Ꮡf, @string op) {
+[GoMethodBody("checkValid")] internal static error checkValidᴍ(ж<File> Ꮡf, @string op) {
     if (Ꮡf == nil) {
         return ErrInvalid;
     }
@@ -350,22 +350,3 @@ internal static (T, error) ignoringEINTR2<T>(Func<(T, error)> fn) {
 }
 
 } // end os_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class osᴛFile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<File> Ꮡf) => os_package.Closeᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) read(this ж<File> Ꮡf, slice<byte> b) => os_package.readᴍ(Ꮡf, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) pread(this ж<File> Ꮡf, slice<byte> b, int64 off) => os_package.preadᴍ(Ꮡf, b, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) write(this ж<File> Ꮡf, slice<byte> b) => os_package.writeᴍ(Ꮡf, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) pwrite(this ж<File> Ꮡf, slice<byte> b, int64 off) => os_package.pwriteᴍ(Ꮡf, b, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error chmod(this ж<File> Ꮡf, FileMode mode) => os_package.chmodᴍ(Ꮡf, mode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Chown(this ж<File> Ꮡf, nint uid, nint gid) => os_package.Chownᴍ(Ꮡf, uid, gid);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Truncate(this ж<File> Ꮡf, int64 size) => os_package.Truncateᴍ(Ꮡf, size);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Sync(this ж<File> Ꮡf) => os_package.Syncᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Chdir(this ж<File> Ꮡf) => os_package.Chdirᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error setDeadline(this ж<File> Ꮡf, time.Time t) => os_package.setDeadlineᴍ(Ꮡf, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error setReadDeadline(this ж<File> Ꮡf, time.Time t) => os_package.setReadDeadlineᴍ(Ꮡf, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error setWriteDeadline(this ж<File> Ꮡf, time.Time t) => os_package.setWriteDeadlineᴍ(Ꮡf, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error checkValid(this ж<File> Ꮡf, @string op) => os_package.checkValidᴍ(Ꮡf, op);
-}
-// </GlyphForwarders>

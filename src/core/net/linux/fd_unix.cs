@@ -44,7 +44,7 @@ internal static (ж<netFD>, error) newFD(nint sysfd, nint family, nint sotype, @
 
 } partial class net_package {
 
-internal static error initᴍ(ж<netFD> Ꮡfd) {
+[GoMethodBody("init")] internal static error initᴍ(ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     return Ꮡfd.Ꮡpfd.Init(fd.net, true);
@@ -56,7 +56,7 @@ private static readonly @string connectˢᵇᴍnetFD = "connect"u8;
 internal static ref readonly @string getsockoptˢᴍnetFD => ref getsockoptˢᵇᴍnetFD;
 private static readonly @string getsockoptˢᵇᴍnetFD = "getsockopt"u8;
 
-internal static (syscall.Sockaddr rsa, error ret) connectᴍ(ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
+[GoMethodBody("connect")] internal static (syscall.Sockaddr rsa, error ret) connectᴍ(ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
     syscall.Sockaddr rsa = default;
     error ret = default;
     GoFrame ᒐ = default;
@@ -199,7 +199,7 @@ internal static (syscall.Sockaddr rsa, error ret) connectᴍ(ж<netFD> Ꮡfd, co
     ᒐdone: return (rsa, ret);
 }
 
-internal static (ж<netFD> netfd, error err) acceptᴍ(ж<netFD> Ꮡfd) {
+[GoMethodBody("accept")] internal static (ж<netFD> netfd, error err) acceptᴍ(ж<netFD> Ꮡfd) {
     ж<netFD> netfd = default;
     error err = default;
     ref var fd = ref Ꮡfd.DerefOrNull();
@@ -234,7 +234,7 @@ internal static (ж<netFD> netfd, error err) acceptᴍ(ж<netFD> Ꮡfd) {
 
 } partial class net_package {
 
-internal static (ж<os.File> f, error err) dupᴍ(ж<netFD> Ꮡfd) {
+[GoMethodBody("dup")] internal static (ж<os.File> f, error err) dupᴍ(ж<netFD> Ꮡfd) {
     error err = default;
     ref var fd = ref Ꮡfd.DerefOrNull();
 
@@ -250,12 +250,3 @@ internal static (ж<os.File> f, error err) dupᴍ(ж<netFD> Ꮡfd) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛnetFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error init(this ж<netFD> Ꮡfd) => net_package.initᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (syscall.Sockaddr rsa, error ret) connect(this ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) => net_package.connectᴍ(Ꮡfd, ctx, la, ra);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<netFD> netfd, error err) accept(this ж<netFD> Ꮡfd) => net_package.acceptᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<os.File> f, error err) dup(this ж<netFD> Ꮡfd) => net_package.dupᴍ(Ꮡfd);
-}
-// </GlyphForwarders>

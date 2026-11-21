@@ -131,7 +131,7 @@ private static readonly @string lineˢᵇᴍData = "line"u8;
 // unit cu, which must be an [Entry] with tag [TagCompileUnit].
 //
 // If this compilation unit has no line table, it returns nil, nil.
-internal static (ж<LineReader>, error) LineReaderᴍ(ж<Data> Ꮡd, ж<Entry> Ꮡcu) {
+[GoMethodBody("LineReader")] internal static (ж<LineReader>, error) LineReaderᴍ(ж<Data> Ꮡd, ж<Entry> Ꮡcu) {
     ref var d = ref Ꮡd.DerefOrNull();
     ref var cu = ref Ꮡcu.DerefOrNull();
 
@@ -179,7 +179,7 @@ internal static (ж<LineReader>, error) LineReaderᴍ(ж<Data> Ꮡd, ж<Entry> �
 
 // readHeader reads the line number program header from r.buf and sets
 // all of the header fields in r.
-internal static error readHeaderᴍ(ж<LineReader> Ꮡr, @string compDir) {
+[GoMethodBody("readHeader")] internal static error readHeaderᴍ(ж<LineReader> Ꮡr, @string compDir) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var buf = Ꮡr.Ꮡbuf;
@@ -329,7 +329,7 @@ partial struct lnctForm {
 } partial class dwarf_package {
 
 // readLNCTFormat reads an LNCT format description.
-internal static slice<lnctForm> readLNCTFormatᴍ(ref LineReader r) {
+[GoMethodBody("readLNCTFormat")] internal static slice<lnctForm> readLNCTFormatᴍ(ref LineReader r) {
     var c = r.buf.uint8();
     var ret = new slice<lnctForm>(c);
     foreach (var i in range(len(ret))) {
@@ -346,7 +346,7 @@ internal static ref readonly @string lineStrˢᴍLineReader => ref lineStrˢᵇ�
 private static readonly @string lineStrˢᵇᴍLineReader = "line_str"u8;
 
 // readLNCT reads a sequence of LNCT entries and returns path information.
-internal static (@string path, uint64 mtime, uint64 size, error err) readLNCTᴍ(ref LineReader r, slice<lnctForm> s, bool dwarf64) {
+[GoMethodBody("readLNCT")] internal static (@string path, uint64 mtime, uint64 size, error err) readLNCTᴍ(ref LineReader r, slice<lnctForm> s, bool dwarf64) {
     @string path = default;
     uint64 mtime = default;
     uint64 size = default;
@@ -478,7 +478,7 @@ internal static (@string path, uint64 mtime, uint64 size, error err) readLNCTᴍ
 // readFileEntry reads a file entry from either the header or a
 // DW_LNE_define_file extended opcode and adds it to r.fileEntries. A
 // true return value indicates that there are no more entries to read.
-internal static (bool, error) readFileEntryᴍ(ref LineReader r) {
+[GoMethodBody("readFileEntry")] internal static (bool, error) readFileEntryᴍ(ref LineReader r) {
     ref var name = ref heap<@string>(r.buf.@string(), out var Ꮡname);
     if (r.buf.err != nil) {
         return (false, r.buf.err);
@@ -516,7 +516,7 @@ internal static (bool, error) readFileEntryᴍ(ref LineReader r) {
 
 // updateFile updates r.state.File after r.fileIndex has
 // changed or r.fileEntries has changed.
-internal static void updateFileᴍ(ref LineReader r) {
+[GoMethodBody("updateFile")] internal static void updateFileᴍ(ref LineReader r) {
     if (r.fileIndex < len(r.fileEntries)) {
         r.state.File = r.fileEntries[r.fileIndex];
     } else {
@@ -530,7 +530,7 @@ internal static void updateFileᴍ(ref LineReader r) {
 //
 // Rows are always in order of increasing entry.Address, but
 // entry.Line may go forward or backward.
-internal static error Nextᴍ(ref LineReader r, ж<LineEntry> entry) {
+[GoMethodBody("Next")] internal static error Nextᴍ(ref LineReader r, ж<LineEntry> entry) {
     if (r.buf.err != nil) {
         return r.buf.err;
     }
@@ -580,7 +580,7 @@ private static readonly @string unknownAddressSizeˢᵇᴍLineReader = "unknown 
 // step processes the next opcode and updates r.state. If the opcode
 // emits a row in the line table, this updates *entry and returns
 // true.
-internal static bool stepᴍ(ref LineReader r, ж<LineEntry> Ꮡentry) {
+[GoMethodBody("step")] internal static bool stepᴍ(ref LineReader r, ж<LineEntry> Ꮡentry) {
     ref var entry = ref Ꮡentry.DerefOrNull();
 
     nint opcode = (nint)r.buf.uint8();
@@ -728,7 +728,7 @@ emit:
 
 // advancePC advances "operation pointer" (the combination of Address
 // and OpIndex) in r.state by opAdvance steps.
-internal static void advancePCᴍ(ref LineReader r, nint opAdvance) {
+[GoMethodBody("advancePC")] internal static void advancePCᴍ(ref LineReader r, nint opAdvance) {
     nint opIndex = r.state.OpIndex + opAdvance;
     r.state.Address += (uint64)(r.minInstructionLength * (quo(opIndex, r.maxOpsPerInstruction)));
     r.state.OpIndex = rem(opIndex, r.maxOpsPerInstruction);
@@ -751,7 +751,7 @@ partial struct LineReaderPos {
 } partial class dwarf_package {
 
 // Tell returns the current position in the line table.
-internal static LineReaderPos Tellᴍ(ref LineReader r) {
+[GoMethodBody("Tell")] internal static LineReaderPos Tellᴍ(ref LineReader r) {
     return new LineReaderPos(r.buf.off, len(r.fileEntries), r.state, r.fileIndex);
 }
 
@@ -759,7 +759,7 @@ internal static LineReaderPos Tellᴍ(ref LineReader r) {
 //
 // The argument pos must have been returned by a call to [LineReader.Tell] on this
 // line table.
-internal static void Seekᴍ(ref LineReader r, LineReaderPos pos) {
+[GoMethodBody("Seek")] internal static void Seekᴍ(ref LineReader r, LineReaderPos pos) {
     r.buf.off = pos.off;
     r.buf.data = r.section.slice((nint)(r.buf.off), (nint)(r.endOffset));
     r.fileEntries = r.fileEntries.slice(0, pos.numFileEntries);
@@ -769,7 +769,7 @@ internal static void Seekᴍ(ref LineReader r, LineReaderPos pos) {
 
 // Reset repositions the line table reader at the beginning of the
 // line table.
-internal static void Resetᴍ(ref LineReader r) {
+[GoMethodBody("Reset")] internal static void Resetᴍ(ref LineReader r) {
     // Reset buffer to the line number program offset.
     r.buf.off = r.programOffset;
     r.buf.data = r.section.slice((nint)(r.buf.off), (nint)(r.endOffset));
@@ -782,7 +782,7 @@ internal static void Resetᴍ(ref LineReader r) {
 }
 
 // resetState resets r.state to its default values
-internal static void resetStateᴍ(ref LineReader r) {
+[GoMethodBody("resetState")] internal static void resetStateᴍ(ref LineReader r) {
     // Reset the state machine registers to the defaults given in
     // [DWARF4 6.2.2].
     r.state = new LineEntry(
@@ -814,7 +814,7 @@ internal static void resetStateᴍ(ref LineReader r) {
 // table. This may contain more entries than the file table at an
 // earlier position in the line table, though existing entries never
 // change.
-internal static slice<ж<LineFile>> Filesᴍ(ref LineReader r) {
+[GoMethodBody("Files")] internal static slice<ж<LineFile>> Filesᴍ(ref LineReader r) {
     return r.fileEntries;
 }
 
@@ -838,7 +838,7 @@ public static error ErrUnknownPC = errors.New("ErrUnknownPC");
 // Hence, in the worst case, this takes time linear in the size of the
 // line table. If the caller wishes to do repeated fast PC lookups, it
 // should build an appropriate index of the line table.
-internal static error SeekPCᴍ(ref LineReader r, uint64 pc, ж<LineEntry> Ꮡentry) {
+[GoMethodBody("SeekPC")] internal static error SeekPCᴍ(ref LineReader r, uint64 pc, ж<LineEntry> Ꮡentry) {
     ref var entry = ref Ꮡentry.DerefOrNull();
 
     {
@@ -955,25 +955,3 @@ internal static (@string drive, @string rest) splitDrive(@string path) {
 }
 
 } // end dwarf_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class dwarfᴛData {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<LineReader>, error) LineReader(this ж<Data> Ꮡd, ж<Entry> Ꮡcu) => dwarf_package.LineReaderᴍ(Ꮡd, Ꮡcu);
-}
-partial class dwarfᴛLineReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readHeader(this ж<LineReader> Ꮡr, @string compDir) => dwarf_package.readHeaderᴍ(Ꮡr, compDir);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<lnctForm> readLNCTFormat(this ref LineReader r) => dwarf_package.readLNCTFormatᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string path, uint64 mtime, uint64 size, error err) readLNCT(this ref LineReader r, slice<lnctForm> s, bool dwarf64) => dwarf_package.readLNCTᴍ(ref r, s, dwarf64);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool, error) readFileEntry(this ref LineReader r) => dwarf_package.readFileEntryᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void updateFile(this ref LineReader r) => dwarf_package.updateFileᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Next(this ref LineReader r, ж<LineEntry> entry) => dwarf_package.Nextᴍ(ref r, entry);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool step(this ref LineReader r, ж<LineEntry> Ꮡentry) => dwarf_package.stepᴍ(ref r, Ꮡentry);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void advancePC(this ref LineReader r, nint opAdvance) => dwarf_package.advancePCᴍ(ref r, opAdvance);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static LineReaderPos Tell(this ref LineReader r) => dwarf_package.Tellᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Seek(this ref LineReader r, LineReaderPos pos) => dwarf_package.Seekᴍ(ref r, pos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref LineReader r) => dwarf_package.Resetᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void resetState(this ref LineReader r) => dwarf_package.resetStateᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<ж<LineFile>> Files(this ref LineReader r) => dwarf_package.Filesᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SeekPC(this ref LineReader r, uint64 pc, ж<LineEntry> Ꮡentry) => dwarf_package.SeekPCᴍ(ref r, pc, Ꮡentry);
-}
-// </GlyphForwarders>

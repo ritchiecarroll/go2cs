@@ -29,7 +29,7 @@ public static (ж<TextWriter>, error) NewTextWriter(io.Writer w, version.Version
 } partial class raw_package {
 
 // WriteEvent writes a single event to the stream.
-internal static error WriteEventᴍ(ref TextWriter w, Event e) {
+[GoMethodBody("WriteEvent")] internal static error WriteEventᴍ(ref TextWriter w, Event e) {
     // Check version.
     if (e.Version != w.v) {
         return fmt.Errorf("mismatched version between writer (go 1.%d) and event (go 1.%d)"u8, w.v, e.Version);
@@ -41,9 +41,3 @@ internal static error WriteEventᴍ(ref TextWriter w, Event e) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class rawᴛTextWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteEvent(this ref TextWriter w, Event e) => raw_package.WriteEventᴍ(ref w, e);
-}
-// </GlyphForwarders>

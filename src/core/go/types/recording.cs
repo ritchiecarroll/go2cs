@@ -18,7 +18,7 @@ partial class types_package {
 
 } partial class types_package {
 
-internal static void recordᴍ(ref Checker check, ж<operand> Ꮡx) {
+[GoMethodBody("record")] internal static void recordᴍ(ref Checker check, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // convert x into a user-friendly set of values
@@ -58,7 +58,7 @@ internal static void recordᴍ(ref Checker check, ж<operand> Ꮡx) {
 internal static ref readonly @string vSTypeSIsTypedˢᴍChecker => ref vSTypeSIsTypedˢᵇᴍChecker;
 private static readonly @string vSTypeSIsTypedˢᵇᴍChecker = "%v: %s (type %s) is typed"u8;
 
-internal static void recordUntypedᴍ(ж<Checker> Ꮡcheck) {
+[GoMethodBody("recordUntyped")] internal static void recordUntypedᴍ(ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     if (!debug && !check.recordTypes()) {
@@ -74,7 +74,7 @@ internal static void recordUntypedᴍ(ж<Checker> Ꮡcheck) {
     }
 }
 
-internal static void recordTypeAndValueᴍ(ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val) {
+[GoMethodBody("recordTypeAndValue")] internal static void recordTypeAndValueᴍ(ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val) {
     assert(x != nil);
     assert(typ != nil);
     if (mode == invalid) {
@@ -92,7 +92,7 @@ internal static void recordTypeAndValueᴍ(ref Checker check, ast.Expr x, operan
     check.recordTypeAndValueInSyntax(x, mode, typ, val);
 }
 
-internal static void recordBuiltinTypeᴍ(ref Checker check, ast.Expr f, ж<Signature> sig) {
+[GoMethodBody("recordBuiltinType")] internal static void recordBuiltinTypeᴍ(ref Checker check, ast.Expr f, ж<Signature> sig) {
     // f must be a (possibly parenthesized, possibly qualified)
     // identifier denoting a built-in (including unsafe's non-constant
     // functions Add and Slice): record the signature for f and possible
@@ -119,7 +119,7 @@ internal static void recordBuiltinTypeᴍ(ref Checker check, ast.Expr f, ж<Sign
 
 // recordCommaOkTypes updates recorded types to reflect that x is used in a commaOk context
 // (and therefore has tuple type).
-internal static void recordCommaOkTypesᴍ(ref Checker check, ast.Expr x, slice<ж<operand>> a) {
+[GoMethodBody("recordCommaOkTypes")] internal static void recordCommaOkTypesᴍ(ref Checker check, ast.Expr x, slice<ж<operand>> a) {
     assert(x != nil);
     assert(len(a) == 2);
     if (a[0].mode == invalid) {
@@ -153,7 +153,7 @@ internal static void recordCommaOkTypesᴍ(ref Checker check, ast.Expr x, slice<
 //
 // TODO(rfindley): the expr parameter is fragile. See if we can access the
 // instantiated identifier in some other way.
-internal static void recordInstanceᴍ(ref Checker check, ast.Expr expr, slice<Type> targs, Type typ) {
+[GoMethodBody("recordInstance")] internal static void recordInstanceᴍ(ref Checker check, ast.Expr expr, slice<Type> targs, Type typ) {
     var ident = instantiatedIdent(expr);
     assert(ident != nil);
     assert(typ != nil);
@@ -162,14 +162,14 @@ internal static void recordInstanceᴍ(ref Checker check, ast.Expr expr, slice<T
     }
 }
 
-internal static void recordDefᴍ(ref Checker check, ж<ast.Ident> id, Object obj) {
+[GoMethodBody("recordDef")] internal static void recordDefᴍ(ref Checker check, ж<ast.Ident> id, Object obj) {
     assert(id != nil);
     var m = check.Defs; if (m != nil) {
         m[id] = obj;
     }
 }
 
-internal static void recordUseᴍ(ref Checker check, ж<ast.Ident> id, Object obj) {
+[GoMethodBody("recordUse")] internal static void recordUseᴍ(ref Checker check, ж<ast.Ident> id, Object obj) {
     assert(id != nil);
     assert(obj != nil);
     var m = check.Uses; if (m != nil) {
@@ -177,7 +177,7 @@ internal static void recordUseᴍ(ref Checker check, ж<ast.Ident> id, Object ob
     }
 }
 
-internal static void recordImplicitᴍ(ref Checker check, ast.Node node, Object obj) {
+[GoMethodBody("recordImplicit")] internal static void recordImplicitᴍ(ref Checker check, ast.Node node, Object obj) {
     assert(node != nil);
     assert(obj != nil);
     var m = check.Implicits; if (m != nil) {
@@ -185,7 +185,7 @@ internal static void recordImplicitᴍ(ref Checker check, ast.Node node, Object 
     }
 }
 
-internal static void recordSelectionᴍ(ref Checker check, ж<ast.SelectorExpr> Ꮡx, SelectionKind kind, Type recv, Object obj, slice<nint> index, bool indirect) {
+[GoMethodBody("recordSelection")] internal static void recordSelectionᴍ(ref Checker check, ж<ast.SelectorExpr> Ꮡx, SelectionKind kind, Type recv, Object obj, slice<nint> index, bool indirect) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     assert(obj != nil && (recv == nil || len(index) > 0));
@@ -195,7 +195,7 @@ internal static void recordSelectionᴍ(ref Checker check, ж<ast.SelectorExpr> 
     }
 }
 
-internal static void recordScopeᴍ(ref Checker check, ast.Node node, ж<Scope> scope) {
+[GoMethodBody("recordScope")] internal static void recordScopeᴍ(ref Checker check, ast.Node node, ж<Scope> scope) {
     assert(node != nil);
     assert(scope != nil);
     var m = check.Scopes; if (m != nil) {
@@ -204,19 +204,3 @@ internal static void recordScopeᴍ(ref Checker check, ast.Node node, ж<Scope> 
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void record(this ref Checker check, ж<operand> Ꮡx) => types_package.recordᴍ(ref check, Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordUntyped(this ж<Checker> Ꮡcheck) => types_package.recordUntypedᴍ(Ꮡcheck);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordTypeAndValue(this ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val) => types_package.recordTypeAndValueᴍ(ref check, x, mode, typ, val);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordBuiltinType(this ref Checker check, ast.Expr f, ж<Signature> sig) => types_package.recordBuiltinTypeᴍ(ref check, f, sig);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordCommaOkTypes(this ref Checker check, ast.Expr x, slice<ж<operand>> a) => types_package.recordCommaOkTypesᴍ(ref check, x, a);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordInstance(this ref Checker check, ast.Expr expr, slice<Type> targs, Type typ) => types_package.recordInstanceᴍ(ref check, expr, targs, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordDef(this ref Checker check, ж<ast.Ident> id, Object obj) => types_package.recordDefᴍ(ref check, id, obj);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordUse(this ref Checker check, ж<ast.Ident> id, Object obj) => types_package.recordUseᴍ(ref check, id, obj);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordImplicit(this ref Checker check, ast.Node node, Object obj) => types_package.recordImplicitᴍ(ref check, node, obj);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordSelection(this ref Checker check, ж<ast.SelectorExpr> Ꮡx, SelectionKind kind, Type recv, Object obj, slice<nint> index, bool indirect) => types_package.recordSelectionᴍ(ref check, Ꮡx, kind, recv, obj, index, indirect);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordScope(this ref Checker check, ast.Node node, ж<Scope> scope) => types_package.recordScopeᴍ(ref check, node, scope);
-}
-// </GlyphForwarders>

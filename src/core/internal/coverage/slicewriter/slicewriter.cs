@@ -21,7 +21,7 @@ partial struct WriteSeeker {
 
 } partial class slicewriter_package {
 
-internal static (nint n, error err) Writeᴍ(ref WriteSeeker sws, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref WriteSeeker sws, slice<byte> p) {
     nint amt = len(p);
     var towrite = sws.payload.slice((nint)(sws.off));
     if (len(towrite) < amt) {
@@ -37,7 +37,7 @@ internal static (nint n, error err) Writeᴍ(ref WriteSeeker sws, slice<byte> p)
 // its internally maintained slice. Note that it is not possible to
 // expand the size of the slice using SEEK_SET; trying to seek outside
 // the slice will result in an error.
-internal static (int64, error) Seekᴍ(ref WriteSeeker sws, int64 offset, nint whence) {
+[GoMethodBody("Seek")] internal static (int64, error) Seekᴍ(ref WriteSeeker sws, int64 offset, nint whence) {
     switch (whence) {
     case var ᴛ when ᴛ == io.SeekStart: {
         if (sws.off != offset && (offset < 0 || offset > (int64)len(sws.payload))) {
@@ -68,11 +68,11 @@ internal static (int64, error) Seekᴍ(ref WriteSeeker sws, int64 offset, nint w
 
 // BytesWritten returns the underlying byte slice for the WriteSeeker,
 // containing the data written to it via Write/Seek calls.
-internal static slice<byte> BytesWrittenᴍ(ref WriteSeeker sws) {
+[GoMethodBody("BytesWritten")] internal static slice<byte> BytesWrittenᴍ(ref WriteSeeker sws) {
     return sws.payload;
 }
 
-internal static (nint n, error err) Readᴍ(ref WriteSeeker sws, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref WriteSeeker sws, slice<byte> p) {
     nint amt = len(p);
     var toread = sws.payload.slice((nint)(sws.off));
     if (len(toread) < amt) {
@@ -84,12 +84,3 @@ internal static (nint n, error err) Readᴍ(ref WriteSeeker sws, slice<byte> p) 
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class slicewriterᴛWriteSeeker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ref WriteSeeker sws, slice<byte> p) => slicewriter_package.Writeᴍ(ref sws, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) Seek(this ref WriteSeeker sws, int64 offset, nint whence) => slicewriter_package.Seekᴍ(ref sws, offset, whence);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> BytesWritten(this ref WriteSeeker sws) => slicewriter_package.BytesWrittenᴍ(ref sws);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ref WriteSeeker sws, slice<byte> p) => slicewriter_package.Readᴍ(ref sws, p);
-}
-// </GlyphForwarders>

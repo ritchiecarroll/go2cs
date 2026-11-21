@@ -54,7 +54,7 @@ partial struct bracketPair {
 
 } partial class bidi_package {
 
-internal static @string Stringᴍ(ref bracketPair b) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref bracketPair b) {
     return fmt.Sprintf("(%v, %v)"u8, b.opener, b.closer);
 }
 
@@ -65,9 +65,9 @@ partial struct bracketPairs /*[]bracketPair*/;
 
 } partial class bidi_package {
 
-internal static nint Lenᴍ(bracketPairs b) { return len(b); }
-internal static void Swapᴍ(bracketPairs b, nint i, nint j) { (b[i], b[j]) = (b[j], b[i]); }
-internal static bool Lessᴍ(bracketPairs b, nint i, nint j) { return b[i].opener < b[j].opener; }
+[GoMethodBody("Len")] internal static nint Lenᴍ(bracketPairs b) { return len(b); }
+[GoMethodBody("Swap")] internal static void Swapᴍ(bracketPairs b, nint i, nint j) { (b[i], b[j]) = (b[j], b[i]); }
+[GoMethodBody("Less")] internal static bool Lessᴍ(bracketPairs b, nint i, nint j) { return b[i].opener < b[j].opener; }
 
 } partial class bidi_package {
 
@@ -124,7 +124,7 @@ partial struct bracketPairer {
 
 // matchOpener reports whether characters at given positions form a matching
 // bracket pair.
-internal static bool matchOpenerᴍ(ref bracketPairer p, slice<rune> pairValues, nint opener, nint closer) {
+[GoMethodBody("matchOpener")] internal static bool matchOpenerᴍ(ref bracketPairer p, slice<rune> pairValues, nint opener, nint closer) {
     return pairValues[p.indexes[opener]] == pairValues[p.indexes[closer]];
 }
 
@@ -139,7 +139,7 @@ internal static UntypedInt maxPairingDepth => 63;
 // This implementation uses a linked list instead of a stack, because, while
 // elements are added at the front (like a push) they are not generally removed
 // in atomic 'pop' operations, reducing the benefit of the stack archetype.
-internal static void locateBracketsᴍ(ref bracketPairer p, slice<bracketType> pairTypes, slice<rune> pairValues) {
+[GoMethodBody("locateBrackets")] internal static void locateBracketsᴍ(ref bracketPairer p, slice<bracketType> pairTypes, slice<rune> pairValues) {
     // traverse the run
     // do that explicitly (not in a for-each) so we can record position
     foreach (var (i, index) in range(p.indexes)) {
@@ -238,7 +238,7 @@ internal static void locateBracketsᴍ(ref bracketPairer p, slice<bracketType> p
 // by rule N0.
 //
 // TODO: have separate type for "strong" directionality.
-internal static Class getStrongTypeN0ᴍ(ref bracketPairer p, nint index) {
+[GoMethodBody("getStrongTypeN0")] internal static Class getStrongTypeN0ᴍ(ref bracketPairer p, nint index) {
     switch (p.codesIsolatedRun[index]) {
     // in the scope of N0, number types are treated as R
     case var ᴛ when ᴛ == EN || ᴛ == AN || ᴛ == AL || ᴛ == R: {
@@ -259,7 +259,7 @@ internal static Class getStrongTypeN0ᴍ(ref bracketPairer p, nint index) {
 // it returns this type. Otherwise it returns the embedding direction.
 //
 // TODO: use separate type for "strong" directionality.
-internal static Class classifyPairContentᴍ(ref bracketPairer p, bracketPair loc, Class dirEmbed) {
+[GoMethodBody("classifyPairContent")] internal static Class classifyPairContentᴍ(ref bracketPairer p, bracketPair loc, Class dirEmbed) {
     Class dirOpposite = ON;
     for (nint i = loc.opener + 1; i < loc.closer; i++) {
         Class dir = p.getStrongTypeN0(i);
@@ -277,7 +277,7 @@ internal static Class classifyPairContentᴍ(ref bracketPairer p, bracketPair lo
 
 // classBeforePair determines which strong types are present before a Bracket
 // Pair. Return R or L if strong type found, otherwise ON.
-internal static Class classBeforePairᴍ(ref bracketPairer p, bracketPair loc) {
+[GoMethodBody("classBeforePair")] internal static Class classBeforePairᴍ(ref bracketPairer p, bracketPair loc) {
     for (nint i = loc.opener - 1; i >= 0; i--) {
         Class dir = p.getStrongTypeN0(i); if (dir != ON) {
             return dir;
@@ -288,7 +288,7 @@ internal static Class classBeforePairᴍ(ref bracketPairer p, bracketPair loc) {
 }
 
 // assignBracketType implements rule N0 for a single bracket pair.
-internal static void assignBracketTypeᴍ(ref bracketPairer p, bracketPair loc, Class dirEmbed, slice<Class> initialTypes) {
+[GoMethodBody("assignBracketType")] internal static void assignBracketTypeᴍ(ref bracketPairer p, bracketPair loc, Class dirEmbed, slice<Class> initialTypes) {
     // rule "N0, a", inspect contents of pair
     Class dirPair = p.classifyPairContent(loc, dirEmbed);
 
@@ -316,7 +316,7 @@ internal static void assignBracketTypeᴍ(ref bracketPairer p, bracketPair loc, 
     p.setBracketsToType(loc, dirPair, initialTypes);
 }
 
-internal static void setBracketsToTypeᴍ(ref bracketPairer p, bracketPair loc, Class dirPair, slice<Class> initialTypes) {
+[GoMethodBody("setBracketsToType")] internal static void setBracketsToTypeᴍ(ref bracketPairer p, bracketPair loc, Class dirPair, slice<Class> initialTypes) {
     p.codesIsolatedRun[loc.opener] = dirPair;
     p.codesIsolatedRun[loc.closer] = dirPair;
 
@@ -338,31 +338,10 @@ internal static void setBracketsToTypeᴍ(ref bracketPairer p, bracketPair loc, 
 }
 
 // resolveBrackets implements rule N0 for a list of pairs.
-internal static void resolveBracketsᴍ(ref bracketPairer p, Class dirEmbed, slice<Class> initialTypes) {
+[GoMethodBody("resolveBrackets")] internal static void resolveBracketsᴍ(ref bracketPairer p, Class dirEmbed, slice<Class> initialTypes) {
     foreach (var (_, loc) in range<bracketPair>(p.pairPositions)) {
         p.assignBracketType(loc, dirEmbed, initialTypes);
     }
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class bidiᴛbracketPair {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref bracketPair b) => bidi_package.Stringᴍ(ref b);
-}
-partial class bidiᴛbracketPairs {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this bracketPairs b) => bidi_package.Lenᴍ(b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Swap(this bracketPairs b, nint i, nint j) => bidi_package.Swapᴍ(b, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this bracketPairs b, nint i, nint j) => bidi_package.Lessᴍ(b, i, j);
-}
-partial class bidiᴛbracketPairer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool matchOpener(this ref bracketPairer p, slice<rune> pairValues, nint opener, nint closer) => bidi_package.matchOpenerᴍ(ref p, pairValues, opener, closer);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void locateBrackets(this ref bracketPairer p, slice<bracketType> pairTypes, slice<rune> pairValues) => bidi_package.locateBracketsᴍ(ref p, pairTypes, pairValues);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Class getStrongTypeN0(this ref bracketPairer p, nint index) => bidi_package.getStrongTypeN0ᴍ(ref p, index);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Class classifyPairContent(this ref bracketPairer p, bracketPair loc, Class dirEmbed) => bidi_package.classifyPairContentᴍ(ref p, loc, dirEmbed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Class classBeforePair(this ref bracketPairer p, bracketPair loc) => bidi_package.classBeforePairᴍ(ref p, loc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void assignBracketType(this ref bracketPairer p, bracketPair loc, Class dirEmbed, slice<Class> initialTypes) => bidi_package.assignBracketTypeᴍ(ref p, loc, dirEmbed, initialTypes);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setBracketsToType(this ref bracketPairer p, bracketPair loc, Class dirPair, slice<Class> initialTypes) => bidi_package.setBracketsToTypeᴍ(ref p, loc, dirPair, initialTypes);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void resolveBrackets(this ref bracketPairer p, Class dirEmbed, slice<Class> initialTypes) => bidi_package.resolveBracketsᴍ(ref p, dirEmbed, initialTypes);
-}
-// </GlyphForwarders>

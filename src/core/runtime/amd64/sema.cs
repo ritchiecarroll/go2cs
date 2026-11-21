@@ -60,7 +60,7 @@ partial struct semTable /*[251]semTableᴛ1*/;
 
 } partial class runtime_package {
 
-internal static ж<semaRoot> rootForᴍ(ref semTable t, ж<uint32> addr) {
+[GoMethodBody("rootFor")] internal static ж<semaRoot> rootForᴍ(ref semTable t, ж<uint32> addr) {
     return Ꮡ(t.Value, ((uintptr)addr >> 3) % (uintptr)semTabSize).of(semTableᴛ1.Ꮡroot);
 }
 
@@ -173,7 +173,7 @@ internal static bool cansemacquire(ж<uint32> addr) {
 } partial class runtime_package {
 
 // queue adds s to the blocked goroutines in semaRoot.
-internal static void queueᴍ(ж<semaRoot> Ꮡroot, ж<uint32> addr, ж<sudog> Ꮡs, bool lifo) {
+[GoMethodBody("queue")] internal static void queueᴍ(ж<semaRoot> Ꮡroot, ж<uint32> addr, ж<sudog> Ꮡs, bool lifo) {
     ref var root = ref Ꮡroot.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -277,7 +277,7 @@ internal static void queueᴍ(ж<semaRoot> Ꮡroot, ж<uint32> addr, ж<sudog> �
 // If there are additional entries in the wait list, dequeue
 // returns tailtime set to the last entry's acquiretime.
 // Otherwise tailtime is found.acquiretime.
-internal static (ж<sudog> found, int64 now, int64 tailtime) dequeueᴍ(ж<semaRoot> Ꮡroot, ж<uint32> addr) {
+[GoMethodBody("dequeue")] internal static (ж<sudog> found, int64 now, int64 tailtime) dequeueᴍ(ж<semaRoot> Ꮡroot, ж<uint32> addr) {
     int64 now = default;
     int64 tailtime = default;
     ref var root = ref Ꮡroot.DerefOrNull();
@@ -370,7 +370,7 @@ private static readonly @string semaRootRotateLeftˢᵇᴍsemaRoot = "semaRoot r
 
 // rotateLeft rotates the tree rooted at node x.
 // turning (x a (y b c)) into (y (x a b) c).
-internal static void rotateLeftᴍ(ref semaRoot root, ж<sudog> Ꮡx) {
+[GoMethodBody("rotateLeft")] internal static void rotateLeftᴍ(ref semaRoot root, ж<sudog> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // p -> (x a (y b c))
@@ -404,7 +404,7 @@ private static readonly @string semaRootRotateRightˢᵇᴍsemaRoot = "semaRoot 
 
 // rotateRight rotates the tree rooted at node y.
 // turning (y (x a b) c) into (x a (y b c)).
-internal static void rotateRightᴍ(ref semaRoot root, ж<sudog> Ꮡy) {
+[GoMethodBody("rotateRight")] internal static void rotateRightᴍ(ref semaRoot root, ж<sudog> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     // p -> (y (x a b) c)
@@ -640,15 +640,3 @@ internal static int64 internal_sync_nanotime() {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛsemTable {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<semaRoot> rootFor(this ref semTable t, ж<uint32> addr) => runtime_package.rootForᴍ(ref t, addr);
-}
-partial class runtimeᴛsemaRoot {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void queue(this ж<semaRoot> Ꮡroot, ж<uint32> addr, ж<sudog> Ꮡs, bool lifo) => runtime_package.queueᴍ(Ꮡroot, addr, Ꮡs, lifo);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<sudog> found, int64 now, int64 tailtime) dequeue(this ж<semaRoot> Ꮡroot, ж<uint32> addr) => runtime_package.dequeueᴍ(Ꮡroot, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void rotateLeft(this ref semaRoot root, ж<sudog> Ꮡx) => runtime_package.rotateLeftᴍ(ref root, Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void rotateRight(this ref semaRoot root, ж<sudog> Ꮡy) => runtime_package.rotateRightᴍ(ref root, Ꮡy);
-}
-// </GlyphForwarders>

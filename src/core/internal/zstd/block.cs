@@ -20,7 +20,7 @@ private static readonly @string extraneousDataAfterNoˢᵇᴍReader = "extraneou
 // compressedBlock decompresses a compressed block, storing the decompressed
 // data in r.buffer. The blockSize argument is the compressed size.
 // RFC 3.1.1.3.
-internal static error compressedBlockᴍ(ж<Reader> Ꮡr, nint blockSize) {
+[GoMethodBody("compressedBlock")] internal static error compressedBlockᴍ(ж<Reader> Ꮡr, nint blockSize) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (len(r.compressedBuf) >= blockSize) {
@@ -123,7 +123,7 @@ private static readonly @string invalidSymbolCompressionˢᵇᴍReader = "invali
 // initSeqs reads the Sequences_Section_Header and sets up the FSE
 // tables used to read the sequence codes. It returns the number of
 // sequences and the new offset. RFC 3.1.1.3.2.1.
-internal static (nint, nint, error) initSeqsᴍ(ж<Reader> Ꮡr, block data, nint off) {
+[GoMethodBody("initSeqs")] internal static (nint, nint, error) initSeqsᴍ(ж<Reader> Ꮡr, block data, nint off) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (off >= len(data)) {
@@ -192,7 +192,7 @@ private static readonly @string missingRepeatSequenceFseˢᵇᴍReader = "missin
 // setSeqTable uses the Compression_Mode in mode to set up r.seqTables and
 // r.seqTableBits for kind. We store these in the Reader because one of
 // the modes simply reuses the value from the last block in the frame.
-internal static (nint, error) setSeqTableᴍ(ж<Reader> Ꮡr, block data, nint off, seqCode kind, byte mode) {
+[GoMethodBody("setSeqTable")] internal static (nint, error) setSeqTableᴍ(ж<Reader> Ꮡr, block data, nint off, seqCode kind, byte mode) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var info = ᏑseqCodeInfo.at<seqCodeInfoData>(kind);
@@ -279,7 +279,7 @@ internal static ref readonly @string extraneousDataAfterˢᴍReader => ref extra
 private static readonly @string extraneousDataAfterˢᵇᴍReader = "extraneous data after sequences"u8;
 
 // execSeqs reads and executes the sequences. RFC 3.1.1.3.2.1.2.
-internal static error execSeqsᴍ(ж<Reader> Ꮡr, block data, nint off, slice<byte> litbuf, nint seqCount) {
+[GoMethodBody("execSeqs")] internal static error execSeqsᴍ(ж<Reader> Ꮡr, block data, nint off, slice<byte> litbuf, nint seqCount) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     // Set up the initial states for the sequence code readers.
@@ -432,7 +432,7 @@ internal static ref readonly @string offsetPastWindowˢᴍReader => ref offsetPa
 private static readonly @string offsetPastWindowˢᵇᴍReader = "offset past window"u8;
 
 // Copy match bytes from the decoded output, or the window, at offset.
-internal static error copyFromWindowᴍ(ref Reader r, ж<reverseBitReader> Ꮡrbr, uint32 offset, uint32 match) {
+[GoMethodBody("copyFromWindow")] internal static error copyFromWindowᴍ(ref Reader r, ж<reverseBitReader> Ꮡrbr, uint32 offset, uint32 match) {
     ref var rbr = ref Ꮡrbr.DerefOrNull();
 
     if (offset == 0) {
@@ -476,13 +476,3 @@ internal static error copyFromWindowᴍ(ref Reader r, ж<reverseBitReader> Ꮡrb
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class zstdᴛReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error compressedBlock(this ж<Reader> Ꮡr, nint blockSize) => zstd_package.compressedBlockᴍ(Ꮡr, blockSize);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, nint, error) initSeqs(this ж<Reader> Ꮡr, block data, nint off) => zstd_package.initSeqsᴍ(Ꮡr, data, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) setSeqTable(this ж<Reader> Ꮡr, block data, nint off, seqCode kind, byte mode) => zstd_package.setSeqTableᴍ(Ꮡr, data, off, kind, mode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error execSeqs(this ж<Reader> Ꮡr, block data, nint off, slice<byte> litbuf, nint seqCount) => zstd_package.execSeqsᴍ(Ꮡr, data, off, litbuf, seqCount);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error copyFromWindow(this ref Reader r, ж<reverseBitReader> Ꮡrbr, uint32 offset, uint32 match) => zstd_package.copyFromWindowᴍ(ref r, Ꮡrbr, offset, match);
-}
-// </GlyphForwarders>

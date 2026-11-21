@@ -60,6 +60,15 @@ using static go.@internal.coverage.cmerge_package;
 
 namespace go.@internal.coverage;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using fmt = fmt_package;
+using coverage = go.@internal.coverage_package;
+using math = math_package;
+using go.@internal;
+using cmerge = cmerge_package;
+using static cmerge_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("cmerge")]
 public static partial class cmerge_package
 {
@@ -96,3 +105,15 @@ public static partial class cmerge_package
 // <MethodHolders>
 [GoMethodHost(typeof(cmerge_package.Merger)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cmergeᴛMerger;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class cmergeᴛMerger {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetModeMergePolicy(this ref Merger cm, ModeMergePolicy policy) => cmerge_package.SetModeMergePolicyᴍ(ref cm, policy);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (error, bool) MergeCounters(this ref Merger m, slice<uint32> dst, slice<uint32> src) => cmerge_package.MergeCountersᴍ(ref m, dst, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 SaturatingAdd(this ref Merger m, uint32 dst, uint32 src) => cmerge_package.SaturatingAddᴍ(ref m, dst, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetModeAndGranularity(this ref Merger cm, @string mdf, coverage.CounterMode cmode, coverage.CounterGranularity cgran) => cmerge_package.SetModeAndGranularityᴍ(ref cm, mdf, cmode, cgran);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ResetModeAndGranularity(this ref Merger cm) => cmerge_package.ResetModeAndGranularityᴍ(ref cm);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static coverage.CounterMode Mode(this ref Merger cm) => cmerge_package.Modeᴍ(ref cm);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static coverage.CounterGranularity Granularity(this ref Merger cm) => cmerge_package.Granularityᴍ(ref cm);
+}
+// </GlyphForwarders>

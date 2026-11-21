@@ -160,7 +160,7 @@ partial struct stackObject {
 // obj.r = r, but with no write barrier.
 //
 //go:nowritebarrier
-internal static void setRecordᴍ(ж<stackObject> Ꮡobj, ж<stackObjectRecord> r) {
+[GoMethodBody("setRecord")] internal static void setRecordᴍ(ж<stackObject> Ꮡobj, ж<stackObjectRecord> r) {
     // Types of stack objects are always in read-only memory, not the heap.
     // So not using a write barrier is ok.
     (Ꮡobj.Ꮡr.Reinterpret<ж<stackObjectRecord>, uintptr>()).Value = (uintptr)r;
@@ -205,7 +205,7 @@ private static readonly @string addressNotAStackAddressˢᵇᴍstackScanState = 
 
 // Add p as a potential pointer to a stack object.
 // p must be a stack address.
-internal static void putPtrᴍ(ж<stackScanState> Ꮡs, uintptr p, bool conservative) {
+[GoMethodBody("putPtr")] internal static void putPtrᴍ(ж<stackScanState> Ꮡs, uintptr p, bool conservative) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (p < s.stack.lo || p >= s.stack.hi) {
@@ -242,7 +242,7 @@ internal static void putPtrᴍ(ж<stackScanState> Ꮡs, uintptr p, bool conserva
 //
 // This prefers non-conservative pointers so we scan stack objects
 // precisely if there are any non-conservative pointers to them.
-internal static (uintptr p, bool conservative) getPtrᴍ(ж<stackScanState> Ꮡs) {
+[GoMethodBody("getPtr")] internal static (uintptr p, bool conservative) getPtrᴍ(ж<stackScanState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     foreach (var (_, head) in range(slice<ж<ж<stackWorkBuf>>>([Ꮡs.Ꮡbuf, Ꮡs.Ꮡcbuf]))) {
@@ -281,7 +281,7 @@ internal static ref readonly @string objectsAddedOutOfOrderOrˢᴍstackScanState
 private static readonly @string objectsAddedOutOfOrderOrˢᵇᴍstackScanState = "objects added out of order or overlapping"u8;
 
 // addObject adds a stack object at addr of type typ to the set of stack objects.
-internal static void addObjectᴍ(ref stackScanState s, uintptr addr, ж<stackObjectRecord> Ꮡr) {
+[GoMethodBody("addObject")] internal static void addObjectᴍ(ref stackScanState s, uintptr addr, ж<stackObjectRecord> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var x = s.tail;
@@ -315,7 +315,7 @@ internal static void addObjectᴍ(ref stackScanState s, uintptr addr, ж<stackOb
 // buildIndex initializes s.root to a binary search tree.
 // It should be called after all addObject calls but before
 // any call of findObject.
-internal static void buildIndexᴍ(ref stackScanState s) {
+[GoMethodBody("buildIndex")] internal static void buildIndexᴍ(ref stackScanState s) {
     (s.root, _, _) = binarySearchTree(s.head, 0, s.nobjs);
 }
 
@@ -352,7 +352,7 @@ internal static (ж<stackObject> root, ж<stackObjectBuf> restBuf, nint restIdx)
 
 // findObject returns the stack object containing address a, if any.
 // Must have called buildIndex previously.
-internal static ж<stackObject> findObjectᴍ(ref stackScanState s, uintptr a) {
+[GoMethodBody("findObject")] internal static ж<stackObject> findObjectᴍ(ref stackScanState s, uintptr a) {
     var off = (uint32)(a - s.stack.lo);
     var obj = s.root;
     for (;;) {
@@ -372,16 +372,3 @@ internal static ж<stackObject> findObjectᴍ(ref stackScanState s, uintptr a) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛstackObject {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setRecord(this ж<stackObject> Ꮡobj, ж<stackObjectRecord> r) => runtime_package.setRecordᴍ(Ꮡobj, r);
-}
-partial class runtimeᴛstackScanState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void putPtr(this ж<stackScanState> Ꮡs, uintptr p, bool conservative) => runtime_package.putPtrᴍ(Ꮡs, p, conservative);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uintptr p, bool conservative) getPtr(this ж<stackScanState> Ꮡs) => runtime_package.getPtrᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addObject(this ref stackScanState s, uintptr addr, ж<stackObjectRecord> Ꮡr) => runtime_package.addObjectᴍ(ref s, addr, Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void buildIndex(this ref stackScanState s) => runtime_package.buildIndexᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<stackObject> findObject(this ref stackScanState s, uintptr a) => runtime_package.findObjectᴍ(ref s, a);
-}
-// </GlyphForwarders>

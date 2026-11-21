@@ -27,7 +27,7 @@ partial struct nistCurve {
 
 } partial class ecdh_package {
 
-internal static @string Stringᴍ(ref nistCurve c) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref nistCurve c) {
     return c.name;
 }
 
@@ -35,7 +35,7 @@ internal static @string Stringᴍ(ref nistCurve c) {
 private static ref readonly @string cryptoEcdhOnlyCryptoRandˢᴍnistCurve => ref cryptoEcdhOnlyCryptoRandˢᵇᴍnistCurve;
 private static readonly @string cryptoEcdhOnlyCryptoRandˢᵇᴍnistCurve = "crypto/ecdh: only crypto/rand.Reader is allowed in FIPS 140-only mode"u8;
 
-internal static (ж<PrivateKey>, error) GenerateKeyᴍ(ж<nistCurve> Ꮡc, io.Reader r) {
+[GoMethodBody("GenerateKey")] internal static (ж<PrivateKey>, error) GenerateKeyᴍ(ж<nistCurve> Ꮡc, io.Reader r) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (boring.Enabled && rand.IsDefaultReader(r)) {
@@ -96,7 +96,7 @@ internal static (ж<PrivateKey>, error) GenerateKeyᴍ(ж<nistCurve> Ꮡc, io.Re
 private static ref readonly @string cryptoEcdhInvalidPrivateˢᴍnistCurve => ref cryptoEcdhInvalidPrivateˢᵇᴍnistCurve;
 private static readonly @string cryptoEcdhInvalidPrivateˢᵇᴍnistCurve = "crypto/ecdh: invalid private key"u8;
 
-internal static (ж<PrivateKey>, error) NewPrivateKeyᴍ(ж<nistCurve> Ꮡc, slice<byte> key) {
+[GoMethodBody("NewPrivateKey")] internal static (ж<PrivateKey>, error) NewPrivateKeyᴍ(ж<nistCurve> Ꮡc, slice<byte> key) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (boring.Enabled) {
@@ -138,7 +138,7 @@ internal static (ж<PrivateKey>, error) NewPrivateKeyᴍ(ж<nistCurve> Ꮡc, sli
 private static ref readonly @string cryptoEcdhInvalidPublicˢᴍnistCurve => ref cryptoEcdhInvalidPublicˢᵇᴍnistCurve;
 private static readonly @string cryptoEcdhInvalidPublicˢᵇᴍnistCurve = "crypto/ecdh: invalid public key"u8;
 
-internal static (ж<PublicKey>, error) NewPublicKeyᴍ(ж<nistCurve> Ꮡc, slice<byte> key) {
+[GoMethodBody("NewPublicKey")] internal static (ж<PublicKey>, error) NewPublicKeyᴍ(ж<nistCurve> Ꮡc, slice<byte> key) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Reject the point at infinity and compressed encodings.
@@ -166,7 +166,7 @@ internal static (ж<PublicKey>, error) NewPublicKeyᴍ(ж<nistCurve> Ꮡc, slice
     return (k, default);
 }
 
-internal static (slice<byte>, error) ecdhᴍ(ref nistCurve c, ж<PrivateKey> Ꮡlocal, ж<PublicKey> Ꮡremote) {
+[GoMethodBody("ecdh")] internal static (slice<byte>, error) ecdhᴍ(ref nistCurve c, ж<PrivateKey> Ꮡlocal, ж<PublicKey> Ꮡremote) {
     ref var local = ref Ꮡlocal.DerefOrNull();
     ref var remote = ref Ꮡremote.DerefOrNull();
 
@@ -237,13 +237,3 @@ public static Curve P521() { return new nistCurveжCurve(p521); }
 )); }
 
 } // end ecdh_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class ecdhᴛnistCurve {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref nistCurve c) => ecdh_package.Stringᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<PrivateKey>, error) GenerateKey(this ж<nistCurve> Ꮡc, io.Reader r) => ecdh_package.GenerateKeyᴍ(Ꮡc, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<nistCurve> Ꮡc, slice<byte> key) => ecdh_package.NewPrivateKeyᴍ(Ꮡc, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<PublicKey>, error) NewPublicKey(this ж<nistCurve> Ꮡc, slice<byte> key) => ecdh_package.NewPublicKeyᴍ(Ꮡc, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) ecdh(this ref nistCurve c, ж<PrivateKey> Ꮡlocal, ж<PublicKey> Ꮡremote) => ecdh_package.ecdhᴍ(ref c, Ꮡlocal, Ꮡremote);
-}
-// </GlyphForwarders>

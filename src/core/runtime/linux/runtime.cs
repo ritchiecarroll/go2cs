@@ -32,7 +32,7 @@ partial struct ticksType {
 // init initializes ticks to maximize the chance that we have a good ticksPerSecond reference.
 //
 // Must not run concurrently with ticksPerSecond.
-internal static void initᴍ(ref ticksType t) {
+[GoMethodBody("init")] internal static void initᴍ(ref ticksType t) {
     @lock(Ꮡticks.Ꮡlock);
     t.startTime = nanotime();
     t.startTicks = cputicks();
@@ -173,7 +173,7 @@ partial struct godebugInc {
 
 } partial class runtime_package {
 
-internal static void IncNonDefaultᴍ(ж<godebugInc> Ꮡg) {
+[GoMethodBody("IncNonDefault")] internal static void IncNonDefaultᴍ(ж<godebugInc> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     var inc = Ꮡg.Ꮡinc.Load();
@@ -321,12 +321,3 @@ public static readonly ж<array<byte>> ᏑzeroVal = new StaticBox<array<byte>>(n
 public static ref array<byte> zeroVal => ref ((StaticBox<array<byte>>)ᏑzeroVal).ValueSlot;
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛticksType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref ticksType t) => runtime_package.initᴍ(ref t);
-}
-partial class runtimeᴛgodebugInc {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void IncNonDefault(this ж<godebugInc> Ꮡg) => runtime_package.IncNonDefaultᴍ(Ꮡg);
-}
-// </GlyphForwarders>

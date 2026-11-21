@@ -44,7 +44,7 @@ partial struct traceWriter {
 // nosplit to allow for safe reentrant tracing from stack growth paths.
 //
 //go:nosplit
-internal static traceWriter writerᴍ(traceLocker tl) {
+[GoMethodBody("writer")] internal static traceWriter writerᴍ(traceLocker tl) {
     if (debugTraceReentrancy) {
         // Checks that the invariants of this function are being upheld.
         var gp = getg();
@@ -79,7 +79,7 @@ internal static traceWriter unsafeTraceWriter(uintptr gen, ж<traceBuf> buf) {
 // have any stack growth.
 //
 //go:nosplit
-internal static traceWriter @eventᴍ(traceWriter w, tracev2.EventType ev, params ꓸꓸꓸtraceArg argsʗp) {
+[GoMethodBody("event")] internal static traceWriter @eventᴍ(traceWriter w, tracev2.EventType ev, params ꓸꓸꓸtraceArg argsʗp) {
     var args = argsʗp.sslice();
 
     // N.B. Everything in this call must be nosplit to maintain
@@ -111,7 +111,7 @@ internal static traceWriter @eventᴍ(traceWriter w, tracev2.EventType ev, param
 // have any stack growth.
 //
 //go:nosplit
-internal static void endᴍ(traceWriter w) {
+[GoMethodBody("end")] internal static void endᴍ(traceWriter w) {
     if (w.mp == nil) {
         // Tolerate a nil mp. It makes code that creates traceWriters directly
         // less error-prone.
@@ -136,7 +136,7 @@ internal static void endᴍ(traceWriter w) {
 // have any stack growth.
 //
 //go:nosplit
-internal static (traceWriter, bool) ensureᴍ(traceWriter w, nint maxSize) {
+[GoMethodBody("ensure")] internal static (traceWriter, bool) ensureᴍ(traceWriter w, nint maxSize) {
     var refill = w.traceBuf == nil || !w.available(maxSize);
     if (refill) {
         w = w.refill();
@@ -150,7 +150,7 @@ internal static (traceWriter, bool) ensureᴍ(traceWriter w, nint maxSize) {
 // have any stack growth.
 //
 //go:nosplit
-internal static traceWriter flushᴍ(traceWriter w) {
+[GoMethodBody("flush")] internal static traceWriter flushᴍ(traceWriter w) {
     systemstack(() => {
         @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         if (w.traceBuf != nil) {
@@ -169,7 +169,7 @@ internal static ref readonly @string traceOutOfMemoryˢᴍtraceWriter => ref tra
 private static readonly @string traceOutOfMemoryˢᵇᴍtraceWriter = "trace: out of memory"u8;
 
 // refill puts w.traceBuf on the queue of full buffers and refresh's w's buffer.
-internal static traceWriter refillᴍ(traceWriter w) {
+[GoMethodBody("refill")] internal static traceWriter refillᴍ(traceWriter w) {
     systemstack(() => {
         @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         if (w.traceBuf != nil) {
@@ -220,7 +220,7 @@ internal static traceWriter refillᴍ(traceWriter w) {
 
 // expWriter returns a traceWriter that writes into the current M's stream for
 // the given experiment.
-internal static traceWriter expWriterᴍ(traceLocker tl, tracev2.Experiment exp) {
+[GoMethodBody("expWriter")] internal static traceWriter expWriterᴍ(traceLocker tl, tracev2.Experiment exp) {
     return new traceWriter(traceLocker: tl, traceBuf: (~tl.mp).trace.buf[tl.gen % 2][exp], exp: exp);
 }
 
@@ -249,7 +249,7 @@ partial struct traceBufQueue {
 } partial class runtime_package {
 
 // push queues buf into queue of buffers.
-internal static void pushᴍ(ref traceBufQueue q, ж<traceBuf> Ꮡbuf) {
+[GoMethodBody("push")] internal static void pushᴍ(ref traceBufQueue q, ж<traceBuf> Ꮡbuf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     buf.link = default;
@@ -262,7 +262,7 @@ internal static void pushᴍ(ref traceBufQueue q, ж<traceBuf> Ꮡbuf) {
 }
 
 // pop dequeues from the queue of buffers.
-internal static ж<traceBuf> popᴍ(ref traceBufQueue q) {
+[GoMethodBody("pop")] internal static ж<traceBuf> popᴍ(ref traceBufQueue q) {
     var buf = q.head;
     if (buf == nil) {
         return default;
@@ -275,7 +275,7 @@ internal static ж<traceBuf> popᴍ(ref traceBufQueue q) {
     return buf;
 }
 
-internal static bool emptyᴍ(ref traceBufQueue q) {
+[GoMethodBody("empty")] internal static bool emptyᴍ(ref traceBufQueue q) {
     return q.head == nil;
 }
 
@@ -306,7 +306,7 @@ partial struct traceBuf {
 // have any stack growth.
 //
 //go:nosplit
-internal static void @byteᴍ(ref traceBuf buf, byte v) {
+[GoMethodBody("byte")] internal static void @byteᴍ(ref traceBuf buf, byte v) {
     buf.arr[buf.pos] = v;
     buf.pos++;
 }
@@ -317,7 +317,7 @@ internal static void @byteᴍ(ref traceBuf buf, byte v) {
 // have any stack growth.
 //
 //go:nosplit
-internal static void varintᴍ(ref traceBuf buf, uint64 v) {
+[GoMethodBody("varint")] internal static void varintᴍ(ref traceBuf buf, uint64 v) {
     nint pos = buf.pos;
     var arr = buf.arr.slice(pos, pos + (nint)traceBytesPerNumber);
     foreach (var i in range(len(arr))) {
@@ -340,7 +340,7 @@ internal static void varintᴍ(ref traceBuf buf, uint64 v) {
 // have any stack growth.
 //
 //go:nosplit
-internal static nint varintReserveᴍ(ref traceBuf buf) {
+[GoMethodBody("varintReserve")] internal static nint varintReserveᴍ(ref traceBuf buf) {
     nint p = buf.pos;
     buf.pos += traceBytesPerNumber;
     return p;
@@ -352,7 +352,7 @@ internal static nint varintReserveᴍ(ref traceBuf buf) {
 // have any stack growth.
 //
 //go:nosplit
-internal static void stringDataᴍ(ref traceBuf buf, @string s) {
+[GoMethodBody("stringData")] internal static void stringDataᴍ(ref traceBuf buf, @string s) {
     buf.pos += copy(buf.arr.slice(buf.pos), s);
 }
 
@@ -360,7 +360,7 @@ internal static void stringDataᴍ(ref traceBuf buf, @string s) {
 // have any stack growth.
 //
 //go:nosplit
-internal static bool availableᴍ(ref traceBuf buf, nint size) {
+[GoMethodBody("available")] internal static bool availableᴍ(ref traceBuf buf, nint size) {
     return len(buf.arr) - buf.pos >= size;
 }
 
@@ -377,7 +377,7 @@ private static readonly @string vCouldNotFitInˢᵇᴍtraceBuf = "v could not fi
 // have any stack growth.
 //
 //go:nosplit
-internal static void varintAtᴍ(ref traceBuf buf, nint pos, uint64 v) {
+[GoMethodBody("varintAt")] internal static void varintAtᴍ(ref traceBuf buf, nint pos, uint64 v) {
     for (nint i = 0; i < traceBytesPerNumber; i++) {
         if (i < (nint)(traceBytesPerNumber - 1)) {
             buf.arr[pos] = (byte)(0x80 | (byte)v);
@@ -423,30 +423,3 @@ internal static void traceBufFlush(ж<traceBuf> Ꮡbuf, uintptr gen) {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛtraceLocker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceWriter writer(this traceLocker tl) => runtime_package.writerᴍ(tl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceWriter expWriter(this traceLocker tl, tracev2.Experiment exp) => runtime_package.expWriterᴍ(tl, exp);
-}
-partial class runtimeᴛtraceWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceWriter @event(this traceWriter w, tracev2.EventType ev, params ꓸꓸꓸtraceArg argsʗp) => runtime_package.@eventᴍ(w, ev, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void end(this traceWriter w) => runtime_package.endᴍ(w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (traceWriter, bool) ensure(this traceWriter w, nint maxSize) => runtime_package.ensureᴍ(w, maxSize);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceWriter flush(this traceWriter w) => runtime_package.flushᴍ(w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static traceWriter refill(this traceWriter w) => runtime_package.refillᴍ(w);
-}
-partial class runtimeᴛtraceBufQueue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void push(this ref traceBufQueue q, ж<traceBuf> Ꮡbuf) => runtime_package.pushᴍ(ref q, Ꮡbuf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<traceBuf> pop(this ref traceBufQueue q) => runtime_package.popᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ref traceBufQueue q) => runtime_package.emptyᴍ(ref q);
-}
-partial class runtimeᴛtraceBuf {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void @byte(this ref traceBuf buf, byte v) => runtime_package.@byteᴍ(ref buf, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void varint(this ref traceBuf buf, uint64 v) => runtime_package.varintᴍ(ref buf, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint varintReserve(this ref traceBuf buf) => runtime_package.varintReserveᴍ(ref buf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stringData(this ref traceBuf buf, @string s) => runtime_package.stringDataᴍ(ref buf, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool available(this ref traceBuf buf, nint size) => runtime_package.availableᴍ(ref buf, size);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void varintAt(this ref traceBuf buf, nint pos, uint64 v) => runtime_package.varintAtᴍ(ref buf, pos, v);
-}
-// </GlyphForwarders>

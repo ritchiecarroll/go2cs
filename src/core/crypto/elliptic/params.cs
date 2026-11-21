@@ -26,7 +26,7 @@ partial struct CurveParams {
 
 } partial class elliptic_package {
 
-internal static ж<CurveParams> Paramsᴍ(ж<CurveParams> Ꮡcurve) {
+[GoMethodBody("Params")] internal static ж<CurveParams> Paramsᴍ(ж<CurveParams> Ꮡcurve) {
     return Ꮡcurve;
 }
 
@@ -38,7 +38,7 @@ internal static ж<CurveParams> Paramsᴍ(ж<CurveParams> Ꮡcurve) {
 // reverse the transform than to operate in affine coordinates.
 
 // polynomial returns x³ - 3x + b.
-internal static ж<big.Int> polynomialᴍ(ref CurveParams curve, ж<big.Int> x) {
+[GoMethodBody("polynomial")] internal static ж<big.Int> polynomialᴍ(ref CurveParams curve, ж<big.Int> x) {
     var x3 = @new<big.Int>().Mul(x, x);
     x3.Mul(x3, x);
 
@@ -58,7 +58,7 @@ internal static ж<big.Int> polynomialᴍ(ref CurveParams curve, ж<big.Int> x) 
 // provide any security property. For ECDH, use the [crypto/ecdh] package.
 // For ECDSA, use the [crypto/ecdsa] package with a [Curve] value returned directly
 // from [P224], [P256], [P384], or [P521].
-internal static bool IsOnCurveᴍ(ж<CurveParams> Ꮡcurve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) {
+[GoMethodBody("IsOnCurve")] internal static bool IsOnCurveᴍ(ж<CurveParams> Ꮡcurve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) {
     ref var curve = ref Ꮡcurve.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -100,7 +100,7 @@ internal static ж<big.Int> zForAffine(ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) {
 
 // affineFromJacobian reverses the Jacobian transform. See the comment at the
 // top of the file. If the point is ∞ it returns 0, 0.
-internal static (ж<big.Int> xOut, ж<big.Int> yOut) affineFromJacobianᴍ(ref CurveParams curve, ж<big.Int> x, ж<big.Int> y, ж<big.Int> Ꮡz) {
+[GoMethodBody("affineFromJacobian")] internal static (ж<big.Int> xOut, ж<big.Int> yOut) affineFromJacobianᴍ(ref CurveParams curve, ж<big.Int> x, ж<big.Int> y, ж<big.Int> Ꮡz) {
     ж<big.Int> xOut = default;
     ж<big.Int> yOut = default;
     ref var z = ref Ꮡz.DerefOrNull();
@@ -126,7 +126,7 @@ internal static (ж<big.Int> xOut, ж<big.Int> yOut) affineFromJacobianᴍ(ref C
 // provide any security property. For ECDH, use the [crypto/ecdh] package.
 // For ECDSA, use the [crypto/ecdsa] package with a [Curve] value returned directly
 // from [P224], [P256], [P384], or [P521].
-internal static (ж<big.Int>, ж<big.Int>) Addᴍ(ж<CurveParams> Ꮡcurve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> x2, ж<big.Int> y2) {
+[GoMethodBody("Add")] internal static (ж<big.Int>, ж<big.Int>) Addᴍ(ж<CurveParams> Ꮡcurve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> x2, ж<big.Int> y2) {
     ref var curve = ref Ꮡcurve.DerefOrNull();
 
     // If there is a dedicated constant-time implementation for this curve operation,
@@ -145,7 +145,7 @@ internal static (ж<big.Int>, ж<big.Int>) Addᴍ(ж<CurveParams> Ꮡcurve, ж<b
 
 // addJacobian takes two points in Jacobian coordinates, (x1, y1, z1) and
 // (x2, y2, z2) and returns their sum, also in Jacobian form.
-internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) addJacobianᴍ(ref CurveParams curve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> Ꮡz1, ж<big.Int> x2, ж<big.Int> y2, ж<big.Int> Ꮡz2) {
+[GoMethodBody("addJacobian")] internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) addJacobianᴍ(ref CurveParams curve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> Ꮡz1, ж<big.Int> x2, ж<big.Int> y2, ж<big.Int> Ꮡz2) {
     ref var z1 = ref Ꮡz1.DerefOrNull();
     ref var z2 = ref Ꮡz2.DerefOrNull();
 
@@ -230,7 +230,7 @@ internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) addJacobianᴍ(ref Curve
 // provide any security property. For ECDH, use the [crypto/ecdh] package.
 // For ECDSA, use the [crypto/ecdsa] package with a [Curve] value returned directly
 // from [P224], [P256], [P384], or [P521].
-internal static (ж<big.Int>, ж<big.Int>) Doubleᴍ(ж<CurveParams> Ꮡcurve, ж<big.Int> x1, ж<big.Int> y1) {
+[GoMethodBody("Double")] internal static (ж<big.Int>, ж<big.Int>) Doubleᴍ(ж<CurveParams> Ꮡcurve, ж<big.Int> x1, ж<big.Int> y1) {
     ref var curve = ref Ꮡcurve.DerefOrNull();
 
     // If there is a dedicated constant-time implementation for this curve operation,
@@ -247,7 +247,7 @@ internal static (ж<big.Int>, ж<big.Int>) Doubleᴍ(ж<CurveParams> Ꮡcurve, �
 
 // doubleJacobian takes a point in Jacobian coordinates, (x, y, z), and
 // returns its double, also in Jacobian form.
-internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) doubleJacobianᴍ(ref CurveParams curve, ж<big.Int> x, ж<big.Int> y, ж<big.Int> z) {
+[GoMethodBody("doubleJacobian")] internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) doubleJacobianᴍ(ref CurveParams curve, ж<big.Int> x, ж<big.Int> y, ж<big.Int> z) {
     // See https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-3.html#doubling-dbl-2001-b
     var delta = @new<big.Int>().Mul(z, z);
     delta.Mod(delta, curve.P);
@@ -312,7 +312,7 @@ internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) doubleJacobianᴍ(ref Cu
 // provide any security property. For ECDH, use the [crypto/ecdh] package.
 // For ECDSA, use the [crypto/ecdsa] package with a [Curve] value returned directly
 // from [P224], [P256], [P384], or [P521].
-internal static (ж<big.Int>, ж<big.Int>) ScalarMultᴍ(ж<CurveParams> Ꮡcurve, ж<big.Int> Bx, ж<big.Int> By, slice<byte> k) {
+[GoMethodBody("ScalarMult")] internal static (ж<big.Int>, ж<big.Int>) ScalarMultᴍ(ж<CurveParams> Ꮡcurve, ж<big.Int> Bx, ж<big.Int> By, slice<byte> k) {
     ref var curve = ref Ꮡcurve.DerefOrNull();
 
     // If there is a dedicated constant-time implementation for this curve operation,
@@ -346,7 +346,7 @@ internal static (ж<big.Int>, ж<big.Int>) ScalarMultᴍ(ж<CurveParams> Ꮡcurv
 // provide any security property. For ECDH, use the [crypto/ecdh] package.
 // For ECDSA, use the [crypto/ecdsa] package with a [Curve] value returned directly
 // from [P224], [P256], [P384], or [P521].
-internal static (ж<big.Int>, ж<big.Int>) ScalarBaseMultᴍ(ж<CurveParams> Ꮡcurve, slice<byte> k) {
+[GoMethodBody("ScalarBaseMult")] internal static (ж<big.Int>, ж<big.Int>) ScalarBaseMultᴍ(ж<CurveParams> Ꮡcurve, slice<byte> k) {
     ref var curve = ref Ꮡcurve.DerefOrNull();
 
     // If there is a dedicated constant-time implementation for this curve operation,
@@ -370,18 +370,3 @@ internal static (Curve, bool) matchesSpecificCurve(ж<CurveParams> @params) {
 }
 
 } // end elliptic_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class ellipticᴛCurveParams {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<CurveParams> Params(this ж<CurveParams> Ꮡcurve) => elliptic_package.Paramsᴍ(Ꮡcurve);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<big.Int> polynomial(this ref CurveParams curve, ж<big.Int> x) => elliptic_package.polynomialᴍ(ref curve, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsOnCurve(this ж<CurveParams> Ꮡcurve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) => elliptic_package.IsOnCurveᴍ(Ꮡcurve, Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<big.Int> xOut, ж<big.Int> yOut) affineFromJacobian(this ref CurveParams curve, ж<big.Int> x, ж<big.Int> y, ж<big.Int> Ꮡz) => elliptic_package.affineFromJacobianᴍ(ref curve, x, y, Ꮡz);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<big.Int>, ж<big.Int>) Add(this ж<CurveParams> Ꮡcurve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> x2, ж<big.Int> y2) => elliptic_package.Addᴍ(Ꮡcurve, x1, y1, x2, y2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) addJacobian(this ref CurveParams curve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> Ꮡz1, ж<big.Int> x2, ж<big.Int> y2, ж<big.Int> Ꮡz2) => elliptic_package.addJacobianᴍ(ref curve, x1, y1, Ꮡz1, x2, y2, Ꮡz2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<big.Int>, ж<big.Int>) Double(this ж<CurveParams> Ꮡcurve, ж<big.Int> x1, ж<big.Int> y1) => elliptic_package.Doubleᴍ(Ꮡcurve, x1, y1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<big.Int>, ж<big.Int>, ж<big.Int>) doubleJacobian(this ref CurveParams curve, ж<big.Int> x, ж<big.Int> y, ж<big.Int> z) => elliptic_package.doubleJacobianᴍ(ref curve, x, y, z);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<big.Int>, ж<big.Int>) ScalarMult(this ж<CurveParams> Ꮡcurve, ж<big.Int> Bx, ж<big.Int> By, slice<byte> k) => elliptic_package.ScalarMultᴍ(Ꮡcurve, Bx, By, k);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<big.Int>, ж<big.Int>) ScalarBaseMult(this ж<CurveParams> Ꮡcurve, slice<byte> k) => elliptic_package.ScalarBaseMultᴍ(Ꮡcurve, k);
-}
-// </GlyphForwarders>

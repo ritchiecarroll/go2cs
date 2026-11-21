@@ -60,6 +60,10 @@ using static go.@internal.coverage.calloc_package;
 
 namespace go.@internal.coverage;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using static calloc_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("calloc")]
 public static partial class calloc_package
 {
@@ -92,3 +96,9 @@ public static partial class calloc_package
 // <MethodHolders>
 [GoMethodHost(typeof(calloc_package.BatchCounterAlloc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class callocᴛBatchCounterAlloc;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class callocᴛBatchCounterAlloc {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<uint32> AllocateCounters(this ref BatchCounterAlloc ca, nint n) => calloc_package.AllocateCountersᴍ(ref ca, n);
+}
+// </GlyphForwarders>

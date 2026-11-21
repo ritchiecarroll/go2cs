@@ -24,7 +24,7 @@ partial struct Error {
 } partial class scanner_package {
 
 // Error implements the error interface.
-internal static @string Errorᴍ(Error e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(Error e) {
     if (e.Pos.Filename != ""u8 || e.Pos.IsValid()) {
         // don't print "<unknown position>"
         // TODO(gri) reconsider the semantics of Position.IsValid
@@ -42,18 +42,18 @@ partial struct ErrorList /*[]ж<Error>*/;
 } partial class scanner_package {
 
 // Add adds an [Error] with given position and error message to an [ErrorList].
-internal static void Addᴍ(ref ErrorList p, token.Position pos, @string msg) {
+[GoMethodBody("Add")] internal static void Addᴍ(ref ErrorList p, token.Position pos, @string msg) {
     p = append(p, Ꮡ(new Error(pos, msg)));
 }
 
 // Reset resets an [ErrorList] to no errors.
-internal static void Resetᴍ(ref ErrorList p) { p = (p)[0..0]; }
+[GoMethodBody("Reset")] internal static void Resetᴍ(ref ErrorList p) { p = (p)[0..0]; }
 
 // [ErrorList] implements the sort Interface.
-internal static nint Lenᴍ(ErrorList p) { return len(p); }
-internal static void Swapᴍ(ErrorList p, nint i, nint j) { (p[i], p[j]) = (p[j], p[i]); }
+[GoMethodBody("Len")] internal static nint Lenᴍ(ErrorList p) { return len(p); }
+[GoMethodBody("Swap")] internal static void Swapᴍ(ErrorList p, nint i, nint j) { (p[i], p[j]) = (p[j], p[i]); }
 
-internal static bool Lessᴍ(ErrorList p, nint i, nint j) {
+[GoMethodBody("Less")] internal static bool Lessᴍ(ErrorList p, nint i, nint j) {
     var e = p[i].ᏑPos;
     var f = p[j].ᏑPos;
     // Note that it is not sufficient to simply compare file offsets because
@@ -74,12 +74,12 @@ internal static bool Lessᴍ(ErrorList p, nint i, nint j) {
 // Sort sorts an [ErrorList]. *[Error] entries are sorted by position,
 // other errors are sorted by error message, and before any *[Error]
 // entry.
-internal static void Sortᴍ(ErrorList p) {
+[GoMethodBody("Sort")] internal static void Sortᴍ(ErrorList p) {
     sort.Sort(p);
 }
 
 // RemoveMultiples sorts an [ErrorList] and removes all but the first error per line.
-internal static void RemoveMultiplesᴍ(ж<ErrorList> Ꮡp) {
+[GoMethodBody("RemoveMultiples")] internal static void RemoveMultiplesᴍ(ж<ErrorList> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     sort.Sort(new ErrorListжInterface(Ꮡp));
@@ -100,7 +100,7 @@ internal static ref readonly @string noErrorsˢᴍErrorList => ref noErrorsˢᵇ
 private static readonly @string noErrorsˢᵇᴍErrorList = "no errors"u8;
 
 // An [ErrorList] implements the error interface.
-internal static @string Errorᴍ(ErrorList p) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ErrorList p) {
     switch (len(p)) {
     case 0: {
         return noErrorsˢᴍErrorList;
@@ -113,7 +113,7 @@ internal static @string Errorᴍ(ErrorList p) {
 
 // Err returns an error equivalent to this error list.
 // If the list is empty, Err returns nil.
-internal static error Errᴍ(ErrorList p) {
+[GoMethodBody("Err")] internal static error Errᴍ(ErrorList p) {
     if (len(p) == 0) {
         return default;
     }
@@ -136,20 +136,3 @@ public static void PrintError(io.Writer w, error err) {
 }
 
 } // end scanner_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class scannerᴛError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this Error e) => scanner_package.Errorᴍ(e);
-}
-partial class scannerᴛErrorList {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Add(this ref ErrorList p, token.Position pos, @string msg) => scanner_package.Addᴍ(ref p, pos, msg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref ErrorList p) => scanner_package.Resetᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ErrorList p) => scanner_package.Lenᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Swap(this ErrorList p, nint i, nint j) => scanner_package.Swapᴍ(p, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Less(this ErrorList p, nint i, nint j) => scanner_package.Lessᴍ(p, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Sort(this ErrorList p) => scanner_package.Sortᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RemoveMultiples(this ж<ErrorList> Ꮡp) => scanner_package.RemoveMultiplesᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ErrorList p) => scanner_package.Errorᴍ(p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Err(this ErrorList p) => scanner_package.Errᴍ(p);
-}
-// </GlyphForwarders>

@@ -52,14 +52,14 @@ partial struct Printer {
 
 } partial class comment_package {
 
-internal static nint headingLevelᴍ(ref Printer p) {
+[GoMethodBody("headingLevel")] internal static nint headingLevelᴍ(ref Printer p) {
     if (p.HeadingLevel <= 0) {
         return 3;
     }
     return p.HeadingLevel;
 }
 
-internal static @string headingIDᴍ(ref Printer p, ж<Heading> Ꮡh) {
+[GoMethodBody("headingID")] internal static @string headingIDᴍ(ref Printer p, ж<Heading> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (p.HeadingID == nil) {
@@ -68,7 +68,7 @@ internal static @string headingIDᴍ(ref Printer p, ж<Heading> Ꮡh) {
     return p.HeadingID(Ꮡh);
 }
 
-internal static @string docLinkURLᴍ(ref Printer p, ж<DocLink> Ꮡlink) {
+[GoMethodBody("docLinkURL")] internal static @string docLinkURLᴍ(ref Printer p, ж<DocLink> Ꮡlink) {
     ref var link = ref Ꮡlink.DerefOrNull();
 
     if (p.DocLinkURL != nil) {
@@ -97,7 +97,7 @@ internal static @string docLinkURLᴍ(ref Printer p, ж<DocLink> Ꮡlink) {
 //	"/pkg"  → "/pkg/math#Sqrt"
 //	"/"     → "/math/#Sqrt"
 //	""      → "/math#Sqrt"
-internal static @string DefaultURLᴍ(ref DocLink l, @string baseURL) {
+[GoMethodBody("DefaultURL")] internal static @string DefaultURLᴍ(ref DocLink l, @string baseURL) {
     if (l.ImportPath != ""u8) {
         @string slash = ""u8;
         if (strings.HasSuffix(baseURL, "/")) {
@@ -135,7 +135,7 @@ private static readonly @string hdrˢᵇᴍHeading = "hdr-"u8;
 // and then adding the prefix “hdr-”.
 // For example, if the heading text is “Go Doc Comments”,
 // the default ID is “hdr-Go_Doc_Comments”.
-internal static @string DefaultIDᴍ(ref Heading h) {
+[GoMethodBody("DefaultID")] internal static @string DefaultIDᴍ(ref Heading h) {
     // Note: The “hdr-” prefix is important to avoid DOM clobbering attacks.
     // See https://pkg.go.dev/github.com/google/safehtml#Identifier.
     ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
@@ -167,7 +167,7 @@ partial struct commentPrinter {
 
 // Comment returns the standard Go formatting of the [Doc],
 // without any comment markers.
-internal static slice<byte> Commentᴍ(ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+[GoMethodBody("Comment")] internal static slice<byte> Commentᴍ(ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var cp = Ꮡ(new commentPrinter(Printer: Ꮡp));
@@ -223,7 +223,7 @@ internal static ref readonly @string fourSpaceᶜ1ᴍcommentPrinter => ref fourS
 private static readonly @string fourSpaceᶜ1ᵇᴍcommentPrinter = "    "u8;
 
 // block prints the block x to out.
-internal static void blockᴍ(ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
+[GoMethodBody("block")] internal static void blockᴍ(ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     switch (x.type()) {
@@ -283,7 +283,7 @@ internal static void blockᴍ(ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Blo
 }
 
 // text prints the text sequence x to out.
-internal static void textᴍ(ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) {
+[GoMethodBody("text")] internal static void textᴍ(ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     foreach (var (_, t) in range(x)) {
@@ -317,7 +317,7 @@ internal static void textᴍ(ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @str
 
 // indent prints s to out, indenting with the indent string
 // after each newline in s.
-internal static void indentᴍ(ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, @string s) {
+[GoMethodBody("indent")] internal static void indentᴍ(ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, @string s) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     while (s != ""u8) {
@@ -332,23 +332,3 @@ internal static void indentᴍ(ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @s
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class commentᴛPrinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint headingLevel(this ref Printer p) => comment_package.headingLevelᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string headingID(this ref Printer p, ж<Heading> Ꮡh) => comment_package.headingIDᴍ(ref p, Ꮡh);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string docLinkURL(this ref Printer p, ж<DocLink> Ꮡlink) => comment_package.docLinkURLᴍ(ref p, Ꮡlink);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.Commentᴍ(Ꮡp, Ꮡd);
-}
-partial class commentᴛDocLink {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string DefaultURL(this ref DocLink l, @string baseURL) => comment_package.DefaultURLᴍ(ref l, baseURL);
-}
-partial class commentᴛHeading {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string DefaultID(this ref Heading h) => comment_package.DefaultIDᴍ(ref h);
-}
-partial class commentᴛcommentPrinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.blockᴍ(ref p, Ꮡout, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) => comment_package.textᴍ(ref p, Ꮡout, indent, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void indent(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, @string s) => comment_package.indentᴍ(ref p, Ꮡout, indent, s);
-}
-// </GlyphForwarders>

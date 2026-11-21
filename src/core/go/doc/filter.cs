@@ -110,7 +110,7 @@ internal static slice<ж<Type>> filterTypes(slice<ж<Type>> a, Func<@string, boo
 
 // Filter eliminates documentation for names that don't pass through the filter f.
 // TODO(gri): Recognize "Type.Method" as a name.
-internal static void Filterᴍ(ref Package p, Func<@string, bool> f) {
+[GoMethodBody("Filter")] internal static void Filterᴍ(ref Package p, Func<@string, bool> f) {
     p.Consts = filterValues(p.Consts, f);
     p.Vars = filterValues(p.Vars, f);
     p.Types = filterTypes(p.Types, f);
@@ -119,9 +119,3 @@ internal static void Filterᴍ(ref Package p, Func<@string, bool> f) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class docᴛPackage {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Filter(this ref Package p, Func<@string, bool> f) => doc_package.Filterᴍ(ref p, f);
-}
-// </GlyphForwarders>

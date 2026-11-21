@@ -73,6 +73,33 @@ using static go.net.http.pprof_package;
 
 namespace go.net.http;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using bufio = bufio_package;
+using bytes = bytes_package;
+using context = context_package;
+using fmt = fmt_package;
+using html = html_package;
+using godebug = go.@internal.godebug_package;
+using goexperiment = go.@internal.goexperiment_package;
+using profile = go.@internal.profile_package;
+using io = io_package;
+using log = log_package;
+using http = go.net.http_package;
+using url = go.net.url_package;
+using os = os_package;
+using runtime = runtime_package;
+using pprof = go.runtime.pprof_package;
+using trace = go.runtime.trace_package;
+using slices = slices_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using time = time_package;
+using go.@internal;
+using go.net;
+using go.runtime;
+using static pprof_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("pprof")]
 public static partial class pprof_package
 {
@@ -125,3 +152,10 @@ public static partial class pprof_package
 // <MethodHolders>
 [GoMethodHost(typeof(pprof_package.handler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pprofᴛhandler;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class pprofᴛhandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ServeHTTP(this handler name, http.ResponseWriter w, ж<http.Request> r) => pprof_package.ServeHTTPᴍ(name, w, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void serveDeltaProfile(this handler name, http.ResponseWriter w, ж<http.Request> Ꮡr, ж<pprof.Profile> p, @string secStr) => pprof_package.serveDeltaProfileᴍ(name, w, Ꮡr, p, secStr);
+}
+// </GlyphForwarders>

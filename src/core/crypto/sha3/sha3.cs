@@ -131,14 +131,14 @@ public static ж<SHA3> New512() {
 
 } partial class sha3_package {
 
-internal static void initᴍ(ref SHA3 s) {
+[GoMethodBody("init")] internal static void initᴍ(ref SHA3 s) {
     if (s.s.Size() == 0) {
         s.AssignFrom(New256().Value);
     }
 }
 
 // Write absorbs more data into the hash's state.
-internal static (nint n, error err) Writeᴍ(ж<SHA3> Ꮡs, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<SHA3> Ꮡs, slice<byte> p) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.init();
@@ -146,49 +146,49 @@ internal static (nint n, error err) Writeᴍ(ж<SHA3> Ꮡs, slice<byte> p) {
 }
 
 // Sum appends the current hash to b and returns the resulting slice.
-internal static slice<byte> Sumᴍ(ref SHA3 s, slice<byte> b) {
+[GoMethodBody("Sum")] internal static slice<byte> Sumᴍ(ref SHA3 s, slice<byte> b) {
     s.init();
     return s.s.Sum(b);
 }
 
 // Reset resets the hash to its initial state.
-internal static void Resetᴍ(ref SHA3 s) {
+[GoMethodBody("Reset")] internal static void Resetᴍ(ref SHA3 s) {
     s.init();
     s.s.Reset();
 }
 
 // Size returns the number of bytes Sum will produce.
-internal static nint Sizeᴍ(ref SHA3 s) {
+[GoMethodBody("Size")] internal static nint Sizeᴍ(ref SHA3 s) {
     s.init();
     return s.s.Size();
 }
 
 // BlockSize returns the hash's rate.
-internal static nint BlockSizeᴍ(ref SHA3 s) {
+[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref SHA3 s) {
     s.init();
     return s.s.BlockSize();
 }
 
 // MarshalBinary implements [encoding.BinaryMarshaler].
-internal static (slice<byte>, error) MarshalBinaryᴍ(ref SHA3 s) {
+[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(ref SHA3 s) {
     s.init();
     return s.s.MarshalBinary();
 }
 
 // AppendBinary implements [encoding.BinaryAppender].
-internal static (slice<byte>, error) AppendBinaryᴍ(ref SHA3 s, slice<byte> p) {
+[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ref SHA3 s, slice<byte> p) {
     s.init();
     return s.s.AppendBinary(p);
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler].
-internal static error UnmarshalBinaryᴍ(ref SHA3 s, slice<byte> data) {
+[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref SHA3 s, slice<byte> data) {
     s.init();
     return s.s.UnmarshalBinary(data);
 }
 
 // Clone implements [hash.Cloner].
-internal static (hash.Cloner, error) Cloneᴍ(ref SHA3 d) {
+[GoMethodBody("Clone")] internal static (hash.Cloner, error) Cloneᴍ(ref SHA3 d) {
     ref var r = ref heap<SHA3>(d.ΔClone(), out var Ꮡr);
     return (new SHA3жCloner(Ꮡr), default);
 }
@@ -203,7 +203,7 @@ partial struct SHAKE {
 
 } partial class sha3_package {
 
-internal static void initᴍ(ref SHAKE s) {
+[GoMethodBody("init")] internal static void initᴍ(ref SHAKE s) {
     if (s.s.Size() == 0) {
         s.AssignFrom(NewSHAKE256().Value);
     }
@@ -244,7 +244,7 @@ public static ж<SHAKE> NewCSHAKE256(slice<byte> N, slice<byte> S) {
 // Write absorbs more data into the XOF's state.
 //
 // It panics if any output has already been read.
-internal static (nint n, error err) Writeᴍ(ж<SHAKE> Ꮡs, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<SHAKE> Ꮡs, slice<byte> p) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.init();
@@ -254,7 +254,7 @@ internal static (nint n, error err) Writeᴍ(ж<SHAKE> Ꮡs, slice<byte> p) {
 // Read squeezes more output from the XOF.
 //
 // Any call to Write after a call to Read will panic.
-internal static (nint n, error err) Readᴍ(ж<SHAKE> Ꮡs, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ж<SHAKE> Ꮡs, slice<byte> p) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.init();
@@ -262,7 +262,7 @@ internal static (nint n, error err) Readᴍ(ж<SHAKE> Ꮡs, slice<byte> p) {
 }
 
 // Reset resets the XOF to its initial state.
-internal static void Resetᴍ(ж<SHAKE> Ꮡs) {
+[GoMethodBody("Reset")] internal static void Resetᴍ(ж<SHAKE> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.init();
@@ -270,52 +270,27 @@ internal static void Resetᴍ(ж<SHAKE> Ꮡs) {
 }
 
 // BlockSize returns the rate of the XOF.
-internal static nint BlockSizeᴍ(ref SHAKE s) {
+[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref SHAKE s) {
     s.init();
     return s.s.BlockSize();
 }
 
 // MarshalBinary implements [encoding.BinaryMarshaler].
-internal static (slice<byte>, error) MarshalBinaryᴍ(ref SHAKE s) {
+[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(ref SHAKE s) {
     s.init();
     return s.s.MarshalBinary();
 }
 
 // AppendBinary implements [encoding.BinaryAppender].
-internal static (slice<byte>, error) AppendBinaryᴍ(ref SHAKE s, slice<byte> p) {
+[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ref SHAKE s, slice<byte> p) {
     s.init();
     return s.s.AppendBinary(p);
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler].
-internal static error UnmarshalBinaryᴍ(ref SHAKE s, slice<byte> data) {
+[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref SHAKE s, slice<byte> data) {
     s.init();
     return s.s.UnmarshalBinary(data);
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class sha3ᴛSHA3 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref SHA3 s) => sha3_package.initᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ж<SHA3> Ꮡs, slice<byte> p) => sha3_package.Writeᴍ(Ꮡs, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Sum(this ref SHA3 s, slice<byte> b) => sha3_package.Sumᴍ(ref s, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref SHA3 s) => sha3_package.Resetᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Size(this ref SHA3 s) => sha3_package.Sizeᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint BlockSize(this ref SHA3 s) => sha3_package.BlockSizeᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this ref SHA3 s) => sha3_package.MarshalBinaryᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this ref SHA3 s, slice<byte> p) => sha3_package.AppendBinaryᴍ(ref s, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalBinary(this ref SHA3 s, slice<byte> data) => sha3_package.UnmarshalBinaryᴍ(ref s, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (hash.Cloner, error) Clone(this ref SHA3 d) => sha3_package.Cloneᴍ(ref d);
-}
-partial class sha3ᴛSHAKE {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref SHAKE s) => sha3_package.initᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ж<SHAKE> Ꮡs, slice<byte> p) => sha3_package.Writeᴍ(Ꮡs, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ж<SHAKE> Ꮡs, slice<byte> p) => sha3_package.Readᴍ(Ꮡs, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ж<SHAKE> Ꮡs) => sha3_package.Resetᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint BlockSize(this ref SHAKE s) => sha3_package.BlockSizeᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this ref SHAKE s) => sha3_package.MarshalBinaryᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this ref SHAKE s, slice<byte> p) => sha3_package.AppendBinaryᴍ(ref s, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalBinary(this ref SHAKE s, slice<byte> data) => sha3_package.UnmarshalBinaryᴍ(ref s, data);
-}
-// </GlyphForwarders>

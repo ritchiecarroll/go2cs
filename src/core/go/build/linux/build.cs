@@ -117,7 +117,7 @@ partial struct Context {
 } partial class build_package {
 
 // joinPath calls ctxt.JoinPath (if not nil) or else filepath.Join.
-internal static @string joinPathᴍ(ref Context ctxt, params ꓸꓸꓸstring elemʗp) {
+[GoMethodBody("joinPath")] internal static @string joinPathᴍ(ref Context ctxt, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
 
     var f = ctxt.JoinPath; if (f != nil) {
@@ -127,7 +127,7 @@ internal static @string joinPathᴍ(ref Context ctxt, params ꓸꓸꓸstring ele
 }
 
 // splitPathList calls ctxt.SplitPathList (if not nil) or else filepath.SplitList.
-internal static slice<@string> splitPathListᴍ(ref Context ctxt, @string s) {
+[GoMethodBody("splitPathList")] internal static slice<@string> splitPathListᴍ(ref Context ctxt, @string s) {
     var f = ctxt.SplitPathList; if (f != nil) {
         return f(s);
     }
@@ -135,7 +135,7 @@ internal static slice<@string> splitPathListᴍ(ref Context ctxt, @string s) {
 }
 
 // isAbsPath calls ctxt.IsAbsPath (if not nil) or else filepath.IsAbs.
-internal static bool isAbsPathᴍ(ref Context ctxt, @string path) {
+[GoMethodBody("isAbsPath")] internal static bool isAbsPathᴍ(ref Context ctxt, @string path) {
     var f = ctxt.IsAbsPath; if (f != nil) {
         return f(path);
     }
@@ -143,7 +143,7 @@ internal static bool isAbsPathᴍ(ref Context ctxt, @string path) {
 }
 
 // isDir calls ctxt.IsDir (if not nil) or else uses os.Stat.
-internal static bool isDirᴍ(ref Context ctxt, @string path) {
+[GoMethodBody("isDir")] internal static bool isDirᴍ(ref Context ctxt, @string path) {
     var f = ctxt.IsDir; if (f != nil) {
         return f(path);
     }
@@ -153,7 +153,7 @@ internal static bool isDirᴍ(ref Context ctxt, @string path) {
 
 // hasSubdir calls ctxt.HasSubdir (if not nil) or else uses
 // the local file system to answer the question.
-internal static (@string rel, bool ok) hasSubdirᴍ(ref Context ctxt, @string root, @string dir) {
+[GoMethodBody("hasSubdir")] internal static (@string rel, bool ok) hasSubdirᴍ(ref Context ctxt, @string root, @string dir) {
     @string rel = default;
     bool ok = default;
 
@@ -205,7 +205,7 @@ internal static (@string rel, bool ok) hasSubdir(@string root, @string dir) {
 } partial class build_package {
 
 // readDir calls ctxt.ReadDir (if not nil) or else os.ReadDir.
-internal static (slice<fs.DirEntry>, error) readDirᴍ(ref Context ctxt, @string path) {
+[GoMethodBody("readDir")] internal static (slice<fs.DirEntry>, error) readDirᴍ(ref Context ctxt, @string path) {
     // TODO: add a fs.DirEntry version of Context.ReadDir
     var f = ctxt.ReadDir; if (f != nil) {
         var (fis, err) = f(path);
@@ -222,7 +222,7 @@ internal static (slice<fs.DirEntry>, error) readDirᴍ(ref Context ctxt, @string
 }
 
 // openFile calls ctxt.OpenFile (if not nil) or else os.Open.
-internal static (io.ReadCloser, error) openFileᴍ(ref Context ctxt, @string path) {
+[GoMethodBody("openFile")] internal static (io.ReadCloser, error) openFileᴍ(ref Context ctxt, @string path) {
     var fn = ctxt.OpenFile; if (fn != nil) {
         return fn(path);
     }
@@ -237,7 +237,7 @@ internal static (io.ReadCloser, error) openFileᴍ(ref Context ctxt, @string pat
 // isFile determines whether path is a file by trying to open it.
 // It reuses openFile instead of adding another function to the
 // list in Context.
-internal static bool isFileᴍ(ref Context ctxt, @string path) {
+[GoMethodBody("isFile")] internal static bool isFileᴍ(ref Context ctxt, @string path) {
     var (f, err) = ctxt.openFile(path);
     if (err != nil) {
         return false;
@@ -247,7 +247,7 @@ internal static bool isFileᴍ(ref Context ctxt, @string path) {
 }
 
 // gopath returns the list of Go path directories.
-internal static slice<@string> gopathᴍ(ref Context ctxt) {
+[GoMethodBody("gopath")] internal static slice<@string> gopathᴍ(ref Context ctxt) {
     var allᴷ = new stackAppend<@string>(moves: true);
 
     slice<@string> all = default;
@@ -287,7 +287,7 @@ private static readonly @string srcˢᵇᴍContext = "src"u8;
 // SrcDirs returns a list of package source root directories.
 // It draws from the current Go root and Go path but omits directories
 // that do not exist.
-internal static slice<@string> SrcDirsᴍ(ref Context ctxt) {
+[GoMethodBody("SrcDirs")] internal static slice<@string> SrcDirsᴍ(ref Context ctxt) {
     slice<@string> all = default;
     if (ctxt.GOROOT != ""u8 && ctxt.Compiler != "gccgo"u8) {
         @string dir = ctxt.joinPath(ctxt.GOROOT, srcˢᴍContext);
@@ -552,7 +552,7 @@ partial struct Directive {
 // IsCommand reports whether the package is considered a
 // command to be installed (not just a library).
 // Packages named "main" are treated as commands.
-internal static bool IsCommandᴍ(ref Package p) {
+[GoMethodBody("IsCommand")] internal static bool IsCommandᴍ(ref Package p) {
     return p.Name == "main"u8;
 }
 
@@ -560,7 +560,7 @@ internal static bool IsCommandᴍ(ref Package p) {
 
 // ImportDir is like [Import] but processes the Go package found in
 // the named directory.
-internal static (ж<Package>, error) ImportDirᴍ(ж<Context> Ꮡctxt, @string dir, ImportMode mode) {
+[GoMethodBody("ImportDir")] internal static (ж<Package>, error) ImportDirᴍ(ж<Context> Ꮡctxt, @string dir, ImportMode mode) {
     return Ꮡctxt.Import(".", dir, mode);
 }
 
@@ -575,7 +575,7 @@ partial struct NoGoError {
 
 } partial class build_package {
 
-internal static @string Errorᴍ(ref NoGoError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref NoGoError e) {
     return "no buildable Go source files in "u8 + e.Dir;
 }
 
@@ -591,7 +591,7 @@ partial struct MultiplePackageError {
 
 } partial class build_package {
 
-internal static @string Errorᴍ(ref MultiplePackageError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref MultiplePackageError e) {
     // Error string limited to two entries for compatibility.
     return fmt.Sprintf("found packages %s (%s) and %s (%s) in %s"u8, e.Packages[0], e.Files[0], e.Packages[1], e.Files[1], e.Dir);
 }
@@ -659,7 +659,7 @@ private static readonly @string cgoˢᵇᴍContext = "cgo"u8;
 //
 // If an error occurs, Import returns a non-nil error and a non-nil
 // *[Package] containing partial information.
-internal static (ж<Package>, error) Importᴍ(ж<Context> Ꮡctxt, @string path, @string srcDir, ImportMode mode) {
+[GoMethodBody("Import")] internal static (ж<Package>, error) Importᴍ(ж<Context> Ꮡctxt, @string path, @string srcDir, ImportMode mode) {
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
     var pathsᴷ = new stackAppend<@string>();
     var Sfilesᴷ = new stackAppend<@string>();
@@ -1270,7 +1270,7 @@ private static readonly @string fDirImportPathRootGorootˢᵇᴍContext = "-f={{
 // about the requested package and all dependencies and then only reports about the requested package.
 // Then we reinvoke it for every dependency. But this is still better than not working at all.
 // See golang.org/issue/26504.
-internal static error importGoᴍ(ref Context ctxt, ж<Package> Ꮡp, @string path, @string srcDir, ImportMode mode) {
+[GoMethodBody("importGo")] internal static error importGoᴍ(ref Context ctxt, ж<Package> Ꮡp, @string path, @string srcDir, ImportMode mode) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // To invoke the go command,
@@ -1559,7 +1559,7 @@ internal static (slice<byte> word, slice<byte> rest) parseWord(slice<byte> data)
 //
 // MatchFile considers the name of the file and may use ctxt.OpenFile to
 // read some or all of the file's content.
-internal static (bool match, error err) MatchFileᴍ(ж<Context> Ꮡctxt, @string dir, @string name) {
+[GoMethodBody("MatchFile")] internal static (bool match, error err) MatchFileᴍ(ж<Context> Ꮡctxt, @string dir, @string name) {
     error err = default;
 
     (var info, err) = Ꮡctxt.matchFile(dir, name, default, nil, nil);
@@ -1608,7 +1608,7 @@ partial struct fileEmbed {
 //
 // If allTags is non-nil, matchFile records any encountered build tag
 // by setting allTags[tag] = true.
-internal static (ж<fileInfo>, error) matchFileᴍ(ж<Context> Ꮡctxt, @string dir, @string name, map<@string, bool> allTags, ж<bool> ᏑbinaryOnly, ж<token.FileSet> fset) {
+[GoMethodBody("matchFile")] internal static (ж<fileInfo>, error) matchFileᴍ(ж<Context> Ꮡctxt, @string dir, @string name, map<@string, bool> allTags, ж<bool> ᏑbinaryOnly, ж<token.FileSet> fset) {
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
     ref var binaryOnly = ref ᏑbinaryOnly.DerefOrNull();
 
@@ -1732,7 +1732,7 @@ internal static slice<byte> binaryOnlyComment = slice<byte>("//go:binary-only-pa
 //
 // shouldBuild reports whether the file should be built
 // and whether a //go:binary-only-package comment was found.
-internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuildᴍ(ж<Context> Ꮡctxt, slice<byte> content, map<@string, bool> allTags) {
+[GoMethodBody("shouldBuild")] internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuildᴍ(ж<Context> Ꮡctxt, slice<byte> content, map<@string, bool> allTags) {
     bool shouldBuild = default;
     error err = default;
 
@@ -1877,7 +1877,7 @@ break_Lines:;
 // saveCgo saves the information from the #cgo lines in the import "C" comment.
 // These lines set CFLAGS, CPPFLAGS, CXXFLAGS and LDFLAGS and pkg-config directives
 // that affect the way cgo's C code is built.
-internal static error saveCgoᴍ(ж<Context> Ꮡctxt, @string filename, ж<Package> Ꮡdi, ж<ast.CommentGroup> cg) {
+[GoMethodBody("saveCgo")] internal static error saveCgoᴍ(ж<Context> Ꮡctxt, @string filename, ж<Package> Ꮡdi, ж<ast.CommentGroup> cg) {
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
     ref var di = ref Ꮡdi.DerefOrNull();
 
@@ -2018,7 +2018,7 @@ internal static (@string, bool) expandSrcDir(@string str, @string srcdir) {
 // Using filepath.IsAbs and filepath.Join here means the results will be
 // different on different systems, but that's OK: -I and -L options are
 // inherently system-dependent.
-internal static void makePathsAbsoluteᴍ(ref Context ctxt, slice<@string> args, @string srcDir) {
+[GoMethodBody("makePathsAbsolute")] internal static void makePathsAbsoluteᴍ(ref Context ctxt, slice<@string> args, @string srcDir) {
     var nextPath = false;
     foreach (var (i, arg) in range(args)) {
         if (nextPath) {
@@ -2146,7 +2146,7 @@ internal static (slice<@string> r, error err) splitQuoted(@string s) {
 //
 // matchAuto is only used for testing of tag evaluation
 // and in #cgo lines, which accept either syntax.
-internal static bool matchAutoᴍ(ж<Context> Ꮡctxt, @string text, map<@string, bool> allTags) {
+[GoMethodBody("matchAuto")] internal static bool matchAutoᴍ(ж<Context> Ꮡctxt, @string text, map<@string, bool> allTags) {
     if (strings.ContainsAny(text, "&|()")) {
         text = "//go:build "u8 + text;
     } else {
@@ -2159,7 +2159,7 @@ internal static bool matchAutoᴍ(ж<Context> Ꮡctxt, @string text, map<@string
     return Ꮡctxt.eval(x, allTags);
 }
 
-internal static bool evalᴍ(ж<Context> Ꮡctxt, constraint.Expr x, map<@string, bool> allTags) {
+[GoMethodBody("eval")] internal static bool evalᴍ(ж<Context> Ꮡctxt, constraint.Expr x, map<@string, bool> allTags) {
     var allTagsʗ1 = allTags;
     return x.Eval((@string tag) => Ꮡctxt.Value.matchTag(tag, allTagsʗ1));
 }
@@ -2182,7 +2182,7 @@ private static readonly @string goexperimentBoringcryptoˢᵇᴍContext = "goexp
 //	tag (if tag is listed in ctxt.BuildTags, ctxt.ToolTags, or ctxt.ReleaseTags)
 //
 // It records all consulted tags in allTags.
-internal static bool matchTagᴍ(ref Context ctxt, @string name, map<@string, bool> allTags) {
+[GoMethodBody("matchTag")] internal static bool matchTagᴍ(ref Context ctxt, @string name, map<@string, bool> allTags) {
     if (allTags != nil) {
         allTags[name] = true;
     }
@@ -2229,7 +2229,7 @@ internal static bool matchTagᴍ(ref Context ctxt, @string name, map<@string, bo
 // if GOOS=android, then files with GOOS=linux are also matched.
 // if GOOS=illumos, then files with GOOS=solaris are also matched.
 // if GOOS=ios, then files with GOOS=darwin are also matched.
-internal static bool goodOSArchFileᴍ(ref Context ctxt, @string name, map<@string, bool> allTags) {
+[GoMethodBody("goodOSArchFile")] internal static bool goodOSArchFileᴍ(ref Context ctxt, @string name, map<@string, bool> allTags) {
     (name, _, _) = strings.Cut(name, ".");
 
     // Before Go 1.4, a file called "linux.go" would be equivalent to having a
@@ -2289,39 +2289,3 @@ public static (@string, error) ArchChar(@string goarch) {
 }
 
 } // end build_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class buildᴛContext {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string joinPath(this ref Context ctxt, params ꓸꓸꓸstring elemʗp) => build_package.joinPathᴍ(ref ctxt, elemʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<@string> splitPathList(this ref Context ctxt, @string s) => build_package.splitPathListᴍ(ref ctxt, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isAbsPath(this ref Context ctxt, @string path) => build_package.isAbsPathᴍ(ref ctxt, path);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isDir(this ref Context ctxt, @string path) => build_package.isDirᴍ(ref ctxt, path);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string rel, bool ok) hasSubdir(this ref Context ctxt, @string root, @string dir) => build_package.hasSubdirᴍ(ref ctxt, root, dir);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<fs.DirEntry>, error) readDir(this ref Context ctxt, @string path) => build_package.readDirᴍ(ref ctxt, path);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (io.ReadCloser, error) openFile(this ref Context ctxt, @string path) => build_package.openFileᴍ(ref ctxt, path);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isFile(this ref Context ctxt, @string path) => build_package.isFileᴍ(ref ctxt, path);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<@string> gopath(this ref Context ctxt) => build_package.gopathᴍ(ref ctxt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> SrcDirs(this ref Context ctxt) => build_package.SrcDirsᴍ(ref ctxt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Package>, error) ImportDir(this ж<Context> Ꮡctxt, @string dir, ImportMode mode) => build_package.ImportDirᴍ(Ꮡctxt, dir, mode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path, @string srcDir, ImportMode mode) => build_package.Importᴍ(Ꮡctxt, path, srcDir, mode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error importGo(this ref Context ctxt, ж<Package> Ꮡp, @string path, @string srcDir, ImportMode mode) => build_package.importGoᴍ(ref ctxt, Ꮡp, path, srcDir, mode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (bool match, error err) MatchFile(this ж<Context> Ꮡctxt, @string dir, @string name) => build_package.MatchFileᴍ(Ꮡctxt, dir, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<fileInfo>, error) matchFile(this ж<Context> Ꮡctxt, @string dir, @string name, map<@string, bool> allTags, ж<bool> ᏑbinaryOnly, ж<token.FileSet> fset) => build_package.matchFileᴍ(Ꮡctxt, dir, name, allTags, ᏑbinaryOnly, fset);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuild(this ж<Context> Ꮡctxt, slice<byte> content, map<@string, bool> allTags) => build_package.shouldBuildᴍ(Ꮡctxt, content, allTags);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Package> Ꮡdi, ж<ast.CommentGroup> cg) => build_package.saveCgoᴍ(Ꮡctxt, filename, Ꮡdi, cg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void makePathsAbsolute(this ref Context ctxt, slice<@string> args, @string srcDir) => build_package.makePathsAbsoluteᴍ(ref ctxt, args, srcDir);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool matchAuto(this ж<Context> Ꮡctxt, @string text, map<@string, bool> allTags) => build_package.matchAutoᴍ(Ꮡctxt, text, allTags);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool eval(this ж<Context> Ꮡctxt, constraint.Expr x, map<@string, bool> allTags) => build_package.evalᴍ(Ꮡctxt, x, allTags);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool matchTag(this ref Context ctxt, @string name, map<@string, bool> allTags) => build_package.matchTagᴍ(ref ctxt, name, allTags);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool goodOSArchFile(this ref Context ctxt, @string name, map<@string, bool> allTags) => build_package.goodOSArchFileᴍ(ref ctxt, name, allTags);
-}
-partial class buildᴛPackage {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsCommand(this ref Package p) => build_package.IsCommandᴍ(ref p);
-}
-partial class buildᴛNoGoError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref NoGoError e) => build_package.Errorᴍ(ref e);
-}
-partial class buildᴛMultiplePackageError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref MultiplePackageError e) => build_package.Errorᴍ(ref e);
-}
-// </GlyphForwarders>

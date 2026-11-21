@@ -37,7 +37,7 @@ partial struct x25519Curve {
 private static ref readonly @string x25519ˢᴍx25519Curve => ref x25519ˢᵇᴍx25519Curve;
 private static readonly @string x25519ˢᵇᴍx25519Curve = "X25519"u8;
 
-internal static @string Stringᴍ(ref x25519Curve c) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref x25519Curve c) {
     return x25519ˢᴍx25519Curve;
 }
 
@@ -45,7 +45,7 @@ internal static @string Stringᴍ(ref x25519Curve c) {
 private static ref readonly @string cryptoEcdhUseOfX25519Isˢᴍx25519Curve => ref cryptoEcdhUseOfX25519Isˢᵇᴍx25519Curve;
 private static readonly @string cryptoEcdhUseOfX25519Isˢᵇᴍx25519Curve = "crypto/ecdh: use of X25519 is not allowed in FIPS 140-only mode"u8;
 
-internal static (ж<PrivateKey>, error) GenerateKeyᴍ(ж<x25519Curve> Ꮡc, io.Reader r) {
+[GoMethodBody("GenerateKey")] internal static (ж<PrivateKey>, error) GenerateKeyᴍ(ж<x25519Curve> Ꮡc, io.Reader r) {
     if (fips140only.Enforced()) {
         return (default, errors.New(cryptoEcdhUseOfX25519Isˢᴍx25519Curve));
     }
@@ -61,7 +61,7 @@ internal static (ж<PrivateKey>, error) GenerateKeyᴍ(ж<x25519Curve> Ꮡc, io.
 private static ref readonly @string cryptoEcdhInvalidPrivateˢ2ᴍx25519Curve => ref cryptoEcdhInvalidPrivateˢ2ᵇᴍx25519Curve;
 private static readonly @string cryptoEcdhInvalidPrivateˢ2ᵇᴍx25519Curve = "crypto/ecdh: invalid private key size"u8;
 
-internal static (ж<PrivateKey>, error) NewPrivateKeyᴍ(ж<x25519Curve> Ꮡc, slice<byte> key) {
+[GoMethodBody("NewPrivateKey")] internal static (ж<PrivateKey>, error) NewPrivateKeyᴍ(ж<x25519Curve> Ꮡc, slice<byte> key) {
     if (fips140only.Enforced()) {
         return (default, errors.New(cryptoEcdhUseOfX25519Isˢᴍx25519Curve));
     }
@@ -85,7 +85,7 @@ internal static (ж<PrivateKey>, error) NewPrivateKeyᴍ(ж<x25519Curve> Ꮡc, s
 private static ref readonly @string cryptoEcdhInvalidPublicˢᴍx25519Curve => ref cryptoEcdhInvalidPublicˢᵇᴍx25519Curve;
 private static readonly @string cryptoEcdhInvalidPublicˢᵇᴍx25519Curve = "crypto/ecdh: invalid public key"u8;
 
-internal static (ж<PublicKey>, error) NewPublicKeyᴍ(ж<x25519Curve> Ꮡc, slice<byte> key) {
+[GoMethodBody("NewPublicKey")] internal static (ж<PublicKey>, error) NewPublicKeyᴍ(ж<x25519Curve> Ꮡc, slice<byte> key) {
     if (fips140only.Enforced()) {
         return (default, errors.New(cryptoEcdhUseOfX25519Isˢᴍx25519Curve));
     }
@@ -102,7 +102,7 @@ internal static (ж<PublicKey>, error) NewPublicKeyᴍ(ж<x25519Curve> Ꮡc, sli
 private static ref readonly @string cryptoEcdhBadX25519ˢᴍx25519Curve => ref cryptoEcdhBadX25519ˢᵇᴍx25519Curve;
 private static readonly @string cryptoEcdhBadX25519ˢᵇᴍx25519Curve = "crypto/ecdh: bad X25519 remote ECDH input: low order point"u8;
 
-internal static (slice<byte>, error) ecdhᴍ(ref x25519Curve c, ж<PrivateKey> Ꮡlocal, ж<PublicKey> Ꮡremote) {
+[GoMethodBody("ecdh")] internal static (slice<byte>, error) ecdhᴍ(ref x25519Curve c, ж<PrivateKey> Ꮡlocal, ж<PublicKey> Ꮡremote) {
     ref var local = ref Ꮡlocal.DerefOrNull();
     ref var remote = ref Ꮡremote.DerefOrNull();
 
@@ -184,13 +184,3 @@ internal static bool isZero(slice<byte> x) {
 }
 
 } // end ecdh_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class ecdhᴛx25519Curve {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref x25519Curve c) => ecdh_package.Stringᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<PrivateKey>, error) GenerateKey(this ж<x25519Curve> Ꮡc, io.Reader r) => ecdh_package.GenerateKeyᴍ(Ꮡc, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<x25519Curve> Ꮡc, slice<byte> key) => ecdh_package.NewPrivateKeyᴍ(Ꮡc, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<PublicKey>, error) NewPublicKey(this ж<x25519Curve> Ꮡc, slice<byte> key) => ecdh_package.NewPublicKeyᴍ(Ꮡc, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) ecdh(this ref x25519Curve c, ж<PrivateKey> Ꮡlocal, ж<PublicKey> Ꮡremote) => ecdh_package.ecdhᴍ(ref c, Ꮡlocal, Ꮡremote);
-}
-// </GlyphForwarders>

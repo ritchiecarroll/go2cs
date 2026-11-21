@@ -211,15 +211,15 @@ partial struct response {
 
 } partial class cgi_package {
 
-internal static void Flushᴍ(ref response r) {
+[GoMethodBody("Flush")] internal static void Flushᴍ(ref response r) {
     r.bufw.Flush();
 }
 
-internal static http.Header Headerᴍ(ref response r) {
+[GoMethodBody("Header")] internal static http.Header Headerᴍ(ref response r) {
     return r.header;
 }
 
-internal static (nint n, error err) Writeᴍ(ref response r, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref response r, slice<byte> p) {
     if (!r.wroteHeader) {
         r.WriteHeader(http.StatusOK);
     }
@@ -229,7 +229,7 @@ internal static (nint n, error err) Writeᴍ(ref response r, slice<byte> p) {
     return r.bufw.Write(p);
 }
 
-internal static void WriteHeaderᴍ(ref response r, nint code) {
+[GoMethodBody("WriteHeader")] internal static void WriteHeaderᴍ(ref response r, nint code) {
     if (r.wroteHeader) {
         // Note: explicitly using Stderr, as Stdout is our HTTP output.
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "CGI attempted to write header twice on request for %s"u8, r.req.URL.OrTypedNil());
@@ -247,7 +247,7 @@ private static readonly @string contentTypeˢ2ᵇᴍresponse = "Content-Type"u8;
 // p is not written by writeHeader, but is the first chunk of the body
 // that will be written. It is sniffed for a Content-Type if none is
 // set explicitly.
-internal static void writeCGIHeaderᴍ(ref response r, slice<byte> p) {
+[GoMethodBody("writeCGIHeader")] internal static void writeCGIHeaderᴍ(ref response r, slice<byte> p) {
     if (r.wroteCGIHeader) {
         return;
     }
@@ -262,13 +262,3 @@ internal static void writeCGIHeaderᴍ(ref response r, slice<byte> p) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class cgiᴛresponse {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Flush(this ref response r) => cgi_package.Flushᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static http.Header Header(this ref response r) => cgi_package.Headerᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref response r, slice<byte> p) => cgi_package.Writeᴍ(ref r, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void WriteHeader(this ref response r, nint code) => cgi_package.WriteHeaderᴍ(ref r, code);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeCGIHeader(this ref response r, slice<byte> p) => cgi_package.writeCGIHeaderᴍ(ref r, p);
-}
-// </GlyphForwarders>

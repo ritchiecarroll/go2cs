@@ -75,6 +75,21 @@ using static go.crypto.@internal.fips140.aes.gcm_package;
 
 namespace go.crypto.@internal.fips140.aes;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using fips140 = go.crypto.@internal.fips140_package;
+using aes = go.crypto.@internal.fips140.aes_package;
+using subtle = go.crypto.@internal.fips140.subtle_package;
+using go.crypto.@internal;
+using go.crypto.@internal.fips140;
+using static gcm_package;
+using alias = go.crypto.@internal.fips140.alias_package;
+using errors = errors_package;
+using drbg = go.crypto.@internal.fips140.drbg_package;
+using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
+using math = math_package;
+using go.crypto.@internal.fips140deps;
+// </GlyphForwarderUsings>
+
 [GoPackage("gcm")]
 public static partial class gcm_package
 {
@@ -124,3 +139,33 @@ public static partial class gcm_package
 [GoMethodHost(typeof(gcm_package.GCMWithCounterNonce)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcmᴛGCMWithCounterNonce;
 [GoMethodHost(typeof(gcm_package.GCMWithXORCounterNonce)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcmᴛGCMWithXORCounterNonce;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class gcmᴛCMAC {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void deriveSubkeys(this ж<CMAC> Ꮡc) => gcm_package.deriveSubkeysᴍ(Ꮡc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static array<byte> MAC(this ж<CMAC> Ꮡc, slice<byte> m) => gcm_package.MACᴍ(Ꮡc, m);
+}
+partial class gcmᴛCounterKDF {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static array<byte> DeriveKey(this ж<CounterKDF> Ꮡkdf, byte label, /*[12]*/ array<byte> context) => gcm_package.DeriveKeyᴍ(Ꮡkdf, label, context);
+}
+partial class gcmᴛGCM {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NonceSize(this ref GCM g) => gcm_package.NonceSizeᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Overhead(this ref GCM g) => gcm_package.Overheadᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Seal(this ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) => gcm_package.Sealᴍ(Ꮡg, dst, nonce, plaintext, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> sealAfterIndicator(this ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) => gcm_package.sealAfterIndicatorᴍ(Ꮡg, dst, nonce, plaintext, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Open(this ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) => gcm_package.Openᴍ(Ꮡg, dst, nonce, ciphertext, data);
+}
+partial class gcmᴛGCMWithCounterNonce {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NonceSize(this ref GCMWithCounterNonce g) => gcm_package.NonceSizeᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Overhead(this ref GCMWithCounterNonce g) => gcm_package.Overheadᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Seal(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) => gcm_package.Sealᴍ(Ꮡg, dst, nonce, plaintext, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Open(this ж<GCMWithCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) => gcm_package.Openᴍ(Ꮡg, dst, nonce, ciphertext, data);
+}
+partial class gcmᴛGCMWithXORCounterNonce {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetNoncePrefixAndMask(this ref GCMWithXORCounterNonce g, slice<byte> nonce) => gcm_package.SetNoncePrefixAndMaskᴍ(ref g, nonce);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NonceSize(this ref GCMWithXORCounterNonce g) => gcm_package.NonceSizeᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Overhead(this ref GCMWithXORCounterNonce g) => gcm_package.Overheadᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Seal(this ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) => gcm_package.Sealᴍ(Ꮡg, dst, nonce, plaintext, data);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Open(this ж<GCMWithXORCounterNonce> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) => gcm_package.Openᴍ(Ꮡg, dst, nonce, ciphertext, data);
+}
+// </GlyphForwarders>

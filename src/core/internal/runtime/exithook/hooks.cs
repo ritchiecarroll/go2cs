@@ -100,12 +100,6 @@ partial struct exitError /*@string*/;
 
 } partial class exithook_package {
 
-internal static @string Errorᴍ(exitError e) { return (@string)e; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(exitError e) { return (@string)e; }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class exithookᴛexitError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this exitError e) => exithook_package.Errorᴍ(e);
-}
-// </GlyphForwarders>

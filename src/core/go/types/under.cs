@@ -60,7 +60,7 @@ internal static ж<typeError> typeErrorf(@string format, params ꓸꓸꓸany arg
 
 // format formats a type error as a string.
 // check may be nil.
-internal static @string formatᴍ(ref typeError err, ж<Checker> check) {
+[GoMethodBody("format")] internal static @string formatᴍ(ref typeError err, ж<Checker> check) {
     return check.sprintf(err.format_, err.args.ꓸꓸꓸ);
 }
 
@@ -136,9 +136,3 @@ internal static (Type, ж<typeError>) commonUnder(Type t, Func<Type, Type, ж<ty
 }
 
 } // end types_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛtypeError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string format(this ref typeError err, ж<Checker> check) => types_package.formatᴍ(ref err, check);
-}
-// </GlyphForwarders>

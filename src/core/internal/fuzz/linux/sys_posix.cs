@@ -33,7 +33,7 @@ internal static (ж<sharedMem>, error) sharedMemMapFile(ж<os.File> f, nint size
 
 // Close unmaps the shared memory and closes the temporary file. If this
 // sharedMem was created with sharedMemTempFile, Close also removes the file.
-internal static error Closeᴍ(ref sharedMem m) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref sharedMem m) {
     var errsᴷ = new stackAppend<error>();
 
     // Attempt all operations, even if we get an error for an earlier operation.
@@ -149,9 +149,3 @@ internal static bool isCrashSignal(os.Signal signal) {
 }
 
 } // end fuzz_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class fuzzᴛsharedMem {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref sharedMem m) => fuzz_package.Closeᴍ(ref m);
-}
-// </GlyphForwarders>

@@ -55,7 +55,7 @@ partial struct pinner {
 
 } partial class runtime_package {
 
-internal static void unpinᴍ(ж<pinner> Ꮡp) {
+[GoMethodBody("unpin")] internal static void unpinᴍ(ж<pinner> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (Ꮡp == nil || p.refs == nil) {
@@ -189,25 +189,25 @@ partial struct pinState {
 // nosplit, because it's called by isPinned, which is nosplit
 //
 //go:nosplit
-internal static bool isPinnedᴍ(ref pinState v) {
+[GoMethodBody("isPinned")] internal static bool isPinnedᴍ(ref pinState v) {
     return ((uint8)(v.byteVal & v.mask)) != 0;
 }
 
-internal static bool isMultiPinnedᴍ(ref pinState v) {
+[GoMethodBody("isMultiPinned")] internal static bool isMultiPinnedᴍ(ref pinState v) {
     return ((uint8)(v.byteVal & ((uint8)(v.mask << 1)))) != 0;
 }
 
-internal static void setPinnedᴍ(ref pinState v, bool val) {
+[GoMethodBody("setPinned")] internal static void setPinnedᴍ(ref pinState v, bool val) {
     v.set(val, false);
 }
 
-internal static void setMultiPinnedᴍ(ref pinState v, bool val) {
+[GoMethodBody("setMultiPinned")] internal static void setMultiPinnedᴍ(ref pinState v, bool val) {
     v.set(val, true);
 }
 
 // set sets the pin bit of the pinState to val. If multipin is true, it
 // sets/unsets the multipin bit instead.
-internal static void setᴍ(ref pinState v, bool val, bool multipin) {
+[GoMethodBody("set")] internal static void setᴍ(ref pinState v, bool val, bool multipin) {
     var mask = v.mask;
     if (multipin) {
         mask <<= 1;
@@ -230,7 +230,7 @@ partial struct pinnerBits /*gcBits*/;
 // nosplit, because it's called by isPinned, which is nosplit
 //
 //go:nosplit
-internal static pinState ofObjectᴍ(ж<pinnerBits> Ꮡp, uintptr n) {
+[GoMethodBody("ofObject")] internal static pinState ofObjectᴍ(ж<pinnerBits> Ꮡp, uintptr n) {
     var (bytep, mask) = (Ꮡp.Reinterpret<pinnerBits, gcBits>()).bitp(n * 2);
     var byteVal = atomic.Load8(bytep);
     return new pinState(bytep, byteVal, mask);
@@ -238,32 +238,32 @@ internal static pinState ofObjectᴍ(ж<pinnerBits> Ꮡp, uintptr n) {
 
 } partial class runtime_package {
 
-internal static uintptr pinnerBitSizeᴍ(ref mspan s) {
+[GoMethodBody("pinnerBitSize")] internal static uintptr pinnerBitSizeᴍ(ref mspan s) {
     return divRoundUp((uintptr)s.nelems * 2, 8);
 }
 
 // newPinnerBits returns a pointer to 8 byte aligned bytes to be used for this
 // span's pinner bits. newPinnerBits is used to mark objects that are pinned.
 // They are copied when the span is swept.
-internal static ж<pinnerBits> newPinnerBitsᴍ(ref mspan s) {
+[GoMethodBody("newPinnerBits")] internal static ж<pinnerBits> newPinnerBitsᴍ(ref mspan s) {
     return newMarkBits((uintptr)s.nelems * 2).Reinterpret<gcBits, pinnerBits>();
 }
 
 // nosplit, because it's called by isPinned, which is nosplit
 //
 //go:nosplit
-internal static ж<pinnerBits> getPinnerBitsᴍ(ж<mspan> Ꮡs) {
+[GoMethodBody("getPinnerBits")] internal static ж<pinnerBits> getPinnerBitsᴍ(ж<mspan> Ꮡs) {
     return @unsafe.Pointer.To<pinnerBits>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.ᏑpinnerBits)));
 }
 
-internal static void setPinnerBitsᴍ(ж<mspan> Ꮡs, ж<pinnerBits> p) {
+[GoMethodBody("setPinnerBits")] internal static void setPinnerBitsᴍ(ж<mspan> Ꮡs, ж<pinnerBits> p) {
     atomicstorep(@unsafe.Pointer.FromBox(Ꮡs.ᏑpinnerBits), @unsafe.Pointer.FromPinnedBox(p));
 }
 
 // refreshPinnerBits replaces pinnerBits with a fresh copy in the arenas for the
 // next GC cycle. If it does not contain any pinned objects, pinnerBits of the
 // span is set to nil.
-internal static void refreshPinnerBitsᴍ(ж<mspan> Ꮡs) {
+[GoMethodBody("refreshPinnerBits")] internal static void refreshPinnerBitsᴍ(ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var p = Ꮡs.getPinnerBits();
@@ -296,7 +296,7 @@ internal static void refreshPinnerBitsᴍ(ж<mspan> Ꮡs) {
 
 // incPinCounter is only called for multiple pins of the same object and records
 // the _additional_ pins.
-internal static void incPinCounterᴍ(ж<mspan> Ꮡspan, uintptr offset) {
+[GoMethodBody("incPinCounter")] internal static void incPinCounterᴍ(ж<mspan> Ꮡspan, uintptr offset) {
     ж<specialPinCounter> rec = default;
     var (@ref, exists) = Ꮡspan.specialFindSplicePoint(offset, _KindSpecialPinCounter);
     if (!exists) {
@@ -321,7 +321,7 @@ private static readonly @string runtimePinnerDecreasedˢᵇᴍmspan = "runtime.P
 
 // decPinCounter decreases the counter. If the counter reaches 0, the counter
 // special is deleted and false is returned. Otherwise true is returned.
-internal static bool decPinCounterᴍ(ж<mspan> Ꮡspan, uintptr offset) {
+[GoMethodBody("decPinCounter")] internal static bool decPinCounterᴍ(ж<mspan> Ꮡspan, uintptr offset) {
     ref var span = ref Ꮡspan.DerefOrNull();
 
     var (@ref, exists) = Ꮡspan.specialFindSplicePoint(offset, _KindSpecialPinCounter);
@@ -354,28 +354,3 @@ internal static Action pinnerLeakPanic = () => {
 };
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛpinner {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unpin(this ж<pinner> Ꮡp) => runtime_package.unpinᴍ(Ꮡp);
-}
-partial class runtimeᴛpinState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isPinned(this ref pinState v) => runtime_package.isPinnedᴍ(ref v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isMultiPinned(this ref pinState v) => runtime_package.isMultiPinnedᴍ(ref v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setPinned(this ref pinState v, bool val) => runtime_package.setPinnedᴍ(ref v, val);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setMultiPinned(this ref pinState v, bool val) => runtime_package.setMultiPinnedᴍ(ref v, val);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this ref pinState v, bool val, bool multipin) => runtime_package.setᴍ(ref v, val, multipin);
-}
-partial class runtimeᴛpinnerBits {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static pinState ofObject(this ж<pinnerBits> Ꮡp, uintptr n) => runtime_package.ofObjectᴍ(Ꮡp, n);
-}
-partial class runtimeᴛmspan {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr pinnerBitSize(this ref mspan s) => runtime_package.pinnerBitSizeᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<pinnerBits> newPinnerBits(this ref mspan s) => runtime_package.newPinnerBitsᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<pinnerBits> getPinnerBits(this ж<mspan> Ꮡs) => runtime_package.getPinnerBitsᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setPinnerBits(this ж<mspan> Ꮡs, ж<pinnerBits> p) => runtime_package.setPinnerBitsᴍ(Ꮡs, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void refreshPinnerBits(this ж<mspan> Ꮡs) => runtime_package.refreshPinnerBitsᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void incPinCounter(this ж<mspan> Ꮡspan, uintptr offset) => runtime_package.incPinCounterᴍ(Ꮡspan, offset);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool decPinCounter(this ж<mspan> Ꮡspan, uintptr offset) => runtime_package.decPinCounterᴍ(Ꮡspan, offset);
-}
-// </GlyphForwarders>

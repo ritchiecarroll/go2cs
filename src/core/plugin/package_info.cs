@@ -62,6 +62,10 @@ using static go.plugin_package;
 
 namespace go;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using static plugin_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("plugin")]
 public static partial class plugin_package
 {
@@ -96,3 +100,9 @@ public static partial class plugin_package
 // <MethodHolders>
 [GoMethodHost(typeof(plugin_package.Plugin)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pluginᴛPlugin;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class pluginᴛPlugin {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Symbol, error) Lookup(this ж<Plugin> Ꮡp, @string symName) => plugin_package.Lookupᴍ(Ꮡp, symName);
+}
+// </GlyphForwarders>

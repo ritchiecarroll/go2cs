@@ -36,7 +36,7 @@ partial struct context {
 
 } partial class template_package {
 
-internal static @string Stringᴍ(context c) {
+[GoMethodBody("String")] internal static @string Stringᴍ(context c) {
     error err = default;
     if (c.err != nil) {
         err = new Errorжerror(c.err);
@@ -45,13 +45,13 @@ internal static @string Stringᴍ(context c) {
 }
 
 // eq reports whether two contexts are equal.
-internal static bool eqᴍ(context c, context d) {
+[GoMethodBody("eq")] internal static bool eqᴍ(context c, context d) {
     return c.state == d.state && c.delim == d.delim && c.urlPart == d.urlPart && c.jsCtx == d.jsCtx && slices.Equal<slice<nint>, nint>(c.jsBraceDepth, d.jsBraceDepth) && c.attr == d.attr && c.element == d.element && c.err == d.err;
 }
 
 // mangle produces an identifier that includes a suffix that distinguishes it
 // from template names mangled with different contexts.
-internal static @string mangleᴍ(context c, @string templateName) {
+[GoMethodBody("mangle")] internal static @string mangleᴍ(context c, @string templateName) {
     // The mangled name for the default context is the input templateName.
     if (c.state == stateText) {
         return templateName;
@@ -79,7 +79,7 @@ internal static @string mangleᴍ(context c, @string templateName) {
 }
 
 // clone returns a copy of c with the same field values.
-internal static context cloneᴍ(context c) {
+[GoMethodBody("clone")] internal static context cloneᴍ(context c) {
     var clone = c;
     clone.jsBraceDepth = slices.Clone<slice<nint>, nint>(c.jsBraceDepth);
     return clone;
@@ -297,12 +297,3 @@ internal static attr attrSrcset => 5;
 internal static attr attrMetaContent => 6;
 
 } // end template_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class templateᴛcontext {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this context c) => template_package.Stringᴍ(c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool eq(this context c, context d) => template_package.eqᴍ(c, d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string mangle(this context c, @string templateName) => template_package.mangleᴍ(c, templateName);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context clone(this context c) => template_package.cloneᴍ(c);
-}
-// </GlyphForwarders>

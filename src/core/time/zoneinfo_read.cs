@@ -40,7 +40,7 @@ partial struct fileSizeError /*@string*/;
 
 } partial class time_package {
 
-internal static @string Errorᴍ(fileSizeError f) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(fileSizeError f) {
     return "time: file "u8 + ((@string)f) + " is too large"u8;
 }
 
@@ -59,7 +59,7 @@ partial struct dataIO {
 
 } partial class time_package {
 
-internal static slice<byte> readᴍ(ref dataIO d, nint n) {
+[GoMethodBody("read")] internal static slice<byte> readᴍ(ref dataIO d, nint n) {
     if (len(d.p) < n) {
         d.p = default;
         d.error = true;
@@ -70,7 +70,7 @@ internal static slice<byte> readᴍ(ref dataIO d, nint n) {
     return p;
 }
 
-internal static (uint32 n, bool ok) big4ᴍ(ref dataIO d) {
+[GoMethodBody("big4")] internal static (uint32 n, bool ok) big4ᴍ(ref dataIO d) {
     var p = d.read(4);
     if (len(p) < 4) {
         d.error = true;
@@ -79,7 +79,7 @@ internal static (uint32 n, bool ok) big4ᴍ(ref dataIO d) {
     return ((uint32)p[3] | (uint32)p[2] << 8 | (uint32)p[1] << 16 | (uint32)p[0] << 24, true);
 }
 
-internal static (uint64 n, bool ok) big8ᴍ(ref dataIO d) {
+[GoMethodBody("big8")] internal static (uint64 n, bool ok) big8ᴍ(ref dataIO d) {
     var (n1, ok1) = d.big4();
     var (n2, ok2) = d.big4();
     if (!ok1 || !ok2) {
@@ -89,7 +89,7 @@ internal static (uint64 n, bool ok) big8ᴍ(ref dataIO d) {
     return (((uint64)n1 << 32) | (uint64)n2, true);
 }
 
-internal static (byte n, bool ok) @byteᴍ(ref dataIO d) {
+[GoMethodBody("byte")] internal static (byte n, bool ok) @byteᴍ(ref dataIO d) {
     var p = d.read(1);
     if (len(p) < 1) {
         d.error = true;
@@ -99,7 +99,7 @@ internal static (byte n, bool ok) @byteᴍ(ref dataIO d) {
 }
 
 // rest returns the rest of the data in the buffer.
-internal static slice<byte> restᴍ(ref dataIO d) {
+[GoMethodBody("rest")] internal static slice<byte> restᴍ(ref dataIO d) {
     var r = d.p;
     d.p = default;
     return r;
@@ -613,16 +613,3 @@ internal static (slice<byte>, error) readFile(@string name) {
 }
 
 } // end time_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class timeᴛfileSizeError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this fileSizeError f) => time_package.Errorᴍ(f);
-}
-partial class timeᴛdataIO {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> read(this ref dataIO d, nint n) => time_package.readᴍ(ref d, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint32 n, bool ok) big4(this ref dataIO d) => time_package.big4ᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64 n, bool ok) big8(this ref dataIO d) => time_package.big8ᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte n, bool ok) @byte(this ref dataIO d) => time_package.@byteᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> rest(this ref dataIO d) => time_package.restᴍ(ref d);
-}
-// </GlyphForwarders>

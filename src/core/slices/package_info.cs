@@ -64,6 +64,13 @@ using static go.slices_package;
 
 namespace go;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using cmp = cmp_package;
+using bits = math.bits_package;
+using math;
+using static slices_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("slices")]
 public static partial class slices_package
 {
@@ -99,3 +106,9 @@ public static partial class slices_package
 // <MethodHolders>
 [GoMethodHost(typeof(slices_package.xorshift)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class slicesᴛxorshift;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class slicesᴛxorshift {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 Next(this ref xorshift r) => slices_package.Nextᴍ(ref r);
+}
+// </GlyphForwarders>

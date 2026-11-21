@@ -52,7 +52,7 @@ internal static mptcpStatusDial mptcpDisabledDial => 2;
 
 } partial class net_package {
 
-internal static bool getᴍ(ref mptcpStatusDial m) {
+[GoMethodBody("get")] internal static bool getᴍ(ref mptcpStatusDial m) {
     switch (m) {
     case var ᴛ when ᴛ == mptcpEnabledDial: {
         return true;
@@ -71,7 +71,7 @@ internal static bool getᴍ(ref mptcpStatusDial m) {
     return defaultMPTCPEnabledDial;
 }
 
-internal static void setᴍ(ref mptcpStatusDial m, bool use) {
+[GoMethodBody("set")] internal static void setᴍ(ref mptcpStatusDial m, bool use) {
     if (use) {
         m = mptcpEnabledDial;
     } else {
@@ -92,7 +92,7 @@ internal static mptcpStatusListen mptcpDisabledListen => 2;
 
 } partial class net_package {
 
-internal static bool getᴍ(ref mptcpStatusListen m) {
+[GoMethodBody("get")] internal static bool getᴍ(ref mptcpStatusListen m) {
     switch (m) {
     case var ᴛ when ᴛ == mptcpEnabledListen: {
         return true;
@@ -112,7 +112,7 @@ internal static bool getᴍ(ref mptcpStatusListen m) {
     return defaultMPTCPEnabledListen;
 }
 
-internal static void setᴍ(ref mptcpStatusListen m, bool use) {
+[GoMethodBody("set")] internal static void setᴍ(ref mptcpStatusListen m, bool use) {
     if (use) {
         m = mptcpEnabledListen;
     } else {
@@ -227,7 +227,7 @@ partial struct Dialer {
 
 } partial class net_package {
 
-internal static bool dualStackᴍ(ref Dialer d) { return d.FallbackDelay >= 0; }
+[GoMethodBody("dualStack")] internal static bool dualStackᴍ(ref Dialer d) { return d.FallbackDelay >= 0; }
 
 } partial class net_package {
 
@@ -249,7 +249,7 @@ internal static time.Time minNonzeroTime(time.Time a, time.Time b) {
 //   - the context's deadline
 //
 // Or zero, if none of Timeout, Deadline, or context's deadline is set.
-internal static time.Time /*earliest*/ deadlineᴍ(ref Dialer d, context.Context ctx, time.Time now) {
+[GoMethodBody("deadline")] internal static time.Time /*earliest*/ deadlineᴍ(ref Dialer d, context.Context ctx, time.Time now) {
     time.Time earliest = default;
 
     if (d.Timeout != 0) { // including negative, for historical reasons
@@ -261,7 +261,7 @@ internal static time.Time /*earliest*/ deadlineᴍ(ref Dialer d, context.Context
     return minNonzeroTime(earliest, d.Deadline);
 }
 
-internal static ж<Resolver> resolverᴍ(ref Dialer d) {
+[GoMethodBody("resolver")] internal static ж<Resolver> resolverᴍ(ref Dialer d) {
     if (d.Resolver != nil) {
         return d.Resolver;
     }
@@ -296,7 +296,7 @@ internal static (time.Time, error) partialDeadline(time.Time now, time.Time dead
 
 } partial class net_package {
 
-internal static time.Duration fallbackDelayᴍ(ref Dialer d) {
+[GoMethodBody("fallbackDelay")] internal static time.Duration fallbackDelayᴍ(ref Dialer d) {
     if (d.FallbackDelay > 0) {
         return d.FallbackDelay;
     } else {
@@ -354,7 +354,7 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
 // resolveAddrList resolves addr using hint and returns a list of
 // addresses. The result contains at least one address when error is
 // nil.
-internal static (addrList, error) resolveAddrListᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string op, @string network, @string addr, Addr hint) {
+[GoMethodBody("resolveAddrList")] internal static (addrList, error) resolveAddrListᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string op, @string network, @string addr, Addr hint) {
     var (afnet, _, err) = parseNetwork(ctx, network, true);
     if (err != nil) {
         return (default, err);
@@ -437,7 +437,7 @@ internal static (addrList, error) resolveAddrListᴍ(ж<Resolver> Ꮡr, context.
 //
 // This method doesn't check if MPTCP is supported by the operating
 // system or not.
-internal static bool MultipathTCPᴍ(ref Dialer d) {
+[GoMethodBody("MultipathTCP")] internal static bool MultipathTCPᴍ(ref Dialer d) {
     return d.mptcpStatus.get();
 }
 
@@ -447,7 +447,7 @@ internal static bool MultipathTCPᴍ(ref Dialer d) {
 //
 // If MPTCP is not available on the host or not supported by the server,
 // the Dial methods will fall back to TCP.
-internal static void SetMultipathTCPᴍ(ref Dialer d, bool use) {
+[GoMethodBody("SetMultipathTCP")] internal static void SetMultipathTCPᴍ(ref Dialer d, bool use) {
     d.mptcpStatus.set(use);
 }
 
@@ -537,7 +537,7 @@ partial struct sysDialer {
 //
 // Dial uses [context.Background] internally; to specify the context, use
 // [Dialer.DialContext].
-internal static (Conn, error) Dialᴍ(ж<Dialer> Ꮡd, @string network, @string address) {
+[GoMethodBody("Dial")] internal static (Conn, error) Dialᴍ(ж<Dialer> Ꮡd, @string network, @string address) {
     return Ꮡd.DialContext(context.Background(), network, address);
 }
 
@@ -563,7 +563,7 @@ private static readonly @string dialˢᵇᴍDialer = "dial"u8;
 //
 // See func [Dial] for a description of the network and address
 // parameters.
-internal static (Conn, error) DialContextᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, @string address) {
+[GoMethodBody("DialContext")] internal static (Conn, error) DialContextᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, @string address) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -606,7 +606,7 @@ internal static (Conn, error) DialContextᴍ(ж<Dialer> Ꮡd, context.Context ct
     finally { ᒐ.Run(); }
 }
 
-internal static partial (context.Context, Action) dialCtxᴍ(ref Dialer d, context.Context ctx) {
+[GoMethodBody("dialCtx")] internal static partial (context.Context, Action) dialCtxᴍ(ref Dialer d, context.Context ctx) {
     if (ctx == nil) {
         throw panic("nil context");
     }
@@ -662,7 +662,7 @@ internal static partial (context.Context, Action) dialCtxᴍ(ref Dialer d, conte
 // connection.
 //
 // The network must be a TCP network name; see func Dial for details.
-internal static (ж<TCPConn>, error) DialTCPᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
+[GoMethodBody("DialTCP")] internal static (ж<TCPConn>, error) DialTCPᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -692,7 +692,7 @@ internal static (ж<TCPConn>, error) DialTCPᴍ(ж<Dialer> Ꮡd, context.Context
 // connection.
 //
 // The network must be a UDP network name; see func Dial for details.
-internal static (ж<UDPConn>, error) DialUDPᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
+[GoMethodBody("DialUDP")] internal static (ж<UDPConn>, error) DialUDPᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -722,7 +722,7 @@ internal static (ж<UDPConn>, error) DialUDPᴍ(ж<Dialer> Ꮡd, context.Context
 // connection.
 //
 // The network must be an IP network name; see func Dial for details.
-internal static (ж<IPConn>, error) DialIPᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.Addr laddr, netip.Addr raddr) {
+[GoMethodBody("DialIP")] internal static (ж<IPConn>, error) DialIPᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.Addr laddr, netip.Addr raddr) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -752,7 +752,7 @@ internal static (ж<IPConn>, error) DialIPᴍ(ж<Dialer> Ꮡd, context.Context c
 // connection.
 //
 // The network must be a Unix network name; see func Dial for details.
-internal static (ж<UnixConn>, error) DialUnixᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, ж<UnixAddr> laddr, ж<UnixAddr> raddr) {
+[GoMethodBody("DialUnix")] internal static (ж<UnixConn>, error) DialUnixᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, ж<UnixAddr> laddr, ж<UnixAddr> raddr) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -781,7 +781,7 @@ internal partial struct dialParallel_dialResult /*dyn*/ {
 // head start. It returns the first established connection and
 // closes the others. Otherwise it returns an error from the first
 // primary address.
-internal static partial (Conn, error) dialParallelᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, addrList primaries, addrList fallbacks) {
+[GoMethodBody("dialParallel")] internal static partial (Conn, error) dialParallelᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, addrList primaries, addrList fallbacks) {
     GoFrame ᒐ = default;
     try {
         if (len(fallbacks) == 0) {
@@ -872,7 +872,7 @@ internal static partial (Conn, error) dialParallelᴍ(ж<sysDialer> Ꮡsd, conte
 
 // dialSerial connects to a list of addresses in sequence, returning
 // either the first successful connection, or the first error.
-internal static (Conn, error) dialSerialᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, addrList ras) {
+[GoMethodBody("dialSerial")] internal static (Conn, error) dialSerialᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, addrList ras) {
     GoFrame ᒐ = default;
     try {
         ref var sd = ref Ꮡsd.DerefOrNull();
@@ -929,7 +929,7 @@ internal static (Conn, error) dialSerialᴍ(ж<sysDialer> Ꮡsd, context.Context
 
 // dialSingle attempts to establish and returns a single connection to
 // the destination address.
-internal static (Conn c, error err) dialSingleᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, Addr ra) {
+[GoMethodBody("dialSingle")] internal static (Conn c, error err) dialSingleᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, Addr ra) {
     Conn c = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -1037,7 +1037,7 @@ partial struct ListenConfig {
 //
 // This method doesn't check if MPTCP is supported by the operating
 // system or not.
-internal static bool MultipathTCPᴍ(ref ListenConfig lc) {
+[GoMethodBody("MultipathTCP")] internal static bool MultipathTCPᴍ(ref ListenConfig lc) {
     return lc.mptcpStatus.get();
 }
 
@@ -1047,7 +1047,7 @@ internal static bool MultipathTCPᴍ(ref ListenConfig lc) {
 //
 // If MPTCP is not available on the host or not supported by the client,
 // the Listen method will fall back to TCP.
-internal static void SetMultipathTCPᴍ(ref ListenConfig lc, bool use) {
+[GoMethodBody("SetMultipathTCP")] internal static void SetMultipathTCPᴍ(ref ListenConfig lc, bool use) {
     lc.mptcpStatus.set(use);
 }
 
@@ -1062,7 +1062,7 @@ private static readonly @string listenˢᵇᴍListenConfig = "listen"u8;
 //
 // The ctx argument is used while resolving the address on which to listen;
 // it does not affect the returned Listener.
-internal static (Listener, error) Listenᴍ(ref ListenConfig lc, context.Context ctx, @string network, @string address) {
+[GoMethodBody("Listen")] internal static (Listener, error) Listenᴍ(ref ListenConfig lc, context.Context ctx, @string network, @string address) {
     var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢᴍListenConfig, network, address, default);
     if (err != nil) {
         return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen", Net: network, Source: default, Addr: default, Err: err))));
@@ -1107,7 +1107,7 @@ internal static (Listener, error) Listenᴍ(ref ListenConfig lc, context.Context
 //
 // The ctx argument is used while resolving the address on which to listen;
 // it does not affect the returned PacketConn.
-internal static (PacketConn, error) ListenPacketᴍ(ref ListenConfig lc, context.Context ctx, @string network, @string address) {
+[GoMethodBody("ListenPacket")] internal static (PacketConn, error) ListenPacketᴍ(ref ListenConfig lc, context.Context ctx, @string network, @string address) {
     var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢᴍListenConfig, network, address, default);
     if (err != nil) {
         return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen", Net: network, Source: default, Addr: default, Err: err))));
@@ -1210,43 +1210,3 @@ public static (PacketConn, error) ListenPacket(@string network, @string address)
 }
 
 } // end net_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛmptcpStatusDial {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool get(this ref mptcpStatusDial m) => net_package.getᴍ(ref m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this ref mptcpStatusDial m, bool use) => net_package.setᴍ(ref m, use);
-}
-partial class netᴛmptcpStatusListen {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool get(this ref mptcpStatusListen m) => net_package.getᴍ(ref m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this ref mptcpStatusListen m, bool use) => net_package.setᴍ(ref m, use);
-}
-partial class netᴛDialer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool dualStack(this ref Dialer d) => net_package.dualStackᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Time /*earliest*/ deadline(this ref Dialer d, context.Context ctx, time.Time now) => net_package.deadlineᴍ(ref d, ctx, now);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Resolver> resolver(this ref Dialer d) => net_package.resolverᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Duration fallbackDelay(this ref Dialer d) => net_package.fallbackDelayᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool MultipathTCP(this ref Dialer d) => net_package.MultipathTCPᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetMultipathTCP(this ref Dialer d, bool use) => net_package.SetMultipathTCPᴍ(ref d, use);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Conn, error) Dial(this ж<Dialer> Ꮡd, @string network, @string address) => net_package.Dialᴍ(Ꮡd, network, address);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ctx, @string network, @string address) => net_package.DialContextᴍ(Ꮡd, ctx, network, address);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (context.Context, Action) dialCtx(this ref Dialer d, context.Context ctx) => net_package.dialCtxᴍ(ref d, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<TCPConn>, error) DialTCP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) => net_package.DialTCPᴍ(Ꮡd, ctx, network, laddr, raddr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<UDPConn>, error) DialUDP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) => net_package.DialUDPᴍ(Ꮡd, ctx, network, laddr, raddr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<IPConn>, error) DialIP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.Addr laddr, netip.Addr raddr) => net_package.DialIPᴍ(Ꮡd, ctx, network, laddr, raddr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<UnixConn>, error) DialUnix(this ж<Dialer> Ꮡd, context.Context ctx, @string network, ж<UnixAddr> laddr, ж<UnixAddr> raddr) => net_package.DialUnixᴍ(Ꮡd, ctx, network, laddr, raddr);
-}
-partial class netᴛResolver {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, context.Context ctx, @string op, @string network, @string addr, Addr hint) => net_package.resolveAddrListᴍ(Ꮡr, ctx, op, network, addr, hint);
-}
-partial class netᴛsysDialer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, context.Context ctx, addrList primaries, addrList fallbacks) => net_package.dialParallelᴍ(Ꮡsd, ctx, primaries, fallbacks);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Context ctx, addrList ras) => net_package.dialSerialᴍ(Ꮡsd, ctx, ras);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Conn c, error err) dialSingle(this ж<sysDialer> Ꮡsd, context.Context ctx, Addr ra) => net_package.dialSingleᴍ(Ꮡsd, ctx, ra);
-}
-partial class netᴛListenConfig {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool MultipathTCP(this ref ListenConfig lc) => net_package.MultipathTCPᴍ(ref lc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetMultipathTCP(this ref ListenConfig lc, bool use) => net_package.SetMultipathTCPᴍ(ref lc, use);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Listener, error) Listen(this ref ListenConfig lc, context.Context ctx, @string network, @string address) => net_package.Listenᴍ(ref lc, ctx, network, address);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (PacketConn, error) ListenPacket(this ref ListenConfig lc, context.Context ctx, @string network, @string address) => net_package.ListenPacketᴍ(ref lc, ctx, network, address);
-}
-// </GlyphForwarders>

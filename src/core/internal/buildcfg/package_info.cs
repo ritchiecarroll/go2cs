@@ -65,6 +65,22 @@ using static go.@internal.buildcfg_package;
 
 namespace go.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using fmt = fmt_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using strconv = go.strconv_package;
+using strings = strings_package;
+using go;
+using io = io_package;
+using iter = iter_package;
+using path;
+using static buildcfg_package;
+using reflect = reflect_package;
+using goexperiment = go.@internal.goexperiment_package;
+using go.@internal;
+// </GlyphForwarderUsings>
+
 [GoPackage("buildcfg")]
 public static partial class buildcfg_package
 {
@@ -110,3 +126,21 @@ public static partial class buildcfg_package
 [GoMethodHost(typeof(buildcfg_package.GoarmFeatures)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildcfgᴛGoarmFeatures;
 [GoMethodHost(typeof(buildcfg_package.gowasmFeatures)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildcfgᴛgowasmFeatures;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class buildcfgᴛGoarmFeatures {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this GoarmFeatures g) => buildcfg_package.Stringᴍ(g);
+}
+partial class buildcfgᴛGoarm64Features {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Goarm64Features g) => buildcfg_package.Stringᴍ(g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Supports(this Goarm64Features g, @string s) => buildcfg_package.Supportsᴍ(g, s);
+}
+partial class buildcfgᴛgowasmFeatures {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this gowasmFeatures f) => buildcfg_package.Stringᴍ(f);
+}
+partial class buildcfgᴛExperimentFlags {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<ExperimentFlags> Ꮡexp) => buildcfg_package.Stringᴍ(Ꮡexp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> Enabled(this ж<ExperimentFlags> Ꮡexp) => buildcfg_package.Enabledᴍ(Ꮡexp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> All(this ж<ExperimentFlags> Ꮡexp) => buildcfg_package.Allᴍ(Ꮡexp);
+}
+// </GlyphForwarders>

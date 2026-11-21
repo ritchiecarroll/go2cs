@@ -81,7 +81,7 @@ partial struct monoEdge {
 
 } partial class types_package {
 
-internal static void monomorphᴍ(ж<Checker> Ꮡcheck) {
+[GoMethodBody("monomorph")] internal static void monomorphᴍ(ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // We detect unbounded instantiation cycles using a variant of
@@ -118,7 +118,7 @@ internal static void monomorphᴍ(ж<Checker> Ꮡcheck) {
     }
 }
 
-internal static void reportInstanceLoopᴍ(ж<Checker> Ꮡcheck, nint v) {
+[GoMethodBody("reportInstanceLoop")] internal static void reportInstanceLoopᴍ(ж<Checker> Ꮡcheck, nint v) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     var stackᴷ = new stackAppend<nint>(moves: true, capacityUsed: true);
 
@@ -175,7 +175,7 @@ internal static void reportInstanceLoopᴍ(ж<Checker> Ꮡcheck, nint v) {
 
 // recordCanon records that tpar is the canonical type parameter
 // corresponding to method type parameter mpar.
-internal static void recordCanonᴍ(ref monoGraph w, ж<TypeParam> mpar, ж<TypeParam> tpar) {
+[GoMethodBody("recordCanon")] internal static void recordCanonᴍ(ref monoGraph w, ж<TypeParam> mpar, ж<TypeParam> tpar) {
     if (w.canon == nil) {
         w.canon = new map<ж<TypeParam>, ж<TypeParam>>();
     }
@@ -184,7 +184,7 @@ internal static void recordCanonᴍ(ref monoGraph w, ж<TypeParam> mpar, ж<Type
 
 // recordInstance records that the given type parameters were
 // instantiated with the corresponding type arguments.
-internal static void recordInstanceᴍ(ж<monoGraph> Ꮡw, ж<Package> pkg, token.Pos pos, slice<ж<TypeParam>> tparams, slice<Type> targs, slice<ast.Expr> xlist) {
+[GoMethodBody("recordInstance")] internal static void recordInstanceᴍ(ж<monoGraph> Ꮡw, ж<Package> pkg, token.Pos pos, slice<ж<TypeParam>> tparams, slice<Type> targs, slice<ast.Expr> xlist) {
     foreach (var (i, tpar) in range(tparams)) {
         token.Pos posΔ1 = pos;
         if (i < len(xlist)) {
@@ -195,7 +195,7 @@ internal static void recordInstanceᴍ(ж<monoGraph> Ꮡw, ж<Package> pkg, toke
 }
 
 // assign records that tpar was instantiated as targ at pos.
-internal static void assignᴍ(ж<monoGraph> Ꮡw, ж<Package> pkg, token.Pos pos, ж<TypeParam> Ꮡtpar, Type targ) {
+[GoMethodBody("assign")] internal static void assignᴍ(ж<monoGraph> Ꮡw, ж<Package> pkg, token.Pos pos, ж<TypeParam> Ꮡtpar, Type targ) {
     ref var tpar = ref Ꮡtpar.DerefOrNull();
 
     // Go generics do not have an analog to C++`s template-templates,
@@ -301,7 +301,7 @@ internal static void assignᴍ(ж<monoGraph> Ꮡw, ж<Package> pkg, token.Pos po
 
 // localNamedVertex returns the index of the vertex representing
 // named, or -1 if named doesn't need representation.
-internal static nint localNamedVertexᴍ(ref monoGraph w, ж<Package> pkg, ж<Named> Ꮡnamed) {
+[GoMethodBody("localNamedVertex")] internal static nint localNamedVertexᴍ(ref monoGraph w, ж<Package> pkg, ж<Named> Ꮡnamed) {
     ref var named = ref Ꮡnamed.DerefOrNull();
 
     var obj = named.Obj();
@@ -345,7 +345,7 @@ internal static nint localNamedVertexᴍ(ref monoGraph w, ж<Package> pkg, ж<Na
 }
 
 // typeParamVertex returns the index of the vertex representing tpar.
-internal static nint typeParamVertexᴍ(ref monoGraph w, ж<TypeParam> Ꮡtpar) {
+[GoMethodBody("typeParamVertex")] internal static nint typeParamVertexᴍ(ref monoGraph w, ж<TypeParam> Ꮡtpar) {
     ref var tpar = ref Ꮡtpar.DerefOrNull();
 
     if (w.canon[Ꮡtpar, ꟷ] is (var x, true)) {
@@ -368,7 +368,7 @@ internal static nint typeParamVertexᴍ(ref monoGraph w, ж<TypeParam> Ꮡtpar) 
     return idx;
 }
 
-internal static void addEdgeᴍ(ref monoGraph w, nint dst, nint src, nint weight, token.Pos pos, Type typ) {
+[GoMethodBody("addEdge")] internal static void addEdgeᴍ(ref monoGraph w, nint dst, nint src, nint weight, token.Pos pos, Type typ) {
     // TODO(mdempsky): Deduplicate redundant edges?
     w.edges = append(w.edges, new monoEdge(
         dst: dst,
@@ -381,18 +381,3 @@ internal static void addEdgeᴍ(ref monoGraph w, nint dst, nint src, nint weight
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void monomorph(this ж<Checker> Ꮡcheck) => types_package.monomorphᴍ(Ꮡcheck);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reportInstanceLoop(this ж<Checker> Ꮡcheck, nint v) => types_package.reportInstanceLoopᴍ(Ꮡcheck, v);
-}
-partial class typesᴛmonoGraph {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordCanon(this ref monoGraph w, ж<TypeParam> mpar, ж<TypeParam> tpar) => types_package.recordCanonᴍ(ref w, mpar, tpar);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordInstance(this ж<monoGraph> Ꮡw, ж<Package> pkg, token.Pos pos, slice<ж<TypeParam>> tparams, slice<Type> targs, slice<ast.Expr> xlist) => types_package.recordInstanceᴍ(Ꮡw, pkg, pos, tparams, targs, xlist);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void assign(this ж<monoGraph> Ꮡw, ж<Package> pkg, token.Pos pos, ж<TypeParam> Ꮡtpar, Type targ) => types_package.assignᴍ(Ꮡw, pkg, pos, Ꮡtpar, targ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint localNamedVertex(this ref monoGraph w, ж<Package> pkg, ж<Named> Ꮡnamed) => types_package.localNamedVertexᴍ(ref w, pkg, Ꮡnamed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint typeParamVertex(this ref monoGraph w, ж<TypeParam> Ꮡtpar) => types_package.typeParamVertexᴍ(ref w, Ꮡtpar);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addEdge(this ref monoGraph w, nint dst, nint src, nint weight, token.Pos pos, Type typ) => types_package.addEdgeᴍ(ref w, dst, src, weight, pos, typ);
-}
-// </GlyphForwarders>

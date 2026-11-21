@@ -50,7 +50,7 @@ internal partial interface Flush_type /*dyn*/ {
 } partial class http_package {
 
 // Flush flushes buffered data to the client.
-internal static error Flushᴍ(ref ResponseController c) {
+[GoMethodBody("Flush")] internal static error Flushᴍ(ref ResponseController c) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {
@@ -74,7 +74,7 @@ internal static error Flushᴍ(ref ResponseController c) {
 
 // Hijack lets the caller take over the connection.
 // See the [Hijacker] interface for details.
-internal static (net.Conn, ж<bufio.ReadWriter>, error) Hijackᴍ(ref ResponseController c) {
+[GoMethodBody("Hijack")] internal static (net.Conn, ж<bufio.ReadWriter>, error) Hijackᴍ(ref ResponseController c) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {
@@ -105,7 +105,7 @@ internal partial interface SetReadDeadline_type /*dyn*/ {
 // A zero value means no deadline.
 //
 // Setting the read deadline after it has been exceeded will not extend it.
-internal static error SetReadDeadlineᴍ(ref ResponseController c, time.Time deadline) {
+[GoMethodBody("SetReadDeadline")] internal static error SetReadDeadlineᴍ(ref ResponseController c, time.Time deadline) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {
@@ -137,7 +137,7 @@ internal partial interface SetWriteDeadline_type /*dyn*/ {
 // A zero value means no deadline.
 //
 // Setting the write deadline after it has been exceeded will not extend it.
-internal static error SetWriteDeadlineᴍ(ref ResponseController c, time.Time deadline) {
+[GoMethodBody("SetWriteDeadline")] internal static error SetWriteDeadlineᴍ(ref ResponseController c, time.Time deadline) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {
@@ -173,7 +173,7 @@ internal partial interface EnableFullDuplex_type /*dyn*/ {
 // from the request while concurrently writing the response.
 //
 // For HTTP/2 requests, the Go HTTP server always permits concurrent reads and responses.
-internal static error EnableFullDuplexᴍ(ref ResponseController c) {
+[GoMethodBody("EnableFullDuplex")] internal static error EnableFullDuplexᴍ(ref ResponseController c) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {
@@ -200,13 +200,3 @@ internal static error errNotSupported() {
 }
 
 } // end http_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httpᴛResponseController {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Flush(this ref ResponseController c) => http_package.Flushᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (net.Conn, ж<bufio.ReadWriter>, error) Hijack(this ref ResponseController c) => http_package.Hijackᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetReadDeadline(this ref ResponseController c, time.Time deadline) => http_package.SetReadDeadlineᴍ(ref c, deadline);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetWriteDeadline(this ref ResponseController c, time.Time deadline) => http_package.SetWriteDeadlineᴍ(ref c, deadline);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error EnableFullDuplex(this ref ResponseController c) => http_package.EnableFullDuplexᴍ(ref c);
-}
-// </GlyphForwarders>

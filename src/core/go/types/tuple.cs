@@ -30,7 +30,7 @@ public static ж<Tuple> NewTuple(params ꓸꓸꓸжVar xʗp) {
 } partial class types_package {
 
 // Len returns the number variables of tuple t.
-internal static nint Lenᴍ(ж<Tuple> Ꮡt) {
+[GoMethodBody("Len")] internal static nint Lenᴍ(ж<Tuple> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt != nil) {
@@ -40,18 +40,9 @@ internal static nint Lenᴍ(ж<Tuple> Ꮡt) {
 }
 
 // At returns the i'th variable of tuple t.
-internal static ж<Var> Atᴍ(ref Tuple t, nint i) { return t.vars[i]; }
+[GoMethodBody("At")] internal static ж<Var> Atᴍ(ref Tuple t, nint i) { return t.vars[i]; }
 
-internal static Type Underlyingᴍ(ж<Tuple> Ꮡt) { return new TupleжType(Ꮡt); }
-internal static @string Stringᴍ(ж<Tuple> Ꮡt) { return TypeString(new TupleжType(Ꮡt), default); }
+[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Tuple> Ꮡt) { return new TupleжType(Ꮡt); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<Tuple> Ꮡt) { return TypeString(new TupleжType(Ꮡt), default); }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛTuple {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ж<Tuple> Ꮡt) => types_package.Lenᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Var> At(this ref Tuple t, nint i) => types_package.Atᴍ(ref t, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Underlying(this ж<Tuple> Ꮡt) => types_package.Underlyingᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Tuple> Ꮡt) => types_package.Stringᴍ(Ꮡt);
-}
-// </GlyphForwarders>

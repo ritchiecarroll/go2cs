@@ -67,7 +67,7 @@ partial struct UnknownUserIdError /*num:nint*/;
 
 } partial class user_package {
 
-internal static @string Errorᴍ(UnknownUserIdError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(UnknownUserIdError e) {
     return "user: unknown userid "u8 + strconv.Itoa((nint)e);
 }
 
@@ -79,7 +79,7 @@ partial struct UnknownUserError /*@string*/;
 
 } partial class user_package {
 
-internal static @string Errorᴍ(UnknownUserError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(UnknownUserError e) {
     return "user: unknown user "u8 + ((@string)e);
 }
 
@@ -91,7 +91,7 @@ partial struct UnknownGroupIdError /*@string*/;
 
 } partial class user_package {
 
-internal static @string Errorᴍ(UnknownGroupIdError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(UnknownGroupIdError e) {
     return "group: unknown groupid "u8 + ((@string)e);
 }
 
@@ -103,23 +103,8 @@ partial struct UnknownGroupError /*@string*/;
 
 } partial class user_package {
 
-internal static @string Errorᴍ(UnknownGroupError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(UnknownGroupError e) {
     return "group: unknown group "u8 + ((@string)e);
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class userᴛUnknownUserIdError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownUserIdError e) => user_package.Errorᴍ(e);
-}
-partial class userᴛUnknownUserError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownUserError e) => user_package.Errorᴍ(e);
-}
-partial class userᴛUnknownGroupIdError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownGroupIdError e) => user_package.Errorᴍ(e);
-}
-partial class userᴛUnknownGroupError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownGroupError e) => user_package.Errorᴍ(e);
-}
-// </GlyphForwarders>

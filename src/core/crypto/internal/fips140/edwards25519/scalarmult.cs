@@ -36,7 +36,7 @@ internal static ref basepointTablePrecompᴛ1 basepointTablePrecomp => ref ((Sta
 // returns v.
 //
 // The scalar multiplication is done in constant time.
-internal static ж<Point> ScalarBaseMultᴍ(ж<Point> Ꮡv, ж<Scalar> x) {
+[GoMethodBody("ScalarBaseMult")] internal static ж<Point> ScalarBaseMultᴍ(ж<Point> Ꮡv, ж<Scalar> x) {
     var basepointTableΔ1 = basepointTable();
 
     // Write x = sum(x_i * 16^i) so  x*B = sum( B*x_i*16^i )
@@ -88,7 +88,7 @@ internal static ж<Point> ScalarBaseMultᴍ(ж<Point> Ꮡv, ж<Scalar> x) {
 // ScalarMult sets v = x * q, and returns v.
 //
 // The scalar multiplication is done in constant time.
-internal static ж<Point> ScalarMultᴍ(ж<Point> Ꮡv, ж<Scalar> x, ж<Point> q) {
+[GoMethodBody("ScalarMult")] internal static ж<Point> ScalarMultᴍ(ж<Point> Ꮡv, ж<Scalar> x, ж<Point> q) {
     checkInitialized(q);
 
     projLookupTable table = new();
@@ -152,7 +152,7 @@ internal static ref basepointNafTablePrecompᴛ1 basepointNafTablePrecomp => ref
 // generator, and returns v.
 //
 // Execution time depends on the inputs.
-internal static ж<Point> VarTimeDoubleScalarBaseMultᴍ(ж<Point> Ꮡv, ж<Scalar> a, ж<Point> A, ж<Scalar> b) {
+[GoMethodBody("VarTimeDoubleScalarBaseMult")] internal static ж<Point> VarTimeDoubleScalarBaseMultᴍ(ж<Point> Ꮡv, ж<Scalar> a, ж<Point> A, ж<Scalar> b) {
     checkInitialized(A);
 
     // Similarly to the single variable-base approach, we compute
@@ -226,11 +226,3 @@ internal static ж<Point> VarTimeDoubleScalarBaseMultᴍ(ж<Point> Ꮡv, ж<Scal
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class edwards25519ᴛPoint {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Point> ScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> x) => edwards25519_package.ScalarBaseMultᴍ(Ꮡv, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Point> ScalarMult(this ж<Point> Ꮡv, ж<Scalar> x, ж<Point> q) => edwards25519_package.ScalarMultᴍ(Ꮡv, x, q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Point> VarTimeDoubleScalarBaseMult(this ж<Point> Ꮡv, ж<Scalar> a, ж<Point> A, ж<Scalar> b) => edwards25519_package.VarTimeDoubleScalarBaseMultᴍ(Ꮡv, a, A, b);
-}
-// </GlyphForwarders>

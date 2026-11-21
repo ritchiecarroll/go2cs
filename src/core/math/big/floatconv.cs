@@ -21,7 +21,7 @@ internal static ref Float floatZero => ref ((StaticBox<Float>)ᏑfloatZero).Valu
 // by [Float.Parse], with base argument 0. The entire string (not just a prefix) must
 // be valid for success. If the operation failed, the value of z is undefined
 // but the returned value is nil.
-internal static (ж<Float>, bool) SetStringᴍ(ж<Float> Ꮡz, @string s) {
+[GoMethodBody("SetString")] internal static (ж<Float>, bool) SetStringᴍ(ж<Float> Ꮡz, @string s) {
     var (f, _, err) = Ꮡz.Parse(s, 0); if (err == nil) {
         return (f, true);
     }
@@ -32,7 +32,7 @@ internal static (ж<Float>, bool) SetStringᴍ(ж<Float> Ꮡz, @string s) {
 // floating point number from an io.ByteScanner rather than a string. It serves
 // as the implementation of Parse. It does not recognize ±Inf and does not expect
 // EOF at the end.
-internal static (ж<Float> f, nint b, error err) scanᴍ(ж<Float> Ꮡz, io.ByteScanner r, nint @base) {
+[GoMethodBody("scan")] internal static (ж<Float> f, nint b, error err) scanᴍ(ж<Float> Ꮡz, io.ByteScanner r, nint @base) {
     ж<Float> f = default;
     nint b = default;
     error err = default;
@@ -203,7 +203,7 @@ internal static (ж<Float> f, nint b, error err) scanᴍ(ж<Float> Ꮡz, io.Byte
 
 // pow5 sets z to 5**n and returns z.
 // n must not be negative.
-internal static ж<Float> pow5ᴍ(ж<Float> Ꮡz, uint64 n) {
+[GoMethodBody("pow5")] internal static ж<Float> pow5ᴍ(ж<Float> Ꮡz, uint64 n) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     const uint64 m = /* uint64(len(pow5tab) - 1) */ 27;
@@ -275,7 +275,7 @@ internal static ж<Float> pow5ᴍ(ж<Float> Ꮡz, uint64 n) {
 //
 // The returned *Float f is nil and the value of z is valid but not
 // defined if an error is reported.
-internal static (ж<Float> f, nint b, error err) Parseᴍ(ж<Float> Ꮡz, @string s, nint @base) {
+[GoMethodBody("Parse")] internal static (ж<Float> f, nint b, error err) Parseᴍ(ж<Float> Ꮡz, @string s, nint @base) {
     ж<Float> f = default;
     nint b = default;
     error err = default;
@@ -322,20 +322,10 @@ internal static fmt.Scanner _ᴛ2ʗ = new FloatжScanner(((ж<Float>)nil)); // *
 // [fmt.Scan] for floating point values, which are:
 // 'b' (binary), 'e', 'E', 'f', 'F', 'g' and 'G'.
 // Scan doesn't handle ±Inf.
-internal static error Scanᴍ(ж<Float> Ꮡz, fmt.ScanState s, rune ch) {
+[GoMethodBody("Scan")] internal static error Scanᴍ(ж<Float> Ꮡz, fmt.ScanState s, rune ch) {
     s.SkipSpace();
     var (_, _, err) = Ꮡz.scan(new byteReader(s), 0);
     return err;
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class bigᴛFloat {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Float>, bool) SetString(this ж<Float> Ꮡz, @string s) => big_package.SetStringᴍ(Ꮡz, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Float> f, nint b, error err) scan(this ж<Float> Ꮡz, io.ByteScanner r, nint @base) => big_package.scanᴍ(Ꮡz, r, @base);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Float> pow5(this ж<Float> Ꮡz, uint64 n) => big_package.pow5ᴍ(Ꮡz, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Float> f, nint b, error err) Parse(this ж<Float> Ꮡz, @string s, nint @base) => big_package.Parseᴍ(Ꮡz, s, @base);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Scan(this ж<Float> Ꮡz, fmt.ScanState s, rune ch) => big_package.Scanᴍ(Ꮡz, s, ch);
-}
-// </GlyphForwarders>

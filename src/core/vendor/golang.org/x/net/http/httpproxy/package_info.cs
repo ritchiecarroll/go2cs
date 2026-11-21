@@ -68,6 +68,23 @@ using static go.vendor.golang.org.x.net.http.httpproxy_package;
 
 namespace go.vendor.golang.org.x.net.http;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using errors = errors_package;
+using fmt = fmt_package;
+using net = net_package;
+using netip = go.net.netip_package;
+using url = go.net.url_package;
+using os = os_package;
+using strings = strings_package;
+using utf8 = unicode.utf8_package;
+using idna = go.vendor.golang.org.x.net.idna_package;
+using go.net;
+using go.vendor.golang.org.x.net;
+using unicode;
+using ꓸꓸꓸstring = Span<@string>;
+using static httpproxy_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("httpproxy", ImportPath = "vendor/golang.org/x/net/http/httpproxy")]
 public static partial class httpproxy_package
 {
@@ -120,3 +137,26 @@ public static partial class httpproxy_package
 [GoMethodHost(typeof(httpproxy_package.domainMatch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httpproxyᴛdomainMatch;
 [GoMethodHost(typeof(httpproxy_package.ipMatch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httpproxyᴛipMatch;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class httpproxyᴛConfig {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Func<ж<url.URL>, (ж<url.URL>, error)> ProxyFunc(this ref Config cfg) => httpproxy_package.ProxyFuncᴍ(ref cfg);
+}
+partial class httpproxyᴛconfig {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<url.URL>, error) proxyForURL(this ref config cfg, ж<url.URL> ᏑreqURL) => httpproxy_package.proxyForURLᴍ(ref cfg, ᏑreqURL);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool useProxy(this ref config cfg, @string addr) => httpproxy_package.useProxyᴍ(ref cfg, addr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref config c) => httpproxy_package.initᴍ(ref c);
+}
+partial class httpproxyᴛallMatch {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool match(this allMatch a, @string host, @string port, net.IP ip) => httpproxy_package.matchᴍ(a, host, port, ip);
+}
+partial class httpproxyᴛcidrMatch {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool match(this cidrMatch m, @string host, @string port, net.IP ip) => httpproxy_package.matchᴍ(m, host, port, ip);
+}
+partial class httpproxyᴛipMatch {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool match(this ipMatch m, @string host, @string port, net.IP ip) => httpproxy_package.matchᴍ(m, host, port, ip);
+}
+partial class httpproxyᴛdomainMatch {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool match(this domainMatch m, @string host, @string port, net.IP ip) => httpproxy_package.matchᴍ(m, host, port, ip);
+}
+// </GlyphForwarders>

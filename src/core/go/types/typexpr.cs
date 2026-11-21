@@ -28,7 +28,7 @@ private static readonly @string cannotUseIotaOutsideˢᵇᴍChecker = "cannot us
 // ident type-checks identifier e and initializes x with the value or type of e.
 // If an error occurred, x.mode is set to invalid.
 // If wantType is set, the identifier e is expected to denote a type.
-internal static void identᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.Ident> Ꮡe, bool wantType) {
+[GoMethodBody("ident")] internal static void identᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.Ident> Ꮡe, bool wantType) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -173,14 +173,14 @@ internal static void identᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.Ide
 
 // typ type-checks the type expression e and returns its type, or Typ[Invalid].
 // The type must not be an (uninstantiated) generic type.
-internal static Type typᴍ(ж<Checker> Ꮡcheck, ast.Expr e) {
+[GoMethodBody("typ")] internal static Type typᴍ(ж<Checker> Ꮡcheck, ast.Expr e) {
     return Ꮡcheck.declaredType(e, nil);
 }
 
 // varType type-checks the type expression e and returns its type, or Typ[Invalid].
 // The type must not be an (uninstantiated) generic type and it must not be a
 // constraint interface.
-internal static Type varTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr e) {
+[GoMethodBody("varType")] internal static Type varTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr e) {
     var typ = Ꮡcheck.declaredType(e, nil);
     Ꮡcheck.validVarType(e, typ);
     return typ;
@@ -188,7 +188,7 @@ internal static Type varTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr e) {
 
 // validVarType reports an error if typ is a constraint interface.
 // The expression e is used for error reporting, if any.
-internal static void validVarTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr e, Type typ) {
+[GoMethodBody("validVarType")] internal static void validVarTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr e, Type typ) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // If we have a type parameter there's nothing to do.
@@ -217,7 +217,7 @@ internal static void validVarTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr e, Type typ)
 // If def != nil, e is the type specification for the [Alias] or [Named] type
 // named def, and def.typ.fromRHS will be set to the [Type] of e immediately
 // after its creation.
-internal static Type declaredTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr e, ж<TypeName> def) {
+[GoMethodBody("declaredType")] internal static Type declaredTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr e, ж<TypeName> def) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var typ = Ꮡcheck.typInternal(e, def);
@@ -237,7 +237,7 @@ internal static Type declaredTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr e, ж<TypeNa
 // Note: If the type expression was invalid and an error was reported before,
 // cause will not be populated; thus cause alone cannot be used to determine
 // if an error occurred.
-internal static Type genericTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr e, ж<@string> Ꮡcause) {
+[GoMethodBody("genericType")] internal static Type genericTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr e, ж<@string> Ꮡcause) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var cause = ref Ꮡcause.DerefOrNull();
 
@@ -280,7 +280,7 @@ private static readonly @string missingComparableˢᵇᴍChecker = " (missing co
 
 // typInternal drives type checking of types.
 // Must only be called by declaredType or genericType.
-internal static Type /*T*/ typInternalᴍ(ж<Checker> Ꮡcheck, ast.Expr e0, ж<TypeName> def) {
+[GoMethodBody("typInternal")] internal static Type /*T*/ typInternalᴍ(ж<Checker> Ꮡcheck, ast.Expr e0, ж<TypeName> def) {
     Type T = default;
     GoFrame ᒐ = default;
     try {
@@ -500,7 +500,7 @@ internal partial interface instantiatedType_type /*dyn*/ {
 internal static ref readonly @string instantiatingTypeSWithSˢᴍChecker => ref instantiatingTypeSWithSˢᵇᴍChecker;
 private static readonly @string instantiatingTypeSWithSˢᵇᴍChecker = "-- instantiating type %s with %s"u8;
 
-internal static Type /*res*/ instantiatedTypeᴍ(ж<Checker> Ꮡcheck, ж<indexedExpr> Ꮡix) {
+[GoMethodBody("instantiatedType")] internal static Type /*res*/ instantiatedTypeᴍ(ж<Checker> Ꮡcheck, ж<indexedExpr> Ꮡix) {
     Type res = default;
     GoFrame ᒐ = default;
     try {
@@ -589,7 +589,7 @@ private static readonly @string arrayLengthSMustBeˢᵇᴍChecker = "array lengt
 // arrayLength type-checks the array length expression e
 // and returns the constant length >= 0, or a value < 0
 // to indicate an error (and thus an unknown length).
-internal static int64 arrayLengthᴍ(ж<Checker> Ꮡcheck, ast.Expr e) {
+[GoMethodBody("arrayLength")] internal static int64 arrayLengthᴍ(ж<Checker> Ꮡcheck, ast.Expr e) {
     // If e is an identifier, the array declaration might be an
     // attempt at a parameterized type declaration with missing
     // constraint. Provide an error message that mentions array
@@ -637,7 +637,7 @@ internal static int64 arrayLengthᴍ(ж<Checker> Ꮡcheck, ast.Expr e) {
 
 // typeList provides the list of types corresponding to the incoming expression list.
 // If an error occurred, the result is nil, but all list elements were type-checked.
-internal static slice<Type> typeListᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> list) {
+[GoMethodBody("typeList")] internal static slice<Type> typeListᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> list) {
     var res = new slice<Type>(len(list)); // res != nil even if len(list) == 0
     foreach (var (i, x) in range(list)) {
         var t = Ꮡcheck.varType(x);
@@ -652,18 +652,3 @@ internal static slice<Type> typeListᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> li
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ident(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.Ident> Ꮡe, bool wantType) => types_package.identᴍ(Ꮡcheck, Ꮡx, Ꮡe, wantType);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type typ(this ж<Checker> Ꮡcheck, ast.Expr e) => types_package.typᴍ(Ꮡcheck, e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type varType(this ж<Checker> Ꮡcheck, ast.Expr e) => types_package.varTypeᴍ(Ꮡcheck, e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void validVarType(this ж<Checker> Ꮡcheck, ast.Expr e, Type typ) => types_package.validVarTypeᴍ(Ꮡcheck, e, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type declaredType(this ж<Checker> Ꮡcheck, ast.Expr e, ж<TypeName> def) => types_package.declaredTypeᴍ(Ꮡcheck, e, def);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type genericType(this ж<Checker> Ꮡcheck, ast.Expr e, ж<@string> Ꮡcause) => types_package.genericTypeᴍ(Ꮡcheck, e, Ꮡcause);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type /*T*/ typInternal(this ж<Checker> Ꮡcheck, ast.Expr e0, ж<TypeName> def) => types_package.typInternalᴍ(Ꮡcheck, e0, def);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type /*res*/ instantiatedType(this ж<Checker> Ꮡcheck, ж<indexedExpr> Ꮡix) => types_package.instantiatedTypeᴍ(Ꮡcheck, Ꮡix);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 arrayLength(this ж<Checker> Ꮡcheck, ast.Expr e) => types_package.arrayLengthᴍ(Ꮡcheck, e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Type> typeList(this ж<Checker> Ꮡcheck, slice<ast.Expr> list) => types_package.typeListᴍ(Ꮡcheck, list);
-}
-// </GlyphForwarders>

@@ -25,7 +25,7 @@ partial class types_package {
 // object was inserted into the scope and already had a parent at that
 // time (see Insert). This can only happen for dot-imported objects
 // whose parent is the scope of the package that exported them.
-internal static (ж<Scope>, Object) LookupParentᴍ(ж<Scope> Ꮡs, @string name, token.Pos pos) {
+[GoMethodBody("LookupParent")] internal static (ж<Scope>, Object) LookupParentᴍ(ж<Scope> Ꮡs, @string name, token.Pos pos) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     for (; Ꮡs != nil; Ꮡs = s.parent, s = ref Ꮡs.DerefOrNull()) {
@@ -40,13 +40,13 @@ internal static (ж<Scope>, Object) LookupParentᴍ(ж<Scope> Ꮡs, @string name
 // The results are guaranteed to be valid only if the type-checked
 // AST has complete position information. The extent is undefined
 // for Universe and package scopes.
-internal static token.Pos Posᴍ(ref Scope s) { return s.pos; }
-internal static token.Pos Endᴍ(ref Scope s) { return s.end; }
+[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref Scope s) { return s.pos; }
+[GoMethodBody("End")] internal static token.Pos Endᴍ(ref Scope s) { return s.end; }
 
 // Contains reports whether pos is within the scope's extent.
 // The result is guaranteed to be valid only if the type-checked
 // AST has complete position information.
-internal static bool Containsᴍ(ref Scope s, token.Pos pos) {
+[GoMethodBody("Contains")] internal static bool Containsᴍ(ref Scope s, token.Pos pos) {
     return cmpPos(s.pos, pos) <= 0 && cmpPos(pos, s.end) < 0;
 }
 
@@ -55,7 +55,7 @@ internal static bool Containsᴍ(ref Scope s, token.Pos pos) {
 // The result is also nil for the Universe scope.
 // The result is guaranteed to be valid only if the type-checked
 // AST has complete position information.
-internal static ж<Scope> Innermostᴍ(ж<Scope> Ꮡs, token.Pos pos) {
+[GoMethodBody("Innermost")] internal static ж<Scope> Innermostᴍ(ж<Scope> Ꮡs, token.Pos pos) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Package scopes do not have extents since they may be
@@ -80,13 +80,3 @@ internal static ж<Scope> Innermostᴍ(ж<Scope> Ꮡs, token.Pos pos) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛScope {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Scope>, Object) LookupParent(this ж<Scope> Ꮡs, @string name, token.Pos pos) => types_package.LookupParentᴍ(Ꮡs, name, pos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos Pos(this ref Scope s) => types_package.Posᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static token.Pos End(this ref Scope s) => types_package.Endᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Contains(this ref Scope s, token.Pos pos) => types_package.Containsᴍ(ref s, pos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scope> Innermost(this ж<Scope> Ꮡs, token.Pos pos) => types_package.Innermostᴍ(Ꮡs, pos);
-}
-// </GlyphForwarders>

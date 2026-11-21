@@ -86,6 +86,27 @@ using static go.mime.multipart_package;
 
 namespace go.mime;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using bytes = bytes_package;
+using errors = errors_package;
+using godebug = @internal.godebug_package;
+using io = io_package;
+using math = math_package;
+using textproto = net.textproto_package;
+using os = os_package;
+using strconv = strconv_package;
+using @internal;
+using net;
+using static multipart_package;
+using rand = crypto.rand_package;
+using fmt = fmt_package;
+using maps = maps_package;
+using slices = slices_package;
+using strings = strings_package;
+using crypto;
+using iter = iter_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("multipart")]
 public static partial class multipart_package
 {
@@ -153,3 +174,54 @@ public static partial class multipart_package
 [GoMethodHost(typeof(multipart_package.sectionReadCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛsectionReadCloser;
 [GoMethodHost(typeof(multipart_package.stickyErrorReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class multipartᴛstickyErrorReader;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class multipartᴛReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Form>, error) ReadForm(this ж<Reader> Ꮡr, int64 maxMemory) => multipart_package.ReadFormᴍ(Ꮡr, maxMemory);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Form>, error err) readForm(this ж<Reader> Ꮡr, int64 maxMemory) => multipart_package.readFormᴍ(Ꮡr, maxMemory);
+}
+partial class multipartᴛForm {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error RemoveAll(this ref Form f) => multipart_package.RemoveAllᴍ(ref f);
+}
+partial class multipartᴛFileHeader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (File, error) Open(this ref FileHeader fh) => multipart_package.Openᴍ(ref fh);
+}
+partial class multipartᴛsectionReadCloser {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this sectionReadCloser rc) => multipart_package.Closeᴍ(rc);
+}
+partial class multipartᴛPart {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string FormName(this ref Part p) => multipart_package.FormNameᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string FileName(this ref Part p) => multipart_package.FileNameᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parseContentDisposition(this ref Part p) => multipart_package.parseContentDispositionᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error populateHeaders(this ref Part p, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) => multipart_package.populateHeadersᴍ(ref p, maxMIMEHeaderSize, maxMIMEHeaders);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ref Part p, slice<byte> d) => multipart_package.Readᴍ(ref p, d);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<Part> Ꮡp) => multipart_package.Closeᴍ(Ꮡp);
+}
+partial class multipartᴛstickyErrorReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error) Read(this ref stickyErrorReader r, slice<byte> p) => multipart_package.Readᴍ(ref r, p);
+}
+partial class multipartᴛpartReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this partReader pr, slice<byte> d) => multipart_package.Readᴍ(pr, d);
+}
+partial class multipartᴛReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Part>, error) NextPart(this ж<Reader> Ꮡr) => multipart_package.NextPartᴍ(Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Part>, error) NextRawPart(this ж<Reader> Ꮡr) => multipart_package.NextRawPartᴍ(Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Part>, error) nextPart(this ж<Reader> Ꮡr, bool rawPart, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) => multipart_package.nextPartᴍ(Ꮡr, rawPart, maxMIMEHeaderSize, maxMIMEHeaders);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isFinalBoundary(this ref Reader r, slice<byte> line) => multipart_package.isFinalBoundaryᴍ(ref r, line);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*ret*/ isBoundaryDelimiterLine(this ref Reader r, slice<byte> line) => multipart_package.isBoundaryDelimiterLineᴍ(ref r, line);
+}
+partial class multipartᴛWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Boundary(this ref Writer w) => multipart_package.Boundaryᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetBoundary(this ref Writer w, @string boundary) => multipart_package.SetBoundaryᴍ(ref w, boundary);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string FormDataContentType(this ref Writer w) => multipart_package.FormDataContentTypeᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (io.Writer, error) CreatePart(this ж<Writer> Ꮡw, textproto.MIMEHeader header) => multipart_package.CreatePartᴍ(Ꮡw, header);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (io.Writer, error) CreateFormFile(this ж<Writer> Ꮡw, @string fieldname, @string filename) => multipart_package.CreateFormFileᴍ(Ꮡw, fieldname, filename);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (io.Writer, error) CreateFormField(this ж<Writer> Ꮡw, @string fieldname) => multipart_package.CreateFormFieldᴍ(Ꮡw, fieldname);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteField(this ж<Writer> Ꮡw, @string fieldname, @string value) => multipart_package.WriteFieldᴍ(Ꮡw, fieldname, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Writer w) => multipart_package.Closeᴍ(ref w);
+}
+partial class multipartᴛpart {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error close(this ref part p) => multipart_package.closeᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref part p, slice<byte> d) => multipart_package.Writeᴍ(ref p, d);
+}
+// </GlyphForwarders>

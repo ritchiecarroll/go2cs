@@ -62,6 +62,17 @@ using static go.crypto.aes_package;
 
 namespace go.crypto;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using cipher = go.crypto.cipher_package;
+using boring = go.crypto.@internal.boring_package;
+using aes = go.crypto.@internal.fips140.aes_package;
+using strconv = strconv_package;
+using go.crypto;
+using go.crypto.@internal;
+using go.crypto.@internal.fips140;
+using static aes_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("aes")]
 public static partial class aes_package
 {
@@ -98,3 +109,9 @@ public static partial class aes_package
 // <MethodHolders>
 [GoMethodHost(typeof(aes_package.KeySizeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class aesᴛKeySizeError;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class aesᴛKeySizeError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this KeySizeError k) => aes_package.Errorᴍ(k);
+}
+// </GlyphForwarders>

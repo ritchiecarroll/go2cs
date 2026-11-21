@@ -33,7 +33,7 @@ internal static uint32 absInt32(int32 i) {
 // adjust the output using:
 //
 //	sample = NormFloat64() * desiredStdDev + desiredMean
-internal static float64 NormFloat64ᴍ(ref Rand r) {
+[GoMethodBody("NormFloat64")] internal static float64 NormFloat64ᴍ(ref Rand r) {
     for (;;) {
         var u = r.Uint64();
         var j = (int32)u; // Possibly negative
@@ -158,9 +158,3 @@ internal static float64 NormFloat64ᴍ(ref Rand r) {
 }.array(); }
 
 } // end rand_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class randᴛRand {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 NormFloat64(this ref Rand r) => rand_package.NormFloat64ᴍ(ref r);
-}
-// </GlyphForwarders>

@@ -25,7 +25,7 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
 
 } partial class net_package {
 
-internal static nint familyᴍ(ж<UDPAddr> Ꮡa) {
+[GoMethodBody("family")] internal static nint familyᴍ(ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil || len(a.IP) <= IPv4len) {
@@ -37,7 +37,7 @@ internal static nint familyᴍ(ж<UDPAddr> Ꮡa) {
     return syscall.AF_INET6;
 }
 
-internal static (syscall.Sockaddr, error) sockaddrᴍ(ж<UDPAddr> Ꮡa, nint family) {
+[GoMethodBody("sockaddr")] internal static (syscall.Sockaddr, error) sockaddrᴍ(ж<UDPAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -46,13 +46,13 @@ internal static (syscall.Sockaddr, error) sockaddrᴍ(ж<UDPAddr> Ꮡa, nint fam
     return ipToSockaddr(family, a.IP, a.Port, a.Zone);
 }
 
-internal static sockaddr toLocalᴍ(ref UDPAddr a, @string net) {
+[GoMethodBody("toLocal")] internal static sockaddr toLocalᴍ(ref UDPAddr a, @string net) {
     return new UDPAddrжsockaddr(Ꮡ(new UDPAddr(loopbackIP(net), a.Port, a.Zone)));
 }
 
 } partial class net_package {
 
-internal static (nint, ж<UDPAddr>, error) readFromᴍ(ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
+[GoMethodBody("readFrom")] internal static (nint, ж<UDPAddr>, error) readFromᴍ(ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
     nint n = default;
@@ -83,7 +83,7 @@ internal static (nint, ж<UDPAddr>, error) readFromᴍ(ref UDPConn c, slice<byte
     return (n, Ꮡaddr, err);
 }
 
-internal static (nint n, netip.AddrPort addr, error err) readFromAddrPortᴍ(ref UDPConn c, slice<byte> b) {
+[GoMethodBody("readFromAddrPort")] internal static (nint n, netip.AddrPort addr, error err) readFromAddrPortᴍ(ref UDPConn c, slice<byte> b) {
     nint n = default;
     netip.AddrPort addr = default;
     error err = default;
@@ -115,7 +115,7 @@ internal static (nint n, netip.AddrPort addr, error err) readFromAddrPortᴍ(ref
     return (n, addr, err);
 }
 
-internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) readMsgᴍ(ref UDPConn c, slice<byte> b, slice<byte> oob) {
+[GoMethodBody("readMsg")] internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) readMsgᴍ(ref UDPConn c, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -140,7 +140,7 @@ internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) 
     return (n, oobn, flags, addr, err);
 }
 
-internal static (nint, error) writeToᴍ(ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
+[GoMethodBody("writeTo")] internal static (nint, error) writeToᴍ(ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
     if (c.fd.isConnected) {
@@ -172,7 +172,7 @@ internal static (nint, error) writeToᴍ(ref UDPConn c, slice<byte> b, ж<UDPAdd
     }}
 }
 
-internal static (nint, error) writeToAddrPortᴍ(ref UDPConn c, slice<byte> b, netip.AddrPort addr) {
+[GoMethodBody("writeToAddrPort")] internal static (nint, error) writeToAddrPortᴍ(ref UDPConn c, slice<byte> b, netip.AddrPort addr) {
     if (c.fd.isConnected) {
         return (0, ErrWriteToConnected);
     }
@@ -202,7 +202,7 @@ internal static (nint, error) writeToAddrPortᴍ(ref UDPConn c, slice<byte> b, n
     }}
 }
 
-internal static (nint n, nint oobn, error err) writeMsgᴍ(ref UDPConn c, slice<byte> b, slice<byte> oob, ж<UDPAddr> addr) {
+[GoMethodBody("writeMsg")] internal static (nint n, nint oobn, error err) writeMsgᴍ(ref UDPConn c, slice<byte> b, slice<byte> oob, ж<UDPAddr> addr) {
     error err = default;
 
     if (c.fd.isConnected && addr != nil) {
@@ -218,7 +218,7 @@ internal static (nint n, nint oobn, error err) writeMsgᴍ(ref UDPConn c, slice<
     return c.fd.writeMsg(b, oob, sa);
 }
 
-internal static (nint n, nint oobn, error err) writeMsgAddrPortᴍ(ref UDPConn c, slice<byte> b, slice<byte> oob, netip.AddrPort addr) {
+[GoMethodBody("writeMsgAddrPort")] internal static (nint n, nint oobn, error err) writeMsgAddrPortᴍ(ref UDPConn c, slice<byte> b, slice<byte> oob, netip.AddrPort addr) {
     if (c.fd.isConnected && addr.IsValid()) {
         return (0, 0, ErrWriteToConnected);
     }
@@ -258,7 +258,7 @@ internal static (nint n, nint oobn, error err) writeMsgAddrPortᴍ(ref UDPConn c
 
 } partial class net_package {
 
-internal static (ж<UDPConn>, error) dialUDPᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<UDPAddr> laddr, ж<UDPAddr> raddr) {
+[GoMethodBody("dialUDP")] internal static (ж<UDPConn>, error) dialUDPᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<UDPAddr> laddr, ж<UDPAddr> raddr) {
     ref var sd = ref Ꮡsd.DerefOrNull();
 
     var ctrlCtxFn = sd.Dialer.ControlContext;
@@ -274,7 +274,7 @@ internal static (ж<UDPConn>, error) dialUDPᴍ(ж<sysDialer> Ꮡsd, context.Con
 
 } partial class net_package {
 
-internal static (ж<UDPConn>, error) listenUDPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<UDPAddr> laddr) {
+[GoMethodBody("listenUDP")] internal static (ж<UDPConn>, error) listenUDPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<UDPAddr> laddr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default;
@@ -288,7 +288,7 @@ internal static (ж<UDPConn>, error) listenUDPᴍ(ж<sysListener> Ꮡsl, context
     return (newUDPConn(fd), default);
 }
 
-internal static (ж<UDPConn>, error) listenMulticastUDPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<Interface> ifi, ж<UDPAddr> Ꮡgaddr) {
+[GoMethodBody("listenMulticastUDP")] internal static (ж<UDPConn>, error) listenMulticastUDPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<Interface> ifi, ж<UDPAddr> Ꮡgaddr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
     ref var gaddr = ref Ꮡgaddr.DerefOrNull();
 
@@ -356,27 +356,3 @@ internal static error listenIPv6MulticastUDP(ref UDPConn c, ж<Interface> ifi, I
 }
 
 } // end net_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛUDPAddr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint family(this ж<UDPAddr> Ꮡa) => net_package.familyᴍ(Ꮡa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (syscall.Sockaddr, error) sockaddr(this ж<UDPAddr> Ꮡa, nint family) => net_package.sockaddrᴍ(Ꮡa, family);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static sockaddr toLocal(this ref UDPAddr a, @string net) => net_package.toLocalᴍ(ref a, net);
-}
-partial class netᴛUDPConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, ж<UDPAddr>, error) readFrom(this ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) => net_package.readFromᴍ(ref c, b, Ꮡaddr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, netip.AddrPort addr, error err) readFromAddrPort(this ref UDPConn c, slice<byte> b) => net_package.readFromAddrPortᴍ(ref c, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) readMsg(this ref UDPConn c, slice<byte> b, slice<byte> oob) => net_package.readMsgᴍ(ref c, b, oob);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) writeTo(this ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) => net_package.writeToᴍ(ref c, b, Ꮡaddr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) writeToAddrPort(this ref UDPConn c, slice<byte> b, netip.AddrPort addr) => net_package.writeToAddrPortᴍ(ref c, b, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, nint oobn, error err) writeMsg(this ref UDPConn c, slice<byte> b, slice<byte> oob, ж<UDPAddr> addr) => net_package.writeMsgᴍ(ref c, b, oob, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, nint oobn, error err) writeMsgAddrPort(this ref UDPConn c, slice<byte> b, slice<byte> oob, netip.AddrPort addr) => net_package.writeMsgAddrPortᴍ(ref c, b, oob, addr);
-}
-partial class netᴛsysDialer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<UDPConn>, error) dialUDP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<UDPAddr> laddr, ж<UDPAddr> raddr) => net_package.dialUDPᴍ(Ꮡsd, ctx, laddr, raddr);
-}
-partial class netᴛsysListener {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<UDPConn>, error) listenUDP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<UDPAddr> laddr) => net_package.listenUDPᴍ(Ꮡsl, ctx, laddr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<UDPConn>, error) listenMulticastUDP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<Interface> ifi, ж<UDPAddr> Ꮡgaddr) => net_package.listenMulticastUDPᴍ(Ꮡsl, ctx, ifi, Ꮡgaddr);
-}
-// </GlyphForwarders>

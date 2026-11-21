@@ -341,7 +341,7 @@ partial struct gcControllerState {
 
 } partial class runtime_package {
 
-internal static void initᴍ(ж<gcControllerState> Ꮡc, int32 gcPercent, int64 memoryLimit) {
+[GoMethodBody("init")] internal static void initᴍ(ж<gcControllerState> Ꮡc, int32 gcPercent, int64 memoryLimit) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.heapMinimum = defaultHeapMinimum;
@@ -358,7 +358,7 @@ internal static void initᴍ(ж<gcControllerState> Ꮡc, int32 gcPercent, int64 
 // startCycle resets the GC controller's state and computes estimates
 // for a new GC cycle. The caller must hold worldsema and the world
 // must be stopped.
-internal static void startCycleᴍ(ж<gcControllerState> Ꮡc, int64 markStartTime, nint procs, gcTrigger trigger) {
+[GoMethodBody("startCycle")] internal static void startCycleᴍ(ж<gcControllerState> Ꮡc, int64 markStartTime, nint procs, gcTrigger trigger) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     Ꮡc.ᏑheapScanWork.Store(0);
@@ -466,7 +466,7 @@ internal static void startCycleᴍ(ж<gcControllerState> Ꮡc, int64 markStartTi
 // It should only be called when gcBlackenEnabled != 0 (because this
 // is when assists are enabled and the necessary statistics are
 // available).
-internal static void reviseᴍ(ж<gcControllerState> Ꮡc) {
+[GoMethodBody("revise")] internal static void reviseᴍ(ж<gcControllerState> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var gcPercent = Ꮡc.ᏑgcPercent.Load();
@@ -576,7 +576,7 @@ internal static void reviseᴍ(ж<gcControllerState> Ꮡc) {
 // endCycle computes the consMark estimate for the next cycle.
 // userForced indicates whether the current GC cycle was forced
 // by the application.
-internal static void endCycleᴍ(ж<gcControllerState> Ꮡc, int64 now, nint procs, bool userForced) {
+[GoMethodBody("endCycle")] internal static void endCycleᴍ(ж<gcControllerState> Ꮡc, int64 now, nint procs, bool userForced) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Record last heap goal for the scavenger.
@@ -674,7 +674,7 @@ internal static void endCycleᴍ(ж<gcControllerState> Ꮡc, int64 now, nint pro
 // the static lock ranking.
 //
 //go:nowritebarrier
-internal static void enlistWorkerᴍ(ж<gcControllerState> Ꮡc) {
+[GoMethodBody("enlistWorker")] internal static void enlistWorkerᴍ(ж<gcControllerState> Ꮡc) {
     var needDedicated = Ꮡc.ᏑdedicatedMarkWorkersNeeded.Load() > 0;
 
     // Create new workers from idle Ps with goexperiment.GreenTeaGC.
@@ -745,7 +745,7 @@ private static readonly @string gcControllerStateˢᵇᴍgcControllerState = "gc
 // - Or, call c.releaseNextGCMarkWorker.
 //
 // This must only be called when gcBlackenEnabled != 0.
-internal static (bool, int64) assignWaitingGCWorkerᴍ(ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 now) {
+[GoMethodBody("assignWaitingGCWorker")] internal static (bool, int64) assignWaitingGCWorkerᴍ(ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 now) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var pp = ref Ꮡpp.DerefOrNull();
 
@@ -845,7 +845,7 @@ internal static (bool, int64) assignWaitingGCWorkerᴍ(ж<gcControllerState> Ꮡ
 // the portion of findRunnable that always has a P.
 //
 //go:yeswritebarrierrec
-internal static (ж<g>, int64) findRunnableGCWorkerᴍ(ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 now) {
+[GoMethodBody("findRunnableGCWorker")] internal static (ж<g>, int64) findRunnableGCWorkerᴍ(ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 now) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     // Since we have the current time, check if the GC CPU limiter
@@ -887,7 +887,7 @@ internal static (ж<g>, int64) findRunnableGCWorkerᴍ(ж<gcControllerState> Ꮡ
 // the portion of schedule.
 //
 //go:yeswritebarrierrec
-internal static void releaseNextGCMarkWorkerᴍ(ж<gcControllerState> Ꮡc, ж<p> Ꮡpp) {
+[GoMethodBody("releaseNextGCMarkWorker")] internal static void releaseNextGCMarkWorkerᴍ(ж<gcControllerState> Ꮡc, ж<p> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     var node = pp.nextGCMarkWorker;
@@ -905,7 +905,7 @@ internal static void releaseNextGCMarkWorkerᴍ(ж<gcControllerState> Ꮡc, ж<p
 // the world is started.
 //
 // The world must be stopped.
-internal static void resetLiveᴍ(ж<gcControllerState> Ꮡc, uint64 bytesMarked) {
+[GoMethodBody("resetLive")] internal static void resetLiveᴍ(ж<gcControllerState> Ꮡc, uint64 bytesMarked) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.heapMarked = bytesMarked;
@@ -933,7 +933,7 @@ private static readonly @string markWorkerStopUnknownˢᵇᴍgcControllerState =
 // work in nanoseconds and other bookkeeping.
 //
 // Safe to execute at any time.
-internal static void markWorkerStopᴍ(ж<gcControllerState> Ꮡc, gcMarkWorkerMode mode, int64 duration) {
+[GoMethodBody("markWorkerStop")] internal static void markWorkerStopᴍ(ж<gcControllerState> Ꮡc, gcMarkWorkerMode mode, int64 duration) {
     switch (mode) {
     case var ᴛ when ᴛ == gcMarkWorkerDedicatedMode: {
         Ꮡc.ᏑdedicatedMarkTime.Add(duration);
@@ -955,7 +955,7 @@ internal static void markWorkerStopᴍ(ж<gcControllerState> Ꮡc, gcMarkWorkerM
     }}
 }
 
-internal static void updateᴍ(ж<gcControllerState> Ꮡc, int64 dHeapLive, int64 dHeapScan) {
+[GoMethodBody("update")] internal static void updateᴍ(ж<gcControllerState> Ꮡc, int64 dHeapLive, int64 dHeapScan) {
     if (dHeapLive != 0) {
         var trace = traceAcquire();
         var live = ᏑgcController.ᏑheapLive.Add(dHeapLive);
@@ -977,7 +977,7 @@ internal static void updateᴍ(ж<gcControllerState> Ꮡc, int64 dHeapLive, int6
     }
 }
 
-internal static void addScannableStackᴍ(ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 amount) {
+[GoMethodBody("addScannableStack")] internal static void addScannableStackᴍ(ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 amount) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     if (Ꮡpp == nil) {
@@ -991,12 +991,12 @@ internal static void addScannableStackᴍ(ж<gcControllerState> Ꮡc, ж<p> Ꮡp
     }
 }
 
-internal static void addGlobalsᴍ(ж<gcControllerState> Ꮡc, int64 amount) {
+[GoMethodBody("addGlobals")] internal static void addGlobalsᴍ(ж<gcControllerState> Ꮡc, int64 amount) {
     Ꮡc.ᏑglobalsScan.Add(amount);
 }
 
 // heapGoal returns the current heap goal.
-internal static uint64 heapGoalᴍ(ж<gcControllerState> Ꮡc) {
+[GoMethodBody("heapGoal")] internal static uint64 heapGoalᴍ(ж<gcControllerState> Ꮡc) {
     var (goal, _) = Ꮡc.heapGoalInternal();
     return goal;
 }
@@ -1005,7 +1005,7 @@ internal static uint64 heapGoalᴍ(ж<gcControllerState> Ꮡc) {
 // information that is necessary for computing the trigger.
 //
 // The returned minTrigger is always <= goal.
-internal static (uint64 goal, uint64 minTrigger) heapGoalInternalᴍ(ж<gcControllerState> Ꮡc) {
+[GoMethodBody("heapGoalInternal")] internal static (uint64 goal, uint64 minTrigger) heapGoalInternalᴍ(ж<gcControllerState> Ꮡc) {
     uint64 goal = default;
     uint64 minTrigger = default;
     ref var c = ref Ꮡc.DerefOrNull();
@@ -1055,7 +1055,7 @@ internal static (uint64 goal, uint64 minTrigger) heapGoalInternalᴍ(ж<gcContro
 }
 
 // memoryLimitHeapGoal returns a heap goal derived from memoryLimit.
-internal static uint64 memoryLimitHeapGoalᴍ(ж<gcControllerState> Ꮡc) {
+[GoMethodBody("memoryLimitHeapGoal")] internal static uint64 memoryLimitHeapGoalᴍ(ж<gcControllerState> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Start by pulling out some values we'll need. Be careful about overflow.
@@ -1207,7 +1207,7 @@ private static readonly @string producedATriggerGreaterˢᵇᴍgcControllerState
 // the GC should trigger. Thus, the GC trigger condition should be (but may
 // not be, in the case of small movements for efficiency) checked whenever
 // the heap goal may change.
-internal static (uint64, uint64) triggerᴍ(ж<gcControllerState> Ꮡc) {
+[GoMethodBody("trigger")] internal static (uint64, uint64) triggerᴍ(ж<gcControllerState> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (goal, minTrigger) = Ꮡc.heapGoalInternal();
@@ -1295,7 +1295,7 @@ internal static (uint64, uint64) triggerᴍ(ж<gcControllerState> Ꮡc) {
 // function if the GC is enabled.
 //
 // mheap_.lock must be held or the world must be stopped.
-internal static void commitᴍ(ж<gcControllerState> Ꮡc, bool isSweepDone) {
+[GoMethodBody("commit")] internal static void commitᴍ(ж<gcControllerState> Ꮡc, bool isSweepDone) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!c.test) {
@@ -1357,7 +1357,7 @@ internal static void commitᴍ(ж<gcControllerState> Ꮡc, bool isSweepDone) {
 // Returns the old value of gcPercent.
 //
 // The world must be stopped, or mheap_.lock must be held.
-internal static int32 setGCPercentᴍ(ж<gcControllerState> Ꮡc, int32 @in) {
+[GoMethodBody("setGCPercent")] internal static int32 setGCPercentᴍ(ж<gcControllerState> Ꮡc, int32 @in) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!c.test) {
@@ -1418,7 +1418,7 @@ internal static int32 readGOGC() {
 // Returns the old value of memoryLimit.
 //
 // The world must be stopped, or mheap_.lock must be held.
-internal static int64 setMemoryLimitᴍ(ж<gcControllerState> Ꮡc, int64 @in) {
+[GoMethodBody("setMemoryLimit")] internal static int64 setMemoryLimitᴍ(ж<gcControllerState> Ꮡc, int64 @in) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!c.test) {
@@ -1490,7 +1490,7 @@ private static readonly @string negativeIdleMarkWorkersˢᵇᴍgcControllerState
 // nosplit because it may be called without a P.
 //
 //go:nosplit
-internal static bool addIdleMarkWorkerᴍ(ж<gcControllerState> Ꮡc) {
+[GoMethodBody("addIdleMarkWorker")] internal static bool addIdleMarkWorkerᴍ(ж<gcControllerState> Ꮡc) {
     for (;;) {
         var old = Ꮡc.ᏑidleMarkWorkers.Load();
         var (n, max) = ((int32)(old & (uint64)(~(uint32)0)), (int32)(old >> 32));
@@ -1518,14 +1518,14 @@ internal static bool addIdleMarkWorkerᴍ(ж<gcControllerState> Ꮡc) {
 // nosplit because it may be called without a P.
 //
 //go:nosplit
-internal static bool needIdleMarkWorkerᴍ(ж<gcControllerState> Ꮡc) {
+[GoMethodBody("needIdleMarkWorker")] internal static bool needIdleMarkWorkerᴍ(ж<gcControllerState> Ꮡc) {
     var p = Ꮡc.ᏑidleMarkWorkers.Load();
     var (n, max) = ((int32)(p & (uint64)(~(uint32)0)), (int32)(p >> 32));
     return n < max;
 }
 
 // removeIdleMarkWorker must be called when a new idle mark worker stops executing.
-internal static void removeIdleMarkWorkerᴍ(ж<gcControllerState> Ꮡc) {
+[GoMethodBody("removeIdleMarkWorker")] internal static void removeIdleMarkWorkerᴍ(ж<gcControllerState> Ꮡc) {
     for (;;) {
         var old = Ꮡc.ᏑidleMarkWorkers.Load();
         var (n, max) = ((int32)(old & (uint64)(~(uint32)0)), (int32)(old >> 32));
@@ -1545,7 +1545,7 @@ internal static void removeIdleMarkWorkerᴍ(ж<gcControllerState> Ꮡc) {
 // This method is optimistic in that it does not wait for the number of
 // idle mark workers to reduce to max before returning; it assumes the workers
 // will deschedule themselves.
-internal static void setMaxIdleMarkWorkersᴍ(ж<gcControllerState> Ꮡc, int32 max) {
+[GoMethodBody("setMaxIdleMarkWorkers")] internal static void setMaxIdleMarkWorkersᴍ(ж<gcControllerState> Ꮡc, int32 max) {
     for (;;) {
         var old = Ꮡc.ᏑidleMarkWorkers.Load();
         var n = (int32)(old & (uint64)(~(uint32)0));
@@ -1595,32 +1595,3 @@ internal static void gcControllerCommit() {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛgcControllerState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<gcControllerState> Ꮡc, int32 gcPercent, int64 memoryLimit) => runtime_package.initᴍ(Ꮡc, gcPercent, memoryLimit);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void startCycle(this ж<gcControllerState> Ꮡc, int64 markStartTime, nint procs, gcTrigger trigger) => runtime_package.startCycleᴍ(Ꮡc, markStartTime, procs, trigger);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void revise(this ж<gcControllerState> Ꮡc) => runtime_package.reviseᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void endCycle(this ж<gcControllerState> Ꮡc, int64 now, nint procs, bool userForced) => runtime_package.endCycleᴍ(Ꮡc, now, procs, userForced);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void enlistWorker(this ж<gcControllerState> Ꮡc) => runtime_package.enlistWorkerᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool, int64) assignWaitingGCWorker(this ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 now) => runtime_package.assignWaitingGCWorkerᴍ(Ꮡc, Ꮡpp, now);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<g>, int64) findRunnableGCWorker(this ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 now) => runtime_package.findRunnableGCWorkerᴍ(Ꮡc, Ꮡpp, now);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void releaseNextGCMarkWorker(this ж<gcControllerState> Ꮡc, ж<p> Ꮡpp) => runtime_package.releaseNextGCMarkWorkerᴍ(Ꮡc, Ꮡpp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void resetLive(this ж<gcControllerState> Ꮡc, uint64 bytesMarked) => runtime_package.resetLiveᴍ(Ꮡc, bytesMarked);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void markWorkerStop(this ж<gcControllerState> Ꮡc, gcMarkWorkerMode mode, int64 duration) => runtime_package.markWorkerStopᴍ(Ꮡc, mode, duration);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void update(this ж<gcControllerState> Ꮡc, int64 dHeapLive, int64 dHeapScan) => runtime_package.updateᴍ(Ꮡc, dHeapLive, dHeapScan);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addScannableStack(this ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 amount) => runtime_package.addScannableStackᴍ(Ꮡc, Ꮡpp, amount);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addGlobals(this ж<gcControllerState> Ꮡc, int64 amount) => runtime_package.addGlobalsᴍ(Ꮡc, amount);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 heapGoal(this ж<gcControllerState> Ꮡc) => runtime_package.heapGoalᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64 goal, uint64 minTrigger) heapGoalInternal(this ж<gcControllerState> Ꮡc) => runtime_package.heapGoalInternalᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 memoryLimitHeapGoal(this ж<gcControllerState> Ꮡc) => runtime_package.memoryLimitHeapGoalᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, uint64) trigger(this ж<gcControllerState> Ꮡc) => runtime_package.triggerᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void commit(this ж<gcControllerState> Ꮡc, bool isSweepDone) => runtime_package.commitᴍ(Ꮡc, isSweepDone);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int32 setGCPercent(this ж<gcControllerState> Ꮡc, int32 @in) => runtime_package.setGCPercentᴍ(Ꮡc, @in);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 setMemoryLimit(this ж<gcControllerState> Ꮡc, int64 @in) => runtime_package.setMemoryLimitᴍ(Ꮡc, @in);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool addIdleMarkWorker(this ж<gcControllerState> Ꮡc) => runtime_package.addIdleMarkWorkerᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool needIdleMarkWorker(this ж<gcControllerState> Ꮡc) => runtime_package.needIdleMarkWorkerᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void removeIdleMarkWorker(this ж<gcControllerState> Ꮡc) => runtime_package.removeIdleMarkWorkerᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setMaxIdleMarkWorkers(this ж<gcControllerState> Ꮡc, int32 max) => runtime_package.setMaxIdleMarkWorkersᴍ(Ꮡc, max);
-}
-// </GlyphForwarders>

@@ -61,6 +61,10 @@ using static go.@internal.trace.tracev2_package;
 
 namespace go.@internal.trace;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using static tracev2_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("tracev2")]
 public static partial class tracev2_package
 {
@@ -99,3 +103,15 @@ public static partial class tracev2_package
 [GoMethodHost(typeof(tracev2_package.GoStatus)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tracev2ᴛGoStatus;
 [GoMethodHost(typeof(tracev2_package.ProcStatus)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tracev2ᴛProcStatus;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class tracev2ᴛEventType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Experimental(this EventType ev) => tracev2_package.Experimentalᴍ(ev);
+}
+partial class tracev2ᴛGoStatus {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this GoStatus s) => tracev2_package.Stringᴍ(s);
+}
+partial class tracev2ᴛProcStatus {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ProcStatus s) => tracev2_package.Stringᴍ(s);
+}
+// </GlyphForwarders>

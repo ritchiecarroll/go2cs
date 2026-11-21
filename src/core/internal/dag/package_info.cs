@@ -66,6 +66,15 @@ using static go.@internal.dag_package;
 
 namespace go.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using static dag_package;
+using cmp = cmp_package;
+using fmt = fmt_package;
+using slices = slices_package;
+using strings = strings_package;
+using ꓸꓸꓸany = Span<any>;
+// </GlyphForwarderUsings>
+
 [GoPackage("dag")]
 public static partial class dag_package
 {
@@ -106,3 +115,26 @@ public static partial class dag_package
 [GoMethodHost(typeof(dag_package.rulesParser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dagᴛrulesParser;
 [GoMethodHost(typeof(dag_package.syntaxError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class dagᴛsyntaxError;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class dagᴛGraph {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Transpose(this ref Graph g) => dag_package.Transposeᴍ(ref g);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> Topo(this ж<Graph> Ꮡg) => dag_package.Topoᴍ(Ꮡg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void TransitiveReduction(this ref Graph g) => dag_package.TransitiveReductionᴍ(ref g);
+}
+partial class dagᴛGraph {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool addNode(this ref Graph g, @string label) => dag_package.addNodeᴍ(ref g, label);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddEdge(this ref Graph g, @string from, @string to) => dag_package.AddEdgeᴍ(ref g, from, to);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void DelEdge(this ref Graph g, @string from, @string to) => dag_package.DelEdgeᴍ(ref g, from, to);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HasEdge(this ref Graph g, @string from, @string to) => dag_package.HasEdgeᴍ(ref g, from, to);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> Edges(this ж<Graph> Ꮡg, @string from) => dag_package.Edgesᴍ(Ꮡg, from);
+}
+partial class dagᴛsyntaxError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this syntaxError e) => dag_package.Errorᴍ(e);
+}
+partial class dagᴛrulesParser {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void syntaxError(this ref rulesParser p, @string msg) => dag_package.syntaxErrorᴍ(ref p, msg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<@string> list, @string token) nextList(this ref rulesParser p) => dag_package.nextListᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string nextToken(this ref rulesParser p) => dag_package.nextTokenᴍ(ref p);
+}
+// </GlyphForwarders>

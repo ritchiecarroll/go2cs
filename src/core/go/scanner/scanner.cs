@@ -77,7 +77,7 @@ private static readonly @string illegalByteOrderMarkˢᵇᴍScanner = "illegal b
 //
 // For optimization, there is some overlap between this method and
 // s.scanIdentifier.
-internal static void nextᴍ(ref Scanner s) {
+[GoMethodBody("next")] internal static void nextᴍ(ref Scanner s) {
     if (s.rdOffset < len(s.src)) {
         s.offset = s.rdOffset;
         if (s.ch == '\n') {
@@ -123,7 +123,7 @@ internal static void nextᴍ(ref Scanner s) {
 
 // peek returns the byte following the most recently read character without
 // advancing the scanner. If the scanner is at EOF, peek returns 0.
-internal static byte peekᴍ(ref Scanner s) {
+[GoMethodBody("peek")] internal static byte peekᴍ(ref Scanner s) {
     if (s.rdOffset < len(s.src)) {
         return s.src[s.rdOffset];
     }
@@ -155,7 +155,7 @@ internal static Mode dontInsertSemis => 2;            // do not automatically in
 //
 // Note that Init may call err if there is an error in the first character
 // of the file.
-internal static void Initᴍ(ref Scanner s, ж<token.File> Ꮡfile, slice<byte> src, Action<token.Position, @string> err, Mode mode) {
+[GoMethodBody("Init")] internal static void Initᴍ(ref Scanner s, ж<token.File> Ꮡfile, slice<byte> src, Action<token.Position, @string> err, Mode mode) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     // Explicitly initialize all fields since a scanner may be reused.
@@ -181,14 +181,14 @@ internal static void Initᴍ(ref Scanner s, ж<token.File> Ꮡfile, slice<byte> 
     }
 }
 
-internal static void errorᴍ(ref Scanner s, nint offs, @string msg) {
+[GoMethodBody("error")] internal static void errorᴍ(ref Scanner s, nint offs, @string msg) {
     if (s.err != nil) {
         s.err(s.@file.Position(s.@file.Pos(offs)), msg);
     }
     s.ErrorCount++;
 }
 
-internal static void errorfᴍ(ref Scanner s, nint offs, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("errorf")] internal static void errorfᴍ(ref Scanner s, nint offs, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     s.error(offs, fmt.Sprintf(format, args.ꓸꓸꓸ));
@@ -201,7 +201,7 @@ private static readonly @string commentNotTerminatedˢᵇᴍScanner = "comment n
 // scanComment returns the text of the comment and (if nonzero)
 // the offset of the first newline within it, which implies a
 // /*...*/ comment.
-internal static (@string, nint) scanCommentᴍ(ref Scanner s) {
+[GoMethodBody("scanComment")] internal static (@string, nint) scanCommentᴍ(ref Scanner s) {
     // initial '/' already consumed; s.ch == '/' || s.ch == '*'
     nint offs = s.offset - 1; // position of initial '/'
     nint next = -1;           // position immediately following the comment; < 0 means invalid comment
@@ -280,7 +280,7 @@ internal static slice<byte> prefix = slice<byte>("line "u8);
 // updateLineInfo parses the incoming comment text at offset offs
 // as a line directive. If successful, it updates the line info table
 // for the position next per the line directive.
-internal static void updateLineInfoᴍ(ref Scanner s, nint next, nint offs, slice<byte> text) {
+[GoMethodBody("updateLineInfo")] internal static void updateLineInfoᴍ(ref Scanner s, nint next, nint offs, slice<byte> text) {
     // extract comment text
     if (text[1] == '*') {
         text = text.slice(0, len(text) - 2); // lop off trailing "*/"
@@ -371,7 +371,7 @@ internal static bool isDigit(rune ch) {
 //
 // Be careful when making changes to this function: it is optimized and affects
 // scanning performance significantly.
-internal static @string scanIdentifierᴍ(ref Scanner s) {
+[GoMethodBody("scanIdentifier")] internal static @string scanIdentifierᴍ(ref Scanner s) {
     nint offs = s.offset;
 
     // Optimize for the common case of an ASCII identifier.
@@ -441,7 +441,7 @@ internal static bool isHex(rune ch) { return '0' <= ch && ch <= '9' || 'a' <= lo
 // in *invalid, if *invalid < 0.
 // digits returns a bitset describing whether the sequence contained
 // digits (bit 0 is set), or separators '_' (bit 1 is set).
-internal static nint /*digsep*/ digitsᴍ(ref Scanner s, nint @base, ж<nint> Ꮡinvalid) {
+[GoMethodBody("digits")] internal static nint /*digsep*/ digitsᴍ(ref Scanner s, nint @base, ж<nint> Ꮡinvalid) {
     nint digsep = default;
     ref var invalid = ref Ꮡinvalid.DerefOrNull();
 
@@ -478,7 +478,7 @@ private static readonly @string hexadecimalMantissaˢᵇᴍScanner = "hexadecima
 internal static ref readonly @string mustSeparateSuccessiveˢᴍScanner => ref mustSeparateSuccessiveˢᵇᴍScanner;
 private static readonly @string mustSeparateSuccessiveˢᵇᴍScanner = "'_' must separate successive digits"u8;
 
-internal static (token.Token, @string) scanNumberᴍ(ref Scanner s) {
+[GoMethodBody("scanNumber")] internal static (token.Token, @string) scanNumberᴍ(ref Scanner s) {
     nint offs = s.offset;
     token.Token tok = token.ILLEGAL;
 
@@ -660,7 +660,7 @@ private static readonly @string escapeSequenceIsInvalidˢᵇᴍScanner = "escape
 // escaped quote. In case of a syntax error, it stops at the offending
 // character (without consuming it) and returns false. Otherwise
 // it returns true.
-internal static bool scanEscapeᴍ(ref Scanner s, rune quote) {
+[GoMethodBody("scanEscape")] internal static bool scanEscapeᴍ(ref Scanner s, rune quote) {
     nint offs = s.offset;
 
     nint n = default;
@@ -729,7 +729,7 @@ private static readonly @string runeLiteralNotTerminatedˢᵇᴍScanner = "rune 
 internal static ref readonly @string illegalRuneLiteralˢᴍScanner => ref illegalRuneLiteralˢᵇᴍScanner;
 private static readonly @string illegalRuneLiteralˢᵇᴍScanner = "illegal rune literal"u8;
 
-internal static @string scanRuneᴍ(ref Scanner s) {
+[GoMethodBody("scanRune")] internal static @string scanRuneᴍ(ref Scanner s) {
     // '\'' opening already consumed
     nint offs = s.offset - 1;
 
@@ -769,7 +769,7 @@ internal static @string scanRuneᴍ(ref Scanner s) {
 internal static ref readonly @string stringLiteralNotˢᴍScanner => ref stringLiteralNotˢᵇᴍScanner;
 private static readonly @string stringLiteralNotˢᵇᴍScanner = "string literal not terminated"u8;
 
-internal static @string scanStringᴍ(ref Scanner s) {
+[GoMethodBody("scanString")] internal static @string scanStringᴍ(ref Scanner s) {
     // '"' opening already consumed
     nint offs = s.offset - 1;
 
@@ -816,7 +816,7 @@ internal static slice<byte> stripCR(slice<byte> b, bool comment) {
 internal static ref readonly @string rawStringLiteralNotˢᴍScanner => ref rawStringLiteralNotˢᵇᴍScanner;
 private static readonly @string rawStringLiteralNotˢᵇᴍScanner = "raw string literal not terminated"u8;
 
-internal static (@string, nint) scanRawStringᴍ(ref Scanner s) {
+[GoMethodBody("scanRawString")] internal static (@string, nint) scanRawStringᴍ(ref Scanner s) {
     // '`' opening already consumed
     nint offs = s.offset - 1;
 
@@ -845,7 +845,7 @@ internal static (@string, nint) scanRawStringᴍ(ref Scanner s) {
     return ((@string)lit, rawLen);
 }
 
-internal static void skipWhitespaceᴍ(ref Scanner s) {
+[GoMethodBody("skipWhitespace")] internal static void skipWhitespaceᴍ(ref Scanner s) {
     while (s.ch == ' ' || s.ch == '\t' || s.ch == '\n' && !s.insertSemi || s.ch == '\r') {
         s.next();
     }
@@ -856,7 +856,7 @@ internal static void skipWhitespaceᴍ(ref Scanner s) {
 // of ch_i. If a token ends in '=', the result is tok1 or tok3
 // respectively. Otherwise, the result is tok0 if there was no other
 // matching character, or tok2 if the matching character was ch2.
-internal static token.Token switch2ᴍ(ref Scanner s, token.Token tok0, token.Token tok1) {
+[GoMethodBody("switch2")] internal static token.Token switch2ᴍ(ref Scanner s, token.Token tok0, token.Token tok1) {
     if (s.ch == '=') {
         s.next();
         return tok1;
@@ -864,7 +864,7 @@ internal static token.Token switch2ᴍ(ref Scanner s, token.Token tok0, token.To
     return tok0;
 }
 
-internal static token.Token switch3ᴍ(ref Scanner s, token.Token tok0, token.Token tok1, rune ch2, token.Token tok2) {
+[GoMethodBody("switch3")] internal static token.Token switch3ᴍ(ref Scanner s, token.Token tok0, token.Token tok1, rune ch2, token.Token tok2) {
     if (s.ch == '=') {
         s.next();
         return tok1;
@@ -876,7 +876,7 @@ internal static token.Token switch3ᴍ(ref Scanner s, token.Token tok0, token.To
     return tok0;
 }
 
-internal static token.Token switch4ᴍ(ref Scanner s, token.Token tok0, token.Token tok1, rune ch2, token.Token tok2, token.Token tok3) {
+[GoMethodBody("switch4")] internal static token.Token switch4ᴍ(ref Scanner s, token.Token tok0, token.Token tok1, rune ch2, token.Token tok2, token.Token tok3) {
     if (s.ch == '=') {
         s.next();
         return tok1;
@@ -922,7 +922,7 @@ internal static token.Token switch4ᴍ(ref Scanner s, token.Token tok0, token.To
 // Scan adds line information to the file added to the file
 // set with Init. Token positions are relative to that file
 // and thus relative to the file set.
-internal static (token.Pos pos, token.Token tok, @string lit) Scanᴍ(ref Scanner s) {
+[GoMethodBody("Scan")] internal static (token.Pos pos, token.Token tok, @string lit) Scanᴍ(ref Scanner s) {
     token.Pos pos = default;
     token.Token tok = default;
     @string lit = default;
@@ -1169,27 +1169,3 @@ scanAgain:
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class scannerᴛScanner {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void next(this ref Scanner s) => scanner_package.nextᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte peek(this ref Scanner s) => scanner_package.peekᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Init(this ref Scanner s, ж<token.File> Ꮡfile, slice<byte> src, Action<token.Position, @string> err, Mode mode) => scanner_package.Initᴍ(ref s, Ꮡfile, src, err, mode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void error(this ref Scanner s, nint offs, @string msg) => scanner_package.errorᴍ(ref s, offs, msg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void errorf(this ref Scanner s, nint offs, @string format, params ꓸꓸꓸany argsʗp) => scanner_package.errorfᴍ(ref s, offs, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, nint) scanComment(this ref Scanner s) => scanner_package.scanCommentᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void updateLineInfo(this ref Scanner s, nint next, nint offs, slice<byte> text) => scanner_package.updateLineInfoᴍ(ref s, next, offs, text);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string scanIdentifier(this ref Scanner s) => scanner_package.scanIdentifierᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*digsep*/ digits(this ref Scanner s, nint @base, ж<nint> Ꮡinvalid) => scanner_package.digitsᴍ(ref s, @base, Ꮡinvalid);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (token.Token, @string) scanNumber(this ref Scanner s) => scanner_package.scanNumberᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool scanEscape(this ref Scanner s, rune quote) => scanner_package.scanEscapeᴍ(ref s, quote);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string scanRune(this ref Scanner s) => scanner_package.scanRuneᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string scanString(this ref Scanner s) => scanner_package.scanStringᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, nint) scanRawString(this ref Scanner s) => scanner_package.scanRawStringᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void skipWhitespace(this ref Scanner s) => scanner_package.skipWhitespaceᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Token switch2(this ref Scanner s, token.Token tok0, token.Token tok1) => scanner_package.switch2ᴍ(ref s, tok0, tok1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Token switch3(this ref Scanner s, token.Token tok0, token.Token tok1, rune ch2, token.Token tok2) => scanner_package.switch3ᴍ(ref s, tok0, tok1, ch2, tok2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Token switch4(this ref Scanner s, token.Token tok0, token.Token tok1, rune ch2, token.Token tok2, token.Token tok3) => scanner_package.switch4ᴍ(ref s, tok0, tok1, ch2, tok2, tok3);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (token.Pos pos, token.Token tok, @string lit) Scan(this ref Scanner s) => scanner_package.Scanᴍ(ref s);
-}
-// </GlyphForwarders>

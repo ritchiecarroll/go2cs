@@ -71,6 +71,17 @@ using static go.os.signal_package;
 
 namespace go.os;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using context = context_package;
+using os = os_package;
+using slices = slices_package;
+using sync = sync_package;
+using MethodImplAttribute = global::System.Runtime.CompilerServices.MethodImplAttribute;
+using MethodImplOptions = global::System.Runtime.CompilerServices.MethodImplOptions;
+using ꓸꓸꓸosꓸSignal = Span<os_package.Signal>;
+using static signal_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("signal")]
 public static partial class signal_package
 {
@@ -115,3 +126,19 @@ public static partial class signal_package
 [GoMethodHost(typeof(signal_package.signalCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class signalᴛsignalCtx;
 [GoMethodHost(typeof(signal_package.signalError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class signalᴛsignalError;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class signalᴛhandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool want(this ref handler h, nint sig) => signal_package.wantᴍ(ref h, sig);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this ref handler h, nint sig) => signal_package.setᴍ(ref h, sig);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clear(this ref handler h, nint sig) => signal_package.clearᴍ(ref h, sig);
+}
+partial class signalᴛsignalCtx {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stop(this ref signalCtx c) => signal_package.stopᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref signalCtx c) => signal_package.Stringᴍ(ref c);
+}
+partial class signalᴛsignalError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this signalError s) => signal_package.Errorᴍ(s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Is(this signalError s, error target) => signal_package.Isᴍ(s, target);
+}
+// </GlyphForwarders>

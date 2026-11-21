@@ -142,11 +142,11 @@ partial struct orderEventList /*[]orderEvent*/;
 
 } partial class tracev1_package {
 
-internal static bool Lessᴍ(ref orderEventList l, nint i, nint j) {
+[GoMethodBody("Less")] internal static bool Lessᴍ(ref orderEventList l, nint i, nint j) {
     return (l)[i].ev.Ts < (l)[j].ev.Ts;
 }
 
-internal static void Pushᴍ(ж<orderEventList> Ꮡh, orderEvent x) {
+[GoMethodBody("Push")] internal static void Pushᴍ(ж<orderEventList> Ꮡh, orderEvent x) {
     x = x.ΔClone();
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -154,7 +154,7 @@ internal static void Pushᴍ(ж<orderEventList> Ꮡh, orderEvent x) {
     heapUp(Ꮡh, len(h) - 1);
 }
 
-internal static orderEvent Popᴍ(ж<orderEventList> Ꮡh) {
+[GoMethodBody("Pop")] internal static orderEvent Popᴍ(ж<orderEventList> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     nint n = len(h) - 1;
@@ -215,11 +215,3 @@ internal static bool heapDown(ж<orderEventList> Ꮡh, nint i0, nint n) {
 }
 
 } // end tracev1_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tracev1ᴛorderEventList {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this ref orderEventList l, nint i, nint j) => tracev1_package.Lessᴍ(ref l, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Push(this ж<orderEventList> Ꮡh, orderEvent x) => tracev1_package.Pushᴍ(Ꮡh, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static orderEvent Pop(this ж<orderEventList> Ꮡh) => tracev1_package.Popᴍ(Ꮡh);
-}
-// </GlyphForwarders>

@@ -61,7 +61,7 @@ internal static void initMPTCPavailable() {
 
 } partial class net_package {
 
-internal static (ж<TCPConn>, error) dialMPTCPᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
+[GoMethodBody("dialMPTCP")] internal static (ж<TCPConn>, error) dialMPTCPᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
     if (supportsMultipathTCP()) {
         var (conn, err) = Ꮡsd.doDialTCPProto(ctx, laddr, raddr, _IPPROTO_MPTCP); if (err == nil) {
             return (conn, default);
@@ -79,7 +79,7 @@ internal static (ж<TCPConn>, error) dialMPTCPᴍ(ж<sysDialer> Ꮡsd, context.C
 
 } partial class net_package {
 
-internal static (ж<TCPListener>, error) listenMPTCPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) {
+[GoMethodBody("listenMPTCP")] internal static (ж<TCPListener>, error) listenMPTCPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) {
     if (supportsMultipathTCP()) {
         var (dial, err) = Ꮡsl.listenTCPProto(ctx, laddr, _IPPROTO_MPTCP); if (err == nil) {
             return (dial, default);
@@ -145,12 +145,3 @@ internal static bool isUsingMultipathTCP(ж<netFD> fd) {
 }
 
 } // end net_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛsysDialer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<TCPConn>, error) dialMPTCP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) => net_package.dialMPTCPᴍ(Ꮡsd, ctx, laddr, raddr);
-}
-partial class netᴛsysListener {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<TCPListener>, error) listenMPTCP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) => net_package.listenMPTCPᴍ(Ꮡsl, ctx, laddr);
-}
-// </GlyphForwarders>

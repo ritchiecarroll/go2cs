@@ -112,7 +112,7 @@ internal static error errInvalSep = errors.New("'_' must separate successive dig
 // parsed. A digit count <= 0 indicates the presence of a period (if fracOk
 // is set, only), and -count is the number of fractional digits found.
 // In this case, the actual value of the scanned number is res * b**count.
-internal static (nat res, nint b, nint count, error err) scanᴍ(nat z, io.ByteScanner r, nint @base, bool fracOk) {
+[GoMethodBody("scan")] internal static (nat res, nint b, nint count, error err) scanᴍ(nat z, io.ByteScanner r, nint @base, bool fracOk) {
     nat res = default;
     nint b = default;
     nint count = default;
@@ -320,12 +320,12 @@ internal static (nat res, nint b, nint count, error err) scanᴍ(nat z, io.ByteS
 
 // utoa converts x to an ASCII representation in the given base;
 // base must be between 2 and MaxBase, inclusive.
-internal static slice<byte> utoaᴍ(nat x, nint @base) {
+[GoMethodBody("utoa")] internal static slice<byte> utoaᴍ(nat x, nint @base) {
     return x.itoa(false, @base);
 }
 
 // itoa is like utoa but it prepends a '-' if neg && x != 0.
-internal static slice<byte> itoaᴍ(nat x, bool neg, nint @base) {
+[GoMethodBody("itoa")] internal static slice<byte> itoaᴍ(nat x, bool neg, nint @base) {
     GoFrame ᒐ = default;
     try {
         if (@base < 2 || @base > MaxBase) {
@@ -440,7 +440,7 @@ internal static slice<byte> itoaᴍ(nat x, bool neg, nint @base) {
 // range 2..64 shows that values of 8 and 16 work well, with a 4x speedup at medium lengths and
 // ~30x for 20000 digits. Use nat_test.go's BenchmarkLeafSize tests to optimize leafSize for
 // specific hardware.
-internal static void convertWordsᴍ(nat q, ж<stack> stk, slice<byte> s, Word b, nint ndigits, Word bb, slice<divisor> table) {
+[GoMethodBody("convertWords")] internal static void convertWordsᴍ(nat q, ж<stack> stk, slice<byte> s, Word b, nint ndigits, Word bb, slice<divisor> table) {
     // split larger blocks recursively
     if (table != nil) {
         // len(q) > leafSize > 0
@@ -532,7 +532,7 @@ internal static ref cacheBase10ᴛ1 cacheBase10 => ref ((StaticBox<cacheBase10�
 } partial class big_package {
 
 // expWW computes x**y
-internal static nat expWWᴍ(nat z, ж<stack> stk, Word x, Word y) {
+[GoMethodBody("expWW")] internal static nat expWWᴍ(nat z, ж<stack> stk, Word x, Word y) {
     return z.expNN(stk, ((nat)default).setWord(x), ((nat)default).setWord(y), default, false);
 }
 
@@ -594,13 +594,3 @@ internal static slice<divisor> divisors(ж<stack> stk, nint m, Word b, nint ndig
 }
 
 } // end big_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class bigᴛnat {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nat res, nint b, nint count, error err) scan(this nat z, io.ByteScanner r, nint @base, bool fracOk) => big_package.scanᴍ(z, r, @base, fracOk);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> utoa(this nat x, nint @base) => big_package.utoaᴍ(x, @base);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> itoa(this nat x, bool neg, nint @base) => big_package.itoaᴍ(x, neg, @base);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void convertWords(this nat q, ж<stack> stk, slice<byte> s, Word b, nint ndigits, Word bb, slice<divisor> table) => big_package.convertWordsᴍ(q, stk, s, b, ndigits, bb, table);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat expWW(this nat z, ж<stack> stk, Word x, Word y) => big_package.expWWᴍ(z, stk, x, y);
-}
-// </GlyphForwarders>

@@ -223,7 +223,7 @@ private static readonly @string testmainˢᵇᴍCounterMode = "testmain"u8;
 private static ref readonly @string invalidˢᴍCounterMode => ref invalidˢᵇᴍCounterMode;
 private static readonly @string invalidˢᵇᴍCounterMode = "<invalid>"u8;
 
-internal static @string Stringᴍ(CounterMode cm) {
+[GoMethodBody("String")] internal static @string Stringᴍ(CounterMode cm) {
     switch (cm) {
     case var ᴛ when ᴛ == CtrModeSet: {
         return setˢᴍCounterMode;
@@ -293,7 +293,7 @@ private static readonly @string perfuncˢᵇᴍCounterGranularity = "perfunc"u8;
 private static ref readonly @string invalidˢᴍCounterGranularity => ref invalidˢᵇᴍCounterGranularity;
 private static readonly @string invalidˢᵇᴍCounterGranularity = "<invalid>"u8;
 
-internal static @string Stringᴍ(CounterGranularity cm) {
+[GoMethodBody("String")] internal static @string Stringᴍ(CounterGranularity cm) {
     switch (cm) {
     case var ᴛ when ᴛ == CtrGranularityPerBlock: {
         return perblockˢᴍCounterGranularity;
@@ -433,12 +433,3 @@ public static UntypedInt FuncIdOffset => 2;
 public static UntypedInt FirstCtrOffset => 3;
 
 } // end coverage_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class coverageᴛCounterMode {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this CounterMode cm) => coverage_package.Stringᴍ(cm);
-}
-partial class coverageᴛCounterGranularity {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this CounterGranularity cm) => coverage_package.Stringᴍ(cm);
-}
-// </GlyphForwarders>

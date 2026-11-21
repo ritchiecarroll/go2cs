@@ -60,6 +60,23 @@ using static go.@internal.cgrouptest_package;
 
 namespace go.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using fmt = fmt_package;
+using cgroup = go.@internal.runtime.cgroup_package;
+using os = os_package;
+using filepath = path.filepath_package;
+using slices = slices_package;
+using strconv = go.strconv_package;
+using strings = strings_package;
+using Δsyscall = syscall_package;
+using testing = testing_package;
+using fs = io.fs_package;
+using go;
+using go.@internal.runtime;
+using path;
+using static cgrouptest_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("cgrouptest")]
 public static partial class cgrouptest_package
 {
@@ -101,3 +118,11 @@ public static partial class cgrouptest_package
 // <MethodHolders>
 [GoMethodHost(typeof(cgrouptest_package.CgroupV2)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgrouptestᴛCgroupV2;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class cgrouptestᴛCgroupV2 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Path(this ref CgroupV2 c) => cgrouptest_package.Pathᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string CPUMaxPath(this ref CgroupV2 c) => cgrouptest_package.CPUMaxPathᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetCPUMax(this ref CgroupV2 c, int64 quota, int64 period) => cgrouptest_package.SetCPUMaxᴍ(ref c, quota, period);
+}
+// </GlyphForwarders>

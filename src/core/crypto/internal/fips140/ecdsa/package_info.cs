@@ -76,6 +76,22 @@ using static go.crypto.@internal.fips140.ecdsa_package;
 
 namespace go.crypto.@internal.fips140;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using bytes = bytes_package;
+using fips140 = go.crypto.@internal.fips140_package;
+using bigmod = go.crypto.@internal.fips140.bigmod_package;
+using drbg = go.crypto.@internal.fips140.drbg_package;
+using Δnistec = go.crypto.@internal.fips140.nistec_package;
+using errors = errors_package;
+using hash = hash_package;
+using io = io_package;
+using sync = sync_package;
+using go.crypto.@internal;
+using go.crypto.@internal.fips140;
+using static ecdsa_package;
+using hmac = go.crypto.@internal.fips140.hmac_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("ecdsa")]
 public static partial class ecdsa_package
 {
@@ -133,3 +149,22 @@ public static partial class ecdsa_package
 [GoMethodHost(typeof(ecdsa_package.hmacDRBG)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛhmacDRBG;
 [GoMethodHost(typeof(ecdsa_package.plainPersonalizationString)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛplainPersonalizationString;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class ecdsaᴛPrivateKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => ecdsa_package.Bytesᴍ(ref priv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => ecdsa_package.PublicKeyᴍ(Ꮡpriv);
+}
+partial class ecdsaᴛPublicKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => ecdsa_package.Bytesᴍ(ref pub);
+}
+partial class ecdsaᴛplainPersonalizationString {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isPersonalizationString(this plainPersonalizationString _) => ecdsa_package.isPersonalizationStringᴍ(_);
+}
+partial class ecdsaᴛblockAlignedPersonalizationString {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isPersonalizationString(this blockAlignedPersonalizationString _) => ecdsa_package.isPersonalizationStringᴍ(_);
+}
+partial class ecdsaᴛhmacDRBG {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Generate(this ref hmacDRBG d, slice<byte> @out) => ecdsa_package.Generateᴍ(ref d, @out);
+}
+// </GlyphForwarders>

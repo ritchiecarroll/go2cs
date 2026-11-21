@@ -56,7 +56,7 @@ partial struct InvalidByteError /*num:byte*/;
 
 } partial class hex_package {
 
-internal static @string Errorᴍ(InvalidByteError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(InvalidByteError e) {
     return fmt.Sprintf("encoding/hex: invalid byte: %#U"u8, (rune)e);
 }
 
@@ -166,7 +166,7 @@ public static io.Writer NewEncoder(io.Writer w) {
 
 } partial class hex_package {
 
-internal static (nint n, error err) Writeᴍ(ref encoder e, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref encoder e, slice<byte> p) {
     nint n = default;
 
     while (len(p) > 0 && e.err == nil) {
@@ -201,7 +201,7 @@ public static io.Reader NewDecoder(io.Reader r) {
 
 } partial class hex_package {
 
-internal static (nint n, error err) Readᴍ(ref decoder d, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref decoder d, slice<byte> p) {
     error err = default;
 
     // Fill internal buffer with sufficient bytes to decode
@@ -267,7 +267,7 @@ internal static byte toChar(byte b) {
 internal static ref readonly @string encodingHexDumperClosedˢᴍdumper => ref encodingHexDumperClosedˢᵇᴍdumper;
 private static readonly @string encodingHexDumperClosedˢᵇᴍdumper = "encoding/hex: dumper closed"u8;
 
-internal static (nint n, error err) Writeᴍ(ref dumper h, slice<byte> data) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref dumper h, slice<byte> data) {
     nint n = default;
     error err = default;
 
@@ -329,7 +329,7 @@ internal static (nint n, error err) Writeᴍ(ref dumper h, slice<byte> data) {
     return (n, err);
 }
 
-internal static error /*err*/ Closeᴍ(ref dumper h) {
+[GoMethodBody("Close")] internal static error /*err*/ Closeᴍ(ref dumper h) {
     error err = default;
 
     // See the comments in Write() for the details of this format.
@@ -366,19 +366,3 @@ internal static error /*err*/ Closeᴍ(ref dumper h) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class hexᴛInvalidByteError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this InvalidByteError e) => hex_package.Errorᴍ(e);
-}
-partial class hexᴛencoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) => hex_package.Writeᴍ(ref e, p);
-}
-partial class hexᴛdecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) => hex_package.Readᴍ(ref d, p);
-}
-partial class hexᴛdumper {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) => hex_package.Writeᴍ(ref h, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ Close(this ref dumper h) => hex_package.Closeᴍ(ref h);
-}
-// </GlyphForwarders>

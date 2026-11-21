@@ -50,7 +50,7 @@ private static readonly @string _state_nameᵇ = "stateTextstateTagstateAttrName
 
 } partial class template_package {
 
-internal static @string Stringᴍ(state i) {
+[GoMethodBody("String")] internal static @string Stringᴍ(state i) {
     if (i >= ((state)(uint8)(len(_state_index) - 1))) {
         return "state("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -58,9 +58,3 @@ internal static @string Stringᴍ(state i) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class templateᴛstate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this state i) => template_package.Stringᴍ(i);
-}
-// </GlyphForwarders>

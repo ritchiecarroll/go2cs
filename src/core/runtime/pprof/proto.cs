@@ -128,7 +128,7 @@ internal static UntypedInt tagFunction_StartLine => 5;  // int64
 
 // stringIndex adds s to the string table if not already present
 // and returns the index of s in the string table.
-internal static int64 stringIndexᴍ(ref profileBuilder b, @string s) {
+[GoMethodBody("stringIndex")] internal static int64 stringIndexᴍ(ref profileBuilder b, @string s) {
     var (id, ok) = b.stringMap[s, ꟷ];
     if (!ok) {
         id = len(b.strings);
@@ -138,7 +138,7 @@ internal static int64 stringIndexᴍ(ref profileBuilder b, @string s) {
     return (int64)id;
 }
 
-internal static void flushᴍ(ref profileBuilder b) {
+[GoMethodBody("flush")] internal static void flushᴍ(ref profileBuilder b) {
     const nint dataFlush = 4096;
     if (b.pb.nest == 0 && len(b.pb.data) > dataFlush) {
         b.zw.Write(b.pb.data);
@@ -147,7 +147,7 @@ internal static void flushᴍ(ref profileBuilder b) {
 }
 
 // pbValueType encodes a ValueType message to b.pb.
-internal static void pbValueTypeᴍ(ref profileBuilder b, nint tag, @string typ, @string unit) {
+[GoMethodBody("pbValueType")] internal static void pbValueTypeᴍ(ref profileBuilder b, nint tag, @string typ, @string unit) {
     msgOffset start = b.pb.startMessage();
     b.pb.int64(tagValueType_Type, b.stringIndex(typ));
     b.pb.int64(tagValueType_Unit, b.stringIndex(unit));
@@ -155,7 +155,7 @@ internal static void pbValueTypeᴍ(ref profileBuilder b, nint tag, @string typ,
 }
 
 // pbSample encodes a Sample message to b.pb.
-internal static void pbSampleᴍ(ref profileBuilder b, slice<int64> values, slice<uint64> locs, Action labels) {
+[GoMethodBody("pbSample")] internal static void pbSampleᴍ(ref profileBuilder b, slice<int64> values, slice<uint64> locs, Action labels) {
     msgOffset start = b.pb.startMessage();
     b.pb.int64s(tagSample_Value, values);
     b.pb.uint64s(tagSample_Location, locs);
@@ -167,7 +167,7 @@ internal static void pbSampleᴍ(ref profileBuilder b, slice<int64> values, slic
 }
 
 // pbLabel encodes a Label message to b.pb.
-internal static void pbLabelᴍ(ref profileBuilder b, nint tag, @string key, @string str, int64 num) {
+[GoMethodBody("pbLabel")] internal static void pbLabelᴍ(ref profileBuilder b, nint tag, @string key, @string str, int64 num) {
     msgOffset start = b.pb.startMessage();
     b.pb.int64Opt(tagLabel_Key, b.stringIndex(key));
     b.pb.int64Opt(tagLabel_Str, b.stringIndex(str));
@@ -176,7 +176,7 @@ internal static void pbLabelᴍ(ref profileBuilder b, nint tag, @string key, @st
 }
 
 // pbLine encodes a Line message to b.pb.
-internal static void pbLineᴍ(ref profileBuilder b, nint tag, uint64 funcID, int64 line) {
+[GoMethodBody("pbLine")] internal static void pbLineᴍ(ref profileBuilder b, nint tag, uint64 funcID, int64 line) {
     msgOffset start = b.pb.startMessage();
     b.pb.uint64Opt(tagLine_FunctionID, funcID);
     b.pb.int64Opt(tagLine_Line, line);
@@ -184,7 +184,7 @@ internal static void pbLineᴍ(ref profileBuilder b, nint tag, uint64 funcID, in
 }
 
 // pbMapping encodes a Mapping message to b.pb.
-internal static void pbMappingᴍ(ref profileBuilder b, nint tag, uint64 id, uint64 @base, uint64 limit, uint64 offset, @string @file, @string buildID, bool hasFuncs) {
+[GoMethodBody("pbMapping")] internal static void pbMappingᴍ(ref profileBuilder b, nint tag, uint64 id, uint64 @base, uint64 limit, uint64 offset, @string @file, @string buildID, bool hasFuncs) {
     msgOffset start = b.pb.startMessage();
     b.pb.uint64Opt(tagMapping_ID, id);
     b.pb.uint64Opt(tagMapping_Start, @base);
@@ -275,7 +275,7 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
 //
 // The data must be a whole number of records, as delivered by the runtime.
 // len(tags) must be equal to the number of records in data.
-internal static error addCPUDataᴍ(ref profileBuilder b, slice<uint64> data, slice<@unsafe.Pointer> tags) {
+[GoMethodBody("addCPUData")] internal static error addCPUDataᴍ(ref profileBuilder b, slice<uint64> data, slice<@unsafe.Pointer> tags) {
     if (!b.havePeriod) {
         // first record is period
         if (len(data) < 3) {
@@ -355,7 +355,7 @@ internal static ref readonly @string nanosecondsˢᴍprofileBuilder => ref nanos
 private static readonly @string nanosecondsˢᵇᴍprofileBuilder = "nanoseconds"u8;
 
 // build completes and returns the constructed profile.
-internal static error buildᴍ(ж<profileBuilder> Ꮡb) {
+[GoMethodBody("build")] internal static error buildᴍ(ж<profileBuilder> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.end = time.Now();
@@ -417,7 +417,7 @@ internal static error buildᴍ(ж<profileBuilder> Ꮡb) {
 // get the right cumulative sample count.
 //
 // It may emit to b.pb, so there must be no message encoding in progress.
-internal static slice<uint64> /*newLocs*/ appendLocsForStackᴍ(ж<profileBuilder> Ꮡb, slice<uint64> locs, slice<uintptr> stk) {
+[GoMethodBody("appendLocsForStack")] internal static slice<uint64> /*newLocs*/ appendLocsForStackᴍ(ж<profileBuilder> Ꮡb, slice<uint64> locs, slice<uintptr> stk) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.deck.reset();
@@ -570,7 +570,7 @@ partial struct pcDeck {
 
 } partial class pprof_package {
 
-internal static void resetᴍ(ref pcDeck d) {
+[GoMethodBody("reset")] internal static void resetᴍ(ref pcDeck d) {
     d.pcs = d.pcs[..0];
     d.frames = d.frames[..0];
     d.symbolizeResult = 0;
@@ -581,7 +581,7 @@ internal static void resetᴍ(ref pcDeck d) {
 // tryAdd tries to add the pc and Frames expanded from it (most likely one,
 // since the stack trace is already fully expanded) and the symbolizeResult
 // to the deck. If it fails the caller needs to flush the deck and retry.
-internal static bool /*success*/ tryAddᴍ(ref pcDeck d, uintptr pc, slice<runtime.Frame> frames, symbolizeFlag symbolizeResult) {
+[GoMethodBody("tryAdd")] internal static bool /*success*/ tryAddᴍ(ref pcDeck d, uintptr pc, slice<runtime.Frame> frames, symbolizeFlag symbolizeResult) {
     nint existing = len(d.frames); if (existing > 0) {
         // 'd.frames' are all expanded from one 'pc' and represent all
         // inlined functions so we check only the last one.
@@ -628,7 +628,7 @@ internal partial struct emitLocation_newFunc /*dyn*/ {
 // and returns the location ID encoded in the profile protobuf.
 // It emits to b.pb, so there must be no message encoding in progress.
 // It resets the deck.
-internal static uint64 emitLocationᴍ(ж<profileBuilder> Ꮡb) {
+[GoMethodBody("emitLocation")] internal static uint64 emitLocationᴍ(ж<profileBuilder> Ꮡb) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -805,11 +805,11 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
 
 } partial class pprof_package {
 
-internal static void addMappingᴍ(ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID) {
+[GoMethodBody("addMapping")] internal static void addMappingᴍ(ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID) {
     b.addMappingEntry(lo, hi, offset, @file, buildID, false);
 }
 
-internal static void addMappingEntryᴍ(ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID, bool fake) {
+[GoMethodBody("addMappingEntry")] internal static void addMappingEntryᴍ(ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID, bool fake) {
     b.mem = append(b.mem, new memMap(
         start: (uintptr)lo,
         end: (uintptr)hi,
@@ -821,25 +821,3 @@ internal static void addMappingEntryᴍ(ref profileBuilder b, uint64 lo, uint64 
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class pprofᴛprofileBuilder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 stringIndex(this ref profileBuilder b, @string s) => pprof_package.stringIndexᴍ(ref b, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void flush(this ref profileBuilder b) => pprof_package.flushᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pbValueType(this ref profileBuilder b, nint tag, @string typ, @string unit) => pprof_package.pbValueTypeᴍ(ref b, tag, typ, unit);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pbSample(this ref profileBuilder b, slice<int64> values, slice<uint64> locs, Action labels) => pprof_package.pbSampleᴍ(ref b, values, locs, labels);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pbLabel(this ref profileBuilder b, nint tag, @string key, @string str, int64 num) => pprof_package.pbLabelᴍ(ref b, tag, key, str, num);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pbLine(this ref profileBuilder b, nint tag, uint64 funcID, int64 line) => pprof_package.pbLineᴍ(ref b, tag, funcID, line);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pbMapping(this ref profileBuilder b, nint tag, uint64 id, uint64 @base, uint64 limit, uint64 offset, @string @file, @string buildID, bool hasFuncs) => pprof_package.pbMappingᴍ(ref b, tag, id, @base, limit, offset, @file, buildID, hasFuncs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error addCPUData(this ref profileBuilder b, slice<uint64> data, slice<@unsafe.Pointer> tags) => pprof_package.addCPUDataᴍ(ref b, data, tags);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error build(this ж<profileBuilder> Ꮡb) => pprof_package.buildᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<uint64> /*newLocs*/ appendLocsForStack(this ж<profileBuilder> Ꮡb, slice<uint64> locs, slice<uintptr> stk) => pprof_package.appendLocsForStackᴍ(Ꮡb, locs, stk);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 emitLocation(this ж<profileBuilder> Ꮡb) => pprof_package.emitLocationᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addMapping(this ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID) => pprof_package.addMappingᴍ(ref b, lo, hi, offset, @file, buildID);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addMappingEntry(this ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID, bool fake) => pprof_package.addMappingEntryᴍ(ref b, lo, hi, offset, @file, buildID, fake);
-}
-partial class pprofᴛpcDeck {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref pcDeck d) => pprof_package.resetᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*success*/ tryAdd(this ref pcDeck d, uintptr pc, slice<runtime.Frame> frames, symbolizeFlag symbolizeResult) => pprof_package.tryAddᴍ(ref d, pc, frames, symbolizeResult);
-}
-// </GlyphForwarders>

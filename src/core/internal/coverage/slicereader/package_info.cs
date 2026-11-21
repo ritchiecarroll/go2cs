@@ -60,6 +60,15 @@ using static go.@internal.coverage.slicereader_package;
 
 namespace go.@internal.coverage;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using io = io_package;
+using @unsafe = unsafe_package;
+using encoding;
+using static slicereader_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("slicereader")]
 public static partial class slicereader_package
 {
@@ -95,3 +104,16 @@ public static partial class slicereader_package
 // <MethodHolders>
 [GoMethodHost(typeof(slicereader_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class slicereaderᴛReader;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class slicereaderᴛReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Read(this ref Reader r, slice<byte> b) => slicereader_package.Readᴍ(ref r, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64 ret, error err) Seek(this ref Reader r, int64 offset, nint whence) => slicereader_package.Seekᴍ(ref r, offset, whence);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Offset(this ref Reader r) => slicereader_package.Offsetᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint8 ReadUint8(this ref Reader r) => slicereader_package.ReadUint8ᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 ReadUint32(this ref Reader r) => slicereader_package.ReadUint32ᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 ReadUint64(this ref Reader r) => slicereader_package.ReadUint64ᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 /*value*/ ReadULEB128(this ref Reader r) => slicereader_package.ReadULEB128ᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string ReadString(this ref Reader r, int64 len) => slicereader_package.ReadStringᴍ(ref r, len);
+}
+// </GlyphForwarders>

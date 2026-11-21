@@ -27,19 +27,19 @@ partial struct Writer {
 } partial class stringtab_package {
 
 // InitWriter initializes a stringtab.Writer.
-internal static void InitWriterᴍ(ref Writer stw) {
+[GoMethodBody("InitWriter")] internal static void InitWriterᴍ(ref Writer stw) {
     stw.stab = new map<@string, uint32>();
     stw.tmp = new slice<byte>(64);
 }
 
 // Nentries returns the number of strings interned so far.
-internal static uint32 Nentriesᴍ(ref Writer stw) {
+[GoMethodBody("Nentries")] internal static uint32 Nentriesᴍ(ref Writer stw) {
     return (uint32)len(stw.strs);
 }
 
 // Lookup looks up string 's' in the writer's table, adding
 // a new entry if need be, and returning an index into the table.
-internal static uint32 Lookupᴍ(ref Writer stw, @string s) {
+[GoMethodBody("Lookup")] internal static uint32 Lookupᴍ(ref Writer stw, @string s) {
     var (idxΔ1, ok) = stw.stab[s, ꟷ]; if (ok) {
         return idxΔ1;
     }
@@ -54,7 +54,7 @@ internal static uint32 Lookupᴍ(ref Writer stw, @string s) {
 
 // Size computes the memory in bytes needed for the serialized
 // version of a stringtab.Writer.
-internal static uint32 Sizeᴍ(ref Writer stw) {
+[GoMethodBody("Size")] internal static uint32 Sizeᴍ(ref Writer stw) {
     var rval = (uint32)0;
     stw.tmp = stw.tmp[..0];
     stw.tmp = uleb128.AppendUleb128(stw.tmp, (nuint)len(stw.strs));
@@ -70,7 +70,7 @@ internal static uint32 Sizeᴍ(ref Writer stw) {
 
 // Write writes the string table in serialized form to the specified
 // io.Writer.
-internal static error Writeᴍ(ж<Writer> Ꮡstw, io.Writer w) {
+[GoMethodBody("Write")] internal static error Writeᴍ(ж<Writer> Ꮡstw, io.Writer w) {
     ref var stw = ref Ꮡstw.DerefOrNull();
 
     error wr128(nuint v) {
@@ -109,7 +109,7 @@ internal static error Writeᴍ(ж<Writer> Ꮡstw, io.Writer w) {
 // allowed, only lookups of existing strings (if a lookup triggers
 // addition, a panic will result). Useful as a mechanism for
 // "finalizing" a string table prior to writing it out.
-internal static void Freezeᴍ(ref Writer stw) {
+[GoMethodBody("Freeze")] internal static void Freezeᴍ(ref Writer stw) {
     stw.frozen = true;
 }
 
@@ -134,7 +134,7 @@ public static ж<Reader> NewReader(ж<slicereader.Reader> r) {
 } partial class stringtab_package {
 
 // Read reads/decodes a string table using the reader provided.
-internal static void Readᴍ(ref Reader str) {
+[GoMethodBody("Read")] internal static void Readᴍ(ref Reader str) {
     nint numEntries = (nint)str.r.ReadULEB128();
     str.strs = new slice<@string>(0, numEntries);
     for (nint idx = 0; idx < numEntries; idx++) {
@@ -144,29 +144,13 @@ internal static void Readᴍ(ref Reader str) {
 }
 
 // Entries returns the number of decoded entries in a string table.
-internal static nint Entriesᴍ(ref Reader str) {
+[GoMethodBody("Entries")] internal static nint Entriesᴍ(ref Reader str) {
     return len(str.strs);
 }
 
 // Get returns string 'idx' within the string table.
-internal static @string Getᴍ(ref Reader str, uint32 idx) {
+[GoMethodBody("Get")] internal static @string Getᴍ(ref Reader str, uint32 idx) {
     return str.strs[idx];
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class stringtabᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void InitWriter(this ref Writer stw) => stringtab_package.InitWriterᴍ(ref stw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Nentries(this ref Writer stw) => stringtab_package.Nentriesᴍ(ref stw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Lookup(this ref Writer stw, @string s) => stringtab_package.Lookupᴍ(ref stw, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Size(this ref Writer stw) => stringtab_package.Sizeᴍ(ref stw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ж<Writer> Ꮡstw, io.Writer w) => stringtab_package.Writeᴍ(Ꮡstw, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Freeze(this ref Writer stw) => stringtab_package.Freezeᴍ(ref stw);
-}
-partial class stringtabᴛReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Read(this ref Reader str) => stringtab_package.Readᴍ(ref str);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Entries(this ref Reader str) => stringtab_package.Entriesᴍ(ref str);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Get(this ref Reader str, uint32 idx) => stringtab_package.Getᴍ(ref str, idx);
-}
-// </GlyphForwarders>

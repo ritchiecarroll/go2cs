@@ -65,6 +65,24 @@ using static go.net.http.cookiejar_package;
 
 namespace go.net.http;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using cmp = cmp_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using net = net_package;
+using http = go.net.http_package;
+using ascii = go.net.http.@internal.ascii_package;
+using netip = go.net.netip_package;
+using url = go.net.url_package;
+using slices = slices_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+using go.net;
+using go.net.http.@internal;
+using static cookiejar_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("cookiejar")]
 public static partial class cookiejar_package
 {
@@ -113,3 +131,21 @@ public static partial class cookiejar_package
 [GoMethodHost(typeof(cookiejar_package.Jar)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cookiejarᴛJar;
 [GoMethodHost(typeof(cookiejar_package.entry)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cookiejarᴛentry;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class cookiejarᴛentry {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string id(this ref entry e) => cookiejar_package.idᴍ(ref e);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool shouldSend(this ref entry e, bool https, @string host, @string path) => cookiejar_package.shouldSendᴍ(ref e, https, host, path);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool domainMatch(this ref entry e, @string host) => cookiejar_package.domainMatchᴍ(ref e, host);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool pathMatch(this ref entry e, @string requestPath) => cookiejar_package.pathMatchᴍ(ref e, requestPath);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool secureMatch(this ref entry e, bool https) => cookiejar_package.secureMatchᴍ(ref e, https);
+}
+partial class cookiejarᴛJar {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<ж<http.Cookie>> /*cookies*/ Cookies(this ж<Jar> Ꮡj, ж<url.URL> u) => cookiejar_package.Cookiesᴍ(Ꮡj, u);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ж<http.Cookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, time.Time now) => cookiejar_package.cookiesᴍ(Ꮡj, Ꮡu, now);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetCookies(this ж<Jar> Ꮡj, ж<url.URL> u, slice<ж<http.Cookie>> cookies) => cookiejar_package.SetCookiesᴍ(Ꮡj, u, cookies);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<http.Cookie>> cookies, time.Time now) => cookiejar_package.setCookiesᴍ(Ꮡj, Ꮡu, cookies, now);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<http.Cookie> Ꮡc, time.Time now, @string defPath, @string host) => cookiejar_package.newEntryᴍ(ref j, Ꮡc, now, defPath, host);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, bool, error) domainAndType(this ref Jar j, @string host, @string domain) => cookiejar_package.domainAndTypeᴍ(ref j, host, domain);
+}
+// </GlyphForwarders>

@@ -45,7 +45,7 @@ public static ж<CoverageMetaFileWriter> NewCoverageMetaFileWriter(@string mfnam
 
 } partial class encodemeta_package {
 
-internal static error Writeᴍ(ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<byte> finalHash, slice<slice<byte>> blobs, coverage.CounterMode mode, coverage.CounterGranularity granularity) {
+[GoMethodBody("Write")] internal static error Writeᴍ(ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<byte> finalHash, slice<slice<byte>> blobs, coverage.CounterMode mode, coverage.CounterGranularity granularity) {
     finalHash = finalHash.Clone();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -143,9 +143,3 @@ internal static error Writeᴍ(ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<b
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class encodemetaᴛCoverageMetaFileWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<byte> finalHash, slice<slice<byte>> blobs, coverage.CounterMode mode, coverage.CounterGranularity granularity) => encodemeta_package.Writeᴍ(Ꮡm, finalHash, blobs, mode, granularity);
-}
-// </GlyphForwarders>

@@ -68,6 +68,20 @@ using static go.crypto.@internal.fips140.mldsa_package;
 
 namespace go.crypto.@internal.fips140;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using bytes = bytes_package;
+using fips140 = go.crypto.@internal.fips140_package;
+using drbg = go.crypto.@internal.fips140.drbg_package;
+using sha3 = go.crypto.@internal.fips140.sha3_package;
+using subtle = go.crypto.@internal.fips140.subtle_package;
+using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
+using errors = errors_package;
+using go.crypto.@internal;
+using go.crypto.@internal.fips140;
+using go.crypto.@internal.fips140deps;
+using static mldsa_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("mldsa")]
 public static partial class mldsa_package
 {
@@ -116,3 +130,16 @@ public static partial class mldsa_package
 [GoMethodHost(typeof(mldsa_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mldsaᴛPrivateKey;
 [GoMethodHost(typeof(mldsa_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mldsaᴛPublicKey;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class mldsaᴛPrivateKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ref PrivateKey priv, ж<PrivateKey> Ꮡx) => mldsa_package.Equalᴍ(ref priv, Ꮡx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => mldsa_package.Bytesᴍ(ref priv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => mldsa_package.PublicKeyᴍ(Ꮡpriv);
+}
+partial class mldsaᴛPublicKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ref PublicKey pub, ж<PublicKey> Ꮡx) => mldsa_package.Equalᴍ(ref pub, Ꮡx);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => mldsa_package.Bytesᴍ(ref pub);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Parameters(this ref PublicKey pub) => mldsa_package.Parametersᴍ(ref pub);
+}
+// </GlyphForwarders>

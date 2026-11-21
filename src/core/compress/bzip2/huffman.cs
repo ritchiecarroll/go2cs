@@ -38,7 +38,7 @@ internal static UntypedInt invalidNodeValue => 0xffff;
 
 // Decode reads bits from the given bitReader and navigates the tree until a
 // symbol is found.
-internal static uint16 /*v*/ Decodeᴍ(ref huffmanTree t, ж<bitReader> Ꮡbr) {
+[GoMethodBody("Decode")] internal static uint16 /*v*/ Decodeᴍ(ref huffmanTree t, ж<bitReader> Ꮡbr) {
     uint16 v = default;
     ref var br = ref Ꮡbr.DerefOrNull();
 
@@ -249,9 +249,3 @@ internal static (uint16 nodeIndex, error err) buildHuffmanNode(ж<huffmanTree> �
 }
 
 } // end bzip2_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class bzip2ᴛhuffmanTree {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 /*v*/ Decode(this ref huffmanTree t, ж<bitReader> Ꮡbr) => bzip2_package.Decodeᴍ(ref t, Ꮡbr);
-}
-// </GlyphForwarders>

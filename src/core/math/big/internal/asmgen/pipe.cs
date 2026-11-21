@@ -48,7 +48,7 @@ partial struct Pipe {
 } partial class asmgen_package {
 
 // Pipe creates and returns a new pipe for use in the function f.
-internal static ж<Pipe> Pipeᴍ(ж<Func> Ꮡf) {
+[GoMethodBody("Pipe")] internal static ж<Pipe> Pipeᴍ(ж<Func> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var a = f.Asm;
@@ -67,7 +67,7 @@ internal static ж<Pipe> Pipeᴍ(ж<Func> Ꮡf) {
 
 // SetBackward sets the pipe to process the input and output columns in reverse order.
 // This is needed for left shifts, which might otherwise overwrite data they will read later.
-internal static void SetBackwardᴍ(ref Pipe p) {
+[GoMethodBody("SetBackward")] internal static void SetBackwardᴍ(ref Pipe p) {
     if (p.loaded) {
         p.f.Asm.Fatalf("SetBackward after Start/LoadPtrs");
     }
@@ -78,7 +78,7 @@ internal static void SetBackwardᴍ(ref Pipe p) {
 // meaning the loop counter is also used as an index for accessing the slice data.
 // This clever trick is slower on modern processors, but it is still necessary on 386.
 // On non-386 systems, SetUseIndexCounter is a no-op.
-internal static void SetUseIndexCounterᴍ(ref Pipe p) {
+[GoMethodBody("SetUseIndexCounter")] internal static void SetUseIndexCounterᴍ(ref Pipe p) {
     if (p.f.Asm.Arch.memIndex == nil) { // need memIndex (only 386 provides it)
         return;
     }
@@ -87,13 +87,13 @@ internal static void SetUseIndexCounterᴍ(ref Pipe p) {
 
 // SetLabel sets the label prefix for the loops emitted by the pipe.
 // The default prefix is "loop".
-internal static void SetLabelᴍ(ref Pipe p, @string label) {
+[GoMethodBody("SetLabel")] internal static void SetLabelᴍ(ref Pipe p, @string label) {
     p.label = label;
 }
 
 // SetMaxColumns sets the maximum number of
 // columns processed in a single loop body call.
-internal static void SetMaxColumnsᴍ(ref Pipe p, nint m) {
+[GoMethodBody("SetMaxColumns")] internal static void SetMaxColumnsᴍ(ref Pipe p, nint m) {
     p.maxColumns = m;
 }
 
@@ -103,7 +103,7 @@ internal static void SetMaxColumnsᴍ(ref Pipe p, nint m) {
 // If the hint indicates a single register on the target architecture,
 // then SetHint calls SetMaxColumns(1), since the hinted register
 // can only be used for one value at a time.
-internal static void SetHintᴍ(ref Pipe p, @string name, Hint hint) {
+[GoMethodBody("SetHint")] internal static void SetHintᴍ(ref Pipe p, @string name, Hint hint) {
     if (hint == HintMemOK && !p.f.Asm.Arch.memOK) {
         return;
     }
@@ -136,7 +136,7 @@ private static readonly @string runLoopBackwardˢᵇᴍPipe = "run loop backward
 // LoadPtrs only needs to be called explicitly when code needs
 // to use LoadN before Start, like when the shift.go generators
 // read an initial word before the loop.
-internal static void LoadPtrsᴍ(ref Pipe p, Reg n) {
+[GoMethodBody("LoadPtrs")] internal static void LoadPtrsᴍ(ref Pipe p, Reg n) {
     var a = p.f.Asm;
     if (p.loaded) {
         a.Fatalf("pointers already loaded");
@@ -215,7 +215,7 @@ internal static void LoadPtrsᴍ(ref Pipe p, Reg n) {
 // LoadN returns the next n columns of input words as a slice of rows.
 // Regs for inputs that have been marked using p.SetMemOK will be direct memory references.
 // Regs for other inputs will be newly allocated registers and must be freed.
-internal static slice<slice<Reg>> LoadNᴍ(ref Pipe p, nint n) {
+[GoMethodBody("LoadN")] internal static slice<slice<Reg>> LoadNᴍ(ref Pipe p, nint n) {
     var a = p.f.Asm;
     var regs = new slice<slice<Reg>>(len(p.inPtr));
     foreach (var (i, vᴛ1) in range(p.inPtr)) {
@@ -270,7 +270,7 @@ internal static slice<slice<Reg>> LoadNᴍ(ref Pipe p, nint n) {
 }
 
 // StoreN writes regs (a slice of rows) to the next n columns of output, where n = len(regs[0]).
-internal static void StoreNᴍ(ref Pipe p, slice<slice<Reg>> regs) {
+[GoMethodBody("StoreN")] internal static void StoreNᴍ(ref Pipe p, slice<slice<Reg>> regs) {
     p.needWrite = false;
     var a = p.f.Asm;
     if (len(regs) != len(p.outPtr)) {
@@ -316,7 +316,7 @@ internal static void StoreNᴍ(ref Pipe p, slice<slice<Reg>> regs) {
 // advancePtrs advances the pointers by step
 // or handles bookkeeping for an imminent index advance by step
 // that the caller will do.
-internal static void advancePtrsᴍ(ref Pipe p, nint step) {
+[GoMethodBody("advancePtrs")] internal static void advancePtrsᴍ(ref Pipe p, nint step) {
     var a = p.f.Asm;
     switch (ᐧ) {
     case {} when a.Arch.loadIncN != nil: {
@@ -347,7 +347,7 @@ internal static void advancePtrsᴍ(ref Pipe p, nint step) {
 // DropInput deletes the named input from the pipe,
 // usually because it has been exhausted.
 // (This is not used yet but will be used in a future generator.)
-internal static void DropInputᴍ(ref Pipe p, @string name) {
+[GoMethodBody("DropInput")] internal static void DropInputᴍ(ref Pipe p, @string name) {
     nint i = slices.Index(p.f.inputs, name);
     if (i < 0) {
         p.f.Asm.Fatalf("unknown input %s", name);
@@ -381,7 +381,7 @@ internal static void DropInputᴍ(ref Pipe p, @string name) {
 // Start must be followed by a call to Loop1 or LoopN,
 // but it is permitted to emit other instructions first,
 // for example to set an initial carry flag.
-internal static void Startᴍ(ref Pipe p, Reg n, params ꓸꓸꓸnint factorsʗp) {
+[GoMethodBody("Start")] internal static void Startᴍ(ref Pipe p, Reg n, params ꓸꓸꓸnint factorsʗp) {
     var factors = factorsʗp.slice();
 
     var a = p.f.Asm;
@@ -427,7 +427,7 @@ private static readonly @string computeUnrolledLoopˢᵇᴍPipe = "compute unrol
 
 // Restart prepares to loop over an additional n columns,
 // beyond a previous loop run by p.Start/p.Loop.
-internal static void Restartᴍ(ref Pipe p, Reg n, params ꓸꓸꓸnint factorsʗp) {
+[GoMethodBody("Restart")] internal static void Restartᴍ(ref Pipe p, Reg n, params ꓸꓸꓸnint factorsʗp) {
     var factors = factorsʗp.slice();
 
     var a = p.f.Asm;
@@ -493,7 +493,7 @@ internal static void Restartᴍ(ref Pipe p, Reg n, params ꓸꓸꓸnint factors�
 }
 
 // Done frees all the registers allocated by the pipe.
-internal static void Doneᴍ(ref Pipe p) {
+[GoMethodBody("Done")] internal static void Doneᴍ(ref Pipe p) {
     foreach (var (_, ptr) in range(p.inPtr)) {
         p.f.Asm.Free((Reg)ptr);
     }
@@ -525,7 +525,7 @@ internal static void Doneᴍ(ref Pipe p) {
 //	end()  // set by p.AtUnrollEnd
 //
 // Any registers allocated during block are freed automatically when block returns.
-internal static void Loopᴍ(ref Pipe p, Action<slice<slice<Reg>>, slice<slice<Reg>>> block) {
+[GoMethodBody("Loop")] internal static void Loopᴍ(ref Pipe p, Action<slice<slice<Reg>>, slice<slice<Reg>>> block) {
     if (p.factors == nil) {
         p.f.Asm.Fatalf("Pipe.Start not called");
     }
@@ -541,13 +541,13 @@ internal static void Loopᴍ(ref Pipe p, Action<slice<slice<Reg>>, slice<slice<R
 
 // AtUnrollStart sets a function to call at the start of an unrolled sequence.
 // See [Pipe.Loop] for details.
-internal static void AtUnrollStartᴍ(ref Pipe p, Action start) {
+[GoMethodBody("AtUnrollStart")] internal static void AtUnrollStartᴍ(ref Pipe p, Action start) {
     p.unrollStart = start;
 }
 
 // AtUnrollEnd sets a function to call at the end of an unrolled sequence.
 // See [Pipe.Loop] for details.
-internal static void AtUnrollEndᴍ(ref Pipe p, Action end) {
+[GoMethodBody("AtUnrollEnd")] internal static void AtUnrollEndᴍ(ref Pipe p, Action end) {
     p.unrollEnd = end;
 }
 
@@ -558,7 +558,7 @@ internal static ref readonly @string unrollDXInBatchesOfDˢᴍPipe => ref unroll
 private static readonly @string unrollDXInBatchesOfDˢᵇᴍPipe = "unroll %dX in batches of %d"u8;
 
 // unroll emits a single unrolled loop for the given factor, iterating n times.
-internal static void unrollᴍ(ref Pipe p, Reg n, nint factor, Action<slice<slice<Reg>>, slice<slice<Reg>>> block) {
+[GoMethodBody("unroll")] internal static void unrollᴍ(ref Pipe p, Reg n, nint factor, Action<slice<slice<Reg>>, slice<slice<Reg>>> block) {
     var a = p.f.Asm;
     @string label = fmt.Sprintf("%s%d"u8, p.label, factor);
 
@@ -624,28 +624,3 @@ internal static void unrollᴍ(ref Pipe p, Reg n, nint factor, Action<slice<slic
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class asmgenᴛFunc {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Pipe> Pipe(this ж<Func> Ꮡf) => asmgen_package.Pipeᴍ(Ꮡf);
-}
-partial class asmgenᴛPipe {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetBackward(this ref Pipe p) => asmgen_package.SetBackwardᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetUseIndexCounter(this ref Pipe p) => asmgen_package.SetUseIndexCounterᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetLabel(this ref Pipe p, @string label) => asmgen_package.SetLabelᴍ(ref p, label);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetMaxColumns(this ref Pipe p, nint m) => asmgen_package.SetMaxColumnsᴍ(ref p, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetHint(this ref Pipe p, @string name, Hint hint) => asmgen_package.SetHintᴍ(ref p, name, hint);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void LoadPtrs(this ref Pipe p, Reg n) => asmgen_package.LoadPtrsᴍ(ref p, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<slice<Reg>> LoadN(this ref Pipe p, nint n) => asmgen_package.LoadNᴍ(ref p, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StoreN(this ref Pipe p, slice<slice<Reg>> regs) => asmgen_package.StoreNᴍ(ref p, regs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void advancePtrs(this ref Pipe p, nint step) => asmgen_package.advancePtrsᴍ(ref p, step);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void DropInput(this ref Pipe p, @string name) => asmgen_package.DropInputᴍ(ref p, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Start(this ref Pipe p, Reg n, params ꓸꓸꓸnint factorsʗp) => asmgen_package.Startᴍ(ref p, n, factorsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Restart(this ref Pipe p, Reg n, params ꓸꓸꓸnint factorsʗp) => asmgen_package.Restartᴍ(ref p, n, factorsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Done(this ref Pipe p) => asmgen_package.Doneᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Loop(this ref Pipe p, Action<slice<slice<Reg>>, slice<slice<Reg>>> block) => asmgen_package.Loopᴍ(ref p, block);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AtUnrollStart(this ref Pipe p, Action start) => asmgen_package.AtUnrollStartᴍ(ref p, start);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AtUnrollEnd(this ref Pipe p, Action end) => asmgen_package.AtUnrollEndᴍ(ref p, end);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unroll(this ref Pipe p, Reg n, nint factor, Action<slice<slice<Reg>>, slice<slice<Reg>>> block) => asmgen_package.unrollᴍ(ref p, n, factor, block);
-}
-// </GlyphForwarders>

@@ -78,6 +78,15 @@ using static go.@internal.runtime.atomic_package;
 
 namespace go.@internal.runtime;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using @unsafe = unsafe_package;
+using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
+using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
+using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
+using atomic = atomic_package;
+using static atomic_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("atomic")]
 public static partial class atomic_package
 {
@@ -131,3 +140,84 @@ public static partial class atomic_package
 [GoMethodHost(typeof(atomic_package.UnsafePointer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛUnsafePointer;
 [GoMethodHost(typeof(atomic_package.noCopy)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class atomicᴛnoCopy;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class atomicᴛInt32 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int32 Load(this ж<Int32> Ꮡi) => atomic_package.Loadᴍ(Ꮡi);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Int32> Ꮡi, int32 value) => atomic_package.Storeᴍ(Ꮡi, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwap(this ж<Int32> Ꮡi, int32 old, int32 @new) => atomic_package.CompareAndSwapᴍ(Ꮡi, old, @new);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int32 Swap(this ж<Int32> Ꮡi, int32 @new) => atomic_package.Swapᴍ(Ꮡi, @new);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int32 Add(this ж<Int32> Ꮡi, int32 delta) => atomic_package.Addᴍ(Ꮡi, delta);
+}
+partial class atomicᴛInt64 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Load(this ж<Int64> Ꮡi) => atomic_package.Loadᴍ(Ꮡi);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Int64> Ꮡi, int64 value) => atomic_package.Storeᴍ(Ꮡi, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwap(this ж<Int64> Ꮡi, int64 old, int64 @new) => atomic_package.CompareAndSwapᴍ(Ꮡi, old, @new);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Swap(this ж<Int64> Ꮡi, int64 @new) => atomic_package.Swapᴍ(Ꮡi, @new);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Add(this ж<Int64> Ꮡi, int64 delta) => atomic_package.Addᴍ(Ꮡi, delta);
+}
+partial class atomicᴛUint8 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint8 Load(this ж<Uint8> Ꮡu) => atomic_package.Loadᴍ(Ꮡu);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Uint8> Ꮡu, uint8 value) => atomic_package.Storeᴍ(Ꮡu, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void And(this ж<Uint8> Ꮡu, uint8 value) => atomic_package.Andᴍ(Ꮡu, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Or(this ж<Uint8> Ꮡu, uint8 value) => atomic_package.Orᴍ(Ꮡu, value);
+}
+partial class atomicᴛBool {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Load(this ж<Bool> Ꮡb) => atomic_package.Loadᴍ(Ꮡb);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Bool> Ꮡb, bool value) => atomic_package.Storeᴍ(Ꮡb, value);
+}
+partial class atomicᴛUint32 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Load(this ж<Uint32> Ꮡu) => atomic_package.Loadᴍ(Ꮡu);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 LoadAcquire(this ж<Uint32> Ꮡu) => atomic_package.LoadAcquireᴍ(Ꮡu);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.Storeᴍ(Ꮡu, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StoreRelease(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.StoreReleaseᴍ(Ꮡu, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwap(this ж<Uint32> Ꮡu, uint32 old, uint32 @new) => atomic_package.CompareAndSwapᴍ(Ꮡu, old, @new);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwapRelease(this ж<Uint32> Ꮡu, uint32 old, uint32 @new) => atomic_package.CompareAndSwapReleaseᴍ(Ꮡu, old, @new);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Swap(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.Swapᴍ(Ꮡu, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void And(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.Andᴍ(Ꮡu, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Or(this ж<Uint32> Ꮡu, uint32 value) => atomic_package.Orᴍ(Ꮡu, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Add(this ж<Uint32> Ꮡu, int32 delta) => atomic_package.Addᴍ(Ꮡu, delta);
+}
+partial class atomicᴛUint64 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Load(this ж<Uint64> Ꮡu) => atomic_package.Loadᴍ(Ꮡu);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Uint64> Ꮡu, uint64 value) => atomic_package.Storeᴍ(Ꮡu, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwap(this ж<Uint64> Ꮡu, uint64 old, uint64 @new) => atomic_package.CompareAndSwapᴍ(Ꮡu, old, @new);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Swap(this ж<Uint64> Ꮡu, uint64 value) => atomic_package.Swapᴍ(Ꮡu, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Add(this ж<Uint64> Ꮡu, int64 delta) => atomic_package.Addᴍ(Ꮡu, delta);
+}
+partial class atomicᴛUintptr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uintptr Load(this ж<Uintptr> Ꮡu) => atomic_package.Loadᴍ(Ꮡu);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uintptr LoadAcquire(this ж<Uintptr> Ꮡu) => atomic_package.LoadAcquireᴍ(Ꮡu);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Uintptr> Ꮡu, uintptr value) => atomic_package.Storeᴍ(Ꮡu, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StoreRelease(this ж<Uintptr> Ꮡu, uintptr value) => atomic_package.StoreReleaseᴍ(Ꮡu, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwap(this ж<Uintptr> Ꮡu, uintptr old, uintptr @new) => atomic_package.CompareAndSwapᴍ(Ꮡu, old, @new);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uintptr Swap(this ж<Uintptr> Ꮡu, uintptr value) => atomic_package.Swapᴍ(Ꮡu, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uintptr Add(this ж<Uintptr> Ꮡu, uintptr delta) => atomic_package.Addᴍ(Ꮡu, delta);
+}
+partial class atomicᴛFloat64 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 Load(this ж<Float64> Ꮡf) => atomic_package.Loadᴍ(Ꮡf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<Float64> Ꮡf, float64 value) => atomic_package.Storeᴍ(Ꮡf, value);
+}
+partial class atomicᴛUnsafePointer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) => atomic_package.Loadᴍ(Ꮡu);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StoreNoWB(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer value) => atomic_package.StoreNoWBᴍ(Ꮡu, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer value) => atomic_package.Storeᴍ(Ꮡu, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwapNoWB(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer old, @unsafe.Pointer @new) => atomic_package.CompareAndSwapNoWBᴍ(Ꮡu, old, @new);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwap(this ж<UnsafePointer> Ꮡu, @unsafe.Pointer old, @unsafe.Pointer @new) => atomic_package.CompareAndSwapᴍ(Ꮡu, old, @new);
+}
+partial class atomicᴛPointer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡp) => atomic_package.Loadᴍ<T>(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StoreNoWB<T>(this ж<Pointer<T>> Ꮡp, ж<T> value) => atomic_package.StoreNoWBᴍ<T>(Ꮡp, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Store<T>(this ж<Pointer<T>> Ꮡp, ж<T> value) => atomic_package.Storeᴍ<T>(Ꮡp, value);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwapNoWB<T>(this ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> @new) => atomic_package.CompareAndSwapNoWBᴍ<T>(Ꮡp, old, @new);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CompareAndSwap<T>(this ж<Pointer<T>> Ꮡp, ж<T> old, ж<T> @new) => atomic_package.CompareAndSwapᴍ<T>(Ꮡp, old, @new);
+}
+partial class atomicᴛnoCopy {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Lock(this ref noCopy _) => atomic_package.Lockᴍ(ref _);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Unlock(this ref noCopy _) => atomic_package.Unlockᴍ(ref _);
+}
+partial class atomicᴛUint64 {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 LoadAcquire(this ж<Uint64> Ꮡu) => atomic_package.LoadAcquireᴍ(Ꮡu);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StoreRelease(this ж<Uint64> Ꮡu, uint64 value) => atomic_package.StoreReleaseᴍ(Ꮡu, value);
+}
+// </GlyphForwarders>

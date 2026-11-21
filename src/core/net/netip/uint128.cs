@@ -31,36 +31,36 @@ internal static uint128 mask6(nint n) {
 // It's faster than u == (uint128{}) because the compiler (as of Go
 // 1.15/1.16b1) doesn't do this trick and instead inserts a branch in
 // its eq alg's generated code.
-internal static bool isZeroᴍ(uint128 u) { return (u.hi | u.lo) == 0; }
+[GoMethodBody("isZero")] internal static bool isZeroᴍ(uint128 u) { return (u.hi | u.lo) == 0; }
 
 // and returns the bitwise AND of u and m (u&m).
-internal static uint128 andᴍ(uint128 u, uint128 m) {
+[GoMethodBody("and")] internal static uint128 andᴍ(uint128 u, uint128 m) {
     return new uint128(u.hi & m.hi, u.lo & m.lo);
 }
 
 // xor returns the bitwise XOR of u and m (u^m).
-internal static uint128 xorᴍ(uint128 u, uint128 m) {
+[GoMethodBody("xor")] internal static uint128 xorᴍ(uint128 u, uint128 m) {
     return new uint128(u.hi ^ m.hi, u.lo ^ m.lo);
 }
 
 // or returns the bitwise OR of u and m (u|m).
-internal static uint128 orᴍ(uint128 u, uint128 m) {
+[GoMethodBody("or")] internal static uint128 orᴍ(uint128 u, uint128 m) {
     return new uint128(u.hi | m.hi, u.lo | m.lo);
 }
 
 // not returns the bitwise NOT of u.
-internal static uint128 notᴍ(uint128 u) {
+[GoMethodBody("not")] internal static uint128 notᴍ(uint128 u) {
     return new uint128(~u.hi, ~u.lo);
 }
 
 // subOne returns u - 1.
-internal static uint128 subOneᴍ(uint128 u) {
+[GoMethodBody("subOne")] internal static uint128 subOneᴍ(uint128 u) {
     var (lo, borrow) = bits.Sub64(u.lo, 1, 0);
     return new uint128(u.hi - borrow, lo);
 }
 
 // addOne returns u + 1.
-internal static uint128 addOneᴍ(uint128 u) {
+[GoMethodBody("addOne")] internal static uint128 addOneᴍ(uint128 u) {
     var (lo, carry) = bits.Add64(u.lo, 1, 0);
     return new uint128(u.hi + carry, lo);
 }
@@ -69,35 +69,20 @@ internal static uint128 addOneᴍ(uint128 u) {
 //
 // Logically, think of it as returning two uint64s.
 // It only returns pointers for inlining reasons on 32-bit platforms.
-internal static array<ж<uint64>> halvesᴍ(ж<uint128> Ꮡu) {
+[GoMethodBody("halves")] internal static array<ж<uint64>> halvesᴍ(ж<uint128> Ꮡu) {
     return new ж<uint64>[]{Ꮡu.Ꮡhi, Ꮡu.Ꮡlo}.array();
 }
 
 // bitsSetFrom returns a copy of u with the given bit
 // and all subsequent ones set.
-internal static uint128 bitsSetFromᴍ(uint128 u, uint8 bit) {
+[GoMethodBody("bitsSetFrom")] internal static uint128 bitsSetFromᴍ(uint128 u, uint8 bit) {
     return u.or(mask6((nint)bit).not());
 }
 
 // bitsClearedFrom returns a copy of u with the given bit
 // and all subsequent ones cleared.
-internal static uint128 bitsClearedFromᴍ(uint128 u, uint8 bit) {
+[GoMethodBody("bitsClearedFrom")] internal static uint128 bitsClearedFromᴍ(uint128 u, uint8 bit) {
     return u.and(mask6((nint)bit));
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netipᴛuint128 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isZero(this uint128 u) => netip_package.isZeroᴍ(u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint128 and(this uint128 u, uint128 m) => netip_package.andᴍ(u, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint128 xor(this uint128 u, uint128 m) => netip_package.xorᴍ(u, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint128 or(this uint128 u, uint128 m) => netip_package.orᴍ(u, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint128 not(this uint128 u) => netip_package.notᴍ(u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint128 subOne(this uint128 u) => netip_package.subOneᴍ(u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint128 addOne(this uint128 u) => netip_package.addOneᴍ(u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static array<ж<uint64>> halves(this ж<uint128> Ꮡu) => netip_package.halvesᴍ(Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint128 bitsSetFrom(this uint128 u, uint8 bit) => netip_package.bitsSetFromᴍ(u, bit);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint128 bitsClearedFrom(this uint128 u, uint8 bit) => netip_package.bitsClearedFromᴍ(u, bit);
-}
-// </GlyphForwarders>

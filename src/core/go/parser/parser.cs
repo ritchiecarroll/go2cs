@@ -76,7 +76,7 @@ partial struct parser {
 
 } partial class parser_package {
 
-internal static void initᴍ(ж<parser> Ꮡp, ж<token.File> Ꮡfile, slice<byte> src, Mode mode) {
+[GoMethodBody("init")] internal static void initᴍ(ж<parser> Ꮡp, ж<token.File> Ꮡfile, slice<byte> src, Mode mode) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var @file = ref Ꮡfile.DerefOrNull();
 
@@ -98,7 +98,7 @@ private static readonly @string dotsᶜᵇᴍparser = ". . . . . . . . . . . . .
 
 // ----------------------------------------------------------------------------
 // Parsing support
-internal static void printTraceᴍ(ref parser p, params ꓸꓸꓸany aʗp) {
+[GoMethodBody("printTrace")] internal static void printTraceᴍ(ref parser p, params ꓸꓸꓸany aʗp) {
     var a = aʗp.sslice();
 
     @string dots = dotsᶜᴍparser;
@@ -164,7 +164,7 @@ internal static ref readonly @string goBuildˢᴍparser => ref goBuildˢᵇᴍpa
 private static readonly @string goBuildˢᵇᴍparser = "//go:build"u8;
 
 // Advance to the next token.
-internal static void next0ᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("next0")] internal static void next0ᴍ(ж<parser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Because of one-token look-ahead, print the previous token
@@ -212,12 +212,12 @@ internal static void next0ᴍ(ж<parser> Ꮡp) {
 }
 
 // lineFor returns the line of pos, ignoring line directive adjustments.
-internal static nint lineForᴍ(ref parser p, token.Pos pos) {
+[GoMethodBody("lineFor")] internal static nint lineForᴍ(ref parser p, token.Pos pos) {
     return p.@file.PositionFor(pos, false).Line;
 }
 
 // Consume a comment and return it and the line on which it ends.
-internal static (ж<ast.Comment> comment, nint endline) consumeCommentᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("consumeComment")] internal static (ж<ast.Comment> comment, nint endline) consumeCommentᴍ(ж<parser> Ꮡp) {
     ж<ast.Comment> comment = default;
     nint endline = default;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -244,7 +244,7 @@ internal static (ж<ast.Comment> comment, nint endline) consumeCommentᴍ(ж<par
 // comments list, and return it together with the line at which
 // the last comment in the group ends. A non-comment token or n
 // empty lines terminate a comment group.
-internal static (ж<ast.CommentGroup> comments, nint endline) consumeCommentGroupᴍ(ж<parser> Ꮡp, nint n) {
+[GoMethodBody("consumeCommentGroup")] internal static (ж<ast.CommentGroup> comments, nint endline) consumeCommentGroupᴍ(ж<parser> Ꮡp, nint n) {
     ж<ast.CommentGroup> comments = default;
     nint endline = default;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -278,7 +278,7 @@ internal static (ж<ast.CommentGroup> comments, nint endline) consumeCommentGrou
 //
 // Lead and line comments may be considered documentation that is
 // stored in the AST.
-internal static void nextᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("next")] internal static void nextᴍ(ж<parser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.leadComment = default;
@@ -326,7 +326,7 @@ partial struct bailout {
 
 } partial class parser_package {
 
-internal static void errorᴍ(ж<parser> Ꮡp, token.Pos pos, @string msg) {
+[GoMethodBody("error")] internal static void errorᴍ(ж<parser> Ꮡp, token.Pos pos, @string msg) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -356,7 +356,7 @@ internal static void errorᴍ(ж<parser> Ꮡp, token.Pos pos, @string msg) {
     finally { ᒐ.Run(); }
 }
 
-internal static void errorExpectedᴍ(ж<parser> Ꮡp, token.Pos pos, @string msg) {
+[GoMethodBody("errorExpected")] internal static void errorExpectedᴍ(ж<parser> Ꮡp, token.Pos pos, @string msg) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     msg = "expected "u8 + msg;
@@ -381,7 +381,7 @@ internal static void errorExpectedᴍ(ж<parser> Ꮡp, token.Pos pos, @string ms
     Ꮡp.error(pos, msg);
 }
 
-internal static token.Pos expectᴍ(ж<parser> Ꮡp, token.Token tok) {
+[GoMethodBody("expect")] internal static token.Pos expectᴍ(ж<parser> Ꮡp, token.Token tok) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     token.Pos pos = p.pos;
@@ -394,7 +394,7 @@ internal static token.Pos expectᴍ(ж<parser> Ꮡp, token.Token tok) {
 
 // expect2 is like expect, but it returns an invalid position
 // if the expected token is not found.
-internal static token.Pos /*pos*/ expect2ᴍ(ж<parser> Ꮡp, token.Token tok) {
+[GoMethodBody("expect2")] internal static token.Pos /*pos*/ expect2ᴍ(ж<parser> Ꮡp, token.Token tok) {
     token.Pos pos = default;
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -409,7 +409,7 @@ internal static token.Pos /*pos*/ expect2ᴍ(ж<parser> Ꮡp, token.Token tok) {
 
 // expectClosing is like expect but provides a better error message
 // for the common case of a missing comma before a newline.
-internal static token.Pos expectClosingᴍ(ж<parser> Ꮡp, token.Token tok, @string context) {
+[GoMethodBody("expectClosing")] internal static token.Pos expectClosingᴍ(ж<parser> Ꮡp, token.Token tok, @string context) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (p.tok != tok && p.tok == token.SEMICOLON && p.lit == "\n"u8) {
@@ -420,7 +420,7 @@ internal static token.Pos expectClosingᴍ(ж<parser> Ꮡp, token.Token tok, @st
 }
 
 // expectSemi consumes a semicolon and returns the applicable line comment.
-internal static ж<ast.CommentGroup> /*comment*/ expectSemiᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("expectSemi")] internal static ж<ast.CommentGroup> /*comment*/ expectSemiᴍ(ж<parser> Ꮡp) {
     ж<ast.CommentGroup> comment = default;
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -458,7 +458,7 @@ internal static ж<ast.CommentGroup> /*comment*/ expectSemiᴍ(ж<parser> Ꮡp) 
 internal static ref readonly @string missingˢᴍparser => ref missingˢᵇᴍparser;
 private static readonly @string missingˢᵇᴍparser = "missing ','"u8;
 
-internal static bool atCommaᴍ(ж<parser> Ꮡp, @string context, token.Token follow) {
+[GoMethodBody("atComma")] internal static bool atCommaᴍ(ж<parser> Ꮡp, @string context, token.Token follow) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (p.tok == token.COMMA) {
@@ -487,7 +487,7 @@ internal static void assert(bool cond, @string msg) {
 
 // advance consumes tokens until the current token p.tok
 // is in the 'to' set, or token.EOF. For error recovery.
-internal static void advanceᴍ(ж<parser> Ꮡp, map<token.Token, bool> to) {
+[GoMethodBody("advance")] internal static void advanceᴍ(ж<parser> Ꮡp, map<token.Token, bool> to) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     for (; p.tok != token.EOF; Ꮡp.next()) {
@@ -556,7 +556,7 @@ internal static void advanceᴍ(ж<parser> Ꮡp, map<token.Token, bool> to) {
 
 // ----------------------------------------------------------------------------
 // Identifiers
-internal static ж<ast.Ident> parseIdentᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseIdent")] internal static ж<ast.Ident> parseIdentᴍ(ж<parser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     ref var pos = ref heap<token.Pos>(p.pos, out var Ꮡpos);
@@ -574,7 +574,7 @@ internal static ж<ast.Ident> parseIdentᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string identListˢᴍparser => ref identListˢᵇᴍparser;
 private static readonly @string identListˢᵇᴍparser = "IdentList"u8;
 
-internal static slice<ж<ast.Ident>> /*list*/ parseIdentListᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseIdentList")] internal static slice<ж<ast.Ident>> /*list*/ parseIdentListᴍ(ж<parser> Ꮡp) {
     slice<ж<ast.Ident>> list = default;
     GoFrame ᒐ = default;
     try {
@@ -603,7 +603,7 @@ private static readonly @string expressionListˢᵇᴍparser = "ExpressionList"u
 // Common productions
 
 // If lhs is set, result list elements which are identifiers are not resolved.
-internal static slice<ast.Expr> /*list*/ parseExprListᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseExprList")] internal static slice<ast.Expr> /*list*/ parseExprListᴍ(ж<parser> Ꮡp) {
     slice<ast.Expr> list = default;
     GoFrame ᒐ = default;
     try {
@@ -624,7 +624,7 @@ internal static slice<ast.Expr> /*list*/ parseExprListᴍ(ж<parser> Ꮡp) {
     return list;
 }
 
-internal static slice<ast.Expr> parseListᴍ(ж<parser> Ꮡp, bool inRhs) {
+[GoMethodBody("parseList")] internal static slice<ast.Expr> parseListᴍ(ж<parser> Ꮡp, bool inRhs) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var old = p.inRhs;
@@ -642,7 +642,7 @@ private static readonly @string typeˢ2ᵇᴍparser = "type"u8;
 
 // ----------------------------------------------------------------------------
 // Types
-internal static ast.Expr parseTypeᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseType")] internal static ast.Expr parseTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -670,7 +670,7 @@ internal static ast.Expr parseTypeᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string qualifiedIdentˢᴍparser => ref qualifiedIdentˢᵇᴍparser;
 private static readonly @string qualifiedIdentˢᵇᴍparser = "QualifiedIdent"u8;
 
-internal static ast.Expr parseQualifiedIdentᴍ(ж<parser> Ꮡp, ж<ast.Ident> ident) {
+[GoMethodBody("parseQualifiedIdent")] internal static ast.Expr parseQualifiedIdentᴍ(ж<parser> Ꮡp, ж<ast.Ident> ident) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -695,7 +695,7 @@ internal static ref readonly @string typeNameˢᴍparser => ref typeNameˢᵇᴍ
 private static readonly @string typeNameˢᵇᴍparser = "TypeName"u8;
 
 // If the result is an identifier, it is not resolved.
-internal static ast.Expr parseTypeNameᴍ(ж<parser> Ꮡp, ж<ast.Ident> Ꮡident) {
+[GoMethodBody("parseTypeName")] internal static ast.Expr parseTypeNameᴍ(ж<parser> Ꮡp, ж<ast.Ident> Ꮡident) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -730,7 +730,7 @@ private static readonly @string unexpectedCommaExpectingˢᵇᴍparser = "unexpe
 
 // "[" has already been consumed, and lbrack is its position.
 // If len != nil it is the already consumed array length.
-internal static ж<ast.ArrayType> parseArrayTypeᴍ(ж<parser> Ꮡp, token.Pos lbrack, ast.Expr len) {
+[GoMethodBody("parseArrayType")] internal static ж<ast.ArrayType> parseArrayTypeᴍ(ж<parser> Ꮡp, token.Pos lbrack, ast.Expr len) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -769,7 +769,7 @@ internal static ж<ast.ArrayType> parseArrayTypeᴍ(ж<parser> Ꮡp, token.Pos l
 internal static ref readonly @string arrayFieldOrTypeInstanceˢᴍparser => ref arrayFieldOrTypeInstanceˢᵇᴍparser;
 private static readonly @string arrayFieldOrTypeInstanceˢᵇᴍparser = "ArrayFieldOrTypeInstance"u8;
 
-internal static (ж<ast.Ident>, ast.Expr) parseArrayFieldOrTypeInstanceᴍ(ж<parser> Ꮡp, ж<ast.Ident> x) {
+[GoMethodBody("parseArrayFieldOrTypeInstance")] internal static (ж<ast.Ident>, ast.Expr) parseArrayFieldOrTypeInstanceᴍ(ж<parser> Ꮡp, ж<ast.Ident> x) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -831,7 +831,7 @@ private static readonly @string cannotParenthesizeˢᵇᴍparser = "cannot paren
 internal static ref readonly @string fieldNameOrEmbeddedTypeˢᴍparser => ref fieldNameOrEmbeddedTypeˢᵇᴍparser;
 private static readonly @string fieldNameOrEmbeddedTypeˢᵇᴍparser = "field name or embedded type"u8;
 
-internal static ж<ast.Field> parseFieldDeclᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseFieldDecl")] internal static ж<ast.Field> parseFieldDeclᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -938,7 +938,7 @@ internal static ж<ast.Field> parseFieldDeclᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string structTypeˢᴍparser => ref structTypeˢᵇᴍparser;
 private static readonly @string structTypeˢᵇᴍparser = "StructType"u8;
 
-internal static ж<ast.StructType> parseStructTypeᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseStructType")] internal static ж<ast.StructType> parseStructTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -975,7 +975,7 @@ internal static ж<ast.StructType> parseStructTypeᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string pointerTypeˢᴍparser => ref pointerTypeˢᵇᴍparser;
 private static readonly @string pointerTypeˢᵇᴍparser = "PointerType"u8;
 
-internal static ж<ast.StarExpr> parsePointerTypeᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parsePointerType")] internal static ж<ast.StarExpr> parsePointerTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -997,7 +997,7 @@ internal static ж<ast.StarExpr> parsePointerTypeᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string dotsTypeˢᴍparser => ref dotsTypeˢᵇᴍparser;
 private static readonly @string dotsTypeˢᵇᴍparser = "DotsType"u8;
 
-internal static ж<ast.Ellipsis> parseDotsTypeᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseDotsType")] internal static ж<ast.Ellipsis> parseDotsTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1028,7 +1028,7 @@ partial struct field {
 internal static ref readonly @string paramDeclˢᴍparser => ref paramDeclˢᵇᴍparser;
 private static readonly @string paramDeclˢᵇᴍparser = "ParamDecl"u8;
 
-internal static field /*f*/ parseParamDeclᴍ(ж<parser> Ꮡp, ж<ast.Ident> Ꮡname, bool typeSetsOK) {
+[GoMethodBody("parseParamDecl")] internal static field /*f*/ parseParamDeclᴍ(ж<parser> Ꮡp, ж<ast.Ident> Ꮡname, bool typeSetsOK) {
     field f = default;
     GoFrame ᒐ = default;
     try {
@@ -1149,7 +1149,7 @@ private static readonly @string nilTypeInUnnamedˢᵇᴍparser = "nil type in un
 internal static ref readonly @string nilTypeInNamedParameterˢᴍparser => ref nilTypeInNamedParameterˢᵇᴍparser;
 private static readonly @string nilTypeInNamedParameterˢᵇᴍparser = "nil type in named parameter list"u8;
 
-internal static slice<ж<ast.Field>> /*params*/ parseParameterListᴍ(ж<parser> Ꮡp, ж<ast.Ident> Ꮡname0, ast.Expr typ0, token.Token closing, bool dddok) {
+[GoMethodBody("parseParameterList")] internal static slice<ж<ast.Field>> /*params*/ parseParameterListᴍ(ж<parser> Ꮡp, ж<ast.Ident> Ꮡname0, ast.Expr typ0, token.Token closing, bool dddok) {
     slice<ж<ast.Field>> @params = default;
     GoFrame ᒐ = default;
     try {
@@ -1356,7 +1356,7 @@ private static readonly @string typeParametersˢᵇᴍparser = "TypeParameters"u
 internal static ref readonly @string emptyTypeParameterListˢᴍparser => ref emptyTypeParameterListˢᵇᴍparser;
 private static readonly @string emptyTypeParameterListˢᵇᴍparser = "empty type parameter list"u8;
 
-internal static ж<ast.FieldList> parseTypeParametersᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseTypeParameters")] internal static ж<ast.FieldList> parseTypeParametersᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1387,7 +1387,7 @@ internal static ж<ast.FieldList> parseTypeParametersᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string parametersˢᴍparser => ref parametersˢᵇᴍparser;
 private static readonly @string parametersˢᵇᴍparser = "Parameters"u8;
 
-internal static ж<ast.FieldList> parseParametersᴍ(ж<parser> Ꮡp, bool result) {
+[GoMethodBody("parseParameters")] internal static ж<ast.FieldList> parseParametersᴍ(ж<parser> Ꮡp, bool result) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1424,7 +1424,7 @@ private static readonly @string funcTypeˢᵇᴍparser = "FuncType"u8;
 internal static ref readonly @string functionTypeMustHaveNoˢᴍparser => ref functionTypeMustHaveNoˢᵇᴍparser;
 private static readonly @string functionTypeMustHaveNoˢᵇᴍparser = "function type must have no type parameters"u8;
 
-internal static ж<ast.FuncType> parseFuncTypeᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseFuncType")] internal static ж<ast.FuncType> parseFuncTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1458,7 +1458,7 @@ private static readonly @string interfaceMethodMustHaveˢᵇᴍparser = "interfa
 internal static ref readonly @string typeArgumentListˢᴍparser => ref typeArgumentListˢᵇᴍparser;
 private static readonly @string typeArgumentListˢᵇᴍparser = "type argument list"u8;
 
-internal static ж<ast.Field> parseMethodSpecᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseMethodSpec")] internal static ж<ast.Field> parseMethodSpecᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1556,7 +1556,7 @@ internal static ж<ast.Field> parseMethodSpecᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string embeddedElemˢᴍparser => ref embeddedElemˢᵇᴍparser;
 private static readonly @string embeddedElemˢᵇᴍparser = "EmbeddedElem"u8;
 
-internal static ast.Expr embeddedElemᴍ(ж<parser> Ꮡp, ast.Expr x) {
+[GoMethodBody("embeddedElem")] internal static ast.Expr embeddedElemᴍ(ж<parser> Ꮡp, ast.Expr x) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1588,7 +1588,7 @@ private static readonly @string embeddedTermˢᵇᴍparser = "EmbeddedTerm"u8;
 internal static ref readonly @string termOrTypeˢᴍparser => ref termOrTypeˢᵇᴍparser;
 private static readonly @string termOrTypeˢᵇᴍparser = "~ term or type"u8;
 
-internal static ast.Expr embeddedTermᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("embeddedTerm")] internal static ast.Expr embeddedTermᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1623,7 +1623,7 @@ internal static ast.Expr embeddedTermᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string interfaceTypeˢᴍparser => ref interfaceTypeˢᵇᴍparser;
 private static readonly @string interfaceTypeˢᵇᴍparser = "InterfaceType"u8;
 
-internal static ж<ast.InterfaceType> parseInterfaceTypeᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseInterfaceType")] internal static ж<ast.InterfaceType> parseInterfaceTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1690,7 +1690,7 @@ break_parseElements:;
 internal static ref readonly @string mapTypeˢᴍparser => ref mapTypeˢᵇᴍparser;
 private static readonly @string mapTypeˢᵇᴍparser = "MapType"u8;
 
-internal static ж<ast.MapType> parseMapTypeᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseMapType")] internal static ж<ast.MapType> parseMapTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1715,7 +1715,7 @@ internal static ж<ast.MapType> parseMapTypeᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string chanTypeˢᴍparser => ref chanTypeˢᵇᴍparser;
 private static readonly @string chanTypeˢᵇᴍparser = "ChanType"u8;
 
-internal static ж<ast.ChanType> parseChanTypeᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseChanType")] internal static ж<ast.ChanType> parseChanTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1751,7 +1751,7 @@ internal static ж<ast.ChanType> parseChanTypeᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string typeInstanceˢᴍparser => ref typeInstanceˢᵇᴍparser;
 private static readonly @string typeInstanceˢᵇᴍparser = "TypeInstance"u8;
 
-internal static ast.Expr parseTypeInstanceᴍ(ж<parser> Ꮡp, ast.Expr typ) {
+[GoMethodBody("parseTypeInstance")] internal static ast.Expr parseTypeInstanceᴍ(ж<parser> Ꮡp, ast.Expr typ) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1790,7 +1790,7 @@ internal static ast.Expr parseTypeInstanceᴍ(ж<parser> Ꮡp, ast.Expr typ) {
     finally { ᒐ.Run(); }
 }
 
-internal static ast.Expr tryIdentOrTypeᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("tryIdentOrType")] internal static ast.Expr tryIdentOrTypeᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1848,7 +1848,7 @@ private static readonly @string statementListˢᵇᴍparser = "StatementList"u8;
 
 // ----------------------------------------------------------------------------
 // Blocks
-internal static slice<ast.Stmt> /*list*/ parseStmtListᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseStmtList")] internal static slice<ast.Stmt> /*list*/ parseStmtListᴍ(ж<parser> Ꮡp) {
     slice<ast.Stmt> list = default;
     GoFrame ᒐ = default;
     try {
@@ -1871,7 +1871,7 @@ internal static slice<ast.Stmt> /*list*/ parseStmtListᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string bodyˢᴍparser => ref bodyˢᵇᴍparser;
 private static readonly @string bodyˢᵇᴍparser = "Body"u8;
 
-internal static ж<ast.BlockStmt> parseBodyᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseBody")] internal static ж<ast.BlockStmt> parseBodyᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1894,7 +1894,7 @@ internal static ж<ast.BlockStmt> parseBodyᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string blockStmtˢᴍparser => ref blockStmtˢᵇᴍparser;
 private static readonly @string blockStmtˢᵇᴍparser = "BlockStmt"u8;
 
-internal static ж<ast.BlockStmt> parseBlockStmtᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseBlockStmt")] internal static ж<ast.BlockStmt> parseBlockStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1919,7 +1919,7 @@ private static readonly @string funcTypeOrLitˢᵇᴍparser = "FuncTypeOrLit"u8;
 
 // ----------------------------------------------------------------------------
 // Expressions
-internal static ast.Expr parseFuncTypeOrLitᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseFuncTypeOrLit")] internal static ast.Expr parseFuncTypeOrLitᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -1954,7 +1954,7 @@ private static readonly @string operandˢ2ᵇᴍparser = "operand"u8;
 
 // parseOperand may return an expression or a raw type (incl. array
 // types of the form [...]T). Callers must verify the result.
-internal static ast.Expr parseOperandᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseOperand")] internal static ast.Expr parseOperandᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2011,7 +2011,7 @@ internal static ast.Expr parseOperandᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string selectorˢᴍparser => ref selectorˢᵇᴍparser;
 private static readonly @string selectorˢᵇᴍparser = "Selector"u8;
 
-internal static ast.Expr parseSelectorᴍ(ж<parser> Ꮡp, ast.Expr x) {
+[GoMethodBody("parseSelector")] internal static ast.Expr parseSelectorᴍ(ж<parser> Ꮡp, ast.Expr x) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2032,7 +2032,7 @@ internal static ast.Expr parseSelectorᴍ(ж<parser> Ꮡp, ast.Expr x) {
 internal static ref readonly @string typeAssertionˢᴍparser => ref typeAssertionˢᵇᴍparser;
 private static readonly @string typeAssertionˢᵇᴍparser = "TypeAssertion"u8;
 
-internal static ast.Expr parseTypeAssertionᴍ(ж<parser> Ꮡp, ast.Expr x) {
+[GoMethodBody("parseTypeAssertion")] internal static ast.Expr parseTypeAssertionᴍ(ж<parser> Ꮡp, ast.Expr x) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2063,7 +2063,7 @@ private static readonly @string middleIndexRequiredIn3ˢᵇᴍparser = "middle i
 internal static ref readonly @string finalIndexRequiredIn3ˢᴍparser => ref finalIndexRequiredIn3ˢᵇᴍparser;
 private static readonly @string finalIndexRequiredIn3ˢᵇᴍparser = "final index required in 3-index slice"u8;
 
-internal static ast.Expr parseIndexOrSliceOrInstanceᴍ(ж<parser> Ꮡp, ast.Expr x) {
+[GoMethodBody("parseIndexOrSliceOrInstance")] internal static ast.Expr parseIndexOrSliceOrInstanceᴍ(ж<parser> Ꮡp, ast.Expr x) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2163,7 +2163,7 @@ private static readonly @string callOrConversionˢᵇᴍparser = "CallOrConversi
 internal static ref readonly @string argumentListˢᴍparser => ref argumentListˢᵇᴍparser;
 private static readonly @string argumentListˢᵇᴍparser = "argument list"u8;
 
-internal static ж<ast.CallExpr> parseCallOrConversionᴍ(ж<parser> Ꮡp, ast.Expr fun) {
+[GoMethodBody("parseCallOrConversion")] internal static ж<ast.CallExpr> parseCallOrConversionᴍ(ж<parser> Ꮡp, ast.Expr fun) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2200,7 +2200,7 @@ internal static ж<ast.CallExpr> parseCallOrConversionᴍ(ж<parser> Ꮡp, ast.E
 internal static ref readonly @string elementˢᴍparser => ref elementˢᵇᴍparser;
 private static readonly @string elementˢᵇᴍparser = "Element"u8;
 
-internal static ast.Expr parseValueᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseValue")] internal static ast.Expr parseValueᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2221,7 +2221,7 @@ internal static ast.Expr parseValueᴍ(ж<parser> Ꮡp) {
     finally { ᒐ.Run(); }
 }
 
-internal static ast.Expr parseElementᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseElement")] internal static ast.Expr parseElementᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2249,7 +2249,7 @@ private static readonly @string elementListˢᵇᴍparser = "ElementList"u8;
 internal static ref readonly @string compositeLiteralˢᴍparser => ref compositeLiteralˢᵇᴍparser;
 private static readonly @string compositeLiteralˢᵇᴍparser = "composite literal"u8;
 
-internal static slice<ast.Expr> /*list*/ parseElementListᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseElementList")] internal static slice<ast.Expr> /*list*/ parseElementListᴍ(ж<parser> Ꮡp) {
     slice<ast.Expr> list = default;
     GoFrame ᒐ = default;
     try {
@@ -2276,7 +2276,7 @@ internal static slice<ast.Expr> /*list*/ parseElementListᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string literalValueˢᴍparser => ref literalValueˢᵇᴍparser;
 private static readonly @string literalValueˢᵇᴍparser = "LiteralValue"u8;
 
-internal static ast.Expr parseLiteralValueᴍ(ж<parser> Ꮡp, ast.Expr typ) {
+[GoMethodBody("parseLiteralValue")] internal static ast.Expr parseLiteralValueᴍ(ж<parser> Ꮡp, ast.Expr typ) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2309,7 +2309,7 @@ private static readonly @string selectorOrTypeAssertionˢᵇᴍparser = "selecto
 internal static ref readonly @string cannotParenthesizeTypeInˢᴍparser => ref cannotParenthesizeTypeInˢᵇᴍparser;
 private static readonly @string cannotParenthesizeTypeInˢᵇᴍparser = "cannot parenthesize type in composite literal"u8;
 
-internal static ast.Expr parsePrimaryExprᴍ(ж<parser> Ꮡp, ast.Expr x) {
+[GoMethodBody("parsePrimaryExpr")] internal static ast.Expr parsePrimaryExprᴍ(ж<parser> Ꮡp, ast.Expr x) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2423,7 +2423,7 @@ private static readonly @string chanˢᵇᴍparser = "'chan'"u8;
 internal static ref readonly @string channelTypeˢᴍparser => ref channelTypeˢᵇᴍparser;
 private static readonly @string channelTypeˢᵇᴍparser = "channel type"u8;
 
-internal static ast.Expr parseUnaryExprᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseUnaryExpr")] internal static ast.Expr parseUnaryExprᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2504,7 +2504,7 @@ internal static ast.Expr parseUnaryExprᴍ(ж<parser> Ꮡp) {
     finally { ᒐ.Run(); }
 }
 
-internal static (token.Token, nint) tokPrecᴍ(ref parser p) {
+[GoMethodBody("tokPrec")] internal static (token.Token, nint) tokPrecᴍ(ref parser p) {
     token.Token tok = p.tok;
     if (p.inRhs && tok == token.ASSIGN) {
         tok = token.EQL;
@@ -2520,7 +2520,7 @@ private static readonly @string binaryExprˢᵇᴍparser = "BinaryExpr"u8;
 // If x is non-nil, it is used as the left operand.
 //
 // TODO(rfindley): parseBinaryExpr has become overloaded. Consider refactoring.
-internal static ast.Expr parseBinaryExprᴍ(ж<parser> Ꮡp, ast.Expr x, nint prec1) {
+[GoMethodBody("parseBinaryExpr")] internal static ast.Expr parseBinaryExprᴍ(ж<parser> Ꮡp, ast.Expr x, nint prec1) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2560,7 +2560,7 @@ internal static ref readonly @string expressionˢᴍparser => ref expressionˢ�
 private static readonly @string expressionˢᵇᴍparser = "Expression"u8;
 
 // The result may be a type or even a raw type ([...]int).
-internal static ast.Expr parseExprᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseExpr")] internal static ast.Expr parseExprᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2575,7 +2575,7 @@ internal static ast.Expr parseExprᴍ(ж<parser> Ꮡp) {
     finally { ᒐ.Run(); }
 }
 
-internal static ast.Expr parseRhsᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseRhs")] internal static ast.Expr parseRhsᴍ(ж<parser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var old = p.inRhs;
@@ -2609,7 +2609,7 @@ private static readonly @string illegalLabelDeclarationˢᵇᴍparser = "illegal
 // of a range clause (with mode == rangeOk). The returned statement is an
 // assignment with a right-hand side that is a single unary expression of
 // the form "range x". No guarantees are given for the left-hand side.
-internal static (ast.Stmt, bool) parseSimpleStmtᴍ(ж<parser> Ꮡp, nint mode) {
+[GoMethodBody("parseSimpleStmt")] internal static (ast.Stmt, bool) parseSimpleStmtᴍ(ж<parser> Ꮡp, nint mode) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2688,7 +2688,7 @@ internal static (ast.Stmt, bool) parseSimpleStmtᴍ(ж<parser> Ꮡp, nint mode) 
     finally { ᒐ.Run(); }
 }
 
-internal static ж<ast.CallExpr> parseCallExprᴍ(ж<parser> Ꮡp, @string callType) {
+[GoMethodBody("parseCallExpr")] internal static ж<ast.CallExpr> parseCallExprᴍ(ж<parser> Ꮡp, @string callType) {
     var x = Ꮡp.parseRhs(); // could be a conversion: (some type)(x)
     var t = ast.Unparen(x); if (!AreEqual(t, x)) {
         Ꮡp.error(x.Pos(), fmt.Sprintf("expression in %s must not be parenthesized"u8, callType));
@@ -2708,7 +2708,7 @@ internal static ж<ast.CallExpr> parseCallExprᴍ(ж<parser> Ꮡp, @string callT
 internal static ref readonly @string goStmtˢᴍparser => ref goStmtˢᵇᴍparser;
 private static readonly @string goStmtˢᵇᴍparser = "GoStmt"u8;
 
-internal static ast.Stmt parseGoStmtᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseGoStmt")] internal static ast.Stmt parseGoStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2736,7 +2736,7 @@ private static readonly @string deferStmtˢᵇᴍparser = "DeferStmt"u8;
 internal static ref readonly @string deferˢᴍparser => ref deferˢᵇᴍparser;
 private static readonly @string deferˢᵇᴍparser = "defer"u8;
 
-internal static ast.Stmt parseDeferStmtᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseDeferStmt")] internal static ast.Stmt parseDeferStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2762,7 +2762,7 @@ internal static ast.Stmt parseDeferStmtᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string returnStmtˢᴍparser => ref returnStmtˢᵇᴍparser;
 private static readonly @string returnStmtˢᵇᴍparser = "ReturnStmt"u8;
 
-internal static ж<ast.ReturnStmt> parseReturnStmtᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseReturnStmt")] internal static ж<ast.ReturnStmt> parseReturnStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2789,7 +2789,7 @@ internal static ж<ast.ReturnStmt> parseReturnStmtᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string branchStmtˢᴍparser => ref branchStmtˢᵇᴍparser;
 private static readonly @string branchStmtˢᵇᴍparser = "BranchStmt"u8;
 
-internal static ж<ast.BranchStmt> parseBranchStmtᴍ(ж<parser> Ꮡp, token.Token tok) {
+[GoMethodBody("parseBranchStmt")] internal static ж<ast.BranchStmt> parseBranchStmtᴍ(ж<parser> Ꮡp, token.Token tok) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2817,7 +2817,7 @@ private static readonly @string simpleStatementˢᵇᴍparser = "simple statemen
 internal static ref readonly @string assignmentˢᴍparser => ref assignmentˢᵇᴍparser;
 private static readonly @string assignmentˢᵇᴍparser = "assignment"u8;
 
-internal static ast.Expr makeExprᴍ(ж<parser> Ꮡp, ast.Stmt s, @string want) {
+[GoMethodBody("makeExpr")] internal static ast.Expr makeExprᴍ(ж<parser> Ꮡp, ast.Stmt s, @string want) {
     if (s == nil) {
         return default;
     }
@@ -2854,7 +2854,7 @@ private static readonly @string unexpectedNewlineˢᵇᴍparser = "unexpected ne
 // parseIfHeader is an adjusted version of parser.header
 // in cmd/compile/internal/syntax/parser.go, which has
 // been tuned for better error handling.
-internal static (ast.Stmt init, ast.Expr cond) parseIfHeaderᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseIfHeader")] internal static (ast.Stmt init, ast.Expr cond) parseIfHeaderᴍ(ж<parser> Ꮡp) {
     ast.Stmt init = default;
     ast.Expr cond = default;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -2921,7 +2921,7 @@ private static readonly @string ifStmtˢᵇᴍparser = "IfStmt"u8;
 internal static ref readonly @string ifStatementOrBlockˢᴍparser => ref ifStatementOrBlockˢᵇᴍparser;
 private static readonly @string ifStatementOrBlockˢᵇᴍparser = "if statement or block"u8;
 
-internal static ж<ast.IfStmt> parseIfStmtᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseIfStmt")] internal static ж<ast.IfStmt> parseIfStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2969,7 +2969,7 @@ internal static ж<ast.IfStmt> parseIfStmtᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string caseClauseˢᴍparser => ref caseClauseˢᵇᴍparser;
 private static readonly @string caseClauseˢᵇᴍparser = "CaseClause"u8;
 
-internal static ж<ast.CaseClause> parseCaseClauseᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseCaseClause")] internal static ж<ast.CaseClause> parseCaseClauseᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -3009,7 +3009,7 @@ internal static bool isTypeSwitchAssert(ast.Expr x) {
 internal static ref readonly @string expectedFoundˢᴍparser => ref expectedFoundˢᵇᴍparser;
 private static readonly @string expectedFoundˢᵇᴍparser = "expected ':=', found '='"u8;
 
-internal static bool isTypeSwitchGuardᴍ(ж<parser> Ꮡp, ast.Stmt s) {
+[GoMethodBody("isTypeSwitchGuard")] internal static bool isTypeSwitchGuardᴍ(ж<parser> Ꮡp, ast.Stmt s) {
     switch (s.type()) {
     case ж<ast.ExprStmt> t: {
         // x.(type)
@@ -3040,7 +3040,7 @@ private static readonly @string switchStmtˢᵇᴍparser = "SwitchStmt"u8;
 internal static ref readonly @string switchExpressionˢᴍparser => ref switchExpressionˢᵇᴍparser;
 private static readonly @string switchExpressionˢᵇᴍparser = "switch expression"u8;
 
-internal static ast.Stmt parseSwitchStmtᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseSwitchStmt")] internal static ast.Stmt parseSwitchStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -3108,7 +3108,7 @@ private static readonly @string commClauseˢᵇᴍparser = "CommClause"u8;
 internal static ref readonly @string or2Expressionsˢᴍparser => ref or2Expressionsˢᵇᴍparser;
 private static readonly @string or2Expressionsˢᵇᴍparser = "1 or 2 expressions"u8;
 
-internal static ж<ast.CommClause> parseCommClauseᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseCommClause")] internal static ж<ast.CommClause> parseCommClauseᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -3171,7 +3171,7 @@ internal static ж<ast.CommClause> parseCommClauseᴍ(ж<parser> Ꮡp) {
 internal static ref readonly @string selectStmtˢᴍparser => ref selectStmtˢᵇᴍparser;
 private static readonly @string selectStmtˢᵇᴍparser = "SelectStmt"u8;
 
-internal static ж<ast.SelectStmt> parseSelectStmtᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseSelectStmt")] internal static ж<ast.SelectStmt> parseSelectStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -3204,7 +3204,7 @@ private static readonly @string atMost2Expressionsˢᵇᴍparser = "at most 2 ex
 internal static ref readonly @string booleanOrRangeExpressionˢᴍparser => ref booleanOrRangeExpressionˢᵇᴍparser;
 private static readonly @string booleanOrRangeExpressionˢᵇᴍparser = "boolean or range expression"u8;
 
-internal static ast.Stmt parseForStmtᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseForStmt")] internal static ast.Stmt parseForStmtᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -3308,7 +3308,7 @@ private static readonly @string statementˢᵇᴍparser = "Statement"u8;
 internal static ref readonly @string statementˢ2ᴍparser => ref statementˢ2ᵇᴍparser;
 private static readonly @string statementˢ2ᵇᴍparser = "statement"u8;
 
-internal static ast.Stmt /*s*/ parseStmtᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseStmt")] internal static ast.Stmt /*s*/ parseStmtᴍ(ж<parser> Ꮡp) {
     ast.Stmt s = default;
     GoFrame ᒐ = default;
     try {
@@ -3418,7 +3418,7 @@ private static readonly @string missingImportPathˢᵇᴍparser = "missing impor
 
 // ----------------------------------------------------------------------------
 // Declarations
-internal static ast.Spec parseImportSpecᴍ(ж<parser> Ꮡp, ж<ast.CommentGroup> doc, token.Token _Δp2, nint _Δp3) {
+[GoMethodBody("parseImportSpec")] internal static ast.Spec parseImportSpecᴍ(ж<parser> Ꮡp, ж<ast.CommentGroup> doc, token.Token _Δp2, nint _Δp3) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -3470,7 +3470,7 @@ internal static ast.Spec parseImportSpecᴍ(ж<parser> Ꮡp, ж<ast.CommentGroup
     finally { ᒐ.Run(); }
 }
 
-internal static ast.Spec parseValueSpecᴍ(ж<parser> Ꮡp, ж<ast.CommentGroup> doc, token.Token keyword, nint iota) {
+[GoMethodBody("parseValueSpec")] internal static ast.Spec parseValueSpecᴍ(ж<parser> Ꮡp, ж<ast.CommentGroup> doc, token.Token keyword, nint iota) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -3527,7 +3527,7 @@ internal static ast.Spec parseValueSpecᴍ(ж<parser> Ꮡp, ж<ast.CommentGroup>
 internal static ref readonly @string parseGenericTypeˢᴍparser => ref parseGenericTypeˢᵇᴍparser;
 private static readonly @string parseGenericTypeˢᵇᴍparser = "parseGenericType"u8;
 
-internal static void parseGenericTypeᴍ(ж<parser> Ꮡp, ж<ast.TypeSpec> Ꮡspec, token.Pos openPos, ж<ast.Ident> name0, ast.Expr typ0) {
+[GoMethodBody("parseGenericType")] internal static void parseGenericTypeᴍ(ж<parser> Ꮡp, ж<ast.TypeSpec> Ꮡspec, token.Pos openPos, ж<ast.Ident> name0, ast.Expr typ0) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -3555,7 +3555,7 @@ internal static void parseGenericTypeᴍ(ж<parser> Ꮡp, ж<ast.TypeSpec> Ꮡsp
 internal static ref readonly @string typeSpecˢᴍparser => ref typeSpecˢᵇᴍparser;
 private static readonly @string typeSpecˢᵇᴍparser = "TypeSpec"u8;
 
-internal static ast.Spec parseTypeSpecᴍ(ж<parser> Ꮡp, ж<ast.CommentGroup> doc, token.Token _Δp2, nint _Δp3) {
+[GoMethodBody("parseTypeSpec")] internal static ast.Spec parseTypeSpecᴍ(ж<parser> Ꮡp, ж<ast.CommentGroup> doc, token.Token _Δp2, nint _Δp3) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -3733,7 +3733,7 @@ internal static bool isTypeElem(ast.Expr x) {
 
 } partial class parser_package {
 
-internal static ж<ast.GenDecl> parseGenDeclᴍ(ж<parser> Ꮡp, token.Token keyword, Func<ж<ast.CommentGroup>, token.Token, nint, ast.Spec> f) {
+[GoMethodBody("parseGenDecl")] internal static ж<ast.GenDecl> parseGenDeclᴍ(ж<parser> Ꮡp, token.Token keyword, Func<ж<ast.CommentGroup>, token.Token, nint, ast.Spec> f) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -3780,7 +3780,7 @@ private static readonly @string methodMustHaveNoTypeˢᵇᴍparser = "method mus
 internal static ref readonly @string unexpectedSemicolonOrˢᴍparser => ref unexpectedSemicolonOrˢᵇᴍparser;
 private static readonly @string unexpectedSemicolonOrˢᵇᴍparser = "unexpected semicolon or newline before {"u8;
 
-internal static ж<ast.FuncDecl> parseFuncDeclᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseFuncDecl")] internal static ж<ast.FuncDecl> parseFuncDeclᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -3858,7 +3858,7 @@ private static readonly @string declarationˢᵇᴍparser = "Declaration"u8;
 internal static ref readonly @string declarationˢ2ᴍparser => ref declarationˢ2ᵇᴍparser;
 private static readonly @string declarationˢ2ᵇᴍparser = "declaration"u8;
 
-internal static ast.Decl parseDeclᴍ(ж<parser> Ꮡp, map<token.Token, bool> sync) {
+[GoMethodBody("parseDecl")] internal static ast.Decl parseDeclᴍ(ж<parser> Ꮡp, map<token.Token, bool> sync) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -3907,7 +3907,7 @@ private static readonly @string importsMustAppearBeforeˢᵇᴍparser = "imports
 
 // ----------------------------------------------------------------------------
 // Source files
-internal static ж<ast.File> parseFileᴍ(ж<parser> Ꮡp) {
+[GoMethodBody("parseFile")] internal static ж<ast.File> parseFileᴍ(ж<parser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -4013,92 +4013,3 @@ internal static ast.Expr packIndexExpr(ast.Expr x, token.Pos lbrack, slice<ast.E
 }
 
 } // end parser_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class parserᴛparser {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<parser> Ꮡp, ж<token.File> Ꮡfile, slice<byte> src, Mode mode) => parser_package.initᴍ(Ꮡp, Ꮡfile, src, mode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void printTrace(this ref parser p, params ꓸꓸꓸany aʗp) => parser_package.printTraceᴍ(ref p, aʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void next0(this ж<parser> Ꮡp) => parser_package.next0ᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint lineFor(this ref parser p, token.Pos pos) => parser_package.lineForᴍ(ref p, pos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<ast.Comment> comment, nint endline) consumeComment(this ж<parser> Ꮡp) => parser_package.consumeCommentᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<ast.CommentGroup> comments, nint endline) consumeCommentGroup(this ж<parser> Ꮡp, nint n) => parser_package.consumeCommentGroupᴍ(Ꮡp, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void next(this ж<parser> Ꮡp) => parser_package.nextᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void error(this ж<parser> Ꮡp, token.Pos pos, @string msg) => parser_package.errorᴍ(Ꮡp, pos, msg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void errorExpected(this ж<parser> Ꮡp, token.Pos pos, @string msg) => parser_package.errorExpectedᴍ(Ꮡp, pos, msg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Pos expect(this ж<parser> Ꮡp, token.Token tok) => parser_package.expectᴍ(Ꮡp, tok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Pos /*pos*/ expect2(this ж<parser> Ꮡp, token.Token tok) => parser_package.expect2ᴍ(Ꮡp, tok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Pos expectClosing(this ж<parser> Ꮡp, token.Token tok, @string context) => parser_package.expectClosingᴍ(Ꮡp, tok, context);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.CommentGroup> /*comment*/ expectSemi(this ж<parser> Ꮡp) => parser_package.expectSemiᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool atComma(this ж<parser> Ꮡp, @string context, token.Token follow) => parser_package.atCommaᴍ(Ꮡp, context, follow);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void advance(this ж<parser> Ꮡp, map<token.Token, bool> to) => parser_package.advanceᴍ(Ꮡp, to);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.Ident> parseIdent(this ж<parser> Ꮡp) => parser_package.parseIdentᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ж<ast.Ident>> /*list*/ parseIdentList(this ж<parser> Ꮡp) => parser_package.parseIdentListᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ast.Expr> /*list*/ parseExprList(this ж<parser> Ꮡp) => parser_package.parseExprListᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ast.Expr> parseList(this ж<parser> Ꮡp, bool inRhs) => parser_package.parseListᴍ(Ꮡp, inRhs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseType(this ж<parser> Ꮡp) => parser_package.parseTypeᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseQualifiedIdent(this ж<parser> Ꮡp, ж<ast.Ident> ident) => parser_package.parseQualifiedIdentᴍ(Ꮡp, ident);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseTypeName(this ж<parser> Ꮡp, ж<ast.Ident> Ꮡident) => parser_package.parseTypeNameᴍ(Ꮡp, Ꮡident);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.ArrayType> parseArrayType(this ж<parser> Ꮡp, token.Pos lbrack, ast.Expr len) => parser_package.parseArrayTypeᴍ(Ꮡp, lbrack, len);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<ast.Ident>, ast.Expr) parseArrayFieldOrTypeInstance(this ж<parser> Ꮡp, ж<ast.Ident> x) => parser_package.parseArrayFieldOrTypeInstanceᴍ(Ꮡp, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.Field> parseFieldDecl(this ж<parser> Ꮡp) => parser_package.parseFieldDeclᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.StructType> parseStructType(this ж<parser> Ꮡp) => parser_package.parseStructTypeᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.StarExpr> parsePointerType(this ж<parser> Ꮡp) => parser_package.parsePointerTypeᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.Ellipsis> parseDotsType(this ж<parser> Ꮡp) => parser_package.parseDotsTypeᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static field /*f*/ parseParamDecl(this ж<parser> Ꮡp, ж<ast.Ident> Ꮡname, bool typeSetsOK) => parser_package.parseParamDeclᴍ(Ꮡp, Ꮡname, typeSetsOK);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ж<ast.Field>> /*params*/ parseParameterList(this ж<parser> Ꮡp, ж<ast.Ident> Ꮡname0, ast.Expr typ0, token.Token closing, bool dddok) => parser_package.parseParameterListᴍ(Ꮡp, Ꮡname0, typ0, closing, dddok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.FieldList> parseTypeParameters(this ж<parser> Ꮡp) => parser_package.parseTypeParametersᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.FieldList> parseParameters(this ж<parser> Ꮡp, bool result) => parser_package.parseParametersᴍ(Ꮡp, result);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.FuncType> parseFuncType(this ж<parser> Ꮡp) => parser_package.parseFuncTypeᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.Field> parseMethodSpec(this ж<parser> Ꮡp) => parser_package.parseMethodSpecᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr embeddedElem(this ж<parser> Ꮡp, ast.Expr x) => parser_package.embeddedElemᴍ(Ꮡp, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr embeddedTerm(this ж<parser> Ꮡp) => parser_package.embeddedTermᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.InterfaceType> parseInterfaceType(this ж<parser> Ꮡp) => parser_package.parseInterfaceTypeᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.MapType> parseMapType(this ж<parser> Ꮡp) => parser_package.parseMapTypeᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.ChanType> parseChanType(this ж<parser> Ꮡp) => parser_package.parseChanTypeᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseTypeInstance(this ж<parser> Ꮡp, ast.Expr typ) => parser_package.parseTypeInstanceᴍ(Ꮡp, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr tryIdentOrType(this ж<parser> Ꮡp) => parser_package.tryIdentOrTypeᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ast.Stmt> /*list*/ parseStmtList(this ж<parser> Ꮡp) => parser_package.parseStmtListᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.BlockStmt> parseBody(this ж<parser> Ꮡp) => parser_package.parseBodyᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.BlockStmt> parseBlockStmt(this ж<parser> Ꮡp) => parser_package.parseBlockStmtᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseFuncTypeOrLit(this ж<parser> Ꮡp) => parser_package.parseFuncTypeOrLitᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseOperand(this ж<parser> Ꮡp) => parser_package.parseOperandᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseSelector(this ж<parser> Ꮡp, ast.Expr x) => parser_package.parseSelectorᴍ(Ꮡp, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseTypeAssertion(this ж<parser> Ꮡp, ast.Expr x) => parser_package.parseTypeAssertionᴍ(Ꮡp, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseIndexOrSliceOrInstance(this ж<parser> Ꮡp, ast.Expr x) => parser_package.parseIndexOrSliceOrInstanceᴍ(Ꮡp, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.CallExpr> parseCallOrConversion(this ж<parser> Ꮡp, ast.Expr fun) => parser_package.parseCallOrConversionᴍ(Ꮡp, fun);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseValue(this ж<parser> Ꮡp) => parser_package.parseValueᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseElement(this ж<parser> Ꮡp) => parser_package.parseElementᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ast.Expr> /*list*/ parseElementList(this ж<parser> Ꮡp) => parser_package.parseElementListᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseLiteralValue(this ж<parser> Ꮡp, ast.Expr typ) => parser_package.parseLiteralValueᴍ(Ꮡp, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parsePrimaryExpr(this ж<parser> Ꮡp, ast.Expr x) => parser_package.parsePrimaryExprᴍ(Ꮡp, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseUnaryExpr(this ж<parser> Ꮡp) => parser_package.parseUnaryExprᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (token.Token, nint) tokPrec(this ref parser p) => parser_package.tokPrecᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseBinaryExpr(this ж<parser> Ꮡp, ast.Expr x, nint prec1) => parser_package.parseBinaryExprᴍ(Ꮡp, x, prec1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseExpr(this ж<parser> Ꮡp) => parser_package.parseExprᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr parseRhs(this ж<parser> Ꮡp) => parser_package.parseRhsᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ast.Stmt, bool) parseSimpleStmt(this ж<parser> Ꮡp, nint mode) => parser_package.parseSimpleStmtᴍ(Ꮡp, mode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.CallExpr> parseCallExpr(this ж<parser> Ꮡp, @string callType) => parser_package.parseCallExprᴍ(Ꮡp, callType);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Stmt parseGoStmt(this ж<parser> Ꮡp) => parser_package.parseGoStmtᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Stmt parseDeferStmt(this ж<parser> Ꮡp) => parser_package.parseDeferStmtᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.ReturnStmt> parseReturnStmt(this ж<parser> Ꮡp) => parser_package.parseReturnStmtᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.BranchStmt> parseBranchStmt(this ж<parser> Ꮡp, token.Token tok) => parser_package.parseBranchStmtᴍ(Ꮡp, tok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Expr makeExpr(this ж<parser> Ꮡp, ast.Stmt s, @string want) => parser_package.makeExprᴍ(Ꮡp, s, want);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ast.Stmt init, ast.Expr cond) parseIfHeader(this ж<parser> Ꮡp) => parser_package.parseIfHeaderᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.IfStmt> parseIfStmt(this ж<parser> Ꮡp) => parser_package.parseIfStmtᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.CaseClause> parseCaseClause(this ж<parser> Ꮡp) => parser_package.parseCaseClauseᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isTypeSwitchGuard(this ж<parser> Ꮡp, ast.Stmt s) => parser_package.isTypeSwitchGuardᴍ(Ꮡp, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Stmt parseSwitchStmt(this ж<parser> Ꮡp) => parser_package.parseSwitchStmtᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.CommClause> parseCommClause(this ж<parser> Ꮡp) => parser_package.parseCommClauseᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.SelectStmt> parseSelectStmt(this ж<parser> Ꮡp) => parser_package.parseSelectStmtᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Stmt parseForStmt(this ж<parser> Ꮡp) => parser_package.parseForStmtᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Stmt /*s*/ parseStmt(this ж<parser> Ꮡp) => parser_package.parseStmtᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Spec parseImportSpec(this ж<parser> Ꮡp, ж<ast.CommentGroup> doc, token.Token _Δp2, nint _Δp3) => parser_package.parseImportSpecᴍ(Ꮡp, doc, _Δp2, _Δp3);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Spec parseValueSpec(this ж<parser> Ꮡp, ж<ast.CommentGroup> doc, token.Token keyword, nint iota) => parser_package.parseValueSpecᴍ(Ꮡp, doc, keyword, iota);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parseGenericType(this ж<parser> Ꮡp, ж<ast.TypeSpec> Ꮡspec, token.Pos openPos, ж<ast.Ident> name0, ast.Expr typ0) => parser_package.parseGenericTypeᴍ(Ꮡp, Ꮡspec, openPos, name0, typ0);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Spec parseTypeSpec(this ж<parser> Ꮡp, ж<ast.CommentGroup> doc, token.Token _Δp2, nint _Δp3) => parser_package.parseTypeSpecᴍ(Ꮡp, doc, _Δp2, _Δp3);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.GenDecl> parseGenDecl(this ж<parser> Ꮡp, token.Token keyword, Func<ж<ast.CommentGroup>, token.Token, nint, ast.Spec> f) => parser_package.parseGenDeclᴍ(Ꮡp, keyword, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.FuncDecl> parseFuncDecl(this ж<parser> Ꮡp) => parser_package.parseFuncDeclᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ast.Decl parseDecl(this ж<parser> Ꮡp, map<token.Token, bool> sync) => parser_package.parseDeclᴍ(Ꮡp, sync);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<ast.File> parseFile(this ж<parser> Ꮡp) => parser_package.parseFileᴍ(Ꮡp);
-}
-// </GlyphForwarders>

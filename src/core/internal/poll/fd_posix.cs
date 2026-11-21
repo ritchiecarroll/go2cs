@@ -14,7 +14,7 @@ partial class poll_package {
 
 // eofError returns io.EOF when fd is available for reading end of
 // file.
-internal static error eofErrorᴍ(ref FD fd, nint n, error err) {
+[GoMethodBody("eofError")] internal static error eofErrorᴍ(ref FD fd, nint n, error err) {
     if (n == 0 && err == nil && fd.ZeroReadIsEOF) {
         return io.EOF;
     }
@@ -22,7 +22,7 @@ internal static error eofErrorᴍ(ref FD fd, nint n, error err) {
 }
 
 // Shutdown wraps syscall.Shutdown.
-internal static error Shutdownᴍ(ж<FD> Ꮡfd, nint how) {
+[GoMethodBody("Shutdown")] internal static error Shutdownᴍ(ж<FD> Ꮡfd, nint how) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -39,7 +39,7 @@ internal static error Shutdownᴍ(ж<FD> Ꮡfd, nint how) {
 }
 
 // Fchown wraps syscall.Fchown.
-internal static error Fchownᴍ(ж<FD> Ꮡfd, nint uid, nint gid) {
+[GoMethodBody("Fchown")] internal static error Fchownᴍ(ж<FD> Ꮡfd, nint uid, nint gid) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -54,7 +54,7 @@ internal static error Fchownᴍ(ж<FD> Ꮡfd, nint uid, nint gid) {
 }
 
 // Ftruncate wraps syscall.Ftruncate.
-internal static error Ftruncateᴍ(ж<FD> Ꮡfd, int64 size) {
+[GoMethodBody("Ftruncate")] internal static error Ftruncateᴍ(ж<FD> Ꮡfd, int64 size) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -70,7 +70,7 @@ internal static error Ftruncateᴍ(ж<FD> Ꮡfd, int64 size) {
 
 // RawControl invokes the user-defined function f for a non-IO
 // operation.
-internal static error RawControlᴍ(ж<FD> Ꮡfd, Action<uintptr> f) {
+[GoMethodBody("RawControl")] internal static error RawControlᴍ(ж<FD> Ꮡfd, Action<uintptr> f) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -116,13 +116,3 @@ internal static (T, error) ignoringEINTR2<T>(Func<(T, error)> fn) {
 }
 
 } // end poll_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error eofError(this ref FD fd, nint n, error err) => poll_package.eofErrorᴍ(ref fd, n, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Shutdown(this ж<FD> Ꮡfd, nint how) => poll_package.Shutdownᴍ(Ꮡfd, how);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Fchown(this ж<FD> Ꮡfd, nint uid, nint gid) => poll_package.Fchownᴍ(Ꮡfd, uid, gid);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Ftruncate(this ж<FD> Ꮡfd, int64 size) => poll_package.Ftruncateᴍ(Ꮡfd, size);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error RawControl(this ж<FD> Ꮡfd, Action<uintptr> f) => poll_package.RawControlᴍ(Ꮡfd, f);
-}
-// </GlyphForwarders>

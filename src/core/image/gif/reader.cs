@@ -114,7 +114,7 @@ partial struct blockReader {
 
 } partial class gif_package {
 
-internal static void fillᴍ(ref blockReader b) {
+[GoMethodBody("fill")] internal static void fillᴍ(ref blockReader b) {
     if (b.err != nil) {
         return;
     }
@@ -133,7 +133,7 @@ internal static void fillᴍ(ref blockReader b) {
     }
 }
 
-internal static (byte, error) ReadByteᴍ(ref blockReader b) {
+[GoMethodBody("ReadByte")] internal static (byte, error) ReadByteᴍ(ref blockReader b) {
     if (b.i == b.j) {
         b.fill();
         if (b.err != nil) {
@@ -148,7 +148,7 @@ internal static (byte, error) ReadByteᴍ(ref blockReader b) {
 
 // blockReader must implement io.Reader, but its Read shouldn't ever actually
 // be called in practice. The compress/lzw package will only call [blockReader.ReadByte].
-internal static (nint, error) Readᴍ(ref blockReader b, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref blockReader b, slice<byte> p) {
     if (len(p) == 0 || b.err != nil) {
         return (0, b.err);
     }
@@ -172,7 +172,7 @@ internal static (nint, error) Readᴍ(ref blockReader b, slice<byte> p) {
 // most one more sub-block of length 1 may exist before the block-terminator.
 // These accommodations allow us to support GIFs created by less strict encoders.
 // See https://golang.org/issue/16146.
-internal static error closeᴍ(ref blockReader b) {
+[GoMethodBody("close")] internal static error closeᴍ(ref blockReader b) {
     if (AreEqual(b.err, io.EOF)) {
         // A clean block-sequence terminator was encountered while reading.
         return default;
@@ -209,7 +209,7 @@ internal static error closeᴍ(ref blockReader b) {
 } partial class gif_package {
 
 // decode reads a GIF image from r and stores the result in d.
-internal static error decodeᴍ(ж<decoder> Ꮡd, io.Reader r, bool configOnly, bool keepAllFrames) {
+[GoMethodBody("decode")] internal static error decodeᴍ(ж<decoder> Ꮡd, io.Reader r, bool configOnly, bool keepAllFrames) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Add buffering if r does not provide ReadByte.
@@ -263,7 +263,7 @@ internal static error decodeᴍ(ж<decoder> Ꮡd, io.Reader r, bool configOnly, 
     }
 }
 
-internal static error readHeaderAndScreenDescriptorᴍ(ref decoder d) {
+[GoMethodBody("readHeaderAndScreenDescriptor")] internal static error readHeaderAndScreenDescriptorᴍ(ref decoder d) {
     var err = readFull(d.r, d.tmp[..13]);
     if (err != nil) {
         return fmt.Errorf("gif: reading header: %v"u8, err);
@@ -285,7 +285,7 @@ internal static error readHeaderAndScreenDescriptorᴍ(ref decoder d) {
     return default;
 }
 
-internal static (Δcolor.Palette, error) readColorTableᴍ(ref decoder d, byte fields) {
+[GoMethodBody("readColorTable")] internal static (Δcolor.Palette, error) readColorTableᴍ(ref decoder d, byte fields) {
     nint n = ((nint)1).Lsh((1 + (nuint)((byte)(fields & (byte)fColorTableBitsMask))));
     var err = readFull(d.r, d.tmp.slice(0, 3 * n));
     if (err != nil) {
@@ -300,7 +300,7 @@ internal static (Δcolor.Palette, error) readColorTableᴍ(ref decoder d, byte f
     return (p, default);
 }
 
-internal static error readExtensionᴍ(ref decoder d) {
+[GoMethodBody("readExtension")] internal static error readExtensionᴍ(ref decoder d) {
     var (extension, err) = readByte(d.r);
     if (err != nil) {
         return fmt.Errorf("gif: reading extension: %v"u8, err);
@@ -361,7 +361,7 @@ internal static error readExtensionᴍ(ref decoder d) {
     }
 }
 
-internal static error readGraphicControlᴍ(ref decoder d) {
+[GoMethodBody("readGraphicControl")] internal static error readGraphicControlᴍ(ref decoder d) {
     var err = readFull(d.r, d.tmp[..6]); if (err != nil) {
         return fmt.Errorf("gif: can't read graphic control: %s"u8, err);
     }
@@ -385,7 +385,7 @@ internal static error readGraphicControlᴍ(ref decoder d) {
 internal static ref readonly @string gifNoColorTableˢᴍdecoder => ref gifNoColorTableˢᵇᴍdecoder;
 private static readonly @string gifNoColorTableˢᵇᴍdecoder = "gif: no color table"u8;
 
-internal static error readImageDescriptorᴍ(ж<decoder> Ꮡd, bool keepAllFrames) {
+[GoMethodBody("readImageDescriptor")] internal static error readImageDescriptorᴍ(ж<decoder> Ꮡd, bool keepAllFrames) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -504,7 +504,7 @@ internal static error readImageDescriptorᴍ(ж<decoder> Ꮡd, bool keepAllFrame
 internal static ref readonly @string gifFrameBoundsLargerThanˢᴍdecoder => ref gifFrameBoundsLargerThanˢᵇᴍdecoder;
 private static readonly @string gifFrameBoundsLargerThanˢᵇᴍdecoder = "gif: frame bounds larger than image bounds"u8;
 
-internal static (ж<image.Paletted>, error) newImageFromDescriptorᴍ(ref decoder d) {
+[GoMethodBody("newImageFromDescriptor")] internal static (ж<image.Paletted>, error) newImageFromDescriptorᴍ(ref decoder d) {
     var err = readFull(d.r, d.tmp[..9]); if (err != nil) {
         return (default, fmt.Errorf("gif: can't read image descriptor: %s"u8, err));
     }
@@ -539,7 +539,7 @@ internal static (ж<image.Paletted>, error) newImageFromDescriptorᴍ(ref decode
     ), default), default);
 }
 
-internal static (nint, error) readBlockᴍ(ref decoder d) {
+[GoMethodBody("readBlock")] internal static (nint, error) readBlockᴍ(ref decoder d) {
     var (n, err) = readByte(d.r);
     if (n == 0 || err != nil) {
         return (0, err);
@@ -666,22 +666,3 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
 }
 
 } // end gif_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class gifᴛblockReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fill(this ref blockReader b) => gif_package.fillᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte, error) ReadByte(this ref blockReader b) => gif_package.ReadByteᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref blockReader b, slice<byte> p) => gif_package.Readᴍ(ref b, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error close(this ref blockReader b) => gif_package.closeᴍ(ref b);
-}
-partial class gifᴛdecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly, bool keepAllFrames) => gif_package.decodeᴍ(Ꮡd, r, configOnly, keepAllFrames);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readHeaderAndScreenDescriptor(this ref decoder d) => gif_package.readHeaderAndScreenDescriptorᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte fields) => gif_package.readColorTableᴍ(ref d, fields);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readExtension(this ref decoder d) => gif_package.readExtensionᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readGraphicControl(this ref decoder d) => gif_package.readGraphicControlᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFrames) => gif_package.readImageDescriptorᴍ(Ꮡd, keepAllFrames);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<image.Paletted>, error) newImageFromDescriptor(this ref decoder d) => gif_package.newImageFromDescriptorᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) readBlock(this ref decoder d) => gif_package.readBlockᴍ(ref d);
-}
-// </GlyphForwarders>

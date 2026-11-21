@@ -60,6 +60,16 @@ using static go.crypto.@internal.boring_package;
 
 namespace go.crypto.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using crypto = crypto_package;
+using cipher = go.crypto.cipher_package;
+using sig = go.crypto.@internal.boring.sig_package;
+using hash = hash_package;
+using go.crypto;
+using go.crypto.@internal.boring;
+using static boring_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("boring")]
 public static partial class boring_package
 {
@@ -104,3 +114,15 @@ public static partial class boring_package
 [GoMethodHost(typeof(boring_package.PublicKeyECDH)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class boringᴛPublicKeyECDH;
 [GoMethodHost(typeof(boring_package.randReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class boringᴛrandReader;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class boringᴛrandReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Read(this randReader _, slice<byte> b) => boring_package.Readᴍ(_, b);
+}
+partial class boringᴛPublicKeyECDH {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKeyECDH _) => boring_package.Bytesᴍ(ref _);
+}
+partial class boringᴛPrivateKeyECDH {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<PublicKeyECDH>, error) PublicKey(this ref PrivateKeyECDH _) => boring_package.PublicKeyᴍ(ref _);
+}
+// </GlyphForwarders>

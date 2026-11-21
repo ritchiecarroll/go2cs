@@ -269,7 +269,7 @@ internal static @string xorData = ""u8 + // Size: 4907 bytes
 // lookup returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-internal static (uint16 v, nint sz) lookupᴍ(ref idnaTrie t, slice<byte> s) {
+[GoMethodBody("lookup")] internal static (uint16 v, nint sz) lookupᴍ(ref idnaTrie t, slice<byte> s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -335,7 +335,7 @@ internal static (uint16 v, nint sz) lookupᴍ(ref idnaTrie t, slice<byte> s) {
 
 // lookupUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-internal static uint16 lookupUnsafeᴍ(ref idnaTrie t, slice<byte> s) {
+[GoMethodBody("lookupUnsafe")] internal static uint16 lookupUnsafeᴍ(ref idnaTrie t, slice<byte> s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return idnaValues[c0];
@@ -358,7 +358,7 @@ internal static uint16 lookupUnsafeᴍ(ref idnaTrie t, slice<byte> s) {
 // lookupString returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-internal static (uint16 v, nint sz) lookupStringᴍ(ref idnaTrie t, @string s) {
+[GoMethodBody("lookupString")] internal static (uint16 v, nint sz) lookupStringᴍ(ref idnaTrie t, @string s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -424,7 +424,7 @@ internal static (uint16 v, nint sz) lookupStringᴍ(ref idnaTrie t, @string s) {
 
 // lookupStringUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-internal static uint16 lookupStringUnsafeᴍ(ref idnaTrie t, @string s) {
+[GoMethodBody("lookupStringUnsafe")] internal static uint16 lookupStringUnsafeᴍ(ref idnaTrie t, @string s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return idnaValues[c0];
@@ -457,7 +457,7 @@ internal static ж<idnaTrie> newIdnaTrie(nint i) {
 } partial class idna_package {
 
 // lookupValue determines the type of block n and looks up the value for b.
-internal static uint16 lookupValueᴍ(ref idnaTrie t, uint32 n, byte b) {
+[GoMethodBody("lookupValue")] internal static uint16 lookupValueᴍ(ref idnaTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     case {} when n is < 133: {
         return (uint16)idnaValues[(n << 6) + (uint32)b];
@@ -4892,13 +4892,3 @@ internal static uint16 lookupValueᴍ(ref idnaTrie t, uint32 n, byte b) {
 // Total table size 46723 bytes (45KiB); checksum: 4CF3143A
 
 } // end idna_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class idnaᴛidnaTrie {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint16 v, nint sz) lookup(this ref idnaTrie t, slice<byte> s) => idna_package.lookupᴍ(ref t, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 lookupUnsafe(this ref idnaTrie t, slice<byte> s) => idna_package.lookupUnsafeᴍ(ref t, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint16 v, nint sz) lookupString(this ref idnaTrie t, @string s) => idna_package.lookupStringᴍ(ref t, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 lookupStringUnsafe(this ref idnaTrie t, @string s) => idna_package.lookupStringUnsafeᴍ(ref t, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 lookupValue(this ref idnaTrie t, uint32 n, byte b) => idna_package.lookupValueᴍ(ref t, n, b);
-}
-// </GlyphForwarders>

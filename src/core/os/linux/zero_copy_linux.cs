@@ -22,7 +22,7 @@ internal static ref Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)> 
 internal static ref readonly @string sendfileˢᴍFile => ref sendfileˢᵇᴍFile;
 private static readonly @string sendfileˢᵇᴍFile = "sendfile"u8;
 
-internal static (int64 written, bool handled, error err) writeToᴍ(ж<File> Ꮡf, Δio.Writer w) {
+[GoMethodBody("writeTo")] internal static (int64 written, bool handled, error err) writeToᴍ(ж<File> Ꮡf, Δio.Writer w) {
     int64 written = default;
     bool handled = default;
     ref var err = ref heap<error>(out var Ꮡerr);
@@ -51,7 +51,7 @@ internal static (int64 written, bool handled, error err) writeToᴍ(ж<File> Ꮡ
     return (written, handled, wrapSyscallError(sendfileˢᴍFile, err));
 }
 
-internal static (int64 written, bool handled, error err) readFromᴍ(ж<File> Ꮡf, Δio.Reader r) {
+[GoMethodBody("readFrom")] internal static (int64 written, bool handled, error err) readFromᴍ(ж<File> Ꮡf, Δio.Reader r) {
     int64 written = default;
     bool handled = default;
     error err = default;
@@ -77,7 +77,7 @@ internal static (int64 written, bool handled, error err) readFromᴍ(ж<File> �
 internal static ref readonly @string spliceˢᴍFile => ref spliceˢᵇᴍFile;
 private static readonly @string spliceˢᵇᴍFile = "splice"u8;
 
-internal static (int64 written, bool handled, error err) spliceToFileᴍ(ж<File> Ꮡf, Δio.Reader r) {
+[GoMethodBody("spliceToFile")] internal static (int64 written, bool handled, error err) spliceToFileᴍ(ж<File> Ꮡf, Δio.Reader r) {
     int64 written = default;
     bool handled = default;
     error err = default;
@@ -115,7 +115,7 @@ private static readonly @string readFromˢᵇᴍFile = "ReadFrom"u8;
 internal static ref readonly @string copyFileRangeˢᴍFile => ref copyFileRangeˢᵇᴍFile;
 private static readonly @string copyFileRangeˢᵇᴍFile = "copy_file_range"u8;
 
-internal static (int64 written, bool handled, error err) copyFileRangeᴍ(ж<File> Ꮡf, Δio.Reader r) {
+[GoMethodBody("copyFileRange")] internal static (int64 written, bool handled, error err) copyFileRangeᴍ(ж<File> Ꮡf, Δio.Reader r) {
     int64 written = default;
     bool handled = default;
     error err = default;
@@ -191,12 +191,3 @@ internal static bool isUnixOrTCP(@string network) {
 }
 
 } // end os_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class osᴛFile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 written, bool handled, error err) writeTo(this ж<File> Ꮡf, Δio.Writer w) => os_package.writeToᴍ(Ꮡf, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 written, bool handled, error err) readFrom(this ж<File> Ꮡf, Δio.Reader r) => os_package.readFromᴍ(Ꮡf, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 written, bool handled, error err) spliceToFile(this ж<File> Ꮡf, Δio.Reader r) => os_package.spliceToFileᴍ(Ꮡf, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 written, bool handled, error err) copyFileRange(this ж<File> Ꮡf, Δio.Reader r) => os_package.copyFileRangeᴍ(Ꮡf, r);
-}
-// </GlyphForwarders>

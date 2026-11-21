@@ -36,7 +36,7 @@ partial struct CorruptInputError /*num:int64*/;
 
 } partial class flate_package {
 
-internal static @string Errorᴍ(CorruptInputError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(CorruptInputError e) {
     return "flate: corrupt input before offset "u8 + strconv.FormatInt((int64)e, 10);
 }
 
@@ -47,7 +47,7 @@ partial struct InternalError /*@string*/;
 
 } partial class flate_package {
 
-internal static @string Errorᴍ(InternalError e) { return "flate: internal error: "u8 + ((@string)e); }
+[GoMethodBody("Error")] internal static @string Errorᴍ(InternalError e) { return "flate: internal error: "u8 + ((@string)e); }
 
 } partial class flate_package {
 
@@ -61,7 +61,7 @@ partial struct ReadError {
 
 } partial class flate_package {
 
-internal static @string Errorᴍ(ref ReadError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref ReadError e) {
     return "flate: read error at offset "u8 + strconv.FormatInt(e.Offset, 10) + ": "u8 + e.Err.Error();
 }
 
@@ -77,7 +77,7 @@ partial struct WriteError {
 
 } partial class flate_package {
 
-internal static @string Errorᴍ(ref WriteError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref WriteError e) {
     return "flate: write error at offset "u8 + strconv.FormatInt(e.Offset, 10) + ": "u8 + e.Err.Error();
 }
 
@@ -129,7 +129,7 @@ partial struct huffmanDecoder {
 // tree (i.e., neither over-subscribed nor under-subscribed). The exception is a
 // degenerate case where the tree has only a single symbol with length 1. Empty
 // trees are permitted.
-internal static bool initᴍ(ref huffmanDecoder h, slice<nint> lengths) {
+[GoMethodBody("init")] internal static bool initᴍ(ref huffmanDecoder h, slice<nint> lengths) {
     // Sanity enables additional runtime tests during Huffman
     // table construction. It's intended to be used during
     // development to supplement the currently ad-hoc unit tests.
@@ -315,7 +315,7 @@ partial struct decompressor {
 
 } partial class flate_package {
 
-internal static void nextBlockᴍ(ж<decompressor> Ꮡf) {
+[GoMethodBody("nextBlock")] internal static void nextBlockᴍ(ж<decompressor> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     while (f.nb < 1 + 2) {
@@ -357,7 +357,7 @@ internal static void nextBlockᴍ(ж<decompressor> Ꮡf) {
     }}
 }
 
-internal static (nint, error) Readᴍ(ж<decompressor> Ꮡf, slice<byte> b) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ж<decompressor> Ꮡf, slice<byte> b) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     for (;;) {
@@ -379,7 +379,7 @@ internal static (nint, error) Readᴍ(ж<decompressor> Ꮡf, slice<byte> b) {
     }
 }
 
-internal static error Closeᴍ(ref decompressor f) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref decompressor f) {
     if (AreEqual(f.err, io.EOF)) {
         return default;
     }
@@ -398,7 +398,7 @@ internal static error Closeᴍ(ref decompressor f) {
 internal static ref readonly @string unexpectedLengthCodeˢᴍdecompressor => ref unexpectedLengthCodeˢᵇᴍdecompressor;
 private static readonly @string unexpectedLengthCodeˢᵇᴍdecompressor = "unexpected length code"u8;
 
-internal static error readHuffmanᴍ(ж<decompressor> Ꮡf) {
+[GoMethodBody("readHuffman")] internal static error readHuffmanᴍ(ж<decompressor> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     // HLIT[5], HDIST[5], HCLEN[4].
@@ -518,7 +518,7 @@ internal static error readHuffmanᴍ(ж<decompressor> Ꮡf) {
 // hl and hd are the Huffman states for the lit/length values
 // and the distance values, respectively. If hd == nil, using the
 // fixed distance encoding associated with fixed Huffman blocks.
-internal static void huffmanBlockᴍ(ref decompressor f) {
+[GoMethodBody("huffmanBlock")] internal static void huffmanBlockᴍ(ref decompressor f) {
     const nint stateInit = iota; // Zero value must be stateInit
     const nint stateDict = 1;
 
@@ -684,7 +684,7 @@ copyHistory:
 }
 
 // Copy a single uncompressed data block from input to output.
-internal static void dataBlockᴍ(ref decompressor f) {
+[GoMethodBody("dataBlock")] internal static void dataBlockᴍ(ref decompressor f) {
     // Uncompressed.
     // Discard current half-byte.
     f.nb = 0;
@@ -716,7 +716,7 @@ internal static void dataBlockᴍ(ref decompressor f) {
 
 // copyData copies f.copyLen bytes from the underlying reader into f.hist.
 // It pauses for reads when f.hist is full.
-internal static void copyDataᴍ(ref decompressor f) {
+[GoMethodBody("copyData")] internal static void copyDataᴍ(ref decompressor f) {
     var buf = f.dict.writeSlice();
     if (len(buf) > f.copyLen) {
         buf = buf.slice(0, f.copyLen);
@@ -739,7 +739,7 @@ internal static void copyDataᴍ(ref decompressor f) {
     f.finishBlock();
 }
 
-internal static void finishBlockᴍ(ref decompressor f) {
+[GoMethodBody("finishBlock")] internal static void finishBlockᴍ(ref decompressor f) {
     if (f.final) {
         if (f.dict.availRead() > 0) {
             f.toRead = f.dict.readFlush();
@@ -761,7 +761,7 @@ internal static error noEOF(error e) {
 
 } partial class flate_package {
 
-internal static error moreBitsᴍ(ref decompressor f) {
+[GoMethodBody("moreBits")] internal static error moreBitsᴍ(ref decompressor f) {
     var (c, err) = f.r.ReadByte();
     if (err != nil) {
         return noEOF(err);
@@ -773,7 +773,7 @@ internal static error moreBitsᴍ(ref decompressor f) {
 }
 
 // Read the next Huffman-encoded symbol from f according to h.
-internal static (nint, error) huffSymᴍ(ref decompressor f, ж<huffmanDecoder> Ꮡh) {
+[GoMethodBody("huffSym")] internal static (nint, error) huffSymᴍ(ref decompressor f, ж<huffmanDecoder> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     // Since a huffmanDecoder can be empty or be composed of a degenerate tree
@@ -818,7 +818,7 @@ internal static (nint, error) huffSymᴍ(ref decompressor f, ж<huffmanDecoder> 
     }
 }
 
-internal static void makeReaderᴍ(ref decompressor f, io.Reader r) {
+[GoMethodBody("makeReader")] internal static void makeReaderᴍ(ref decompressor f, io.Reader r) {
     var (rr, ok) = r._<Reader>(ᐧ); if (ok) {
         f.rBuf = default;
         f.r = rr;
@@ -858,7 +858,7 @@ internal static void fixedHuffmanDecoderInit() {
 
 } partial class flate_package {
 
-internal static error Resetᴍ(ref decompressor f, io.Reader r, slice<byte> dict) {
+[GoMethodBody("Reset")] internal static error Resetᴍ(ref decompressor f, io.Reader r, slice<byte> dict) {
     f.AssignFrom(new decompressor(
         rBuf: f.rBuf,
         bits: f.bits,
@@ -913,35 +913,3 @@ public static io.ReadCloser NewReaderDict(io.Reader r, slice<byte> dict) {
 }
 
 } // end flate_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class flateᴛCorruptInputError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this CorruptInputError e) => flate_package.Errorᴍ(e);
-}
-partial class flateᴛInternalError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this InternalError e) => flate_package.Errorᴍ(e);
-}
-partial class flateᴛReadError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref ReadError e) => flate_package.Errorᴍ(ref e);
-}
-partial class flateᴛWriteError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref WriteError e) => flate_package.Errorᴍ(ref e);
-}
-partial class flateᴛhuffmanDecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool init(this ref huffmanDecoder h, slice<nint> lengths) => flate_package.initᴍ(ref h, lengths);
-}
-partial class flateᴛdecompressor {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void nextBlock(this ж<decompressor> Ꮡf) => flate_package.nextBlockᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ж<decompressor> Ꮡf, slice<byte> b) => flate_package.Readᴍ(Ꮡf, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref decompressor f) => flate_package.Closeᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readHuffman(this ж<decompressor> Ꮡf) => flate_package.readHuffmanᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void huffmanBlock(this ref decompressor f) => flate_package.huffmanBlockᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void dataBlock(this ref decompressor f) => flate_package.dataBlockᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void copyData(this ref decompressor f) => flate_package.copyDataᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void finishBlock(this ref decompressor f) => flate_package.finishBlockᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error moreBits(this ref decompressor f) => flate_package.moreBitsᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) huffSym(this ref decompressor f, ж<huffmanDecoder> Ꮡh) => flate_package.huffSymᴍ(ref f, Ꮡh);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void makeReader(this ref decompressor f, io.Reader r) => flate_package.makeReaderᴍ(ref f, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Reset(this ref decompressor f, io.Reader r, slice<byte> dict) => flate_package.Resetᴍ(ref f, r, dict);
-}
-// </GlyphForwarders>

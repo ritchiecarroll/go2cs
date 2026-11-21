@@ -108,11 +108,11 @@ partial struct queueOnePass {
 
 } partial class regexp_package {
 
-internal static bool emptyᴍ(ref queueOnePass q) {
+[GoMethodBody("empty")] internal static bool emptyᴍ(ref queueOnePass q) {
     return q.nextIndex >= q.size;
 }
 
-internal static uint32 /*n*/ nextᴍ(ref queueOnePass q) {
+[GoMethodBody("next")] internal static uint32 /*n*/ nextᴍ(ref queueOnePass q) {
     uint32 n = default;
 
     n = q.dense[q.nextIndex];
@@ -120,25 +120,25 @@ internal static uint32 /*n*/ nextᴍ(ref queueOnePass q) {
     return n;
 }
 
-internal static void clearᴍ(ref queueOnePass q) {
+[GoMethodBody("clear")] internal static void clearᴍ(ref queueOnePass q) {
     q.size = 0;
     q.nextIndex = 0;
 }
 
-internal static bool containsᴍ(ref queueOnePass q, uint32 u) {
+[GoMethodBody("contains")] internal static bool containsᴍ(ref queueOnePass q, uint32 u) {
     if (u >= (uint32)len(q.sparse)) {
         return false;
     }
     return q.sparse[u] < q.size && q.dense[q.sparse[u]] == u;
 }
 
-internal static void insertᴍ(ref queueOnePass q, uint32 u) {
+[GoMethodBody("insert")] internal static void insertᴍ(ref queueOnePass q, uint32 u) {
     if (!q.contains(u)) {
         q.insertNew(u);
     }
 }
 
-internal static void insertNewᴍ(ref queueOnePass q, uint32 u) {
+[GoMethodBody("insertNew")] internal static void insertNewᴍ(ref queueOnePass q, uint32 u) {
     if (u >= (uint32)len(q.sparse)) {
         return;
     }
@@ -566,14 +566,3 @@ internal static ж<onePassProg> /*p*/ compileOnePass(ref syntax.Prog prog) {
 }
 
 } // end regexp_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class regexpᴛqueueOnePass {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ref queueOnePass q) => regexp_package.emptyᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 /*n*/ next(this ref queueOnePass q) => regexp_package.nextᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clear(this ref queueOnePass q) => regexp_package.clearᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool contains(this ref queueOnePass q, uint32 u) => regexp_package.containsᴍ(ref q, u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void insert(this ref queueOnePass q, uint32 u) => regexp_package.insertᴍ(ref q, u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void insertNew(this ref queueOnePass q, uint32 u) => regexp_package.insertNewᴍ(ref q, u);
-}
-// </GlyphForwarders>

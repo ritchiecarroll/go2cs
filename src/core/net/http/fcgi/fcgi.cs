@@ -75,7 +75,7 @@ partial struct beginRequest {
 internal static ref readonly @string fcgiInvalidBeginRequestˢᴍbeginRequest => ref fcgiInvalidBeginRequestˢᵇᴍbeginRequest;
 private static readonly @string fcgiInvalidBeginRequestˢᵇᴍbeginRequest = "fcgi: invalid begin request record"u8;
 
-internal static error readᴍ(ref beginRequest br, slice<byte> content) {
+[GoMethodBody("read")] internal static error readᴍ(ref beginRequest br, slice<byte> content) {
     if (len(content) != 8) {
         return errors.New(fcgiInvalidBeginRequestˢᴍbeginRequest);
     }
@@ -92,7 +92,7 @@ internal static array<byte> pad = new(255);
 
 } partial class fcgi_package {
 
-internal static void initᴍ(ref header h, recType recType, uint16 reqId, nint contentLength) {
+[GoMethodBody("init")] internal static void initᴍ(ref header h, recType recType, uint16 reqId, nint contentLength) {
     h.Version = 1;
     h.Type = recType;
     h.Id = reqId;
@@ -120,7 +120,7 @@ internal static ж<conn> newConn(io.ReadWriteCloser rwc) {
 } partial class fcgi_package {
 
 // Close closes the conn if it is not already closed.
-internal static error Closeᴍ(ж<conn> Ꮡc) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -151,7 +151,7 @@ partial struct record {
 internal static ref readonly @string fcgiInvalidHeaderVersionˢᴍrecord => ref fcgiInvalidHeaderVersionˢᵇᴍrecord;
 private static readonly @string fcgiInvalidHeaderVersionˢᵇᴍrecord = "fcgi: invalid header version"u8;
 
-internal static error /*err*/ readᴍ(ж<record> Ꮡrec, io.Reader r) {
+[GoMethodBody("read")] internal static error /*err*/ readᴍ(ж<record> Ꮡrec, io.Reader r) {
     error err = default;
     ref var rec = ref Ꮡrec.DerefOrNull();
 
@@ -168,14 +168,14 @@ internal static error /*err*/ readᴍ(ж<record> Ꮡrec, io.Reader r) {
     return default;
 }
 
-internal static slice<byte> contentᴍ(ref record r) {
+[GoMethodBody("content")] internal static slice<byte> contentᴍ(ref record r) {
     return r.buf.slice(0, r.h.ContentLength);
 }
 
 } partial class fcgi_package {
 
 // writeRecord writes and sends a single record.
-internal static error writeRecordᴍ(ж<conn> Ꮡc, recType recType, uint16 reqId, slice<byte> b) {
+[GoMethodBody("writeRecord")] internal static error writeRecordᴍ(ж<conn> Ꮡc, recType recType, uint16 reqId, slice<byte> b) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -201,14 +201,14 @@ internal static error writeRecordᴍ(ж<conn> Ꮡc, recType recType, uint16 reqI
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
 
-internal static error writeEndRequestᴍ(ж<conn> Ꮡc, uint16 reqId, nint appStatus, uint8 protocolStatus) {
+[GoMethodBody("writeEndRequest")] internal static error writeEndRequestᴍ(ж<conn> Ꮡc, uint16 reqId, nint appStatus, uint8 protocolStatus) {
     var b = new slice<byte>(8);
     binary.BigEndian.PutUint32(b, (uint32)appStatus);
     b[4] = protocolStatus;
     return Ꮡc.writeRecord(typeEndRequest, reqId, b);
 }
 
-internal static error writePairsᴍ(ж<conn> Ꮡc, recType recType, uint16 reqId, map<@string, @string> pairs) {
+[GoMethodBody("writePairs")] internal static error writePairsᴍ(ж<conn> Ꮡc, recType recType, uint16 reqId, map<@string, @string> pairs) {
     var w = newWriter(Ꮡc, recType, reqId);
     var b = new slice<byte>(8);
     foreach (var (k, v) in pairs) {
@@ -279,7 +279,7 @@ partial struct bufWriter {
 
 } partial class fcgi_package {
 
-internal static error Closeᴍ(ref bufWriter w) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref bufWriter w) {
     var err = w.Writer.Flush(); if (err != nil) {
         w.closer.Close();
         return err;
@@ -305,7 +305,7 @@ partial struct streamWriter {
 
 } partial class fcgi_package {
 
-internal static (nint, error) Writeᴍ(ref streamWriter w, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ref streamWriter w, slice<byte> p) {
     nint nn = 0;
     while (len(p) > 0) {
         nint n = len(p);
@@ -321,35 +321,9 @@ internal static (nint, error) Writeᴍ(ref streamWriter w, slice<byte> p) {
     return (nn, default);
 }
 
-internal static error Closeᴍ(ref streamWriter w) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref streamWriter w) {
     // send empty record to close the stream
     return w.c.writeRecord(w.recType, w.reqId, default);
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class fcgiᴛbeginRequest {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error read(this ref beginRequest br, slice<byte> content) => fcgi_package.readᴍ(ref br, content);
-}
-partial class fcgiᴛheader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref header h, recType recType, uint16 reqId, nint contentLength) => fcgi_package.initᴍ(ref h, recType, reqId, contentLength);
-}
-partial class fcgiᴛconn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<conn> Ꮡc) => fcgi_package.Closeᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeRecord(this ж<conn> Ꮡc, recType recType, uint16 reqId, slice<byte> b) => fcgi_package.writeRecordᴍ(Ꮡc, recType, reqId, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeEndRequest(this ж<conn> Ꮡc, uint16 reqId, nint appStatus, uint8 protocolStatus) => fcgi_package.writeEndRequestᴍ(Ꮡc, reqId, appStatus, protocolStatus);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writePairs(this ж<conn> Ꮡc, recType recType, uint16 reqId, map<@string, @string> pairs) => fcgi_package.writePairsᴍ(Ꮡc, recType, reqId, pairs);
-}
-partial class fcgiᴛrecord {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ read(this ж<record> Ꮡrec, io.Reader r) => fcgi_package.readᴍ(Ꮡrec, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> content(this ref record r) => fcgi_package.contentᴍ(ref r);
-}
-partial class fcgiᴛbufWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref bufWriter w) => fcgi_package.Closeᴍ(ref w);
-}
-partial class fcgiᴛstreamWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this ref streamWriter w, slice<byte> p) => fcgi_package.Writeᴍ(ref w, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref streamWriter w) => fcgi_package.Closeᴍ(ref w);
-}
-// </GlyphForwarders>

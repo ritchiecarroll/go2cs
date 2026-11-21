@@ -19,7 +19,7 @@ partial class atomic_package {
 // WARNING: Use sparingly and with great care.
 //
 //go:nosplit
-internal static uint64 LoadAcquireᴍ(ж<Uint64> Ꮡu) {
+[GoMethodBody("LoadAcquire")] internal static uint64 LoadAcquireᴍ(ж<Uint64> Ꮡu) {
     return LoadAcq64(Ꮡu.Ꮡvalue);
 }
 
@@ -32,15 +32,8 @@ internal static uint64 LoadAcquireᴍ(ж<Uint64> Ꮡu) {
 // WARNING: Use sparingly and with great care.
 //
 //go:nosplit
-internal static void StoreReleaseᴍ(ж<Uint64> Ꮡu, uint64 value) {
+[GoMethodBody("StoreRelease")] internal static void StoreReleaseᴍ(ж<Uint64> Ꮡu, uint64 value) {
     StoreRel64(Ꮡu.Ꮡvalue, value);
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class atomicᴛUint64 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 LoadAcquire(this ж<Uint64> Ꮡu) => atomic_package.LoadAcquireᴍ(Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StoreRelease(this ж<Uint64> Ꮡu, uint64 value) => atomic_package.StoreReleaseᴍ(Ꮡu, value);
-}
-// </GlyphForwarders>

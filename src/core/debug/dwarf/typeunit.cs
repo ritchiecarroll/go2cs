@@ -31,7 +31,7 @@ internal static ref readonly @string typeUnitTypeOffsetˢᴍData => ref typeUnit
 private static readonly @string typeUnitTypeOffsetˢᵇᴍData = "type unit type offset overflow"u8;
 
 // Parse a .debug_types section.
-internal static error parseTypesᴍ(ж<Data> Ꮡd, @string name, slice<byte> types) {
+[GoMethodBody("parseTypes")] internal static error parseTypesᴍ(ж<Data> Ꮡd, @string name, slice<byte> types) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var b = makeBuf(Ꮡd, new unknownFormat(), name, 0, types);
@@ -95,7 +95,7 @@ internal static error parseTypesᴍ(ж<Data> Ꮡd, @string name, slice<byte> typ
 }
 
 // Return the type for a type signature.
-internal static (Type, error) sigToTypeᴍ(ж<Data> Ꮡd, uint64 sig) {
+[GoMethodBody("sigToType")] internal static (Type, error) sigToTypeᴍ(ж<Data> Ꮡd, uint64 sig) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var tu = d.typeSigs[sig];
@@ -130,7 +130,7 @@ partial struct typeUnitReader {
 } partial class dwarf_package {
 
 // Seek to a new position in the type unit.
-internal static void Seekᴍ(ref typeUnitReader tur, Offset off) {
+[GoMethodBody("Seek")] internal static void Seekᴍ(ref typeUnitReader tur, Offset off) {
     tur.err = default;
     var doff = off - tur.tu.off;
     if (doff < 0 || doff >= ((Offset)(uint32)len(tur.tu.data))) {
@@ -141,12 +141,12 @@ internal static void Seekᴍ(ref typeUnitReader tur, Offset off) {
 }
 
 // AddressSize returns the size in bytes of addresses in the current type unit.
-internal static nint AddressSizeᴍ(ref typeUnitReader tur) {
+[GoMethodBody("AddressSize")] internal static nint AddressSizeᴍ(ref typeUnitReader tur) {
     return tur.tu.unit.asize;
 }
 
 // Next reads the next [Entry] from the type unit.
-internal static (ж<Entry>, error) Nextᴍ(ж<typeUnitReader> Ꮡtur) {
+[GoMethodBody("Next")] internal static (ж<Entry>, error) Nextᴍ(ж<typeUnitReader> Ꮡtur) {
     ref var tur = ref Ꮡtur.DerefOrNull();
 
     if (tur.err != nil) {
@@ -164,7 +164,7 @@ internal static (ж<Entry>, error) Nextᴍ(ж<typeUnitReader> Ꮡtur) {
 }
 
 // clone returns a new reader for the type unit.
-internal static typeReader cloneᴍ(ref typeUnitReader tur) {
+[GoMethodBody("clone")] internal static typeReader cloneᴍ(ref typeUnitReader tur) {
     return new typeUnitReaderжtypeReader(Ꮡ(new typeUnitReader(
         d: tur.d,
         tu: tur.tu,
@@ -173,22 +173,8 @@ internal static typeReader cloneᴍ(ref typeUnitReader tur) {
 }
 
 // offset returns the current offset.
-internal static Offset offsetᴍ(ref typeUnitReader tur) {
+[GoMethodBody("offset")] internal static Offset offsetᴍ(ref typeUnitReader tur) {
     return tur.b.off;
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class dwarfᴛData {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseTypes(this ж<Data> Ꮡd, @string name, slice<byte> types) => dwarf_package.parseTypesᴍ(Ꮡd, name, types);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Type, error) sigToType(this ж<Data> Ꮡd, uint64 sig) => dwarf_package.sigToTypeᴍ(Ꮡd, sig);
-}
-partial class dwarfᴛtypeUnitReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Seek(this ref typeUnitReader tur, Offset off) => dwarf_package.Seekᴍ(ref tur, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint AddressSize(this ref typeUnitReader tur) => dwarf_package.AddressSizeᴍ(ref tur);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Entry>, error) Next(this ж<typeUnitReader> Ꮡtur) => dwarf_package.Nextᴍ(Ꮡtur);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static typeReader clone(this ref typeUnitReader tur) => dwarf_package.cloneᴍ(ref tur);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Offset offset(this ref typeUnitReader tur) => dwarf_package.offsetᴍ(ref tur);
-}
-// </GlyphForwarders>

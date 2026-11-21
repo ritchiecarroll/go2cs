@@ -31,11 +31,11 @@ partial struct PrivateKey {
 
 } partial class ecdh_package {
 
-internal static slice<byte> Bytesᴍ(ref PrivateKey priv) {
+[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref PrivateKey priv) {
     return priv.d;
 }
 
-internal static ж<PublicKey> PublicKeyᴍ(ж<PrivateKey> Ꮡpriv) {
+[GoMethodBody("PublicKey")] internal static ж<PublicKey> PublicKeyᴍ(ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.Ꮡpub;
 }
 
@@ -48,7 +48,7 @@ partial struct PublicKey {
 
 } partial class ecdh_package {
 
-internal static slice<byte> Bytesᴍ(ref PublicKey pub) {
+[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref PublicKey pub) {
     return pub.q;
 }
 
@@ -365,13 +365,3 @@ internal static bool isLess(slice<byte> a, slice<byte> b) {
 }
 
 } // end ecdh_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class ecdhᴛPrivateKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => ecdh_package.Bytesᴍ(ref priv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => ecdh_package.PublicKeyᴍ(Ꮡpriv);
-}
-partial class ecdhᴛPublicKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => ecdh_package.Bytesᴍ(ref pub);
-}
-// </GlyphForwarders>

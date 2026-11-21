@@ -196,7 +196,7 @@ internal static void appendT(ж<Hash> Ꮡh, reflect.Value v) {
 
 } partial class maphash_package {
 
-internal static void float64ᴍ(ref Hash h, float64 f) {
+[GoMethodBody("float64")] internal static void float64ᴍ(ref Hash h, float64 f) {
     if (f == 0D) {
         h.WriteByte(0);
         return;
@@ -221,9 +221,3 @@ internal static byte btoi(bool b) {
 }
 
 } // end maphash_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class maphashᴛHash {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void float64(this ref Hash h, float64 f) => maphash_package.float64ᴍ(ref h, f);
-}
-// </GlyphForwarders>

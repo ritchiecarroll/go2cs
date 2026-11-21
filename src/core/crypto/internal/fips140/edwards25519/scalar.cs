@@ -65,14 +65,14 @@ public static ж<Scalar> NewScalar() {
 
 // MultiplyAdd sets s = x * y + z mod l, and returns s. It is equivalent to
 // using Multiply and then Add.
-internal static ж<Scalar> MultiplyAddᴍ(ж<Scalar> Ꮡs, ж<Scalar> x, ж<Scalar> y, ж<Scalar> z) {
+[GoMethodBody("MultiplyAdd")] internal static ж<Scalar> MultiplyAddᴍ(ж<Scalar> Ꮡs, ж<Scalar> x, ж<Scalar> y, ж<Scalar> z) {
     // Make a copy of z in case it aliases s.
     var zCopy = @new<Scalar>().Set(z);
     return Ꮡs.Multiply(x, y).Add(Ꮡs, zCopy);
 }
 
 // Add sets s = x + y mod l, and returns s.
-internal static ж<Scalar> Addᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
+[GoMethodBody("Add")] internal static ж<Scalar> Addᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -83,7 +83,7 @@ internal static ж<Scalar> Addᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> �
 }
 
 // Subtract sets s = x - y mod l, and returns s.
-internal static ж<Scalar> Subtractᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
+[GoMethodBody("Subtract")] internal static ж<Scalar> Subtractᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -94,7 +94,7 @@ internal static ж<Scalar> Subtractᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scal
 }
 
 // Negate sets s = -x mod l, and returns s.
-internal static ж<Scalar> Negateᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) {
+[GoMethodBody("Negate")] internal static ж<Scalar> Negateᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -104,7 +104,7 @@ internal static ж<Scalar> Negateᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) {
 }
 
 // Multiply sets s = x * y mod l, and returns s.
-internal static ж<Scalar> Multiplyᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
+[GoMethodBody("Multiply")] internal static ж<Scalar> Multiplyᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -115,7 +115,7 @@ internal static ж<Scalar> Multiplyᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scal
 }
 
 // Set sets s = x, and returns s.
-internal static ж<Scalar> Setᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) {
+[GoMethodBody("Set")] internal static ж<Scalar> Setᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -133,7 +133,7 @@ private static readonly @string edwards25519InvalidˢᵇᴍScalar = "edwards2551
 //
 // SetUniformBytes can be used to set s to a uniformly distributed value given
 // 64 uniformly distributed random bytes.
-internal static (ж<Scalar>, error) SetUniformBytesᴍ(ж<Scalar> Ꮡs, slice<byte> x) {
+[GoMethodBody("SetUniformBytes")] internal static (ж<Scalar>, error) SetUniformBytesᴍ(ж<Scalar> Ꮡs, slice<byte> x) {
     if (len(x) != 64) {
         return (default, errors.New(edwards25519InvalidˢᴍScalar));
     }
@@ -174,7 +174,7 @@ internal static ж<Scalar> scalarTwo336 = Ꮡ(new Scalar(s: new uint64[]{0xbd3d1
 
 // setShortBytes sets s = x mod l, where x is a little-endian integer shorter
 // than 32 bytes.
-internal static ж<Scalar> setShortBytesᴍ(ж<Scalar> Ꮡs, slice<byte> x) {
+[GoMethodBody("setShortBytes")] internal static ж<Scalar> setShortBytesᴍ(ж<Scalar> Ꮡs, slice<byte> x) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (len(x) >= 32) {
@@ -198,7 +198,7 @@ private static readonly @string invalidScalarEncodingˢᵇᴍScalar = "invalid s
 // SetCanonicalBytes sets s = x, where x is a 32-byte little-endian encoding of
 // s, and returns s. If x is not a canonical encoding of s, SetCanonicalBytes
 // returns nil and an error, and the receiver is unchanged.
-internal static (ж<Scalar>, error) SetCanonicalBytesᴍ(ж<Scalar> Ꮡs, slice<byte> x) {
+[GoMethodBody("SetCanonicalBytes")] internal static (ж<Scalar>, error) SetCanonicalBytesᴍ(ж<Scalar> Ꮡs, slice<byte> x) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (len(x) != 32) {
@@ -264,7 +264,7 @@ private static readonly @string edwards25519Invalidˢ2ᵇᴍScalar = "edwards255
 // expected as long as it is applied to points on the prime order subgroup, like
 // in Ed25519. In fact, it is lost to history why RFC 8032 adopted the
 // irrelevant RFC 7748 clamping, but it is now required for compatibility.
-internal static (ж<Scalar>, error) SetBytesWithClampingᴍ(ж<Scalar> Ꮡs, slice<byte> x) {
+[GoMethodBody("SetBytesWithClamping")] internal static (ж<Scalar>, error) SetBytesWithClampingᴍ(ж<Scalar> Ꮡs, slice<byte> x) {
     // The description above omits the purpose of the high bits of the clamping
     // for brevity, but those are also lost to reductions, and are also
     // irrelevant to edwards25519 as they protect against a specific
@@ -284,14 +284,14 @@ internal static (ж<Scalar>, error) SetBytesWithClampingᴍ(ж<Scalar> Ꮡs, sli
 }
 
 // Bytes returns the canonical 32-byte little-endian encoding of s.
-internal static slice<byte> Bytesᴍ(ж<Scalar> Ꮡs) {
+[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ж<Scalar> Ꮡs) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var encoded = ref heap(new array<byte>(32), out var Ꮡencoded);
     return Ꮡs.bytes(Ꮡencoded);
 }
 
-internal static slice<byte> bytesᴍ(ж<Scalar> Ꮡs, /*[32]*/ ж<array<byte>> Ꮡout) {
+[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ж<Scalar> Ꮡs, /*[32]*/ ж<array<byte>> Ꮡout) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -303,7 +303,7 @@ internal static slice<byte> bytesᴍ(ж<Scalar> Ꮡs, /*[32]*/ ж<array<byte>> �
 }
 
 // Equal returns 1 if s and t are equal, and 0 otherwise.
-internal static nint Equalᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡt) {
+[GoMethodBody("Equal")] internal static nint Equalᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡt) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -324,7 +324,7 @@ internal static nint Equalᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡt) {
 // nonAdjacentForm computes a width-w non-adjacent form for this scalar.
 //
 // w must be between 2 and 8, or nonAdjacentForm will panic.
-internal static array<int8> nonAdjacentFormᴍ(ж<Scalar> Ꮡs, nuint w) {
+[GoMethodBody("nonAdjacentForm")] internal static array<int8> nonAdjacentFormᴍ(ж<Scalar> Ꮡs, nuint w) {
     // This implementation is adapted from the one
     // in curve25519-dalek and is documented there:
     // https://github.com/dalek-cryptography/curve25519-dalek/blob/f630041af28e9a405255f98a8a93adca18e4315b/src/scalar.rs#L800-L871
@@ -389,7 +389,7 @@ internal static array<int8> nonAdjacentFormᴍ(ж<Scalar> Ꮡs, nuint w) {
     return naf.Clone();
 }
 
-internal static array<int8> signedRadix16ᴍ(ж<Scalar> Ꮡs) {
+[GoMethodBody("signedRadix16")] internal static array<int8> signedRadix16ᴍ(ж<Scalar> Ꮡs) {
     var b = Ꮡs.Bytes();
     if (b[31] > 127) {
         throw panic("scalar has high bit set illegally");
@@ -414,23 +414,3 @@ internal static array<int8> signedRadix16ᴍ(ж<Scalar> Ꮡs) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class edwards25519ᴛScalar {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scalar> MultiplyAdd(this ж<Scalar> Ꮡs, ж<Scalar> x, ж<Scalar> y, ж<Scalar> z) => edwards25519_package.MultiplyAddᴍ(Ꮡs, x, y, z);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scalar> Add(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) => edwards25519_package.Addᴍ(Ꮡs, Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scalar> Subtract(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) => edwards25519_package.Subtractᴍ(Ꮡs, Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scalar> Negate(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) => edwards25519_package.Negateᴍ(Ꮡs, Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scalar> Multiply(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) => edwards25519_package.Multiplyᴍ(Ꮡs, Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scalar> Set(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) => edwards25519_package.Setᴍ(Ꮡs, Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Scalar>, error) SetUniformBytes(this ж<Scalar> Ꮡs, slice<byte> x) => edwards25519_package.SetUniformBytesᴍ(Ꮡs, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Scalar> setShortBytes(this ж<Scalar> Ꮡs, slice<byte> x) => edwards25519_package.setShortBytesᴍ(Ꮡs, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Scalar>, error) SetCanonicalBytes(this ж<Scalar> Ꮡs, slice<byte> x) => edwards25519_package.SetCanonicalBytesᴍ(Ꮡs, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Scalar>, error) SetBytesWithClamping(this ж<Scalar> Ꮡs, slice<byte> x) => edwards25519_package.SetBytesWithClampingᴍ(Ꮡs, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ж<Scalar> Ꮡs) => edwards25519_package.Bytesᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytes(this ж<Scalar> Ꮡs, /*[32]*/ ж<array<byte>> Ꮡout) => edwards25519_package.bytesᴍ(Ꮡs, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Equal(this ж<Scalar> Ꮡs, ж<Scalar> Ꮡt) => edwards25519_package.Equalᴍ(Ꮡs, Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static array<int8> nonAdjacentForm(this ж<Scalar> Ꮡs, nuint w) => edwards25519_package.nonAdjacentFormᴍ(Ꮡs, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static array<int8> signedRadix16(this ж<Scalar> Ꮡs) => edwards25519_package.signedRadix16ᴍ(Ꮡs);
-}
-// </GlyphForwarders>

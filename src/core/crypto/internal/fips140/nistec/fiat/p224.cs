@@ -27,7 +27,7 @@ internal static UntypedInt p224ElementLen => 28;
 } partial class fiat_package {
 
 // One sets e = 1, and returns e.
-internal static ж<P224Element> Oneᴍ(ж<P224Element> Ꮡe) {
+[GoMethodBody("One")] internal static ж<P224Element> Oneᴍ(ж<P224Element> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     p224SetOne(ref nonnil(ref e).x);
@@ -35,21 +35,21 @@ internal static ж<P224Element> Oneᴍ(ж<P224Element> Ꮡe) {
 }
 
 // Equal returns 1 if e == t, and zero otherwise.
-internal static nint Equalᴍ(ж<P224Element> Ꮡe, ж<P224Element> t) {
+[GoMethodBody("Equal")] internal static nint Equalᴍ(ж<P224Element> Ꮡe, ж<P224Element> t) {
     var eBytes = Ꮡe.Bytes();
     var tBytes = t.Bytes();
     return subtle.ConstantTimeCompare(eBytes, tBytes);
 }
 
 // IsZero returns 1 if e == 0, and zero otherwise.
-internal static nint IsZeroᴍ(ж<P224Element> Ꮡe) {
+[GoMethodBody("IsZero")] internal static nint IsZeroᴍ(ж<P224Element> Ꮡe) {
     var zero = new slice<byte>(p224ElementLen);
     var eBytes = Ꮡe.Bytes();
     return subtle.ConstantTimeCompare(eBytes, zero);
 }
 
 // Set sets e = t, and returns e.
-internal static ж<P224Element> Setᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt) {
+[GoMethodBody("Set")] internal static ж<P224Element> Setᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -58,14 +58,14 @@ internal static ж<P224Element> Setᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡ
 }
 
 // Bytes returns the 28-byte big-endian encoding of e.
-internal static slice<byte> Bytesᴍ(ж<P224Element> Ꮡe) {
+[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ж<P224Element> Ꮡe) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(28), out var Ꮡout);
     return Ꮡe.bytes(Ꮡout);
 }
 
-internal static slice<byte> bytesᴍ(ж<P224Element> Ꮡe, /*[28]*/ ж<array<byte>> Ꮡout) {
+[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ж<P224Element> Ꮡe, /*[28]*/ ж<array<byte>> Ꮡout) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -84,7 +84,7 @@ private static readonly @string invalidP224ElementˢᵇᴍP224Element = "invalid
 // SetBytes sets e = v, where v is a big-endian 28-byte encoding, and returns e.
 // If v is not 28 bytes or it encodes a value higher than 2^224 - 2^96 + 1,
 // SetBytes returns nil and an error, and e is unchanged.
-internal static (ж<P224Element>, error) SetBytesᴍ(ж<P224Element> Ꮡe, slice<byte> v) {
+[GoMethodBody("SetBytes")] internal static (ж<P224Element>, error) SetBytesᴍ(ж<P224Element> Ꮡe, slice<byte> v) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (len(v) != p224ElementLen) {
@@ -110,7 +110,7 @@ internal static (ж<P224Element>, error) SetBytesᴍ(ж<P224Element> Ꮡe, slice
 }
 
 // Add sets e = t1 + t2, and returns e.
-internal static ж<P224Element> Addᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
+[GoMethodBody("Add")] internal static ж<P224Element> Addᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -120,7 +120,7 @@ internal static ж<P224Element> Addᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡ
 }
 
 // Sub sets e = t1 - t2, and returns e.
-internal static ж<P224Element> Subᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
+[GoMethodBody("Sub")] internal static ж<P224Element> Subᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -130,7 +130,7 @@ internal static ж<P224Element> Subᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡ
 }
 
 // Mul sets e = t1 * t2, and returns e.
-internal static ж<P224Element> Mulᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
+[GoMethodBody("Mul")] internal static ж<P224Element> Mulᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -140,7 +140,7 @@ internal static ж<P224Element> Mulᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡ
 }
 
 // Square sets e = t * t, and returns e.
-internal static ж<P224Element> Squareᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt) {
+[GoMethodBody("Square")] internal static ж<P224Element> Squareᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -149,7 +149,7 @@ internal static ж<P224Element> Squareᴍ(ж<P224Element> Ꮡe, ж<P224Element> 
 }
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
-internal static ж<P224Element> Selectᴍ(ж<P224Element> Ꮡv, ж<P224Element> Ꮡa, ж<P224Element> Ꮡb, nint cond) {
+[GoMethodBody("Select")] internal static ж<P224Element> Selectᴍ(ж<P224Element> Ꮡv, ж<P224Element> Ꮡa, ж<P224Element> Ꮡb, nint cond) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -173,20 +173,3 @@ internal static void p224InvertEndianness(slice<byte> v) {
 }
 
 } // end fiat_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class fiatᴛP224Element {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P224Element> One(this ж<P224Element> Ꮡe) => fiat_package.Oneᴍ(Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Equal(this ж<P224Element> Ꮡe, ж<P224Element> t) => fiat_package.Equalᴍ(Ꮡe, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint IsZero(this ж<P224Element> Ꮡe) => fiat_package.IsZeroᴍ(Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P224Element> Set(this ж<P224Element> Ꮡe, ж<P224Element> Ꮡt) => fiat_package.Setᴍ(Ꮡe, Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ж<P224Element> Ꮡe) => fiat_package.Bytesᴍ(Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytes(this ж<P224Element> Ꮡe, /*[28]*/ ж<array<byte>> Ꮡout) => fiat_package.bytesᴍ(Ꮡe, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<P224Element>, error) SetBytes(this ж<P224Element> Ꮡe, slice<byte> v) => fiat_package.SetBytesᴍ(Ꮡe, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P224Element> Add(this ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) => fiat_package.Addᴍ(Ꮡe, Ꮡt1, Ꮡt2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P224Element> Sub(this ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) => fiat_package.Subᴍ(Ꮡe, Ꮡt1, Ꮡt2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P224Element> Mul(this ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) => fiat_package.Mulᴍ(Ꮡe, Ꮡt1, Ꮡt2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P224Element> Square(this ж<P224Element> Ꮡe, ж<P224Element> Ꮡt) => fiat_package.Squareᴍ(Ꮡe, Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P224Element> Select(this ж<P224Element> Ꮡv, ж<P224Element> Ꮡa, ж<P224Element> Ꮡb, nint cond) => fiat_package.Selectᴍ(Ꮡv, Ꮡa, Ꮡb, cond);
-}
-// </GlyphForwarders>

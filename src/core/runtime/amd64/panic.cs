@@ -857,8 +857,8 @@ partial struct PanicNilError {
 internal static ref readonly @string panicCalledWithNilˢᴍPanicNilError => ref panicCalledWithNilˢᵇᴍPanicNilError;
 private static readonly @string panicCalledWithNilˢᵇᴍPanicNilError = "panic called with nil argument"u8;
 
-internal static @string Errorᴍ(ref PanicNilError _) { return panicCalledWithNilˢᴍPanicNilError; }
-internal static void RuntimeErrorᴍ(ref PanicNilError _) { }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref PanicNilError _) { return panicCalledWithNilˢᴍPanicNilError; }
+[GoMethodBody("RuntimeError")] internal static void RuntimeErrorᴍ(ref PanicNilError _) { }
 
 } partial class runtime_package {
 
@@ -963,7 +963,7 @@ internal static void gopanic(any e) {
 // start initializes a panic to start unwinding the stack.
 //
 // If p.goexit is true, then start may return multiple times.
-internal static void startᴍ(ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp) {
+[GoMethodBody("start")] internal static void startᴍ(ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var gp = getg();
@@ -1016,7 +1016,7 @@ private static readonly @string recoveryFailedˢᵇᴍ_panic = "recovery failed"
 //
 // Note: The "ok bool" result is necessary to correctly handle when
 // the deferred function itself was nil (e.g., "defer (func())(nil)").
-internal static (Action, bool) nextDeferᴍ(ж<_panic> Ꮡp) {
+[GoMethodBody("nextDefer")] internal static (Action, bool) nextDeferᴍ(ж<_panic> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var gp = getg();
@@ -1084,7 +1084,7 @@ Recheck:
 }
 
 // nextFrame finds the next frame that contains deferred calls, if any.
-internal static bool /*ok*/ nextFrameᴍ(ж<_panic> Ꮡp) {
+[GoMethodBody("nextFrame")] internal static bool /*ok*/ nextFrameᴍ(ж<_panic> Ꮡp) {
     bool ok = default;
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -1138,7 +1138,7 @@ internal static bool /*ok*/ nextFrameᴍ(ж<_panic> Ꮡp) {
 internal static ref readonly @string missingDeferreturnˢᴍ_panic => ref missingDeferreturnˢᵇᴍ_panic;
 private static readonly @string missingDeferreturnˢᵇᴍ_panic = "missing deferreturn"u8;
 
-internal static bool initOpenCodedDefersᴍ(ref _panic p, funcInfo fn, @unsafe.Pointer varp) {
+[GoMethodBody("initOpenCodedDefers")] internal static bool initOpenCodedDefersᴍ(ref _panic p, funcInfo fn, @unsafe.Pointer varp) {
     @unsafe.Pointer fd = funcdata(fn, abi.FUNCDATA_OpenCodedDeferInfo);
     if (fd == nil) {
         return false;
@@ -1783,16 +1783,3 @@ internal static bool isAbortPC(uintptr pc) {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛPanicNilError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref PanicNilError _) => runtime_package.Errorᴍ(ref _);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RuntimeError(this ref PanicNilError _) => runtime_package.RuntimeErrorᴍ(ref _);
-}
-partial class runtimeᴛ_panic {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void start(this ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp) => runtime_package.startᴍ(Ꮡp, pc, sp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Action, bool) nextDefer(this ж<_panic> Ꮡp) => runtime_package.nextDeferᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*ok*/ nextFrame(this ж<_panic> Ꮡp) => runtime_package.nextFrameᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool initOpenCodedDefers(this ref _panic p, funcInfo fn, @unsafe.Pointer varp) => runtime_package.initOpenCodedDefersᴍ(ref p, fn, varp);
-}
-// </GlyphForwarders>

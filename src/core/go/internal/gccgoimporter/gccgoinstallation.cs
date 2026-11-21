@@ -39,7 +39,7 @@ private static readonly @string targetˢᵇᴍGccgoInstallation = "Target: "u8;
 
 // Ask the driver at the given path for information for this GccgoInstallation.
 // The given arguments are passed directly to the call of the driver.
-internal static error /*err*/ InitFromDriverᴍ(ref GccgoInstallation inst, @string gccgoPath, params ꓸꓸꓸstring argsʗp) {
+[GoMethodBody("InitFromDriver")] internal static error /*err*/ InitFromDriverᴍ(ref GccgoInstallation inst, @string gccgoPath, params ꓸꓸꓸstring argsʗp) {
     error err = default;
     var args = argsʗp.sslice();
 
@@ -85,7 +85,7 @@ internal static error /*err*/ InitFromDriverᴍ(ref GccgoInstallation inst, @str
 }
 
 // Return the list of export search paths for this GccgoInstallation.
-internal static slice<@string> /*paths*/ SearchPathsᴍ(ref GccgoInstallation inst) {
+[GoMethodBody("SearchPaths")] internal static slice<@string> /*paths*/ SearchPathsᴍ(ref GccgoInstallation inst) {
     slice<@string> paths = default;
 
     foreach (var (_, lpath) in range(inst.LibPaths)) {
@@ -111,16 +111,8 @@ internal static slice<@string> /*paths*/ SearchPathsᴍ(ref GccgoInstallation in
 
 // Return an importer that searches incpaths followed by the gcc installation's
 // built-in search paths and the current directory.
-internal static Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> GetImporterᴍ(ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) {
+[GoMethodBody("GetImporter")] internal static Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> GetImporterᴍ(ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) {
     return gccgoimporter.GetImporter(append(appendꓸꓸꓸ(incpaths, inst.SearchPaths()), (@string)"."), initmap);
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class gccgoimporterᴛGccgoInstallation {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error /*err*/ InitFromDriver(this ref GccgoInstallation inst, @string gccgoPath, params ꓸꓸꓸstring argsʗp) => gccgoimporter_package.InitFromDriverᴍ(ref inst, gccgoPath, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> /*paths*/ SearchPaths(this ref GccgoInstallation inst) => gccgoimporter_package.SearchPathsᴍ(ref inst);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@string, (io.ReadCloser, error)>, (ж<types.Package>, error)> GetImporter(this ref GccgoInstallation inst, slice<@string> incpaths, map<ж<types.Package>, InitData> initmap) => gccgoimporter_package.GetImporterᴍ(ref inst, incpaths, initmap);
-}
-// </GlyphForwarders>

@@ -11,7 +11,7 @@ partial class jpeg_package {
 } partial class jpeg_package {
 
 // makeImg allocates and initializes the destination image.
-internal static void makeImgᴍ(ref decoder d, nint mxx, nint myy) {
+[GoMethodBody("makeImg")] internal static void makeImgᴍ(ref decoder d, nint mxx, nint myy) {
     if (d.nComp == 1) {
         var mΔ1 = image.NewGray(image.Rect(0, 0, 8 * mxx, 8 * myy));
         d.img1 = mΔ1.SubImage(image.Rect(0, 0, d.width, d.height))._<ж<image.Gray>>();
@@ -100,7 +100,7 @@ internal static ref readonly @string excessiveDcComponentˢᴍdecoder => ref exc
 private static readonly @string excessiveDcComponentˢᵇᴍdecoder = "excessive DC component"u8;
 
 // Specified in section B.2.3.
-internal static error processSOSᴍ(ref decoder d, nint n) {
+[GoMethodBody("processSOS")] internal static error processSOSᴍ(ref decoder d, nint n) {
     if (d.nComp == 0) {
         return ((FormatError)(@string)missingSofMarkerˢᴍdecoder);
     }
@@ -397,7 +397,7 @@ private static readonly @string tooManyCoefficientsˢᵇᴍdecoder = "too many c
 
 // refine decodes a successive approximation refinement block, as specified in
 // section G.1.2.
-internal static error refineᴍ(ref decoder d, ж<block> Ꮡb, ж<huffman> h, int32 zigStart, int32 zigEnd, int32 delta) {
+[GoMethodBody("refine")] internal static error refineᴍ(ref decoder d, ж<block> Ꮡb, ж<huffman> h, int32 zigStart, int32 zigEnd, int32 delta) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Refining a DC component is trivial.
@@ -483,7 +483,7 @@ break_loop:;
 
 // refineNonZeroes refines non-zero entries of b in zig-zag order. If nz >= 0,
 // the first nz zero entries are skipped over.
-internal static (int32, error) refineNonZeroesᴍ(ref decoder d, ж<block> Ꮡb, int32 zig, int32 zigEnd, int32 nz, int32 delta) {
+[GoMethodBody("refineNonZeroes")] internal static (int32, error) refineNonZeroesᴍ(ref decoder d, ж<block> Ꮡb, int32 zig, int32 zigEnd, int32 nz, int32 delta) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (; zig <= zigEnd; zig++) {
@@ -511,7 +511,7 @@ internal static (int32, error) refineNonZeroesᴍ(ref decoder d, ж<block> Ꮡb,
     return (zig, default);
 }
 
-internal static error reconstructProgressiveImageᴍ(ref decoder d) {
+[GoMethodBody("reconstructProgressiveImage")] internal static error reconstructProgressiveImageᴍ(ref decoder d) {
     // The h0, mxx, by and bx variables have the same meaning as in the
     // processSOS method.
     nint h0 = d.comp[0].h;
@@ -540,7 +540,7 @@ private static readonly @string tooManyComponentsˢᵇᴍdecoder = "too many com
 
 // reconstructBlock dequantizes, performs the inverse DCT and stores the block
 // to the image.
-internal static error reconstructBlockᴍ(ref decoder d, ж<block> Ꮡb, nint bx, nint by, nint compIndex) {
+[GoMethodBody("reconstructBlock")] internal static error reconstructBlockᴍ(ref decoder d, ж<block> Ꮡb, nint bx, nint by, nint compIndex) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var qt = Ꮡ(d.quant, d.comp[compIndex].tq);
@@ -606,7 +606,7 @@ private static readonly @string badRstMarkerˢᵇᴍdecoder = "bad RST marker"u8
 //
 // Precondition: d.tmp[:2] holds the next two bytes of JPEG-encoded input
 // (input in the d.readFull sense).
-internal static error findRSTᴍ(ref decoder d, uint8 expectedRST) {
+[GoMethodBody("findRST")] internal static error findRSTᴍ(ref decoder d, uint8 expectedRST) {
     for (;;) {
         // i is the index such that, at the bottom of the loop, we read 2-i
         // bytes into d.tmp[i:2], maintaining the invariant that d.tmp[:2]
@@ -641,15 +641,3 @@ internal static error findRSTᴍ(ref decoder d, uint8 expectedRST) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class jpegᴛdecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void makeImg(this ref decoder d, nint mxx, nint myy) => jpeg_package.makeImgᴍ(ref d, mxx, myy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processSOS(this ref decoder d, nint n) => jpeg_package.processSOSᴍ(ref d, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error refine(this ref decoder d, ж<block> Ꮡb, ж<huffman> h, int32 zigStart, int32 zigEnd, int32 delta) => jpeg_package.refineᴍ(ref d, Ꮡb, h, zigStart, zigEnd, delta);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int32, error) refineNonZeroes(this ref decoder d, ж<block> Ꮡb, int32 zig, int32 zigEnd, int32 nz, int32 delta) => jpeg_package.refineNonZeroesᴍ(ref d, Ꮡb, zig, zigEnd, nz, delta);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error reconstructProgressiveImage(this ref decoder d) => jpeg_package.reconstructProgressiveImageᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error reconstructBlock(this ref decoder d, ж<block> Ꮡb, nint bx, nint by, nint compIndex) => jpeg_package.reconstructBlockᴍ(ref d, Ꮡb, bx, by, compIndex);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error findRST(this ref decoder d, uint8 expectedRST) => jpeg_package.findRSTᴍ(ref d, expectedRST);
-}
-// </GlyphForwarders>

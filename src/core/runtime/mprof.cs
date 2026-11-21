@@ -153,7 +153,7 @@ partial struct memRecordCycle {
 } partial class runtime_package {
 
 // add accumulates b into a. It does not zero b.
-internal static void addᴍ(ref memRecordCycle a, ж<memRecordCycle> Ꮡb) {
+[GoMethodBody("add")] internal static void addᴍ(ref memRecordCycle a, ж<memRecordCycle> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     a.allocs += b.allocs;
@@ -199,7 +199,7 @@ partial struct mProfCycleHolder {
 } partial class runtime_package {
 
 // read returns the current cycle count.
-internal static uint32 /*cycle*/ readᴍ(ж<mProfCycleHolder> Ꮡc) {
+[GoMethodBody("read")] internal static uint32 /*cycle*/ readᴍ(ж<mProfCycleHolder> Ꮡc) {
     uint32 cycle = default;
 
     var v = Ꮡc.Ꮡvalue.Load();
@@ -209,7 +209,7 @@ internal static uint32 /*cycle*/ readᴍ(ж<mProfCycleHolder> Ꮡc) {
 
 // setFlushed sets the flushed flag. It returns the current cycle count and the
 // previous value of the flushed flag.
-internal static (uint32 cycle, bool alreadyFlushed) setFlushedᴍ(ж<mProfCycleHolder> Ꮡc) {
+[GoMethodBody("setFlushed")] internal static (uint32 cycle, bool alreadyFlushed) setFlushedᴍ(ж<mProfCycleHolder> Ꮡc) {
     uint32 cycle = default;
     bool alreadyFlushed = default;
 
@@ -226,7 +226,7 @@ internal static (uint32 cycle, bool alreadyFlushed) setFlushedᴍ(ж<mProfCycleH
 
 // increment increases the cycle count by one, wrapping the value at
 // mProfCycleWrap. It clears the flushed flag.
-internal static void incrementᴍ(ж<mProfCycleHolder> Ꮡc) {
+[GoMethodBody("increment")] internal static void incrementᴍ(ж<mProfCycleHolder> Ꮡc) {
     // We explicitly wrap mProfCycle rather than depending on
     // uint wraparound because the memRecord.future ring does not
     // itself wrap at a power of two.
@@ -524,14 +524,14 @@ partial struct mLockProfile {
 
 } partial class runtime_package {
 
-internal static int64 startᴍ(ref mLockProfile prof) {
+[GoMethodBody("start")] internal static int64 startᴍ(ref mLockProfile prof) {
     if (cheaprandn(gTrackingPeriod) == 0) {
         return nanotime();
     }
     return 0;
 }
 
-internal static void endᴍ(ж<mLockProfile> Ꮡprof, int64 start) {
+[GoMethodBody("end")] internal static void endᴍ(ж<mLockProfile> Ꮡprof, int64 start) {
     if (start != 0) {
         Ꮡprof.ᏑwaitTime.Add((nanotime() - start) * (int64)gTrackingPeriod);
     }
@@ -543,7 +543,7 @@ internal static void endᴍ(ж<mLockProfile> Ꮡprof, int64 start) {
 // From unlock2, we might not be holding a p in this code.
 //
 //go:nowritebarrierrec
-internal static void recordUnlockᴍ(ж<mLockProfile> Ꮡprof, int64 cycles) {
+[GoMethodBody("recordUnlock")] internal static void recordUnlockᴍ(ж<mLockProfile> Ꮡprof, int64 cycles) {
     ref var prof = ref Ꮡprof.DerefOrNull();
 
     if (cycles < 0) {
@@ -578,7 +578,7 @@ internal static void recordUnlockᴍ(ж<mLockProfile> Ꮡprof, int64 cycles) {
     prof.cycles = cycles;
 }
 
-internal static void captureStackᴍ(ж<mLockProfile> Ꮡprof) {
+[GoMethodBody("captureStack")] internal static void captureStackᴍ(ж<mLockProfile> Ꮡprof) {
     ref var prof = ref Ꮡprof.DerefOrNull();
 
     if (debug.profstackdepth == 0) {
@@ -624,13 +624,13 @@ internal static void captureStackᴍ(ж<mLockProfile> Ꮡprof) {
 // From unlock2, we might not be holding a p in this code.
 //
 //go:nowritebarrierrec
-internal static void storeᴍ(ref mLockProfile prof) {
+[GoMethodBody("store")] internal static void storeᴍ(ref mLockProfile prof) {
     var gp = getg(); if ((~(~gp).m).locks == 1 && (~(~gp).m).mLockProfile.haveStack) {
         prof.storeSlow();
     }
 }
 
-internal static void storeSlowᴍ(ref mLockProfile prof) {
+[GoMethodBody("storeSlow")] internal static void storeSlowᴍ(ref mLockProfile prof) {
     // Report any contention we experience within this function as "lost"; it's
     // important that the act of reporting a contention event not lead to a
     // reportable contention event. This also means we can use prof.stack
@@ -731,7 +731,7 @@ partial struct StackRecord {
 
 // Stack returns the stack trace associated with the record,
 // a prefix of r.Stack0.
-internal static slice<uintptr> Stackᴍ(ref StackRecord r) {
+[GoMethodBody("Stack")] internal static slice<uintptr> Stackᴍ(ref StackRecord r) {
     foreach (var (i, v) in range(r.Stack0.ΔRangeSnapshot())) {
         if (v == 0) {
             return r.Stack0.slice(0, i);
@@ -775,16 +775,16 @@ partial struct MemProfileRecord {
 } partial class runtime_package {
 
 // InUseBytes returns the number of bytes in use (AllocBytes - FreeBytes).
-internal static int64 InUseBytesᴍ(ref MemProfileRecord r) { return r.AllocBytes - r.FreeBytes; }
+[GoMethodBody("InUseBytes")] internal static int64 InUseBytesᴍ(ref MemProfileRecord r) { return r.AllocBytes - r.FreeBytes; }
 
 // InUseObjects returns the number of objects in use (AllocObjects - FreeObjects).
-internal static int64 InUseObjectsᴍ(ref MemProfileRecord r) {
+[GoMethodBody("InUseObjects")] internal static int64 InUseObjectsᴍ(ref MemProfileRecord r) {
     return r.AllocObjects - r.FreeObjects;
 }
 
 // Stack returns the stack trace associated with the record,
 // a prefix of r.Stack0.
-internal static slice<uintptr> Stackᴍ(ref MemProfileRecord r) {
+[GoMethodBody("Stack")] internal static slice<uintptr> Stackᴍ(ref MemProfileRecord r) {
     foreach (var (i, v) in range(r.Stack0.ΔRangeSnapshot())) {
         if (v == 0) {
             return r.Stack0.slice(0, i);
@@ -1206,15 +1206,15 @@ partial struct goroutineProfileStateHolder /*global::go.@internal.runtime.atomic
 
 } partial class runtime_package {
 
-internal static goroutineProfileState Loadᴍ(ж<goroutineProfileStateHolder> Ꮡp) {
+[GoMethodBody("Load")] internal static goroutineProfileState Loadᴍ(ж<goroutineProfileStateHolder> Ꮡp) {
     return (goroutineProfileState)(Ꮡp.Reinterpret<goroutineProfileStateHolder, atomic.Uint32>()).Load();
 }
 
-internal static void Storeᴍ(ж<goroutineProfileStateHolder> Ꮡp, goroutineProfileState value) {
+[GoMethodBody("Store")] internal static void Storeᴍ(ж<goroutineProfileStateHolder> Ꮡp, goroutineProfileState value) {
     (Ꮡp.Reinterpret<goroutineProfileStateHolder, atomic.Uint32>()).Store((uint32)value);
 }
 
-internal static bool CompareAndSwapᴍ(ж<goroutineProfileStateHolder> Ꮡp, goroutineProfileState old, goroutineProfileState @new) {
+[GoMethodBody("CompareAndSwap")] internal static bool CompareAndSwapᴍ(ж<goroutineProfileStateHolder> Ꮡp, goroutineProfileState old, goroutineProfileState @new) {
     return (Ꮡp.Reinterpret<goroutineProfileStateHolder, atomic.Uint32>()).CompareAndSwap((uint32)old, (uint32)@new);
 }
 
@@ -1648,35 +1648,3 @@ internal static void saveg(uintptr pc, uintptr sp, ж<g> gp, ref profilerecord.S
 // go2cs generated this placeholder — func Stack is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛmemRecordCycle {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ref memRecordCycle a, ж<memRecordCycle> Ꮡb) => runtime_package.addᴍ(ref a, Ꮡb);
-}
-partial class runtimeᴛmProfCycleHolder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 /*cycle*/ read(this ж<mProfCycleHolder> Ꮡc) => runtime_package.readᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint32 cycle, bool alreadyFlushed) setFlushed(this ж<mProfCycleHolder> Ꮡc) => runtime_package.setFlushedᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void increment(this ж<mProfCycleHolder> Ꮡc) => runtime_package.incrementᴍ(Ꮡc);
-}
-partial class runtimeᴛmLockProfile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 start(this ref mLockProfile prof) => runtime_package.startᴍ(ref prof);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void end(this ж<mLockProfile> Ꮡprof, int64 start) => runtime_package.endᴍ(Ꮡprof, start);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordUnlock(this ж<mLockProfile> Ꮡprof, int64 cycles) => runtime_package.recordUnlockᴍ(Ꮡprof, cycles);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void captureStack(this ж<mLockProfile> Ꮡprof) => runtime_package.captureStackᴍ(Ꮡprof);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void store(this ref mLockProfile prof) => runtime_package.storeᴍ(ref prof);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void storeSlow(this ref mLockProfile prof) => runtime_package.storeSlowᴍ(ref prof);
-}
-partial class runtimeᴛStackRecord {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<uintptr> Stack(this ref StackRecord r) => runtime_package.Stackᴍ(ref r);
-}
-partial class runtimeᴛMemProfileRecord {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 InUseBytes(this ref MemProfileRecord r) => runtime_package.InUseBytesᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 InUseObjects(this ref MemProfileRecord r) => runtime_package.InUseObjectsᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<uintptr> Stack(this ref MemProfileRecord r) => runtime_package.Stackᴍ(ref r);
-}
-partial class runtimeᴛgoroutineProfileStateHolder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static goroutineProfileState Load(this ж<goroutineProfileStateHolder> Ꮡp) => runtime_package.Loadᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Store(this ж<goroutineProfileStateHolder> Ꮡp, goroutineProfileState value) => runtime_package.Storeᴍ(Ꮡp, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool CompareAndSwap(this ж<goroutineProfileStateHolder> Ꮡp, goroutineProfileState old, goroutineProfileState @new) => runtime_package.CompareAndSwapᴍ(Ꮡp, old, @new);
-}
-// </GlyphForwarders>

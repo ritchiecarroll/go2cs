@@ -45,7 +45,7 @@ internal static ж<kind> voidKind = Ꮡ(new kind(typ: "void", reg: regClassNone)
 
 } partial class gen_package {
 
-internal static ж<kind> kindᴍ(@void _) { return voidKind; }
+[GoMethodBody("kind")] internal static ж<kind> kindᴍ(@void _) { return voidKind; }
 
 } partial class gen_package {
 
@@ -63,7 +63,7 @@ internal static ref sync.Map ptrKinds => ref ((StaticBox<sync.Map>)ᏑptrKinds).
 
 } partial class gen_package {
 
-internal static ж<kind> kindᴍ<T>(Ptr<T> _Δp0)
+[GoMethodBody("kind")] internal static ж<kind> kindᴍ<T>(Ptr<T> _Δp0)
     where T : Value
 {
     T x = GoZero<T>();
@@ -76,7 +76,7 @@ internal static ж<kind> kindᴍ<T>(Ptr<T> _Δp0)
     return pk._<ж<kind>>();
 }
 
-internal static Ptr<T> wrapᴍ<T>(Ptr<T> _, ж<op> x)
+[GoMethodBody("wrap")] internal static Ptr<T> wrapᴍ<T>(Ptr<T> _, ж<op> x)
     where T : Value
 {
     Ptr<T> y = new(nil);
@@ -84,7 +84,7 @@ internal static Ptr<T> wrapᴍ<T>(Ptr<T> _, ж<op> x)
     return y;
 }
 
-internal static Ptr<T> /*y*/ AddConstᴍ<T>(Ptr<T> x, nint off)
+[GoMethodBody("AddConst")] internal static Ptr<T> /*y*/ AddConstᴍ<T>(Ptr<T> x, nint off)
     where T : Value
 {
     Ptr<T> y = new(nil);
@@ -134,7 +134,7 @@ public static Array<T> /*y*/ ConstArray<T>(slice<T> vals, @string name)
 
 } partial class gen_package {
 
-internal static ж<kind> kindᴍ<T>(Array<T> _)
+[GoMethodBody("kind")] internal static ж<kind> kindᴍ<T>(Array<T> _)
     where T : Value
 {
     // TODO: Cache this like Ptr.kind.
@@ -150,7 +150,7 @@ partial struct valGP {
 
 } partial class gen_package {
 
-internal static void isWordᴍ(valGP _) { }
+[GoMethodBody("isWord")] internal static void isWordᴍ(valGP _) { }
 
 } partial class gen_package {
 
@@ -160,7 +160,7 @@ partial struct valAny {
 
 } partial class gen_package {
 
-internal static void initOpᴍ(ref valAny v, ж<op> Ꮡx) {
+[GoMethodBody("initOp")] internal static void initOpᴍ(ref valAny v, ж<op> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (v.op != nil) {
@@ -180,29 +180,8 @@ internal static void initOpᴍ(ref valAny v, ж<op> Ꮡx) {
     }
 }
 
-internal static ж<op> getOpᴍ(valAny v) {
+[GoMethodBody("getOp")] internal static ж<op> getOpᴍ(valAny v) {
     return v.op;
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class genᴛvoid {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<kind> kind(this @void _) => gen_package.kindᴍ(_);
-}
-partial class genᴛPtr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<kind> kind<T>(this Ptr<T> _Δp0) where T : Value => gen_package.kindᴍ<T>(_Δp0);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Ptr<T> wrap<T>(this Ptr<T> _, ж<op> x) where T : Value => gen_package.wrapᴍ<T>(_, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Ptr<T> /*y*/ AddConst<T>(this Ptr<T> x, nint off) where T : Value => gen_package.AddConstᴍ<T>(x, off);
-}
-partial class genᴛArray {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<kind> kind<T>(this Array<T> _) where T : Value => gen_package.kindᴍ<T>(_);
-}
-partial class genᴛvalGP {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isWord(this valGP _) => gen_package.isWordᴍ(_);
-}
-partial class genᴛvalAny {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initOp(this ref valAny v, ж<op> Ꮡx) => gen_package.initOpᴍ(ref v, Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<op> getOp(this valAny v) => gen_package.getOpᴍ(v);
-}
-// </GlyphForwarders>

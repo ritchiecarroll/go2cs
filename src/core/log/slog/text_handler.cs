@@ -48,17 +48,17 @@ public static ж<TextHandler> NewTextHandler(io.Writer w, ж<HandlerOptions> Ꮡ
 
 // Enabled reports whether the handler handles records at the given level.
 // The handler ignores records whose level is lower.
-internal static bool Enabledᴍ(ref TextHandler h, context.Context _, Level level) {
+[GoMethodBody("Enabled")] internal static bool Enabledᴍ(ref TextHandler h, context.Context _, Level level) {
     return h.commonHandler.enabled(level);
 }
 
 // WithAttrs returns a new [TextHandler] whose attributes consists
 // of h's attributes followed by attrs.
-internal static Handler WithAttrsᴍ(ref TextHandler h, slice<Attr> attrs) {
+[GoMethodBody("WithAttrs")] internal static Handler WithAttrsᴍ(ref TextHandler h, slice<Attr> attrs) {
     return new TextHandlerжHandler(Ꮡ(new TextHandler(commonHandler: h.commonHandler.withAttrs(attrs))));
 }
 
-internal static Handler WithGroupᴍ(ref TextHandler h, @string name) {
+[GoMethodBody("WithGroup")] internal static Handler WithGroupᴍ(ref TextHandler h, @string name) {
     return new TextHandlerжHandler(Ꮡ(new TextHandler(commonHandler: h.commonHandler.withGroup(name))));
 }
 
@@ -96,7 +96,7 @@ internal static Handler WithGroupᴍ(ref TextHandler h, @string name) {
 //
 // Each call to Handle results in a single serialized call to
 // io.Writer.Write.
-internal static error Handleᴍ(ref TextHandler h, context.Context _, Record r) {
+[GoMethodBody("Handle")] internal static error Handleᴍ(ref TextHandler h, context.Context _, Record r) {
     r = r.ΔClone();
 
     return h.commonHandler.handle(r);
@@ -181,12 +181,3 @@ internal static bool needsQuoting(@string s) {
 }
 
 } // end slog_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class slogᴛTextHandler {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Enabled(this ref TextHandler h, context.Context _, Level level) => slog_package.Enabledᴍ(ref h, _, level);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Handler WithAttrs(this ref TextHandler h, slice<Attr> attrs) => slog_package.WithAttrsᴍ(ref h, attrs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Handler WithGroup(this ref TextHandler h, @string name) => slog_package.WithGroupᴍ(ref h, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Handle(this ref TextHandler h, context.Context _, Record r) => slog_package.Handleᴍ(ref h, _, r);
-}
-// </GlyphForwarders>

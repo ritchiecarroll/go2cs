@@ -120,7 +120,7 @@ internal static @string sprintf(ж<token.FileSet> fset, Func<ж<Package>, @strin
 } partial class types_package {
 
 // check may be nil.
-internal static @string sprintfᴍ(ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("sprintf")] internal static @string sprintfᴍ(ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var check = ref Ꮡcheck.DerefOrNull();
 
@@ -133,7 +133,7 @@ internal static @string sprintfᴍ(ж<Checker> Ꮡcheck, @string format, params 
     return types.sprintf(fset, qf, false, format, args.ꓸꓸꓸ);
 }
 
-internal static void traceᴍ(ж<Checker> Ꮡcheck, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("trace")] internal static void traceᴍ(ж<Checker> Ꮡcheck, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var check = ref Ꮡcheck.DerefOrNull();
 
@@ -171,14 +171,14 @@ internal static nint ndigits(nint x) {
 } partial class types_package {
 
 // dump is only needed for debugging
-internal static void dumpᴍ(ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("dump")] internal static void dumpᴍ(ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     fmt.Println(types.sprintf(check.fset, new Func<ж<Package>, @string>(Ꮡcheck.qualifier), true, format, args.ꓸꓸꓸ));
 }
 
-internal static @string qualifierᴍ(ref Checker check, ж<Package> Ꮡpkg) {
+[GoMethodBody("qualifier")] internal static @string qualifierᴍ(ref Checker check, ж<Package> Ꮡpkg) {
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
     // Qualify the package unless it's the package being type-checked.
@@ -199,7 +199,7 @@ internal static @string qualifierᴍ(ref Checker check, ж<Package> Ꮡpkg) {
 
 // markImports recursively walks pkg and its imports, to record unique import
 // paths in pkgPathMap.
-internal static void markImportsᴍ(ref Checker check, ж<Package> Ꮡpkg) {
+[GoMethodBody("markImports")] internal static void markImportsᴍ(ref Checker check, ж<Package> Ꮡpkg) {
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
     if (check.seenPkgMap[Ꮡpkg]) {
@@ -237,13 +237,3 @@ internal static @string stripAnnotations(@string s) {
 }
 
 } // end types_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string sprintf(this ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) => types_package.sprintfᴍ(Ꮡcheck, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void trace(this ж<Checker> Ꮡcheck, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) => types_package.traceᴍ(Ꮡcheck, pos, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void dump(this ж<Checker> Ꮡcheck, @string format, params ꓸꓸꓸany argsʗp) => types_package.dumpᴍ(Ꮡcheck, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string qualifier(this ref Checker check, ж<Package> Ꮡpkg) => types_package.qualifierᴍ(ref check, Ꮡpkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void markImports(this ref Checker check, ж<Package> Ꮡpkg) => types_package.markImportsᴍ(ref check, Ꮡpkg);
-}
-// </GlyphForwarders>

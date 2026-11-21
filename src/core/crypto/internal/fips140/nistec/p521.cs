@@ -37,7 +37,7 @@ public static ж<P521Point> NewP521Point() {
 } partial class nistec_package {
 
 // SetGenerator sets p to the canonical generator and returns p.
-internal static ж<P521Point> SetGeneratorᴍ(ж<P521Point> Ꮡp) {
+[GoMethodBody("SetGenerator")] internal static ж<P521Point> SetGeneratorᴍ(ж<P521Point> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.x.SetBytes([0x0, 0xc6, 0x85, 0x8e, 0x6, 0xb7, 0x4, 0x4, 0xe9, 0xcd, 0x9e, 0x3e, 0xcb, 0x66, 0x23, 0x95, 0xb4, 0x42, 0x9c, 0x64, 0x81, 0x39, 0x5, 0x3f, 0xb5, 0x21, 0xf8, 0x28, 0xaf, 0x60, 0x6b, 0x4d, 0x3d, 0xba, 0xa1, 0x4b, 0x5e, 0x77, 0xef, 0xe7, 0x59, 0x28, 0xfe, 0x1d, 0xc1, 0x27, 0xa2, 0xff, 0xa8, 0xde, 0x33, 0x48, 0xb3, 0xc1, 0x85, 0x6a, 0x42, 0x9b, 0xf9, 0x7e, 0x7e, 0x31, 0xc2, 0xe5, 0xbd, 0x66]);
@@ -47,7 +47,7 @@ internal static ж<P521Point> SetGeneratorᴍ(ж<P521Point> Ꮡp) {
 }
 
 // Set sets p = q and returns p.
-internal static ж<P521Point> Setᴍ(ж<P521Point> Ꮡp, ж<P521Point> Ꮡq) {
+[GoMethodBody("Set")] internal static ж<P521Point> Setᴍ(ж<P521Point> Ꮡp, ж<P521Point> Ꮡq) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var q = ref Ꮡq.DerefOrNull();
 
@@ -67,7 +67,7 @@ private static readonly @string invalidP521PointEncodingˢᵇᴍP521Point = "inv
 // b, as specified in SEC 1, Version 2.0, Section 2.3.4. If the point is not on
 // the curve, it returns nil and an error, and the receiver is unchanged.
 // Otherwise, it returns p.
-internal static (ж<P521Point>, error) SetBytesᴍ(ж<P521Point> Ꮡp, slice<byte> b) {
+[GoMethodBody("SetBytes")] internal static (ж<P521Point>, error) SetBytesᴍ(ж<P521Point> Ꮡp, slice<byte> b) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (ᐧ) {
@@ -167,14 +167,14 @@ internal static error p521CheckOnCurve(ж<fiat.P521Element> x, ж<fiat.P521Eleme
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
 // infinity is shorter than all other encodings.
-internal static slice<byte> Bytesᴍ(ref P521Point p) {
+[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref P521Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(133), out var Ꮡout);
     return p.bytes(Ꮡout);
 }
 
-internal static slice<byte> bytesᴍ(ref P521Point p, /*[133]*/ ж<array<byte>> Ꮡout) {
+[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ref P521Point p, /*[133]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -193,7 +193,7 @@ internal static slice<byte> bytesᴍ(ref P521Point p, /*[133]*/ ж<array<byte>> 
 
 // BytesX returns the encoding of the x-coordinate of p, as specified in SEC 1,
 // Version 2.0, Section 2.3.5, or an error if p is the point at infinity.
-internal static (slice<byte>, error) BytesXᴍ(ref P521Point p) {
+[GoMethodBody("BytesX")] internal static (slice<byte>, error) BytesXᴍ(ref P521Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(66), out var Ꮡout);
@@ -204,7 +204,7 @@ internal static (slice<byte>, error) BytesXᴍ(ref P521Point p) {
 internal static ref readonly @string p521PointIsThePointAtˢᴍP521Point => ref p521PointIsThePointAtˢᵇᴍP521Point;
 private static readonly @string p521PointIsThePointAtˢᵇᴍP521Point = "P521 point is the point at infinity"u8;
 
-internal static (slice<byte>, error) bytesXᴍ(ref P521Point p, /*[66]*/ ж<array<byte>> Ꮡout) {
+[GoMethodBody("bytesX")] internal static (slice<byte>, error) bytesXᴍ(ref P521Point p, /*[66]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -220,14 +220,14 @@ internal static (slice<byte>, error) bytesXᴍ(ref P521Point p, /*[66]*/ ж<arra
 // BytesCompressed returns the compressed or infinity encoding of p, as
 // specified in SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the
 // point at infinity is shorter than all other encodings.
-internal static slice<byte> BytesCompressedᴍ(ref P521Point p) {
+[GoMethodBody("BytesCompressed")] internal static slice<byte> BytesCompressedᴍ(ref P521Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(67), out var Ꮡout);
     return p.bytesCompressed(Ꮡout);
 }
 
-internal static slice<byte> bytesCompressedᴍ(ref P521Point p, /*[67]*/ ж<array<byte>> Ꮡout) {
+[GoMethodBody("bytesCompressed")] internal static slice<byte> bytesCompressedᴍ(ref P521Point p, /*[67]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -247,7 +247,7 @@ internal static slice<byte> bytesCompressedᴍ(ref P521Point p, /*[67]*/ ж<arra
 }
 
 // Add sets q = p1 + p2, and returns q. The points may overlap.
-internal static ж<P521Point> Addᴍ(ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2) {
+[GoMethodBody("Add")] internal static ж<P521Point> Addᴍ(ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -306,7 +306,7 @@ internal static ж<P521Point> Addᴍ(ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж
 }
 
 // Double sets q = p + p, and returns q. The points may overlap.
-internal static ж<P521Point> Doubleᴍ(ж<P521Point> Ꮡq, ж<P521Point> Ꮡp) {
+[GoMethodBody("Double")] internal static ж<P521Point> Doubleᴍ(ж<P521Point> Ꮡq, ж<P521Point> Ꮡp) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -355,7 +355,7 @@ internal static ж<P521Point> Doubleᴍ(ж<P521Point> Ꮡq, ж<P521Point> Ꮡp) 
 }
 
 // Select sets q to p1 if cond == 1, and to p2 if cond == 0.
-internal static ж<P521Point> Selectᴍ(ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2, nint cond) {
+[GoMethodBody("Select")] internal static ж<P521Point> Selectᴍ(ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2, nint cond) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -377,7 +377,7 @@ partial struct p521Table /*[15]ж<P521Point>*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
-internal static void Selectᴍ(ref p521Table table, ж<P521Point> p, uint8 n) {
+[GoMethodBody("Select")] internal static void Selectᴍ(ref p521Table table, ж<P521Point> p, uint8 n) {
     if (n >= 16) {
         throw panic("nistec: internal error: p521Table called with out-of-bounds value");
     }
@@ -391,7 +391,7 @@ internal static void Selectᴍ(ref p521Table table, ж<P521Point> p, uint8 n) {
 } partial class nistec_package {
 
 // ScalarMult sets p = scalar * q, and returns p.
-internal static (ж<P521Point>, error) ScalarMultᴍ(ж<P521Point> Ꮡp, ж<P521Point> q, slice<byte> scalar) {
+[GoMethodBody("ScalarMult")] internal static (ж<P521Point>, error) ScalarMultᴍ(ж<P521Point> Ꮡp, ж<P521Point> q, slice<byte> scalar) {
     // Compute a p521Table for the base point q. The explicit NewP521Point
     // calls get inlined, letting the allocations live on the stack.
     p521Table table = new p521Table(new ж<P521Point>[]{NewP521Point(), NewP521Point(), NewP521Point(),
@@ -446,7 +446,7 @@ internal static ref sync.Once p521GeneratorTableOnce => ref ((StaticBox<sync.Onc
 // generatorTable returns a sequence of p521Tables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four
 // times.
-internal static ж<array<p521Table>> generatorTableᴍ(ref P521Point p) {
+[GoMethodBody("generatorTable")] internal static ж<array<p521Table>> generatorTableᴍ(ref P521Point p) {
     Ꮡp521GeneratorTableOnce.Do(() => {
         p521GeneratorTable = Ꮡ(new array<p521Table>(132));
         var @base = NewP521Point().SetGenerator();
@@ -470,7 +470,7 @@ private static readonly @string invalidScalarLengthˢᵇᴍP521Point = "invalid 
 
 // ScalarBaseMult sets p = scalar * B, where B is the canonical generator, and
 // returns p.
-internal static (ж<P521Point>, error) ScalarBaseMultᴍ(ж<P521Point> Ꮡp, slice<byte> scalar) {
+[GoMethodBody("ScalarBaseMult")] internal static (ж<P521Point>, error) ScalarBaseMultᴍ(ж<P521Point> Ꮡp, slice<byte> scalar) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (len(scalar) != p521ElementLength) {
@@ -534,26 +534,3 @@ internal static void p521SqrtCandidate(ж<fiat.P521Element> z, ж<fiat.P521Eleme
 }
 
 } // end nistec_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class nistecᴛP521Point {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P521Point> SetGenerator(this ж<P521Point> Ꮡp) => nistec_package.SetGeneratorᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P521Point> Set(this ж<P521Point> Ꮡp, ж<P521Point> Ꮡq) => nistec_package.Setᴍ(Ꮡp, Ꮡq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<P521Point>, error) SetBytes(this ж<P521Point> Ꮡp, slice<byte> b) => nistec_package.SetBytesᴍ(Ꮡp, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref P521Point p) => nistec_package.Bytesᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytes(this ref P521Point p, /*[133]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesᴍ(ref p, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) BytesX(this ref P521Point p) => nistec_package.BytesXᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) bytesX(this ref P521Point p, /*[66]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesXᴍ(ref p, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> BytesCompressed(this ref P521Point p) => nistec_package.BytesCompressedᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytesCompressed(this ref P521Point p, /*[67]*/ ж<array<byte>> Ꮡout) => nistec_package.bytesCompressedᴍ(ref p, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P521Point> Add(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2) => nistec_package.Addᴍ(Ꮡq, Ꮡp1, Ꮡp2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P521Point> Double(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp) => nistec_package.Doubleᴍ(Ꮡq, Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P521Point> Select(this ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2, nint cond) => nistec_package.Selectᴍ(Ꮡq, Ꮡp1, Ꮡp2, cond);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<P521Point>, error) ScalarMult(this ж<P521Point> Ꮡp, ж<P521Point> q, slice<byte> scalar) => nistec_package.ScalarMultᴍ(Ꮡp, q, scalar);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<array<p521Table>> generatorTable(this ref P521Point p) => nistec_package.generatorTableᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<P521Point>, error) ScalarBaseMult(this ж<P521Point> Ꮡp, slice<byte> scalar) => nistec_package.ScalarBaseMultᴍ(Ꮡp, scalar);
-}
-partial class nistecᴛp521Table {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Select(this ref p521Table table, ж<P521Point> p, uint8 n) => nistec_package.Selectᴍ(ref table, p, n);
-}
-// </GlyphForwarders>

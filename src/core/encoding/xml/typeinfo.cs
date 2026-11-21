@@ -367,7 +367,7 @@ partial struct TagPathError {
 
 } partial class xml_package {
 
-internal static @string Errorᴍ(ref TagPathError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref TagPathError e) {
     return fmt.Sprintf("%s field %q with tag %q conflicts with field %q with tag %q"u8, e.Struct, e.Field1, e.Tag1, e.Field2, e.Tag2);
 }
 
@@ -383,7 +383,7 @@ internal const bool dontInitNilPointers = false;
 // initNilPointers, it initializes and dereferences pointers as necessary.
 // When passed dontInitNilPointers and a nil pointer is reached, the function
 // returns a zero reflect.Value.
-internal static reflect.Value valueᴍ(ref fieldInfo finfo, reflect.Value v, bool shouldInitNilPointers) {
+[GoMethodBody("value")] internal static reflect.Value valueᴍ(ref fieldInfo finfo, reflect.Value v, bool shouldInitNilPointers) {
     foreach (var (i, x) in range(finfo.idx)) {
         if (i > 0) {
             var t = v.Type();
@@ -403,12 +403,3 @@ internal static reflect.Value valueᴍ(ref fieldInfo finfo, reflect.Value v, boo
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class xmlᴛTagPathError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref TagPathError e) => xml_package.Errorᴍ(ref e);
-}
-partial class xmlᴛfieldInfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static reflect.Value value(this ref fieldInfo finfo, reflect.Value v, bool shouldInitNilPointers) => xml_package.valueᴍ(ref finfo, v, shouldInitNilPointers);
-}
-// </GlyphForwarders>

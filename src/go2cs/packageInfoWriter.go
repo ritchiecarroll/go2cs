@@ -1011,6 +1011,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	packageInfoLines = applyCgoDynamicImports(packageInfoLines, packageInfoFileName, mergeExisting)
 	packageInfoLines = applyCgoPseudoPackageStamp(packageInfoLines, mergeExisting)
 	packageInfoLines = applyMethodHolderSection(packageInfoLines, mergeExisting)
+	packageInfoLines = applyGlyphForwarderSection(packageInfoLines)
 
 	// Remove trailing empty lines
 	for i := len(packageInfoLines) - 1; i >= 0; i-- {

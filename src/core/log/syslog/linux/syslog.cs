@@ -157,7 +157,7 @@ private static readonly @string localhostˢᵇᴍWriter = "localhost"u8;
 
 // connect makes a connection to the syslog server.
 // It must be called with w.mu held.
-internal static error /*err*/ connectᴍ(ref Writer w) {
+[GoMethodBody("connect")] internal static error /*err*/ connectᴍ(ref Writer w) {
     error err = default;
 
     if (w.conn != nil) {
@@ -188,14 +188,14 @@ internal static error /*err*/ connectᴍ(ref Writer w) {
 }
 
 // Write sends a log message to the syslog daemon.
-internal static (nint, error) Writeᴍ(ж<Writer> Ꮡw, slice<byte> b) {
+[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ж<Writer> Ꮡw, slice<byte> b) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     return Ꮡw.writeAndRetry(w.priority, (@string)b);
 }
 
 // Close closes a connection to the syslog daemon.
-internal static error Closeᴍ(ж<Writer> Ꮡw) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<Writer> Ꮡw) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -217,61 +217,61 @@ internal static error Closeᴍ(ж<Writer> Ꮡw) {
 
 // Emerg logs a message with severity [LOG_EMERG], ignoring the severity
 // passed to New.
-internal static error Emergᴍ(ж<Writer> Ꮡw, @string m) {
+[GoMethodBody("Emerg")] internal static error Emergᴍ(ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_EMERG, m);
     return err;
 }
 
 // Alert logs a message with severity [LOG_ALERT], ignoring the severity
 // passed to New.
-internal static error Alertᴍ(ж<Writer> Ꮡw, @string m) {
+[GoMethodBody("Alert")] internal static error Alertᴍ(ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_ALERT, m);
     return err;
 }
 
 // Crit logs a message with severity [LOG_CRIT], ignoring the severity
 // passed to New.
-internal static error Critᴍ(ж<Writer> Ꮡw, @string m) {
+[GoMethodBody("Crit")] internal static error Critᴍ(ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_CRIT, m);
     return err;
 }
 
 // Err logs a message with severity [LOG_ERR], ignoring the severity
 // passed to New.
-internal static error Errᴍ(ж<Writer> Ꮡw, @string m) {
+[GoMethodBody("Err")] internal static error Errᴍ(ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_ERR, m);
     return err;
 }
 
 // Warning logs a message with severity [LOG_WARNING], ignoring the
 // severity passed to New.
-internal static error Warningᴍ(ж<Writer> Ꮡw, @string m) {
+[GoMethodBody("Warning")] internal static error Warningᴍ(ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_WARNING, m);
     return err;
 }
 
 // Notice logs a message with severity [LOG_NOTICE], ignoring the
 // severity passed to New.
-internal static error Noticeᴍ(ж<Writer> Ꮡw, @string m) {
+[GoMethodBody("Notice")] internal static error Noticeᴍ(ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_NOTICE, m);
     return err;
 }
 
 // Info logs a message with severity [LOG_INFO], ignoring the severity
 // passed to New.
-internal static error Infoᴍ(ж<Writer> Ꮡw, @string m) {
+[GoMethodBody("Info")] internal static error Infoᴍ(ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_INFO, m);
     return err;
 }
 
 // Debug logs a message with severity [LOG_DEBUG], ignoring the severity
 // passed to New.
-internal static error Debugᴍ(ж<Writer> Ꮡw, @string m) {
+[GoMethodBody("Debug")] internal static error Debugᴍ(ж<Writer> Ꮡw, @string m) {
     var (_, err) = Ꮡw.writeAndRetry(LOG_DEBUG, m);
     return err;
 }
 
-internal static (nint, error) writeAndRetryᴍ(ж<Writer> Ꮡw, Priority p, @string s) {
+[GoMethodBody("writeAndRetry")] internal static (nint, error) writeAndRetryᴍ(ж<Writer> Ꮡw, Priority p, @string s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -300,7 +300,7 @@ internal static (nint, error) writeAndRetryᴍ(ж<Writer> Ꮡw, Priority p, @str
 
 // write generates and writes a syslog formatted string. The
 // format is as follows: <PRI>TIMESTAMP HOSTNAME TAG[PID]: MSG
-internal static (nint, error) writeᴍ(ref Writer w, Priority p, @string msg) {
+[GoMethodBody("write")] internal static (nint, error) writeᴍ(ref Writer w, Priority p, @string msg) {
     // ensure it ends in a \n
     @string nl = ""u8;
     if (!strings.HasSuffix(msg, "\n")) {
@@ -319,7 +319,7 @@ internal static (nint, error) writeᴍ(ref Writer w, Priority p, @string msg) {
 
 } partial class syslog_package {
 
-internal static error writeStringᴍ(ref netConn n, Priority p, @string hostname, @string tag, @string msg, @string nl) {
+[GoMethodBody("writeString")] internal static error writeStringᴍ(ref netConn n, Priority p, @string hostname, @string tag, @string msg, @string nl) {
     if (n.local) {
         // Compared to the network form below, the changes are:
         //	1. Use time.Stamp instead of time.RFC3339.
@@ -337,7 +337,7 @@ internal static error writeStringᴍ(ref netConn n, Priority p, @string hostname
     return err;
 }
 
-internal static error closeᴍ(ref netConn n) {
+[GoMethodBody("close")] internal static error closeᴍ(ref netConn n) {
     return n.conn.Close();
 }
 
@@ -356,25 +356,3 @@ public static (ж<log.Logger>, error) NewLogger(Priority p, nint logFlag) {
 }
 
 } // end syslog_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class syslogᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ connect(this ref Writer w) => syslog_package.connectᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Write(this ж<Writer> Ꮡw, slice<byte> b) => syslog_package.Writeᴍ(Ꮡw, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<Writer> Ꮡw) => syslog_package.Closeᴍ(Ꮡw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Emerg(this ж<Writer> Ꮡw, @string m) => syslog_package.Emergᴍ(Ꮡw, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Alert(this ж<Writer> Ꮡw, @string m) => syslog_package.Alertᴍ(Ꮡw, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Crit(this ж<Writer> Ꮡw, @string m) => syslog_package.Critᴍ(Ꮡw, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Err(this ж<Writer> Ꮡw, @string m) => syslog_package.Errᴍ(Ꮡw, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Warning(this ж<Writer> Ꮡw, @string m) => syslog_package.Warningᴍ(Ꮡw, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Notice(this ж<Writer> Ꮡw, @string m) => syslog_package.Noticeᴍ(Ꮡw, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Info(this ж<Writer> Ꮡw, @string m) => syslog_package.Infoᴍ(Ꮡw, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Debug(this ж<Writer> Ꮡw, @string m) => syslog_package.Debugᴍ(Ꮡw, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) writeAndRetry(this ж<Writer> Ꮡw, Priority p, @string s) => syslog_package.writeAndRetryᴍ(Ꮡw, p, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) write(this ref Writer w, Priority p, @string msg) => syslog_package.writeᴍ(ref w, p, msg);
-}
-partial class syslogᴛnetConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeString(this ref netConn n, Priority p, @string hostname, @string tag, @string msg, @string nl) => syslog_package.writeStringᴍ(ref n, p, hostname, tag, msg, nl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error close(this ref netConn n) => syslog_package.closeᴍ(ref n);
-}
-// </GlyphForwarders>

@@ -79,7 +79,7 @@ partial struct gclinkptr /*num:uintptr*/;
 // ptr returns the *gclink form of p.
 // The result should be used for accessing fields, not stored
 // in other data structures.
-internal static ж<gclink> ptrᴍ(gclinkptr p) {
+[GoMethodBody("ptr")] internal static ж<gclink> ptrᴍ(gclinkptr p) {
     return @unsafe.Pointer.To<gclink>((@unsafe.Pointer)(uintptr)p);
 }
 
@@ -171,7 +171,7 @@ private static readonly @string spanHasNoFreeSpaceˢᵇᴍmcache = "span has no 
 //
 // Must run in a non-preemptible context since otherwise the owner of
 // c could change.
-internal static void refillᴍ(ref mcache c, spanClass spc) {
+[GoMethodBody("refill")] internal static void refillᴍ(ref mcache c, spanClass spc) {
     // Return the current cached span to the central lists.
     var s = c.alloc[spc];
 
@@ -253,7 +253,7 @@ internal static void refillᴍ(ref mcache c, spanClass spc) {
 }
 
 // allocLarge allocates a span for a large object.
-internal static ж<mspan> allocLargeᴍ(ref mcache c, uintptr size, bool noscan) {
+[GoMethodBody("allocLarge")] internal static ж<mspan> allocLargeᴍ(ref mcache c, uintptr size, bool noscan) {
     if (size + (uintptr)pageSize < size) {
         @throw(outOfMemoryˢᴍmcache);
     }
@@ -301,7 +301,7 @@ internal static ж<mspan> allocLargeᴍ(ref mcache c, uintptr size, bool noscan)
     return s;
 }
 
-internal static void releaseAllᴍ(ref mcache c) {
+[GoMethodBody("releaseAll")] internal static void releaseAllᴍ(ref mcache c) {
     // Take this opportunity to flush scanAlloc.
     var scanAlloc = (int64)c.scanAlloc;
     c.scanAlloc = 0;
@@ -365,7 +365,7 @@ private static readonly @string badFlushGenˢᵇᴍmcache = "bad flushGen"u8;
 // prepareForSweep flushes c if the system has entered a new sweep phase
 // since c was populated. This must happen between the sweep phase
 // starting and the first allocation from c.
-internal static void prepareForSweepᴍ(ж<mcache> Ꮡc) {
+[GoMethodBody("prepareForSweep")] internal static void prepareForSweepᴍ(ж<mcache> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Alternatively, instead of making sure we do this on every P
@@ -390,7 +390,7 @@ internal static void prepareForSweepᴍ(ж<mcache> Ꮡc) {
 
 // addReusableNoscan adds a noscan object pointer to the reusable pointer free list
 // for a span class.
-internal static void addReusableNoscanᴍ(ref mcache c, spanClass spc, uintptr ptr) {
+[GoMethodBody("addReusableNoscan")] internal static void addReusableNoscanᴍ(ref mcache c, spanClass spc, uintptr ptr) {
     if (!runtimeFreegcEnabled) {
         return;
     }
@@ -403,7 +403,7 @@ internal static void addReusableNoscanᴍ(ref mcache c, spanClass spc, uintptr p
 
 // hasReusableNoscan reports whether there is a reusable object available for
 // a noscan spc.
-internal static bool hasReusableNoscanᴍ(ref mcache c, spanClass spc) {
+[GoMethodBody("hasReusableNoscan")] internal static bool hasReusableNoscanᴍ(ref mcache c, spanClass spc) {
     if (!runtimeFreegcEnabled) {
         return false;
     }
@@ -411,17 +411,3 @@ internal static bool hasReusableNoscanᴍ(ref mcache c, spanClass spc) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛgclinkptr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<gclink> ptr(this gclinkptr p) => runtime_package.ptrᴍ(p);
-}
-partial class runtimeᴛmcache {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void refill(this ref mcache c, spanClass spc) => runtime_package.refillᴍ(ref c, spc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<mspan> allocLarge(this ref mcache c, uintptr size, bool noscan) => runtime_package.allocLargeᴍ(ref c, size, noscan);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void releaseAll(this ref mcache c) => runtime_package.releaseAllᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void prepareForSweep(this ж<mcache> Ꮡc) => runtime_package.prepareForSweepᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addReusableNoscan(this ref mcache c, spanClass spc, uintptr ptr) => runtime_package.addReusableNoscanᴍ(ref c, spc, ptr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasReusableNoscan(this ref mcache c, spanClass spc) => runtime_package.hasReusableNoscanᴍ(ref c, spc);
-}
-// </GlyphForwarders>

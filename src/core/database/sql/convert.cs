@@ -50,7 +50,7 @@ partial struct ccChecker {
 
 } partial class sql_package {
 
-internal static error CheckNamedValueᴍ(ccChecker c, ж<driver.NamedValue> Ꮡnv) {
+[GoMethodBody("CheckNamedValue")] internal static error CheckNamedValueᴍ(ccChecker c, ж<driver.NamedValue> Ꮡnv) {
     ref var nv = ref Ꮡnv.DerefOrNull();
 
     if (c.cci == nil) {
@@ -687,9 +687,3 @@ partial interface decimalCompose {
 }
 
 } // end sql_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class sqlᴛccChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error CheckNamedValue(this ccChecker c, ж<driver.NamedValue> Ꮡnv) => sql_package.CheckNamedValueᴍ(c, Ꮡnv);
-}
-// </GlyphForwarders>

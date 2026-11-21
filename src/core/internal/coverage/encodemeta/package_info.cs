@@ -67,6 +67,26 @@ using static go.@internal.coverage.encodemeta_package;
 
 namespace go.@internal.coverage;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using bytes = bytes_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using hash = hash_package;
+using fnv = go.hash.fnv_package;
+using coverage = go.@internal.coverage_package;
+using stringtab = go.@internal.coverage.stringtab_package;
+using uleb128 = go.@internal.coverage.uleb128_package;
+using io = io_package;
+using os = os_package;
+using encoding;
+using go.@internal;
+using go.@internal.coverage;
+using go.hash;
+using static encodemeta_package;
+using bufio = bufio_package;
+using @unsafe = unsafe_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("encodemeta")]
 public static partial class encodemeta_package
 {
@@ -112,3 +132,17 @@ public static partial class encodemeta_package
 [GoMethodHost(typeof(encodemeta_package.CoverageMetaDataBuilder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class encodemetaᴛCoverageMetaDataBuilder;
 [GoMethodHost(typeof(encodemeta_package.CoverageMetaFileWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class encodemetaᴛCoverageMetaFileWriter;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class encodemetaᴛCoverageMetaDataBuilder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nuint AddFunc(this ref CoverageMetaDataBuilder b, coverage.FuncDesc f) => encodemeta_package.AddFuncᴍ(ref b, f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 emitFuncOffsets(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off) => encodemeta_package.emitFuncOffsetsᴍ(ref b, w, off);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) emitFunc(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off, funcDesc f) => encodemeta_package.emitFuncᴍ(ref b, w, off, f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reportWriteError(this ref CoverageMetaDataBuilder b, error err) => encodemeta_package.reportWriteErrorᴍ(ref b, err);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void wrUint32(this ref CoverageMetaDataBuilder b, io.WriteSeeker w, uint32 v) => encodemeta_package.wrUint32ᴍ(ref b, w, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (array<byte>, error) Emit(this ж<CoverageMetaDataBuilder> Ꮡb, io.WriteSeeker w) => encodemeta_package.Emitᴍ(Ꮡb, w);
+}
+partial class encodemetaᴛCoverageMetaFileWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<byte> finalHash, slice<slice<byte>> blobs, coverage.CounterMode mode, coverage.CounterGranularity granularity) => encodemeta_package.Writeᴍ(Ꮡm, finalHash, blobs, mode, granularity);
+}
+// </GlyphForwarders>

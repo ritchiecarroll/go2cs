@@ -98,20 +98,20 @@ internal static (ж<sharedMem> m, error err) sharedMemTempFile(nint size) {
 } partial class fuzz_package {
 
 // header returns a pointer to metadata within the shared memory region.
-internal static ж<sharedMemHeader> headerᴍ(ref sharedMem m) {
+[GoMethodBody("header")] internal static ж<sharedMemHeader> headerᴍ(ref sharedMem m) {
     return Ꮡ(m.region, 0).Reinterpret<byte, sharedMemHeader>();
 }
 
 // valueRef returns the value currently stored in shared memory. The returned
 // slice points to shared memory; it is not a copy.
-internal static slice<byte> valueRefᴍ(ref sharedMem m) {
+[GoMethodBody("valueRef")] internal static slice<byte> valueRefᴍ(ref sharedMem m) {
     nint length = m.header().valueLen;
     nint valueOffset = (nint)/* unsafe.Sizeof(sharedMemHeader{}) */ (uintptr)40;
     return m.region.slice(valueOffset, valueOffset + length);
 }
 
 // valueCopy returns a copy of the value stored in shared memory.
-internal static slice<byte> valueCopyᴍ(ref sharedMem m) {
+[GoMethodBody("valueCopy")] internal static slice<byte> valueCopyᴍ(ref sharedMem m) {
     var @ref = m.valueRef();
     return bytes.Clone(@ref);
 }
@@ -119,7 +119,7 @@ internal static slice<byte> valueCopyᴍ(ref sharedMem m) {
 // setValue copies the data in b into the shared memory buffer and sets
 // the length. len(b) must be less than or equal to the capacity of the buffer
 // (as returned by cap(m.value())).
-internal static void setValueᴍ(ref sharedMem m, slice<byte> b) {
+[GoMethodBody("setValue")] internal static void setValueᴍ(ref sharedMem m, slice<byte> b) {
     var v = m.valueRef();
     if (len(b) > cap(v)) {
         throw panic(fmt.Sprintf("value length %d larger than shared memory capacity %d"u8, len(b), cap(v)));
@@ -134,7 +134,7 @@ internal static void setValueᴍ(ref sharedMem m, slice<byte> b) {
 // Note that we can only store the length in the shared memory header. The full
 // slice header contains a pointer, which is likely only valid for one process,
 // since each process can map shared memory at a different virtual address.
-internal static void setValueLenᴍ(ref sharedMem m, nint n) {
+[GoMethodBody("setValueLen")] internal static void setValueLenᴍ(ref sharedMem m, nint n) {
     var v = m.valueRef();
     if (n > cap(v)) {
         throw panic(fmt.Sprintf("length %d larger than shared memory capacity %d"u8, n, cap(v)));
@@ -148,13 +148,3 @@ internal static void setValueLenᴍ(ref sharedMem m, nint n) {
 // remap the file.
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class fuzzᴛsharedMem {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<sharedMemHeader> header(this ref sharedMem m) => fuzz_package.headerᴍ(ref m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> valueRef(this ref sharedMem m) => fuzz_package.valueRefᴍ(ref m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> valueCopy(this ref sharedMem m) => fuzz_package.valueCopyᴍ(ref m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setValue(this ref sharedMem m, slice<byte> b) => fuzz_package.setValueᴍ(ref m, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setValueLen(this ref sharedMem m, nint n) => fuzz_package.setValueLenᴍ(ref m, n);
-}
-// </GlyphForwarders>

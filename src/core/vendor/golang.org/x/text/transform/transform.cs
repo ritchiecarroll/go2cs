@@ -108,7 +108,7 @@ partial struct NopResetter {
 } partial class transform_package {
 
 // Reset implements the Reset method of the Transformer interface.
-internal static void Resetᴍ(NopResetter _) { }
+[GoMethodBody("Reset")] internal static void Resetᴍ(NopResetter _) { }
 
 } partial class transform_package {
 
@@ -147,7 +147,7 @@ public static ж<Reader> NewReader(io.Reader r, Transformer t) {
 } partial class transform_package {
 
 // Read implements the io.Reader interface.
-internal static (nint, error) Readᴍ(ref Reader r, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref Reader r, slice<byte> p) {
     nint n = 0;
     var err = ((error)default);
     for (;;) {
@@ -247,7 +247,7 @@ public static ж<Writer> NewWriter(io.Writer w, Transformer t) {
 // Write implements the io.Writer interface. If there are not enough
 // bytes available to complete a Transform, the bytes will be buffered
 // for the next write. Call Close to convert the remaining bytes.
-internal static (nint n, error err) Writeᴍ(ref Writer w, slice<byte> data) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref Writer w, slice<byte> data) {
     nint n = default;
 
     var src = data;
@@ -316,7 +316,7 @@ internal static (nint n, error err) Writeᴍ(ref Writer w, slice<byte> data) {
 }
 
 // Close implements the io.Closer interface.
-internal static error Closeᴍ(ref Writer w) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref Writer w) {
     var src = w.src.slice(0, w.n);
     for (;;) {
         var (nDst, nSrc, err) = w.t.Transform(w.dst, src, true);
@@ -338,7 +338,7 @@ partial struct nop {
 
 } partial class transform_package {
 
-internal static (nint nDst, nint nSrc, error err) Transformᴍ(nop _, slice<byte> dst, slice<byte> src, bool atEOF) {
+[GoMethodBody("Transform")] internal static (nint nDst, nint nSrc, error err) Transformᴍ(nop _, slice<byte> dst, slice<byte> src, bool atEOF) {
     error err = default;
 
     nint n = copy(dst, src);
@@ -348,7 +348,7 @@ internal static (nint nDst, nint nSrc, error err) Transformᴍ(nop _, slice<byte
     return (n, n, err);
 }
 
-internal static (nint n, error err) Spanᴍ(nop _, slice<byte> src, bool atEOF) {
+[GoMethodBody("Span")] internal static (nint n, error err) Spanᴍ(nop _, slice<byte> src, bool atEOF) {
     return (len(src), default);
 }
 
@@ -360,7 +360,7 @@ partial struct discard {
 
 } partial class transform_package {
 
-internal static (nint nDst, nint nSrc, error err) Transformᴍ(discard _, slice<byte> dst, slice<byte> src, bool atEOF) {
+[GoMethodBody("Transform")] internal static (nint nDst, nint nSrc, error err) Transformᴍ(discard _, slice<byte> dst, slice<byte> src, bool atEOF) {
     return (0, len(src), default);
 }
 
@@ -390,7 +390,7 @@ partial struct chain {
 
 } partial class transform_package {
 
-internal static void fatalErrorᴍ(ref chain c, nint errIndex, error err) {
+[GoMethodBody("fatalError")] internal static void fatalErrorᴍ(ref chain c, nint errIndex, error err) {
     nint i = errIndex + 1; if (i > c.errStart) {
         c.errStart = i;
         c.err = err;
@@ -409,11 +409,11 @@ partial struct link {
 
 } partial class transform_package {
 
-internal static slice<byte> srcᴍ(ref link l) {
+[GoMethodBody("src")] internal static slice<byte> srcᴍ(ref link l) {
     return l.b.slice(l.p, l.n);
 }
 
-internal static slice<byte> dstᴍ(ref link l) {
+[GoMethodBody("dst")] internal static slice<byte> dstᴍ(ref link l) {
     return l.b.slice(l.n);
 }
 
@@ -441,7 +441,7 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
 } partial class transform_package {
 
 // Reset resets the state of Chain. It calls Reset on all the Transformers.
-internal static void Resetᴍ(ref chain c) {
+[GoMethodBody("Reset")] internal static void Resetᴍ(ref chain c) {
     foreach (var (i, l) in range(c.link)) {
         if (l.t != nil) {
             l.t.Reset();
@@ -453,7 +453,7 @@ internal static void Resetᴍ(ref chain c) {
 // TODO: make chain use Span (is going to be fun to implement!)
 
 // Transform applies the transformers of c in sequence.
-internal static (nint nDst, nint nSrc, error err) Transformᴍ(ref chain c, slice<byte> dst, slice<byte> src, bool atEOF) {
+[GoMethodBody("Transform")] internal static (nint nDst, nint nSrc, error err) Transformᴍ(ref chain c, slice<byte> dst, slice<byte> src, bool atEOF) {
     error err = default;
 
     // Set up src and dst in the chain.
@@ -561,10 +561,10 @@ internal delegate bool removeF(rune r);
 
 } partial class transform_package {
 
-internal static void Resetᴍ(removeF _) { }
+[GoMethodBody("Reset")] internal static void Resetᴍ(removeF _) { }
 
 // Transform implements the Transformer interface.
-internal static (nint nDst, nint nSrc, error err) Transformᴍ(removeF t, slice<byte> dst, slice<byte> src, bool atEOF) {
+[GoMethodBody("Transform")] internal static (nint nDst, nint nSrc, error err) Transformᴍ(removeF t, slice<byte> dst, slice<byte> src, bool atEOF) {
     nint nDst = default;
     nint nSrc = default;
     error err = default;
@@ -778,36 +778,3 @@ internal static (slice<byte> result, nint n, error err) doAppend(Transformer t, 
 }
 
 } // end transform_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class transformᴛNopResetter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this NopResetter _) => transform_package.Resetᴍ(_);
-}
-partial class transformᴛReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Read(this ref Reader r, slice<byte> p) => transform_package.Readᴍ(ref r, p);
-}
-partial class transformᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ref Writer w, slice<byte> data) => transform_package.Writeᴍ(ref w, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Writer w) => transform_package.Closeᴍ(ref w);
-}
-partial class transformᴛnop {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this nop _, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transformᴍ(_, dst, src, atEOF);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Span(this nop _, slice<byte> src, bool atEOF) => transform_package.Spanᴍ(_, src, atEOF);
-}
-partial class transformᴛdiscard {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this discard _, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transformᴍ(_, dst, src, atEOF);
-}
-partial class transformᴛchain {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fatalError(this ref chain c, nint errIndex, error err) => transform_package.fatalErrorᴍ(ref c, errIndex, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Reset(this ref chain c) => transform_package.Resetᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transformᴍ(ref c, dst, src, atEOF);
-}
-partial class transformᴛlink {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> src(this ref link l) => transform_package.srcᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> dst(this ref link l) => transform_package.dstᴍ(ref l);
-}
-partial class transformᴛremoveF {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Reset(this removeF _) => transform_package.Resetᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this removeF t, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transformᴍ(t, dst, src, atEOF);
-}
-// </GlyphForwarders>

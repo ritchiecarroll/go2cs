@@ -63,6 +63,18 @@ using static go.testing.quick_package;
 
 namespace go.testing;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using flag = flag_package;
+using fmt = fmt_package;
+using math = math_package;
+using rand = go.math.rand_package;
+using reflect = reflect_package;
+using strings = strings_package;
+using time = time_package;
+using go.math;
+using static quick_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("quick")]
 public static partial class quick_package
 {
@@ -109,3 +121,19 @@ public static partial class quick_package
 [GoMethodHost(typeof(quick_package.Config)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quickᴛConfig;
 [GoMethodHost(typeof(quick_package.SetupError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quickᴛSetupError;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class quickᴛConfig {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<rand.Rand> getRand(this ref Config c) => quick_package.getRandᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*maxCount*/ getMaxCount(this ref Config c) => quick_package.getMaxCountᴍ(ref c);
+}
+partial class quickᴛSetupError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this SetupError s) => quick_package.Errorᴍ(s);
+}
+partial class quickᴛCheckError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref CheckError s) => quick_package.Errorᴍ(ref s);
+}
+partial class quickᴛCheckEqualError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref CheckEqualError s) => quick_package.Errorᴍ(ref s);
+}
+// </GlyphForwarders>

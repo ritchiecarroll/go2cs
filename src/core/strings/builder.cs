@@ -32,7 +32,7 @@ partial struct Builder {
 // We cannot add a noCopy field to Builder, to cause vet's copylocks
 // check to report copying, because copylocks cannot reliably
 // discriminate the zero and nonzero cases.
-internal static void copyCheckᴍ(ж<Builder> Ꮡb) {
+[GoMethodBody("copyCheck")] internal static void copyCheckᴍ(ж<Builder> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (b.addr == nil) {
@@ -48,27 +48,27 @@ internal static void copyCheckᴍ(ж<Builder> Ꮡb) {
 }
 
 // String returns the accumulated string.
-internal static @string Stringᴍ(ref Builder b) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref Builder b) {
     return @unsafe.String(@unsafe.SliceData(b.buf), len(b.buf));
 }
 
 // Len returns the number of accumulated bytes; b.Len() == len(b.String()).
-internal static nint Lenᴍ(ref Builder b) { return len(b.buf); }
+[GoMethodBody("Len")] internal static nint Lenᴍ(ref Builder b) { return len(b.buf); }
 
 // Cap returns the capacity of the builder's underlying byte slice. It is the
 // total space allocated for the string being built and includes any bytes
 // already written.
-internal static nint Capᴍ(ref Builder b) { return cap(b.buf); }
+[GoMethodBody("Cap")] internal static nint Capᴍ(ref Builder b) { return cap(b.buf); }
 
 // Reset resets the [Builder] to be empty.
-internal static void Resetᴍ(ref Builder b) {
+[GoMethodBody("Reset")] internal static void Resetᴍ(ref Builder b) {
     b.addr = default;
     b.buf = default;
 }
 
 // grow copies the buffer to a new, larger buffer so that there are at least n
 // bytes of capacity beyond len(b.buf).
-internal static void growᴍ(ref Builder b, nint n) {
+[GoMethodBody("grow")] internal static void growᴍ(ref Builder b, nint n) {
     var buf = bytealg.MakeNoZero(2 * cap(b.buf) + n).slice(0, len(b.buf));
     copy(buf, b.buf);
     b.buf = buf;
@@ -77,7 +77,7 @@ internal static void growᴍ(ref Builder b, nint n) {
 // Grow grows b's capacity, if necessary, to guarantee space for
 // another n bytes. After Grow(n), at least n bytes can be written to b
 // without another allocation. If n is negative, Grow panics.
-internal static void Growᴍ(ж<Builder> Ꮡb, nint n) {
+[GoMethodBody("Grow")] internal static void Growᴍ(ж<Builder> Ꮡb, nint n) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     Ꮡb.copyCheck();
@@ -91,7 +91,7 @@ internal static void Growᴍ(ж<Builder> Ꮡb, nint n) {
 
 // Write appends the contents of p to b's buffer.
 // Write always returns len(p), nil.
-internal static (nint, error) Writeᴍ(ж<Builder> Ꮡb, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ж<Builder> Ꮡb, slice<byte> p) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     Ꮡb.copyCheck();
@@ -101,7 +101,7 @@ internal static (nint, error) Writeᴍ(ж<Builder> Ꮡb, slice<byte> p) {
 
 // WriteByte appends the byte c to b's buffer.
 // The returned error is always nil.
-internal static error WriteByteᴍ(ж<Builder> Ꮡb, byte c) {
+[GoMethodBody("WriteByte")] internal static error WriteByteᴍ(ж<Builder> Ꮡb, byte c) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     Ꮡb.copyCheck();
@@ -111,7 +111,7 @@ internal static error WriteByteᴍ(ж<Builder> Ꮡb, byte c) {
 
 // WriteRune appends the UTF-8 encoding of Unicode code point r to b's buffer.
 // It returns the length of r and a nil error.
-internal static (nint, error) WriteRuneᴍ(ж<Builder> Ꮡb, rune r) {
+[GoMethodBody("WriteRune")] internal static (nint, error) WriteRuneᴍ(ж<Builder> Ꮡb, rune r) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     Ꮡb.copyCheck();
@@ -122,7 +122,7 @@ internal static (nint, error) WriteRuneᴍ(ж<Builder> Ꮡb, rune r) {
 
 // WriteString appends the contents of s to b's buffer.
 // It returns the length of s and a nil error.
-internal static (nint, error) WriteStringᴍ(ж<Builder> Ꮡb, @string s) {
+[GoMethodBody("WriteString")] internal static (nint, error) WriteStringᴍ(ж<Builder> Ꮡb, @string s) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     Ꮡb.copyCheck();
@@ -131,19 +131,3 @@ internal static (nint, error) WriteStringᴍ(ж<Builder> Ꮡb, @string s) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class stringsᴛBuilder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void copyCheck(this ж<Builder> Ꮡb) => strings_package.copyCheckᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Builder b) => strings_package.Stringᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ref Builder b) => strings_package.Lenᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Cap(this ref Builder b) => strings_package.Capᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Builder b) => strings_package.Resetᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void grow(this ref Builder b, nint n) => strings_package.growᴍ(ref b, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Grow(this ж<Builder> Ꮡb, nint n) => strings_package.Growᴍ(Ꮡb, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Write(this ж<Builder> Ꮡb, slice<byte> p) => strings_package.Writeᴍ(Ꮡb, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteByte(this ж<Builder> Ꮡb, byte c) => strings_package.WriteByteᴍ(Ꮡb, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteRune(this ж<Builder> Ꮡb, rune r) => strings_package.WriteRuneᴍ(Ꮡb, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteString(this ж<Builder> Ꮡb, @string s) => strings_package.WriteStringᴍ(Ꮡb, s);
-}
-// </GlyphForwarders>

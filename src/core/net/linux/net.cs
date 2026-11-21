@@ -183,7 +183,7 @@ partial struct conn {
 
 } partial class net_package {
 
-internal static bool okᴍ(ж<conn> Ꮡc) {
+[GoMethodBody("ok")] internal static bool okᴍ(ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     return Ꮡc != nil && c.fd != nil;
@@ -192,7 +192,7 @@ internal static bool okᴍ(ж<conn> Ꮡc) {
 // Implementation of the Conn interface.
 
 // Read implements the Conn Read method.
-internal static (nint, error) Readᴍ(ж<conn> Ꮡc, slice<byte> b) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ж<conn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -206,7 +206,7 @@ internal static (nint, error) Readᴍ(ж<conn> Ꮡc, slice<byte> b) {
 }
 
 // Write implements the Conn Write method.
-internal static (nint, error) Writeᴍ(ж<conn> Ꮡc, slice<byte> b) {
+[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ж<conn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -220,7 +220,7 @@ internal static (nint, error) Writeᴍ(ж<conn> Ꮡc, slice<byte> b) {
 }
 
 // Close closes the connection.
-internal static error Closeᴍ(ж<conn> Ꮡc) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -236,7 +236,7 @@ internal static error Closeᴍ(ж<conn> Ꮡc) {
 // LocalAddr returns the local network address.
 // The Addr returned is shared by all invocations of LocalAddr, so
 // do not modify it.
-internal static Addr LocalAddrᴍ(ж<conn> Ꮡc) {
+[GoMethodBody("LocalAddr")] internal static Addr LocalAddrᴍ(ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -248,7 +248,7 @@ internal static Addr LocalAddrᴍ(ж<conn> Ꮡc) {
 // RemoteAddr returns the remote network address.
 // The Addr returned is shared by all invocations of RemoteAddr, so
 // do not modify it.
-internal static Addr RemoteAddrᴍ(ж<conn> Ꮡc) {
+[GoMethodBody("RemoteAddr")] internal static Addr RemoteAddrᴍ(ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -258,7 +258,7 @@ internal static Addr RemoteAddrᴍ(ж<conn> Ꮡc) {
 }
 
 // SetDeadline implements the Conn SetDeadline method.
-internal static error SetDeadlineᴍ(ж<conn> Ꮡc, time.Time t) {
+[GoMethodBody("SetDeadline")] internal static error SetDeadlineᴍ(ж<conn> Ꮡc, time.Time t) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -271,7 +271,7 @@ internal static error SetDeadlineᴍ(ж<conn> Ꮡc, time.Time t) {
 }
 
 // SetReadDeadline implements the Conn SetReadDeadline method.
-internal static error SetReadDeadlineᴍ(ж<conn> Ꮡc, time.Time t) {
+[GoMethodBody("SetReadDeadline")] internal static error SetReadDeadlineᴍ(ж<conn> Ꮡc, time.Time t) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -284,7 +284,7 @@ internal static error SetReadDeadlineᴍ(ж<conn> Ꮡc, time.Time t) {
 }
 
 // SetWriteDeadline implements the Conn SetWriteDeadline method.
-internal static error SetWriteDeadlineᴍ(ж<conn> Ꮡc, time.Time t) {
+[GoMethodBody("SetWriteDeadline")] internal static error SetWriteDeadlineᴍ(ж<conn> Ꮡc, time.Time t) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -298,7 +298,7 @@ internal static error SetWriteDeadlineᴍ(ж<conn> Ꮡc, time.Time t) {
 
 // SetReadBuffer sets the size of the operating system's
 // receive buffer associated with the connection.
-internal static error SetReadBufferᴍ(ж<conn> Ꮡc, nint bytes) {
+[GoMethodBody("SetReadBuffer")] internal static error SetReadBufferᴍ(ж<conn> Ꮡc, nint bytes) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -312,7 +312,7 @@ internal static error SetReadBufferᴍ(ж<conn> Ꮡc, nint bytes) {
 
 // SetWriteBuffer sets the size of the operating system's
 // transmit buffer associated with the connection.
-internal static error SetWriteBufferᴍ(ж<conn> Ꮡc, nint bytes) {
+[GoMethodBody("SetWriteBuffer")] internal static error SetWriteBufferᴍ(ж<conn> Ꮡc, nint bytes) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -334,7 +334,7 @@ internal static error SetWriteBufferᴍ(ж<conn> Ꮡc, nint bytes) {
 //
 // On Windows, the returned os.File's file descriptor is not usable
 // on other processes.
-internal static (ж<os.File> f, error err) Fileᴍ(ref conn c) {
+[GoMethodBody("File")] internal static (ж<os.File> f, error err) Fileᴍ(ref conn c) {
     ж<os.File> f = default;
     error err = default;
 
@@ -482,9 +482,9 @@ partial struct canceledError {
 internal static ref readonly @string operationWasCanceledˢᴍcanceledError => ref operationWasCanceledˢᵇᴍcanceledError;
 private static readonly @string operationWasCanceledˢᵇᴍcanceledError = "operation was canceled"u8;
 
-internal static @string Errorᴍ(canceledError _) { return operationWasCanceledˢᴍcanceledError; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(canceledError _) { return operationWasCanceledˢᴍcanceledError; }
 
-internal static bool Isᴍ(canceledError _, error err) { return AreEqual(err, context.Canceled); }
+[GoMethodBody("Is")] internal static bool Isᴍ(canceledError _, error err) { return AreEqual(err, context.Canceled); }
 
 } partial class net_package {
 
@@ -531,13 +531,13 @@ partial struct OpError {
 
 } partial class net_package {
 
-internal static error Unwrapᴍ(ref OpError e) { return e.Err; }
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref OpError e) { return e.Err; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢᴍOpError => ref nilˢᵇᴍOpError;
 private static readonly @string nilˢᵇᴍOpError = "<nil>"u8;
 
-internal static @string Errorᴍ(ж<OpError> Ꮡe) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ж<OpError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (Ꮡe == nil) {
@@ -579,7 +579,7 @@ partial interface timeout {
 
 } partial class net_package {
 
-internal static bool Timeoutᴍ(ref OpError e) {
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref OpError e) {
     var (ne, okΔ1) = e.Err._<ж<os.SyscallError>>(ᐧ); if (okΔ1) {
         var (tΔ1, okΔ2) = ne.Err._<timeout>(ᐧ);
         return okΔ2 && tΔ1.Timeout();
@@ -596,7 +596,7 @@ partial interface temporary {
 
 } partial class net_package {
 
-internal static bool Temporaryᴍ(ref OpError e) {
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref OpError e) {
     // Treat ECONNRESET and ECONNABORTED as temporary errors when
     // they come from calling accept. See issue 6163.
     if (e.Op == "accept"u8 && isConnError(e.Err)) {
@@ -624,10 +624,10 @@ partial struct ParseError {
 
 } partial class net_package {
 
-internal static @string Errorᴍ(ref ParseError e) { return "invalid "u8 + e.Type + ": "u8 + e.Text; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref ParseError e) { return "invalid "u8 + e.Type + ": "u8 + e.Text; }
 
-internal static bool Timeoutᴍ(ref ParseError e) { return false; }
-internal static bool Temporaryᴍ(ref ParseError e) { return false; }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref ParseError e) { return false; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref ParseError e) { return false; }
 
 } partial class net_package {
 
@@ -642,7 +642,7 @@ partial struct AddrError {
 internal static ref readonly @string nilˢᴍAddrError => ref nilˢᵇᴍAddrError;
 private static readonly @string nilˢᵇᴍAddrError = "<nil>"u8;
 
-internal static @string Errorᴍ(ж<AddrError> Ꮡe) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ж<AddrError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (Ꮡe == nil) {
@@ -655,8 +655,8 @@ internal static @string Errorᴍ(ж<AddrError> Ꮡe) {
     return s;
 }
 
-internal static bool Timeoutᴍ(ref AddrError e) { return false; }
-internal static bool Temporaryᴍ(ref AddrError e) { return false; }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref AddrError e) { return false; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref AddrError e) { return false; }
 
 } partial class net_package {
 
@@ -664,9 +664,9 @@ partial struct UnknownNetworkError /*@string*/;
 
 } partial class net_package {
 
-internal static @string Errorᴍ(UnknownNetworkError e) { return "unknown network "u8 + ((@string)e); }
-internal static bool Timeoutᴍ(UnknownNetworkError e) { return false; }
-internal static bool Temporaryᴍ(UnknownNetworkError e) { return false; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(UnknownNetworkError e) { return "unknown network "u8 + ((@string)e); }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(UnknownNetworkError e) { return false; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(UnknownNetworkError e) { return false; }
 
 } partial class net_package {
 
@@ -674,9 +674,9 @@ partial struct InvalidAddrError /*@string*/;
 
 } partial class net_package {
 
-internal static @string Errorᴍ(InvalidAddrError e) { return (@string)e; }
-internal static bool Timeoutᴍ(InvalidAddrError e) { return false; }
-internal static bool Temporaryᴍ(InvalidAddrError e) { return false; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(InvalidAddrError e) { return (@string)e; }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(InvalidAddrError e) { return false; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(InvalidAddrError e) { return false; }
 
 } partial class net_package {
 
@@ -702,11 +702,11 @@ partial struct timeoutError {
 internal static ref readonly @string iOTimeoutˢᴍtimeoutError => ref iOTimeoutˢᵇᴍtimeoutError;
 private static readonly @string iOTimeoutˢᵇᴍtimeoutError = "i/o timeout"u8;
 
-internal static @string Errorᴍ(ref timeoutError e) { return iOTimeoutˢᴍtimeoutError; }
-internal static bool Timeoutᴍ(ref timeoutError e) { return true; }
-internal static bool Temporaryᴍ(ref timeoutError e) { return true; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref timeoutError e) { return iOTimeoutˢᴍtimeoutError; }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref timeoutError e) { return true; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref timeoutError e) { return true; }
 
-internal static bool Isᴍ(ref timeoutError e, error err) {
+[GoMethodBody("Is")] internal static bool Isᴍ(ref timeoutError e, error err) {
     return AreEqual(err, context.DeadlineExceeded);
 }
 
@@ -720,10 +720,10 @@ partial struct DNSConfigError {
 
 } partial class net_package {
 
-internal static error Unwrapᴍ(ref DNSConfigError e) { return e.Err; }
-internal static @string Errorᴍ(ref DNSConfigError e) { return "error reading DNS config: "u8 + e.Err.Error(); }
-internal static bool Timeoutᴍ(ref DNSConfigError e) { return false; }
-internal static bool Temporaryᴍ(ref DNSConfigError e) { return false; }
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref DNSConfigError e) { return e.Err; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref DNSConfigError e) { return "error reading DNS config: "u8 + e.Err.Error(); }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref DNSConfigError e) { return false; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref DNSConfigError e) { return false; }
 
 } partial class net_package {
 
@@ -739,7 +739,7 @@ partial struct notFoundError {
 
 } partial class net_package {
 
-internal static @string Errorᴍ(ref notFoundError e) { return e.s; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref notFoundError e) { return e.s; }
 
 } partial class net_package {
 
@@ -751,9 +751,9 @@ partial struct temporaryError {
 
 } partial class net_package {
 
-internal static @string Errorᴍ(ref temporaryError e) { return e.s; }
-internal static bool Temporaryᴍ(ref temporaryError e) { return true; }
-internal static bool Timeoutᴍ(ref temporaryError e) { return false; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref temporaryError e) { return e.s; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref temporaryError e) { return true; }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref temporaryError e) { return false; }
 
 } partial class net_package {
 
@@ -805,13 +805,13 @@ internal static ж<DNSError> newDNSError(error err, @string name, @string server
 } partial class net_package {
 
 // Unwrap returns e.UnwrapErr.
-internal static error Unwrapᴍ(ref DNSError e) { return e.UnwrapErr; }
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref DNSError e) { return e.UnwrapErr; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢᴍDNSError => ref nilˢᵇᴍDNSError;
 private static readonly @string nilˢᵇᴍDNSError = "<nil>"u8;
 
-internal static @string Errorᴍ(ж<DNSError> Ꮡe) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ж<DNSError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (Ꮡe == nil) {
@@ -828,12 +828,12 @@ internal static @string Errorᴍ(ж<DNSError> Ꮡe) {
 // Timeout reports whether the DNS lookup is known to have timed out.
 // This is not always known; a DNS lookup may fail due to a timeout
 // and return a [DNSError] for which Timeout returns false.
-internal static bool Timeoutᴍ(ref DNSError e) { return e.IsTimeout; }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref DNSError e) { return e.IsTimeout; }
 
 // Temporary reports whether the DNS error is known to be temporary.
 // This is not always known; a DNS lookup may fail due to a temporary
 // error and return a [DNSError] for which Temporary returns false.
-internal static bool Temporaryᴍ(ref DNSError e) { return e.IsTimeout || e.IsTemporary; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref DNSError e) { return e.IsTimeout || e.IsTemporary; }
 
 } partial class net_package {
 
@@ -857,7 +857,7 @@ partial struct noReadFrom {
 
 // ReadFrom hides another ReadFrom method.
 // It should never be called.
-internal static (int64, error) ReadFromᴍ(noReadFrom _Δp0, Δio.Reader _Δp1) {
+[GoMethodBody("ReadFrom")] internal static (int64, error) ReadFromᴍ(noReadFrom _Δp0, Δio.Reader _Δp1) {
     throw panic("can't happen");
 }
 
@@ -887,7 +887,7 @@ partial struct noWriteTo {
 
 // WriteTo hides another WriteTo method.
 // It should never be called.
-internal static (int64, error) WriteToᴍ(noWriteTo _Δp0, Δio.Writer _Δp1) {
+[GoMethodBody("WriteTo")] internal static (int64, error) WriteToᴍ(noWriteTo _Δp0, Δio.Writer _Δp1) {
     throw panic("can't happen");
 }
 
@@ -963,7 +963,7 @@ internal static Δio.Reader _ᴛ3ʗ = new BuffersжReader(((ж<Buffers>)nil));
 //
 // WriteTo modifies the slice v as well as v[i] for 0 <= i < len(v),
 // but does not modify v[i][j] for any i, j.
-internal static (int64 n, error err) WriteToᴍ(ж<Buffers> Ꮡv, Δio.Writer w) {
+[GoMethodBody("WriteTo")] internal static (int64 n, error err) WriteToᴍ(ж<Buffers> Ꮡv, Δio.Writer w) {
     int64 n = default;
     ref var v = ref Ꮡv.DerefOrNull();
 
@@ -988,7 +988,7 @@ internal static (int64 n, error err) WriteToᴍ(ж<Buffers> Ꮡv, Δio.Writer w)
 //
 // Read modifies the slice v as well as v[i] for 0 <= i < len(v),
 // but does not modify v[i][j] for any i, j.
-internal static (nint n, error err) Readᴍ(ref Buffers v, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref Buffers v, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -1004,7 +1004,7 @@ internal static (nint n, error err) Readᴍ(ref Buffers v, slice<byte> p) {
     return (n, err);
 }
 
-internal static void consumeᴍ(ref Buffers v, int64 n) {
+[GoMethodBody("consume")] internal static void consumeᴍ(ref Buffers v, int64 n) {
     while (len(v) > 0) {
         var ln0 = (int64)len((v)[0]);
         if (ln0 > n) {
@@ -1018,87 +1018,3 @@ internal static void consumeᴍ(ref Buffers v, int64 n) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛconn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool ok(this ж<conn> Ꮡc) => net_package.okᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ж<conn> Ꮡc, slice<byte> b) => net_package.Readᴍ(Ꮡc, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this ж<conn> Ꮡc, slice<byte> b) => net_package.Writeᴍ(Ꮡc, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<conn> Ꮡc) => net_package.Closeᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Addr LocalAddr(this ж<conn> Ꮡc) => net_package.LocalAddrᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Addr RemoteAddr(this ж<conn> Ꮡc) => net_package.RemoteAddrᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetDeadline(this ж<conn> Ꮡc, time.Time t) => net_package.SetDeadlineᴍ(Ꮡc, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetReadDeadline(this ж<conn> Ꮡc, time.Time t) => net_package.SetReadDeadlineᴍ(Ꮡc, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetWriteDeadline(this ж<conn> Ꮡc, time.Time t) => net_package.SetWriteDeadlineᴍ(Ꮡc, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetReadBuffer(this ж<conn> Ꮡc, nint bytes) => net_package.SetReadBufferᴍ(Ꮡc, bytes);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetWriteBuffer(this ж<conn> Ꮡc, nint bytes) => net_package.SetWriteBufferᴍ(Ꮡc, bytes);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<os.File> f, error err) File(this ref conn c) => net_package.Fileᴍ(ref c);
-}
-partial class netᴛcanceledError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this canceledError _) => net_package.Errorᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Is(this canceledError _, error err) => net_package.Isᴍ(_, err);
-}
-partial class netᴛOpError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref OpError e) => net_package.Unwrapᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ж<OpError> Ꮡe) => net_package.Errorᴍ(Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this ref OpError e) => net_package.Timeoutᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Temporary(this ref OpError e) => net_package.Temporaryᴍ(ref e);
-}
-partial class netᴛParseError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref ParseError e) => net_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this ref ParseError e) => net_package.Timeoutᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Temporary(this ref ParseError e) => net_package.Temporaryᴍ(ref e);
-}
-partial class netᴛAddrError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ж<AddrError> Ꮡe) => net_package.Errorᴍ(Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this ref AddrError e) => net_package.Timeoutᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Temporary(this ref AddrError e) => net_package.Temporaryᴍ(ref e);
-}
-partial class netᴛUnknownNetworkError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownNetworkError e) => net_package.Errorᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this UnknownNetworkError e) => net_package.Timeoutᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Temporary(this UnknownNetworkError e) => net_package.Temporaryᴍ(e);
-}
-partial class netᴛInvalidAddrError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this InvalidAddrError e) => net_package.Errorᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this InvalidAddrError e) => net_package.Timeoutᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Temporary(this InvalidAddrError e) => net_package.Temporaryᴍ(e);
-}
-partial class netᴛtimeoutError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref timeoutError e) => net_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Timeout(this ref timeoutError e) => net_package.Timeoutᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Temporary(this ref timeoutError e) => net_package.Temporaryᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Is(this ref timeoutError e, error err) => net_package.Isᴍ(ref e, err);
-}
-partial class netᴛDNSConfigError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref DNSConfigError e) => net_package.Unwrapᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref DNSConfigError e) => net_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this ref DNSConfigError e) => net_package.Timeoutᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Temporary(this ref DNSConfigError e) => net_package.Temporaryᴍ(ref e);
-}
-partial class netᴛnotFoundError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref notFoundError e) => net_package.Errorᴍ(ref e);
-}
-partial class netᴛtemporaryError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref temporaryError e) => net_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Temporary(this ref temporaryError e) => net_package.Temporaryᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Timeout(this ref temporaryError e) => net_package.Timeoutᴍ(ref e);
-}
-partial class netᴛDNSError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref DNSError e) => net_package.Unwrapᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ж<DNSError> Ꮡe) => net_package.Errorᴍ(Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this ref DNSError e) => net_package.Timeoutᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Temporary(this ref DNSError e) => net_package.Temporaryᴍ(ref e);
-}
-partial class netᴛnoReadFrom {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1) => net_package.ReadFromᴍ(_Δp0, _Δp1);
-}
-partial class netᴛnoWriteTo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) => net_package.WriteToᴍ(_Δp0, _Δp1);
-}
-partial class netᴛBuffers {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64 n, error err) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w) => net_package.WriteToᴍ(Ꮡv, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ref Buffers v, slice<byte> p) => net_package.Readᴍ(ref v, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void consume(this ref Buffers v, int64 n) => net_package.consumeᴍ(ref v, n);
-}
-// </GlyphForwarders>

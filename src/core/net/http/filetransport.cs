@@ -53,7 +53,7 @@ public static RoundTripper NewFileTransportFS(fs.FS fsys) {
 
 } partial class http_package {
 
-internal static partial (ж<Response> resp, error err) RoundTripᴍ(fileTransport t, ж<Request> req) {
+[GoMethodBody("RoundTrip")] internal static partial (ж<Response> resp, error err) RoundTripᴍ(fileTransport t, ж<Request> req) {
     // We start ServeHTTP in a goroutine, which may take a long
     // time if the file is large. The newPopulateResponseWriter
     // call returns a channel which either ServeHTTP or finish()
@@ -103,7 +103,7 @@ partial struct populateResponse {
 
 } partial class http_package {
 
-internal static void finishᴍ(ref populateResponse pr) {
+[GoMethodBody("finish")] internal static void finishᴍ(ref populateResponse pr) {
     if (!pr.wroteHeader) {
         pr.WriteHeader(500);
     }
@@ -113,7 +113,7 @@ internal static void finishᴍ(ref populateResponse pr) {
     pr.pw.Close();
 }
 
-internal static void sendResponseᴍ(ref populateResponse pr) {
+[GoMethodBody("sendResponse")] internal static void sendResponseᴍ(ref populateResponse pr) {
     if (pr.sentResponse) {
         return;
     }
@@ -125,11 +125,11 @@ internal static void sendResponseᴍ(ref populateResponse pr) {
     pr.ch.ᐸꟷ(pr.res);
 }
 
-internal static Header Headerᴍ(ref populateResponse pr) {
+[GoMethodBody("Header")] internal static Header Headerᴍ(ref populateResponse pr) {
     return pr.res.Header;
 }
 
-internal static void WriteHeaderᴍ(ref populateResponse pr, nint code) {
+[GoMethodBody("WriteHeader")] internal static void WriteHeaderᴍ(ref populateResponse pr, nint code) {
     if (pr.wroteHeader) {
         return;
     }
@@ -139,7 +139,7 @@ internal static void WriteHeaderᴍ(ref populateResponse pr, nint code) {
     pr.res.Status = fmt.Sprintf("%d %s"u8, code, StatusText(code));
 }
 
-internal static (nint n, error err) Writeᴍ(ref populateResponse pr, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref populateResponse pr, slice<byte> p) {
     if (!pr.wroteHeader) {
         pr.WriteHeader(StatusOK);
     }
@@ -151,16 +151,3 @@ internal static (nint n, error err) Writeᴍ(ref populateResponse pr, slice<byte
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httpᴛfileTransport {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Response> resp, error err) RoundTrip(this fileTransport t, ж<Request> req) => http_package.RoundTripᴍ(t, req);
-}
-partial class httpᴛpopulateResponse {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void finish(this ref populateResponse pr) => http_package.finishᴍ(ref pr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sendResponse(this ref populateResponse pr) => http_package.sendResponseᴍ(ref pr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Header Header(this ref populateResponse pr) => http_package.Headerᴍ(ref pr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void WriteHeader(this ref populateResponse pr, nint code) => http_package.WriteHeaderᴍ(ref pr, code);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref populateResponse pr, slice<byte> p) => http_package.Writeᴍ(ref pr, p);
-}
-// </GlyphForwarders>

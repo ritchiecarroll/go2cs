@@ -86,7 +86,7 @@ internal static unsafeBuf<T> newUnsafeBuf<T>(ж<T> @base) {
 // addIf speculatively writes to the next index of the buffer, so the caller
 // must be certain that such a write will still be in-bounds with respect
 // to the buffer's true capacity.
-internal static void addIfᴍ<T>(ref unsafeBuf<T> b, T val, bool pred) {
+[GoMethodBody("addIf")] internal static void addIfᴍ<T>(ref unsafeBuf<T> b, T val, bool pred) {
     (@unsafe.Pointer.To<T>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(b.@base), b.n * (nint)@unsafe.Sizeof(val)))).ValueSlot = val;
     b.n += bool2int(pred);
 }
@@ -96,7 +96,7 @@ internal static void addIfᴍ<T>(ref unsafeBuf<T> b, T val, bool pred) {
 // catch any misuse as fast as possible. Separating the bounds check from
 // the append is more efficient, but one check to cover several appends is
 // still efficient and much more memory safe.
-internal static void checkᴍ<T>(unsafeBuf<T> b, nint cap) {
+[GoMethodBody("check")] internal static void checkᴍ<T>(unsafeBuf<T> b, nint cap) {
     // We fail even if b.n == cap because addIf speculatively writes one past b.n.
     if (b.n >= cap) {
         throw panic("unsafeBuf overflow");
@@ -115,10 +115,3 @@ internal static nint bool2int(bool x) {
 }
 
 } // end scan_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class scanᴛunsafeBuf {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addIf<T>(this ref unsafeBuf<T> b, T val, bool pred) => scan_package.addIfᴍ<T>(ref b, val, pred);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void check<T>(this unsafeBuf<T> b, nint cap) => scan_package.checkᴍ<T>(b, cap);
-}
-// </GlyphForwarders>

@@ -381,7 +381,7 @@ partial struct mSpanStateBox {
 // It is nosplit to match get, below.
 
 //go:nosplit
-internal static void setᴍ(ж<mSpanStateBox> Ꮡb, mSpanState s) {
+[GoMethodBody("set")] internal static void setᴍ(ж<mSpanStateBox> Ꮡb, mSpanState s) {
     Ꮡb.Ꮡs.Store((uint8)s);
 }
 
@@ -389,7 +389,7 @@ internal static void setᴍ(ж<mSpanStateBox> Ꮡb, mSpanState s) {
 // which must not be preempted.
 
 //go:nosplit
-internal static mSpanState getᴍ(ж<mSpanStateBox> Ꮡb) {
+[GoMethodBody("get")] internal static mSpanState getᴍ(ж<mSpanStateBox> Ꮡb) {
     return (mSpanState)Ꮡb.Ꮡs.Load();
 }
 
@@ -486,11 +486,11 @@ partial struct mspan {
 
 } partial class runtime_package {
 
-internal static uintptr @baseᴍ(ref mspan s) {
+[GoMethodBody("base")] internal static uintptr @baseᴍ(ref mspan s) {
     return s.startAddr;
 }
 
-internal static (uintptr size, uintptr n, uintptr total) layoutᴍ(ref mspan s) {
+[GoMethodBody("layout")] internal static (uintptr size, uintptr n, uintptr total) layoutᴍ(ref mspan s) {
     uintptr size = default;
     uintptr n = default;
     uintptr total = default;
@@ -574,12 +574,12 @@ internal static spanClass makeSpanClass(uint8 sizeclass, bool noscan) {
 } partial class runtime_package {
 
 //go:nosplit
-internal static int8 sizeclassᴍ(spanClass sc) {
+[GoMethodBody("sizeclass")] internal static int8 sizeclassᴍ(spanClass sc) {
     return (int8)(sc >> 1);
 }
 
 //go:nosplit
-internal static bool noscanᴍ(spanClass sc) {
+[GoMethodBody("noscan")] internal static bool noscanᴍ(spanClass sc) {
     return (spanClass)(sc & 1) != 0;
 }
 
@@ -617,7 +617,7 @@ partial struct arenaIdx /*num:nuint*/;
 // functions.
 //
 //go:nosplit
-internal static nuint l1ᴍ(arenaIdx i) {
+[GoMethodBody("l1")] internal static nuint l1ᴍ(arenaIdx i) {
     if (arenaL1Bits == 0) {
         // Let the compiler optimize this away if there's no
         // L1 map.
@@ -633,7 +633,7 @@ internal static nuint l1ᴍ(arenaIdx i) {
 // functions.
 //
 //go:nosplit
-internal static nuint l2ᴍ(arenaIdx i) {
+[GoMethodBody("l2")] internal static nuint l2ᴍ(arenaIdx i) {
     if (arenaL1Bits == 0) {
         return (nuint)i;
     } else {
@@ -742,7 +742,7 @@ internal static ж<heapArena> heapArenaOf(uintptr p) {
 } partial class runtime_package {
 
 // Initialize the heap.
-internal static void initᴍ(ж<mheap> Ꮡh) {
+[GoMethodBody("init")] internal static void initᴍ(ж<mheap> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     lockInit(ref nonnil(ref h).@lock, lockRankMheap);
@@ -789,7 +789,7 @@ internal static void initᴍ(ж<mheap> Ꮡh) {
 // reclaim implements the page-reclaimer half of the sweeper.
 //
 // h.lock must NOT be held.
-internal static void reclaimᴍ(ж<mheap> Ꮡh, uintptr npage) {
+[GoMethodBody("reclaim")] internal static void reclaimᴍ(ж<mheap> Ꮡh, uintptr npage) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     // TODO(austin): Half of the time spent freeing spans is in
@@ -871,7 +871,7 @@ internal static void reclaimᴍ(ж<mheap> Ꮡh, uintptr npage) {
 // h.lock must be held and the caller must be non-preemptible. Note: h.lock may be
 // temporarily unlocked and re-locked in order to do sweeping or if tracing is
 // enabled.
-internal static uintptr reclaimChunkᴍ(ж<mheap> Ꮡh, slice<arenaIdx> arenas, uintptr pageIdx, uintptr n) {
+[GoMethodBody("reclaimChunk")] internal static uintptr reclaimChunkᴍ(ж<mheap> Ꮡh, slice<arenaIdx> arenas, uintptr pageIdx, uintptr n) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     // The heap lock must be held because this accesses the
@@ -959,7 +959,7 @@ internal static spanAllocType spanAllocWorkBuf => 2;         // work buf span
 } partial class runtime_package {
 
 // manual returns true if the span allocation is manually managed.
-internal static bool manualᴍ(spanAllocType s) {
+[GoMethodBody("manual")] internal static bool manualᴍ(spanAllocType s) {
     return s != spanAllocHeap;
 }
 
@@ -971,7 +971,7 @@ internal static bool manualᴍ(spanAllocType s) {
 //
 // Returns a span that has been fully initialized. span.needzero indicates
 // whether the span has been zeroed. Note that it may not be.
-internal static ж<mspan> allocᴍ(ж<mheap> Ꮡh, uintptr npages, spanClass spanclass) {
+[GoMethodBody("alloc")] internal static ж<mspan> allocᴍ(ж<mheap> Ꮡh, uintptr npages, spanClass spanclass) {
     // Don't do any operations that lock the heap on the G stack.
     // It might trigger stack growth, and the stack growth code needs
     // to be able to allocate heap.
@@ -1008,7 +1008,7 @@ private static readonly @string manualSpanAllocationˢᵇᴍmheap = "manual span
 // existing spanAllocType value and instead declare a new one.
 //
 //go:systemstack
-internal static ж<mspan> allocManualᴍ(ж<mheap> Ꮡh, uintptr npages, spanAllocType typ) {
+[GoMethodBody("allocManual")] internal static ж<mspan> allocManualᴍ(ж<mheap> Ꮡh, uintptr npages, spanAllocType typ) {
     if (!typ.manual()) {
         @throw(manualSpanAllocationˢᴍmheap);
     }
@@ -1017,7 +1017,7 @@ internal static ж<mspan> allocManualᴍ(ж<mheap> Ꮡh, uintptr npages, spanAll
 
 // setSpans modifies the span map so [spanOf(base), spanOf(base+npage*pageSize))
 // is s.
-internal static void setSpansᴍ(ref mheap h, uintptr @base, uintptr npage, ж<mspan> s) {
+[GoMethodBody("setSpans")] internal static void setSpansᴍ(ref mheap h, uintptr @base, uintptr npage, ж<mspan> s) {
     var p = @base / (uintptr)pageSize;
     arenaIdx ai = arenaIndex(@base);
     var ha = h.arenas[ai.l1()].Value[ai.l2()];
@@ -1045,7 +1045,7 @@ private static readonly @string potentiallyOverlappingInˢᵇᴍmheap = "potenti
 // critical for future page allocations.
 //
 // There are no locking constraints on this method.
-internal static bool /*needZero*/ allocNeedsZeroᴍ(ref mheap h, uintptr @base, uintptr npage) {
+[GoMethodBody("allocNeedsZero")] internal static bool /*needZero*/ allocNeedsZeroᴍ(ref mheap h, uintptr @base, uintptr npage) {
     bool needZero = default;
 
     while (npage > 0) {
@@ -1112,7 +1112,7 @@ internal static bool /*needZero*/ allocNeedsZeroᴍ(ref mheap h, uintptr @base, 
 // may be relaxed if its use is necessary elsewhere.
 //
 //go:systemstack
-internal static ж<mspan> tryAllocMSpanᴍ(ref mheap h) {
+[GoMethodBody("tryAllocMSpan")] internal static ж<mspan> tryAllocMSpanᴍ(ref mheap h) {
     var pp = (~(~getg()).m).p.ptr();
     // If we don't have a p or the cache is empty, we can't do
     // anything here.
@@ -1135,7 +1135,7 @@ internal static ж<mspan> tryAllocMSpanᴍ(ref mheap h) {
 // switch Ps during this function. See tryAllocMSpan for details.
 //
 //go:systemstack
-internal static ж<mspan> allocMSpanLockedᴍ(ж<mheap> Ꮡh) {
+[GoMethodBody("allocMSpanLocked")] internal static ж<mspan> allocMSpanLockedᴍ(ж<mheap> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     assertLockHeld(Ꮡh.Ꮡlock);
@@ -1169,7 +1169,7 @@ internal static ж<mspan> allocMSpanLockedᴍ(ж<mheap> Ꮡh) {
 // switch Ps during this function. See tryAllocMSpan for details.
 //
 //go:systemstack
-internal static void freeMSpanLockedᴍ(ж<mheap> Ꮡh, ж<mspan> s) {
+[GoMethodBody("freeMSpanLocked")] internal static void freeMSpanLockedᴍ(ж<mheap> Ꮡh, ж<mspan> s) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     assertLockHeld(Ꮡh.Ꮡlock);
@@ -1207,7 +1207,7 @@ private static readonly @string grewHeapButNoAdequateˢᵇᴍmheap = "grew heap,
 // the heap lock and because it must block GC transitions.
 //
 //go:systemstack
-internal static ж<mspan> /*s*/ allocSpanᴍ(ж<mheap> Ꮡh, uintptr npages, spanAllocType typ, spanClass spanclass) {
+[GoMethodBody("allocSpan")] internal static ж<mspan> /*s*/ allocSpanᴍ(ж<mheap> Ꮡh, uintptr npages, spanAllocType typ, spanClass spanclass) {
     ж<mspan> s = default;
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -1428,7 +1428,7 @@ HaveSpan:
 
 // initSpan initializes a blank span s which will represent the range
 // [base, base+npages*pageSize). typ is the type of span being allocated.
-internal static void initSpanᴍ(ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ, spanClass spanclass, uintptr @base, uintptr npages, uintptr scav) {
+[GoMethodBody("initSpan")] internal static void initSpanᴍ(ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ, spanClass spanclass, uintptr @base, uintptr npages, uintptr scav) {
     ref var h = ref Ꮡh.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -1545,7 +1545,7 @@ internal static void initSpanᴍ(ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType t
 // returning how much the heap grew by and whether it worked.
 //
 // h.lock must be held.
-internal static (uintptr, bool) growᴍ(ж<mheap> Ꮡh, uintptr npage) {
+[GoMethodBody("grow")] internal static (uintptr, bool) growᴍ(ж<mheap> Ꮡh, uintptr npage) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     assertLockHeld(Ꮡh.Ꮡlock);
@@ -1660,7 +1660,7 @@ internal static (uintptr, bool) growᴍ(ж<mheap> Ꮡh, uintptr npage) {
 }
 
 // Free the span back into the heap.
-internal static void freeSpanᴍ(ж<mheap> Ꮡh, ж<mspan> s) {
+[GoMethodBody("freeSpan")] internal static void freeSpanᴍ(ж<mheap> Ꮡh, ж<mspan> s) {
     systemstack(() => {
         // Trace the span free.
         if (traceAllocFreeEnabled()) {
@@ -1704,7 +1704,7 @@ internal static void freeSpanᴍ(ж<mheap> Ꮡh, ж<mspan> s) {
 // the heap lock. See mheap for details.
 //
 //go:systemstack
-internal static void freeManualᴍ(ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ) {
+[GoMethodBody("freeManual")] internal static void freeManualᴍ(ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Trace the span free.
@@ -1736,7 +1736,7 @@ private static readonly @string mheapFreeSpanLockedˢ3ᵇᴍmheap = "mheap.freeS
 internal static ref readonly @string mheapFreeSpanLockedˢ4ᴍmheap => ref mheapFreeSpanLockedˢ4ᵇᴍmheap;
 private static readonly @string mheapFreeSpanLockedˢ4ᵇᴍmheap = "mheap.freeSpanLocked - invalid span state"u8;
 
-internal static void freeSpanLockedᴍ(ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ) {
+[GoMethodBody("freeSpanLocked")] internal static void freeSpanLockedᴍ(ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ) {
     ref var h = ref Ꮡh.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -1814,7 +1814,7 @@ internal static void freeSpanLockedᴍ(ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAlloc
 // Must run on the system stack because it acquires the heap lock.
 //
 //go:systemstack
-internal static void scavengeAllᴍ(ж<mheap> Ꮡh) {
+[GoMethodBody("scavengeAll")] internal static void scavengeAllᴍ(ж<mheap> Ꮡh) {
     // Disallow malloc or panic while holding the heap lock. We do
     // this here because this is a non-mallocgc entry-point to
     // the mheap API.
@@ -1844,7 +1844,7 @@ internal static void runtime_debug_freeOSMemory() {
 } partial class runtime_package {
 
 // Initialize a new span with the given start and npages.
-internal static void initᴍ(ж<mspan> Ꮡspan, uintptr @base, uintptr npages) {
+[GoMethodBody("init")] internal static void initᴍ(ж<mspan> Ꮡspan, uintptr @base, uintptr npages) {
     ref var span = ref Ꮡspan.DerefOrNull();
 
     // span is *not* zeroed.
@@ -1869,7 +1869,7 @@ internal static void initᴍ(ж<mspan> Ꮡspan, uintptr @base, uintptr npages) {
     lockInit(ref nonnil(ref span).speciallock, lockRankMspanSpecial);
 }
 
-internal static bool inListᴍ(ref mspan span) {
+[GoMethodBody("inList")] internal static bool inListᴍ(ref mspan span) {
     return span.list != nil;
 }
 
@@ -1885,7 +1885,7 @@ partial struct mSpanList {
 } partial class runtime_package {
 
 // Initialize an empty doubly-linked list.
-internal static void initᴍ(ref mSpanList list) {
+[GoMethodBody("init")] internal static void initᴍ(ref mSpanList list) {
     list.first = default;
     list.last = default;
 }
@@ -1894,7 +1894,7 @@ internal static void initᴍ(ref mSpanList list) {
 internal static ref readonly @string mSpanListRemoveˢᴍmSpanList => ref mSpanListRemoveˢᵇᴍmSpanList;
 private static readonly @string mSpanListRemoveˢᵇᴍmSpanList = "mSpanList.remove"u8;
 
-internal static void removeᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
+[GoMethodBody("remove")] internal static void removeᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     ref var list = ref Ꮡlist.DerefOrNull();
     ref var span = ref Ꮡspan.DerefOrNull();
 
@@ -1918,7 +1918,7 @@ internal static void removeᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     span.list = default;
 }
 
-internal static bool isEmptyᴍ(ref mSpanList list) {
+[GoMethodBody("isEmpty")] internal static bool isEmptyᴍ(ref mSpanList list) {
     return list.first == nil;
 }
 
@@ -1926,7 +1926,7 @@ internal static bool isEmptyᴍ(ref mSpanList list) {
 internal static ref readonly @string mSpanListInsertˢᴍmSpanList => ref mSpanListInsertˢᵇᴍmSpanList;
 private static readonly @string mSpanListInsertˢᵇᴍmSpanList = "mSpanList.insert"u8;
 
-internal static void insertᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
+[GoMethodBody("insert")] internal static void insertᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     ref var list = ref Ꮡlist.DerefOrNull();
     ref var span = ref Ꮡspan.DerefOrNull();
 
@@ -1951,7 +1951,7 @@ internal static void insertᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
 internal static ref readonly @string mSpanListInsertBackˢᴍmSpanList => ref mSpanListInsertBackˢᵇᴍmSpanList;
 private static readonly @string mSpanListInsertBackˢᵇᴍmSpanList = "mSpanList.insertBack"u8;
 
-internal static void insertBackᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
+[GoMethodBody("insertBack")] internal static void insertBackᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
     ref var list = ref Ꮡlist.DerefOrNull();
     ref var span = ref Ꮡspan.DerefOrNull();
 
@@ -1973,7 +1973,7 @@ internal static void insertBackᴍ(ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) {
 
 // takeAll removes all spans from other and inserts them at the front
 // of list.
-internal static void takeAllᴍ(ж<mSpanList> Ꮡlist, ж<mSpanList> Ꮡother) {
+[GoMethodBody("takeAll")] internal static void takeAllᴍ(ж<mSpanList> Ꮡlist, ж<mSpanList> Ꮡother) {
     ref var list = ref Ꮡlist.DerefOrNull();
     ref var other = ref Ꮡother.DerefOrNull();
 
@@ -2146,7 +2146,7 @@ internal static ж<special> removespecial(@unsafe.Pointer p, uint8 kind) {
 // Find a splice point in the sorted list and check for an already existing
 // record. Returns a pointer to the next-reference in the list predecessor.
 // Returns true, if the referenced item is an exact match.
-internal static (ж<ж<special>>, bool) specialFindSplicePointᴍ(ж<mspan> Ꮡspan, uintptr offset, byte kind) {
+[GoMethodBody("specialFindSplicePoint")] internal static (ж<ж<special>>, bool) specialFindSplicePointᴍ(ж<mspan> Ꮡspan, uintptr offset, byte kind) {
     // Find splice point, check for existing record.
     var iter = Ꮡspan.Ꮡspecials;
     var found = false;
@@ -2742,7 +2742,7 @@ partial struct immortalWeakHandle {
 } partial class runtime_package {
 
 // handle returns a canonical weak handle.
-internal static ж<atomic.Uintptr> handleᴍ(ж<immortalWeakHandle> Ꮡh) {
+[GoMethodBody("handle")] internal static ж<atomic.Uintptr> handleᴍ(ж<immortalWeakHandle> Ꮡh) {
     // N.B. Since we just need an *atomic.Uintptr that never changes, we can trivially
     // reference ptr to save on some memory in immortalWeakHandle and avoid extra atomics
     // in getOrAdd.
@@ -2753,7 +2753,7 @@ internal static ж<atomic.Uintptr> handleᴍ(ж<immortalWeakHandle> Ꮡh) {
 
 // getOrAdd introduces p, which must be a pointer to immortal memory (for example, a linker-allocated
 // object) and returns a weak handle. The weak handle will never become nil.
-internal static ж<atomic.Uintptr> getOrAddᴍ(ж<immortalWeakHandleMap> Ꮡtab, uintptr pʗp) {
+[GoMethodBody("getOrAdd")] internal static ж<atomic.Uintptr> getOrAddᴍ(ж<immortalWeakHandleMap> Ꮡtab, uintptr pʗp) {
     ref var p = ref heap(pʗp, out var Ꮡp);
 
     ж<immortalWeakHandle> newNode = default;
@@ -2862,18 +2862,18 @@ internal static specialsIter newSpecialsIter(ж<mspan> Ꮡspan) {
 
 } partial class runtime_package {
 
-internal static bool validᴍ(ref specialsIter i) {
+[GoMethodBody("valid")] internal static bool validᴍ(ref specialsIter i) {
     return i.s != nil;
 }
 
-internal static void nextᴍ(ref specialsIter i) {
+[GoMethodBody("next")] internal static void nextᴍ(ref specialsIter i) {
     i.pprev = i.s.Ꮡnext;
     i.s = i.pprev.ValueSlot;
 }
 
 // unlinkAndNext removes the current special from the list and moves
 // the iterator to the next special. It returns the unlinked special.
-internal static ж<special> unlinkAndNextᴍ(ref specialsIter i) {
+[GoMethodBody("unlinkAndNext")] internal static ж<special> unlinkAndNextᴍ(ref specialsIter i) {
     var cur = i.s;
     i.s = cur.next;
     i.pprev.ValueSlot = i.s;
@@ -3001,13 +3001,13 @@ internal static void freeSpecial(ж<special> Ꮡs, @unsafe.Pointer p, uintptr si
 } partial class runtime_package {
 
 // bytep returns a pointer to the n'th byte of b.
-internal static ж<uint8> bytepᴍ(ж<gcBits> Ꮡb, uintptr n) {
+[GoMethodBody("bytep")] internal static ж<uint8> bytepᴍ(ж<gcBits> Ꮡb, uintptr n) {
     return addb(Ꮡb.Ꮡx, n);
 }
 
 // bitp returns a pointer to the byte containing bit n and a mask for
 // selecting that bit from *bytep.
-internal static (ж<uint8> bytep, uint8 mask) bitpᴍ(ж<gcBits> Ꮡb, uintptr n) {
+[GoMethodBody("bitp")] internal static (ж<uint8> bytep, uint8 mask) bitpᴍ(ж<gcBits> Ꮡb, uintptr n) {
     return (Ꮡb.bytep(n / 8), (uint8)(1 << (int)(n % 8)));
 }
 
@@ -3043,7 +3043,7 @@ internal static ref gcBitsArenasᴛ1 gcBitsArenas => ref ((StaticBox<gcBitsArena
 
 // tryAlloc allocates from b or returns nil if b does not have enough room.
 // This is safe to call concurrently.
-internal static ж<gcBits> tryAllocᴍ(ж<gcBitsArena> Ꮡb, uintptr bytes) {
+[GoMethodBody("tryAlloc")] internal static ж<gcBits> tryAllocᴍ(ж<gcBitsArena> Ꮡb, uintptr bytes) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (Ꮡb == nil || atomic.Loaduintptr(Ꮡb.Ꮡfree) + bytes > (uintptr)len(b.bits)) {
@@ -3193,73 +3193,3 @@ internal static ж<gcBitsArena> newArenaMayUnlock() {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛmSpanStateBox {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this ж<mSpanStateBox> Ꮡb, mSpanState s) => runtime_package.setᴍ(Ꮡb, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static mSpanState get(this ж<mSpanStateBox> Ꮡb) => runtime_package.getᴍ(Ꮡb);
-}
-partial class runtimeᴛmspan {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr @base(this ref mspan s) => runtime_package.@baseᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uintptr size, uintptr n, uintptr total) layout(this ref mspan s) => runtime_package.layoutᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<mspan> Ꮡspan, uintptr @base, uintptr npages) => runtime_package.initᴍ(Ꮡspan, @base, npages);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool inList(this ref mspan span) => runtime_package.inListᴍ(ref span);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<ж<special>>, bool) specialFindSplicePoint(this ж<mspan> Ꮡspan, uintptr offset, byte kind) => runtime_package.specialFindSplicePointᴍ(Ꮡspan, offset, kind);
-}
-partial class runtimeᴛspanClass {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int8 sizeclass(this spanClass sc) => runtime_package.sizeclassᴍ(sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool noscan(this spanClass sc) => runtime_package.noscanᴍ(sc);
-}
-partial class runtimeᴛarenaIdx {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nuint l1(this arenaIdx i) => runtime_package.l1ᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nuint l2(this arenaIdx i) => runtime_package.l2ᴍ(i);
-}
-partial class runtimeᴛmheap {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<mheap> Ꮡh) => runtime_package.initᴍ(Ꮡh);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reclaim(this ж<mheap> Ꮡh, uintptr npage) => runtime_package.reclaimᴍ(Ꮡh, npage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr reclaimChunk(this ж<mheap> Ꮡh, slice<arenaIdx> arenas, uintptr pageIdx, uintptr n) => runtime_package.reclaimChunkᴍ(Ꮡh, arenas, pageIdx, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<mspan> alloc(this ж<mheap> Ꮡh, uintptr npages, spanClass spanclass) => runtime_package.allocᴍ(Ꮡh, npages, spanclass);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<mspan> allocManual(this ж<mheap> Ꮡh, uintptr npages, spanAllocType typ) => runtime_package.allocManualᴍ(Ꮡh, npages, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setSpans(this ref mheap h, uintptr @base, uintptr npage, ж<mspan> s) => runtime_package.setSpansᴍ(ref h, @base, npage, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*needZero*/ allocNeedsZero(this ref mheap h, uintptr @base, uintptr npage) => runtime_package.allocNeedsZeroᴍ(ref h, @base, npage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<mspan> tryAllocMSpan(this ref mheap h) => runtime_package.tryAllocMSpanᴍ(ref h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<mspan> allocMSpanLocked(this ж<mheap> Ꮡh) => runtime_package.allocMSpanLockedᴍ(Ꮡh);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void freeMSpanLocked(this ж<mheap> Ꮡh, ж<mspan> s) => runtime_package.freeMSpanLockedᴍ(Ꮡh, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<mspan> /*s*/ allocSpan(this ж<mheap> Ꮡh, uintptr npages, spanAllocType typ, spanClass spanclass) => runtime_package.allocSpanᴍ(Ꮡh, npages, typ, spanclass);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initSpan(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ, spanClass spanclass, uintptr @base, uintptr npages, uintptr scav) => runtime_package.initSpanᴍ(Ꮡh, Ꮡs, typ, spanclass, @base, npages, scav);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uintptr, bool) grow(this ж<mheap> Ꮡh, uintptr npage) => runtime_package.growᴍ(Ꮡh, npage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void freeSpan(this ж<mheap> Ꮡh, ж<mspan> s) => runtime_package.freeSpanᴍ(Ꮡh, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void freeManual(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ) => runtime_package.freeManualᴍ(Ꮡh, Ꮡs, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void freeSpanLocked(this ж<mheap> Ꮡh, ж<mspan> Ꮡs, spanAllocType typ) => runtime_package.freeSpanLockedᴍ(Ꮡh, Ꮡs, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void scavengeAll(this ж<mheap> Ꮡh) => runtime_package.scavengeAllᴍ(Ꮡh);
-}
-partial class runtimeᴛspanAllocType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool manual(this spanAllocType s) => runtime_package.manualᴍ(s);
-}
-partial class runtimeᴛmSpanList {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref mSpanList list) => runtime_package.initᴍ(ref list);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void remove(this ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) => runtime_package.removeᴍ(Ꮡlist, Ꮡspan);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isEmpty(this ref mSpanList list) => runtime_package.isEmptyᴍ(ref list);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void insert(this ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) => runtime_package.insertᴍ(Ꮡlist, Ꮡspan);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void insertBack(this ж<mSpanList> Ꮡlist, ж<mspan> Ꮡspan) => runtime_package.insertBackᴍ(Ꮡlist, Ꮡspan);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void takeAll(this ж<mSpanList> Ꮡlist, ж<mSpanList> Ꮡother) => runtime_package.takeAllᴍ(Ꮡlist, Ꮡother);
-}
-partial class runtimeᴛimmortalWeakHandle {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<atomic.Uintptr> handle(this ж<immortalWeakHandle> Ꮡh) => runtime_package.handleᴍ(Ꮡh);
-}
-partial class runtimeᴛimmortalWeakHandleMap {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<atomic.Uintptr> getOrAdd(this ж<immortalWeakHandleMap> Ꮡtab, uintptr pʗp) => runtime_package.getOrAddᴍ(Ꮡtab, pʗp);
-}
-partial class runtimeᴛspecialsIter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool valid(this ref specialsIter i) => runtime_package.validᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void next(this ref specialsIter i) => runtime_package.nextᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<special> unlinkAndNext(this ref specialsIter i) => runtime_package.unlinkAndNextᴍ(ref i);
-}
-partial class runtimeᴛgcBits {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<uint8> bytep(this ж<gcBits> Ꮡb, uintptr n) => runtime_package.bytepᴍ(Ꮡb, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<uint8> bytep, uint8 mask) bitp(this ж<gcBits> Ꮡb, uintptr n) => runtime_package.bitpᴍ(Ꮡb, n);
-}
-partial class runtimeᴛgcBitsArena {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<gcBits> tryAlloc(this ж<gcBitsArena> Ꮡb, uintptr bytes) => runtime_package.tryAllocᴍ(Ꮡb, bytes);
-}
-// </GlyphForwarders>

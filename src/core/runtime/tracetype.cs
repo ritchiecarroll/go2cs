@@ -28,7 +28,7 @@ partial struct traceTypeTable {
 // if it's seeing it for the first time.
 //
 // N.B. typ must be kept alive forever for this to work correctly.
-internal static uint64 putᴍ(ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
+[GoMethodBody("put")] internal static uint64 putᴍ(ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (Ꮡtyp == nil) {
@@ -43,7 +43,7 @@ internal static uint64 putᴍ(ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
 // dump writes all previously cached types to trace buffers and
 // releases all memory and resets state. It must only be called once the caller
 // can guarantee that there are no more writers to the table.
-internal static void dumpᴍ(ж<traceTypeTable> Ꮡt, uintptr gen) {
+[GoMethodBody("dump")] internal static void dumpᴍ(ж<traceTypeTable> Ꮡt, uintptr gen) {
     var w = unsafeTraceExpWriter(gen, nil, tracev2.AllocFree);
     var root = @unsafe.Pointer.To<traceMapNode>(Ꮡt.Ꮡtab.Ꮡroot.Load()); if (root != nil) {
         w = dumpTypesRec(root, w);
@@ -95,10 +95,3 @@ internal static traceWriter dumpTypesRec(ж<traceMapNode> Ꮡnode, traceWriter w
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛtraceTypeTable {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 put(this ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) => runtime_package.putᴍ(Ꮡt, Ꮡtyp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void dump(this ж<traceTypeTable> Ꮡt, uintptr gen) => runtime_package.dumpᴍ(Ꮡt, gen);
-}
-// </GlyphForwarders>

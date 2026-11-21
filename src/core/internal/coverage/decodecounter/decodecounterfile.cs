@@ -92,7 +92,7 @@ internal static bool checkMagic(/*[4]*/ array<byte> v) {
 
 } partial class decodecounter_package {
 
-internal static error readFooterᴍ(ж<CounterDataReader> Ꮡcdr) {
+[GoMethodBody("readFooter")] internal static error readFooterᴍ(ж<CounterDataReader> Ꮡcdr) {
     ref var cdr = ref Ꮡcdr.DerefOrNull();
 
     var ftrSize = (int64)/* unsafe.Sizeof(cdr.ftr) */ (uintptr)16;
@@ -117,7 +117,7 @@ internal static error readFooterᴍ(ж<CounterDataReader> Ꮡcdr) {
 
 // readSegmentPreamble reads and consumes the segment header, segment string
 // table, and segment args table.
-internal static error readSegmentPreambleᴍ(ж<CounterDataReader> Ꮡcdr) {
+[GoMethodBody("readSegmentPreamble")] internal static error readSegmentPreambleᴍ(ж<CounterDataReader> Ꮡcdr) {
     ref var cdr = ref Ꮡcdr.DerefOrNull();
 
     // Read segment header.
@@ -160,7 +160,7 @@ internal static error readSegmentPreambleᴍ(ж<CounterDataReader> Ꮡcdr) {
     return default;
 }
 
-internal static error readStringTableᴍ(ref CounterDataReader cdr) {
+[GoMethodBody("readStringTable")] internal static error readStringTableᴍ(ref CounterDataReader cdr) {
     var b = new slice<byte>((nint)(cdr.shdr.StrTabLen));
     var (nr, err) = cdr.mr.Read(b);
     if (err != nil) {
@@ -183,7 +183,7 @@ private static readonly @string goosˢᵇᴍCounterDataReader = "GOOS"u8;
 private static ref readonly @string goarchˢᴍCounterDataReader => ref goarchˢᵇᴍCounterDataReader;
 private static readonly @string goarchˢᵇᴍCounterDataReader = "GOARCH"u8;
 
-internal static error readArgsᴍ(ж<CounterDataReader> Ꮡcdr) {
+[GoMethodBody("readArgs")] internal static error readArgsᴍ(ж<CounterDataReader> Ꮡcdr) {
     ref var cdr = ref Ꮡcdr.DerefOrNull();
 
     var b = new slice<byte>((nint)(cdr.shdr.ArgsLen));
@@ -245,7 +245,7 @@ internal static error readArgsᴍ(ж<CounterDataReader> Ꮡcdr) {
 // for example, if a data file is produced by merging coverage
 // data from two distinct runs, no os args will be available (an
 // empty list is returned).
-internal static slice<@string> OsArgsᴍ(ref CounterDataReader cdr) {
+[GoMethodBody("OsArgs")] internal static slice<@string> OsArgsᴍ(ref CounterDataReader cdr) {
     return cdr.osargs;
 }
 
@@ -253,7 +253,7 @@ internal static slice<@string> OsArgsᴍ(ref CounterDataReader cdr) {
 // that produced this counter data file. The GOOS value may be
 // empty in the case where the counter data file was produced
 // from a merge in which more than one GOOS value was present.
-internal static @string Goosᴍ(ref CounterDataReader cdr) {
+[GoMethodBody("Goos")] internal static @string Goosᴍ(ref CounterDataReader cdr) {
     return cdr.goos;
 }
 
@@ -261,7 +261,7 @@ internal static @string Goosᴍ(ref CounterDataReader cdr) {
 // that produced this counter data file. The GOARCH value may be
 // empty in the case where the counter data file was produced
 // from a merge in which more than one GOARCH value was present.
-internal static @string Goarchᴍ(ref CounterDataReader cdr) {
+[GoMethodBody("Goarch")] internal static @string Goarchᴍ(ref CounterDataReader cdr) {
     return cdr.goarch;
 }
 
@@ -278,7 +278,7 @@ partial struct FuncPayload {
 } partial class decodecounter_package {
 
 // NumSegments returns the number of execution segments in the file.
-internal static uint32 NumSegmentsᴍ(ref CounterDataReader cdr) {
+[GoMethodBody("NumSegments")] internal static uint32 NumSegmentsᴍ(ref CounterDataReader cdr) {
     return cdr.ftr.NumSegments;
 }
 
@@ -286,7 +286,7 @@ internal static uint32 NumSegmentsᴍ(ref CounterDataReader cdr) {
 // returning TRUE if we do have another segment to read, or FALSE
 // if we're done with all the segments (also an error if
 // something went wrong).
-internal static (bool, error) BeginNextSegmentᴍ(ж<CounterDataReader> Ꮡcdr) {
+[GoMethodBody("BeginNextSegment")] internal static (bool, error) BeginNextSegmentᴍ(ж<CounterDataReader> Ꮡcdr) {
     ref var cdr = ref Ꮡcdr.DerefOrNull();
 
     if (cdr.segCount >= cdr.ftr.NumSegments) {
@@ -312,7 +312,7 @@ internal static (bool, error) BeginNextSegmentᴍ(ж<CounterDataReader> Ꮡcdr) 
 
 // NumFunctionsInSegment returns the number of live functions
 // in the currently selected segment.
-internal static uint32 NumFunctionsInSegmentᴍ(ref CounterDataReader cdr) {
+[GoMethodBody("NumFunctionsInSegment")] internal static uint32 NumFunctionsInSegmentᴍ(ref CounterDataReader cdr) {
     return (uint32)cdr.shdr.FcnEntries;
 }
 
@@ -327,7 +327,7 @@ internal const bool supportDeadFunctionsInCounterData = false;
 // if we've read all the functions already (also an error if
 // something went wrong with the read or we hit a premature
 // EOF).
-internal static (bool, error) NextFuncᴍ(ж<CounterDataReader> Ꮡcdr, ж<FuncPayload> Ꮡp) {
+[GoMethodBody("NextFunc")] internal static (bool, error) NextFuncᴍ(ж<CounterDataReader> Ꮡcdr, ж<FuncPayload> Ꮡp) {
     ref var cdr = ref Ꮡcdr.DerefOrNull();
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -432,19 +432,3 @@ internal static (bool, error) NextFuncᴍ(ж<CounterDataReader> Ꮡcdr, ж<FuncP
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class decodecounterᴛCounterDataReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readFooter(this ж<CounterDataReader> Ꮡcdr) => decodecounter_package.readFooterᴍ(Ꮡcdr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readSegmentPreamble(this ж<CounterDataReader> Ꮡcdr) => decodecounter_package.readSegmentPreambleᴍ(Ꮡcdr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readStringTable(this ref CounterDataReader cdr) => decodecounter_package.readStringTableᴍ(ref cdr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readArgs(this ж<CounterDataReader> Ꮡcdr) => decodecounter_package.readArgsᴍ(Ꮡcdr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> OsArgs(this ref CounterDataReader cdr) => decodecounter_package.OsArgsᴍ(ref cdr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Goos(this ref CounterDataReader cdr) => decodecounter_package.Goosᴍ(ref cdr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Goarch(this ref CounterDataReader cdr) => decodecounter_package.Goarchᴍ(ref cdr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 NumSegments(this ref CounterDataReader cdr) => decodecounter_package.NumSegmentsᴍ(ref cdr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (bool, error) BeginNextSegment(this ж<CounterDataReader> Ꮡcdr) => decodecounter_package.BeginNextSegmentᴍ(Ꮡcdr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 NumFunctionsInSegment(this ref CounterDataReader cdr) => decodecounter_package.NumFunctionsInSegmentᴍ(ref cdr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (bool, error) NextFunc(this ж<CounterDataReader> Ꮡcdr, ж<FuncPayload> Ꮡp) => decodecounter_package.NextFuncᴍ(Ꮡcdr, Ꮡp);
-}
-// </GlyphForwarders>

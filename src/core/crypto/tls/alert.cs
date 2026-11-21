@@ -16,7 +16,7 @@ partial struct AlertError /*num:uint8*/;
 
 } partial class tls_package {
 
-internal static @string Errorᴍ(AlertError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(AlertError e) {
     return ((alert)(uint8)e).String();
 }
 
@@ -102,7 +102,7 @@ internal static alert alertECHRequired => 121;
 
 } partial class tls_package {
 
-internal static @string Stringᴍ(alert e) {
+[GoMethodBody("String")] internal static @string Stringᴍ(alert e) {
     var (s, ok) = alertText[e, ꟷ];
     if (ok) {
         return "tls: "u8 + s;
@@ -110,18 +110,8 @@ internal static @string Stringᴍ(alert e) {
     return "tls: alert("u8 + strconv.Itoa((nint)e) + ")"u8;
 }
 
-internal static @string Errorᴍ(alert e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(alert e) {
     return e.String();
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tlsᴛAlertError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this AlertError e) => tls_package.Errorᴍ(e);
-}
-partial class tlsᴛalert {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this alert e) => tls_package.Stringᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this alert e) => tls_package.Errorᴍ(e);
-}
-// </GlyphForwarders>

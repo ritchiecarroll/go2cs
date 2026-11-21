@@ -582,7 +582,7 @@ private static readonly @string mstˢᵇᴍTime = "2006-01-02 15:04:05.999999999
 // The returned string is meant for debugging; for a stable serialized
 // representation, use t.MarshalText, t.MarshalBinary, or t.Format
 // with an explicit format string.
-internal static @string Stringᴍ(Time t) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Time t) {
     var bufᴷ = new stackAppend<byte>();
 
     @string s = t.Format(mstˢᴍTime);
@@ -617,7 +617,7 @@ internal static @string Stringᴍ(Time t) {
 
 // GoString implements [fmt.GoStringer] and formats t to be printed in Go source
 // code.
-internal static @string GoStringᴍ(Time t) {
+[GoMethodBody("GoString")] internal static @string GoStringᴍ(Time t) {
     var bufᴷ = new stackAppend<byte>();
 
     var abs = t.absSec();
@@ -687,7 +687,7 @@ internal static @string GoStringᴍ(Time t) {
 //
 // The executable example for [Time.Format] demonstrates the working
 // of the layout string in detail and is a good reference.
-internal static @string Formatᴍ(Time t, @string layout) {
+[GoMethodBody("Format")] internal static @string Formatᴍ(Time t, @string layout) {
     UntypedInt bufSize = 64;
     slice<byte> b = default;
     nint max = len(layout) + 10;
@@ -703,7 +703,7 @@ internal static @string Formatᴍ(Time t, @string layout) {
 
 // AppendFormat is like [Time.Format] but appends the textual
 // representation to b and returns the extended buffer.
-internal static slice<byte> AppendFormatᴍ(Time t, slice<byte> b, @string layout) {
+[GoMethodBody("AppendFormat")] internal static slice<byte> AppendFormatᴍ(Time t, slice<byte> b, @string layout) {
     // Optimize for RFC3339 as it accounts for over half of all representations.
     switch (ᐧ) {
     case {} when layout == RFC3339: {
@@ -717,7 +717,7 @@ internal static slice<byte> AppendFormatᴍ(Time t, slice<byte> b, @string layou
     }}
 }
 
-internal static slice<byte> appendFormatᴍ(Time t, slice<byte> b, @string layout) {
+[GoMethodBody("appendFormat")] internal static slice<byte> appendFormatᴍ(Time t, slice<byte> b, @string layout) {
     var (name, offset, abs) = t.locabs();
     var days = abs.days();
 
@@ -1003,7 +1003,7 @@ internal static @string quote(@string s) {
 } partial class time_package {
 
 // Error returns the string representation of a ParseError.
-internal static @string Errorᴍ(ref ParseError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref ParseError e) {
     if (e.Message == ""u8) {
         return "parsing time "u8 + quote(e.Value) + " as "u8 + quote(e.Layout) + ": cannot parse "u8 + quote(e.ValueElem) + " as "u8 + quote(e.LayoutElem);
     }
@@ -1820,7 +1820,7 @@ partial struct parseDurationError {
 
 } partial class time_package {
 
-internal static @string Errorᴍ(ref parseDurationError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref parseDurationError e) {
     return "time: "u8 + e.message + " "u8 + quote(e.value);
 }
 
@@ -1941,19 +1941,3 @@ public static (Duration, error) ParseDuration(@string s) {
 }
 
 } // end time_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class timeᴛTime {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Time t) => time_package.Stringᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Time t) => time_package.GoStringᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Format(this Time t, @string layout) => time_package.Formatᴍ(t, layout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> AppendFormat(this Time t, slice<byte> b, @string layout) => time_package.AppendFormatᴍ(t, b, layout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string layout) => time_package.appendFormatᴍ(t, b, layout);
-}
-partial class timeᴛParseError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref ParseError e) => time_package.Errorᴍ(ref e);
-}
-partial class timeᴛparseDurationError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref parseDurationError e) => time_package.Errorᴍ(ref e);
-}
-// </GlyphForwarders>

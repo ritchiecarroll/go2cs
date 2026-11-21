@@ -102,11 +102,11 @@ public static hash.Hash64 New(ж<Table> tab) { return new digestжHash64(Ꮡ(new
 
 } partial class crc64_package {
 
-internal static nint Sizeᴍ(ref digest d) { return crc64.Size; }
+[GoMethodBody("Size")] internal static nint Sizeᴍ(ref digest d) { return crc64.Size; }
 
-internal static nint BlockSizeᴍ(ref digest d) { return 1; }
+[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref digest d) { return 1; }
 
-internal static void Resetᴍ(ref digest d) { d.crc = 0; }
+[GoMethodBody("Reset")] internal static void Resetᴍ(ref digest d) { d.crc = 0; }
 
 } partial class crc64_package {
 
@@ -116,14 +116,14 @@ internal const nint marshaledSize = /* len(magic) + 8 + 8 */ 20;
 
 } partial class crc64_package {
 
-internal static (slice<byte>, error) AppendBinaryᴍ(ref digest d, slice<byte> b) {
+[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint64(b, tableSum(d.tab));
     b = byteorder.BEAppendUint64(b, d.crc);
     return (b, default);
 }
 
-internal static (slice<byte>, error) MarshalBinaryᴍ(ref digest d) {
+[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
@@ -135,7 +135,7 @@ private static readonly @string hashCrc64InvalidHashˢ2ᵇᴍdigest = "hash/crc6
 internal static ref readonly @string hashCrc64TablesDoNotˢᴍdigest => ref hashCrc64TablesDoNotˢᵇᴍdigest;
 private static readonly @string hashCrc64TablesDoNotˢᵇᴍdigest = "hash/crc64: tables do not match"u8;
 
-internal static error UnmarshalBinaryᴍ(ref digest d, slice<byte> b) {
+[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
         return errors.New(hashCrc64InvalidHashˢᴍdigest);
     }
@@ -149,7 +149,7 @@ internal static error UnmarshalBinaryᴍ(ref digest d, slice<byte> b) {
     return default;
 }
 
-internal static (hash.Cloner, error) Cloneᴍ(ref digest d) {
+[GoMethodBody("Clone")] internal static (hash.Cloner, error) Cloneᴍ(ref digest d) {
     ref var r = ref heap<digest>(d, out var Ꮡr);
     return (new digestжCloner(Ꮡr), default);
 }
@@ -195,14 +195,14 @@ public static uint64 Update(uint64 crc, ж<Table> tab, slice<byte> p) {
 
 } partial class crc64_package {
 
-internal static (nint n, error err) Writeᴍ(ref digest d, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref digest d, slice<byte> p) {
     d.crc = update(d.crc, ref (d.tab).DerefOrNull(), p);
     return (len(p), default);
 }
 
-internal static uint64 Sum64ᴍ(ref digest d) { return d.crc; }
+[GoMethodBody("Sum64")] internal static uint64 Sum64ᴍ(ref digest d) { return d.crc; }
 
-internal static slice<byte> Sumᴍ(ref digest d, slice<byte> @in) {
+[GoMethodBody("Sum")] internal static slice<byte> Sumᴍ(ref digest d, slice<byte> @in) {
     var s = d.Sum64();
     return append(@in, (byte)(s >> 56), (byte)(s >> 48), (byte)(s >> 40), (byte)(s >> 32), (byte)(s >> 24), (byte)(s >> 16), (byte)(s >> 8), (byte)s);
 }
@@ -228,18 +228,3 @@ internal static uint64 tableSum(ж<Table> Ꮡt) {
 }
 
 } // end crc64_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class crc64ᴛdigest {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Size(this ref digest d) => crc64_package.Sizeᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref digest d) => crc64_package.BlockSizeᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Reset(this ref digest d) => crc64_package.Resetᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) => crc64_package.AppendBinaryᴍ(ref d, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) MarshalBinary(this ref digest d) => crc64_package.MarshalBinaryᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error UnmarshalBinary(this ref digest d, slice<byte> b) => crc64_package.UnmarshalBinaryᴍ(ref d, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (hash.Cloner, error) Clone(this ref digest d) => crc64_package.Cloneᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref digest d, slice<byte> p) => crc64_package.Writeᴍ(ref d, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 Sum64(this ref digest d) => crc64_package.Sum64ᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) => crc64_package.Sumᴍ(ref d, @in);
-}
-// </GlyphForwarders>

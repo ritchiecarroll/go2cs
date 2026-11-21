@@ -33,7 +33,7 @@ internal partial struct probe_type /*dyn*/ {
 // the IPv6 interface. That simplifies our code and is most
 // general. Unfortunately, we need to run on kernels built without
 // IPv6 support too. So probe the kernel to figure it out.
-internal static void probeᴍ(ж<ipStackCapabilities> Ꮡp) {
+[GoMethodBody("probe")] internal static void probeᴍ(ж<ipStackCapabilities> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -294,9 +294,3 @@ internal static (syscall.SockaddrInet6, error) addrPortToSockaddrInet6(netip.Add
 }
 
 } // end net_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛipStackCapabilities {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void probe(this ж<ipStackCapabilities> Ꮡp) => net_package.probeᴍ(Ꮡp);
-}
-// </GlyphForwarders>

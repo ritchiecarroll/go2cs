@@ -89,7 +89,7 @@ private static readonly @string _SyncMarker_nameᵇ = "EOFBoolInt64Uint64StringV
 
 } partial class pkgbits_package {
 
-internal static @string Stringᴍ(SyncMarker i) {
+[GoMethodBody("String")] internal static @string Stringᴍ(SyncMarker i) {
     i -= 1;
     if (i < 0 || i >= ((SyncMarker)(len(_SyncMarker_index) - 1))) {
         return "SyncMarker("u8 + strconv.FormatInt((int64)(i + 1), 10) + ")"u8;
@@ -98,9 +98,3 @@ internal static @string Stringᴍ(SyncMarker i) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class pkgbitsᴛSyncMarker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SyncMarker i) => pkgbits_package.Stringᴍ(i);
-}
-// </GlyphForwarders>

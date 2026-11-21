@@ -64,6 +64,20 @@ using static go.@internal.goroot_package;
 
 namespace go.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using os = os_package;
+using exec = go.os.exec_package;
+using filepath = path.filepath_package;
+using strings = strings_package;
+using sync = go.sync_package;
+using fs = io.fs_package;
+using go;
+using go.os;
+using io;
+using path;
+using static goroot_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("goroot")]
 public static partial class goroot_package
 {
@@ -101,3 +115,10 @@ public static partial class goroot_package
 // <MethodHolders>
 [GoMethodHost(typeof(goroot_package.gccgoDirs)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gorootᴛgccgoDirs;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class gorootᴛgccgoDirs {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref gccgoDirs gd) => goroot_package.initᴍ(ref gd);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) => goroot_package.isStandardᴍ(Ꮡgd, path);
+}
+// </GlyphForwarders>

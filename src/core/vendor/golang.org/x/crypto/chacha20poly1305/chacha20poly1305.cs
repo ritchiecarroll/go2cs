@@ -57,15 +57,15 @@ public static (cipher.AEAD, error) New(slice<byte> key) {
 
 } partial class chacha20poly1305_package {
 
-internal static nint NonceSizeᴍ(ref chacha20poly1305 c) {
+[GoMethodBody("NonceSize")] internal static nint NonceSizeᴍ(ref chacha20poly1305 c) {
     return chacha20poly1305_package.NonceSize;
 }
 
-internal static nint Overheadᴍ(ref chacha20poly1305 c) {
+[GoMethodBody("Overhead")] internal static nint Overheadᴍ(ref chacha20poly1305 c) {
     return chacha20poly1305_package.Overhead;
 }
 
-internal static slice<byte> Sealᴍ(ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+[GoMethodBody("Seal")] internal static slice<byte> Sealᴍ(ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     if (len(nonce) != chacha20poly1305_package.NonceSize) {
         throw panic("chacha20poly1305: bad nonce length passed to Seal");
     }
@@ -83,7 +83,7 @@ internal static error errOpen = errors.New("chacha20poly1305: message authentica
 
 } partial class chacha20poly1305_package {
 
-internal static (slice<byte>, error) Openᴍ(ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+[GoMethodBody("Open")] internal static (slice<byte>, error) Openᴍ(ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     if (len(nonce) != chacha20poly1305_package.NonceSize) {
         throw panic("chacha20poly1305: bad nonce length passed to Open");
     }
@@ -118,12 +118,3 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 }
 
 } // end chacha20poly1305_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class chacha20poly1305ᴛchacha20poly1305 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NonceSize(this ref chacha20poly1305 c) => chacha20poly1305_package.NonceSizeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Overhead(this ref chacha20poly1305 c) => chacha20poly1305_package.Overheadᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Seal(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => chacha20poly1305_package.Sealᴍ(ref c, dst, nonce, plaintext, additionalData);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) Open(this ref chacha20poly1305 c, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => chacha20poly1305_package.Openᴍ(ref c, dst, nonce, ciphertext, additionalData);
-}
-// </GlyphForwarders>

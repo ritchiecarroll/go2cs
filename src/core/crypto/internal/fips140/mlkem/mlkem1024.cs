@@ -29,7 +29,7 @@ partial struct DecapsulationKey1024 {
 // Bytes returns the decapsulation key as a 64-byte seed in the "d || z" form.
 //
 // The decapsulation key must be kept secret.
-internal static slice<byte> Bytesᴍ(ref DecapsulationKey1024 dk) {
+[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref DecapsulationKey1024 dk) {
     array<byte> b = new(64); /* SeedSize */
     copy(b[..], dk.d[..]);
     copy(b[32..], dk.z[..]);
@@ -70,7 +70,7 @@ public static slice<byte> TestingOnlyExpandedBytes1024(ж<DecapsulationKey1024> 
 
 // EncapsulationKey returns the public encapsulation key necessary to produce
 // ciphertexts.
-internal static ж<EncapsulationKey1024> EncapsulationKeyᴍ(ref DecapsulationKey1024 dk) {
+[GoMethodBody("EncapsulationKey")] internal static ж<EncapsulationKey1024> EncapsulationKeyᴍ(ref DecapsulationKey1024 dk) {
     return Ꮡ(new EncapsulationKey1024(
         ρ: dk.ρ.Clone(),
         h: dk.h.Clone(),
@@ -91,13 +91,13 @@ partial struct EncapsulationKey1024 {
 } partial class mlkem_package {
 
 // Bytes returns the encapsulation key as a byte slice.
-internal static slice<byte> Bytesᴍ(ref EncapsulationKey1024 ek) {
+[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref EncapsulationKey1024 ek) {
     // The actual logic is in a separate function to outline this allocation.
     var b = new slice<byte>(0, EncapsulationKeySize1024);
     return ek.bytes(b);
 }
 
-internal static slice<byte> bytesᴍ(ref EncapsulationKey1024 ek, slice<byte> b) {
+[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ref EncapsulationKey1024 ek, slice<byte> b) {
     foreach (var i in range(len(ek.t))) {
         b = polyByteEncode(b, ek.t[i]);
     }
@@ -317,13 +317,13 @@ internal static error kemPCT1024(ж<DecapsulationKey1024> Ꮡdk) {
 // encapsulation key, drawing random bytes from a DRBG.
 //
 // The shared key must be kept secret.
-internal static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulateᴍ(ж<EncapsulationKey1024> Ꮡek) {
+[GoMethodBody("Encapsulate")] internal static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulateᴍ(ж<EncapsulationKey1024> Ꮡek) {
     // The actual logic is in a separate function to outline this allocation.
     ref var cc = ref heap(new array<byte>(1568), out var Ꮡcc);
     return Ꮡek.encapsulate(Ꮡcc);
 }
 
-internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulateᴍ(ж<EncapsulationKey1024> Ꮡek, /*[1568]*/ ж<array<byte>> cc) {
+[GoMethodBody("encapsulate")] internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulateᴍ(ж<EncapsulationKey1024> Ꮡek, /*[1568]*/ ж<array<byte>> cc) {
     fipsSelfTest();
     ref var m = ref heap(new array<byte>(32), out var Ꮡm);
     drbg.Read(m[..]);
@@ -335,7 +335,7 @@ internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulateᴍ(�
 
 // EncapsulateInternal is a derandomized version of Encapsulate, exclusively for
 // use in tests.
-internal static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInternalᴍ(ж<EncapsulationKey1024> Ꮡek, /*[32]*/ ж<array<byte>> m) {
+[GoMethodBody("EncapsulateInternal")] internal static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInternalᴍ(ж<EncapsulationKey1024> Ꮡek, /*[32]*/ ж<array<byte>> m) {
     fipsSelfTest();
     var cc = Ꮡ(new byte[]{}.array(1568));
     return kemEncaps1024(cc, ref (Ꮡek).DerefOrNull(), m);
@@ -467,7 +467,7 @@ private static readonly @string mlkemInvalidCiphertextˢᵇᴍDecapsulationKey10
 // If the ciphertext is not valid, Decapsulate returns an error.
 //
 // The shared key must be kept secret.
-internal static (slice<byte> sharedKey, error err) Decapsulateᴍ(ж<DecapsulationKey1024> Ꮡdk, slice<byte> ciphertext) {
+[GoMethodBody("Decapsulate")] internal static (slice<byte> sharedKey, error err) Decapsulateᴍ(ж<DecapsulationKey1024> Ꮡdk, slice<byte> ciphertext) {
     fipsSelfTest();
     if (len(ciphertext) != CiphertextSize1024) {
         return (default, errors.New(mlkemInvalidCiphertextˢᴍDecapsulationKey1024));
@@ -532,18 +532,3 @@ internal static slice<byte> pkeDecrypt1024(ref decryptionKey1024 dx, /*[1568]*/ 
 }
 
 } // end mlkem_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class mlkemᴛDecapsulationKey1024 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref DecapsulationKey1024 dk) => mlkem_package.Bytesᴍ(ref dk);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<EncapsulationKey1024> EncapsulationKey(this ref DecapsulationKey1024 dk) => mlkem_package.EncapsulationKeyᴍ(ref dk);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> sharedKey, error err) Decapsulate(this ж<DecapsulationKey1024> Ꮡdk, slice<byte> ciphertext) => mlkem_package.Decapsulateᴍ(Ꮡdk, ciphertext);
-}
-partial class mlkemᴛEncapsulationKey1024 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref EncapsulationKey1024 ek) => mlkem_package.Bytesᴍ(ref ek);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytes(this ref EncapsulationKey1024 ek, slice<byte> b) => mlkem_package.bytesᴍ(ref ek, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this ж<EncapsulationKey1024> Ꮡek) => mlkem_package.Encapsulateᴍ(Ꮡek);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate(this ж<EncapsulationKey1024> Ꮡek, /*[1568]*/ ж<array<byte>> cc) => mlkem_package.encapsulateᴍ(Ꮡek, cc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInternal(this ж<EncapsulationKey1024> Ꮡek, /*[32]*/ ж<array<byte>> m) => mlkem_package.EncapsulateInternalᴍ(Ꮡek, m);
-}
-// </GlyphForwarders>

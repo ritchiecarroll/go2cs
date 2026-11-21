@@ -53,7 +53,7 @@ partial struct key {
 
 } partial class token_package {
 
-internal static key keyᴍ(ref File f) {
+[GoMethodBody("key")] internal static key keyᴍ(ref File f) {
     return new key(f.@base, f.@base + f.size);
 }
 
@@ -83,7 +83,7 @@ internal static nint compareKey(key x, key y) {
 
 // check asserts that each node's height, subtree, and parent link is
 // correct.
-internal static void checkᴍ(ж<node> Ꮡn, ж<node> Ꮡparent) {
+[GoMethodBody("check")] internal static void checkᴍ(ж<node> Ꮡn, ж<node> Ꮡparent) {
     ref var n = ref Ꮡn.DerefOrNull();
     ref var parent = ref Ꮡparent.DerefOrNull();
 
@@ -101,7 +101,7 @@ internal static void checkᴍ(ж<node> Ꮡn, ж<node> Ꮡparent) {
     }
 }
 
-internal static void checkBalanceᴍ(ref node n) {
+[GoMethodBody("checkBalance")] internal static void checkBalanceᴍ(ref node n) {
     var (lheight, rheight) = (n.left.safeHeight(), n.right.safeHeight());
     var balance = rheight - lheight;
     if (balance != n.balance) {
@@ -122,7 +122,7 @@ internal static void checkBalanceᴍ(ref node n) {
 // identified by k, along with its parent, if any. If the key is not
 // present, it returns a pointer to the node where the key should be
 // inserted by a subsequent call to [tree.set].
-internal static (ж<ж<node>> pos, ж<node> parent) locateᴍ(ж<tree> Ꮡt, key k) {
+[GoMethodBody("locate")] internal static (ж<ж<node>> pos, ж<node> parent) locateᴍ(ж<tree> Ꮡt, key k) {
     ж<ж<node>> pos = default;
     ж<node> parent = default;
     ref var t = ref Ꮡt.DerefOrNull();
@@ -146,7 +146,7 @@ internal static (ж<ж<node>> pos, ж<node> parent) locateᴍ(ж<tree> Ꮡt, key
 // If t is modified during the iteration,
 // some files may not be visited.
 // No file will be visited multiple times.
-internal static iter.Seq<ж<File>> allᴍ(ж<tree> Ꮡt) {
+[GoMethodBody("all")] internal static iter.Seq<ж<File>> allᴍ(ж<tree> Ꮡt) {
     return (Func<ж<File>, bool> yield) => {
         if (Ꮡt == nil) {
             return;
@@ -172,7 +172,7 @@ internal static iter.Seq<ж<File>> allᴍ(ж<tree> Ꮡt) {
 
 // nextAfter returns the node in the key sequence following
 // (pos, parent), a result pair from [tree.locate].
-internal static ж<node> nextAfterᴍ(ref tree t, ж<ж<node>> Ꮡpos, ж<node> parent) {
+[GoMethodBody("nextAfter")] internal static ж<node> nextAfterᴍ(ref tree t, ж<ж<node>> Ꮡpos, ж<node> parent) {
     ref var pos = ref Ꮡpos.DerefOrNull();
 
     switch (ᐧ) {
@@ -192,7 +192,7 @@ internal static ж<node> nextAfterᴍ(ref tree t, ж<ж<node>> Ꮡpos, ж<node> 
 
 } partial class token_package {
 
-internal static ж<node> nextᴍ(ж<node> Ꮡx) {
+[GoMethodBody("next")] internal static ж<node> nextᴍ(ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.right == nil) {
@@ -210,7 +210,7 @@ internal static ж<node> nextᴍ(ж<node> Ꮡx) {
 
 } partial class token_package {
 
-internal static void setRootᴍ(ref tree t, ж<node> Ꮡx) {
+[GoMethodBody("setRoot")] internal static void setRootᴍ(ref tree t, ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     t.root = Ꮡx;
@@ -221,7 +221,7 @@ internal static void setRootᴍ(ref tree t, ж<node> Ꮡx) {
 
 } partial class token_package {
 
-internal static void setLeftᴍ(ж<node> Ꮡx, ж<node> Ꮡy) {
+[GoMethodBody("setLeft")] internal static void setLeftᴍ(ж<node> Ꮡx, ж<node> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -231,7 +231,7 @@ internal static void setLeftᴍ(ж<node> Ꮡx, ж<node> Ꮡy) {
     }
 }
 
-internal static void setRightᴍ(ж<node> Ꮡx, ж<node> Ꮡy) {
+[GoMethodBody("setRight")] internal static void setRightᴍ(ж<node> Ꮡx, ж<node> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -241,7 +241,7 @@ internal static void setRightᴍ(ж<node> Ꮡx, ж<node> Ꮡy) {
     }
 }
 
-internal static int32 safeHeightᴍ(ж<node> Ꮡn) {
+[GoMethodBody("safeHeight")] internal static int32 safeHeightᴍ(ж<node> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (Ꮡn == nil) {
@@ -250,7 +250,7 @@ internal static int32 safeHeightᴍ(ж<node> Ꮡn) {
     return n.height;
 }
 
-internal static void updateᴍ(ref node n) {
+[GoMethodBody("update")] internal static void updateᴍ(ref node n) {
     var (lheight, rheight) = (n.left.safeHeight(), n.right.safeHeight());
     n.height = max(lheight, rheight) + 1;
     n.balance = rheight - lheight;
@@ -258,7 +258,7 @@ internal static void updateᴍ(ref node n) {
 
 } partial class token_package {
 
-internal static void replaceChildᴍ(ref tree t, ж<node> Ꮡparent, ж<node> old, ж<node> @new) {
+[GoMethodBody("replaceChild")] internal static void replaceChildᴍ(ref tree t, ж<node> Ꮡparent, ж<node> old, ж<node> @new) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     switch (ᐧ) {
@@ -289,7 +289,7 @@ internal static void replaceChildᴍ(ref tree t, ж<node> Ꮡparent, ж<node> ol
 // x is a node that has just been mutated, and so the height and
 // balance of x and its ancestors may be stale, but the children of x
 // must be in a valid state.
-internal static void rebalanceUpᴍ(ref tree t, ж<node> Ꮡx) {
+[GoMethodBody("rebalanceUp")] internal static void rebalanceUpᴍ(ref tree t, ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     while (Ꮡx != nil) {
@@ -322,7 +322,7 @@ internal static void rebalanceUpᴍ(ref tree t, ж<node> Ꮡx) {
 
 // rotateRight rotates the subtree rooted at node y.
 // turning (y (x a b) c) into (x a (y b c)).
-internal static ж<node> rotateRightᴍ(ref tree t, ж<node> Ꮡy) {
+[GoMethodBody("rotateRight")] internal static ж<node> rotateRightᴍ(ref tree t, ж<node> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     // p -> (y (x a b) c)
@@ -344,7 +344,7 @@ internal static ж<node> rotateRightᴍ(ref tree t, ж<node> Ꮡy) {
 
 // rotateLeft rotates the subtree rooted at node x.
 // turning (x a (y b c)) into (y (x a b) c).
-internal static ж<node> rotateLeftᴍ(ref tree t, ж<node> Ꮡx) {
+[GoMethodBody("rotateLeft")] internal static ж<node> rotateLeftᴍ(ref tree t, ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // p -> (x a (y b c))
@@ -366,7 +366,7 @@ internal static ж<node> rotateLeftᴍ(ref tree t, ж<node> Ꮡx) {
 
 // add inserts file into the tree, if not present.
 // It panics if file overlaps with another.
-internal static void addᴍ(ж<tree> Ꮡt, ж<File> Ꮡfile) {
+[GoMethodBody("add")] internal static void addᴍ(ж<tree> Ꮡt, ж<File> Ꮡfile) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var @file = ref Ꮡfile.DerefOrNull();
 
@@ -384,7 +384,7 @@ internal static void addᴍ(ж<tree> Ꮡt, ж<File> Ꮡfile) {
 
 // set updates the existing node at (pos, parent) if present, or
 // inserts a new node if not, so that it refers to file.
-internal static void setᴍ(ref tree t, ж<File> Ꮡfile, ж<ж<node>> Ꮡpos, ж<node> parent) {
+[GoMethodBody("set")] internal static void setᴍ(ref tree t, ж<File> Ꮡfile, ж<ж<node>> Ꮡpos, ж<node> parent) {
     ref var @file = ref Ꮡfile.DerefOrNull();
     ref var pos = ref Ꮡpos.DerefOrNull();
 
@@ -404,7 +404,7 @@ internal static void setᴍ(ref tree t, ж<File> Ꮡfile, ж<ж<node>> Ꮡpos, �
 }
 
 // delete deletes the node at pos.
-internal static void deleteᴍ(ref tree t, ж<ж<node>> Ꮡpos) {
+[GoMethodBody("delete")] internal static void deleteᴍ(ref tree t, ж<ж<node>> Ꮡpos) {
     ref var pos = ref Ꮡpos.DerefOrNull();
 
     t.root.check(nil);
@@ -448,7 +448,7 @@ internal static void deleteᴍ(ref tree t, ж<ж<node>> Ꮡpos) {
 
 // deleteSwap deletes a node that has two children by replacing
 // it by its in-order successor, then triggers a rebalance.
-internal static void deleteSwapᴍ(ref tree t, ж<ж<node>> Ꮡpos) {
+[GoMethodBody("deleteSwap")] internal static void deleteSwapᴍ(ref tree t, ж<ж<node>> Ꮡpos) {
     ref var pos = ref Ꮡpos.DerefOrNull();
 
     var x = pos;
@@ -471,7 +471,7 @@ internal static void deleteSwapᴍ(ref tree t, ж<ж<node>> Ꮡpos) {
 // deleteMin updates the subtree rooted at *zpos to delete its minimum
 // (leftmost) element, which may be *zpos itself. It returns the
 // deleted node.
-internal static ж<node> /*z*/ deleteMinᴍ(ref tree t, ж<ж<node>> Ꮡzpos) {
+[GoMethodBody("deleteMin")] internal static ж<node> /*z*/ deleteMinᴍ(ref tree t, ж<ж<node>> Ꮡzpos) {
     ж<node> z = default;
     ref var zpos = ref Ꮡzpos.DerefOrNull();
 
@@ -487,33 +487,3 @@ internal static ж<node> /*z*/ deleteMinᴍ(ref tree t, ж<ж<node>> Ꮡzpos) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tokenᴛFile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static key key(this ref File f) => token_package.keyᴍ(ref f);
-}
-partial class tokenᴛnode {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void check(this ж<node> Ꮡn, ж<node> Ꮡparent) => token_package.checkᴍ(Ꮡn, Ꮡparent);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkBalance(this ref node n) => token_package.checkBalanceᴍ(ref n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<node> next(this ж<node> Ꮡx) => token_package.nextᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setLeft(this ж<node> Ꮡx, ж<node> Ꮡy) => token_package.setLeftᴍ(Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setRight(this ж<node> Ꮡx, ж<node> Ꮡy) => token_package.setRightᴍ(Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int32 safeHeight(this ж<node> Ꮡn) => token_package.safeHeightᴍ(Ꮡn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void update(this ref node n) => token_package.updateᴍ(ref n);
-}
-partial class tokenᴛtree {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<ж<node>> pos, ж<node> parent) locate(this ж<tree> Ꮡt, key k) => token_package.locateᴍ(Ꮡt, k);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static iter.Seq<ж<File>> all(this ж<tree> Ꮡt) => token_package.allᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<node> nextAfter(this ref tree t, ж<ж<node>> Ꮡpos, ж<node> parent) => token_package.nextAfterᴍ(ref t, Ꮡpos, parent);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setRoot(this ref tree t, ж<node> Ꮡx) => token_package.setRootᴍ(ref t, Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void replaceChild(this ref tree t, ж<node> Ꮡparent, ж<node> old, ж<node> @new) => token_package.replaceChildᴍ(ref t, Ꮡparent, old, @new);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void rebalanceUp(this ref tree t, ж<node> Ꮡx) => token_package.rebalanceUpᴍ(ref t, Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<node> rotateRight(this ref tree t, ж<node> Ꮡy) => token_package.rotateRightᴍ(ref t, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<node> rotateLeft(this ref tree t, ж<node> Ꮡx) => token_package.rotateLeftᴍ(ref t, Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ж<tree> Ꮡt, ж<File> Ꮡfile) => token_package.addᴍ(Ꮡt, Ꮡfile);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this ref tree t, ж<File> Ꮡfile, ж<ж<node>> Ꮡpos, ж<node> parent) => token_package.setᴍ(ref t, Ꮡfile, Ꮡpos, parent);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void delete(this ref tree t, ж<ж<node>> Ꮡpos) => token_package.deleteᴍ(ref t, Ꮡpos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void deleteSwap(this ref tree t, ж<ж<node>> Ꮡpos) => token_package.deleteSwapᴍ(ref t, Ꮡpos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<node> /*z*/ deleteMin(this ref tree t, ж<ж<node>> Ꮡzpos) => token_package.deleteMinᴍ(ref t, Ꮡzpos);
-}
-// </GlyphForwarders>

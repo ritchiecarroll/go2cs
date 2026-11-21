@@ -50,7 +50,7 @@ partial struct echConfigErr {
 internal static ref readonly @string tlsMalformedECHConfigˢᴍechConfigErr => ref tlsMalformedECHConfigˢᵇᴍechConfigErr;
 private static readonly @string tlsMalformedECHConfigˢᵇᴍechConfigErr = "tls: malformed ECHConfig"u8;
 
-internal static @string Errorᴍ(ref echConfigErr e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref echConfigErr e) {
     if (e.field == ""u8) {
         return tlsMalformedECHConfigˢᴍechConfigErr;
     }
@@ -551,7 +551,7 @@ partial struct ECHRejectionError {
 internal static ref readonly @string tlsServerRejectedEchˢᴍECHRejectionError => ref tlsServerRejectedEchˢᵇᴍECHRejectionError;
 private static readonly @string tlsServerRejectedEchˢᵇᴍECHRejectionError = "tls: server rejected ECH"u8;
 
-internal static @string Errorᴍ(ref ECHRejectionError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref ECHRejectionError e) {
     return tlsServerRejectedEchˢᴍECHRejectionError;
 }
 
@@ -621,7 +621,7 @@ internal static (echExtType echType, echCipher cs, uint8 configID, slice<byte> e
 
 } partial class tls_package {
 
-internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClientHelloᴍ(ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡouter, slice<EncryptedClientHelloKey> echKeys) {
+[GoMethodBody("processECHClientHello")] internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClientHelloᴍ(ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡouter, slice<EncryptedClientHelloKey> echKeys) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var outer = ref Ꮡouter.DerefOrNull();
 
@@ -734,15 +734,3 @@ internal static (slice<byte>, error) buildRetryConfigList(slice<EncryptedClientH
 }
 
 } // end tls_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tlsᴛechConfigErr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref echConfigErr e) => tls_package.Errorᴍ(ref e);
-}
-partial class tlsᴛECHRejectionError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref ECHRejectionError e) => tls_package.Errorᴍ(ref e);
-}
-partial class tlsᴛConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClientHello(this ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡouter, slice<EncryptedClientHelloKey> echKeys) => tls_package.processECHClientHelloᴍ(Ꮡc, Ꮡouter, echKeys);
-}
-// </GlyphForwarders>

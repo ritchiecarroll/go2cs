@@ -37,7 +37,7 @@ public static ж<Rat> NewRat(int64 a, int64 b) {
 
 // SetFloat64 sets z to exactly f and returns z.
 // If f is not finite, SetFloat returns nil.
-internal static ж<Rat> SetFloat64ᴍ(ж<Rat> Ꮡz, float64 f) {
+[GoMethodBody("SetFloat64")] internal static ж<Rat> SetFloat64ᴍ(ж<Rat> Ꮡz, float64 f) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     UntypedInt expMask = /* 1<<11 - 1 */ 2047;
@@ -289,7 +289,7 @@ internal static (float64 f, bool exact) quotToFloat64(ж<stack> stk, nat a, nat 
 // whether f represents x exactly. If the magnitude of x is too large to
 // be represented by a float32, f is an infinity and exact is false.
 // The sign of f always matches the sign of x, even if f == 0.
-internal static (float32 f, bool exact) Float32ᴍ(ж<Rat> Ꮡx) {
+[GoMethodBody("Float32")] internal static (float32 f, bool exact) Float32ᴍ(ж<Rat> Ꮡx) {
     float32 f = default;
     bool exact = default;
     GoFrame ᒐ = default;
@@ -317,7 +317,7 @@ internal static (float32 f, bool exact) Float32ᴍ(ж<Rat> Ꮡx) {
 // whether f represents x exactly. If the magnitude of x is too large to
 // be represented by a float64, f is an infinity and exact is false.
 // The sign of f always matches the sign of x, even if f == 0.
-internal static (float64 f, bool exact) Float64ᴍ(ж<Rat> Ꮡx) {
+[GoMethodBody("Float64")] internal static (float64 f, bool exact) Float64ᴍ(ж<Rat> Ꮡx) {
     float64 f = default;
     bool exact = default;
     GoFrame ᒐ = default;
@@ -343,7 +343,7 @@ internal static (float64 f, bool exact) Float64ᴍ(ж<Rat> Ꮡx) {
 
 // SetFrac sets z to a/b and returns z.
 // If b == 0, SetFrac panics.
-internal static ж<Rat> SetFracᴍ(ж<Rat> Ꮡz, ж<Int> Ꮡa, ж<Int> Ꮡb) {
+[GoMethodBody("SetFrac")] internal static ж<Rat> SetFracᴍ(ж<Rat> Ꮡz, ж<Int> Ꮡa, ж<Int> Ꮡb) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -363,7 +363,7 @@ internal static ж<Rat> SetFracᴍ(ж<Rat> Ꮡz, ж<Int> Ꮡa, ж<Int> Ꮡb) {
 
 // SetFrac64 sets z to a/b and returns z.
 // If b == 0, SetFrac64 panics.
-internal static ж<Rat> SetFrac64ᴍ(ж<Rat> Ꮡz, int64 a, int64 b) {
+[GoMethodBody("SetFrac64")] internal static ж<Rat> SetFrac64ᴍ(ж<Rat> Ꮡz, int64 a, int64 b) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (b == 0) {
@@ -379,7 +379,7 @@ internal static ж<Rat> SetFrac64ᴍ(ж<Rat> Ꮡz, int64 a, int64 b) {
 }
 
 // SetInt sets z to x (by making a copy of x) and returns z.
-internal static ж<Rat> SetIntᴍ(ж<Rat> Ꮡz, ж<Int> x) {
+[GoMethodBody("SetInt")] internal static ж<Rat> SetIntᴍ(ж<Rat> Ꮡz, ж<Int> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     Ꮡz.Ꮡa.Set(x);
@@ -388,7 +388,7 @@ internal static ж<Rat> SetIntᴍ(ж<Rat> Ꮡz, ж<Int> x) {
 }
 
 // SetInt64 sets z to x and returns z.
-internal static ж<Rat> SetInt64ᴍ(ж<Rat> Ꮡz, int64 x) {
+[GoMethodBody("SetInt64")] internal static ж<Rat> SetInt64ᴍ(ж<Rat> Ꮡz, int64 x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     Ꮡz.Ꮡa.SetInt64(x);
@@ -397,7 +397,7 @@ internal static ж<Rat> SetInt64ᴍ(ж<Rat> Ꮡz, int64 x) {
 }
 
 // SetUint64 sets z to x and returns z.
-internal static ж<Rat> SetUint64ᴍ(ж<Rat> Ꮡz, uint64 x) {
+[GoMethodBody("SetUint64")] internal static ж<Rat> SetUint64ᴍ(ж<Rat> Ꮡz, uint64 x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     Ꮡz.Ꮡa.SetUint64(x);
@@ -406,7 +406,7 @@ internal static ж<Rat> SetUint64ᴍ(ж<Rat> Ꮡz, uint64 x) {
 }
 
 // Set sets z to x (by making a copy of x) and returns z.
-internal static ж<Rat> Setᴍ(ж<Rat> Ꮡz, ж<Rat> x) {
+[GoMethodBody("Set")] internal static ж<Rat> Setᴍ(ж<Rat> Ꮡz, ж<Rat> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (Ꮡz != x) {
@@ -420,7 +420,7 @@ internal static ж<Rat> Setᴍ(ж<Rat> Ꮡz, ж<Rat> x) {
 }
 
 // Abs sets z to |x| (the absolute value of x) and returns z.
-internal static ж<Rat> Absᴍ(ж<Rat> Ꮡz, ж<Rat> x) {
+[GoMethodBody("Abs")] internal static ж<Rat> Absᴍ(ж<Rat> Ꮡz, ж<Rat> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     Ꮡz.Set(x);
@@ -429,7 +429,7 @@ internal static ж<Rat> Absᴍ(ж<Rat> Ꮡz, ж<Rat> x) {
 }
 
 // Neg sets z to -x and returns z.
-internal static ж<Rat> Negᴍ(ж<Rat> Ꮡz, ж<Rat> x) {
+[GoMethodBody("Neg")] internal static ж<Rat> Negᴍ(ж<Rat> Ꮡz, ж<Rat> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     Ꮡz.Set(x);
@@ -439,7 +439,7 @@ internal static ж<Rat> Negᴍ(ж<Rat> Ꮡz, ж<Rat> x) {
 
 // Inv sets z to 1/x and returns z.
 // If x == 0, Inv panics.
-internal static ж<Rat> Invᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx) {
+[GoMethodBody("Inv")] internal static ж<Rat> Invᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -455,12 +455,12 @@ internal static ж<Rat> Invᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx) {
 //   - -1 if x < 0;
 //   - 0 if x == 0;
 //   - +1 if x > 0.
-internal static nint Signᴍ(ref Rat x) {
+[GoMethodBody("Sign")] internal static nint Signᴍ(ref Rat x) {
     return x.a.Sign();
 }
 
 // IsInt reports whether the denominator of x is 1.
-internal static bool IsIntᴍ(ref Rat x) {
+[GoMethodBody("IsInt")] internal static bool IsIntᴍ(ref Rat x) {
     return len(x.b.abs) == 0 || x.b.abs.cmp(natOne) == 0;
 }
 
@@ -468,7 +468,7 @@ internal static bool IsIntᴍ(ref Rat x) {
 // The result is a reference to x's numerator; it
 // may change if a new value is assigned to x, and vice versa.
 // The sign of the numerator corresponds to the sign of x.
-internal static ж<Int> Numᴍ(ж<Rat> Ꮡx) {
+[GoMethodBody("Num")] internal static ж<Int> Numᴍ(ж<Rat> Ꮡx) {
     return Ꮡx.Ꮡa;
 }
 
@@ -479,7 +479,7 @@ internal static ж<Int> Numᴍ(ж<Rat> Ꮡx) {
 // any operation that sets x will do, including x.Set(x).)
 // If the result is a reference to x's denominator it
 // may change if a new value is assigned to x, and vice versa.
-internal static ж<Int> Denomᴍ(ж<Rat> Ꮡx) {
+[GoMethodBody("Denom")] internal static ж<Int> Denomᴍ(ж<Rat> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // Note that x.b.neg is guaranteed false.
@@ -492,7 +492,7 @@ internal static ж<Int> Denomᴍ(ж<Rat> Ꮡx) {
     return Ꮡx.Ꮡb;
 }
 
-internal static ж<Rat> normᴍ(ж<Rat> Ꮡz) {
+[GoMethodBody("norm")] internal static ж<Rat> normᴍ(ж<Rat> Ꮡz) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -550,7 +550,7 @@ internal static nat mulDenom(ж<stack> stk, nat z, nat x, nat y) {
 
 // scaleDenom sets z to the product x*f.
 // If f == 0 (zero value of denominator), z is set to (a copy of) x.
-internal static void scaleDenomᴍ(ж<Int> Ꮡz, ж<stack> stk, ж<Int> Ꮡx, nat f) {
+[GoMethodBody("scaleDenom")] internal static void scaleDenomᴍ(ж<Int> Ꮡz, ж<stack> stk, ж<Int> Ꮡx, nat f) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -568,7 +568,7 @@ internal static void scaleDenomᴍ(ж<Int> Ꮡz, ж<stack> stk, ж<Int> Ꮡx, na
 //   - -1 if x < y;
 //   - 0 if x == y;
 //   - +1 if x > y.
-internal static nint Cmpᴍ(ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
+[GoMethodBody("Cmp")] internal static nint Cmpᴍ(ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
     GoFrame ᒐ = default;
     try {
         ref var x = ref Ꮡx.DerefOrNull();
@@ -588,7 +588,7 @@ internal static nint Cmpᴍ(ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
 }
 
 // Add sets z to the sum x+y and returns z.
-internal static ж<Rat> Addᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
+[GoMethodBody("Add")] internal static ж<Rat> Addᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -612,7 +612,7 @@ internal static ж<Rat> Addᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
 }
 
 // Sub sets z to the difference x-y and returns z.
-internal static ж<Rat> Subᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
+[GoMethodBody("Sub")] internal static ж<Rat> Subᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -636,7 +636,7 @@ internal static ж<Rat> Subᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
 }
 
 // Mul sets z to the product x*y and returns z.
-internal static ж<Rat> Mulᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
+[GoMethodBody("Mul")] internal static ж<Rat> Mulᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -669,7 +669,7 @@ internal static ж<Rat> Mulᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
 
 // Quo sets z to the quotient x/y and returns z.
 // If y == 0, Quo panics.
-internal static ж<Rat> Quoᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
+[GoMethodBody("Quo")] internal static ж<Rat> Quoᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -697,33 +697,3 @@ internal static ж<Rat> Quoᴍ(ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class bigᴛRat {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Rat> SetFloat64(this ж<Rat> Ꮡz, float64 f) => big_package.SetFloat64ᴍ(Ꮡz, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (float32 f, bool exact) Float32(this ж<Rat> Ꮡx) => big_package.Float32ᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (float64 f, bool exact) Float64(this ж<Rat> Ꮡx) => big_package.Float64ᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Rat> SetFrac(this ж<Rat> Ꮡz, ж<Int> Ꮡa, ж<Int> Ꮡb) => big_package.SetFracᴍ(Ꮡz, Ꮡa, Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Rat> SetFrac64(this ж<Rat> Ꮡz, int64 a, int64 b) => big_package.SetFrac64ᴍ(Ꮡz, a, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Rat> SetInt(this ж<Rat> Ꮡz, ж<Int> x) => big_package.SetIntᴍ(Ꮡz, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Rat> SetInt64(this ж<Rat> Ꮡz, int64 x) => big_package.SetInt64ᴍ(Ꮡz, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Rat> SetUint64(this ж<Rat> Ꮡz, uint64 x) => big_package.SetUint64ᴍ(Ꮡz, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Rat> Set(this ж<Rat> Ꮡz, ж<Rat> x) => big_package.Setᴍ(Ꮡz, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Rat> Abs(this ж<Rat> Ꮡz, ж<Rat> x) => big_package.Absᴍ(Ꮡz, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Rat> Neg(this ж<Rat> Ꮡz, ж<Rat> x) => big_package.Negᴍ(Ꮡz, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Rat> Inv(this ж<Rat> Ꮡz, ж<Rat> Ꮡx) => big_package.Invᴍ(Ꮡz, Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Sign(this ref Rat x) => big_package.Signᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsInt(this ref Rat x) => big_package.IsIntᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Int> Num(this ж<Rat> Ꮡx) => big_package.Numᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Int> Denom(this ж<Rat> Ꮡx) => big_package.Denomᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Rat> norm(this ж<Rat> Ꮡz) => big_package.normᴍ(Ꮡz);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Cmp(this ж<Rat> Ꮡx, ж<Rat> Ꮡy) => big_package.Cmpᴍ(Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Rat> Add(this ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) => big_package.Addᴍ(Ꮡz, Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Rat> Sub(this ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) => big_package.Subᴍ(Ꮡz, Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Rat> Mul(this ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) => big_package.Mulᴍ(Ꮡz, Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Rat> Quo(this ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) => big_package.Quoᴍ(Ꮡz, Ꮡx, Ꮡy);
-}
-partial class bigᴛInt {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void scaleDenom(this ж<Int> Ꮡz, ж<stack> stk, ж<Int> Ꮡx, nat f) => big_package.scaleDenomᴍ(Ꮡz, stk, Ꮡx, f);
-}
-// </GlyphForwarders>

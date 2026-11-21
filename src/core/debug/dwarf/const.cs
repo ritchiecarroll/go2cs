@@ -140,7 +140,7 @@ public static Attr AttrLoclistsBase => 0x8C;
 
 } partial class dwarf_package {
 
-internal static @string GoStringᴍ(Attr a) {
+[GoMethodBody("GoString")] internal static @string GoStringᴍ(Attr a) {
     var (str, ok) = _Attr_map[a, ꟷ]; if (ok) {
         return "dwarf.Attr"u8 + str;
     }
@@ -283,7 +283,7 @@ public static Tag TagImmutableType => 0x4B;
 
 } partial class dwarf_package {
 
-internal static @string GoStringᴍ(Tag t) {
+[GoMethodBody("GoString")] internal static @string GoStringᴍ(Tag t) {
     if (t <= TagTemplateAlias) {
         return "dwarf.Tag"u8 + t.String();
     }
@@ -464,12 +464,3 @@ internal static UntypedInt rleStartEnd => 0x6;
 internal static UntypedInt rleStartLength => 0x7;
 
 } // end dwarf_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class dwarfᴛAttr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Attr a) => dwarf_package.GoStringᴍ(a);
-}
-partial class dwarfᴛTag {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Tag t) => dwarf_package.GoStringᴍ(t);
-}
-// </GlyphForwarders>

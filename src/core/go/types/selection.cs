@@ -80,18 +80,18 @@ partial struct Selection {
 } partial class types_package {
 
 // Kind returns the selection kind.
-internal static SelectionKind Kindᴍ(ref Selection s) { return s.kind; }
+[GoMethodBody("Kind")] internal static SelectionKind Kindᴍ(ref Selection s) { return s.kind; }
 
 // Recv returns the type of x in x.f.
-internal static Type Recvᴍ(ref Selection s) { return s.recv; }
+[GoMethodBody("Recv")] internal static Type Recvᴍ(ref Selection s) { return s.recv; }
 
 // Obj returns the object denoted by x.f; a *Var for
 // a field selection, and a *Func in all other cases.
-internal static Object Objᴍ(ref Selection s) { return s.obj; }
+[GoMethodBody("Obj")] internal static Object Objᴍ(ref Selection s) { return s.obj; }
 
 // Type returns the type of x.f, which may be different from the type of f.
 // See Selection for more information.
-internal static Type Typeᴍ(ref Selection s) {
+[GoMethodBody("Type")] internal static Type Typeᴍ(ref Selection s) {
     switch (s.kind) {
     case var ᴛ when ᴛ == MethodVal: {
         // The type of x.f is a method with its receiver type set
@@ -133,7 +133,7 @@ internal static Type Typeᴍ(ref Selection s) {
 //
 // The earlier index entries are the indices of the embedded fields implicitly
 // traversed to get from (the type of) x to f, starting at embedding depth 0.
-internal static slice<nint> Indexᴍ(ref Selection s) { return s.index; }
+[GoMethodBody("Index")] internal static slice<nint> Indexᴍ(ref Selection s) { return s.index; }
 
 // Indirect reports whether any pointer indirection was required to get from
 // x to f in x.f.
@@ -142,9 +142,9 @@ internal static slice<nint> Indexᴍ(ref Selection s) { return s.index; }
 // MethodVal selection in which the receiver argument and parameter
 // both have type *T so there is no indirection.
 // Unfortunately, a fix is too risky.
-internal static bool Indirectᴍ(ref Selection s) { return s.indirect; }
+[GoMethodBody("Indirect")] internal static bool Indirectᴍ(ref Selection s) { return s.indirect; }
 
-internal static @string Stringᴍ(ж<Selection> Ꮡs) { return SelectionString(Ꮡs, default); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<Selection> Ꮡs) { return SelectionString(Ꮡs, default); }
 
 } partial class types_package {
 
@@ -201,15 +201,3 @@ public static @string SelectionString(ж<Selection> Ꮡs, Func<ж<Package>, @str
 }
 
 } // end types_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛSelection {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static SelectionKind Kind(this ref Selection s) => types_package.Kindᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Recv(this ref Selection s) => types_package.Recvᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Object Obj(this ref Selection s) => types_package.Objᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Type(this ref Selection s) => types_package.Typeᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<nint> Index(this ref Selection s) => types_package.Indexᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Indirect(this ref Selection s) => types_package.Indirectᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Selection> Ꮡs) => types_package.Stringᴍ(Ꮡs);
-}
-// </GlyphForwarders>

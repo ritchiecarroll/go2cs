@@ -506,7 +506,7 @@ partial class big_package {
 
 // rem returns r such that r = u%v.
 // It uses z as the storage for r.
-internal static nat /*r*/ remᴍ(nat z, ж<stack> Ꮡstk, nat u, nat v) {
+[GoMethodBody("rem")] internal static nat /*r*/ remᴍ(nat z, ж<stack> Ꮡstk, nat u, nat v) {
     nat r = default;
     GoFrame ᒐ = default;
     try {
@@ -527,7 +527,7 @@ internal static nat /*r*/ remᴍ(nat z, ж<stack> Ꮡstk, nat u, nat v) {
 // div returns q, r such that q = ⌊u/v⌋ and r = u%v = u - q·v.
 // It uses z and z2 as the storage for q and r.
 // The caller may pass stk == nil to request that div obtain and release one itself.
-internal static (nat q, nat r) divᴍ(nat z, ж<stack> Ꮡstk, nat z2, nat u, nat v) {
+[GoMethodBody("div")] internal static (nat q, nat r) divᴍ(nat z, ж<stack> Ꮡstk, nat z2, nat u, nat v) {
     nat q = default;
     nat r = default;
     GoFrame ᒐ = default;
@@ -568,7 +568,7 @@ internal static (nat q, nat r) divᴍ(nat z, ж<stack> Ꮡstk, nat z2, nat u, na
 // divW returns q, r such that q = ⌊x/y⌋ and r = x%y = x - q·y.
 // It uses z as the storage for q.
 // Note that y is a single digit (Word), not a big number.
-internal static (nat q, Word r) divWᴍ(nat z, nat x, Word y) {
+[GoMethodBody("divW")] internal static (nat q, Word r) divWᴍ(nat z, nat x, Word y) {
     nat q = default;
     Word r = default;
 
@@ -594,7 +594,7 @@ internal static (nat q, Word r) divWᴍ(nat z, nat x, Word y) {
 }
 
 // modW returns x % d.
-internal static Word /*r*/ modWᴍ(nat x, Word d) {
+[GoMethodBody("modW")] internal static Word /*r*/ modWᴍ(nat x, Word d) {
     // TODO(agl): we don't actually need to store the q value.
     nat q = default;
     q = q.make(len(x));
@@ -627,7 +627,7 @@ internal static Word /*r*/ divWVW(slice<Word> z, Word xn, slice<Word> x, Word y)
 // It uses z and u as the storage for q and r.
 // The caller must ensure that len(vIn) ≥ 2 (use divW otherwise)
 // and that len(uIn) ≥ len(vIn) (the answer is 0, uIn otherwise).
-internal static (nat q, nat r) divLargeᴍ(nat z, ж<stack> Ꮡstk, nat u, nat uIn, nat vIn) {
+[GoMethodBody("divLarge")] internal static (nat q, nat r) divLargeᴍ(nat z, ж<stack> Ꮡstk, nat u, nat uIn, nat vIn) {
     nat q = default;
     nat r = default;
     GoFrame ᒐ = default;
@@ -684,7 +684,7 @@ internal static (nat q, nat r) divLargeᴍ(nat z, ж<stack> Ꮡstk, nat u, nat u
 // divBasic implements long division as described above.
 // It overwrites q with ⌊u/v⌋ and overwrites u with the remainder r.
 // q must be large enough to hold ⌊u/v⌋.
-internal static void divBasicᴍ(nat q, ж<stack> Ꮡstk, nat u, nat v) {
+[GoMethodBody("divBasic")] internal static void divBasicᴍ(nat q, ж<stack> Ꮡstk, nat u, nat v) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -789,7 +789,7 @@ internal static nint divRecursiveThreshold = 40; // see calibrate_test.go
 // z must be large enough to hold ⌊u/v⌋.
 // This function is just for allocating and freeing temporaries
 // around divRecursiveStep, the real implementation.
-internal static void divRecursiveᴍ(nat z, ж<stack> stk, nat u, nat v) {
+[GoMethodBody("divRecursive")] internal static void divRecursiveᴍ(nat z, ж<stack> stk, nat u, nat v) {
     clear(z);
     z.divRecursiveStep(stk, u, v, 0);
 }
@@ -799,7 +799,7 @@ internal static void divRecursiveᴍ(nat z, ж<stack> stk, nat u, nat v) {
 // z must be large enough to hold ⌊u/v⌋.
 // It uses temps[depth] (allocating if needed) as a temporary live across
 // the recursive call. It also uses tmp, but not live across the recursion.
-internal static void divRecursiveStepᴍ(nat z, ж<stack> Ꮡstk, nat u, nat v, nint depth) {
+[GoMethodBody("divRecursiveStep")] internal static void divRecursiveStepᴍ(nat z, ж<stack> Ꮡstk, nat u, nat v, nint depth) {
     GoFrame ᒐ = default;
     try {
         ref var stk = ref Ꮡstk.DerefOrNull();
@@ -951,16 +951,3 @@ internal static void divRecursiveStepᴍ(nat z, ж<stack> Ꮡstk, nat u, nat v, 
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class bigᴛnat {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nat /*r*/ rem(this nat z, ж<stack> Ꮡstk, nat u, nat v) => big_package.remᴍ(z, Ꮡstk, u, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nat q, nat r) div(this nat z, ж<stack> Ꮡstk, nat z2, nat u, nat v) => big_package.divᴍ(z, Ꮡstk, z2, u, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nat q, Word r) divW(this nat z, nat x, Word y) => big_package.divWᴍ(z, x, y);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Word /*r*/ modW(this nat x, Word d) => big_package.modWᴍ(x, d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nat q, nat r) divLarge(this nat z, ж<stack> Ꮡstk, nat u, nat uIn, nat vIn) => big_package.divLargeᴍ(z, Ꮡstk, u, uIn, vIn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void divBasic(this nat q, ж<stack> Ꮡstk, nat u, nat v) => big_package.divBasicᴍ(q, Ꮡstk, u, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void divRecursive(this nat z, ж<stack> stk, nat u, nat v) => big_package.divRecursiveᴍ(z, stk, u, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void divRecursiveStep(this nat z, ж<stack> Ꮡstk, nat u, nat v, nint depth) => big_package.divRecursiveStepᴍ(z, Ꮡstk, u, v, depth);
-}
-// </GlyphForwarders>

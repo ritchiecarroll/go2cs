@@ -550,7 +550,7 @@ internal delegate uint64 metricReader();
 
 } partial class runtime_package {
 
-internal static void computeᴍ(metricReader f, ж<statAggregate> _, ж<metricValue> Ꮡout) {
+[GoMethodBody("compute")] internal static void computeᴍ(metricReader f, ж<statAggregate> _, ж<metricValue> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     @out.kind = metricKindUint64;
@@ -604,7 +604,7 @@ internal static statDepSet makeStatDepSet(params ꓸꓸꓸstatDep depsʗp) {
 } partial class runtime_package {
 
 // difference returns set difference of s from b as a new set.
-internal static statDepSet differenceᴍ(statDepSet s, statDepSet b) {
+[GoMethodBody("difference")] internal static statDepSet differenceᴍ(statDepSet s, statDepSet b) {
     s = s.Clone();
     b = b.Clone();
 
@@ -616,7 +616,7 @@ internal static statDepSet differenceᴍ(statDepSet s, statDepSet b) {
 }
 
 // union returns the union of the two sets as a new set.
-internal static statDepSet unionᴍ(statDepSet s, statDepSet b) {
+[GoMethodBody("union")] internal static statDepSet unionᴍ(statDepSet s, statDepSet b) {
     s = s.Clone();
     b = b.Clone();
 
@@ -628,7 +628,7 @@ internal static statDepSet unionᴍ(statDepSet s, statDepSet b) {
 }
 
 // empty returns true if there are no dependencies in the set.
-internal static bool emptyᴍ(ref statDepSet s) {
+[GoMethodBody("empty")] internal static bool emptyᴍ(ref statDepSet s) {
     foreach (var (_, c) in range(s.Value)) {
         if (c != 0) {
             return false;
@@ -638,7 +638,7 @@ internal static bool emptyᴍ(ref statDepSet s) {
 }
 
 // has returns true if the set contains a given statDep.
-internal static bool hasᴍ(ref statDepSet s, statDep d) {
+[GoMethodBody("has")] internal static bool hasᴍ(ref statDepSet s, statDep d) {
     return (s.Value[d / 64] & ((uint64)1 << (int)(d % 64))) != 0;
 }
 
@@ -674,7 +674,7 @@ partial struct heapStatsAggregate {
 } partial class runtime_package {
 
 // compute populates the heapStatsAggregate with values from the runtime.
-internal static void computeᴍ(ж<heapStatsAggregate> Ꮡa) {
+[GoMethodBody("compute")] internal static void computeᴍ(ж<heapStatsAggregate> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡmemstats.ᏑheapStats.read(Ꮡa.ᏑheapStatsDelta);
@@ -722,7 +722,7 @@ partial struct sysStatsAggregate {
 } partial class runtime_package {
 
 // compute populates the sysStatsAggregate with values from the runtime.
-internal static void computeᴍ(ж<sysStatsAggregate> Ꮡa) {
+[GoMethodBody("compute")] internal static void computeᴍ(ж<sysStatsAggregate> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     a.stacksSys = Ꮡmemstats.Ꮡstacks_sys.load();
@@ -754,7 +754,7 @@ partial struct cpuStatsAggregate {
 } partial class runtime_package {
 
 // compute populates the cpuStatsAggregate with values from the runtime.
-internal static void computeᴍ(ref cpuStatsAggregate a) {
+[GoMethodBody("compute")] internal static void computeᴍ(ref cpuStatsAggregate a) {
     a.cpuStats = work.cpuStats;
     // TODO(mknyszek): Update the CPU stats again so that we're not
     // just relying on the STW snapshot. The issue here is that currently
@@ -777,7 +777,7 @@ partial struct gcStatsAggregate {
 } partial class runtime_package {
 
 // compute populates the gcStatsAggregate with values from the runtime.
-internal static void computeᴍ(ref gcStatsAggregate a) {
+[GoMethodBody("compute")] internal static void computeᴍ(ref gcStatsAggregate a) {
     a.heapScan = ᏑgcController.ᏑheapScan.Load();
     a.stackScan = ᏑgcController.ᏑlastStackScan.Load();
     a.globalsScan = ᏑgcController.ᏑglobalsScan.Load();
@@ -798,7 +798,7 @@ partial struct finalStatsAggregate {
 } partial class runtime_package {
 
 // compute populates the finalStatsAggregate with values from the runtime.
-internal static void computeᴍ(ref finalStatsAggregate a) {
+[GoMethodBody("compute")] internal static void computeᴍ(ref finalStatsAggregate a) {
     (a.finalizersQueued, a.finalizersExecuted) = finReadQueueStats();
     (a.cleanupsQueued, a.cleanupsExecuted) = ᏑgcCleanups.readQueueStats();
 }
@@ -848,7 +848,7 @@ partial struct statAggregate {
 
 // ensure populates statistics aggregates determined by deps if they
 // haven't yet been populated.
-internal static void ensureᴍ(ж<statAggregate> Ꮡa, ж<statDepSet> deps) {
+[GoMethodBody("ensure")] internal static void ensureᴍ(ж<statAggregate> Ꮡa, ж<statDepSet> deps) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var missing = deps.difference(a.ensured);
@@ -921,7 +921,7 @@ partial struct metricValue {
 // float64HistOrInit tries to pull out an existing float64Histogram
 // from the value, but if none exists, then it allocates one with
 // the given buckets.
-internal static ж<metricFloat64Histogram> float64HistOrInitᴍ(ref metricValue v, slice<float64> buckets) {
+[GoMethodBody("float64HistOrInit")] internal static ж<metricFloat64Histogram> float64HistOrInitᴍ(ref metricValue v, slice<float64> buckets) {
     ж<metricFloat64Histogram> hist = default;
     if (v.kind == metricKindFloat64Histogram && v.pointer != nil) {
         hist = @unsafe.Pointer.To<metricFloat64Histogram>(v.pointer);
@@ -997,36 +997,3 @@ internal static void readMetrics(@unsafe.Pointer samplesp, nint len, nint cap) {
 // go2cs generated this placeholder — func readMetricsLocked is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛmetricReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void compute(this metricReader f, ж<statAggregate> _, ж<metricValue> Ꮡout) => runtime_package.computeᴍ(f, _, Ꮡout);
-}
-partial class runtimeᴛstatDepSet {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static statDepSet difference(this statDepSet s, statDepSet b) => runtime_package.differenceᴍ(s, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static statDepSet union(this statDepSet s, statDepSet b) => runtime_package.unionᴍ(s, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ref statDepSet s) => runtime_package.emptyᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool has(this ref statDepSet s, statDep d) => runtime_package.hasᴍ(ref s, d);
-}
-partial class runtimeᴛheapStatsAggregate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void compute(this ж<heapStatsAggregate> Ꮡa) => runtime_package.computeᴍ(Ꮡa);
-}
-partial class runtimeᴛsysStatsAggregate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void compute(this ж<sysStatsAggregate> Ꮡa) => runtime_package.computeᴍ(Ꮡa);
-}
-partial class runtimeᴛcpuStatsAggregate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void compute(this ref cpuStatsAggregate a) => runtime_package.computeᴍ(ref a);
-}
-partial class runtimeᴛgcStatsAggregate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void compute(this ref gcStatsAggregate a) => runtime_package.computeᴍ(ref a);
-}
-partial class runtimeᴛfinalStatsAggregate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void compute(this ref finalStatsAggregate a) => runtime_package.computeᴍ(ref a);
-}
-partial class runtimeᴛstatAggregate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ensure(this ж<statAggregate> Ꮡa, ж<statDepSet> deps) => runtime_package.ensureᴍ(Ꮡa, deps);
-}
-partial class runtimeᴛmetricValue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<metricFloat64Histogram> float64HistOrInit(this ref metricValue v, slice<float64> buckets) => runtime_package.float64HistOrInitᴍ(ref v, buckets);
-}
-// </GlyphForwarders>

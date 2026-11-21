@@ -73,7 +73,7 @@ internal static opPredicates unaryOpPredicates;
 
 } partial class types_package {
 
-internal static bool opᴍ(ж<Checker> Ꮡcheck, opPredicates m, ж<operand> Ꮡx, token.Token op) {
+[GoMethodBody("op")] internal static bool opᴍ(ж<Checker> Ꮡcheck, opPredicates m, ж<operand> Ꮡx, token.Token op) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     var pred = m[op]; if (pred != nil) {
@@ -147,7 +147,7 @@ internal static ref readonly @string cannotUseOutsideOfˢ2ᴍChecker => ref cann
 private static readonly @string cannotUseOutsideOfˢ2ᵇᴍChecker = "cannot use ~ outside of interface or type constraint (use ^ for bitwise complement)"u8;
 
 // The unary expression e may be nil. It's passed in for better error messages only.
-internal static void unaryᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.UnaryExpr> Ꮡe) {
+[GoMethodBody("unary")] internal static void unaryᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.UnaryExpr> Ꮡe) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -220,7 +220,7 @@ internal static void unaryᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.Una
 // chanElem returns the channel element type of x for a receive from x (recv == true)
 // or send to x (recv == false) operation. If the operation is not valid, chanElem
 // reports an error and returns nil.
-internal static Type chanElemᴍ(ж<Checker> Ꮡcheck, positioner pos, ж<operand> Ꮡx, bool recv) {
+[GoMethodBody("chanElem")] internal static Type chanElemᴍ(ж<Checker> Ꮡcheck, positioner pos, ж<operand> Ꮡx, bool recv) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     var (u, err) = commonUnder(x.typ, (Type t, Type uΔ1) => {
@@ -293,7 +293,7 @@ private static readonly @string vFoundOldTypeSSNewSˢᵇᴍChecker = "%v: found 
 // Also, if x is a constant, it must be representable as a value of typ,
 // and if x is the (formerly untyped) lhs operand of a non-constant
 // shift, it must be an integer value.
-internal static void updateExprTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr x, Type typ, bool final) {
+[GoMethodBody("updateExprType")] internal static void updateExprTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr x, Type typ, bool final) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var (old, found) = check.untyped[x, ꟷ];
@@ -420,7 +420,7 @@ internal static void updateExprTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr x, Type ty
 }
 
 // updateExprVal updates the value of x to val.
-internal static void updateExprValᴍ(ref Checker check, ast.Expr x, constant.Value val) {
+[GoMethodBody("updateExprVal")] internal static void updateExprValᴍ(ref Checker check, ast.Expr x, constant.Value val) {
     var (info, ok) = check.untyped[x, ꟷ]; if (ok) {
         info.val = val;
         check.untyped[x] = info;
@@ -433,7 +433,7 @@ internal static void updateExprValᴍ(ref Checker check, ast.Expr x, constant.Va
 //
 // If x is a constant operand, the returned constant.Value will be the
 // representation of x in this context.
-internal static (Type, constant.Value, errors.Code) implicitTypeAndValueᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type target) {
+[GoMethodBody("implicitTypeAndValue")] internal static (Type, constant.Value, errors.Code) implicitTypeAndValueᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type target) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid || isTyped(x.typ) || !isValid(target)) {
@@ -548,7 +548,7 @@ internal static (Type, constant.Value, errors.Code) implicitTypeAndValueᴍ(ж<C
 }
 
 // If switchCase is true, the operator op is ignored.
-internal static void comparisonᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy, token.Token op, bool switchCase) {
+[GoMethodBody("comparison")] internal static void comparisonᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy, token.Token op, bool switchCase) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -685,7 +685,7 @@ Error:
 
 // incomparableCause returns a more specific cause why typ is not comparable.
 // If there is no more specific cause, the result is "".
-internal static @string incomparableCauseᴍ(ж<Checker> Ꮡcheck, Type typ) {
+[GoMethodBody("incomparableCause")] internal static @string incomparableCauseᴍ(ж<Checker> Ꮡcheck, Type typ) {
     switch (typ.Underlying().type()) {
     case ж<Slice> _:
     case ж<Signature> _:
@@ -697,7 +697,7 @@ internal static @string incomparableCauseᴍ(ж<Checker> Ꮡcheck, Type typ) {
 }
 
 // If e != nil, it must be the shift expression; it may be nil for non-constant shifts.
-internal static void shiftᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy, ast.Expr e, token.Token op) {
+[GoMethodBody("shift")] internal static void shiftᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy, ast.Expr e, token.Token op) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -871,7 +871,7 @@ internal static opPredicates binaryOpPredicates;
 
 // If e != nil, it must be the binary expression; it may be nil for non-constant expressions
 // (when invoked for an assignment operation where the binary expression is implicit).
-internal static void binaryᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e, ast.Expr lhs, ast.Expr rhs, token.Token op, token.Pos opPos) {
+[GoMethodBody("binary")] internal static void binaryᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e, ast.Expr lhs, ast.Expr rhs, token.Token op, token.Pos opPos) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     ref var y = ref heap(new operand(), out var Ꮡy);
@@ -969,7 +969,7 @@ internal static void binaryᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr 
 
 // matchTypes attempts to convert any untyped types x and y such that they match.
 // If an error occurs, x.mode is set to invalid.
-internal static void matchTypesᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy) {
+[GoMethodBody("matchTypes")] internal static void matchTypesᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -1075,7 +1075,7 @@ private static readonly @string exprSˢᵇᴍChecker = "-- expr %s"u8;
 // If hint != nil, it is the type of a composite literal element.
 // If allowGeneric is set, the operand type may be an uninstantiated
 // parameterized type or function value.
-internal static exprKind rawExprᴍ(ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e, Type hint, bool allowGeneric) {
+[GoMethodBody("rawExpr")] internal static exprKind rawExprᴍ(ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e, Type hint, bool allowGeneric) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -1119,7 +1119,7 @@ private static readonly @string functionˢᵇᴍChecker = "function"u8;
 // If x is a generic type, or a generic function whose type arguments cannot be inferred
 // from a non-nil target T, nonGeneric reports an error and invalidates x.mode and x.typ.
 // Otherwise it leaves x alone.
-internal static void nonGenericᴍ(ж<Checker> Ꮡcheck, ж<target> T, ж<operand> Ꮡx) {
+[GoMethodBody("nonGeneric")] internal static void nonGenericᴍ(ж<Checker> Ꮡcheck, ж<target> T, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid || x.mode == novalue) {
@@ -1155,7 +1155,7 @@ internal static void nonGenericᴍ(ж<Checker> Ꮡcheck, ж<target> T, ж<operan
 // If x has a pending type (i.e. its declaring object is on the object path), pendingType
 // reports an error and invalidates x.mode and x.typ.
 // Otherwise it leaves x alone.
-internal static void pendingTypeᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
+[GoMethodBody("pendingType")] internal static void pendingTypeᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid || x.mode == novalue) {
@@ -1178,7 +1178,7 @@ private static readonly @string noKeyValueExpectedˢᵇᴍChecker = "no key:valu
 // exprInternal contains the core of type checking of expressions.
 // Must only be called by rawExpr.
 // (See rawExpr for an explanation of the parameters.)
-internal static exprKind exprInternalᴍ(ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx, ast.Expr e, Type hint) {
+[GoMethodBody("exprInternal")] internal static exprKind exprInternalᴍ(ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx, ast.Expr e, Type hint) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var T = ref ᏑT.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
@@ -1435,7 +1435,7 @@ internal static any keyVal(constant.Value x) {
 } partial class types_package {
 
 // typeAssertion checks x.(T). The type of x must be an interface.
-internal static void typeAssertionᴍ(ж<Checker> Ꮡcheck, ast.Expr e, ж<operand> Ꮡx, Type T, bool typeSwitch) {
+[GoMethodBody("typeAssertion")] internal static void typeAssertionᴍ(ж<Checker> Ꮡcheck, ast.Expr e, ж<operand> Ꮡx, Type T, bool typeSwitch) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     ref var cause = ref heap(new @string(), out var Ꮡcause);
@@ -1456,14 +1456,14 @@ internal static void typeAssertionᴍ(ж<Checker> Ꮡcheck, ast.Expr e, ж<opera
 // a function call, T is used to infer the type arguments for e.
 // The result must be a single value.
 // If an error occurred, x.mode is set to invalid.
-internal static void exprᴍ(ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e) {
+[GoMethodBody("expr")] internal static void exprᴍ(ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e) {
     Ꮡcheck.rawExpr(T, x, e, default, false);
     Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(types.Δbuiltin)) | (nuint)(1 << (int)(typexpr))));
     Ꮡcheck.singleValue(x);
 }
 
 // genericExpr is like expr but the result may also be generic.
-internal static void genericExprᴍ(ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e) {
+[GoMethodBody("genericExpr")] internal static void genericExprᴍ(ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e) {
     Ꮡcheck.rawExpr(nil, x, e, default, true);
     Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(types.Δbuiltin)) | (nuint)(1 << (int)(typexpr))));
     Ꮡcheck.singleValue(x);
@@ -1474,7 +1474,7 @@ internal static void genericExprᴍ(ж<Checker> Ꮡcheck, ж<operand> x, ast.Exp
 // expression, the result is a two-element list containing the value
 // of e, and an untyped bool value or an error value, respectively.
 // If an error occurred, list[0] is not valid.
-internal static (slice<ж<operand>> list, bool commaOk) multiExprᴍ(ж<Checker> Ꮡcheck, ast.Expr e, bool allowCommaOk) {
+[GoMethodBody("multiExpr")] internal static (slice<ж<operand>> list, bool commaOk) multiExprᴍ(ж<Checker> Ꮡcheck, ast.Expr e, bool allowCommaOk) {
     slice<ж<operand>> list = default;
     bool commaOk = default;
 
@@ -1508,7 +1508,7 @@ internal static (slice<ж<operand>> list, bool commaOk) multiExprᴍ(ж<Checker>
 // exprWithHint typechecks expression e and initializes x with the expression value;
 // hint is the type of a composite literal element.
 // If an error occurred, x.mode is set to invalid.
-internal static void exprWithHintᴍ(ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, Type hint) {
+[GoMethodBody("exprWithHint")] internal static void exprWithHintᴍ(ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, Type hint) {
     assert(hint != nil);
     Ꮡcheck.rawExpr(nil, x, e, hint, false);
     Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(types.Δbuiltin)) | (nuint)(1 << (int)(typexpr))));
@@ -1519,7 +1519,7 @@ internal static void exprWithHintᴍ(ж<Checker> Ꮡcheck, ж<operand> x, ast.Ex
 // If allowGeneric is set, the operand type may be an uninstantiated parameterized type or function
 // value.
 // If an error occurred, x.mode is set to invalid.
-internal static void exprOrTypeᴍ(ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, bool allowGeneric) {
+[GoMethodBody("exprOrType")] internal static void exprOrTypeᴍ(ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, bool allowGeneric) {
     Ꮡcheck.rawExpr(nil, x, e, default, allowGeneric);
     Ꮡcheck.exclude(x, (nuint)1 << (int)(novalue));
     Ꮡcheck.singleValue(x);
@@ -1537,7 +1537,7 @@ private static readonly @string sIsNotAnExpressionˢᵇᴍChecker = "%s is not a
 
 // exclude reports an error if x.mode is in modeset and sets x.mode to invalid.
 // The modeset may contain any of 1<<novalue, 1<<builtin, 1<<typexpr.
-internal static void excludeᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint modeset) {
+[GoMethodBody("exclude")] internal static void excludeᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint modeset) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if ((modeset & (((nuint)1).Lsh((uint64)(x.mode)))) != 0) {
@@ -1573,7 +1573,7 @@ internal static void excludeᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint mo
 }
 
 // singleValue reports an error if x describes a tuple and sets x.mode to invalid.
-internal static void singleValueᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
+[GoMethodBody("singleValue")] internal static void singleValueᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == value) {
@@ -1587,31 +1587,3 @@ internal static void singleValueᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool op(this ж<Checker> Ꮡcheck, opPredicates m, ж<operand> Ꮡx, token.Token op) => types_package.opᴍ(Ꮡcheck, m, Ꮡx, op);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.UnaryExpr> Ꮡe) => types_package.unaryᴍ(Ꮡcheck, Ꮡx, Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type chanElem(this ж<Checker> Ꮡcheck, positioner pos, ж<operand> Ꮡx, bool recv) => types_package.chanElemᴍ(Ꮡcheck, pos, Ꮡx, recv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void updateExprType(this ж<Checker> Ꮡcheck, ast.Expr x, Type typ, bool final) => types_package.updateExprTypeᴍ(Ꮡcheck, x, typ, final);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void updateExprVal(this ref Checker check, ast.Expr x, constant.Value val) => types_package.updateExprValᴍ(ref check, x, val);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Type, constant.Value, errors.Code) implicitTypeAndValue(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type target) => types_package.implicitTypeAndValueᴍ(Ꮡcheck, Ꮡx, target);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void comparison(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy, token.Token op, bool switchCase) => types_package.comparisonᴍ(Ꮡcheck, Ꮡx, Ꮡy, op, switchCase);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string incomparableCause(this ж<Checker> Ꮡcheck, Type typ) => types_package.incomparableCauseᴍ(Ꮡcheck, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void shift(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy, ast.Expr e, token.Token op) => types_package.shiftᴍ(Ꮡcheck, Ꮡx, Ꮡy, e, op);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void binary(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e, ast.Expr lhs, ast.Expr rhs, token.Token op, token.Pos opPos) => types_package.binaryᴍ(Ꮡcheck, Ꮡx, e, lhs, rhs, op, opPos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void matchTypes(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy) => types_package.matchTypesᴍ(Ꮡcheck, Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static exprKind rawExpr(this ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e, Type hint, bool allowGeneric) => types_package.rawExprᴍ(Ꮡcheck, T, x, e, hint, allowGeneric);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void nonGeneric(this ж<Checker> Ꮡcheck, ж<target> T, ж<operand> Ꮡx) => types_package.nonGenericᴍ(Ꮡcheck, T, Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pendingType(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx) => types_package.pendingTypeᴍ(Ꮡcheck, Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static exprKind exprInternal(this ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx, ast.Expr e, Type hint) => types_package.exprInternalᴍ(Ꮡcheck, ᏑT, Ꮡx, e, hint);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void typeAssertion(this ж<Checker> Ꮡcheck, ast.Expr e, ж<operand> Ꮡx, Type T, bool typeSwitch) => types_package.typeAssertionᴍ(Ꮡcheck, e, Ꮡx, T, typeSwitch);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void expr(this ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e) => types_package.exprᴍ(Ꮡcheck, T, x, e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void genericExpr(this ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e) => types_package.genericExprᴍ(Ꮡcheck, x, e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<ж<operand>> list, bool commaOk) multiExpr(this ж<Checker> Ꮡcheck, ast.Expr e, bool allowCommaOk) => types_package.multiExprᴍ(Ꮡcheck, e, allowCommaOk);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprWithHint(this ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, Type hint) => types_package.exprWithHintᴍ(Ꮡcheck, x, e, hint);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exprOrType(this ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, bool allowGeneric) => types_package.exprOrTypeᴍ(Ꮡcheck, x, e, allowGeneric);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void exclude(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint modeset) => types_package.excludeᴍ(Ꮡcheck, Ꮡx, modeset);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void singleValue(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx) => types_package.singleValueᴍ(Ꮡcheck, Ꮡx);
-}
-// </GlyphForwarders>

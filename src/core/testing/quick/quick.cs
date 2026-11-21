@@ -254,7 +254,7 @@ internal static ref Config defaultConfig => ref ((StaticBox<Config>)ᏑdefaultCo
 } partial class quick_package {
 
 // getRand returns the *rand.Rand to use for a given Config.
-internal static ж<rand.Rand> getRandᴍ(ref Config c) {
+[GoMethodBody("getRand")] internal static ж<rand.Rand> getRandᴍ(ref Config c) {
     if (c.Rand == nil) {
         return rand.New(rand.NewSource(time.Now().UnixNano()));
     }
@@ -263,7 +263,7 @@ internal static ж<rand.Rand> getRandᴍ(ref Config c) {
 
 // getMaxCount returns the maximum number of iterations to run for a given
 // Config.
-internal static nint /*maxCount*/ getMaxCountᴍ(ref Config c) {
+[GoMethodBody("getMaxCount")] internal static nint /*maxCount*/ getMaxCountᴍ(ref Config c) {
     nint maxCount = default;
 
     maxCount = c.MaxCount;
@@ -286,7 +286,7 @@ partial struct SetupError /*@string*/;
 
 } partial class quick_package {
 
-internal static @string Errorᴍ(SetupError s) { return (@string)s; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(SetupError s) { return (@string)s; }
 
 } partial class quick_package {
 
@@ -298,7 +298,7 @@ partial struct CheckError {
 
 } partial class quick_package {
 
-internal static @string Errorᴍ(ref CheckError s) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref CheckError s) {
     return fmt.Sprintf("#%d: failed on input %s"u8, s.Count, toString(s.In));
 }
 
@@ -313,7 +313,7 @@ partial struct CheckEqualError {
 
 } partial class quick_package {
 
-internal static @string Errorᴍ(ref CheckEqualError s) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref CheckEqualError s) {
     return fmt.Sprintf("#%d: failed on input %s. Output 1: %s. Output 2: %s"u8, s.Count, toString(s.In), toString(s.Out1), toString(s.Out2));
 }
 
@@ -485,19 +485,3 @@ internal static @string toString(slice<any> interfaces) {
 }
 
 } // end quick_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class quickᴛConfig {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<rand.Rand> getRand(this ref Config c) => quick_package.getRandᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*maxCount*/ getMaxCount(this ref Config c) => quick_package.getMaxCountᴍ(ref c);
-}
-partial class quickᴛSetupError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this SetupError s) => quick_package.Errorᴍ(s);
-}
-partial class quickᴛCheckError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref CheckError s) => quick_package.Errorᴍ(ref s);
-}
-partial class quickᴛCheckEqualError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref CheckEqualError s) => quick_package.Errorᴍ(ref s);
-}
-// </GlyphForwarders>

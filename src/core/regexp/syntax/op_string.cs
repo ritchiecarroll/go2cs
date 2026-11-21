@@ -41,7 +41,7 @@ private static readonly @string _Op_name_1ᵇ = "opPseudo"u8;
 
 } partial class syntax_package {
 
-internal static @string Stringᴍ(Op i) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Op i) {
     switch (ᐧ) {
     case {} when 1 <= i && i <= 19: {
         i -= 1;
@@ -56,9 +56,3 @@ internal static @string Stringᴍ(Op i) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class syntaxᴛOp {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Op i) => syntax_package.Stringᴍ(i);
-}
-// </GlyphForwarders>

@@ -110,7 +110,7 @@ private static ref readonly @string depˢᴍBuildInfo => ref depˢᵇᴍBuildInf
 private static readonly @string depˢᵇᴍBuildInfo = "dep"u8;
 
 // String returns a string representation of a [BuildInfo].
-internal static @string Stringᴍ(ref BuildInfo bi) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref BuildInfo bi) {
     var buf = @new<strings.Builder>();
     if (bi.GoVersion != ""u8) {
         fmt.Fprintf(new strings_BuilderжWriter(buf), "go\t%s\n"u8, bi.GoVersion);
@@ -351,9 +351,3 @@ public static (ж<BuildInfo> bi, error err) ParseBuildInfo(@string data) {
 }
 
 } // end debug_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class debugᴛBuildInfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref BuildInfo bi) => debug_package.Stringᴍ(ref bi);
-}
-// </GlyphForwarders>

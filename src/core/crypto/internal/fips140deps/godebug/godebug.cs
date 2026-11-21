@@ -17,7 +17,7 @@ public static ж<Setting> New(@string name) {
 
 } partial class godebug_package {
 
-internal static @string Valueᴍ(ж<Setting> Ꮡs) {
+[GoMethodBody("Value")] internal static @string Valueᴍ(ж<Setting> Ꮡs) {
     return (Ꮡs.Reinterpret<Setting, godebug.Setting>()).Value();
 }
 
@@ -28,9 +28,3 @@ public static @string Value(@string name) {
 }
 
 } // end godebug_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class godebugᴛSetting {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Value(this ж<Setting> Ꮡs) => godebug_package.Valueᴍ(Ꮡs);
-}
-// </GlyphForwarders>

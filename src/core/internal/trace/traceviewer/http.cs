@@ -271,7 +271,7 @@ private static readonly ViewType ViewThreadᵇ = "thread"u8;
 
 } partial class traceviewer_package {
 
-internal static @string URLᴍ(View v, nint rangeIdx) {
+[GoMethodBody("URL")] internal static @string URLᴍ(View v, nint rangeIdx) {
     if (rangeIdx < 0) {
         return fmt.Sprintf("/trace?view=%s"u8, v.Type);
     }
@@ -290,7 +290,7 @@ partial struct Range {
 
 } partial class traceviewer_package {
 
-internal static @string URLᴍ(Range r, ViewType viewType) {
+[GoMethodBody("URL")] internal static @string URLᴍ(Range r, ViewType viewType) {
     return fmt.Sprintf("/trace?view=%s&start=%d&end=%d"u8, viewType, r.Start, r.End);
 }
 
@@ -449,12 +449,3 @@ public static http.Handler StaticHandler() {
 }
 
 } // end traceviewer_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class traceviewerᴛView {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string URL(this View v, nint rangeIdx) => traceviewer_package.URLᴍ(v, rangeIdx);
-}
-partial class traceviewerᴛRange {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string URL(this Range r, ViewType viewType) => traceviewer_package.URLᴍ(r, viewType);
-}
-// </GlyphForwarders>

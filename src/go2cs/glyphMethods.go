@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"unicode"
 )
 
@@ -151,7 +152,6 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 	}
 
 	var tail strings.Builder
-	tail.WriteString("\n// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)\n")
 
 	// Group by holder, keeping first-seen order.
 	order := []string{}
@@ -191,9 +191,153 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 		tail.WriteString("}\n")
 	}
 
-	tail.WriteString("// </GlyphForwarders>\n")
+	// The forwarders go to package_info.cs with the using directives their signatures read; a file whose alias
+	// would mean something else there than another file's keeps them at its own end.
+	if glyphRegisterForwarders(result, tail.String()) {
+		return result
+	}
 
-	return strings.TrimRight(result, "\n") + "\n" + tail.String()
+	return strings.TrimRight(result, "\n") + "\n\n// <GlyphForwarders> (scratch prototype: placed here, an alias of this file conflicts in package_info.cs)\n" + tail.String() + "// </GlyphForwarders>\n"
+}
+
+// The package's forwarders and the using directives their files read, collected while its files are written and
+// emitted into package_info.cs (applyGlyphForwarderSection). One package converts at a time (resetPackageState).
+var glyphUnit struct {
+	sync.Mutex
+	usings    []string          // the files' using directives, first-seen order, deduplicated
+	aliases   map[string]string // alias name → its using line
+	blocks    []string          // holder blocks of forwarders
+	fallbacks int               // files that kept their forwarders for an alias conflict
+}
+
+func resetGlyphForwarderUnit() {
+	glyphUnit.Lock()
+	defer glyphUnit.Unlock()
+
+	glyphUnit.usings, glyphUnit.aliases, glyphUnit.blocks, glyphUnit.fallbacks = nil, map[string]string{}, nil, 0
+}
+
+var glyphUsingAlias = regexp.MustCompile(`^using\s+([\p{L}_@][\p{L}\p{N}_]*)\s*=`)
+
+// glyphRegisterForwarders records a file's forwarder blocks and its using directives for package_info.cs, or answers
+// false when one of its aliases already names something else there.
+func glyphRegisterForwarders(text string, blocks string) bool {
+	var usings []string
+
+	for _, line := range strings.Split(text, "\n") {
+		trimmed := strings.TrimRight(line, "\r")
+
+		if strings.HasPrefix(trimmed, "partial class ") || strings.HasPrefix(trimmed, "[") && !strings.HasPrefix(trimmed, "[assembly") {
+			break
+		}
+
+		if strings.HasPrefix(trimmed, "using ") && strings.HasSuffix(trimmed, ";") {
+			usings = append(usings, trimmed)
+		}
+
+		// `namespace go; using static x_package;` (the transform's own addition) carries a using too.
+		if strings.HasPrefix(trimmed, "namespace ") {
+			if at := strings.Index(trimmed, "; using "); at >= 0 {
+				usings = append(usings, strings.TrimSpace(trimmed[at+2:]))
+			}
+		}
+	}
+
+	glyphUnit.Lock()
+	defer glyphUnit.Unlock()
+
+	if glyphUnit.aliases == nil {
+		glyphUnit.aliases = map[string]string{}
+	}
+
+	for _, using := range usings {
+		if match := glyphUsingAlias.FindStringSubmatch(using); match != nil {
+			if existing, ok := glyphUnit.aliases[match[1]]; ok && existing != using {
+				glyphUnit.fallbacks++
+				return false
+			}
+		}
+	}
+
+	seen := map[string]bool{}
+
+	for _, using := range glyphUnit.usings {
+		seen[using] = true
+	}
+
+	for _, using := range usings {
+		if match := glyphUsingAlias.FindStringSubmatch(using); match != nil {
+			glyphUnit.aliases[match[1]] = using
+		}
+
+		if !seen[using] {
+			seen[using] = true
+			glyphUnit.usings = append(glyphUnit.usings, using)
+		}
+	}
+
+	glyphUnit.blocks = append(glyphUnit.blocks, blocks)
+
+	return true
+}
+
+// applyGlyphForwarderSection writes the package's forwarders into package_info.cs: their files' using directives
+// right after the namespace declaration, and the holder blocks at the end. A whole-package conversion rebuilds both.
+func applyGlyphForwarderSection(lines []string) []string {
+	glyphUnit.Lock()
+	defer glyphUnit.Unlock()
+
+	lines = glyphStripSection(lines, "GlyphForwarderUsings")
+	lines = glyphStripSection(lines, "GlyphForwarders")
+
+	if len(glyphUnit.blocks) == 0 {
+		return lines
+	}
+
+	for i, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), "namespace ") && strings.HasSuffix(strings.TrimSpace(line), ";") {
+			section := append([]string{"", "// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)"}, glyphUnit.usings...)
+			section = append(section, "// </GlyphForwarderUsings>")
+			lines = append(lines[:i+1], append(section, lines[i+1:]...)...)
+			break
+		}
+	}
+
+	for len(lines) > 0 && strings.TrimSpace(lines[len(lines)-1]) == "" {
+		lines = lines[:len(lines)-1]
+	}
+
+	lines = append(lines, "", "// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)")
+
+	for _, block := range glyphUnit.blocks {
+		lines = append(lines, strings.Split(strings.TrimRight(block, "\n"), "\n")...)
+	}
+
+	return append(lines, "// </GlyphForwarders>")
+}
+
+func glyphStripSection(lines []string, name string) []string {
+	start, end := -1, -1
+
+	for i, line := range lines {
+		if strings.Contains(line, "<"+name+">") {
+			start = i
+		} else if start >= 0 && strings.Contains(line, "</"+name+">") {
+			end = i
+			break
+		}
+	}
+
+	if start < 0 || end < 0 {
+		return lines
+	}
+
+	// A blank line before the section goes with it.
+	if start > 0 && strings.TrimSpace(lines[start-1]) == "" {
+		start--
+	}
+
+	return append(lines[:start:start], lines[end+1:]...)
 }
 
 type glyphForwarderText struct {
@@ -356,6 +500,9 @@ done:
 	}
 
 	var body strings.Builder
+
+	// The body's stamp (golib GoMethodBodyAttribute): frame naming reads the Go name here, never the spelling.
+	fmt.Fprintf(&body, "[GoMethodBody(%q)] ", strings.TrimPrefix(name, "@"))
 
 	for _, attr := range bodyAttrs {
 		body.WriteString(attr)

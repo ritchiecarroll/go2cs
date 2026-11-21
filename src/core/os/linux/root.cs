@@ -95,25 +95,25 @@ public static (ж<Root>, error) OpenRoot(@string name) {
 // Name returns the name of the directory presented to OpenRoot.
 //
 // It is safe to call Name after [Close].
-internal static @string Nameᴍ(ref Root r) {
+[GoMethodBody("Name")] internal static @string Nameᴍ(ref Root r) {
     return r.root.Name();
 }
 
 // Close closes the Root.
 // After Close is called, methods on Root return errors.
-internal static error Closeᴍ(ref Root r) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref Root r) {
     return r.root.Close();
 }
 
 // Open opens the named file in the root for reading.
 // See [Open] for more details.
-internal static (ж<File>, error) Openᴍ(ж<Root> Ꮡr, @string name) {
+[GoMethodBody("Open")] internal static (ж<File>, error) Openᴍ(ж<Root> Ꮡr, @string name) {
     return Ꮡr.OpenFile(name, O_RDONLY, 0);
 }
 
 // Create creates or truncates the named file in the root.
 // See [Create] for more details.
-internal static (ж<File>, error) Createᴍ(ж<Root> Ꮡr, @string name) {
+[GoMethodBody("Create")] internal static (ж<File>, error) Createᴍ(ж<Root> Ꮡr, @string name) {
     return Ꮡr.OpenFile(name, (nint)((nint)(nint)(O_RDWR | O_CREATE) | O_TRUNC), 438);
 }
 
@@ -126,7 +126,7 @@ private static readonly @string unsupportedFileModeˢᵇᴍRoot = "unsupported f
 //
 // If perm contains bits other than the nine least-significant bits (0o777),
 // OpenFile returns an error.
-internal static (ж<File>, error) OpenFileᴍ(ж<Root> Ꮡr, @string name, nint flag, FileMode perm) {
+[GoMethodBody("OpenFile")] internal static (ж<File>, error) OpenFileᴍ(ж<Root> Ꮡr, @string name, nint flag, FileMode perm) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if ((FileMode)(perm & 511) != perm) {
@@ -143,7 +143,7 @@ internal static (ж<File>, error) OpenFileᴍ(ж<Root> Ꮡr, @string name, nint 
 
 // OpenRoot opens the named directory in the root.
 // If there is an error, it will be of type [*PathError].
-internal static (ж<Root>, error) OpenRootᴍ(ж<Root> Ꮡr, @string name) {
+[GoMethodBody("OpenRoot")] internal static (ж<Root>, error) OpenRootᴍ(ж<Root> Ꮡr, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.logOpen(name);
@@ -152,7 +152,7 @@ internal static (ж<Root>, error) OpenRootᴍ(ж<Root> Ꮡr, @string name) {
 
 // Chmod changes the mode of the named file in the root to mode.
 // See [Chmod] for more details.
-internal static error Chmodᴍ(ж<Root> Ꮡr, @string name, FileMode mode) {
+[GoMethodBody("Chmod")] internal static error Chmodᴍ(ж<Root> Ꮡr, @string name, FileMode mode) {
     return rootChmod(ref (Ꮡr).DerefOrNull(), name, mode);
 }
 
@@ -162,7 +162,7 @@ internal static error Chmodᴍ(ж<Root> Ꮡr, @string name, FileMode mode) {
 //
 // If perm contains bits other than the nine least-significant bits (0o777),
 // Mkdir returns an error.
-internal static error Mkdirᴍ(ж<Root> Ꮡr, @string name, FileMode perm) {
+[GoMethodBody("Mkdir")] internal static error Mkdirᴍ(ж<Root> Ꮡr, @string name, FileMode perm) {
     if ((FileMode)(perm & 511) != perm) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Path: name, Err: errors.New(unsupportedFileModeˢᴍRoot))));
     }
@@ -174,7 +174,7 @@ internal static error Mkdirᴍ(ж<Root> Ꮡr, @string name, FileMode perm) {
 //
 // If perm contains bits other than the nine least-significant bits (0o777),
 // MkdirAll returns an error.
-internal static error MkdirAllᴍ(ж<Root> Ꮡr, @string name, FileMode perm) {
+[GoMethodBody("MkdirAll")] internal static error MkdirAllᴍ(ж<Root> Ꮡr, @string name, FileMode perm) {
     if ((FileMode)(perm & 511) != perm) {
         return new fs.PathErrorжerror(Ꮡ(new PathError(Op: "mkdirat", Path: name, Err: errors.New(unsupportedFileModeˢᴍRoot))));
     }
@@ -183,37 +183,37 @@ internal static error MkdirAllᴍ(ж<Root> Ꮡr, @string name, FileMode perm) {
 
 // Chown changes the numeric uid and gid of the named file in the root.
 // See [Chown] for more details.
-internal static error Chownᴍ(ж<Root> Ꮡr, @string name, nint uid, nint gid) {
+[GoMethodBody("Chown")] internal static error Chownᴍ(ж<Root> Ꮡr, @string name, nint uid, nint gid) {
     return rootChown(ref (Ꮡr).DerefOrNull(), name, uid, gid);
 }
 
 // Lchown changes the numeric uid and gid of the named file in the root.
 // See [Lchown] for more details.
-internal static error Lchownᴍ(ж<Root> Ꮡr, @string name, nint uid, nint gid) {
+[GoMethodBody("Lchown")] internal static error Lchownᴍ(ж<Root> Ꮡr, @string name, nint uid, nint gid) {
     return rootLchown(ref (Ꮡr).DerefOrNull(), name, uid, gid);
 }
 
 // Chtimes changes the access and modification times of the named file in the root.
 // See [Chtimes] for more details.
-internal static error Chtimesᴍ(ж<Root> Ꮡr, @string name, time.Time atime, time.Time mtime) {
+[GoMethodBody("Chtimes")] internal static error Chtimesᴍ(ж<Root> Ꮡr, @string name, time.Time atime, time.Time mtime) {
     return rootChtimes(ref (Ꮡr).DerefOrNull(), name, atime, mtime);
 }
 
 // Remove removes the named file or (empty) directory in the root.
 // See [Remove] for more details.
-internal static error Removeᴍ(ж<Root> Ꮡr, @string name) {
+[GoMethodBody("Remove")] internal static error Removeᴍ(ж<Root> Ꮡr, @string name) {
     return rootRemove(ref (Ꮡr).DerefOrNull(), name);
 }
 
 // RemoveAll removes the named file or directory and any children that it contains.
 // See [RemoveAll] for more details.
-internal static error RemoveAllᴍ(ж<Root> Ꮡr, @string name) {
+[GoMethodBody("RemoveAll")] internal static error RemoveAllᴍ(ж<Root> Ꮡr, @string name) {
     return rootRemoveAll(ref (Ꮡr).DerefOrNull(), name);
 }
 
 // Stat returns a [FileInfo] describing the named file in the root.
 // See [Stat] for more details.
-internal static (FileInfo, error) Statᴍ(ж<Root> Ꮡr, @string name) {
+[GoMethodBody("Stat")] internal static (FileInfo, error) Statᴍ(ж<Root> Ꮡr, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.logStat(name);
@@ -224,7 +224,7 @@ internal static (FileInfo, error) Statᴍ(ж<Root> Ꮡr, @string name) {
 // If the file is a symbolic link, the returned FileInfo
 // describes the symbolic link.
 // See [Lstat] for more details.
-internal static (FileInfo, error) Lstatᴍ(ж<Root> Ꮡr, @string name) {
+[GoMethodBody("Lstat")] internal static (FileInfo, error) Lstatᴍ(ж<Root> Ꮡr, @string name) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.logStat(name);
@@ -233,14 +233,14 @@ internal static (FileInfo, error) Lstatᴍ(ж<Root> Ꮡr, @string name) {
 
 // Readlink returns the destination of the named symbolic link in the root.
 // See [Readlink] for more details.
-internal static (@string, error) Readlinkᴍ(ж<Root> Ꮡr, @string name) {
+[GoMethodBody("Readlink")] internal static (@string, error) Readlinkᴍ(ж<Root> Ꮡr, @string name) {
     return rootReadlink(ref (Ꮡr).DerefOrNull(), name);
 }
 
 // Rename renames (moves) oldname to newname.
 // Both paths are relative to the root.
 // See [Rename] for more details.
-internal static error Renameᴍ(ж<Root> Ꮡr, @string oldname, @string newname) {
+[GoMethodBody("Rename")] internal static error Renameᴍ(ж<Root> Ꮡr, @string oldname, @string newname) {
     return rootRename(Ꮡr, oldname, newname);
 }
 
@@ -252,7 +252,7 @@ internal static error Renameᴍ(ж<Root> Ꮡr, @string oldname, @string newname)
 // This behavior may differ from that of [Link] on some platforms.
 //
 // When GOOS=js, Link returns an error if oldname is a symbolic link.
-internal static error Linkᴍ(ж<Root> Ꮡr, @string oldname, @string newname) {
+[GoMethodBody("Link")] internal static error Linkᴍ(ж<Root> Ꮡr, @string oldname, @string newname) {
     return rootLink(Ꮡr, oldname, newname);
 }
 
@@ -264,13 +264,13 @@ internal static error Linkᴍ(ж<Root> Ꮡr, @string oldname, @string newname) {
 //
 // On Windows, a directory link is created if oldname references
 // a directory within the root. Otherwise a file link is created.
-internal static error Symlinkᴍ(ж<Root> Ꮡr, @string oldname, @string newname) {
+[GoMethodBody("Symlink")] internal static error Symlinkᴍ(ж<Root> Ꮡr, @string oldname, @string newname) {
     return rootSymlink(ref (Ꮡr).DerefOrNull(), oldname, newname);
 }
 
 // ReadFile reads the named file in the root and returns its contents.
 // See [ReadFile] for more details.
-internal static (slice<byte>, error) ReadFileᴍ(ж<Root> Ꮡr, @string name) {
+[GoMethodBody("ReadFile")] internal static (slice<byte>, error) ReadFileᴍ(ж<Root> Ꮡr, @string name) {
     GoFrame ᒐ = default;
     try {
         var (f, err) = Ꮡr.Open(name);
@@ -287,7 +287,7 @@ internal static (slice<byte>, error) ReadFileᴍ(ж<Root> Ꮡr, @string name) {
 
 // WriteFile writes data to the named file in the root, creating it if necessary.
 // See [WriteFile] for more details.
-internal static error WriteFileᴍ(ж<Root> Ꮡr, @string name, slice<byte> data, FileMode perm) {
+[GoMethodBody("WriteFile")] internal static error WriteFileᴍ(ж<Root> Ꮡr, @string name, slice<byte> data, FileMode perm) {
     var (f, err) = Ꮡr.OpenFile(name, (nint)((nint)(nint)(O_WRONLY | O_CREATE) | O_TRUNC), perm);
     if (err != nil) {
         return err;
@@ -299,7 +299,7 @@ internal static error WriteFileᴍ(ж<Root> Ꮡr, @string name, slice<byte> data
     return err;
 }
 
-internal static void logOpenᴍ(ref Root r, @string name) {
+[GoMethodBody("logOpen")] internal static void logOpenᴍ(ref Root r, @string name) {
     var log = testlog.Logger(); if (log != nil) {
         // This won't be right if r's name has changed since it was opened,
         // but it's the best we can do.
@@ -307,7 +307,7 @@ internal static void logOpenᴍ(ref Root r, @string name) {
     }
 }
 
-internal static void logStatᴍ(ref Root r, @string name) {
+[GoMethodBody("logStat")] internal static void logStatᴍ(ref Root r, @string name) {
     var log = testlog.Logger(); if (log != nil) {
         // This won't be right if r's name has changed since it was opened,
         // but it's the best we can do.
@@ -394,7 +394,7 @@ internal static (slice<@string>, bool endsInSlash, error err) splitPathInRoot(@s
 //
 // The result implements [io/fs.StatFS], [io/fs.ReadFileFS],
 // [io/fs.ReadDirFS], and [io/fs.ReadLinkFS].
-internal static fs.FS FSᴍ(ж<Root> Ꮡr) {
+[GoMethodBody("FS")] internal static fs.FS FSᴍ(ж<Root> Ꮡr) {
     return new rootFSжFS(Ꮡr.Reinterpret<Root, rootFS>());
 }
 
@@ -404,7 +404,7 @@ partial struct rootFS /*Root*/;
 
 } partial class os_package {
 
-internal static (fs.File, error) Openᴍ(ж<rootFS> Ꮡrfs, @string name) {
+[GoMethodBody("Open")] internal static (fs.File, error) Openᴍ(ж<rootFS> Ꮡrfs, @string name) {
     var r = Ꮡrfs.Reinterpret<rootFS, Root>();
     if (!isValidRootFSPath(name)) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "open", Path: name, Err: ErrInvalid))));
@@ -416,7 +416,7 @@ internal static (fs.File, error) Openᴍ(ж<rootFS> Ꮡrfs, @string name) {
     return (new FileжFile(f), default);
 }
 
-internal static (slice<DirEntry>, error) ReadDirᴍ(ж<rootFS> Ꮡrfs, @string name) {
+[GoMethodBody("ReadDir")] internal static (slice<DirEntry>, error) ReadDirᴍ(ж<rootFS> Ꮡrfs, @string name) {
     GoFrame ᒐ = default;
     try {
         var r = Ꮡrfs.Reinterpret<rootFS, Root>();
@@ -444,7 +444,7 @@ internal static (slice<DirEntry>, error) ReadDirᴍ(ж<rootFS> Ꮡrfs, @string n
     finally { ᒐ.Run(); }
 }
 
-internal static (slice<byte>, error) ReadFileᴍ(ж<rootFS> Ꮡrfs, @string name) {
+[GoMethodBody("ReadFile")] internal static (slice<byte>, error) ReadFileᴍ(ж<rootFS> Ꮡrfs, @string name) {
     GoFrame ᒐ = default;
     try {
         var r = Ꮡrfs.Reinterpret<rootFS, Root>();
@@ -463,7 +463,7 @@ internal static (slice<byte>, error) ReadFileᴍ(ж<rootFS> Ꮡrfs, @string name
     finally { ᒐ.Run(); }
 }
 
-internal static (@string, error) ReadLinkᴍ(ж<rootFS> Ꮡrfs, @string name) {
+[GoMethodBody("ReadLink")] internal static (@string, error) ReadLinkᴍ(ж<rootFS> Ꮡrfs, @string name) {
     var r = Ꮡrfs.Reinterpret<rootFS, Root>();
     if (!isValidRootFSPath(name)) {
         return ("", new fs.PathErrorжerror(Ꮡ(new PathError(Op: "readlink", Path: name, Err: ErrInvalid))));
@@ -471,7 +471,7 @@ internal static (@string, error) ReadLinkᴍ(ж<rootFS> Ꮡrfs, @string name) {
     return r.Readlink(name);
 }
 
-internal static (FileInfo, error) Statᴍ(ж<rootFS> Ꮡrfs, @string name) {
+[GoMethodBody("Stat")] internal static (FileInfo, error) Statᴍ(ж<rootFS> Ꮡrfs, @string name) {
     var r = Ꮡrfs.Reinterpret<rootFS, Root>();
     if (!isValidRootFSPath(name)) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "stat", Path: name, Err: ErrInvalid))));
@@ -479,7 +479,7 @@ internal static (FileInfo, error) Statᴍ(ж<rootFS> Ꮡrfs, @string name) {
     return r.Stat(name);
 }
 
-internal static (FileInfo, error) Lstatᴍ(ж<rootFS> Ꮡrfs, @string name) {
+[GoMethodBody("Lstat")] internal static (FileInfo, error) Lstatᴍ(ж<rootFS> Ꮡrfs, @string name) {
     var r = Ꮡrfs.Reinterpret<rootFS, Root>();
     if (!isValidRootFSPath(name)) {
         return (default, new fs.PathErrorжerror(Ꮡ(new PathError(Op: "lstat", Path: name, Err: ErrInvalid))));
@@ -507,41 +507,3 @@ internal static bool isValidRootFSPath(@string name) {
 }
 
 } // end os_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class osᴛRoot {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Name(this ref Root r) => os_package.Nameᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Root r) => os_package.Closeᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<File>, error) Open(this ж<Root> Ꮡr, @string name) => os_package.Openᴍ(Ꮡr, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<File>, error) Create(this ж<Root> Ꮡr, @string name) => os_package.Createᴍ(Ꮡr, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<File>, error) OpenFile(this ж<Root> Ꮡr, @string name, nint flag, FileMode perm) => os_package.OpenFileᴍ(Ꮡr, name, flag, perm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Root>, error) OpenRoot(this ж<Root> Ꮡr, @string name) => os_package.OpenRootᴍ(Ꮡr, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Chmod(this ж<Root> Ꮡr, @string name, FileMode mode) => os_package.Chmodᴍ(Ꮡr, name, mode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Mkdir(this ж<Root> Ꮡr, @string name, FileMode perm) => os_package.Mkdirᴍ(Ꮡr, name, perm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error MkdirAll(this ж<Root> Ꮡr, @string name, FileMode perm) => os_package.MkdirAllᴍ(Ꮡr, name, perm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Chown(this ж<Root> Ꮡr, @string name, nint uid, nint gid) => os_package.Chownᴍ(Ꮡr, name, uid, gid);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Lchown(this ж<Root> Ꮡr, @string name, nint uid, nint gid) => os_package.Lchownᴍ(Ꮡr, name, uid, gid);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Chtimes(this ж<Root> Ꮡr, @string name, time.Time atime, time.Time mtime) => os_package.Chtimesᴍ(Ꮡr, name, atime, mtime);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Remove(this ж<Root> Ꮡr, @string name) => os_package.Removeᴍ(Ꮡr, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error RemoveAll(this ж<Root> Ꮡr, @string name) => os_package.RemoveAllᴍ(Ꮡr, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (FileInfo, error) Stat(this ж<Root> Ꮡr, @string name) => os_package.Statᴍ(Ꮡr, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (FileInfo, error) Lstat(this ж<Root> Ꮡr, @string name) => os_package.Lstatᴍ(Ꮡr, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) Readlink(this ж<Root> Ꮡr, @string name) => os_package.Readlinkᴍ(Ꮡr, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Rename(this ж<Root> Ꮡr, @string oldname, @string newname) => os_package.Renameᴍ(Ꮡr, oldname, newname);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Link(this ж<Root> Ꮡr, @string oldname, @string newname) => os_package.Linkᴍ(Ꮡr, oldname, newname);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Symlink(this ж<Root> Ꮡr, @string oldname, @string newname) => os_package.Symlinkᴍ(Ꮡr, oldname, newname);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) ReadFile(this ж<Root> Ꮡr, @string name) => os_package.ReadFileᴍ(Ꮡr, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteFile(this ж<Root> Ꮡr, @string name, slice<byte> data, FileMode perm) => os_package.WriteFileᴍ(Ꮡr, name, data, perm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void logOpen(this ref Root r, @string name) => os_package.logOpenᴍ(ref r, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void logStat(this ref Root r, @string name) => os_package.logStatᴍ(ref r, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static fs.FS FS(this ж<Root> Ꮡr) => os_package.FSᴍ(Ꮡr);
-}
-partial class osᴛrootFS {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fs.File, error) Open(this ж<rootFS> Ꮡrfs, @string name) => os_package.Openᴍ(Ꮡrfs, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<DirEntry>, error) ReadDir(this ж<rootFS> Ꮡrfs, @string name) => os_package.ReadDirᴍ(Ꮡrfs, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) ReadFile(this ж<rootFS> Ꮡrfs, @string name) => os_package.ReadFileᴍ(Ꮡrfs, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) ReadLink(this ж<rootFS> Ꮡrfs, @string name) => os_package.ReadLinkᴍ(Ꮡrfs, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (FileInfo, error) Stat(this ж<rootFS> Ꮡrfs, @string name) => os_package.Statᴍ(Ꮡrfs, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (FileInfo, error) Lstat(this ж<rootFS> Ꮡrfs, @string name) => os_package.Lstatᴍ(Ꮡrfs, name);
-}
-// </GlyphForwarders>

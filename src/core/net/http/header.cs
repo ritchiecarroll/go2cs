@@ -32,7 +32,7 @@ partial struct Header /*map[@string, slice<@string>]*/;
 // It appends to any existing values associated with key.
 // The key is case insensitive; it is canonicalized by
 // [CanonicalHeaderKey].
-internal static void Addᴍ(Header h, @string key, @string value) {
+[GoMethodBody("Add")] internal static void Addᴍ(Header h, @string key, @string value) {
     ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Add(key, value);
 }
 
@@ -41,7 +41,7 @@ internal static void Addᴍ(Header h, @string key, @string value) {
 // associated with key. The key is case insensitive; it is
 // canonicalized by [textproto.CanonicalMIMEHeaderKey].
 // To use non-canonical keys, assign to the map directly.
-internal static void Setᴍ(Header h, @string key, @string value) {
+[GoMethodBody("Set")] internal static void Setᴍ(Header h, @string key, @string value) {
     ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Set(key, value);
 }
 
@@ -51,7 +51,7 @@ internal static void Setᴍ(Header h, @string key, @string value) {
 // used to canonicalize the provided key. Get assumes that all
 // keys are stored in canonical form. To use non-canonical keys,
 // access the map directly.
-internal static @string Getᴍ(Header h, @string key) {
+[GoMethodBody("Get")] internal static @string Getᴍ(Header h, @string key) {
     return ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Get(key);
 }
 
@@ -60,12 +60,12 @@ internal static @string Getᴍ(Header h, @string key) {
 // used to canonicalize the provided key. To use non-canonical
 // keys, access the map directly.
 // The returned slice is not a copy.
-internal static slice<@string> Valuesᴍ(Header h, @string key) {
+[GoMethodBody("Values")] internal static slice<@string> Valuesᴍ(Header h, @string key) {
     return ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Values(key);
 }
 
 // get is like Get, but key must already be in CanonicalHeaderKey form.
-internal static @string getᴍ(Header h, @string key) {
+[GoMethodBody("get")] internal static @string getᴍ(Header h, @string key) {
     var v = h[key]; if (len(v) > 0) {
         return v[0];
     }
@@ -74,7 +74,7 @@ internal static @string getᴍ(Header h, @string key) {
 
 // has reports whether h has the provided key defined, even if it's
 // set to 0-length slice.
-internal static bool hasᴍ(Header h, @string key) {
+[GoMethodBody("has")] internal static bool hasᴍ(Header h, @string key) {
     var (_, ok) = h[key, ꟷ];
     return ok;
 }
@@ -82,21 +82,21 @@ internal static bool hasᴍ(Header h, @string key) {
 // Del deletes the values associated with key.
 // The key is case insensitive; it is canonicalized by
 // [CanonicalHeaderKey].
-internal static void Delᴍ(Header h, @string key) {
+[GoMethodBody("Del")] internal static void Delᴍ(Header h, @string key) {
     ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Del(key);
 }
 
 // Write writes a header in wire format.
-internal static error Writeᴍ(Header h, io.Writer w) {
+[GoMethodBody("Write")] internal static error Writeᴍ(Header h, io.Writer w) {
     return h.write(w, nil);
 }
 
-internal static error writeᴍ(Header h, io.Writer w, ж<httptrace.ClientTrace> trace) {
+[GoMethodBody("write")] internal static error writeᴍ(Header h, io.Writer w, ж<httptrace.ClientTrace> trace) {
     return h.writeSubset(w, default, trace);
 }
 
 // Clone returns a copy of h or nil if h is nil.
-internal static Header Cloneᴍ(Header h) {
+[GoMethodBody("Clone")] internal static Header Cloneᴍ(Header h) {
     if (h == nil) {
         return default;
     }
@@ -156,7 +156,7 @@ partial struct stringWriter {
 
 } partial class http_package {
 
-internal static (nint n, error err) WriteStringᴍ(stringWriter w, @string s) {
+[GoMethodBody("WriteString")] internal static (nint n, error err) WriteStringᴍ(stringWriter w, @string s) {
     return w.w.Write(slice<byte>(s));
 }
 
@@ -182,7 +182,7 @@ internal static ref sync.Pool headerSorterPool => ref ((StaticBox<sync.Pool>)Ꮡ
 // sortedKeyValues returns h's keys sorted in the returned kvs
 // slice. The headerSorter used to sort is also returned, for possible
 // return to headerSorterCache.
-internal static (slice<keyValues> kvs, ж<headerSorter> hs) sortedKeyValuesᴍ(Header h, map<@string, bool> exclude) {
+[GoMethodBody("sortedKeyValues")] internal static (slice<keyValues> kvs, ж<headerSorter> hs) sortedKeyValuesᴍ(Header h, map<@string, bool> exclude) {
     slice<keyValues> kvs = default;
     ж<headerSorter> hs = default;
 
@@ -204,11 +204,11 @@ internal static (slice<keyValues> kvs, ж<headerSorter> hs) sortedKeyValuesᴍ(H
 // WriteSubset writes a header in wire format.
 // If exclude is not nil, keys where exclude[key] == true are not written.
 // Keys are not canonicalized before checking the exclude map.
-internal static error WriteSubsetᴍ(Header h, io.Writer w, map<@string, bool> exclude) {
+[GoMethodBody("WriteSubset")] internal static error WriteSubsetᴍ(Header h, io.Writer w, map<@string, bool> exclude) {
     return h.writeSubset(w, exclude, nil);
 }
 
-internal static error writeSubsetᴍ(Header h, io.Writer w, map<@string, bool> exclude, ж<httptrace.ClientTrace> Ꮡtrace) {
+[GoMethodBody("writeSubset")] internal static error writeSubsetᴍ(Header h, io.Writer w, map<@string, bool> exclude, ж<httptrace.ClientTrace> Ꮡtrace) {
     ref var trace = ref Ꮡtrace.DerefOrNull();
 
     var (ws, ok) = w._<io.StringWriter>(ᐧ);
@@ -301,24 +301,3 @@ internal static bool isTokenBoundary(byte b) {
 }
 
 } // end http_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httpᴛHeader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Add(this Header h, @string key, @string value) => http_package.Addᴍ(h, key, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Set(this Header h, @string key, @string value) => http_package.Setᴍ(h, key, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Get(this Header h, @string key) => http_package.Getᴍ(h, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> Values(this Header h, @string key) => http_package.Valuesᴍ(h, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string get(this Header h, @string key) => http_package.getᴍ(h, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool has(this Header h, @string key) => http_package.hasᴍ(h, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Del(this Header h, @string key) => http_package.Delᴍ(h, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this Header h, io.Writer w) => http_package.Writeᴍ(h, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error write(this Header h, io.Writer w, ж<httptrace.ClientTrace> trace) => http_package.writeᴍ(h, w, trace);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Header Clone(this Header h) => http_package.Cloneᴍ(h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<keyValues> kvs, ж<headerSorter> hs) sortedKeyValues(this Header h, map<@string, bool> exclude) => http_package.sortedKeyValuesᴍ(h, exclude);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteSubset(this Header h, io.Writer w, map<@string, bool> exclude) => http_package.WriteSubsetᴍ(h, w, exclude);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeSubset(this Header h, io.Writer w, map<@string, bool> exclude, ж<httptrace.ClientTrace> Ꮡtrace) => http_package.writeSubsetᴍ(h, w, exclude, Ꮡtrace);
-}
-partial class httpᴛstringWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this stringWriter w, @string s) => http_package.WriteStringᴍ(w, s);
-}
-// </GlyphForwarders>

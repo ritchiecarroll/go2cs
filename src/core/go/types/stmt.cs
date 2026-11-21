@@ -23,7 +23,7 @@ internal static ref readonly @string missingReturnˢᴍChecker => ref missingRet
 private static readonly @string missingReturnˢᵇᴍChecker = "missing return"u8;
 
 // decl may be nil
-internal static void funcBodyᴍ(ж<Checker> Ꮡcheck, ж<declInfo> decl, @string name, ж<Signature> Ꮡsig, ж<ast.BlockStmt> Ꮡbody, constant.Value iota) {
+[GoMethodBody("funcBody")] internal static void funcBodyᴍ(ж<Checker> Ꮡcheck, ж<declInfo> decl, @string name, ж<Signature> Ꮡsig, ж<ast.BlockStmt> Ꮡbody, constant.Value iota) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -71,7 +71,7 @@ internal static void funcBodyᴍ(ж<Checker> Ꮡcheck, ж<declInfo> decl, @strin
     finally { ᒐ.Run(); }
 }
 
-internal static void usageᴍ(ж<Checker> Ꮡcheck, ж<Scope> Ꮡscope) {
+[GoMethodBody("usage")] internal static void usageᴍ(ж<Checker> Ꮡcheck, ж<Scope> Ꮡscope) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var scope = ref Ꮡscope.DerefOrNull();
     var unusedᴷ = new stackAppend<ж<Var>>();
@@ -119,7 +119,7 @@ internal static stmtContext inTypeSwitch => 16;
 
 } partial class types_package {
 
-internal static void simpleStmtᴍ(ж<Checker> Ꮡcheck, ast.Stmt s) {
+[GoMethodBody("simpleStmt")] internal static void simpleStmtᴍ(ж<Checker> Ꮡcheck, ast.Stmt s) {
     if (s != nil) {
         Ꮡcheck.stmt(0, s);
     }
@@ -138,7 +138,7 @@ internal static slice<ast.Stmt> trimTrailingEmptyStmts(slice<ast.Stmt> list) {
 
 } partial class types_package {
 
-internal static void stmtListᴍ(ж<Checker> Ꮡcheck, stmtContext ctxt, slice<ast.Stmt> list) {
+[GoMethodBody("stmtList")] internal static void stmtListᴍ(ж<Checker> Ꮡcheck, stmtContext ctxt, slice<ast.Stmt> list) {
     var ok = (stmtContext)(ctxt & fallthroughOk) != 0;
     stmtContext inner = (stmtContext)(ctxt & ~fallthroughOk);
     list = trimTrailingEmptyStmts(list); // trailing empty statements are "invisible" to fallthrough analysis
@@ -155,7 +155,7 @@ internal static void stmtListᴍ(ж<Checker> Ꮡcheck, stmtContext ctxt, slice<a
 internal static ref readonly @string caseCommunicationClauseˢᴍChecker => ref caseCommunicationClauseˢᵇᴍChecker;
 private static readonly @string caseCommunicationClauseˢᵇᴍChecker = "case/communication clause expected"u8;
 
-internal static void multipleDefaultsᴍ(ж<Checker> Ꮡcheck, slice<ast.Stmt> list) {
+[GoMethodBody("multipleDefaults")] internal static void multipleDefaultsᴍ(ж<Checker> Ꮡcheck, slice<ast.Stmt> list) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     ast.Stmt first = default;
@@ -189,13 +189,13 @@ internal static void multipleDefaultsᴍ(ж<Checker> Ꮡcheck, slice<ast.Stmt> l
     }
 }
 
-internal static void openScopeᴍ(ref Checker check, ast.Node node, @string comment) {
+[GoMethodBody("openScope")] internal static void openScopeᴍ(ref Checker check, ast.Node node, @string comment) {
     var scope = NewScope(check.scope, node.Pos(), node.End(), comment);
     check.recordScope(node, scope);
     check.scope = scope;
 }
 
-internal static void closeScopeᴍ(ref Checker check) {
+[GoMethodBody("closeScope")] internal static void closeScopeᴍ(ref Checker check) {
     check.scope = check.scope.Parent();
 }
 
@@ -217,7 +217,7 @@ private static readonly @string requiresFunctionCallNotˢᵇᴍChecker = "requir
 internal static ref readonly @string discardsResultOfˢᴍChecker => ref discardsResultOfˢᵇᴍChecker;
 private static readonly @string discardsResultOfˢᵇᴍChecker = "discards result of"u8;
 
-internal static void suspendedCallᴍ(ж<Checker> Ꮡcheck, @string keyword, ж<ast.CallExpr> call) {
+[GoMethodBody("suspendedCall")] internal static void suspendedCallᴍ(ж<Checker> Ꮡcheck, @string keyword, ж<ast.CallExpr> call) {
     ref var x = ref heap(new operand(), out var Ꮡx);
     @string msg = default;
     errors.Code code = default;
@@ -300,7 +300,7 @@ partial struct valueType {
 
 } partial class types_package {
 
-internal static void caseValuesᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> values, valueMap seen) {
+[GoMethodBody("caseValues")] internal static void caseValuesᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> values, valueMap seen) {
     ref var x = ref Ꮡx.DerefOrNull();
 
 L:
@@ -344,7 +344,7 @@ break_L:;
 }
 
 // isNil reports whether the expression e denotes the predeclared value nil.
-internal static bool isNilᴍ(ref Checker check, ast.Expr e) {
+[GoMethodBody("isNil")] internal static bool isNilᴍ(ref Checker check, ast.Expr e) {
     // The only way to express the nil value is by literally writing nil (possibly in parentheses).
     var (name, _) = ast.Unparen(e)._<ж<ast.Ident>>(ᐧ); if (name != nil) {
         var (_, ok) = check.environment.lookup(name.Name)._<ж<Nil>>(ᐧ);
@@ -378,7 +378,7 @@ private static readonly @string nilˢ2ᵇᴍChecker = "nil"u8;
 // If there is exactly one type expression, T is the type of that expression. If there
 // are multiple type expressions, or if predeclared nil is among the types, the result
 // is the type of x. If x is invalid (nil), the result is the invalid type.
-internal static Type caseTypesᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> types, map<Type, ast.Expr> seen) {
+[GoMethodBody("caseTypes")] internal static Type caseTypesᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> types, map<Type, ast.Expr> seen) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -439,7 +439,7 @@ private static readonly @string nilˢᵇᴍChecker = "<nil>"u8;
 
 // TODO(gri) Once we are certain that typeHash is correct in all situations, use this version of caseTypes instead.
 // (Currently it may be possible that different types have identical names and import paths due to ImporterFrom.)
-internal static Type caseTypes_currently_unusedᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Interface> xtyp, slice<ast.Expr> types, map<@string, ast.Expr> seen) {
+[GoMethodBody("caseTypes_currently_unused")] internal static Type caseTypes_currently_unusedᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Interface> xtyp, slice<ast.Expr> types, map<@string, ast.Expr> seen) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -550,7 +550,7 @@ internal static ref readonly @string invalidStatementˢᴍChecker => ref invalid
 private static readonly @string invalidStatementˢᵇᴍChecker = "invalid statement"u8;
 
 // stmt typechecks statement s.
-internal static void stmtᴍ(ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt s) {
+[GoMethodBody("stmt")] internal static void stmtᴍ(ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt s) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -1078,21 +1078,3 @@ internal static void stmtᴍ(ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt s)
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void funcBody(this ж<Checker> Ꮡcheck, ж<declInfo> decl, @string name, ж<Signature> Ꮡsig, ж<ast.BlockStmt> Ꮡbody, constant.Value iota) => types_package.funcBodyᴍ(Ꮡcheck, decl, name, Ꮡsig, Ꮡbody, iota);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void usage(this ж<Checker> Ꮡcheck, ж<Scope> Ꮡscope) => types_package.usageᴍ(Ꮡcheck, Ꮡscope);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void simpleStmt(this ж<Checker> Ꮡcheck, ast.Stmt s) => types_package.simpleStmtᴍ(Ꮡcheck, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmtList(this ж<Checker> Ꮡcheck, stmtContext ctxt, slice<ast.Stmt> list) => types_package.stmtListᴍ(Ꮡcheck, ctxt, list);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void multipleDefaults(this ж<Checker> Ꮡcheck, slice<ast.Stmt> list) => types_package.multipleDefaultsᴍ(Ꮡcheck, list);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void openScope(this ref Checker check, ast.Node node, @string comment) => types_package.openScopeᴍ(ref check, node, comment);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeScope(this ref Checker check) => types_package.closeScopeᴍ(ref check);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void suspendedCall(this ж<Checker> Ꮡcheck, @string keyword, ж<ast.CallExpr> call) => types_package.suspendedCallᴍ(Ꮡcheck, keyword, call);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void caseValues(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> values, valueMap seen) => types_package.caseValuesᴍ(Ꮡcheck, Ꮡx, values, seen);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isNil(this ref Checker check, ast.Expr e) => types_package.isNilᴍ(ref check, e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type caseTypes(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> types, map<Type, ast.Expr> seen) => types_package.caseTypesᴍ(Ꮡcheck, Ꮡx, types, seen);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type caseTypes_currently_unused(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Interface> xtyp, slice<ast.Expr> types, map<@string, ast.Expr> seen) => types_package.caseTypes_currently_unusedᴍ(Ꮡcheck, Ꮡx, xtyp, types, seen);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stmt(this ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt s) => types_package.stmtᴍ(Ꮡcheck, ctxt, s);
-}
-// </GlyphForwarders>

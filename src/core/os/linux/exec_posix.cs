@@ -83,11 +83,11 @@ internal static (ж<Process> p, error err) startProcess(@string name, slice<@str
 
 } partial class os_package {
 
-internal static error killᴍ(ж<Process> Ꮡp) {
+[GoMethodBody("kill")] internal static error killᴍ(ж<Process> Ꮡp) {
     return Ꮡp.Signal(os.Kill);
 }
 
-internal static error withHandleᴍ(ж<Process> Ꮡp, Action<uintptr> f) {
+[GoMethodBody("withHandle")] internal static error withHandleᴍ(ж<Process> Ꮡp, Action<uintptr> f) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -125,23 +125,23 @@ partial struct ProcessState {
 } partial class os_package {
 
 // Pid returns the process id of the exited process.
-internal static nint Pidᴍ(ref ProcessState p) {
+[GoMethodBody("Pid")] internal static nint Pidᴍ(ref ProcessState p) {
     return p.pid;
 }
 
-internal static bool exitedᴍ(ref ProcessState p) {
+[GoMethodBody("exited")] internal static bool exitedᴍ(ref ProcessState p) {
     return p.status.Exited();
 }
 
-internal static bool successᴍ(ref ProcessState p) {
+[GoMethodBody("success")] internal static bool successᴍ(ref ProcessState p) {
     return p.status.ExitStatus() == 0;
 }
 
-internal static any sysᴍ(ref ProcessState p) {
+[GoMethodBody("sys")] internal static any sysᴍ(ref ProcessState p) {
     return p.status;
 }
 
-internal static any sysUsageᴍ(ref ProcessState p) {
+[GoMethodBody("sysUsage")] internal static any sysUsageᴍ(ref ProcessState p) {
     return p.rusage.OrTypedNil();
 }
 
@@ -151,7 +151,7 @@ private static readonly @string nilˢᵇᴍProcessState = "<nil>"u8;
 internal static ref readonly @string continuedˢᴍProcessState => ref continuedˢᵇᴍProcessState;
 private static readonly @string continuedˢᵇᴍProcessState = "continued"u8;
 
-internal static @string Stringᴍ(ж<ProcessState> Ꮡp) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<ProcessState> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (Ꮡp == nil) {
@@ -192,7 +192,7 @@ internal static @string Stringᴍ(ж<ProcessState> Ꮡp) {
 
 // ExitCode returns the exit code of the exited process, or -1
 // if the process hasn't exited or was terminated by a signal.
-internal static nint ExitCodeᴍ(ж<ProcessState> Ꮡp) {
+[GoMethodBody("ExitCode")] internal static nint ExitCodeᴍ(ж<ProcessState> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // return -1 if the process hasn't started.
@@ -203,19 +203,3 @@ internal static nint ExitCodeᴍ(ж<ProcessState> Ꮡp) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class osᴛProcess {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error kill(this ж<Process> Ꮡp) => os_package.killᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error withHandle(this ж<Process> Ꮡp, Action<uintptr> f) => os_package.withHandleᴍ(Ꮡp, f);
-}
-partial class osᴛProcessState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Pid(this ref ProcessState p) => os_package.Pidᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool exited(this ref ProcessState p) => os_package.exitedᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool success(this ref ProcessState p) => os_package.successᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any sys(this ref ProcessState p) => os_package.sysᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any sysUsage(this ref ProcessState p) => os_package.sysUsageᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<ProcessState> Ꮡp) => os_package.Stringᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint ExitCode(this ж<ProcessState> Ꮡp) => os_package.ExitCodeᴍ(Ꮡp);
-}
-// </GlyphForwarders>

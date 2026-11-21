@@ -36,13 +36,13 @@ partial struct streamSafe /*num:uint8*/;
 
 // first inserts the first rune of a segment. It is a faster version of next if
 // it is known p represents the first rune in a segment.
-internal static void firstᴍ(ref streamSafe ss, Properties p) {
+[GoMethodBody("first")] internal static void firstᴍ(ref streamSafe ss, Properties p) {
     ss = (streamSafe)p.nTrailingNonStarters();
 }
 
 // insert returns a ssState value to indicate whether a rune represented by p
 // can be inserted.
-internal static ssState nextᴍ(ref streamSafe ss, Properties p) {
+[GoMethodBody("next")] internal static ssState nextᴍ(ref streamSafe ss, Properties p) {
     if (ss > maxNonStarters) {
         throw panic("streamSafe was not reset");
     }
@@ -69,7 +69,7 @@ internal static ssState nextᴍ(ref streamSafe ss, Properties p) {
 // when traversing a string backwards. Users do not need to call first
 // for the first rune. The state of the streamSafe retains the count of
 // the non-starters loaded.
-internal static ssState backwardsᴍ(ref streamSafe ss, Properties p) {
+[GoMethodBody("backwards")] internal static ssState backwardsᴍ(ref streamSafe ss, Properties p) {
     if (ss > maxNonStarters) {
         throw panic("streamSafe was not reset");
     }
@@ -84,7 +84,7 @@ internal static ssState backwardsᴍ(ref streamSafe ss, Properties p) {
     return ssSuccess;
 }
 
-internal static bool isMaxᴍ(streamSafe ss) {
+[GoMethodBody("isMax")] internal static bool isMaxᴍ(streamSafe ss) {
     return ss == maxNonStarters;
 }
 
@@ -115,32 +115,32 @@ partial struct reorderBuffer {
 
 } partial class norm_package {
 
-internal static void initᴍ(ref reorderBuffer rb, Form f, slice<byte> src) {
+[GoMethodBody("init")] internal static void initᴍ(ref reorderBuffer rb, Form f, slice<byte> src) {
     rb.f = formTable[f].Value;
     rb.src.setBytes(src);
     rb.nsrc = len(src);
     rb.ss = 0;
 }
 
-internal static void initStringᴍ(ref reorderBuffer rb, Form f, @string src) {
+[GoMethodBody("initString")] internal static void initStringᴍ(ref reorderBuffer rb, Form f, @string src) {
     rb.f = formTable[f].Value;
     rb.src.setString(src);
     rb.nsrc = len(src);
     rb.ss = 0;
 }
 
-internal static void setFlusherᴍ(ref reorderBuffer rb, slice<byte> @out, Func<ж<reorderBuffer>, bool> f) {
+[GoMethodBody("setFlusher")] internal static void setFlusherᴍ(ref reorderBuffer rb, slice<byte> @out, Func<ж<reorderBuffer>, bool> f) {
     rb.@out = @out;
     rb.flushF = f;
 }
 
 // reset discards all characters from the buffer.
-internal static void resetᴍ(ref reorderBuffer rb) {
+[GoMethodBody("reset")] internal static void resetᴍ(ref reorderBuffer rb) {
     rb.nrune = 0;
     rb.nbyte = 0;
 }
 
-internal static bool doFlushᴍ(ж<reorderBuffer> Ꮡrb) {
+[GoMethodBody("doFlush")] internal static bool doFlushᴍ(ж<reorderBuffer> Ꮡrb) {
     ref var rb = ref Ꮡrb.DerefOrNull();
 
     if (rb.f.composing) {
@@ -168,7 +168,7 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
 } partial class norm_package {
 
 // flush appends the normalized segment to out and resets rb.
-internal static slice<byte> flushᴍ(ref reorderBuffer rb, slice<byte> @out) {
+[GoMethodBody("flush")] internal static slice<byte> flushᴍ(ref reorderBuffer rb, slice<byte> @out) {
     for (nint i = 0; i < rb.nrune; i++) {
         var start = rb.rune[i].pos;
         var end = (uint8)(start + rb.rune[i].size);
@@ -180,7 +180,7 @@ internal static slice<byte> flushᴍ(ref reorderBuffer rb, slice<byte> @out) {
 
 // flushCopy copies the normalized segment to buf and resets rb.
 // It returns the number of bytes written to buf.
-internal static nint flushCopyᴍ(ref reorderBuffer rb, slice<byte> buf) {
+[GoMethodBody("flushCopy")] internal static nint flushCopyᴍ(ref reorderBuffer rb, slice<byte> buf) {
     nint p = 0;
     for (nint i = 0; i < rb.nrune; i++) {
         var runep = rb.rune[i];
@@ -193,7 +193,7 @@ internal static nint flushCopyᴍ(ref reorderBuffer rb, slice<byte> buf) {
 // insertOrdered inserts a rune in the buffer, ordered by Canonical Combining Class.
 // It returns false if the buffer is not large enough to hold the rune.
 // It is used internally by insert and insertString only.
-internal static void insertOrderedᴍ(ref reorderBuffer rb, Properties info) {
+[GoMethodBody("insertOrdered")] internal static void insertOrderedᴍ(ref reorderBuffer rb, Properties info) {
     nint n = rb.nrune;
     var b = rb.rune[..];
     var cc = info.ccc;
@@ -229,7 +229,7 @@ internal static insertErr iShortSrc => -2;
 // If a decomposition with multiple segments are encountered, they leading
 // ones are flushed.
 // It returns a non-zero error code if the rune was not inserted.
-internal static insertErr insertFlushᴍ(ж<reorderBuffer> Ꮡrb, input src, nint i, Properties info) {
+[GoMethodBody("insertFlush")] internal static insertErr insertFlushᴍ(ж<reorderBuffer> Ꮡrb, input src, nint i, Properties info) {
     ref var rb = ref Ꮡrb.DerefOrNull();
 
     var rune = src.hangul(i); if (rune != 0) {
@@ -247,7 +247,7 @@ internal static insertErr insertFlushᴍ(ж<reorderBuffer> Ꮡrb, input src, nin
 // It is assumed there is sufficient space to hold the runes. It is the
 // responsibility of the caller to ensure this. This can be done by checking
 // the state returned by the streamSafe type.
-internal static void insertUnsafeᴍ(ж<reorderBuffer> Ꮡrb, input src, nint i, Properties info) {
+[GoMethodBody("insertUnsafe")] internal static void insertUnsafeᴍ(ж<reorderBuffer> Ꮡrb, input src, nint i, Properties info) {
     ref var rb = ref Ꮡrb.DerefOrNull();
 
     var rune = src.hangul(i); if (rune != 0) {
@@ -264,7 +264,7 @@ internal static void insertUnsafeᴍ(ж<reorderBuffer> Ꮡrb, input src, nint i,
 // insertDecomposed inserts an entry in to the reorderBuffer for each rune
 // in dcomp. dcomp must be a sequence of decomposed UTF-8-encoded runes.
 // It flushes the buffer on each new segment start.
-internal static insertErr insertDecomposedᴍ(ж<reorderBuffer> Ꮡrb, slice<byte> dcomp) {
+[GoMethodBody("insertDecomposed")] internal static insertErr insertDecomposedᴍ(ж<reorderBuffer> Ꮡrb, slice<byte> dcomp) {
     ref var rb = ref Ꮡrb.DerefOrNull();
 
     rb.tmpBytes.setBytes(dcomp);
@@ -284,18 +284,18 @@ internal static insertErr insertDecomposedᴍ(ж<reorderBuffer> Ꮡrb, slice<byt
 
 // insertSingle inserts an entry in the reorderBuffer for the rune at
 // position i. info is the runeInfo for the rune at position i.
-internal static void insertSingleᴍ(ref reorderBuffer rb, input src, nint i, Properties info) {
+[GoMethodBody("insertSingle")] internal static void insertSingleᴍ(ref reorderBuffer rb, input src, nint i, Properties info) {
     src.copySlice(rb.@byte.slice(rb.nbyte), i, i + (nint)info.size);
     rb.insertOrdered(info);
 }
 
 // insertCGJ inserts a Combining Grapheme Joiner (0x034f) into rb.
-internal static void insertCGJᴍ(ref reorderBuffer rb) {
+[GoMethodBody("insertCGJ")] internal static void insertCGJᴍ(ref reorderBuffer rb) {
     rb.insertSingle(new input(str: GraphemeJoiner), 0, new Properties(size: (uint8)len(GraphemeJoiner)));
 }
 
 // appendRune inserts a rune at the end of the buffer. It is used for Hangul.
-internal static void appendRuneᴍ(ref reorderBuffer rb, rune r) {
+[GoMethodBody("appendRune")] internal static void appendRuneᴍ(ref reorderBuffer rb, rune r) {
     var bn = rb.nbyte;
     nint sz = utf8.EncodeRune(rb.@byte.slice(bn), (rune)r);
     rb.nbyte += utf8.UTFMax;
@@ -304,14 +304,14 @@ internal static void appendRuneᴍ(ref reorderBuffer rb, rune r) {
 }
 
 // assignRune sets a rune at position pos. It is used for Hangul and recomposition.
-internal static void assignRuneᴍ(ref reorderBuffer rb, nint pos, rune r) {
+[GoMethodBody("assignRune")] internal static void assignRuneᴍ(ref reorderBuffer rb, nint pos, rune r) {
     var bn = rb.rune[pos].pos;
     nint sz = utf8.EncodeRune(rb.@byte.slice(bn), (rune)r);
     rb.rune[pos] = new Properties(pos: bn, size: (uint8)sz);
 }
 
 // runeAt returns the rune at position n. It is used for Hangul and recomposition.
-internal static rune runeAtᴍ(ref reorderBuffer rb, nint n) {
+[GoMethodBody("runeAt")] internal static rune runeAtᴍ(ref reorderBuffer rb, nint n) {
     var inf = rb.rune[n];
     var (r, _) = utf8.DecodeRune(rb.@byte.slice(inf.pos, (uint8)(inf.pos + inf.size)));
     return r;
@@ -319,7 +319,7 @@ internal static rune runeAtᴍ(ref reorderBuffer rb, nint n) {
 
 // bytesAt returns the UTF-8 encoding of the rune at position n.
 // It is used for Hangul and recomposition.
-internal static slice<byte> bytesAtᴍ(ref reorderBuffer rb, nint n) {
+[GoMethodBody("bytesAt")] internal static slice<byte> bytesAtᴍ(ref reorderBuffer rb, nint n) {
     var inf = rb.rune[n];
     return rb.@byte.slice(inf.pos, (nint)inf.pos + (nint)inf.size);
 }
@@ -436,7 +436,7 @@ internal static nint decomposeHangul(slice<byte> buf, rune r) {
 // decomposeHangul algorithmically decomposes a Hangul rune into
 // its Jamo components.
 // See https://unicode.org/reports/tr15/#Hangul for details on decomposing Hangul.
-internal static void decomposeHangulᴍ(ref reorderBuffer rb, rune r) {
+[GoMethodBody("decomposeHangul")] internal static void decomposeHangulᴍ(ref reorderBuffer rb, rune r) {
     r -= hangulBase;
     var x = r % (rune)jamoTCount;
     r /= jamoTCount;
@@ -449,7 +449,7 @@ internal static void decomposeHangulᴍ(ref reorderBuffer rb, rune r) {
 
 // combineHangul algorithmically combines Jamo character components into Hangul.
 // See https://unicode.org/reports/tr15/#Hangul for details on combining Hangul.
-internal static void combineHangulᴍ(ref reorderBuffer rb, nint s, nint i, nint k) {
+[GoMethodBody("combineHangul")] internal static void combineHangulᴍ(ref reorderBuffer rb, nint s, nint i, nint k) {
     var b = rb.rune[..];
     nint bn = rb.nrune;
     for (; i < bn; i++) {
@@ -489,7 +489,7 @@ internal static void combineHangulᴍ(ref reorderBuffer rb, nint s, nint i, nint
 // compose recombines the runes in the buffer.
 // It should only be used to recompose a single segment, as it will not
 // handle alternations between Hangul and non-Hangul characters correctly.
-internal static void composeᴍ(ref reorderBuffer rb) {
+[GoMethodBody("compose")] internal static void composeᴍ(ref reorderBuffer rb) {
     // Lazily load the map used by the combine func below, but do
     // it outside of the loop.
     ᏑrecompMapOnce.Do(buildRecompMap);
@@ -541,34 +541,3 @@ internal static void composeᴍ(ref reorderBuffer rb) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class normᴛstreamSafe {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void first(this ref streamSafe ss, Properties p) => norm_package.firstᴍ(ref ss, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ssState next(this ref streamSafe ss, Properties p) => norm_package.nextᴍ(ref ss, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ssState backwards(this ref streamSafe ss, Properties p) => norm_package.backwardsᴍ(ref ss, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isMax(this streamSafe ss) => norm_package.isMaxᴍ(ss);
-}
-partial class normᴛreorderBuffer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref reorderBuffer rb, Form f, slice<byte> src) => norm_package.initᴍ(ref rb, f, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initString(this ref reorderBuffer rb, Form f, @string src) => norm_package.initStringᴍ(ref rb, f, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setFlusher(this ref reorderBuffer rb, slice<byte> @out, Func<ж<reorderBuffer>, bool> f) => norm_package.setFlusherᴍ(ref rb, @out, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref reorderBuffer rb) => norm_package.resetᴍ(ref rb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool doFlush(this ж<reorderBuffer> Ꮡrb) => norm_package.doFlushᴍ(Ꮡrb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> flush(this ref reorderBuffer rb, slice<byte> @out) => norm_package.flushᴍ(ref rb, @out);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint flushCopy(this ref reorderBuffer rb, slice<byte> buf) => norm_package.flushCopyᴍ(ref rb, buf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void insertOrdered(this ref reorderBuffer rb, Properties info) => norm_package.insertOrderedᴍ(ref rb, info);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static insertErr insertFlush(this ж<reorderBuffer> Ꮡrb, input src, nint i, Properties info) => norm_package.insertFlushᴍ(Ꮡrb, src, i, info);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void insertUnsafe(this ж<reorderBuffer> Ꮡrb, input src, nint i, Properties info) => norm_package.insertUnsafeᴍ(Ꮡrb, src, i, info);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static insertErr insertDecomposed(this ж<reorderBuffer> Ꮡrb, slice<byte> dcomp) => norm_package.insertDecomposedᴍ(Ꮡrb, dcomp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void insertSingle(this ref reorderBuffer rb, input src, nint i, Properties info) => norm_package.insertSingleᴍ(ref rb, src, i, info);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void insertCGJ(this ref reorderBuffer rb) => norm_package.insertCGJᴍ(ref rb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void appendRune(this ref reorderBuffer rb, rune r) => norm_package.appendRuneᴍ(ref rb, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void assignRune(this ref reorderBuffer rb, nint pos, rune r) => norm_package.assignRuneᴍ(ref rb, pos, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static rune runeAt(this ref reorderBuffer rb, nint n) => norm_package.runeAtᴍ(ref rb, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytesAt(this ref reorderBuffer rb, nint n) => norm_package.bytesAtᴍ(ref rb, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void decomposeHangul(this ref reorderBuffer rb, rune r) => norm_package.decomposeHangulᴍ(ref rb, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void combineHangul(this ref reorderBuffer rb, nint s, nint i, nint k) => norm_package.combineHangulᴍ(ref rb, s, i, k);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void compose(this ref reorderBuffer rb) => norm_package.composeᴍ(ref rb);
-}
-// </GlyphForwarders>

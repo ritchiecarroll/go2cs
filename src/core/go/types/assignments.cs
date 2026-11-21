@@ -25,7 +25,7 @@ partial class types_package {
 // type. context describes the context in which the assignment takes place.
 // Use T == nil to indicate assignment to an untyped blank identifier.
 // If the assignment check fails, x.mode is set to invalid.
-internal static void assignmentᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T, @string context) {
+[GoMethodBody("assignment")] internal static void assignmentᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T, @string context) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -141,7 +141,7 @@ internal static void assignmentᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type 
 internal static ref readonly @string constantDeclarationˢᴍChecker => ref constantDeclarationˢᵇᴍChecker;
 private static readonly @string constantDeclarationˢᵇᴍChecker = "constant declaration"u8;
 
-internal static void initConstᴍ(ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<operand> Ꮡx) {
+[GoMethodBody("initConst")] internal static void initConstᴍ(ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<operand> Ꮡx) {
     ref var lhs = ref Ꮡlhs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -179,7 +179,7 @@ internal static void initConstᴍ(ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<ope
 // If lhs doesn't have a type yet, it is given the type of x,
 // or Typ[Invalid] in case of an error.
 // If the initialization check fails, x.mode is set to invalid.
-internal static void initVarᴍ(ж<Checker> Ꮡcheck, ж<Var> Ꮡlhs, ж<operand> Ꮡx, @string context) {
+[GoMethodBody("initVar")] internal static void initVarᴍ(ж<Checker> Ꮡcheck, ж<Var> Ꮡlhs, ж<operand> Ꮡx, @string context) {
     ref var lhs = ref Ꮡlhs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -214,7 +214,7 @@ internal static void initVarᴍ(ж<Checker> Ꮡcheck, ж<Var> Ꮡlhs, ж<operand
 // lhsVar takes care of not counting a lhs identifier as a "use" of
 // that identifier. The result is nil if it is the blank identifier,
 // and Typ[Invalid] if it is an invalid lhs expression.
-internal static Type lhsVarᴍ(ж<Checker> Ꮡcheck, ast.Expr lhs) {
+[GoMethodBody("lhsVar")] internal static Type lhsVarᴍ(ж<Checker> Ꮡcheck, ast.Expr lhs) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // Determine if the lhs is a (possibly parenthesized) identifier.
@@ -287,7 +287,7 @@ private static readonly @string assignmentToIdentifierˢᵇᴍChecker = "assignm
 // assignVar checks the assignment lhs = rhs (if x == nil), or lhs = x (if x != nil).
 // If x != nil, it must be the evaluation of rhs (and rhs will be ignored).
 // If the assignment check fails and x != nil, x.mode is set to invalid.
-internal static void assignVarᴍ(ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr rhs, ж<operand> Ꮡx, @string context) {
+[GoMethodBody("assignVar")] internal static void assignVarᴍ(ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr rhs, ж<operand> Ꮡx, @string context) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     var T = Ꮡcheck.lhsVar(lhs); // nil if lhs is _
@@ -361,7 +361,7 @@ private static readonly @string untypedˢᵇᴍChecker = "untyped "u8;
 // If hasDots is set, the last argument string is of the form "T..."
 // where T is the last type.
 // Only one of variadic and hasDots may be set.
-internal static @string typesSummaryᴍ(ж<Checker> Ꮡcheck, slice<Type> list, bool variadic, bool hasDots) {
+[GoMethodBody("typesSummary")] internal static @string typesSummaryᴍ(ж<Checker> Ꮡcheck, slice<Type> list, bool variadic, bool hasDots) {
     var resᴷ = new stackAppend<@string>();
 
     assert(!(variadic && hasDots));
@@ -429,7 +429,7 @@ private static readonly @string variableˢᵇᴍChecker = "variable"u8;
 internal static ref readonly @string valueˢᴍChecker => ref valueˢᵇᴍChecker;
 private static readonly @string valueˢᵇᴍChecker = "value"u8;
 
-internal static void assignErrorᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> rhs, nint l, nint r) {
+[GoMethodBody("assignError")] internal static void assignErrorᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> rhs, nint l, nint r) {
     @string vars = measure(l, variableˢᴍChecker);
     @string vals = measure(r, valueˢᴍChecker);
     var rhs0 = rhs[0];
@@ -449,7 +449,7 @@ private static readonly @string notEnoughˢᵇᴍChecker = "not enough"u8;
 internal static ref readonly @string tooManyˢᴍChecker => ref tooManyˢᵇᴍChecker;
 private static readonly @string tooManyˢᵇᴍChecker = "too many"u8;
 
-internal static void returnErrorᴍ(ж<Checker> Ꮡcheck, positioner at, slice<ж<Var>> lhs, slice<ж<operand>> rhs) {
+[GoMethodBody("returnError")] internal static void returnErrorᴍ(ж<Checker> Ꮡcheck, positioner at, slice<ж<Var>> lhs, slice<ж<operand>> rhs) {
     nint l = len(lhs);
     nint r = len(rhs);
     @string qualifier = notEnoughˢᴍChecker;
@@ -478,7 +478,7 @@ private static readonly @string resultVariableˢᵇᴍChecker = "result variable
 // to variables lhs.
 // If returnStmt is non-nil, initVars type-checks the implicit assignment
 // of result expressions orig_rhs to function result parameters lhs.
-internal static void initVarsᴍ(ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, slice<ast.Expr> orig_rhs, ast.Stmt returnStmt) {
+[GoMethodBody("initVars")] internal static void initVarsᴍ(ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, slice<ast.Expr> orig_rhs, ast.Stmt returnStmt) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     @string context = assignmentˢᴍChecker;
@@ -565,7 +565,7 @@ internal static void initVarsᴍ(ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, slice
 }
 
 // assignVars type-checks assignments of expressions orig_rhs to variables lhs.
-internal static void assignVarsᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, slice<ast.Expr> orig_rhs) {
+[GoMethodBody("assignVars")] internal static void assignVarsᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, slice<ast.Expr> orig_rhs) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     nint l = len(lhs);
@@ -622,7 +622,7 @@ internal static void assignVarsᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, sl
     // orig_rhs[0] was already evaluated
 }
 
-internal static void shortVarDeclᴍ(ж<Checker> Ꮡcheck, positioner pos, slice<ast.Expr> lhs, slice<ast.Expr> rhs) {
+[GoMethodBody("shortVarDecl")] internal static void shortVarDeclᴍ(ж<Checker> Ꮡcheck, positioner pos, slice<ast.Expr> lhs, slice<ast.Expr> rhs) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     var newVarsᴷ = new stackAppend<ж<Var>>();
 
@@ -708,19 +708,3 @@ internal static void shortVarDeclᴍ(ж<Checker> Ꮡcheck, positioner pos, slice
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void assignment(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T, @string context) => types_package.assignmentᴍ(Ꮡcheck, Ꮡx, T, context);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initConst(this ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<operand> Ꮡx) => types_package.initConstᴍ(Ꮡcheck, Ꮡlhs, Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initVar(this ж<Checker> Ꮡcheck, ж<Var> Ꮡlhs, ж<operand> Ꮡx, @string context) => types_package.initVarᴍ(Ꮡcheck, Ꮡlhs, Ꮡx, context);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type lhsVar(this ж<Checker> Ꮡcheck, ast.Expr lhs) => types_package.lhsVarᴍ(Ꮡcheck, lhs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void assignVar(this ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr rhs, ж<operand> Ꮡx, @string context) => types_package.assignVarᴍ(Ꮡcheck, lhs, rhs, Ꮡx, context);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string typesSummary(this ж<Checker> Ꮡcheck, slice<Type> list, bool variadic, bool hasDots) => types_package.typesSummaryᴍ(Ꮡcheck, list, variadic, hasDots);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void assignError(this ж<Checker> Ꮡcheck, slice<ast.Expr> rhs, nint l, nint r) => types_package.assignErrorᴍ(Ꮡcheck, rhs, l, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void returnError(this ж<Checker> Ꮡcheck, positioner at, slice<ж<Var>> lhs, slice<ж<operand>> rhs) => types_package.returnErrorᴍ(Ꮡcheck, at, lhs, rhs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initVars(this ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, slice<ast.Expr> orig_rhs, ast.Stmt returnStmt) => types_package.initVarsᴍ(Ꮡcheck, lhs, orig_rhs, returnStmt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void assignVars(this ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, slice<ast.Expr> orig_rhs) => types_package.assignVarsᴍ(Ꮡcheck, lhs, orig_rhs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, slice<ast.Expr> lhs, slice<ast.Expr> rhs) => types_package.shortVarDeclᴍ(Ꮡcheck, pos, lhs, rhs);
-}
-// </GlyphForwarders>

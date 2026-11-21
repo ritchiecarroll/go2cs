@@ -70,7 +70,7 @@ public static ж<CertPool> NewCertPool() {
 
 // len returns the number of certs in the set.
 // A nil set is a valid empty set.
-internal static nint lenᴍ(ж<CertPool> Ꮡs) {
+[GoMethodBody("len")] internal static nint lenᴍ(ж<CertPool> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (Ꮡs == nil) {
@@ -80,13 +80,13 @@ internal static nint lenᴍ(ж<CertPool> Ꮡs) {
 }
 
 // cert returns cert index n in s.
-internal static (ж<Certificate>, Func<slice<ж<Certificate>>, error>, error) certᴍ(ref CertPool s, nint n) {
+[GoMethodBody("cert")] internal static (ж<Certificate>, Func<slice<ж<Certificate>>, error>, error) certᴍ(ref CertPool s, nint n) {
     var (cert, err) = s.lazyCerts[n].getCert();
     return (cert, s.lazyCerts[n].constraint, err);
 }
 
 // Clone returns a copy of s.
-internal static ж<CertPool> Cloneᴍ(ref CertPool s) {
+[GoMethodBody("Clone")] internal static ж<CertPool> Cloneᴍ(ref CertPool s) {
     var p = Ꮡ(new CertPool(
         byName: new map<@string, slice<nint>>(builtin.len(s.byName)),
         lazyCerts: new slice<lazyCert>(builtin.len(s.lazyCerts)),
@@ -137,7 +137,7 @@ partial struct potentialParent {
 
 // findPotentialParents returns the certificates in s which might have signed
 // cert.
-internal static slice<potentialParent> findPotentialParentsᴍ(ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
+[GoMethodBody("findPotentialParents")] internal static slice<potentialParent> findPotentialParentsᴍ(ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var cert = ref Ꮡcert.DerefOrNull();
     var matchingKeyIDᴷ = new stackAppend<potentialParent>();
@@ -189,7 +189,7 @@ internal static slice<potentialParent> findPotentialParentsᴍ(ж<CertPool> Ꮡs
     return candidates;
 }
 
-internal static bool containsᴍ(ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
+[GoMethodBody("contains")] internal static bool containsᴍ(ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var cert = ref Ꮡcert.DerefOrNull();
 
@@ -200,7 +200,7 @@ internal static bool containsᴍ(ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) {
 }
 
 // AddCert adds a certificate to a pool.
-internal static void AddCertᴍ(ref CertPool s, ж<Certificate> Ꮡcert) {
+[GoMethodBody("AddCert")] internal static void AddCertᴍ(ref CertPool s, ж<Certificate> Ꮡcert) {
     ref var cert = ref Ꮡcert.DerefOrNull();
 
     if (Ꮡcert == nil) {
@@ -214,7 +214,7 @@ internal static void AddCertᴍ(ref CertPool s, ж<Certificate> Ꮡcert) {
 //
 // The rawSubject is Certificate.RawSubject and must be non-empty.
 // The getCert func may be called 0 or more times.
-internal static void addCertFuncᴍ(ref CertPool s, sum224 rawSum224, @string rawSubject, Func<(ж<Certificate>, error)> getCert, Func<slice<ж<Certificate>>, error> constraint) {
+[GoMethodBody("addCertFunc")] internal static void addCertFuncᴍ(ref CertPool s, sum224 rawSum224, @string rawSubject, Func<(ж<Certificate>, error)> getCert, Func<slice<ж<Certificate>>, error> constraint) {
     rawSum224 = rawSum224.Clone();
 
     if (getCert == nil) {
@@ -250,7 +250,7 @@ internal partial struct AppendCertsFromPEM_lazyCert /*dyn*/ {
 //
 // On many Linux systems, /etc/ssl/cert.pem will contain the system wide set
 // of root CAs in a format suitable for this function.
-internal static bool /*ok*/ AppendCertsFromPEMᴍ(ref CertPool s, slice<byte> pemCerts) {
+[GoMethodBody("AppendCertsFromPEM")] internal static bool /*ok*/ AppendCertsFromPEMᴍ(ref CertPool s, slice<byte> pemCerts) {
     bool ok = default;
 
     while (builtin.len(pemCerts) > 0) {
@@ -288,7 +288,7 @@ internal static bool /*ok*/ AppendCertsFromPEMᴍ(ref CertPool s, slice<byte> pe
 //
 // Deprecated: if s was returned by [SystemCertPool], Subjects
 // will not include the system roots.
-internal static slice<slice<byte>> Subjectsᴍ(ж<CertPool> Ꮡs) {
+[GoMethodBody("Subjects")] internal static slice<slice<byte>> Subjectsᴍ(ж<CertPool> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var res = new slice<slice<byte>>(Ꮡs.len());
@@ -299,7 +299,7 @@ internal static slice<slice<byte>> Subjectsᴍ(ж<CertPool> Ꮡs) {
 }
 
 // Equal reports whether s and other are equal.
-internal static bool Equalᴍ(ж<CertPool> Ꮡs, ж<CertPool> Ꮡother) {
+[GoMethodBody("Equal")] internal static bool Equalᴍ(ж<CertPool> Ꮡs, ж<CertPool> Ꮡother) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var other = ref Ꮡother.DerefOrNull();
 
@@ -324,7 +324,7 @@ internal static bool Equalᴍ(ж<CertPool> Ꮡs, ж<CertPool> Ꮡother) {
 // it will additionally pass the whole chain to constraint to determine its
 // validity. If constraint returns a non-nil error, the chain will be discarded.
 // constraint may be called concurrently from multiple goroutines.
-internal static void AddCertWithConstraintᴍ(ref CertPool s, ж<Certificate> Ꮡcert, Func<slice<ж<Certificate>>, error> constraint) {
+[GoMethodBody("AddCertWithConstraint")] internal static void AddCertWithConstraintᴍ(ref CertPool s, ж<Certificate> Ꮡcert, Func<slice<ж<Certificate>>, error> constraint) {
     ref var cert = ref Ꮡcert.DerefOrNull();
 
     if (Ꮡcert == nil) {
@@ -334,19 +334,3 @@ internal static void AddCertWithConstraintᴍ(ref CertPool s, ж<Certificate> �
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class x509ᴛCertPool {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint len(this ж<CertPool> Ꮡs) => x509_package.lenᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Certificate>, Func<slice<ж<Certificate>>, error>, error) cert(this ref CertPool s, nint n) => x509_package.certᴍ(ref s, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<CertPool> Clone(this ref CertPool s) => x509_package.Cloneᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<potentialParent> findPotentialParents(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) => x509_package.findPotentialParentsᴍ(Ꮡs, Ꮡcert);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool contains(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) => x509_package.containsᴍ(Ꮡs, Ꮡcert);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddCert(this ref CertPool s, ж<Certificate> Ꮡcert) => x509_package.AddCertᴍ(ref s, Ꮡcert);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addCertFunc(this ref CertPool s, sum224 rawSum224, @string rawSubject, Func<(ж<Certificate>, error)> getCert, Func<slice<ж<Certificate>>, error> constraint) => x509_package.addCertFuncᴍ(ref s, rawSum224, rawSubject, getCert, constraint);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool /*ok*/ AppendCertsFromPEM(this ref CertPool s, slice<byte> pemCerts) => x509_package.AppendCertsFromPEMᴍ(ref s, pemCerts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<slice<byte>> Subjects(this ж<CertPool> Ꮡs) => x509_package.Subjectsᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ж<CertPool> Ꮡs, ж<CertPool> Ꮡother) => x509_package.Equalᴍ(Ꮡs, Ꮡother);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddCertWithConstraint(this ref CertPool s, ж<Certificate> Ꮡcert, Func<slice<ж<Certificate>>, error> constraint) => x509_package.AddCertWithConstraintᴍ(ref s, Ꮡcert, constraint);
-}
-// </GlyphForwarders>

@@ -72,6 +72,14 @@ using static go.compress.bzip2_package;
 
 namespace go.compress;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using bufio = bufio_package;
+using io = io_package;
+using static bzip2_package;
+using cmp = cmp_package;
+using slices = slices_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("bzip2")]
 public static partial class bzip2_package
 {
@@ -118,3 +126,29 @@ public static partial class bzip2_package
 [GoMethodHost(typeof(bzip2_package.moveToFrontDecoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bzip2ᴛmoveToFrontDecoder;
 [GoMethodHost(typeof(bzip2_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bzip2ᴛreader;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class bzip2ᴛbitReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 /*n*/ ReadBits64(this ref bitReader br, nuint bits) => bzip2_package.ReadBits64ᴍ(ref br, bits);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*n*/ ReadBits(this ref bitReader br, nuint bits) => bzip2_package.ReadBitsᴍ(ref br, bits);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool ReadBit(this ref bitReader br) => bzip2_package.ReadBitᴍ(ref br);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Err(this ref bitReader br) => bzip2_package.Errᴍ(ref br);
+}
+partial class bzip2ᴛStructuralError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this StructuralError s) => bzip2_package.Errorᴍ(s);
+}
+partial class bzip2ᴛreader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error setup(this ж<reader> Ꮡbz2, bool needMagic) => bzip2_package.setupᴍ(Ꮡbz2, needMagic);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ж<reader> Ꮡbz2, slice<byte> buf) => bzip2_package.Readᴍ(Ꮡbz2, buf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint readFromBlock(this ref reader bz2, slice<byte> buf) => bzip2_package.readFromBlockᴍ(ref bz2, buf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) read(this ж<reader> Ꮡbz2, slice<byte> buf) => bzip2_package.readᴍ(Ꮡbz2, buf);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ readBlock(this ж<reader> Ꮡbz2) => bzip2_package.readBlockᴍ(Ꮡbz2);
+}
+partial class bzip2ᴛhuffmanTree {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 /*v*/ Decode(this ref huffmanTree t, ж<bitReader> Ꮡbr) => bzip2_package.Decodeᴍ(ref t, Ꮡbr);
+}
+partial class bzip2ᴛmoveToFrontDecoder {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte /*b*/ Decode(this moveToFrontDecoder m, nint n) => bzip2_package.Decodeᴍ(m, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte First(this moveToFrontDecoder m) => bzip2_package.Firstᴍ(m);
+}
+// </GlyphForwarders>

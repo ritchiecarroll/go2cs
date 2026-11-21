@@ -48,7 +48,7 @@ partial struct Result {
 // time. If a duplicate comes in, the duplicate caller waits for the
 // original to complete and receives the same results.
 // The return value shared indicates whether v was given to multiple callers.
-internal static (any v, error err, bool shared) Doᴍ(ж<Group> Ꮡg, @string key, Func<(any, error)> fn) {
+[GoMethodBody("Do")] internal static (any v, error err, bool shared) Doᴍ(ж<Group> Ꮡg, @string key, Func<(any, error)> fn) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     g.mu.Lock();
@@ -72,7 +72,7 @@ internal static (any v, error err, bool shared) Doᴍ(ж<Group> Ꮡg, @string ke
 
 // DoChan is like Do but returns a channel that will receive the
 // results when they are ready.
-internal static partial /*<-*/channel<Result> DoChanᴍ(ж<Group> Ꮡg, @string key, Func<(any, error)> fn) {
+[GoMethodBody("DoChan")] internal static partial /*<-*/channel<Result> DoChanᴍ(ж<Group> Ꮡg, @string key, Func<(any, error)> fn) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     var ch = new channel<Result>(1);
@@ -97,7 +97,7 @@ internal static partial /*<-*/channel<Result> DoChanᴍ(ж<Group> Ꮡg, @string 
 }
 
 // doCall handles the single call for a key.
-internal static void doCallᴍ(ж<Group> Ꮡg, ж<call> Ꮡc, @string key, Func<(any, error)> fn) {
+[GoMethodBody("doCall")] internal static void doCallᴍ(ж<Group> Ꮡg, ж<call> Ꮡc, @string key, Func<(any, error)> fn) {
     ref var g = ref Ꮡg.DerefOrNull();
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -119,7 +119,7 @@ internal static void doCallᴍ(ж<Group> Ꮡg, ж<call> Ꮡc, @string key, Func<
 // will call the function rather than waiting for an earlier call to complete.
 // Returns whether the key was forgotten or unknown--that is, whether no
 // other goroutines are waiting for the result.
-internal static bool ForgetUnsharedᴍ(ж<Group> Ꮡg, @string key) {
+[GoMethodBody("ForgetUnshared")] internal static bool ForgetUnsharedᴍ(ж<Group> Ꮡg, @string key) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -142,12 +142,3 @@ internal static bool ForgetUnsharedᴍ(ж<Group> Ꮡg, @string key) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class singleflightᴛGroup {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (any v, error err, bool shared) Do(this ж<Group> Ꮡg, @string key, Func<(any, error)> fn) => singleflight_package.Doᴍ(Ꮡg, key, fn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static /*<-*/channel<Result> DoChan(this ж<Group> Ꮡg, @string key, Func<(any, error)> fn) => singleflight_package.DoChanᴍ(Ꮡg, key, fn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void doCall(this ж<Group> Ꮡg, ж<call> Ꮡc, @string key, Func<(any, error)> fn) => singleflight_package.doCallᴍ(Ꮡg, Ꮡc, key, fn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ForgetUnshared(this ж<Group> Ꮡg, @string key) => singleflight_package.ForgetUnsharedᴍ(Ꮡg, key);
-}
-// </GlyphForwarders>

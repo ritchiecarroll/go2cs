@@ -90,7 +90,7 @@ internal static ж<aead> aes256GCM = Ꮡ(new aead(
 
 } partial class hpke_package {
 
-internal static uint16 IDᴍ(ref aead a) {
+[GoMethodBody("ID")] internal static uint16 IDᴍ(ref aead a) {
     return a.id;
 }
 
@@ -98,18 +98,18 @@ internal static uint16 IDᴍ(ref aead a) {
 internal static ref readonly @string invalidKeySizeˢᴍaead => ref invalidKeySizeˢᵇᴍaead;
 private static readonly @string invalidKeySizeˢᵇᴍaead = "invalid key size"u8;
 
-internal static (cipher.AEAD, error) aeadᴍ(ref aead a, slice<byte> key) {
+[GoMethodBody("aead")] internal static (cipher.AEAD, error) aeadᴍ(ref aead a, slice<byte> key) {
     if (len(key) != a.nK) {
         return (default, errors.New(invalidKeySizeˢᴍaead));
     }
     return a.@new(key);
 }
 
-internal static nint keySizeᴍ(ref aead a) {
+[GoMethodBody("keySize")] internal static nint keySizeᴍ(ref aead a) {
     return a.nK;
 }
 
-internal static nint nonceSizeᴍ(ref aead a) {
+[GoMethodBody("nonceSize")] internal static nint nonceSizeᴍ(ref aead a) {
     return a.nN;
 }
 
@@ -120,35 +120,20 @@ partial struct exportOnlyAEAD {
 
 } partial class hpke_package {
 
-internal static uint16 IDᴍ(exportOnlyAEAD _) {
+[GoMethodBody("ID")] internal static uint16 IDᴍ(exportOnlyAEAD _) {
     return 0xFFFF;
 }
 
-internal static (cipher.AEAD, error) aeadᴍ(exportOnlyAEAD _, slice<byte> key) {
+[GoMethodBody("aead")] internal static (cipher.AEAD, error) aeadᴍ(exportOnlyAEAD _, slice<byte> key) {
     return (default, default);
 }
 
-internal static nint keySizeᴍ(exportOnlyAEAD _) {
+[GoMethodBody("keySize")] internal static nint keySizeᴍ(exportOnlyAEAD _) {
     return 0;
 }
 
-internal static nint nonceSizeᴍ(exportOnlyAEAD _) {
+[GoMethodBody("nonceSize")] internal static nint nonceSizeᴍ(exportOnlyAEAD _) {
     return 0;
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class hpkeᴛaead {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 ID(this ref aead a) => hpke_package.IDᴍ(ref a);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (cipher.AEAD, error) aead(this ref aead a, slice<byte> key) => hpke_package.aeadᴍ(ref a, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint keySize(this ref aead a) => hpke_package.keySizeᴍ(ref a);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint nonceSize(this ref aead a) => hpke_package.nonceSizeᴍ(ref a);
-}
-partial class hpkeᴛexportOnlyAEAD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 ID(this exportOnlyAEAD _) => hpke_package.IDᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (cipher.AEAD, error) aead(this exportOnlyAEAD _, slice<byte> key) => hpke_package.aeadᴍ(_, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint keySize(this exportOnlyAEAD _) => hpke_package.keySizeᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint nonceSize(this exportOnlyAEAD _) => hpke_package.nonceSizeᴍ(_);
-}
-// </GlyphForwarders>

@@ -23,7 +23,7 @@ partial struct listHead {
 
 // init initializes the list head. off is the offset (via unsafe.Offsetof) of
 // the listNode field in the objects in the list.
-internal static void initᴍ(ref listHead head, uintptr off) {
+[GoMethodBody("init")] internal static void initᴍ(ref listHead head, uintptr off) {
     head.initialized = true;
     head.nodeOffset = off;
 }
@@ -56,7 +56,7 @@ partial struct listNode {
 internal static ref readonly @string runtimeUninitializedˢᴍlistHead => ref runtimeUninitializedˢᵇᴍlistHead;
 private static readonly @string runtimeUninitializedˢᵇᴍlistHead = "runtime: uninitialized listHead"u8;
 
-internal static ж<listNode> getNodeᴍ(ref listHead head, @unsafe.Pointer p) {
+[GoMethodBody("getNode")] internal static ж<listNode> getNodeᴍ(ref listHead head, @unsafe.Pointer p) {
     if (!head.initialized) {
         @throw(runtimeUninitializedˢᴍlistHead);
     }
@@ -68,17 +68,17 @@ internal static ж<listNode> getNodeᴍ(ref listHead head, @unsafe.Pointer p) {
 }
 
 // Returns true if the list is empty.
-internal static bool emptyᴍ(ref listHead head) {
+[GoMethodBody("empty")] internal static bool emptyᴍ(ref listHead head) {
     return head.obj == nil;
 }
 
 // Returns the head of the list without removing it.
-internal static @unsafe.Pointer headᴍ(ref listHead head) {
+[GoMethodBody("head")] internal static @unsafe.Pointer headᴍ(ref listHead head) {
     return head.obj;
 }
 
 // Push p onto the front of the list.
-internal static void pushᴍ(ref listHead head, @unsafe.Pointer p) {
+[GoMethodBody("push")] internal static void pushᴍ(ref listHead head, @unsafe.Pointer p) {
     // p becomes the head of the list.
 
     // ... so p's next is the current head.
@@ -95,7 +95,7 @@ internal static void pushᴍ(ref listHead head, @unsafe.Pointer p) {
 }
 
 // Pop removes the head of the list.
-internal static @unsafe.Pointer popᴍ(ref listHead head) {
+[GoMethodBody("pop")] internal static @unsafe.Pointer popᴍ(ref listHead head) {
     if (head.obj == nil) {
         return default;
     }
@@ -120,7 +120,7 @@ internal static @unsafe.Pointer popᴍ(ref listHead head) {
 }
 
 // Remove p from the middle of the list.
-internal static void removeᴍ(ref listHead head, @unsafe.Pointer p) {
+[GoMethodBody("remove")] internal static void removeᴍ(ref listHead head, @unsafe.Pointer p) {
     if (head.obj == p) {
         // Use pop to ensure head is updated when removing the head.
         head.pop();
@@ -145,15 +145,3 @@ internal static void removeᴍ(ref listHead head, @unsafe.Pointer p) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛlistHead {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref listHead head, uintptr off) => runtime_package.initᴍ(ref head, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<listNode> getNode(this ref listHead head, @unsafe.Pointer p) => runtime_package.getNodeᴍ(ref head, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ref listHead head) => runtime_package.emptyᴍ(ref head);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer head(this ref listHead head) => runtime_package.headᴍ(ref head);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void push(this ref listHead head, @unsafe.Pointer p) => runtime_package.pushᴍ(ref head, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer pop(this ref listHead head) => runtime_package.popᴍ(ref head);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void remove(this ref listHead head, @unsafe.Pointer p) => runtime_package.removeᴍ(ref head, p);
-}
-// </GlyphForwarders>

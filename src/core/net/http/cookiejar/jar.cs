@@ -117,21 +117,21 @@ partial struct entry {
 } partial class cookiejar_package {
 
 // id returns the domain;path;name triple of e as an id.
-internal static @string idᴍ(ref entry e) {
+[GoMethodBody("id")] internal static @string idᴍ(ref entry e) {
     return fmt.Sprintf("%s;%s;%s"u8, e.Domain, e.Path, e.Name);
 }
 
 // shouldSend determines whether e's cookie qualifies to be included in a
 // request to host/path. It is the caller's responsibility to check if the
 // cookie is expired.
-internal static bool shouldSendᴍ(ref entry e, bool https, @string host, @string path) {
+[GoMethodBody("shouldSend")] internal static bool shouldSendᴍ(ref entry e, bool https, @string host, @string path) {
     return e.domainMatch(host) && e.pathMatch(path) && e.secureMatch(https);
 }
 
 // domainMatch checks whether e's Domain allows sending e back to host.
 // It differs from "domain-match" of RFC 6265 section 5.1.3 because we treat
 // a cookie with an IP address in the Domain always as a host cookie.
-internal static bool domainMatchᴍ(ref entry e, @string host) {
+[GoMethodBody("domainMatch")] internal static bool domainMatchᴍ(ref entry e, @string host) {
     if (e.Domain == host) {
         return true;
     }
@@ -139,7 +139,7 @@ internal static bool domainMatchᴍ(ref entry e, @string host) {
 }
 
 // pathMatch implements "path-match" according to RFC 6265 section 5.1.4.
-internal static bool pathMatchᴍ(ref entry e, @string requestPath) {
+[GoMethodBody("pathMatch")] internal static bool pathMatchᴍ(ref entry e, @string requestPath) {
     if (requestPath == e.Path) {
         return true;
     }
@@ -156,7 +156,7 @@ internal static bool pathMatchᴍ(ref entry e, @string requestPath) {
 // secureMatch checks whether a cookie should be sent based on the protocol
 // and the Secure flag. Localhost is considered a secure origin regardless
 // of protocol, matching browser behavior.
-internal static bool secureMatchᴍ(ref entry e, bool https) {
+[GoMethodBody("secureMatch")] internal static bool secureMatchᴍ(ref entry e, bool https) {
     if (!e.Secure) {
         // Cookies not marked secure are always sent.
         return true;
@@ -201,12 +201,12 @@ internal static bool hasDotSuffix(@string s, @string suffix) {
 // Cookies implements the Cookies method of the [http.CookieJar] interface.
 //
 // It returns an empty slice if the URL's scheme is not HTTP or HTTPS.
-internal static slice<ж<http.Cookie>> /*cookies*/ Cookiesᴍ(ж<Jar> Ꮡj, ж<url.URL> u) {
+[GoMethodBody("Cookies")] internal static slice<ж<http.Cookie>> /*cookies*/ Cookiesᴍ(ж<Jar> Ꮡj, ж<url.URL> u) {
     return Ꮡj.cookies(u, time.Now());
 }
 
 // cookies is like Cookies but takes the current time as a parameter.
-internal static slice<ж<http.Cookie>> /*cookies*/ cookiesᴍ(ж<Jar> Ꮡj, ж<url.URL> Ꮡu, time.Time now) {
+[GoMethodBody("cookies")] internal static slice<ж<http.Cookie>> /*cookies*/ cookiesᴍ(ж<Jar> Ꮡj, ж<url.URL> Ꮡu, time.Time now) {
     slice<ж<http.Cookie>> cookies = default;
     GoFrame ᒐ = default;
     try {
@@ -289,12 +289,12 @@ internal static slice<ж<http.Cookie>> /*cookies*/ cookiesᴍ(ж<Jar> Ꮡj, ж<u
 // SetCookies implements the SetCookies method of the [http.CookieJar] interface.
 //
 // It does nothing if the URL's scheme is not HTTP or HTTPS.
-internal static void SetCookiesᴍ(ж<Jar> Ꮡj, ж<url.URL> u, slice<ж<http.Cookie>> cookies) {
+[GoMethodBody("SetCookies")] internal static void SetCookiesᴍ(ж<Jar> Ꮡj, ж<url.URL> u, slice<ж<http.Cookie>> cookies) {
     Ꮡj.setCookies(u, cookies, time.Now());
 }
 
 // setCookies is like SetCookies but takes the current time as parameter.
-internal static void setCookiesᴍ(ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<http.Cookie>> cookies, time.Time now) {
+[GoMethodBody("setCookies")] internal static void setCookiesᴍ(ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<http.Cookie>> cookies, time.Time now) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -476,7 +476,7 @@ private static readonly @string sameSiteLaxˢᵇᴍJar = "SameSite=Lax"u8;
 // be valid to call e.id (which depends on e's Name, Domain and Path).
 //
 // A malformed c.Domain will result in an error.
-internal static (entry e, bool remove, error err) newEntryᴍ(ref Jar j, ж<http.Cookie> Ꮡc, time.Time now, @string defPath, @string host) {
+[GoMethodBody("newEntry")] internal static (entry e, bool remove, error err) newEntryᴍ(ref Jar j, ж<http.Cookie> Ꮡc, time.Time now, @string defPath, @string host) {
     entry e = default;
     error err = default;
     ref var c = ref Ꮡc.DerefOrNull();
@@ -548,7 +548,7 @@ internal static time.Time endOfTime = time.Date(9999, 12, 31, 23, 59, 59, 0, tim
 } partial class cookiejar_package {
 
 // domainAndType determines the cookie's domain and hostOnly attribute.
-internal static (@string, bool, error) domainAndTypeᴍ(ref Jar j, @string host, @string domain) {
+[GoMethodBody("domainAndType")] internal static (@string, bool, error) domainAndTypeᴍ(ref Jar j, @string host, @string domain) {
     if (domain == ""u8) {
         // No domain attribute in the SetCookie header indicates a
         // host cookie.
@@ -637,21 +637,3 @@ internal static (@string, bool, error) domainAndTypeᴍ(ref Jar j, @string host,
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class cookiejarᴛentry {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string id(this ref entry e) => cookiejar_package.idᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool shouldSend(this ref entry e, bool https, @string host, @string path) => cookiejar_package.shouldSendᴍ(ref e, https, host, path);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool domainMatch(this ref entry e, @string host) => cookiejar_package.domainMatchᴍ(ref e, host);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool pathMatch(this ref entry e, @string requestPath) => cookiejar_package.pathMatchᴍ(ref e, requestPath);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool secureMatch(this ref entry e, bool https) => cookiejar_package.secureMatchᴍ(ref e, https);
-}
-partial class cookiejarᴛJar {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<ж<http.Cookie>> /*cookies*/ Cookies(this ж<Jar> Ꮡj, ж<url.URL> u) => cookiejar_package.Cookiesᴍ(Ꮡj, u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ж<http.Cookie>> /*cookies*/ cookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, time.Time now) => cookiejar_package.cookiesᴍ(Ꮡj, Ꮡu, now);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetCookies(this ж<Jar> Ꮡj, ж<url.URL> u, slice<ж<http.Cookie>> cookies) => cookiejar_package.SetCookiesᴍ(Ꮡj, u, cookies);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setCookies(this ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<http.Cookie>> cookies, time.Time now) => cookiejar_package.setCookiesᴍ(Ꮡj, Ꮡu, cookies, now);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (entry e, bool remove, error err) newEntry(this ref Jar j, ж<http.Cookie> Ꮡc, time.Time now, @string defPath, @string host) => cookiejar_package.newEntryᴍ(ref j, Ꮡc, now, defPath, host);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, bool, error) domainAndType(this ref Jar j, @string host, @string domain) => cookiejar_package.domainAndTypeᴍ(ref j, host, domain);
-}
-// </GlyphForwarders>

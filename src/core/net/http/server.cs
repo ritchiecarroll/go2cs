@@ -302,7 +302,7 @@ partial struct conn {
 
 } partial class http_package {
 
-internal static bool hijackedᴍ(ж<conn> Ꮡc) {
+[GoMethodBody("hijacked")] internal static bool hijackedᴍ(ж<conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -317,7 +317,7 @@ internal static bool hijackedᴍ(ж<conn> Ꮡc) {
 }
 
 // c.mu must be held.
-internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) hijackLockedᴍ(ж<conn> Ꮡc) {
+[GoMethodBody("hijackLocked")] internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) hijackLockedᴍ(ж<conn> Ꮡc) {
     net.Conn rwc = default;
     ж<bufio.ReadWriter> buf = default;
     error err = default;
@@ -380,7 +380,7 @@ internal static slice<byte> colonSpace = slice<byte>(": "u8);
 
 } partial class http_package {
 
-internal static (nint n, error err) Writeᴍ(ref chunkWriter cw, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref chunkWriter cw, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -408,14 +408,14 @@ internal static (nint n, error err) Writeᴍ(ref chunkWriter cw, slice<byte> p) 
     return (n, err);
 }
 
-internal static error flushᴍ(ref chunkWriter cw) {
+[GoMethodBody("flush")] internal static error flushᴍ(ref chunkWriter cw) {
     if (!cw.wroteHeader) {
         cw.writeHeader(default);
     }
     return cw.res.conn.bufw.Flush();
 }
 
-internal static void closeᴍ(ref chunkWriter cw) {
+[GoMethodBody("close")] internal static void closeᴍ(ref chunkWriter cw) {
     if (!cw.wroteHeader) {
         cw.writeHeader(default);
     }
@@ -500,15 +500,15 @@ partial struct response {
 
 } partial class http_package {
 
-internal static error SetReadDeadlineᴍ(ref response c, time.Time deadline) {
+[GoMethodBody("SetReadDeadline")] internal static error SetReadDeadlineᴍ(ref response c, time.Time deadline) {
     return c.conn.rwc.SetReadDeadline(deadline);
 }
 
-internal static error SetWriteDeadlineᴍ(ref response c, time.Time deadline) {
+[GoMethodBody("SetWriteDeadline")] internal static error SetWriteDeadlineᴍ(ref response c, time.Time deadline) {
     return c.conn.rwc.SetWriteDeadline(deadline);
 }
 
-internal static error EnableFullDuplexᴍ(ref response c) {
+[GoMethodBody("EnableFullDuplex")] internal static error EnableFullDuplexᴍ(ref response c) {
     c.fullDuplex = true;
     return default;
 }
@@ -535,7 +535,7 @@ private static readonly @string TrailerPrefixᵇ = "Trailer:"u8;
 
 // finalTrailers is called after the Handler exits and returns a non-nil
 // value if the Handler set any trailers.
-internal static Header finalTrailersᴍ(ref response w) {
+[GoMethodBody("finalTrailers")] internal static Header finalTrailersᴍ(ref response w) {
     Header t = default;
     foreach (var (k, vv) in w.handlerHeader) {
         var (kk, found) = strings.CutPrefix(k, TrailerPrefix); if (found) {
@@ -559,7 +559,7 @@ internal static Header finalTrailersᴍ(ref response w) {
 // declareTrailer is called for each Trailer header when the
 // response header is written. It notes that a header will need to be
 // written in the trailers at the end of the response.
-internal static void declareTrailerᴍ(ref response w, @string k) {
+[GoMethodBody("declareTrailer")] internal static void declareTrailerᴍ(ref response w, @string k) {
     k = CanonicalHeaderKey(k);
     if (!httpguts.ValidTrailerHeader(k)) {
         // Forbidden by RFC 7230, section 4.1.2
@@ -570,13 +570,13 @@ internal static void declareTrailerᴍ(ref response w, @string k) {
 
 // requestTooLarge is called by maxBytesReader when too much input has
 // been read from the client.
-internal static void requestTooLargeᴍ(ж<response> Ꮡw) {
+[GoMethodBody("requestTooLarge")] internal static void requestTooLargeᴍ(ж<response> Ꮡw) {
     Ꮡw.ᏑrequestBodyLimitHit.Store(true);
 }
 
 // disableWriteContinue stops Request.Body.Read from sending an automatic 100-Continue.
 // If a 100-Continue is being written, it waits for it to complete before continuing.
-internal static void disableWriteContinueᴍ(ж<response> Ꮡw) {
+[GoMethodBody("disableWriteContinue")] internal static void disableWriteContinueᴍ(ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.writeContinueMu.Lock();
@@ -597,7 +597,7 @@ partial struct writerOnly {
 // ReadFrom is here to optimize copying from an [*os.File] regular file
 // to a [*net.TCPConn] with sendfile, or from a supported src type such
 // as a *net.TCPConn on Linux with splice.
-internal static (int64 n, error err) ReadFromᴍ(ж<response> Ꮡw, io.Reader src) {
+[GoMethodBody("ReadFrom")] internal static (int64 n, error err) ReadFromᴍ(ж<response> Ꮡw, io.Reader src) {
     int64 n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -659,7 +659,7 @@ internal static ref readonly @string serverˢᴍServer => ref serverˢᵇᴍServ
 private static readonly @string serverˢᵇᴍServer = "server"u8;
 
 // Create new connection from rwc.
-internal static ж<conn> newConnᴍ(ж<Server> Ꮡs, net.Conn rwc) {
+[GoMethodBody("newConn")] internal static ж<conn> newConnᴍ(ж<Server> Ꮡs, net.Conn rwc) {
     var c = Ꮡ(new conn(
         server: Ꮡs,
         rwc: rwc
@@ -700,7 +700,7 @@ partial struct connReader {
 
 } partial class http_package {
 
-internal static void @lockᴍ(ж<connReader> Ꮡcr) {
+[GoMethodBody("lock")] internal static void @lockᴍ(ж<connReader> Ꮡcr) {
     ref var cr = ref Ꮡcr.DerefOrNull();
 
     cr.mu.Lock();
@@ -709,13 +709,13 @@ internal static void @lockᴍ(ж<connReader> Ꮡcr) {
     }
 }
 
-internal static void unlockᴍ(ж<connReader> Ꮡcr) {
+[GoMethodBody("unlock")] internal static void unlockᴍ(ж<connReader> Ꮡcr) {
     ref var cr = ref Ꮡcr.DerefOrNull();
 
     cr.mu.Unlock();
 }
 
-internal static void releaseConnᴍ(ж<connReader> Ꮡcr) {
+[GoMethodBody("releaseConn")] internal static void releaseConnᴍ(ж<connReader> Ꮡcr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -729,7 +729,7 @@ internal static void releaseConnᴍ(ж<connReader> Ꮡcr) {
     finally { if (ᒐd1) Ꮡcr.unlock(); ᒐ.Run(); }
 }
 
-internal static partial void startBackgroundReadᴍ(ж<connReader> Ꮡcr) {
+[GoMethodBody("startBackgroundRead")] internal static partial void startBackgroundReadᴍ(ж<connReader> Ꮡcr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -751,7 +751,7 @@ internal static partial void startBackgroundReadᴍ(ж<connReader> Ꮡcr) {
     finally { if (ᒐd1) Ꮡcr.unlock(); ᒐ.Run(); }
 }
 
-internal static void backgroundReadᴍ(ж<connReader> Ꮡcr) {
+[GoMethodBody("backgroundRead")] internal static void backgroundReadᴍ(ж<connReader> Ꮡcr) {
     ref var cr = ref Ꮡcr.DerefOrNull();
 
     var (n, err) = cr.rwc.Read(cr.byteBuf[..]);
@@ -793,7 +793,7 @@ internal static void backgroundReadᴍ(ж<connReader> Ꮡcr) {
     cr.cond.Broadcast();
 }
 
-internal static void abortPendingReadᴍ(ж<connReader> Ꮡcr) {
+[GoMethodBody("abortPendingRead")] internal static void abortPendingReadᴍ(ж<connReader> Ꮡcr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -815,9 +815,9 @@ internal static void abortPendingReadᴍ(ж<connReader> Ꮡcr) {
     finally { if (ᒐd1) Ꮡcr.unlock(); ᒐ.Run(); }
 }
 
-internal static void setReadLimitᴍ(ref connReader cr, int64 remain) { cr.remain = remain; }
-internal static void setInfiniteReadLimitᴍ(ref connReader cr) { cr.remain = maxInt64; }
-internal static bool hitReadLimitᴍ(ref connReader cr) { return cr.remain <= 0; }
+[GoMethodBody("setReadLimit")] internal static void setReadLimitᴍ(ref connReader cr, int64 remain) { cr.remain = remain; }
+[GoMethodBody("setInfiniteReadLimit")] internal static void setInfiniteReadLimitᴍ(ref connReader cr) { cr.remain = maxInt64; }
+[GoMethodBody("hitReadLimit")] internal static bool hitReadLimitᴍ(ref connReader cr) { return cr.remain <= 0; }
 
 // handleReadErrorLocked is called whenever a Read from the client returns a
 // non-nil error.
@@ -829,7 +829,7 @@ internal static bool hitReadLimitᴍ(ref connReader cr) { return cr.remain <= 0;
 // down its context.
 //
 // The caller must hold connReader.mu.
-internal static void handleReadErrorLockedᴍ(ref connReader cr, error _) {
+[GoMethodBody("handleReadErrorLocked")] internal static void handleReadErrorLockedᴍ(ref connReader cr, error _) {
     if (cr.conn == nil) {
         return;
     }
@@ -839,7 +839,7 @@ internal static void handleReadErrorLockedᴍ(ref connReader cr, error _) {
     }
 }
 
-internal static (nint n, error err) Readᴍ(ж<connReader> Ꮡcr, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ж<connReader> Ꮡcr, slice<byte> p) {
     nint n = default;
     error err = default;
     ref var cr = ref Ꮡcr.DerefOrNull();
@@ -970,14 +970,14 @@ public static UntypedInt DefaultMaxHeaderBytes => /* 1 << 20 */ 1048576; // 1 MB
 
 } partial class http_package {
 
-internal static nint maxHeaderBytesᴍ(ref Server s) {
+[GoMethodBody("maxHeaderBytes")] internal static nint maxHeaderBytesᴍ(ref Server s) {
     if (s.MaxHeaderBytes > 0) {
         return s.MaxHeaderBytes;
     }
     return DefaultMaxHeaderBytes;
 }
 
-internal static int64 initialReadLimitSizeᴍ(ref Server s) {
+[GoMethodBody("initialReadLimitSize")] internal static int64 initialReadLimitSizeᴍ(ref Server s) {
     return (int64)s.maxHeaderBytes() + 4096; // bufio slop
 }
 
@@ -986,7 +986,7 @@ internal static int64 initialReadLimitSizeᴍ(ref Server s) {
 //
 // It returns the minimum of any positive ReadHeaderTimeout,
 // ReadTimeout, or WriteTimeout.
-internal static time.Duration tlsHandshakeTimeoutᴍ(ref Server s) {
+[GoMethodBody("tlsHandshakeTimeout")] internal static time.Duration tlsHandshakeTimeoutᴍ(ref Server s) {
     time.Duration ret = default;
     foreach (var (_, v) in range(new time.Duration[]{
         s.ReadHeaderTimeout,
@@ -1019,7 +1019,7 @@ partial struct expectContinueReader {
 internal static ref readonly @string http11100ContinueˢᴍexpectContinueReader => ref http11100ContinueˢᵇᴍexpectContinueReader;
 private static readonly @string http11100ContinueˢᵇᴍexpectContinueReader = "HTTP/1.1 100 Continue\r\n\r\n"u8;
 
-internal static (nint n, error err) Readᴍ(ж<expectContinueReader> Ꮡecr, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ж<expectContinueReader> Ꮡecr, slice<byte> p) {
     ref var ecr = ref Ꮡecr.DerefOrNull();
 
     if (Ꮡecr.Ꮡclosed.Load()) {
@@ -1038,7 +1038,7 @@ internal static (nint n, error err) Readᴍ(ж<expectContinueReader> Ꮡecr, sli
     return ecr.readCloser.Read(p);
 }
 
-internal static error Closeᴍ(ж<expectContinueReader> Ꮡecr) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<expectContinueReader> Ꮡecr) {
     ref var ecr = ref Ꮡecr.DerefOrNull();
 
     Ꮡecr.Ꮡclosed.Store(true);
@@ -1073,7 +1073,7 @@ internal static ref readonly @string invalidHeaderValueˢᴍconn => ref invalidH
 private static readonly @string invalidHeaderValueˢᵇᴍconn = "invalid header value"u8;
 
 // Read next request from connection.
-internal static (ж<response> w, error err) readRequestᴍ(ж<conn> Ꮡc, context.Context ctx) {
+[GoMethodBody("readRequest")] internal static (ж<response> w, error err) readRequestᴍ(ж<conn> Ꮡc, context.Context ctx) {
     ж<response> w = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -1208,7 +1208,7 @@ internal static bool http1ServerSupportsRequest(ref Request req) {
 
 } partial class http_package {
 
-internal static Header Headerᴍ(ref response w) {
+[GoMethodBody("Header")] internal static Header Headerᴍ(ref response w) {
     if (w.cw.header == nil && w.wroteHeader && !w.cw.wroteHeader) {
         // Accessing the header between logically writing it
         // and physically writing it means we need to allocate
@@ -1277,7 +1277,7 @@ internal static partial runtime.Frame relevantCaller() {
 internal static ref readonly @string contentLengthˢᴍresponse => ref contentLengthˢᵇᴍresponse;
 private static readonly @string contentLengthˢᵇᴍresponse = "Content-Length"u8;
 
-internal static void WriteHeaderᴍ(ж<response> Ꮡw, nint code) {
+[GoMethodBody("WriteHeader")] internal static void WriteHeaderᴍ(ж<response> Ꮡw, nint code) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.conn.hijacked()) {
@@ -1361,7 +1361,7 @@ internal static slice<byte> headerDate = slice<byte>("Date: "u8);
 // This method has a value receiver, despite the somewhat large size
 // of h, because it prevents an allocation. The escape analysis isn't
 // smart enough to realize this function doesn't mutate h.
-internal static void Writeᴍ(extraHeader h, ж<bufio.Writer> Ꮡw) {
+[GoMethodBody("Write")] internal static void Writeᴍ(extraHeader h, ж<bufio.Writer> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (h.date != nil) {
@@ -1416,7 +1416,7 @@ private static readonly @string chunkedˢᵇᴍchunkWriter = "chunked"u8;
 // set explicitly. It's also used to set the Content-Length, if the
 // total body size was small and the handler has already finished
 // running.
-internal static void writeHeaderᴍ(ref chunkWriter cw, slice<byte> p) {
+[GoMethodBody("writeHeader")] internal static void writeHeaderᴍ(ref chunkWriter cw, slice<byte> p) {
     if (cw.wroteHeader) {
         return;
     }
@@ -1756,7 +1756,7 @@ internal static void writeStatusLine(ж<bufio.Writer> Ꮡbw, bool is11, nint cod
 
 // bodyAllowed reports whether a Write is allowed for this response type.
 // It's illegal to call this before the header has been flushed.
-internal static bool bodyAllowedᴍ(ref response w) {
+[GoMethodBody("bodyAllowed")] internal static bool bodyAllowedᴍ(ref response w) {
     if (!w.wroteHeader) {
         throw panic("net/http: bodyAllowed called before the header was written");
     }
@@ -1797,16 +1797,16 @@ internal static bool bodyAllowedᴍ(ref response w) {
 // threshold and nothing is in (2).  The answer might be mostly making
 // bufferBeforeChunkingSize smaller and having bufio's fast-paths deal
 // with this instead.
-internal static (nint n, error err) Writeᴍ(ж<response> Ꮡw, slice<byte> data) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<response> Ꮡw, slice<byte> data) {
     return Ꮡw.write(len(data), data, ""u8);
 }
 
-internal static (nint n, error err) WriteStringᴍ(ж<response> Ꮡw, @string data) {
+[GoMethodBody("WriteString")] internal static (nint n, error err) WriteStringᴍ(ж<response> Ꮡw, @string data) {
     return Ꮡw.write(len(data), default, data);
 }
 
 // either dataB or dataS is non-zero.
-internal static (nint n, error err) writeᴍ(ж<response> Ꮡw, nint lenData, slice<byte> dataB, @string dataS) {
+[GoMethodBody("write")] internal static (nint n, error err) writeᴍ(ж<response> Ꮡw, nint lenData, slice<byte> dataB, @string dataS) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.conn.hijacked()) {
@@ -1843,7 +1843,7 @@ internal static (nint n, error err) writeᴍ(ж<response> Ꮡw, nint lenData, sl
     }
 }
 
-internal static void finishRequestᴍ(ж<response> Ꮡw) {
+[GoMethodBody("finishRequest")] internal static void finishRequestᴍ(ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     Ꮡw.ᏑhandlerDone.Store(true);
@@ -1873,7 +1873,7 @@ internal static void finishRequestᴍ(ж<response> Ꮡw) {
 
 // shouldReuseConnection reports whether the underlying TCP connection can be reused.
 // It must only be called after the handler is done executing.
-internal static bool shouldReuseConnectionᴍ(ж<response> Ꮡw) {
+[GoMethodBody("shouldReuseConnection")] internal static bool shouldReuseConnectionᴍ(ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.closeAfterReply || Ꮡw.ᏑrequestBodyLimitHit.Load()) {
@@ -1901,15 +1901,15 @@ internal static bool shouldReuseConnectionᴍ(ж<response> Ꮡw) {
     return true;
 }
 
-internal static bool closedRequestBodyEarlyᴍ(ref response w) {
+[GoMethodBody("closedRequestBodyEarly")] internal static bool closedRequestBodyEarlyᴍ(ref response w) {
     return w.reqBody != nil && w.reqBody.didEarlyClose();
 }
 
-internal static void Flushᴍ(ж<response> Ꮡw) {
+[GoMethodBody("Flush")] internal static void Flushᴍ(ж<response> Ꮡw) {
     Ꮡw.FlushError();
 }
 
-internal static error FlushErrorᴍ(ж<response> Ꮡw) {
+[GoMethodBody("FlushError")] internal static error FlushErrorᴍ(ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (!w.wroteHeader) {
@@ -1925,7 +1925,7 @@ internal static error FlushErrorᴍ(ж<response> Ꮡw) {
 
 } partial class http_package {
 
-internal static void finalFlushᴍ(ref conn c) {
+[GoMethodBody("finalFlush")] internal static void finalFlushᴍ(ref conn c) {
     if (c.bufr != nil) {
         // Steal the bufio.Reader (~4KB worth of memory) and its associated
         // reader for a future connection.
@@ -1943,7 +1943,7 @@ internal static void finalFlushᴍ(ref conn c) {
 }
 
 // Close the connection.
-internal static void closeᴍ(ref conn c) {
+[GoMethodBody("close")] internal static void closeᴍ(ref conn c) {
     c.finalFlush();
     c.rwc.Close();
 }
@@ -1977,7 +1977,7 @@ internal static closeWriter _ᴛ9ʗ = new net_TCPConnжcloseWriter(((ж<net.TCPC
 // subsequent RST.
 //
 // See https://golang.org/issue/3595
-internal static void closeWriteAndWaitᴍ(ref conn c) {
+[GoMethodBody("closeWriteAndWait")] internal static void closeWriteAndWaitᴍ(ref conn c) {
     c.finalFlush();
     var (tcp, ok) = c.rwc._<closeWriter>(ᐧ); if (ok) {
         tcp.CloseWrite();
@@ -2024,7 +2024,7 @@ internal const bool skipHooks = false;
 
 } partial class http_package {
 
-internal static void setStateᴍ(ж<conn> Ꮡc, net.Conn nc, ConnState state, bool runHook) {
+[GoMethodBody("setState")] internal static void setStateᴍ(ж<conn> Ꮡc, net.Conn nc, ConnState state, bool runHook) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var srv = c.server;
@@ -2050,7 +2050,7 @@ internal static void setStateᴍ(ж<conn> Ꮡc, net.Conn nc, ConnState state, bo
     }
 }
 
-internal static (ConnState state, int64 unixSec) getStateᴍ(ж<conn> Ꮡc) {
+[GoMethodBody("getState")] internal static (ConnState state, int64 unixSec) getStateᴍ(ж<conn> Ꮡc) {
     var packedState = Ꮡc.ᏑcurState.Load();
     return ((ConnState)(nint)((packedState & 0xff)), (int64)(packedState >> 8));
 }
@@ -2071,7 +2071,7 @@ partial struct statusError {
 
 } partial class http_package {
 
-internal static @string Errorᴍ(statusError e) { return StatusText(e.code) + ": "u8 + e.text; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(statusError e) { return StatusText(e.code) + ": "u8 + e.text; }
 
 } partial class http_package {
 
@@ -2129,7 +2129,7 @@ internal static ref readonly @string publicErrᶜ1ᴍconn => ref publicErrᶜ1�
 private static readonly @string publicErrᶜ1ᵇᴍconn = "400 Bad Request"u8;
 
 // Serve a new connection.
-internal static void serveᴍ(ж<conn> Ꮡc, context.Context ctx) {
+[GoMethodBody("serve")] internal static void serveᴍ(ж<conn> Ꮡc, context.Context ctx) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -2389,9 +2389,9 @@ partial struct unencryptedHTTP2Request {
 
 } partial class http_package {
 
-internal static context.Context BaseContextᴍ(unencryptedHTTP2Request h) { return h.ctx; }
+[GoMethodBody("BaseContext")] internal static context.Context BaseContextᴍ(unencryptedHTTP2Request h) { return h.ctx; }
 
-internal static void ServeHTTPᴍ(unencryptedHTTP2Request h, ResponseWriter rw, ж<Request> Ꮡreq) {
+[GoMethodBody("ServeHTTP")] internal static void ServeHTTPᴍ(unencryptedHTTP2Request h, ResponseWriter rw, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     if (req.Body == nil) {
@@ -2414,7 +2414,7 @@ partial struct unencryptedNetConnInTLSConn {
 
 } partial class http_package {
 
-internal static net.Conn UnencryptedNetConnᴍ(unencryptedNetConnInTLSConn c) {
+[GoMethodBody("UnencryptedNetConn")] internal static net.Conn UnencryptedNetConnᴍ(unencryptedNetConnInTLSConn c) {
     return c.conn;
 }
 
@@ -2431,7 +2431,7 @@ private static readonly @string nextProtoUnencryptedHTTP2ᵇ = "unencrypted_http
 
 } partial class http_package {
 
-internal static bool maybeServeUnencryptedHTTP2ᴍ(ж<conn> Ꮡc, context.Context ctx) {
+[GoMethodBody("maybeServeUnencryptedHTTP2")] internal static bool maybeServeUnencryptedHTTP2ᴍ(ж<conn> Ꮡc, context.Context ctx) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (fn, ok) = c.server.TLSNextProto[nextProtoUnencryptedHTTP2, ꟷ];
@@ -2466,7 +2466,7 @@ private static readonly @string connectionˢᵇᴍresponse = "Connection"u8;
 internal static ref readonly @string closeˢᴍresponse => ref closeˢᵇᴍresponse;
 private static readonly @string closeˢᵇᴍresponse = "close"u8;
 
-internal static void sendExpectationFailedᴍ(ж<response> Ꮡw) {
+[GoMethodBody("sendExpectationFailed")] internal static void sendExpectationFailedᴍ(ж<response> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     // TODO(bradfitz): let ServeHTTP handlers handle
@@ -2488,7 +2488,7 @@ internal static void sendExpectationFailedᴍ(ж<response> Ꮡw) {
 
 // Hijack implements the [Hijacker.Hijack] method. Our response is both a [ResponseWriter]
 // and a [Hijacker].
-internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) Hijackᴍ(ж<response> Ꮡw) {
+[GoMethodBody("Hijack")] internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) Hijackᴍ(ж<response> Ꮡw) {
     net.Conn rwc = default;
     ж<bufio.ReadWriter> buf = default;
     error err = default;
@@ -2522,7 +2522,7 @@ internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) Hijackᴍ(ж
     return (rwc, buf, err);
 }
 
-internal static /*<-*/channel<bool> CloseNotifyᴍ(ж<response> Ꮡw) {
+[GoMethodBody("CloseNotify")] internal static /*<-*/channel<bool> CloseNotifyᴍ(ж<response> Ꮡw) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -2545,7 +2545,7 @@ internal static /*<-*/channel<bool> CloseNotifyᴍ(ж<response> Ꮡw) {
     finally { if (ᒐd1) Ꮡw.DerefOrNull().lazyCloseNotifyMu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void closeNotifyᴍ(ж<response> Ꮡw) {
+[GoMethodBody("closeNotify")] internal static void closeNotifyᴍ(ж<response> Ꮡw) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -2576,7 +2576,7 @@ public delegate void HandlerFunc(ResponseWriter _Δp0, ж<Request> _Δp1);
 } partial class http_package {
 
 // ServeHTTP calls f(w, r).
-internal static partial void ServeHTTPᴍ(HandlerFunc f, ResponseWriter w, ж<Request> r) {
+[GoMethodBody("ServeHTTP")] internal static partial void ServeHTTPᴍ(HandlerFunc f, ResponseWriter w, ж<Request> r) {
     f(w, r);
 }
 
@@ -2746,7 +2746,7 @@ partial struct redirectHandler {
 
 } partial class http_package {
 
-internal static void ServeHTTPᴍ(ref redirectHandler rh, ResponseWriter w, ж<Request> r) {
+[GoMethodBody("ServeHTTP")] internal static void ServeHTTPᴍ(ref redirectHandler rh, ResponseWriter w, ж<Request> r) {
     Redirect(w, r, rh.url, rh.code);
 }
 
@@ -2957,7 +2957,7 @@ internal static @string stripHostPort(@string h) {
 // Handler does not modify its argument. In particular, it does not
 // populate named path wildcards, so r.PathValue will always return
 // the empty string.
-internal static (Handler h, @string pattern) Handlerᴍ(ж<ServeMux> Ꮡmux, ж<Request> r) {
+[GoMethodBody("Handler")] internal static (Handler h, @string pattern) Handlerᴍ(ж<ServeMux> Ꮡmux, ж<Request> r) {
     Handler h = default;
 
     if (use121) {
@@ -2975,7 +2975,7 @@ private static readonly @string allowˢᵇᴍServeMux = "Allow"u8;
 // If there is a matching handler, it returns it and the pattern that matched.
 // Otherwise it returns a Redirect or NotFound handler with the path that would match
 // after the redirect.
-internal static (Handler h, @string patStr, ж<pattern>, slice<@string> matches) findHandlerᴍ(ж<ServeMux> Ꮡmux, ж<Request> Ꮡr) {
+[GoMethodBody("findHandler")] internal static (Handler h, @string patStr, ж<pattern>, slice<@string> matches) findHandlerᴍ(ж<ServeMux> Ꮡmux, ж<Request> Ꮡr) {
     slice<@string> matches = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -3041,7 +3041,7 @@ internal static (Handler h, @string patStr, ж<pattern>, slice<@string> matches)
 // redirection: when a path doesn't match exactly, the match is tried again
 // after appending "/" to the path. If that second match succeeds, the last
 // return value is the URL to redirect to.
-internal static (ж<routingNode>, slice<@string> matches, ж<urlpkg.URL> redirectTo) matchOrRedirectᴍ(ж<ServeMux> Ꮡmux, @string host, @string method, @string path, ж<urlpkg.URL> Ꮡu) {
+[GoMethodBody("matchOrRedirect")] internal static (ж<routingNode>, slice<@string> matches, ж<urlpkg.URL> redirectTo) matchOrRedirectᴍ(ж<ServeMux> Ꮡmux, @string host, @string method, @string path, ж<urlpkg.URL> Ꮡu) {
     ж<routingNode> _ᴛ1 = default;
     slice<@string> matches = default;
     ж<urlpkg.URL> redirectTo = default;
@@ -3135,7 +3135,7 @@ internal static bool exactMatch(ж<routingNode> Ꮡn, @string path) {
 } partial class http_package {
 
 // matchingMethods return a sorted list of all methods that would match with the given host and path.
-internal static slice<@string> matchingMethodsᴍ(ж<ServeMux> Ꮡmux, @string host, @string path) {
+[GoMethodBody("matchingMethods")] internal static slice<@string> matchingMethodsᴍ(ж<ServeMux> Ꮡmux, @string host, @string path) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3163,7 +3163,7 @@ private static readonly @string closeˢᵇᴍServeMux = "close"u8;
 
 // ServeHTTP dispatches the request to the handler whose
 // pattern most closely matches the request URL.
-internal static void ServeHTTPᴍ(ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Request> Ꮡr) {
+[GoMethodBody("ServeHTTP")] internal static void ServeHTTPᴍ(ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.RequestURI == "*"u8) {
@@ -3190,7 +3190,7 @@ internal static void ServeHTTPᴍ(ж<ServeMux> Ꮡmux, ResponseWriter w, ж<Requ
 // or if the pattern is invalid, Handle panics.
 //
 // See [ServeMux] for details on valid patterns and conflict rules.
-internal static partial void Handleᴍ(ж<ServeMux> Ꮡmux, @string pattern, Handler handler) {
+[GoMethodBody("Handle")] internal static partial void Handleᴍ(ж<ServeMux> Ꮡmux, @string pattern, Handler handler) {
     if (use121) {
         Ꮡmux.Ꮡmux121.handle(pattern, handler);
     } else {
@@ -3203,7 +3203,7 @@ internal static partial void Handleᴍ(ж<ServeMux> Ꮡmux, @string pattern, Han
 // or if the pattern is invalid, HandleFunc panics.
 //
 // See [ServeMux] for details on valid patterns and conflict rules.
-internal static partial void HandleFuncᴍ(ж<ServeMux> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
+[GoMethodBody("HandleFunc")] internal static partial void HandleFuncᴍ(ж<ServeMux> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
     if (use121) {
         Ꮡmux.Ꮡmux121.handleFunc(pattern, handler);
     } else {
@@ -3235,7 +3235,7 @@ public static partial void HandleFunc(@string pattern, Action<ResponseWriter, ж
 
 } partial class http_package {
 
-internal static partial void registerᴍ(ж<ServeMux> Ꮡmux, @string pattern, Handler handler) {
+[GoMethodBody("register")] internal static partial void registerᴍ(ж<ServeMux> Ꮡmux, @string pattern, Handler handler) {
     var err = Ꮡmux.registerErr(pattern, handler); if (err != nil) {
         throw panic(err);
     }
@@ -3249,7 +3249,7 @@ private static readonly @string httpNilHandlerˢᵇᴍServeMux = "http: nil hand
 internal static ref readonly @string unknownLocationˢᴍServeMux => ref unknownLocationˢᵇᴍServeMux;
 private static readonly @string unknownLocationˢᵇᴍServeMux = "unknown location"u8;
 
-internal static partial error registerErrᴍ(ж<ServeMux> Ꮡmux, @string patstr, Handler handler) {
+[GoMethodBody("registerErr")] internal static partial error registerErrᴍ(ж<ServeMux> Ꮡmux, @string patstr, Handler handler) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3459,7 +3459,7 @@ partial struct Server {
 //
 // Close returns any error returned from closing the [Server]'s
 // underlying Listener(s).
-internal static error Closeᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3521,7 +3521,7 @@ internal static time.Duration shutdownPollIntervalMax => /* 500 * time.Milliseco
 //
 // Once Shutdown has been called on a server, it may not be reused;
 // future calls to methods such as Serve will return ErrServerClosed.
-internal static partial error Shutdownᴍ(ж<Server> Ꮡs, context.Context ctx) {
+[GoMethodBody("Shutdown")] internal static partial error Shutdownᴍ(ж<Server> Ꮡs, context.Context ctx) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -3577,7 +3577,7 @@ internal static partial error Shutdownᴍ(ж<Server> Ꮡs, context.Context ctx) 
 // undergone ALPN protocol upgrade or that have been hijacked.
 // This function should start protocol-specific graceful shutdown,
 // but should not wait for shutdown to complete.
-internal static void RegisterOnShutdownᴍ(ж<Server> Ꮡs, Action f) {
+[GoMethodBody("RegisterOnShutdown")] internal static void RegisterOnShutdownᴍ(ж<Server> Ꮡs, Action f) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.mu.Lock();
@@ -3587,7 +3587,7 @@ internal static void RegisterOnShutdownᴍ(ж<Server> Ꮡs, Action f) {
 
 // closeIdleConns closes all idle connections and reports whether the
 // server is quiescent.
-internal static bool closeIdleConnsᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("closeIdleConns")] internal static bool closeIdleConnsᴍ(ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3619,7 +3619,7 @@ internal static bool closeIdleConnsᴍ(ж<Server> Ꮡs) {
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static error closeListenersLockedᴍ(ref Server s) {
+[GoMethodBody("closeListenersLocked")] internal static error closeListenersLockedᴍ(ref Server s) {
     error err = default;
     foreach (var (ln, _) in s.listeners) {
         var cerr = (ln.ValueSlot).Close(); if (cerr != nil && err == nil) {
@@ -3679,7 +3679,7 @@ internal static map<ConnState, @string> stateName = new map<ConnState, @string>{
 
 } partial class http_package {
 
-internal static @string Stringᴍ(ConnState c) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ConnState c) {
     return stateName[c];
 }
 
@@ -3702,7 +3702,7 @@ partial struct serverHandler {
 // See go.dev/issue/67401.
 //
 //go:linkname badServeHTTP net/http.serverHandler.ServeHTTP
-internal static void ServeHTTPᴍ(serverHandler sh, ResponseWriter rw, ж<Request> Ꮡreq) {
+[GoMethodBody("ServeHTTP")] internal static void ServeHTTPᴍ(serverHandler sh, ResponseWriter rw, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var handler = sh.srv.Handler;
@@ -3760,7 +3760,7 @@ private static readonly @string tcpˢᵇᴍServer = "tcp"u8;
 //
 // ListenAndServe always returns a non-nil error. After [Server.Shutdown] or [Server.Close],
 // the returned error is [ErrServerClosed].
-internal static error ListenAndServeᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("ListenAndServe")] internal static error ListenAndServeᴍ(ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (Ꮡs.shuttingDown()) {
@@ -3785,7 +3785,7 @@ internal static Action<ж<Server>, net.Listener> testHookServerServe; // used if
 
 // shouldConfigureHTTP2ForServe reports whether Server.Serve should configure
 // automatic HTTP/2. (which sets up the s.TLSNextProto map)
-internal static bool shouldConfigureHTTP2ForServeᴍ(ref Server s) {
+[GoMethodBody("shouldConfigureHTTP2ForServe")] internal static bool shouldConfigureHTTP2ForServeᴍ(ref Server s) {
     if (s.TLSConfig == nil) {
         // Compatibility with Go 1.6:
         // If there's no TLSConfig, it's possible that the user just
@@ -3826,7 +3826,7 @@ public static error ErrServerClosed = errors.New("http: Server closed");
 //
 // Serve always returns a non-nil error and closes l.
 // After [Server.Shutdown] or [Server.Close], the returned error is [ErrServerClosed].
-internal static partial error Serveᴍ(ж<Server> Ꮡs, net.Listener lʗp) {
+[GoMethodBody("Serve")] internal static partial error Serveᴍ(ж<Server> Ꮡs, net.Listener lʗp) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -3915,7 +3915,7 @@ internal static partial error Serveᴍ(ж<Server> Ꮡs, net.Listener lʗp) {
 //
 // ServeTLS always returns a non-nil error. After [Server.Shutdown] or [Server.Close], the
 // returned error is [ErrServerClosed].
-internal static error ServeTLSᴍ(ж<Server> Ꮡs, net.Listener l, @string certFile, @string keyFile) {
+[GoMethodBody("ServeTLS")] internal static error ServeTLSᴍ(ж<Server> Ꮡs, net.Listener l, @string certFile, @string keyFile) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Setup HTTP/2 before s.Serve, to initialize s.TLSConfig
@@ -3943,7 +3943,7 @@ internal static error ServeTLSᴍ(ж<Server> Ꮡs, net.Listener l, @string certF
     return Ꮡs.Serve(tlsListener);
 }
 
-internal static Protocols protocolsᴍ(ref Server s) {
+[GoMethodBody("protocols")] internal static Protocols protocolsᴍ(ref Server s) {
     if (s.Protocols != nil) {
         return s.Protocols.Value; // user-configured set
     }
@@ -4020,7 +4020,7 @@ internal static slice<@string> adjustNextProtos(slice<@string> nextProtos, Proto
 // Listener from another caller.
 //
 // It reports whether the server is still up (not Shutdown or Closed).
-internal static bool trackListenerᴍ(ж<Server> Ꮡs, ж<net.Listener> ln, bool add) {
+[GoMethodBody("trackListener")] internal static bool trackListenerᴍ(ж<Server> Ꮡs, ж<net.Listener> ln, bool add) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4047,7 +4047,7 @@ internal static bool trackListenerᴍ(ж<Server> Ꮡs, ж<net.Listener> ln, bool
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void trackConnᴍ(ж<Server> Ꮡs, ж<conn> c, bool add) {
+[GoMethodBody("trackConn")] internal static void trackConnᴍ(ж<Server> Ꮡs, ж<conn> c, bool add) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4068,25 +4068,25 @@ internal static void trackConnᴍ(ж<Server> Ꮡs, ж<conn> c, bool add) {
     finally { if (ᒐd1) Ꮡs.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static time.Duration idleTimeoutᴍ(ref Server s) {
+[GoMethodBody("idleTimeout")] internal static time.Duration idleTimeoutᴍ(ref Server s) {
     if (s.IdleTimeout != 0) {
         return s.IdleTimeout;
     }
     return s.ReadTimeout;
 }
 
-internal static time.Duration readHeaderTimeoutᴍ(ref Server s) {
+[GoMethodBody("readHeaderTimeout")] internal static time.Duration readHeaderTimeoutᴍ(ref Server s) {
     if (s.ReadHeaderTimeout != 0) {
         return s.ReadHeaderTimeout;
     }
     return s.ReadTimeout;
 }
 
-internal static bool doKeepAlivesᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("doKeepAlives")] internal static bool doKeepAlivesᴍ(ж<Server> Ꮡs) {
     return !Ꮡs.ᏑdisableKeepAlives.Load() && !Ꮡs.shuttingDown();
 }
 
-internal static bool shuttingDownᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("shuttingDown")] internal static bool shuttingDownᴍ(ж<Server> Ꮡs) {
     return Ꮡs.ᏑinShutdown.Load();
 }
 
@@ -4094,7 +4094,7 @@ internal static bool shuttingDownᴍ(ж<Server> Ꮡs) {
 // By default, keep-alives are always enabled. Only very
 // resource-constrained environments or servers in the process of
 // shutting down should disable them.
-internal static void SetKeepAlivesEnabledᴍ(ж<Server> Ꮡs, bool v) {
+[GoMethodBody("SetKeepAlivesEnabled")] internal static void SetKeepAlivesEnabledᴍ(ж<Server> Ꮡs, bool v) {
     if (v) {
         Ꮡs.ᏑdisableKeepAlives.Store(false);
         return;
@@ -4107,7 +4107,7 @@ internal static void SetKeepAlivesEnabledᴍ(ж<Server> Ꮡs, bool v) {
     // TODO: Issue 26303: close HTTP/2 conns as soon as they become idle.
 }
 
-internal static void logfᴍ(ref Server s, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("logf")] internal static void logfᴍ(ref Server s, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     if (s.ErrorLog != nil) {
@@ -4177,7 +4177,7 @@ private static readonly @string httpsˢ2ᵇᴍServer = ":https"u8;
 //
 // ListenAndServeTLS always returns a non-nil error. After [Server.Shutdown] or
 // [Server.Close], the returned error is [ErrServerClosed].
-internal static error ListenAndServeTLSᴍ(ж<Server> Ꮡs, @string certFile, @string keyFile) {
+[GoMethodBody("ListenAndServeTLS")] internal static error ListenAndServeTLSᴍ(ж<Server> Ꮡs, @string certFile, @string keyFile) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -4207,7 +4207,7 @@ internal static error ListenAndServeTLSᴍ(ж<Server> Ꮡs, @string certFile, @s
 // setupHTTP2_ServeTLS conditionally configures HTTP/2 on
 // s and reports whether there was an error setting it up. If it is
 // not configured for policy reasons, nil is returned.
-internal static error setupHTTP2_ServeTLSᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("setupHTTP2_ServeTLS")] internal static error setupHTTP2_ServeTLSᴍ(ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     Ꮡs.ᏑnextProtoOnce.Do(Ꮡs.onceSetNextProtoDefaults);
@@ -4222,14 +4222,14 @@ internal static error setupHTTP2_ServeTLSᴍ(ж<Server> Ꮡs) {
 // The tests named TestTransportAutomaticHTTP2* and
 // TestConcurrentServerServe in server_test.go demonstrate some
 // of the supported use cases and motivations.
-internal static error setupHTTP2_Serveᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("setupHTTP2_Serve")] internal static error setupHTTP2_Serveᴍ(ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     Ꮡs.ᏑnextProtoOnce.Do(Ꮡs.onceSetNextProtoDefaults_Serve);
     return s.nextProtoErr;
 }
 
-internal static void onceSetNextProtoDefaults_Serveᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("onceSetNextProtoDefaults_Serve")] internal static void onceSetNextProtoDefaults_Serveᴍ(ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.shouldConfigureHTTP2ForServe()) {
@@ -4246,7 +4246,7 @@ internal static ж<godebug.Setting> http2server = godebug.New("http2server");
 // onceSetNextProtoDefaults configures HTTP/2, if the user hasn't
 // configured otherwise. (by setting s.TLSNextProto non-nil)
 // It must only be called via s.nextProtoOnce (use s.setupHTTP2_*).
-internal static void onceSetNextProtoDefaultsᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("onceSetNextProtoDefaults")] internal static void onceSetNextProtoDefaultsᴍ(ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (omitBundledHTTP2) {
@@ -4310,14 +4310,14 @@ partial struct timeoutHandler {
 internal static ref readonly @string htmlHeadTitleTimeoutˢᴍtimeoutHandler => ref htmlHeadTitleTimeoutˢᵇᴍtimeoutHandler;
 private static readonly @string htmlHeadTitleTimeoutˢᵇᴍtimeoutHandler = "<html><head><title>Timeout</title></head><body><h1>Timeout</h1></body></html>"u8;
 
-internal static @string errorBodyᴍ(ref timeoutHandler h) {
+[GoMethodBody("errorBody")] internal static @string errorBodyᴍ(ref timeoutHandler h) {
     if (h.body != ""u8) {
         return h.body;
     }
     return htmlHeadTitleTimeoutˢᴍtimeoutHandler;
 }
 
-internal static partial void ServeHTTPᴍ(ж<timeoutHandler> Ꮡh, ResponseWriter w, ж<Request> Ꮡr) {
+[GoMethodBody("ServeHTTP")] internal static partial void ServeHTTPᴍ(ж<timeoutHandler> Ꮡh, ResponseWriter w, ж<Request> Ꮡr) {
     GoFrame ᒐ = default;
     try {
         ref var h = ref Ꮡh.DerefOrNull();
@@ -4419,16 +4419,16 @@ internal static Pusher _ᴛ10ʗ = new timeoutWriterжPusher(((ж<timeoutWriter>)
 } partial class http_package {
 
 // Push implements the [Pusher] interface.
-internal static error Pushᴍ(ref timeoutWriter tw, @string target, ж<PushOptions> opts) {
+[GoMethodBody("Push")] internal static error Pushᴍ(ref timeoutWriter tw, @string target, ж<PushOptions> opts) {
     var (pusher, ok) = tw.w._<Pusher>(ᐧ); if (ok) {
         return pusher.Push(target, opts);
     }
     return new ProtocolErrorжerror(ErrNotSupported);
 }
 
-internal static Header Headerᴍ(ref timeoutWriter tw) { return tw.h; }
+[GoMethodBody("Header")] internal static Header Headerᴍ(ref timeoutWriter tw) { return tw.h; }
 
-internal static (nint, error) Writeᴍ(ж<timeoutWriter> Ꮡtw, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ж<timeoutWriter> Ꮡtw, slice<byte> p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4448,7 +4448,7 @@ internal static (nint, error) Writeᴍ(ж<timeoutWriter> Ꮡtw, slice<byte> p) {
     finally { if (ᒐd1) Ꮡtw.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void writeHeaderLockedᴍ(ref timeoutWriter tw, nint code) {
+[GoMethodBody("writeHeaderLocked")] internal static void writeHeaderLockedᴍ(ref timeoutWriter tw, nint code) {
     checkWriteHeaderCode(code);
 
     switch (ᐧ) {
@@ -4469,7 +4469,7 @@ internal static void writeHeaderLockedᴍ(ref timeoutWriter tw, nint code) {
     }}
 }
 
-internal static void WriteHeaderᴍ(ж<timeoutWriter> Ꮡtw, nint code) {
+[GoMethodBody("WriteHeader")] internal static void WriteHeaderᴍ(ж<timeoutWriter> Ꮡtw, nint code) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4497,20 +4497,20 @@ partial struct onceCloseListener {
 
 // Go method set entry for the promoted 'Listener.Accept()' - provided ONLY by the embedded
 // interface field in *onceCloseListener's method set; see the pointer-only satisfaction record.
-internal static (net.Conn, error) Acceptᴍ(onceCloseListener recvᴛ) => recvᴛ.Listener.Accept();
+[GoMethodBody("Accept")] internal static (net.Conn, error) Acceptᴍ(onceCloseListener recvᴛ) => recvᴛ.Listener.Accept();
 
 // Go method set entry for the promoted 'Listener.Addr()' - provided ONLY by the embedded
 // interface field in *onceCloseListener's method set; see the pointer-only satisfaction record.
-internal static net.Addr Addrᴍ(onceCloseListener recvᴛ) => recvᴛ.Listener.Addr();
+[GoMethodBody("Addr")] internal static net.Addr Addrᴍ(onceCloseListener recvᴛ) => recvᴛ.Listener.Addr();
 
-internal static error Closeᴍ(ж<onceCloseListener> Ꮡoc) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<onceCloseListener> Ꮡoc) {
     ref var oc = ref Ꮡoc.DerefOrNull();
 
     Ꮡoc.Ꮡonce.Do(Ꮡoc.close);
     return oc.closeErr;
 }
 
-internal static void closeᴍ(ref onceCloseListener oc) { oc.closeErr = oc.Listener.Close(); }
+[GoMethodBody("close")] internal static void closeᴍ(ref onceCloseListener oc) { oc.closeErr = oc.Listener.Close(); }
 
 } partial class http_package {
 
@@ -4524,7 +4524,7 @@ partial struct globalOptionsHandler {
 internal static ref readonly @string contentLengthˢᴍglobalOptionsHandler => ref contentLengthˢᵇᴍglobalOptionsHandler;
 private static readonly @string contentLengthˢᵇᴍglobalOptionsHandler = "Content-Length"u8;
 
-internal static void ServeHTTPᴍ(globalOptionsHandler _, ResponseWriter w, ж<Request> Ꮡr) {
+[GoMethodBody("ServeHTTP")] internal static void ServeHTTPᴍ(globalOptionsHandler _, ResponseWriter w, ж<Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     w.Header().Set(contentLengthˢᴍglobalOptionsHandler, "0");
@@ -4556,9 +4556,9 @@ partial struct initALPNRequest {
 // recognized by x/net/http2 to pass down a context; the TLSNextProto
 // API predates context support so we shoehorn through the only
 // interface we have available.
-internal static context.Context BaseContextᴍ(initALPNRequest h) { return h.ctx; }
+[GoMethodBody("BaseContext")] internal static context.Context BaseContextᴍ(initALPNRequest h) { return h.ctx; }
 
-internal static void ServeHTTPᴍ(initALPNRequest h, ResponseWriter rw, ж<Request> Ꮡreq) {
+[GoMethodBody("ServeHTTP")] internal static void ServeHTTPᴍ(initALPNRequest h, ResponseWriter rw, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     if (req.TLS == nil) {
@@ -4586,23 +4586,23 @@ partial struct loggingConn {
 
 // Go method set entry for the promoted 'Conn.LocalAddr()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static net.Addr LocalAddrᴍ(loggingConn recvᴛ) => recvᴛ.Conn.LocalAddr();
+[GoMethodBody("LocalAddr")] internal static net.Addr LocalAddrᴍ(loggingConn recvᴛ) => recvᴛ.Conn.LocalAddr();
 
 // Go method set entry for the promoted 'Conn.RemoteAddr()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static net.Addr RemoteAddrᴍ(loggingConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
+[GoMethodBody("RemoteAddr")] internal static net.Addr RemoteAddrᴍ(loggingConn recvᴛ) => recvᴛ.Conn.RemoteAddr();
 
 // Go method set entry for the promoted 'Conn.SetDeadline()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static error SetDeadlineᴍ(loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetDeadline(t);
+[GoMethodBody("SetDeadline")] internal static error SetDeadlineᴍ(loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetDeadline(t);
 
 // Go method set entry for the promoted 'Conn.SetReadDeadline()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static error SetReadDeadlineᴍ(loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetReadDeadline(t);
+[GoMethodBody("SetReadDeadline")] internal static error SetReadDeadlineᴍ(loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetReadDeadline(t);
 
 // Go method set entry for the promoted 'Conn.SetWriteDeadline()' - provided ONLY by the embedded
 // interface field in *loggingConn's method set; see the pointer-only satisfaction record.
-internal static error SetWriteDeadlineᴍ(loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
+[GoMethodBody("SetWriteDeadline")] internal static error SetWriteDeadlineᴍ(loggingConn recvᴛ, time.Time t) => recvᴛ.Conn.SetWriteDeadline(t);
 
 } partial class http_package {
 
@@ -4627,7 +4627,7 @@ internal static net.Conn newLoggingConn(@string baseName, net.Conn c) {
 
 } partial class http_package {
 
-internal static (nint n, error err) Writeᴍ(ref loggingConn c, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref loggingConn c, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -4637,7 +4637,7 @@ internal static (nint n, error err) Writeᴍ(ref loggingConn c, slice<byte> p) {
     return (n, err);
 }
 
-internal static (nint n, error err) Readᴍ(ref loggingConn c, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref loggingConn c, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -4647,7 +4647,7 @@ internal static (nint n, error err) Readᴍ(ref loggingConn c, slice<byte> p) {
     return (n, err);
 }
 
-internal static error /*err*/ Closeᴍ(ref loggingConn c) {
+[GoMethodBody("Close")] internal static error /*err*/ Closeᴍ(ref loggingConn c) {
     error err = default;
 
     log.Printf("%s.Close() = ...", c.name);
@@ -4667,7 +4667,7 @@ partial struct checkConnErrorWriter {
 
 } partial class http_package {
 
-internal static (nint n, error err) Writeᴍ(checkConnErrorWriter w, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(checkConnErrorWriter w, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -4718,7 +4718,7 @@ public static Handler MaxBytesHandler(Handler h, int64 n) {
 
 } // end http_package
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
+// <GlyphForwarders> (scratch prototype: placed here, an alias of this file conflicts in package_info.cs)
 partial class httpᴛconn {
 [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hijacked(this ж<conn> Ꮡc) => http_package.hijackedᴍ(Ꮡc);
 [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (net.Conn rwc, ж<bufio.ReadWriter> buf, error err) hijackLocked(this ж<conn> Ꮡc) => http_package.hijackLockedᴍ(Ꮡc);

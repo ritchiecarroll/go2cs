@@ -121,39 +121,39 @@ partial struct Conn {
 // export the struct field too.
 
 // LocalAddr returns the local network address.
-internal static net.Addr LocalAddrᴍ(ref Conn c) {
+[GoMethodBody("LocalAddr")] internal static net.Addr LocalAddrᴍ(ref Conn c) {
     return c.conn.LocalAddr();
 }
 
 // RemoteAddr returns the remote network address.
-internal static net.Addr RemoteAddrᴍ(ref Conn c) {
+[GoMethodBody("RemoteAddr")] internal static net.Addr RemoteAddrᴍ(ref Conn c) {
     return c.conn.RemoteAddr();
 }
 
 // SetDeadline sets the read and write deadlines associated with the connection.
 // A zero value for t means [Conn.Read] and [Conn.Write] will not time out.
 // After a Write has timed out, the TLS state is corrupt and all future writes will return the same error.
-internal static error SetDeadlineᴍ(ref Conn c, time.Time t) {
+[GoMethodBody("SetDeadline")] internal static error SetDeadlineᴍ(ref Conn c, time.Time t) {
     return c.conn.SetDeadline(t);
 }
 
 // SetReadDeadline sets the read deadline on the underlying connection.
 // A zero value for t means [Conn.Read] will not time out.
-internal static error SetReadDeadlineᴍ(ref Conn c, time.Time t) {
+[GoMethodBody("SetReadDeadline")] internal static error SetReadDeadlineᴍ(ref Conn c, time.Time t) {
     return c.conn.SetReadDeadline(t);
 }
 
 // SetWriteDeadline sets the write deadline on the underlying connection.
 // A zero value for t means [Conn.Write] will not time out.
 // After a [Conn.Write] has timed out, the TLS state is corrupt and all future writes will return the same error.
-internal static error SetWriteDeadlineᴍ(ref Conn c, time.Time t) {
+[GoMethodBody("SetWriteDeadline")] internal static error SetWriteDeadlineᴍ(ref Conn c, time.Time t) {
     return c.conn.SetWriteDeadline(t);
 }
 
 // NetConn returns the underlying connection that is wrapped by c.
 // Note that writing to or reading from this connection directly will corrupt the
 // TLS session.
-internal static net.Conn NetConnᴍ(ref Conn c) {
+[GoMethodBody("NetConn")] internal static net.Conn NetConnᴍ(ref Conn c) {
     return c.conn;
 }
 
@@ -181,14 +181,14 @@ partial struct permanentError {
 
 } partial class tls_package {
 
-internal static @string Errorᴍ(ref permanentError e) { return e.err.Error(); }
-internal static error Unwrapᴍ(ref permanentError e) { return new net_Errorᴠerror(e.err); }
-internal static bool Timeoutᴍ(ref permanentError e) { return e.err.Timeout(); }
-internal static bool Temporaryᴍ(ref permanentError e) { return false; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref permanentError e) { return e.err.Error(); }
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref permanentError e) { return new net_Errorᴠerror(e.err); }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref permanentError e) { return e.err.Timeout(); }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref permanentError e) { return false; }
 
 } partial class tls_package {
 
-internal static error setErrorLockedᴍ(ref halfConn hc, error err) {
+[GoMethodBody("setErrorLocked")] internal static error setErrorLockedᴍ(ref halfConn hc, error err) {
     var (e, ok) = err._<net.Error>(ᐧ); if (ok) {
         hc.err = new permanentErrorжerror(Ꮡ(new permanentError(err: e)));
     } else {
@@ -199,7 +199,7 @@ internal static error setErrorLockedᴍ(ref halfConn hc, error err) {
 
 // prepareCipherSpec sets the encryption and MAC states
 // that a subsequent changeCipherSpec will use.
-internal static void prepareCipherSpecᴍ(ref halfConn hc, uint16 version, any cipher, hash.Hash mac) {
+[GoMethodBody("prepareCipherSpec")] internal static void prepareCipherSpecᴍ(ref halfConn hc, uint16 version, any cipher, hash.Hash mac) {
     hc.version = version;
     hc.nextCipher = cipher;
     hc.nextMac = mac;
@@ -207,7 +207,7 @@ internal static void prepareCipherSpecᴍ(ref halfConn hc, uint16 version, any c
 
 // changeCipherSpec changes the encryption and MAC states
 // to the ones previously passed to prepareCipherSpec.
-internal static error changeCipherSpecᴍ(ref halfConn hc) {
+[GoMethodBody("changeCipherSpec")] internal static error changeCipherSpecᴍ(ref halfConn hc) {
     if (hc.nextCipher == nil || hc.version == VersionTLS13) {
         return alertInternalError;
     }
@@ -222,7 +222,7 @@ internal static error changeCipherSpecᴍ(ref halfConn hc) {
 // setTrafficSecret sets the traffic secret for the given encryption level. setTrafficSecret
 // should not be called directly, but rather through the Conn setWriteTrafficSecret and
 // setReadTrafficSecret wrapper methods.
-internal static void setTrafficSecretᴍ(ref halfConn hc, ж<cipherSuiteTLS13> Ꮡsuite, QUICEncryptionLevel level, slice<byte> secret) {
+[GoMethodBody("setTrafficSecret")] internal static void setTrafficSecretᴍ(ref halfConn hc, ж<cipherSuiteTLS13> Ꮡsuite, QUICEncryptionLevel level, slice<byte> secret) {
     ref var suite = ref Ꮡsuite.DerefOrNull();
 
     hc.trafficSecret = secret;
@@ -233,7 +233,7 @@ internal static void setTrafficSecretᴍ(ref halfConn hc, ж<cipherSuiteTLS13> �
 }
 
 // incSeq increments the sequence number.
-internal static void incSeqᴍ(ref halfConn hc) {
+[GoMethodBody("incSeq")] internal static void incSeqᴍ(ref halfConn hc) {
     for (nint i = 7; i >= 0; i--) {
         hc.seq[i]++;
         if (hc.seq[i] != 0) {
@@ -250,7 +250,7 @@ internal static void incSeqᴍ(ref halfConn hc) {
 // explicitNonceLen returns the number of bytes of explicit nonce or IV included
 // in each record. Explicit nonces are present only in CBC modes after TLS 1.0
 // and in certain AEAD modes in TLS 1.2.
-internal static nint explicitNonceLenᴍ(ref halfConn hc) {
+[GoMethodBody("explicitNonceLen")] internal static nint explicitNonceLenᴍ(ref halfConn hc) {
     if (hc.cipher == nil) {
         return 0;
     }
@@ -346,7 +346,7 @@ partial interface cbcMode :
 
 // decrypt authenticates and decrypts the record if protection is active at
 // this stage. The returned plaintext might overlap with the input.
-internal static (slice<byte>, recordType, error) decryptᴍ(ref halfConn hc, slice<byte> record) {
+[GoMethodBody("decrypt")] internal static (slice<byte>, recordType, error) decryptᴍ(ref halfConn hc, slice<byte> record) {
     slice<byte> plaintext = default;
     var typ = (recordType)record[0];
     var payload = record[(int)(recordHeaderLen)..];
@@ -501,7 +501,7 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 
 // encrypt encrypts payload, adding the appropriate nonce and/or MAC, and
 // appends it to record, which must already contain the record header.
-internal static (slice<byte>, error) encryptᴍ(ref halfConn hc, slice<byte> record, slice<byte> payload, io.Reader rand) {
+[GoMethodBody("encrypt")] internal static (slice<byte>, error) encryptᴍ(ref halfConn hc, slice<byte> record, slice<byte> payload, io.Reader rand) {
     if (hc.cipher == nil) {
         return (appendꓸꓸꓸ(record, payload), default);
     }
@@ -612,7 +612,7 @@ partial struct RecordHeaderError {
 
 } partial class tls_package {
 
-internal static @string Errorᴍ(RecordHeaderError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(RecordHeaderError e) {
     e = e.ΔClone();
 
     return "tls: "u8 + e.Msg;
@@ -620,7 +620,7 @@ internal static @string Errorᴍ(RecordHeaderError e) {
 
 } partial class tls_package {
 
-internal static RecordHeaderError /*err*/ newRecordHeaderErrorᴍ(ref Conn c, net.Conn conn, @string msg) {
+[GoMethodBody("newRecordHeaderError")] internal static RecordHeaderError /*err*/ newRecordHeaderErrorᴍ(ref Conn c, net.Conn conn, @string msg) {
     RecordHeaderError err = new();
 
     err.Msg = msg;
@@ -629,11 +629,11 @@ internal static RecordHeaderError /*err*/ newRecordHeaderErrorᴍ(ref Conn c, ne
     return err.ΔClone();
 }
 
-internal static error readRecordᴍ(ж<Conn> Ꮡc) {
+[GoMethodBody("readRecord")] internal static error readRecordᴍ(ж<Conn> Ꮡc) {
     return Ꮡc.readRecordOrCCS(false);
 }
 
-internal static error readChangeCipherSpecᴍ(ж<Conn> Ꮡc) {
+[GoMethodBody("readChangeCipherSpec")] internal static error readChangeCipherSpecᴍ(ж<Conn> Ꮡc) {
     return Ꮡc.readRecordOrCCS(true);
 }
 
@@ -661,7 +661,7 @@ private static readonly @string firstRecordDoesNotLookˢᵇᴍConn = "first reco
 //   - c.hand grows
 //   - c.input is set
 //   - an error is returned
-internal static error readRecordOrCCSᴍ(ж<Conn> Ꮡc, bool expectChangeCipherSpec) {
+[GoMethodBody("readRecordOrCCS")] internal static error readRecordOrCCSᴍ(ж<Conn> Ꮡc, bool expectChangeCipherSpec) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.@in.err != nil) {
@@ -858,7 +858,7 @@ private static readonly @string tlsTooManyIgnoredRecordsˢᵇᴍConn = "tls: too
 
 // retryReadRecord recurs into readRecordOrCCS to drop a non-advancing record, like
 // a warning alert, empty application_data, or a change_cipher_spec in TLS 1.3.
-internal static error retryReadRecordᴍ(ж<Conn> Ꮡc, bool expectChangeCipherSpec) {
+[GoMethodBody("retryReadRecord")] internal static error retryReadRecordᴍ(ж<Conn> Ꮡc, bool expectChangeCipherSpec) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.retryCount++;
@@ -881,7 +881,7 @@ partial struct atLeastReader {
 
 } partial class tls_package {
 
-internal static (nint, error) Readᴍ(ref atLeastReader r, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref atLeastReader r, slice<byte> p) {
     if (r.N <= 0) {
         return (0, io.EOF);
     }
@@ -900,7 +900,7 @@ internal static (nint, error) Readᴍ(ref atLeastReader r, slice<byte> p) {
 
 // readFromUntil reads from r into c.rawInput until c.rawInput contains
 // at least n bytes or else returns an error.
-internal static error readFromUntilᴍ(ref Conn c, io.Reader r, nint n) {
+[GoMethodBody("readFromUntil")] internal static error readFromUntilᴍ(ref Conn c, io.Reader r, nint n) {
     if (c.rawInput.Len() >= n) {
         return default;
     }
@@ -914,7 +914,7 @@ internal static error readFromUntilᴍ(ref Conn c, io.Reader r, nint n) {
 }
 
 // sendAlertLocked sends a TLS alert message.
-internal static error sendAlertLockedᴍ(ж<Conn> Ꮡc, alert err) {
+[GoMethodBody("sendAlertLocked")] internal static error sendAlertLockedᴍ(ж<Conn> Ꮡc, alert err) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.quic != nil) {
@@ -942,7 +942,7 @@ internal static error sendAlertLockedᴍ(ж<Conn> Ꮡc, alert err) {
 }
 
 // sendAlert sends a TLS alert message.
-internal static error sendAlertᴍ(ж<Conn> Ꮡc, alert err) {
+[GoMethodBody("sendAlert")] internal static error sendAlertᴍ(ж<Conn> Ꮡc, alert err) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -986,7 +986,7 @@ internal static UntypedInt recordSizeBoostThreshold => /* 128 * 1024 */ 131072;
 //
 // In the interests of simplicity and determinism, this code does not attempt
 // to reset the record size once the connection is idle, however.
-internal static nint maxPayloadSizeForWriteᴍ(ref Conn c, recordType typ) {
+[GoMethodBody("maxPayloadSizeForWrite")] internal static nint maxPayloadSizeForWriteᴍ(ref Conn c, recordType typ) {
     if (c.config.DynamicRecordSizingDisabled || typ != recordTypeApplicationData) {
         return maxPlaintext;
     }
@@ -1041,7 +1041,7 @@ internal static nint maxPayloadSizeForWriteᴍ(ref Conn c, recordType typ) {
     return n;
 }
 
-internal static (nint, error) writeᴍ(ref Conn c, slice<byte> data) {
+[GoMethodBody("write")] internal static (nint, error) writeᴍ(ref Conn c, slice<byte> data) {
     if (c.buffering) {
         c.sendBuf = appendꓸꓸꓸ(c.sendBuf, data);
         return (len(data), default);
@@ -1052,7 +1052,7 @@ internal static (nint, error) writeᴍ(ref Conn c, slice<byte> data) {
     return (n, err);
 }
 
-internal static (nint, error) flushᴍ(ref Conn c) {
+[GoMethodBody("flush")] internal static (nint, error) flushᴍ(ref Conn c) {
     if (len(c.sendBuf) == 0) {
         return (0, default);
     }
@@ -1080,7 +1080,7 @@ private static readonly @string tlsInternalErrorSendingˢᵇᴍConn = "tls: inte
 
 // writeRecordLocked writes a TLS record with the given type and payload to the
 // connection and updates the record layer state.
-internal static (nint, error) writeRecordLockedᴍ(ж<Conn> Ꮡc, recordType typ, slice<byte> data) {
+[GoMethodBody("writeRecordLocked")] internal static (nint, error) writeRecordLockedᴍ(ж<Conn> Ꮡc, recordType typ, slice<byte> data) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -1162,7 +1162,7 @@ internal static (nint, error) writeRecordLockedᴍ(ж<Conn> Ꮡc, recordType typ
 // writeHandshakeRecord writes a handshake message to the connection and updates
 // the record layer state. If transcript is non-nil the marshaled message is
 // written to it.
-internal static (nint, error) writeHandshakeRecordᴍ(ж<Conn> Ꮡc, handshakeMessage msg, transcriptHash transcript) {
+[GoMethodBody("writeHandshakeRecord")] internal static (nint, error) writeHandshakeRecordᴍ(ж<Conn> Ꮡc, handshakeMessage msg, transcriptHash transcript) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1185,7 +1185,7 @@ internal static (nint, error) writeHandshakeRecordᴍ(ж<Conn> Ꮡc, handshakeMe
 
 // writeChangeCipherRecord writes a ChangeCipherSpec message to the connection and
 // updates the record layer state.
-internal static error writeChangeCipherRecordᴍ(ж<Conn> Ꮡc) {
+[GoMethodBody("writeChangeCipherRecord")] internal static error writeChangeCipherRecordᴍ(ж<Conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1199,7 +1199,7 @@ internal static error writeChangeCipherRecordᴍ(ж<Conn> Ꮡc) {
 }
 
 // readHandshakeBytes reads handshake data until c.hand contains at least n bytes.
-internal static error readHandshakeBytesᴍ(ж<Conn> Ꮡc, nint n) {
+[GoMethodBody("readHandshakeBytes")] internal static error readHandshakeBytesᴍ(ж<Conn> Ꮡc, nint n) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.quic != nil) {
@@ -1216,7 +1216,7 @@ internal static error readHandshakeBytesᴍ(ж<Conn> Ꮡc, nint n) {
 // readHandshake reads the next handshake message from
 // the record layer. If transcript is non-nil, the message
 // is written to the passed transcriptHash.
-internal static (any, error) readHandshakeᴍ(ж<Conn> Ꮡc, transcriptHash transcript) {
+[GoMethodBody("readHandshake")] internal static (any, error) readHandshakeᴍ(ж<Conn> Ꮡc, transcriptHash transcript) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
@@ -1251,7 +1251,7 @@ internal static (any, error) readHandshakeᴍ(ж<Conn> Ꮡc, transcriptHash tran
     return Ꮡc.unmarshalHandshakeMessage(data, transcript);
 }
 
-internal static (handshakeMessage, error) unmarshalHandshakeMessageᴍ(ж<Conn> Ꮡc, slice<byte> data, transcriptHash transcript) {
+[GoMethodBody("unmarshalHandshakeMessage")] internal static (handshakeMessage, error) unmarshalHandshakeMessageᴍ(ж<Conn> Ꮡc, slice<byte> data, transcriptHash transcript) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     handshakeMessage m = default;
@@ -1364,7 +1364,7 @@ internal static error errShutdown = errors.New("tls: protocol is shutdown");
 // must be set for both [Conn.Read] and Write before Write is called when the handshake
 // has not yet completed. See [Conn.SetDeadline], [Conn.SetReadDeadline], and
 // [Conn.SetWriteDeadline].
-internal static (nint, error) Writeᴍ(ж<Conn> Ꮡc, slice<byte> b) {
+[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ж<Conn> Ꮡc, slice<byte> b) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -1434,7 +1434,7 @@ internal static ref readonly @string tlsUnknownRenegotiationˢᴍConn => ref tls
 private static readonly @string tlsUnknownRenegotiationˢᵇᴍConn = "tls: unknown Renegotiation value"u8;
 
 // handleRenegotiation processes a HelloRequest handshake message.
-internal static error handleRenegotiationᴍ(ж<Conn> Ꮡc) {
+[GoMethodBody("handleRenegotiation")] internal static error handleRenegotiationᴍ(ж<Conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1497,7 +1497,7 @@ private static readonly @string tlsTooManyNonAdvancingˢᵇᴍConn = "tls: too m
 
 // handlePostHandshakeMessage processes a handshake message arrived after the
 // handshake is complete. Up to TLS 1.2, it indicates the start of a renegotiation.
-internal static error handlePostHandshakeMessageᴍ(ж<Conn> Ꮡc) {
+[GoMethodBody("handlePostHandshakeMessage")] internal static error handlePostHandshakeMessageᴍ(ж<Conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.vers != VersionTLS13) {
@@ -1533,7 +1533,7 @@ internal static error handlePostHandshakeMessageᴍ(ж<Conn> Ꮡc) {
 internal static ref readonly @string tlsReceivedUnexpectedKeyˢᴍConn => ref tlsReceivedUnexpectedKeyˢᵇᴍConn;
 private static readonly @string tlsReceivedUnexpectedKeyˢᵇᴍConn = "tls: received unexpected key update message"u8;
 
-internal static error handleKeyUpdateᴍ(ж<Conn> Ꮡc, ж<keyUpdateMsg> ᏑkeyUpdate) {
+[GoMethodBody("handleKeyUpdate")] internal static error handleKeyUpdateᴍ(ж<Conn> Ꮡc, ж<keyUpdateMsg> ᏑkeyUpdate) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1589,7 +1589,7 @@ internal static error handleKeyUpdateᴍ(ж<Conn> Ꮡc, ж<keyUpdateMsg> ᏑkeyU
 // must be set for both Read and [Conn.Write] before Read is called when the handshake
 // has not yet completed. See [Conn.SetDeadline], [Conn.SetReadDeadline], and
 // [Conn.SetWriteDeadline].
-internal static (nint, error) Readᴍ(ж<Conn> Ꮡc, slice<byte> b) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ж<Conn> Ꮡc, slice<byte> b) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1644,7 +1644,7 @@ internal static (nint, error) Readᴍ(ж<Conn> Ꮡc, slice<byte> b) {
 }
 
 // Close closes the connection.
-internal static error Closeᴍ(ж<Conn> Ꮡc) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<Conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Interlock with Conn.Write above.
@@ -1692,7 +1692,7 @@ internal static error errEarlyCloseWrite = errors.New("tls: CloseWrite called be
 // CloseWrite shuts down the writing side of the connection. It should only be
 // called once the handshake has completed and does not call CloseWrite on the
 // underlying connection. Most callers should just use [Conn.Close].
-internal static error CloseWriteᴍ(ж<Conn> Ꮡc) {
+[GoMethodBody("CloseWrite")] internal static error CloseWriteᴍ(ж<Conn> Ꮡc) {
     if (!Ꮡc.ᏑisHandshakeComplete.Load()) {
         return errEarlyCloseWrite;
     }
@@ -1700,7 +1700,7 @@ internal static error CloseWriteᴍ(ж<Conn> Ꮡc) {
     return Ꮡc.closeNotify();
 }
 
-internal static error closeNotifyᴍ(ж<Conn> Ꮡc) {
+[GoMethodBody("closeNotify")] internal static error closeNotifyᴍ(ж<Conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1736,7 +1736,7 @@ internal static error closeNotifyᴍ(ж<Conn> Ꮡc) {
 // in certificates sent by either the TLS server or client is limited to 8192
 // bits. This limit can be overridden by setting tlsmaxrsasize in the GODEBUG
 // environment variable (e.g. GODEBUG=tlsmaxrsasize=4096).
-internal static error Handshakeᴍ(ж<Conn> Ꮡc) {
+[GoMethodBody("Handshake")] internal static error Handshakeᴍ(ж<Conn> Ꮡc) {
     return Ꮡc.HandshakeContext(context.Background());
 }
 
@@ -1750,7 +1750,7 @@ internal static error Handshakeᴍ(ж<Conn> Ꮡc) {
 //
 // Most uses of this package need not call HandshakeContext explicitly: the
 // first [Conn.Read] or [Conn.Write] will call it automatically.
-internal static error HandshakeContextᴍ(ж<Conn> Ꮡc, context.Context ctx) {
+[GoMethodBody("HandshakeContext")] internal static error HandshakeContextᴍ(ж<Conn> Ꮡc, context.Context ctx) {
     // Delegate to unexported method for named return
     // without confusing documented signature.
     return Ꮡc.handshakeContext(ctx);
@@ -1760,7 +1760,7 @@ internal static error HandshakeContextᴍ(ж<Conn> Ꮡc, context.Context ctx) {
 internal static ref readonly @string tlsInternalErrorˢ4ᴍConn => ref tlsInternalErrorˢ4ᵇᴍConn;
 private static readonly @string tlsInternalErrorˢ4ᵇᴍConn = "tls: internal error: handshake should have had a result"u8;
 
-internal static error /*ret*/ handshakeContextᴍ(ж<Conn> Ꮡc, context.Context ctx) {
+[GoMethodBody("handshakeContext")] internal static error /*ret*/ handshakeContextᴍ(ж<Conn> Ꮡc, context.Context ctx) {
     error ret = default;
     GoFrame ᒐ = default;
     try {
@@ -1862,7 +1862,7 @@ internal static error /*ret*/ handshakeContextᴍ(ж<Conn> Ꮡc, context.Context
 }
 
 // ConnectionState returns basic TLS details about the connection.
-internal static ConnectionState ConnectionStateᴍ(ж<Conn> Ꮡc) {
+[GoMethodBody("ConnectionState")] internal static ConnectionState ConnectionStateᴍ(ж<Conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1882,7 +1882,7 @@ internal static ж<godebug.Setting> tlsunsafeekm = godebug.New("tlsunsafeekm");
 
 } partial class tls_package {
 
-internal static ConnectionState connectionStateLockedᴍ(ж<Conn> Ꮡc) {
+[GoMethodBody("connectionStateLocked")] internal static ConnectionState connectionStateLockedᴍ(ж<Conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     ConnectionState state = default;
@@ -1926,7 +1926,7 @@ internal static ConnectionState connectionStateLockedᴍ(ж<Conn> Ꮡc) {
 
 // OCSPResponse returns the stapled OCSP response from the TLS server, if
 // any. (Only valid for client connections.)
-internal static slice<byte> OCSPResponseᴍ(ж<Conn> Ꮡc) {
+[GoMethodBody("OCSPResponse")] internal static slice<byte> OCSPResponseᴍ(ж<Conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1952,7 +1952,7 @@ private static readonly @string tlsHandshakeDidNotVerifyˢᵇᴍConn = "tls: han
 // VerifyHostname checks that the peer certificate chain is valid for
 // connecting to host. If so, it returns nil; if not, it returns an error
 // describing the problem.
-internal static error VerifyHostnameᴍ(ж<Conn> Ꮡc, @string host) {
+[GoMethodBody("VerifyHostname")] internal static error VerifyHostnameᴍ(ж<Conn> Ꮡc, @string host) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1982,7 +1982,7 @@ private static readonly @string tlsHandshakeBufferNotˢᵇᴍConn = "tls: handsh
 // setReadTrafficSecret sets the read traffic secret for the given encryption level. If
 // being called at the same time as setWriteTrafficSecret, the caller must ensure the call
 // to setWriteTrafficSecret happens first so any alerts are sent at the write level.
-internal static error setReadTrafficSecretᴍ(ж<Conn> Ꮡc, ж<cipherSuiteTLS13> suite, QUICEncryptionLevel level, slice<byte> secret, bool locked) {
+[GoMethodBody("setReadTrafficSecret")] internal static error setReadTrafficSecretᴍ(ж<Conn> Ꮡc, ж<cipherSuiteTLS13> suite, QUICEncryptionLevel level, slice<byte> secret, bool locked) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Ensure that there are no buffered handshake messages before changing the
@@ -2003,75 +2003,8 @@ internal static error setReadTrafficSecretᴍ(ж<Conn> Ꮡc, ж<cipherSuiteTLS13
 // setWriteTrafficSecret sets the write traffic secret for the given encryption level. If
 // being called at the same time as setReadTrafficSecret, the caller must ensure the call
 // to setWriteTrafficSecret happens first so any alerts are sent at the write level.
-internal static void setWriteTrafficSecretᴍ(ref Conn c, ж<cipherSuiteTLS13> suite, QUICEncryptionLevel level, slice<byte> secret) {
+[GoMethodBody("setWriteTrafficSecret")] internal static void setWriteTrafficSecretᴍ(ref Conn c, ж<cipherSuiteTLS13> suite, QUICEncryptionLevel level, slice<byte> secret) {
     c.@out.setTrafficSecret(suite, level, secret);
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tlsᴛConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static net.Addr LocalAddr(this ref Conn c) => tls_package.LocalAddrᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static net.Addr RemoteAddr(this ref Conn c) => tls_package.RemoteAddrᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetDeadline(this ref Conn c, time.Time t) => tls_package.SetDeadlineᴍ(ref c, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetReadDeadline(this ref Conn c, time.Time t) => tls_package.SetReadDeadlineᴍ(ref c, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetWriteDeadline(this ref Conn c, time.Time t) => tls_package.SetWriteDeadlineᴍ(ref c, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static net.Conn NetConn(this ref Conn c) => tls_package.NetConnᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static RecordHeaderError /*err*/ newRecordHeaderError(this ref Conn c, net.Conn conn, @string msg) => tls_package.newRecordHeaderErrorᴍ(ref c, conn, msg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readRecord(this ж<Conn> Ꮡc) => tls_package.readRecordᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readChangeCipherSpec(this ж<Conn> Ꮡc) => tls_package.readChangeCipherSpecᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readRecordOrCCS(this ж<Conn> Ꮡc, bool expectChangeCipherSpec) => tls_package.readRecordOrCCSᴍ(Ꮡc, expectChangeCipherSpec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error retryReadRecord(this ж<Conn> Ꮡc, bool expectChangeCipherSpec) => tls_package.retryReadRecordᴍ(Ꮡc, expectChangeCipherSpec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readFromUntil(this ref Conn c, io.Reader r, nint n) => tls_package.readFromUntilᴍ(ref c, r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error sendAlertLocked(this ж<Conn> Ꮡc, alert err) => tls_package.sendAlertLockedᴍ(Ꮡc, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error sendAlert(this ж<Conn> Ꮡc, alert err) => tls_package.sendAlertᴍ(Ꮡc, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint maxPayloadSizeForWrite(this ref Conn c, recordType typ) => tls_package.maxPayloadSizeForWriteᴍ(ref c, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) write(this ref Conn c, slice<byte> data) => tls_package.writeᴍ(ref c, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) flush(this ref Conn c) => tls_package.flushᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) writeRecordLocked(this ж<Conn> Ꮡc, recordType typ, slice<byte> data) => tls_package.writeRecordLockedᴍ(Ꮡc, typ, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) writeHandshakeRecord(this ж<Conn> Ꮡc, handshakeMessage msg, transcriptHash transcript) => tls_package.writeHandshakeRecordᴍ(Ꮡc, msg, transcript);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeChangeCipherRecord(this ж<Conn> Ꮡc) => tls_package.writeChangeCipherRecordᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readHandshakeBytes(this ж<Conn> Ꮡc, nint n) => tls_package.readHandshakeBytesᴍ(Ꮡc, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (any, error) readHandshake(this ж<Conn> Ꮡc, transcriptHash transcript) => tls_package.readHandshakeᴍ(Ꮡc, transcript);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (handshakeMessage, error) unmarshalHandshakeMessage(this ж<Conn> Ꮡc, slice<byte> data, transcriptHash transcript) => tls_package.unmarshalHandshakeMessageᴍ(Ꮡc, data, transcript);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Write(this ж<Conn> Ꮡc, slice<byte> b) => tls_package.Writeᴍ(Ꮡc, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error handleRenegotiation(this ж<Conn> Ꮡc) => tls_package.handleRenegotiationᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error handlePostHandshakeMessage(this ж<Conn> Ꮡc) => tls_package.handlePostHandshakeMessageᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error handleKeyUpdate(this ж<Conn> Ꮡc, ж<keyUpdateMsg> ᏑkeyUpdate) => tls_package.handleKeyUpdateᴍ(Ꮡc, ᏑkeyUpdate);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Read(this ж<Conn> Ꮡc, slice<byte> b) => tls_package.Readᴍ(Ꮡc, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<Conn> Ꮡc) => tls_package.Closeᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CloseWrite(this ж<Conn> Ꮡc) => tls_package.CloseWriteᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error closeNotify(this ж<Conn> Ꮡc) => tls_package.closeNotifyᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Handshake(this ж<Conn> Ꮡc) => tls_package.Handshakeᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error HandshakeContext(this ж<Conn> Ꮡc, context.Context ctx) => tls_package.HandshakeContextᴍ(Ꮡc, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*ret*/ handshakeContext(this ж<Conn> Ꮡc, context.Context ctx) => tls_package.handshakeContextᴍ(Ꮡc, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ConnectionState ConnectionState(this ж<Conn> Ꮡc) => tls_package.ConnectionStateᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ConnectionState connectionStateLocked(this ж<Conn> Ꮡc) => tls_package.connectionStateLockedᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> OCSPResponse(this ж<Conn> Ꮡc) => tls_package.OCSPResponseᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error VerifyHostname(this ж<Conn> Ꮡc, @string host) => tls_package.VerifyHostnameᴍ(Ꮡc, host);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error setReadTrafficSecret(this ж<Conn> Ꮡc, ж<cipherSuiteTLS13> suite, QUICEncryptionLevel level, slice<byte> secret, bool locked) => tls_package.setReadTrafficSecretᴍ(Ꮡc, suite, level, secret, locked);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setWriteTrafficSecret(this ref Conn c, ж<cipherSuiteTLS13> suite, QUICEncryptionLevel level, slice<byte> secret) => tls_package.setWriteTrafficSecretᴍ(ref c, suite, level, secret);
-}
-partial class tlsᴛpermanentError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref permanentError e) => tls_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Unwrap(this ref permanentError e) => tls_package.Unwrapᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Timeout(this ref permanentError e) => tls_package.Timeoutᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Temporary(this ref permanentError e) => tls_package.Temporaryᴍ(ref e);
-}
-partial class tlsᴛhalfConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error setErrorLocked(this ref halfConn hc, error err) => tls_package.setErrorLockedᴍ(ref hc, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void prepareCipherSpec(this ref halfConn hc, uint16 version, any cipher, hash.Hash mac) => tls_package.prepareCipherSpecᴍ(ref hc, version, cipher, mac);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error changeCipherSpec(this ref halfConn hc) => tls_package.changeCipherSpecᴍ(ref hc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setTrafficSecret(this ref halfConn hc, ж<cipherSuiteTLS13> Ꮡsuite, QUICEncryptionLevel level, slice<byte> secret) => tls_package.setTrafficSecretᴍ(ref hc, Ꮡsuite, level, secret);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void incSeq(this ref halfConn hc) => tls_package.incSeqᴍ(ref hc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint explicitNonceLen(this ref halfConn hc) => tls_package.explicitNonceLenᴍ(ref hc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, recordType, error) decrypt(this ref halfConn hc, slice<byte> record) => tls_package.decryptᴍ(ref hc, record);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) encrypt(this ref halfConn hc, slice<byte> record, slice<byte> payload, io.Reader rand) => tls_package.encryptᴍ(ref hc, record, payload, rand);
-}
-partial class tlsᴛRecordHeaderError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this RecordHeaderError e) => tls_package.Errorᴍ(e);
-}
-partial class tlsᴛatLeastReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref atLeastReader r, slice<byte> p) => tls_package.Readᴍ(ref r, p);
-}
-// </GlyphForwarders>

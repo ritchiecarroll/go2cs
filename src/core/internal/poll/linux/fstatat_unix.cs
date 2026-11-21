@@ -13,7 +13,7 @@ partial class poll_package {
 
 } partial class poll_package {
 
-internal static error Fstatatᴍ(ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t> s, nint flags) {
+[GoMethodBody("Fstatat")] internal static error Fstatatᴍ(ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t> s, nint flags) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -28,9 +28,3 @@ internal static error Fstatatᴍ(ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Fstatat(this ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t> s, nint flags) => poll_package.Fstatatᴍ(Ꮡfd, name, s, flags);
-}
-// </GlyphForwarders>

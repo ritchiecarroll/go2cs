@@ -40,7 +40,7 @@ partial struct errorReader {
 
 } partial class http_package {
 
-internal static (nint n, error err) Readᴍ(errorReader r, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(errorReader r, slice<byte> p) {
     return (0, r.err);
 }
 
@@ -53,7 +53,7 @@ partial struct byteReader {
 
 } partial class http_package {
 
-internal static (nint n, error err) Readᴍ(ref byteReader br, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref byteReader br, slice<byte> p) {
     if (br.done) {
         return (0, io.EOF);
     }
@@ -185,7 +185,7 @@ internal static (ж<transferWriter> t, error err) newTransferWriter(any r) {
 // a non-nil content-less ReadCloser (the more common case). In that more
 // common case, we act as if their Body were nil instead, and don't send
 // a body.
-internal static bool shouldSendChunkedRequestBodyᴍ(ж<transferWriter> Ꮡt) {
+[GoMethodBody("shouldSendChunkedRequestBody")] internal static bool shouldSendChunkedRequestBodyᴍ(ж<transferWriter> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Note that t.ContentLength is the corrected content length
@@ -225,7 +225,7 @@ internal static bool shouldSendChunkedRequestBodyᴍ(ж<transferWriter> Ꮡt) {
 //
 // In other words, this delay will not normally affect anybody, and there
 // are workarounds if it does.
-internal static partial void probeRequestBodyᴍ(ж<transferWriter> Ꮡt) {
+[GoMethodBody("probeRequestBody")] internal static partial void probeRequestBodyᴍ(ж<transferWriter> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.ByteReadCh = new channel<readResult>(1);
@@ -282,7 +282,7 @@ internal static bool noResponseBodyExpected(@string requestMethod) {
 
 } partial class http_package {
 
-internal static bool shouldSendContentLengthᴍ(ref transferWriter t) {
+[GoMethodBody("shouldSendContentLength")] internal static bool shouldSendContentLengthᴍ(ref transferWriter t) {
     if (chunked(t.TransferEncoding)) {
         return false;
     }
@@ -326,7 +326,7 @@ private static readonly @string invalidTrailerKeyˢᵇᴍtransferWriter = "inval
 internal static ref readonly @string trailerˢᴍtransferWriter => ref trailerˢᵇᴍtransferWriter;
 private static readonly @string trailerˢᵇᴍtransferWriter = "Trailer"u8;
 
-internal static error writeHeaderᴍ(ref transferWriter t, io.Writer w, ж<httptrace.ClientTrace> Ꮡtrace) {
+[GoMethodBody("writeHeader")] internal static error writeHeaderᴍ(ref transferWriter t, io.Writer w, ж<httptrace.ClientTrace> Ꮡtrace) {
     ref var trace = ref Ꮡtrace.DerefOrNull();
 
     if (t.Close && !hasToken(t.Header.get(connectionˢᴍtransferWriter), closeˢᴍtransferWriter)) {
@@ -394,7 +394,7 @@ internal static error writeHeaderᴍ(ref transferWriter t, io.Writer w, ж<httpt
 }
 
 // always closes t.BodyCloser
-internal static error /*err*/ writeBodyᴍ(ж<transferWriter> Ꮡt, io.Writer w) {
+[GoMethodBody("writeBody")] internal static error /*err*/ writeBodyᴍ(ж<transferWriter> Ꮡt, io.Writer w) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -477,7 +477,7 @@ internal static error /*err*/ writeBodyᴍ(ж<transferWriter> Ꮡt, io.Writer w)
 // being saved in bodyReadError.
 //
 // This function is only intended for use in writeBody.
-internal static (int64 n, error err) doBodyCopyᴍ(ж<transferWriter> Ꮡt, io.Writer dst, io.Reader src) {
+[GoMethodBody("doBodyCopy")] internal static (int64 n, error err) doBodyCopyᴍ(ж<transferWriter> Ꮡt, io.Writer dst, io.Reader src) {
     int64 n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -502,7 +502,7 @@ internal static (int64 n, error err) doBodyCopyᴍ(ж<transferWriter> Ꮡt, io.W
 // files (*os.File types) are properly optimized.
 //
 // This function is only intended for use in writeBody.
-internal static io.Reader unwrapBodyᴍ(ref transferWriter t) {
+[GoMethodBody("unwrapBody")] internal static io.Reader unwrapBodyᴍ(ref transferWriter t) {
     {
         var (r, ok) = unwrapNopCloser(t.Body); if (ok) {
             return r;
@@ -536,7 +536,7 @@ partial struct transferReader {
 
 } partial class http_package {
 
-internal static bool protoAtLeastᴍ(ref transferReader t, nint m, nint n) {
+[GoMethodBody("protoAtLeast")] internal static bool protoAtLeastᴍ(ref transferReader t, nint m, nint n) {
     return t.ProtoMajor > m || (t.ProtoMajor == m && t.ProtoMinor >= n);
 }
 
@@ -724,7 +724,7 @@ partial struct unsupportedTEError {
 
 } partial class http_package {
 
-internal static @string Errorᴍ(ref unsupportedTEError uste) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref unsupportedTEError uste) {
     return uste.err;
 }
 
@@ -746,7 +746,7 @@ internal static ref readonly @string chunkedˢᴍtransferReader => ref chunkedˢ
 private static readonly @string chunkedˢᵇᴍtransferReader = "chunked"u8;
 
 // parseTransferEncoding sets t.Chunked based on the Transfer-Encoding header.
-internal static error parseTransferEncodingᴍ(ref transferReader t) {
+[GoMethodBody("parseTransferEncoding")] internal static error parseTransferEncodingᴍ(ref transferReader t) {
     var (raw, present) = t.Header[transferEncodingˢᴍtransferReader, ꟷ];
     if (!present) {
         return default;
@@ -964,7 +964,7 @@ public static error ErrBodyReadAfterClose = errors.New("http: invalid Read on cl
 
 } partial class http_package {
 
-internal static (nint n, error err) Readᴍ(ж<body> Ꮡb, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ж<body> Ꮡb, slice<byte> p) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -987,7 +987,7 @@ internal static (nint n, error err) Readᴍ(ж<body> Ꮡb, slice<byte> p) {
 }
 
 // Must hold b.mu.
-internal static (nint n, error err) readLockedᴍ(ref body b, slice<byte> p) {
+[GoMethodBody("readLocked")] internal static (nint n, error err) readLockedᴍ(ref body b, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -1068,7 +1068,7 @@ internal static error errTrailerEOF = errors.New("http: unexpected EOF reading t
 internal static ref readonly @string httpSuspiciouslyLongˢᴍbody => ref httpSuspiciouslyLongˢᵇᴍbody;
 private static readonly @string httpSuspiciouslyLongˢᵇᴍbody = "http: suspiciously long trailer after chunked body"u8;
 
-internal static error readTrailerᴍ(ref body b) {
+[GoMethodBody("readTrailer")] internal static error readTrailerᴍ(ref body b) {
     // The common case, since nobody uses trailers.
     var (buf, err) = b.r.Peek(2);
     if (bytes.Equal(buf, singleCRLF)) {
@@ -1128,14 +1128,14 @@ internal static void mergeSetHeader(ref Header dst, Header src) {
 // unreadDataSizeLocked returns the number of bytes of unread input.
 // It returns -1 if unknown.
 // b.mu must be held.
-internal static int64 unreadDataSizeLockedᴍ(ref body b) {
+[GoMethodBody("unreadDataSizeLocked")] internal static int64 unreadDataSizeLockedᴍ(ref body b) {
     var (lr, ok) = b.src._<ж<io.LimitedReader>>(ᐧ); if (ok) {
         return lr.N;
     }
     return -1;
 }
 
-internal static error Closeᴍ(ж<body> Ꮡb) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<body> Ꮡb) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1196,7 +1196,7 @@ internal static error Closeᴍ(ж<body> Ꮡb) {
     finally { if (ᒐd1) Ꮡb.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static bool didEarlyCloseᴍ(ж<body> Ꮡb) {
+[GoMethodBody("didEarlyClose")] internal static bool didEarlyCloseᴍ(ж<body> Ꮡb) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1212,7 +1212,7 @@ internal static bool didEarlyCloseᴍ(ж<body> Ꮡb) {
 
 // bodyRemains reports whether future Read calls might
 // yield data.
-internal static bool bodyRemainsᴍ(ж<body> Ꮡb) {
+[GoMethodBody("bodyRemains")] internal static bool bodyRemainsᴍ(ж<body> Ꮡb) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1229,7 +1229,7 @@ internal static bool bodyRemainsᴍ(ж<body> Ꮡb) {
     finally { if (ᒐd1) Ꮡb.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void registerOnHitEOFᴍ(ж<body> Ꮡb, Action fn) {
+[GoMethodBody("registerOnHitEOF")] internal static void registerOnHitEOFᴍ(ж<body> Ꮡb, Action fn) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1256,7 +1256,7 @@ partial struct bodyLocked {
 
 } partial class http_package {
 
-internal static (nint n, error err) Readᴍ(bodyLocked bl, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(bodyLocked bl, slice<byte> p) {
     if (bl.b.closed) {
         return (0, ErrBodyReadAfterClose);
     }
@@ -1306,7 +1306,7 @@ partial struct finishAsyncByteRead {
 
 } partial class http_package {
 
-internal static (nint n, error err) Readᴍ(finishAsyncByteRead fr, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(finishAsyncByteRead fr, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -1372,7 +1372,7 @@ partial struct bufioFlushWriter {
 
 } partial class http_package {
 
-internal static (nint n, error err) Writeᴍ(bufioFlushWriter fw, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(bufioFlushWriter fw, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -1387,47 +1387,3 @@ internal static (nint n, error err) Writeᴍ(bufioFlushWriter fw, slice<byte> p)
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httpᴛerrorReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this errorReader r, slice<byte> p) => http_package.Readᴍ(r, p);
-}
-partial class httpᴛbyteReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref byteReader br, slice<byte> p) => http_package.Readᴍ(ref br, p);
-}
-partial class httpᴛtransferWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool shouldSendChunkedRequestBody(this ж<transferWriter> Ꮡt) => http_package.shouldSendChunkedRequestBodyᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void probeRequestBody(this ж<transferWriter> Ꮡt) => http_package.probeRequestBodyᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool shouldSendContentLength(this ref transferWriter t) => http_package.shouldSendContentLengthᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeHeader(this ref transferWriter t, io.Writer w, ж<httptrace.ClientTrace> Ꮡtrace) => http_package.writeHeaderᴍ(ref t, w, Ꮡtrace);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ writeBody(this ж<transferWriter> Ꮡt, io.Writer w) => http_package.writeBodyᴍ(Ꮡt, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 n, error err) doBodyCopy(this ж<transferWriter> Ꮡt, io.Writer dst, io.Reader src) => http_package.doBodyCopyᴍ(Ꮡt, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static io.Reader unwrapBody(this ref transferWriter t) => http_package.unwrapBodyᴍ(ref t);
-}
-partial class httpᴛtransferReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool protoAtLeast(this ref transferReader t, nint m, nint n) => http_package.protoAtLeastᴍ(ref t, m, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseTransferEncoding(this ref transferReader t) => http_package.parseTransferEncodingᴍ(ref t);
-}
-partial class httpᴛunsupportedTEError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref unsupportedTEError uste) => http_package.Errorᴍ(ref uste);
-}
-partial class httpᴛbody {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ж<body> Ꮡb, slice<byte> p) => http_package.Readᴍ(Ꮡb, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) readLocked(this ref body b, slice<byte> p) => http_package.readLockedᴍ(ref b, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readTrailer(this ref body b) => http_package.readTrailerᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 unreadDataSizeLocked(this ref body b) => http_package.unreadDataSizeLockedᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<body> Ꮡb) => http_package.Closeᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool didEarlyClose(this ж<body> Ꮡb) => http_package.didEarlyCloseᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool bodyRemains(this ж<body> Ꮡb) => http_package.bodyRemainsᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void registerOnHitEOF(this ж<body> Ꮡb, Action fn) => http_package.registerOnHitEOFᴍ(Ꮡb, fn);
-}
-partial class httpᴛbodyLocked {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this bodyLocked bl, slice<byte> p) => http_package.Readᴍ(bl, p);
-}
-partial class httpᴛfinishAsyncByteRead {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this finishAsyncByteRead fr, slice<byte> p) => http_package.Readᴍ(fr, p);
-}
-partial class httpᴛbufioFlushWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this bufioFlushWriter fw, slice<byte> p) => http_package.Writeᴍ(fw, p);
-}
-// </GlyphForwarders>

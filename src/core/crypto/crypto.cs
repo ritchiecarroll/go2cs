@@ -47,7 +47,7 @@ partial struct Hash /*num:nuint*/;
 } partial class crypto_package {
 
 // HashFunc simply returns the value of h so that [Hash] implements [SignerOpts].
-internal static Hash HashFuncᴍ(Hash h) {
+[GoMethodBody("HashFunc")] internal static Hash HashFuncᴍ(Hash h) {
     return h;
 }
 
@@ -91,7 +91,7 @@ private static readonly @string blake2b384ˢᵇᴍHash = "BLAKE2b-384"u8;
 private static ref readonly @string blake2b512ˢᴍHash => ref blake2b512ˢᵇᴍHash;
 private static readonly @string blake2b512ˢᵇᴍHash = "BLAKE2b-512"u8;
 
-internal static @string Stringᴍ(Hash h) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Hash h) {
     switch (h) {
     case var ᴛ when ᴛ == MD4: {
         return md4ˢᴍHash;
@@ -205,7 +205,7 @@ internal static Hash maxHash => 20;
 // Size returns the length, in bytes, of a digest resulting from the given hash
 // function. It doesn't require that the hash function in question be linked
 // into the program.
-internal static nint Sizeᴍ(Hash h) {
+[GoMethodBody("Size")] internal static nint Sizeᴍ(Hash h) {
     if (h > 0 && h < maxHash) {
         return (nint)digestSizes[h];
     }
@@ -220,7 +220,7 @@ internal static slice<Func<hash.Hash>> hashes = new slice<Func<hash.Hash>>((nint
 
 // New returns a new hash.Hash calculating the given hash function. New panics
 // if the hash function is not linked into the binary.
-internal static hash.Hash Newᴍ(Hash h) {
+[GoMethodBody("New")] internal static hash.Hash Newᴍ(Hash h) {
     if (h > 0 && h < maxHash) {
         var f = hashes[h];
         if (f != nil) {
@@ -231,7 +231,7 @@ internal static hash.Hash Newᴍ(Hash h) {
 }
 
 // Available reports whether the given hash function is linked into the binary.
-internal static bool Availableᴍ(Hash h) {
+[GoMethodBody("Available")] internal static bool Availableᴍ(Hash h) {
     return h < maxHash && hashes[h] != nil;
 }
 
@@ -342,13 +342,3 @@ partial interface Encapsulator {
 }
 
 } // end crypto_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class cryptoᴛHash {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Hash HashFunc(this Hash h) => crypto_package.HashFuncᴍ(h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Hash h) => crypto_package.Stringᴍ(h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Size(this Hash h) => crypto_package.Sizeᴍ(h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static hash.Hash New(this Hash h) => crypto_package.Newᴍ(h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Available(this Hash h) => crypto_package.Availableᴍ(h);
-}
-// </GlyphForwarders>

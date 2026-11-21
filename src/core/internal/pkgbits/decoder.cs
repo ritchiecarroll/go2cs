@@ -59,10 +59,10 @@ partial struct PkgDecoder {
 // PkgPath returns the package path for the package
 //
 // TODO(mdempsky): Remove; unneeded since CL 391014.
-internal static @string PkgPathᴍ(ref PkgDecoder pr) { return pr.pkgPath; }
+[GoMethodBody("PkgPath")] internal static @string PkgPathᴍ(ref PkgDecoder pr) { return pr.pkgPath; }
 
 // SyncMarkers reports whether pr uses sync markers.
-internal static bool SyncMarkersᴍ(ref PkgDecoder pr) { return pr.sync; }
+[GoMethodBody("SyncMarkers")] internal static bool SyncMarkersᴍ(ref PkgDecoder pr) { return pr.sync; }
 
 } partial class pkgbits_package {
 
@@ -112,7 +112,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 } partial class pkgbits_package {
 
 // NumElems returns the number of elements in section k.
-internal static nint NumElemsᴍ(ref PkgDecoder pr, SectionKind k) {
+[GoMethodBody("NumElems")] internal static nint NumElemsᴍ(ref PkgDecoder pr, SectionKind k) {
     nint count = (nint)pr.elemEndsEnds[k];
     if (k > 0) {
         count -= (nint)pr.elemEndsEnds[k - 1];
@@ -121,12 +121,12 @@ internal static nint NumElemsᴍ(ref PkgDecoder pr, SectionKind k) {
 }
 
 // TotalElems returns the total number of elements across all sections.
-internal static nint TotalElemsᴍ(ref PkgDecoder pr) {
+[GoMethodBody("TotalElems")] internal static nint TotalElemsᴍ(ref PkgDecoder pr) {
     return len(pr.elemEnds);
 }
 
 // Fingerprint returns the package fingerprint.
-internal static array<byte> Fingerprintᴍ(ref PkgDecoder pr) {
+[GoMethodBody("Fingerprint")] internal static array<byte> Fingerprintᴍ(ref PkgDecoder pr) {
     array<byte> fp = new(8);
     copy(fp[..], pr.elemData.slice(len(pr.elemData) - 8));
     return fp.Clone();
@@ -134,7 +134,7 @@ internal static array<byte> Fingerprintᴍ(ref PkgDecoder pr) {
 
 // AbsIdx returns the absolute index for the given (section, index)
 // pair.
-internal static nint AbsIdxᴍ(ref PkgDecoder pr, SectionKind k, RelElemIdx idx) {
+[GoMethodBody("AbsIdx")] internal static nint AbsIdxᴍ(ref PkgDecoder pr, SectionKind k, RelElemIdx idx) {
     nint absIdx = (nint)idx;
     if (k > 0) {
         absIdx += (nint)pr.elemEndsEnds[k - 1];
@@ -147,7 +147,7 @@ internal static nint AbsIdxᴍ(ref PkgDecoder pr, SectionKind k, RelElemIdx idx)
 
 // DataIdx returns the raw element bitstream for the given (section,
 // index) pair.
-internal static @string DataIdxᴍ(ref PkgDecoder pr, SectionKind k, RelElemIdx idx) {
+[GoMethodBody("DataIdx")] internal static @string DataIdxᴍ(ref PkgDecoder pr, SectionKind k, RelElemIdx idx) {
     nint absIdx = pr.AbsIdx(k, idx);
 
     uint32 start = default;
@@ -160,13 +160,13 @@ internal static @string DataIdxᴍ(ref PkgDecoder pr, SectionKind k, RelElemIdx 
 }
 
 // StringIdx returns the string value for the given string index.
-internal static @string StringIdxᴍ(ref PkgDecoder pr, RelElemIdx idx) {
+[GoMethodBody("StringIdx")] internal static @string StringIdxᴍ(ref PkgDecoder pr, RelElemIdx idx) {
     return pr.DataIdx(SectionString, idx);
 }
 
 // NewDecoder returns a Decoder for the given (section, index) pair,
 // and decodes the given SyncMarker from the element bitstream.
-internal static Decoder NewDecoderᴍ(ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) {
+[GoMethodBody("NewDecoder")] internal static Decoder NewDecoderᴍ(ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) {
     ref var r = ref heap<Decoder>(Ꮡpr.NewDecoderRaw(k, idx), out var Ꮡr);
     Ꮡr.Sync(marker);
     return r;
@@ -176,13 +176,13 @@ internal static Decoder NewDecoderᴍ(ж<PkgDecoder> Ꮡpr, SectionKind k, RelEl
 // and decodes the given SyncMarker from the element bitstream.
 // If possible the Decoder should be RetireDecoder'd when it is no longer
 // needed, this will avoid heap allocations.
-internal static Decoder TempDecoderᴍ(ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) {
+[GoMethodBody("TempDecoder")] internal static Decoder TempDecoderᴍ(ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) {
     ref var r = ref heap<Decoder>(Ꮡpr.TempDecoderRaw(k, idx), out var Ꮡr);
     Ꮡr.Sync(marker);
     return r;
 }
 
-internal static void RetireDecoderᴍ(ref PkgDecoder pr, ж<Decoder> Ꮡd) {
+[GoMethodBody("RetireDecoder")] internal static void RetireDecoderᴍ(ref PkgDecoder pr, ж<Decoder> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     pr.scratchRelocEnt = d.Relocs;
@@ -192,7 +192,7 @@ internal static void RetireDecoderᴍ(ref PkgDecoder pr, ж<Decoder> Ꮡd) {
 // NewDecoderRaw returns a Decoder for the given (section, index) pair.
 //
 // Most callers should use NewDecoder instead.
-internal static Decoder NewDecoderRawᴍ(ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) {
+[GoMethodBody("NewDecoderRaw")] internal static Decoder NewDecoderRawᴍ(ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     ref var r = ref heap<Decoder>(new Decoder(
@@ -212,7 +212,7 @@ internal static Decoder NewDecoderRawᴍ(ж<PkgDecoder> Ꮡpr, SectionKind k, Re
     return r;
 }
 
-internal static Decoder TempDecoderRawᴍ(ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) {
+[GoMethodBody("TempDecoderRaw")] internal static Decoder TempDecoderRawᴍ(ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     ref var r = ref heap<Decoder>(new Decoder(
@@ -252,13 +252,13 @@ partial struct Decoder {
 
 } partial class pkgbits_package {
 
-internal static void checkErrᴍ(ref Decoder r, error err) {
+[GoMethodBody("checkErr")] internal static void checkErrᴍ(ref Decoder r, error err) {
     if (err != nil) {
         panicf("unexpected decoding error: %w", err);
     }
 }
 
-internal static uint64 rawUvarintᴍ(ж<Decoder> Ꮡr) {
+[GoMethodBody("rawUvarint")] internal static uint64 rawUvarintᴍ(ж<Decoder> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var (x, err) = readUvarint(Ꮡr.ᏑData);
@@ -300,7 +300,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 
 } partial class pkgbits_package {
 
-internal static int64 rawVarintᴍ(ж<Decoder> Ꮡr) {
+[GoMethodBody("rawVarint")] internal static int64 rawVarintᴍ(ж<Decoder> Ꮡr) {
     var ux = Ꮡr.rawUvarint();
 
     // Zig-zag decode.
@@ -311,7 +311,7 @@ internal static int64 rawVarintᴍ(ж<Decoder> Ꮡr) {
     return x;
 }
 
-internal static RelElemIdx rawRelocᴍ(ref Decoder r, SectionKind k, nint idx) {
+[GoMethodBody("rawReloc")] internal static RelElemIdx rawRelocᴍ(ref Decoder r, SectionKind k, nint idx) {
     var e = r.Relocs[idx];
     assert(e.Kind == k);
     return e.Idx;
@@ -321,7 +321,7 @@ internal static RelElemIdx rawRelocᴍ(ref Decoder r, SectionKind k, nint idx) {
 // that it matches the expected marker.
 //
 // If EnableSync is false, then Sync is a no-op.
-internal static partial void Syncᴍ(ж<Decoder> Ꮡr, SyncMarker mWant) {
+[GoMethodBody("Sync")] internal static partial void Syncᴍ(ж<Decoder> Ꮡr, SyncMarker mWant) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (!r.common.sync) {
@@ -379,7 +379,7 @@ internal static partial void Syncᴍ(ж<Decoder> Ꮡr, SyncMarker mWant) {
 }
 
 // Bool decodes and returns a bool value from the element bitstream.
-internal static bool Boolᴍ(ж<Decoder> Ꮡr) {
+[GoMethodBody("Bool")] internal static bool Boolᴍ(ж<Decoder> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Sync(SyncBool);
@@ -390,19 +390,19 @@ internal static bool Boolᴍ(ж<Decoder> Ꮡr) {
 }
 
 // Int64 decodes and returns an int64 value from the element bitstream.
-internal static int64 Int64ᴍ(ж<Decoder> Ꮡr) {
+[GoMethodBody("Int64")] internal static int64 Int64ᴍ(ж<Decoder> Ꮡr) {
     Ꮡr.Sync(SyncInt64);
     return Ꮡr.rawVarint();
 }
 
 // Uint64 decodes and returns a uint64 value from the element bitstream.
-internal static uint64 Uint64ᴍ(ж<Decoder> Ꮡr) {
+[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(ж<Decoder> Ꮡr) {
     Ꮡr.Sync(SyncUint64);
     return Ꮡr.rawUvarint();
 }
 
 // Len decodes and returns a non-negative int value from the element bitstream.
-internal static nint Lenᴍ(ж<Decoder> Ꮡr) {
+[GoMethodBody("Len")] internal static nint Lenᴍ(ж<Decoder> Ꮡr) {
     var x = Ꮡr.Uint64();
     nint v = (nint)x;
     assert((uint64)v == x);
@@ -410,7 +410,7 @@ internal static nint Lenᴍ(ж<Decoder> Ꮡr) {
 }
 
 // Int decodes and returns an int value from the element bitstream.
-internal static nint Intᴍ(ж<Decoder> Ꮡr) {
+[GoMethodBody("Int")] internal static nint Intᴍ(ж<Decoder> Ꮡr) {
     var x = Ꮡr.Int64();
     nint v = (nint)x;
     assert((int64)v == x);
@@ -418,7 +418,7 @@ internal static nint Intᴍ(ж<Decoder> Ꮡr) {
 }
 
 // Uint decodes and returns a uint value from the element bitstream.
-internal static nuint Uintᴍ(ж<Decoder> Ꮡr) {
+[GoMethodBody("Uint")] internal static nuint Uintᴍ(ж<Decoder> Ꮡr) {
     var x = Ꮡr.Uint64();
     nuint v = (nuint)x;
     assert((uint64)v == x);
@@ -432,14 +432,14 @@ internal static nuint Uintᴍ(ж<Decoder> Ꮡr) {
 // TODO(mdempsky): Ideally this method would have signature "Code[T
 // Code] T" instead, but we don't allow generic methods and the
 // compiler can't depend on generics yet anyway.
-internal static nint Codeᴍ(ж<Decoder> Ꮡr, SyncMarker mark) {
+[GoMethodBody("Code")] internal static nint Codeᴍ(ж<Decoder> Ꮡr, SyncMarker mark) {
     Ꮡr.Sync(mark);
     return Ꮡr.Len();
 }
 
 // Reloc decodes a relocation of expected section k from the element
 // bitstream and returns an index to the referenced element.
-internal static RelElemIdx Relocᴍ(ж<Decoder> Ꮡr, SectionKind k) {
+[GoMethodBody("Reloc")] internal static RelElemIdx Relocᴍ(ж<Decoder> Ꮡr, SectionKind k) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Sync(SyncUseReloc);
@@ -448,7 +448,7 @@ internal static RelElemIdx Relocᴍ(ж<Decoder> Ꮡr, SectionKind k) {
 
 // String decodes and returns a string value from the element
 // bitstream.
-internal static @string Stringᴍ(ж<Decoder> Ꮡr) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<Decoder> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Sync(SyncString);
@@ -457,7 +457,7 @@ internal static @string Stringᴍ(ж<Decoder> Ꮡr) {
 
 // Strings decodes and returns a variable-length slice of strings from
 // the element bitstream.
-internal static slice<@string> Stringsᴍ(ж<Decoder> Ꮡr) {
+[GoMethodBody("Strings")] internal static slice<@string> Stringsᴍ(ж<Decoder> Ꮡr) {
     var res = new slice<@string>(Ꮡr.Len());
     foreach (var i in range(len(res))) {
         res[i] = Ꮡr.String();
@@ -467,7 +467,7 @@ internal static slice<@string> Stringsᴍ(ж<Decoder> Ꮡr) {
 
 // Value decodes and returns a constant.Value from the element
 // bitstream.
-internal static constant.Value Valueᴍ(ж<Decoder> Ꮡr) {
+[GoMethodBody("Value")] internal static constant.Value Valueᴍ(ж<Decoder> Ꮡr) {
     Ꮡr.Sync(SyncValue);
     var isComplex = Ꮡr.Bool();
     var val = Ꮡr.scalar();
@@ -477,7 +477,7 @@ internal static constant.Value Valueᴍ(ж<Decoder> Ꮡr) {
     return val;
 }
 
-internal static constant.Value scalarᴍ(ж<Decoder> Ꮡr) {
+[GoMethodBody("scalar")] internal static constant.Value scalarᴍ(ж<Decoder> Ꮡr) {
     CodeVal tag = (CodeVal)Ꮡr.Code(SyncVal);
     switch (tag) {
     default: {
@@ -506,7 +506,7 @@ internal static constant.Value scalarᴍ(ж<Decoder> Ꮡr) {
     }}
 }
 
-internal static ж<big.Int> bigIntᴍ(ж<Decoder> Ꮡr) {
+[GoMethodBody("bigInt")] internal static ж<big.Int> bigIntᴍ(ж<Decoder> Ꮡr) {
     var v = @new<big.Int>().SetBytes(slice<byte>(Ꮡr.String()));
     if (Ꮡr.Bool()) {
         v.Neg(v);
@@ -514,7 +514,7 @@ internal static ж<big.Int> bigIntᴍ(ж<Decoder> Ꮡr) {
     return v;
 }
 
-internal static ж<big.Float> bigFloatᴍ(ж<Decoder> Ꮡr) {
+[GoMethodBody("bigFloat")] internal static ж<big.Float> bigFloatᴍ(ж<Decoder> Ꮡr) {
     var v = @new<big.Float>().SetPrec(512);
     assert(v.UnmarshalText(slice<byte>(Ꮡr.String())) == nil);
     return v;
@@ -528,7 +528,7 @@ internal static ж<big.Float> bigFloatᴍ(ж<Decoder> Ꮡr) {
 
 // PeekPkgPath returns the package path for the specified package
 // index.
-internal static @string PeekPkgPathᴍ(ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
+[GoMethodBody("PeekPkgPath")] internal static @string PeekPkgPathᴍ(ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     @string path = default;
@@ -545,7 +545,7 @@ internal static @string PeekPkgPathᴍ(ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
 
 // PeekObj returns the package path, object name, and CodeObj for the
 // specified object index.
-internal static (@string, @string, CodeObj) PeekObjᴍ(ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
+[GoMethodBody("PeekObj")] internal static (@string, @string, CodeObj) PeekObjᴍ(ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     RelElemIdx ridx = default;
@@ -572,48 +572,6 @@ internal static (@string, @string, CodeObj) PeekObjᴍ(ж<PkgDecoder> Ꮡpr, Rel
 } partial class pkgbits_package {
 
 // Version reports the version of the bitstream.
-internal static Version Versionᴍ(ref Decoder w) { return w.common.version; }
+[GoMethodBody("Version")] internal static Version Versionᴍ(ref Decoder w) { return w.common.version; }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class pkgbitsᴛPkgDecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string PkgPath(this ref PkgDecoder pr) => pkgbits_package.PkgPathᴍ(ref pr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool SyncMarkers(this ref PkgDecoder pr) => pkgbits_package.SyncMarkersᴍ(ref pr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumElems(this ref PkgDecoder pr, SectionKind k) => pkgbits_package.NumElemsᴍ(ref pr, k);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint TotalElems(this ref PkgDecoder pr) => pkgbits_package.TotalElemsᴍ(ref pr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static array<byte> Fingerprint(this ref PkgDecoder pr) => pkgbits_package.Fingerprintᴍ(ref pr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint AbsIdx(this ref PkgDecoder pr, SectionKind k, RelElemIdx idx) => pkgbits_package.AbsIdxᴍ(ref pr, k, idx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string DataIdx(this ref PkgDecoder pr, SectionKind k, RelElemIdx idx) => pkgbits_package.DataIdxᴍ(ref pr, k, idx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string StringIdx(this ref PkgDecoder pr, RelElemIdx idx) => pkgbits_package.StringIdxᴍ(ref pr, idx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Decoder NewDecoder(this ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) => pkgbits_package.NewDecoderᴍ(Ꮡpr, k, idx, marker);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Decoder TempDecoder(this ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) => pkgbits_package.TempDecoderᴍ(Ꮡpr, k, idx, marker);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void RetireDecoder(this ref PkgDecoder pr, ж<Decoder> Ꮡd) => pkgbits_package.RetireDecoderᴍ(ref pr, Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Decoder NewDecoderRaw(this ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) => pkgbits_package.NewDecoderRawᴍ(Ꮡpr, k, idx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Decoder TempDecoderRaw(this ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) => pkgbits_package.TempDecoderRawᴍ(Ꮡpr, k, idx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string PeekPkgPath(this ж<PkgDecoder> Ꮡpr, RelElemIdx idx) => pkgbits_package.PeekPkgPathᴍ(Ꮡpr, idx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, @string, CodeObj) PeekObj(this ж<PkgDecoder> Ꮡpr, RelElemIdx idx) => pkgbits_package.PeekObjᴍ(Ꮡpr, idx);
-}
-partial class pkgbitsᴛDecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkErr(this ref Decoder r, error err) => pkgbits_package.checkErrᴍ(ref r, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 rawUvarint(this ж<Decoder> Ꮡr) => pkgbits_package.rawUvarintᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 rawVarint(this ж<Decoder> Ꮡr) => pkgbits_package.rawVarintᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static RelElemIdx rawReloc(this ref Decoder r, SectionKind k, nint idx) => pkgbits_package.rawRelocᴍ(ref r, k, idx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Sync(this ж<Decoder> Ꮡr, SyncMarker mWant) => pkgbits_package.Syncᴍ(Ꮡr, mWant);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Bool(this ж<Decoder> Ꮡr) => pkgbits_package.Boolᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Int64(this ж<Decoder> Ꮡr) => pkgbits_package.Int64ᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Uint64(this ж<Decoder> Ꮡr) => pkgbits_package.Uint64ᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ж<Decoder> Ꮡr) => pkgbits_package.Lenᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Int(this ж<Decoder> Ꮡr) => pkgbits_package.Intᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nuint Uint(this ж<Decoder> Ꮡr) => pkgbits_package.Uintᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Code(this ж<Decoder> Ꮡr, SyncMarker mark) => pkgbits_package.Codeᴍ(Ꮡr, mark);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static RelElemIdx Reloc(this ж<Decoder> Ꮡr, SectionKind k) => pkgbits_package.Relocᴍ(Ꮡr, k);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Decoder> Ꮡr) => pkgbits_package.Stringᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> Strings(this ж<Decoder> Ꮡr) => pkgbits_package.Stringsᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static constant.Value Value(this ж<Decoder> Ꮡr) => pkgbits_package.Valueᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static constant.Value scalar(this ж<Decoder> Ꮡr) => pkgbits_package.scalarᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<big.Int> bigInt(this ж<Decoder> Ꮡr) => pkgbits_package.bigIntᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<big.Float> bigFloat(this ж<Decoder> Ꮡr) => pkgbits_package.bigFloatᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Version Version(this ref Decoder w) => pkgbits_package.Versionᴍ(ref w);
-}
-// </GlyphForwarders>

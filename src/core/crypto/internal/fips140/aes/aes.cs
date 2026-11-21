@@ -48,7 +48,7 @@ internal static UntypedInt aes256Rounds => 14;
 } partial class aes_package {
 
 // roundKeysSize returns the number of uint32 of c.end or c.dec that are used.
-internal static nint roundKeysSizeᴍ(ref blockExpanded b) {
+[GoMethodBody("roundKeysSize")] internal static nint roundKeysSizeᴍ(ref blockExpanded b) {
     return (b.rounds + 1) * (128 / 32);
 }
 
@@ -58,7 +58,7 @@ partial struct KeySizeError /*num:nint*/;
 
 } partial class aes_package {
 
-internal static @string Errorᴍ(KeySizeError k) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(KeySizeError k) {
     return "crypto/aes: invalid key size "u8 + strconv.Itoa((nint)k);
 }
 
@@ -108,9 +108,9 @@ internal static void newBlockExpanded(ж<blockExpanded> Ꮡc, slice<byte> key) {
 
 } partial class aes_package {
 
-internal static nint BlockSizeᴍ(ref Block c) { return aes.BlockSize; }
+[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref Block c) { return aes.BlockSize; }
 
-internal static void Encryptᴍ(ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) {
+[GoMethodBody("Encrypt")] internal static void Encryptᴍ(ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) {
     // AES-ECB is not approved in FIPS 140-3 mode.
     fips140.RecordNonApproved();
     if (len(src) < aes.BlockSize) {
@@ -125,7 +125,7 @@ internal static void Encryptᴍ(ж<Block> Ꮡc, slice<byte> dst, slice<byte> src
     encryptBlock(ref (Ꮡc).DerefOrNull(), dst, src);
 }
 
-internal static void Decryptᴍ(ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) {
+[GoMethodBody("Decrypt")] internal static void Decryptᴍ(ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) {
     // AES-ECB is not approved in FIPS 140-3 mode.
     fips140.RecordNonApproved();
     if (len(src) < aes.BlockSize) {
@@ -150,17 +150,3 @@ public static void EncryptBlockInternal(ж<Block> c, slice<byte> dst, slice<byte
 }
 
 } // end aes_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class aesᴛblockExpanded {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint roundKeysSize(this ref blockExpanded b) => aes_package.roundKeysSizeᴍ(ref b);
-}
-partial class aesᴛKeySizeError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this KeySizeError k) => aes_package.Errorᴍ(k);
-}
-partial class aesᴛBlock {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint BlockSize(this ref Block c) => aes_package.BlockSizeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Encrypt(this ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.Encryptᴍ(Ꮡc, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Decrypt(this ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.Decryptᴍ(Ꮡc, dst, src);
-}
-// </GlyphForwarders>

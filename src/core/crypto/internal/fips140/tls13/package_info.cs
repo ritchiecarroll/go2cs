@@ -62,6 +62,15 @@ using static go.crypto.@internal.fips140.tls13_package;
 
 namespace go.crypto.@internal.fips140;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using hkdf = go.crypto.@internal.fips140.hkdf_package;
+using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
+using hash = hash_package;
+using go.crypto.@internal.fips140;
+using go.crypto.@internal.fips140deps;
+using static tls13_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("tls13")]
 public static partial class tls13_package
 {
@@ -107,3 +116,26 @@ public static partial class tls13_package
 [GoMethodHost(typeof(tls13_package.HandshakeSecret)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tls13ᴛHandshakeSecret;
 [GoMethodHost(typeof(tls13_package.MasterSecret)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tls13ᴛMasterSecret;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class tls13ᴛEarlySecret {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> ResumptionBinderKey(this ref EarlySecret s) => tls13_package.ResumptionBinderKeyᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> ClientEarlyTrafficSecret(this ref EarlySecret s, hash.Hash transcript) => tls13_package.ClientEarlyTrafficSecretᴍ(ref s, transcript);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<HandshakeSecret> HandshakeSecret(this ref EarlySecret s, slice<byte> sharedSecret) => tls13_package.HandshakeSecretᴍ(ref s, sharedSecret);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<ExporterMasterSecret> EarlyExporterMasterSecret(this ref EarlySecret s, hash.Hash transcript) => tls13_package.EarlyExporterMasterSecretᴍ(ref s, transcript);
+}
+partial class tls13ᴛHandshakeSecret {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> ClientHandshakeTrafficSecret(this ref HandshakeSecret s, hash.Hash transcript) => tls13_package.ClientHandshakeTrafficSecretᴍ(ref s, transcript);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> ServerHandshakeTrafficSecret(this ref HandshakeSecret s, hash.Hash transcript) => tls13_package.ServerHandshakeTrafficSecretᴍ(ref s, transcript);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<MasterSecret> MasterSecret(this ref HandshakeSecret s) => tls13_package.MasterSecretᴍ(ref s);
+}
+partial class tls13ᴛMasterSecret {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> ClientApplicationTrafficSecret(this ref MasterSecret s, hash.Hash transcript) => tls13_package.ClientApplicationTrafficSecretᴍ(ref s, transcript);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> ServerApplicationTrafficSecret(this ref MasterSecret s, hash.Hash transcript) => tls13_package.ServerApplicationTrafficSecretᴍ(ref s, transcript);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> ResumptionMasterSecret(this ref MasterSecret s, hash.Hash transcript) => tls13_package.ResumptionMasterSecretᴍ(ref s, transcript);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<ExporterMasterSecret> ExporterMasterSecret(this ref MasterSecret s, hash.Hash transcript) => tls13_package.ExporterMasterSecretᴍ(ref s, transcript);
+}
+partial class tls13ᴛExporterMasterSecret {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Exporter(this ref ExporterMasterSecret s, @string label, slice<byte> context, nint length) => tls13_package.Exporterᴍ(ref s, label, context, length);
+}
+// </GlyphForwarders>

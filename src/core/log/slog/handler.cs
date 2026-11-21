@@ -104,14 +104,14 @@ internal static ж<defaultHandler> newDefaultHandler(Func<uintptr, slice<byte>, 
 
 } partial class slog_package {
 
-internal static bool Enabledᴍ(ref defaultHandler _Δp0, context.Context _Δp1, Level l) {
+[GoMethodBody("Enabled")] internal static bool Enabledᴍ(ref defaultHandler _Δp0, context.Context _Δp1, Level l) {
     return l >= ᏑlogLoggerLevel.Level();
 }
 
 // Collect the level, attributes and message in a string and
 // write it with the default log.Logger.
 // Let the log.Logger handle time and file/line.
-internal static error Handleᴍ(ж<defaultHandler> Ꮡh, context.Context ctx, Record r) {
+[GoMethodBody("Handle")] internal static error Handleᴍ(ж<defaultHandler> Ꮡh, context.Context ctx, Record r) {
     GoFrame ᒐ = default;
     try {
         r = r.ΔClone();
@@ -130,11 +130,11 @@ internal static error Handleᴍ(ж<defaultHandler> Ꮡh, context.Context ctx, Re
     finally { ᒐ.Run(); }
 }
 
-internal static Handler WithAttrsᴍ(ref defaultHandler h, slice<Attr> @as) {
+[GoMethodBody("WithAttrs")] internal static Handler WithAttrsᴍ(ref defaultHandler h, slice<Attr> @as) {
     return new defaultHandlerжHandler(Ꮡ(new defaultHandler(h.ch.withAttrs(@as), h.output)));
 }
 
-internal static Handler WithGroupᴍ(ref defaultHandler h, @string name) {
+[GoMethodBody("WithGroup")] internal static Handler WithGroupᴍ(ref defaultHandler h, @string name) {
     return new defaultHandlerжHandler(Ꮡ(new defaultHandler(h.ch.withGroup(name), h.output)));
 }
 
@@ -215,7 +215,7 @@ partial struct commonHandler {
 
 } partial class slog_package {
 
-internal static ж<commonHandler> cloneᴍ(ref commonHandler h) {
+[GoMethodBody("clone")] internal static ж<commonHandler> cloneᴍ(ref commonHandler h) {
     // We can't use assignment because we can't copy the mutex.
     return Ꮡ(new commonHandler(
         json: h.json,
@@ -231,7 +231,7 @@ internal static ж<commonHandler> cloneᴍ(ref commonHandler h) {
 
 // enabled reports whether l is greater than or equal to the
 // minimum level.
-internal static bool enabledᴍ(ref commonHandler h, Level l) {
+[GoMethodBody("enabled")] internal static bool enabledᴍ(ref commonHandler h, Level l) {
     Level minLevel = LevelInfo;
     if (h.opts.Level != nil) {
         minLevel = h.opts.Level.Level();
@@ -239,7 +239,7 @@ internal static bool enabledᴍ(ref commonHandler h, Level l) {
     return l >= minLevel;
 }
 
-internal static ж<commonHandler> withAttrsᴍ(ж<commonHandler> Ꮡh, slice<Attr> @as) {
+[GoMethodBody("withAttrs")] internal static ж<commonHandler> withAttrsᴍ(ж<commonHandler> Ꮡh, slice<Attr> @as) {
     GoFrame ᒐ = default;
     try {
         ref var h = ref Ꮡh.DerefOrNull();
@@ -278,7 +278,7 @@ internal static ж<commonHandler> withAttrsᴍ(ж<commonHandler> Ꮡh, slice<Att
     finally { ᒐ.Run(); }
 }
 
-internal static ж<commonHandler> withGroupᴍ(ref commonHandler h, @string name) {
+[GoMethodBody("withGroup")] internal static ж<commonHandler> withGroupᴍ(ref commonHandler h, @string name) {
     var h2 = h.clone();
     h2.groups = append(h2.groups, name);
     return h2;
@@ -286,7 +286,7 @@ internal static ж<commonHandler> withGroupᴍ(ref commonHandler h, @string name
 
 // handle is the internal implementation of Handler.Handle
 // used by TextHandler and JSONHandler.
-internal static error handleᴍ(ж<commonHandler> Ꮡh, Record r) {
+[GoMethodBody("handle")] internal static error handleᴍ(ж<commonHandler> Ꮡh, Record r) {
     GoFrame ᒐ = default;
     try {
         r = r.ΔClone();
@@ -352,7 +352,7 @@ internal static error handleᴍ(ж<commonHandler> Ꮡh, Record r) {
 
 } partial class slog_package {
 
-internal static void appendNonBuiltInsᴍ(ж<handleState> Ꮡs, Record r) {
+[GoMethodBody("appendNonBuiltIns")] internal static void appendNonBuiltInsᴍ(ж<handleState> Ꮡs, Record r) {
     r = r.ΔClone();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -403,7 +403,7 @@ internal static void appendNonBuiltInsᴍ(ж<handleState> Ꮡs, Record r) {
 } partial class slog_package {
 
 // attrSep returns the separator between attributes.
-internal static @string attrSepᴍ(ref commonHandler h) {
+[GoMethodBody("attrSep")] internal static @string attrSepᴍ(ref commonHandler h) {
     if (h.json) {
         return ",";
     }
@@ -433,7 +433,7 @@ internal static ref sync.Pool groupPool => ref ((StaticBox<sync.Pool>)ᏑgroupPo
 
 } partial class slog_package {
 
-internal static handleState newHandleStateᴍ(ж<commonHandler> Ꮡh, ж<buffer.Buffer> buf, bool freeBuf, @string sep) {
+[GoMethodBody("newHandleState")] internal static handleState newHandleStateᴍ(ж<commonHandler> Ꮡh, ж<buffer.Buffer> buf, bool freeBuf, @string sep) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var s = new handleState(
@@ -452,7 +452,7 @@ internal static handleState newHandleStateᴍ(ж<commonHandler> Ꮡh, ж<buffer.
 
 } partial class slog_package {
 
-internal static void freeᴍ(ref handleState s) {
+[GoMethodBody("free")] internal static void freeᴍ(ref handleState s) {
     if (s.freeBuf) {
         s.buf.Free();
     }
@@ -463,7 +463,7 @@ internal static void freeᴍ(ref handleState s) {
     s.prefix.Free();
 }
 
-internal static void openGroupsᴍ(ref handleState s) {
+[GoMethodBody("openGroups")] internal static void openGroupsᴍ(ref handleState s) {
     foreach (var (_, n) in range(s.h.groups.slice(s.h.nOpenGroups))) {
         s.openGroup(n);
     }
@@ -478,7 +478,7 @@ internal static UntypedInt keyComponentSep => /* '.' */ 46;
 
 // openGroup starts a new group of attributes
 // with the given name.
-internal static void openGroupᴍ(ref handleState s, @string name) {
+[GoMethodBody("openGroup")] internal static void openGroupᴍ(ref handleState s, @string name) {
     if (s.h.json) {
         s.appendKey(name);
         s.buf.WriteByte((byte)'{');
@@ -494,7 +494,7 @@ internal static void openGroupᴍ(ref handleState s, @string name) {
 }
 
 // closeGroup ends the group with the given name.
-internal static void closeGroupᴍ(ref handleState s, @string name) {
+[GoMethodBody("closeGroup")] internal static void closeGroupᴍ(ref handleState s, @string name) {
     if (s.h.json) {
         s.buf.WriteByte((byte)'}');
     } else {
@@ -509,7 +509,7 @@ internal static void closeGroupᴍ(ref handleState s, @string name) {
 
 // appendAttrs appends the slice of Attrs.
 // It reports whether something was appended.
-internal static bool appendAttrsᴍ(ж<handleState> Ꮡs, slice<Attr> @as) {
+[GoMethodBody("appendAttrs")] internal static bool appendAttrsᴍ(ж<handleState> Ꮡs, slice<Attr> @as) {
     var nonEmpty = false;
     foreach (var (_, a) in range(@as)) {
         if (Ꮡs.appendAttr(a)) {
@@ -522,7 +522,7 @@ internal static bool appendAttrsᴍ(ж<handleState> Ꮡs, slice<Attr> @as) {
 // appendAttr appends the Attr's key and value.
 // It handles replacement and checking for an empty key.
 // It reports whether something was appended.
-internal static bool appendAttrᴍ(ж<handleState> Ꮡs, Attr a) {
+[GoMethodBody("appendAttr")] internal static bool appendAttrᴍ(ж<handleState> Ꮡs, Attr a) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     a.Value = a.Value.Resolve();
@@ -581,11 +581,11 @@ internal static bool appendAttrᴍ(ж<handleState> Ꮡs, Attr a) {
     return true;
 }
 
-internal static void appendErrorᴍ(ref handleState s, error err) {
+[GoMethodBody("appendError")] internal static void appendErrorᴍ(ref handleState s, error err) {
     s.appendString(fmt.Sprintf("!ERROR:%v"u8, err));
 }
 
-internal static void appendKeyᴍ(ref handleState s, @string key) {
+[GoMethodBody("appendKey")] internal static void appendKeyᴍ(ref handleState s, @string key) {
     s.buf.WriteString(s.sep);
     if (s.prefix != nil && len(s.prefix.ValueSlot) > 0) {
         s.appendTwoStrings((@string)(slice<byte>)s.prefix.ValueSlot, key);
@@ -601,7 +601,7 @@ internal static void appendKeyᴍ(ref handleState s, @string key) {
 }
 
 // appendTwoStrings implements appendString(prefix + key), but faster.
-internal static void appendTwoStringsᴍ(ref handleState s, @string x, @string y) {
+[GoMethodBody("appendTwoStrings")] internal static void appendTwoStringsᴍ(ref handleState s, @string x, @string y) {
     var buf = s.buf.ValueSlot;
     switch (ᐧ) {
     case {} when s.h.json: {
@@ -623,7 +623,7 @@ internal static void appendTwoStringsᴍ(ref handleState s, @string x, @string y
     s.buf.ValueSlot = buf;
 }
 
-internal static void appendStringᴍ(ref handleState s, @string str) {
+[GoMethodBody("appendString")] internal static void appendStringᴍ(ref handleState s, @string str) {
     if (s.h.json) {
         s.buf.WriteByte((byte)'"');
         s.buf.ValueSlot = appendEscapedJSONString(s.buf.ValueSlot, str);
@@ -642,7 +642,7 @@ internal static void appendStringᴍ(ref handleState s, @string str) {
 internal static ref readonly @string nilˢᴍhandleState => ref nilˢᵇᴍhandleState;
 private static readonly @string nilˢᵇᴍhandleState = "<nil>"u8;
 
-internal static void appendValueᴍ(ж<handleState> Ꮡs, Value v) {
+[GoMethodBody("appendValue")] internal static void appendValueᴍ(ж<handleState> Ꮡs, Value v) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -679,7 +679,7 @@ internal static void appendValueᴍ(ж<handleState> Ꮡs, Value v) {
     finally { ᒐ.Run(); }
 }
 
-internal static void appendTimeᴍ(ж<handleState> Ꮡs, time.Time t) {
+[GoMethodBody("appendTime")] internal static void appendTimeᴍ(ж<handleState> Ꮡs, time.Time t) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.h.json) {
@@ -713,48 +713,9 @@ partial struct discardHandler {
 
 } partial class slog_package {
 
-internal static bool Enabledᴍ(discardHandler dh, context.Context _Δp1, Level _Δp2) { return false; }
-internal static error Handleᴍ(discardHandler dh, context.Context _Δp1, Record _Δp2) { return default; }
-internal static Handler WithAttrsᴍ(discardHandler dh, slice<Attr> attrs) { return dh; }
-internal static Handler WithGroupᴍ(discardHandler dh, @string name) { return dh; }
+[GoMethodBody("Enabled")] internal static bool Enabledᴍ(discardHandler dh, context.Context _Δp1, Level _Δp2) { return false; }
+[GoMethodBody("Handle")] internal static error Handleᴍ(discardHandler dh, context.Context _Δp1, Record _Δp2) { return default; }
+[GoMethodBody("WithAttrs")] internal static Handler WithAttrsᴍ(discardHandler dh, slice<Attr> attrs) { return dh; }
+[GoMethodBody("WithGroup")] internal static Handler WithGroupᴍ(discardHandler dh, @string name) { return dh; }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class slogᴛdefaultHandler {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Enabled(this ref defaultHandler _Δp0, context.Context _Δp1, Level l) => slog_package.Enabledᴍ(ref _Δp0, _Δp1, l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Handle(this ж<defaultHandler> Ꮡh, context.Context ctx, Record r) => slog_package.Handleᴍ(Ꮡh, ctx, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Handler WithAttrs(this ref defaultHandler h, slice<Attr> @as) => slog_package.WithAttrsᴍ(ref h, @as);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Handler WithGroup(this ref defaultHandler h, @string name) => slog_package.WithGroupᴍ(ref h, name);
-}
-partial class slogᴛcommonHandler {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<commonHandler> clone(this ref commonHandler h) => slog_package.cloneᴍ(ref h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool enabled(this ref commonHandler h, Level l) => slog_package.enabledᴍ(ref h, l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<commonHandler> withAttrs(this ж<commonHandler> Ꮡh, slice<Attr> @as) => slog_package.withAttrsᴍ(Ꮡh, @as);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<commonHandler> withGroup(this ref commonHandler h, @string name) => slog_package.withGroupᴍ(ref h, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error handle(this ж<commonHandler> Ꮡh, Record r) => slog_package.handleᴍ(Ꮡh, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string attrSep(this ref commonHandler h) => slog_package.attrSepᴍ(ref h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static handleState newHandleState(this ж<commonHandler> Ꮡh, ж<buffer.Buffer> buf, bool freeBuf, @string sep) => slog_package.newHandleStateᴍ(Ꮡh, buf, freeBuf, sep);
-}
-partial class slogᴛhandleState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) => slog_package.appendNonBuiltInsᴍ(Ꮡs, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void free(this ref handleState s) => slog_package.freeᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void openGroups(this ref handleState s) => slog_package.openGroupsᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void openGroup(this ref handleState s, @string name) => slog_package.openGroupᴍ(ref s, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeGroup(this ref handleState s, @string name) => slog_package.closeGroupᴍ(ref s, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool appendAttrs(this ж<handleState> Ꮡs, slice<Attr> @as) => slog_package.appendAttrsᴍ(Ꮡs, @as);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool appendAttr(this ж<handleState> Ꮡs, Attr a) => slog_package.appendAttrᴍ(Ꮡs, a);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void appendError(this ref handleState s, error err) => slog_package.appendErrorᴍ(ref s, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void appendKey(this ref handleState s, @string key) => slog_package.appendKeyᴍ(ref s, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void appendTwoStrings(this ref handleState s, @string x, @string y) => slog_package.appendTwoStringsᴍ(ref s, x, y);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void appendString(this ref handleState s, @string str) => slog_package.appendStringᴍ(ref s, str);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void appendValue(this ж<handleState> Ꮡs, Value v) => slog_package.appendValueᴍ(Ꮡs, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void appendTime(this ж<handleState> Ꮡs, time.Time t) => slog_package.appendTimeᴍ(Ꮡs, t);
-}
-partial class slogᴛdiscardHandler {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Enabled(this discardHandler dh, context.Context _Δp1, Level _Δp2) => slog_package.Enabledᴍ(dh, _Δp1, _Δp2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Handle(this discardHandler dh, context.Context _Δp1, Record _Δp2) => slog_package.Handleᴍ(dh, _Δp1, _Δp2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Handler WithAttrs(this discardHandler dh, slice<Attr> attrs) => slog_package.WithAttrsᴍ(dh, attrs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Handler WithGroup(this discardHandler dh, @string name) => slog_package.WithGroupᴍ(dh, name);
-}
-// </GlyphForwarders>

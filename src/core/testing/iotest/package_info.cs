@@ -71,6 +71,15 @@ using static go.testing.iotest_package;
 
 namespace go.testing;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using io = io_package;
+using log = log_package;
+using static iotest_package;
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("iotest")]
 public static partial class iotest_package
 {
@@ -124,3 +133,33 @@ public static partial class iotest_package
 [GoMethodHost(typeof(iotest_package.truncateWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛtruncateWriter;
 [GoMethodHost(typeof(iotest_package.writeLogger)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛwriteLogger;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class iotestᴛwriteLogger {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref writeLogger l, slice<byte> p) => iotest_package.Writeᴍ(ref l, p);
+}
+partial class iotestᴛreadLogger {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref readLogger l, slice<byte> p) => iotest_package.Readᴍ(ref l, p);
+}
+partial class iotestᴛoneByteReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref oneByteReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
+}
+partial class iotestᴛhalfReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref halfReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
+}
+partial class iotestᴛdataErrReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref dataErrReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
+}
+partial class iotestᴛtimeoutReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref timeoutReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
+}
+partial class iotestᴛerrReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref errReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
+}
+partial class iotestᴛsmallByteReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref smallByteReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
+}
+partial class iotestᴛtruncateWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref truncateWriter t, slice<byte> p) => iotest_package.Writeᴍ(ref t, p);
+}
+// </GlyphForwarders>

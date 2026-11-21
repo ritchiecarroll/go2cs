@@ -13,7 +13,7 @@ partial class net_package {
 } partial class net_package {
 
 // SetKeepAliveConfig configures keep-alive messages sent by the operating system.
-internal static error SetKeepAliveConfigᴍ(ж<TCPConn> Ꮡc, KeepAliveConfig config) {
+[GoMethodBody("SetKeepAliveConfig")] internal static error SetKeepAliveConfigᴍ(ж<TCPConn> Ꮡc, KeepAliveConfig config) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {
@@ -45,9 +45,3 @@ internal static error SetKeepAliveConfigᴍ(ж<TCPConn> Ꮡc, KeepAliveConfig co
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛTCPConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetKeepAliveConfig(this ж<TCPConn> Ꮡc, KeepAliveConfig config) => net_package.SetKeepAliveConfigᴍ(Ꮡc, config);
-}
-// </GlyphForwarders>

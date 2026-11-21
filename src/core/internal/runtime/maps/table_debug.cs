@@ -14,7 +14,7 @@ internal const bool debugLog = false;
 
 } partial class maps_package {
 
-internal static void checkInvariantsᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
+[GoMethodBody("checkInvariants")] internal static void checkInvariantsᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -91,7 +91,7 @@ internal static void checkInvariantsᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<
         throw panic("invariant failed: found no empty slots (violates probe invariant)");
     }
 }
-internal static void Printᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> m) {
+[GoMethodBody("Print")] internal static void Printᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> m) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     print((@string)"""
@@ -162,10 +162,3 @@ internal static void dump(@unsafe.Pointer ptr, uintptr size) {
 }
 
 } // end maps_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class mapsᴛtable {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkInvariants(this ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) => maps_package.checkInvariantsᴍ(ref t, Ꮡtyp, Ꮡm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Print(this ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> m) => maps_package.Printᴍ(ref t, Ꮡtyp, m);
-}
-// </GlyphForwarders>

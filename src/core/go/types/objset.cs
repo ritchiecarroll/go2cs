@@ -24,7 +24,7 @@ partial struct objset /*map[@string, Object]*/; // initialized lazily
 // If s already contains an alternative object alt with
 // the same name, insert leaves s unchanged and returns alt.
 // Otherwise it inserts obj and returns nil.
-internal static Object insertᴍ(ref objset s, Object obj) {
+[GoMethodBody("insert")] internal static Object insertᴍ(ref objset s, Object obj) {
     @string id = obj.Id();
     var alt = (s)[id]; if (alt != nil) {
         return alt;
@@ -37,9 +37,3 @@ internal static Object insertᴍ(ref objset s, Object obj) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛobjset {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Object insert(this ref objset s, Object obj) => types_package.insertᴍ(ref s, obj);
-}
-// </GlyphForwarders>

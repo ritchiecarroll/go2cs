@@ -37,7 +37,7 @@ private static readonly @string invalidBitSizeˢᵇᴍError = "invalid bit size"
 internal static ref readonly @string unknownErrorˢᴍError => ref unknownErrorˢᵇᴍError;
 private static readonly @string unknownErrorˢᵇᴍError = "unknown error"u8;
 
-internal static @string Errorᴍ(Error e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(Error e) {
     switch (e) {
     case var ᴛ when ᴛ == ErrRange: {
         return valueOutOfRangeˢᴍError;
@@ -354,9 +354,3 @@ internal static bool underscoreOK(@string s) {
 }
 
 } // end strconv_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class strconvᴛError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this Error e) => strconv_package.Errorᴍ(e);
-}
-// </GlyphForwarders>

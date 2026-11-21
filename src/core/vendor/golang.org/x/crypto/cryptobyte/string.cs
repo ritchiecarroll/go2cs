@@ -29,7 +29,7 @@ partial struct String /*[]byte*/;
 
 // read advances a String by n bytes and returns them. If less than n bytes
 // remain, it returns nil.
-internal static slice<byte> readᴍ(ref String s, nint n) {
+[GoMethodBody("read")] internal static slice<byte> readᴍ(ref String s, nint n) {
     if (len(s) < n || n < 0) {
         return default;
     }
@@ -39,13 +39,13 @@ internal static slice<byte> readᴍ(ref String s, nint n) {
 }
 
 // Skip advances the String by n byte and reports whether it was successful.
-internal static bool Skipᴍ(ref String s, nint n) {
+[GoMethodBody("Skip")] internal static bool Skipᴍ(ref String s, nint n) {
     return s.read(n) != nil;
 }
 
 // ReadUint8 decodes an 8-bit value into out and advances over it.
 // It reports whether the read was successful.
-internal static bool ReadUint8ᴍ(ref String s, ж<uint8> Ꮡout) {
+[GoMethodBody("ReadUint8")] internal static bool ReadUint8ᴍ(ref String s, ж<uint8> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(1);
@@ -58,7 +58,7 @@ internal static bool ReadUint8ᴍ(ref String s, ж<uint8> Ꮡout) {
 
 // ReadUint16 decodes a big-endian, 16-bit value into out and advances over it.
 // It reports whether the read was successful.
-internal static bool ReadUint16ᴍ(ref String s, ж<uint16> Ꮡout) {
+[GoMethodBody("ReadUint16")] internal static bool ReadUint16ᴍ(ref String s, ж<uint16> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(2);
@@ -71,7 +71,7 @@ internal static bool ReadUint16ᴍ(ref String s, ж<uint16> Ꮡout) {
 
 // ReadUint24 decodes a big-endian, 24-bit value into out and advances over it.
 // It reports whether the read was successful.
-internal static bool ReadUint24ᴍ(ref String s, ж<uint32> Ꮡout) {
+[GoMethodBody("ReadUint24")] internal static bool ReadUint24ᴍ(ref String s, ж<uint32> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(3);
@@ -84,7 +84,7 @@ internal static bool ReadUint24ᴍ(ref String s, ж<uint32> Ꮡout) {
 
 // ReadUint32 decodes a big-endian, 32-bit value into out and advances over it.
 // It reports whether the read was successful.
-internal static bool ReadUint32ᴍ(ref String s, ж<uint32> Ꮡout) {
+[GoMethodBody("ReadUint32")] internal static bool ReadUint32ᴍ(ref String s, ж<uint32> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(4);
@@ -97,7 +97,7 @@ internal static bool ReadUint32ᴍ(ref String s, ж<uint32> Ꮡout) {
 
 // ReadUint48 decodes a big-endian, 48-bit value into out and advances over it.
 // It reports whether the read was successful.
-internal static bool ReadUint48ᴍ(ref String s, ж<uint64> Ꮡout) {
+[GoMethodBody("ReadUint48")] internal static bool ReadUint48ᴍ(ref String s, ж<uint64> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(6);
@@ -110,7 +110,7 @@ internal static bool ReadUint48ᴍ(ref String s, ж<uint64> Ꮡout) {
 
 // ReadUint64 decodes a big-endian, 64-bit value into out and advances over it.
 // It reports whether the read was successful.
-internal static bool ReadUint64ᴍ(ref String s, ж<uint64> Ꮡout) {
+[GoMethodBody("ReadUint64")] internal static bool ReadUint64ᴍ(ref String s, ж<uint64> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(8);
@@ -121,7 +121,7 @@ internal static bool ReadUint64ᴍ(ref String s, ж<uint64> Ꮡout) {
     return true;
 }
 
-internal static bool readUnsignedᴍ(ref String s, ж<uint32> Ꮡout, nint length) {
+[GoMethodBody("readUnsigned")] internal static bool readUnsignedᴍ(ref String s, ж<uint32> Ꮡout, nint length) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(length);
@@ -137,7 +137,7 @@ internal static bool readUnsignedᴍ(ref String s, ж<uint32> Ꮡout, nint lengt
     return true;
 }
 
-internal static bool readLengthPrefixedᴍ(ref String s, nint lenLen, ж<String> ᏑoutChild) {
+[GoMethodBody("readLengthPrefixed")] internal static bool readLengthPrefixedᴍ(ref String s, nint lenLen, ж<String> ᏑoutChild) {
     ref var outChild = ref ᏑoutChild.DerefOrNull();
 
     var lenBytes = s.read(lenLen);
@@ -159,27 +159,27 @@ internal static bool readLengthPrefixedᴍ(ref String s, nint lenLen, ж<String>
 
 // ReadUint8LengthPrefixed reads the content of an 8-bit length-prefixed value
 // into out and advances over it. It reports whether the read was successful.
-internal static bool ReadUint8LengthPrefixedᴍ(ref String s, ж<String> @out) {
+[GoMethodBody("ReadUint8LengthPrefixed")] internal static bool ReadUint8LengthPrefixedᴍ(ref String s, ж<String> @out) {
     return s.readLengthPrefixed(1, @out);
 }
 
 // ReadUint16LengthPrefixed reads the content of a big-endian, 16-bit
 // length-prefixed value into out and advances over it. It reports whether the
 // read was successful.
-internal static bool ReadUint16LengthPrefixedᴍ(ref String s, ж<String> @out) {
+[GoMethodBody("ReadUint16LengthPrefixed")] internal static bool ReadUint16LengthPrefixedᴍ(ref String s, ж<String> @out) {
     return s.readLengthPrefixed(2, @out);
 }
 
 // ReadUint24LengthPrefixed reads the content of a big-endian, 24-bit
 // length-prefixed value into out and advances over it. It reports whether
 // the read was successful.
-internal static bool ReadUint24LengthPrefixedᴍ(ref String s, ж<String> @out) {
+[GoMethodBody("ReadUint24LengthPrefixed")] internal static bool ReadUint24LengthPrefixedᴍ(ref String s, ж<String> @out) {
     return s.readLengthPrefixed(3, @out);
 }
 
 // ReadBytes reads n bytes into out and advances over them. It reports
 // whether the read was successful.
-internal static bool ReadBytesᴍ(ref String s, ж<slice<byte>> Ꮡout, nint n) {
+[GoMethodBody("ReadBytes")] internal static bool ReadBytesᴍ(ref String s, ж<slice<byte>> Ꮡout, nint n) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(n);
@@ -192,7 +192,7 @@ internal static bool ReadBytesᴍ(ref String s, ж<slice<byte>> Ꮡout, nint n) 
 
 // CopyBytes copies len(out) bytes into out and advances over them. It reports
 // whether the copy operation was successful
-internal static bool CopyBytesᴍ(ref String s, slice<byte> @out) {
+[GoMethodBody("CopyBytes")] internal static bool CopyBytesᴍ(ref String s, slice<byte> @out) {
     nint n = len(@out);
     var v = s.read(n);
     if (v == nil) {
@@ -202,29 +202,8 @@ internal static bool CopyBytesᴍ(ref String s, slice<byte> @out) {
 }
 
 // Empty reports whether the string does not contain any bytes.
-internal static bool Emptyᴍ(String s) {
+[GoMethodBody("Empty")] internal static bool Emptyᴍ(String s) {
     return len(s) == 0;
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class cryptobyteᴛString {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> read(this ref String s, nint n) => cryptobyte_package.readᴍ(ref s, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Skip(this ref String s, nint n) => cryptobyte_package.Skipᴍ(ref s, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadUint8(this ref String s, ж<uint8> Ꮡout) => cryptobyte_package.ReadUint8ᴍ(ref s, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadUint16(this ref String s, ж<uint16> Ꮡout) => cryptobyte_package.ReadUint16ᴍ(ref s, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadUint24(this ref String s, ж<uint32> Ꮡout) => cryptobyte_package.ReadUint24ᴍ(ref s, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadUint32(this ref String s, ж<uint32> Ꮡout) => cryptobyte_package.ReadUint32ᴍ(ref s, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadUint48(this ref String s, ж<uint64> Ꮡout) => cryptobyte_package.ReadUint48ᴍ(ref s, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadUint64(this ref String s, ж<uint64> Ꮡout) => cryptobyte_package.ReadUint64ᴍ(ref s, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool readUnsigned(this ref String s, ж<uint32> Ꮡout, nint length) => cryptobyte_package.readUnsignedᴍ(ref s, Ꮡout, length);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool readLengthPrefixed(this ref String s, nint lenLen, ж<String> ᏑoutChild) => cryptobyte_package.readLengthPrefixedᴍ(ref s, lenLen, ᏑoutChild);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadUint8LengthPrefixed(this ref String s, ж<String> @out) => cryptobyte_package.ReadUint8LengthPrefixedᴍ(ref s, @out);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadUint16LengthPrefixed(this ref String s, ж<String> @out) => cryptobyte_package.ReadUint16LengthPrefixedᴍ(ref s, @out);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadUint24LengthPrefixed(this ref String s, ж<String> @out) => cryptobyte_package.ReadUint24LengthPrefixedᴍ(ref s, @out);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ReadBytes(this ref String s, ж<slice<byte>> Ꮡout, nint n) => cryptobyte_package.ReadBytesᴍ(ref s, Ꮡout, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CopyBytes(this ref String s, slice<byte> @out) => cryptobyte_package.CopyBytesᴍ(ref s, @out);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Empty(this String s) => cryptobyte_package.Emptyᴍ(s);
-}
-// </GlyphForwarders>

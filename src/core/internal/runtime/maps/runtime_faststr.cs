@@ -16,7 +16,7 @@ partial class maps_package {
 
 } partial class maps_package {
 
-internal static @unsafe.Pointer getWithoutKeySmallFastStrᴍ(ref Map m, ж<abi.MapType> Ꮡtyp, @string keyʗp) {
+[GoMethodBody("getWithoutKeySmallFastStr")] internal static @unsafe.Pointer getWithoutKeySmallFastStrᴍ(ref Map m, ж<abi.MapType> Ꮡtyp, @string keyʗp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var key = ref heap(keyʗp, out var Ꮡkey);
 
@@ -241,7 +241,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_faststr(ж<abi.MapTyp
 
 } partial class maps_package {
 
-internal static @unsafe.Pointer putSlotSmallFastStrᴍ(ref Map m, ж<abi.MapType> typ, uintptr hash, @string key) {
+[GoMethodBody("putSlotSmallFastStr")] internal static @unsafe.Pointer putSlotSmallFastStrᴍ(ref Map m, ж<abi.MapType> typ, uintptr hash, @string key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -450,10 +450,3 @@ internal static void runtime_mapdelete_faststr(ж<abi.MapType> typ, ж<Map> Ꮡm
 }
 
 } // end maps_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class mapsᴛMap {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer getWithoutKeySmallFastStr(this ref Map m, ж<abi.MapType> Ꮡtyp, @string keyʗp) => maps_package.getWithoutKeySmallFastStrᴍ(ref m, Ꮡtyp, keyʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer putSlotSmallFastStr(this ref Map m, ж<abi.MapType> typ, uintptr hash, @string key) => maps_package.putSlotSmallFastStrᴍ(ref m, typ, hash, key);
-}
-// </GlyphForwarders>

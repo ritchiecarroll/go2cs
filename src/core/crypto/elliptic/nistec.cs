@@ -109,13 +109,13 @@ partial interface nistPoint<T> {
 
 } partial class elliptic_package {
 
-internal static ж<CurveParams> Paramsᴍ<Point>(ref nistCurve<Point> curve)
+[GoMethodBody("Params")] internal static ж<CurveParams> Paramsᴍ<Point>(ref nistCurve<Point> curve)
     where Point : nistPoint<Point>
 {
     return curve.@params;
 }
 
-internal static bool IsOnCurveᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy)
+[GoMethodBody("IsOnCurve")] internal static bool IsOnCurveᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy)
     where Point : nistPoint<Point>
 {
     ref var x = ref Ꮡx.DerefOrNull();
@@ -136,7 +136,7 @@ private static readonly @string negativeCoordinateˢᵇᴍnistCurve = "negative 
 internal static ref readonly @string overflowingCoordinateˢᴍnistCurve => ref overflowingCoordinateˢᵇᴍnistCurve;
 private static readonly @string overflowingCoordinateˢᵇᴍnistCurve = "overflowing coordinate"u8;
 
-internal static (Point p, error err) pointFromAffineᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy)
+[GoMethodBody("pointFromAffine")] internal static (Point p, error err) pointFromAffineᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy)
     where Point : nistPoint<Point>
 {
     Point p = GoZero<Point>();
@@ -164,7 +164,7 @@ internal static (Point p, error err) pointFromAffineᴍ<Point>(ref nistCurve<Poi
     return curve.newPoint().SetBytes(buf);
 }
 
-internal static (ж<big.Int> x, ж<big.Int> y) pointToAffineᴍ<Point>(ref nistCurve<Point> curve, Point p)
+[GoMethodBody("pointToAffine")] internal static (ж<big.Int> x, ж<big.Int> y) pointToAffineᴍ<Point>(ref nistCurve<Point> curve, Point p)
     where Point : nistPoint<Point>
 {
     ж<big.Int> x = default;
@@ -182,7 +182,7 @@ internal static (ж<big.Int> x, ж<big.Int> y) pointToAffineᴍ<Point>(ref nistC
     return (x, y);
 }
 
-internal static (ж<big.Int>, ж<big.Int>) Addᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> x2, ж<big.Int> y2)
+[GoMethodBody("Add")] internal static (ж<big.Int>, ж<big.Int>) Addᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> x2, ж<big.Int> y2)
     where Point : nistPoint<Point>
 {
     var (p1, err) = curve.pointFromAffine(x1, y1);
@@ -196,7 +196,7 @@ internal static (ж<big.Int>, ж<big.Int>) Addᴍ<Point>(ref nistCurve<Point> cu
     return curve.pointToAffine(p1.Add(p1, p2));
 }
 
-internal static (ж<big.Int>, ж<big.Int>) Doubleᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> x1, ж<big.Int> y1)
+[GoMethodBody("Double")] internal static (ж<big.Int>, ж<big.Int>) Doubleᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> x1, ж<big.Int> y1)
     where Point : nistPoint<Point>
 {
     var (p, err) = curve.pointFromAffine(x1, y1);
@@ -208,7 +208,7 @@ internal static (ж<big.Int>, ж<big.Int>) Doubleᴍ<Point>(ref nistCurve<Point>
 
 // normalizeScalar brings the scalar within the byte size of the order of the
 // curve, as expected by the nistec scalar multiplication functions.
-internal static slice<byte> normalizeScalarᴍ<Point>(ref nistCurve<Point> curve, slice<byte> scalar)
+[GoMethodBody("normalizeScalar")] internal static slice<byte> normalizeScalarᴍ<Point>(ref nistCurve<Point> curve, slice<byte> scalar)
     where Point : nistPoint<Point>
 {
     nint byteSize = (curve.@params.N.BitLen() + 7) / 8;
@@ -223,7 +223,7 @@ internal static slice<byte> normalizeScalarᴍ<Point>(ref nistCurve<Point> curve
     return s.FillBytes(@out);
 }
 
-internal static (ж<big.Int>, ж<big.Int>) ScalarMultᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> Bx, ж<big.Int> By, slice<byte> scalar)
+[GoMethodBody("ScalarMult")] internal static (ж<big.Int>, ж<big.Int>) ScalarMultᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> Bx, ж<big.Int> By, slice<byte> scalar)
     where Point : nistPoint<Point>
 {
     var (p, err) = curve.pointFromAffine(Bx, By);
@@ -238,7 +238,7 @@ internal static (ж<big.Int>, ж<big.Int>) ScalarMultᴍ<Point>(ref nistCurve<Po
     return curve.pointToAffine(p);
 }
 
-internal static (ж<big.Int>, ж<big.Int>) ScalarBaseMultᴍ<Point>(ref nistCurve<Point> curve, slice<byte> scalar)
+[GoMethodBody("ScalarBaseMult")] internal static (ж<big.Int>, ж<big.Int>) ScalarBaseMultᴍ<Point>(ref nistCurve<Point> curve, slice<byte> scalar)
     where Point : nistPoint<Point>
 {
     scalar = curve.normalizeScalar(scalar);
@@ -249,7 +249,7 @@ internal static (ж<big.Int>, ж<big.Int>) ScalarBaseMultᴍ<Point>(ref nistCurv
     return curve.pointToAffine(p);
 }
 
-internal static (ж<big.Int> x, ж<big.Int> y) Unmarshalᴍ<Point>(ref nistCurve<Point> curve, slice<byte> data)
+[GoMethodBody("Unmarshal")] internal static (ж<big.Int> x, ж<big.Int> y) Unmarshalᴍ<Point>(ref nistCurve<Point> curve, slice<byte> data)
     where Point : nistPoint<Point>
 {
     ж<big.Int> x = default;
@@ -272,7 +272,7 @@ internal static (ж<big.Int> x, ж<big.Int> y) Unmarshalᴍ<Point>(ref nistCurve
     return (x, y);
 }
 
-internal static (ж<big.Int> x, ж<big.Int> y) UnmarshalCompressedᴍ<Point>(ref nistCurve<Point> curve, slice<byte> data)
+[GoMethodBody("UnmarshalCompressed")] internal static (ж<big.Int> x, ж<big.Int> y) UnmarshalCompressedᴍ<Point>(ref nistCurve<Point> curve, slice<byte> data)
     where Point : nistPoint<Point>
 {
     if (len(data) == 0 || (data[0] != 2 && data[0] != 3)) {
@@ -304,19 +304,3 @@ internal static ж<big.Int> bigFromHex(@string s) {
 }
 
 } // end elliptic_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class ellipticᴛnistCurve {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<CurveParams> Params<Point>(this ref nistCurve<Point> curve) where Point : nistPoint<Point> => elliptic_package.Paramsᴍ<Point>(ref curve);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsOnCurve<Point>(this ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) where Point : nistPoint<Point> => elliptic_package.IsOnCurveᴍ<Point>(ref curve, Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Point p, error err) pointFromAffine<Point>(this ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy) where Point : nistPoint<Point> => elliptic_package.pointFromAffineᴍ<Point>(ref curve, Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<big.Int> x, ж<big.Int> y) pointToAffine<Point>(this ref nistCurve<Point> curve, Point p) where Point : nistPoint<Point> => elliptic_package.pointToAffineᴍ<Point>(ref curve, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<big.Int>, ж<big.Int>) Add<Point>(this ref nistCurve<Point> curve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> x2, ж<big.Int> y2) where Point : nistPoint<Point> => elliptic_package.Addᴍ<Point>(ref curve, x1, y1, x2, y2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<big.Int>, ж<big.Int>) Double<Point>(this ref nistCurve<Point> curve, ж<big.Int> x1, ж<big.Int> y1) where Point : nistPoint<Point> => elliptic_package.Doubleᴍ<Point>(ref curve, x1, y1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> normalizeScalar<Point>(this ref nistCurve<Point> curve, slice<byte> scalar) where Point : nistPoint<Point> => elliptic_package.normalizeScalarᴍ<Point>(ref curve, scalar);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<big.Int>, ж<big.Int>) ScalarMult<Point>(this ref nistCurve<Point> curve, ж<big.Int> Bx, ж<big.Int> By, slice<byte> scalar) where Point : nistPoint<Point> => elliptic_package.ScalarMultᴍ<Point>(ref curve, Bx, By, scalar);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<big.Int>, ж<big.Int>) ScalarBaseMult<Point>(this ref nistCurve<Point> curve, slice<byte> scalar) where Point : nistPoint<Point> => elliptic_package.ScalarBaseMultᴍ<Point>(ref curve, scalar);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<big.Int> x, ж<big.Int> y) Unmarshal<Point>(this ref nistCurve<Point> curve, slice<byte> data) where Point : nistPoint<Point> => elliptic_package.Unmarshalᴍ<Point>(ref curve, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<big.Int> x, ж<big.Int> y) UnmarshalCompressed<Point>(this ref nistCurve<Point> curve, slice<byte> data) where Point : nistPoint<Point> => elliptic_package.UnmarshalCompressedᴍ<Point>(ref curve, data);
-}
-// </GlyphForwarders>

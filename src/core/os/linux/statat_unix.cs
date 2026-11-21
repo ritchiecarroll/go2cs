@@ -18,7 +18,7 @@ partial class os_package {
 internal static ref readonly @string fstatatˢᴍFile => ref fstatatˢᵇᴍFile;
 private static readonly @string fstatatˢᵇᴍFile = "fstatat"u8;
 
-internal static (FileInfo, error) lstatatNologᴍ(ж<File> Ꮡf, @string name) {
+[GoMethodBody("lstatatNolog")] internal static (FileInfo, error) lstatatNologᴍ(ж<File> Ꮡf, @string name) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     ref var fs = ref heap(new fileStat(), out var Ꮡfs);
@@ -30,9 +30,3 @@ internal static (FileInfo, error) lstatatNologᴍ(ж<File> Ꮡf, @string name) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class osᴛFile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (FileInfo, error) lstatatNolog(this ж<File> Ꮡf, @string name) => os_package.lstatatNologᴍ(Ꮡf, name);
-}
-// </GlyphForwarders>

@@ -18,7 +18,7 @@ partial struct gcSizes {
 
 } partial class types_package {
 
-internal static int64 /*result*/ Alignofᴍ(ж<gcSizes> Ꮡs, Type T) {
+[GoMethodBody("Alignof")] internal static int64 /*result*/ Alignofᴍ(ж<gcSizes> Ꮡs, Type T) {
     int64 result = default;
     GoFrame ᒐ = default;
     try {
@@ -102,7 +102,7 @@ internal static int64 /*result*/ Alignofᴍ(ж<gcSizes> Ꮡs, Type T) {
     ᒐdone: return result;
 }
 
-internal static slice<int64> Offsetsofᴍ(ж<gcSizes> Ꮡs, slice<ж<Var>> fields) {
+[GoMethodBody("Offsetsof")] internal static slice<int64> Offsetsofᴍ(ж<gcSizes> Ꮡs, slice<ж<Var>> fields) {
     var offsets = new slice<int64>(len(fields));
     int64 offs = default;
     foreach (var (i, f) in range(fields)) {
@@ -124,7 +124,7 @@ internal static slice<int64> Offsetsofᴍ(ж<gcSizes> Ꮡs, slice<ж<Var>> field
     return offsets;
 }
 
-internal static int64 Sizeofᴍ(ж<gcSizes> Ꮡs, Type T) {
+[GoMethodBody("Sizeof")] internal static int64 Sizeofᴍ(ж<gcSizes> Ꮡs, Type T) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var switchᴛ8 = T.Underlying();
@@ -213,11 +213,3 @@ internal static ж<gcSizes> gcSizesFor(@string compiler, @string arch) {
 }
 
 } // end types_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛgcSizes {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 /*result*/ Alignof(this ж<gcSizes> Ꮡs, Type T) => types_package.Alignofᴍ(Ꮡs, T);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<int64> Offsetsof(this ж<gcSizes> Ꮡs, slice<ж<Var>> fields) => types_package.Offsetsofᴍ(Ꮡs, fields);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 Sizeof(this ж<gcSizes> Ꮡs, Type T) => types_package.Sizeofᴍ(Ꮡs, T);
-}
-// </GlyphForwarders>

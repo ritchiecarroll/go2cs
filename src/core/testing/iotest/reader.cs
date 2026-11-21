@@ -23,7 +23,7 @@ partial struct oneByteReader {
 
 } partial class iotest_package {
 
-internal static (nint, error) Readᴍ(ref oneByteReader r, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref oneByteReader r, slice<byte> p) {
     if (len(p) == 0) {
         return (0, default);
     }
@@ -42,7 +42,7 @@ partial struct halfReader {
 
 } partial class iotest_package {
 
-internal static (nint, error) Readᴍ(ref halfReader r, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref halfReader r, slice<byte> p) {
     return r.r.Read(p.slice(0, (len(p) + 1) / 2));
 }
 
@@ -63,7 +63,7 @@ partial struct dataErrReader {
 
 } partial class iotest_package {
 
-internal static (nint n, error err) Readᴍ(ref dataErrReader r, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref dataErrReader r, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -100,7 +100,7 @@ partial struct timeoutReader {
 
 } partial class iotest_package {
 
-internal static (nint, error) Readᴍ(ref timeoutReader r, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref timeoutReader r, slice<byte> p) {
     r.count++;
     if (r.count == 2) {
         return (0, ErrTimeout);
@@ -121,7 +121,7 @@ partial struct errReader {
 
 } partial class iotest_package {
 
-internal static (nint, error) Readᴍ(ref errReader r, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref errReader r, slice<byte> p) {
     return (0, r.err);
 }
 
@@ -135,7 +135,7 @@ partial struct smallByteReader {
 
 } partial class iotest_package {
 
-internal static (nint, error) Readᴍ(ref smallByteReader r, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref smallByteReader r, slice<byte> p) {
     if (len(p) == 0) {
         return (0, default);
     }
@@ -318,24 +318,3 @@ public static error TestReader(io.Reader r, slice<byte> content) {
 }
 
 } // end iotest_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class iotestᴛoneByteReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref oneByteReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
-}
-partial class iotestᴛhalfReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref halfReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
-}
-partial class iotestᴛdataErrReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref dataErrReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
-}
-partial class iotestᴛtimeoutReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref timeoutReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
-}
-partial class iotestᴛerrReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref errReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
-}
-partial class iotestᴛsmallByteReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref smallByteReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
-}
-// </GlyphForwarders>

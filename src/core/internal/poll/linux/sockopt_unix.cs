@@ -12,7 +12,7 @@ partial class poll_package {
 } partial class poll_package {
 
 // SetsockoptByte wraps the setsockopt network call with a byte argument.
-internal static error SetsockoptByteᴍ(ж<FD> Ꮡfd, nint level, nint name, byte arg) {
+[GoMethodBody("SetsockoptByte")] internal static error SetsockoptByteᴍ(ж<FD> Ꮡfd, nint level, nint name, byte arg) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -29,9 +29,3 @@ internal static error SetsockoptByteᴍ(ж<FD> Ꮡfd, nint level, nint name, byt
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetsockoptByte(this ж<FD> Ꮡfd, nint level, nint name, byte arg) => poll_package.SetsockoptByteᴍ(Ꮡfd, level, name, arg);
-}
-// </GlyphForwarders>

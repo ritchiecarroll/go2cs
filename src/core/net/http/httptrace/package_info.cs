@@ -64,6 +64,20 @@ using static go.net.http.httptrace_package;
 
 namespace go.net.http;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using context = context_package;
+using tls = crypto.tls_package;
+using nettrace = @internal.nettrace_package;
+using net = net_package;
+using textproto = go.net.textproto_package;
+using reflect = reflect_package;
+using time = time_package;
+using @internal;
+using crypto;
+using go.net;
+using static httptrace_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("httptrace")]
 public static partial class httptrace_package
 {
@@ -107,3 +121,10 @@ public static partial class httptrace_package
 // <MethodHolders>
 [GoMethodHost(typeof(httptrace_package.ClientTrace)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httptraceᴛClientTrace;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class httptraceᴛClientTrace {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void compose(this ж<ClientTrace> Ꮡt, ж<ClientTrace> old) => httptrace_package.composeᴍ(Ꮡt, old);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasNetHooks(this ж<ClientTrace> Ꮡt) => httptrace_package.hasNetHooksᴍ(Ꮡt);
+}
+// </GlyphForwarders>

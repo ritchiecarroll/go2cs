@@ -287,11 +287,11 @@ partial struct NumError {
 
 } partial class strconv_package {
 
-internal static @string Errorᴍ(ref NumError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref NumError e) {
     return "strconv."u8 + e.Func + ": "u8 + "parsing "u8 + Quote(e.Num) + ": "u8 + e.Err.Error();
 }
 
-internal static error Unwrapᴍ(ref NumError e) { return e.Err; }
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref NumError e) { return e.Err; }
 
 } partial class strconv_package {
 
@@ -319,10 +319,3 @@ internal static ж<NumError> bitSizeError(@string fn, @string str, nint bitSize)
 }
 
 } // end strconv_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class strconvᴛNumError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref NumError e) => strconv_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref NumError e) => strconv_package.Unwrapᴍ(ref e);
-}
-// </GlyphForwarders>

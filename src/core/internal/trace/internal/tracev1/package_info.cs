@@ -69,6 +69,22 @@ using static go.@internal.trace.@internal.tracev1_package;
 
 namespace go.@internal.trace.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using errors = errors_package;
+using static tracev1_package;
+using bytes = bytes_package;
+using cmp = cmp_package;
+using binary = encoding.binary_package;
+using fmt = fmt_package;
+using version = go.@internal.trace.version_package;
+using io = io_package;
+using math = math_package;
+using slices = slices_package;
+using sort = sort_package;
+using encoding;
+using go.@internal.trace;
+// </GlyphForwarderUsings>
+
 [GoPackage("tracev1")]
 public static partial class tracev1_package
 {
@@ -132,3 +148,47 @@ public static partial class tracev1_package
 [GoMethodHost(typeof(tracev1_package.parser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tracev1ᴛparser;
 [GoMethodHost(typeof(tracev1_package.rawEvent)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tracev1ᴛrawEvent;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class tracev1ᴛorderEventList {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this ref orderEventList l, nint i, nint j) => tracev1_package.Lessᴍ(ref l, i, j);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Push(this ж<orderEventList> Ꮡh, orderEvent x) => tracev1_package.Pushᴍ(Ꮡh, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static orderEvent Pop(this ж<orderEventList> Ꮡh) => tracev1_package.Popᴍ(Ꮡh);
+}
+partial class tracev1ᴛparser {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool discard(this ref parser p, uint64 n) => tracev1_package.discardᴍ(ref p, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Trace, error) parse(this ж<parser> Ꮡp) => tracev1_package.parseᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Events, error) parseEventBatches(this ref parser p) => tracev1_package.parseEventBatchesᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error collectBatchesAndCPUSamples(this ref parser p) => tracev1_package.collectBatchesAndCPUSamplesᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte, bool) readByte(this ref parser p) => tracev1_package.readByteᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) readFull(this ref parser p, nint n) => tracev1_package.readFullᴍ(ref p, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readRawEvent(this ref parser p, nuint flags, ж<rawEvent> Ꮡev) => tracev1_package.readRawEventᴍ(ref p, flags, Ꮡev);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<Event>, error) loadBatch(this ref parser p, int32 pid, slice<Event> events) => tracev1_package.loadBatchᴍ(ref p, pid, events);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string s, error err) readStr(this ref parser p) => tracev1_package.readStrᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseEvent(this ref parser p, ж<rawEvent> Ꮡraw, ж<Event> Ꮡev) => tracev1_package.parseEventᴍ(ref p, Ꮡraw, Ꮡev);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error postProcessTrace(this ж<parser> Ꮡp, Events events) => tracev1_package.postProcessTraceᴍ(Ꮡp, events);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, error) readVal(this ref parser p) => tracev1_package.readValᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<uint64> allocateStack(this ref parser p, uint64 size) => tracev1_package.allocateStackᴍ(ref p, size);
+}
+partial class tracev1ᴛEvents {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Event> grow(this ref Events l) => tracev1_package.growᴍ(ref l);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Event> append(this ref Events l, Event v) => tracev1_package.appendᴍ(ref l, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Event> Ptr(this ref Events l, nint i) => tracev1_package.Ptrᴍ(ref l, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, nint) index(this ref Events l, nint i) => tracev1_package.indexᴍ(ref l, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ref Events l) => tracev1_package.Lenᴍ(ref l);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Less(this ref Events l, nint i, nint j) => tracev1_package.Lessᴍ(ref l, i, j);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Swap(this ref Events l, nint i, nint j) => tracev1_package.Swapᴍ(ref l, i, j);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Event>, bool) Pop(this ref Events l) => tracev1_package.Popᴍ(ref l);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Event>, bool) Peek(this ref Events l) => tracev1_package.Peekᴍ(ref l);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Action<Func<ж<Event>, bool>> All(this ж<Events> Ꮡl) => tracev1_package.Allᴍ(Ꮡl);
+}
+partial class tracev1ᴛEvent {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Event ev) => tracev1_package.Stringᴍ(ref ev);
+}
+partial class tracev1ᴛrawEvent {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint argNum(this ref rawEvent raw) => tracev1_package.argNumᴍ(ref raw);
+}
+partial class tracev1ᴛTrace {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static STWReason STWReason(this ref Trace tr, uint64 kindID) => tracev1_package.STWReasonᴍ(ref tr, kindID);
+}
+// </GlyphForwarders>

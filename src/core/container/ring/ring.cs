@@ -21,7 +21,7 @@ partial struct Ring {
 
 } partial class ring_package {
 
-internal static ж<Ring> initᴍ(ж<Ring> Ꮡr) {
+[GoMethodBody("init")] internal static ж<Ring> initᴍ(ж<Ring> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.next = Ꮡr;
@@ -30,7 +30,7 @@ internal static ж<Ring> initᴍ(ж<Ring> Ꮡr) {
 }
 
 // Next returns the next ring element. r must not be empty.
-internal static ж<Ring> Nextᴍ(ж<Ring> Ꮡr) {
+[GoMethodBody("Next")] internal static ж<Ring> Nextᴍ(ж<Ring> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.next == nil) {
@@ -40,7 +40,7 @@ internal static ж<Ring> Nextᴍ(ж<Ring> Ꮡr) {
 }
 
 // Prev returns the previous ring element. r must not be empty.
-internal static ж<Ring> Prevᴍ(ж<Ring> Ꮡr) {
+[GoMethodBody("Prev")] internal static ж<Ring> Prevᴍ(ж<Ring> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.next == nil) {
@@ -51,7 +51,7 @@ internal static ж<Ring> Prevᴍ(ж<Ring> Ꮡr) {
 
 // Move moves n % r.Len() elements backward (n < 0) or forward (n >= 0)
 // in the ring and returns that ring element. r must not be empty.
-internal static ж<Ring> Moveᴍ(ж<Ring> Ꮡr, nint n) {
+[GoMethodBody("Move")] internal static ж<Ring> Moveᴍ(ж<Ring> Ꮡr, nint n) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.next == nil) {
@@ -108,7 +108,7 @@ public static ж<Ring> New(nint n) {
 // them creates a single ring with the elements of s inserted
 // after r. The result points to the element following the
 // last element of s after insertion.
-internal static ж<Ring> Linkᴍ(ж<Ring> Ꮡr, ж<Ring> Ꮡs) {
+[GoMethodBody("Link")] internal static ж<Ring> Linkᴍ(ж<Ring> Ꮡr, ж<Ring> Ꮡs) {
     ref var r = ref Ꮡr.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -128,7 +128,7 @@ internal static ж<Ring> Linkᴍ(ж<Ring> Ꮡr, ж<Ring> Ꮡs) {
 // Unlink removes n % r.Len() elements from the ring r, starting
 // at r.Next(). If n % r.Len() == 0, r remains unchanged.
 // The result is the removed subring. r must not be empty.
-internal static ж<Ring> Unlinkᴍ(ж<Ring> Ꮡr, nint n) {
+[GoMethodBody("Unlink")] internal static ж<Ring> Unlinkᴍ(ж<Ring> Ꮡr, nint n) {
     if (n <= 0) {
         return default;
     }
@@ -137,7 +137,7 @@ internal static ж<Ring> Unlinkᴍ(ж<Ring> Ꮡr, nint n) {
 
 // Len computes the number of elements in ring r.
 // It executes in time proportional to the number of elements.
-internal static nint Lenᴍ(ж<Ring> Ꮡr) {
+[GoMethodBody("Len")] internal static nint Lenᴍ(ж<Ring> Ꮡr) {
     nint n = 0;
     if (Ꮡr != nil) {
         n = 1;
@@ -150,7 +150,7 @@ internal static nint Lenᴍ(ж<Ring> Ꮡr) {
 
 // Do calls function f on each element of the ring, in forward order.
 // The behavior of Do is undefined if f changes *r.
-internal static void Doᴍ(ж<Ring> Ꮡr, Action<any> f) {
+[GoMethodBody("Do")] internal static void Doᴍ(ж<Ring> Ꮡr, Action<any> f) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (Ꮡr != nil) {
@@ -162,16 +162,3 @@ internal static void Doᴍ(ж<Ring> Ꮡr, Action<any> f) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class ringᴛRing {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Ring> init(this ж<Ring> Ꮡr) => ring_package.initᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Ring> Next(this ж<Ring> Ꮡr) => ring_package.Nextᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Ring> Prev(this ж<Ring> Ꮡr) => ring_package.Prevᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Ring> Move(this ж<Ring> Ꮡr, nint n) => ring_package.Moveᴍ(Ꮡr, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Ring> Link(this ж<Ring> Ꮡr, ж<Ring> Ꮡs) => ring_package.Linkᴍ(Ꮡr, Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Ring> Unlink(this ж<Ring> Ꮡr, nint n) => ring_package.Unlinkᴍ(Ꮡr, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ж<Ring> Ꮡr) => ring_package.Lenᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Do(this ж<Ring> Ꮡr, Action<any> f) => ring_package.Doᴍ(Ꮡr, f);
-}
-// </GlyphForwarders>

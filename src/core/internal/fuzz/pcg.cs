@@ -85,12 +85,12 @@ internal static ж<pcgRand> newPcgRand() {
 
 } partial class fuzz_package {
 
-internal static void stepᴍ(ref pcgRand r) {
+[GoMethodBody("step")] internal static void stepᴍ(ref pcgRand r) {
     r.state *= multiplier;
     r.state += r.inc;
 }
 
-internal static void saveᴍ(ref pcgRand r, ж<uint64> ᏑrandState, ж<uint64> ᏑrandInc) {
+[GoMethodBody("save")] internal static void saveᴍ(ref pcgRand r, ж<uint64> ᏑrandState, ж<uint64> ᏑrandInc) {
     ref var randState = ref ᏑrandState.DerefOrNull();
     ref var randInc = ref ᏑrandInc.DerefOrNull();
 
@@ -98,13 +98,13 @@ internal static void saveᴍ(ref pcgRand r, ж<uint64> ᏑrandState, ж<uint64> 
     randInc = r.inc;
 }
 
-internal static void restoreᴍ(ref pcgRand r, uint64 randState, uint64 randInc) {
+[GoMethodBody("restore")] internal static void restoreᴍ(ref pcgRand r, uint64 randState, uint64 randInc) {
     r.state = randState;
     r.inc = randInc;
 }
 
 // uint32 returns a pseudo-random uint32.
-internal static uint32 uint32ᴍ(ref pcgRand r) {
+[GoMethodBody("uint32")] internal static uint32 uint32ᴍ(ref pcgRand r) {
     var x = r.state;
     r.step();
     return bits.RotateLeft32((uint32)(((x >> 18) ^ x) >> 27), -(nint)(x >> 59));
@@ -112,7 +112,7 @@ internal static uint32 uint32ᴍ(ref pcgRand r) {
 
 // intn returns a pseudo-random number in [0, n).
 // n must fit in a uint32.
-internal static nint intnᴍ(ref pcgRand r, nint n) {
+[GoMethodBody("intn")] internal static nint intnᴍ(ref pcgRand r, nint n) {
     if ((nint)(uint32)n != n) {
         throw panic("large Intn");
     }
@@ -124,7 +124,7 @@ internal static nint intnᴍ(ref pcgRand r, nint n) {
 // For implementation details, see:
 // https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction
 // https://lemire.me/blog/2016/06/30/fast-random-shuffling
-internal static uint32 uint32nᴍ(ref pcgRand r, uint32 n) {
+[GoMethodBody("uint32n")] internal static uint32 uint32nᴍ(ref pcgRand r, uint32 n) {
     var v = r.uint32();
     var prod = (uint64)v * (uint64)n;
     var low = (uint32)prod;
@@ -140,7 +140,7 @@ internal static uint32 uint32nᴍ(ref pcgRand r, uint32 n) {
 }
 
 // bool generates a random bool.
-internal static bool @boolᴍ(ref pcgRand r) {
+[GoMethodBody("bool")] internal static bool @boolᴍ(ref pcgRand r) {
     return (r.uint32() & 1) == 0;
 }
 
@@ -157,23 +157,7 @@ partial struct noCopy {
 } partial class fuzz_package {
 
 // Lock is a no-op used by -copylocks checker from `go vet`.
-internal static void Lockᴍ(ref noCopy _) { }
-internal static void Unlockᴍ(ref noCopy _) { }
+[GoMethodBody("Lock")] internal static void Lockᴍ(ref noCopy _) { }
+[GoMethodBody("Unlock")] internal static void Unlockᴍ(ref noCopy _) { }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class fuzzᴛpcgRand {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void step(this ref pcgRand r) => fuzz_package.stepᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void save(this ref pcgRand r, ж<uint64> ᏑrandState, ж<uint64> ᏑrandInc) => fuzz_package.saveᴍ(ref r, ᏑrandState, ᏑrandInc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void restore(this ref pcgRand r, uint64 randState, uint64 randInc) => fuzz_package.restoreᴍ(ref r, randState, randInc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 uint32(this ref pcgRand r) => fuzz_package.uint32ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint intn(this ref pcgRand r, nint n) => fuzz_package.intnᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 uint32n(this ref pcgRand r, uint32 n) => fuzz_package.uint32nᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool @bool(this ref pcgRand r) => fuzz_package.@boolᴍ(ref r);
-}
-partial class fuzzᴛnoCopy {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Lock(this ref noCopy _) => fuzz_package.Lockᴍ(ref _);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Unlock(this ref noCopy _) => fuzz_package.Unlockᴍ(ref _);
-}
-// </GlyphForwarders>

@@ -59,6 +59,19 @@ using static go.testing.slogtest_package;
 
 namespace go.testing;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using context = context_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using slog = log.slog_package;
+using reflect = reflect_package;
+using runtime = runtime_package;
+using testing = testing_package;
+using time = time_package;
+using log;
+using static slogtest_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("slogtest")]
 public static partial class slogtest_package
 {
@@ -102,3 +115,16 @@ public static partial class slogtest_package
 [GoMethodHost(typeof(slogtest_package.replace)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class slogtestᴛreplace;
 [GoMethodHost(typeof(slogtest_package.wrapper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class slogtestᴛwrapper;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class slogtestᴛwrapper {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Enabled(this wrapper recvᴛ, context.Context arg1ᴛ, slog.Level arg2ᴛ) => slogtest_package.Enabledᴍ(recvᴛ, arg1ᴛ, arg2ᴛ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithAttrs(this wrapper recvᴛ, slice<slog.Attr> attrs) => slogtest_package.WithAttrsᴍ(recvᴛ, attrs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithGroup(this wrapper recvᴛ, @string name) => slogtest_package.WithGroupᴍ(recvᴛ, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Handle(this ref wrapper h, context.Context ctx, slog.Record rʗp) => slogtest_package.Handleᴍ(ref h, ctx, rʗp);
+}
+partial class slogtestᴛreplace {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Value LogValue(this ref replace r) => slogtest_package.LogValueᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref replace r) => slogtest_package.Stringᴍ(ref r);
+}
+// </GlyphForwarders>

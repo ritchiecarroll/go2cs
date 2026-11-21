@@ -129,7 +129,7 @@ private static readonly @string eaePrkˢᵇᴍdhKEM = "eae_prk"u8;
 internal static ref readonly @string sharedSecretˢᴍdhKEM => ref sharedSecretˢᵇᴍdhKEM;
 private static readonly @string sharedSecretˢᵇᴍdhKEM = "shared_secret"u8;
 
-internal static (slice<byte>, error) extractAndExpandᴍ(ref dhKEM kem, slice<byte> dhKey, slice<byte> kemContext) {
+[GoMethodBody("extractAndExpand")] internal static (slice<byte>, error) extractAndExpandᴍ(ref dhKEM kem, slice<byte> dhKey, slice<byte> kemContext) {
     var suiteID = byteorder.BEAppendUint16(slice<byte>("KEM"u8), kem.id);
     var (eaePRK, err) = kem.kdf.labeledExtract(suiteID, default, eaePrkˢᴍdhKEM, dhKey);
     if (err != nil) {
@@ -138,11 +138,11 @@ internal static (slice<byte>, error) extractAndExpandᴍ(ref dhKEM kem, slice<by
     return kem.kdf.labeledExpand(suiteID, eaePRK, sharedSecretˢᴍdhKEM, kemContext, kem.Nsecret);
 }
 
-internal static uint16 IDᴍ(ref dhKEM kem) {
+[GoMethodBody("ID")] internal static uint16 IDᴍ(ref dhKEM kem) {
     return kem.id;
 }
 
-internal static nint encSizeᴍ(ref dhKEM kem) {
+[GoMethodBody("encSize")] internal static nint encSizeᴍ(ref dhKEM kem) {
     return kem.Nenc;
 }
 
@@ -192,26 +192,26 @@ partial struct unsupportedCurveKEM {
 
 } partial class hpke_package {
 
-internal static uint16 IDᴍ(unsupportedCurveKEM _) {
+[GoMethodBody("ID")] internal static uint16 IDᴍ(unsupportedCurveKEM _) {
     return 0;
 }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string unsupportedCurveˢᴍunsupportedCurveKEM => ref unsupportedCurveˢᵇᴍunsupportedCurveKEM;
 private static readonly @string unsupportedCurveˢᵇᴍunsupportedCurveKEM = "unsupported curve"u8;
 
-internal static (PrivateKey, error) GenerateKeyᴍ(unsupportedCurveKEM _) {
+[GoMethodBody("GenerateKey")] internal static (PrivateKey, error) GenerateKeyᴍ(unsupportedCurveKEM _) {
     return (default, errors.New(unsupportedCurveˢᴍunsupportedCurveKEM));
 }
-internal static (PublicKey, error) NewPublicKeyᴍ(unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
+[GoMethodBody("NewPublicKey")] internal static (PublicKey, error) NewPublicKeyᴍ(unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
     return (default, errors.New(unsupportedCurveˢᴍunsupportedCurveKEM));
 }
-internal static (PrivateKey, error) NewPrivateKeyᴍ(unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
+[GoMethodBody("NewPrivateKey")] internal static (PrivateKey, error) NewPrivateKeyᴍ(unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
     return (default, errors.New(unsupportedCurveˢᴍunsupportedCurveKEM));
 }
-internal static (PrivateKey, error) DeriveKeyPairᴍ(unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
+[GoMethodBody("DeriveKeyPair")] internal static (PrivateKey, error) DeriveKeyPairᴍ(unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
     return (default, errors.New(unsupportedCurveˢᴍunsupportedCurveKEM));
 }
-internal static nint encSizeᴍ(unsupportedCurveKEM _) {
+[GoMethodBody("encSize")] internal static nint encSizeᴍ(unsupportedCurveKEM _) {
     return 0;
 }
 
@@ -254,7 +254,7 @@ public static (PublicKey, error) NewDHKEMPublicKey(ж<ecdh.PublicKey> Ꮡpub) {
 
 } partial class hpke_package {
 
-internal static (PublicKey, error) NewPublicKeyᴍ(ref dhKEM kem, slice<byte> data) {
+[GoMethodBody("NewPublicKey")] internal static (PublicKey, error) NewPublicKeyᴍ(ref dhKEM kem, slice<byte> data) {
     var (pub, err) = kem.curve.NewPublicKey(data);
     if (err != nil) {
         return (default, err);
@@ -264,11 +264,11 @@ internal static (PublicKey, error) NewPublicKeyᴍ(ref dhKEM kem, slice<byte> da
 
 } partial class hpke_package {
 
-internal static KEM KEMᴍ(ref dhKEMPublicKey pk) {
+[GoMethodBody("KEM")] internal static KEM KEMᴍ(ref dhKEMPublicKey pk) {
     return new dhKEMжKEM(pk.kem);
 }
 
-internal static slice<byte> Bytesᴍ(ref dhKEMPublicKey pk) {
+[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref dhKEMPublicKey pk) {
     return pk.pub.Bytes();
 }
 
@@ -280,7 +280,7 @@ internal static Func<ж<ecdh.PrivateKey>> testingOnlyGenerateKey;
 
 } partial class hpke_package {
 
-internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encapᴍ(ref dhKEMPublicKey pk) {
+[GoMethodBody("encap")] internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encapᴍ(ref dhKEMPublicKey pk) {
     slice<byte> sharedSecret = default;
     error err = default;
 
@@ -340,7 +340,7 @@ public static (PrivateKey, error) NewDHKEMPrivateKey(ecdh.KeyExchanger priv) {
 
 } partial class hpke_package {
 
-internal static (PrivateKey, error) GenerateKeyᴍ(ref dhKEM kem) {
+[GoMethodBody("GenerateKey")] internal static (PrivateKey, error) GenerateKeyᴍ(ref dhKEM kem) {
     var (priv, err) = kem.curve.GenerateKey(rand.Reader);
     if (err != nil) {
         return (default, err);
@@ -348,7 +348,7 @@ internal static (PrivateKey, error) GenerateKeyᴍ(ref dhKEM kem) {
     return NewDHKEMPrivateKey(new ecdh.PrivateKeyжKeyExchanger(priv));
 }
 
-internal static (PrivateKey, error) NewPrivateKeyᴍ(ref dhKEM kem, slice<byte> ikm) {
+[GoMethodBody("NewPrivateKey")] internal static (PrivateKey, error) NewPrivateKeyᴍ(ref dhKEM kem, slice<byte> ikm) {
     var (priv, err) = kem.curve.NewPrivateKey(ikm);
     if (err != nil) {
         return (default, err);
@@ -362,7 +362,7 @@ private static readonly @string dkpPrkˢᵇᴍdhKEM = "dkp_prk"u8;
 internal static ref readonly @string candidateˢᴍdhKEM => ref candidateˢᵇᴍdhKEM;
 private static readonly @string candidateˢᵇᴍdhKEM = "candidate"u8;
 
-internal static (PrivateKey, error) DeriveKeyPairᴍ(ж<dhKEM> Ꮡkem, slice<byte> ikm) {
+[GoMethodBody("DeriveKeyPair")] internal static (PrivateKey, error) DeriveKeyPairᴍ(ж<dhKEM> Ꮡkem, slice<byte> ikm) {
     ref var kem = ref Ꮡkem.DerefOrNull();
 
     // DeriveKeyPair from RFC 9180 Section 7.1.3.
@@ -399,7 +399,7 @@ internal static (PrivateKey, error) DeriveKeyPairᴍ(ж<dhKEM> Ꮡkem, slice<byt
 
 } partial class hpke_package {
 
-internal static KEM KEMᴍ(ref dhKEMPrivateKey k) {
+[GoMethodBody("KEM")] internal static KEM KEMᴍ(ref dhKEMPrivateKey k) {
     return new dhKEMжKEM(k.kem);
 }
 
@@ -407,7 +407,7 @@ internal static KEM KEMᴍ(ref dhKEMPrivateKey k) {
 internal static ref readonly @string ecdhPrivateKeyDoesNotˢᴍdhKEMPrivateKey => ref ecdhPrivateKeyDoesNotˢᵇᴍdhKEMPrivateKey;
 private static readonly @string ecdhPrivateKeyDoesNotˢᵇᴍdhKEMPrivateKey = "ecdh: private key does not support Bytes"u8;
 
-internal static (slice<byte>, error) Bytesᴍ(ref dhKEMPrivateKey k) {
+[GoMethodBody("Bytes")] internal static (slice<byte>, error) Bytesᴍ(ref dhKEMPrivateKey k) {
     // Bizarrely, RFC 9180, Section 7.1.2 says SerializePrivateKey MUST clamp
     // the output, which I thought we all agreed to instead do as part of the DH
     // function, letting private keys be random bytes.
@@ -431,14 +431,14 @@ internal static (slice<byte>, error) Bytesᴍ(ref dhKEMPrivateKey k) {
     return (priv.Bytes(), default);
 }
 
-internal static PublicKey PublicKeyᴍ(ref dhKEMPrivateKey k) {
+[GoMethodBody("PublicKey")] internal static PublicKey PublicKeyᴍ(ref dhKEMPrivateKey k) {
     return new dhKEMPublicKeyжPublicKey(Ꮡ(new dhKEMPublicKey(
         kem: k.kem,
         pub: k.priv.PublicKey()
     )));
 }
 
-internal static (slice<byte>, error) decapᴍ(ref dhKEMPrivateKey k, slice<byte> encPubEph) {
+[GoMethodBody("decap")] internal static (slice<byte>, error) decapᴍ(ref dhKEMPrivateKey k, slice<byte> encPubEph) {
     var (pubEph, err) = k.priv.Curve().NewPublicKey(encPubEph);
     if (err != nil) {
         return (default, err);
@@ -452,34 +452,3 @@ internal static (slice<byte>, error) decapᴍ(ref dhKEMPrivateKey k, slice<byte>
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class hpkeᴛdhKEM {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) extractAndExpand(this ref dhKEM kem, slice<byte> dhKey, slice<byte> kemContext) => hpke_package.extractAndExpandᴍ(ref kem, dhKey, kemContext);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 ID(this ref dhKEM kem) => hpke_package.IDᴍ(ref kem);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint encSize(this ref dhKEM kem) => hpke_package.encSizeᴍ(ref kem);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (PublicKey, error) NewPublicKey(this ref dhKEM kem, slice<byte> data) => hpke_package.NewPublicKeyᴍ(ref kem, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (PrivateKey, error) GenerateKey(this ref dhKEM kem) => hpke_package.GenerateKeyᴍ(ref kem);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (PrivateKey, error) NewPrivateKey(this ref dhKEM kem, slice<byte> ikm) => hpke_package.NewPrivateKeyᴍ(ref kem, ikm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (PrivateKey, error) DeriveKeyPair(this ж<dhKEM> Ꮡkem, slice<byte> ikm) => hpke_package.DeriveKeyPairᴍ(Ꮡkem, ikm);
-}
-partial class hpkeᴛunsupportedCurveKEM {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 ID(this unsupportedCurveKEM _) => hpke_package.IDᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (PrivateKey, error) GenerateKey(this unsupportedCurveKEM _) => hpke_package.GenerateKeyᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (PublicKey, error) NewPublicKey(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) => hpke_package.NewPublicKeyᴍ(_Δp0, _Δp1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (PrivateKey, error) NewPrivateKey(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) => hpke_package.NewPrivateKeyᴍ(_Δp0, _Δp1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (PrivateKey, error) DeriveKeyPair(this unsupportedCurveKEM _Δp0, slice<byte> _Δp1) => hpke_package.DeriveKeyPairᴍ(_Δp0, _Δp1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint encSize(this unsupportedCurveKEM _) => hpke_package.encSizeᴍ(_);
-}
-partial class hpkeᴛdhKEMPublicKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static KEM KEM(this ref dhKEMPublicKey pk) => hpke_package.KEMᴍ(ref pk);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Bytes(this ref dhKEMPublicKey pk) => hpke_package.Bytesᴍ(ref pk);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encap(this ref dhKEMPublicKey pk) => hpke_package.encapᴍ(ref pk);
-}
-partial class hpkeᴛdhKEMPrivateKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static KEM KEM(this ref dhKEMPrivateKey k) => hpke_package.KEMᴍ(ref k);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) Bytes(this ref dhKEMPrivateKey k) => hpke_package.Bytesᴍ(ref k);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static PublicKey PublicKey(this ref dhKEMPrivateKey k) => hpke_package.PublicKeyᴍ(ref k);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) decap(this ref dhKEMPrivateKey k, slice<byte> encPubEph) => hpke_package.decapᴍ(ref k, encPubEph);
-}
-// </GlyphForwarders>

@@ -78,7 +78,7 @@ internal static (inlineUnwinder, inlineFrame) newInlineUnwinder(funcInfo f, uint
 
 } partial class runtime_package {
 
-internal static inlineFrame resolveInternalᴍ(ref inlineUnwinder u, uintptr pc) {
+[GoMethodBody("resolveInternal")] internal static inlineFrame resolveInternalᴍ(ref inlineUnwinder u, uintptr pc) {
     return new inlineFrame(
         pc: pc,
         // Conveniently, this returns -1 if there's an error, which is the same
@@ -89,14 +89,14 @@ internal static inlineFrame resolveInternalᴍ(ref inlineUnwinder u, uintptr pc)
 
 } partial class runtime_package {
 
-internal static bool validᴍ(inlineFrame uf) {
+[GoMethodBody("valid")] internal static bool validᴍ(inlineFrame uf) {
     return uf.pc != 0;
 }
 
 } partial class runtime_package {
 
 // next returns the frame representing uf's logical caller.
-internal static inlineFrame nextᴍ(ref inlineUnwinder u, inlineFrame uf) {
+[GoMethodBody("next")] internal static inlineFrame nextᴍ(ref inlineUnwinder u, inlineFrame uf) {
     if (uf.index < 0) {
         uf.pc = 0;
         return uf;
@@ -106,7 +106,7 @@ internal static inlineFrame nextᴍ(ref inlineUnwinder u, inlineFrame uf) {
 }
 
 // isInlined returns whether uf is an inlined frame.
-internal static bool isInlinedᴍ(ref inlineUnwinder u, inlineFrame uf) {
+[GoMethodBody("isInlined")] internal static bool isInlinedᴍ(ref inlineUnwinder u, inlineFrame uf) {
     return uf.index >= 0;
 }
 
@@ -121,7 +121,7 @@ internal static bool isInlinedᴍ(ref inlineUnwinder u, inlineFrame uf) {
 // See go.dev/issue/67401.
 //
 // The go:linkname is below.
-internal static srcFunc srcFuncᴍ(ref inlineUnwinder u, inlineFrame uf) {
+[GoMethodBody("srcFunc")] internal static srcFunc srcFuncᴍ(ref inlineUnwinder u, inlineFrame uf) {
     if (uf.index < 0) {
         return u.f.srcFunc();
     }
@@ -147,7 +147,7 @@ internal static partial srcFunc badSrcFunc(ж<inlineUnwinder> _Δp0, inlineFrame
 // physical function).
 //
 // It returns "?", 0 if something goes wrong.
-internal static (@string @file, nint line) fileLineᴍ(ref inlineUnwinder u, inlineFrame uf) {
+[GoMethodBody("fileLine")] internal static (@string @file, nint line) fileLineᴍ(ref inlineUnwinder u, inlineFrame uf) {
     @string @file = default;
 
     (@file, var line32) = funcline1(u.f, uf.pc, false);
@@ -155,16 +155,3 @@ internal static (@string @file, nint line) fileLineᴍ(ref inlineUnwinder u, inl
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛinlineUnwinder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static inlineFrame resolveInternal(this ref inlineUnwinder u, uintptr pc) => runtime_package.resolveInternalᴍ(ref u, pc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static inlineFrame next(this ref inlineUnwinder u, inlineFrame uf) => runtime_package.nextᴍ(ref u, uf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isInlined(this ref inlineUnwinder u, inlineFrame uf) => runtime_package.isInlinedᴍ(ref u, uf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static srcFunc srcFunc(this ref inlineUnwinder u, inlineFrame uf) => runtime_package.srcFuncᴍ(ref u, uf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string @file, nint line) fileLine(this ref inlineUnwinder u, inlineFrame uf) => runtime_package.fileLineᴍ(ref u, uf);
-}
-partial class runtimeᴛinlineFrame {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool valid(this inlineFrame uf) => runtime_package.validᴍ(uf);
-}
-// </GlyphForwarders>

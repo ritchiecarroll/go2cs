@@ -71,6 +71,18 @@ using static go.debug.plan9obj_package;
 
 namespace go.debug;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using binary = encoding.binary_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using saferio = @internal.saferio_package;
+using io = io_package;
+using os = os_package;
+using @internal;
+using encoding;
+using static plan9obj_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("plan9obj")]
 public static partial class plan9obj_package
 {
@@ -119,3 +131,18 @@ public static partial class plan9obj_package
 [GoMethodHost(typeof(plan9obj_package.Section)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class plan9objᴛSection;
 [GoMethodHost(typeof(plan9obj_package.formatError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class plan9objᴛformatError;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class plan9objᴛSection {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Data(this ref Section s) => plan9obj_package.Dataᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.ReadSeeker Open(this ref Section s) => plan9obj_package.Openᴍ(ref s);
+}
+partial class plan9objᴛformatError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref formatError e) => plan9obj_package.Errorᴍ(ref e);
+}
+partial class plan9objᴛFile {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref File f) => plan9obj_package.Closeᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<Sym>, error) Symbols(this ref File f) => plan9obj_package.Symbolsᴍ(ref f);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Section> Section(this ref File f, @string name) => plan9obj_package.Sectionᴍ(ref f, name);
+}
+// </GlyphForwarders>

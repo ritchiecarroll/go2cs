@@ -97,7 +97,7 @@ internal static ж<table> newTable(ж<abi.MapType> typ, uint64 capacity, nint in
 
 // reset resets the table with new, empty groups with the specified new total
 // capacity.
-internal static void resetᴍ(ref table t, ж<abi.MapType> typ, uint16 capacity) {
+[GoMethodBody("reset")] internal static void resetᴍ(ref table t, ж<abi.MapType> typ, uint16 capacity) {
     var groupCount = (uint64)capacity / (uint64)abi.MapGroupSlots;
     t.groups = newGroups(ref (typ).DerefOrNull(), groupCount);
     t.capacity = capacity;
@@ -111,7 +111,7 @@ internal static void resetᴍ(ref table t, ж<abi.MapType> typ, uint16 capacity)
 
 // maxGrowthLeft is the number of inserts we can do before
 // resizing, starting from an empty table.
-internal static uint16 maxGrowthLeftᴍ(ref table t) {
+[GoMethodBody("maxGrowthLeft")] internal static uint16 maxGrowthLeftᴍ(ref table t) {
     if (t.capacity == 0) {
         // No real reason to support zero capacity table, since an
         // empty Map simply won't have a table.
@@ -132,13 +132,13 @@ internal static uint16 maxGrowthLeftᴍ(ref table t) {
     }
 }
 
-internal static uint64 Usedᴍ(ref table t) {
+[GoMethodBody("Used")] internal static uint64 Usedᴍ(ref table t) {
     return (uint64)t.used;
 }
 
 // Get performs a lookup of the key that key points to. It returns a pointer to
 // the element, or false if the key doesn't exist.
-internal static (@unsafe.Pointer, bool) Getᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, @unsafe.Pointer key) {
+[GoMethodBody("Get")] internal static (@unsafe.Pointer, bool) Getᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -162,7 +162,7 @@ internal static (@unsafe.Pointer, bool) Getᴍ(ref table t, ж<abi.MapType> Ꮡt
 // expose updated elements. For NeedsKeyUpdate keys, iteration also must return
 // the new key value, not the old key value.
 // hash must be the hash of the key.
-internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeyᴍ(ref table t, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+[GoMethodBody("getWithKey")] internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeyᴍ(ref table t, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     // To find the location of a key in the table, we compute hash(key). From
@@ -225,7 +225,7 @@ internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKeyᴍ(ref table
     }
 }
 
-internal static (@unsafe.Pointer, bool) getWithoutKeyᴍ(ref table t, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
+[GoMethodBody("getWithoutKey")] internal static (@unsafe.Pointer, bool) getWithoutKeyᴍ(ref table t, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var seq = makeProbeSeq(h1(hash), t.groups.lengthMask);
@@ -268,7 +268,7 @@ internal static (@unsafe.Pointer, bool) getWithoutKeyᴍ(ref table t, ж<abi.Map
 // the new table.
 //
 // hash must be the hash of key.
-internal static (@unsafe.Pointer, bool) PutSlotᴍ(ж<table> Ꮡt, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uintptr hash, @unsafe.Pointer key) {
+[GoMethodBody("PutSlot")] internal static (@unsafe.Pointer, bool) PutSlotᴍ(ж<table> Ꮡt, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uintptr hash, @unsafe.Pointer key) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
@@ -388,7 +388,7 @@ internal static (@unsafe.Pointer, bool) PutSlotᴍ(ж<table> Ꮡt, ж<abi.MapTyp
 // requires the caller to ensure that the referenced memory never
 // changes (by sourcing those pointers from another indirect key/elem
 // map).
-internal static void uncheckedPutSlotᴍ(ref table t, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key, @unsafe.Pointer elem) {
+[GoMethodBody("uncheckedPutSlot")] internal static void uncheckedPutSlotᴍ(ref table t, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key, @unsafe.Pointer elem) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (t.growthLeft == 0) {
@@ -430,7 +430,7 @@ internal static void uncheckedPutSlotᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ui
 }
 
 // Delete returns true if it put a tombstone in t.
-internal static bool Deleteᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uintptr hash, @unsafe.Pointer key) {
+[GoMethodBody("Delete")] internal static bool Deleteᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uintptr hash, @unsafe.Pointer key) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -521,7 +521,7 @@ internal static bool Deleteᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm
 // We really need to remove O(n) tombstones so we can pay for the cost
 // of finding them. If we can't, then we need to grow (which is also O(n),
 // but guarantees O(n) subsequent inserts can happen in constant time).
-internal static void pruneTombstonesᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
+[GoMethodBody("pruneTombstones")] internal static void pruneTombstonesᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -609,12 +609,12 @@ internal static void pruneTombstonesᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<
 // tombstones returns the number of deleted (tombstone) entries in the table. A
 // tombstone is a slot that has been deleted but is still considered occupied
 // so as not to violate the probing invariant.
-internal static uint16 tombstonesᴍ(ref table t) {
+[GoMethodBody("tombstones")] internal static uint16 tombstonesᴍ(ref table t) {
     return (uint16)((uint16)(t.capacity * (uint16)maxAvgGroupLoad) / (uint16)abi.MapGroupSlots - t.used - t.growthLeft);
 }
 
 // Clear deletes all entries from the table resulting in an empty table.
-internal static void Clearᴍ(ref table t, ж<abi.MapType> Ꮡtyp) {
+[GoMethodBody("Clear")] internal static void Clearᴍ(ref table t, ж<abi.MapType> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var mgl = t.maxGrowthLeft();
@@ -691,7 +691,7 @@ partial struct Iter {
 } partial class maps_package {
 
 // Init initializes Iter for iteration.
-internal static void Initᴍ(ref Iter it, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
+[GoMethodBody("Init")] internal static void Initᴍ(ref Iter it, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -718,19 +718,19 @@ internal static void Initᴍ(ref Iter it, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) 
     it.clearSeq = m.clearSeq;
 }
 
-internal static bool Initializedᴍ(ref Iter it) {
+[GoMethodBody("Initialized")] internal static bool Initializedᴍ(ref Iter it) {
     return it.typ != nil;
 }
 
 // Map returns the map this iterator is iterating over.
-internal static ж<Map> Mapᴍ(ref Iter it) {
+[GoMethodBody("Map")] internal static ж<Map> Mapᴍ(ref Iter it) {
     return it.m;
 }
 
 // Key returns a pointer to the current key. nil indicates end of iteration.
 //
 // Must not be called prior to Next.
-internal static @unsafe.Pointer Keyᴍ(ref Iter it) {
+[GoMethodBody("Key")] internal static @unsafe.Pointer Keyᴍ(ref Iter it) {
     return it.key;
 }
 
@@ -738,11 +738,11 @@ internal static @unsafe.Pointer Keyᴍ(ref Iter it) {
 // iteration.
 //
 // Must not be called prior to Next.
-internal static @unsafe.Pointer Elemᴍ(ref Iter it) {
+[GoMethodBody("Elem")] internal static @unsafe.Pointer Elemᴍ(ref Iter it) {
     return it.elem;
 }
 
-internal static void nextDirIdxᴍ(ref Iter it) {
+[GoMethodBody("nextDirIdx")] internal static void nextDirIdxᴍ(ref Iter it) {
     // Skip other entries in the directory that refer to the same
     // logical table. There are two cases of this:
     //
@@ -778,7 +778,7 @@ internal static void nextDirIdxᴍ(ref Iter it) {
 
 // Return the appropriate key/elem for key at slotIdx index within it.group, if
 // any.
-internal static (@unsafe.Pointer, @unsafe.Pointer, bool) grownKeyElemᴍ(ref Iter it, @unsafe.Pointer key, uintptr slotIdx) {
+[GoMethodBody("grownKeyElem")] internal static (@unsafe.Pointer, @unsafe.Pointer, bool) grownKeyElemᴍ(ref Iter it, @unsafe.Pointer key, uintptr slotIdx) {
     var (newKey, newElem, ok) = it.m.getWithKey(it.typ, key);
     if (!ok) {
         // Key has likely been deleted, and
@@ -830,7 +830,7 @@ private static readonly @string concurrentMapIterationˢᵇᴍIter = "concurrent
 // the mutations will be visible to the iteration.
 //
 // Init must be called prior to Next.
-internal static void Nextᴍ(ref Iter it) {
+[GoMethodBody("Next")] internal static void Nextᴍ(ref Iter it) {
     if (it.m == nil) {
         // Map was empty at Iter.Init.
         it.key = default;
@@ -1167,7 +1167,7 @@ next:
 // Replaces the table with one larger table or two split tables to fit more
 // entries. Since the table is replaced, t is now stale and should not be
 // modified.
-internal static void rehashᴍ(ж<table> Ꮡt, ж<abi.MapType> typ, ж<Map> m) {
+[GoMethodBody("rehash")] internal static void rehashᴍ(ж<table> Ꮡt, ж<abi.MapType> typ, ж<Map> m) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // TODO(prattmic): SwissTables typically perform a "rehash in place"
@@ -1207,7 +1207,7 @@ internal static uintptr localDepthMask(uint8 localDepth) {
 } partial class maps_package {
 
 // split the table into two, installing the new tables in the map directory.
-internal static void splitᴍ(ж<table> Ꮡt, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
+[GoMethodBody("split")] internal static void splitᴍ(ж<table> Ꮡt, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
@@ -1259,7 +1259,7 @@ internal static void splitᴍ(ж<table> Ꮡt, ж<abi.MapType> Ꮡtyp, ж<Map> �
 // and uncheckedPutting each element of the table into the new table (we know
 // that no insertion here will Put an already-present value), and discard the
 // old table.
-internal static void growᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uint16 newCapacity) {
+[GoMethodBody("grow")] internal static void growᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uint16 newCapacity) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -1327,7 +1327,7 @@ internal static probeSeq makeProbeSeq(uintptr hash, uint64 mask) {
 
 } partial class maps_package {
 
-internal static probeSeq nextᴍ(probeSeq s) {
+[GoMethodBody("next")] internal static probeSeq nextᴍ(probeSeq s) {
     s.index++;
     s.offset = (s.offset + s.index) & s.mask;
     return s;
@@ -1335,7 +1335,7 @@ internal static probeSeq nextᴍ(probeSeq s) {
 
 } partial class maps_package {
 
-internal static ж<table> cloneᴍ(ж<table> Ꮡt, ж<abi.MapType> typ) {
+[GoMethodBody("clone")] internal static ж<table> cloneᴍ(ж<table> Ꮡt, ж<abi.MapType> typ) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Shallow copy the table structure.
@@ -1357,37 +1357,3 @@ internal static ж<table> cloneᴍ(ж<table> Ꮡt, ж<abi.MapType> typ) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class mapsᴛtable {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref table t, ж<abi.MapType> typ, uint16 capacity) => maps_package.resetᴍ(ref t, typ, capacity);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 maxGrowthLeft(this ref table t) => maps_package.maxGrowthLeftᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Used(this ref table t) => maps_package.Usedᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@unsafe.Pointer, bool) Get(this ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, @unsafe.Pointer key) => maps_package.Getᴍ(ref t, Ꮡtyp, Ꮡm, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@unsafe.Pointer, @unsafe.Pointer, bool) getWithKey(this ref table t, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) => maps_package.getWithKeyᴍ(ref t, Ꮡtyp, hash, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@unsafe.Pointer, bool) getWithoutKey(this ref table t, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key) => maps_package.getWithoutKeyᴍ(ref t, Ꮡtyp, hash, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@unsafe.Pointer, bool) PutSlot(this ж<table> Ꮡt, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uintptr hash, @unsafe.Pointer key) => maps_package.PutSlotᴍ(Ꮡt, Ꮡtyp, Ꮡm, hash, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void uncheckedPutSlot(this ref table t, ж<abi.MapType> Ꮡtyp, uintptr hash, @unsafe.Pointer key, @unsafe.Pointer elem) => maps_package.uncheckedPutSlotᴍ(ref t, Ꮡtyp, hash, key, elem);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Delete(this ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uintptr hash, @unsafe.Pointer key) => maps_package.Deleteᴍ(ref t, Ꮡtyp, Ꮡm, hash, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pruneTombstones(this ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) => maps_package.pruneTombstonesᴍ(ref t, Ꮡtyp, Ꮡm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 tombstones(this ref table t) => maps_package.tombstonesᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Clear(this ref table t, ж<abi.MapType> Ꮡtyp) => maps_package.Clearᴍ(ref t, Ꮡtyp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void rehash(this ж<table> Ꮡt, ж<abi.MapType> typ, ж<Map> m) => maps_package.rehashᴍ(Ꮡt, typ, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void split(this ж<table> Ꮡt, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) => maps_package.splitᴍ(Ꮡt, Ꮡtyp, Ꮡm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void grow(this ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm, uint16 newCapacity) => maps_package.growᴍ(ref t, Ꮡtyp, Ꮡm, newCapacity);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<table> clone(this ж<table> Ꮡt, ж<abi.MapType> typ) => maps_package.cloneᴍ(Ꮡt, typ);
-}
-partial class mapsᴛIter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Init(this ref Iter it, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) => maps_package.Initᴍ(ref it, Ꮡtyp, Ꮡm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Initialized(this ref Iter it) => maps_package.Initializedᴍ(ref it);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Map> Map(this ref Iter it) => maps_package.Mapᴍ(ref it);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @unsafe.Pointer Key(this ref Iter it) => maps_package.Keyᴍ(ref it);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @unsafe.Pointer Elem(this ref Iter it) => maps_package.Elemᴍ(ref it);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void nextDirIdx(this ref Iter it) => maps_package.nextDirIdxᴍ(ref it);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@unsafe.Pointer, @unsafe.Pointer, bool) grownKeyElem(this ref Iter it, @unsafe.Pointer key, uintptr slotIdx) => maps_package.grownKeyElemᴍ(ref it, key, slotIdx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Next(this ref Iter it) => maps_package.Nextᴍ(ref it);
-}
-partial class mapsᴛprobeSeq {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static probeSeq next(this probeSeq s) => maps_package.nextᴍ(s);
-}
-// </GlyphForwarders>

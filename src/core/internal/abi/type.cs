@@ -138,7 +138,7 @@ partial struct TextOff /*num:int32*/;
 } partial class abi_package {
 
 // String returns the name of k.
-internal static @string Stringᴍ(Kind k) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Kind k) {
     if ((nint)k < len(kindNames)) {
         return kindNames[k];
     }
@@ -183,21 +183,21 @@ internal static @string Stringᴍ(Kind k) {
 
 } partial class abi_package {
 
-internal static Kind Kindᴍ(ref Type t) { return t.Kind_; }
+[GoMethodBody("Kind")] internal static Kind Kindᴍ(ref Type t) { return t.Kind_; }
 
-internal static bool HasNameᴍ(ref Type t) {
+[GoMethodBody("HasName")] internal static bool HasNameᴍ(ref Type t) {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;
 }
 
 // Pointers reports whether t contains pointers.
-internal static bool Pointersᴍ(ref Type t) { return t.PtrBytes != 0; }
+[GoMethodBody("Pointers")] internal static bool Pointersᴍ(ref Type t) { return t.PtrBytes != 0; }
 
 // IsDirectIface reports whether t is stored directly in an interface value.
-internal static bool IsDirectIfaceᴍ(ref Type t) {
+[GoMethodBody("IsDirectIface")] internal static bool IsDirectIfaceᴍ(ref Type t) {
     return (TFlag)(t.TFlag & TFlagDirectIface) != 0;
 }
 
-internal static slice<byte> GcSliceᴍ(ref Type t, uintptr begin, uintptr end) {
+[GoMethodBody("GcSlice")] internal static slice<byte> GcSliceᴍ(ref Type t, uintptr begin, uintptr end) {
     if ((TFlag)(t.TFlag & TFlagGCMaskOnDemand) != 0) {
         throw panic("GcSlice can't handle on-demand gcdata types");
     }
@@ -232,7 +232,7 @@ partial struct UncommonType {
 internal static ref readonly @string tMcount0ˢᴍUncommonType => ref tMcount0ˢᵇᴍUncommonType;
 private static readonly @string tMcount0ˢᵇᴍUncommonType = "t.mcount > 0"u8;
 
-internal static unsafe slice<Method> Methodsᴍ(ж<UncommonType> Ꮡt) {
+[GoMethodBody("Methods")] internal static unsafe slice<Method> Methodsᴍ(ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Mcount == 0) {
@@ -245,7 +245,7 @@ internal static unsafe slice<Method> Methodsᴍ(ж<UncommonType> Ꮡt) {
 internal static ref readonly @string tXcount0ˢᴍUncommonType => ref tXcount0ˢᵇᴍUncommonType;
 private static readonly @string tXcount0ˢᵇᴍUncommonType = "t.xcount > 0"u8;
 
-internal static unsafe slice<Method> ExportedMethodsᴍ(ж<UncommonType> Ꮡt) {
+[GoMethodBody("ExportedMethods")] internal static unsafe slice<Method> ExportedMethodsᴍ(ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Xcount == 0) {
@@ -285,7 +285,7 @@ partial struct ArrayType {
 
 // go2cs generated this placeholder — func Len is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static ж<Type> Commonᴍ(ж<Type> Ꮡt) {
+[GoMethodBody("Common")] internal static ж<Type> Commonᴍ(ж<Type> Ꮡt) {
     return Ꮡt;
 }
 
@@ -359,7 +359,7 @@ internal partial struct Uncommon_uᴛ7 /*dyn*/ {
 } partial class abi_package {
 
 // Uncommon returns a pointer to T's "uncommon" data if there is any, otherwise nil
-internal static ж<UncommonType> Uncommonᴍ(ж<Type> Ꮡt) {
+[GoMethodBody("Uncommon")] internal static ж<UncommonType> Uncommonᴍ(ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if ((TFlag)(t.TFlag & TFlagUncommon) == 0) {
@@ -410,9 +410,9 @@ internal static ж<UncommonType> Uncommonᴍ(ж<Type> Ꮡt) {
 // go2cs generated this placeholder — func Size is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Align returns the alignment of data with type t.
-internal static nint Alignᴍ(ref Type t) { return (nint)t.Align_; }
+[GoMethodBody("Align")] internal static nint Alignᴍ(ref Type t) { return (nint)t.Align_; }
 
-internal static nint FieldAlignᴍ(ref Type t) { return (nint)t.FieldAlign_; }
+[GoMethodBody("FieldAlign")] internal static nint FieldAlignᴍ(ref Type t) { return (nint)t.FieldAlign_; }
 
 } partial class abi_package {
 
@@ -424,7 +424,7 @@ partial struct InterfaceType {
 
 } partial class abi_package {
 
-internal static slice<Method> ExportedMethodsᴍ(ж<Type> Ꮡt) {
+[GoMethodBody("ExportedMethods")] internal static slice<Method> ExportedMethodsᴍ(ж<Type> Ꮡt) {
     var ut = Ꮡt.Uncommon();
     if (ut == nil) {
         return default;
@@ -432,7 +432,7 @@ internal static slice<Method> ExportedMethodsᴍ(ж<Type> Ꮡt) {
     return ut.ExportedMethods();
 }
 
-internal static nint NumMethodᴍ(ж<Type> Ꮡt) {
+[GoMethodBody("NumMethod")] internal static nint NumMethodᴍ(ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() == Interface) {
@@ -445,7 +445,7 @@ internal static nint NumMethodᴍ(ж<Type> Ꮡt) {
 } partial class abi_package {
 
 // NumMethod returns the number of interface methods in the type's method set.
-internal static nint NumMethodᴍ(ref InterfaceType t) { return len(t.Methods); }
+[GoMethodBody("NumMethod")] internal static nint NumMethodᴍ(ref InterfaceType t) { return len(t.Methods); }
 
 } partial class abi_package {
 
@@ -477,26 +477,26 @@ partial struct FuncType {
 
 } partial class abi_package {
 
-internal static ж<Type> Inᴍ(ж<FuncType> Ꮡt, nint i) {
+[GoMethodBody("In")] internal static ж<Type> Inᴍ(ж<FuncType> Ꮡt, nint i) {
     return Ꮡt.InSlice()[i];
 }
 
-internal static nint NumInᴍ(ref FuncType t) {
+[GoMethodBody("NumIn")] internal static nint NumInᴍ(ref FuncType t) {
     return (nint)t.InCount;
 }
 
-internal static nint NumOutᴍ(ref FuncType t) {
+[GoMethodBody("NumOut")] internal static nint NumOutᴍ(ref FuncType t) {
     return (nint)((uint16)(t.OutCount & ((1 << 15) - 1)));
 }
 
-internal static ж<Type> Outᴍ(ж<FuncType> Ꮡt, nint i) {
+[GoMethodBody("Out")] internal static ж<Type> Outᴍ(ж<FuncType> Ꮡt, nint i) {
     return (Ꮡt.OutSlice()[i]);
 }
 
 // go2cs generated this placeholder — func InSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 // go2cs generated this placeholder — func OutSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static bool IsVariadicᴍ(ref FuncType t) {
+[GoMethodBody("IsVariadic")] internal static bool IsVariadicᴍ(ref FuncType t) {
     return (uint16)(t.OutCount & ((uint16)(1 << 15))) != 0;
 }
 
@@ -515,7 +515,7 @@ partial struct StructField {
 
 } partial class abi_package {
 
-internal static bool Embeddedᴍ(ref StructField f) {
+[GoMethodBody("Embedded")] internal static bool Embeddedᴍ(ref StructField f) {
     return f.Name.IsEmbedded();
 }
 
@@ -560,7 +560,7 @@ partial struct Name {
 
 // DataChecked does pointer arithmetic on n's Bytes, and that arithmetic is asserted to
 // be safe for the reason in whySafe (which can appear in a backtrace, etc.)
-internal static ж<byte> DataCheckedᴍ(Name n, nint off, @string whySafe) {
+[GoMethodBody("DataChecked")] internal static ж<byte> DataCheckedᴍ(Name n, nint off, @string whySafe) {
     return @unsafe.Pointer.To<byte>(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, whySafe));
 }
 
@@ -570,22 +570,22 @@ private static readonly @string theRuntimeDoesnTNeedToˢᵇᴍName = "the runtim
 
 // Data does pointer arithmetic on n's Bytes, and that arithmetic is asserted to
 // be safe because the runtime made the call (other packages use DataChecked)
-internal static ж<byte> Dataᴍ(Name n, nint off) {
+[GoMethodBody("Data")] internal static ж<byte> Dataᴍ(Name n, nint off) {
     return @unsafe.Pointer.To<byte>(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, theRuntimeDoesnTNeedToˢᴍName));
 }
 
 // IsExported returns "is n exported?"
-internal static bool IsExportedᴍ(Name n) {
+[GoMethodBody("IsExported")] internal static bool IsExportedᴍ(Name n) {
     return (byte)((n.Bytes.Value) & ((byte)(1 << 0))) != 0;
 }
 
 // HasTag returns true iff there is tag data following this name
-internal static bool HasTagᴍ(Name n) {
+[GoMethodBody("HasTag")] internal static bool HasTagᴍ(Name n) {
     return (byte)((n.Bytes.Value) & ((byte)(1 << 1))) != 0;
 }
 
 // IsEmbedded returns true iff n is embedded (an anonymous field).
-internal static bool IsEmbeddedᴍ(Name n) {
+[GoMethodBody("IsEmbedded")] internal static bool IsEmbeddedᴍ(Name n) {
     return (byte)((n.Bytes.Value) & ((byte)(1 << 3))) != 0;
 }
 
@@ -595,7 +595,7 @@ private static readonly @string readVarintˢᵇᴍName = "read varint"u8;
 
 // ReadVarint parses a varint as encoded by encoding/binary.
 // It returns the number of encoded bytes and the encoded value.
-internal static (nint, nint) ReadVarintᴍ(Name n, nint off) {
+[GoMethodBody("ReadVarint")] internal static (nint, nint) ReadVarintᴍ(Name n, nint off) {
     nint v = 0;
     for (nint i = 0; ; i++) {
         var x = n.DataChecked(off + i, readVarintˢᴍName).Value;
@@ -607,7 +607,7 @@ internal static (nint, nint) ReadVarintᴍ(Name n, nint off) {
 }
 
 // IsBlank indicates whether n is "_".
-internal static bool IsBlankᴍ(Name n) {
+[GoMethodBody("IsBlank")] internal static bool IsBlankᴍ(Name n) {
     if (n.Bytes == nil) {
         return false;
     }
@@ -639,7 +639,7 @@ internal static ref readonly @string nonEmptyStringˢᴍName => ref nonEmptyStri
 private static readonly @string nonEmptyStringˢᵇᴍName = "non-empty string"u8;
 
 // Name returns the name of n, or empty if it does not actually have a name.
-internal static @string Nameᴍ(Name n) {
+[GoMethodBody("Name")] internal static @string Nameᴍ(Name n) {
     if (n.Bytes == nil) {
         return ""u8;
     }
@@ -648,7 +648,7 @@ internal static @string Nameᴍ(Name n) {
 }
 
 // Tag returns the tag string for n, or empty if there is none.
-internal static @string Tagᴍ(Name n) {
+[GoMethodBody("Tag")] internal static @string Tagᴍ(Name n) {
     if (!n.HasTag()) {
         return ""u8;
     }
@@ -758,50 +758,3 @@ public static UntypedInt TraceArgsSpecial => 0xf0; // above this are operators, 
 public static UntypedInt MaxPtrmaskBytes => 2048;
 
 } // end abi_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class abiᴛKind {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Kind k) => abi_package.Stringᴍ(k);
-}
-partial class abiᴛType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Kind Kind(this ref Type t) => abi_package.Kindᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HasName(this ref Type t) => abi_package.HasNameᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Pointers(this ref Type t) => abi_package.Pointersᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsDirectIface(this ref Type t) => abi_package.IsDirectIfaceᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) => abi_package.GcSliceᴍ(ref t, begin, end);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Type> Common(this ж<Type> Ꮡt) => abi_package.Commonᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) => abi_package.Uncommonᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Align(this ref Type t) => abi_package.Alignᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint FieldAlign(this ref Type t) => abi_package.FieldAlignᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<Method> ExportedMethods(this ж<Type> Ꮡt) => abi_package.ExportedMethodsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumMethod(this ж<Type> Ꮡt) => abi_package.NumMethodᴍ(Ꮡt);
-}
-partial class abiᴛUncommonType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static unsafe slice<Method> Methods(this ж<UncommonType> Ꮡt) => abi_package.Methodsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static unsafe slice<Method> ExportedMethods(this ж<UncommonType> Ꮡt) => abi_package.ExportedMethodsᴍ(Ꮡt);
-}
-partial class abiᴛInterfaceType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumMethod(this ref InterfaceType t) => abi_package.NumMethodᴍ(ref t);
-}
-partial class abiᴛFuncType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Type> In(this ж<FuncType> Ꮡt, nint i) => abi_package.Inᴍ(Ꮡt, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumIn(this ref FuncType t) => abi_package.NumInᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumOut(this ref FuncType t) => abi_package.NumOutᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Type> Out(this ж<FuncType> Ꮡt, nint i) => abi_package.Outᴍ(Ꮡt, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsVariadic(this ref FuncType t) => abi_package.IsVariadicᴍ(ref t);
-}
-partial class abiᴛStructField {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Embedded(this ref StructField f) => abi_package.Embeddedᴍ(ref f);
-}
-partial class abiᴛName {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<byte> DataChecked(this Name n, nint off, @string whySafe) => abi_package.DataCheckedᴍ(n, off, whySafe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<byte> Data(this Name n, nint off) => abi_package.Dataᴍ(n, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsExported(this Name n) => abi_package.IsExportedᴍ(n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HasTag(this Name n) => abi_package.HasTagᴍ(n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsEmbedded(this Name n) => abi_package.IsEmbeddedᴍ(n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, nint) ReadVarint(this Name n, nint off) => abi_package.ReadVarintᴍ(n, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsBlank(this Name n) => abi_package.IsBlankᴍ(n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Name(this Name n) => abi_package.Nameᴍ(n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Tag(this Name n) => abi_package.Tagᴍ(n);
-}
-// </GlyphForwarders>

@@ -10,14 +10,8 @@ partial class bidirule_package {
 
 } partial class bidirule_package {
 
-internal static bool isFinalᴍ(ref Transformer t) {
+[GoMethodBody("isFinal")] internal static bool isFinalᴍ(ref Transformer t) {
     return t.state == ruleLTRFinal || t.state == ruleRTLFinal || t.state == ruleInitial;
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class bidiruleᴛTransformer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isFinal(this ref Transformer t) => bidirule_package.isFinalᴍ(ref t);
-}
-// </GlyphForwarders>

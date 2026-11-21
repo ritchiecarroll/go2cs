@@ -54,7 +54,7 @@ internal static slice<@string> instOpNames = [
 
 } partial class syntax_package {
 
-internal static @string Stringᴍ(InstOp i) {
+[GoMethodBody("String")] internal static @string Stringᴍ(InstOp i) {
     if ((nuint)i >= (nuint)len(instOpNames)) {
         return ""u8;
     }
@@ -133,14 +133,14 @@ partial struct Inst {
 
 } partial class syntax_package {
 
-internal static @string Stringᴍ(ж<Prog> Ꮡp) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<Prog> Ꮡp) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     dumpProg(Ꮡb, Ꮡp);
     return b.String();
 }
 
 // skipNop follows any no-op or capturing instructions.
-internal static ж<Inst> skipNopᴍ(ref Prog p, uint32 pc) {
+[GoMethodBody("skipNop")] internal static ж<Inst> skipNopᴍ(ref Prog p, uint32 pc) {
     var i = Ꮡ(p.Inst, pc);
     while (i.Op == InstNop || i.Op == InstCapture) {
         i = Ꮡ(p.Inst, i.Out);
@@ -151,7 +151,7 @@ internal static ж<Inst> skipNopᴍ(ref Prog p, uint32 pc) {
 } partial class syntax_package {
 
 // op returns i.Op but merges all the Rune special cases into InstRune
-internal static InstOp opᴍ(ref Inst i) {
+[GoMethodBody("op")] internal static InstOp opᴍ(ref Inst i) {
     var op = i.Op;
     switch (op) {
     case var ᴛ when ᴛ == InstRune1 || ᴛ == InstRuneAny || ᴛ == InstRuneAnyNotNL: {
@@ -166,7 +166,7 @@ internal static InstOp opᴍ(ref Inst i) {
 // Prefix returns a literal string that all matches for the
 // regexp must start with. Complete is true if the prefix
 // is the entire match.
-internal static (@string prefix, bool complete) Prefixᴍ(ref Prog p) {
+[GoMethodBody("Prefix")] internal static (@string prefix, bool complete) Prefixᴍ(ref Prog p) {
     var i = p.skipNop((uint32)p.Start);
 
     // Avoid allocation of buffer if prefix is empty.
@@ -185,7 +185,7 @@ internal static (@string prefix, bool complete) Prefixᴍ(ref Prog p) {
 
 // StartCond returns the leading empty-width conditions that must
 // be true in any match. It returns ^EmptyOp(0) if no matches are possible.
-internal static EmptyOp StartCondᴍ(ref Prog p) {
+[GoMethodBody("StartCond")] internal static EmptyOp StartCondᴍ(ref Prog p) {
     EmptyOp flag = default;
     var pc = (uint32)p.Start;
     var i = Ꮡ(p.Inst, pc);
@@ -223,7 +223,7 @@ internal static UntypedInt noMatch => -1;
 
 // MatchRune reports whether the instruction matches (and consumes) r.
 // It should only be called when i.Op == [InstRune].
-internal static bool MatchRuneᴍ(ref Inst i, rune r) {
+[GoMethodBody("MatchRune")] internal static bool MatchRuneᴍ(ref Inst i, rune r) {
     return i.MatchRunePos(r) != noMatch;
 }
 
@@ -232,7 +232,7 @@ internal static bool MatchRuneᴍ(ref Inst i, rune r) {
 // (or, when len(i.Rune) == 1, rune singleton).
 // If not, MatchRunePos returns -1.
 // MatchRunePos should only be called when i.Op == [InstRune].
-internal static nint MatchRunePosᴍ(ref Inst i, rune r) {
+[GoMethodBody("MatchRunePos")] internal static nint MatchRunePosᴍ(ref Inst i, rune r) {
     var rune = i.Rune;
 
     switch (len(rune)) {
@@ -294,7 +294,7 @@ internal static nint MatchRunePosᴍ(ref Inst i, rune r) {
 // MatchEmptyWidth reports whether the instruction matches
 // an empty string between the runes before and after.
 // It should only be called when i.Op == [InstEmptyWidth].
-internal static bool MatchEmptyWidthᴍ(ref Inst i, rune before, rune after) {
+[GoMethodBody("MatchEmptyWidth")] internal static bool MatchEmptyWidthᴍ(ref Inst i, rune before, rune after) {
     switch (((EmptyOp)(uint8)i.Arg)) {
     case var ᴛ when ᴛ == EmptyBeginLine: {
         return before == '\n' || before == -1;
@@ -317,7 +317,7 @@ internal static bool MatchEmptyWidthᴍ(ref Inst i, rune before, rune after) {
     throw panic("unknown empty width arg");
 }
 
-internal static @string Stringᴍ(ж<Inst> Ꮡi) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<Inst> Ꮡi) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     dumpInst(Ꮡb, ref (Ꮡi).DerefOrNull());
     return b.String();
@@ -438,22 +438,3 @@ internal static void dumpInst(ж<strings.Builder> b, ref Inst i) {
 }
 
 } // end syntax_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class syntaxᴛInstOp {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this InstOp i) => syntax_package.Stringᴍ(i);
-}
-partial class syntaxᴛProg {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Prog> Ꮡp) => syntax_package.Stringᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Inst> skipNop(this ref Prog p, uint32 pc) => syntax_package.skipNopᴍ(ref p, pc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string prefix, bool complete) Prefix(this ref Prog p) => syntax_package.Prefixᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static EmptyOp StartCond(this ref Prog p) => syntax_package.StartCondᴍ(ref p);
-}
-partial class syntaxᴛInst {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static InstOp op(this ref Inst i) => syntax_package.opᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool MatchRune(this ref Inst i, rune r) => syntax_package.MatchRuneᴍ(ref i, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint MatchRunePos(this ref Inst i, rune r) => syntax_package.MatchRunePosᴍ(ref i, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool MatchEmptyWidth(this ref Inst i, rune before, rune after) => syntax_package.MatchEmptyWidthᴍ(ref i, before, after);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Inst> Ꮡi) => syntax_package.Stringᴍ(Ꮡi);
-}
-// </GlyphForwarders>

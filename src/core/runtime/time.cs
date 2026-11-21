@@ -122,7 +122,7 @@ partial struct timer {
 // Any code that allocates a timer must call t.init before using it.
 // The arg and f can be set during init, or they can be nil in init
 // and set by a future call to t.modify.
-internal static void initᴍ(ж<timer> Ꮡt, Action<any, uintptr, int64> f, any arg) {
+[GoMethodBody("init")] internal static void initᴍ(ж<timer> Ꮡt, Action<any, uintptr, int64> f, any arg) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     lockInit(ref nonnil(ref t).mu, lockRankTimer);
@@ -166,7 +166,7 @@ partial struct timerWhen {
 } partial class runtime_package {
 
 // less reports whether tw is less than other.
-internal static bool lessᴍ(timerWhen tw, timerWhen other) {
+[GoMethodBody("less")] internal static bool lessᴍ(timerWhen tw, timerWhen other) {
     switch (ᐧ) {
     case {} when tw.when < other.when: {
         return true;
@@ -184,11 +184,11 @@ internal static bool lessᴍ(timerWhen tw, timerWhen other) {
 
 } partial class runtime_package {
 
-internal static void @lockᴍ(ж<timers> Ꮡts) {
+[GoMethodBody("lock")] internal static void @lockᴍ(ж<timers> Ꮡts) {
     runtime.@lock(Ꮡts.Ꮡmu);
 }
 
-internal static void unlockᴍ(ж<timers> Ꮡts) {
+[GoMethodBody("unlock")] internal static void unlockᴍ(ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     // Update atomic copy of len(ts.heap).
@@ -231,13 +231,13 @@ internal const bool timerDebug = false;
 
 } partial class runtime_package {
 
-internal static void traceᴍ(ж<timer> Ꮡt, @string op) {
+[GoMethodBody("trace")] internal static void traceᴍ(ж<timer> Ꮡt, @string op) {
     if (timerDebug) {
         Ꮡt.trace1(op);
     }
 }
 
-internal static void trace1ᴍ(ж<timer> Ꮡt, @string op) {
+[GoMethodBody("trace1")] internal static void trace1ᴍ(ж<timer> Ꮡt, @string op) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!timerDebug) {
@@ -257,7 +257,7 @@ internal static void trace1ᴍ(ж<timer> Ꮡt, @string op) {
 
 } partial class runtime_package {
 
-internal static void traceᴍ(ж<timers> Ꮡts, @string op) {
+[GoMethodBody("trace")] internal static void traceᴍ(ж<timers> Ꮡts, @string op) {
     if (timerDebug) {
         println((@string)"TS", Ꮡts.OrTypedNil(), op);
     }
@@ -270,7 +270,7 @@ internal static ref readonly @string lockˢᴍtimer => ref lockˢᵇᴍtimer;
 private static readonly @string lockˢᵇᴍtimer = "lock"u8;
 
 // lock locks the timer, allowing reading or writing any of the timer fields.
-internal static void @lockᴍ(ж<timer> Ꮡt) {
+[GoMethodBody("lock")] internal static void @lockᴍ(ж<timer> Ꮡt) {
     runtime.@lock(Ꮡt.Ꮡmu);
     Ꮡt.trace(lockˢᴍtimer);
 }
@@ -280,7 +280,7 @@ internal static ref readonly @string unlockˢᴍtimer => ref unlockˢᵇᴍtimer
 private static readonly @string unlockˢᵇᴍtimer = "unlock"u8;
 
 // unlock updates t.astate and unlocks the timer.
-internal static void unlockᴍ(ж<timer> Ꮡt) {
+[GoMethodBody("unlock")] internal static void unlockᴍ(ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.trace(unlockˢᴍtimer);
@@ -292,7 +292,7 @@ internal static void unlockᴍ(ж<timer> Ꮡt) {
 
 // hchan returns the channel in t.arg.
 // t must be a timer with a channel.
-internal static ж<hchan> hchanᴍ(ж<timer> Ꮡt) {
+[GoMethodBody("hchan")] internal static ж<hchan> hchanᴍ(ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!t.isChan) {
@@ -315,7 +315,7 @@ private static readonly @string updateHeapˢᵇᴍtimer = "updateHeap"u8;
 // takes care of moving t within the timers heap to preserve the heap invariants.
 // If ts == nil, then t must not be in a heap (or is in a heap that is
 // temporarily not maintaining its invariant, such as during timers.adjust).
-internal static bool /*updated*/ updateHeapᴍ(ж<timer> Ꮡt) {
+[GoMethodBody("updateHeap")] internal static bool /*updated*/ updateHeapᴍ(ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     assertWorldStoppedOrLockHeld(ref nonnil(ref t).mu);
@@ -509,7 +509,7 @@ private static readonly @string tsSetInTimerˢᵇᴍtimers = "ts set in timer"u8
 // The caller must also have checked that t belongs in the heap.
 // Callers that are not sure can call t.maybeAdd instead,
 // but note that maybeAdd has different locking requirements.
-internal static void addHeapᴍ(ж<timers> Ꮡts, ж<timer> Ꮡt) {
+[GoMethodBody("addHeap")] internal static void addHeapᴍ(ж<timers> Ꮡts, ж<timer> Ꮡt) {
     ref var ts = ref Ꮡts.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -538,7 +538,7 @@ internal static void addHeapᴍ(ж<timers> Ꮡts, ж<timer> Ꮡt) {
 // are running timers in async mode. If the timer needs to be run,
 // maybeRunAsync will unlock and re-lock it.
 // The timer is always locked on return.
-internal static void maybeRunAsyncᴍ(ж<timer> Ꮡt) {
+[GoMethodBody("maybeRunAsync")] internal static void maybeRunAsyncᴍ(ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     assertLockHeld(Ꮡt.Ꮡmu);
@@ -569,7 +569,7 @@ private static readonly @string stopˢᵇᴍtimer = "stop"u8;
 // actually remove it from the timers heap. We can only mark it as stopped.
 // It will be removed in due course by the P whose heap it is on.
 // Reports whether the timer was stopped before it was run.
-internal static bool stopᴍ(ж<timer> Ꮡt) {
+[GoMethodBody("stop")] internal static bool stopᴍ(ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var async = Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan).Load() != 0;
@@ -625,7 +625,7 @@ private static readonly @string wrongTimersˢᵇᴍtimers = "wrong timers"u8;
 
 // deleteMin removes timer 0 from ts.
 // ts must be locked.
-internal static void deleteMinᴍ(ж<timers> Ꮡts) {
+[GoMethodBody("deleteMin")] internal static void deleteMinᴍ(ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     assertLockHeld(Ꮡts.Ꮡmu);
@@ -666,7 +666,7 @@ private static readonly @string fakeTimerExecutingWithNoˢᵇᴍtimer = "fake ti
 // This is called by the netpoll code or time.Ticker.Reset or time.Timer.Reset.
 // Reports whether the timer was modified before it was run.
 // If f == nil, then t.f, t.arg, and t.seq are not modified.
-internal static bool modifyᴍ(ж<timer> Ꮡt, int64 when, int64 period, Action<any, uintptr, int64> f, any arg, uintptr seq) {
+[GoMethodBody("modify")] internal static bool modifyᴍ(ж<timer> Ꮡt, int64 when, int64 period, Action<any, uintptr, int64> f, any arg, uintptr seq) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (when <= 0) {
@@ -785,7 +785,7 @@ private static readonly @string needsAddˢ2ᵇᴍtimer = "needsAdd-"u8;
 
 // needsAdd reports whether t needs to be added to a timers heap.
 // t must be locked.
-internal static bool needsAddᴍ(ж<timer> Ꮡt) {
+[GoMethodBody("needsAdd")] internal static bool needsAddᴍ(ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     assertLockHeld(Ꮡt.Ꮡmu);
@@ -822,7 +822,7 @@ private static readonly @string maybeAddˢᵇᴍtimer = "maybeAdd"u8;
 // Concurrent calls to time.Timer.Reset or blockTimerChan
 // may result in concurrent calls to t.maybeAdd,
 // so we cannot assume that t is not in a heap on entry to t.maybeAdd.
-internal static void maybeAddᴍ(ж<timer> Ꮡt) {
+[GoMethodBody("maybeAdd")] internal static void maybeAddᴍ(ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Note: Not holding any locks on entry to t.maybeAdd,
@@ -875,7 +875,7 @@ internal static void maybeAddᴍ(ж<timer> Ꮡt) {
 // reset resets the time when a timer should fire.
 // If used for an inactive timer, the timer will become active.
 // Reports whether the timer was active and was stopped.
-internal static bool resetᴍ(ж<timer> Ꮡt, int64 when, int64 period) {
+[GoMethodBody("reset")] internal static bool resetᴍ(ж<timer> Ꮡt, int64 when, int64 period) {
     return Ꮡt.modify(when, period, default, default, 0);
 }
 
@@ -891,7 +891,7 @@ private static readonly @string badTsˢᵇᴍtimers = "bad ts"u8;
 // programs that create and delete timers; leaving them in the heap
 // slows down heap operations.
 // The caller must have locked ts.
-internal static void cleanHeadᴍ(ж<timers> Ꮡts) {
+[GoMethodBody("cleanHead")] internal static void cleanHeadᴍ(ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     Ꮡts.trace(cleanHeadˢᴍtimers);
@@ -957,7 +957,7 @@ private static readonly @string takeˢᵇᴍtimers = "take"u8;
 // because src is being destroyed.
 // The caller must not have locked either timers.
 // For now this is only called when the world is stopped.
-internal static void takeᴍ(ж<timers> Ꮡts, ж<timers> Ꮡsrc) {
+[GoMethodBody("take")] internal static void takeᴍ(ж<timers> Ꮡts, ж<timers> Ꮡsrc) {
     ref var ts = ref Ꮡts.DerefOrNull();
     ref var src = ref Ꮡsrc.DerefOrNull();
 
@@ -995,7 +995,7 @@ private static readonly @string adjustˢᵇᴍtimers = "adjust"u8;
 // the correct place in the heap. While looking for those timers,
 // it also moves timers that have been modified to run later,
 // and removes deleted timers. The caller must have locked ts.
-internal static void adjustᴍ(ж<timers> Ꮡts, int64 now, bool force) {
+[GoMethodBody("adjust")] internal static void adjustᴍ(ж<timers> Ꮡts, int64 now, bool force) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     Ꮡts.trace(adjustˢᴍtimers);
@@ -1124,7 +1124,7 @@ internal static void adjustᴍ(ж<timers> Ꮡts, int64 now, bool force) {
 // any write barriers.
 //
 //go:nowritebarrierrec
-internal static int64 wakeTimeᴍ(ж<timers> Ꮡts) {
+[GoMethodBody("wakeTime")] internal static int64 wakeTimeᴍ(ж<timers> Ꮡts) {
     // Note that the order of these two loads matters:
     // adjust updates minWhen to make it safe to clear minNextWhen.
     // We read minWhen after reading minNextWhen so that
@@ -1152,7 +1152,7 @@ private static readonly @string checkˢᵇᴍtimers = "check"u8;
 // We pass now in and out to avoid extra calls of nanotime.
 //
 //go:yeswritebarrierrec
-internal static (int64 rnow, int64 pollUntil, bool ran) checkᴍ(ж<timers> Ꮡts, int64 now, ж<synctestBubble> bubble) {
+[GoMethodBody("check")] internal static (int64 rnow, int64 pollUntil, bool ran) checkᴍ(ж<timers> Ꮡts, int64 now, ж<synctestBubble> bubble) {
     int64 pollUntil = default;
     bool ran = default;
     ref var ts = ref Ꮡts.DerefOrNull();
@@ -1225,7 +1225,7 @@ private static readonly @string runˢᵇᴍtimers = "run"u8;
 // If a timer is run, this will temporarily unlock ts.
 //
 //go:systemstack
-internal static int64 runᴍ(ж<timers> Ꮡts, int64 now, ж<synctestBubble> bubble) {
+[GoMethodBody("run")] internal static int64 runᴍ(ж<timers> Ꮡts, int64 now, ж<synctestBubble> bubble) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     Ꮡts.trace(runˢᴍtimers);
@@ -1286,7 +1286,7 @@ private static readonly @string mismatchedIsSendingˢᵇᴍtimer = "mismatched i
 // unlockAndRun returns with t unlocked and t.ts (re-)locked.
 //
 //go:systemstack
-internal static void unlockAndRunᴍ(ж<timer> Ꮡt, int64 now, ж<synctestBubble> Ꮡbubble) {
+[GoMethodBody("unlockAndRun")] internal static void unlockAndRunᴍ(ж<timer> Ꮡt, int64 now, ж<synctestBubble> Ꮡbubble) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
@@ -1452,7 +1452,7 @@ private static readonly @string badTimerHeapLenˢᵇᴍtimers = "bad timer heap 
 // verifyTimerHeap verifies that the timers is in a valid state.
 // This is only for debugging, and is only called if verifyTimers is true.
 // The caller must have locked ts.
-internal static void verifyᴍ(ж<timers> Ꮡts) {
+[GoMethodBody("verify")] internal static void verifyᴍ(ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     assertLockHeld(Ꮡts.Ꮡmu);
@@ -1477,7 +1477,7 @@ internal static void verifyᴍ(ж<timers> Ꮡts) {
 
 // updateMinWhenHeap sets ts.minWhenHeap to ts.heap[0].when.
 // The caller must have locked ts or the world must be stopped.
-internal static void updateMinWhenHeapᴍ(ж<timers> Ꮡts) {
+[GoMethodBody("updateMinWhenHeap")] internal static void updateMinWhenHeapᴍ(ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     assertWorldStoppedOrLockHeld(ref nonnil(ref ts).mu);
@@ -1490,7 +1490,7 @@ internal static void updateMinWhenHeapᴍ(ж<timers> Ꮡts) {
 
 // updateMinWhenModified updates ts.minWhenModified to be <= when.
 // ts need not be (and usually is not) locked.
-internal static void updateMinWhenModifiedᴍ(ж<timers> Ꮡts, int64 when) {
+[GoMethodBody("updateMinWhenModified")] internal static void updateMinWhenModifiedᴍ(ж<timers> Ꮡts, int64 when) {
     for (;;) {
         var old = Ꮡts.ᏑminWhenModified.Load();
         if (old != 0 && old < when) {
@@ -1542,7 +1542,7 @@ internal static UntypedInt timerHeapN => 4;
 
 // siftUp puts the timer at position i in the right place
 // in the heap by moving it up toward the top of the heap.
-internal static void siftUpᴍ(ref timers ts, nint i) {
+[GoMethodBody("siftUp")] internal static void siftUpᴍ(ref timers ts, nint i) {
     var heap = ts.heap;
     if (i >= len(heap)) {
         badTimer();
@@ -1566,7 +1566,7 @@ internal static void siftUpᴍ(ref timers ts, nint i) {
 
 // siftDown puts the timer at position i in the right place
 // in the heap by moving it down toward the bottom of the heap.
-internal static void siftDownᴍ(ref timers ts, nint i) {
+[GoMethodBody("siftDown")] internal static void siftDownᴍ(ref timers ts, nint i) {
     var heap = ts.heap;
     nint n = len(heap);
     if (i >= n) {
@@ -1605,7 +1605,7 @@ internal static void siftDownᴍ(ref timers ts, nint i) {
 
 // initHeap reestablishes the heap order in the slice ts.heap.
 // It takes O(n) time for n=len(ts.heap), not the O(n log n) of n repeated add operations.
-internal static void initHeapᴍ(ref timers ts) {
+[GoMethodBody("initHeap")] internal static void initHeapᴍ(ref timers ts) {
     // Last possible element that needs sifting down is parent of last element;
     // last element is len(t)-1; parent of last element is (len(t)-1-1)/timerHeapN.
     if (len(ts.heap) <= 1) {
@@ -1645,7 +1645,7 @@ private static readonly @string maybeRunChanˢ2ᵇᴍtimer = "maybeRunChan+"u8;
 // maybeRunChan checks whether the timer needs to run
 // to send a value to its associated channel. If so, it does.
 // The timer must not be locked.
-internal static void maybeRunChanᴍ(ж<timer> Ꮡt, ж<hchan> Ꮡc) {
+[GoMethodBody("maybeRunChan")] internal static void maybeRunChanᴍ(ж<timer> Ꮡt, ж<hchan> Ꮡc) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -1753,45 +1753,3 @@ internal static void unblockTimerChan(ref hchan c) {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛtimer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<timer> Ꮡt, Action<any, uintptr, int64> f, any arg) => runtime_package.initᴍ(Ꮡt, f, arg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void trace(this ж<timer> Ꮡt, @string op) => runtime_package.traceᴍ(Ꮡt, op);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void trace1(this ж<timer> Ꮡt, @string op) => runtime_package.trace1ᴍ(Ꮡt, op);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void @lock(this ж<timer> Ꮡt) => runtime_package.@lockᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unlock(this ж<timer> Ꮡt) => runtime_package.unlockᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<hchan> hchan(this ж<timer> Ꮡt) => runtime_package.hchanᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*updated*/ updateHeap(this ж<timer> Ꮡt) => runtime_package.updateHeapᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void maybeRunAsync(this ж<timer> Ꮡt) => runtime_package.maybeRunAsyncᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool stop(this ж<timer> Ꮡt) => runtime_package.stopᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool modify(this ж<timer> Ꮡt, int64 when, int64 period, Action<any, uintptr, int64> f, any arg, uintptr seq) => runtime_package.modifyᴍ(Ꮡt, when, period, f, arg, seq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool needsAdd(this ж<timer> Ꮡt) => runtime_package.needsAddᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void maybeAdd(this ж<timer> Ꮡt) => runtime_package.maybeAddᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool reset(this ж<timer> Ꮡt, int64 when, int64 period) => runtime_package.resetᴍ(Ꮡt, when, period);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unlockAndRun(this ж<timer> Ꮡt, int64 now, ж<synctestBubble> Ꮡbubble) => runtime_package.unlockAndRunᴍ(Ꮡt, now, Ꮡbubble);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void maybeRunChan(this ж<timer> Ꮡt, ж<hchan> Ꮡc) => runtime_package.maybeRunChanᴍ(Ꮡt, Ꮡc);
-}
-partial class runtimeᴛtimerWhen {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool less(this timerWhen tw, timerWhen other) => runtime_package.lessᴍ(tw, other);
-}
-partial class runtimeᴛtimers {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void @lock(this ж<timers> Ꮡts) => runtime_package.@lockᴍ(Ꮡts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unlock(this ж<timers> Ꮡts) => runtime_package.unlockᴍ(Ꮡts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void trace(this ж<timers> Ꮡts, @string op) => runtime_package.traceᴍ(Ꮡts, op);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addHeap(this ж<timers> Ꮡts, ж<timer> Ꮡt) => runtime_package.addHeapᴍ(Ꮡts, Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void deleteMin(this ж<timers> Ꮡts) => runtime_package.deleteMinᴍ(Ꮡts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cleanHead(this ж<timers> Ꮡts) => runtime_package.cleanHeadᴍ(Ꮡts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void take(this ж<timers> Ꮡts, ж<timers> Ꮡsrc) => runtime_package.takeᴍ(Ꮡts, Ꮡsrc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void adjust(this ж<timers> Ꮡts, int64 now, bool force) => runtime_package.adjustᴍ(Ꮡts, now, force);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 wakeTime(this ж<timers> Ꮡts) => runtime_package.wakeTimeᴍ(Ꮡts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 rnow, int64 pollUntil, bool ran) check(this ж<timers> Ꮡts, int64 now, ж<synctestBubble> bubble) => runtime_package.checkᴍ(Ꮡts, now, bubble);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 run(this ж<timers> Ꮡts, int64 now, ж<synctestBubble> bubble) => runtime_package.runᴍ(Ꮡts, now, bubble);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void verify(this ж<timers> Ꮡts) => runtime_package.verifyᴍ(Ꮡts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void updateMinWhenHeap(this ж<timers> Ꮡts) => runtime_package.updateMinWhenHeapᴍ(Ꮡts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void updateMinWhenModified(this ж<timers> Ꮡts, int64 when) => runtime_package.updateMinWhenModifiedᴍ(Ꮡts, when);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void siftUp(this ref timers ts, nint i) => runtime_package.siftUpᴍ(ref ts, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void siftDown(this ref timers ts, nint i) => runtime_package.siftDownᴍ(ref ts, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initHeap(this ref timers ts) => runtime_package.initHeapᴍ(ref ts);
-}
-// </GlyphForwarders>

@@ -26,7 +26,7 @@ internal static UntypedFloat re => 7.69711747013104972;
 // callers can adjust the output using:
 //
 //	sample = ExpFloat64() / desiredRateParameter
-internal static float64 ExpFloat64ᴍ(ref Rand r) {
+[GoMethodBody("ExpFloat64")] internal static float64 ExpFloat64ᴍ(ref Rand r) {
     for (;;) {
         var u = r.Uint64();
         var j = (uint32)u;
@@ -223,9 +223,3 @@ internal static float64 ExpFloat64ᴍ(ref Rand r) {
 }.array(); }
 
 } // end rand_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class randᴛRand {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 ExpFloat64(this ref Rand r) => rand_package.ExpFloat64ᴍ(ref r);
-}
-// </GlyphForwarders>

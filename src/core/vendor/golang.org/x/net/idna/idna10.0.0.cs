@@ -239,7 +239,7 @@ public static ж<Profile> New(params Span<Action<ж<options>>> oʗp) {
 // ToASCII("bücher.example.com") is "xn--bcher-kva.example.com", and
 // ToASCII("golang") is "golang". If an error is encountered it will return
 // an error and a (partially) processed result.
-internal static (@string, error) ToASCIIᴍ(ж<Profile> Ꮡp, @string s) {
+[GoMethodBody("ToASCII")] internal static (@string, error) ToASCIIᴍ(ж<Profile> Ꮡp, @string s) {
     return Ꮡp.process(s, true);
 }
 
@@ -247,7 +247,7 @@ internal static (@string, error) ToASCIIᴍ(ж<Profile> Ꮡp, @string s) {
 // ToUnicode("xn--bcher-kva.example.com") is "bücher.example.com", and
 // ToUnicode("golang") is "golang". If an error is encountered it will return
 // an error and a (partially) processed result.
-internal static (@string, error) ToUnicodeᴍ(ref Profile p, @string s) {
+[GoMethodBody("ToUnicode")] internal static (@string, error) ToUnicodeᴍ(ref Profile p, @string s) {
     ref var pp = ref heap<Profile>(p, out var Ꮡpp);
     pp.transitional = false;
     return Ꮡpp.process(s, false);
@@ -261,7 +261,7 @@ private static readonly @string nonTransitionalˢᵇᴍProfile = "NonTransitiona
 
 // String reports a string with a description of the profile for debugging
 // purposes. The string format may change with different versions.
-internal static @string Stringᴍ(ref Profile p) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref Profile p) {
     @string s = ""u8;
     if (p.transitional) {
         s = transitionalˢᴍProfile;
@@ -346,8 +346,8 @@ partial struct labelError {
 
 } partial class idna_package {
 
-internal static @string codeᴍ(labelError e) { return e.code_; }
-internal static @string Errorᴍ(labelError e) {
+[GoMethodBody("code")] internal static @string codeᴍ(labelError e) { return e.code_; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(labelError e) {
     return fmt.Sprintf("idna: invalid label %q"u8, e.label);
 }
 
@@ -357,8 +357,8 @@ partial struct runeError /*num:rune*/;
 
 } partial class idna_package {
 
-internal static @string codeᴍ(runeError e) { return "P1"; }
-internal static @string Errorᴍ(runeError e) {
+[GoMethodBody("code")] internal static @string codeᴍ(runeError e) { return "P1"; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(runeError e) {
     return fmt.Sprintf("idna: disallowed rune %U"u8, e);
 }
 
@@ -366,7 +366,7 @@ internal static @string Errorᴍ(runeError e) {
 
 // process implements the algorithm described in section 4 of UTS #46,
 // see https://www.unicode.org/reports/tr46.
-internal static (@string, error) processᴍ(ж<Profile> Ꮡp, @string s, bool toASCII) {
+[GoMethodBody("process")] internal static (@string, error) processᴍ(ж<Profile> Ꮡp, @string s, bool toASCII) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     error err = default;
@@ -518,7 +518,7 @@ internal static (@string idem, bool bidi, error err) validateRegistration(ж<Pro
 
 } partial class idna_package {
 
-internal static bool isBidiᴍ(info c, @string s) {
+[GoMethodBody("isBidi")] internal static bool isBidiᴍ(info c, @string s) {
     if (!c.isMapped()) {
         return (info)(c & (uint16)attributesMask) == rtl;
     }
@@ -619,24 +619,24 @@ partial struct labelIter {
 
 } partial class idna_package {
 
-internal static void resetᴍ(ref labelIter l) {
+[GoMethodBody("reset")] internal static void resetᴍ(ref labelIter l) {
     l.curStart = 0;
     l.curEnd = 0;
     l.i = 0;
 }
 
-internal static bool doneᴍ(ref labelIter l) {
+[GoMethodBody("done")] internal static bool doneᴍ(ref labelIter l) {
     return l.curStart >= len(l.orig);
 }
 
-internal static @string resultᴍ(ref labelIter l) {
+[GoMethodBody("result")] internal static @string resultᴍ(ref labelIter l) {
     if (l.Δslice != nil) {
         return strings.Join(l.Δslice, ".");
     }
     return l.orig;
 }
 
-internal static @string labelᴍ(ref labelIter l) {
+[GoMethodBody("label")] internal static @string labelᴍ(ref labelIter l) {
     if (l.Δslice != nil) {
         return l.Δslice[l.i];
     }
@@ -649,7 +649,7 @@ internal static @string labelᴍ(ref labelIter l) {
 }
 
 // next sets the value to the next label. It skips the last label if it is empty.
-internal static void nextᴍ(ref labelIter l) {
+[GoMethodBody("next")] internal static void nextᴍ(ref labelIter l) {
     l.i++;
     if (l.Δslice != nil) {
         if (l.i >= len(l.Δslice) || l.i == len(l.Δslice) - 1 && l.Δslice[l.i] == "") {
@@ -663,7 +663,7 @@ internal static void nextᴍ(ref labelIter l) {
     }
 }
 
-internal static void setᴍ(ref labelIter l, @string s) {
+[GoMethodBody("set")] internal static void setᴍ(ref labelIter l, @string s) {
     if (l.Δslice == nil) {
         l.Δslice = strings.Split(l.orig, ".");
     }
@@ -678,7 +678,7 @@ private static readonly @string acePrefixᵇ = "xn--"u8;
 
 } partial class idna_package {
 
-internal static category simplifyᴍ(ref Profile p, category cat) {
+[GoMethodBody("simplify")] internal static category simplifyᴍ(ref Profile p, category cat) {
     switch (cat) {
     case var ᴛ when ᴛ == disallowedSTD3Mapped: {
         if (p.useSTD3Rules) {
@@ -792,7 +792,7 @@ internal static joinState stateFAIL => 5;
 
 // validateLabel validates the criteria from Section 4.1. Item 1, 4, and 6 are
 // already implicitly satisfied by the overall implementation.
-internal static error /*err*/ validateLabelᴍ(ref Profile p, @string s) {
+[GoMethodBody("validateLabel")] internal static error /*err*/ validateLabelᴍ(ref Profile p, @string s) {
     if (s == ""u8) {
         if (p.verifyDNSLength) {
             return new labelErrorжerror(Ꮡ(new labelError(s, "A4")));
@@ -857,33 +857,3 @@ internal static bool ascii(@string s) {
 }
 
 } // end idna_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class idnaᴛProfile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) ToASCII(this ж<Profile> Ꮡp, @string s) => idna_package.ToASCIIᴍ(Ꮡp, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) ToUnicode(this ref Profile p, @string s) => idna_package.ToUnicodeᴍ(ref p, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Profile p) => idna_package.Stringᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) process(this ж<Profile> Ꮡp, @string s, bool toASCII) => idna_package.processᴍ(Ꮡp, s, toASCII);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static category simplify(this ref Profile p, category cat) => idna_package.simplifyᴍ(ref p, cat);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ validateLabel(this ref Profile p, @string s) => idna_package.validateLabelᴍ(ref p, s);
-}
-partial class idnaᴛlabelError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string code(this labelError e) => idna_package.codeᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this labelError e) => idna_package.Errorᴍ(e);
-}
-partial class idnaᴛruneError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string code(this runeError e) => idna_package.codeᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this runeError e) => idna_package.Errorᴍ(e);
-}
-partial class idnaᴛinfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isBidi(this info c, @string s) => idna_package.isBidiᴍ(c, s);
-}
-partial class idnaᴛlabelIter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref labelIter l) => idna_package.resetᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool done(this ref labelIter l) => idna_package.doneᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string result(this ref labelIter l) => idna_package.resultᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string label(this ref labelIter l) => idna_package.labelᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void next(this ref labelIter l) => idna_package.nextᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this ref labelIter l, @string s) => idna_package.setᴍ(ref l, s);
-}
-// </GlyphForwarders>

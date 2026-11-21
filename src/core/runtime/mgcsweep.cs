@@ -58,11 +58,11 @@ internal static sweepClass sweepClassDone => /* sweepClass(^uint32(0)) */ 429496
 
 } partial class runtime_package {
 
-internal static sweepClass loadᴍ(ж<sweepClass> Ꮡs) {
+[GoMethodBody("load")] internal static sweepClass loadᴍ(ж<sweepClass> Ꮡs) {
     return (sweepClass)atomic.Load(Ꮡs.Reinterpret<sweepClass, uint32>());
 }
 
-internal static void updateᴍ(ж<sweepClass> Ꮡs, sweepClass sNew) {
+[GoMethodBody("update")] internal static void updateᴍ(ж<sweepClass> Ꮡs, sweepClass sNew) {
     // Only update *s if its current value is less than sNew,
     // since *s increases monotonically.
     var sOld = Ꮡs.load();
@@ -76,7 +76,7 @@ internal static void updateᴍ(ж<sweepClass> Ꮡs, sweepClass sNew) {
     // like RISC-V however have native support for an atomic max.
 }
 
-internal static void clearᴍ(ж<sweepClass> Ꮡs) {
+[GoMethodBody("clear")] internal static void clearᴍ(ж<sweepClass> Ꮡs) {
     atomic.Store(Ꮡs.Reinterpret<sweepClass, uint32>(), 0);
 }
 
@@ -84,7 +84,7 @@ internal static void clearᴍ(ж<sweepClass> Ꮡs) {
 // whether we're interested in the full or partial
 // unswept lists for that class, indicated as a boolean
 // (true means "full").
-internal static (spanClass spc, bool full) splitᴍ(sweepClass s) {
+[GoMethodBody("split")] internal static (spanClass spc, bool full) splitᴍ(sweepClass s) {
     return ((spanClass)(uint8)((s >> 1)), (sweepClass)(s & 1) == 0);
 }
 
@@ -93,7 +93,7 @@ internal static (spanClass spc, bool full) splitᴍ(sweepClass s) {
 // nextSpanForSweep finds and pops the next span for sweeping from the
 // central sweep buffers. It returns ownership of the span to the caller.
 // Returns nil if no such span exists.
-internal static ж<mspan> nextSpanForSweepᴍ(ref mheap h) {
+[GoMethodBody("nextSpanForSweep")] internal static ж<mspan> nextSpanForSweepᴍ(ref mheap h) {
     var sg = h.sweepgen;
     for (var sc = Ꮡsweep.ᏑcentralIndex.load(); sc < numSweepClasses; sc++) {
         var (spc, full) = sc.split();
@@ -149,7 +149,7 @@ partial struct activeSweep {
 // this does not indicate that all sweeping has completed.
 //
 // Even if the sweepLocker is invalid, its sweepGen is always valid.
-internal static sweepLocker beginᴍ(ж<activeSweep> Ꮡa) {
+[GoMethodBody("begin")] internal static sweepLocker beginᴍ(ж<activeSweep> Ꮡa) {
     for (;;) {
         var state = Ꮡa.Ꮡstate.Load();
         if ((state & (uint32)sweepDrainedMask) != 0) {
@@ -169,7 +169,7 @@ private static readonly @string mismatchedBeginEndOfˢᵇᴍactiveSweep = "misma
 
 // end deregisters a sweeper. Must be called once for each time
 // begin is called if the sweepLocker is valid.
-internal static void endᴍ(ж<activeSweep> Ꮡa, sweepLocker sl) {
+[GoMethodBody("end")] internal static void endᴍ(ж<activeSweep> Ꮡa, sweepLocker sl) {
     if (sl.sweepGen != mheap_.sweepgen) {
         @throw(sweeperLeftOutstandingˢᴍactiveSweep);
     }
@@ -200,7 +200,7 @@ internal static void endᴍ(ж<activeSweep> Ꮡa, sweepLocker sl) {
 //
 // Returns true if this call was the one that actually performed
 // the mark.
-internal static bool markDrainedᴍ(ж<activeSweep> Ꮡa) {
+[GoMethodBody("markDrained")] internal static bool markDrainedᴍ(ж<activeSweep> Ꮡa) {
     for (;;) {
         var state = Ꮡa.Ꮡstate.Load();
         if ((state & (uint32)sweepDrainedMask) != 0) {
@@ -213,21 +213,21 @@ internal static bool markDrainedᴍ(ж<activeSweep> Ꮡa) {
 }
 
 // sweepers returns the current number of active sweepers.
-internal static uint32 sweepersᴍ(ж<activeSweep> Ꮡa) {
+[GoMethodBody("sweepers")] internal static uint32 sweepersᴍ(ж<activeSweep> Ꮡa) {
     return Ꮡa.Ꮡstate.Load() & ~(uint32)sweepDrainedMask;
 }
 
 // isDone returns true if all sweep work has been drained and no more
 // outstanding sweepers exist. That is, when the sweep phase is
 // completely done.
-internal static bool isDoneᴍ(ж<activeSweep> Ꮡa) {
+[GoMethodBody("isDone")] internal static bool isDoneᴍ(ж<activeSweep> Ꮡa) {
     return Ꮡa.Ꮡstate.Load() == sweepDrainedMask;
 }
 
 // reset sets up the activeSweep for the next sweep cycle.
 //
 // The world must be stopped.
-internal static void resetᴍ(ж<activeSweep> Ꮡa) {
+[GoMethodBody("reset")] internal static void resetᴍ(ж<activeSweep> Ꮡa) {
     assertWorldStopped();
     Ꮡa.Ꮡstate.Store(0);
 }
@@ -361,7 +361,7 @@ private static readonly @string useOfInvalidSweepLockerˢᵇᴍsweepLocker = "us
 
 // tryAcquire attempts to acquire sweep ownership of span s. If it
 // successfully acquires ownership, it blocks sweep completion.
-internal static (sweepLocked, bool) tryAcquireᴍ(ref sweepLocker l, ж<mspan> s) {
+[GoMethodBody("tryAcquire")] internal static (sweepLocked, bool) tryAcquireᴍ(ref sweepLocker l, ж<mspan> s) {
     if (!l.valid) {
         @throw(useOfInvalidSweepLockerˢᴍsweepLocker);
     }
@@ -496,7 +496,7 @@ private static readonly @string mspanEnsureSweptMIsNotˢᵇᴍmspan = "mspan.ens
 // Returns only when span s has been swept.
 //
 //go:nowritebarrier
-internal static void ensureSweptᴍ(ж<mspan> Ꮡs) {
+[GoMethodBody("ensureSwept")] internal static void ensureSweptᴍ(ж<mspan> Ꮡs) {
     // Caller must disable preemption.
     // Otherwise when this function returns the span can become unswept again
     // (if GC is triggered on another goroutine).
@@ -554,7 +554,7 @@ private static readonly @string userArenaSpanIsOnTheˢᵇᴍsweepLocked = "user 
 // Returns true if the span was returned to heap.
 // If preserve=true, don't return it to heap nor relink in mcentral lists;
 // caller takes care of it.
-internal static bool sweepᴍ(ref sweepLocked sl, bool preserve) {
+[GoMethodBody("sweep")] internal static bool sweepᴍ(ref sweepLocked sl, bool preserve) {
     // It's critical that we enter this function with preemption disabled,
     // GC must not start while we are in the middle of this function.
     var gp = getg();
@@ -919,7 +919,7 @@ private static readonly @string foundPointerToFreeObjectˢᵇᴍmspan = "found p
 // 3. The GC two cycles ago missed a pointer and freed a live object,
 // but it was still live in the last cycle, so this GC cycle found a
 // pointer to that object and marked it.
-internal static void reportZombiesᴍ(ж<mspan> Ꮡs) {
+[GoMethodBody("reportZombies")] internal static void reportZombiesᴍ(ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     printlock();
@@ -1085,33 +1085,3 @@ internal static void gcPaceSweeper(uint64 trigger) {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛsweepClass {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static sweepClass load(this ж<sweepClass> Ꮡs) => runtime_package.loadᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void update(this ж<sweepClass> Ꮡs, sweepClass sNew) => runtime_package.updateᴍ(Ꮡs, sNew);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clear(this ж<sweepClass> Ꮡs) => runtime_package.clearᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (spanClass spc, bool full) split(this sweepClass s) => runtime_package.splitᴍ(s);
-}
-partial class runtimeᴛmheap {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<mspan> nextSpanForSweep(this ref mheap h) => runtime_package.nextSpanForSweepᴍ(ref h);
-}
-partial class runtimeᴛactiveSweep {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static sweepLocker begin(this ж<activeSweep> Ꮡa) => runtime_package.beginᴍ(Ꮡa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void end(this ж<activeSweep> Ꮡa, sweepLocker sl) => runtime_package.endᴍ(Ꮡa, sl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool markDrained(this ж<activeSweep> Ꮡa) => runtime_package.markDrainedᴍ(Ꮡa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 sweepers(this ж<activeSweep> Ꮡa) => runtime_package.sweepersᴍ(Ꮡa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isDone(this ж<activeSweep> Ꮡa) => runtime_package.isDoneᴍ(Ꮡa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ж<activeSweep> Ꮡa) => runtime_package.resetᴍ(Ꮡa);
-}
-partial class runtimeᴛsweepLocker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (sweepLocked, bool) tryAcquire(this ref sweepLocker l, ж<mspan> s) => runtime_package.tryAcquireᴍ(ref l, s);
-}
-partial class runtimeᴛmspan {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ensureSwept(this ж<mspan> Ꮡs) => runtime_package.ensureSweptᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reportZombies(this ж<mspan> Ꮡs) => runtime_package.reportZombiesᴍ(Ꮡs);
-}
-partial class runtimeᴛsweepLocked {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool sweep(this ref sweepLocked sl, bool preserve) => runtime_package.sweepᴍ(ref sl, preserve);
-}
-// </GlyphForwarders>

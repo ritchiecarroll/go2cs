@@ -19,7 +19,7 @@ partial struct recorder {
 
 } partial class trace_package {
 
-internal static (nint n, error err) Writeᴍ(ж<recorder> Ꮡw, slice<byte> b) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<recorder> Ꮡw, slice<byte> b) {
     nint n = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
@@ -73,7 +73,7 @@ internal static (nint n, error err) Writeᴍ(ж<recorder> Ꮡw, slice<byte> b) {
     ᒐdone: return (n, Ꮡerr.ValueSlot);
 }
 
-internal static void endGenerationᴍ(ref recorder w) {
+[GoMethodBody("endGeneration")] internal static void endGenerationᴍ(ref recorder w) {
     var r = w.r;
 
     // Check if we're entering a new generation.
@@ -130,7 +130,7 @@ partial struct frequency /*num:float64*/;
 } partial class trace_package {
 
 // mul multiplies an unprocessed timestamp to produce a time in nanoseconds.
-internal static eventTime mulᴍ(frequency f, timestamp t) {
+[GoMethodBody("mul")] internal static eventTime mulᴍ(frequency f, timestamp t) {
     return (eventTime)(int64)((float64)t * (float64)f);
 }
 
@@ -160,21 +160,8 @@ partial struct eventTime /*num:int64*/;
 } partial class trace_package {
 
 // Sub subtracts t0 from t, returning the duration in nanoseconds.
-internal static time.Duration Subᴍ(eventTime t, eventTime t0) {
+[GoMethodBody("Sub")] internal static time.Duration Subᴍ(eventTime t, eventTime t0) {
     return (time.Duration)((int64)t - (int64)t0);
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class traceᴛrecorder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ж<recorder> Ꮡw, slice<byte> b) => trace_package.Writeᴍ(Ꮡw, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void endGeneration(this ref recorder w) => trace_package.endGenerationᴍ(ref w);
-}
-partial class traceᴛfrequency {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static eventTime mul(this frequency f, timestamp t) => trace_package.mulᴍ(f, t);
-}
-partial class traceᴛeventTime {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Duration Sub(this eventTime t, eventTime t0) => trace_package.Subᴍ(t, t0);
-}
-// </GlyphForwarders>

@@ -32,13 +32,13 @@ partial struct Merger {
 
 } partial class cmerge_package {
 
-internal static void SetModeMergePolicyᴍ(ref Merger cm, ModeMergePolicy policy) {
+[GoMethodBody("SetModeMergePolicy")] internal static void SetModeMergePolicyᴍ(ref Merger cm, ModeMergePolicy policy) {
     cm.policy = policy;
 }
 
 // MergeCounters takes the counter values in 'src' and merges them
 // into 'dst' according to the correct counter mode.
-internal static (error, bool) MergeCountersᴍ(ref Merger m, slice<uint32> dst, slice<uint32> src) {
+[GoMethodBody("MergeCounters")] internal static (error, bool) MergeCountersᴍ(ref Merger m, slice<uint32> dst, slice<uint32> src) {
     if (len(src) != len(dst)) {
         return (fmt.Errorf("merging counters: len(dst)=%d len(src)=%d"u8, len(dst), len(src)), false);
     }
@@ -61,7 +61,7 @@ internal static (error, bool) MergeCountersᴍ(ref Merger m, slice<uint32> dst, 
 // SaturatingAdd does a saturating addition of 'dst' and 'src',
 // returning added value or math.MaxUint32 if there is an overflow.
 // Overflows are recorded in case the client needs to track them.
-internal static uint32 SaturatingAddᴍ(ref Merger m, uint32 dst, uint32 src) {
+[GoMethodBody("SaturatingAdd")] internal static uint32 SaturatingAddᴍ(ref Merger m, uint32 dst, uint32 src) {
     var (result, overflow) = cmerge.SaturatingAdd(dst, src);
     if (overflow) {
         m.overflow = true;
@@ -91,7 +91,7 @@ public static (uint32, bool) SaturatingAdd(uint32 dst, uint32 src) {
 // data files from different binaries, where we're combining data from
 // more than one meta-data file, we need to check for and resolve
 // mode/granularity clashes.
-internal static error SetModeAndGranularityᴍ(ref Merger cm, @string mdf, coverage.CounterMode cmode, coverage.CounterGranularity cgran) {
+[GoMethodBody("SetModeAndGranularity")] internal static error SetModeAndGranularityᴍ(ref Merger cm, @string mdf, coverage.CounterMode cmode, coverage.CounterGranularity cgran) {
     if (cm.cmode == coverage.CtrModeInvalid) {
         // Set merger mode based on what we're seeing here.
         cm.cmode = cmode;
@@ -117,30 +117,18 @@ internal static error SetModeAndGranularityᴍ(ref Merger cm, @string mdf, cover
     return default;
 }
 
-internal static void ResetModeAndGranularityᴍ(ref Merger cm) {
+[GoMethodBody("ResetModeAndGranularity")] internal static void ResetModeAndGranularityᴍ(ref Merger cm) {
     cm.cmode = coverage.CtrModeInvalid;
     cm.cgran = coverage.CtrGranularityInvalid;
     cm.overflow = false;
 }
 
-internal static coverage.CounterMode Modeᴍ(ref Merger cm) {
+[GoMethodBody("Mode")] internal static coverage.CounterMode Modeᴍ(ref Merger cm) {
     return cm.cmode;
 }
 
-internal static coverage.CounterGranularity Granularityᴍ(ref Merger cm) {
+[GoMethodBody("Granularity")] internal static coverage.CounterGranularity Granularityᴍ(ref Merger cm) {
     return cm.cgran;
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class cmergeᴛMerger {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetModeMergePolicy(this ref Merger cm, ModeMergePolicy policy) => cmerge_package.SetModeMergePolicyᴍ(ref cm, policy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (error, bool) MergeCounters(this ref Merger m, slice<uint32> dst, slice<uint32> src) => cmerge_package.MergeCountersᴍ(ref m, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 SaturatingAdd(this ref Merger m, uint32 dst, uint32 src) => cmerge_package.SaturatingAddᴍ(ref m, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetModeAndGranularity(this ref Merger cm, @string mdf, coverage.CounterMode cmode, coverage.CounterGranularity cgran) => cmerge_package.SetModeAndGranularityᴍ(ref cm, mdf, cmode, cgran);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ResetModeAndGranularity(this ref Merger cm) => cmerge_package.ResetModeAndGranularityᴍ(ref cm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static coverage.CounterMode Mode(this ref Merger cm) => cmerge_package.Modeᴍ(ref cm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static coverage.CounterGranularity Granularity(this ref Merger cm) => cmerge_package.Granularityᴍ(ref cm);
-}
-// </GlyphForwarders>

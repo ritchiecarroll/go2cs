@@ -323,7 +323,7 @@ partial struct ConnectionState {
 // in Go 1.22 due to security issues (see the Security Considerations sections
 // of RFC 5705 and RFC 7627), but can be re-enabled with the GODEBUG setting
 // tlsunsafeekm=1.
-internal static (slice<byte>, error) ExportKeyingMaterialᴍ(ref ConnectionState cs, @string label, slice<byte> context, nint length) {
+[GoMethodBody("ExportKeyingMaterial")] internal static (slice<byte>, error) ExportKeyingMaterialᴍ(ref ConnectionState cs, @string label, slice<byte> context, nint length) {
     return cs.ekm(label, context, length);
 }
 
@@ -471,7 +471,7 @@ partial struct ClientHelloInfo {
 // Context returns the context of the handshake that is in progress.
 // This context is a child of the context passed to HandshakeContext,
 // if any, and is canceled when the handshake concludes.
-internal static context.Context Contextᴍ(ref ClientHelloInfo c) {
+[GoMethodBody("Context")] internal static context.Context Contextᴍ(ref ClientHelloInfo c) {
     return c.ctx;
 }
 
@@ -500,7 +500,7 @@ partial struct CertificateRequestInfo {
 // Context returns the context of the handshake that is in progress.
 // This context is a child of the context passed to HandshakeContext,
 // if any, and is canceled when the handshake concludes.
-internal static context.Context Contextᴍ(ref CertificateRequestInfo c) {
+[GoMethodBody("Context")] internal static context.Context Contextᴍ(ref CertificateRequestInfo c) {
     return c.ctx;
 }
 
@@ -910,7 +910,7 @@ partial struct ticketKey {
 // ticketKeyFromBytes converts from the external representation of a session
 // ticket key to a ticketKey. Externally, session ticket keys are 32 random
 // bytes and this function expands that into sufficient name and key material.
-internal static ticketKey /*key*/ ticketKeyFromBytesᴍ(ref Config c, /*[32]*/ array<byte> b) {
+[GoMethodBody("ticketKeyFromBytes")] internal static ticketKey /*key*/ ticketKeyFromBytesᴍ(ref Config c, /*[32]*/ array<byte> b) {
     ticketKey key = new();
     b = b.Clone();
 
@@ -942,7 +942,7 @@ internal static time.Duration maxSessionTicketLifetime => /* 7 * 24 * time.Hour 
 // including connections that were originally established on the parent Config.
 // If that is not intended, use [Config.VerifyConnection] instead, or set
 // [Config.SessionTicketsDisabled].
-internal static ж<Config> Cloneᴍ(ж<Config> Ꮡc) {
+[GoMethodBody("Clone")] internal static ж<Config> Cloneᴍ(ж<Config> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1004,7 +1004,7 @@ internal static slice<byte> deprecatedSessionTicketKey = slice<byte>("DEPRECATED
 
 // initLegacySessionTicketKeyRLocked ensures the legacy SessionTicketKey field is
 // randomized if empty, and that sessionTicketKeys is populated from it otherwise.
-internal static void initLegacySessionTicketKeyRLockedᴍ(ж<Config> Ꮡc) {
+[GoMethodBody("initLegacySessionTicketKeyRLocked")] internal static void initLegacySessionTicketKeyRLockedᴍ(ж<Config> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     bool ᒐd2 = false;
@@ -1048,7 +1048,7 @@ internal static void initLegacySessionTicketKeyRLockedᴍ(ж<Config> Ꮡc) {
 // encrypting tickets (ie. the first ticketKey in c.sessionTicketKeys)
 // is not fresh, then a new session ticket key will be
 // created and prepended to c.sessionTicketKeys.
-internal static slice<ticketKey> ticketKeysᴍ(ж<Config> Ꮡc, ж<Config> ᏑconfigForClient) {
+[GoMethodBody("ticketKeys")] internal static slice<ticketKey> ticketKeysᴍ(ж<Config> Ꮡc, ж<Config> ᏑconfigForClient) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     bool ᒐd2 = false;
@@ -1130,7 +1130,7 @@ internal static slice<ticketKey> ticketKeysᴍ(ж<Config> Ꮡc, ж<Config> Ꮡco
 // all have the same session ticket keys. If the session ticket keys leaks,
 // previously recorded and future TLS connections using those keys might be
 // compromised.
-internal static void SetSessionTicketKeysᴍ(ж<Config> Ꮡc, slice<array<byte>> keys) {
+[GoMethodBody("SetSessionTicketKeys")] internal static void SetSessionTicketKeysᴍ(ж<Config> Ꮡc, slice<array<byte>> keys) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (len(keys) == 0) {
@@ -1149,7 +1149,7 @@ internal static void SetSessionTicketKeysᴍ(ж<Config> Ꮡc, slice<array<byte>>
     Ꮡc.Ꮡmutex.Unlock();
 }
 
-internal static io.Reader randᴍ(ref Config c) {
+[GoMethodBody("rand")] internal static io.Reader randᴍ(ref Config c) {
     var r = c.Rand;
     if (r == nil) {
         return go.crypto.rand_package.Reader;
@@ -1157,7 +1157,7 @@ internal static io.Reader randᴍ(ref Config c) {
     return r;
 }
 
-internal static time.Time timeᴍ(ref Config c) {
+[GoMethodBody("time")] internal static time.Time timeᴍ(ref Config c) {
     var t = c.Time;
     if (t == nil) {
         t = time_package.Now;
@@ -1165,7 +1165,7 @@ internal static time.Time timeᴍ(ref Config c) {
     return t();
 }
 
-internal static slice<uint16> cipherSuitesᴍ(ж<Config> Ꮡc, bool aesGCMPreferred) {
+[GoMethodBody("cipherSuites")] internal static slice<uint16> cipherSuitesᴍ(ж<Config> Ꮡc, bool aesGCMPreferred) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     slice<uint16> cipherSuites = default;
@@ -1183,7 +1183,7 @@ internal static slice<uint16> cipherSuitesᴍ(ж<Config> Ꮡc, bool aesGCMPrefer
 
 // supportedCipherSuites returns the supported TLS 1.0–1.2 cipher suites in an
 // undefined order. For preference ordering, use [Config.cipherSuites].
-internal static slice<uint16> supportedCipherSuitesᴍ(ж<Config> Ꮡc) {
+[GoMethodBody("supportedCipherSuites")] internal static slice<uint16> supportedCipherSuitesᴍ(ж<Config> Ꮡc) {
     return Ꮡc.cipherSuites(false);
 }
 
@@ -1207,7 +1207,7 @@ internal static ж<godebug.Setting> tls10server = godebug.New("tls10server");
 
 // supportedVersions returns the list of supported TLS versions, sorted from
 // highest to lowest (and hence also in preference order).
-internal static slice<uint16> supportedVersionsᴍ(ж<Config> Ꮡc, bool isClient) {
+[GoMethodBody("supportedVersions")] internal static slice<uint16> supportedVersionsᴍ(ж<Config> Ꮡc, bool isClient) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var versions = new slice<uint16>(0, len(Δtls.supportedVersions));
@@ -1234,7 +1234,7 @@ internal static slice<uint16> supportedVersionsᴍ(ж<Config> Ꮡc, bool isClien
     return versions;
 }
 
-internal static uint16 maxSupportedVersionᴍ(ж<Config> Ꮡc, bool isClient) {
+[GoMethodBody("maxSupportedVersion")] internal static uint16 maxSupportedVersionᴍ(ж<Config> Ꮡc, bool isClient) {
     var supportedVersions = Ꮡc.supportedVersions(isClient);
     if (len(supportedVersions) == 0) {
         return 0;
@@ -1260,7 +1260,7 @@ internal static slice<uint16> supportedVersionsFromMax(uint16 maxVersion) {
 
 } partial class tls_package {
 
-internal static slice<CurveID> curvePreferencesᴍ(ж<Config> Ꮡc, uint16 version) {
+[GoMethodBody("curvePreferences")] internal static slice<CurveID> curvePreferencesᴍ(ж<Config> Ꮡc, uint16 version) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var curvePreferences = defaultCurvePreferences();
@@ -1276,13 +1276,13 @@ internal static slice<CurveID> curvePreferencesᴍ(ж<Config> Ꮡc, uint16 versi
     return curvePreferences;
 }
 
-internal static bool supportsCurveᴍ(ж<Config> Ꮡc, uint16 version, CurveID curve) {
+[GoMethodBody("supportsCurve")] internal static bool supportsCurveᴍ(ж<Config> Ꮡc, uint16 version, CurveID curve) {
     return slices.Contains(Ꮡc.curvePreferences(version), curve);
 }
 
 // mutualVersion returns the protocol version to use given the advertised
 // versions of the peer. The highest supported version is preferred.
-internal static (uint16, bool) mutualVersionᴍ(ж<Config> Ꮡc, bool isClient, slice<uint16> peerVersions) {
+[GoMethodBody("mutualVersion")] internal static (uint16, bool) mutualVersionᴍ(ж<Config> Ꮡc, bool isClient, slice<uint16> peerVersions) {
     var supportedVersions = Ꮡc.supportedVersions(isClient);
     foreach (var (_, v) in range(supportedVersions)) {
         if (slices.Contains(peerVersions, v)) {
@@ -1309,7 +1309,7 @@ public static error errNoCertificates = errors.New("tls: no certificates configu
 
 // getCertificate returns the best certificate for the given ClientHelloInfo,
 // defaulting to the first element of c.Certificates.
-internal static (ж<Certificate>, error) getCertificateᴍ(ref Config c, ж<ClientHelloInfo> ᏑclientHello) {
+[GoMethodBody("getCertificate")] internal static (ж<Certificate>, error) getCertificateᴍ(ref Config c, ж<ClientHelloInfo> ᏑclientHello) {
     ref var clientHello = ref ᏑclientHello.DerefOrNull();
 
     if (c.GetCertificate != nil && (len(c.Certificates) == 0 || len(clientHello.ServerName) > 0)) {
@@ -1383,7 +1383,7 @@ private static readonly @string clientDoesnTSupportAnyˢᵇᴍClientHelloInfo = 
 //
 // This function will call x509.ParseCertificate unless c.Leaf is set, which can
 // incur a significant performance cost.
-internal static error SupportsCertificateᴍ(ж<ClientHelloInfo> Ꮡchi, ж<Certificate> Ꮡc) {
+[GoMethodBody("SupportsCertificate")] internal static error SupportsCertificateᴍ(ж<ClientHelloInfo> Ꮡchi, ж<Certificate> Ꮡc) {
     ref var chi = ref Ꮡchi.DerefOrNull();
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -1566,7 +1566,7 @@ private static readonly @string chainIsNotSignedByAnˢᵇᴍCertificateRequestIn
 // SupportsCertificate returns nil if the provided certificate is supported by
 // the server that sent the CertificateRequest. Otherwise, it returns an error
 // describing the reason for the incompatibility.
-internal static error SupportsCertificateᴍ(ref CertificateRequestInfo cri, ж<Certificate> Ꮡc) {
+[GoMethodBody("SupportsCertificate")] internal static error SupportsCertificateᴍ(ref CertificateRequestInfo cri, ж<Certificate> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
@@ -1608,7 +1608,7 @@ internal static error SupportsCertificateᴍ(ref CertificateRequestInfo cri, ж<
 // Deprecated: NameToCertificate only allows associating a single certificate
 // with a given name. Leave that field nil to let the library select the first
 // compatible chain from Certificates.
-internal static void BuildNameToCertificateᴍ(ref Config c) {
+[GoMethodBody("BuildNameToCertificate")] internal static void BuildNameToCertificateᴍ(ref Config c) {
     c.NameToCertificate = new map<@string, ж<Certificate>>();
     foreach (var i in range(len(c.Certificates))) {
         var cert = Ꮡ(c.Certificates, i);
@@ -1642,7 +1642,7 @@ private static readonly @string keyLogLabelServerTrafficᵇ = "SERVER_TRAFFIC_SE
 
 } partial class tls_package {
 
-internal static error writeKeyLogᴍ(ref Config c, @string label, slice<byte> clientRandom, slice<byte> secret) {
+[GoMethodBody("writeKeyLog")] internal static error writeKeyLogᴍ(ref Config c, @string label, slice<byte> clientRandom, slice<byte> secret) {
     if (c.KeyLogWriter == nil) {
         return default;
     }
@@ -1695,7 +1695,7 @@ partial struct Certificate {
 
 // leaf returns the parsed leaf certificate, either from c.Leaf or by parsing
 // the corresponding c.Certificate[0].
-internal static (ж<Δx509.Certificate>, error) leafᴍ(ref Certificate c) {
+[GoMethodBody("leaf")] internal static (ж<Δx509.Certificate>, error) leafᴍ(ref Certificate c) {
     if (c.Leaf != nil) {
         return (c.Leaf, default);
     }
@@ -1752,7 +1752,7 @@ public static ClientSessionCache NewLRUClientSessionCache(nint capacity) {
 
 // Put adds the provided (sessionKey, cs) pair to the cache. If cs is nil, the entry
 // corresponding to sessionKey is removed from the cache instead.
-internal static void Putᴍ(ж<lruSessionCache> Ꮡc, @string sessionKey, ж<ClientSessionState> cs) {
+[GoMethodBody("Put")] internal static void Putᴍ(ж<lruSessionCache> Ꮡc, @string sessionKey, ж<ClientSessionState> cs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1793,7 +1793,7 @@ internal static void Putᴍ(ж<lruSessionCache> Ꮡc, @string sessionKey, ж<Cli
 
 // Get returns the [ClientSessionState] value associated with a given key. It
 // returns (nil, false) if no value is found.
-internal static (ж<ClientSessionState>, bool) Getᴍ(ж<lruSessionCache> Ꮡc, @string sessionKey) {
+[GoMethodBody("Get")] internal static (ж<ClientSessionState>, bool) Getᴍ(ж<lruSessionCache> Ꮡc, @string sessionKey) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1892,11 +1892,11 @@ partial struct CertificateVerificationError {
 
 } partial class tls_package {
 
-internal static @string Errorᴍ(ref CertificateVerificationError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref CertificateVerificationError e) {
     return fmt.Sprintf("tls: failed to verify certificate: %s"u8, e.Err);
 }
 
-internal static error Unwrapᴍ(ref CertificateVerificationError e) {
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref CertificateVerificationError e) {
     return e.Err;
 }
 
@@ -1984,47 +1984,3 @@ internal static bool anyValidVerifiedChain(slice<slice<ж<Δx509.Certificate>>> 
 }
 
 } // end tls_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tlsᴛConnectionState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) ExportKeyingMaterial(this ref ConnectionState cs, @string label, slice<byte> context, nint length) => tls_package.ExportKeyingMaterialᴍ(ref cs, label, context, length);
-}
-partial class tlsᴛClientHelloInfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static context.Context Context(this ref ClientHelloInfo c) => tls_package.Contextᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SupportsCertificate(this ж<ClientHelloInfo> Ꮡchi, ж<Certificate> Ꮡc) => tls_package.SupportsCertificateᴍ(Ꮡchi, Ꮡc);
-}
-partial class tlsᴛCertificateRequestInfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static context.Context Context(this ref CertificateRequestInfo c) => tls_package.Contextᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SupportsCertificate(this ref CertificateRequestInfo cri, ж<Certificate> Ꮡc) => tls_package.SupportsCertificateᴍ(ref cri, Ꮡc);
-}
-partial class tlsᴛConfig {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ticketKey /*key*/ ticketKeyFromBytes(this ref Config c, /*[32]*/ array<byte> b) => tls_package.ticketKeyFromBytesᴍ(ref c, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Config> Clone(this ж<Config> Ꮡc) => tls_package.Cloneᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initLegacySessionTicketKeyRLocked(this ж<Config> Ꮡc) => tls_package.initLegacySessionTicketKeyRLockedᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ticketKey> ticketKeys(this ж<Config> Ꮡc, ж<Config> ᏑconfigForClient) => tls_package.ticketKeysᴍ(Ꮡc, ᏑconfigForClient);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetSessionTicketKeys(this ж<Config> Ꮡc, slice<array<byte>> keys) => tls_package.SetSessionTicketKeysᴍ(Ꮡc, keys);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static io.Reader rand(this ref Config c) => tls_package.randᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Time time(this ref Config c) => tls_package.timeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<uint16> cipherSuites(this ж<Config> Ꮡc, bool aesGCMPreferred) => tls_package.cipherSuitesᴍ(Ꮡc, aesGCMPreferred);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<uint16> supportedCipherSuites(this ж<Config> Ꮡc) => tls_package.supportedCipherSuitesᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<uint16> supportedVersions(this ж<Config> Ꮡc, bool isClient) => tls_package.supportedVersionsᴍ(Ꮡc, isClient);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 maxSupportedVersion(this ж<Config> Ꮡc, bool isClient) => tls_package.maxSupportedVersionᴍ(Ꮡc, isClient);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<CurveID> curvePreferences(this ж<Config> Ꮡc, uint16 version) => tls_package.curvePreferencesᴍ(Ꮡc, version);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool supportsCurve(this ж<Config> Ꮡc, uint16 version, CurveID curve) => tls_package.supportsCurveᴍ(Ꮡc, version, curve);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint16, bool) mutualVersion(this ж<Config> Ꮡc, bool isClient, slice<uint16> peerVersions) => tls_package.mutualVersionᴍ(Ꮡc, isClient, peerVersions);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Certificate>, error) getCertificate(this ref Config c, ж<ClientHelloInfo> ᏑclientHello) => tls_package.getCertificateᴍ(ref c, ᏑclientHello);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void BuildNameToCertificate(this ref Config c) => tls_package.BuildNameToCertificateᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeKeyLog(this ref Config c, @string label, slice<byte> clientRandom, slice<byte> secret) => tls_package.writeKeyLogᴍ(ref c, label, clientRandom, secret);
-}
-partial class tlsᴛCertificate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Δx509.Certificate>, error) leaf(this ref Certificate c) => tls_package.leafᴍ(ref c);
-}
-partial class tlsᴛlruSessionCache {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Put(this ж<lruSessionCache> Ꮡc, @string sessionKey, ж<ClientSessionState> cs) => tls_package.Putᴍ(Ꮡc, sessionKey, cs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<ClientSessionState>, bool) Get(this ж<lruSessionCache> Ꮡc, @string sessionKey) => tls_package.Getᴍ(Ꮡc, sessionKey);
-}
-partial class tlsᴛCertificateVerificationError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref CertificateVerificationError e) => tls_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref CertificateVerificationError e) => tls_package.Unwrapᴍ(ref e);
-}
-// </GlyphForwarders>

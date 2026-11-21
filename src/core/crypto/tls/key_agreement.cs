@@ -48,7 +48,7 @@ partial struct rsaKeyAgreement {
 
 } partial class tls_package {
 
-internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchangeᴍ(rsaKeyAgreement ka, ж<Config> config, ж<Certificate> cert, ж<clientHelloMsg> clientHello, ж<serverHelloMsg> hello) {
+[GoMethodBody("generateServerKeyExchange")] internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchangeᴍ(rsaKeyAgreement ka, ж<Config> config, ж<Certificate> cert, ж<clientHelloMsg> clientHello, ж<serverHelloMsg> hello) {
     return (default, default);
 }
 
@@ -56,7 +56,7 @@ internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchangeᴍ(r
 internal static ref readonly @string tlsCertificatePrivateKeyˢᴍrsaKeyAgreement => ref tlsCertificatePrivateKeyˢᵇᴍrsaKeyAgreement;
 private static readonly @string tlsCertificatePrivateKeyˢᵇᴍrsaKeyAgreement = "tls: certificate private key does not implement crypto.Decrypter"u8;
 
-internal static (slice<byte>, error) processClientKeyExchangeᴍ(rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) {
+[GoMethodBody("processClientKeyExchange")] internal static (slice<byte>, error) processClientKeyExchangeᴍ(rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) {
     ref var config = ref Ꮡconfig.DerefOrNull();
     ref var cert = ref Ꮡcert.DerefOrNull();
     ref var ckx = ref Ꮡckx.DerefOrNull();
@@ -92,7 +92,7 @@ internal static (slice<byte>, error) processClientKeyExchangeᴍ(rsaKeyAgreement
 internal static ref readonly @string tlsUnexpectedˢᴍrsaKeyAgreement => ref tlsUnexpectedˢᵇᴍrsaKeyAgreement;
 private static readonly @string tlsUnexpectedˢᵇᴍrsaKeyAgreement = "tls: unexpected ServerKeyExchange"u8;
 
-internal static error processServerKeyExchangeᴍ(rsaKeyAgreement ka, ж<Config> config, ж<clientHelloMsg> clientHello, ж<serverHelloMsg> serverHello, ж<Δx509.Certificate> cert, ж<serverKeyExchangeMsg> skx) {
+[GoMethodBody("processServerKeyExchange")] internal static error processServerKeyExchangeᴍ(rsaKeyAgreement ka, ж<Config> config, ж<clientHelloMsg> clientHello, ж<serverHelloMsg> serverHello, ж<Δx509.Certificate> cert, ж<serverKeyExchangeMsg> skx) {
     return errors.New(tlsUnexpectedˢᴍrsaKeyAgreement);
 }
 
@@ -100,7 +100,7 @@ internal static error processServerKeyExchangeᴍ(rsaKeyAgreement ka, ж<Config>
 internal static ref readonly @string tlsServerCertificateˢᴍrsaKeyAgreement => ref tlsServerCertificateˢᵇᴍrsaKeyAgreement;
 private static readonly @string tlsServerCertificateˢᵇᴍrsaKeyAgreement = "tls: server certificate contains incorrect key type for selected ciphersuite"u8;
 
-internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchangeᴍ(rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<Δx509.Certificate> Ꮡcert) {
+[GoMethodBody("generateClientKeyExchange")] internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchangeᴍ(rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<Δx509.Certificate> Ꮡcert) {
     ref var config = ref Ꮡconfig.DerefOrNull();
     ref var clientHello = ref ᏑclientHello.DerefOrNull();
     ref var cert = ref Ꮡcert.DerefOrNull();
@@ -192,7 +192,7 @@ private static readonly @string tlsCurvePreferencesˢᵇᴍecdheKeyAgreement = "
 internal static ref readonly @string tlsCertificateCannotBeˢᴍecdheKeyAgreement => ref tlsCertificateCannotBeˢᵇᴍecdheKeyAgreement;
 private static readonly @string tlsCertificateCannotBeˢᵇᴍecdheKeyAgreement = "tls: certificate cannot be used with the selected cipher suite"u8;
 
-internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchangeᴍ(ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> Ꮡhello) {
+[GoMethodBody("generateServerKeyExchange")] internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchangeᴍ(ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> Ꮡhello) {
     ref var config = ref Ꮡconfig.DerefOrNull();
     ref var cert = ref Ꮡcert.DerefOrNull();
     ref var clientHello = ref ᏑclientHello.DerefOrNull();
@@ -294,7 +294,7 @@ internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchangeᴍ(r
     return (skx, default);
 }
 
-internal static (slice<byte>, error) processClientKeyExchangeᴍ(ref ecdheKeyAgreement ka, ж<Config> config, ж<Certificate> cert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) {
+[GoMethodBody("processClientKeyExchange")] internal static (slice<byte>, error) processClientKeyExchangeᴍ(ref ecdheKeyAgreement ka, ж<Config> config, ж<Certificate> cert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) {
     ref var ckx = ref Ꮡckx.DerefOrNull();
 
     if (len(ckx.ciphertext) == 0 || (nint)ckx.ciphertext[0] != len(ckx.ciphertext) - 1) {
@@ -321,7 +321,7 @@ private static readonly @string tlsServerSelectedˢ5ᵇᴍecdheKeyAgreement = "t
 internal static ref readonly @string tlsCertificateUsedWithˢᴍecdheKeyAgreement => ref tlsCertificateUsedWithˢᵇᴍecdheKeyAgreement;
 private static readonly @string tlsCertificateUsedWithˢᵇᴍecdheKeyAgreement = "tls: certificate used with invalid signature algorithm"u8;
 
-internal static error processServerKeyExchangeᴍ(ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> ᏑserverHello, ж<Δx509.Certificate> Ꮡcert, ж<serverKeyExchangeMsg> Ꮡskx) {
+[GoMethodBody("processServerKeyExchange")] internal static error processServerKeyExchangeᴍ(ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> ᏑserverHello, ж<Δx509.Certificate> Ꮡcert, ж<serverKeyExchangeMsg> Ꮡskx) {
     ref var config = ref Ꮡconfig.DerefOrNull();
     ref var clientHello = ref ᏑclientHello.DerefOrNull();
     ref var serverHello = ref ᏑserverHello.DerefOrNull();
@@ -431,7 +431,7 @@ internal static error processServerKeyExchangeᴍ(ref ecdheKeyAgreement ka, ж<C
 internal static ref readonly @string tlsMissingˢᴍecdheKeyAgreement => ref tlsMissingˢᵇᴍecdheKeyAgreement;
 private static readonly @string tlsMissingˢᵇᴍecdheKeyAgreement = "tls: missing ServerKeyExchange message"u8;
 
-internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchangeᴍ(ref ecdheKeyAgreement ka, ж<Config> config, ж<clientHelloMsg> clientHello, ж<Δx509.Certificate> cert) {
+[GoMethodBody("generateClientKeyExchange")] internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchangeᴍ(ref ecdheKeyAgreement ka, ж<Config> config, ж<clientHelloMsg> clientHello, ж<Δx509.Certificate> cert) {
     if (ka.ckx == nil) {
         return (default, default, errors.New(tlsMissingˢᴍecdheKeyAgreement));
     }
@@ -476,18 +476,3 @@ internal static (ecdh.Curve, bool) curveForCurveID(CurveID id) {
 }
 
 } // end tls_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tlsᴛrsaKeyAgreement {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this rsaKeyAgreement ka, ж<Config> config, ж<Certificate> cert, ж<clientHelloMsg> clientHello, ж<serverHelloMsg> hello) => tls_package.generateServerKeyExchangeᴍ(ka, config, cert, clientHello, hello);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) processClientKeyExchange(this rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) => tls_package.processClientKeyExchangeᴍ(ka, Ꮡconfig, Ꮡcert, Ꮡckx, version);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processServerKeyExchange(this rsaKeyAgreement ka, ж<Config> config, ж<clientHelloMsg> clientHello, ж<serverHelloMsg> serverHello, ж<Δx509.Certificate> cert, ж<serverKeyExchangeMsg> skx) => tls_package.processServerKeyExchangeᴍ(ka, config, clientHello, serverHello, cert, skx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchange(this rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<Δx509.Certificate> Ꮡcert) => tls_package.generateClientKeyExchangeᴍ(ka, Ꮡconfig, ᏑclientHello, Ꮡcert);
-}
-partial class tlsᴛecdheKeyAgreement {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> Ꮡhello) => tls_package.generateServerKeyExchangeᴍ(ref ka, Ꮡconfig, Ꮡcert, ᏑclientHello, Ꮡhello);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) processClientKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> config, ж<Certificate> cert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) => tls_package.processClientKeyExchangeᴍ(ref ka, config, cert, Ꮡckx, version);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processServerKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> ᏑserverHello, ж<Δx509.Certificate> Ꮡcert, ж<serverKeyExchangeMsg> Ꮡskx) => tls_package.processServerKeyExchangeᴍ(ref ka, Ꮡconfig, ᏑclientHello, ᏑserverHello, Ꮡcert, Ꮡskx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchange(this ref ecdheKeyAgreement ka, ж<Config> config, ж<clientHelloMsg> clientHello, ж<Δx509.Certificate> cert) => tls_package.generateClientKeyExchangeᴍ(ref ka, config, clientHello, cert);
-}
-// </GlyphForwarders>

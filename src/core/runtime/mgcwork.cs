@@ -136,7 +136,7 @@ partial struct gcWork {
 // write barrier while the gcWork was in an inconsistent state, and
 // the write barrier in turn invoked a gcWork method, it could
 // permanently corrupt the gcWork.
-internal static void initᴍ(ref gcWork w) {
+[GoMethodBody("init")] internal static void initᴍ(ref gcWork w) {
     w.wbuf1 = getempty();
     var wbuf2 = trygetfull();
     if (wbuf2 == nil) {
@@ -149,7 +149,7 @@ internal static void initᴍ(ref gcWork w) {
 // obj must point to the beginning of a heap object or an oblet.
 //
 //go:nowritebarrierrec
-internal static void putObjᴍ(ref gcWork w, uintptr obj) {
+[GoMethodBody("putObj")] internal static void putObjᴍ(ref gcWork w, uintptr obj) {
     var flushed = false;
     var wbuf = w.wbuf1;
     // Record that this may acquire the wbufSpans or heap lock to
@@ -192,7 +192,7 @@ internal static void putObjᴍ(ref gcWork w, uintptr obj) {
 // otherwise it returns false and the caller needs to call put.
 //
 //go:nowritebarrierrec
-internal static bool putObjFastᴍ(ref gcWork w, uintptr obj) {
+[GoMethodBody("putObjFast")] internal static bool putObjFastᴍ(ref gcWork w, uintptr obj) {
     var wbuf = w.wbuf1;
     if (wbuf == nil || wbuf.nobj == len(wbuf.obj)) {
         return false;
@@ -207,7 +207,7 @@ internal static bool putObjFastᴍ(ref gcWork w, uintptr obj) {
 // constraints on these pointers.
 //
 //go:nowritebarrierrec
-internal static void putObjBatchᴍ(ref gcWork w, slice<uintptr> obj) {
+[GoMethodBody("putObjBatch")] internal static void putObjBatchᴍ(ref gcWork w, slice<uintptr> obj) {
     if (len(obj) == 0) {
         return;
     }
@@ -248,7 +248,7 @@ internal static void putObjBatchᴍ(ref gcWork w, slice<uintptr> obj) {
 // other gcWork instances or other caches.
 //
 //go:nowritebarrierrec
-internal static uintptr tryGetObjᴍ(ref gcWork w) {
+[GoMethodBody("tryGetObj")] internal static uintptr tryGetObjᴍ(ref gcWork w) {
     var wbuf = w.wbuf1;
     if (wbuf == nil) {
         w.init();
@@ -278,7 +278,7 @@ internal static uintptr tryGetObjᴍ(ref gcWork w) {
 // the caller is expected to call tryGet().
 //
 //go:nowritebarrierrec
-internal static uintptr tryGetObjFastᴍ(ref gcWork w) {
+[GoMethodBody("tryGetObjFast")] internal static uintptr tryGetObjFastᴍ(ref gcWork w) {
     var wbuf = w.wbuf1;
     if (wbuf == nil || wbuf.nobj == 0) {
         return 0;
@@ -295,7 +295,7 @@ internal static uintptr tryGetObjFastᴍ(ref gcWork w) {
 // ability to hide pointers during the concurrent mark phase.
 //
 //go:nowritebarrierrec
-internal static void disposeᴍ(ж<gcWork> Ꮡw) {
+[GoMethodBody("dispose")] internal static void disposeᴍ(ж<gcWork> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     var wbuf = w.wbuf1; if (wbuf != nil) {
@@ -348,7 +348,7 @@ internal static void disposeᴍ(ж<gcWork> Ꮡw) {
 // global queue.
 //
 //go:nowritebarrierrec
-internal static void balanceᴍ(ref gcWork w) {
+[GoMethodBody("balance")] internal static void balanceᴍ(ref gcWork w) {
     if (w.wbuf1 == nil) {
         return;
     }
@@ -375,7 +375,7 @@ internal static void balanceᴍ(ref gcWork w) {
 // empty reports whether w has no mark work available.
 //
 //go:nowritebarrierrec
-internal static bool emptyᴍ(ж<gcWork> Ꮡw) {
+[GoMethodBody("empty")] internal static bool emptyᴍ(ж<gcWork> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     return (w.wbuf1 == nil || (w.wbuf1.nobj == 0 && w.wbuf2.nobj == 0)) && Ꮡw.Ꮡspanq.empty();
@@ -408,7 +408,7 @@ private static readonly @string workbufIsEmptyˢᵇᴍworkbuf = "workbuf is empt
 // workbufs.
 // If the GC asks for some work these are the only routines that
 // make wbufs available to the GC.
-internal static void checknonemptyᴍ(ref workbuf b) {
+[GoMethodBody("checknonempty")] internal static void checknonemptyᴍ(ref workbuf b) {
     if (b.nobj == 0) {
         @throw(workbufIsEmptyˢᴍworkbuf);
     }
@@ -418,7 +418,7 @@ internal static void checknonemptyᴍ(ref workbuf b) {
 internal static ref readonly @string workbufIsNotEmptyˢᴍworkbuf => ref workbufIsNotEmptyˢᵇᴍworkbuf;
 private static readonly @string workbufIsNotEmptyˢᵇᴍworkbuf = "workbuf is not empty"u8;
 
-internal static void checkemptyᴍ(ref workbuf b) {
+[GoMethodBody("checkempty")] internal static void checkemptyᴍ(ref workbuf b) {
     if (b.nobj != 0) {
         @throw(workbufIsNotEmptyˢᴍworkbuf);
     }
@@ -580,21 +580,3 @@ internal static bool freeSomeWbufs(bool preemptible) {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛgcWork {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref gcWork w) => runtime_package.initᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void putObj(this ref gcWork w, uintptr obj) => runtime_package.putObjᴍ(ref w, obj);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool putObjFast(this ref gcWork w, uintptr obj) => runtime_package.putObjFastᴍ(ref w, obj);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void putObjBatch(this ref gcWork w, slice<uintptr> obj) => runtime_package.putObjBatchᴍ(ref w, obj);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr tryGetObj(this ref gcWork w) => runtime_package.tryGetObjᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr tryGetObjFast(this ref gcWork w) => runtime_package.tryGetObjFastᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void dispose(this ж<gcWork> Ꮡw) => runtime_package.disposeᴍ(Ꮡw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void balance(this ref gcWork w) => runtime_package.balanceᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ж<gcWork> Ꮡw) => runtime_package.emptyᴍ(Ꮡw);
-}
-partial class runtimeᴛworkbuf {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checknonempty(this ref workbuf b) => runtime_package.checknonemptyᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkempty(this ref workbuf b) => runtime_package.checkemptyᴍ(ref b);
-}
-// </GlyphForwarders>

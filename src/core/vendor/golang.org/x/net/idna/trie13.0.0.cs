@@ -13,7 +13,7 @@ partial class idna_package {
 
 // appendMapping appends the mapping for the respective rune. isMapped must be
 // true. A mapping is a categorization of a rune as defined in UTS #46.
-internal static slice<byte> appendMappingᴍ(info c, slice<byte> b, @string s) {
+[GoMethodBody("appendMapping")] internal static slice<byte> appendMappingᴍ(info c, slice<byte> b, @string s) {
     nint index = (nint)(c >> (int)(indexShift));
     if ((info)(c & (uint16)xorBit) == 0) {
         nint p = index;
@@ -33,9 +33,3 @@ internal static slice<byte> appendMappingᴍ(info c, slice<byte> b, @string s) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class idnaᴛinfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendMapping(this info c, slice<byte> b, @string s) => idna_package.appendMappingᴍ(c, b, s);
-}
-// </GlyphForwarders>

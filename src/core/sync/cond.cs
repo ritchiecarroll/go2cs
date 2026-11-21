@@ -65,7 +65,7 @@ public static ж<Cond> NewCond(Locker l) {
 //	}
 //	... make use of condition ...
 //	c.L.Unlock()
-internal static void Waitᴍ(ж<Cond> Ꮡc) {
+[GoMethodBody("Wait")] internal static void Waitᴍ(ж<Cond> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     Ꮡc.Ꮡchecker.check();
@@ -82,7 +82,7 @@ internal static void Waitᴍ(ж<Cond> Ꮡc) {
 //
 // Signal() does not affect goroutine scheduling priority; if other goroutines
 // are attempting to lock c.L, they may be awoken before a "waiting" goroutine.
-internal static void Signalᴍ(ж<Cond> Ꮡc) {
+[GoMethodBody("Signal")] internal static void Signalᴍ(ж<Cond> Ꮡc) {
     Ꮡc.Ꮡchecker.check();
     runtime_notifyListNotifyOne(Ꮡc.Ꮡnotify);
 }
@@ -91,7 +91,7 @@ internal static void Signalᴍ(ж<Cond> Ꮡc) {
 //
 // It is allowed but not required for the caller to hold c.L
 // during the call.
-internal static void Broadcastᴍ(ж<Cond> Ꮡc) {
+[GoMethodBody("Broadcast")] internal static void Broadcastᴍ(ж<Cond> Ꮡc) {
     Ꮡc.Ꮡchecker.check();
     runtime_notifyListNotifyAll(Ꮡc.Ꮡnotify);
 }
@@ -120,19 +120,7 @@ partial struct noCopy {
 } partial class sync_package {
 
 // Lock is a no-op used by -copylocks checker from `go vet`.
-internal static void Lockᴍ(ref noCopy _) { }
-internal static void Unlockᴍ(ref noCopy _) { }
+[GoMethodBody("Lock")] internal static void Lockᴍ(ref noCopy _) { }
+[GoMethodBody("Unlock")] internal static void Unlockᴍ(ref noCopy _) { }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class syncᴛCond {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Wait(this ж<Cond> Ꮡc) => sync_package.Waitᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Signal(this ж<Cond> Ꮡc) => sync_package.Signalᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Broadcast(this ж<Cond> Ꮡc) => sync_package.Broadcastᴍ(Ꮡc);
-}
-partial class syncᴛnoCopy {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Lock(this ref noCopy _) => sync_package.Lockᴍ(ref _);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Unlock(this ref noCopy _) => sync_package.Unlockᴍ(ref _);
-}
-// </GlyphForwarders>

@@ -169,12 +169,6 @@ namespace go;
 
         string name = method.Name;
 
-        // SCRATCH PROTOTYPE (the global ᴍ cost test): a method body `<name>ᴍ` is the Go method `<name>` (managed_impl.cs,
-        // isGlyphMethodBody).
-        if (method.IsStatic && name.Length > 1 && name.EndsWith("ᴍ", StringComparison.Ordinal) &&
-            !method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false))
-            name = name[..^1];
-
         // An sstring twin's canonical value delegate (`Sprintfᶠ`) is a lambda. Its method is a
         // compiler-generated `<.cctor>b__X_Y` on the nested `<>c` class, so the function's Go name is
         // RECORDED on it, and its package is the enclosing package class, not the closure class

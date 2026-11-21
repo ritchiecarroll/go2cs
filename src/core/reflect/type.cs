@@ -343,11 +343,11 @@ partial struct rtype {
 
 } partial class reflect_package {
 
-internal static ж<abi.Type> commonᴍ(ж<rtype> Ꮡt) {
+[GoMethodBody("common")] internal static ж<abi.Type> commonᴍ(ж<rtype> Ꮡt) {
     return Ꮡt.Ꮡt;
 }
 
-internal static ж<abi.UncommonType> uncommonᴍ(ж<rtype> Ꮡt) {
+[GoMethodBody("uncommon")] internal static ж<abi.UncommonType> uncommonᴍ(ж<rtype> Ꮡt) {
     return Ꮡt.Ꮡt.Uncommon();
 }
 
@@ -367,7 +367,7 @@ partial struct interfaceType {
 
 } partial class reflect_package {
 
-internal static abi.Name nameOffᴍ(ж<interfaceType> Ꮡt, aNameOff off) {
+[GoMethodBody("nameOff")] internal static abi.Name nameOffᴍ(ж<interfaceType> Ꮡt, aNameOff off) {
     return toRType(Ꮡt.of(interfaceType.ᏑType)).nameOff(off);
 }
 
@@ -383,15 +383,15 @@ internal static ж<abi.Type> typeOffFor(ж<abi.Type> t, aTypeOff off) {
 
 } partial class reflect_package {
 
-internal static ж<abi.Type> typeOffᴍ(ж<interfaceType> Ꮡt, aTypeOff off) {
+[GoMethodBody("typeOff")] internal static ж<abi.Type> typeOffᴍ(ж<interfaceType> Ꮡt, aTypeOff off) {
     return toRType(Ꮡt.of(interfaceType.ᏑType)).typeOff(off);
 }
 
-internal static ж<abi.Type> commonᴍ(ж<interfaceType> Ꮡt) {
+[GoMethodBody("common")] internal static ж<abi.Type> commonᴍ(ж<interfaceType> Ꮡt) {
     return Ꮡt.of(interfaceType.ᏑType);
 }
 
-internal static ж<abi.UncommonType> uncommonᴍ(ж<interfaceType> Ꮡt) {
+[GoMethodBody("uncommon")] internal static ж<abi.UncommonType> uncommonᴍ(ж<interfaceType> Ꮡt) {
     return Ꮡt.of(interfaceType.ᏑInterfaceType).of(abi.InterfaceType.ᏑType).Uncommon();
 }
 
@@ -463,14 +463,14 @@ partial struct Method {
 } partial class reflect_package {
 
 // IsExported reports whether the method is exported.
-internal static bool IsExportedᴍ(Method m) {
+[GoMethodBody("IsExported")] internal static bool IsExportedᴍ(Method m) {
     return m.PkgPath == ""u8;
 }
 
 } partial class reflect_package {
 
 // String returns the name of k.
-internal static @string Stringᴍ(Kind k) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Kind k) {
     if ((nuint)k < (nuint)len(kindNames)) {
         return kindNames[(nuint)k];
     }
@@ -575,19 +575,19 @@ internal static aTextOff resolveReflectText(@unsafe.Pointer ptr) {
 
 } partial class reflect_package {
 
-internal static abi.Name nameOffᴍ(ж<rtype> Ꮡt, aNameOff off) {
+[GoMethodBody("nameOff")] internal static abi.Name nameOffᴍ(ж<rtype> Ꮡt, aNameOff off) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     return new abi.Name(Bytes: @unsafe.Pointer.To<byte>(resolveNameOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off)));
 }
 
-internal static ж<abi.Type> typeOffᴍ(ж<rtype> Ꮡt, aTypeOff off) {
+[GoMethodBody("typeOff")] internal static ж<abi.Type> typeOffᴍ(ж<rtype> Ꮡt, aTypeOff off) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     return @unsafe.Pointer.To<abi.Type>(resolveTypeOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off));
 }
 
-internal static @unsafe.Pointer textOffᴍ(ж<rtype> Ꮡt, aTextOff off) {
+[GoMethodBody("textOff")] internal static @unsafe.Pointer textOffᴍ(ж<rtype> Ꮡt, aTextOff off) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     return resolveTextOff((uintptr)@unsafe.Pointer.FromRef(ref t), (int32)off);
@@ -603,9 +603,9 @@ internal static @unsafe.Pointer textOffFor(ж<abi.Type> t, aTextOff off) {
 
 // go2cs generated this placeholder — func String is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static uintptr Sizeᴍ(ref rtype t) { return t.t.Size(); }
+[GoMethodBody("Size")] internal static uintptr Sizeᴍ(ref rtype t) { return t.t.Size(); }
 
-internal static nint Bitsᴍ(ж<rtype> Ꮡt) {
+[GoMethodBody("Bits")] internal static nint Bitsᴍ(ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt == nil) {
@@ -618,13 +618,13 @@ internal static nint Bitsᴍ(ж<rtype> Ꮡt) {
     return (nint)t.t.Size_ * 8;
 }
 
-internal static nint Alignᴍ(ref rtype t) { return t.t.Align(); }
+[GoMethodBody("Align")] internal static nint Alignᴍ(ref rtype t) { return t.t.Align(); }
 
-internal static nint FieldAlignᴍ(ref rtype t) { return t.t.FieldAlign(); }
+[GoMethodBody("FieldAlign")] internal static nint FieldAlignᴍ(ref rtype t) { return t.t.FieldAlign(); }
 
-internal static Kind Kindᴍ(ref rtype t) { return (Kind)(nuint)t.t.Kind(); }
+[GoMethodBody("Kind")] internal static Kind Kindᴍ(ref rtype t) { return (Kind)(nuint)t.t.Kind(); }
 
-internal static slice<abi.Method> exportedMethodsᴍ(ж<rtype> Ꮡt) {
+[GoMethodBody("exportedMethods")] internal static slice<abi.Method> exportedMethodsᴍ(ж<rtype> Ꮡt) {
     var ut = Ꮡt.uncommon();
     if (ut == nil) {
         return default;
@@ -684,7 +684,7 @@ internal static ж<abi.Type> elem(ж<abi.Type> t) {
 
 // go2cs generated this placeholder — func FieldByName is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static (StructField, bool) FieldByNameFuncᴍ(ж<rtype> Ꮡt, Func<@string, bool> match) {
+[GoMethodBody("FieldByNameFunc")] internal static (StructField, bool) FieldByNameFuncᴍ(ж<rtype> Ꮡt, Func<@string, bool> match) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Struct) {
@@ -708,7 +708,7 @@ internal static (StructField, bool) FieldByNameFuncᴍ(ж<rtype> Ꮡt, Func<@str
 
 // go2cs generated this placeholder — func IsVariadic is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static bool OverflowComplexᴍ(ж<rtype> Ꮡt, complex128 x) {
+[GoMethodBody("OverflowComplex")] internal static bool OverflowComplexᴍ(ж<rtype> Ꮡt, complex128 x) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Kind k = t.Kind();
@@ -722,7 +722,7 @@ internal static bool OverflowComplexᴍ(ж<rtype> Ꮡt, complex128 x) {
     throw panic("reflect: OverflowComplex of non-complex type " + Ꮡt.String());
 }
 
-internal static bool OverflowFloatᴍ(ж<rtype> Ꮡt, float64 x) {
+[GoMethodBody("OverflowFloat")] internal static bool OverflowFloatᴍ(ж<rtype> Ꮡt, float64 x) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Kind k = t.Kind();
@@ -736,7 +736,7 @@ internal static bool OverflowFloatᴍ(ж<rtype> Ꮡt, float64 x) {
     throw panic("reflect: OverflowFloat of non-float type " + Ꮡt.String());
 }
 
-internal static bool OverflowIntᴍ(ж<rtype> Ꮡt, int64 x) {
+[GoMethodBody("OverflowInt")] internal static bool OverflowIntᴍ(ж<rtype> Ꮡt, int64 x) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Kind k = t.Kind();
@@ -749,7 +749,7 @@ internal static bool OverflowIntᴍ(ж<rtype> Ꮡt, int64 x) {
     throw panic("reflect: OverflowInt of non-int type " + Ꮡt.String());
 }
 
-internal static bool OverflowUintᴍ(ж<rtype> Ꮡt, uint64 x) {
+[GoMethodBody("OverflowUint")] internal static bool OverflowUintᴍ(ж<rtype> Ꮡt, uint64 x) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Kind k = t.Kind();
@@ -762,7 +762,7 @@ internal static bool OverflowUintᴍ(ж<rtype> Ꮡt, uint64 x) {
     throw panic("reflect: OverflowUint of non-uint type " + Ꮡt.String());
 }
 
-internal static bool CanSeqᴍ(ж<rtype> Ꮡt) {
+[GoMethodBody("CanSeq")] internal static bool CanSeqᴍ(ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     switch (t.Kind()) {
@@ -800,7 +800,7 @@ internal static bool canRangeFunc(ж<abi.Type> Ꮡt) {
 
 } partial class reflect_package {
 
-internal static bool CanSeq2ᴍ(ж<rtype> Ꮡt) {
+[GoMethodBody("CanSeq2")] internal static bool CanSeq2ᴍ(ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     switch (t.Kind()) {
@@ -838,7 +838,7 @@ internal static bool canRangeFunc2(ж<abi.Type> Ꮡt) {
 
 } partial class reflect_package {
 
-internal static iter.Seq<StructField> Fieldsᴍ(ж<rtype> Ꮡt) {
+[GoMethodBody("Fields")] internal static iter.Seq<StructField> Fieldsᴍ(ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Struct) {
@@ -853,7 +853,7 @@ internal static iter.Seq<StructField> Fieldsᴍ(ж<rtype> Ꮡt) {
     };
 }
 
-internal static iter.Seq<Method> Methodsᴍ(ж<rtype> Ꮡt) {
+[GoMethodBody("Methods")] internal static iter.Seq<Method> Methodsᴍ(ж<rtype> Ꮡt) {
     return (Func<Method, bool> yield) => {
         foreach (var i in range(Ꮡt.NumMethod())) {
             if (!yield(Ꮡt.Method(i))) {
@@ -863,7 +863,7 @@ internal static iter.Seq<Method> Methodsᴍ(ж<rtype> Ꮡt) {
     };
 }
 
-internal static iter.Seq<Type> Insᴍ(ж<rtype> Ꮡt) {
+[GoMethodBody("Ins")] internal static iter.Seq<Type> Insᴍ(ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Func) {
@@ -878,7 +878,7 @@ internal static iter.Seq<Type> Insᴍ(ж<rtype> Ꮡt) {
     };
 }
 
-internal static iter.Seq<Type> Outsᴍ(ж<rtype> Ꮡt) {
+[GoMethodBody("Outs")] internal static iter.Seq<Type> Outsᴍ(ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() != Func) {
@@ -927,7 +927,7 @@ private static readonly @string chanˢ2ᵇᴍChanDir = "<-chan"u8;
 internal static ref readonly @string chanˢ3ᴍChanDir => ref chanˢ3ᵇᴍChanDir;
 private static readonly @string chanˢ3ᵇᴍChanDir = "chan"u8;
 
-internal static @string Stringᴍ(ChanDir d) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ChanDir d) {
     switch (d) {
     case var ᴛ when ᴛ == SendDir: {
         return chanˢᴍChanDir;
@@ -944,7 +944,7 @@ internal static @string Stringᴍ(ChanDir d) {
 } partial class reflect_package {
 
 // Method returns the i'th method in the type's method set.
-internal static Method /*m*/ Methodᴍ(ж<interfaceType> Ꮡt, nint i) {
+[GoMethodBody("Method")] internal static Method /*m*/ Methodᴍ(ж<interfaceType> Ꮡt, nint i) {
     Method m = new();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -966,10 +966,10 @@ internal static Method /*m*/ Methodᴍ(ж<interfaceType> Ꮡt, nint i) {
 }
 
 // NumMethod returns the number of interface methods in the type's method set.
-internal static nint NumMethodᴍ(ref interfaceType t) { return len(t.Methods); }
+[GoMethodBody("NumMethod")] internal static nint NumMethodᴍ(ref interfaceType t) { return len(t.Methods); }
 
 // MethodByName method with the given name in the type's method set.
-internal static (Method m, bool ok) MethodByNameᴍ(ж<interfaceType> Ꮡt, @string name) {
+[GoMethodBody("MethodByName")] internal static (Method m, bool ok) MethodByNameᴍ(ж<interfaceType> Ꮡt, @string name) {
     Method m = new();
     bool ok = default;
     ref var t = ref Ꮡt.DerefOrNull();
@@ -1007,7 +1007,7 @@ partial struct StructField {
 } partial class reflect_package {
 
 // IsExported reports whether the field is exported.
-internal static bool IsExportedᴍ(StructField f) {
+[GoMethodBody("IsExported")] internal static bool IsExportedᴍ(StructField f) {
     return f.PkgPath == ""u8;
 }
 
@@ -1030,7 +1030,7 @@ partial struct StructTag /*@string*/;
 // If the tag does not have the conventional format, the value
 // returned by Get is unspecified. To determine whether a tag is
 // explicitly set to the empty string, use [StructTag.Lookup].
-internal static @string Getᴍ(StructTag tag, @string key) {
+[GoMethodBody("Get")] internal static @string Getᴍ(StructTag tag, @string key) {
     var (v, _) = tag.Lookup(key);
     return v;
 }
@@ -1041,7 +1041,7 @@ internal static @string Getᴍ(StructTag tag, @string key) {
 // The ok return value reports whether the value was explicitly set in
 // the tag string. If the tag does not have the conventional format,
 // the value returned by Lookup is unspecified.
-internal static (@string value, bool ok) Lookupᴍ(StructTag tag, @string key) {
+[GoMethodBody("Lookup")] internal static (@string value, bool ok) Lookupᴍ(StructTag tag, @string key) {
     // When modifying this code, also update the validateStructTag code
     // in cmd/vet/structtag.go.
 
@@ -1098,7 +1098,7 @@ internal static (@string value, bool ok) Lookupᴍ(StructTag tag, @string key) {
 } partial class reflect_package {
 
 // Field returns the i'th struct field.
-internal static StructField /*f*/ Fieldᴍ(ref structType t, nint i) {
+[GoMethodBody("Field")] internal static StructField /*f*/ Fieldᴍ(ref structType t, nint i) {
     StructField f = default;
 
     if (i < 0 || i >= len(t.Fields)) {
@@ -1153,7 +1153,7 @@ internal static partial ж<array<uint64>> getStaticuint64s();
 // is wrong for FieldByIndex?
 
 // FieldByIndex returns the nested field corresponding to index.
-internal static StructField /*f*/ FieldByIndexᴍ(ж<structType> Ꮡt, slice<nint> index) {
+[GoMethodBody("FieldByIndex")] internal static StructField /*f*/ FieldByIndexᴍ(ж<structType> Ꮡt, slice<nint> index) {
     StructField f = default;
 
     f.Type = toType(Ꮡt.of(structType.ᏑType));
@@ -1182,7 +1182,7 @@ partial struct fieldScan {
 
 // FieldByNameFunc returns the struct field with a name that satisfies the
 // match function and a boolean to indicate if the field was found.
-internal static (StructField result, bool ok) FieldByNameFuncᴍ(ж<structType> Ꮡt, Func<@string, bool> match) {
+[GoMethodBody("FieldByNameFunc")] internal static (StructField result, bool ok) FieldByNameFuncᴍ(ж<structType> Ꮡt, Func<@string, bool> match) {
     StructField result = default;
     bool ok = default;
     var nextᴷ = new stackAppend<fieldScan>();
@@ -1292,7 +1292,7 @@ internal static (StructField result, bool ok) FieldByNameFuncᴍ(ж<structType> 
 
 // FieldByName returns the struct field with the given name
 // and a boolean to indicate if the field was found.
-internal static (StructField f, bool present) FieldByNameᴍ(ж<structType> Ꮡt, @string name) {
+[GoMethodBody("FieldByName")] internal static (StructField f, bool present) FieldByNameᴍ(ж<structType> Ꮡt, @string name) {
     StructField f = default;
     bool present = default;
     ref var t = ref Ꮡt.DerefOrNull();
@@ -1350,7 +1350,7 @@ public static Type PtrTo(Type t) { return PointerTo(t); }
 
 } partial class reflect_package {
 
-internal static ж<abi.Type> ptrToᴍ(ж<rtype> Ꮡt) {
+[GoMethodBody("ptrTo")] internal static ж<abi.Type> ptrToᴍ(ж<rtype> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var at = Ꮡt.Ꮡt;
@@ -1418,7 +1418,7 @@ internal static uint32 fnv1(uint32 x, params ꓸꓸꓸbyte listʗp) {
 
 // go2cs generated this placeholder — func Implements is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static bool AssignableToᴍ(ж<rtype> Ꮡt, Type u) {
+[GoMethodBody("AssignableTo")] internal static bool AssignableToᴍ(ж<rtype> Ꮡt, Type u) {
     if (u == nil) {
         throw panic("reflect: nil type passed to Type.AssignableTo");
     }
@@ -1426,14 +1426,14 @@ internal static bool AssignableToᴍ(ж<rtype> Ꮡt, Type u) {
     return directlyAssignable(uu, Ꮡt.common()) || implements(uu, Ꮡt.common());
 }
 
-internal static bool ConvertibleToᴍ(ж<rtype> Ꮡt, Type u) {
+[GoMethodBody("ConvertibleTo")] internal static bool ConvertibleToᴍ(ж<rtype> Ꮡt, Type u) {
     if (u == nil) {
         throw panic("reflect: nil type passed to Type.ConvertibleTo");
     }
     return convertOp(u.common(), Ꮡt.common()) != nil;
 }
 
-internal static bool Comparableᴍ(ref rtype t) {
+[GoMethodBody("Comparable")] internal static bool Comparableᴍ(ref rtype t) {
     return t.t.Equal != nil;
 }
 
@@ -2032,7 +2032,7 @@ partial struct bitVector {
 } partial class reflect_package {
 
 // append a bit to the bitmap.
-internal static void appendᴍ(ref bitVector bv, uint8 bit) {
+[GoMethodBody("append")] internal static void appendᴍ(ref bitVector bv, uint8 bit) {
     if (bv.n % (uint32)(8 * goarch.PtrSize) == 0) {
         // Runtime needs pointer masks to be a multiple of uintptr in size.
         // Since reflect passes bv.data directly to the runtime as a pointer mask,
@@ -2050,68 +2050,3 @@ internal static void appendᴍ(ref bitVector bv, uint8 bit) {
 // go2cs generated this placeholder — func addTypeBits is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 } // end reflect_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class reflectᴛrtype {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> common(this ж<rtype> Ꮡt) => reflect_package.commonᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.UncommonType> uncommon(this ж<rtype> Ꮡt) => reflect_package.uncommonᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static abi.Name nameOff(this ж<rtype> Ꮡt, aNameOff off) => reflect_package.nameOffᴍ(Ꮡt, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> typeOff(this ж<rtype> Ꮡt, aTypeOff off) => reflect_package.typeOffᴍ(Ꮡt, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer textOff(this ж<rtype> Ꮡt, aTextOff off) => reflect_package.textOffᴍ(Ꮡt, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr Size(this ref rtype t) => reflect_package.Sizeᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Bits(this ж<rtype> Ꮡt) => reflect_package.Bitsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Align(this ref rtype t) => reflect_package.Alignᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint FieldAlign(this ref rtype t) => reflect_package.FieldAlignᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Kind Kind(this ref rtype t) => reflect_package.Kindᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<abi.Method> exportedMethods(this ж<rtype> Ꮡt) => reflect_package.exportedMethodsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (StructField, bool) FieldByNameFunc(this ж<rtype> Ꮡt, Func<@string, bool> match) => reflect_package.FieldByNameFuncᴍ(Ꮡt, match);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool OverflowComplex(this ж<rtype> Ꮡt, complex128 x) => reflect_package.OverflowComplexᴍ(Ꮡt, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool OverflowFloat(this ж<rtype> Ꮡt, float64 x) => reflect_package.OverflowFloatᴍ(Ꮡt, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool OverflowInt(this ж<rtype> Ꮡt, int64 x) => reflect_package.OverflowIntᴍ(Ꮡt, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool OverflowUint(this ж<rtype> Ꮡt, uint64 x) => reflect_package.OverflowUintᴍ(Ꮡt, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool CanSeq(this ж<rtype> Ꮡt) => reflect_package.CanSeqᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool CanSeq2(this ж<rtype> Ꮡt) => reflect_package.CanSeq2ᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static iter.Seq<StructField> Fields(this ж<rtype> Ꮡt) => reflect_package.Fieldsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static iter.Seq<Method> Methods(this ж<rtype> Ꮡt) => reflect_package.Methodsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static iter.Seq<Type> Ins(this ж<rtype> Ꮡt) => reflect_package.Insᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static iter.Seq<Type> Outs(this ж<rtype> Ꮡt) => reflect_package.Outsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) => reflect_package.ptrToᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool AssignableTo(this ж<rtype> Ꮡt, Type u) => reflect_package.AssignableToᴍ(Ꮡt, u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool ConvertibleTo(this ж<rtype> Ꮡt, Type u) => reflect_package.ConvertibleToᴍ(Ꮡt, u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Comparable(this ref rtype t) => reflect_package.Comparableᴍ(ref t);
-}
-partial class reflectᴛinterfaceType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static abi.Name nameOff(this ж<interfaceType> Ꮡt, aNameOff off) => reflect_package.nameOffᴍ(Ꮡt, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> typeOff(this ж<interfaceType> Ꮡt, aTypeOff off) => reflect_package.typeOffᴍ(Ꮡt, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> common(this ж<interfaceType> Ꮡt) => reflect_package.commonᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.UncommonType> uncommon(this ж<interfaceType> Ꮡt) => reflect_package.uncommonᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Method /*m*/ Method(this ж<interfaceType> Ꮡt, nint i) => reflect_package.Methodᴍ(Ꮡt, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NumMethod(this ref interfaceType t) => reflect_package.NumMethodᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Method m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, @string name) => reflect_package.MethodByNameᴍ(Ꮡt, name);
-}
-partial class reflectᴛMethod {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsExported(this Method m) => reflect_package.IsExportedᴍ(m);
-}
-partial class reflectᴛKind {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Kind k) => reflect_package.Stringᴍ(k);
-}
-partial class reflectᴛChanDir {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ChanDir d) => reflect_package.Stringᴍ(d);
-}
-partial class reflectᴛStructField {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsExported(this StructField f) => reflect_package.IsExportedᴍ(f);
-}
-partial class reflectᴛStructTag {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Get(this StructTag tag, @string key) => reflect_package.Getᴍ(tag, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string value, bool ok) Lookup(this StructTag tag, @string key) => reflect_package.Lookupᴍ(tag, key);
-}
-partial class reflectᴛstructType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static StructField /*f*/ Field(this ref structType t, nint i) => reflect_package.Fieldᴍ(ref t, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static StructField /*f*/ FieldByIndex(this ж<structType> Ꮡt, slice<nint> index) => reflect_package.FieldByIndexᴍ(Ꮡt, index);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType> Ꮡt, Func<@string, bool> match) => reflect_package.FieldByNameFuncᴍ(Ꮡt, match);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (StructField f, bool present) FieldByName(this ж<structType> Ꮡt, @string name) => reflect_package.FieldByNameᴍ(Ꮡt, name);
-}
-partial class reflectᴛbitVector {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void append(this ref bitVector bv, uint8 bit) => reflect_package.appendᴍ(ref bv, bit);
-}
-// </GlyphForwarders>

@@ -25,11 +25,11 @@ partial struct queue {
 
 } partial class fuzz_package {
 
-internal static nint capᴍ(ref queue q) {
+[GoMethodBody("cap")] internal static nint capᴍ(ref queue q) {
     return len(q.elems);
 }
 
-internal static void growᴍ(ref queue q) {
+[GoMethodBody("grow")] internal static void growᴍ(ref queue q) {
     nint oldCap = q.cap();
     nint newCap = oldCap * 2;
     if (newCap == 0) {
@@ -44,7 +44,7 @@ internal static void growᴍ(ref queue q) {
     q.head = 0;
 }
 
-internal static void enqueueᴍ(ref queue q, any e) {
+[GoMethodBody("enqueue")] internal static void enqueueᴍ(ref queue q, any e) {
     if (q.len + 1 > q.cap()) {
         q.grow();
     }
@@ -53,7 +53,7 @@ internal static void enqueueᴍ(ref queue q, any e) {
     q.len++;
 }
 
-internal static (any, bool) dequeueᴍ(ref queue q) {
+[GoMethodBody("dequeue")] internal static (any, bool) dequeueᴍ(ref queue q) {
     if (q.len == 0) {
         return (default, false);
     }
@@ -64,26 +64,15 @@ internal static (any, bool) dequeueᴍ(ref queue q) {
     return (e, true);
 }
 
-internal static (any, bool) peekᴍ(ref queue q) {
+[GoMethodBody("peek")] internal static (any, bool) peekᴍ(ref queue q) {
     if (q.len == 0) {
         return (default, false);
     }
     return (q.elems[q.head], true);
 }
 
-internal static void clearᴍ(ref queue q) {
+[GoMethodBody("clear")] internal static void clearᴍ(ref queue q) {
     q = new queue();
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class fuzzᴛqueue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint cap(this ref queue q) => fuzz_package.capᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void grow(this ref queue q) => fuzz_package.growᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void enqueue(this ref queue q, any e) => fuzz_package.enqueueᴍ(ref q, e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (any, bool) dequeue(this ref queue q) => fuzz_package.dequeueᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (any, bool) peek(this ref queue q) => fuzz_package.peekᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clear(this ref queue q) => fuzz_package.clearᴍ(ref q);
-}
-// </GlyphForwarders>

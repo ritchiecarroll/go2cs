@@ -15,7 +15,7 @@ partial struct HardwareAddr /*[]byte*/;
 
 } partial class net_package {
 
-internal static @string Stringᴍ(HardwareAddr a) {
+[GoMethodBody("String")] internal static @string Stringᴍ(HardwareAddr a) {
     var bufᴷ = new stackAppend<byte>();
 
     if (len(a) == 0) {
@@ -115,9 +115,3 @@ error:
 }
 
 } // end net_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛHardwareAddr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this HardwareAddr a) => net_package.Stringᴍ(a);
-}
-// </GlyphForwarders>

@@ -72,13 +72,13 @@ partial struct aesCtrWrapper {
 
 } partial class cipher_package {
 
-internal static void XORKeyStreamᴍ(aesCtrWrapper x, slice<byte> dst, slice<byte> src) {
+[GoMethodBody("XORKeyStream")] internal static void XORKeyStreamᴍ(aesCtrWrapper x, slice<byte> dst, slice<byte> src) {
     x.c.XORKeyStream(dst, src);
 }
 
 } partial class cipher_package {
 
-internal static void refillᴍ(ref ctr x) {
+[GoMethodBody("refill")] internal static void refillᴍ(ref ctr x) {
     nint remain = len(x.@out) - x.outUsed;
     copy(x.@out, x.@out.slice(x.outUsed));
     x.@out = x.@out.slice(0, cap(x.@out));
@@ -99,7 +99,7 @@ internal static void refillᴍ(ref ctr x) {
     x.outUsed = 0;
 }
 
-internal static void XORKeyStreamᴍ(ref ctr x, slice<byte> dst, slice<byte> src) {
+[GoMethodBody("XORKeyStream")] internal static void XORKeyStreamᴍ(ref ctr x, slice<byte> dst, slice<byte> src) {
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }
@@ -121,13 +121,3 @@ internal static void XORKeyStreamᴍ(ref ctr x, slice<byte> dst, slice<byte> src
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class cipherᴛaesCtrWrapper {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void XORKeyStream(this aesCtrWrapper x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStreamᴍ(x, dst, src);
-}
-partial class cipherᴛctr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void refill(this ref ctr x) => cipher_package.refillᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void XORKeyStream(this ref ctr x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStreamᴍ(ref x, dst, src);
-}
-// </GlyphForwarders>

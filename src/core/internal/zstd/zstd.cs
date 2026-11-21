@@ -80,7 +80,7 @@ public static ж<Reader> NewReader(io.Reader input) {
 
 // Reset discards the current state and starts reading a new stream from r.
 // This permits reusing a Reader rather than allocating a new one.
-internal static void Resetᴍ(ref Reader r, io.Reader input) {
+[GoMethodBody("Reset")] internal static void Resetᴍ(ref Reader r, io.Reader input) {
     r.r = input;
 
     // Several fields are preserved to avoid allocation.
@@ -109,7 +109,7 @@ internal static void Resetᴍ(ref Reader r, io.Reader input) {
 }
 
 // Read implements [io.Reader].
-internal static (nint, error) Readᴍ(ж<Reader> Ꮡr, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ж<Reader> Ꮡr, slice<byte> p) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var err = Ꮡr.refillIfNeeded(); if (err != nil) {
@@ -121,7 +121,7 @@ internal static (nint, error) Readᴍ(ж<Reader> Ꮡr, slice<byte> p) {
 }
 
 // ReadByte implements [io.ByteReader].
-internal static (byte, error) ReadByteᴍ(ж<Reader> Ꮡr) {
+[GoMethodBody("ReadByte")] internal static (byte, error) ReadByteᴍ(ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var err = Ꮡr.refillIfNeeded(); if (err != nil) {
@@ -133,7 +133,7 @@ internal static (byte, error) ReadByteᴍ(ж<Reader> Ꮡr) {
 }
 
 // refillIfNeeded reads the next block if necessary.
-internal static error refillIfNeededᴍ(ж<Reader> Ꮡr) {
+[GoMethodBody("refillIfNeeded")] internal static error refillIfNeededᴍ(ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     while (r.off >= len(r.buffer)) {
@@ -146,7 +146,7 @@ internal static error refillIfNeededᴍ(ж<Reader> Ꮡr) {
 }
 
 // refill reads and decompresses the next block.
-internal static error refillᴍ(ж<Reader> Ꮡr) {
+[GoMethodBody("refill")] internal static error refillᴍ(ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (!r.sawFrameHeader) {
@@ -168,7 +168,7 @@ internal static ref readonly @string dictionariesAreNotˢᴍReader => ref dictio
 private static readonly @string dictionariesAreNotˢᵇᴍReader = "dictionaries are not supported"u8;
 
 // readFrameHeader reads the frame header and prepares to read a block.
-internal static error readFrameHeaderᴍ(ref Reader r) {
+[GoMethodBody("readFrameHeader")] internal static error readFrameHeaderᴍ(ref Reader r) {
 retry:
     nint relativeOffset = 0;
 
@@ -339,7 +339,7 @@ retry:
 }
 
 // skipFrame skips a skippable frame. RFC 3.1.2.
-internal static error skipFrameᴍ(ref Reader r) {
+[GoMethodBody("skipFrame")] internal static error skipFrameᴍ(ref Reader r) {
     nint relativeOffset = 0;
 
     var (_, errΔ1) = io.ReadFull(r.r, r.scratch[..4]); if (errΔ1 != nil) {
@@ -400,7 +400,7 @@ internal static ref readonly @string notEnoughUncompressedˢᴍReader => ref not
 private static readonly @string notEnoughUncompressedˢᵇᴍReader = "not enough uncompressed bytes for frame"u8;
 
 // readBlock reads the next block from a frame.
-internal static error readBlockᴍ(ж<Reader> Ꮡr) {
+[GoMethodBody("readBlock")] internal static error readBlockᴍ(ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     nint relativeOffset = 0;
@@ -508,7 +508,7 @@ internal static error readBlockᴍ(ж<Reader> Ꮡr) {
 
 // setBufferSize sets the decompressed buffer size.
 // When this is called the buffer is empty.
-internal static void setBufferSizeᴍ(ref Reader r, nint size) {
+[GoMethodBody("setBufferSize")] internal static void setBufferSizeᴍ(ref Reader r, nint size) {
     if (cap(r.buffer) < size) {
         nint need = size - cap(r.buffer);
         r.buffer = appendꓸꓸꓸ(r.buffer.slice(0, cap(r.buffer)), makeꓸꓸꓸ<byte>(need));
@@ -526,32 +526,32 @@ partial struct zstdError {
 
 } partial class zstd_package {
 
-internal static @string Errorᴍ(ref zstdError ze) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref zstdError ze) {
     return fmt.Sprintf("zstd decompression error at %d: %v"u8, ze.offset, ze.err);
 }
 
-internal static error Unwrapᴍ(ref zstdError ze) {
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref zstdError ze) {
     return ze.err;
 }
 
 } partial class zstd_package {
 
-internal static error makeEOFErrorᴍ(ref Reader r, nint off) {
+[GoMethodBody("makeEOFError")] internal static error makeEOFErrorᴍ(ref Reader r, nint off) {
     return r.wrapError(off, io.ErrUnexpectedEOF);
 }
 
-internal static error wrapNonEOFErrorᴍ(ref Reader r, nint off, error err) {
+[GoMethodBody("wrapNonEOFError")] internal static error wrapNonEOFErrorᴍ(ref Reader r, nint off, error err) {
     if (AreEqual(err, io.EOF)) {
         err = io.ErrUnexpectedEOF;
     }
     return r.wrapError(off, err);
 }
 
-internal static error makeErrorᴍ(ref Reader r, nint off, @string msg) {
+[GoMethodBody("makeError")] internal static error makeErrorᴍ(ref Reader r, nint off, @string msg) {
     return r.wrapError(off, errors.New(msg));
 }
 
-internal static error wrapErrorᴍ(ref Reader r, nint off, error err) {
+[GoMethodBody("wrapError")] internal static error wrapErrorᴍ(ref Reader r, nint off, error err) {
     if (AreEqual(err, io.EOF)) {
         return err;
     }
@@ -559,25 +559,3 @@ internal static error wrapErrorᴍ(ref Reader r, nint off, error err) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class zstdᴛReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Reader r, io.Reader input) => zstd_package.Resetᴍ(ref r, input);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> p) => zstd_package.Readᴍ(Ꮡr, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (byte, error) ReadByte(this ж<Reader> Ꮡr) => zstd_package.ReadByteᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error refillIfNeeded(this ж<Reader> Ꮡr) => zstd_package.refillIfNeededᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error refill(this ж<Reader> Ꮡr) => zstd_package.refillᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readFrameHeader(this ref Reader r) => zstd_package.readFrameHeaderᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error skipFrame(this ref Reader r) => zstd_package.skipFrameᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readBlock(this ж<Reader> Ꮡr) => zstd_package.readBlockᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setBufferSize(this ref Reader r, nint size) => zstd_package.setBufferSizeᴍ(ref r, size);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error makeEOFError(this ref Reader r, nint off) => zstd_package.makeEOFErrorᴍ(ref r, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error wrapNonEOFError(this ref Reader r, nint off, error err) => zstd_package.wrapNonEOFErrorᴍ(ref r, off, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error makeError(this ref Reader r, nint off, @string msg) => zstd_package.makeErrorᴍ(ref r, off, msg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error wrapError(this ref Reader r, nint off, error err) => zstd_package.wrapErrorᴍ(ref r, off, err);
-}
-partial class zstdᴛzstdError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref zstdError ze) => zstd_package.Errorᴍ(ref ze);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Unwrap(this ref zstdError ze) => zstd_package.Unwrapᴍ(ref ze);
-}
-// </GlyphForwarders>

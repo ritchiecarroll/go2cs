@@ -116,7 +116,7 @@ partial struct unwinder {
 // iterator on gp's innermost frame. gp must not be the current G.
 //
 // A single unwinder can be reused for multiple unwinds.
-internal static void initᴍ(ж<unwinder> Ꮡu, ж<g> gp, unwindFlags flags) {
+[GoMethodBody("init")] internal static void initᴍ(ж<unwinder> Ꮡu, ж<g> gp, unwindFlags flags) {
     // Implementation note: This starts the iterator on the first frame and we
     // provide a "valid" method. Alternatively, this could start in a "before
     // the first frame" state and "next" could return whether it was able to
@@ -132,7 +132,7 @@ private static readonly @string cannotTraceUserGoroutineˢᵇᴍunwinder = "cann
 internal static ref readonly @string unknownPcˢᴍunwinder => ref unknownPcˢᵇᴍunwinder;
 private static readonly @string unknownPcˢᵇᴍunwinder = "unknown pc"u8;
 
-internal static void initAtᴍ(ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, uintptr lr0, ж<g> Ꮡgp, unwindFlags flags) {
+[GoMethodBody("initAt")] internal static void initAtᴍ(ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, uintptr lr0, ж<g> Ꮡgp, unwindFlags flags) {
     ref var u = ref Ꮡu.DerefOrNull();
     ref var gp = ref Ꮡgp.DerefOrNull();
 
@@ -230,7 +230,7 @@ internal static void initAtᴍ(ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, uint
     Ꮡu.resolveInternal(true, isSyscall);
 }
 
-internal static bool validᴍ(ref unwinder u) {
+[GoMethodBody("valid")] internal static bool validᴍ(ref unwinder u) {
     return u.frame.pc != 0;
 }
 
@@ -259,7 +259,7 @@ private static readonly @string tracebackˢᵇᴍunwinder = "traceback"u8;
 // frame state to follow that stack jump.
 //
 // This is internal to unwinder.
-internal static void resolveInternalᴍ(ж<unwinder> Ꮡu, bool innermost, bool isSyscall) {
+[GoMethodBody("resolveInternal")] internal static void resolveInternalᴍ(ж<unwinder> Ꮡu, bool innermost, bool isSyscall) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var frame = Ꮡu.Ꮡframe;
@@ -466,7 +466,7 @@ private static readonly @string unknownCallerPcˢᵇᴍunwinder = "unknown calle
 internal static ref readonly @string tracebackStuckˢᴍunwinder => ref tracebackStuckˢᵇᴍunwinder;
 private static readonly @string tracebackStuckˢᵇᴍunwinder = "traceback stuck"u8;
 
-internal static void nextᴍ(ж<unwinder> Ꮡu) {
+[GoMethodBody("next")] internal static void nextᴍ(ж<unwinder> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var frame = Ꮡu.Ꮡframe;
@@ -552,7 +552,7 @@ private static readonly @string tracebackDidNotUnwindˢᵇᴍunwinder = "traceba
 // finishInternal is an unwinder-internal helper called after the stack has been
 // exhausted. It sets the unwinder to an invalid state and checks that it
 // successfully unwound the entire stack.
-internal static void finishInternalᴍ(ref unwinder u) {
+[GoMethodBody("finishInternal")] internal static void finishInternalᴍ(ref unwinder u) {
     u.frame.pc = 0;
 
     // Note that panic != nil is okay here: there can be leftover panics,
@@ -613,7 +613,7 @@ internal static void finishInternalᴍ(ref unwinder u) {
 // frame.pc can be at function entry when the frame is initialized without
 // actually running code, like in runtime.mstart, in which case this returns
 // frame.pc because that's the best we can do.
-internal static uintptr symPCᴍ(ref unwinder u) {
+[GoMethodBody("symPC")] internal static uintptr symPCᴍ(ref unwinder u) {
     if ((unwindFlags)(u.flags & unwindTrap) == 0 && u.frame.pc > u.frame.fn.entry()) {
         // Regular call.
         return u.frame.pc - 1;
@@ -626,7 +626,7 @@ internal static uintptr symPCᴍ(ref unwinder u) {
 // the registered cgo unwinder. It returns the number of PCs written to pcBuf.
 // If the current frame is not a cgo frame or if there's no registered cgo
 // unwinder, it returns 0.
-internal static nint cgoCallersᴍ(ref unwinder u, slice<uintptr> pcBuf) {
+[GoMethodBody("cgoCallers")] internal static nint cgoCallersᴍ(ref unwinder u, slice<uintptr> pcBuf) {
     if (!cgoTracebackAvailable() || u.frame.fn.funcID != abi.FuncID_cgocallback || u.cgoCtxt < 0) {
         // We don't have a cgo unwinder (typical case), or we do but we're not
         // in a cgo frame or we're out of cgo context.
@@ -1829,16 +1829,3 @@ internal static void cgoContextPCs(uintptr ctxt, slice<uintptr> buf) {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛunwinder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<unwinder> Ꮡu, ж<g> gp, unwindFlags flags) => runtime_package.initᴍ(Ꮡu, gp, flags);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initAt(this ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, uintptr lr0, ж<g> Ꮡgp, unwindFlags flags) => runtime_package.initAtᴍ(Ꮡu, pc0, sp0, lr0, Ꮡgp, flags);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool valid(this ref unwinder u) => runtime_package.validᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void resolveInternal(this ж<unwinder> Ꮡu, bool innermost, bool isSyscall) => runtime_package.resolveInternalᴍ(Ꮡu, innermost, isSyscall);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void next(this ж<unwinder> Ꮡu) => runtime_package.nextᴍ(Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void finishInternal(this ref unwinder u) => runtime_package.finishInternalᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr symPC(this ref unwinder u) => runtime_package.symPCᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint cgoCallers(this ref unwinder u, slice<uintptr> pcBuf) => runtime_package.cgoCallersᴍ(ref u, pcBuf);
-}
-// </GlyphForwarders>

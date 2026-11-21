@@ -50,7 +50,7 @@ partial struct pooledFlateWriter {
 internal static ref readonly @string writeAfterCloseˢᴍpooledFlateWriter => ref writeAfterCloseˢᵇᴍpooledFlateWriter;
 private static readonly @string writeAfterCloseˢᵇᴍpooledFlateWriter = "Write after Close"u8;
 
-internal static (nint n, error err) Writeᴍ(ж<pooledFlateWriter> Ꮡw, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<pooledFlateWriter> Ꮡw, slice<byte> p) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -69,7 +69,7 @@ internal static (nint n, error err) Writeᴍ(ж<pooledFlateWriter> Ꮡw, slice<b
     ᒐdone: return (n, err);
 }
 
-internal static error Closeᴍ(ж<pooledFlateWriter> Ꮡw) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<pooledFlateWriter> Ꮡw) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -115,7 +115,7 @@ partial struct pooledFlateReader {
 internal static ref readonly @string readAfterCloseˢᴍpooledFlateReader => ref readAfterCloseˢᵇᴍpooledFlateReader;
 private static readonly @string readAfterCloseˢᵇᴍpooledFlateReader = "Read after Close"u8;
 
-internal static (nint n, error err) Readᴍ(ж<pooledFlateReader> Ꮡr, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ж<pooledFlateReader> Ꮡr, slice<byte> p) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -134,7 +134,7 @@ internal static (nint n, error err) Readᴍ(ж<pooledFlateReader> Ꮡr, slice<by
     ᒐdone: return (n, err);
 }
 
-internal static error Closeᴍ(ж<pooledFlateReader> Ꮡr) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<pooledFlateReader> Ꮡr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -202,14 +202,3 @@ internal static Func<io.Reader, io.ReadCloser> decompressor(uint16 method) {
 }
 
 } // end zip_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class zipᴛpooledFlateWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ж<pooledFlateWriter> Ꮡw, slice<byte> p) => zip_package.Writeᴍ(Ꮡw, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<pooledFlateWriter> Ꮡw) => zip_package.Closeᴍ(Ꮡw);
-}
-partial class zipᴛpooledFlateReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ж<pooledFlateReader> Ꮡr, slice<byte> p) => zip_package.Readᴍ(Ꮡr, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<pooledFlateReader> Ꮡr) => zip_package.Closeᴍ(Ꮡr);
-}
-// </GlyphForwarders>

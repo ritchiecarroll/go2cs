@@ -89,7 +89,7 @@ internal static ж<typeWriter> newTypeHasher(ж<bytes.Buffer> buf, ж<Context> c
 
 } partial class types_package {
 
-internal static void @byteᴍ(ref typeWriter w, byte b) {
+[GoMethodBody("byte")] internal static void @byteᴍ(ref typeWriter w, byte b) {
     if (w.ctxt != nil) {
         if (b == ' ') {
             b = (byte)'#';
@@ -103,11 +103,11 @@ internal static void @byteᴍ(ref typeWriter w, byte b) {
     }
 }
 
-internal static void @stringᴍ(ref typeWriter w, @string s) {
+[GoMethodBody("string")] internal static void @stringᴍ(ref typeWriter w, @string s) {
     w.buf.WriteString(s);
 }
 
-internal static void errorᴍ(ref typeWriter w, @string msg) {
+[GoMethodBody("error")] internal static void errorᴍ(ref typeWriter w, @string msg) {
     if (w.ctxt != nil) {
         throw panic(msg);
     }
@@ -148,7 +148,7 @@ private static readonly @string unnamedTypeParameterˢᵇᴍtypeWriter = "unname
 internal static ref readonly @string typeParameterˢ2ᴍtypeWriter => ref typeParameterˢ2ᵇᴍtypeWriter;
 private static readonly @string typeParameterˢ2ᵇᴍtypeWriter = "/* type parameter */"u8;
 
-internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
+[GoMethodBody("typ")] internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
     GoFrame ᒐ = default;
     try {
         ref var w = ref Ꮡw.DerefOrNull();
@@ -427,7 +427,7 @@ internal static void typᴍ(ж<typeWriter> Ꮡw, Type typ) {
 }
 
 // typeSet writes a canonical hash for an interface type set.
-internal static void typeSetᴍ(ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
+[GoMethodBody("typeSet")] internal static void typeSetᴍ(ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
     ref var w = ref Ꮡw.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
     var termHashesᴷ = new stackAppend<@string>();
@@ -471,7 +471,7 @@ internal static void typeSetᴍ(ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) {
     }}
 }
 
-internal static void typeListᴍ(ж<typeWriter> Ꮡw, slice<Type> list) {
+[GoMethodBody("typeList")] internal static void typeListᴍ(ж<typeWriter> Ꮡw, slice<Type> list) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.@byte((byte)'[');
@@ -488,7 +488,7 @@ internal static void typeListᴍ(ж<typeWriter> Ꮡw, slice<Type> list) {
 internal static ref readonly @string nilTypeParameterˢᴍtypeWriter => ref nilTypeParameterˢᵇᴍtypeWriter;
 private static readonly @string nilTypeParameterˢᵇᴍtypeWriter = "nil type parameter"u8;
 
-internal static void tParamListᴍ(ж<typeWriter> Ꮡw, slice<ж<TypeParam>> list) {
+[GoMethodBody("tParamList")] internal static void tParamListᴍ(ж<typeWriter> Ꮡw, slice<ж<TypeParam>> list) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.@byte((byte)'[');
@@ -519,14 +519,14 @@ internal static void tParamListᴍ(ж<typeWriter> Ꮡw, slice<ж<TypeParam>> lis
     w.@byte((byte)']');
 }
 
-internal static void typeNameᴍ(ref typeWriter w, ж<TypeName> Ꮡobj) {
+[GoMethodBody("typeName")] internal static void typeNameᴍ(ref typeWriter w, ж<TypeName> Ꮡobj) {
     ref var obj = ref Ꮡobj.DerefOrNull();
 
     w.@string(packagePrefix(obj.pkg, w.qf));
     w.@string(obj.name);
 }
 
-internal static void tupleᴍ(ж<typeWriter> Ꮡw, ж<Tuple> Ꮡtup, bool variadic) {
+[GoMethodBody("tuple")] internal static void tupleᴍ(ж<typeWriter> Ꮡw, ж<Tuple> Ꮡtup, bool variadic) {
     ref var w = ref Ꮡw.DerefOrNull();
     ref var tup = ref Ꮡtup.DerefOrNull();
 
@@ -567,7 +567,7 @@ internal static void tupleᴍ(ж<typeWriter> Ꮡw, ж<Tuple> Ꮡtup, bool variad
     w.@byte((byte)')');
 }
 
-internal static void signatureᴍ(ж<typeWriter> Ꮡw, ж<Signature> Ꮡsig) {
+[GoMethodBody("signature")] internal static void signatureᴍ(ж<typeWriter> Ꮡw, ж<Signature> Ꮡsig) {
     GoFrame ᒐ = default;
     try {
         ref var w = ref Ꮡw.DerefOrNull();
@@ -625,18 +625,3 @@ internal static @string subscript(uint64 x) {
 }
 
 } // end types_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛtypeWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void @byte(this ref typeWriter w, byte b) => types_package.@byteᴍ(ref w, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void @string(this ref typeWriter w, @string s) => types_package.@stringᴍ(ref w, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void error(this ref typeWriter w, @string msg) => types_package.errorᴍ(ref w, msg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void typ(this ж<typeWriter> Ꮡw, Type typ) => types_package.typᴍ(Ꮡw, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void typeSet(this ж<typeWriter> Ꮡw, ж<_TypeSet> Ꮡs) => types_package.typeSetᴍ(Ꮡw, Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void typeList(this ж<typeWriter> Ꮡw, slice<Type> list) => types_package.typeListᴍ(Ꮡw, list);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void tParamList(this ж<typeWriter> Ꮡw, slice<ж<TypeParam>> list) => types_package.tParamListᴍ(Ꮡw, list);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void typeName(this ref typeWriter w, ж<TypeName> Ꮡobj) => types_package.typeNameᴍ(ref w, Ꮡobj);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void tuple(this ж<typeWriter> Ꮡw, ж<Tuple> Ꮡtup, bool variadic) => types_package.tupleᴍ(Ꮡw, Ꮡtup, variadic);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void signature(this ж<typeWriter> Ꮡw, ж<Signature> Ꮡsig) => types_package.signatureᴍ(Ꮡw, Ꮡsig);
-}
-// </GlyphForwarders>

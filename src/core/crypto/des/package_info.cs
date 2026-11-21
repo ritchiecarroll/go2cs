@@ -69,6 +69,22 @@ using static go.crypto.des_package;
 
 namespace go.crypto;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using byteorder = go.@internal.byteorder_package;
+using sync = sync_package;
+using go.@internal;
+using static des_package;
+using cipher = go.crypto.cipher_package;
+using alias = go.crypto.@internal.fips140.alias_package;
+using fips140only = go.crypto.@internal.fips140only_package;
+using errors = errors_package;
+using strconv = strconv_package;
+using go.crypto;
+using go.crypto.@internal;
+using go.crypto.@internal.fips140;
+using des = des_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("des")]
 public static partial class des_package
 {
@@ -110,3 +126,22 @@ public static partial class des_package
 [GoMethodHost(typeof(des_package.desCipher)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class desᴛdesCipher;
 [GoMethodHost(typeof(des_package.tripleDESCipher)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class desᴛtripleDESCipher;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class desᴛdesCipher {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void generateSubkeys(this ref desCipher c, slice<byte> keyBytes) => des_package.generateSubkeysᴍ(ref c, keyBytes);
+}
+partial class desᴛKeySizeError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this KeySizeError k) => des_package.Errorᴍ(k);
+}
+partial class desᴛdesCipher {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref desCipher c) => des_package.BlockSizeᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) => des_package.Encryptᴍ(ref c, dst, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Decrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) => des_package.Decryptᴍ(ref c, dst, src);
+}
+partial class desᴛtripleDESCipher {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref tripleDESCipher c) => des_package.BlockSizeᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) => des_package.Encryptᴍ(ref c, dst, src);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Decrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) => des_package.Decryptᴍ(ref c, dst, src);
+}
+// </GlyphForwarders>

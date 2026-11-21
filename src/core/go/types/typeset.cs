@@ -36,16 +36,16 @@ partial struct _TypeSet {
 } partial class types_package {
 
 // IsEmpty reports whether s is the empty set.
-internal static bool IsEmptyᴍ(ref _TypeSet s) { return s.terms.isEmpty(); }
+[GoMethodBody("IsEmpty")] internal static bool IsEmptyᴍ(ref _TypeSet s) { return s.terms.isEmpty(); }
 
 // IsAll reports whether s is the set of all types (corresponding to the empty interface).
-internal static bool IsAllᴍ(ref _TypeSet s) { return s.IsMethodSet() && len(s.methods) == 0; }
+[GoMethodBody("IsAll")] internal static bool IsAllᴍ(ref _TypeSet s) { return s.IsMethodSet() && len(s.methods) == 0; }
 
 // IsMethodSet reports whether the interface t is fully described by its method set.
-internal static bool IsMethodSetᴍ(ref _TypeSet s) { return !s.comparable && s.terms.isAll(); }
+[GoMethodBody("IsMethodSet")] internal static bool IsMethodSetᴍ(ref _TypeSet s) { return !s.comparable && s.terms.isAll(); }
 
 // IsComparable reports whether each type in the set is comparable.
-internal static bool IsComparableᴍ(ref _TypeSet s, map<Type, bool> seen) {
+[GoMethodBody("IsComparable")] internal static bool IsComparableᴍ(ref _TypeSet s, map<Type, bool> seen) {
     if (s.terms.isAll()) {
         return s.comparable;
     }
@@ -54,14 +54,14 @@ internal static bool IsComparableᴍ(ref _TypeSet s, map<Type, bool> seen) {
 }
 
 // NumMethods returns the number of methods available.
-internal static nint NumMethodsᴍ(ref _TypeSet s) { return len(s.methods); }
+[GoMethodBody("NumMethods")] internal static nint NumMethodsᴍ(ref _TypeSet s) { return len(s.methods); }
 
 // Method returns the i'th method of s for 0 <= i < s.NumMethods().
 // The methods are ordered by their unique ID.
-internal static ж<Func> Methodᴍ(ref _TypeSet s, nint i) { return s.methods[i]; }
+[GoMethodBody("Method")] internal static ж<Func> Methodᴍ(ref _TypeSet s, nint i) { return s.methods[i]; }
 
 // LookupMethod returns the index of and method with matching package and name, or (-1, nil).
-internal static (nint, ж<Func>) LookupMethodᴍ(ref _TypeSet s, ж<Package> pkg, @string name, bool foldCase) {
+[GoMethodBody("LookupMethod")] internal static (nint, ж<Func>) LookupMethodᴍ(ref _TypeSet s, ж<Package> pkg, @string name, bool foldCase) {
     return methodIndex(s.methods, pkg, name, foldCase);
 }
 
@@ -69,7 +69,7 @@ internal static (nint, ж<Func>) LookupMethodᴍ(ref _TypeSet s, ж<Package> pkg
 internal static ref readonly @string comparableˢᴍ_TypeSet => ref comparableˢᵇᴍ_TypeSet;
 private static readonly @string comparableˢᵇᴍ_TypeSet = "comparable"u8;
 
-internal static @string Stringᴍ(ref _TypeSet s) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref _TypeSet s) {
     switch (ᐧ) {
     case {} when s.IsEmpty(): {
         return "∅";
@@ -109,10 +109,10 @@ internal static @string Stringᴍ(ref _TypeSet s) {
 // Implementation
 
 // hasTerms reports whether s has specific type terms.
-internal static bool hasTermsᴍ(ref _TypeSet s) { return !s.terms.isEmpty() && !s.terms.isAll(); }
+[GoMethodBody("hasTerms")] internal static bool hasTermsᴍ(ref _TypeSet s) { return !s.terms.isEmpty() && !s.terms.isAll(); }
 
 // subsetOf reports whether s1 ⊆ s2.
-internal static bool subsetOfᴍ(ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {
+[GoMethodBody("subsetOf")] internal static bool subsetOfᴍ(ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {
     ref var s2 = ref Ꮡs2.DerefOrNull();
 
     return s1.terms.subsetOf(s2.terms);
@@ -121,7 +121,7 @@ internal static bool subsetOfᴍ(ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {
 // all reports whether f(t, u) is true for each (type/underlying type) pairs in s.
 // If s has no specific terms, all calls f(nil, nil).
 // In any case, all is guaranteed to call f at least once.
-internal static bool allᴍ(ref _TypeSet s, Func<Type, Type, bool> f) {
+[GoMethodBody("all")] internal static bool allᴍ(ref _TypeSet s, Func<Type, Type, bool> f) {
     if (!s.hasTerms()) {
         return f(default, default);
     }
@@ -146,7 +146,7 @@ internal static bool allᴍ(ref _TypeSet s, Func<Type, Type, bool> f) {
 // is calls f with the specific type terms of s and reports whether
 // all calls to f returned true. If there are no specific terms, is
 // returns the result of f(nil).
-internal static bool @isᴍ(ref _TypeSet s, Func<ж<term>, bool> f) {
+[GoMethodBody("is")] internal static bool @isᴍ(ref _TypeSet s, Func<ж<term>, bool> f) {
     if (!s.hasTerms()) {
         return f(nil);
     }
@@ -465,20 +465,3 @@ internal static ж<_TypeSet> computeUnionTypeSet(ж<Checker> check, map<ж<Union
 }
 
 } // end types_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛ_TypeSet {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsEmpty(this ref _TypeSet s) => types_package.IsEmptyᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsAll(this ref _TypeSet s) => types_package.IsAllᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsMethodSet(this ref _TypeSet s) => types_package.IsMethodSetᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsComparable(this ref _TypeSet s, map<Type, bool> seen) => types_package.IsComparableᴍ(ref s, seen);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NumMethods(this ref _TypeSet s) => types_package.NumMethodsᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Func> Method(this ref _TypeSet s, nint i) => types_package.Methodᴍ(ref s, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, ж<Func>) LookupMethod(this ref _TypeSet s, ж<Package> pkg, @string name, bool foldCase) => types_package.LookupMethodᴍ(ref s, pkg, name, foldCase);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref _TypeSet s) => types_package.Stringᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasTerms(this ref _TypeSet s) => types_package.hasTermsᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool subsetOf(this ref _TypeSet s1, ж<_TypeSet> Ꮡs2) => types_package.subsetOfᴍ(ref s1, Ꮡs2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool all(this ref _TypeSet s, Func<Type, Type, bool> f) => types_package.allᴍ(ref s, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool @is(this ref _TypeSet s, Func<ж<term>, bool> f) => types_package.@isᴍ(ref s, f);
-}
-// </GlyphForwarders>

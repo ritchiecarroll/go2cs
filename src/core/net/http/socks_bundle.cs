@@ -35,7 +35,7 @@ private static readonly @string fqdnTooLongˢᵇᴍsocksDialer = "FQDN too long"
 internal static ref readonly @string nonZeroReservedFieldˢᴍsocksDialer => ref nonZeroReservedFieldˢᵇᴍsocksDialer;
 private static readonly @string nonZeroReservedFieldˢᵇᴍsocksDialer = "non-zero reserved field"u8;
 
-internal static partial (net.Addr, error ctxErr) connectᴍ(ж<socksDialer> Ꮡd, context.Context ctx, net.Conn c, @string address) {
+[GoMethodBody("connect")] internal static partial (net.Addr, error ctxErr) connectᴍ(ж<socksDialer> Ꮡd, context.Context ctx, net.Conn c, @string address) {
     net.Addr _ᴛ1 = default;
     error ctxErr = default;
     GoFrame ᒐ = default;
@@ -224,7 +224,7 @@ private static readonly @string socksConnectˢᵇᴍsocksCommand = "socks connec
 internal static ref readonly @string socksBindˢᴍsocksCommand => ref socksBindˢᵇᴍsocksCommand;
 private static readonly @string socksBindˢᵇᴍsocksCommand = "socks bind"u8;
 
-internal static @string Stringᴍ(socksCommand cmd) {
+[GoMethodBody("String")] internal static @string Stringᴍ(socksCommand cmd) {
     switch (cmd) {
     case var ᴛ when ᴛ == socksCmdConnect: {
         return socksConnectˢᴍsocksCommand;
@@ -267,7 +267,7 @@ private static readonly @string commandNotSupportedˢᵇᴍsocksReply = "command
 internal static ref readonly @string addressTypeNotSupportedˢᴍsocksReply => ref addressTypeNotSupportedˢᵇᴍsocksReply;
 private static readonly @string addressTypeNotSupportedˢᵇᴍsocksReply = "address type not supported"u8;
 
-internal static @string Stringᴍ(socksReply code) {
+[GoMethodBody("String")] internal static @string Stringᴍ(socksReply code) {
     switch (code) {
     case var ᴛ when ᴛ == socksStatusSucceeded: {
         return succeededˢᴍsocksReply;
@@ -333,13 +333,13 @@ partial struct socksAddr {
 internal static ref readonly @string socksˢᴍsocksAddr => ref socksˢᵇᴍsocksAddr;
 private static readonly @string socksˢᵇᴍsocksAddr = "socks"u8;
 
-internal static @string Networkᴍ(ref socksAddr a) { return socksˢᴍsocksAddr; }
+[GoMethodBody("Network")] internal static @string Networkᴍ(ref socksAddr a) { return socksˢᴍsocksAddr; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nilˢᴍsocksAddr => ref nilˢᵇᴍsocksAddr;
 private static readonly @string nilˢᵇᴍsocksAddr = "<nil>"u8;
 
-internal static @string Stringᴍ(ж<socksAddr> Ꮡa) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<socksAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -364,7 +364,7 @@ partial struct socksConn {
 
 // BoundAddr returns the address assigned by the proxy server for
 // connecting to the command target address from the proxy server.
-internal static net.Addr BoundAddrᴍ(ж<socksConn> Ꮡc) {
+[GoMethodBody("BoundAddr")] internal static net.Addr BoundAddrᴍ(ж<socksConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (Ꮡc == nil) {
@@ -409,7 +409,7 @@ private static readonly @string nilContextˢᵇᴍsocksDialer = "nil context"u8;
 //
 // See func Dial of the net package of standard library for a
 // description of the network and address parameters.
-internal static (net.Conn, error) DialContextᴍ(ж<socksDialer> Ꮡd, context.Context ctx, @string network, @string address) {
+[GoMethodBody("DialContext")] internal static (net.Conn, error) DialContextᴍ(ж<socksDialer> Ꮡd, context.Context ctx, @string network, @string address) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var errΔ1 = d.validateTarget(network, address); if (errΔ1 != nil) {
@@ -447,7 +447,7 @@ internal static (net.Conn, error) DialContextᴍ(ж<socksDialer> Ꮡd, context.C
 //
 // It returns the connection's local address assigned by the SOCKS
 // server.
-internal static (net.Addr, error) DialWithConnᴍ(ж<socksDialer> Ꮡd, context.Context ctx, net.Conn c, @string network, @string address) {
+[GoMethodBody("DialWithConn")] internal static (net.Addr, error) DialWithConnᴍ(ж<socksDialer> Ꮡd, context.Context ctx, net.Conn c, @string network, @string address) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var errΔ1 = d.validateTarget(network, address); if (errΔ1 != nil) {
@@ -472,7 +472,7 @@ internal static (net.Addr, error) DialWithConnᴍ(ж<socksDialer> Ꮡd, context.
 // of a forward proxy connection.
 //
 // Deprecated: Use DialContext or DialWithConn instead.
-internal static (net.Conn, error) Dialᴍ(ж<socksDialer> Ꮡd, @string network, @string address) {
+[GoMethodBody("Dial")] internal static (net.Conn, error) Dialᴍ(ж<socksDialer> Ꮡd, @string network, @string address) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var errΔ1 = d.validateTarget(network, address); if (errΔ1 != nil) {
@@ -503,7 +503,7 @@ private static readonly @string networkNotImplementedˢᵇᴍsocksDialer = "netw
 internal static ref readonly @string commandNotImplementedˢᴍsocksDialer => ref commandNotImplementedˢᵇᴍsocksDialer;
 private static readonly @string commandNotImplementedˢᵇᴍsocksDialer = "command not implemented"u8;
 
-internal static error validateTargetᴍ(ref socksDialer d, @string network, @string address) {
+[GoMethodBody("validateTarget")] internal static error validateTargetᴍ(ref socksDialer d, @string network, @string address) {
     switch (ᐧ) {
     case {} when network == "tcp"u8 || network == "tcp6"u8 || network == "tcp4"u8: {
         break;
@@ -521,7 +521,7 @@ internal static error validateTargetᴍ(ref socksDialer d, @string network, @str
     return default;
 }
 
-internal static (net.Addr proxy, net.Addr dst, error err) pathAddrsᴍ(ref socksDialer d, @string address) {
+[GoMethodBody("pathAddrs")] internal static (net.Addr proxy, net.Addr dst, error err) pathAddrsᴍ(ref socksDialer d, @string address) {
     net.Addr proxy = default;
     net.Addr dst = default;
     error err = default;
@@ -576,7 +576,7 @@ private static readonly @string usernamePasswordˢᵇᴍsocksUsernamePassword = 
 
 // Authenticate authenticates a pair of username and password with the
 // proxy server.
-internal static error Authenticateᴍ(ref socksUsernamePassword up, context.Context ctx, io.ReadWriter rw, socksAuthMethod auth) {
+[GoMethodBody("Authenticate")] internal static error Authenticateᴍ(ref socksUsernamePassword up, context.Context ctx, io.ReadWriter rw, socksAuthMethod auth) {
     switch (auth) {
     case var ᴛ when ᴛ == socksAuthMethodNotRequired: {
         return default;
@@ -614,30 +614,3 @@ internal static error Authenticateᴍ(ref socksUsernamePassword up, context.Cont
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httpᴛsocksDialer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (net.Addr, error ctxErr) connect(this ж<socksDialer> Ꮡd, context.Context ctx, net.Conn c, @string address) => http_package.connectᴍ(Ꮡd, ctx, c, address);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (net.Conn, error) DialContext(this ж<socksDialer> Ꮡd, context.Context ctx, @string network, @string address) => http_package.DialContextᴍ(Ꮡd, ctx, network, address);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (net.Addr, error) DialWithConn(this ж<socksDialer> Ꮡd, context.Context ctx, net.Conn c, @string network, @string address) => http_package.DialWithConnᴍ(Ꮡd, ctx, c, network, address);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (net.Conn, error) Dial(this ж<socksDialer> Ꮡd, @string network, @string address) => http_package.Dialᴍ(Ꮡd, network, address);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error validateTarget(this ref socksDialer d, @string network, @string address) => http_package.validateTargetᴍ(ref d, network, address);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (net.Addr proxy, net.Addr dst, error err) pathAddrs(this ref socksDialer d, @string address) => http_package.pathAddrsᴍ(ref d, address);
-}
-partial class httpᴛsocksCommand {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this socksCommand cmd) => http_package.Stringᴍ(cmd);
-}
-partial class httpᴛsocksReply {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this socksReply code) => http_package.Stringᴍ(code);
-}
-partial class httpᴛsocksAddr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Network(this ref socksAddr a) => http_package.Networkᴍ(ref a);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ж<socksAddr> Ꮡa) => http_package.Stringᴍ(Ꮡa);
-}
-partial class httpᴛsocksConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static net.Addr BoundAddr(this ж<socksConn> Ꮡc) => http_package.BoundAddrᴍ(Ꮡc);
-}
-partial class httpᴛsocksUsernamePassword {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Authenticate(this ref socksUsernamePassword up, context.Context ctx, io.ReadWriter rw, socksAuthMethod auth) => http_package.Authenticateᴍ(ref up, ctx, rw, auth);
-}
-// </GlyphForwarders>

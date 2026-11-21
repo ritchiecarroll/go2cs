@@ -2173,19 +2173,7 @@ partial class runtime_package
         method.Name == "Main" && method.IsStatic && method.GetParameters().Length == 0 &&
         !method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false)
             ? "main"
-            : isGlyphMethodBody(method) ? method.Name[..^GlyphMethodSuffix.Length] : method.Name;
-
-    // SCRATCH PROTOTYPE (the global ᴍ cost test): a Go method's BODY is a plain static `<name>ᴍ` in the package class,
-    // its receiver the first parameter, and the Go-named extension forwarder is [StackTraceHidden]. The body's frame is
-    // the method's: its name drops the suffix and its receiver is read from parameter 0. No Go identifier in std, the
-    // behavioral corpus or the converted modules ends in ᴍ (census 2026-11-20), so the suffix is the prototype's
-    // discriminator; the design's form reads a stamp on the body instead.
-    private const string GlyphMethodSuffix = "ᴍ";
-
-    private static bool isGlyphMethodBody(System.Reflection.MethodBase method) =>
-        method.IsStatic && method.Name.Length > GlyphMethodSuffix.Length && method.Name.EndsWith(GlyphMethodSuffix, StringComparison.Ordinal) &&
-        method.GetParameters().Length > 0 &&
-        !method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false);
+            : method.Name;
 
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, (string? Suffix, string? MethodValue)?> s_statementSiblingNames = new();
 
@@ -2811,7 +2799,7 @@ partial class runtime_package
     // static method and keeps its bare `<pkg>.<name>`, exactly as Go renders one.
     private static string? goReceiverName(System.Reflection.MethodBase method)
     {
-        if (!method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false) && !isGlyphMethodBody(method))
+        if (!method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false))
             return null;
 
         System.Reflection.ParameterInfo[] parameters = method.GetParameters();
@@ -5777,44 +5765,6 @@ partial class runtime_package
                 (receiver.IsGenericType && referent.IsGenericType && receiver.GetGenericTypeDefinition() == referent.GetGenericTypeDefinition());
 
             if (sameReceiver)
-                return glyphBodyOf(candidate) ?? candidate;
-        }
-
-        return null;
-    }
-
-    // SCRATCH PROTOTYPE (the global ᴍ cost test): the Go-named `this ref T` method a twin forwards to is itself a
-    // [StackTraceHidden] forwarder to the body `<name>ᴍ(ref T, …)` in the package class; the body is the Go method.
-    private static System.Reflection.MethodBase? glyphBodyOf(System.Reflection.MethodInfo forwarder)
-    {
-        if (!forwarder.IsDefined(typeof(System.Diagnostics.StackTraceHiddenAttribute), inherit: false) || forwarder.DeclaringType is not { } holder)
-            return null;
-
-        Type? package = GoMethodHostAttribute.PackageClassOf(holder);
-
-        if (package is null || package == holder)
-            return null;
-
-        Type[] parameterTypes = Array.ConvertAll(forwarder.GetParameters(), parameter => parameter.ParameterType);
-        const System.Reflection.BindingFlags anyStatic = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
-
-        foreach (System.Reflection.MethodInfo candidate in package.GetMethods(anyStatic))
-        {
-            if (candidate.Name != forwarder.Name + GlyphMethodSuffix)
-                continue;
-
-            System.Reflection.ParameterInfo[] parameters = candidate.GetParameters();
-
-            if (parameters.Length != parameterTypes.Length)
-                continue;
-
-            bool same = true;
-
-            for (int i = 0; i < parameters.Length && same; i++)
-                same = parameters[i].ParameterType == parameterTypes[i] ||
-                       (parameters[i].ParameterType.IsGenericParameter && parameterTypes[i].IsGenericParameter);
-
-            if (same)
                 return candidate;
         }
 

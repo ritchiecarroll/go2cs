@@ -33,25 +33,25 @@ public static ж<Package> NewPackage(@string path, @string name) {
 } partial class types_package {
 
 // Path returns the package path.
-internal static @string Pathᴍ(ref Package pkg) { return pkg.path; }
+[GoMethodBody("Path")] internal static @string Pathᴍ(ref Package pkg) { return pkg.path; }
 
 // Name returns the package name.
-internal static @string Nameᴍ(ref Package pkg) { return pkg.name; }
+[GoMethodBody("Name")] internal static @string Nameᴍ(ref Package pkg) { return pkg.name; }
 
 // SetName sets the package name.
-internal static void SetNameᴍ(ref Package pkg, @string name) { pkg.name = name; }
+[GoMethodBody("SetName")] internal static void SetNameᴍ(ref Package pkg, @string name) { pkg.name = name; }
 
 // GoVersion returns the minimum Go version required by this package.
 // If the minimum version is unknown, GoVersion returns the empty string.
 // Individual source files may specify a different minimum Go version,
 // as reported in the [go/ast.File.GoVersion] field.
-internal static @string GoVersionᴍ(ref Package pkg) { return pkg.goVersion; }
+[GoMethodBody("GoVersion")] internal static @string GoVersionᴍ(ref Package pkg) { return pkg.goVersion; }
 
 // Scope returns the (complete or incomplete) package scope
 // holding the objects declared at package level (TypeNames,
 // Consts, Vars, and Funcs).
 // For a nil pkg receiver, Scope returns the Universe scope.
-internal static ж<Scope> Scopeᴍ(ж<Package> Ꮡpkg) {
+[GoMethodBody("Scope")] internal static ж<Scope> Scopeᴍ(ж<Package> Ꮡpkg) {
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
     if (Ꮡpkg != nil) {
@@ -62,10 +62,10 @@ internal static ж<Scope> Scopeᴍ(ж<Package> Ꮡpkg) {
 
 // A package is complete if its scope contains (at least) all
 // exported objects; otherwise it is incomplete.
-internal static bool Completeᴍ(ref Package pkg) { return pkg.complete; }
+[GoMethodBody("Complete")] internal static bool Completeᴍ(ref Package pkg) { return pkg.complete; }
 
 // MarkComplete marks a package as complete.
-internal static void MarkCompleteᴍ(ref Package pkg) { pkg.complete = true; }
+[GoMethodBody("MarkComplete")] internal static void MarkCompleteᴍ(ref Package pkg) { pkg.complete = true; }
 
 // Imports returns the list of packages directly imported by
 // pkg; the list is in source order.
@@ -76,29 +76,14 @@ internal static void MarkCompleteᴍ(ref Package pkg) { pkg.complete = true; }
 //
 // If pkg uses cgo and the FakeImportC configuration option
 // was enabled, the imports list may contain a fake "C" package.
-internal static slice<ж<Package>> Importsᴍ(ref Package pkg) { return pkg.imports; }
+[GoMethodBody("Imports")] internal static slice<ж<Package>> Importsᴍ(ref Package pkg) { return pkg.imports; }
 
 // SetImports sets the list of explicitly imported packages to list.
 // It is the caller's responsibility to make sure list elements are unique.
-internal static void SetImportsᴍ(ref Package pkg, slice<ж<Package>> list) { pkg.imports = list; }
+[GoMethodBody("SetImports")] internal static void SetImportsᴍ(ref Package pkg, slice<ж<Package>> list) { pkg.imports = list; }
 
-internal static @string Stringᴍ(ref Package pkg) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref Package pkg) {
     return fmt.Sprintf("package %s (%q)"u8, pkg.name, pkg.path);
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛPackage {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Path(this ref Package pkg) => types_package.Pathᴍ(ref pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Name(this ref Package pkg) => types_package.Nameᴍ(ref pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetName(this ref Package pkg, @string name) => types_package.SetNameᴍ(ref pkg, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoVersion(this ref Package pkg) => types_package.GoVersionᴍ(ref pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Scope> Scope(this ж<Package> Ꮡpkg) => types_package.Scopeᴍ(Ꮡpkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Complete(this ref Package pkg) => types_package.Completeᴍ(ref pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void MarkComplete(this ref Package pkg) => types_package.MarkCompleteᴍ(ref pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<ж<Package>> Imports(this ref Package pkg) => types_package.Importsᴍ(ref pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetImports(this ref Package pkg, slice<ж<Package>> list) => types_package.SetImportsᴍ(ref pkg, list);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Package pkg) => types_package.Stringᴍ(ref pkg);
-}
-// </GlyphForwarders>

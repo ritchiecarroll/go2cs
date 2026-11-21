@@ -54,7 +54,7 @@ partial struct LoadBytes /*[]byte*/;
 
 } partial class macho_package {
 
-internal static slice<byte> Rawᴍ(LoadBytes b) { return b; }
+[GoMethodBody("Raw")] internal static slice<byte> Rawᴍ(LoadBytes b) { return b; }
 
 } partial class macho_package {
 
@@ -90,12 +90,12 @@ partial struct Segment {
 } partial class macho_package {
 
 // Data reads and returns the contents of the segment.
-internal static (slice<byte>, error) Dataᴍ(ref Segment s) {
+[GoMethodBody("Data")] internal static (slice<byte>, error) Dataᴍ(ref Segment s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), s.Filesz, 0);
 }
 
 // Open returns a new ReadSeeker reading the segment.
-internal static io.ReadSeeker Openᴍ(ref Segment s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
+[GoMethodBody("Open")] internal static io.ReadSeeker Openᴍ(ref Segment s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 } partial class macho_package {
 
@@ -141,12 +141,12 @@ partial struct Section {
 } partial class macho_package {
 
 // Data reads and returns the contents of the Mach-O section.
-internal static (slice<byte>, error) Dataᴍ(ref Section s) {
+[GoMethodBody("Data")] internal static (slice<byte>, error) Dataᴍ(ref Section s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), s.Size, 0);
 }
 
 // Open returns a new ReadSeeker reading the Mach-O section.
-internal static io.ReadSeeker Openᴍ(ref Section s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
+[GoMethodBody("Open")] internal static io.ReadSeeker Openᴍ(ref Section s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 } partial class macho_package {
 
@@ -202,7 +202,7 @@ partial struct FormatError {
 
 } partial class macho_package {
 
-internal static @string Errorᴍ(ref FormatError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref FormatError e) {
     @string msg = e.msg;
     if (e.val != nil) {
         msg += fmt.Sprintf(" '%v'"u8, e.val);
@@ -233,7 +233,7 @@ public static (ж<File>, error) Open(@string name) {
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-internal static error Closeᴍ(ref File f) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref File f) {
     error err = default;
     if (f.closer != nil) {
         err = f.closer.Close();
@@ -503,7 +503,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
 
 } partial class macho_package {
 
-internal static (ж<Symtab>, error) parseSymtabᴍ(ref File f, slice<byte> symdat, slice<byte> strtab, slice<byte> cmddat, ж<SymtabCmd> Ꮡhdr, int64 offset) {
+[GoMethodBody("parseSymtab")] internal static (ж<Symtab>, error) parseSymtabᴍ(ref File f, slice<byte> symdat, slice<byte> strtab, slice<byte> cmddat, ж<SymtabCmd> Ꮡhdr, int64 offset) {
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
     var bo = f.ByteOrder;
@@ -561,7 +561,7 @@ partial struct relocInfo {
 
 } partial class macho_package {
 
-internal static error pushSectionᴍ(ref File f, ж<Section> Ꮡsh, io.ReaderAt r) {
+[GoMethodBody("pushSection")] internal static error pushSectionᴍ(ref File f, ж<Section> Ꮡsh, io.ReaderAt r) {
     ref var sh = ref Ꮡsh.DerefOrNull();
 
     f.Sections = append(f.Sections, Ꮡsh);
@@ -637,7 +637,7 @@ internal static @string cstring(slice<byte> b) {
 } partial class macho_package {
 
 // Segment returns the first Segment with the given name, or nil if no such segment exists.
-internal static ж<Segment> Segmentᴍ(ref File f, @string name) {
+[GoMethodBody("Segment")] internal static ж<Segment> Segmentᴍ(ref File f, @string name) {
     foreach (var (_, l) in range(f.Loads)) {
         var (s, ok) = l._<ж<Segment>>(ᐧ); if (ok && s.Name == name) {
             return s;
@@ -648,7 +648,7 @@ internal static ж<Segment> Segmentᴍ(ref File f, @string name) {
 
 // Section returns the first section with the given name, or nil if no such
 // section exists.
-internal static ж<Section> Sectionᴍ(ref File f, @string name) {
+[GoMethodBody("Section")] internal static ж<Section> Sectionᴍ(ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
@@ -674,7 +674,7 @@ internal static ref readonly @string strˢᴍFile => ref strˢᵇᴍFile;
 private static readonly @string strˢᵇᴍFile = "str"u8;
 
 // DWARF returns the DWARF debug information for the Mach-O file.
-internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
+[GoMethodBody("DWARF")] internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
     @string dwarfSuffix(ж<Section> s) {
         @string sectname = s.Name;
         nint pfx = default;
@@ -788,7 +788,7 @@ internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
 // ImportedSymbols returns the names of all symbols
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
-internal static (slice<@string>, error) ImportedSymbolsᴍ(ref File f) {
+[GoMethodBody("ImportedSymbols")] internal static (slice<@string>, error) ImportedSymbolsᴍ(ref File f) {
     if (f.Symtab == nil) {
         return (default, new FormatErrorжerror(Ꮡ(new FormatError(0, "missing symbol table", default))));
     }
@@ -817,7 +817,7 @@ internal static (slice<@string>, error) ImportedSymbolsᴍ(ref File f) {
 // ImportedLibraries returns the paths of all libraries
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
-internal static (slice<@string>, error) ImportedLibrariesᴍ(ref File f) {
+[GoMethodBody("ImportedLibraries")] internal static (slice<@string>, error) ImportedLibrariesᴍ(ref File f) {
     var allᴷ = new stackAppend<@string>(moves: true);
 
     slice<@string> all = default;
@@ -831,30 +831,3 @@ internal static (slice<@string>, error) ImportedLibrariesᴍ(ref File f) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class machoᴛLoadBytes {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Raw(this LoadBytes b) => macho_package.Rawᴍ(b);
-}
-partial class machoᴛSegment {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Data(this ref Segment s) => macho_package.Dataᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.ReadSeeker Open(this ref Segment s) => macho_package.Openᴍ(ref s);
-}
-partial class machoᴛSection {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Data(this ref Section s) => macho_package.Dataᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.ReadSeeker Open(this ref Section s) => macho_package.Openᴍ(ref s);
-}
-partial class machoᴛFormatError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref FormatError e) => macho_package.Errorᴍ(ref e);
-}
-partial class machoᴛFile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref File f) => macho_package.Closeᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Symtab>, error) parseSymtab(this ref File f, slice<byte> symdat, slice<byte> strtab, slice<byte> cmddat, ж<SymtabCmd> Ꮡhdr, int64 offset) => macho_package.parseSymtabᴍ(ref f, symdat, strtab, cmddat, Ꮡhdr, offset);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error pushSection(this ref File f, ж<Section> Ꮡsh, io.ReaderAt r) => macho_package.pushSectionᴍ(ref f, Ꮡsh, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Segment> Segment(this ref File f, @string name) => macho_package.Segmentᴍ(ref f, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Section> Section(this ref File f, @string name) => macho_package.Sectionᴍ(ref f, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<dwarf.Data>, error) DWARF(this ref File f) => macho_package.DWARFᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) ImportedSymbols(this ref File f) => macho_package.ImportedSymbolsᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) ImportedLibraries(this ref File f) => macho_package.ImportedLibrariesᴍ(ref f);
-}
-// </GlyphForwarders>

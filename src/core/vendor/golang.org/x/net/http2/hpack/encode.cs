@@ -47,7 +47,7 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 // WriteField encodes f into a single Write to e's underlying Writer.
 // This function may also produce bytes for "Header Table Size Update"
 // if necessary. If produced, it is done before encoding f.
-internal static error WriteFieldᴍ(ж<Encoder> Ꮡe, HeaderField f) {
+[GoMethodBody("WriteField")] internal static error WriteFieldᴍ(ж<Encoder> Ꮡe, HeaderField f) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     e.buf = e.buf[..0];
@@ -90,7 +90,7 @@ internal static error WriteFieldᴍ(ж<Encoder> Ꮡe, HeaderField f) {
 // match, i is the matched index and nameValueMatch becomes true. If
 // only name matches, i points to that index and nameValueMatch
 // becomes false.
-internal static (uint64 i, bool nameValueMatch) searchTableᴍ(ж<Encoder> Ꮡe, HeaderField f) {
+[GoMethodBody("searchTable")] internal static (uint64 i, bool nameValueMatch) searchTableᴍ(ж<Encoder> Ꮡe, HeaderField f) {
     uint64 i = default;
     bool nameValueMatch = default;
 
@@ -110,7 +110,7 @@ internal static (uint64 i, bool nameValueMatch) searchTableᴍ(ж<Encoder> Ꮡe,
 // SetMaxDynamicTableSize changes the dynamic header table size to v.
 // The actual size is bounded by the value passed to
 // SetMaxDynamicTableSizeLimit.
-internal static void SetMaxDynamicTableSizeᴍ(ref Encoder e, uint32 v) {
+[GoMethodBody("SetMaxDynamicTableSize")] internal static void SetMaxDynamicTableSizeᴍ(ref Encoder e, uint32 v) {
     if (v > e.maxSizeLimit) {
         v = e.maxSizeLimit;
     }
@@ -122,7 +122,7 @@ internal static void SetMaxDynamicTableSizeᴍ(ref Encoder e, uint32 v) {
 }
 
 // MaxDynamicTableSize returns the current dynamic header table size.
-internal static uint32 /*v*/ MaxDynamicTableSizeᴍ(ref Encoder e) {
+[GoMethodBody("MaxDynamicTableSize")] internal static uint32 /*v*/ MaxDynamicTableSizeᴍ(ref Encoder e) {
     return e.dynTab.maxSize;
 }
 
@@ -133,7 +133,7 @@ internal static uint32 /*v*/ MaxDynamicTableSizeᴍ(ref Encoder e) {
 // dynamic header table size is strictly greater than v, "Header Table
 // Size Update" will be done in the next WriteField call and the
 // maximum dynamic header table size is truncated to v.
-internal static void SetMaxDynamicTableSizeLimitᴍ(ref Encoder e, uint32 v) {
+[GoMethodBody("SetMaxDynamicTableSizeLimit")] internal static void SetMaxDynamicTableSizeLimitᴍ(ref Encoder e, uint32 v) {
     e.maxSizeLimit = v;
     if (e.dynTab.maxSize > v) {
         e.tableSizeUpdate = true;
@@ -142,7 +142,7 @@ internal static void SetMaxDynamicTableSizeLimitᴍ(ref Encoder e, uint32 v) {
 }
 
 // shouldIndex reports whether f should be indexed.
-internal static bool shouldIndexᴍ(ref Encoder e, HeaderField f) {
+[GoMethodBody("shouldIndex")] internal static bool shouldIndexᴍ(ref Encoder e, HeaderField f) {
     return !f.Sensitive && f.Size() <= e.dynTab.maxSize;
 }
 
@@ -252,14 +252,3 @@ internal static byte encodeTypeByte(bool indexing, bool sensitive) {
 }
 
 } // end hpack_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class hpackᴛEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteField(this ж<Encoder> Ꮡe, HeaderField f) => hpack_package.WriteFieldᴍ(Ꮡe, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64 i, bool nameValueMatch) searchTable(this ж<Encoder> Ꮡe, HeaderField f) => hpack_package.searchTableᴍ(Ꮡe, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetMaxDynamicTableSize(this ref Encoder e, uint32 v) => hpack_package.SetMaxDynamicTableSizeᴍ(ref e, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 /*v*/ MaxDynamicTableSize(this ref Encoder e) => hpack_package.MaxDynamicTableSizeᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetMaxDynamicTableSizeLimit(this ref Encoder e, uint32 v) => hpack_package.SetMaxDynamicTableSizeLimitᴍ(ref e, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool shouldIndex(this ref Encoder e, HeaderField f) => hpack_package.shouldIndexᴍ(ref e, f);
-}
-// </GlyphForwarders>

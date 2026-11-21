@@ -10,7 +10,7 @@ partial class dag_package {
 } partial class dag_package {
 
 // Transpose reverses all edges in g.
-internal static void Transposeᴍ(ref Graph g) {
+[GoMethodBody("Transpose")] internal static void Transposeᴍ(ref Graph g) {
     var old = g.edges;
 
     g.edges = new map<@string, map<@string, bool>>();
@@ -26,7 +26,7 @@ internal static void Transposeᴍ(ref Graph g) {
 }
 
 // Topo returns a topological sort of g. This function is deterministic.
-internal static slice<@string> Topoᴍ(ж<Graph> Ꮡg) {
+[GoMethodBody("Topo")] internal static slice<@string> Topoᴍ(ж<Graph> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     ref var topo = ref heap<slice<@string>>(new slice<@string>(0, len(g.Nodes)), out var Ꮡtopo);
@@ -55,7 +55,7 @@ internal static slice<@string> Topoᴍ(ж<Graph> Ꮡg) {
 
 // TransitiveReduction removes edges from g that are transitively
 // reachable. g must be transitively closed.
-internal static void TransitiveReductionᴍ(ref Graph g) {
+[GoMethodBody("TransitiveReduction")] internal static void TransitiveReductionᴍ(ref Graph g) {
     // For i -> j -> k, if i -> k exists, delete it.
     foreach (var (_, i) in range(g.Nodes)) {
         foreach (var (_, j) in range(g.Nodes)) {
@@ -71,11 +71,3 @@ internal static void TransitiveReductionᴍ(ref Graph g) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class dagᴛGraph {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Transpose(this ref Graph g) => dag_package.Transposeᴍ(ref g);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> Topo(this ж<Graph> Ꮡg) => dag_package.Topoᴍ(Ꮡg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void TransitiveReduction(this ref Graph g) => dag_package.TransitiveReductionᴍ(ref g);
-}
-// </GlyphForwarders>

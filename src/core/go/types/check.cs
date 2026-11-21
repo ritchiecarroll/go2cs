@@ -104,7 +104,7 @@ partial struct environment {
 // object was inserted into the scope and already had a parent at that
 // time (see Scope.Insert). This can only happen for dot-imported objects
 // whose parent is the scope of the package that exported them.
-internal static (ж<Scope>, Object) lookupScopeᴍ(ref environment env, @string name) {
+[GoMethodBody("lookupScope")] internal static (ж<Scope>, Object) lookupScopeᴍ(ref environment env, @string name) {
     for (var s = env.scope; s != nil; s = s.parent) {
         var obj = s.Lookup(name); if (obj != nil && (!env.exprPos.IsValid() || cmpPos(obj.scopePos(), env.exprPos) <= 0)) {
             return (s, obj);
@@ -114,7 +114,7 @@ internal static (ж<Scope>, Object) lookupScopeᴍ(ref environment env, @string 
 }
 
 // lookup is like lookupScope but it only returns the object (or nil).
-internal static Object lookupᴍ(ref environment env, @string name) {
+[GoMethodBody("lookup")] internal static Object lookupᴍ(ref environment env, @string name) {
     var (_, obj) = env.lookupScope(name);
     return obj;
 }
@@ -148,7 +148,7 @@ partial struct action {
 
 // If debug is set, describef sets a printf-formatted description for action a.
 // Otherwise, it is a no-op.
-internal static void describefᴍ(ref action a, positioner pos, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("describef")] internal static void describefᴍ(ref action a, positioner pos, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
     if (debug) {
@@ -222,7 +222,7 @@ partial struct Checker {
 } partial class types_package {
 
 // addDeclDep adds the dependency edge (check.decl -> to) if check.decl exists
-internal static void addDeclDepᴍ(ref Checker check, Object to) {
+[GoMethodBody("addDeclDep")] internal static void addDeclDepᴍ(ref Checker check, Object to) {
     var from = check.decl;
     if (from == nil) {
         return; // not in a package-level init expression
@@ -239,7 +239,7 @@ internal static void addDeclDepᴍ(ref Checker check, Object to) {
 // brokenAlias records that alias doesn't have a determined type yet.
 // It also sets alias.typ to Typ[Invalid].
 // Not used if check.conf._EnableAlias is set.
-internal static void brokenAliasᴍ(ref Checker check, ж<TypeName> Ꮡalias) {
+[GoMethodBody("brokenAlias")] internal static void brokenAliasᴍ(ref Checker check, ж<TypeName> Ꮡalias) {
     ref var alias = ref Ꮡalias.DerefOrNull();
 
     assert(!check.conf._EnableAlias);
@@ -251,7 +251,7 @@ internal static void brokenAliasᴍ(ref Checker check, ж<TypeName> Ꮡalias) {
 }
 
 // validAlias records that alias has the valid type typ (possibly Typ[Invalid]).
-internal static void validAliasᴍ(ref Checker check, ж<TypeName> Ꮡalias, Type typ) {
+[GoMethodBody("validAlias")] internal static void validAliasᴍ(ref Checker check, ж<TypeName> Ꮡalias, Type typ) {
     ref var alias = ref Ꮡalias.DerefOrNull();
 
     assert(!check.conf._EnableAlias);
@@ -260,12 +260,12 @@ internal static void validAliasᴍ(ref Checker check, ж<TypeName> Ꮡalias, Typ
 }
 
 // isBrokenAlias reports whether alias doesn't have a determined type yet.
-internal static bool isBrokenAliasᴍ(ref Checker check, ж<TypeName> alias) {
+[GoMethodBody("isBrokenAlias")] internal static bool isBrokenAliasᴍ(ref Checker check, ж<TypeName> alias) {
     assert(!check.conf._EnableAlias);
     return check.brokenAliases[alias];
 }
 
-internal static void rememberUntypedᴍ(ref Checker check, ast.Expr e, bool lhs, operandMode mode, ж<Basic> typ, constant.Value val) {
+[GoMethodBody("rememberUntyped")] internal static void rememberUntypedᴍ(ref Checker check, ast.Expr e, bool lhs, operandMode mode, ж<Basic> typ, constant.Value val) {
     var m = check.untyped;
     if (m == nil) {
         m = new map<ast.Expr, exprInfo>();
@@ -280,14 +280,14 @@ internal static void rememberUntypedᴍ(ref Checker check, ast.Expr e, bool lhs,
 // (so that f still sees the scope before any new declarations).
 // later returns the pushed action so one can provide a description
 // via action.describef for debugging, if desired.
-internal static ж<action> laterᴍ(ref Checker check, Action f) {
+[GoMethodBody("later")] internal static ж<action> laterᴍ(ref Checker check, Action f) {
     nint i = len(check.delayed);
     check.delayed = append(check.delayed, new action(version: check.version, f: f));
     return Ꮡ(check.delayed, i);
 }
 
 // push pushes obj onto the object path and records its index in the path index map.
-internal static void pushᴍ(ref Checker check, Object obj) {
+[GoMethodBody("push")] internal static void pushᴍ(ref Checker check, Object obj) {
     if (check.objPathIdx == nil) {
         check.objPathIdx = new map<Object, nint>();
     }
@@ -296,7 +296,7 @@ internal static void pushᴍ(ref Checker check, Object obj) {
 }
 
 // pop pops an object from the object path and removes it from the path index map.
-internal static void popᴍ(ref Checker check) {
+[GoMethodBody("pop")] internal static void popᴍ(ref Checker check) {
     nint i = len(check.objPath) - 1;
     var obj = check.objPath[i];
     check.objPath[i] = default; // help the garbage collector
@@ -314,7 +314,7 @@ partial interface cleaner {
 
 // needsCleanup records objects/types that implement the cleanup method
 // which will be called at the end of type-checking.
-internal static void needsCleanupᴍ(ref Checker check, cleaner c) {
+[GoMethodBody("needsCleanup")] internal static void needsCleanupᴍ(ref Checker check, cleaner c) {
     check.cleaners = append(check.cleaners, c);
 }
 
@@ -366,7 +366,7 @@ private static readonly @string invalidPackageNameˢᵇᴍChecker = "invalid pac
 
 // initFiles initializes the files-specific portion of checker.
 // The provided files must all belong to the same package.
-internal static void initFilesᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) {
+[GoMethodBody("initFiles")] internal static void initFilesᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // start with a clean slate (check.Files may be called multiple times)
@@ -473,12 +473,12 @@ internal static goVersion versionMax(goVersion a, goVersion b) {
 } partial class types_package {
 
 // pushPos pushes pos onto the pos stack.
-internal static void pushPosᴍ(ref Checker check, positioner pos) {
+[GoMethodBody("pushPos")] internal static void pushPosᴍ(ref Checker check, positioner pos) {
     check.posStack = append(check.posStack, pos);
 }
 
 // popPos pops from the pos stack.
-internal static void popPosᴍ(ref Checker check) {
+[GoMethodBody("popPos")] internal static void popPosᴍ(ref Checker check) {
     check.posStack = check.posStack.slice(0, len(check.posStack) - 1);
 }
 
@@ -493,7 +493,7 @@ partial struct bailout {
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static readonly object theFollowingPanicˢᴍChecker = (@string)"The following panic happened checking types near:"u8;
 
-internal static void handleBailoutᴍ(ж<Checker> Ꮡcheck, ж<error> Ꮡerr) {
+[GoMethodBody("handleBailout")] internal static void handleBailoutᴍ(ж<Checker> Ꮡcheck, ж<error> Ꮡerr) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
@@ -539,7 +539,7 @@ internal static void handleBailoutᴍ(ж<Checker> Ꮡcheck, ж<error> Ꮡerr) {
 }
 
 // Files checks the provided files as part of the checker's package.
-internal static error /*err*/ Filesᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) {
+[GoMethodBody("Files")] internal static error /*err*/ Filesᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -591,7 +591,7 @@ private static readonly @string recordUntypedˢᵇᴍChecker = "== recordUntyped
 // a side effect, not by returning early, to ensure that well-formed
 // syntax is properly type annotated even in a package containing
 // errors.
-internal static void checkFilesᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) {
+[GoMethodBody("checkFiles")] internal static void checkFilesᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -680,7 +680,7 @@ internal static ref readonly @string delayedPˢᴍChecker => ref delayedPˢᵇ�
 private static readonly @string delayedPˢᵇᴍChecker = "-- delayed %p"u8;
 
 // processDelayed processes all delayed actions pushed after top.
-internal static void processDelayedᴍ(ж<Checker> Ꮡcheck, nint top) {
+[GoMethodBody("processDelayed")] internal static void processDelayedᴍ(ж<Checker> Ꮡcheck, nint top) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // If each delayed action pushes a new action, the
@@ -712,7 +712,7 @@ internal static void processDelayedᴍ(ж<Checker> Ꮡcheck, nint top) {
 }
 
 // cleanup runs cleanup for all collected cleaners.
-internal static void cleanupᴍ(ref Checker check) {
+[GoMethodBody("cleanup")] internal static void cleanupᴍ(ref Checker check) {
     // Don't use a range clause since Named.cleanup may add more cleaners.
     for (nint i = 0; i < len(check.cleaners); i++) {
         check.cleaners[i].cleanup();
@@ -722,13 +722,13 @@ internal static void cleanupᴍ(ref Checker check) {
 
 // go/types doesn't support recording of types directly in the AST.
 // dummy function to match types2 code.
-internal static void recordTypeAndValueInSyntaxᴍ(ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val) {
+[GoMethodBody("recordTypeAndValueInSyntax")] internal static void recordTypeAndValueInSyntaxᴍ(ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val) {
     // nothing to do
 }
 
 // go/types doesn't support recording of types directly in the AST.
 // dummy function to match types2 code.
-internal static void recordCommaOkTypesInSyntaxᴍ(ref Checker check, ast.Expr x, Type t0, Type t1) {
+[GoMethodBody("recordCommaOkTypesInSyntax")] internal static void recordCommaOkTypesInSyntaxᴍ(ref Checker check, ast.Expr x, Type t0, Type t1) {
     // nothing to do
 }
 
@@ -766,34 +766,3 @@ internal static ж<ast.Ident> instantiatedIdent(ast.Expr expr) {
 }
 
 } // end types_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛenvironment {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Scope>, Object) lookupScope(this ref environment env, @string name) => types_package.lookupScopeᴍ(ref env, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Object lookup(this ref environment env, @string name) => types_package.lookupᴍ(ref env, name);
-}
-partial class typesᴛaction {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void describef(this ref action a, positioner pos, @string format, params ꓸꓸꓸany argsʗp) => types_package.describefᴍ(ref a, pos, format, argsʗp);
-}
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addDeclDep(this ref Checker check, Object to) => types_package.addDeclDepᴍ(ref check, to);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void brokenAlias(this ref Checker check, ж<TypeName> Ꮡalias) => types_package.brokenAliasᴍ(ref check, Ꮡalias);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void validAlias(this ref Checker check, ж<TypeName> Ꮡalias, Type typ) => types_package.validAliasᴍ(ref check, Ꮡalias, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isBrokenAlias(this ref Checker check, ж<TypeName> alias) => types_package.isBrokenAliasᴍ(ref check, alias);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void rememberUntyped(this ref Checker check, ast.Expr e, bool lhs, operandMode mode, ж<Basic> typ, constant.Value val) => types_package.rememberUntypedᴍ(ref check, e, lhs, mode, typ, val);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<action> later(this ref Checker check, Action f) => types_package.laterᴍ(ref check, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void push(this ref Checker check, Object obj) => types_package.pushᴍ(ref check, obj);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pop(this ref Checker check) => types_package.popᴍ(ref check);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void needsCleanup(this ref Checker check, cleaner c) => types_package.needsCleanupᴍ(ref check, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) => types_package.initFilesᴍ(Ꮡcheck, files);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pushPos(this ref Checker check, positioner pos) => types_package.pushPosᴍ(ref check, pos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void popPos(this ref Checker check) => types_package.popPosᴍ(ref check);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handleBailout(this ж<Checker> Ꮡcheck, ж<error> Ꮡerr) => types_package.handleBailoutᴍ(Ꮡcheck, Ꮡerr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error /*err*/ Files(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) => types_package.Filesᴍ(Ꮡcheck, files);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkFiles(this ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) => types_package.checkFilesᴍ(Ꮡcheck, files);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void processDelayed(this ж<Checker> Ꮡcheck, nint top) => types_package.processDelayedᴍ(Ꮡcheck, top);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cleanup(this ref Checker check) => types_package.cleanupᴍ(ref check);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordTypeAndValueInSyntax(this ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val) => types_package.recordTypeAndValueInSyntaxᴍ(ref check, x, mode, typ, val);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordCommaOkTypesInSyntax(this ref Checker check, ast.Expr x, Type t0, Type t1) => types_package.recordCommaOkTypesInSyntaxᴍ(ref check, x, t0, t1);
-}
-// </GlyphForwarders>

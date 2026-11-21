@@ -39,7 +39,7 @@ private static readonly @string _Class_nameᵇ = "ClassUnknownClassAddressClassB
 
 } partial class dwarf_package {
 
-internal static @string Stringᴍ(Class i) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Class i) {
     if (i < 0 || i >= ((Class)(len(_Class_index) - 1))) {
         return "Class("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -47,9 +47,3 @@ internal static @string Stringᴍ(Class i) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class dwarfᴛClass {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Class i) => dwarf_package.Stringᴍ(i);
-}
-// </GlyphForwarders>

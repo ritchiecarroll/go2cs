@@ -53,28 +53,28 @@ internal static ref sync.Pool encBufferPool => ref ((StaticBox<sync.Pool>)Ꮡenc
 
 } partial class gob_package {
 
-internal static void writeByteᴍ(ref encBuffer e, byte c) {
+[GoMethodBody("writeByte")] internal static void writeByteᴍ(ref encBuffer e, byte c) {
     e.data = append(e.data, c);
 }
 
-internal static (nint, error) Writeᴍ(ref encBuffer e, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ref encBuffer e, slice<byte> p) {
     e.data = appendꓸꓸꓸ(e.data, p);
     return (len(p), default);
 }
 
-internal static void WriteStringᴍ(ref encBuffer e, @string s) {
+[GoMethodBody("WriteString")] internal static void WriteStringᴍ(ref encBuffer e, @string s) {
     e.data = append(e.data, s.ꓸꓸꓸ);
 }
 
-internal static nint Lenᴍ(ref encBuffer e) {
+[GoMethodBody("Len")] internal static nint Lenᴍ(ref encBuffer e) {
     return len(e.data);
 }
 
-internal static slice<byte> Bytesᴍ(ref encBuffer e) {
+[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref encBuffer e) {
     return e.data;
 }
 
-internal static void Resetᴍ(ref encBuffer e) {
+[GoMethodBody("Reset")] internal static void Resetᴍ(ref encBuffer e) {
     if (len(e.data) >= tooBig) {
         e.data = e.scratch[0..0];
     } else {
@@ -84,7 +84,7 @@ internal static void Resetᴍ(ref encBuffer e) {
 
 } partial class gob_package {
 
-internal static ж<encoderState> newEncoderStateᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb) {
+[GoMethodBody("newEncoderState")] internal static ж<encoderState> newEncoderStateᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb) {
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -104,7 +104,7 @@ internal static ж<encoderState> newEncoderStateᴍ(ж<Encoder> Ꮡenc, ж<encBu
     return e;
 }
 
-internal static void freeEncoderStateᴍ(ref Encoder enc, ж<encoderState> Ꮡe) {
+[GoMethodBody("freeEncoderState")] internal static void freeEncoderStateᴍ(ref Encoder enc, ж<encoderState> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     e.next = enc.freeList;
@@ -119,7 +119,7 @@ internal static void freeEncoderStateᴍ(ref Encoder enc, ж<encoderState> Ꮡe)
 // by the byte length, negated.
 
 // encodeUint writes an encoded unsigned integer to state.b.
-internal static void encodeUintᴍ(ref encoderState state, uint64 x) {
+[GoMethodBody("encodeUint")] internal static void encodeUintᴍ(ref encoderState state, uint64 x) {
     if (x <= 0x7F) {
         state.b.writeByte((uint8)x);
         return;
@@ -135,7 +135,7 @@ internal static void encodeUintᴍ(ref encoderState state, uint64 x) {
 // encodeInt writes an encoded signed integer to state.w.
 // The low bit of the encoding says whether to bit complement the (other bits of the)
 // uint to recover the int.
-internal static void encodeIntᴍ(ref encoderState state, int64 i) {
+[GoMethodBody("encodeInt")] internal static void encodeIntᴍ(ref encoderState state, int64 i) {
     uint64 x = default;
     if (i < 0) {
         x = (uint64)(~i << 1) | 1;
@@ -162,7 +162,7 @@ partial struct encInstr {
 
 // update emits a field number and updates the state to record its value for delta encoding.
 // If the instruction pointer is nil, it does nothing
-internal static void updateᴍ(ref encoderState state, ж<encInstr> Ꮡinstr) {
+[GoMethodBody("update")] internal static void updateᴍ(ref encoderState state, ж<encInstr> Ꮡinstr) {
     ref var instr = ref Ꮡinstr.DerefOrNull();
 
     if (Ꮡinstr != nil) {
@@ -329,7 +329,7 @@ internal static bool valid(reflect.Value v) {
 } partial class gob_package {
 
 // encodeSingle encodes a single top-level non-struct value.
-internal static void encodeSingleᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, ж<encEngine> Ꮡengine, reflect.Value value) {
+[GoMethodBody("encodeSingle")] internal static void encodeSingleᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, ж<encEngine> Ꮡengine, reflect.Value value) {
     GoFrame ᒐ = default;
     try {
         ref var engine = ref Ꮡengine.DerefOrNull();
@@ -353,7 +353,7 @@ internal static void encodeSingleᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, ж<enc
 }
 
 // encodeStruct encodes a single struct value.
-internal static void encodeStructᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, ж<encEngine> Ꮡengine, reflect.Value value) {
+[GoMethodBody("encodeStruct")] internal static void encodeStructᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, ж<encEngine> Ꮡengine, reflect.Value value) {
     GoFrame ᒐ = default;
     try {
         ref var engine = ref Ꮡengine.DerefOrNull();
@@ -387,7 +387,7 @@ internal static void encodeStructᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, ж<enc
 }
 
 // encodeArray encodes an array.
-internal static void encodeArrayᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value value, Action<ж<encInstr>, ж<encoderState>, reflect.Value> op, nint elemIndir, nint length, Func<ж<encoderState>, reflect.Value, bool> helper) {
+[GoMethodBody("encodeArray")] internal static void encodeArrayᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value value, Action<ж<encInstr>, ж<encoderState>, reflect.Value> op, nint elemIndir, nint length, Func<ж<encoderState>, reflect.Value, bool> helper) {
     GoFrame ᒐ = default;
     try {
         var state = Ꮡenc.newEncoderState(b);
@@ -430,7 +430,7 @@ internal static void encodeReflectValue(ж<encoderState> state, reflect.Value v,
 } partial class gob_package {
 
 // encodeMap encodes a map as unsigned count followed by key:value pairs.
-internal static void encodeMapᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value mv, Action<ж<encInstr>, ж<encoderState>, reflect.Value> keyOp, Action<ж<encInstr>, ж<encoderState>, reflect.Value> elemOp, nint keyIndir, nint elemIndir) {
+[GoMethodBody("encodeMap")] internal static void encodeMapᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value mv, Action<ж<encInstr>, ж<encoderState>, reflect.Value> keyOp, Action<ж<encInstr>, ж<encoderState>, reflect.Value> elemOp, nint keyIndir, nint elemIndir) {
     ref var enc = ref Ꮡenc.DerefOrNull();
 
     var state = Ꮡenc.newEncoderState(b);
@@ -450,7 +450,7 @@ internal static void encodeMapᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.V
 // by the type identifier (which might require defining that type right now), followed
 // by the concrete value. A nil value gets sent as the empty string for the name,
 // followed by no value.
-internal static void encodeInterfaceᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflect.Value iv) {
+[GoMethodBody("encodeInterface")] internal static void encodeInterfaceᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflect.Value iv) {
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -503,7 +503,7 @@ internal static void encodeInterfaceᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, 
 
 // encodeGobEncoder encodes a value that implements the GobEncoder interface.
 // The data is sent as a byte array.
-internal static void encodeGobEncoderᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, ж<userTypeInfo> Ꮡut, reflect.Value v) {
+[GoMethodBody("encodeGobEncoder")] internal static void encodeGobEncoderᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, ж<userTypeInfo> Ꮡut, reflect.Value v) {
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
     ref var ut = ref Ꮡut.DerefOrNull();
@@ -768,7 +768,7 @@ internal static ж<encEngine> buildEncEngine(ж<typeInfo> Ꮡinfo, ref userTypeI
 
 } partial class gob_package {
 
-internal static void encodeᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value value, ж<userTypeInfo> Ꮡut) {
+[GoMethodBody("encode")] internal static void encodeᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value value, ж<userTypeInfo> Ꮡut) {
     GoFrame ᒐ = default;
     try {
         ref var ut = ref Ꮡut.DerefOrNull();
@@ -793,30 +793,3 @@ internal static void encodeᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Valu
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class gobᴛencBuffer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeByte(this ref encBuffer e, byte c) => gob_package.writeByteᴍ(ref e, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this ref encBuffer e, slice<byte> p) => gob_package.Writeᴍ(ref e, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void WriteString(this ref encBuffer e, @string s) => gob_package.WriteStringᴍ(ref e, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this ref encBuffer e) => gob_package.Lenᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Bytes(this ref encBuffer e) => gob_package.Bytesᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Reset(this ref encBuffer e) => gob_package.Resetᴍ(ref e);
-}
-partial class gobᴛEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<encoderState> newEncoderState(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb) => gob_package.newEncoderStateᴍ(Ꮡenc, Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void freeEncoderState(this ref Encoder enc, ж<encoderState> Ꮡe) => gob_package.freeEncoderStateᴍ(ref enc, Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encodeSingle(this ж<Encoder> Ꮡenc, ж<encBuffer> b, ж<encEngine> Ꮡengine, reflect.Value value) => gob_package.encodeSingleᴍ(Ꮡenc, b, Ꮡengine, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encodeStruct(this ж<Encoder> Ꮡenc, ж<encBuffer> b, ж<encEngine> Ꮡengine, reflect.Value value) => gob_package.encodeStructᴍ(Ꮡenc, b, Ꮡengine, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encodeArray(this ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value value, Action<ж<encInstr>, ж<encoderState>, reflect.Value> op, nint elemIndir, nint length, Func<ж<encoderState>, reflect.Value, bool> helper) => gob_package.encodeArrayᴍ(Ꮡenc, b, value, op, elemIndir, length, helper);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encodeMap(this ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value mv, Action<ж<encInstr>, ж<encoderState>, reflect.Value> keyOp, Action<ж<encInstr>, ж<encoderState>, reflect.Value> elemOp, nint keyIndir, nint elemIndir) => gob_package.encodeMapᴍ(Ꮡenc, b, mv, keyOp, elemOp, keyIndir, elemIndir);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encodeInterface(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflect.Value iv) => gob_package.encodeInterfaceᴍ(Ꮡenc, Ꮡb, iv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encodeGobEncoder(this ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, ж<userTypeInfo> Ꮡut, reflect.Value v) => gob_package.encodeGobEncoderᴍ(Ꮡenc, Ꮡb, Ꮡut, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value value, ж<userTypeInfo> Ꮡut) => gob_package.encodeᴍ(Ꮡenc, b, value, Ꮡut);
-}
-partial class gobᴛencoderState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encodeUint(this ref encoderState state, uint64 x) => gob_package.encodeUintᴍ(ref state, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encodeInt(this ref encoderState state, int64 i) => gob_package.encodeIntᴍ(ref state, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void update(this ref encoderState state, ж<encInstr> Ꮡinstr) => gob_package.updateᴍ(ref state, Ꮡinstr);
-}
-// </GlyphForwarders>

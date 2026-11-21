@@ -42,7 +42,7 @@ partial struct debugT /*bool*/;
 
 } partial class mail_package {
 
-internal static void Printfᴍ(debugT d, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("Printf")] internal static void Printfᴍ(debugT d, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     if (d) {
@@ -227,7 +227,7 @@ partial struct Header /*map[@string, slice<@string>]*/;
 // If there are no values associated with the key, Get returns "".
 // To access multiple values of a key, or to use non-canonical keys,
 // access the map directly.
-internal static @string Getᴍ(Header h, @string key) {
+[GoMethodBody("Get")] internal static @string Getᴍ(Header h, @string key) {
     return ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Get(key);
 }
 
@@ -242,7 +242,7 @@ internal static ref readonly @string dateˢᴍHeader => ref dateˢᵇᴍHeader;
 private static readonly @string dateˢᵇᴍHeader = "Date"u8;
 
 // Date parses the Date header field.
-internal static (time.Time, error) Dateᴍ(Header h) {
+[GoMethodBody("Date")] internal static (time.Time, error) Dateᴍ(Header h) {
     @string hdr = h.Get(dateˢᴍHeader);
     if (hdr == ""u8) {
         return (new time.Time(), ErrHeaderNotPresent);
@@ -251,7 +251,7 @@ internal static (time.Time, error) Dateᴍ(Header h) {
 }
 
 // AddressList parses the named header field as a list of addresses.
-internal static (slice<ж<Address>>, error) AddressListᴍ(Header h, @string key) {
+[GoMethodBody("AddressList")] internal static (slice<ж<Address>>, error) AddressListᴍ(Header h, @string key) {
     @string hdr = h.Get(key);
     if (hdr == ""u8) {
         return (default, ErrHeaderNotPresent);
@@ -289,13 +289,13 @@ partial struct AddressParser {
 
 // Parse parses a single RFC 5322 address of the
 // form "Gogh Fir <gf@example.com>" or "foo@example.com".
-internal static (ж<Address>, error) Parseᴍ(ref AddressParser p, @string address) {
+[GoMethodBody("Parse")] internal static (ж<Address>, error) Parseᴍ(ref AddressParser p, @string address) {
     return (Ꮡ(new addrParser(s: address, dec: p.WordDecoder))).parseSingleAddress();
 }
 
 // ParseList parses the given string as a list of comma-separated addresses
 // of the form "Gogh Fir <gf@example.com>" or "foo@example.com".
-internal static (slice<ж<Address>>, error) ParseListᴍ(ref AddressParser p, @string list) {
+[GoMethodBody("ParseList")] internal static (slice<ж<Address>>, error) ParseListᴍ(ref AddressParser p, @string list) {
     return (Ꮡ(new addrParser(s: list, dec: p.WordDecoder))).parseAddressList();
 }
 
@@ -308,7 +308,7 @@ private static readonly @string utf8ˢᵇᴍAddress = "utf-8"u8;
 // String formats the address as a valid RFC 5322 address.
 // If the address's name contains non-ASCII characters
 // the name will be rendered according to RFC 2047.
-internal static @string Stringᴍ(ref Address a) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref Address a) {
     // Format address local@domain
     nint at = strings.LastIndex(a.ΔAddress, "@");
     @string local = default;
@@ -386,7 +386,7 @@ private static readonly @string mailMisformattedˢᵇᴍaddrParser = "mail: misf
 internal static ref readonly @string mailExpectedCommaˢᴍaddrParser => ref mailExpectedCommaˢᵇᴍaddrParser;
 private static readonly @string mailExpectedCommaˢᵇᴍaddrParser = "mail: expected comma"u8;
 
-internal static (slice<ж<Address>>, error) parseAddressListᴍ(ж<addrParser> Ꮡp) {
+[GoMethodBody("parseAddressList")] internal static (slice<ж<Address>>, error) parseAddressListᴍ(ж<addrParser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     slice<ж<Address>> list = default;
@@ -431,7 +431,7 @@ private static readonly @string mailEmptyGroupˢᵇᴍaddrParser = "mail: empty 
 internal static ref readonly @string mailGroupWithMultipleˢᴍaddrParser => ref mailGroupWithMultipleˢᵇᴍaddrParser;
 private static readonly @string mailGroupWithMultipleˢᵇᴍaddrParser = "mail: group with multiple addresses"u8;
 
-internal static (ж<Address>, error) parseSingleAddressᴍ(ж<addrParser> Ꮡp) {
+[GoMethodBody("parseSingleAddress")] internal static (ж<Address>, error) parseSingleAddressᴍ(ж<addrParser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var (addrs, err) = Ꮡp.parseAddress(true);
@@ -464,7 +464,7 @@ internal static ref readonly @string mailUnclosedAngleAddrˢᴍaddrParser => ref
 private static readonly @string mailUnclosedAngleAddrˢᵇᴍaddrParser = "mail: unclosed angle-addr"u8;
 
 // parseAddress parses a single RFC 5322 address at the start of p.
-internal static (slice<ж<Address>>, error) parseAddressᴍ(ж<addrParser> Ꮡp, bool handleGroup) {
+[GoMethodBody("parseAddress")] internal static (slice<ж<Address>>, error) parseAddressᴍ(ж<addrParser> Ꮡp, bool handleGroup) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     debug.Printf("parseAddress: %q", p.s);
@@ -549,7 +549,7 @@ internal static (slice<ж<Address>>, error) parseAddressᴍ(ж<addrParser> Ꮡp,
     ]), default);
 }
 
-internal static (slice<ж<Address>>, error) consumeGroupListᴍ(ж<addrParser> Ꮡp) {
+[GoMethodBody("consumeGroupList")] internal static (slice<ж<Address>>, error) consumeGroupListᴍ(ж<addrParser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     slice<ж<Address>> group = default;
@@ -598,7 +598,7 @@ internal static ref readonly @string mailNoDomainInAddrSpecˢᴍaddrParser => re
 private static readonly @string mailNoDomainInAddrSpecˢᵇᴍaddrParser = "mail: no domain in addr-spec"u8;
 
 // consumeAddrSpec parses a single RFC 5322 addr-spec at the start of p.
-internal static (@string spec, error err) consumeAddrSpecᴍ(ж<addrParser> Ꮡp) {
+[GoMethodBody("consumeAddrSpec")] internal static (@string spec, error err) consumeAddrSpecᴍ(ж<addrParser> Ꮡp) {
     @string spec = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -671,7 +671,7 @@ internal static (@string spec, error err) consumeAddrSpecᴍ(ж<addrParser> Ꮡp
 }
 
 // consumePhrase parses the RFC 5322 phrase at the start of p.
-internal static (@string phrase, error err) consumePhraseᴍ(ref addrParser p) {
+[GoMethodBody("consumePhrase")] internal static (@string phrase, error err) consumePhraseᴍ(ref addrParser p) {
     @string phrase = default;
     error err = default;
     var wordsᴷ = new stackAppend<@string>();
@@ -746,7 +746,7 @@ internal static ref readonly @string mailUnclosedQuotedStringˢᴍaddrParser => 
 private static readonly @string mailUnclosedQuotedStringˢᵇᴍaddrParser = "mail: unclosed quoted-string"u8;
 
 // consumeQuotedString parses the quoted string at the start of p.
-internal static (@string qs, error err) consumeQuotedStringᴍ(ref addrParser p) {
+[GoMethodBody("consumeQuotedString")] internal static (@string qs, error err) consumeQuotedStringᴍ(ref addrParser p) {
     var qsbᴷ = new stackAppend<rune>();
 
     // Assume first byte is '"'.
@@ -817,7 +817,7 @@ private static readonly @string mailTrailingDotInAtomˢᵇᴍaddrParser = "mail:
 // If dot is true, consumeAtom parses an RFC 5322 dot-atom instead.
 // If permissive is true, consumeAtom will not fail on:
 // - leading/trailing/double dots in the atom (see golang.org/issue/4938)
-internal static (@string atom, error err) consumeAtomᴍ(ref addrParser p, bool dot, bool permissive) {
+[GoMethodBody("consumeAtom")] internal static (@string atom, error err) consumeAtomᴍ(ref addrParser p, bool dot, bool permissive) {
     @string atom = default;
 
     nint i = 0;
@@ -866,7 +866,7 @@ internal static ref readonly @string mailUnclosedDomainˢᴍaddrParser => ref ma
 private static readonly @string mailUnclosedDomainˢᵇᴍaddrParser = "mail: unclosed domain-literal"u8;
 
 // consumeDomainLiteral parses an RFC 5322 domain-literal at the start of p.
-internal static (@string, error) consumeDomainLiteralᴍ(ref addrParser p) {
+[GoMethodBody("consumeDomainLiteral")] internal static (@string, error) consumeDomainLiteralᴍ(ref addrParser p) {
     // Skip the leading [
     if (!p.consume((byte)'[')) {
         return ("", errors.New(mailMissingInDomainˢᴍaddrParser));
@@ -913,7 +913,7 @@ internal static (@string, error) consumeDomainLiteralᴍ(ref addrParser p) {
 internal static ref readonly @string mailCommentDoesNotStartˢᴍaddrParser => ref mailCommentDoesNotStartˢᵇᴍaddrParser;
 private static readonly @string mailCommentDoesNotStartˢᵇᴍaddrParser = "mail: comment does not start with ("u8;
 
-internal static (@string, error) consumeDisplayNameCommentᴍ(ref addrParser p) {
+[GoMethodBody("consumeDisplayNameComment")] internal static (@string, error) consumeDisplayNameCommentᴍ(ref addrParser p) {
     if (!p.consume((byte)'(')) {
         return ("", errors.New(mailCommentDoesNotStartˢᴍaddrParser));
     }
@@ -937,7 +937,7 @@ internal static (@string, error) consumeDisplayNameCommentᴍ(ref addrParser p) 
     return (strings.Join(words, " "), default);
 }
 
-internal static bool consumeᴍ(ref addrParser p, byte c) {
+[GoMethodBody("consume")] internal static bool consumeᴍ(ref addrParser p, byte c) {
     if (p.empty() || p.peek() != c) {
         return false;
     }
@@ -946,24 +946,24 @@ internal static bool consumeᴍ(ref addrParser p, byte c) {
 }
 
 // skipSpace skips the leading space and tab characters.
-internal static void skipSpaceᴍ(ref addrParser p) {
+[GoMethodBody("skipSpace")] internal static void skipSpaceᴍ(ref addrParser p) {
     p.s = strings.TrimLeft(p.s, " \t");
 }
 
-internal static byte peekᴍ(ref addrParser p) {
+[GoMethodBody("peek")] internal static byte peekᴍ(ref addrParser p) {
     return p.s[0];
 }
 
-internal static bool emptyᴍ(ref addrParser p) {
+[GoMethodBody("empty")] internal static bool emptyᴍ(ref addrParser p) {
     return p.len() == 0;
 }
 
-internal static nint lenᴍ(ref addrParser p) {
+[GoMethodBody("len")] internal static nint lenᴍ(ref addrParser p) {
     return builtin.len(p.s);
 }
 
 // skipCFWS skips CFWS as defined in RFC5322.
-internal static bool skipCFWSᴍ(ref addrParser p) {
+[GoMethodBody("skipCFWS")] internal static bool skipCFWSᴍ(ref addrParser p) {
     p.skipSpace();
 
     for (;;) {
@@ -981,7 +981,7 @@ internal static bool skipCFWSᴍ(ref addrParser p) {
     return true;
 }
 
-internal static (@string, bool) consumeCommentᴍ(ref addrParser p) {
+[GoMethodBody("consumeComment")] internal static (@string, bool) consumeCommentᴍ(ref addrParser p) {
     // '(' already consumed.
     nint depth = 1;
 
@@ -1007,7 +1007,7 @@ internal static (@string, bool) consumeCommentᴍ(ref addrParser p) {
     return (comment.String(), depth == 0);
 }
 
-internal static (@string word, bool isEncoded, error err) decodeRFC2047Wordᴍ(ref addrParser p, @string s) {
+[GoMethodBody("decodeRFC2047Word")] internal static (@string word, bool isEncoded, error err) decodeRFC2047Wordᴍ(ref addrParser p, @string s) {
     @string word = default;
     error err = default;
 
@@ -1065,7 +1065,7 @@ partial struct charsetError /*@string*/;
 
 } partial class mail_package {
 
-internal static @string Errorᴍ(charsetError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(charsetError e) {
     return fmt.Sprintf("charset not supported: %q"u8, (@string)e);
 }
 
@@ -1138,44 +1138,3 @@ internal static bool isDtext(rune r) {
 }
 
 } // end mail_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class mailᴛdebugT {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Printf(this debugT d, @string format, params ꓸꓸꓸany argsʗp) => mail_package.Printfᴍ(d, format, argsʗp);
-}
-partial class mailᴛHeader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Get(this Header h, @string key) => mail_package.Getᴍ(h, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (time.Time, error) Date(this Header h) => mail_package.Dateᴍ(h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<ж<Address>>, error) AddressList(this Header h, @string key) => mail_package.AddressListᴍ(h, key);
-}
-partial class mailᴛAddressParser {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Address>, error) Parse(this ref AddressParser p, @string address) => mail_package.Parseᴍ(ref p, address);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<ж<Address>>, error) ParseList(this ref AddressParser p, @string list) => mail_package.ParseListᴍ(ref p, list);
-}
-partial class mailᴛAddress {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Address a) => mail_package.Stringᴍ(ref a);
-}
-partial class mailᴛaddrParser {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<ж<Address>>, error) parseAddressList(this ж<addrParser> Ꮡp) => mail_package.parseAddressListᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Address>, error) parseSingleAddress(this ж<addrParser> Ꮡp) => mail_package.parseSingleAddressᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<ж<Address>>, error) parseAddress(this ж<addrParser> Ꮡp, bool handleGroup) => mail_package.parseAddressᴍ(Ꮡp, handleGroup);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<ж<Address>>, error) consumeGroupList(this ж<addrParser> Ꮡp) => mail_package.consumeGroupListᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string spec, error err) consumeAddrSpec(this ж<addrParser> Ꮡp) => mail_package.consumeAddrSpecᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string phrase, error err) consumePhrase(this ref addrParser p) => mail_package.consumePhraseᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string qs, error err) consumeQuotedString(this ref addrParser p) => mail_package.consumeQuotedStringᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string atom, error err) consumeAtom(this ref addrParser p, bool dot, bool permissive) => mail_package.consumeAtomᴍ(ref p, dot, permissive);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) consumeDomainLiteral(this ref addrParser p) => mail_package.consumeDomainLiteralᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) consumeDisplayNameComment(this ref addrParser p) => mail_package.consumeDisplayNameCommentᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool consume(this ref addrParser p, byte c) => mail_package.consumeᴍ(ref p, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void skipSpace(this ref addrParser p) => mail_package.skipSpaceᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte peek(this ref addrParser p) => mail_package.peekᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ref addrParser p) => mail_package.emptyᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint len(this ref addrParser p) => mail_package.lenᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool skipCFWS(this ref addrParser p) => mail_package.skipCFWSᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, bool) consumeComment(this ref addrParser p) => mail_package.consumeCommentᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string word, bool isEncoded, error err) decodeRFC2047Word(this ref addrParser p, @string s) => mail_package.decodeRFC2047Wordᴍ(ref p, s);
-}
-partial class mailᴛcharsetError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this charsetError e) => mail_package.Errorᴍ(e);
-}
-// </GlyphForwarders>

@@ -124,7 +124,7 @@ partial struct FormatError /*@string*/;
 
 } partial class png_package {
 
-internal static @string Errorᴍ(FormatError e) { return "png: invalid format: "u8 + ((@string)e); }
+[GoMethodBody("Error")] internal static @string Errorᴍ(FormatError e) { return "png: invalid format: "u8 + ((@string)e); }
 
 } partial class png_package {
 
@@ -135,7 +135,7 @@ partial struct UnsupportedError /*@string*/;
 
 } partial class png_package {
 
-internal static @string Errorᴍ(UnsupportedError e) { return "png: unsupported feature: "u8 + ((@string)e); }
+[GoMethodBody("Error")] internal static @string Errorᴍ(UnsupportedError e) { return "png: unsupported feature: "u8 + ((@string)e); }
 
 } partial class png_package {
 
@@ -153,7 +153,7 @@ private static readonly @string nonPositiveDimensionˢᵇᴍdecoder = "non-posit
 internal static ref readonly @string dimensionOverflowˢᴍdecoder => ref dimensionOverflowˢᵇᴍdecoder;
 private static readonly @string dimensionOverflowˢᵇᴍdecoder = "dimension overflow"u8;
 
-internal static error parseIHDRᴍ(ref decoder d, uint32 length) {
+[GoMethodBody("parseIHDR")] internal static error parseIHDRᴍ(ref decoder d, uint32 length) {
     if (length != 13) {
         return ((FormatError)(@string)badIhdrLengthˢᴍdecoder);
     }
@@ -283,7 +283,7 @@ private static readonly @string badPlteLengthˢᵇᴍdecoder = "bad PLTE length"
 internal static ref readonly @string plteColorTypeMismatchˢᴍdecoder => ref plteColorTypeMismatchˢᵇᴍdecoder;
 private static readonly @string plteColorTypeMismatchˢᵇᴍdecoder = "PLTE, color type mismatch"u8;
 
-internal static error parsePLTEᴍ(ref decoder d, uint32 length) {
+[GoMethodBody("parsePLTE")] internal static error parsePLTEᴍ(ref decoder d, uint32 length) {
     nint np = (nint)(length / 3); // The number of palette entries.
     if (length % 3 != 0 || np <= 0 || np > 256 || np > ((nint)1).Lsh((nuint)d.depth)) {
         return ((FormatError)(@string)badPlteLengthˢᴍdecoder);
@@ -327,7 +327,7 @@ private static readonly @string badTRNSLengthˢᵇᴍdecoder = "bad tRNS length"
 internal static ref readonly @string tRNSColorTypeMismatchˢᴍdecoder => ref tRNSColorTypeMismatchˢᵇᴍdecoder;
 private static readonly @string tRNSColorTypeMismatchˢᵇᴍdecoder = "tRNS, color type mismatch"u8;
 
-internal static error parsetRNSᴍ(ref decoder d, uint32 length) {
+[GoMethodBody("parsetRNS")] internal static error parsetRNSᴍ(ref decoder d, uint32 length) {
     switch (d.cb) {
     case var ᴛ when ᴛ == cbG1 || ᴛ == cbG2 || ᴛ == cbG4 || ᴛ == cbG8 || ᴛ == cbG16: {
         if (length != 2) {
@@ -410,7 +410,7 @@ private static readonly @string idatChunkLengthOverflowˢᵇᴍdecoder = "IDAT c
 // immediately before the first Read call is that d.r is positioned between the
 // first IDAT and xxx, and the decoder state immediately after the last Read
 // call is that d.r is positioned between yy and crc1.
-internal static (nint, error) Readᴍ(ref decoder d, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref decoder d, slice<byte> p) {
     if (len(p) == 0) {
         return (0, default);
     }
@@ -445,7 +445,7 @@ internal static ref readonly @string tooMuchPixelDataˢᴍdecoder => ref tooMuch
 private static readonly @string tooMuchPixelDataˢᵇᴍdecoder = "too much pixel data"u8;
 
 // decode decodes the IDAT data into an image.
-internal static (image.Image, error) decodeᴍ(ж<decoder> Ꮡd) {
+[GoMethodBody("decode")] internal static (image.Image, error) decodeᴍ(ж<decoder> Ꮡd) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -505,7 +505,7 @@ internal static ref readonly @string badFilterTypeˢᴍdecoder => ref badFilterT
 private static readonly @string badFilterTypeˢᵇᴍdecoder = "bad filter type"u8;
 
 // readImagePass reads a single image pass, sized according to the pass number.
-internal static (image.Image, error) readImagePassᴍ(ref decoder d, io.Reader r, nint pass, bool allocateOnly) {
+[GoMethodBody("readImagePass")] internal static (image.Image, error) readImagePassᴍ(ref decoder d, io.Reader r, nint pass, bool allocateOnly) {
     nint bitsPerPixel = 0;
     nint pixOffset = 0;
     ж<image.Gray> gray = default;
@@ -941,7 +941,7 @@ internal static (image.Image, error) readImagePassᴍ(ref decoder d, io.Reader r
 }
 
 // mergePassInto merges a single pass into a full sized image.
-internal static void mergePassIntoᴍ(ref decoder d, image.Image dst, image.Image src, nint pass) {
+[GoMethodBody("mergePassInto")] internal static void mergePassIntoᴍ(ref decoder d, image.Image dst, image.Image src, nint pass) {
     var p = interlacing[pass];
     slice<uint8> srcPix = default;
     slice<uint8> dstPix = default;
@@ -1023,7 +1023,7 @@ internal static void mergePassIntoᴍ(ref decoder d, image.Image dst, image.Imag
     }
 }
 
-internal static error /*err*/ parseIDATᴍ(ж<decoder> Ꮡd, uint32 length) {
+[GoMethodBody("parseIDAT")] internal static error /*err*/ parseIDATᴍ(ж<decoder> Ꮡd, uint32 length) {
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -1039,14 +1039,14 @@ internal static error /*err*/ parseIDATᴍ(ж<decoder> Ꮡd, uint32 length) {
 internal static ref readonly @string badIendLengthˢᴍdecoder => ref badIendLengthˢᵇᴍdecoder;
 private static readonly @string badIendLengthˢᵇᴍdecoder = "bad IEND length"u8;
 
-internal static error parseIENDᴍ(ref decoder d, uint32 length) {
+[GoMethodBody("parseIEND")] internal static error parseIENDᴍ(ref decoder d, uint32 length) {
     if (length != 0) {
         return ((FormatError)(@string)badIendLengthˢᴍdecoder);
     }
     return d.verifyChecksum();
 }
 
-internal static error parseChunkᴍ(ж<decoder> Ꮡd, bool configOnly) {
+[GoMethodBody("parseChunk")] internal static error parseChunkᴍ(ж<decoder> Ꮡd, bool configOnly) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Read the length and chunk type.
@@ -1135,7 +1135,7 @@ internal static error parseChunkᴍ(ж<decoder> Ꮡd, bool configOnly) {
 internal static ref readonly @string invalidChecksumˢᴍdecoder => ref invalidChecksumˢᵇᴍdecoder;
 private static readonly @string invalidChecksumˢᵇᴍdecoder = "invalid checksum"u8;
 
-internal static error verifyChecksumᴍ(ref decoder d) {
+[GoMethodBody("verifyChecksum")] internal static error verifyChecksumᴍ(ref decoder d) {
     var (_, err) = io.ReadFull(d.r, d.tmp[..4]); if (err != nil) {
         return err;
     }
@@ -1149,7 +1149,7 @@ internal static error verifyChecksumᴍ(ref decoder d) {
 internal static ref readonly @string notAPngFileˢᴍdecoder => ref notAPngFileˢᵇᴍdecoder;
 private static readonly @string notAPngFileˢᵇᴍdecoder = "not a PNG file"u8;
 
-internal static error checkHeaderᴍ(ref decoder d) {
+[GoMethodBody("checkHeader")] internal static error checkHeaderᴍ(ref decoder d) {
     var (_, err) = io.ReadFull(d.r, d.tmp[..(int)(len(pngHeader))]);
     if (err != nil) {
         return err;
@@ -1273,26 +1273,3 @@ public static (image.Config, error) DecodeConfig(io.Reader r) {
 }
 
 } // end png_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class pngᴛFormatError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this FormatError e) => png_package.Errorᴍ(e);
-}
-partial class pngᴛUnsupportedError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnsupportedError e) => png_package.Errorᴍ(e);
-}
-partial class pngᴛdecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseIHDR(this ref decoder d, uint32 length) => png_package.parseIHDRᴍ(ref d, length);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parsePLTE(this ref decoder d, uint32 length) => png_package.parsePLTEᴍ(ref d, length);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parsetRNS(this ref decoder d, uint32 length) => png_package.parsetRNSᴍ(ref d, length);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref decoder d, slice<byte> p) => png_package.Readᴍ(ref d, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (image.Image, error) decode(this ж<decoder> Ꮡd) => png_package.decodeᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (image.Image, error) readImagePass(this ref decoder d, io.Reader r, nint pass, bool allocateOnly) => png_package.readImagePassᴍ(ref d, r, pass, allocateOnly);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void mergePassInto(this ref decoder d, image.Image dst, image.Image src, nint pass) => png_package.mergePassIntoᴍ(ref d, dst, src, pass);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ parseIDAT(this ж<decoder> Ꮡd, uint32 length) => png_package.parseIDATᴍ(Ꮡd, length);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseIEND(this ref decoder d, uint32 length) => png_package.parseIENDᴍ(ref d, length);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseChunk(this ж<decoder> Ꮡd, bool configOnly) => png_package.parseChunkᴍ(Ꮡd, configOnly);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error verifyChecksum(this ref decoder d) => png_package.verifyChecksumᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error checkHeader(this ref decoder d) => png_package.checkHeaderᴍ(ref d);
-}
-// </GlyphForwarders>

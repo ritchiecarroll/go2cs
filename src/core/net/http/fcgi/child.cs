@@ -49,7 +49,7 @@ internal static ж<request> newRequest(uint16 reqId, uint8 flags) {
 } partial class fcgi_package {
 
 // parseParams reads an encoded []byte into Params.
-internal static void parseParamsᴍ(ref request r) {
+[GoMethodBody("parseParams")] internal static void parseParamsᴍ(ref request r) {
     var text = r.rawParams;
     r.rawParams = default;
     while (len(text) > 0) {
@@ -98,11 +98,11 @@ internal static ж<response> newResponse(ref child c, ж<request> Ꮡreq) {
 
 } partial class fcgi_package {
 
-internal static http.Header Headerᴍ(ref response r) {
+[GoMethodBody("Header")] internal static http.Header Headerᴍ(ref response r) {
     return r.header;
 }
 
-internal static (nint n, error err) Writeᴍ(ref response r, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref response r, slice<byte> p) {
     if (!r.wroteHeader) {
         r.WriteHeader(http.StatusOK);
     }
@@ -122,7 +122,7 @@ private static readonly @string transferEncodingˢᵇᴍresponse = "Transfer-Enc
 internal static ref readonly @string dateˢᴍresponse => ref dateˢᵇᴍresponse;
 private static readonly @string dateˢᵇᴍresponse = "Date"u8;
 
-internal static void WriteHeaderᴍ(ref response r, nint code) {
+[GoMethodBody("WriteHeader")] internal static void WriteHeaderᴍ(ref response r, nint code) {
     if (r.wroteHeader) {
         return;
     }
@@ -143,7 +143,7 @@ internal static void WriteHeaderᴍ(ref response r, nint code) {
 // p is not written by writeHeader, but is the first chunk of the body
 // that will be written. It is sniffed for a Content-Type if none is
 // set explicitly.
-internal static void writeCGIHeaderᴍ(ref response r, slice<byte> p) {
+[GoMethodBody("writeCGIHeader")] internal static void writeCGIHeaderᴍ(ref response r, slice<byte> p) {
     if (r.wroteCGIHeader) {
         return;
     }
@@ -157,14 +157,14 @@ internal static void writeCGIHeaderᴍ(ref response r, slice<byte> p) {
     r.w.Value.Writer.Value.Flush();
 }
 
-internal static void Flushᴍ(ref response r) {
+[GoMethodBody("Flush")] internal static void Flushᴍ(ref response r) {
     if (!r.wroteHeader) {
         r.WriteHeader(http.StatusOK);
     }
     r.w.Value.Writer.Value.Flush();
 }
 
-internal static error Closeᴍ(ref response r) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref response r) {
     r.Flush();
     return r.w.Close();
 }
@@ -187,7 +187,7 @@ internal static ж<child> newChild(io.ReadWriteCloser rwc, http.Handler handler)
 
 } partial class fcgi_package {
 
-internal static void serveᴍ(ж<child> Ꮡc) {
+[GoMethodBody("serve")] internal static void serveᴍ(ж<child> Ꮡc) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -232,7 +232,7 @@ public static error ErrConnClosed = errors.New("fcgi: connection to web server c
 internal static ref readonly @string fcgiReceivedIdThatIsˢᴍchild => ref fcgiReceivedIdThatIsˢᵇᴍchild;
 private static readonly @string fcgiReceivedIdThatIsˢᵇᴍchild = "fcgi: received ID that is already in-flight"u8;
 
-internal static partial error handleRecordᴍ(ж<child> Ꮡc, ж<record> Ꮡrec) {
+[GoMethodBody("handleRecord")] internal static partial error handleRecordᴍ(ж<child> Ꮡc, ж<record> Ꮡrec) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var rec = ref Ꮡrec.DerefOrNull();
 
@@ -343,7 +343,7 @@ internal static map<@string, @string> filterOutUsedEnvVars(map<@string, @string>
 
 } partial class fcgi_package {
 
-internal static void serveRequestᴍ(ж<child> Ꮡc, ж<request> Ꮡreq, io.ReadCloser body) {
+[GoMethodBody("serveRequest")] internal static void serveRequestᴍ(ж<child> Ꮡc, ж<request> Ꮡreq, io.ReadCloser body) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
@@ -380,7 +380,7 @@ internal static void serveRequestᴍ(ж<child> Ꮡc, ж<request> Ꮡreq, io.Read
     }
 }
 
-internal static void cleanUpᴍ(ref child c) {
+[GoMethodBody("cleanUp")] internal static void cleanUpᴍ(ref child c) {
     foreach (var (_, req) in c.requests) {
         if (req.pw != nil) {
             // race with call to Close in c.serveRequest doesn't matter because
@@ -465,23 +465,3 @@ internal static bool addFastCGIEnvToContext(@string s) {
 }
 
 } // end fcgi_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class fcgiᴛrequest {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parseParams(this ref request r) => fcgi_package.parseParamsᴍ(ref r);
-}
-partial class fcgiᴛresponse {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static http.Header Header(this ref response r) => fcgi_package.Headerᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref response r, slice<byte> p) => fcgi_package.Writeᴍ(ref r, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void WriteHeader(this ref response r, nint code) => fcgi_package.WriteHeaderᴍ(ref r, code);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeCGIHeader(this ref response r, slice<byte> p) => fcgi_package.writeCGIHeaderᴍ(ref r, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Flush(this ref response r) => fcgi_package.Flushᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref response r) => fcgi_package.Closeᴍ(ref r);
-}
-partial class fcgiᴛchild {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void serve(this ж<child> Ꮡc) => fcgi_package.serveᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error handleRecord(this ж<child> Ꮡc, ж<record> Ꮡrec) => fcgi_package.handleRecordᴍ(Ꮡc, Ꮡrec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void serveRequest(this ж<child> Ꮡc, ж<request> Ꮡreq, io.ReadCloser body) => fcgi_package.serveRequestᴍ(Ꮡc, Ꮡreq, body);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cleanUp(this ref child c) => fcgi_package.cleanUpᴍ(ref c);
-}
-// </GlyphForwarders>

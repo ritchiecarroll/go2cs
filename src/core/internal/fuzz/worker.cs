@@ -79,7 +79,7 @@ internal static (ж<worker>, error) newWorker(ж<coordinator> c, @string dir, @s
 } partial class fuzz_package {
 
 // cleanup releases persistent resources associated with the worker.
-internal static error cleanupᴍ(ref worker w) {
+[GoMethodBody("cleanup")] internal static error cleanupᴍ(ref worker w) {
     var mem = ᐸꟷ(w.memMu);
     if (mem == nil) {
         return default;
@@ -98,7 +98,7 @@ internal static error cleanupᴍ(ref worker w) {
 // While looping, coordinate receives inputs from the coordinator, passes
 // those inputs to the worker process, then passes the results back to
 // the coordinator.
-internal static error coordinateᴍ(ж<worker> Ꮡw, context.Context ctx) {
+[GoMethodBody("coordinate")] internal static error coordinateᴍ(ж<worker> Ꮡw, context.Context ctx) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     // Main event loop.
@@ -245,7 +245,7 @@ internal static error coordinateᴍ(ж<worker> Ꮡw, context.Context ctx) {
 // either causes an error (if we started minimizing because we found an input
 // that causes an error) or preserves new coverage (if we started minimizing
 // because we found an input that expands coverage).
-internal static (fuzzResult min, error err) minimizeᴍ(ж<worker> Ꮡw, context.Context ctx, fuzzMinimizeInput input) {
+[GoMethodBody("minimize")] internal static (fuzzResult min, error err) minimizeᴍ(ж<worker> Ꮡw, context.Context ctx, fuzzMinimizeInput input) {
     fuzzResult min = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -311,7 +311,7 @@ internal static (fuzzResult min, error err) minimizeᴍ(ж<worker> Ꮡw, context
     ᒐdone: return (min, err);
 }
 
-internal static bool isRunningᴍ(ref worker w) {
+[GoMethodBody("isRunning")] internal static bool isRunningᴍ(ref worker w) {
     return w.cmd != nil;
 }
 
@@ -323,7 +323,7 @@ internal static bool isRunningᴍ(ref worker w) {
 // responded. Errors that happen after start but before the ping response
 // likely indicate that the worker did not call F.Fuzz or called F.Fail first.
 // We don't record crashers for these errors.
-internal static error startAndPingᴍ(ж<worker> Ꮡw, context.Context ctx) {
+[GoMethodBody("startAndPing")] internal static error startAndPingᴍ(ж<worker> Ꮡw, context.Context ctx) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (ctx.Err() != nil) {
@@ -361,7 +361,7 @@ internal static error startAndPingᴍ(ж<worker> Ꮡw, context.Context ctx) {
 //
 // When the process terminates, w.waitErr is set to the error (if any), and
 // w.termC is closed.
-internal static partial error /*err*/ startᴍ(ж<worker> Ꮡw) {
+[GoMethodBody("start")] internal static partial error /*err*/ startᴍ(ж<worker> Ꮡw) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -438,7 +438,7 @@ internal static partial error /*err*/ startᴍ(ж<worker> Ꮡw) {
 //
 // stop must be called at least once after start returns successfully, even if
 // the worker process terminates unexpectedly.
-internal static partial error stopᴍ(ж<worker> Ꮡw) {
+[GoMethodBody("stop")] internal static partial error stopᴍ(ж<worker> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.termC == nil) {
@@ -701,7 +701,7 @@ private static readonly @string noArgumentsProvidedForˢᵇᴍworkerServer = "no
 // serve returns errors that occurred when communicating over pipes. serve
 // does not return errors from method calls; those are passed through serialized
 // responses.
-internal static error serveᴍ(ж<workerServer> Ꮡws, context.Context ctx) {
+[GoMethodBody("serve")] internal static error serveᴍ(ж<workerServer> Ꮡws, context.Context ctx) {
     ref var ws = ref Ꮡws.DerefOrNull();
 
     var enc = json.NewEncoder(new os.FileжWriter(ws.fuzzOut));
@@ -774,7 +774,7 @@ private static readonly @string fuzzFunctionFailedWithNoˢᵇᴍworkerServer = "
 // initial PRNG state in shared memory and increments a counter in shared
 // memory before each call to the test function. The caller may reconstruct
 // the crashing input with this information, since the PRNG is deterministic.
-internal static fuzzResponse /*resp*/ fuzzᴍ(ж<workerServer> Ꮡws, context.Context ctx, fuzzArgs args) {
+[GoMethodBody("fuzz")] internal static fuzzResponse /*resp*/ fuzzᴍ(ж<workerServer> Ꮡws, context.Context ctx, fuzzArgs args) {
     fuzzResponse resp = default;
     GoFrame ᒐ = default;
     try {
@@ -891,7 +891,7 @@ internal static fuzzResponse /*resp*/ fuzzᴍ(ж<workerServer> Ꮡws, context.Co
     ᒐdone: return resp;
 }
 
-internal static minimizeResponse /*resp*/ minimizeᴍ(ж<workerServer> Ꮡws, context.Context ctx, minimizeArgs args) {
+[GoMethodBody("minimize")] internal static minimizeResponse /*resp*/ minimizeᴍ(ж<workerServer> Ꮡws, context.Context ctx, minimizeArgs args) {
     minimizeResponse resp = default;
     GoFrame ᒐ = default;
     try {
@@ -953,7 +953,7 @@ internal static minimizeResponse /*resp*/ minimizeᴍ(ж<workerServer> Ꮡws, co
 // coverage, in fuzzFn. It uses the context to determine how long to run,
 // stopping once closed. It returns a bool indicating whether minimization was
 // successful and an error if one was found.
-internal static (bool success, error retErr) minimizeInputᴍ(ж<workerServer> Ꮡws, context.Context ctx, slice<any> vals, ж<sharedMem> Ꮡmem, minimizeArgs args) {
+[GoMethodBody("minimizeInput")] internal static (bool success, error retErr) minimizeInputᴍ(ж<workerServer> Ꮡws, context.Context ctx, slice<any> vals, ж<sharedMem> Ꮡmem, minimizeArgs args) {
     error retErr = default;
     ref var ws = ref Ꮡws.DerefOrNull();
     ref var mem = ref Ꮡmem.DerefOrNull();
@@ -1058,7 +1058,7 @@ internal static void writeToMem(slice<any> vals, ж<sharedMem> Ꮡmem) {
 
 // ping does nothing. The coordinator calls this method to ensure the worker
 // has called F.Fuzz and can communicate.
-internal static pingResponse pingᴍ(ref workerServer ws, context.Context ctx, pingArgs args) {
+[GoMethodBody("ping")] internal static pingResponse pingᴍ(ref workerServer ws, context.Context ctx, pingArgs args) {
     return new pingResponse();
 }
 
@@ -1087,7 +1087,7 @@ internal static ж<workerClient> newWorkerClient(workerComm comm, ж<mutator> m)
 // Close shuts down the connection to the RPC server (the worker process) by
 // closing fuzz_in. Close drains fuzz_out (avoiding a SIGPIPE in the worker),
 // and closes it after the worker process closes the other end.
-internal static error Closeᴍ(ж<workerClient> Ꮡwc) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<workerClient> Ꮡwc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1134,7 +1134,7 @@ internal static error errSharedMemClosed = errors.New("internal error: shared me
 
 // minimize tells the worker to call the minimize method. See
 // workerServer.minimize.
-internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) minimizeᴍ(ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, minimizeArgs argsʗp) {
+[GoMethodBody("minimize")] internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) minimizeᴍ(ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, minimizeArgs argsʗp) {
     CorpusEntry entryOut = default;
     heap<minimizeResponse>(out var Ꮡresp);
     error retErr = default;
@@ -1244,7 +1244,7 @@ internal static ref readonly @string workerServerFuzzModifiedˢᴍworkerClient =
 private static readonly @string workerServerFuzzModifiedˢᵇᴍworkerClient = "workerServer.fuzz modified input"u8;
 
 // fuzz tells the worker to call the fuzz method. See workerServer.fuzz.
-internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, error err) fuzzᴍ(ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, fuzzArgs argsʗp) {
+[GoMethodBody("fuzz")] internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, error err) fuzzᴍ(ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, fuzzArgs argsʗp) {
     CorpusEntry entryOut = default;
     heap<fuzzResponse>(out var Ꮡresp);
     bool isInternalError = default;
@@ -1328,7 +1328,7 @@ internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, 
 }
 
 // ping tells the worker to call the ping method. See workerServer.ping.
-internal static error pingᴍ(ж<workerClient> Ꮡwc, context.Context ctx) {
+[GoMethodBody("ping")] internal static error pingᴍ(ж<workerClient> Ꮡwc, context.Context ctx) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1346,7 +1346,7 @@ internal static error pingᴍ(ж<workerClient> Ꮡwc, context.Context ctx) {
 
 // callLocked sends an RPC from the coordinator to the worker process and waits
 // for the response. The callLocked may be canceled with ctx.
-internal static error /*err*/ callLockedᴍ(ref workerClient wc, context.Context ctx, call c, any resp) {
+[GoMethodBody("callLocked")] internal static error /*err*/ callLockedᴍ(ref workerClient wc, context.Context ctx, call c, any resp) {
     var enc = json.NewEncoder(new os.FileжWriter(wc.fuzzIn));
     var dec = json.NewDecoder(new contextReaderжReader(Ꮡ(new contextReader(ctx: ctx, r: new os_FileжReader(wc.fuzzOut)))));
     var errΔ1 = enc.Encode(c); if (errΔ1 != nil) {
@@ -1372,7 +1372,7 @@ partial struct contextReader {
 
 } partial class fuzz_package {
 
-internal static partial (nint, error) Readᴍ(ж<contextReader> Ꮡcr, slice<byte> b) {
+[GoMethodBody("Read")] internal static partial (nint, error) Readᴍ(ж<contextReader> Ꮡcr, slice<byte> b) {
     ref var cr = ref Ꮡcr.DerefOrNull();
 
     var ctxErr = cr.ctx.Err(); if (ctxErr != nil) {
@@ -1404,32 +1404,3 @@ internal static partial (nint, error) Readᴍ(ж<contextReader> Ꮡcr, slice<byt
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class fuzzᴛworker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error cleanup(this ref worker w) => fuzz_package.cleanupᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error coordinate(this ж<worker> Ꮡw, context.Context ctx) => fuzz_package.coordinateᴍ(Ꮡw, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fuzzResult min, error err) minimize(this ж<worker> Ꮡw, context.Context ctx, fuzzMinimizeInput input) => fuzz_package.minimizeᴍ(Ꮡw, ctx, input);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isRunning(this ref worker w) => fuzz_package.isRunningᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error startAndPing(this ж<worker> Ꮡw, context.Context ctx) => fuzz_package.startAndPingᴍ(Ꮡw, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ start(this ж<worker> Ꮡw) => fuzz_package.startᴍ(Ꮡw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error stop(this ж<worker> Ꮡw) => fuzz_package.stopᴍ(Ꮡw);
-}
-partial class fuzzᴛworkerServer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error serve(this ж<workerServer> Ꮡws, context.Context ctx) => fuzz_package.serveᴍ(Ꮡws, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.Context ctx, fuzzArgs args) => fuzz_package.fuzzᴍ(Ꮡws, ctx, args);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static minimizeResponse /*resp*/ minimize(this ж<workerServer> Ꮡws, context.Context ctx, minimizeArgs args) => fuzz_package.minimizeᴍ(Ꮡws, ctx, args);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool success, error retErr) minimizeInput(this ж<workerServer> Ꮡws, context.Context ctx, slice<any> vals, ж<sharedMem> Ꮡmem, minimizeArgs args) => fuzz_package.minimizeInputᴍ(Ꮡws, ctx, vals, Ꮡmem, args);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static pingResponse ping(this ref workerServer ws, context.Context ctx, pingArgs args) => fuzz_package.pingᴍ(ref ws, ctx, args);
-}
-partial class fuzzᴛworkerClient {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<workerClient> Ꮡwc) => fuzz_package.Closeᴍ(Ꮡwc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) minimize(this ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, minimizeArgs argsʗp) => fuzz_package.minimizeᴍ(Ꮡwc, ctx, entryIn, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, error err) fuzz(this ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, fuzzArgs argsʗp) => fuzz_package.fuzzᴍ(Ꮡwc, ctx, entryIn, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ping(this ж<workerClient> Ꮡwc, context.Context ctx) => fuzz_package.pingᴍ(Ꮡwc, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ callLocked(this ref workerClient wc, context.Context ctx, call c, any resp) => fuzz_package.callLockedᴍ(ref wc, ctx, c, resp);
-}
-partial class fuzzᴛcontextReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ж<contextReader> Ꮡcr, slice<byte> b) => fuzz_package.Readᴍ(Ꮡcr, b);
-}
-// </GlyphForwarders>

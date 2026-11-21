@@ -22,7 +22,7 @@ internal static array<uint8> _jsCtx_index = new uint8[]{0, 11, 21, 33}.array();
 
 } partial class template_package {
 
-internal static @string Stringᴍ(jsCtx i) {
+[GoMethodBody("String")] internal static @string Stringᴍ(jsCtx i) {
     if (i >= ((jsCtx)(uint8)(len(_jsCtx_index) - 1))) {
         return "jsCtx("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -30,9 +30,3 @@ internal static @string Stringᴍ(jsCtx i) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class templateᴛjsCtx {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this jsCtx i) => template_package.Stringᴍ(i);
-}
-// </GlyphForwarders>

@@ -63,6 +63,18 @@ using static go.crypto.@internal.rand_package;
 
 namespace go.crypto.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using Δboring = go.crypto.@internal.boring_package;
+using drbg = go.crypto.@internal.fips140.drbg_package;
+using randutil = go.crypto.@internal.randutil_package;
+using godebug = go.@internal.godebug_package;
+using io = io_package;
+using go.@internal;
+using go.crypto.@internal;
+using go.crypto.@internal.fips140;
+using static rand_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("rand")]
 public static partial class rand_package
 {
@@ -100,3 +112,9 @@ public static partial class rand_package
 // <MethodHolders>
 [GoMethodHost(typeof(rand_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class randᴛreader;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class randᴛreader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this reader r, slice<byte> b) => rand_package.Readᴍ(r, b);
+}
+// </GlyphForwarders>

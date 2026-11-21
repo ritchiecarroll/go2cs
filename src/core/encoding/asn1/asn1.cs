@@ -46,7 +46,7 @@ partial struct StructuralError {
 
 } partial class asn1_package {
 
-internal static @string Errorᴍ(StructuralError e) { return "asn1: structure error: "u8 + e.Msg; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(StructuralError e) { return "asn1: structure error: "u8 + e.Msg; }
 
 } partial class asn1_package {
 
@@ -57,7 +57,7 @@ partial struct SyntaxError {
 
 } partial class asn1_package {
 
-internal static @string Errorᴍ(SyntaxError e) { return "asn1: syntax error: "u8 + e.Msg; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(SyntaxError e) { return "asn1: syntax error: "u8 + e.Msg; }
 
 } partial class asn1_package {
 
@@ -189,7 +189,7 @@ partial struct BitString {
 
 // At returns the bit at the given index. If the index is out of range it
 // returns 0.
-internal static nint Atᴍ(BitString b, nint i) {
+[GoMethodBody("At")] internal static nint Atᴍ(BitString b, nint i) {
     if (i < 0 || i >= b.BitLength) {
         return 0;
     }
@@ -200,7 +200,7 @@ internal static nint Atᴍ(BitString b, nint i) {
 
 // RightAlign returns a slice where the padding bits are at the beginning. The
 // slice may share memory with the BitString.
-internal static slice<byte> RightAlignᴍ(BitString b) {
+[GoMethodBody("RightAlign")] internal static slice<byte> RightAlignᴍ(BitString b) {
     nuint shift = (nuint)(8 - (b.BitLength % 8));
     if (shift == 8 || len(b.Bytes) == 0) {
         return b.Bytes;
@@ -255,11 +255,11 @@ partial struct ObjectIdentifier /*[]nint*/;
 } partial class asn1_package {
 
 // Equal reports whether oi and other represent the same identifier.
-internal static bool Equalᴍ(ObjectIdentifier oi, ObjectIdentifier other) {
+[GoMethodBody("Equal")] internal static bool Equalᴍ(ObjectIdentifier oi, ObjectIdentifier other) {
     return slices.Equal<ObjectIdentifier, nint>(oi, other);
 }
 
-internal static @string Stringᴍ(ObjectIdentifier oi) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ObjectIdentifier oi) {
     ref var s = ref heap(new strings.Builder(), out var Ꮡs);
     Ꮡs.Grow(32);
 
@@ -1282,7 +1282,7 @@ partial struct invalidUnmarshalError {
 internal static ref readonly @string asn1UnmarshalRecipientˢᴍinvalidUnmarshalError => ref asn1UnmarshalRecipientˢᵇᴍinvalidUnmarshalError;
 private static readonly @string asn1UnmarshalRecipientˢᵇᴍinvalidUnmarshalError = "asn1: Unmarshal recipient value is nil"u8;
 
-internal static @string Errorᴍ(ref invalidUnmarshalError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref invalidUnmarshalError e) {
     if (e.Type == nil) {
         return asn1UnmarshalRecipientˢᴍinvalidUnmarshalError;
     }
@@ -1312,23 +1312,3 @@ public static (slice<byte> rest, error err) UnmarshalWithParams(slice<byte> b, a
 }
 
 } // end asn1_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class asn1ᴛStructuralError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this StructuralError e) => asn1_package.Errorᴍ(e);
-}
-partial class asn1ᴛSyntaxError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this SyntaxError e) => asn1_package.Errorᴍ(e);
-}
-partial class asn1ᴛBitString {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint At(this BitString b, nint i) => asn1_package.Atᴍ(b, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> RightAlign(this BitString b) => asn1_package.RightAlignᴍ(b);
-}
-partial class asn1ᴛObjectIdentifier {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ObjectIdentifier oi, ObjectIdentifier other) => asn1_package.Equalᴍ(oi, other);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ObjectIdentifier oi) => asn1_package.Stringᴍ(oi);
-}
-partial class asn1ᴛinvalidUnmarshalError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref invalidUnmarshalError e) => asn1_package.Errorᴍ(ref e);
-}
-// </GlyphForwarders>

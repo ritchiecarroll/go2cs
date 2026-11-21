@@ -41,15 +41,15 @@ partial struct handler {
 
 } partial class signal_package {
 
-internal static bool wantᴍ(ref handler h, nint sig) {
+[GoMethodBody("want")] internal static bool wantᴍ(ref handler h, nint sig) {
     return ((h.mask[sig / 32].Rsh((nuint)(sig & 31))) & 1) != 0;
 }
 
-internal static void setᴍ(ref handler h, nint sig) {
+[GoMethodBody("set")] internal static void setᴍ(ref handler h, nint sig) {
     h.mask[sig / 32] |= (uint32)(((uint32)1).Lsh((nuint)(sig & 31)));
 }
 
-internal static void clearᴍ(ref handler h, nint sig) {
+[GoMethodBody("clear")] internal static void clearᴍ(ref handler h, nint sig) {
     h.mask[sig / 32] &= unchecked((uint32)~(uint32)(((uint32)1).Lsh((nuint)(sig & 31))));
 }
 
@@ -357,7 +357,7 @@ partial struct signalCtx {
 
 } partial class signal_package {
 
-internal static void stopᴍ(ref signalCtx c) {
+[GoMethodBody("stop")] internal static void stopᴍ(ref signalCtx c) {
     c.cancel(default);
     Stop(c.ch.AsSendOnly());
 }
@@ -370,7 +370,7 @@ partial interface stringer {
 
 } partial class signal_package {
 
-internal static @string Stringᴍ(ref signalCtx c) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref signalCtx c) {
     var bufᴷ = new stackAppend<byte>();
 
     slice<byte> buf = default;
@@ -399,11 +399,11 @@ partial struct signalError /*@string*/;
 
 } partial class signal_package {
 
-internal static @string Errorᴍ(signalError s) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(signalError s) {
     return (@string)s;
 }
 
-internal static bool Isᴍ(signalError s, error target) {
+[GoMethodBody("Is")] internal static bool Isᴍ(signalError s, error target) {
     if (AreEqual(target, context.Canceled)) {
         return true;
     }
@@ -411,19 +411,3 @@ internal static bool Isᴍ(signalError s, error target) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class signalᴛhandler {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool want(this ref handler h, nint sig) => signal_package.wantᴍ(ref h, sig);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this ref handler h, nint sig) => signal_package.setᴍ(ref h, sig);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clear(this ref handler h, nint sig) => signal_package.clearᴍ(ref h, sig);
-}
-partial class signalᴛsignalCtx {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stop(this ref signalCtx c) => signal_package.stopᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref signalCtx c) => signal_package.Stringᴍ(ref c);
-}
-partial class signalᴛsignalError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this signalError s) => signal_package.Errorᴍ(s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Is(this signalError s, error target) => signal_package.Isᴍ(s, target);
-}
-// </GlyphForwarders>

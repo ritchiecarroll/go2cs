@@ -27,7 +27,7 @@ internal static UntypedInt p384ElementLen => 48;
 } partial class fiat_package {
 
 // One sets e = 1, and returns e.
-internal static ж<P384Element> Oneᴍ(ж<P384Element> Ꮡe) {
+[GoMethodBody("One")] internal static ж<P384Element> Oneᴍ(ж<P384Element> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     p384SetOne(ref nonnil(ref e).x);
@@ -35,21 +35,21 @@ internal static ж<P384Element> Oneᴍ(ж<P384Element> Ꮡe) {
 }
 
 // Equal returns 1 if e == t, and zero otherwise.
-internal static nint Equalᴍ(ж<P384Element> Ꮡe, ж<P384Element> t) {
+[GoMethodBody("Equal")] internal static nint Equalᴍ(ж<P384Element> Ꮡe, ж<P384Element> t) {
     var eBytes = Ꮡe.Bytes();
     var tBytes = t.Bytes();
     return subtle.ConstantTimeCompare(eBytes, tBytes);
 }
 
 // IsZero returns 1 if e == 0, and zero otherwise.
-internal static nint IsZeroᴍ(ж<P384Element> Ꮡe) {
+[GoMethodBody("IsZero")] internal static nint IsZeroᴍ(ж<P384Element> Ꮡe) {
     var zero = new slice<byte>(p384ElementLen);
     var eBytes = Ꮡe.Bytes();
     return subtle.ConstantTimeCompare(eBytes, zero);
 }
 
 // Set sets e = t, and returns e.
-internal static ж<P384Element> Setᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt) {
+[GoMethodBody("Set")] internal static ж<P384Element> Setᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -58,14 +58,14 @@ internal static ж<P384Element> Setᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡ
 }
 
 // Bytes returns the 48-byte big-endian encoding of e.
-internal static slice<byte> Bytesᴍ(ж<P384Element> Ꮡe) {
+[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ж<P384Element> Ꮡe) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(48), out var Ꮡout);
     return Ꮡe.bytes(Ꮡout);
 }
 
-internal static slice<byte> bytesᴍ(ж<P384Element> Ꮡe, /*[48]*/ ж<array<byte>> Ꮡout) {
+[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ж<P384Element> Ꮡe, /*[48]*/ ж<array<byte>> Ꮡout) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -84,7 +84,7 @@ private static readonly @string invalidP384ElementˢᵇᴍP384Element = "invalid
 // SetBytes sets e = v, where v is a big-endian 48-byte encoding, and returns e.
 // If v is not 48 bytes or it encodes a value higher than 2^384 - 2^128 - 2^96 + 2^32 - 1,
 // SetBytes returns nil and an error, and e is unchanged.
-internal static (ж<P384Element>, error) SetBytesᴍ(ж<P384Element> Ꮡe, slice<byte> v) {
+[GoMethodBody("SetBytes")] internal static (ж<P384Element>, error) SetBytesᴍ(ж<P384Element> Ꮡe, slice<byte> v) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (len(v) != p384ElementLen) {
@@ -110,7 +110,7 @@ internal static (ж<P384Element>, error) SetBytesᴍ(ж<P384Element> Ꮡe, slice
 }
 
 // Add sets e = t1 + t2, and returns e.
-internal static ж<P384Element> Addᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
+[GoMethodBody("Add")] internal static ж<P384Element> Addᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -120,7 +120,7 @@ internal static ж<P384Element> Addᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡ
 }
 
 // Sub sets e = t1 - t2, and returns e.
-internal static ж<P384Element> Subᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
+[GoMethodBody("Sub")] internal static ж<P384Element> Subᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -130,7 +130,7 @@ internal static ж<P384Element> Subᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡ
 }
 
 // Mul sets e = t1 * t2, and returns e.
-internal static ж<P384Element> Mulᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
+[GoMethodBody("Mul")] internal static ж<P384Element> Mulᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -140,7 +140,7 @@ internal static ж<P384Element> Mulᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡ
 }
 
 // Square sets e = t * t, and returns e.
-internal static ж<P384Element> Squareᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt) {
+[GoMethodBody("Square")] internal static ж<P384Element> Squareᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -149,7 +149,7 @@ internal static ж<P384Element> Squareᴍ(ж<P384Element> Ꮡe, ж<P384Element> 
 }
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
-internal static ж<P384Element> Selectᴍ(ж<P384Element> Ꮡv, ж<P384Element> Ꮡa, ж<P384Element> Ꮡb, nint cond) {
+[GoMethodBody("Select")] internal static ж<P384Element> Selectᴍ(ж<P384Element> Ꮡv, ж<P384Element> Ꮡa, ж<P384Element> Ꮡb, nint cond) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -173,20 +173,3 @@ internal static void p384InvertEndianness(slice<byte> v) {
 }
 
 } // end fiat_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class fiatᴛP384Element {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P384Element> One(this ж<P384Element> Ꮡe) => fiat_package.Oneᴍ(Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Equal(this ж<P384Element> Ꮡe, ж<P384Element> t) => fiat_package.Equalᴍ(Ꮡe, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint IsZero(this ж<P384Element> Ꮡe) => fiat_package.IsZeroᴍ(Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P384Element> Set(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡt) => fiat_package.Setᴍ(Ꮡe, Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ж<P384Element> Ꮡe) => fiat_package.Bytesᴍ(Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytes(this ж<P384Element> Ꮡe, /*[48]*/ ж<array<byte>> Ꮡout) => fiat_package.bytesᴍ(Ꮡe, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<P384Element>, error) SetBytes(this ж<P384Element> Ꮡe, slice<byte> v) => fiat_package.SetBytesᴍ(Ꮡe, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P384Element> Add(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) => fiat_package.Addᴍ(Ꮡe, Ꮡt1, Ꮡt2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P384Element> Sub(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) => fiat_package.Subᴍ(Ꮡe, Ꮡt1, Ꮡt2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P384Element> Mul(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) => fiat_package.Mulᴍ(Ꮡe, Ꮡt1, Ꮡt2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P384Element> Square(this ж<P384Element> Ꮡe, ж<P384Element> Ꮡt) => fiat_package.Squareᴍ(Ꮡe, Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<P384Element> Select(this ж<P384Element> Ꮡv, ж<P384Element> Ꮡa, ж<P384Element> Ꮡb, nint cond) => fiat_package.Selectᴍ(Ꮡv, Ꮡa, Ꮡb, cond);
-}
-// </GlyphForwarders>

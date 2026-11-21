@@ -25,7 +25,7 @@ partial struct pageCache {
 } partial class runtime_package {
 
 // empty reports whether the page cache has no free pages.
-internal static bool emptyᴍ(ref pageCache c) {
+[GoMethodBody("empty")] internal static bool emptyᴍ(ref pageCache c) {
     return c.cache == 0;
 }
 
@@ -37,7 +37,7 @@ internal static bool emptyᴍ(ref pageCache c) {
 //
 // Returns a base address of zero on failure, in which case the
 // amount of scavenged memory should be ignored.
-internal static (uintptr, uintptr) allocᴍ(ref pageCache c, uintptr npages) {
+[GoMethodBody("alloc")] internal static (uintptr, uintptr) allocᴍ(ref pageCache c, uintptr npages) {
     if (c.cache == 0) {
         return (0, 0);
     }
@@ -57,7 +57,7 @@ internal static (uintptr, uintptr) allocᴍ(ref pageCache c, uintptr npages) {
 //
 // Returns a base address and the amount of scavenged memory in the
 // allocated region in bytes.
-internal static (uintptr, uintptr) allocNᴍ(ref pageCache c, uintptr npages) {
+[GoMethodBody("allocN")] internal static (uintptr, uintptr) allocNᴍ(ref pageCache c, uintptr npages) {
     nuint i = findBitRange64(c.cache, (nuint)npages);
     if (i >= 64) {
         return (0, 0);
@@ -78,7 +78,7 @@ internal static (uintptr, uintptr) allocNᴍ(ref pageCache c, uintptr npages) {
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-internal static void flushᴍ(ref pageCache c, ж<pageAlloc> Ꮡp) {
+[GoMethodBody("flush")] internal static void flushᴍ(ref pageCache c, ж<pageAlloc> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     assertLockHeld(p.mheapLock);
@@ -123,7 +123,7 @@ internal static void flushᴍ(ref pageCache c, ж<pageAlloc> Ꮡp) {
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-internal static pageCache allocToCacheᴍ(ref pageAlloc p) {
+[GoMethodBody("allocToCache")] internal static pageCache allocToCacheᴍ(ref pageAlloc p) {
     assertLockHeld(p.mheapLock);
 
     // If the searchAddr refers to a region which has a higher address than
@@ -190,15 +190,3 @@ internal static pageCache allocToCacheᴍ(ref pageAlloc p) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛpageCache {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ref pageCache c) => runtime_package.emptyᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uintptr, uintptr) alloc(this ref pageCache c, uintptr npages) => runtime_package.allocᴍ(ref c, npages);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uintptr, uintptr) allocN(this ref pageCache c, uintptr npages) => runtime_package.allocNᴍ(ref c, npages);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void flush(this ref pageCache c, ж<pageAlloc> Ꮡp) => runtime_package.flushᴍ(ref c, Ꮡp);
-}
-partial class runtimeᴛpageAlloc {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static pageCache allocToCache(this ref pageAlloc p) => runtime_package.allocToCacheᴍ(ref p);
-}
-// </GlyphForwarders>

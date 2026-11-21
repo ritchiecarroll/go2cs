@@ -85,7 +85,7 @@ partial struct Timer {
 // Before Go 1.23, the only safe way to use Stop was insert an extra
 // <-t.C if Stop returned false to drain a potential stale value.
 // See the [NewTimer] documentation for more details.
-internal static bool Stopᴍ(ж<Timer> Ꮡt) {
+[GoMethodBody("Stop")] internal static bool Stopᴍ(ж<Timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!t.initTimer) {
@@ -149,7 +149,7 @@ public static ж<Timer> NewTimer(Duration d) {
 // Before Go 1.23, the only safe way to use Reset was to call [Timer.Stop]
 // and explicitly drain the timer first.
 // See the [NewTimer] documentation for more details.
-internal static bool Resetᴍ(ж<Timer> Ꮡt, Duration d) {
+[GoMethodBody("Reset")] internal static bool Resetᴍ(ж<Timer> Ꮡt, Duration d) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!t.initTimer) {
@@ -205,10 +205,3 @@ internal static partial void goFunc(any arg, uintptr seq, int64 delta) {
 }
 
 } // end time_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class timeᴛTimer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Stop(this ж<Timer> Ꮡt) => time_package.Stopᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Reset(this ж<Timer> Ꮡt, Duration d) => time_package.Resetᴍ(Ꮡt, d);
-}
-// </GlyphForwarders>

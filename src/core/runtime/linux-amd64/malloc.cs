@@ -811,7 +811,7 @@ private static readonly @string outOfMemoryAllocatingˢ3ᵇᴍmheap = "out of me
 // arenaList is the list the arena should be added to.
 //
 // h must be locked.
-internal static (@unsafe.Pointer v, uintptr size) sysAllocᴍ(ж<mheap> Ꮡh, uintptr n, ж<ж<arenaHint>> ᏑhintList, ж<slice<arenaIdx>> ᏑarenaList) {
+[GoMethodBody("sysAlloc")] internal static (@unsafe.Pointer v, uintptr size) sysAllocᴍ(ж<mheap> Ꮡh, uintptr n, ж<ж<arenaHint>> ᏑhintList, ж<slice<arenaIdx>> ᏑarenaList) {
     @unsafe.Pointer v = default;
     uintptr size = default;
     ref var h = ref Ꮡh.DerefOrNull();
@@ -1013,7 +1013,7 @@ mapped:
 // Must be called on the system stack because it acquires the heap lock.
 //
 //go:systemstack
-internal static void enableMetadataHugePagesᴍ(ж<mheap> Ꮡh) {
+[GoMethodBody("enableMetadataHugePages")] internal static void enableMetadataHugePagesᴍ(ж<mheap> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     // Enable huge pages for page structure.
@@ -1088,7 +1088,7 @@ private static readonly @string sAllocCountSNelemsˢ2ᵇᴍmcache = "s.allocCoun
 //
 // Must run in a non-preemptible context since otherwise the owner of
 // c could change.
-internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFreeᴍ(ref mcache c, spanClass spc) {
+[GoMethodBody("nextFree")] internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFreeᴍ(ref mcache c, spanClass spc) {
     gclinkptr v = default;
     ж<mspan> s = default;
     bool checkGCTrigger = default;
@@ -2201,7 +2201,7 @@ private static readonly @string nextReusableNoScanNilˢᵇᴍmcache = "nextReusa
 
 // nextReusableNoScan returns the next reusable object for a noscan span,
 // or 0 if no reusable object is found.
-internal static (gclinkptr, ж<mspan>) nextReusableNoScanᴍ(ref mcache c, ж<mspan> Ꮡs, spanClass spc) {
+[GoMethodBody("nextReusableNoScan")] internal static (gclinkptr, ж<mspan>) nextReusableNoScanᴍ(ref mcache c, ж<mspan> Ꮡs, spanClass spc) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (!runtimeFreegcEnabled) {
@@ -2543,7 +2543,7 @@ partial struct linearAlloc {
 
 } partial class runtime_package {
 
-internal static void initᴍ(ref linearAlloc l, uintptr @base, uintptr size, bool mapMemory) {
+[GoMethodBody("init")] internal static void initᴍ(ref linearAlloc l, uintptr @base, uintptr size, bool mapMemory) {
     if (@base + size < @base) {
         // Chop off the last byte. The runtime isn't prepared
         // to deal with situations where the bounds could overflow.
@@ -2556,7 +2556,7 @@ internal static void initᴍ(ref linearAlloc l, uintptr @base, uintptr size, boo
     l.mapMemory = mapMemory;
 }
 
-internal static @unsafe.Pointer allocᴍ(ref linearAlloc l, uintptr size, uintptr align, ж<sysMemStat> sysStat, @string vmaName) {
+[GoMethodBody("alloc")] internal static @unsafe.Pointer allocᴍ(ref linearAlloc l, uintptr size, uintptr align, ж<sysMemStat> sysStat, @string vmaName) {
     var p = alignUp(l.next, align);
     if (p + size > l.end) {
         return default;
@@ -2590,7 +2590,7 @@ partial struct notInHeap {
 
 } partial class runtime_package {
 
-internal static ж<notInHeap> addᴍ(ж<notInHeap> Ꮡp, uintptr bytes) {
+[GoMethodBody("add")] internal static ж<notInHeap> addᴍ(ж<notInHeap> Ꮡp, uintptr bytes) {
     return @unsafe.Pointer.To<notInHeap>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡp), bytes));
 }
 
@@ -2627,21 +2627,3 @@ internal static uintptr redZoneSize(uintptr userSize) {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛmheap {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, uintptr n, ж<ж<arenaHint>> ᏑhintList, ж<slice<arenaIdx>> ᏑarenaList) => runtime_package.sysAllocᴍ(Ꮡh, n, ᏑhintList, ᏑarenaList);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void enableMetadataHugePages(this ж<mheap> Ꮡh) => runtime_package.enableMetadataHugePagesᴍ(Ꮡh);
-}
-partial class runtimeᴛmcache {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFree(this ref mcache c, spanClass spc) => runtime_package.nextFreeᴍ(ref c, spc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (gclinkptr, ж<mspan>) nextReusableNoScan(this ref mcache c, ж<mspan> Ꮡs, spanClass spc) => runtime_package.nextReusableNoScanᴍ(ref c, Ꮡs, spc);
-}
-partial class runtimeᴛlinearAlloc {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref linearAlloc l, uintptr @base, uintptr size, bool mapMemory) => runtime_package.initᴍ(ref l, @base, size, mapMemory);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer alloc(this ref linearAlloc l, uintptr size, uintptr align, ж<sysMemStat> sysStat, @string vmaName) => runtime_package.allocᴍ(ref l, size, align, sysStat, vmaName);
-}
-partial class runtimeᴛnotInHeap {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<notInHeap> add(this ж<notInHeap> Ꮡp, uintptr bytes) => runtime_package.addᴍ(Ꮡp, bytes);
-}
-// </GlyphForwarders>

@@ -11,7 +11,7 @@ partial class http_package {
 
 } partial class http_package {
 
-internal static bool Asᴍ(http2StreamError e, any target) {
+[GoMethodBody("As")] internal static bool Asᴍ(http2StreamError e, any target) {
     var dst = reflect.ValueOf(target).Elem();
     var dstType = dst.Type();
     if (dstType.Kind() != reflect.Struct) {
@@ -38,9 +38,3 @@ internal static bool Asᴍ(http2StreamError e, any target) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httpᴛhttp2StreamError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool As(this http2StreamError e, any target) => http_package.Asᴍ(e, target);
-}
-// </GlyphForwarders>

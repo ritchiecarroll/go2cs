@@ -253,7 +253,7 @@ partial struct UnsupportedTypeError {
 
 } partial class json_package {
 
-internal static @string Errorᴍ(ref UnsupportedTypeError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref UnsupportedTypeError e) {
     return "json: unsupported type: "u8 + e.Type.String();
 }
 
@@ -268,7 +268,7 @@ partial struct UnsupportedValueError {
 
 } partial class json_package {
 
-internal static @string Errorᴍ(ref UnsupportedValueError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref UnsupportedValueError e) {
     return "json: unsupported value: "u8 + e.Str;
 }
 
@@ -286,7 +286,7 @@ partial struct InvalidUTF8Error {
 
 } partial class json_package {
 
-internal static @string Errorᴍ(ref InvalidUTF8Error e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref InvalidUTF8Error e) {
     return "json: invalid UTF-8 in string: "u8 + strconv.Quote(e.S);
 }
 
@@ -306,7 +306,7 @@ partial struct MarshalerError {
 internal static ref readonly @string marshalJSONˢᴍMarshalerError => ref marshalJSONˢᵇᴍMarshalerError;
 private static readonly @string marshalJSONˢᵇᴍMarshalerError = "MarshalJSON"u8;
 
-internal static @string Errorᴍ(ref MarshalerError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref MarshalerError e) {
     @string srcFunc = e.sourceFunc;
     if (srcFunc == ""u8) {
         srcFunc = marshalJSONˢᴍMarshalerError;
@@ -315,7 +315,7 @@ internal static @string Errorᴍ(ref MarshalerError e) {
 }
 
 // Unwrap returns the underlying error.
-internal static error Unwrapᴍ(ref MarshalerError e) { return e.Err; }
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref MarshalerError e) { return e.Err; }
 
 } partial class json_package {
 
@@ -361,7 +361,7 @@ partial struct jsonError {
 
 } partial class json_package {
 
-internal static error /*err*/ marshalᴍ(ж<encodeState> Ꮡe, any v, encOpts opts) {
+[GoMethodBody("marshal")] internal static error /*err*/ marshalᴍ(ж<encodeState> Ꮡe, any v, encOpts opts) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -384,7 +384,7 @@ internal static error /*err*/ marshalᴍ(ж<encodeState> Ꮡe, any v, encOpts op
 }
 
 // error aborts the encoding by panicking with err wrapped in jsonError.
-internal static void errorᴍ(ref encodeState e, error err) {
+[GoMethodBody("error")] internal static void errorᴍ(ref encodeState e, error err) {
     throw panic(new jsonError(err));
 }
 
@@ -403,7 +403,7 @@ internal static bool isEmptyValue(reflect.Value v) {
 
 } partial class json_package {
 
-internal static void reflectValueᴍ(ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
+[GoMethodBody("reflectValue")] internal static void reflectValueᴍ(ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     valueEncoder(v)(Ꮡe, v, opts);
 }
 
@@ -634,7 +634,7 @@ partial struct floatEncoder /*num:nint*/; // number of bits
 
 } partial class json_package {
 
-internal static void encodeᴍ(floatEncoder bits, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
+[GoMethodBody("encode")] internal static void encodeᴍ(floatEncoder bits, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     var f = v.Float();
@@ -790,7 +790,7 @@ partial struct structFields {
 
 } partial class json_package {
 
-internal static void encodeᴍ(structEncoder se, ж<encodeState> e, reflect.Value v, encOpts opts) {
+[GoMethodBody("encode")] internal static void encodeᴍ(structEncoder se, ж<encodeState> e, reflect.Value v, encOpts opts) {
     var next = (byte)'{';
 FieldLoop:
     foreach (var i in range(len(se.fields.list))) {
@@ -848,7 +848,7 @@ partial struct mapEncoder {
 internal static ref readonly @string nullˢᴍmapEncoder => ref nullˢᵇᴍmapEncoder;
 private static readonly @string nullˢᵇᴍmapEncoder = "null"u8;
 
-internal static void encodeᴍ(mapEncoder me, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
+[GoMethodBody("encode")] internal static void encodeᴍ(mapEncoder me, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     GoFrame ᒐ = default;
     try {
         ref var e = ref Ꮡe.DerefOrNull();
@@ -948,7 +948,7 @@ internal partial struct encode_ptr /*dyn*/ {
 internal static ref readonly @string nullˢᴍsliceEncoder => ref nullˢᵇᴍsliceEncoder;
 private static readonly @string nullˢᵇᴍsliceEncoder = "null"u8;
 
-internal static void encodeᴍ(sliceEncoder se, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
+[GoMethodBody("encode")] internal static void encodeᴍ(sliceEncoder se, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     GoFrame ᒐ = default;
     try {
         ref var e = ref Ꮡe.DerefOrNull();
@@ -999,7 +999,7 @@ partial struct arrayEncoder {
 
 } partial class json_package {
 
-internal static void encodeᴍ(arrayEncoder ae, ж<encodeState> e, reflect.Value v, encOpts opts) {
+[GoMethodBody("encode")] internal static void encodeᴍ(arrayEncoder ae, ж<encodeState> e, reflect.Value v, encOpts opts) {
     e.of(encodeState.ᏑBuffer).WriteByte((byte)'[');
     nint n = v.Len();
     for (nint i = 0; i < n; i++) {
@@ -1029,7 +1029,7 @@ partial struct ptrEncoder {
 internal static ref readonly @string nullˢᴍptrEncoder => ref nullˢᵇᴍptrEncoder;
 private static readonly @string nullˢᵇᴍptrEncoder = "null"u8;
 
-internal static void encodeᴍ(ptrEncoder pe, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
+[GoMethodBody("encode")] internal static void encodeᴍ(ptrEncoder pe, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) {
     GoFrame ᒐ = default;
     try {
         ref var e = ref Ꮡe.DerefOrNull();
@@ -1071,7 +1071,7 @@ partial struct condAddrEncoder {
 
 } partial class json_package {
 
-internal static void encodeᴍ(condAddrEncoder ce, ж<encodeState> e, reflect.Value v, encOpts opts) {
+[GoMethodBody("encode")] internal static void encodeᴍ(condAddrEncoder ce, ж<encodeState> e, reflect.Value v, encOpts opts) {
     if (v.CanAddr()) {
         ce.canAddrEnc(e, v, opts);
     } else {
@@ -1519,45 +1519,3 @@ internal static slice<byte> mayAppendQuote(slice<byte> b, bool quoted) {
 }
 
 } // end json_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class jsonᴛUnsupportedTypeError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref UnsupportedTypeError e) => json_package.Errorᴍ(ref e);
-}
-partial class jsonᴛUnsupportedValueError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref UnsupportedValueError e) => json_package.Errorᴍ(ref e);
-}
-partial class jsonᴛInvalidUTF8Error {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref InvalidUTF8Error e) => json_package.Errorᴍ(ref e);
-}
-partial class jsonᴛMarshalerError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref MarshalerError e) => json_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref MarshalerError e) => json_package.Unwrapᴍ(ref e);
-}
-partial class jsonᴛencodeState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ marshal(this ж<encodeState> Ꮡe, any v, encOpts opts) => json_package.marshalᴍ(Ꮡe, v, opts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void error(this ref encodeState e, error err) => json_package.errorᴍ(ref e, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reflectValue(this ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.reflectValueᴍ(Ꮡe, v, opts);
-}
-partial class jsonᴛfloatEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this floatEncoder bits, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.encodeᴍ(bits, Ꮡe, v, opts);
-}
-partial class jsonᴛstructEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this structEncoder se, ж<encodeState> e, reflect.Value v, encOpts opts) => json_package.encodeᴍ(se, e, v, opts);
-}
-partial class jsonᴛmapEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.encodeᴍ(me, Ꮡe, v, opts);
-}
-partial class jsonᴛsliceEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this sliceEncoder se, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.encodeᴍ(se, Ꮡe, v, opts);
-}
-partial class jsonᴛarrayEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this arrayEncoder ae, ж<encodeState> e, reflect.Value v, encOpts opts) => json_package.encodeᴍ(ae, e, v, opts);
-}
-partial class jsonᴛptrEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this ptrEncoder pe, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.encodeᴍ(pe, Ꮡe, v, opts);
-}
-partial class jsonᴛcondAddrEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this condAddrEncoder ce, ж<encodeState> e, reflect.Value v, encOpts opts) => json_package.encodeᴍ(ce, e, v, opts);
-}
-// </GlyphForwarders>

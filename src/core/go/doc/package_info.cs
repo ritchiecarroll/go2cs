@@ -105,6 +105,27 @@ using static go.go.doc_package;
 
 namespace go.go;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using fmt = fmt_package;
+using ast = global::go.go.ast_package;
+using comment = global::go.go.doc.comment_package;
+using token = global::go.go.token_package;
+using strings = strings_package;
+using global::go.go;
+using global::go.go.doc;
+using ꓸꓸꓸany = Span<any>;
+using static doc_package;
+using cmp = cmp_package;
+using lazyregexp = global::go.@internal.lazyregexp_package;
+using path = path_package;
+using slices = slices_package;
+using strconv = strconv_package;
+using unicode = unicode_package;
+using utf8 = global::go.unicode.utf8_package;
+using global::go.@internal;
+using global::go.unicode;
+// </GlyphForwarderUsings>
+
 [GoPackage("doc")]
 public static partial class doc_package
 {
@@ -161,3 +182,57 @@ public static partial class doc_package
 [GoMethodHost(typeof(doc_package.methodSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class docᴛmethodSet;
 [GoMethodHost(typeof(doc_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class docᴛreader;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class docᴛPackage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void collectValues(this ref Package p, slice<ж<Value>> values) => doc_package.collectValuesᴍ(ref p, values);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void collectTypes(this ref Package p, slice<ж<Type>> types) => doc_package.collectTypesᴍ(ref p, types);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void collectFuncs(this ref Package p, slice<ж<Func>> funcs) => doc_package.collectFuncsᴍ(ref p, funcs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void collectInterfaceMethods(this ref Package p, ж<Type> Ꮡt) => doc_package.collectInterfaceMethodsᴍ(ref p, Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void collectStructFields(this ref Package p, ж<Type> Ꮡt) => doc_package.collectStructFieldsᴍ(ref p, Ꮡt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool lookupSym(this ref Package p, @string recv, @string name) => doc_package.lookupSymᴍ(ref p, recv, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string importPath, bool ok) lookupPackage(this ref Package p, @string name) => doc_package.lookupPackageᴍ(ref p, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<comment.Parser> Parser(this ж<Package> Ꮡp) => doc_package.Parserᴍ(Ꮡp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<comment.Printer> Printer(this ref Package p) => doc_package.Printerᴍ(ref p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> HTML(this ж<Package> Ꮡp, @string text) => doc_package.HTMLᴍ(Ꮡp, text);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Markdown(this ж<Package> Ꮡp, @string text) => doc_package.Markdownᴍ(Ꮡp, text);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Text(this ж<Package> Ꮡp, @string text) => doc_package.Textᴍ(Ꮡp, text);
+}
+partial class docᴛreader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<namedType> parent, ж<ast.FieldList> Ꮡfields, ж<ast.InterfaceType> ityp) => doc_package.filterFieldListᴍ(ref r, parent, Ꮡfields, ityp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void filterParamList(this ref reader r, ж<ast.FieldList> Ꮡfields) => doc_package.filterParamListᴍ(ref r, Ꮡfields);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void filterType(this ref reader r, ж<namedType> parent, ast.Expr typ) => doc_package.filterTypeᴍ(ref r, parent, typ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool filterSpec(this ref reader r, ast.Spec spec) => doc_package.filterSpecᴍ(ref r, spec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ast.Spec> filterSpecList(this ref reader r, slice<ast.Spec> list, token.Token tok) => doc_package.filterSpecListᴍ(ref r, list, tok);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool filterDecl(this ref reader r, ast.Decl decl) => doc_package.filterDeclᴍ(ref r, decl);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fileExports(this ref reader r, ж<ast.File> Ꮡsrc) => doc_package.fileExportsᴍ(ref r, Ꮡsrc);
+}
+partial class docᴛPackage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Filter(this ref Package p, Func<@string, bool> f) => doc_package.Filterᴍ(ref p, f);
+}
+partial class docᴛmethodSet {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this methodSet mset, ж<ast.FuncDecl> Ꮡf, bool preserveAST) => doc_package.setᴍ(mset, Ꮡf, preserveAST);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this methodSet mset, ж<Func> Ꮡm) => doc_package.addᴍ(mset, Ꮡm);
+}
+partial class docᴛreader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isVisible(this ref reader r, @string name) => doc_package.isVisibleᴍ(ref r, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<namedType> lookupType(this ref reader r, @string name) => doc_package.lookupTypeᴍ(ref r, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string /*fname*/ recordAnonymousField(this ref reader r, ж<namedType> Ꮡparent, ast.Expr fieldType) => doc_package.recordAnonymousFieldᴍ(ref r, Ꮡparent, fieldType);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readDoc(this ref reader r, ж<ast.CommentGroup> comment) => doc_package.readDocᴍ(ref r, comment);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void remember(this ref reader r, @string predecl, ж<ast.InterfaceType> typ) => doc_package.rememberᴍ(ref r, predecl, typ);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readValue(this ж<reader> Ꮡr, ж<ast.GenDecl> Ꮡdecl) => doc_package.readValueᴍ(Ꮡr, Ꮡdecl);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readType(this ref reader r, ж<ast.GenDecl> Ꮡdecl, ж<ast.TypeSpec> Ꮡspec) => doc_package.readTypeᴍ(ref r, Ꮡdecl, Ꮡspec);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isPredeclared(this ref reader r, @string n) => doc_package.isPredeclaredᴍ(ref r, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readFunc(this ref reader r, ж<ast.FuncDecl> Ꮡfun) => doc_package.readFuncᴍ(ref r, Ꮡfun);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readNote(this ref reader r, slice<ж<ast.Comment>> list) => doc_package.readNoteᴍ(ref r, list);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readNotes(this ref reader r, slice<ж<ast.CommentGroup>> comments) => doc_package.readNotesᴍ(ref r, comments);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readFile(this ж<reader> Ꮡr, ж<ast.File> Ꮡsrc) => doc_package.readFileᴍ(Ꮡr, Ꮡsrc);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readPackage(this ж<reader> Ꮡr, ж<ast.Package> Ꮡpkg, Mode mode) => doc_package.readPackageᴍ(Ꮡr, Ꮡpkg, mode);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void collectEmbeddedMethods(this ref reader r, methodSet mset, ж<namedType> Ꮡtyp, @string recvTypeName, bool embeddedIsPtr, nint level, embeddedSet visited) => doc_package.collectEmbeddedMethodsᴍ(ref r, mset, Ꮡtyp, recvTypeName, embeddedIsPtr, level, visited);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void computeMethodSets(this ref reader r) => doc_package.computeMethodSetsᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cleanupTypes(this ref reader r) => doc_package.cleanupTypesᴍ(ref r);
+}
+partial class docᴛPackage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Synopsis(this ж<Package> Ꮡp, @string text) => doc_package.Synopsisᴍ(Ꮡp, text);
+}
+// </GlyphForwarders>

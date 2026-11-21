@@ -54,7 +54,7 @@ private static readonly @string overflowMsgᵇ = "too many concurrent operations
 
 // incref adds a reference to mu.
 // It reports whether mu is available for reading or writing.
-internal static bool increfᴍ(ж<fdMutex> Ꮡmu) {
+[GoMethodBody("incref")] internal static bool increfᴍ(ж<fdMutex> Ꮡmu) {
     for (;;) {
         var old = atomic.LoadUint64(Ꮡmu.Ꮡstate);
         if ((old & (uint64)mutexClosed) != 0) {
@@ -74,7 +74,7 @@ internal static bool increfᴍ(ж<fdMutex> Ꮡmu) {
 
 // decref removes a reference from mu.
 // It reports whether there is no remaining reference.
-internal static bool decrefᴍ(ж<fdMutex> Ꮡmu) {
+[GoMethodBody("decref")] internal static bool decrefᴍ(ж<fdMutex> Ꮡmu) {
     for (;;) {
         var old = atomic.LoadUint64(Ꮡmu.Ꮡstate);
         if ((old & (uint64)mutexRefMask) == 0) {
@@ -101,7 +101,7 @@ internal static partial void runtime_Semrelease(ж<uint32> sema);
 
 // incref adds a reference to fd.
 // It returns an error when fd cannot be used.
-internal static error increfᴍ(ж<FD> Ꮡfd) {
+[GoMethodBody("incref")] internal static error increfᴍ(ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (!Ꮡfd.Ꮡfdmu.incref()) {
@@ -113,7 +113,7 @@ internal static error increfᴍ(ж<FD> Ꮡfd) {
 // decref removes a reference from fd.
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
-internal static error decrefᴍ(ж<FD> Ꮡfd) {
+[GoMethodBody("decref")] internal static error decrefᴍ(ж<FD> Ꮡfd) {
     if (Ꮡfd.Ꮡfdmu.decref()) {
         return Ꮡfd.destroy();
     }
@@ -122,7 +122,7 @@ internal static error decrefᴍ(ж<FD> Ꮡfd) {
 
 // readLock adds a reference to fd and locks fd for reading.
 // It returns an error when fd cannot be used for reading.
-internal static error readLockᴍ(ж<FD> Ꮡfd) {
+[GoMethodBody("readLock")] internal static error readLockᴍ(ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (!fd.fdmu.rwlock(true)) {
@@ -134,7 +134,7 @@ internal static error readLockᴍ(ж<FD> Ꮡfd) {
 // readUnlock removes a reference from fd and unlocks fd for reading.
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
-internal static void readUnlockᴍ(ж<FD> Ꮡfd) {
+[GoMethodBody("readUnlock")] internal static void readUnlockᴍ(ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (fd.fdmu.rwunlock(true)) {
@@ -144,7 +144,7 @@ internal static void readUnlockᴍ(ж<FD> Ꮡfd) {
 
 // writeLock adds a reference to fd and locks fd for writing.
 // It returns an error when fd cannot be used for writing.
-internal static error writeLockᴍ(ж<FD> Ꮡfd) {
+[GoMethodBody("writeLock")] internal static error writeLockᴍ(ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (!fd.fdmu.rwlock(false)) {
@@ -156,7 +156,7 @@ internal static error writeLockᴍ(ж<FD> Ꮡfd) {
 // writeUnlock removes a reference from fd and unlocks fd for writing.
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
-internal static void writeUnlockᴍ(ж<FD> Ꮡfd) {
+[GoMethodBody("writeUnlock")] internal static void writeUnlockᴍ(ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (fd.fdmu.rwunlock(false)) {
@@ -166,7 +166,7 @@ internal static void writeUnlockᴍ(ж<FD> Ꮡfd) {
 
 // readWriteLock adds a reference to fd and locks fd for reading and writing.
 // It returns an error when fd cannot be used for reading and writing.
-internal static error readWriteLockᴍ(ж<FD> Ꮡfd) {
+[GoMethodBody("readWriteLock")] internal static error readWriteLockᴍ(ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (!fd.fdmu.rwlock(true) || !fd.fdmu.rwlock(false)) {
@@ -178,7 +178,7 @@ internal static error readWriteLockᴍ(ж<FD> Ꮡfd) {
 // readWriteUnlock removes a reference from fd and unlocks fd for reading and writing.
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
-internal static void readWriteUnlockᴍ(ж<FD> Ꮡfd) {
+[GoMethodBody("readWriteUnlock")] internal static void readWriteUnlockᴍ(ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     fd.fdmu.rwunlock(true);
@@ -188,26 +188,8 @@ internal static void readWriteUnlockᴍ(ж<FD> Ꮡfd) {
 }
 
 // closing returns true if fd is closing.
-internal static bool closingᴍ(ж<FD> Ꮡfd) {
+[GoMethodBody("closing")] internal static bool closingᴍ(ж<FD> Ꮡfd) {
     return (atomic.LoadUint64(Ꮡfd.Ꮡfdmu.Ꮡstate) & (uint64)mutexClosed) != 0;
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class pollᴛfdMutex {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool incref(this ж<fdMutex> Ꮡmu) => poll_package.increfᴍ(Ꮡmu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool decref(this ж<fdMutex> Ꮡmu) => poll_package.decrefᴍ(Ꮡmu);
-}
-partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error incref(this ж<FD> Ꮡfd) => poll_package.increfᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error decref(this ж<FD> Ꮡfd) => poll_package.decrefᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readLock(this ж<FD> Ꮡfd) => poll_package.readLockᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readUnlock(this ж<FD> Ꮡfd) => poll_package.readUnlockᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeLock(this ж<FD> Ꮡfd) => poll_package.writeLockᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeUnlock(this ж<FD> Ꮡfd) => poll_package.writeUnlockᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readWriteLock(this ж<FD> Ꮡfd) => poll_package.readWriteLockᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readWriteUnlock(this ж<FD> Ꮡfd) => poll_package.readWriteUnlockᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool closing(this ж<FD> Ꮡfd) => poll_package.closingᴍ(Ꮡfd);
-}
-// </GlyphForwarders>

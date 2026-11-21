@@ -116,25 +116,25 @@ internal static profIndex profWriteExtra => /* 1 << 33 */ unchecked((profIndex)8
 
 } partial class runtime_package {
 
-internal static profIndex loadᴍ(ж<profAtomic> Ꮡx) {
+[GoMethodBody("load")] internal static profIndex loadᴍ(ж<profAtomic> Ꮡx) {
     return (profIndex)atomic.Load64(Ꮡx.Reinterpret<profAtomic, uint64>());
 }
 
-internal static void storeᴍ(ж<profAtomic> Ꮡx, profIndex @new) {
+[GoMethodBody("store")] internal static void storeᴍ(ж<profAtomic> Ꮡx, profIndex @new) {
     atomic.Store64(Ꮡx.Reinterpret<profAtomic, uint64>(), (uint64)@new);
 }
 
-internal static bool casᴍ(ж<profAtomic> Ꮡx, profIndex old, profIndex @new) {
+[GoMethodBody("cas")] internal static bool casᴍ(ж<profAtomic> Ꮡx, profIndex old, profIndex @new) {
     return atomic.Cas64(Ꮡx.Reinterpret<profAtomic, uint64>(), (uint64)old, (uint64)@new);
 }
 
 } partial class runtime_package {
 
-internal static uint32 dataCountᴍ(profIndex x) {
+[GoMethodBody("dataCount")] internal static uint32 dataCountᴍ(profIndex x) {
     return (uint32)x;
 }
 
-internal static uint32 tagCountᴍ(profIndex x) {
+[GoMethodBody("tagCount")] internal static uint32 tagCountᴍ(profIndex x) {
     return (uint32)(x >> 34);
 }
 
@@ -153,21 +153,21 @@ internal static nint countSub(uint32 x, uint32 y) {
 } partial class runtime_package {
 
 // addCountsAndClearFlags returns the packed form of "x + (data, tag) - all flags".
-internal static profIndex addCountsAndClearFlagsᴍ(profIndex x, nint data, nint tag) {
+[GoMethodBody("addCountsAndClearFlags")] internal static profIndex addCountsAndClearFlagsᴍ(profIndex x, nint data, nint tag) {
     return (profIndex)((((uint64)x >> 34) + (uint64)(((uint32)tag << 2) >> 2)) << 34 | (uint64)((uint32)x + (uint32)data));
 }
 
 } partial class runtime_package {
 
 // hasOverflow reports whether b has any overflow records pending.
-internal static bool hasOverflowᴍ(ж<profBuf> Ꮡb) {
+[GoMethodBody("hasOverflow")] internal static bool hasOverflowᴍ(ж<profBuf> Ꮡb) {
     return (uint32)Ꮡb.Ꮡoverflow.Load() > 0;
 }
 
 // takeOverflow consumes the pending overflow records, returning the overflow count
 // and the time of the first overflow.
 // When called by the reader, it is racing against incrementOverflow.
-internal static (uint32 count, uint64 time) takeOverflowᴍ(ж<profBuf> Ꮡb) {
+[GoMethodBody("takeOverflow")] internal static (uint32 count, uint64 time) takeOverflowᴍ(ж<profBuf> Ꮡb) {
     uint32 count = default;
     uint64 time = default;
 
@@ -191,7 +191,7 @@ internal static (uint32 count, uint64 time) takeOverflowᴍ(ж<profBuf> Ꮡb) {
 
 // incrementOverflow records a single overflow at time now.
 // It is racing against a possible takeOverflow in the reader.
-internal static void incrementOverflowᴍ(ж<profBuf> Ꮡb, int64 now) {
+[GoMethodBody("incrementOverflow")] internal static void incrementOverflowᴍ(ж<profBuf> Ꮡb, int64 now) {
     for (;;) {
         var overflow = Ꮡb.Ꮡoverflow.Load();
 
@@ -256,7 +256,7 @@ internal static ж<profBuf> newProfBuf(nint hdrsize, nint bufwords, nint tags) {
 
 // canWriteRecord reports whether the buffer has room
 // for a single contiguous record with a stack of length nstk.
-internal static bool canWriteRecordᴍ(ж<profBuf> Ꮡb, nint nstk) {
+[GoMethodBody("canWriteRecord")] internal static bool canWriteRecordᴍ(ж<profBuf> Ꮡb, nint nstk) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var br = Ꮡb.Ꮡr.load();
@@ -284,7 +284,7 @@ internal static bool canWriteRecordᴍ(ж<profBuf> Ꮡb, nint nstk) {
 // Each record must be contiguous on its own, but the two
 // records need not be contiguous (one can be at the end of the buffer
 // and the other can wrap around and start at the beginning of the buffer).
-internal static bool canWriteTwoRecordsᴍ(ж<profBuf> Ꮡb, nint nstk1, nint nstk2) {
+[GoMethodBody("canWriteTwoRecords")] internal static bool canWriteTwoRecordsᴍ(ж<profBuf> Ꮡb, nint nstk1, nint nstk2) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var br = Ꮡb.Ꮡr.load();
@@ -329,7 +329,7 @@ private static readonly @string runtimeProfBufAlreadyˢᵇᴍprofBuf = "runtime:
 
 // close signals that there will be no more writes on the buffer.
 // Once all the data has been read from the buffer, reads will return eof=true.
-internal static void closeᴍ(ж<profBuf> Ꮡb) {
+[GoMethodBody("close")] internal static void closeᴍ(ж<profBuf> Ꮡb) {
     if (Ꮡb.Ꮡeof.Load() > 0) {
         @throw(runtimeProfBufAlreadyˢᴍprofBuf);
     }
@@ -340,7 +340,7 @@ internal static void closeᴍ(ж<profBuf> Ꮡb) {
 // wakeupExtra must be called after setting one of the "extra"
 // atomic fields b.overflow or b.eof.
 // It records the change in b.w and wakes up the reader if needed.
-internal static void wakeupExtraᴍ(ж<profBuf> Ꮡb) {
+[GoMethodBody("wakeupExtra")] internal static void wakeupExtraᴍ(ж<profBuf> Ꮡb) {
     for (;;) {
         var old = Ꮡb.Ꮡw.load();
         var @new = (profIndex)(old | profWriteExtra);
@@ -377,7 +377,7 @@ private static readonly @string runtimeMalformedProfBufˢᵇᴍprofBuf = "runtim
 internal static ref readonly @string runtimeMalformedProfBufˢ2ᴍprofBuf => ref runtimeMalformedProfBufˢ2ᵇᴍprofBuf;
 private static readonly @string runtimeMalformedProfBufˢ2ᵇᴍprofBuf = "runtime: malformed profBuf buffer - invalid size"u8;
 
-internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) readᴍ(ж<profBuf> Ꮡb, profBufReadMode mode) {
+[GoMethodBody("read")] internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) readᴍ(ж<profBuf> Ꮡb, profBufReadMode mode) {
     slice<uint64> data = default;
     slice<@unsafe.Pointer> tags = default;
     ref var b = ref Ꮡb.DerefOrNull();
@@ -512,26 +512,3 @@ Read:
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛprofAtomic {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static profIndex load(this ж<profAtomic> Ꮡx) => runtime_package.loadᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void store(this ж<profAtomic> Ꮡx, profIndex @new) => runtime_package.storeᴍ(Ꮡx, @new);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool cas(this ж<profAtomic> Ꮡx, profIndex old, profIndex @new) => runtime_package.casᴍ(Ꮡx, old, @new);
-}
-partial class runtimeᴛprofIndex {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 dataCount(this profIndex x) => runtime_package.dataCountᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 tagCount(this profIndex x) => runtime_package.tagCountᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static profIndex addCountsAndClearFlags(this profIndex x, nint data, nint tag) => runtime_package.addCountsAndClearFlagsᴍ(x, data, tag);
-}
-partial class runtimeᴛprofBuf {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasOverflow(this ж<profBuf> Ꮡb) => runtime_package.hasOverflowᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint32 count, uint64 time) takeOverflow(this ж<profBuf> Ꮡb) => runtime_package.takeOverflowᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void incrementOverflow(this ж<profBuf> Ꮡb, int64 now) => runtime_package.incrementOverflowᴍ(Ꮡb, now);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool canWriteRecord(this ж<profBuf> Ꮡb, nint nstk) => runtime_package.canWriteRecordᴍ(Ꮡb, nstk);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool canWriteTwoRecords(this ж<profBuf> Ꮡb, nint nstk1, nint nstk2) => runtime_package.canWriteTwoRecordsᴍ(Ꮡb, nstk1, nstk2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void close(this ж<profBuf> Ꮡb) => runtime_package.closeᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void wakeupExtra(this ж<profBuf> Ꮡb) => runtime_package.wakeupExtraᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) read(this ж<profBuf> Ꮡb, profBufReadMode mode) => runtime_package.readᴍ(Ꮡb, mode);
-}
-// </GlyphForwarders>

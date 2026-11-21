@@ -22,7 +22,7 @@ partial struct mdPrinter {
 
 // Markdown returns a Markdown formatting of the Doc.
 // See the [Printer] documentation for ways to customize the Markdown output.
-internal static slice<byte> Markdownᴍ(ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+[GoMethodBody("Markdown")] internal static slice<byte> Markdownᴍ(ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -48,7 +48,7 @@ internal static ref readonly @string fourSpaceᶜᴍmdPrinter => ref fourSpace�
 private static readonly @string fourSpaceᶜᵇᴍmdPrinter = "    "u8;
 
 // block prints the block x to out.
-internal static void blockᴍ(ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) {
+[GoMethodBody("block")] internal static void blockᴍ(ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -114,7 +114,7 @@ internal static void blockᴍ(ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block
 }
 
 // text prints the text sequence x to out.
-internal static void textᴍ(ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
+[GoMethodBody("text")] internal static void textᴍ(ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -149,7 +149,7 @@ internal static void textᴍ(ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slice<
 // rawText prints the text sequence x to out,
 // without worrying about escaping characters
 // that have special meaning at the start of a Markdown line.
-internal static void rawTextᴍ(ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
+[GoMethodBody("rawText")] internal static void rawTextᴍ(ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     foreach (var (_, t) in range(x)) {
@@ -193,7 +193,7 @@ internal static void rawTextᴍ(ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<
 // escape prints s to out as plain text,
 // escaping special characters to avoid being misinterpreted
 // as Markdown markup sequences.
-internal static void escapeᴍ(ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
+[GoMethodBody("escape")] internal static void escapeᴍ(ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     nint start = 0;
@@ -229,15 +229,3 @@ internal static void escapeᴍ(ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @string
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class commentᴛPrinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Markdown(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.Markdownᴍ(Ꮡp, Ꮡd);
-}
-partial class commentᴛmdPrinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.blockᴍ(Ꮡp, Ꮡout, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slice<Text> x) => comment_package.textᴍ(Ꮡp, Ꮡout, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void rawText(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) => comment_package.rawTextᴍ(ref p, Ꮡout, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void escape(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @string s) => comment_package.escapeᴍ(ref p, Ꮡout, s);
-}
-// </GlyphForwarders>

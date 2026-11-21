@@ -54,7 +54,7 @@ internal static slice<@string> flagNames = [
 
 } partial class net_package {
 
-internal static @string Stringᴍ(Flags f) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Flags f) {
     @string s = ""u8;
     foreach (var (i, name) in range(flagNames)) {
         if ((Flags)(f & ((Flags)((nuint)1 << (int)((nuint)i)))) != 0) {
@@ -74,7 +74,7 @@ internal static @string Stringᴍ(Flags f) {
 
 // Addrs returns a list of unicast interface addresses for a specific
 // interface.
-internal static (slice<Addr>, error) Addrsᴍ(ж<Interface> Ꮡifi) {
+[GoMethodBody("Addrs")] internal static (slice<Addr>, error) Addrsᴍ(ж<Interface> Ꮡifi) {
     if (Ꮡifi == nil) {
         return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "route", Net: "ip+net", Source: default, Addr: default, Err: errInvalidInterface))));
     }
@@ -87,7 +87,7 @@ internal static (slice<Addr>, error) Addrsᴍ(ж<Interface> Ꮡifi) {
 
 // MulticastAddrs returns a list of multicast, joined group addresses
 // for a specific interface.
-internal static (slice<Addr>, error) MulticastAddrsᴍ(ж<Interface> Ꮡifi) {
+[GoMethodBody("MulticastAddrs")] internal static (slice<Addr>, error) MulticastAddrsᴍ(ж<Interface> Ꮡifi) {
     if (Ꮡifi == nil) {
         return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "route", Net: "ip+net", Source: default, Addr: default, Err: errInvalidInterface))));
     }
@@ -204,7 +204,7 @@ internal static ref ipv6ZoneCache zoneCache => ref ((StaticBox<ipv6ZoneCache>)�
 // update refreshes the network interface information if the cache was last
 // updated more than 1 minute ago, or if force is set. It reports whether the
 // cache was updated.
-internal static bool /*updated*/ updateᴍ(ж<ipv6ZoneCache> Ꮡzc, slice<Interface> ift, bool force) {
+[GoMethodBody("update")] internal static bool /*updated*/ updateᴍ(ж<ipv6ZoneCache> Ꮡzc, slice<Interface> ift, bool force) {
     bool updated = default;
     GoFrame ᒐ = default;
     try {
@@ -240,7 +240,7 @@ internal static bool /*updated*/ updateᴍ(ж<ipv6ZoneCache> Ꮡzc, slice<Interf
     ᒐdone: return updated;
 }
 
-internal static @string nameᴍ(ref ipv6ZoneCache zc, nint index) {
+[GoMethodBody("name")] internal static @string nameᴍ(ref ipv6ZoneCache zc, nint index) {
     if (index == 0) {
         return ""u8;
     }
@@ -260,7 +260,7 @@ internal static @string nameᴍ(ref ipv6ZoneCache zc, nint index) {
     return name;
 }
 
-internal static nint indexᴍ(ref ipv6ZoneCache zc, @string name) {
+[GoMethodBody("index")] internal static nint indexᴍ(ref ipv6ZoneCache zc, @string name) {
     if (name == ""u8) {
         return 0;
     }
@@ -281,18 +281,3 @@ internal static nint indexᴍ(ref ipv6ZoneCache zc, @string name) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛFlags {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Flags f) => net_package.Stringᴍ(f);
-}
-partial class netᴛInterface {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<Addr>, error) Addrs(this ж<Interface> Ꮡifi) => net_package.Addrsᴍ(Ꮡifi);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<Addr>, error) MulticastAddrs(this ж<Interface> Ꮡifi) => net_package.MulticastAddrsᴍ(Ꮡifi);
-}
-partial class netᴛipv6ZoneCache {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*updated*/ update(this ж<ipv6ZoneCache> Ꮡzc, slice<Interface> ift, bool force) => net_package.updateᴍ(Ꮡzc, ift, force);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string name(this ref ipv6ZoneCache zc, nint index) => net_package.nameᴍ(ref zc, index);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint index(this ref ipv6ZoneCache zc, @string name) => net_package.indexᴍ(ref zc, name);
-}
-// </GlyphForwarders>

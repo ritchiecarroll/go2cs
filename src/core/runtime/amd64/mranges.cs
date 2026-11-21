@@ -46,7 +46,7 @@ internal static addrRange makeAddrRange(uintptr @base, uintptr limit) {
 } partial class runtime_package {
 
 // size returns the size of the range represented in bytes.
-internal static uintptr sizeᴍ(addrRange a) {
+[GoMethodBody("size")] internal static uintptr sizeᴍ(addrRange a) {
     if (!a.@base.lessThan(a.limit)) {
         return 0;
     }
@@ -56,7 +56,7 @@ internal static uintptr sizeᴍ(addrRange a) {
 }
 
 // contains returns whether or not the range contains a given address.
-internal static bool containsᴍ(addrRange a, uintptr addr) {
+[GoMethodBody("contains")] internal static bool containsᴍ(addrRange a, uintptr addr) {
     return a.@base.lessEqual(new offAddr(addr)) && (new offAddr(addr)).lessThan(a.limit);
 }
 
@@ -68,7 +68,7 @@ private static readonly @string badPruneˢᵇᴍaddrRange = "bad prune"u8;
 // from, then returns the new range. subtract assumes that a and b
 // either don't overlap at all, only overlap on one side, or are equal.
 // If b is strictly contained in a, thus forcing a split, it will throw.
-internal static addrRange subtractᴍ(addrRange a, addrRange b) {
+[GoMethodBody("subtract")] internal static addrRange subtractᴍ(addrRange a, addrRange b) {
     if (b.@base.lessEqual(a.@base) && a.limit.lessEqual(b.limit)) {
         return new addrRange();
     } else if (a.@base.lessThan(b.@base) && b.limit.lessThan(a.limit)) {
@@ -84,7 +84,7 @@ internal static addrRange subtractᴍ(addrRange a, addrRange b) {
 // takeFromFront takes len bytes from the front of the address range, aligning
 // the base to align first. On success, returns the aligned start of the region
 // taken and true.
-internal static (uintptr, bool) takeFromFrontᴍ(ref addrRange a, uintptr len, uint8 align) {
+[GoMethodBody("takeFromFront")] internal static (uintptr, bool) takeFromFrontᴍ(ref addrRange a, uintptr len, uint8 align) {
     var @base = alignUp(a.@base.addr(), (uintptr)align) + len;
     if (@base > a.limit.addr()) {
         return (0, false);
@@ -96,7 +96,7 @@ internal static (uintptr, bool) takeFromFrontᴍ(ref addrRange a, uintptr len, u
 // takeFromBack takes len bytes from the end of the address range, aligning
 // the limit to align after subtracting len. On success, returns the aligned
 // start of the region taken and true.
-internal static (uintptr, bool) takeFromBackᴍ(ref addrRange a, uintptr len, uint8 align) {
+[GoMethodBody("takeFromBack")] internal static (uintptr, bool) takeFromBackᴍ(ref addrRange a, uintptr len, uint8 align) {
     var limit = alignDown(a.limit.addr() - len, (uintptr)align);
     if (a.@base.addr() > limit) {
         return (0, false);
@@ -107,7 +107,7 @@ internal static (uintptr, bool) takeFromBackᴍ(ref addrRange a, uintptr len, ui
 
 // removeGreaterEqual removes all addresses in a greater than or equal
 // to addr and returns the new range.
-internal static addrRange removeGreaterEqualᴍ(addrRange a, uintptr addr) {
+[GoMethodBody("removeGreaterEqual")] internal static addrRange removeGreaterEqualᴍ(addrRange a, uintptr addr) {
     if ((new offAddr(addr)).lessEqual(a.@base)) {
         return new addrRange();
     }
@@ -140,42 +140,42 @@ partial struct offAddr {
 } partial class runtime_package {
 
 // add adds a uintptr offset to the offAddr.
-internal static offAddr addᴍ(offAddr l, uintptr bytes) {
+[GoMethodBody("add")] internal static offAddr addᴍ(offAddr l, uintptr bytes) {
     return new offAddr(a: l.a + bytes);
 }
 
 // sub subtracts a uintptr offset from the offAddr.
-internal static offAddr subᴍ(offAddr l, uintptr bytes) {
+[GoMethodBody("sub")] internal static offAddr subᴍ(offAddr l, uintptr bytes) {
     return new offAddr(a: l.a - bytes);
 }
 
 // diff returns the amount of bytes in between the
 // two offAddrs.
-internal static uintptr diffᴍ(offAddr l1, offAddr l2) {
+[GoMethodBody("diff")] internal static uintptr diffᴍ(offAddr l1, offAddr l2) {
     return l1.a - l2.a;
 }
 
 // lessThan returns true if l1 is less than l2 in the offset
 // address space.
-internal static bool lessThanᴍ(offAddr l1, offAddr l2) {
+[GoMethodBody("lessThan")] internal static bool lessThanᴍ(offAddr l1, offAddr l2) {
     return (l1.a - (uintptr)arenaBaseOffset) < (l2.a - (uintptr)arenaBaseOffset);
 }
 
 // lessEqual returns true if l1 is less than or equal to l2 in
 // the offset address space.
-internal static bool lessEqualᴍ(offAddr l1, offAddr l2) {
+[GoMethodBody("lessEqual")] internal static bool lessEqualᴍ(offAddr l1, offAddr l2) {
     return (l1.a - (uintptr)arenaBaseOffset) <= (l2.a - (uintptr)arenaBaseOffset);
 }
 
 // equal returns true if the two offAddr values are equal.
-internal static bool equalᴍ(offAddr l1, offAddr l2) {
+[GoMethodBody("equal")] internal static bool equalᴍ(offAddr l1, offAddr l2) {
     // No need to compare in the offset space, it
     // means the same thing.
     return l1 == l2;
 }
 
 // addr returns the virtual address for this offset address.
-internal static uintptr addrᴍ(offAddr l) {
+[GoMethodBody("addr")] internal static uintptr addrᴍ(offAddr l) {
     return l.a;
 }
 
@@ -193,7 +193,7 @@ partial struct atomicOffAddr {
 
 // Clear attempts to store minOffAddr in atomicOffAddr. It may fail
 // if a marked value is placed in the box in the meanwhile.
-internal static void Clearᴍ(ж<atomicOffAddr> Ꮡb) {
+[GoMethodBody("Clear")] internal static void Clearᴍ(ж<atomicOffAddr> Ꮡb) {
     for (;;) {
         var old = Ꮡb.Ꮡa.Load();
         if (old < 0) {
@@ -207,7 +207,7 @@ internal static void Clearᴍ(ж<atomicOffAddr> Ꮡb) {
 
 // StoreMin stores addr if it's less than the current value in the
 // offset address space if the current value is not marked.
-internal static void StoreMinᴍ(ж<atomicOffAddr> Ꮡb, uintptr addr) {
+[GoMethodBody("StoreMin")] internal static void StoreMinᴍ(ж<atomicOffAddr> Ꮡb, uintptr addr) {
     var @new = (int64)(addr - (uintptr)arenaBaseOffset);
     for (;;) {
         var old = Ꮡb.Ꮡa.Load();
@@ -224,19 +224,19 @@ internal static void StoreMinᴍ(ж<atomicOffAddr> Ꮡb, uintptr addr) {
 // replace it with newAddr. markedAddr must be a marked address
 // returned by Load. This function will not store newAddr if the
 // box no longer contains markedAddr.
-internal static void StoreUnmarkᴍ(ж<atomicOffAddr> Ꮡb, uintptr markedAddr, uintptr newAddr) {
+[GoMethodBody("StoreUnmark")] internal static void StoreUnmarkᴍ(ж<atomicOffAddr> Ꮡb, uintptr markedAddr, uintptr newAddr) {
     Ꮡb.Ꮡa.CompareAndSwap(-(int64)(markedAddr - (uintptr)arenaBaseOffset), (int64)(newAddr - (uintptr)arenaBaseOffset));
 }
 
 // StoreMarked stores addr but first converted to the offset address
 // space and then negated.
-internal static void StoreMarkedᴍ(ж<atomicOffAddr> Ꮡb, uintptr addr) {
+[GoMethodBody("StoreMarked")] internal static void StoreMarkedᴍ(ж<atomicOffAddr> Ꮡb, uintptr addr) {
     Ꮡb.Ꮡa.Store(-(int64)(addr - (uintptr)arenaBaseOffset));
 }
 
 // Load returns the address in the box as a virtual address. It also
 // returns if the value was marked or not.
-internal static (uintptr, bool) Loadᴍ(ж<atomicOffAddr> Ꮡb) {
+[GoMethodBody("Load")] internal static (uintptr, bool) Loadᴍ(ж<atomicOffAddr> Ꮡb) {
     var v = Ꮡb.Ꮡa.Load();
     var wasMarked = false;
     if (v < 0) {
@@ -274,7 +274,7 @@ partial struct addrRanges {
 
 // findSucc returns the first index in a such that addr is
 // less than the base of the addrRange at that index.
-internal static nint findSuccᴍ(ref addrRanges a, uintptr addr) {
+[GoMethodBody("findSucc")] internal static nint findSuccᴍ(ref addrRanges a, uintptr addr) {
     var @base = new offAddr(addr);
 
     // Narrow down the search space via a binary search
@@ -320,7 +320,7 @@ internal static nint findSuccᴍ(ref addrRanges a, uintptr addr) {
 // then it returns addr. The second return value indicates whether
 // such an address exists for addr in a. That is, if addr is larger than
 // any address known to a, the second return value will be false.
-internal static (uintptr, bool) findAddrGreaterEqualᴍ(ref addrRanges a, uintptr addr) {
+[GoMethodBody("findAddrGreaterEqual")] internal static (uintptr, bool) findAddrGreaterEqualᴍ(ref addrRanges a, uintptr addr) {
     nint i = a.findSucc(addr);
     if (i == 0) {
         return (a.ranges[0].@base.addr(), true);
@@ -335,7 +335,7 @@ internal static (uintptr, bool) findAddrGreaterEqualᴍ(ref addrRanges a, uintpt
 }
 
 // contains returns true if a covers the address addr.
-internal static bool containsᴍ(ref addrRanges a, uintptr addr) {
+[GoMethodBody("contains")] internal static bool containsᴍ(ref addrRanges a, uintptr addr) {
     nint i = a.findSucc(addr);
     if (i == 0) {
         return false;
@@ -348,7 +348,7 @@ internal static bool containsᴍ(ref addrRanges a, uintptr addr) {
 // removeLast removes and returns the highest-addressed contiguous range
 // of a, or the last nBytes of that range, whichever is smaller. If a is
 // empty, it returns an empty range.
-internal static addrRange removeLastᴍ(ref addrRanges a, uintptr nBytes) {
+[GoMethodBody("removeLast")] internal static addrRange removeLastᴍ(ref addrRanges a, uintptr nBytes) {
     if (len(a.ranges) == 0) {
         return new addrRange();
     }
@@ -367,7 +367,7 @@ internal static addrRange removeLastᴍ(ref addrRanges a, uintptr nBytes) {
 
 // removeGreaterEqual removes the ranges of a which are above addr, and additionally
 // splits any range containing addr.
-internal static void removeGreaterEqualᴍ(ref addrRanges a, uintptr addr) {
+[GoMethodBody("removeGreaterEqual")] internal static void removeGreaterEqualᴍ(ref addrRanges a, uintptr addr) {
     nint pivot = a.findSucc(addr);
     if (pivot == 0) {
         // addr is before all ranges in a.
@@ -398,37 +398,3 @@ internal static void removeGreaterEqualᴍ(ref addrRanges a, uintptr addr) {
 // go2cs generated this placeholder — func cloneInto is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛaddrRange {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr size(this addrRange a) => runtime_package.sizeᴍ(a);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool contains(this addrRange a, uintptr addr) => runtime_package.containsᴍ(a, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static addrRange subtract(this addrRange a, addrRange b) => runtime_package.subtractᴍ(a, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uintptr, bool) takeFromFront(this ref addrRange a, uintptr len, uint8 align) => runtime_package.takeFromFrontᴍ(ref a, len, align);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uintptr, bool) takeFromBack(this ref addrRange a, uintptr len, uint8 align) => runtime_package.takeFromBackᴍ(ref a, len, align);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static addrRange removeGreaterEqual(this addrRange a, uintptr addr) => runtime_package.removeGreaterEqualᴍ(a, addr);
-}
-partial class runtimeᴛoffAddr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static offAddr add(this offAddr l, uintptr bytes) => runtime_package.addᴍ(l, bytes);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static offAddr sub(this offAddr l, uintptr bytes) => runtime_package.subᴍ(l, bytes);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr diff(this offAddr l1, offAddr l2) => runtime_package.diffᴍ(l1, l2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool lessThan(this offAddr l1, offAddr l2) => runtime_package.lessThanᴍ(l1, l2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool lessEqual(this offAddr l1, offAddr l2) => runtime_package.lessEqualᴍ(l1, l2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool equal(this offAddr l1, offAddr l2) => runtime_package.equalᴍ(l1, l2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr addr(this offAddr l) => runtime_package.addrᴍ(l);
-}
-partial class runtimeᴛatomicOffAddr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Clear(this ж<atomicOffAddr> Ꮡb) => runtime_package.Clearᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void StoreMin(this ж<atomicOffAddr> Ꮡb, uintptr addr) => runtime_package.StoreMinᴍ(Ꮡb, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void StoreUnmark(this ж<atomicOffAddr> Ꮡb, uintptr markedAddr, uintptr newAddr) => runtime_package.StoreUnmarkᴍ(Ꮡb, markedAddr, newAddr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void StoreMarked(this ж<atomicOffAddr> Ꮡb, uintptr addr) => runtime_package.StoreMarkedᴍ(Ꮡb, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uintptr, bool) Load(this ж<atomicOffAddr> Ꮡb) => runtime_package.Loadᴍ(Ꮡb);
-}
-partial class runtimeᴛaddrRanges {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint findSucc(this ref addrRanges a, uintptr addr) => runtime_package.findSuccᴍ(ref a, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uintptr, bool) findAddrGreaterEqual(this ref addrRanges a, uintptr addr) => runtime_package.findAddrGreaterEqualᴍ(ref a, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool contains(this ref addrRanges a, uintptr addr) => runtime_package.containsᴍ(ref a, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static addrRange removeLast(this ref addrRanges a, uintptr nBytes) => runtime_package.removeLastᴍ(ref a, nBytes);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void removeGreaterEqual(this ref addrRanges a, uintptr addr) => runtime_package.removeGreaterEqualᴍ(ref a, addr);
-}
-// </GlyphForwarders>

@@ -77,7 +77,7 @@ internal static UntypedInt oldQuantum => 1;
 
 } partial class gosym_package {
 
-internal static (slice<byte> b, uint64 pc, nint line) parseᴍ(ref LineTable t, uint64 targetPC, nint targetLine) {
+[GoMethodBody("parse")] internal static (slice<byte> b, uint64 pc, nint line) parseᴍ(ref LineTable t, uint64 targetPC, nint targetLine) {
     slice<byte> b = default;
     uint64 pc = default;
     nint line = default;
@@ -123,7 +123,7 @@ internal static (slice<byte> b, uint64 pc, nint line) parseᴍ(ref LineTable t, 
     return (b, pc, line);
 }
 
-internal static ж<LineTable> Δsliceᴍ(ref LineTable t, uint64 pc) {
+[GoMethodBody("Δslice")] internal static ж<LineTable> Δsliceᴍ(ref LineTable t, uint64 pc) {
     ref var line = ref heap<nint>(out var Ꮡline);
     (var data, pc, line) = t.parse(pc, -1);
     return Ꮡ(new LineTable(Data: data, PC: pc, Line: line));
@@ -132,7 +132,7 @@ internal static ж<LineTable> Δsliceᴍ(ref LineTable t, uint64 pc) {
 // PCToLine returns the line number for the given program counter.
 //
 // Deprecated: Use Table's PCToLine method instead.
-internal static nint PCToLineᴍ(ж<LineTable> Ꮡt, uint64 pc) {
+[GoMethodBody("PCToLine")] internal static nint PCToLineᴍ(ж<LineTable> Ꮡt, uint64 pc) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt.isGo12()) {
@@ -146,7 +146,7 @@ internal static nint PCToLineᴍ(ж<LineTable> Ꮡt, uint64 pc) {
 // considering only program counters before maxpc.
 //
 // Deprecated: Use Table's LineToPC method instead.
-internal static uint64 LineToPCᴍ(ж<LineTable> Ꮡt, nint line, uint64 maxpc) {
+[GoMethodBody("LineToPC")] internal static uint64 LineToPCᴍ(ж<LineTable> Ꮡt, nint line, uint64 maxpc) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt.isGo12()) {
@@ -188,7 +188,7 @@ public static ж<LineTable> NewLineTable(slice<byte> data, uint64 text) {
 // are expected to have that recovery logic.
 
 // isGo12 reports whether this is a Go 1.2 (or later) symbol table.
-internal static bool isGo12ᴍ(ж<LineTable> Ꮡt) {
+[GoMethodBody("isGo12")] internal static bool isGo12ᴍ(ж<LineTable> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.parsePclnTab();
@@ -197,7 +197,7 @@ internal static bool isGo12ᴍ(ж<LineTable> Ꮡt) {
 
 // uintptr returns the pointer-sized value encoded at b.
 // The pointer size is dictated by the table being read.
-internal static uint64 uintptrᴍ(ref LineTable t, slice<byte> b) {
+[GoMethodBody("uintptr")] internal static uint64 uintptrᴍ(ref LineTable t, slice<byte> b) {
     if (t.ptrsize == 4) {
         return (uint64)t.binary.Uint32(b);
     }
@@ -205,7 +205,7 @@ internal static uint64 uintptrᴍ(ref LineTable t, slice<byte> b) {
 }
 
 // parsePclnTab parses the pclntab, setting the version.
-internal static void parsePclnTabᴍ(ж<LineTable> Ꮡt) {
+[GoMethodBody("parsePclnTab")] internal static void parsePclnTabᴍ(ж<LineTable> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -342,7 +342,7 @@ internal static void parsePclnTabᴍ(ж<LineTable> Ꮡt) {
 }
 
 // go12Funcs returns a slice of Funcs derived from the Go 1.2+ pcln table.
-internal static slice<Func> go12Funcsᴍ(ж<LineTable> Ꮡt) {
+[GoMethodBody("go12Funcs")] internal static slice<Func> go12Funcsᴍ(ж<LineTable> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -381,7 +381,7 @@ internal static slice<Func> go12Funcsᴍ(ж<LineTable> Ꮡt) {
 }
 
 // findFunc returns the funcData corresponding to the given program counter.
-internal static funcData findFuncᴍ(ж<LineTable> Ꮡt, uint64 pc) {
+[GoMethodBody("findFunc")] internal static funcData findFuncᴍ(ж<LineTable> Ꮡt, uint64 pc) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     ref var ft = ref heap<funcTab>(Ꮡt.funcTab(), out var Ꮡft);
@@ -395,7 +395,7 @@ internal static funcData findFuncᴍ(ж<LineTable> Ꮡt, uint64 pc) {
 }
 
 // readvarint reads, removes, and returns a varint from *pp.
-internal static uint32 readvarintᴍ(ref LineTable t, ж<slice<byte>> Ꮡpp) {
+[GoMethodBody("readvarint")] internal static uint32 readvarintᴍ(ref LineTable t, ж<slice<byte>> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     uint32 v = default;
@@ -414,7 +414,7 @@ internal static uint32 readvarintᴍ(ref LineTable t, ж<slice<byte>> Ꮡpp) {
 }
 
 // funcName returns the name of the function found at off.
-internal static @string funcNameᴍ(ref LineTable t, uint32 off) {
+[GoMethodBody("funcName")] internal static @string funcNameᴍ(ref LineTable t, uint32 off) {
     var (sΔ1, ok) = t.funcNames[off, ꟷ]; if (ok) {
         return sΔ1;
     }
@@ -425,7 +425,7 @@ internal static @string funcNameᴍ(ref LineTable t, uint32 off) {
 }
 
 // stringFrom returns a Go string found at off from a position.
-internal static @string stringFromᴍ(ref LineTable t, slice<byte> arr, uint32 off) {
+[GoMethodBody("stringFrom")] internal static @string stringFromᴍ(ref LineTable t, slice<byte> arr, uint32 off) {
     var (sΔ1, ok) = t.strings[off, ꟷ]; if (ok) {
         return sΔ1;
     }
@@ -436,12 +436,12 @@ internal static @string stringFromᴍ(ref LineTable t, slice<byte> arr, uint32 o
 }
 
 // string returns a Go string found at off.
-internal static @string @stringᴍ(ref LineTable t, uint32 off) {
+[GoMethodBody("string")] internal static @string @stringᴍ(ref LineTable t, uint32 off) {
     return t.stringFrom(t.funcdata, off);
 }
 
 // functabFieldSize returns the size in bytes of a single functab field.
-internal static nint functabFieldSizeᴍ(ref LineTable t) {
+[GoMethodBody("functabFieldSize")] internal static nint functabFieldSizeᴍ(ref LineTable t) {
     if (t.version >= ver118) {
         return 4;
     }
@@ -449,7 +449,7 @@ internal static nint functabFieldSizeᴍ(ref LineTable t) {
 }
 
 // funcTab returns t's funcTab.
-internal static funcTab funcTabᴍ(ж<LineTable> Ꮡt) {
+[GoMethodBody("funcTab")] internal static funcTab funcTabᴍ(ж<LineTable> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     return new funcTab(LineTable: Ꮡt, sz: t.functabFieldSize());
@@ -467,12 +467,12 @@ partial struct funcTab {
 } partial class gosym_package {
 
 // Count returns the number of func entries in f.
-internal static nint Countᴍ(funcTab f) {
+[GoMethodBody("Count")] internal static nint Countᴍ(funcTab f) {
     return (nint)f.nfunctab;
 }
 
 // pc returns the PC of the i'th func in f.
-internal static uint64 pcᴍ(funcTab f, nint i) {
+[GoMethodBody("pc")] internal static uint64 pcᴍ(funcTab f, nint i) {
     var u = f.@uint(f.functab.slice(2 * i * f.sz));
     if (f.version >= ver118) {
         u += f.textStart;
@@ -481,12 +481,12 @@ internal static uint64 pcᴍ(funcTab f, nint i) {
 }
 
 // funcOff returns the funcdata offset of the i'th func in f.
-internal static uint64 funcOffᴍ(funcTab f, nint i) {
+[GoMethodBody("funcOff")] internal static uint64 funcOffᴍ(funcTab f, nint i) {
     return f.@uint(f.functab.slice((2 * i + 1) * f.sz));
 }
 
 // uint returns the uint stored at b.
-internal static uint64 @uintᴍ(funcTab f, slice<byte> b) {
+[GoMethodBody("uint")] internal static uint64 @uintᴍ(funcTab f, slice<byte> b) {
     if (f.sz == 4) {
         return (uint64)f.binary.Uint32(b);
     }
@@ -504,7 +504,7 @@ partial struct funcData {
 } partial class gosym_package {
 
 // funcData returns the ith funcData in t.functab.
-internal static funcData funcDataᴍ(ж<LineTable> Ꮡt, uint32 i) {
+[GoMethodBody("funcData")] internal static funcData funcDataᴍ(ж<LineTable> Ꮡt, uint32 i) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var data = t.funcdata.slice((nint)(Ꮡt.funcTab().funcOff((nint)i)));
@@ -514,12 +514,12 @@ internal static funcData funcDataᴍ(ж<LineTable> Ꮡt, uint32 i) {
 } partial class gosym_package {
 
 // IsZero reports whether f is the zero value.
-internal static bool IsZeroᴍ(funcData f) {
+[GoMethodBody("IsZero")] internal static bool IsZeroᴍ(funcData f) {
     return f.t == nil && f.data == nil;
 }
 
 // entryPC returns the func's entry PC.
-internal static uint64 entryPCᴍ(ref funcData f) {
+[GoMethodBody("entryPC")] internal static uint64 entryPCᴍ(ref funcData f) {
     // In Go 1.18, the first field of _func changed
     // from a uintptr entry PC to a uint32 entry offset.
     if (f.t.version >= ver118) {
@@ -530,16 +530,16 @@ internal static uint64 entryPCᴍ(ref funcData f) {
     return f.t.uintptr(f.data);
 }
 
-internal static uint32 nameOffᴍ(funcData f) { return f.field(1); }
-internal static uint32 deferreturnᴍ(funcData f) { return f.field(3); }
-internal static uint32 pcfileᴍ(funcData f) { return f.field(5); }
-internal static uint32 pclnᴍ(funcData f) { return f.field(6); }
-internal static uint32 cuOffsetᴍ(funcData f) { return f.field(8); }
+[GoMethodBody("nameOff")] internal static uint32 nameOffᴍ(funcData f) { return f.field(1); }
+[GoMethodBody("deferreturn")] internal static uint32 deferreturnᴍ(funcData f) { return f.field(3); }
+[GoMethodBody("pcfile")] internal static uint32 pcfileᴍ(funcData f) { return f.field(5); }
+[GoMethodBody("pcln")] internal static uint32 pclnᴍ(funcData f) { return f.field(6); }
+[GoMethodBody("cuOffset")] internal static uint32 cuOffsetᴍ(funcData f) { return f.field(8); }
 
 // field returns the nth field of the _func struct.
 // It panics if n == 0 or n > 9; for n == 0, call f.entryPC.
 // Most callers should use a named field accessor (just above).
-internal static uint32 fieldᴍ(funcData f, uint32 n) {
+[GoMethodBody("field")] internal static uint32 fieldᴍ(funcData f, uint32 n) {
     if (n == 0 || n > 9) {
         throw panic("bad funcdata field");
     }
@@ -557,7 +557,7 @@ internal static uint32 fieldᴍ(funcData f, uint32 n) {
 } partial class gosym_package {
 
 // step advances to the next pc, value pair in the encoded table.
-internal static bool stepᴍ(ref LineTable t, ж<slice<byte>> p, ж<uint64> Ꮡpc, ж<int32> Ꮡval, bool first) {
+[GoMethodBody("step")] internal static bool stepᴍ(ref LineTable t, ж<slice<byte>> p, ж<uint64> Ꮡpc, ж<int32> Ꮡval, bool first) {
     ref var pc = ref Ꮡpc.DerefOrNull();
     ref var val = ref Ꮡval.DerefOrNull();
 
@@ -580,7 +580,7 @@ internal static bool stepᴍ(ref LineTable t, ж<slice<byte>> p, ж<uint64> Ꮡp
 // pcvalue reports the value associated with the target pc.
 // off is the offset to the beginning of the pc-value table,
 // and entry is the start PC for the corresponding function.
-internal static int32 pcvalueᴍ(ref LineTable t, uint32 off, uint64 entry, uint64 targetpc) {
+[GoMethodBody("pcvalue")] internal static int32 pcvalueᴍ(ref LineTable t, uint32 off, uint64 entry, uint64 targetpc) {
     ref var p = ref heap<slice<byte>>(t.pctab.slice((nint)(off)), out var Ꮡp);
 
     ref var val = ref heap<int32>((int32)(-1), out var Ꮡval);
@@ -599,7 +599,7 @@ internal static int32 pcvalueᴍ(ref LineTable t, uint32 off, uint64 entry, uint
 // to file number. Since most functions come from a single file, these
 // are usually short and quick to scan. If a file match is found, then the
 // code goes to the expense of looking for a simultaneous line number match.
-internal static uint64 findFileLineᴍ(ref LineTable t, uint64 entry, uint32 filetab, uint32 linetab, int32 filenum, int32 line, slice<byte> cutab) {
+[GoMethodBody("findFileLine")] internal static uint64 findFileLineᴍ(ref LineTable t, uint64 entry, uint32 filetab, uint32 linetab, int32 filenum, int32 line, slice<byte> cutab) {
     if (filetab == 0 || linetab == 0) {
         return 0;
     }
@@ -641,7 +641,7 @@ internal static uint64 findFileLineᴍ(ref LineTable t, uint64 entry, uint32 fil
 }
 
 // go12PCToLine maps program counter to line number for the Go 1.2+ pcln table.
-internal static nint /*line*/ go12PCToLineᴍ(ж<LineTable> Ꮡt, uint64 pc) {
+[GoMethodBody("go12PCToLine")] internal static nint /*line*/ go12PCToLineᴍ(ж<LineTable> Ꮡt, uint64 pc) {
     nint line = default;
     GoFrame ᒐ = default;
     try {
@@ -667,7 +667,7 @@ internal static nint /*line*/ go12PCToLineᴍ(ж<LineTable> Ꮡt, uint64 pc) {
 }
 
 // go12PCToFile maps program counter to file name for the Go 1.2+ pcln table.
-internal static @string /*file*/ go12PCToFileᴍ(ж<LineTable> Ꮡt, uint64 pc) {
+[GoMethodBody("go12PCToFile")] internal static @string /*file*/ go12PCToFileᴍ(ж<LineTable> Ꮡt, uint64 pc) {
     @string @file = default;
     GoFrame ᒐ = default;
     try {
@@ -708,7 +708,7 @@ internal static @string /*file*/ go12PCToFileᴍ(ж<LineTable> Ꮡt, uint64 pc) 
 }
 
 // go12LineToPC maps a (file, line) pair to a program counter for the Go 1.2+ pcln table.
-internal static uint64 /*pc*/ go12LineToPCᴍ(ж<LineTable> Ꮡt, @string @file, nint line) {
+[GoMethodBody("go12LineToPC")] internal static uint64 /*pc*/ go12LineToPCᴍ(ж<LineTable> Ꮡt, @string @file, nint line) {
     uint64 pc = default;
     GoFrame ᒐ = default;
     try {
@@ -755,7 +755,7 @@ internal static uint64 /*pc*/ go12LineToPCᴍ(ж<LineTable> Ꮡt, @string @file,
 }
 
 // initFileMap initializes the map from file name to file number.
-internal static void initFileMapᴍ(ж<LineTable> Ꮡt) {
+[GoMethodBody("initFileMap")] internal static void initFileMapᴍ(ж<LineTable> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -791,7 +791,7 @@ internal static void initFileMapᴍ(ж<LineTable> Ꮡt) {
 // go12MapFiles adds to m a key for every file in the Go 1.2 LineTable.
 // Every key maps to obj. That's not a very interesting map, but it provides
 // a way for callers to obtain the list of files in the program.
-internal static void go12MapFilesᴍ(ж<LineTable> Ꮡt, map<@string, ж<Obj>> m, ж<Obj> obj) {
+[GoMethodBody("go12MapFiles")] internal static void go12MapFilesᴍ(ж<LineTable> Ꮡt, map<@string, ж<Obj>> m, ж<Obj> obj) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -818,48 +818,3 @@ internal static void go12MapFilesᴍ(ж<LineTable> Ꮡt, map<@string, ж<Obj>> m
 internal const bool disableRecover = false;
 
 } // end gosym_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class gosymᴛLineTable {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte> b, uint64 pc, nint line) parse(this ref LineTable t, uint64 targetPC, nint targetLine) => gosym_package.parseᴍ(ref t, targetPC, targetLine);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<LineTable> Δslice(this ref LineTable t, uint64 pc) => gosym_package.Δsliceᴍ(ref t, pc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint PCToLine(this ж<LineTable> Ꮡt, uint64 pc) => gosym_package.PCToLineᴍ(Ꮡt, pc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 LineToPC(this ж<LineTable> Ꮡt, nint line, uint64 maxpc) => gosym_package.LineToPCᴍ(Ꮡt, line, maxpc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isGo12(this ж<LineTable> Ꮡt) => gosym_package.isGo12ᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 uintptr(this ref LineTable t, slice<byte> b) => gosym_package.uintptrᴍ(ref t, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parsePclnTab(this ж<LineTable> Ꮡt) => gosym_package.parsePclnTabᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Func> go12Funcs(this ж<LineTable> Ꮡt) => gosym_package.go12Funcsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static funcData findFunc(this ж<LineTable> Ꮡt, uint64 pc) => gosym_package.findFuncᴍ(Ꮡt, pc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 readvarint(this ref LineTable t, ж<slice<byte>> Ꮡpp) => gosym_package.readvarintᴍ(ref t, Ꮡpp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string funcName(this ref LineTable t, uint32 off) => gosym_package.funcNameᴍ(ref t, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string stringFrom(this ref LineTable t, slice<byte> arr, uint32 off) => gosym_package.stringFromᴍ(ref t, arr, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ref LineTable t, uint32 off) => gosym_package.@stringᴍ(ref t, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint functabFieldSize(this ref LineTable t) => gosym_package.functabFieldSizeᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static funcTab funcTab(this ж<LineTable> Ꮡt) => gosym_package.funcTabᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static funcData funcData(this ж<LineTable> Ꮡt, uint32 i) => gosym_package.funcDataᴍ(Ꮡt, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool step(this ref LineTable t, ж<slice<byte>> p, ж<uint64> Ꮡpc, ж<int32> Ꮡval, bool first) => gosym_package.stepᴍ(ref t, p, Ꮡpc, Ꮡval, first);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int32 pcvalue(this ref LineTable t, uint32 off, uint64 entry, uint64 targetpc) => gosym_package.pcvalueᴍ(ref t, off, entry, targetpc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 findFileLine(this ref LineTable t, uint64 entry, uint32 filetab, uint32 linetab, int32 filenum, int32 line, slice<byte> cutab) => gosym_package.findFileLineᴍ(ref t, entry, filetab, linetab, filenum, line, cutab);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*line*/ go12PCToLine(this ж<LineTable> Ꮡt, uint64 pc) => gosym_package.go12PCToLineᴍ(Ꮡt, pc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string /*file*/ go12PCToFile(this ж<LineTable> Ꮡt, uint64 pc) => gosym_package.go12PCToFileᴍ(Ꮡt, pc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 /*pc*/ go12LineToPC(this ж<LineTable> Ꮡt, @string @file, nint line) => gosym_package.go12LineToPCᴍ(Ꮡt, @file, line);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initFileMap(this ж<LineTable> Ꮡt) => gosym_package.initFileMapᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void go12MapFiles(this ж<LineTable> Ꮡt, map<@string, ж<Obj>> m, ж<Obj> obj) => gosym_package.go12MapFilesᴍ(Ꮡt, m, obj);
-}
-partial class gosymᴛfuncTab {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Count(this funcTab f) => gosym_package.Countᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 pc(this funcTab f, nint i) => gosym_package.pcᴍ(f, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 funcOff(this funcTab f, nint i) => gosym_package.funcOffᴍ(f, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 @uint(this funcTab f, slice<byte> b) => gosym_package.@uintᴍ(f, b);
-}
-partial class gosymᴛfuncData {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsZero(this funcData f) => gosym_package.IsZeroᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 entryPC(this ref funcData f) => gosym_package.entryPCᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 nameOff(this funcData f) => gosym_package.nameOffᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 deferreturn(this funcData f) => gosym_package.deferreturnᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 pcfile(this funcData f) => gosym_package.pcfileᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 pcln(this funcData f) => gosym_package.pclnᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 cuOffset(this funcData f) => gosym_package.cuOffsetᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 field(this funcData f, uint32 n) => gosym_package.fieldᴍ(f, n);
-}
-// </GlyphForwarders>

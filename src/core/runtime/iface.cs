@@ -118,7 +118,7 @@ finish:
 
 // find finds the given interface/type pair in t.
 // Returns nil if the given interface/type pair isn't present.
-internal static ж<itab> findᴍ(ж<itabTableType> Ꮡt, ж<interfacetype> inter, ж<_type> typ) {
+[GoMethodBody("find")] internal static ж<itab> findᴍ(ж<itabTableType> Ꮡt, ж<interfacetype> inter, ж<_type> typ) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Implemented using quadratic probing.
@@ -192,7 +192,7 @@ internal static void itabAdd(ж<itab> Ꮡm) {
 
 // add adds the given itab to itab table t.
 // itabLock must be held.
-internal static void addᴍ(ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
+[GoMethodBody("add")] internal static void addᴍ(ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -792,10 +792,3 @@ internal static void unreachableMethod() {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛitabTableType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<itab> find(this ж<itabTableType> Ꮡt, ж<interfacetype> inter, ж<_type> typ) => runtime_package.findᴍ(Ꮡt, inter, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ж<itabTableType> Ꮡt, ж<itab> Ꮡm) => runtime_package.addᴍ(Ꮡt, Ꮡm);
-}
-// </GlyphForwarders>

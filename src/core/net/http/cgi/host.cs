@@ -91,7 +91,7 @@ partial struct Handler {
 
 } partial class cgi_package {
 
-internal static io.Writer stderrᴍ(ref Handler h) {
+[GoMethodBody("stderr")] internal static io.Writer stderrᴍ(ref Handler h) {
     if (h.Stderr != nil) {
         return h.Stderr;
     }
@@ -142,7 +142,7 @@ private static readonly @string binUsrBinUsrUcbUsrBsdUsrˢᵇᴍHandler = "/bin:
 internal static ref readonly @string locationˢᴍHandler => ref locationˢᵇᴍHandler;
 private static readonly @string locationˢᵇᴍHandler = "Location"u8;
 
-internal static void ServeHTTPᴍ(ж<Handler> Ꮡh, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
+[GoMethodBody("ServeHTTP")] internal static void ServeHTTPᴍ(ж<Handler> Ꮡh, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
     GoFrame ᒐ = default;
     try {
         ref var h = ref Ꮡh.DerefOrNull();
@@ -396,7 +396,7 @@ internal static void ServeHTTPᴍ(ж<Handler> Ꮡh, http.ResponseWriter rw, ж<h
     finally { ᒐ.Run(); }
 }
 
-internal static void printfᴍ(ref Handler h, @string format, params ꓸꓸꓸany vʗp) {
+[GoMethodBody("printf")] internal static void printfᴍ(ref Handler h, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     if (h.Logger != nil) {
@@ -406,7 +406,7 @@ internal static void printfᴍ(ref Handler h, @string format, params ꓸꓸꓸan
     }
 }
 
-internal static void handleInternalRedirectᴍ(ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq, @string path) {
+[GoMethodBody("handleInternalRedirect")] internal static void handleInternalRedirectᴍ(ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq, @string path) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var (url, err) = req.URL.Parse(path);
@@ -461,12 +461,3 @@ internal static rune upperCaseAndUnderscore(rune r) {
 internal static Action<ж<os.Process>> testHookStartProcess; // nil except for some tests
 
 } // end cgi_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class cgiᴛHandler {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static io.Writer stderr(this ref Handler h) => cgi_package.stderrᴍ(ref h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<http.Request> Ꮡreq) => cgi_package.ServeHTTPᴍ(Ꮡh, rw, Ꮡreq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void printf(this ref Handler h, @string format, params ꓸꓸꓸany vʗp) => cgi_package.printfᴍ(ref h, format, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handleInternalRedirect(this ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq, @string path) => cgi_package.handleInternalRedirectᴍ(ref h, rw, Ꮡreq, path);
-}
-// </GlyphForwarders>

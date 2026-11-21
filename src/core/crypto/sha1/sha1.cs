@@ -52,11 +52,11 @@ internal const nint marshaledSize = /* len(magic) + 5*4 + chunk + 8 */ 96;
 
 } partial class sha1_package {
 
-internal static (slice<byte>, error) MarshalBinaryᴍ(ref digest d) {
+[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
-internal static (slice<byte>, error) AppendBinaryᴍ(ref digest d, slice<byte> b) {
+[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, d.h[0]);
     b = byteorder.BEAppendUint32(b, d.h[1]);
@@ -75,7 +75,7 @@ private static readonly @string cryptoSha1InvalidHashˢᵇᴍdigest = "crypto/sh
 internal static ref readonly @string cryptoSha1InvalidHashˢ2ᴍdigest => ref cryptoSha1InvalidHashˢ2ᵇᴍdigest;
 private static readonly @string cryptoSha1InvalidHashˢ2ᵇᴍdigest = "crypto/sha1: invalid hash state size"u8;
 
-internal static error UnmarshalBinaryᴍ(ref digest d, slice<byte> b) {
+[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
         return errors.New(cryptoSha1InvalidHashˢᴍdigest);
     }
@@ -106,12 +106,12 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
 
 } partial class sha1_package {
 
-internal static (hash.Cloner, error) Cloneᴍ(ref digest d) {
+[GoMethodBody("Clone")] internal static (hash.Cloner, error) Cloneᴍ(ref digest d) {
     ref var r = ref heap<digest>(d.ΔClone(), out var Ꮡr);
     return (new digestжCloner(Ꮡr), default);
 }
 
-internal static void Resetᴍ(ref digest d) {
+[GoMethodBody("Reset")] internal static void Resetᴍ(ref digest d) {
     d.h[0] = init0;
     d.h[1] = init1;
     d.h[2] = init2;
@@ -138,15 +138,15 @@ public static hash.Hash New() {
 
 } partial class sha1_package {
 
-internal static nint Sizeᴍ(ref digest d) { return sha1.Size; }
+[GoMethodBody("Size")] internal static nint Sizeᴍ(ref digest d) { return sha1.Size; }
 
-internal static nint BlockSizeᴍ(ref digest d) { return sha1.BlockSize; }
+[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref digest d) { return sha1.BlockSize; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoSha1UseOfSha1IsNotˢᴍdigest => ref cryptoSha1UseOfSha1IsNotˢᵇᴍdigest;
 private static readonly @string cryptoSha1UseOfSha1IsNotˢᵇᴍdigest = "crypto/sha1: use of SHA-1 is not allowed in FIPS 140-only mode"u8;
 
-internal static (nint nn, error err) Writeᴍ(ж<digest> Ꮡd, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint nn, error err) Writeᴍ(ж<digest> Ꮡd, slice<byte> p) {
     nint nn = default;
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
@@ -177,7 +177,7 @@ internal static (nint nn, error err) Writeᴍ(ж<digest> Ꮡd, slice<byte> p) {
     return (nn, err);
 }
 
-internal static slice<byte> Sumᴍ(ref digest d, slice<byte> @in) {
+[GoMethodBody("Sum")] internal static slice<byte> Sumᴍ(ref digest d, slice<byte> @in) {
     boring.Unreachable();
     // Make a copy of d so that caller can keep writing and summing.
     ref var d0 = ref heap<digest>(d.ΔClone(), out var Ꮡd0);
@@ -185,7 +185,7 @@ internal static slice<byte> Sumᴍ(ref digest d, slice<byte> @in) {
     return appendꓸꓸꓸ(@in, hash[..]);
 }
 
-internal static array<byte> checkSumᴍ(ж<digest> Ꮡd) {
+[GoMethodBody("checkSum")] internal static array<byte> checkSumᴍ(ж<digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (fips140only.Enforced()) {
@@ -225,13 +225,13 @@ internal static array<byte> checkSumᴍ(ж<digest> Ꮡd) {
 }
 
 // ConstantTimeSum computes the same result of [Sum] but in constant time
-internal static slice<byte> ConstantTimeSumᴍ(ref digest d, slice<byte> @in) {
+[GoMethodBody("ConstantTimeSum")] internal static slice<byte> ConstantTimeSumᴍ(ref digest d, slice<byte> @in) {
     ref var d0 = ref heap<digest>(d.ΔClone(), out var Ꮡd0);
     var hash = Ꮡd0.constSum();
     return appendꓸꓸꓸ(@in, hash[..]);
 }
 
-internal static array<byte> constSumᴍ(ж<digest> Ꮡd) {
+[GoMethodBody("constSum")] internal static array<byte> constSumᴍ(ж<digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (fips140only.Enforced()) {
@@ -315,20 +315,3 @@ public static array<byte> Sum(slice<byte> data) {
 }
 
 } // end sha1_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class sha1ᴛdigest {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) MarshalBinary(this ref digest d) => sha1_package.MarshalBinaryᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) => sha1_package.AppendBinaryᴍ(ref d, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error UnmarshalBinary(this ref digest d, slice<byte> b) => sha1_package.UnmarshalBinaryᴍ(ref d, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (hash.Cloner, error) Clone(this ref digest d) => sha1_package.Cloneᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Reset(this ref digest d) => sha1_package.Resetᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Size(this ref digest d) => sha1_package.Sizeᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref digest d) => sha1_package.BlockSizeᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) => sha1_package.Writeᴍ(Ꮡd, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Sum(this ref digest d, slice<byte> @in) => sha1_package.Sumᴍ(ref d, @in);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static array<byte> checkSum(this ж<digest> Ꮡd) => sha1_package.checkSumᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> ConstantTimeSum(this ref digest d, slice<byte> @in) => sha1_package.ConstantTimeSumᴍ(ref d, @in);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static array<byte> constSum(this ж<digest> Ꮡd) => sha1_package.constSumᴍ(Ꮡd);
-}
-// </GlyphForwarders>

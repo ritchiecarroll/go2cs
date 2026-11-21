@@ -125,11 +125,11 @@ partial struct Error {
 
 } partial class exec_package {
 
-internal static @string Errorᴍ(ref Error e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref Error e) {
     return "exec: "u8 + strconv.Quote(e.Name) + ": "u8 + e.Err.Error();
 }
 
-internal static error Unwrapᴍ(ref Error e) { return e.Err; }
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref Error e) { return e.Err; }
 
 } partial class exec_package {
 
@@ -146,11 +146,11 @@ partial struct wrappedError {
 
 } partial class exec_package {
 
-internal static @string Errorᴍ(wrappedError w) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(wrappedError w) {
     return w.prefix + ": "u8 + w.err.Error();
 }
 
-internal static error Unwrapᴍ(wrappedError w) {
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(wrappedError w) {
     return w.err;
 }
 
@@ -506,7 +506,7 @@ public static ж<Cmd> CommandContext(context.Context ctx, @string name, params �
 // It is intended only for debugging.
 // In particular, it is not suitable for use as input to a shell.
 // The output of String may vary across Go releases.
-internal static @string Stringᴍ(ref Cmd c) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref Cmd c) {
     if (c.Err != nil || c.lookPathErr != nil) {
         // failed to resolve path; report the original requested path (plus args)
         return strings.Join(c.Args, " ");
@@ -539,14 +539,14 @@ internal static bool interfaceEqual(any a, any b) {
 
 } partial class exec_package {
 
-internal static slice<@string> argvᴍ(ref Cmd c) {
+[GoMethodBody("argv")] internal static slice<@string> argvᴍ(ref Cmd c) {
     if (len(c.Args) > 0) {
         return c.Args;
     }
     return [c.Path];
 }
 
-internal static (ж<os.File>, error) childStdinᴍ(ж<Cmd> Ꮡc) {
+[GoMethodBody("childStdin")] internal static (ж<os.File>, error) childStdinᴍ(ж<Cmd> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.Stdin == nil) {
@@ -585,11 +585,11 @@ internal static (ж<os.File>, error) childStdinᴍ(ж<Cmd> Ꮡc) {
     return (pr, default);
 }
 
-internal static (ж<os.File>, error) childStdoutᴍ(ref Cmd c) {
+[GoMethodBody("childStdout")] internal static (ж<os.File>, error) childStdoutᴍ(ref Cmd c) {
     return c.writerDescriptor(c.Stdout);
 }
 
-internal static (ж<os.File>, error) childStderrᴍ(ref Cmd c, ж<os.File> childStdout) {
+[GoMethodBody("childStderr")] internal static (ж<os.File>, error) childStderrᴍ(ref Cmd c, ж<os.File> childStdout) {
     if (c.Stderr != nil && interfaceEqual(c.Stderr, c.Stdout)) {
         return (childStdout, default);
     }
@@ -600,7 +600,7 @@ internal static (ж<os.File>, error) childStderrᴍ(ref Cmd c, ж<os.File> child
 // can write to send data to w.
 //
 // If w is nil, writerDescriptor returns a File that writes to os.DevNull.
-internal static (ж<os.File>, error) writerDescriptorᴍ(ref Cmd c, io.Writer w) {
+[GoMethodBody("writerDescriptor")] internal static (ж<os.File>, error) writerDescriptorᴍ(ref Cmd c, io.Writer w) {
     if (w == nil) {
         var (f, errΔ1) = os.OpenFile(os.DevNull, os.O_WRONLY, 0);
         if (errΔ1 != nil) {
@@ -655,7 +655,7 @@ internal static void closeDescriptors(slice<io.Closer> closers) {
 // with [runtime.LockOSThread] and modified any inheritable OS-level
 // thread state (for example, Linux or Plan 9 name spaces), the new
 // process will inherit the caller's thread state.
-internal static error Runᴍ(ж<Cmd> Ꮡc) {
+[GoMethodBody("Run")] internal static error Runᴍ(ж<Cmd> Ꮡc) {
     var err = Ꮡc.Start(); if (err != nil) {
         return err;
     }
@@ -685,7 +685,7 @@ private static readonly @string execCommandWithANonNilˢᵇᴍCmd = "exec: comma
 //
 // After a successful call to Start the [Cmd.Wait] method must be called in
 // order to release associated system resources.
-internal static partial error Startᴍ(ж<Cmd> Ꮡc) {
+[GoMethodBody("Start")] internal static partial error Startᴍ(ж<Cmd> Ꮡc) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -847,7 +847,7 @@ internal static partial error Startᴍ(ж<Cmd> Ꮡc) {
 //
 // watchCtx manipulates c.goroutineErr, so its result must be received before
 // c.awaitGoroutines is called.
-internal static void watchCtxᴍ(ref Cmd c, channel/*<-*/<ctxResult> resultc) {
+[GoMethodBody("watchCtx")] internal static void watchCtxᴍ(ref Cmd c, channel/*<-*/<ctxResult> resultc) {
     var resultcᴛ1 = resultc.ᐸꟷ(new ctxResult(), ꓸꓸꓸ);
     var selᴛ3 = c.ctx.Done();
     switch (select(resultcᴛ1, ᐸꟷ(selᴛ3, ꓸꓸꓸ))) {
@@ -967,7 +967,7 @@ partial struct ExitError {
 
 } partial class exec_package {
 
-internal static @string Errorᴍ(ref ExitError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref ExitError e) {
     return e.ProcessState.String();
 }
 
@@ -996,7 +996,7 @@ private static readonly @string execWaitWasAlreadyCalledˢᵇᴍCmd = "exec: Wai
 // for the respective I/O loop copying to or from the process to complete.
 //
 // Wait releases any resources associated with the [Cmd].
-internal static error Waitᴍ(ж<Cmd> Ꮡc) {
+[GoMethodBody("Wait")] internal static error Waitᴍ(ж<Cmd> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.Process == nil) {
@@ -1043,7 +1043,7 @@ internal static error Waitᴍ(ж<Cmd> Ꮡc) {
 // forcibly closes their pipes and returns ErrWaitDelay.
 //
 // If timer is non-nil, it must send to timer.C at the end of c.WaitDelay.
-internal static error awaitGoroutinesᴍ(ж<Cmd> Ꮡc, ж<time.Timer> Ꮡtimer) {
+[GoMethodBody("awaitGoroutines")] internal static error awaitGoroutinesᴍ(ж<Cmd> Ꮡc, ж<time.Timer> Ꮡtimer) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -1108,7 +1108,7 @@ private static readonly @string execStdoutAlreadySetˢᵇᴍCmd = "exec: Stdout 
 // If c.Stderr was nil and the returned error is of type
 // [*ExitError], Output populates the Stderr field of the
 // returned error.
-internal static (slice<byte>, error) Outputᴍ(ж<Cmd> Ꮡc) {
+[GoMethodBody("Output")] internal static (slice<byte>, error) Outputᴍ(ж<Cmd> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.Stdout != nil) {
@@ -1137,7 +1137,7 @@ private static readonly @string execStderrAlreadySetˢᵇᴍCmd = "exec: Stderr 
 
 // CombinedOutput runs the command and returns its combined standard
 // output and standard error.
-internal static (slice<byte>, error) CombinedOutputᴍ(ж<Cmd> Ꮡc) {
+[GoMethodBody("CombinedOutput")] internal static (slice<byte>, error) CombinedOutputᴍ(ж<Cmd> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.Stdout != nil) {
@@ -1165,7 +1165,7 @@ private static readonly @string execStdinPipeAfterˢᵇᴍCmd = "exec: StdinPipe
 // A caller need only call Close to force the pipe to close sooner.
 // For example, if the command being run will not exit until standard input
 // is closed, the caller must close the pipe.
-internal static (io.WriteCloser, error) StdinPipeᴍ(ref Cmd c) {
+[GoMethodBody("StdinPipe")] internal static (io.WriteCloser, error) StdinPipeᴍ(ref Cmd c) {
     if (c.Stdin != nil) {
         return (default, errors.New(execStdinAlreadySetˢᴍCmd));
     }
@@ -1194,7 +1194,7 @@ private static readonly @string execStdoutPipeAfterˢᵇᴍCmd = "exec: StdoutPi
 // before all reads from the pipe have completed.
 // For the same reason, it is incorrect to call [Cmd.Run] when using StdoutPipe.
 // See the example for idiomatic usage.
-internal static (io.ReadCloser, error) StdoutPipeᴍ(ref Cmd c) {
+[GoMethodBody("StdoutPipe")] internal static (io.ReadCloser, error) StdoutPipeᴍ(ref Cmd c) {
     if (c.Stdout != nil) {
         return (default, errors.New(execStdoutAlreadySetˢᴍCmd));
     }
@@ -1223,7 +1223,7 @@ private static readonly @string execStderrPipeAfterˢᵇᴍCmd = "exec: StderrPi
 // before all reads from the pipe have completed.
 // For the same reason, it is incorrect to use [Cmd.Run] when using StderrPipe.
 // See the StdoutPipe example for idiomatic usage.
-internal static (io.ReadCloser, error) StderrPipeᴍ(ref Cmd c) {
+[GoMethodBody("StderrPipe")] internal static (io.ReadCloser, error) StderrPipeᴍ(ref Cmd c) {
     if (c.Stderr != nil) {
         return (default, errors.New(execStderrAlreadySetˢᴍCmd));
     }
@@ -1260,7 +1260,7 @@ partial struct prefixSuffixSaver {
 // then the ring buffer suffix, and just rearrange the ring buffer
 // suffix when Bytes() is called, but it doesn't seem worth it for
 // now just for error messages. It's only ~64KB anyway.
-internal static (nint n, error err) Writeᴍ(ж<prefixSuffixSaver> Ꮡw, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<prefixSuffixSaver> Ꮡw, slice<byte> p) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     nint lenp = len(p);
@@ -1288,7 +1288,7 @@ internal static (nint n, error err) Writeᴍ(ж<prefixSuffixSaver> Ꮡw, slice<b
 
 // fill appends up to len(p) bytes of p to *dst, such that *dst does not
 // grow larger than w.N. It returns the un-appended suffix of p.
-internal static slice<byte> /*pRemain*/ fillᴍ(ref prefixSuffixSaver w, ж<slice<byte>> Ꮡdst, slice<byte> p) {
+[GoMethodBody("fill")] internal static slice<byte> /*pRemain*/ fillᴍ(ref prefixSuffixSaver w, ж<slice<byte>> Ꮡdst, slice<byte> p) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
     nint remain = w.N - len(dst); if (remain > 0) {
@@ -1305,7 +1305,7 @@ private static readonly @string omittingˢᵇᴍprefixSuffixSaver = "\n... omitt
 internal static ref readonly @string bytesˢᴍprefixSuffixSaver => ref bytesˢᵇᴍprefixSuffixSaver;
 private static readonly @string bytesˢᵇᴍprefixSuffixSaver = " bytes ...\n"u8;
 
-internal static slice<byte> Bytesᴍ(ref prefixSuffixSaver w) {
+[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref prefixSuffixSaver w) {
     if (w.suffix == nil) {
         return w.prefix;
     }
@@ -1328,7 +1328,7 @@ internal static slice<byte> Bytesᴍ(ref prefixSuffixSaver w) {
 // environ returns a best-effort copy of the environment in which the command
 // would be run as it is currently configured. If an error occurs in computing
 // the environment, it is returned alongside the best-effort copy.
-internal static (slice<@string>, error) environᴍ(ref Cmd c) {
+[GoMethodBody("environ")] internal static (slice<@string>, error) environᴍ(ref Cmd c) {
     error err = default;
 
     var env = c.Env;
@@ -1375,7 +1375,7 @@ internal static (slice<@string>, error) environᴍ(ref Cmd c) {
 
 // Environ returns a copy of the environment in which the command would be run
 // as it is currently configured.
-internal static slice<@string> Environᴍ(ref Cmd c) {
+[GoMethodBody("Environ")] internal static slice<@string> Environᴍ(ref Cmd c) {
     //  Intentionally ignore errors: environ returns a best-effort environment no matter what.
     var (env, _) = c.environ();
     return env;
@@ -1496,42 +1496,3 @@ internal static error validateLookPath(@string s) {
 }
 
 } // end exec_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class execᴛError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref Error e) => exec_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref Error e) => exec_package.Unwrapᴍ(ref e);
-}
-partial class execᴛwrappedError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this wrappedError w) => exec_package.Errorᴍ(w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Unwrap(this wrappedError w) => exec_package.Unwrapᴍ(w);
-}
-partial class execᴛCmd {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Cmd c) => exec_package.Stringᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<@string> argv(this ref Cmd c) => exec_package.argvᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<os.File>, error) childStdin(this ж<Cmd> Ꮡc) => exec_package.childStdinᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<os.File>, error) childStdout(this ref Cmd c) => exec_package.childStdoutᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<os.File>, error) childStderr(this ref Cmd c, ж<os.File> childStdout) => exec_package.childStderrᴍ(ref c, childStdout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<os.File>, error) writerDescriptor(this ref Cmd c, io.Writer w) => exec_package.writerDescriptorᴍ(ref c, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Run(this ж<Cmd> Ꮡc) => exec_package.Runᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Start(this ж<Cmd> Ꮡc) => exec_package.Startᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void watchCtx(this ref Cmd c, channel/*<-*/<ctxResult> resultc) => exec_package.watchCtxᴍ(ref c, resultc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Wait(this ж<Cmd> Ꮡc) => exec_package.Waitᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error awaitGoroutines(this ж<Cmd> Ꮡc, ж<time.Timer> Ꮡtimer) => exec_package.awaitGoroutinesᴍ(Ꮡc, Ꮡtimer);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Output(this ж<Cmd> Ꮡc) => exec_package.Outputᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) CombinedOutput(this ж<Cmd> Ꮡc) => exec_package.CombinedOutputᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (io.WriteCloser, error) StdinPipe(this ref Cmd c) => exec_package.StdinPipeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (io.ReadCloser, error) StdoutPipe(this ref Cmd c) => exec_package.StdoutPipeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (io.ReadCloser, error) StderrPipe(this ref Cmd c) => exec_package.StderrPipeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<@string>, error) environ(this ref Cmd c) => exec_package.environᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> Environ(this ref Cmd c) => exec_package.Environᴍ(ref c);
-}
-partial class execᴛExitError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref ExitError e) => exec_package.Errorᴍ(ref e);
-}
-partial class execᴛprefixSuffixSaver {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ж<prefixSuffixSaver> Ꮡw, slice<byte> p) => exec_package.Writeᴍ(Ꮡw, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> /*pRemain*/ fill(this ref prefixSuffixSaver w, ж<slice<byte>> Ꮡdst, slice<byte> p) => exec_package.fillᴍ(ref w, Ꮡdst, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Bytes(this ref prefixSuffixSaver w) => exec_package.Bytesᴍ(ref w);
-}
-// </GlyphForwarders>

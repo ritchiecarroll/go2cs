@@ -189,7 +189,7 @@ partial struct byPriorityWeight /*[]ж<SRV>*/;
 
 // shuffleByWeight shuffles SRV records by weight using the algorithm
 // described in RFC 2782.
-internal static void shuffleByWeightᴍ(byPriorityWeight addrs) {
+[GoMethodBody("shuffleByWeight")] internal static void shuffleByWeightᴍ(byPriorityWeight addrs) {
     nint sum = 0;
     foreach (var (_, addr) in range<ж<SRV>>(addrs)) {
         sum += (nint)addr.Weight;
@@ -212,7 +212,7 @@ internal static void shuffleByWeightᴍ(byPriorityWeight addrs) {
 }
 
 // sort reorders SRV records as specified in RFC 2782.
-internal static void sortᴍ(byPriorityWeight addrs) {
+[GoMethodBody("sort")] internal static void sortᴍ(byPriorityWeight addrs) {
     slices.SortFunc(addrs, (ж<SRV> a, ж<SRV> b) => {
         nint r = cmp.Compare(a.Priority, b.Priority); if (r != 0) {
             return r;
@@ -243,7 +243,7 @@ partial struct byPref /*[]ж<MX>*/;
 } partial class net_package {
 
 // sort reorders MX records as specified in RFC 5321.
-internal static void sortᴍ(byPref s) {
+[GoMethodBody("sort")] internal static void sortᴍ(byPref s) {
     foreach (var i in range(len(s))) {
         nint j = randIntn(i + 1);
         (s[i], s[j]) = (s[j], s[i]);
@@ -259,13 +259,3 @@ partial struct NS {
 }
 
 } // end net_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛbyPriorityWeight {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void shuffleByWeight(this byPriorityWeight addrs) => net_package.shuffleByWeightᴍ(addrs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sort(this byPriorityWeight addrs) => net_package.sortᴍ(addrs);
-}
-partial class netᴛbyPref {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sort(this byPref s) => net_package.sortᴍ(s);
-}
-// </GlyphForwarders>

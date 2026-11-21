@@ -101,7 +101,7 @@ internal static array<uint8> _Tag_index_4 = new uint8[]{0, 11, 24, 35, 45, 55}.a
 
 } partial class dwarf_package {
 
-internal static @string Stringᴍ(Tag i) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Tag i) {
     switch (ᐧ) {
     case {} when 1 <= i && i <= 5: {
         i -= 1;
@@ -131,9 +131,3 @@ internal static @string Stringᴍ(Tag i) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class dwarfᴛTag {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Tag i) => dwarf_package.Stringᴍ(i);
-}
-// </GlyphForwarders>

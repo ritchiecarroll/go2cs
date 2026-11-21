@@ -65,7 +65,7 @@ private static readonly @string DefaultRemoteAddrᵇ = "1.2.3.4"u8;
 // headers to mutate within a handler. To test the headers that were
 // written after a handler completes, use the [ResponseRecorder.Result] method and see
 // the returned Response value's Header.
-internal static http.Header Headerᴍ(ref ResponseRecorder rw) {
+[GoMethodBody("Header")] internal static http.Header Headerᴍ(ref ResponseRecorder rw) {
     var m = rw.HeaderMap;
     if (m == nil) {
         m = new http.Header(0);
@@ -87,7 +87,7 @@ private static readonly @string transferEncodingˢᵇᴍResponseRecorder = "Tran
 // We pass both to avoid unnecessarily generate garbage
 // in rw.WriteString which was created for performance reasons.
 // Non-nil bytes win.
-internal static void writeHeaderᴍ(ref ResponseRecorder rw, slice<byte> b, @string str) {
+[GoMethodBody("writeHeader")] internal static void writeHeaderᴍ(ref ResponseRecorder rw, slice<byte> b, @string str) {
     if (rw.wroteHeader) {
         return;
     }
@@ -111,7 +111,7 @@ internal static void writeHeaderᴍ(ref ResponseRecorder rw, slice<byte> b, @str
 
 // Write implements http.ResponseWriter. The data in buf is written to
 // rw.Body, if not nil.
-internal static (nint, error) Writeᴍ(ref ResponseRecorder rw, slice<byte> buf) {
+[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ref ResponseRecorder rw, slice<byte> buf) {
     // Record the write, even if we're going to return an error.
     rw.writeHeader(buf, ""u8);
     if (rw.Body != nil) {
@@ -125,7 +125,7 @@ internal static (nint, error) Writeᴍ(ref ResponseRecorder rw, slice<byte> buf)
 
 // WriteString implements [io.StringWriter]. The data in str is written
 // to rw.Body, if not nil.
-internal static (nint, error) WriteStringᴍ(ref ResponseRecorder rw, @string str) {
+[GoMethodBody("WriteString")] internal static (nint, error) WriteStringᴍ(ref ResponseRecorder rw, @string str) {
     // Record the write, even if we're going to return an error.
     rw.writeHeader(default, str);
     if (rw.Body != nil) {
@@ -175,7 +175,7 @@ internal static void checkWriteHeaderCode(nint code) {
 } partial class httptest_package {
 
 // WriteHeader implements [http.ResponseWriter].
-internal static void WriteHeaderᴍ(ref ResponseRecorder rw, nint code) {
+[GoMethodBody("WriteHeader")] internal static void WriteHeaderᴍ(ref ResponseRecorder rw, nint code) {
     if (rw.wroteHeader) {
         return;
     }
@@ -191,7 +191,7 @@ internal static void WriteHeaderᴍ(ref ResponseRecorder rw, nint code) {
 
 // Flush implements [http.Flusher]. To test whether Flush was
 // called, see rw.Flushed.
-internal static void Flushᴍ(ref ResponseRecorder rw) {
+[GoMethodBody("Flush")] internal static void Flushᴍ(ref ResponseRecorder rw) {
     if (!rw.wroteHeader) {
         rw.WriteHeader(200);
     }
@@ -219,7 +219,7 @@ private static readonly @string trailerˢᵇᴍResponseRecorder = "Trailer"u8;
 // guaranteed to not return any error other than [io.EOF].
 //
 // Result must only be called after the handler has finished running.
-internal static ж<http.Response> Resultᴍ(ref ResponseRecorder rw) {
+[GoMethodBody("Result")] internal static ж<http.Response> Resultᴍ(ref ResponseRecorder rw) {
     if (rw.result != nil) {
         return rw.result;
     }
@@ -301,15 +301,3 @@ internal static int64 parseContentLength(@string cl) {
 }
 
 } // end httptest_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httptestᴛResponseRecorder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static http.Header Header(this ref ResponseRecorder rw) => httptest_package.Headerᴍ(ref rw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeHeader(this ref ResponseRecorder rw, slice<byte> b, @string str) => httptest_package.writeHeaderᴍ(ref rw, b, str);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Write(this ref ResponseRecorder rw, slice<byte> buf) => httptest_package.Writeᴍ(ref rw, buf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteString(this ref ResponseRecorder rw, @string str) => httptest_package.WriteStringᴍ(ref rw, str);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void WriteHeader(this ref ResponseRecorder rw, nint code) => httptest_package.WriteHeaderᴍ(ref rw, code);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Flush(this ref ResponseRecorder rw) => httptest_package.Flushᴍ(ref rw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<http.Response> Result(this ref ResponseRecorder rw) => httptest_package.Resultᴍ(ref rw);
-}
-// </GlyphForwarders>

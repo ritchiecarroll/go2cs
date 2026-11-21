@@ -42,7 +42,7 @@ private static readonly @string abbrevˢᵇᴍData = "abbrev"u8;
 
 // parseAbbrev returns the abbreviation table that starts at byte off
 // in the .debug_abbrev section.
-internal static (abbrevTable, error) parseAbbrevᴍ(ж<Data> Ꮡd, uint64 off, nint vers) {
+[GoMethodBody("parseAbbrev")] internal static (abbrevTable, error) parseAbbrevᴍ(ж<Data> Ꮡd, uint64 off, nint vers) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var (mΔ1, ok) = d.abbrevCache[off, ꟷ]; if (ok) {
@@ -391,7 +391,7 @@ public static Class ClassStrOffsetsPtr => 19;
 } partial class dwarf_package {
 
 //go:generate stringer -type=Class
-internal static @string GoStringᴍ(Class i) {
+[GoMethodBody("GoString")] internal static @string GoStringᴍ(Class i) {
     return "dwarf."u8 + i.String();
 }
 
@@ -404,7 +404,7 @@ internal static @string GoStringᴍ(Class i) {
 // the check that the value has the expected dynamic type, as in:
 //
 //	v, ok := e.Val(AttrSibling).(int64)
-internal static any Valᴍ(ref Entry e, Attr a) {
+[GoMethodBody("Val")] internal static any Valᴍ(ref Entry e, Attr a) {
     var f = e.AttrField(a); if (f != nil) {
         return f.Val;
     }
@@ -413,7 +413,7 @@ internal static any Valᴍ(ref Entry e, Attr a) {
 
 // AttrField returns the [Field] associated with attribute [Attr] in
 // [Entry], or nil if there is no such attribute.
-internal static ж<Field> AttrFieldᴍ(ref Entry e, Attr a) {
+[GoMethodBody("AttrField")] internal static ж<Field> AttrFieldᴍ(ref Entry e, Attr a) {
     foreach (var (i, f) in range(e.Field)) {
         if (f.Attr == a) {
             return Ꮡ(e.Field, i);
@@ -470,7 +470,7 @@ private static readonly @string unknownSizeForDwFormStrpˢ2ᵇᴍbuf = "unknown 
 
 // Entry reads a single entry from buf, decoding
 // according to the given abbreviation table.
-internal static ж<Entry> entryᴍ(ж<buf> Ꮡb, ж<Entry> cu, ж<unit> Ꮡu) {
+[GoMethodBody("entry")] internal static ж<Entry> entryᴍ(ж<buf> Ꮡb, ж<Entry> cu, ж<unit> Ꮡu) {
     ref var b = ref Ꮡb.DerefOrNull();
     ref var u = ref Ꮡu.DerefOrNull();
 
@@ -886,7 +886,7 @@ partial struct Reader {
 
 // Reader returns a new Reader for [Data].
 // The reader is positioned at byte offset 0 in the DWARF “info” section.
-internal static ж<Reader> Readerᴍ(ж<Data> Ꮡd) {
+[GoMethodBody("Reader")] internal static ж<Reader> Readerᴍ(ж<Data> Ꮡd) {
     var r = Ꮡ(new Reader(d: Ꮡd));
     r.Seek(0);
     return r;
@@ -896,12 +896,12 @@ internal static ж<Reader> Readerᴍ(ж<Data> Ꮡd) {
 
 // AddressSize returns the size in bytes of addresses in the current compilation
 // unit.
-internal static nint AddressSizeᴍ(ref Reader r) {
+[GoMethodBody("AddressSize")] internal static nint AddressSizeᴍ(ref Reader r) {
     return r.d.unit[r.unit].asize;
 }
 
 // ByteOrder returns the byte order in the current compilation unit.
-internal static binary.ByteOrder ByteOrderᴍ(ref Reader r) {
+[GoMethodBody("ByteOrder")] internal static binary.ByteOrder ByteOrderᴍ(ref Reader r) {
     return r.b.order;
 }
 
@@ -913,7 +913,7 @@ private static readonly @string offsetOutOfRangeˢᵇᴍReader = "offset out of 
 
 // Seek positions the [Reader] at offset off in the encoded entry stream.
 // Offset 0 can be used to denote the first entry.
-internal static void Seekᴍ(ref Reader r, Offset off) {
+[GoMethodBody("Seek")] internal static void Seekᴍ(ref Reader r, Offset off) {
     var d = r.d;
     r.err = default;
     r.lastChildren = false;
@@ -944,14 +944,14 @@ internal static void Seekᴍ(ref Reader r, Offset off) {
 }
 
 // maybeNextUnit advances to the next unit if this one is finished.
-internal static void maybeNextUnitᴍ(ref Reader r) {
+[GoMethodBody("maybeNextUnit")] internal static void maybeNextUnitᴍ(ref Reader r) {
     while (len(r.b.data) == 0 && r.unit + 1 < len(r.d.unit)) {
         r.nextUnit();
     }
 }
 
 // nextUnit advances to the next unit.
-internal static void nextUnitᴍ(ref Reader r) {
+[GoMethodBody("nextUnit")] internal static void nextUnitᴍ(ref Reader r) {
     r.unit++;
     var u = Ꮡ(r.d.unit, r.unit);
     r.b = makeBuf(r.d, new unitжdataFormat(u), infoˢᴍReader, u.off, u.data);
@@ -959,7 +959,7 @@ internal static void nextUnitᴍ(ref Reader r) {
     r.collectDwarf5BaseOffsets(u);
 }
 
-internal static void collectDwarf5BaseOffsetsᴍ(ref Reader r, ж<unit> Ꮡu) {
+[GoMethodBody("collectDwarf5BaseOffsets")] internal static void collectDwarf5BaseOffsetsᴍ(ref Reader r, ж<unit> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     if (u.vers < 5 || u.unit5 != nil) {
@@ -975,7 +975,7 @@ internal static void collectDwarf5BaseOffsetsᴍ(ref Reader r, ж<unit> Ꮡu) {
 // It returns nil, nil when it reaches the end of the section.
 // It returns an error if the current offset is invalid or the data at the
 // offset cannot be decoded as a valid [Entry].
-internal static (ж<Entry>, error) Nextᴍ(ж<Reader> Ꮡr) {
+[GoMethodBody("Next")] internal static (ж<Entry>, error) Nextᴍ(ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.err != nil) {
@@ -1010,7 +1010,7 @@ internal static (ж<Entry>, error) Nextᴍ(ж<Reader> Ꮡr) {
 // SkipChildren skips over the child entries associated with
 // the last [Entry] returned by [Reader.Next]. If that [Entry] did not have
 // children or [Reader.Next] has not been called, SkipChildren is a no-op.
-internal static void SkipChildrenᴍ(ж<Reader> Ꮡr) {
+[GoMethodBody("SkipChildren")] internal static void SkipChildrenᴍ(ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.err != nil || !r.lastChildren) {
@@ -1044,13 +1044,13 @@ internal static void SkipChildrenᴍ(ж<Reader> Ꮡr) {
 
 // clone returns a copy of the reader. This is used by the typeReader
 // interface.
-internal static typeReader cloneᴍ(ref Reader r) {
+[GoMethodBody("clone")] internal static typeReader cloneᴍ(ref Reader r) {
     return new ReaderжtypeReader(r.d.Reader());
 }
 
 // offset returns the current buffer offset. This is used by the
 // typeReader interface.
-internal static Offset offsetᴍ(ref Reader r) {
+[GoMethodBody("offset")] internal static Offset offsetᴍ(ref Reader r) {
     return r.b.off;
 }
 
@@ -1066,7 +1066,7 @@ internal static Offset offsetᴍ(ref Reader r) {
 // looking up a series of PCs will be faster if they are sorted. If
 // the caller wishes to do repeated fast PC lookups, it should build
 // an appropriate index using the Ranges method.
-internal static (ж<Entry>, error) SeekPCᴍ(ж<Reader> Ꮡr, uint64 pc) {
+[GoMethodBody("SeekPC")] internal static (ж<Entry>, error) SeekPCᴍ(ж<Reader> Ꮡr, uint64 pc) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     nint unit = r.unit;
@@ -1109,7 +1109,7 @@ internal static (ж<Entry>, error) SeekPCᴍ(ж<Reader> Ꮡr, uint64 pc) {
 // Ranges returns the PC ranges covered by e, a slice of [low,high) pairs.
 // Only some entry types, such as [TagCompileUnit] or [TagSubprogram], have PC
 // ranges; for others, this will return nil with no error.
-internal static (slice<array<uint64>>, error) Rangesᴍ(ж<Data> Ꮡd, ж<Entry> Ꮡe) {
+[GoMethodBody("Ranges")] internal static (slice<array<uint64>>, error) Rangesᴍ(ж<Data> Ꮡd, ж<Entry> Ꮡe) {
     ref var d = ref Ꮡd.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -1203,7 +1203,7 @@ private static readonly @string infoˢᵇᴍData = "info"u8;
 // DWARF specifies that this should be the lowpc attribute of the enclosing
 // compilation unit, however comments in gdb/dwarf2read.c say that some
 // versions of GCC use the entrypc attribute, so we check that too.
-internal static (ж<Entry>, uint64, error) baseAddressForEntryᴍ(ж<Data> Ꮡd, ж<Entry> Ꮡe) {
+[GoMethodBody("baseAddressForEntry")] internal static (ж<Entry>, uint64, error) baseAddressForEntryᴍ(ж<Data> Ꮡd, ж<Entry> Ꮡe) {
     ref var d = ref Ꮡd.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -1236,7 +1236,7 @@ internal static (ж<Entry>, uint64, error) baseAddressForEntryᴍ(ж<Data> Ꮡd,
 internal static ref readonly @string rangesˢᴍData => ref rangesˢᵇᴍData;
 private static readonly @string rangesˢᵇᴍData = "ranges"u8;
 
-internal static (slice<array<uint64>>, error) dwarf2Rangesᴍ(ж<Data> Ꮡd, ж<unit> Ꮡu, uint64 @base, int64 ranges, slice<array<uint64>> ret) {
+[GoMethodBody("dwarf2Ranges")] internal static (slice<array<uint64>>, error) dwarf2Rangesᴍ(ж<Data> Ꮡd, ж<unit> Ꮡu, uint64 @base, int64 ranges, slice<array<uint64>> ret) {
     ref var d = ref Ꮡd.DerefOrNull();
     ref var u = ref Ꮡu.DerefOrNull();
     var retᴷ = new stackAppend<array<uint64>>(moves: true);
@@ -1270,7 +1270,7 @@ private static readonly @string rnglistsˢᵇᴍData = "rnglists"u8;
 
 // dwarf5Ranges interprets a debug_rnglists sequence, see DWARFv5 section
 // 2.17.3 (page 53).
-internal static (slice<array<uint64>>, error) dwarf5Rangesᴍ(ж<Data> Ꮡd, ж<unit> u, ж<Entry> Ꮡcu, uint64 @base, int64 ranges, slice<array<uint64>> ret) {
+[GoMethodBody("dwarf5Ranges")] internal static (slice<array<uint64>>, error) dwarf5Rangesᴍ(ж<Data> Ꮡd, ж<unit> u, ж<Entry> Ꮡcu, uint64 @base, int64 ranges, slice<array<uint64>> ret) {
     ref var d = ref Ꮡd.DerefOrNull();
     ref var cu = ref Ꮡcu.DerefOrNull();
 
@@ -1359,7 +1359,7 @@ internal static ref readonly @string addrˢᴍData => ref addrˢᵇᴍData;
 private static readonly @string addrˢᵇᴍData = "addr"u8;
 
 // debugAddr returns the address at idx in debug_addr
-internal static (uint64, error) debugAddrᴍ(ж<Data> Ꮡd, dataFormat format, uint64 addrBase, uint64 idx) {
+[GoMethodBody("debugAddr")] internal static (uint64, error) debugAddrᴍ(ж<Data> Ꮡd, dataFormat format, uint64 addrBase, uint64 idx) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var off = idx * (uint64)format.addrsize() + addrBase;
@@ -1378,38 +1378,3 @@ internal static (uint64, error) debugAddrᴍ(ж<Data> Ꮡd, dataFormat format, u
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class dwarfᴛData {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (abbrevTable, error) parseAbbrev(this ж<Data> Ꮡd, uint64 off, nint vers) => dwarf_package.parseAbbrevᴍ(Ꮡd, off, vers);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Reader> Reader(this ж<Data> Ꮡd) => dwarf_package.Readerᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<array<uint64>>, error) Ranges(this ж<Data> Ꮡd, ж<Entry> Ꮡe) => dwarf_package.Rangesᴍ(Ꮡd, Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Entry>, uint64, error) baseAddressForEntry(this ж<Data> Ꮡd, ж<Entry> Ꮡe) => dwarf_package.baseAddressForEntryᴍ(Ꮡd, Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<array<uint64>>, error) dwarf2Ranges(this ж<Data> Ꮡd, ж<unit> Ꮡu, uint64 @base, int64 ranges, slice<array<uint64>> ret) => dwarf_package.dwarf2Rangesᴍ(Ꮡd, Ꮡu, @base, ranges, ret);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<array<uint64>>, error) dwarf5Ranges(this ж<Data> Ꮡd, ж<unit> u, ж<Entry> Ꮡcu, uint64 @base, int64 ranges, slice<array<uint64>> ret) => dwarf_package.dwarf5Rangesᴍ(Ꮡd, u, Ꮡcu, @base, ranges, ret);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, error) debugAddr(this ж<Data> Ꮡd, dataFormat format, uint64 addrBase, uint64 idx) => dwarf_package.debugAddrᴍ(Ꮡd, format, addrBase, idx);
-}
-partial class dwarfᴛClass {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Class i) => dwarf_package.GoStringᴍ(i);
-}
-partial class dwarfᴛEntry {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static any Val(this ref Entry e, Attr a) => dwarf_package.Valᴍ(ref e, a);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Field> AttrField(this ref Entry e, Attr a) => dwarf_package.AttrFieldᴍ(ref e, a);
-}
-partial class dwarfᴛbuf {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Entry> entry(this ж<buf> Ꮡb, ж<Entry> cu, ж<unit> Ꮡu) => dwarf_package.entryᴍ(Ꮡb, cu, Ꮡu);
-}
-partial class dwarfᴛReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint AddressSize(this ref Reader r) => dwarf_package.AddressSizeᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static binary.ByteOrder ByteOrder(this ref Reader r) => dwarf_package.ByteOrderᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Seek(this ref Reader r, Offset off) => dwarf_package.Seekᴍ(ref r, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void maybeNextUnit(this ref Reader r) => dwarf_package.maybeNextUnitᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void nextUnit(this ref Reader r) => dwarf_package.nextUnitᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void collectDwarf5BaseOffsets(this ref Reader r, ж<unit> Ꮡu) => dwarf_package.collectDwarf5BaseOffsetsᴍ(ref r, Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Entry>, error) Next(this ж<Reader> Ꮡr) => dwarf_package.Nextᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SkipChildren(this ж<Reader> Ꮡr) => dwarf_package.SkipChildrenᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static typeReader clone(this ref Reader r) => dwarf_package.cloneᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Offset offset(this ref Reader r) => dwarf_package.offsetᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Entry>, error) SeekPC(this ж<Reader> Ꮡr, uint64 pc) => dwarf_package.SeekPCᴍ(Ꮡr, pc);
-}
-// </GlyphForwarders>

@@ -19,7 +19,7 @@ private static readonly @string statˢᵇᴍFile = "stat"u8;
 
 // Stat returns the [FileInfo] structure describing file.
 // If there is an error, it will be of type [*PathError].
-internal static (FileInfo, error) Statᴍ(ж<File> Ꮡf) {
+[GoMethodBody("Stat")] internal static (FileInfo, error) Statᴍ(ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf == nil) {
@@ -59,9 +59,3 @@ internal static (FileInfo, error) lstatNolog(@string name) {
 }
 
 } // end os_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class osᴛFile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (FileInfo, error) Stat(this ж<File> Ꮡf) => os_package.Statᴍ(Ꮡf);
-}
-// </GlyphForwarders>

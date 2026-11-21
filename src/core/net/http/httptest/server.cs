@@ -133,7 +133,7 @@ private static readonly @string exampleCom80ˢᵇᴍServer = ".example.com:80"u8
 internal static readonly object httptestServingOnˢᴍServer = (@string)"httptest: serving on"u8;
 
 // Start starts a server from NewUnstartedServer.
-internal static void Startᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("Start")] internal static void Startᴍ(ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.URL != ""u8) {
@@ -172,7 +172,7 @@ internal static ref readonly @string exampleCom443ˢᴍServer => ref exampleCom4
 private static readonly @string exampleCom443ˢᵇᴍServer = ".example.com:443"u8;
 
 // StartTLS starts TLS on a server from NewUnstartedServer.
-internal static void StartTLSᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("StartTLS")] internal static void StartTLSᴍ(ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.URL != ""u8) {
@@ -250,7 +250,7 @@ partial interface closeIdleTransport {
 
 // Close shuts down the server and blocks until all outstanding
 // requests on this server have completed.
-internal static void Closeᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("Close")] internal static void Closeᴍ(ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -316,7 +316,7 @@ internal static void Closeᴍ(ж<Server> Ꮡs) {
 internal static ref readonly @string httptestServerBlockedInˢᴍServer => ref httptestServerBlockedInˢᵇᴍServer;
 private static readonly @string httptestServerBlockedInˢᵇᴍServer = "httptest.Server blocked in Close after 5 seconds, waiting for connections:\n"u8;
 
-internal static void logCloseHangDebugInfoᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("logCloseHangDebugInfo")] internal static void logCloseHangDebugInfoᴍ(ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -336,7 +336,7 @@ internal static void logCloseHangDebugInfoᴍ(ж<Server> Ꮡs) {
 }
 
 // CloseClientConnections closes any open HTTP connections to the test Server.
-internal static partial void CloseClientConnectionsᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("CloseClientConnections")] internal static partial void CloseClientConnectionsᴍ(ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -377,7 +377,7 @@ internal static partial void CloseClientConnectionsᴍ(ж<Server> Ꮡs) {
 
 // Certificate returns the certificate used by the server, or nil if
 // the server doesn't use TLS.
-internal static ж<x509.Certificate> Certificateᴍ(ref Server s) {
+[GoMethodBody("Certificate")] internal static ж<x509.Certificate> Certificateᴍ(ref Server s) {
     return s.certificate;
 }
 
@@ -387,11 +387,11 @@ internal static ж<x509.Certificate> Certificateᴍ(ref Server s) {
 // Use Server.URL as the base URL to send requests to the server.
 // The returned client will also redirect any requests to "example.com"
 // or its subdomains to the server.
-internal static ж<http.Client> Clientᴍ(ref Server s) {
+[GoMethodBody("Client")] internal static ж<http.Client> Clientᴍ(ref Server s) {
     return s.client;
 }
 
-internal static partial void goServeᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("goServe")] internal static partial void goServeᴍ(ж<Server> Ꮡs) {
     Ꮡs.Ꮡwg.Add(1);
     goǃ(() => {
         GoFrame ᒐ = default;
@@ -406,7 +406,7 @@ internal static partial void goServeᴍ(ж<Server> Ꮡs) {
 
 // wrap installs the connection state-tracking hook to know which
 // connections are idle.
-internal static void wrapᴍ(ж<Server> Ꮡs) {
+[GoMethodBody("wrap")] internal static void wrapᴍ(ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var oldHook = s.Config.ConnState;
@@ -487,11 +487,11 @@ internal static void wrapᴍ(ж<Server> Ꮡs) {
 
 // closeConn closes c.
 // s.mu must be held.
-internal static void closeConnᴍ(ref Server s, net.Conn c) { s.closeConnChan(c, default); }
+[GoMethodBody("closeConn")] internal static void closeConnᴍ(ref Server s, net.Conn c) { s.closeConnChan(c, default); }
 
 // closeConnChan is like closeConn, but takes an optional channel to receive a value
 // when the goroutine closing c is done.
-internal static void closeConnChanᴍ(ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) {
+[GoMethodBody("closeConnChan")] internal static void closeConnChanᴍ(ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) {
     c.Close();
     if (done != nil) {
         done.ᐸꟷ(new EmptyStruct());
@@ -499,19 +499,3 @@ internal static void closeConnChanᴍ(ref Server s, net.Conn c, channel/*<-*/<Em
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httptestᴛServer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Start(this ж<Server> Ꮡs) => httptest_package.Startᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StartTLS(this ж<Server> Ꮡs) => httptest_package.StartTLSᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Close(this ж<Server> Ꮡs) => httptest_package.Closeᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void logCloseHangDebugInfo(this ж<Server> Ꮡs) => httptest_package.logCloseHangDebugInfoᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void CloseClientConnections(this ж<Server> Ꮡs) => httptest_package.CloseClientConnectionsᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<x509.Certificate> Certificate(this ref Server s) => httptest_package.Certificateᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<http.Client> Client(this ref Server s) => httptest_package.Clientᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void goServe(this ж<Server> Ꮡs) => httptest_package.goServeᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void wrap(this ж<Server> Ꮡs) => httptest_package.wrapᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeConn(this ref Server s, net.Conn c) => httptest_package.closeConnᴍ(ref s, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeConnChan(this ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) => httptest_package.closeConnChanᴍ(ref s, c, done);
-}
-// </GlyphForwarders>

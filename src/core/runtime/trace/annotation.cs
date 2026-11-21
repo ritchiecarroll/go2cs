@@ -82,7 +82,7 @@ partial struct Task {
 // TODO(hyangah): record parent id?
 
 // End marks the end of the operation represented by the [Task].
-internal static void Endᴍ(ref Task t) {
+[GoMethodBody("End")] internal static void Endᴍ(ref Task t) {
     userTaskEnd(t.id);
 }
 
@@ -184,7 +184,7 @@ internal static ж<Region> noopRegion = Ꮡ(new Region());
 } partial class trace_package {
 
 // End marks the end of the traced code region.
-internal static void Endᴍ(ж<Region> Ꮡr) {
+[GoMethodBody("End")] internal static void Endᴍ(ж<Region> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (Ꮡr == noopRegion) {
@@ -219,12 +219,3 @@ internal static partial void userRegion(uint64 id, uint64 mode, @string regionTy
 internal static partial void userLog(uint64 id, @string category, @string message);
 
 } // end trace_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class traceᴛTask {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void End(this ref Task t) => trace_package.Endᴍ(ref t);
-}
-partial class traceᴛRegion {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void End(this ж<Region> Ꮡr) => trace_package.Endᴍ(Ꮡr);
-}
-// </GlyphForwarders>

@@ -66,6 +66,7 @@ var golibNamespaceTypes = nameSet(
 	"GoMemProfile",
 	"GoMemberFact",
 	"GoMemberRecordAttribute",
+	"GoMethodBodyAttribute",
 	"GoMethodHostAttribute",
 	"GoMethodText",
 	"GoModInfoAttribute",

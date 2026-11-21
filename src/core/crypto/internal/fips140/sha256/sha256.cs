@@ -65,11 +65,11 @@ internal const nint marshaledSize = /* len(magic256) + 8*4 + chunk + 8 */ 108;
 
 } partial class sha256_package {
 
-internal static (slice<byte>, error) MarshalBinaryᴍ(ref Digest d) {
+[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(ref Digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
-internal static (slice<byte>, error) AppendBinaryᴍ(ref Digest d, slice<byte> b) {
+[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ref Digest d, slice<byte> b) {
     if (d.is224) {
         b = append(b, magic224.ꓸꓸꓸ);
     } else {
@@ -95,7 +95,7 @@ private static readonly @string cryptoSha256InvalidHashˢᵇᴍDigest = "crypto/
 private static ref readonly @string cryptoSha256InvalidHashˢ2ᴍDigest => ref cryptoSha256InvalidHashˢ2ᵇᴍDigest;
 private static readonly @string cryptoSha256InvalidHashˢ2ᵇᴍDigest = "crypto/sha256: invalid hash state size"u8;
 
-internal static error UnmarshalBinaryᴍ(ref Digest d, slice<byte> b) {
+[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref Digest d, slice<byte> b) {
     if (len(b) < len(magic224) || (d.is224 && ((sstring)(b[..(int)(len(magic224))])) != magic224) || (!d.is224 && ((sstring)(b[..(int)(len(magic256))])) != magic256)) {
         return errors.New(cryptoSha256InvalidHashˢᴍDigest);
     }
@@ -129,12 +129,12 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
 
 } partial class sha256_package {
 
-internal static (hash.Cloner, error) Cloneᴍ(ref Digest d) {
+[GoMethodBody("Clone")] internal static (hash.Cloner, error) Cloneᴍ(ref Digest d) {
     ref var r = ref heap<Digest>(d.ΔClone(), out var Ꮡr);
     return (new DigestжCloner(Ꮡr), default);
 }
 
-internal static void Resetᴍ(ref Digest d) {
+[GoMethodBody("Reset")] internal static void Resetᴍ(ref Digest d) {
     if (!d.is224) {
         d.h[0] = init0;
         d.h[1] = init1;
@@ -177,16 +177,16 @@ public static ж<Digest> New224() {
 
 } partial class sha256_package {
 
-internal static nint Sizeᴍ(ref Digest d) {
+[GoMethodBody("Size")] internal static nint Sizeᴍ(ref Digest d) {
     if (!d.is224) {
         return size;
     }
     return size224;
 }
 
-internal static nint BlockSizeᴍ(ref Digest d) { return blockSize; }
+[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref Digest d) { return blockSize; }
 
-internal static (nint nn, error err) Writeᴍ(ж<Digest> Ꮡd, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint nn, error err) Writeᴍ(ж<Digest> Ꮡd, slice<byte> p) {
     nint nn = default;
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
@@ -218,7 +218,7 @@ internal static (nint nn, error err) Writeᴍ(ж<Digest> Ꮡd, slice<byte> p) {
     return (nn, err);
 }
 
-internal static slice<byte> Sumᴍ(ref Digest d, slice<byte> @in) {
+[GoMethodBody("Sum")] internal static slice<byte> Sumᴍ(ref Digest d, slice<byte> @in) {
     fips140.RecordApproved();
     // Make a copy of d so that caller can keep writing and summing.
     ref var d0 = ref heap<Digest>(d.ΔClone(), out var Ꮡd0);
@@ -229,7 +229,7 @@ internal static slice<byte> Sumᴍ(ref Digest d, slice<byte> @in) {
     return appendꓸꓸꓸ(@in, hash[..]);
 }
 
-internal static array<byte> checkSumᴍ(ж<Digest> Ꮡd) {
+[GoMethodBody("checkSum")] internal static array<byte> checkSumᴍ(ж<Digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var len = d.len;
@@ -270,18 +270,3 @@ internal static array<byte> checkSumᴍ(ж<Digest> Ꮡd) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class sha256ᴛDigest {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this ref Digest d) => sha256_package.MarshalBinaryᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this ref Digest d, slice<byte> b) => sha256_package.AppendBinaryᴍ(ref d, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalBinary(this ref Digest d, slice<byte> b) => sha256_package.UnmarshalBinaryᴍ(ref d, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (hash.Cloner, error) Clone(this ref Digest d) => sha256_package.Cloneᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Digest d) => sha256_package.Resetᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Size(this ref Digest d) => sha256_package.Sizeᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint BlockSize(this ref Digest d) => sha256_package.BlockSizeᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint nn, error err) Write(this ж<Digest> Ꮡd, slice<byte> p) => sha256_package.Writeᴍ(Ꮡd, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Sum(this ref Digest d, slice<byte> @in) => sha256_package.Sumᴍ(ref d, @in);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static array<byte> checkSum(this ж<Digest> Ꮡd) => sha256_package.checkSumᴍ(Ꮡd);
-}
-// </GlyphForwarders>

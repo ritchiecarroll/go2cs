@@ -67,6 +67,19 @@ using static go.crypto.@internal.fips140.drbg_package;
 
 namespace go.crypto.@internal.fips140;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using fips140 = go.crypto.@internal.fips140_package;
+using aes = go.crypto.@internal.fips140.aes_package;
+using subtle = go.crypto.@internal.fips140.subtle_package;
+using byteorder = go.crypto.@internal.fips140deps.byteorder_package;
+using bits = math.bits_package;
+using go.crypto.@internal;
+using go.crypto.@internal.fips140;
+using go.crypto.@internal.fips140deps;
+using math;
+using static drbg_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("drbg")]
 public static partial class drbg_package
 {
@@ -112,3 +125,11 @@ public static partial class drbg_package
 // <MethodHolders>
 [GoMethodHost(typeof(drbg_package.Counter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class drbgᴛCounter;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class drbgᴛCounter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void update(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡseed) => drbg_package.updateᴍ(Ꮡc, Ꮡseed);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reseed(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡentropy, /*[48]*/ ж<array<byte>> ᏑadditionalInput) => drbg_package.Reseedᴍ(Ꮡc, Ꮡentropy, ᏑadditionalInput);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool /*reseedRequired*/ Generate(this ж<Counter> Ꮡc, slice<byte> @out, /*[48]*/ ж<array<byte>> ᏑadditionalInput) => drbg_package.Generateᴍ(Ꮡc, @out, ᏑadditionalInput);
+}
+// </GlyphForwarders>

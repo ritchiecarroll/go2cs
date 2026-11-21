@@ -60,6 +60,10 @@ using static go.vendor.golang.org.x.crypto.cryptobyte.asn1_package;
 
 namespace go.vendor.golang.org.x.crypto.cryptobyte;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using static asn1_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("asn1", ImportPath = "vendor/golang.org/x/crypto/cryptobyte/asn1")]
 public static partial class asn1_package
 {
@@ -92,3 +96,10 @@ public static partial class asn1_package
 // <MethodHolders>
 [GoMethodHost(typeof(asn1_package.Tag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛTag;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class asn1ᴛTag {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Tag Constructed(this Tag t) => asn1_package.Constructedᴍ(t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Tag ContextSpecific(this Tag t) => asn1_package.ContextSpecificᴍ(t);
+}
+// </GlyphForwarders>

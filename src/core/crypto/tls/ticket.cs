@@ -113,7 +113,7 @@ private static readonly @string tlsInternalErrorEmptyˢᵇᴍSessionState = "tls
 //
 // The specific encoding should be considered opaque and may change incompatibly
 // between Go versions.
-internal static (slice<byte>, error) Bytesᴍ(ж<SessionState> Ꮡs) {
+[GoMethodBody("Bytes")] internal static (slice<byte>, error) Bytesᴍ(ж<SessionState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
@@ -322,7 +322,7 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
 
 // sessionState returns a partially filled-out [SessionState] with information
 // from the current connection.
-internal static ж<SessionState> sessionStateᴍ(ref Conn c) {
+[GoMethodBody("sessionState")] internal static ж<SessionState> sessionStateᴍ(ref Conn c) {
     return Ꮡ(new SessionState(
         version: c.vers,
         cipherSuite: c.cipherSuite,
@@ -342,7 +342,7 @@ internal static ж<SessionState> sessionStateᴍ(ref Conn c) {
 
 // EncryptTicket encrypts a ticket with the [Config]'s configured (or default)
 // session ticket keys. It can be used as a [Config.WrapSession] implementation.
-internal static (slice<byte>, error) EncryptTicketᴍ(ж<Config> Ꮡc, ConnectionState cs, ж<SessionState> ss) {
+[GoMethodBody("EncryptTicket")] internal static (slice<byte>, error) EncryptTicketᴍ(ж<Config> Ꮡc, ConnectionState cs, ж<SessionState> ss) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var ticketKeys = Ꮡc.ticketKeys(nil);
@@ -357,7 +357,7 @@ internal static (slice<byte>, error) EncryptTicketᴍ(ж<Config> Ꮡc, Connectio
 internal static ref readonly @string tlsInternalErrorSessionˢᴍConfig => ref tlsInternalErrorSessionˢᵇᴍConfig;
 private static readonly @string tlsInternalErrorSessionˢᵇᴍConfig = "tls: internal error: session ticket keys unavailable"u8;
 
-internal static (slice<byte>, error) encryptTicketᴍ(ref Config c, slice<byte> state, slice<ticketKey> ticketKeys) {
+[GoMethodBody("encryptTicket")] internal static (slice<byte>, error) encryptTicketᴍ(ref Config c, slice<byte> state, slice<ticketKey> ticketKeys) {
     if (len(ticketKeys) == 0) {
         return (default, errors.New(tlsInternalErrorSessionˢᴍConfig));
     }
@@ -389,7 +389,7 @@ internal static (slice<byte>, error) encryptTicketᴍ(ref Config c, slice<byte> 
 // be used as a [Config.UnwrapSession] implementation.
 //
 // If the ticket can't be decrypted or parsed, DecryptTicket returns (nil, nil).
-internal static (ж<SessionState>, error) DecryptTicketᴍ(ж<Config> Ꮡc, slice<byte> identity, ConnectionState cs) {
+[GoMethodBody("DecryptTicket")] internal static (ж<SessionState>, error) DecryptTicketᴍ(ж<Config> Ꮡc, slice<byte> identity, ConnectionState cs) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var ticketKeys = Ꮡc.ticketKeys(nil);
@@ -404,7 +404,7 @@ internal static (ж<SessionState>, error) DecryptTicketᴍ(ж<Config> Ꮡc, slic
     return (s, default);
 }
 
-internal static slice<byte> decryptTicketᴍ(ref Config c, slice<byte> encrypted, slice<ticketKey> ticketKeys) {
+[GoMethodBody("decryptTicket")] internal static slice<byte> decryptTicketᴍ(ref Config c, slice<byte> encrypted, slice<ticketKey> ticketKeys) {
     if (len(encrypted) < (nint)(aes.BlockSize + sha256.Size)) {
         return default;
     }
@@ -453,7 +453,7 @@ partial struct ClientSessionState {
 //
 // It can be called by [ClientSessionCache.Put] to serialize (with
 // [SessionState.Bytes]) and store the session.
-internal static (slice<byte> ticket, ж<SessionState> state, error err) ResumptionStateᴍ(ж<ClientSessionState> Ꮡcs) {
+[GoMethodBody("ResumptionState")] internal static (slice<byte> ticket, ж<SessionState> state, error err) ResumptionStateᴍ(ж<ClientSessionState> Ꮡcs) {
     ref var cs = ref Ꮡcs.DerefOrNull();
 
     if (Ꮡcs == nil || cs.session == nil) {
@@ -479,21 +479,3 @@ public static (ж<ClientSessionState>, error) NewResumptionState(slice<byte> tic
 }
 
 } // end tls_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tlsᴛSessionState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Bytes(this ж<SessionState> Ꮡs) => tls_package.Bytesᴍ(Ꮡs);
-}
-partial class tlsᴛConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<SessionState> sessionState(this ref Conn c) => tls_package.sessionStateᴍ(ref c);
-}
-partial class tlsᴛConfig {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) EncryptTicket(this ж<Config> Ꮡc, ConnectionState cs, ж<SessionState> ss) => tls_package.EncryptTicketᴍ(Ꮡc, cs, ss);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) encryptTicket(this ref Config c, slice<byte> state, slice<ticketKey> ticketKeys) => tls_package.encryptTicketᴍ(ref c, state, ticketKeys);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<SessionState>, error) DecryptTicket(this ж<Config> Ꮡc, slice<byte> identity, ConnectionState cs) => tls_package.DecryptTicketᴍ(Ꮡc, identity, cs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> decryptTicket(this ref Config c, slice<byte> encrypted, slice<ticketKey> ticketKeys) => tls_package.decryptTicketᴍ(ref c, encrypted, ticketKeys);
-}
-partial class tlsᴛClientSessionState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> ticket, ж<SessionState> state, error err) ResumptionState(this ж<ClientSessionState> Ꮡcs) => tls_package.ResumptionStateᴍ(Ꮡcs);
-}
-// </GlyphForwarders>

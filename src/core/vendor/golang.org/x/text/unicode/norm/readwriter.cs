@@ -19,7 +19,7 @@ partial struct normWriter {
 // Write implements the standard write interface.  If the last characters are
 // not at a normalization boundary, the bytes will be buffered for the next
 // write. The remaining bytes will be written on close.
-internal static (nint n, error err) Writeᴍ(ж<normWriter> Ꮡw, slice<byte> data) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<normWriter> Ꮡw, slice<byte> data) {
     nint n = default;
     error err = default;
     ref var w = ref Ꮡw.DerefOrNull();
@@ -57,7 +57,7 @@ internal static (nint n, error err) Writeᴍ(ж<normWriter> Ꮡw, slice<byte> da
 }
 
 // Close forces data that remains in the buffer to be written.
-internal static error Closeᴍ(ref normWriter w) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref normWriter w) {
     if (len(w.buf) > 0) {
         var (_, err) = w.w.Write(w.buf);
         if (err != nil) {
@@ -73,7 +73,7 @@ internal static error Closeᴍ(ref normWriter w) {
 // by writing f(b) to w. The returned writer may use an
 // internal buffer to maintain state across Write calls.
 // Calling its Close method writes any buffered data to w.
-internal static io.WriteCloser Writerᴍ(Form f, io.Writer w) {
+[GoMethodBody("Writer")] internal static io.WriteCloser Writerᴍ(Form f, io.Writer w) {
     var wr = Ꮡ(new normWriter(rb: new reorderBuffer(), w: w));
     wr.Ꮡrb.init(f, default);
     return new normWriterжWriteCloser(wr);
@@ -94,7 +94,7 @@ partial struct normReader {
 } partial class norm_package {
 
 // Read implements the standard read interface.
-internal static (nint, error) Readᴍ(ж<normReader> Ꮡr, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ж<normReader> Ꮡr, slice<byte> p) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     for (;;) {
@@ -134,7 +134,7 @@ internal static (nint, error) Readᴍ(ж<normReader> Ꮡr, slice<byte> p) {
 
 // Reader returns a new reader that implements Read
 // by reading data from r and returning f(data).
-internal static io.Reader Readerᴍ(Form f, io.Reader r) {
+[GoMethodBody("Reader")] internal static io.Reader Readerᴍ(Form f, io.Reader r) {
     const nint chunk = 4000;
     var buf = new slice<byte>(chunk);
     var rr = Ꮡ(new normReader(rb: new reorderBuffer(), r: r, inbuf: buf));
@@ -143,17 +143,3 @@ internal static io.Reader Readerᴍ(Form f, io.Reader r) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class normᴛnormWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ж<normWriter> Ꮡw, slice<byte> data) => norm_package.Writeᴍ(Ꮡw, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref normWriter w) => norm_package.Closeᴍ(ref w);
-}
-partial class normᴛForm {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.WriteCloser Writer(this Form f, io.Writer w) => norm_package.Writerᴍ(f, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.Reader Reader(this Form f, io.Reader r) => norm_package.Readerᴍ(f, r);
-}
-partial class normᴛnormReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ж<normReader> Ꮡr, slice<byte> p) => norm_package.Readᴍ(Ꮡr, p);
-}
-// </GlyphForwarders>

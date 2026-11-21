@@ -164,7 +164,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abi.MapType
 
 } partial class maps_package {
 
-internal static @unsafe.Pointer putSlotSmallFast64ᴍ(ref Map m, ж<abi.MapType> typ, uintptr hash, uint64 key) {
+[GoMethodBody("putSlotSmallFast64")] internal static @unsafe.Pointer putSlotSmallFast64ᴍ(ref Map m, ж<abi.MapType> typ, uintptr hash, uint64 key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -350,7 +350,7 @@ break_outer:;
 
 } partial class maps_package {
 
-internal static @unsafe.Pointer putSlotSmallFastPtrᴍ(ref Map m, ж<abi.MapType> typ, uintptr hash, @unsafe.Pointer key) {
+[GoMethodBody("putSlotSmallFastPtr")] internal static @unsafe.Pointer putSlotSmallFastPtrᴍ(ref Map m, ж<abi.MapType> typ, uintptr hash, @unsafe.Pointer key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -551,10 +551,3 @@ internal static void runtime_mapdelete_fast64(ж<abi.MapType> typ, ж<Map> Ꮡm,
 }
 
 } // end maps_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class mapsᴛMap {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer putSlotSmallFast64(this ref Map m, ж<abi.MapType> typ, uintptr hash, uint64 key) => maps_package.putSlotSmallFast64ᴍ(ref m, typ, hash, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer putSlotSmallFastPtr(this ref Map m, ж<abi.MapType> typ, uintptr hash, @unsafe.Pointer key) => maps_package.putSlotSmallFastPtrᴍ(ref m, typ, hash, key);
-}
-// </GlyphForwarders>

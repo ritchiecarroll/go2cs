@@ -100,7 +100,7 @@ partial struct dloggerFake {
 } partial class runtime_package {
 
 //go:nosplit
-internal static void endᴍ(dloggerFake l) { }
+[GoMethodBody("end")] internal static void endᴍ(dloggerFake l) { }
 
 } partial class runtime_package {
 
@@ -109,7 +109,7 @@ internal static ref readonly @string recordTooLargeˢᴍdloggerImpl => ref recor
 private static readonly @string recordTooLargeˢᵇᴍdloggerImpl = "record too large"u8;
 
 //go:nosplit
-internal static void endᴍ(ж<dloggerImpl> Ꮡl) {
+[GoMethodBody("end")] internal static void endᴍ(ж<dloggerImpl> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     // Fill in framing header.
@@ -150,12 +150,12 @@ internal static UntypedInt debugLogTraceback => 13;
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake bᴍ(dloggerFake l, bool x) { return l; }
+[GoMethodBody("b")] internal static dloggerFake bᴍ(dloggerFake l, bool x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> bᴍ(ж<dloggerImpl> Ꮡl, bool x) {
+[GoMethodBody("b")] internal static ж<dloggerImpl> bᴍ(ж<dloggerImpl> Ꮡl, bool x) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (x) {
@@ -169,60 +169,60 @@ internal static ж<dloggerImpl> bᴍ(ж<dloggerImpl> Ꮡl, bool x) {
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake iᴍ(dloggerFake l, nint x) { return l; }
+[GoMethodBody("i")] internal static dloggerFake iᴍ(dloggerFake l, nint x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> iᴍ(ж<dloggerImpl> Ꮡl, nint x) {
+[GoMethodBody("i")] internal static ж<dloggerImpl> iᴍ(ж<dloggerImpl> Ꮡl, nint x) {
     return Ꮡl.i64((int64)x);
 }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake i8ᴍ(dloggerFake l, int8 x) { return l; }
+[GoMethodBody("i8")] internal static dloggerFake i8ᴍ(dloggerFake l, int8 x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> i8ᴍ(ж<dloggerImpl> Ꮡl, int8 x) {
+[GoMethodBody("i8")] internal static ж<dloggerImpl> i8ᴍ(ж<dloggerImpl> Ꮡl, int8 x) {
     return Ꮡl.i64((int64)x);
 }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake i16ᴍ(dloggerFake l, int16 x) { return l; }
+[GoMethodBody("i16")] internal static dloggerFake i16ᴍ(dloggerFake l, int16 x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> i16ᴍ(ж<dloggerImpl> Ꮡl, int16 x) {
+[GoMethodBody("i16")] internal static ж<dloggerImpl> i16ᴍ(ж<dloggerImpl> Ꮡl, int16 x) {
     return Ꮡl.i64((int64)x);
 }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake i32ᴍ(dloggerFake l, int32 x) { return l; }
+[GoMethodBody("i32")] internal static dloggerFake i32ᴍ(dloggerFake l, int32 x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> i32ᴍ(ж<dloggerImpl> Ꮡl, int32 x) {
+[GoMethodBody("i32")] internal static ж<dloggerImpl> i32ᴍ(ж<dloggerImpl> Ꮡl, int32 x) {
     return Ꮡl.i64((int64)x);
 }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake i64ᴍ(dloggerFake l, int64 x) { return l; }
+[GoMethodBody("i64")] internal static dloggerFake i64ᴍ(dloggerFake l, int64 x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> i64ᴍ(ж<dloggerImpl> Ꮡl, int64 x) {
+[GoMethodBody("i64")] internal static ж<dloggerImpl> i64ᴍ(ж<dloggerImpl> Ꮡl, int64 x) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.w.@byte(debugLogInt);
@@ -233,72 +233,72 @@ internal static ж<dloggerImpl> i64ᴍ(ж<dloggerImpl> Ꮡl, int64 x) {
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake uᴍ(dloggerFake l, nuint x) { return l; }
+[GoMethodBody("u")] internal static dloggerFake uᴍ(dloggerFake l, nuint x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> uᴍ(ж<dloggerImpl> Ꮡl, nuint x) {
+[GoMethodBody("u")] internal static ж<dloggerImpl> uᴍ(ж<dloggerImpl> Ꮡl, nuint x) {
     return Ꮡl.u64((uint64)x);
 }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake uptrᴍ(dloggerFake l, uintptr x) { return l; }
+[GoMethodBody("uptr")] internal static dloggerFake uptrᴍ(dloggerFake l, uintptr x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> uptrᴍ(ж<dloggerImpl> Ꮡl, uintptr x) {
+[GoMethodBody("uptr")] internal static ж<dloggerImpl> uptrᴍ(ж<dloggerImpl> Ꮡl, uintptr x) {
     return Ꮡl.u64((uint64)x);
 }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake u8ᴍ(dloggerFake l, uint8 x) { return l; }
+[GoMethodBody("u8")] internal static dloggerFake u8ᴍ(dloggerFake l, uint8 x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> u8ᴍ(ж<dloggerImpl> Ꮡl, uint8 x) {
+[GoMethodBody("u8")] internal static ж<dloggerImpl> u8ᴍ(ж<dloggerImpl> Ꮡl, uint8 x) {
     return Ꮡl.u64((uint64)x);
 }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake u16ᴍ(dloggerFake l, uint16 x) { return l; }
+[GoMethodBody("u16")] internal static dloggerFake u16ᴍ(dloggerFake l, uint16 x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> u16ᴍ(ж<dloggerImpl> Ꮡl, uint16 x) {
+[GoMethodBody("u16")] internal static ж<dloggerImpl> u16ᴍ(ж<dloggerImpl> Ꮡl, uint16 x) {
     return Ꮡl.u64((uint64)x);
 }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake u32ᴍ(dloggerFake l, uint32 x) { return l; }
+[GoMethodBody("u32")] internal static dloggerFake u32ᴍ(dloggerFake l, uint32 x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> u32ᴍ(ж<dloggerImpl> Ꮡl, uint32 x) {
+[GoMethodBody("u32")] internal static ж<dloggerImpl> u32ᴍ(ж<dloggerImpl> Ꮡl, uint32 x) {
     return Ꮡl.u64((uint64)x);
 }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake u64ᴍ(dloggerFake l, uint64 x) { return l; }
+[GoMethodBody("u64")] internal static dloggerFake u64ᴍ(dloggerFake l, uint64 x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> u64ᴍ(ж<dloggerImpl> Ꮡl, uint64 x) {
+[GoMethodBody("u64")] internal static ж<dloggerImpl> u64ᴍ(ж<dloggerImpl> Ꮡl, uint64 x) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.w.@byte(debugLogUint);
@@ -309,12 +309,12 @@ internal static ж<dloggerImpl> u64ᴍ(ж<dloggerImpl> Ꮡl, uint64 x) {
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake hexᴍ(dloggerFake l, uint64 x) { return l; }
+[GoMethodBody("hex")] internal static dloggerFake hexᴍ(dloggerFake l, uint64 x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> hexᴍ(ж<dloggerImpl> Ꮡl, uint64 x) {
+[GoMethodBody("hex")] internal static ж<dloggerImpl> hexᴍ(ж<dloggerImpl> Ꮡl, uint64 x) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.w.@byte(debugLogHex);
@@ -325,7 +325,7 @@ internal static ж<dloggerImpl> hexᴍ(ж<dloggerImpl> Ꮡl, uint64 x) {
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake pᴍ(dloggerFake l, any x) { return l; }
+[GoMethodBody("p")] internal static dloggerFake pᴍ(dloggerFake l, any x) { return l; }
 
 } partial class runtime_package {
 
@@ -334,7 +334,7 @@ internal static ref readonly @string notAPointerTypeˢᴍdloggerImpl => ref notA
 private static readonly @string notAPointerTypeˢᵇᴍdloggerImpl = "not a pointer type"u8;
 
 //go:nosplit
-internal static ж<dloggerImpl> pᴍ(ж<dloggerImpl> Ꮡl, any xʗp) {
+[GoMethodBody("p")] internal static ж<dloggerImpl> pᴍ(ж<dloggerImpl> Ꮡl, any xʗp) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var x = ref heap(xʗp, out var Ꮡx);
 
@@ -359,7 +359,7 @@ internal static ж<dloggerImpl> pᴍ(ж<dloggerImpl> Ꮡl, any xʗp) {
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake sᴍ(dloggerFake l, @string x) { return l; }
+[GoMethodBody("s")] internal static dloggerFake sᴍ(dloggerFake l, @string x) { return l; }
 
 } partial class runtime_package {
 
@@ -368,12 +368,12 @@ internal static dloggerFake sᴍ(dloggerFake l, @string x) { return l; }
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake hexdumpᴍ(dloggerFake l, @unsafe.Pointer p, uintptr bytes) { return l; }
+[GoMethodBody("hexdump")] internal static dloggerFake hexdumpᴍ(dloggerFake l, @unsafe.Pointer p, uintptr bytes) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> hexdumpᴍ(ж<dloggerImpl> Ꮡl, @unsafe.Pointer p, uintptr bytes) {
+[GoMethodBody("hexdump")] internal static ж<dloggerImpl> hexdumpᴍ(ж<dloggerImpl> Ꮡl, @unsafe.Pointer p, uintptr bytes) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     ref var b = ref heap<slice<byte>>(out var Ꮡb);
@@ -400,12 +400,12 @@ internal static ж<dloggerImpl> hexdumpᴍ(ж<dloggerImpl> Ꮡl, @unsafe.Pointer
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake pcᴍ(dloggerFake l, uintptr x) { return l; }
+[GoMethodBody("pc")] internal static dloggerFake pcᴍ(dloggerFake l, uintptr x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> pcᴍ(ж<dloggerImpl> Ꮡl, uintptr x) {
+[GoMethodBody("pc")] internal static ж<dloggerImpl> pcᴍ(ж<dloggerImpl> Ꮡl, uintptr x) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.w.@byte(debugLogPC);
@@ -416,12 +416,12 @@ internal static ж<dloggerImpl> pcᴍ(ж<dloggerImpl> Ꮡl, uintptr x) {
 } partial class runtime_package {
 
 //go:nosplit
-internal static dloggerFake tracebackᴍ(dloggerFake l, slice<uintptr> x) { return l; }
+[GoMethodBody("traceback")] internal static dloggerFake tracebackᴍ(dloggerFake l, slice<uintptr> x) { return l; }
 
 } partial class runtime_package {
 
 //go:nosplit
-internal static ж<dloggerImpl> tracebackᴍ(ж<dloggerImpl> Ꮡl, slice<uintptr> x) {
+[GoMethodBody("traceback")] internal static ж<dloggerImpl> tracebackᴍ(ж<dloggerImpl> Ꮡl, slice<uintptr> x) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.w.@byte(debugLogTraceback);
@@ -482,7 +482,7 @@ internal static ref readonly @string recordWrappedAroundˢᴍdebugLogWriter => r
 private static readonly @string recordWrappedAroundˢᵇᴍdebugLogWriter = "record wrapped around"u8;
 
 //go:nosplit
-internal static void ensureᴍ(ref debugLogWriter l, uint64 n) {
+[GoMethodBody("ensure")] internal static void ensureᴍ(ref debugLogWriter l, uint64 n) {
     while (l.write + n >= l.r.begin + (uint64)len(l.data.b)) {
         // Consume record at begin.
         if (l.r.skip() == ~(uint64)0) {
@@ -498,14 +498,14 @@ internal static void ensureᴍ(ref debugLogWriter l, uint64 n) {
 }
 
 //go:nosplit
-internal static bool writeFrameAtᴍ(ref debugLogWriter l, uint64 pos, uint64 size) {
+[GoMethodBody("writeFrameAt")] internal static bool writeFrameAtᴍ(ref debugLogWriter l, uint64 pos, uint64 size) {
     l.data.b[pos % (uint64)len(l.data.b)] = (uint8)size;
     l.data.b[(pos + 1) % (uint64)len(l.data.b)] = (uint8)(size >> 8);
     return size <= 0xFFFF;
 }
 
 //go:nosplit
-internal static void writeSyncᴍ(ref debugLogWriter l, uint64 tick, uint64 nano) {
+[GoMethodBody("writeSync")] internal static void writeSyncᴍ(ref debugLogWriter l, uint64 tick, uint64 nano) {
     (l.tick, l.nano) = (tick, nano);
     l.ensure(debugLogHeaderSize);
     l.writeFrameAt(l.write, 0);
@@ -516,14 +516,14 @@ internal static void writeSyncᴍ(ref debugLogWriter l, uint64 tick, uint64 nano
 }
 
 //go:nosplit
-internal static void writeUint64LEᴍ(ref debugLogWriter l, uint64 x) {
+[GoMethodBody("writeUint64LE")] internal static void writeUint64LEᴍ(ref debugLogWriter l, uint64 x) {
     array<byte> b = new(8);
     byteorder.LEPutUint64(b[..], x);
     l.bytes(b[..]);
 }
 
 //go:nosplit
-internal static void @byteᴍ(ref debugLogWriter l, byte x) {
+[GoMethodBody("byte")] internal static void @byteᴍ(ref debugLogWriter l, byte x) {
     l.ensure(1);
     var pos = l.write;
     l.write++;
@@ -531,7 +531,7 @@ internal static void @byteᴍ(ref debugLogWriter l, byte x) {
 }
 
 //go:nosplit
-internal static void bytesᴍ(ref debugLogWriter l, slice<byte> x) {
+[GoMethodBody("bytes")] internal static void bytesᴍ(ref debugLogWriter l, slice<byte> x) {
     l.ensure((uint64)len(x));
     var pos = l.write;
     l.write += (uint64)len(x);
@@ -543,7 +543,7 @@ internal static void bytesᴍ(ref debugLogWriter l, slice<byte> x) {
 }
 
 //go:nosplit
-internal static void varintᴍ(ref debugLogWriter l, int64 x) {
+[GoMethodBody("varint")] internal static void varintᴍ(ref debugLogWriter l, int64 x) {
     uint64 u = default;
     if (x < 0) {
         u = (~(uint64)x << 1) | 1; // complement i, bit 0 is 1
@@ -554,7 +554,7 @@ internal static void varintᴍ(ref debugLogWriter l, int64 x) {
 }
 
 //go:nosplit
-internal static void uvarintᴍ(ref debugLogWriter l, uint64 u) {
+[GoMethodBody("uvarint")] internal static void uvarintᴍ(ref debugLogWriter l, uint64 u) {
     nint i = 0;
     while (u >= 0x80) {
         l.buf[i] = (byte)((byte)u | 0x80);
@@ -580,7 +580,7 @@ partial struct debugLogReader {
 } partial class runtime_package {
 
 //go:nosplit
-internal static uint64 skipᴍ(ref debugLogReader r) {
+[GoMethodBody("skip")] internal static uint64 skipᴍ(ref debugLogReader r) {
     // Read size at pos.
     if (r.begin + (uint64)debugLogHeaderSize > r.end) {
         return ~(uint64)0;
@@ -600,12 +600,12 @@ internal static uint64 skipᴍ(ref debugLogReader r) {
 }
 
 //go:nosplit
-internal static uint16 readUint16LEAtᴍ(ref debugLogReader r, uint64 pos) {
+[GoMethodBody("readUint16LEAt")] internal static uint16 readUint16LEAtᴍ(ref debugLogReader r, uint64 pos) {
     return (uint16)((uint16)r.data.b[pos % (uint64)len(r.data.b)] | (uint16)((uint16)r.data.b[(pos + 1) % (uint64)len(r.data.b)] << 8));
 }
 
 //go:nosplit
-internal static uint64 readUint64LEAtᴍ(ref debugLogReader r, uint64 pos) {
+[GoMethodBody("readUint64LEAt")] internal static uint64 readUint64LEAtᴍ(ref debugLogReader r, uint64 pos) {
     array<byte> b = new(8);
     foreach (var i in range(len(b))) {
         b[i] = r.data.b[pos % (uint64)len(r.data.b)];
@@ -614,7 +614,7 @@ internal static uint64 readUint64LEAtᴍ(ref debugLogReader r, uint64 pos) {
     return byteorder.LEUint64(b[..]);
 }
 
-internal static uint64 /*tick*/ peekᴍ(ref debugLogReader r) {
+[GoMethodBody("peek")] internal static uint64 /*tick*/ peekᴍ(ref debugLogReader r) {
     // Consume any sync records.
     var size = (uint64)0;
     while (size == 0) {
@@ -654,7 +654,7 @@ internal static uint64 /*tick*/ peekᴍ(ref debugLogReader r) {
     return r.tick + u;
 }
 
-internal static (uint64 end, uint64 tick, uint64 nano, nint p) headerᴍ(ref debugLogReader r) {
+[GoMethodBody("header")] internal static (uint64 end, uint64 tick, uint64 nano, nint p) headerᴍ(ref debugLogReader r) {
     uint64 end = default;
     uint64 tick = default;
     uint64 nano = default;
@@ -674,7 +674,7 @@ internal static (uint64 end, uint64 tick, uint64 nano, nint p) headerᴍ(ref deb
     return (end, tick, nano, p);
 }
 
-internal static uint64 uvarintᴍ(ref debugLogReader r) {
+[GoMethodBody("uvarint")] internal static uint64 uvarintᴍ(ref debugLogReader r) {
     uint64 u = default;
     for (nuint i = (nuint)0; ; i += 7) {
         var b = r.data.b[r.begin % (uint64)len(r.data.b)];
@@ -687,7 +687,7 @@ internal static uint64 uvarintᴍ(ref debugLogReader r) {
     return u;
 }
 
-internal static int64 varintᴍ(ref debugLogReader r) {
+[GoMethodBody("varint")] internal static int64 varintᴍ(ref debugLogReader r) {
     var u = r.uvarint();
     int64 v = default;
     if ((u & 1) == 0) {
@@ -714,66 +714,3 @@ internal static void printDebugLog() {
 // go2cs generated this placeholder — func printDebugLogPC is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛdloggerFake {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void end(this dloggerFake l) => runtime_package.endᴍ(l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake b(this dloggerFake l, bool x) => runtime_package.bᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake i(this dloggerFake l, nint x) => runtime_package.iᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake i8(this dloggerFake l, int8 x) => runtime_package.i8ᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake i16(this dloggerFake l, int16 x) => runtime_package.i16ᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake i32(this dloggerFake l, int32 x) => runtime_package.i32ᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake i64(this dloggerFake l, int64 x) => runtime_package.i64ᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake u(this dloggerFake l, nuint x) => runtime_package.uᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake uptr(this dloggerFake l, uintptr x) => runtime_package.uptrᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake u8(this dloggerFake l, uint8 x) => runtime_package.u8ᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake u16(this dloggerFake l, uint16 x) => runtime_package.u16ᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake u32(this dloggerFake l, uint32 x) => runtime_package.u32ᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake u64(this dloggerFake l, uint64 x) => runtime_package.u64ᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake hex(this dloggerFake l, uint64 x) => runtime_package.hexᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake p(this dloggerFake l, any x) => runtime_package.pᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake s(this dloggerFake l, @string x) => runtime_package.sᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake hexdump(this dloggerFake l, @unsafe.Pointer p, uintptr bytes) => runtime_package.hexdumpᴍ(l, p, bytes);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake pc(this dloggerFake l, uintptr x) => runtime_package.pcᴍ(l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static dloggerFake traceback(this dloggerFake l, slice<uintptr> x) => runtime_package.tracebackᴍ(l, x);
-}
-partial class runtimeᴛdloggerImpl {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void end(this ж<dloggerImpl> Ꮡl) => runtime_package.endᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> b(this ж<dloggerImpl> Ꮡl, bool x) => runtime_package.bᴍ(Ꮡl, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> i(this ж<dloggerImpl> Ꮡl, nint x) => runtime_package.iᴍ(Ꮡl, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> i8(this ж<dloggerImpl> Ꮡl, int8 x) => runtime_package.i8ᴍ(Ꮡl, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> i16(this ж<dloggerImpl> Ꮡl, int16 x) => runtime_package.i16ᴍ(Ꮡl, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> i32(this ж<dloggerImpl> Ꮡl, int32 x) => runtime_package.i32ᴍ(Ꮡl, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> i64(this ж<dloggerImpl> Ꮡl, int64 x) => runtime_package.i64ᴍ(Ꮡl, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> u(this ж<dloggerImpl> Ꮡl, nuint x) => runtime_package.uᴍ(Ꮡl, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> uptr(this ж<dloggerImpl> Ꮡl, uintptr x) => runtime_package.uptrᴍ(Ꮡl, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> u8(this ж<dloggerImpl> Ꮡl, uint8 x) => runtime_package.u8ᴍ(Ꮡl, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> u16(this ж<dloggerImpl> Ꮡl, uint16 x) => runtime_package.u16ᴍ(Ꮡl, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> u32(this ж<dloggerImpl> Ꮡl, uint32 x) => runtime_package.u32ᴍ(Ꮡl, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> u64(this ж<dloggerImpl> Ꮡl, uint64 x) => runtime_package.u64ᴍ(Ꮡl, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> hex(this ж<dloggerImpl> Ꮡl, uint64 x) => runtime_package.hexᴍ(Ꮡl, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> p(this ж<dloggerImpl> Ꮡl, any xʗp) => runtime_package.pᴍ(Ꮡl, xʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> hexdump(this ж<dloggerImpl> Ꮡl, @unsafe.Pointer p, uintptr bytes) => runtime_package.hexdumpᴍ(Ꮡl, p, bytes);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> pc(this ж<dloggerImpl> Ꮡl, uintptr x) => runtime_package.pcᴍ(Ꮡl, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<dloggerImpl> traceback(this ж<dloggerImpl> Ꮡl, slice<uintptr> x) => runtime_package.tracebackᴍ(Ꮡl, x);
-}
-partial class runtimeᴛdebugLogWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ensure(this ref debugLogWriter l, uint64 n) => runtime_package.ensureᴍ(ref l, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool writeFrameAt(this ref debugLogWriter l, uint64 pos, uint64 size) => runtime_package.writeFrameAtᴍ(ref l, pos, size);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeSync(this ref debugLogWriter l, uint64 tick, uint64 nano) => runtime_package.writeSyncᴍ(ref l, tick, nano);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeUint64LE(this ref debugLogWriter l, uint64 x) => runtime_package.writeUint64LEᴍ(ref l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void @byte(this ref debugLogWriter l, byte x) => runtime_package.@byteᴍ(ref l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void bytes(this ref debugLogWriter l, slice<byte> x) => runtime_package.bytesᴍ(ref l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void varint(this ref debugLogWriter l, int64 x) => runtime_package.varintᴍ(ref l, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void uvarint(this ref debugLogWriter l, uint64 u) => runtime_package.uvarintᴍ(ref l, u);
-}
-partial class runtimeᴛdebugLogReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 skip(this ref debugLogReader r) => runtime_package.skipᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 readUint16LEAt(this ref debugLogReader r, uint64 pos) => runtime_package.readUint16LEAtᴍ(ref r, pos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 readUint64LEAt(this ref debugLogReader r, uint64 pos) => runtime_package.readUint64LEAtᴍ(ref r, pos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 /*tick*/ peek(this ref debugLogReader r) => runtime_package.peekᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64 end, uint64 tick, uint64 nano, nint p) header(this ref debugLogReader r) => runtime_package.headerᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 uvarint(this ref debugLogReader r) => runtime_package.uvarintᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 varint(this ref debugLogReader r) => runtime_package.varintᴍ(ref r);
-}
-// </GlyphForwarders>

@@ -54,12 +54,12 @@ partial struct SyscallError {
 
 } partial class os_package {
 
-internal static @string Errorᴍ(ref SyscallError e) { return e.Syscall + ": "u8 + e.Err.Error(); }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref SyscallError e) { return e.Syscall + ": "u8 + e.Err.Error(); }
 
-internal static error Unwrapᴍ(ref SyscallError e) { return e.Err; }
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref SyscallError e) { return e.Err; }
 
 // Timeout reports whether this error represents a timeout.
-internal static bool Timeoutᴍ(ref SyscallError e) {
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref SyscallError e) {
     var (t, ok) = e.Err._<timeout>(ᐧ);
     return ok && t.Timeout();
 }
@@ -148,11 +148,3 @@ internal static error underlyingError(error err) {
 }
 
 } // end os_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class osᴛSyscallError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref SyscallError e) => os_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref SyscallError e) => os_package.Unwrapᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this ref SyscallError e) => os_package.Timeoutᴍ(ref e);
-}
-// </GlyphForwarders>

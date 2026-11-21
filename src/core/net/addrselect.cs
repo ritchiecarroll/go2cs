@@ -287,7 +287,7 @@ internal static policyTable rfc6724policyTable = new policyTable(new policyTable
 // Classify returns the policyTableEntry of the entry with the longest
 // matching prefix that contains ip.
 // The table t must be sorted from largest mask size to smallest.
-internal static policyTableEntry Classifyᴍ(policyTable t, netip.Addr ip) {
+[GoMethodBody("Classify")] internal static policyTableEntry Classifyᴍ(policyTable t, netip.Addr ip) {
     // Prefix.Contains() will not match an IPv6 prefix for an IPv4 address.
     if (ip.Is4()) {
         ip = netip.AddrFrom16(ip.As16());
@@ -377,9 +377,3 @@ internal static nint /*cpl*/ commonPrefixLen(netip.Addr a, IP b) {
 }
 
 } // end net_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛpolicyTable {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static policyTableEntry Classify(this policyTable t, netip.Addr ip) => net_package.Classifyᴍ(t, ip);
-}
-// </GlyphForwarders>

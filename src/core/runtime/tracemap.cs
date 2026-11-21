@@ -63,7 +63,7 @@ partial struct traceMapNode {
 
 // stealID steals an ID from the table, ensuring that it will not
 // appear in the table anymore.
-internal static uint64 stealIDᴍ(ж<traceMap> Ꮡtab) {
+[GoMethodBody("stealID")] internal static uint64 stealIDᴍ(ж<traceMap> Ꮡtab) {
     return Ꮡtab.Ꮡseq.Add(1);
 }
 
@@ -73,7 +73,7 @@ internal static uint64 stealIDᴍ(ж<traceMap> Ꮡtab) {
 //
 // Returns a unique ID for the data and whether this is the first time
 // the data has been added to the map.
-internal static (uint64, bool) putᴍ(ж<traceMap> Ꮡtab, @unsafe.Pointer data, uintptr size) {
+[GoMethodBody("put")] internal static (uint64, bool) putᴍ(ж<traceMap> Ꮡtab, @unsafe.Pointer data, uintptr size) {
     if (size == 0) {
         return (0, false);
     }
@@ -127,18 +127,10 @@ internal static (uint64, bool) putᴍ(ж<traceMap> Ꮡtab, @unsafe.Pointer data,
 //
 // The caller must ensure that there are no put operations executing concurrently
 // with this function.
-internal static void resetᴍ(ж<traceMap> Ꮡtab) {
+[GoMethodBody("reset")] internal static void resetᴍ(ж<traceMap> Ꮡtab) {
     Ꮡtab.Ꮡroot.Store(nil);
     Ꮡtab.Ꮡseq.Store(0);
     Ꮡtab.Ꮡmem.drop();
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛtraceMap {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 stealID(this ж<traceMap> Ꮡtab) => runtime_package.stealIDᴍ(Ꮡtab);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, bool) put(this ж<traceMap> Ꮡtab, @unsafe.Pointer data, uintptr size) => runtime_package.putᴍ(Ꮡtab, data, size);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ж<traceMap> Ꮡtab) => runtime_package.resetᴍ(Ꮡtab);
-}
-// </GlyphForwarders>

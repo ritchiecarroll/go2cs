@@ -44,7 +44,7 @@ partial struct Error {
 
 } partial class textproto_package {
 
-internal static @string Errorᴍ(ref Error e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref Error e) {
     return fmt.Sprintf("%03d %q"u8, e.Code, e.Msg);
 }
 
@@ -56,7 +56,7 @@ partial struct ProtocolError /*@string*/;
 
 } partial class textproto_package {
 
-internal static @string Errorᴍ(ProtocolError p) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ProtocolError p) {
     return (@string)p;
 }
 
@@ -86,7 +86,7 @@ public static ж<Conn> NewConn(io.ReadWriteCloser conn) {
 } partial class textproto_package {
 
 // Close closes the connection.
-internal static error Closeᴍ(ref Conn c) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref Conn c) {
     return c.conn.Close();
 }
 
@@ -128,7 +128,7 @@ public static (ж<Conn>, error) Dial(@string network, @string addr) {
 //		return nil, err
 //	}
 //	return c.ReadCodeLine(250)
-internal static (nuint id, error err) Cmdᴍ(ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("Cmd")] internal static (nuint id, error err) Cmdᴍ(ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
     nuint id = default;
     error err = default;
     var args = argsʗp.sslice();
@@ -177,16 +177,3 @@ internal static bool isASCIILetter(byte b) {
 }
 
 } // end textproto_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class textprotoᴛError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref Error e) => textproto_package.Errorᴍ(ref e);
-}
-partial class textprotoᴛProtocolError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ProtocolError p) => textproto_package.Errorᴍ(p);
-}
-partial class textprotoᴛConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Conn c) => textproto_package.Closeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nuint id, error err) Cmd(this ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) => textproto_package.Cmdᴍ(Ꮡc, format, argsʗp);
-}
-// </GlyphForwarders>

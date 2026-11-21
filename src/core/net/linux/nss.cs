@@ -46,14 +46,14 @@ internal static ref readonly @string etcNsswitchConfˢᴍnsswitchConfig => ref e
 private static readonly @string etcNsswitchConfˢᵇᴍnsswitchConfig = "/etc/nsswitch.conf"u8;
 
 // init initializes conf and is only called via conf.initOnce.
-internal static void initᴍ(ref nsswitchConfig conf) {
+[GoMethodBody("init")] internal static void initᴍ(ref nsswitchConfig conf) {
     conf.nssConf = parseNSSConfFile(etcNsswitchConfˢᴍnsswitchConfig);
     conf.lastChecked = time.Now();
     conf.ch = new channel<EmptyStruct>(1);
 }
 
 // tryUpdate tries to update conf.
-internal static void tryUpdateᴍ(ж<nsswitchConfig> Ꮡconf) {
+[GoMethodBody("tryUpdate")] internal static void tryUpdateᴍ(ж<nsswitchConfig> Ꮡconf) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -90,11 +90,11 @@ internal static void tryUpdateᴍ(ж<nsswitchConfig> Ꮡconf) {
     finally { if (ᒐd1) Ꮡconf.DerefOrNull().releaseSema(); ᒐ.Run(); }
 }
 
-internal static void acquireSemaᴍ(ref nsswitchConfig conf) {
+[GoMethodBody("acquireSema")] internal static void acquireSemaᴍ(ref nsswitchConfig conf) {
     conf.ch.ᐸꟷ(new EmptyStruct());
 }
 
-internal static bool tryAcquireSemaᴍ(ref nsswitchConfig conf) {
+[GoMethodBody("tryAcquireSema")] internal static bool tryAcquireSemaᴍ(ref nsswitchConfig conf) {
     var selᴛ16 = conf.ch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
     switch (trySelect(selᴛ16)) {
     case 0: {
@@ -105,7 +105,7 @@ internal static bool tryAcquireSemaᴍ(ref nsswitchConfig conf) {
     }}
 }
 
-internal static void releaseSemaᴍ(ref nsswitchConfig conf) {
+[GoMethodBody("releaseSema")] internal static void releaseSemaᴍ(ref nsswitchConfig conf) {
     ᐸꟷ(conf.ch);
 }
 
@@ -127,7 +127,7 @@ partial struct nssSource {
 
 // standardCriteria reports all specified criteria have the default
 // status actions.
-internal static bool standardCriteriaᴍ(nssSource s) {
+[GoMethodBody("standardCriteria")] internal static bool standardCriteriaᴍ(nssSource s) {
     foreach (var (i, crit) in range(s.criteria)) {
         if (!crit.standardStatusAction(i == len(s.criteria) - 1)) {
             return false;
@@ -157,7 +157,7 @@ private static readonly @string continueˢᵇᴍnssCriterion = "continue"u8;
 // standardStatusAction reports whether c is equivalent to not
 // specifying the criterion at all. last is whether this criteria is the
 // last in the list.
-internal static bool standardStatusActionᴍ(nssCriterion c, bool last) {
+[GoMethodBody("standardStatusAction")] internal static bool standardStatusActionᴍ(nssCriterion c, bool last) {
     if (c.negate) {
         return false;
     }
@@ -310,19 +310,3 @@ internal static (slice<nssCriterion> c, error err) parseCriteria(@string x) {
 }
 
 } // end net_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛnsswitchConfig {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref nsswitchConfig conf) => net_package.initᴍ(ref conf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void tryUpdate(this ж<nsswitchConfig> Ꮡconf) => net_package.tryUpdateᴍ(Ꮡconf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void acquireSema(this ref nsswitchConfig conf) => net_package.acquireSemaᴍ(ref conf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool tryAcquireSema(this ref nsswitchConfig conf) => net_package.tryAcquireSemaᴍ(ref conf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void releaseSema(this ref nsswitchConfig conf) => net_package.releaseSemaᴍ(ref conf);
-}
-partial class netᴛnssSource {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool standardCriteria(this nssSource s) => net_package.standardCriteriaᴍ(s);
-}
-partial class netᴛnssCriterion {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool standardStatusAction(this nssCriterion c, bool last) => net_package.standardStatusActionᴍ(c, last);
-}
-// </GlyphForwarders>

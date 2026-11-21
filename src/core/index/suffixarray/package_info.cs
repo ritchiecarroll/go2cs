@@ -66,6 +66,19 @@ using static go.index.suffixarray_package;
 
 namespace go.index;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using bytes = bytes_package;
+using binary = encoding.binary_package;
+using errors = errors_package;
+using io = io_package;
+using math = math_package;
+using regexp = regexp_package;
+using slices = slices_package;
+using sort = sort_package;
+using encoding;
+using static suffixarray_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("suffixarray")]
 public static partial class suffixarray_package
 {
@@ -108,3 +121,21 @@ public static partial class suffixarray_package
 [GoMethodHost(typeof(suffixarray_package.Index)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class suffixarrayᴛIndex;
 [GoMethodHost(typeof(suffixarray_package.ints)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class suffixarrayᴛints;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class suffixarrayᴛints {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint len(this ref ints a) => suffixarray_package.lenᴍ(ref a);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 get(this ref ints a, nint i) => suffixarray_package.getᴍ(ref a, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this ref ints a, nint i, int64 v) => suffixarray_package.setᴍ(ref a, i, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ints Δslice(this ref ints a, nint i, nint j) => suffixarray_package.Δsliceᴍ(ref a, i, j);
+}
+partial class suffixarrayᴛIndex {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Read(this ref Index x, io.Reader r) => suffixarray_package.Readᴍ(ref x, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ref Index x, io.Writer w) => suffixarray_package.Writeᴍ(ref x, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref Index x) => suffixarray_package.Bytesᴍ(ref x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> at(this ref Index x, nint i) => suffixarray_package.atᴍ(ref x, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ints lookupAll(this ж<Index> Ꮡx, slice<byte> s) => suffixarray_package.lookupAllᴍ(Ꮡx, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<nint> /*result*/ Lookup(this ж<Index> Ꮡx, slice<byte> s, nint n) => suffixarray_package.Lookupᴍ(Ꮡx, s, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж<regexp.Regexp> Ꮡr, nint n) => suffixarray_package.FindAllIndexᴍ(Ꮡx, Ꮡr, n);
+}
+// </GlyphForwarders>

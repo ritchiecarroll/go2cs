@@ -50,7 +50,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 // A record is a slice of strings with each string being one field.
 // Writes are buffered, so [Writer.Flush] must eventually be called to ensure
 // that the record is written to the underlying [io.Writer].
-internal static error Writeᴍ(ref Writer w, slice<@string> record) {
+[GoMethodBody("Write")] internal static error Writeᴍ(ref Writer w, slice<@string> record) {
     if (!validDelim(w.Comma)) {
         return errInvalidDelim;
     }
@@ -132,20 +132,20 @@ internal static error Writeᴍ(ref Writer w, slice<@string> record) {
 
 // Flush writes any buffered data to the underlying [io.Writer].
 // To check if an error occurred during Flush, call [Writer.Error].
-internal static void Flushᴍ(ref Writer w) {
+[GoMethodBody("Flush")] internal static void Flushᴍ(ref Writer w) {
     w.w.Flush();
 }
 
 // Error reports any error that has occurred during
 // a previous [Writer.Write] or [Writer.Flush].
-internal static error Errorᴍ(ref Writer w) {
+[GoMethodBody("Error")] internal static error Errorᴍ(ref Writer w) {
     var (_, err) = w.w.Write(default);
     return err;
 }
 
 // WriteAll writes multiple CSV records to w using [Writer.Write] and
 // then calls [Writer.Flush], returning any error from the Flush.
-internal static error WriteAllᴍ(ref Writer w, slice<slice<@string>> records) {
+[GoMethodBody("WriteAll")] internal static error WriteAllᴍ(ref Writer w, slice<slice<@string>> records) {
     foreach (var (_, record) in range(records)) {
         var err = w.Write(record);
         if (err != nil) {
@@ -167,7 +167,7 @@ internal static error WriteAllᴍ(ref Writer w, slice<slice<@string>> records) {
 // Not quoting the empty string also makes this package match the behavior
 // of Microsoft Excel and Google Drive.
 // For Postgres, quote the data terminating string `\.`.
-internal static bool fieldNeedsQuotesᴍ(ref Writer w, @string field) {
+[GoMethodBody("fieldNeedsQuotes")] internal static bool fieldNeedsQuotesᴍ(ref Writer w, @string field) {
     if (field == ""u8) {
         return false;
     }
@@ -194,13 +194,3 @@ internal static bool fieldNeedsQuotesᴍ(ref Writer w, @string field) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class csvᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ref Writer w, slice<@string> record) => csv_package.Writeᴍ(ref w, record);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Flush(this ref Writer w) => csv_package.Flushᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Error(this ref Writer w) => csv_package.Errorᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteAll(this ref Writer w, slice<slice<@string>> records) => csv_package.WriteAllᴍ(ref w, records);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool fieldNeedsQuotes(this ref Writer w, @string field) => csv_package.fieldNeedsQuotesᴍ(ref w, field);
-}
-// </GlyphForwarders>

@@ -65,6 +65,16 @@ using static go.vendor.golang.org.x.crypto.@internal.poly1305_package;
 
 namespace go.vendor.golang.org.x.crypto.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using subtle = go.crypto.subtle_package;
+using go.crypto;
+using static poly1305_package;
+using binary = encoding.binary_package;
+using bits = math.bits_package;
+using encoding;
+using math;
+// </GlyphForwarderUsings>
+
 [GoPackage("poly1305", ImportPath = "vendor/golang.org/x/crypto/internal/poly1305")]
 public static partial class poly1305_package
 {
@@ -105,3 +115,16 @@ public static partial class poly1305_package
 [GoMethodHost(typeof(poly1305_package.MAC)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class poly1305ᴛMAC;
 [GoMethodHost(typeof(poly1305_package.macGeneric)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class poly1305ᴛmacGeneric;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class poly1305ᴛMAC {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Size(this ref MAC h) => poly1305_package.Sizeᴍ(ref h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ж<MAC> Ꮡh, slice<byte> p) => poly1305_package.Writeᴍ(Ꮡh, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Sum(this ref MAC h, slice<byte> b) => poly1305_package.Sumᴍ(ref h, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Verify(this ref MAC h, slice<byte> expected) => poly1305_package.Verifyᴍ(ref h, expected);
+}
+partial class poly1305ᴛmacGeneric {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this ж<macGeneric> Ꮡh, slice<byte> p) => poly1305_package.Writeᴍ(Ꮡh, p);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Sum(this ref macGeneric h, /*[16]*/ ж<array<byte>> @out) => poly1305_package.Sumᴍ(ref h, @out);
+}
+// </GlyphForwarders>

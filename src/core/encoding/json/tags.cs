@@ -25,7 +25,7 @@ internal static (@string, tagOptions) parseTag(@string tag) {
 // Contains reports whether a comma-separated list of options
 // contains a particular substr flag. substr must be surrounded by a
 // string boundary or commas.
-internal static bool Containsᴍ(tagOptions o, @string optionName) {
+[GoMethodBody("Contains")] internal static bool Containsᴍ(tagOptions o, @string optionName) {
     if (len(o) == 0) {
         return false;
     }
@@ -41,9 +41,3 @@ internal static bool Containsᴍ(tagOptions o, @string optionName) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class jsonᴛtagOptions {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Contains(this tagOptions o, @string optionName) => json_package.Containsᴍ(o, optionName);
-}
-// </GlyphForwarders>

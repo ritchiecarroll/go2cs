@@ -73,6 +73,16 @@ using static go.database.sql.driver_package;
 
 namespace go.database.sql;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using context = context_package;
+using errors = errors_package;
+using reflect = reflect_package;
+using static driver_package;
+using fmt = fmt_package;
+using strconv = strconv_package;
+using time = time_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("driver")]
 public static partial class driver_package
 {
@@ -159,3 +169,33 @@ public static partial class driver_package
 [GoMethodHost(typeof(driver_package.noRows)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛnoRows;
 [GoMethodHost(typeof(driver_package.stringType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class driverᴛstringType;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class driverᴛRowsAffected {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) LastInsertId(this RowsAffected _) => driver_package.LastInsertIdᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) RowsAffected(this RowsAffected v) => driver_package.RowsAffectedᴍ(v);
+}
+partial class driverᴛnoRows {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) LastInsertId(this noRows _) => driver_package.LastInsertIdᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) RowsAffected(this noRows _) => driver_package.RowsAffectedᴍ(_);
+}
+partial class driverᴛboolType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this boolType _) => driver_package.Stringᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value, error) ConvertValue(this boolType _, any src) => driver_package.ConvertValueᴍ(_, src);
+}
+partial class driverᴛint32Type {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value, error) ConvertValue(this int32Type _, any v) => driver_package.ConvertValueᴍ(_, v);
+}
+partial class driverᴛstringType {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value, error) ConvertValue(this stringType _, any v) => driver_package.ConvertValueᴍ(_, v);
+}
+partial class driverᴛNull {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value, error) ConvertValue(this Null n, any v) => driver_package.ConvertValueᴍ(n, v);
+}
+partial class driverᴛNotNull {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value, error) ConvertValue(this NotNull n, any v) => driver_package.ConvertValueᴍ(n, v);
+}
+partial class driverᴛdefaultConverter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value, error) ConvertValue(this defaultConverter _, any v) => driver_package.ConvertValueᴍ(_, v);
+}
+// </GlyphForwarders>

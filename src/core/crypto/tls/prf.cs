@@ -199,7 +199,7 @@ partial struct finishedHash {
 
 } partial class tls_package {
 
-internal static (nint n, error err) Writeᴍ(ref finishedHash h, slice<byte> msg) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref finishedHash h, slice<byte> msg) {
     h.client.Write(msg);
     h.server.Write(msg);
 
@@ -215,7 +215,7 @@ internal static (nint n, error err) Writeᴍ(ref finishedHash h, slice<byte> msg
     return (len(msg), default);
 }
 
-internal static slice<byte> Sumᴍ(finishedHash h) {
+[GoMethodBody("Sum")] internal static slice<byte> Sumᴍ(finishedHash h) {
     if (h.version >= VersionTLS12) {
         return h.client.Sum(default);
     }
@@ -227,19 +227,19 @@ internal static slice<byte> Sumᴍ(finishedHash h) {
 
 // clientSum returns the contents of the verify_data member of a client's
 // Finished message.
-internal static slice<byte> clientSumᴍ(finishedHash h, slice<byte> masterSecret) {
+[GoMethodBody("clientSum")] internal static slice<byte> clientSumᴍ(finishedHash h, slice<byte> masterSecret) {
     return h.prf(masterSecret, clientFinishedLabel, h.Sum(), finishedVerifyLength);
 }
 
 // serverSum returns the contents of the verify_data member of a server's
 // Finished message.
-internal static slice<byte> serverSumᴍ(finishedHash h, slice<byte> masterSecret) {
+[GoMethodBody("serverSum")] internal static slice<byte> serverSumᴍ(finishedHash h, slice<byte> masterSecret) {
     return h.prf(masterSecret, serverFinishedLabel, h.Sum(), finishedVerifyLength);
 }
 
 // hashForClientCertificate returns the handshake messages so far, pre-hashed,
 // suitable for signing by a TLS 1.0 and 1.1 client certificate.
-internal static slice<byte> hashForClientCertificateᴍ(finishedHash h, uint8 sigType) {
+[GoMethodBody("hashForClientCertificate")] internal static slice<byte> hashForClientCertificateᴍ(finishedHash h, uint8 sigType) {
     if (sigType == signatureECDSA) {
         return h.server.Sum(default);
     }
@@ -249,7 +249,7 @@ internal static slice<byte> hashForClientCertificateᴍ(finishedHash h, uint8 si
 
 // discardHandshakeBuffer is called when there is no more need to
 // buffer the entirety of the handshake messages.
-internal static void discardHandshakeBufferᴍ(ref finishedHash h) {
+[GoMethodBody("discardHandshakeBuffer")] internal static void discardHandshakeBufferᴍ(ref finishedHash h) {
     h.buffer = default;
 }
 
@@ -311,14 +311,3 @@ internal static Func<@string, slice<byte>, nint, (slice<byte>, error)> ekmFromMa
 }
 
 } // end tls_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tlsᴛfinishedHash {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref finishedHash h, slice<byte> msg) => tls_package.Writeᴍ(ref h, msg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Sum(this finishedHash h) => tls_package.Sumᴍ(h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> clientSum(this finishedHash h, slice<byte> masterSecret) => tls_package.clientSumᴍ(h, masterSecret);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> serverSum(this finishedHash h, slice<byte> masterSecret) => tls_package.serverSumᴍ(h, masterSecret);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> hashForClientCertificate(this finishedHash h, uint8 sigType) => tls_package.hashForClientCertificateᴍ(h, sigType);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void discardHandshakeBuffer(this ref finishedHash h) => tls_package.discardHandshakeBufferᴍ(ref h);
-}
-// </GlyphForwarders>

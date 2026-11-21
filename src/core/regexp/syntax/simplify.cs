@@ -16,7 +16,7 @@ partial class syntax_package {
 // may have been duplicated or removed. For example, the simplified form
 // for /(x){1,2}/ is /(x)(x)?/ but both parentheses capture as $1.
 // The returned regexp may share structure with or be the original.
-internal static ж<Regexp> Simplifyᴍ(ж<Regexp> Ꮡre) {
+[GoMethodBody("Simplify")] internal static ж<Regexp> Simplifyᴍ(ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (Ꮡre == nil) {
@@ -163,9 +163,3 @@ internal static ж<Regexp> simplify1(Op op, Flags flags, ж<Regexp> Ꮡsub, ж<R
 }
 
 } // end syntax_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class syntaxᴛRegexp {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) => syntax_package.Simplifyᴍ(Ꮡre);
-}
-// </GlyphForwarders>

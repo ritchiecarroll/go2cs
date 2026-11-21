@@ -96,7 +96,7 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
 // coverage data for the package with the specified import path.
 // Note that it's OK to call SetPackage more than once with the
 // same import path; counter data values will be accumulated.
-internal static void SetPackageᴍ(ref Formatter fm, @string importpath) {
+[GoMethodBody("SetPackage")] internal static void SetPackageᴍ(ref Formatter fm, @string importpath) {
     if (importpath == fm.pkg) {
         return;
     }
@@ -114,7 +114,7 @@ internal static void SetPackageᴍ(ref Formatter fm, @string importpath) {
 // AddUnit passes info on a single coverable unit (file, funcname,
 // literal flag, range of lines, and counter value) to the formatter.
 // Counter values will be accumulated where appropriate.
-internal static void AddUnitᴍ(ref Formatter fm, @string @file, @string fname, bool isfnlit, coverage.CoverableUnit unit, uint32 count) {
+[GoMethodBody("AddUnit")] internal static void AddUnitᴍ(ref Formatter fm, @string @file, @string fname, bool isfnlit, coverage.CoverableUnit unit, uint32 count) {
     if (fm.p == nil) {
         throw panic("AddUnit invoked before SetPackage");
     }
@@ -145,7 +145,7 @@ internal static void AddUnitᴍ(ref Formatter fm, @string @file, @string fname, 
 // source position information (e.g. file and line). Note that we don't
 // include function name as part of the sorting criteria, the thinking
 // being that is better to provide things in the original source order.
-internal static void sortUnitsᴍ(ж<pstate> Ꮡp, slice<extcu> units) {
+[GoMethodBody("sortUnits")] internal static void sortUnitsᴍ(ж<pstate> Ꮡp, slice<extcu> units) {
     slices.SortFunc(units, (extcu ui, extcu uj) => {
         @string ifile = Ꮡp.Value.funcs[ui.fnfid].@file;
         @string jfile = Ꮡp.Value.funcs[uj.fnfid].@file;
@@ -188,7 +188,7 @@ internal static void sortUnitsᴍ(ж<pstate> Ꮡp, slice<extcu> units) {
 // importpath, source file, and line number before emitting (this sorting
 // is not explicitly mandated by the format, but seems like a good idea
 // for repeatable/deterministic dumps).
-internal static error EmitTextualᴍ(ref Formatter fm, slice<@string> pkgs, io.Writer w) {
+[GoMethodBody("EmitTextual")] internal static error EmitTextualᴍ(ref Formatter fm, slice<@string> pkgs, io.Writer w) {
     var pkgsᴷ = new stackAppend<@string>();
     var unitsᴷ = new stackAppend<extcu>();
 
@@ -233,7 +233,7 @@ internal static error EmitTextualᴍ(ref Formatter fm, slice<@string> pkgs, io.W
 // EmitPercent writes out a "percentage covered" string to the writer
 // 'w', selecting the set of packages in 'pkgs' and suffixing the
 // printed string with 'inpkgs'.
-internal static error EmitPercentᴍ(ref Formatter fm, io.Writer w, slice<@string> pkgs, @string inpkgs, bool noteEmpty, bool aggregate) {
+[GoMethodBody("EmitPercent")] internal static error EmitPercentᴍ(ref Formatter fm, io.Writer w, slice<@string> pkgs, @string inpkgs, bool noteEmpty, bool aggregate) {
     var pkgsᴷ = new stackAppend<@string>();
 
     if (len(pkgs) == 0) {
@@ -308,7 +308,7 @@ private static readonly object statementsˢᴍFormatter = (@string)"(statements)
 // to name them (this is also consistent with the legacy cmd/cover
 // implementation). We do want to include their counts in the overall
 // summary however.
-internal static error EmitFuncsᴍ(ж<Formatter> Ꮡfm, io.Writer w) {
+[GoMethodBody("EmitFuncs")] internal static error EmitFuncsᴍ(ж<Formatter> Ꮡfm, io.Writer w) {
     GoFrame ᒐ = default;
     try {
         ref var fm = ref Ꮡfm.DerefOrNull();
@@ -413,16 +413,3 @@ internal static error EmitFuncsᴍ(ж<Formatter> Ꮡfm, io.Writer w) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class cformatᴛFormatter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetPackage(this ref Formatter fm, @string importpath) => cformat_package.SetPackageᴍ(ref fm, importpath);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddUnit(this ref Formatter fm, @string @file, @string fname, bool isfnlit, coverage.CoverableUnit unit, uint32 count) => cformat_package.AddUnitᴍ(ref fm, @file, fname, isfnlit, unit, count);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.Writer w) => cformat_package.EmitTextualᴍ(ref fm, pkgs, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@string> pkgs, @string inpkgs, bool noteEmpty, bool aggregate) => cformat_package.EmitPercentᴍ(ref fm, w, pkgs, inpkgs, noteEmpty, aggregate);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) => cformat_package.EmitFuncsᴍ(Ꮡfm, w);
-}
-partial class cformatᴛpstate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sortUnits(this ж<pstate> Ꮡp, slice<extcu> units) => cformat_package.sortUnitsᴍ(Ꮡp, units);
-}
-// </GlyphForwarders>

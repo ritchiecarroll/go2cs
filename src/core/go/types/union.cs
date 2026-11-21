@@ -32,11 +32,11 @@ public static ж<Union> NewUnion(slice<ж<Term>> terms) {
 
 } partial class types_package {
 
-internal static nint Lenᴍ(ref Union u) { return len(u.terms); }
-internal static ж<Term> Termᴍ(ref Union u, nint i) { return u.terms[i]; }
+[GoMethodBody("Len")] internal static nint Lenᴍ(ref Union u) { return len(u.terms); }
+[GoMethodBody("Term")] internal static ж<Term> Termᴍ(ref Union u, nint i) { return u.terms[i]; }
 
-internal static Type Underlyingᴍ(ж<Union> Ꮡu) { return new UnionжType(Ꮡu); }
-internal static @string Stringᴍ(ж<Union> Ꮡu) { return TypeString(new UnionжType(Ꮡu), default); }
+[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Union> Ꮡu) { return new UnionжType(Ꮡu); }
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<Union> Ꮡu) { return TypeString(new UnionжType(Ꮡu), default); }
 
 } partial class types_package {
 
@@ -48,9 +48,9 @@ public static ж<Term> NewTerm(bool tilde, Type typ) { return Ꮡ(new Term(new t
 
 } partial class types_package {
 
-internal static bool Tildeᴍ(ref Term t) { return t.tilde; }
-internal static Type Typeᴍ(ref Term t) { return t.typ; }
-internal static @string Stringᴍ(ж<Term> Ꮡt) { return (Ꮡt.Reinterpret<Term, term>()).String(); }
+[GoMethodBody("Tilde")] internal static bool Tildeᴍ(ref Term t) { return t.tilde; }
+[GoMethodBody("Type")] internal static Type Typeᴍ(ref Term t) { return t.typ; }
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<Term> Ꮡt) { return (Ꮡt.Reinterpret<Term, term>()).String(); }
 
 } partial class types_package {
 
@@ -235,17 +235,3 @@ internal static (slice<ast.Expr> blist, slice<ast.Expr> tlist) flattenUnion(slic
 }
 
 } // end types_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛUnion {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ref Union u) => types_package.Lenᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Term> Term(this ref Union u, nint i) => types_package.Termᴍ(ref u, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Underlying(this ж<Union> Ꮡu) => types_package.Underlyingᴍ(Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Union> Ꮡu) => types_package.Stringᴍ(Ꮡu);
-}
-partial class typesᴛTerm {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Tilde(this ref Term t) => types_package.Tildeᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Type Type(this ref Term t) => types_package.Typeᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Term> Ꮡt) => types_package.Stringᴍ(Ꮡt);
-}
-// </GlyphForwarders>

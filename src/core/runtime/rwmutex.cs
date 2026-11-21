@@ -58,7 +58,7 @@ partial struct rwmutex {
 //     belongs.
 //   - writeRank is placed in the lock order wherever a write lock of this
 //     rwmutex belongs.
-internal static void initᴍ(ж<rwmutex> Ꮡrw, lockRank readRank, lockRank readRankInternal, lockRank writeRank) {
+[GoMethodBody("init")] internal static void initᴍ(ж<rwmutex> Ꮡrw, lockRank readRank, lockRank readRankInternal, lockRank writeRank) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     rw.readRank = readRank;
@@ -74,7 +74,7 @@ internal static UntypedInt rwmutexMaxReaders => /* 1 << 30 */ 1073741824;
 } partial class runtime_package {
 
 // rlock locks rw for reading.
-internal static void rlockᴍ(ж<rwmutex> Ꮡrw) {
+[GoMethodBody("rlock")] internal static void rlockᴍ(ж<rwmutex> Ꮡrw) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     // The reader must not be allowed to lose its P or else other
@@ -111,7 +111,7 @@ internal static ref readonly @string runlockOfUnlockedRwmutexˢᴍrwmutex => ref
 private static readonly @string runlockOfUnlockedRwmutexˢᵇᴍrwmutex = "runlock of unlocked rwmutex"u8;
 
 // runlock undoes a single rlock call on rw.
-internal static void runlockᴍ(ж<rwmutex> Ꮡrw) {
+[GoMethodBody("runlock")] internal static void runlockᴍ(ж<rwmutex> Ꮡrw) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     var r = Ꮡrw.ᏑreaderCount.Add(-1); if (r < 0) {
@@ -133,7 +133,7 @@ internal static void runlockᴍ(ж<rwmutex> Ꮡrw) {
 }
 
 // lock locks rw for writing.
-internal static void @lockᴍ(ж<rwmutex> Ꮡrw) {
+[GoMethodBody("lock")] internal static void @lockᴍ(ж<rwmutex> Ꮡrw) {
     // Resolve competition with other writers and stick to our P.
     runtime.@lock(Ꮡrw.ᏑwLock);
     var m = getg().Value.m;
@@ -160,7 +160,7 @@ internal static ref readonly @string unlockOfUnlockedRwmutexˢᴍrwmutex => ref 
 private static readonly @string unlockOfUnlockedRwmutexˢᵇᴍrwmutex = "unlock of unlocked rwmutex"u8;
 
 // unlock unlocks rw for writing.
-internal static void unlockᴍ(ж<rwmutex> Ꮡrw) {
+[GoMethodBody("unlock")] internal static void unlockᴍ(ж<rwmutex> Ꮡrw) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     // Announce to readers that there is no active writer.
@@ -186,13 +186,3 @@ internal static void unlockᴍ(ж<rwmutex> Ꮡrw) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛrwmutex {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<rwmutex> Ꮡrw, lockRank readRank, lockRank readRankInternal, lockRank writeRank) => runtime_package.initᴍ(Ꮡrw, readRank, readRankInternal, writeRank);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void rlock(this ж<rwmutex> Ꮡrw) => runtime_package.rlockᴍ(Ꮡrw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void runlock(this ж<rwmutex> Ꮡrw) => runtime_package.runlockᴍ(Ꮡrw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void @lock(this ж<rwmutex> Ꮡrw) => runtime_package.@lockᴍ(Ꮡrw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unlock(this ж<rwmutex> Ꮡrw) => runtime_package.unlockᴍ(Ꮡrw);
-}
-// </GlyphForwarders>

@@ -74,7 +74,7 @@ internal static taggedPointer taggedPointerPack(@unsafe.Pointer ptr, uintptr tag
 } partial class runtime_package {
 
 // Pointer returns the pointer from a taggedPointer.
-internal static @unsafe.Pointer pointerᴍ(taggedPointer tp) {
+[GoMethodBody("pointer")] internal static @unsafe.Pointer pointerᴍ(taggedPointer tp) {
     if (GOARCH == "amd64"u8) {
         // amd64 systems can place the stack above the VA hole, so we need to sign extend
         // val before unpacking.
@@ -87,15 +87,8 @@ internal static @unsafe.Pointer pointerᴍ(taggedPointer tp) {
 }
 
 // Tag returns the tag from a taggedPointer.
-internal static uintptr tagᴍ(taggedPointer tp) {
+[GoMethodBody("tag")] internal static uintptr tagᴍ(taggedPointer tp) {
     return (uintptr)((taggedPointer)(tp & (uint64)((1 << (int)(tagBits)) - 1)));
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛtaggedPointer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer pointer(this taggedPointer tp) => runtime_package.pointerᴍ(tp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr tag(this taggedPointer tp) => runtime_package.tagᴍ(tp);
-}
-// </GlyphForwarders>

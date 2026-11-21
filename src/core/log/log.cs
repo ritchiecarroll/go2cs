@@ -82,7 +82,7 @@ public static ж<Logger> New(Δio.Writer @out, @string prefix, nint flag) {
 } partial class log_package {
 
 // SetOutput sets the output destination for the logger.
-internal static void SetOutputᴍ(ж<Logger> Ꮡl, Δio.Writer w) {
+[GoMethodBody("SetOutput")] internal static void SetOutputᴍ(ж<Logger> Ꮡl, Δio.Writer w) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -210,7 +210,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 // already a newline. Calldepth is used to recover the PC and is
 // provided for generality, although at the moment on all pre-defined
 // paths it will be 2.
-internal static partial error Outputᴍ(ж<Logger> Ꮡl, nint calldepth, @string s) {
+[GoMethodBody("Output")] internal static partial error Outputᴍ(ж<Logger> Ꮡl, nint calldepth, @string s) {
     return Ꮡl.output(0, calldepth + 1, (slice<byte> b) => { // +1 for this frame.
         return append(b, s.ꓸꓸꓸ);
     });
@@ -218,7 +218,7 @@ internal static partial error Outputᴍ(ж<Logger> Ꮡl, nint calldepth, @string
 
 // output can take either a calldepth or a pc to get source line information.
 // It uses the pc if it is non-zero.
-internal static partial error outputᴍ(ж<Logger> Ꮡl, uintptr pc, nint calldepth, Func<slice<byte>, slice<byte>> appendOutput) {
+[GoMethodBody("output")] internal static partial error outputᴍ(ж<Logger> Ꮡl, uintptr pc, nint calldepth, Func<slice<byte>, slice<byte>> appendOutput) {
     GoFrame ᒐ = default;
     try {
         ref var l = ref Ꮡl.DerefOrNull();
@@ -285,7 +285,7 @@ internal static partial error outputᴍ(ж<Logger> Ꮡl, uintptr pc, nint callde
 
 // Print calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Print].
-internal static partial void Printᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+[GoMethodBody("Print")] internal static partial void Printᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -294,7 +294,7 @@ internal static partial void Printᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp)
 
 // Printf calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Printf].
-internal static partial void Printfᴍ(ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
+[GoMethodBody("Printf")] internal static partial void Printfᴍ(ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -303,7 +303,7 @@ internal static partial void Printfᴍ(ж<Logger> Ꮡl, @string format, params �
 
 // Println calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Println].
-internal static partial void Printlnᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+[GoMethodBody("Println")] internal static partial void Printlnᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -311,7 +311,7 @@ internal static partial void Printlnᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗ
 }
 
 // Fatal is equivalent to l.Print() followed by a call to [os.Exit](1).
-internal static partial void Fatalᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+[GoMethodBody("Fatal")] internal static partial void Fatalᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -320,7 +320,7 @@ internal static partial void Fatalᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp)
 }
 
 // Fatalf is equivalent to l.Printf() followed by a call to [os.Exit](1).
-internal static partial void Fatalfᴍ(ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
+[GoMethodBody("Fatalf")] internal static partial void Fatalfᴍ(ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -329,7 +329,7 @@ internal static partial void Fatalfᴍ(ж<Logger> Ꮡl, @string format, params �
 }
 
 // Fatalln is equivalent to l.Println() followed by a call to [os.Exit](1).
-internal static partial void Fatallnᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+[GoMethodBody("Fatalln")] internal static partial void Fatallnᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -338,7 +338,7 @@ internal static partial void Fatallnᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗ
 }
 
 // Panic is equivalent to l.Print() followed by a call to panic().
-internal static partial void Panicᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+[GoMethodBody("Panic")] internal static partial void Panicᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprint(v.ꓸꓸꓸ);
@@ -347,7 +347,7 @@ internal static partial void Panicᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp)
 }
 
 // Panicf is equivalent to l.Printf() followed by a call to panic().
-internal static partial void Panicfᴍ(ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
+[GoMethodBody("Panicf")] internal static partial void Panicfᴍ(ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprintf(format, v.ꓸꓸꓸ);
@@ -356,7 +356,7 @@ internal static partial void Panicfᴍ(ж<Logger> Ꮡl, @string format, params �
 }
 
 // Panicln is equivalent to l.Println() followed by a call to panic().
-internal static partial void Paniclnᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+[GoMethodBody("Panicln")] internal static partial void Paniclnᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprintln(v.ꓸꓸꓸ);
@@ -366,18 +366,18 @@ internal static partial void Paniclnᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗ
 
 // Flags returns the output flags for the logger.
 // The flag bits are [Ldate], [Ltime], and so on.
-internal static nint Flagsᴍ(ж<Logger> Ꮡl) {
+[GoMethodBody("Flags")] internal static nint Flagsᴍ(ж<Logger> Ꮡl) {
     return (nint)Ꮡl.Ꮡflag.Load();
 }
 
 // SetFlags sets the output flags for the logger.
 // The flag bits are [Ldate], [Ltime], and so on.
-internal static void SetFlagsᴍ(ж<Logger> Ꮡl, nint flag) {
+[GoMethodBody("SetFlags")] internal static void SetFlagsᴍ(ж<Logger> Ꮡl, nint flag) {
     Ꮡl.Ꮡflag.Store((int32)flag);
 }
 
 // Prefix returns the output prefix for the logger.
-internal static @string Prefixᴍ(ж<Logger> Ꮡl) {
+[GoMethodBody("Prefix")] internal static @string Prefixᴍ(ж<Logger> Ꮡl) {
     var p = Ꮡl.Ꮡprefix.Load(); if (p != nil) {
         return p.Value;
     }
@@ -385,14 +385,14 @@ internal static @string Prefixᴍ(ж<Logger> Ꮡl) {
 }
 
 // SetPrefix sets the output prefix for the logger.
-internal static void SetPrefixᴍ(ж<Logger> Ꮡl, @string prefixʗp) {
+[GoMethodBody("SetPrefix")] internal static void SetPrefixᴍ(ж<Logger> Ꮡl, @string prefixʗp) {
     ref var prefix = ref heap(prefixʗp, out var Ꮡprefix);
 
     Ꮡl.Ꮡprefix.Store(Ꮡprefix);
 }
 
 // Writer returns the output destination for the logger.
-internal static Δio.Writer Writerᴍ(ж<Logger> Ꮡl) {
+[GoMethodBody("Writer")] internal static Δio.Writer Writerᴍ(ж<Logger> Ꮡl) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -537,25 +537,3 @@ public static partial error Output(nint calldepth, @string s) {
 }
 
 } // end log_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class logᴛLogger {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetOutput(this ж<Logger> Ꮡl, Δio.Writer w) => log_package.SetOutputᴍ(Ꮡl, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Output(this ж<Logger> Ꮡl, nint calldepth, @string s) => log_package.Outputᴍ(Ꮡl, calldepth, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error output(this ж<Logger> Ꮡl, uintptr pc, nint calldepth, Func<slice<byte>, slice<byte>> appendOutput) => log_package.outputᴍ(Ꮡl, pc, calldepth, appendOutput);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Print(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Printᴍ(Ꮡl, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Printf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) => log_package.Printfᴍ(Ꮡl, format, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Println(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Printlnᴍ(Ꮡl, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Fatal(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Fatalᴍ(Ꮡl, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Fatalf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) => log_package.Fatalfᴍ(Ꮡl, format, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Fatalln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Fatallnᴍ(Ꮡl, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Panicᴍ(Ꮡl, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Panicf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) => log_package.Panicfᴍ(Ꮡl, format, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Panicln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Paniclnᴍ(Ꮡl, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Flags(this ж<Logger> Ꮡl) => log_package.Flagsᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetFlags(this ж<Logger> Ꮡl, nint flag) => log_package.SetFlagsᴍ(Ꮡl, flag);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Prefix(this ж<Logger> Ꮡl) => log_package.Prefixᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetPrefix(this ж<Logger> Ꮡl, @string prefixʗp) => log_package.SetPrefixᴍ(Ꮡl, prefixʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Δio.Writer Writer(this ж<Logger> Ꮡl) => log_package.Writerᴍ(Ꮡl);
-}
-// </GlyphForwarders>

@@ -111,7 +111,7 @@ partial struct Writer {
 // addLine adds a new line.
 // flushed is a hint indicating whether the underlying writer was just flushed.
 // If so, the previous line is not likely to be a good indicator of the new line's cells.
-internal static void addLineᴍ(ref Writer b, bool flushed) {
+[GoMethodBody("addLine")] internal static void addLineᴍ(ref Writer b, bool flushed) {
     // Grow slice instead of appending,
     // as that gives us an opportunity
     // to re-use an existing []cell.
@@ -138,7 +138,7 @@ internal static void addLineᴍ(ref Writer b, bool flushed) {
 }
 
 // Reset the current state.
-internal static void resetᴍ(ref Writer b) {
+[GoMethodBody("reset")] internal static void resetᴍ(ref Writer b) {
     b.buf = b.buf[..0];
     b.pos = 0;
     b.cell = new cell();
@@ -213,7 +213,7 @@ public const nuint Debug = 32;
 //			(for correct-looking results, tabwidth must correspond
 //			to the tab width in the viewer displaying the result)
 //	flags		formatting control
-internal static ж<Writer> Initᴍ(ж<Writer> Ꮡb, io.Writer output, nint minwidth, nint tabwidth, nint padding, byte padchar, nuint flags) {
+[GoMethodBody("Init")] internal static ж<Writer> Initᴍ(ж<Writer> Ꮡb, io.Writer output, nint minwidth, nint tabwidth, nint padding, byte padchar, nuint flags) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (minwidth < 0 || tabwidth < 0 || padding < 0) {
@@ -238,7 +238,7 @@ internal static ж<Writer> Initᴍ(ж<Writer> Ꮡb, io.Writer output, nint minwi
 }
 
 // debugging support (keep code around)
-internal static void dumpᴍ(ref Writer b) {
+[GoMethodBody("dump")] internal static void dumpᴍ(ref Writer b) {
     nint pos = 0;
     foreach (var (i, line) in range(b.lines)) {
         print((@string)"(", i, (@string)") ");
@@ -261,7 +261,7 @@ partial struct osError {
 
 } partial class tabwriter_package {
 
-internal static void write0ᴍ(ref Writer b, slice<byte> buf) {
+[GoMethodBody("write0")] internal static void write0ᴍ(ref Writer b, slice<byte> buf) {
     var (n, err) = b.output.Write(buf);
     if (n != len(buf) && err == nil) {
         err = io.ErrShortWrite;
@@ -271,7 +271,7 @@ internal static void write0ᴍ(ref Writer b, slice<byte> buf) {
     }
 }
 
-internal static void writeNᴍ(ref Writer b, slice<byte> src, nint n) {
+[GoMethodBody("writeN")] internal static void writeNᴍ(ref Writer b, slice<byte> src, nint n) {
     while (n > len(src)) {
         b.write0(src);
         n -= len(src);
@@ -286,7 +286,7 @@ internal static slice<byte> tabs = slice<byte>("\t\t\t\t\t\t\t\t"u8);
 
 } partial class tabwriter_package {
 
-internal static void writePaddingᴍ(ref Writer b, nint textw, nint cellw, bool useTabs) {
+[GoMethodBody("writePadding")] internal static void writePaddingᴍ(ref Writer b, nint textw, nint cellw, bool useTabs) {
     if (b.padbytes[0] == '\t' || useTabs) {
         // padding is done with tabs
         if (b.tabwidth == 0) {
@@ -312,7 +312,7 @@ internal static slice<byte> vbar = [(byte)'|'];
 
 } partial class tabwriter_package {
 
-internal static nint /*pos*/ writeLinesᴍ(ref Writer b, nint pos0, nint line0, nint line1) {
+[GoMethodBody("writeLines")] internal static nint /*pos*/ writeLinesᴍ(ref Writer b, nint pos0, nint line0, nint line1) {
     nint pos = default;
 
     pos = pos0;
@@ -369,7 +369,7 @@ internal static nint /*pos*/ writeLinesᴍ(ref Writer b, nint pos0, nint line0, 
 // is the buffer position corresponding to the beginning of line0.
 // Returns the buffer position corresponding to the beginning of
 // line1 and an error, if any.
-internal static nint /*pos*/ formatᴍ(ref Writer b, nint pos0, nint line0, nint line1) {
+[GoMethodBody("format")] internal static nint /*pos*/ formatᴍ(ref Writer b, nint pos0, nint line0, nint line1) {
     nint pos = default;
 
     pos = pos0;
@@ -430,13 +430,13 @@ internal static nint /*pos*/ formatᴍ(ref Writer b, nint pos0, nint line0, nint
 }
 
 // Append text to current cell.
-internal static void appendᴍ(ref Writer b, slice<byte> text) {
+[GoMethodBody("append")] internal static void appendᴍ(ref Writer b, slice<byte> text) {
     b.buf = builtin.appendꓸꓸꓸ(b.buf, text);
     b.cell.size += len(text);
 }
 
 // Update the cell width.
-internal static void updateWidthᴍ(ref Writer b) {
+[GoMethodBody("updateWidth")] internal static void updateWidthᴍ(ref Writer b) {
     b.cell.width += utf8.RuneCount(b.buf.slice(b.pos));
     b.pos = len(b.buf);
 }
@@ -454,7 +454,7 @@ public static UntypedInt Escape => /* '\xff' */ 255;
 } partial class tabwriter_package {
 
 // Start escaped mode.
-internal static void startEscapeᴍ(ref Writer b, byte ch) {
+[GoMethodBody("startEscape")] internal static void startEscapeᴍ(ref Writer b, byte ch) {
     switch (ch) {
     case var ᴛ when ᴛ == Escape: {
         b.endChar = Escape;
@@ -474,7 +474,7 @@ internal static void startEscapeᴍ(ref Writer b, byte ch) {
 // is assumed to be zero for formatting purposes; if it was an HTML entity,
 // its width is assumed to be one. In all other cases, the width is the
 // unicode width of the text.
-internal static void endEscapeᴍ(ref Writer b) {
+[GoMethodBody("endEscape")] internal static void endEscapeᴍ(ref Writer b) {
     switch (b.endChar) {
     case var ᴛ when ᴛ == Escape: {
         b.updateWidth();
@@ -496,7 +496,7 @@ internal static void endEscapeᴍ(ref Writer b) {
 
 // Terminate the current cell by adding it to the list of cells of the
 // current line. Returns the number of cells in that line.
-internal static nint terminateCellᴍ(ref Writer b, bool htab) {
+[GoMethodBody("terminateCell")] internal static nint terminateCellᴍ(ref Writer b, bool htab) {
     b.cell.htab = htab;
     var line = Ꮡ(b.lines, len(b.lines) - 1);
     line.ValueSlot = builtin.append(line.ValueSlot, b.cell);
@@ -504,7 +504,7 @@ internal static nint terminateCellᴍ(ref Writer b, bool htab) {
     return len(line.ValueSlot);
 }
 
-internal static void handlePanicᴍ(ж<Writer> Ꮡb, ж<error> Ꮡerr, @string op) {
+[GoMethodBody("handlePanic")] internal static void handlePanicᴍ(ж<Writer> Ꮡb, ж<error> Ꮡerr, @string op) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
@@ -531,7 +531,7 @@ internal static void handlePanicᴍ(ж<Writer> Ꮡb, ж<error> Ꮡerr, @string o
 // that any data buffered in the [Writer] is written to output. Any
 // incomplete escape sequence at the end is considered
 // complete for formatting purposes.
-internal static error Flushᴍ(ж<Writer> Ꮡb) {
+[GoMethodBody("Flush")] internal static error Flushᴍ(ж<Writer> Ꮡb) {
     return Ꮡb.flush();
 }
 
@@ -541,7 +541,7 @@ private static readonly @string flushˢᵇᴍWriter = "Flush"u8;
 
 // flush is the internal version of Flush, with a named return value which we
 // don't want to expose.
-internal static error /*err*/ flushᴍ(ж<Writer> Ꮡb) {
+[GoMethodBody("flush")] internal static error /*err*/ flushᴍ(ж<Writer> Ꮡb) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -560,7 +560,7 @@ internal static error /*err*/ flushᴍ(ж<Writer> Ꮡb) {
 // flushNoDefers is like flush, but without a deferred handlePanic call. This
 // can be called from other methods which already have their own deferred
 // handlePanic calls, such as Write, and avoid the extra defer work.
-internal static void flushNoDefersᴍ(ref Writer b) {
+[GoMethodBody("flushNoDefers")] internal static void flushNoDefersᴍ(ref Writer b) {
     // add current cell if not empty
     if (b.cell.size > 0) {
         if (b.endChar != 0) {
@@ -588,7 +588,7 @@ private static readonly @string writeˢᵇᴍWriter = "Write"u8;
 // Write writes buf to the writer b.
 // The only errors returned are ones encountered
 // while writing to the underlying output stream.
-internal static (nint n, error err) Writeᴍ(ж<Writer> Ꮡb, slice<byte> buf) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<Writer> Ꮡb, slice<byte> buf) {
     nint n = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
@@ -683,27 +683,3 @@ public static ж<Writer> NewWriter(io.Writer output, nint minwidth, nint tabwidt
 }
 
 } // end tabwriter_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tabwriterᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addLine(this ref Writer b, bool flushed) => tabwriter_package.addLineᴍ(ref b, flushed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref Writer b) => tabwriter_package.resetᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwidth, nint tabwidth, nint padding, byte padchar, nuint flags) => tabwriter_package.Initᴍ(Ꮡb, output, minwidth, tabwidth, padding, padchar, flags);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void dump(this ref Writer b) => tabwriter_package.dumpᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void write0(this ref Writer b, slice<byte> buf) => tabwriter_package.write0ᴍ(ref b, buf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeN(this ref Writer b, slice<byte> src, nint n) => tabwriter_package.writeNᴍ(ref b, src, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writePadding(this ref Writer b, nint textw, nint cellw, bool useTabs) => tabwriter_package.writePaddingᴍ(ref b, textw, cellw, useTabs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0, nint line1) => tabwriter_package.writeLinesᴍ(ref b, pos0, line0, line1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*pos*/ format(this ref Writer b, nint pos0, nint line0, nint line1) => tabwriter_package.formatᴍ(ref b, pos0, line0, line1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void append(this ref Writer b, slice<byte> text) => tabwriter_package.appendᴍ(ref b, text);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void updateWidth(this ref Writer b) => tabwriter_package.updateWidthᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void startEscape(this ref Writer b, byte ch) => tabwriter_package.startEscapeᴍ(ref b, ch);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void endEscape(this ref Writer b) => tabwriter_package.endEscapeᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint terminateCell(this ref Writer b, bool htab) => tabwriter_package.terminateCellᴍ(ref b, htab);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handlePanic(this ж<Writer> Ꮡb, ж<error> Ꮡerr, @string op) => tabwriter_package.handlePanicᴍ(Ꮡb, Ꮡerr, op);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Flush(this ж<Writer> Ꮡb) => tabwriter_package.Flushᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ flush(this ж<Writer> Ꮡb) => tabwriter_package.flushᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void flushNoDefers(this ref Writer b) => tabwriter_package.flushNoDefersᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) => tabwriter_package.Writeᴍ(Ꮡb, buf);
-}
-// </GlyphForwarders>

@@ -55,7 +55,7 @@ partial struct edge {
 
 // add adds a uniform function over [l, r] scaled so the total weight
 // of the uniform is area. If l==r, this adds a Dirac delta function.
-internal static void addᴍ(ж<mud> Ꮡd, float64 l, float64 r, float64 area) {
+[GoMethodBody("add")] internal static void addᴍ(ж<mud> Ꮡd, float64 l, float64 r, float64 area) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (area == 0D) {
@@ -121,7 +121,7 @@ internal static void addᴍ(ж<mud> Ꮡd, float64 l, float64 r, float64 area) {
 // Specifically, mass is a cumulative duration, and the mutator
 // utilization bounds for this duration can be queried using
 // approxInvCumulativeSum.
-internal static void setTrackMassᴍ(ref mud d, float64 mass) {
+[GoMethodBody("setTrackMass")] internal static void setTrackMassᴍ(ref mud d, float64 mass) {
     d.trackMass = mass;
 
     // Find the bucket currently containing trackMass by computing
@@ -146,7 +146,7 @@ internal static void setTrackMassᴍ(ref mud d, float64 mass) {
 // approximation of the inverse cumulative sum.
 //
 // The true inverse cumulative sum will be in the range [lower, upper).
-internal static (float64, float64, bool) approxInvCumulativeSumᴍ(ref mud d) {
+[GoMethodBody("approxInvCumulativeSum")] internal static (float64, float64, bool) approxInvCumulativeSumᴍ(ref mud d) {
     if (d.trackBucket == len(d.hist)) {
         return (math.NaN(), math.NaN(), false);
     }
@@ -160,7 +160,7 @@ internal static (float64, float64, bool) approxInvCumulativeSumᴍ(ref mud d) {
 // Specifically, y is a cumulative duration, and invCumulativeSum
 // returns the mutator utilization x such that at least y time has
 // been spent with mutator utilization <= x.
-internal static (float64, bool) invCumulativeSumᴍ(ref mud d, float64 y) {
+[GoMethodBody("invCumulativeSum")] internal static (float64, bool) invCumulativeSumᴍ(ref mud d, float64 y) {
     if (len(d.sorted) == 0 && len(d.unsorted) == 0) {
         return (math.NaN(), false);
     }
@@ -223,12 +223,3 @@ internal static (float64, bool) invCumulativeSumᴍ(ref mud d, float64 y) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class traceᴛmud {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ж<mud> Ꮡd, float64 l, float64 r, float64 area) => trace_package.addᴍ(Ꮡd, l, r, area);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setTrackMass(this ref mud d, float64 mass) => trace_package.setTrackMassᴍ(ref d, mass);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (float64, float64, bool) approxInvCumulativeSum(this ref mud d) => trace_package.approxInvCumulativeSumᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (float64, bool) invCumulativeSum(this ref mud d, float64 y) => trace_package.invCumulativeSumᴍ(ref d, y);
-}
-// </GlyphForwarders>

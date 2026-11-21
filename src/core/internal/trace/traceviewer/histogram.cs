@@ -27,7 +27,7 @@ internal static float64 logDiv = math.Log(math.Pow(10D, 1.0D / 5D));
 } partial class traceviewer_package {
 
 // Add adds a single sample to the histogram.
-internal static void Addᴍ(ref TimeHistogram h, time.Duration d) {
+[GoMethodBody("Add")] internal static void Addᴍ(ref TimeHistogram h, time.Duration d) {
     nint bucket = default;
     if (d > 0) {
         bucket = (nint)(math.Log((float64)d) / logDiv);
@@ -47,12 +47,12 @@ internal static void Addᴍ(ref TimeHistogram h, time.Duration d) {
 }
 
 // BucketMin returns the minimum duration value for a provided bucket.
-internal static time.Duration BucketMinᴍ(ref TimeHistogram h, nint bucket) {
+[GoMethodBody("BucketMin")] internal static time.Duration BucketMinᴍ(ref TimeHistogram h, nint bucket) {
     return (time.Duration)(int64)math.Exp((float64)bucket * logDiv);
 }
 
 // ToHTML renders the histogram as HTML.
-internal static template.HTML ToHTMLᴍ(ж<TimeHistogram> Ꮡh, Func<time.Duration, time.Duration, @string> urlmaker) {
+[GoMethodBody("ToHTML")] internal static template.HTML ToHTMLᴍ(ж<TimeHistogram> Ꮡh, Func<time.Duration, time.Duration, @string> urlmaker) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (Ꮡh == nil || h.Count == 0) {
@@ -91,11 +91,3 @@ internal static template.HTML ToHTMLᴍ(ж<TimeHistogram> Ꮡh, Func<time.Durati
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class traceviewerᴛTimeHistogram {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Add(this ref TimeHistogram h, time.Duration d) => traceviewer_package.Addᴍ(ref h, d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static time.Duration BucketMin(this ref TimeHistogram h, nint bucket) => traceviewer_package.BucketMinᴍ(ref h, bucket);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static template.HTML ToHTML(this ж<TimeHistogram> Ꮡh, Func<time.Duration, time.Duration, @string> urlmaker) => traceviewer_package.ToHTMLᴍ(Ꮡh, urlmaker);
-}
-// </GlyphForwarders>

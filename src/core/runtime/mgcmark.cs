@@ -59,7 +59,7 @@ internal static UntypedInt pagesPerSpanRoot => /* min(512, pagesPerArena) */ 512
 // Such goroutines are never leak detection candidates according to the GC.
 //
 //go:nosplit
-internal static bool internalBlockedᴍ(ref g gp) {
+[GoMethodBody("internalBlocked")] internal static bool internalBlockedᴍ(ref g gp) {
     var reason = gp.waitreason;
     return reason < waitReasonChanReceiveNilChan || waitReasonSyncWaitGroupWait < reason;
 }
@@ -1914,9 +1914,3 @@ internal static void gcMarkTinyAllocs() {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛg {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool internalBlocked(this ref g gp) => runtime_package.internalBlockedᴍ(ref gp);
-}
-// </GlyphForwarders>

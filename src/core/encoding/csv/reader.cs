@@ -75,7 +75,7 @@ partial struct ParseError {
 
 } partial class csv_package {
 
-internal static @string Errorᴍ(ref ParseError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref ParseError e) {
     if (AreEqual(e.Err, ErrFieldCount)) {
         return fmt.Sprintf("record on line %d: %v"u8, e.Line, e.Err);
     }
@@ -85,7 +85,7 @@ internal static @string Errorᴍ(ref ParseError e) {
     return fmt.Sprintf("parse error on line %d, column %d: %v"u8, e.Line, e.Column, e.Err);
 }
 
-internal static error Unwrapᴍ(ref ParseError e) { return e.Err; }
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref ParseError e) { return e.Err; }
 
 } partial class csv_package {
 
@@ -186,7 +186,7 @@ public static ж<Reader> NewReader(io.Reader r) {
 // If there is no data left to be read, Read returns nil, [io.EOF].
 // If [Reader.ReuseRecord] is true, the returned slice may be shared
 // between multiple calls to Read.
-internal static (slice<@string> record, error err) Readᴍ(ref Reader r) {
+[GoMethodBody("Read")] internal static (slice<@string> record, error err) Readᴍ(ref Reader r) {
     slice<@string> record = default;
     error err = default;
 
@@ -205,7 +205,7 @@ internal static (slice<@string> record, error err) Readᴍ(ref Reader r) {
 // columns are counted in bytes, not runes.
 //
 // If this is called with an out-of-bounds index, it panics.
-internal static (nint line, nint column) FieldPosᴍ(ref Reader r, nint field) {
+[GoMethodBody("FieldPos")] internal static (nint line, nint column) FieldPosᴍ(ref Reader r, nint field) {
     if (field < 0 || field >= len(r.fieldPositions)) {
         throw panic("out of range index passed to FieldPos");
     }
@@ -216,7 +216,7 @@ internal static (nint line, nint column) FieldPosᴍ(ref Reader r, nint field) {
 // InputOffset returns the input stream byte offset of the current reader
 // position. The offset gives the location of the end of the most recently
 // read row and the beginning of the next row.
-internal static int64 InputOffsetᴍ(ref Reader r) {
+[GoMethodBody("InputOffset")] internal static int64 InputOffsetᴍ(ref Reader r) {
     return r.offset;
 }
 
@@ -234,7 +234,7 @@ partial struct position {
 // A successful call returns err == nil, not err == [io.EOF]. Because ReadAll is
 // defined to read until EOF, it does not treat end of file as an error to be
 // reported.
-internal static (slice<slice<@string>> records, error err) ReadAllᴍ(ref Reader r) {
+[GoMethodBody("ReadAll")] internal static (slice<slice<@string>> records, error err) ReadAllᴍ(ref Reader r) {
     slice<slice<@string>> records = default;
 
     for (;;) {
@@ -253,7 +253,7 @@ internal static (slice<slice<@string>> records, error err) ReadAllᴍ(ref Reader
 // If EOF is hit without a trailing endline, it will be omitted.
 // If some bytes were read, then the error is never [io.EOF].
 // The result is only valid until the next call to readLine.
-internal static (slice<byte>, error) readLineᴍ(ref Reader r) {
+[GoMethodBody("readLine")] internal static (slice<byte>, error) readLineᴍ(ref Reader r) {
     var (line, err) = r.r.ReadSlice((byte)'\n');
     if (AreEqual(err, bufio.ErrBufferFull)) {
         r.rawBuffer = appendꓸꓸꓸ(r.rawBuffer[..0], line);
@@ -299,7 +299,7 @@ internal static rune nextRune(slice<byte> b) {
 
 } partial class csv_package {
 
-internal static (slice<@string>, error) readRecordᴍ(ref Reader r, slice<@string> dst) {
+[GoMethodBody("readRecord")] internal static (slice<@string>, error) readRecordᴍ(ref Reader r, slice<@string> dst) {
     if (r.Comma == r.Comment || !validDelim(r.Comma) || (r.Comment != 0 && !validDelim(r.Comment))) {
         return (default, errInvalidDelim);
     }
@@ -482,18 +482,3 @@ break_parseField:;
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class csvᴛParseError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref ParseError e) => csv_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref ParseError e) => csv_package.Unwrapᴍ(ref e);
-}
-partial class csvᴛReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string> record, error err) Read(this ref Reader r) => csv_package.Readᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint line, nint column) FieldPos(this ref Reader r, nint field) => csv_package.FieldPosᴍ(ref r, field);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 InputOffset(this ref Reader r) => csv_package.InputOffsetᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<slice<@string>> records, error err) ReadAll(this ref Reader r) => csv_package.ReadAllᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) readLine(this ref Reader r) => csv_package.readLineᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<@string>, error) readRecord(this ref Reader r, slice<@string> dst) => csv_package.readRecordᴍ(ref r, dst);
-}
-// </GlyphForwarders>

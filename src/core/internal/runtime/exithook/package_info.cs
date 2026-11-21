@@ -60,6 +60,12 @@ using static go.@internal.runtime.exithook_package;
 
 namespace go.@internal.runtime;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using atomic = go.@internal.runtime.atomic_package;
+using go.@internal.runtime;
+using static exithook_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("exithook")]
 public static partial class exithook_package
 {
@@ -93,3 +99,9 @@ public static partial class exithook_package
 // <MethodHolders>
 [GoMethodHost(typeof(exithook_package.exitError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class exithookᴛexitError;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class exithookᴛexitError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this exitError e) => exithook_package.Errorᴍ(e);
+}
+// </GlyphForwarders>

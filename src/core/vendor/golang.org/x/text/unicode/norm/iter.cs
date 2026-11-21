@@ -31,7 +31,7 @@ partial struct Iter {
 } partial class norm_package {
 
 // Init initializes i to iterate over src after normalizing it to Form f.
-internal static void Initᴍ(ref Iter i, Form f, slice<byte> src) {
+[GoMethodBody("Init")] internal static void Initᴍ(ref Iter i, Form f, slice<byte> src) {
     i.p = 0;
     if (len(src) == 0) {
         i.setDone();
@@ -47,7 +47,7 @@ internal static void Initᴍ(ref Iter i, Form f, slice<byte> src) {
 }
 
 // InitString initializes i to iterate over src after normalizing it to Form f.
-internal static void InitStringᴍ(ref Iter i, Form f, @string src) {
+[GoMethodBody("InitString")] internal static void InitStringᴍ(ref Iter i, Form f, @string src) {
     i.p = 0;
     if (len(src) == 0) {
         i.setDone();
@@ -65,7 +65,7 @@ internal static void InitStringᴍ(ref Iter i, Form f, @string src) {
 // Seek sets the segment to be returned by the next call to Next to start
 // at position p.  It is the responsibility of the caller to set p to the
 // start of a segment.
-internal static (int64, error) Seekᴍ(ref Iter i, int64 offset, nint whence) {
+[GoMethodBody("Seek")] internal static (int64, error) Seekᴍ(ref Iter i, int64 offset, nint whence) {
     int64 abs = default;
     switch (whence) {
     case 0: {
@@ -102,7 +102,7 @@ internal static (int64, error) Seekᴍ(ref Iter i, int64 offset, nint whence) {
 // If the underlying is of type []byte, it will simply return a slice.
 // If the underlying is of type string, it will copy the slice to the buffer
 // and return that.
-internal static slice<byte> returnSliceᴍ(ref Iter i, nint a, nint b) {
+[GoMethodBody("returnSlice")] internal static slice<byte> returnSliceᴍ(ref Iter i, nint a, nint b) {
     if (i.rb.src.bytes == nil) {
         return i.buf.slice(0, copy(i.buf[..], i.rb.src.str.slice(a, b)));
     }
@@ -110,17 +110,17 @@ internal static slice<byte> returnSliceᴍ(ref Iter i, nint a, nint b) {
 }
 
 // Pos returns the byte position at which the next call to Next will commence processing.
-internal static nint Posᴍ(ref Iter i) {
+[GoMethodBody("Pos")] internal static nint Posᴍ(ref Iter i) {
     return i.p;
 }
 
-internal static void setDoneᴍ(ref Iter i) {
+[GoMethodBody("setDone")] internal static void setDoneᴍ(ref Iter i) {
     i.next = nextDone;
     i.p = i.rb.nsrc;
 }
 
 // Done returns true if there is no more input to process.
-internal static bool Doneᴍ(ref Iter i) {
+[GoMethodBody("Done")] internal static bool Doneᴍ(ref Iter i) {
     return i.p >= i.rb.nsrc;
 }
 
@@ -129,7 +129,7 @@ internal static bool Doneᴍ(ref Iter i) {
 // to Next will return the same segments.
 // Modifying runes are grouped together with the preceding starter, if such a starter exists.
 // Although not guaranteed, n will typically be the smallest possible n.
-internal static slice<byte> Nextᴍ(ж<Iter> Ꮡi) {
+[GoMethodBody("Next")] internal static slice<byte> Nextᴍ(ж<Iter> Ꮡi) {
     ref var i = ref Ꮡi.DerefOrNull();
 
     return i.next(Ꮡi);
@@ -496,16 +496,3 @@ internal static slice<byte> nextCGJCompose(ж<Iter> Ꮡi) {
 }
 
 } // end norm_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class normᴛIter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Init(this ref Iter i, Form f, slice<byte> src) => norm_package.Initᴍ(ref i, f, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void InitString(this ref Iter i, Form f, @string src) => norm_package.InitStringᴍ(ref i, f, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) Seek(this ref Iter i, int64 offset, nint whence) => norm_package.Seekᴍ(ref i, offset, whence);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> returnSlice(this ref Iter i, nint a, nint b) => norm_package.returnSliceᴍ(ref i, a, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Pos(this ref Iter i) => norm_package.Posᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setDone(this ref Iter i) => norm_package.setDoneᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Done(this ref Iter i) => norm_package.Doneᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Next(this ж<Iter> Ꮡi) => norm_package.Nextᴍ(Ꮡi);
-}
-// </GlyphForwarders>

@@ -54,10 +54,10 @@ partial struct ProtocolError {
 
 } partial class http_package {
 
-internal static @string Errorᴍ(ref ProtocolError pe) { return pe.ErrorString; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref ProtocolError pe) { return pe.ErrorString; }
 
 // Is lets http.ErrNotSupported match errors.ErrUnsupported.
-internal static bool Isᴍ(ж<ProtocolError> Ꮡpe, error err) {
+[GoMethodBody("Is")] internal static bool Isᴍ(ж<ProtocolError> Ꮡpe, error err) {
     return Ꮡpe == ErrNotSupported && AreEqual(err, errors.ErrUnsupported);
 }
 
@@ -336,7 +336,7 @@ partial struct Request {
 // For incoming server requests, the context is canceled when the
 // client's connection closes, the request is canceled (with HTTP/2),
 // or when the ServeHTTP method returns.
-internal static context.Context Contextᴍ(ref Request r) {
+[GoMethodBody("Context")] internal static context.Context Contextᴍ(ref Request r) {
     if (r.ctx != nil) {
         return r.ctx;
     }
@@ -352,7 +352,7 @@ internal static context.Context Contextᴍ(ref Request r) {
 //
 // To create a new request with a context, use [NewRequestWithContext].
 // To make a deep copy of a request with a new context, use [Request.Clone].
-internal static ж<Request> WithContextᴍ(ref Request r, context.Context ctx) {
+[GoMethodBody("WithContext")] internal static ж<Request> WithContextᴍ(ref Request r, context.Context ctx) {
     if (ctx == nil) {
         throw panic("nil context");
     }
@@ -370,7 +370,7 @@ internal static ж<Request> WithContextᴍ(ref Request r, context.Context ctx) {
 // For an outgoing client request, the context controls the entire
 // lifetime of a request and its response: obtaining a connection,
 // sending the request, and reading the response headers and body.
-internal static ж<Request> Cloneᴍ(ref Request r, context.Context ctx) {
+[GoMethodBody("Clone")] internal static ж<Request> Cloneᴍ(ref Request r, context.Context ctx) {
     if (ctx == nil) {
         throw panic("nil context");
     }
@@ -405,7 +405,7 @@ internal static ж<Request> Cloneᴍ(ref Request r, context.Context ctx) {
 
 // ProtoAtLeast reports whether the HTTP protocol used
 // in the request is at least major.minor.
-internal static bool ProtoAtLeastᴍ(ref Request r, nint major, nint minor) {
+[GoMethodBody("ProtoAtLeast")] internal static bool ProtoAtLeastᴍ(ref Request r, nint major, nint minor) {
     return r.ProtoMajor > major || r.ProtoMajor == major && r.ProtoMinor >= minor;
 }
 
@@ -414,18 +414,18 @@ internal static ref readonly @string userAgentˢᴍRequest => ref userAgentˢᵇ
 private static readonly @string userAgentˢᵇᴍRequest = "User-Agent"u8;
 
 // UserAgent returns the client's User-Agent, if sent in the request.
-internal static @string UserAgentᴍ(ref Request r) {
+[GoMethodBody("UserAgent")] internal static @string UserAgentᴍ(ref Request r) {
     return r.Header.Get(userAgentˢᴍRequest);
 }
 
 // Cookies parses and returns the HTTP cookies sent with the request.
-internal static slice<ж<Cookie>> Cookiesᴍ(ref Request r) {
+[GoMethodBody("Cookies")] internal static slice<ж<Cookie>> Cookiesᴍ(ref Request r) {
     return readCookies(r.Header, ""u8);
 }
 
 // CookiesNamed parses and returns the named HTTP cookies sent with the request
 // or an empty slice if none matched.
-internal static slice<ж<Cookie>> CookiesNamedᴍ(ref Request r, @string name) {
+[GoMethodBody("CookiesNamed")] internal static slice<ж<Cookie>> CookiesNamedᴍ(ref Request r, @string name) {
     if (name == ""u8) {
         return [];
     }
@@ -443,7 +443,7 @@ public static error ErrNoCookie = errors.New("http: named cookie not present");
 // [ErrNoCookie] if not found.
 // If multiple cookies match the given name, only one cookie will
 // be returned.
-internal static (ж<Cookie>, error) Cookieᴍ(ref Request r, @string name) {
+[GoMethodBody("Cookie")] internal static (ж<Cookie>, error) Cookieᴍ(ref Request r, @string name) {
     if (name == ""u8) {
         return (default, ErrNoCookie);
     }
@@ -463,7 +463,7 @@ private static readonly @string cookieˢᵇᴍRequest = "Cookie"u8;
 // separated by semicolon.
 // AddCookie only sanitizes c's name and value, and does not sanitize
 // a Cookie header already present in the request.
-internal static void AddCookieᴍ(ref Request r, ж<Cookie> Ꮡc) {
+[GoMethodBody("AddCookie")] internal static void AddCookieᴍ(ref Request r, ж<Cookie> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     @string s = fmt.Sprintf("%s=%s"u8, sanitizeCookieName(c.Name), sanitizeCookieValue(c.Value, c.Quoted));
@@ -486,7 +486,7 @@ private static readonly @string refererˢᵇᴍRequest = "Referer"u8;
 // as a method is that the compiler can diagnose programs that use the
 // alternate (correct English) spelling req.Referrer() but cannot
 // diagnose programs that use Header["Referrer"].
-internal static @string Refererᴍ(ref Request r) {
+[GoMethodBody("Referer")] internal static @string Refererᴍ(ref Request r) {
     return r.Header.Get(refererˢᴍRequest);
 }
 
@@ -512,7 +512,7 @@ private static readonly @string httpMultipartHandledByˢᵇᴍRequest = "http: m
 // multipart/form-data or a multipart/mixed POST request, else returns nil and an error.
 // Use this function instead of [Request.ParseMultipartForm] to
 // process the request body as a stream.
-internal static (ж<multipart.Reader>, error) MultipartReaderᴍ(ref Request r) {
+[GoMethodBody("MultipartReader")] internal static (ж<multipart.Reader>, error) MultipartReaderᴍ(ref Request r) {
     if (r.MultipartForm == multipartByReader) {
         return (default, errors.New(httpMultipartReaderˢᴍRequest));
     }
@@ -531,7 +531,7 @@ private static readonly @string missingFormBodyˢᵇᴍRequest = "missing form b
 internal static ref readonly @string boundaryˢᴍRequest => ref boundaryˢᵇᴍRequest;
 private static readonly @string boundaryˢᵇᴍRequest = "boundary"u8;
 
-internal static (ж<multipart.Reader>, error) multipartReaderᴍ(ref Request r, bool allowMixed) {
+[GoMethodBody("multipartReader")] internal static (ж<multipart.Reader>, error) multipartReaderᴍ(ref Request r, bool allowMixed) {
     @string v = r.Header.Get(contentTypeˢᴍRequest);
     if (v == ""u8) {
         return (default, new ProtocolErrorжerror(ErrNotMultipart));
@@ -552,7 +552,7 @@ internal static (ж<multipart.Reader>, error) multipartReaderᴍ(ref Request r, 
 
 // isH2Upgrade reports whether r represents the http2 "client preface"
 // magic string.
-internal static bool isH2Upgradeᴍ(ref Request r) {
+[GoMethodBody("isH2Upgrade")] internal static bool isH2Upgradeᴍ(ref Request r) {
     return r.Method == "PRI"u8 && len(r.Header) == 0 && r.URL.Path == "*"u8 && r.Proto == "HTTP/2.0"u8;
 }
 
@@ -589,7 +589,7 @@ private static readonly @string defaultUserAgentᵇ = "Go-http-client/1.1"u8;
 // If Body is present, Content-Length is <= 0 and [Request.TransferEncoding]
 // hasn't been set to "identity", Write adds "Transfer-Encoding:
 // chunked" to the header. Body is closed after it is sent.
-internal static error Writeᴍ(ж<Request> Ꮡr, io.Writer w) {
+[GoMethodBody("Write")] internal static error Writeᴍ(ж<Request> Ꮡr, io.Writer w) {
     return Ꮡr.write(w, false, default, default);
 }
 
@@ -599,7 +599,7 @@ internal static error Writeᴍ(ж<Request> Ꮡr, io.Writer w) {
 // section 5.3 of RFC 7230, including the scheme and host.
 // In either case, WriteProxy also writes a Host header, using
 // either r.Host or r.URL.Host.
-internal static error WriteProxyᴍ(ж<Request> Ꮡr, io.Writer w) {
+[GoMethodBody("WriteProxy")] internal static error WriteProxyᴍ(ж<Request> Ꮡr, io.Writer w) {
     return Ꮡr.write(w, true, default, default);
 }
 
@@ -624,7 +624,7 @@ private static readonly @string hostˢᵇᴍRequest = "Host"u8;
 // extraHeaders may be nil
 // waitForContinue may be nil
 // always closes body
-internal static error /*err*/ writeᴍ(ж<Request> Ꮡr, io.Writer w, bool usingProxy, Header extraHeaders, Func<bool> waitForContinue) {
+[GoMethodBody("write")] internal static error /*err*/ writeᴍ(ж<Request> Ꮡr, io.Writer w, bool usingProxy, Header extraHeaders, Func<bool> waitForContinue) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -1058,7 +1058,7 @@ private static readonly @string authorizationˢᵇᴍRequest = "Authorization"u8
 // BasicAuth returns the username and password provided in the request's
 // Authorization header, if the request uses HTTP Basic Authentication.
 // See RFC 2617, Section 2.
-internal static (@string username, @string password, bool ok) BasicAuthᴍ(ref Request r) {
+[GoMethodBody("BasicAuth")] internal static (@string username, @string password, bool ok) BasicAuthᴍ(ref Request r) {
     @string auth = r.Header.Get(authorizationˢᴍRequest);
     if (auth == ""u8) {
         return ("", "", false);
@@ -1119,7 +1119,7 @@ internal static (@string username, @string password, bool ok) parseBasicAuth(@st
 // additional requirements on pre-escaping the username and
 // password. For instance, when used with OAuth2, both arguments must
 // be URL encoded first with [url.QueryEscape].
-internal static void SetBasicAuthᴍ(ref Request r, @string username, @string password) {
+[GoMethodBody("SetBasicAuth")] internal static void SetBasicAuthᴍ(ref Request r, @string username, @string password) {
     r.Header.Set(authorizationˢᴍRequest, "Basic "u8 + basicAuth(username, password));
 }
 
@@ -1330,7 +1330,7 @@ partial struct MaxBytesError {
 internal static ref readonly @string httpRequestBodyTooLargeˢᴍMaxBytesError => ref httpRequestBodyTooLargeˢᵇᴍMaxBytesError;
 private static readonly @string httpRequestBodyTooLargeˢᵇᴍMaxBytesError = "http: request body too large"u8;
 
-internal static @string Errorᴍ(ref MaxBytesError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref MaxBytesError e) {
     // Due to Hyrum's law, this text cannot be changed.
     return httpRequestBodyTooLargeˢᴍMaxBytesError;
 }
@@ -1358,7 +1358,7 @@ internal partial interface Read_requestTooLarger /*dyn*/ {
 
 } partial class http_package {
 
-internal static (nint n, error err) Readᴍ(ref maxBytesReader l, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref maxBytesReader l, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -1392,7 +1392,7 @@ internal static (nint n, error err) Readᴍ(ref maxBytesReader l, slice<byte> p)
     return (n, l.err);
 }
 
-internal static error Closeᴍ(ref maxBytesReader l) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref maxBytesReader l) {
     return l.r.Close();
 }
 
@@ -1484,7 +1484,7 @@ internal static (urlpkg.Values vs, error err) parsePostForm(ref Request r) {
 //
 // [Request.ParseMultipartForm] calls ParseForm automatically.
 // ParseForm is idempotent.
-internal static error ParseFormᴍ(ж<Request> Ꮡr) {
+[GoMethodBody("ParseForm")] internal static error ParseFormᴍ(ж<Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     error err = default;
@@ -1533,7 +1533,7 @@ private static readonly @string httpMultipartHandledByˢ2ᵇᴍRequest = "http: 
 // If ParseForm returns an error, ParseMultipartForm returns it but also
 // continues parsing the request body.
 // After one call to ParseMultipartForm, subsequent calls have no effect.
-internal static error ParseMultipartFormᴍ(ж<Request> Ꮡr, int64 maxMemory) {
+[GoMethodBody("ParseMultipartForm")] internal static error ParseMultipartFormᴍ(ж<Request> Ꮡr, int64 maxMemory) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.MultipartForm == multipartByReader) {
@@ -1584,7 +1584,7 @@ internal static error ParseMultipartFormᴍ(ж<Request> Ꮡr, int64 maxMemory) {
 // If key is not present, FormValue returns the empty string.
 // To access multiple values of the same key, call ParseForm and
 // then inspect [Request.Form] directly.
-internal static @string FormValueᴍ(ж<Request> Ꮡr, @string key) {
+[GoMethodBody("FormValue")] internal static @string FormValueᴍ(ж<Request> Ꮡr, @string key) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.Form == nil) {
@@ -1601,7 +1601,7 @@ internal static @string FormValueᴍ(ж<Request> Ꮡr, @string key) {
 // PostFormValue calls [Request.ParseMultipartForm] and [Request.ParseForm] if necessary and ignores
 // any errors returned by these functions.
 // If key is not present, PostFormValue returns the empty string.
-internal static @string PostFormValueᴍ(ж<Request> Ꮡr, @string key) {
+[GoMethodBody("PostFormValue")] internal static @string PostFormValueᴍ(ж<Request> Ꮡr, @string key) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.PostForm == nil) {
@@ -1615,7 +1615,7 @@ internal static @string PostFormValueᴍ(ж<Request> Ꮡr, @string key) {
 
 // FormFile returns the first file for the provided form key.
 // FormFile calls [Request.ParseMultipartForm] and [Request.ParseForm] if necessary.
-internal static (multipart.File, ж<multipart.FileHeader>, error) FormFileᴍ(ж<Request> Ꮡr, @string key) {
+[GoMethodBody("FormFile")] internal static (multipart.File, ж<multipart.FileHeader>, error) FormFileᴍ(ж<Request> Ꮡr, @string key) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.MultipartForm == multipartByReader) {
@@ -1640,7 +1640,7 @@ internal static (multipart.File, ж<multipart.FileHeader>, error) FormFileᴍ(ж
 // that matched the request.
 // It returns the empty string if the request was not matched against a pattern
 // or there is no such wildcard in the pattern.
-internal static @string PathValueᴍ(ref Request r, @string name) {
+[GoMethodBody("PathValue")] internal static @string PathValueᴍ(ref Request r, @string name) {
     nint i = r.patIndex(name); if (i >= 0) {
         return r.matches[i];
     }
@@ -1649,7 +1649,7 @@ internal static @string PathValueᴍ(ref Request r, @string name) {
 
 // SetPathValue sets name to value, so that subsequent calls to r.PathValue(name)
 // return value.
-internal static void SetPathValueᴍ(ref Request r, @string name, @string value) {
+[GoMethodBody("SetPathValue")] internal static void SetPathValueᴍ(ref Request r, @string name, @string value) {
     nint i = r.patIndex(name); if (i >= 0) {
         r.matches[i] = value;
     } else {
@@ -1662,7 +1662,7 @@ internal static void SetPathValueᴍ(ref Request r, @string name, @string value)
 
 // patIndex returns the index of name in the list of named wildcards of the
 // request's pattern, or -1 if there is no such name.
-internal static nint patIndexᴍ(ref Request r, @string name) {
+[GoMethodBody("patIndex")] internal static nint patIndexᴍ(ref Request r, @string name) {
     // The linear search seems expensive compared to a map, but just creating the map
     // takes a lot of time, and most patterns will just have a couple of wildcards.
     if (r.pat == nil) {
@@ -1686,7 +1686,7 @@ private static readonly @string expectˢ2ᵇᴍRequest = "Expect"u8;
 internal static ref readonly @string continueˢᴍRequest => ref continueˢᵇᴍRequest;
 private static readonly @string continueˢᵇᴍRequest = "100-continue"u8;
 
-internal static bool expectsContinueᴍ(ref Request r) {
+[GoMethodBody("expectsContinue")] internal static bool expectsContinueᴍ(ref Request r) {
     return hasToken(r.Header.get(expectˢ2ᴍRequest), continueˢᴍRequest);
 }
 
@@ -1696,7 +1696,7 @@ private static readonly @string connectionˢᵇᴍRequest = "Connection"u8;
 internal static ref readonly @string keepAliveˢᴍRequest => ref keepAliveˢᵇᴍRequest;
 private static readonly @string keepAliveˢᵇᴍRequest = "keep-alive"u8;
 
-internal static bool wantsHttp10KeepAliveᴍ(ref Request r) {
+[GoMethodBody("wantsHttp10KeepAlive")] internal static bool wantsHttp10KeepAliveᴍ(ref Request r) {
     if (r.ProtoMajor != 1 || r.ProtoMinor != 0) {
         return false;
     }
@@ -1707,14 +1707,14 @@ internal static bool wantsHttp10KeepAliveᴍ(ref Request r) {
 internal static ref readonly @string closeˢᴍRequest => ref closeˢᵇᴍRequest;
 private static readonly @string closeˢᵇᴍRequest = "close"u8;
 
-internal static bool wantsCloseᴍ(ref Request r) {
+[GoMethodBody("wantsClose")] internal static bool wantsCloseᴍ(ref Request r) {
     if (r.Close) {
         return true;
     }
     return hasToken(r.Header.get(connectionˢᴍRequest), closeˢᴍRequest);
 }
 
-internal static error closeBodyᴍ(ref Request r) {
+[GoMethodBody("closeBody")] internal static error closeBodyᴍ(ref Request r) {
     if (r.Body == nil) {
         return default;
     }
@@ -1727,7 +1727,7 @@ private static readonly @string idempotencyKeyˢᵇᴍRequest = "Idempotency-Key
 internal static ref readonly @string xIdempotencyKeyˢᴍRequest => ref xIdempotencyKeyˢᵇᴍRequest;
 private static readonly @string xIdempotencyKeyˢᵇᴍRequest = "X-Idempotency-Key"u8;
 
-internal static bool isReplayableᴍ(ref Request r) {
+[GoMethodBody("isReplayable")] internal static bool isReplayableᴍ(ref Request r) {
     if (r.Body == nil || AreEqual(r.Body, NoBody) || r.GetBody != nil) {
         var exprᴛ1 = valueOrDefault(r.Method, getˢᴍRequest);
         switch (ᐧ) {
@@ -1746,7 +1746,7 @@ internal static bool isReplayableᴍ(ref Request r) {
 
 // outgoingLength reports the Content-Length of this outgoing (Client) request.
 // It maps 0 into -1 (unknown) when the Body is non-nil.
-internal static int64 outgoingLengthᴍ(ref Request r) {
+[GoMethodBody("outgoingLength")] internal static int64 outgoingLengthᴍ(ref Request r) {
     if (r.Body == nil || AreEqual(r.Body, NoBody)) {
         return 0;
     }
@@ -1785,57 +1785,8 @@ private static readonly @string websocketˢᵇᴍRequest = "websocket"u8;
 
 // requiresHTTP1 reports whether this request requires being sent on
 // an HTTP/1 connection.
-internal static bool requiresHTTP1ᴍ(ref Request r) {
+[GoMethodBody("requiresHTTP1")] internal static bool requiresHTTP1ᴍ(ref Request r) {
     return hasToken(r.Header.Get(connectionˢᴍRequest), upgradeˢᴍRequest) && ascii.EqualFold(r.Header.Get(upgradeˢ2ᴍRequest), websocketˢᴍRequest);
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httpᴛProtocolError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref ProtocolError pe) => http_package.Errorᴍ(ref pe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Is(this ж<ProtocolError> Ꮡpe, error err) => http_package.Isᴍ(Ꮡpe, err);
-}
-partial class httpᴛRequest {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static context.Context Context(this ref Request r) => http_package.Contextᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Request> WithContext(this ref Request r, context.Context ctx) => http_package.WithContextᴍ(ref r, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Request> Clone(this ref Request r, context.Context ctx) => http_package.Cloneᴍ(ref r, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ProtoAtLeast(this ref Request r, nint major, nint minor) => http_package.ProtoAtLeastᴍ(ref r, major, minor);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string UserAgent(this ref Request r) => http_package.UserAgentᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<ж<Cookie>> Cookies(this ref Request r) => http_package.Cookiesᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<ж<Cookie>> CookiesNamed(this ref Request r, @string name) => http_package.CookiesNamedᴍ(ref r, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Cookie>, error) Cookie(this ref Request r, @string name) => http_package.Cookieᴍ(ref r, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddCookie(this ref Request r, ж<Cookie> Ꮡc) => http_package.AddCookieᴍ(ref r, Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Referer(this ref Request r) => http_package.Refererᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<multipart.Reader>, error) MultipartReader(this ref Request r) => http_package.MultipartReaderᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<multipart.Reader>, error) multipartReader(this ref Request r, bool allowMixed) => http_package.multipartReaderᴍ(ref r, allowMixed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isH2Upgrade(this ref Request r) => http_package.isH2Upgradeᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ж<Request> Ꮡr, io.Writer w) => http_package.Writeᴍ(Ꮡr, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteProxy(this ж<Request> Ꮡr, io.Writer w) => http_package.WriteProxyᴍ(Ꮡr, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ write(this ж<Request> Ꮡr, io.Writer w, bool usingProxy, Header extraHeaders, Func<bool> waitForContinue) => http_package.writeᴍ(Ꮡr, w, usingProxy, extraHeaders, waitForContinue);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string username, @string password, bool ok) BasicAuth(this ref Request r) => http_package.BasicAuthᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetBasicAuth(this ref Request r, @string username, @string password) => http_package.SetBasicAuthᴍ(ref r, username, password);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error ParseForm(this ж<Request> Ꮡr) => http_package.ParseFormᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error ParseMultipartForm(this ж<Request> Ꮡr, int64 maxMemory) => http_package.ParseMultipartFormᴍ(Ꮡr, maxMemory);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string FormValue(this ж<Request> Ꮡr, @string key) => http_package.FormValueᴍ(Ꮡr, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string PostFormValue(this ж<Request> Ꮡr, @string key) => http_package.PostFormValueᴍ(Ꮡr, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (multipart.File, ж<multipart.FileHeader>, error) FormFile(this ж<Request> Ꮡr, @string key) => http_package.FormFileᴍ(Ꮡr, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string PathValue(this ref Request r, @string name) => http_package.PathValueᴍ(ref r, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetPathValue(this ref Request r, @string name, @string value) => http_package.SetPathValueᴍ(ref r, name, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint patIndex(this ref Request r, @string name) => http_package.patIndexᴍ(ref r, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool expectsContinue(this ref Request r) => http_package.expectsContinueᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool wantsHttp10KeepAlive(this ref Request r) => http_package.wantsHttp10KeepAliveᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool wantsClose(this ref Request r) => http_package.wantsCloseᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error closeBody(this ref Request r) => http_package.closeBodyᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isReplayable(this ref Request r) => http_package.isReplayableᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 outgoingLength(this ref Request r) => http_package.outgoingLengthᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool requiresHTTP1(this ref Request r) => http_package.requiresHTTP1ᴍ(ref r);
-}
-partial class httpᴛMaxBytesError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref MaxBytesError e) => http_package.Errorᴍ(ref e);
-}
-partial class httpᴛmaxBytesReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref maxBytesReader l, slice<byte> p) => http_package.Readᴍ(ref l, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref maxBytesReader l) => http_package.Closeᴍ(ref l);
-}
-// </GlyphForwarders>

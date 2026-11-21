@@ -25,11 +25,11 @@ internal static ж<PtyError> ptyError(@string name, error err) {
 
 } partial class testpty_package {
 
-internal static @string Errorᴍ(ref PtyError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref PtyError e) {
     return fmt.Sprintf("%s: %s"u8, e.FuncName, e.ErrorString);
 }
 
-internal static error Unwrapᴍ(ref PtyError e) { return e.Errno; }
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref PtyError e) { return e.Errno; }
 
 } partial class testpty_package {
 
@@ -43,10 +43,3 @@ public static (ж<os.File> pty, @string processTTY, error err) Open() {
 }
 
 } // end testpty_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class testptyᴛPtyError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref PtyError e) => testpty_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref PtyError e) => testpty_package.Unwrapᴍ(ref e);
-}
-// </GlyphForwarders>

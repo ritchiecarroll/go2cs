@@ -64,7 +64,7 @@ partial struct Graph {
 
 // FlatValue returns the exclusive value for this node, computing the
 // mean if a divisor is available.
-internal static int64 FlatValueᴍ(ref Node n) {
+[GoMethodBody("FlatValue")] internal static int64 FlatValueᴍ(ref Node n) {
     if (n.FlatDiv == 0) {
         return n.Flat;
     }
@@ -73,7 +73,7 @@ internal static int64 FlatValueᴍ(ref Node n) {
 
 // CumValue returns the inclusive value for this node, computing the
 // mean if a divisor is available.
-internal static int64 CumValueᴍ(ref Node n) {
+[GoMethodBody("CumValue")] internal static int64 CumValueᴍ(ref Node n) {
     if (n.CumDiv == 0) {
         return n.Cum;
     }
@@ -82,13 +82,13 @@ internal static int64 CumValueᴍ(ref Node n) {
 
 // AddToEdge increases the weight of an edge between two nodes. If
 // there isn't such an edge one is created.
-internal static void AddToEdgeᴍ(ж<Node> Ꮡn, ж<Node> to, int64 v, bool residual, bool inline) {
+[GoMethodBody("AddToEdge")] internal static void AddToEdgeᴍ(ж<Node> Ꮡn, ж<Node> to, int64 v, bool residual, bool inline) {
     Ꮡn.AddToEdgeDiv(to, 0, v, residual, inline);
 }
 
 // AddToEdgeDiv increases the weight of an edge between two nodes. If
 // there isn't such an edge one is created.
-internal static void AddToEdgeDivᴍ(ж<Node> Ꮡn, ж<Node> Ꮡto, int64 dv, int64 v, bool residual, bool inline) {
+[GoMethodBody("AddToEdgeDiv")] internal static void AddToEdgeDivᴍ(ж<Node> Ꮡn, ж<Node> Ꮡto, int64 dv, int64 v, bool residual, bool inline) {
     ref var n = ref Ꮡn.DerefOrNull();
     ref var to = ref Ꮡto.DerefOrNull();
 
@@ -121,12 +121,12 @@ partial struct NodeInfo {
 } partial class profile_package {
 
 // PrintableName calls the Node's Formatter function with a single space separator.
-internal static @string PrintableNameᴍ(ref NodeInfo i) {
+[GoMethodBody("PrintableName")] internal static @string PrintableNameᴍ(ref NodeInfo i) {
     return strings.Join(i.NameComponents(), " ");
 }
 
 // NameComponents returns the components of the printable name to be used for a node.
-internal static slice<@string> NameComponentsᴍ(ref NodeInfo i) {
+[GoMethodBody("NameComponents")] internal static slice<@string> NameComponentsᴍ(ref NodeInfo i) {
     slice<@string> name = default;
     if (i.Address != 0) {
         name = append(name, fmt.Sprintf("%016x"u8, i.Address));
@@ -177,7 +177,7 @@ partial struct NodePtrSet /*map[ж<Node>, bool]*/;
 // FindOrInsertNode takes the info for a node and either returns a matching node
 // from the node map if one exists, or adds one to the map if one does not.
 // If kept is non-nil, nodes are only added if they can be located on it.
-internal static ж<Node> FindOrInsertNodeᴍ(NodeMap nm, NodeInfo info, NodeSet kept) {
+[GoMethodBody("FindOrInsertNode")] internal static ж<Node> FindOrInsertNodeᴍ(NodeMap nm, NodeInfo info, NodeSet kept) {
     if (kept != nil) {
         var (_, ok) = kept[info, ꟷ]; if (!ok) {
             return default;
@@ -212,7 +212,7 @@ partial struct EdgeMap /*[]ж<Edge>*/;
 
 } partial class profile_package {
 
-internal static ж<Edge> FindToᴍ(EdgeMap em, ж<Node> n) {
+[GoMethodBody("FindTo")] internal static ж<Edge> FindToᴍ(EdgeMap em, ж<Node> n) {
     foreach (var (_, e) in range<ж<Edge>>(em)) {
         if (e.Dest == n) {
             return e;
@@ -221,11 +221,11 @@ internal static ж<Edge> FindToᴍ(EdgeMap em, ж<Node> n) {
     return default;
 }
 
-internal static void Addᴍ(ref EdgeMap em, ж<Edge> e) {
+[GoMethodBody("Add")] internal static void Addᴍ(ref EdgeMap em, ж<Edge> e) {
     em = append(em, e);
 }
 
-internal static void Deleteᴍ(ref EdgeMap em, ж<Edge> e) {
+[GoMethodBody("Delete")] internal static void Deleteᴍ(ref EdgeMap em, ж<Edge> e) {
     foreach (var (i, edge) in range<ж<Edge>>(em)) {
         if (edge == e) {
             (em)[i] = (em)[len(em) - 1];
@@ -253,7 +253,7 @@ partial struct Edge {
 
 // WeightValue returns the weight value for this edge, normalizing if a
 // divisor is available.
-internal static int64 WeightValueᴍ(ref Edge e) {
+[GoMethodBody("WeightValue")] internal static int64 WeightValueᴍ(ref Edge e) {
     if (e.WeightDiv == 0) {
         return e.Weight;
     }
@@ -375,7 +375,7 @@ public partial struct locationMap {
 
 } partial class profile_package {
 
-internal static void addᴍ(ref locationMap l, uint64 id, Nodes n) {
+[GoMethodBody("add")] internal static void addᴍ(ref locationMap l, uint64 id, Nodes n) {
     if (id < (uint64)len(l.s)) {
         l.s[id] = n;
     } else {
@@ -383,7 +383,7 @@ internal static void addᴍ(ref locationMap l, uint64 id, Nodes n) {
     }
 }
 
-internal static Nodes getᴍ(locationMap l, uint64 id) {
+[GoMethodBody("get")] internal static Nodes getᴍ(locationMap l, uint64 id) {
     if (id < (uint64)len(l.s)) {
         return l.s[id];
     } else {
@@ -417,7 +417,7 @@ public static (Nodes, locationMap) CreateNodes(ж<Profile> Ꮡprof, ж<Options> 
 
 } partial class profile_package {
 
-internal static Nodes nodesᴍ(NodeMap nm) {
+[GoMethodBody("nodes")] internal static Nodes nodesᴍ(NodeMap nm) {
     var nodes = new Nodes(0, len(nm));
     foreach (var (_, n) in nm) {
         nodes = append(nodes, n);
@@ -425,7 +425,7 @@ internal static Nodes nodesᴍ(NodeMap nm) {
     return nodes;
 }
 
-internal static ж<Node> findOrInsertLineᴍ(NodeMap nm, ж<Location> Ꮡl, Line li, ж<Options> Ꮡo) {
+[GoMethodBody("findOrInsertLine")] internal static ж<Node> findOrInsertLineᴍ(NodeMap nm, ж<Location> Ꮡl, Line li, ж<Options> Ꮡo) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var o = ref Ꮡo.DerefOrNull();
 
@@ -458,7 +458,7 @@ internal static ж<NodeInfo> nodeInfo(ref Location l, Line line, @string objfile
 } partial class profile_package {
 
 // Sum adds the flat and cum values of a set of nodes.
-internal static (int64 flat, int64 cum) Sumᴍ(Nodes ns) {
+[GoMethodBody("Sum")] internal static (int64 flat, int64 cum) Sumᴍ(Nodes ns) {
     int64 flat = default;
     int64 cum = default;
 
@@ -471,7 +471,7 @@ internal static (int64 flat, int64 cum) Sumᴍ(Nodes ns) {
 
 } partial class profile_package {
 
-internal static void addSampleᴍ(ref Node n, int64 dw, int64 w, bool flat) {
+[GoMethodBody("addSample")] internal static void addSampleᴍ(ref Node n, int64 dw, int64 w, bool flat) {
     // Update sample value
     if (flat) {
         n.FlatDiv += dw;
@@ -485,7 +485,7 @@ internal static void addSampleᴍ(ref Node n, int64 dw, int64 w, bool flat) {
 } partial class profile_package {
 
 // String returns a text representation of a graph, for debugging purposes.
-internal static @string Stringᴍ(ref Graph g) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref Graph g) {
     var sᴷ = new stackAppend<@string>();
 
     slice<@string> s = default;
@@ -517,7 +517,7 @@ internal static @string Stringᴍ(ref Graph g) {
 // Sort returns a slice of the edges in the map, in a consistent
 // order. The sort order is first based on the edge weight
 // (higher-to-lower) and then by the node names to avoid flakiness.
-internal static slice<ж<Edge>> Sortᴍ(EdgeMap em) {
+[GoMethodBody("Sort")] internal static slice<ж<Edge>> Sortᴍ(EdgeMap em) {
     var el = new edgeList(0, len(em));
     foreach (var (_, w) in range<ж<Edge>>(em)) {
         el = append(el, w);
@@ -528,7 +528,7 @@ internal static slice<ж<Edge>> Sortᴍ(EdgeMap em) {
 }
 
 // Sum returns the total weight for a set of nodes.
-internal static int64 Sumᴍ(EdgeMap em) {
+[GoMethodBody("Sum")] internal static int64 Sumᴍ(EdgeMap em) {
     int64 ret = default;
     foreach (var (_, edge) in range<ж<Edge>>(em)) {
         ret += edge.Weight;
@@ -542,11 +542,11 @@ partial struct edgeList /*[]ж<Edge>*/;
 
 } partial class profile_package {
 
-internal static nint Lenᴍ(edgeList el) {
+[GoMethodBody("Len")] internal static nint Lenᴍ(edgeList el) {
     return len(el);
 }
 
-internal static bool Lessᴍ(edgeList el, nint i, nint j) {
+[GoMethodBody("Less")] internal static bool Lessᴍ(edgeList el, nint i, nint j) {
     if (el[i].Weight != el[j].Weight) {
         return abs64(el[i].Weight) > abs64(el[j].Weight);
     }
@@ -563,7 +563,7 @@ internal static bool Lessᴍ(edgeList el, nint i, nint j) {
     return to1 < to2;
 }
 
-internal static void Swapᴍ(edgeList el, nint i, nint j) {
+[GoMethodBody("Swap")] internal static void Swapᴍ(edgeList el, nint i, nint j) {
     (el[i], el[j]) = (el[j], el[i]);
 }
 
@@ -577,47 +577,3 @@ internal static int64 abs64(int64 i) {
 }
 
 } // end profile_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class profileᴛNode {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 FlatValue(this ref Node n) => profile_package.FlatValueᴍ(ref n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 CumValue(this ref Node n) => profile_package.CumValueᴍ(ref n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddToEdge(this ж<Node> Ꮡn, ж<Node> to, int64 v, bool residual, bool inline) => profile_package.AddToEdgeᴍ(Ꮡn, to, v, residual, inline);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddToEdgeDiv(this ж<Node> Ꮡn, ж<Node> Ꮡto, int64 dv, int64 v, bool residual, bool inline) => profile_package.AddToEdgeDivᴍ(Ꮡn, Ꮡto, dv, v, residual, inline);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addSample(this ref Node n, int64 dw, int64 w, bool flat) => profile_package.addSampleᴍ(ref n, dw, w, flat);
-}
-partial class profileᴛNodeInfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string PrintableName(this ref NodeInfo i) => profile_package.PrintableNameᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> NameComponents(this ref NodeInfo i) => profile_package.NameComponentsᴍ(ref i);
-}
-partial class profileᴛNodeMap {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Node> FindOrInsertNode(this NodeMap nm, NodeInfo info, NodeSet kept) => profile_package.FindOrInsertNodeᴍ(nm, info, kept);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Nodes nodes(this NodeMap nm) => profile_package.nodesᴍ(nm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Node> findOrInsertLine(this NodeMap nm, ж<Location> Ꮡl, Line li, ж<Options> Ꮡo) => profile_package.findOrInsertLineᴍ(nm, Ꮡl, li, Ꮡo);
-}
-partial class profileᴛEdgeMap {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Edge> FindTo(this EdgeMap em, ж<Node> n) => profile_package.FindToᴍ(em, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Add(this ref EdgeMap em, ж<Edge> e) => profile_package.Addᴍ(ref em, e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Delete(this ref EdgeMap em, ж<Edge> e) => profile_package.Deleteᴍ(ref em, e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<ж<Edge>> Sort(this EdgeMap em) => profile_package.Sortᴍ(em);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Sum(this EdgeMap em) => profile_package.Sumᴍ(em);
-}
-partial class profileᴛEdge {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 WeightValue(this ref Edge e) => profile_package.WeightValueᴍ(ref e);
-}
-partial class profileᴛlocationMap {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ref locationMap l, uint64 id, Nodes n) => profile_package.addᴍ(ref l, id, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Nodes get(this locationMap l, uint64 id) => profile_package.getᴍ(l, id);
-}
-partial class profileᴛNodes {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64 flat, int64 cum) Sum(this Nodes ns) => profile_package.Sumᴍ(ns);
-}
-partial class profileᴛGraph {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Graph g) => profile_package.Stringᴍ(ref g);
-}
-partial class profileᴛedgeList {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this edgeList el) => profile_package.Lenᴍ(el);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this edgeList el, nint i, nint j) => profile_package.Lessᴍ(el, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Swap(this edgeList el, nint i, nint j) => profile_package.Swapᴍ(el, i, j);
-}
-// </GlyphForwarders>

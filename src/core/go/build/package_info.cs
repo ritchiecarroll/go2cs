@@ -80,6 +80,48 @@ using static go.go.build_package;
 
 namespace go.go;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using bytes = bytes_package;
+using errors = errors_package;
+using fmt = fmt_package;
+using ast = global::go.go.ast_package;
+using constraint = global::go.go.build.constraint_package;
+using Δdoc = global::go.go.doc_package;
+using token = global::go.go.token_package;
+using buildcfg = global::go.@internal.buildcfg_package;
+using godebug = global::go.@internal.godebug_package;
+using goroot = global::go.@internal.goroot_package;
+using goversion = global::go.@internal.goversion_package;
+using platform = global::go.@internal.platform_package;
+using syslist = global::go.@internal.syslist_package;
+using io = io_package;
+using fs = global::go.io.fs_package;
+using os = os_package;
+using exec = global::go.os.exec_package;
+using pathpkg = path_package;
+using filepath = global::go.path.filepath_package;
+using runtime = runtime_package;
+using slices = slices_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using unicode = unicode_package;
+using utf8 = global::go.unicode.utf8_package;
+using global::go.@internal;
+using global::go.go;
+using global::go.go.build;
+using global::go.io;
+using global::go.os;
+using global::go.path;
+using global::go.unicode;
+using iter = iter_package;
+using ꓸꓸꓸstring = Span<@string>;
+using Δbuild = build_package;
+using static build_package;
+using bufio = bufio_package;
+using parser = global::go.go.parser_package;
+using scanner = global::go.go.scanner_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("build")]
 public static partial class build_package
 {
@@ -153,3 +195,50 @@ public static partial class build_package
 [GoMethodHost(typeof(build_package.Package)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildᴛPackage;
 [GoMethodHost(typeof(build_package.importReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildᴛimportReader;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class buildᴛContext {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string joinPath(this ref Context ctxt, params ꓸꓸꓸstring elemʗp) => build_package.joinPathᴍ(ref ctxt, elemʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<@string> splitPathList(this ref Context ctxt, @string s) => build_package.splitPathListᴍ(ref ctxt, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isAbsPath(this ref Context ctxt, @string path) => build_package.isAbsPathᴍ(ref ctxt, path);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isDir(this ref Context ctxt, @string path) => build_package.isDirᴍ(ref ctxt, path);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string rel, bool ok) hasSubdir(this ref Context ctxt, @string root, @string dir) => build_package.hasSubdirᴍ(ref ctxt, root, dir);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<fs.DirEntry>, error) readDir(this ref Context ctxt, @string path) => build_package.readDirᴍ(ref ctxt, path);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (io.ReadCloser, error) openFile(this ref Context ctxt, @string path) => build_package.openFileᴍ(ref ctxt, path);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isFile(this ref Context ctxt, @string path) => build_package.isFileᴍ(ref ctxt, path);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<@string> gopath(this ref Context ctxt) => build_package.gopathᴍ(ref ctxt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> SrcDirs(this ref Context ctxt) => build_package.SrcDirsᴍ(ref ctxt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Package>, error) ImportDir(this ж<Context> Ꮡctxt, @string dir, ImportMode mode) => build_package.ImportDirᴍ(Ꮡctxt, dir, mode);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Package>, error) Import(this ж<Context> Ꮡctxt, @string path, @string srcDir, ImportMode mode) => build_package.Importᴍ(Ꮡctxt, path, srcDir, mode);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error importGo(this ref Context ctxt, ж<Package> Ꮡp, @string path, @string srcDir, ImportMode mode) => build_package.importGoᴍ(ref ctxt, Ꮡp, path, srcDir, mode);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (bool match, error err) MatchFile(this ж<Context> Ꮡctxt, @string dir, @string name) => build_package.MatchFileᴍ(Ꮡctxt, dir, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<fileInfo>, error) matchFile(this ж<Context> Ꮡctxt, @string dir, @string name, map<@string, bool> allTags, ж<bool> ᏑbinaryOnly, ж<token.FileSet> fset) => build_package.matchFileᴍ(Ꮡctxt, dir, name, allTags, ᏑbinaryOnly, fset);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool shouldBuild, bool binaryOnly, error err) shouldBuild(this ж<Context> Ꮡctxt, slice<byte> content, map<@string, bool> allTags) => build_package.shouldBuildᴍ(Ꮡctxt, content, allTags);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error saveCgo(this ж<Context> Ꮡctxt, @string filename, ж<Package> Ꮡdi, ж<ast.CommentGroup> cg) => build_package.saveCgoᴍ(Ꮡctxt, filename, Ꮡdi, cg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void makePathsAbsolute(this ref Context ctxt, slice<@string> args, @string srcDir) => build_package.makePathsAbsoluteᴍ(ref ctxt, args, srcDir);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool matchAuto(this ж<Context> Ꮡctxt, @string text, map<@string, bool> allTags) => build_package.matchAutoᴍ(Ꮡctxt, text, allTags);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool eval(this ж<Context> Ꮡctxt, constraint.Expr x, map<@string, bool> allTags) => build_package.evalᴍ(Ꮡctxt, x, allTags);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool matchTag(this ref Context ctxt, @string name, map<@string, bool> allTags) => build_package.matchTagᴍ(ref ctxt, name, allTags);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool goodOSArchFile(this ref Context ctxt, @string name, map<@string, bool> allTags) => build_package.goodOSArchFileᴍ(ref ctxt, name, allTags);
+}
+partial class buildᴛPackage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsCommand(this ref Package p) => build_package.IsCommandᴍ(ref p);
+}
+partial class buildᴛNoGoError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref NoGoError e) => build_package.Errorᴍ(ref e);
+}
+partial class buildᴛMultiplePackageError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref MultiplePackageError e) => build_package.Errorᴍ(ref e);
+}
+partial class buildᴛimportReader {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void syntaxError(this ref importReader r) => build_package.syntaxErrorᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte readByte(this ref importReader r) => build_package.readByteᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readRest(this ref importReader r) => build_package.readRestᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte peekByte(this ref importReader r, bool skipSpace) => build_package.peekByteᴍ(ref r, skipSpace);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte nextByte(this ref importReader r, bool skipSpace) => build_package.nextByteᴍ(ref r, skipSpace);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readKeyword(this ref importReader r, @string kw) => build_package.readKeywordᴍ(ref r, kw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readIdent(this ref importReader r) => build_package.readIdentᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readString(this ref importReader r) => build_package.readStringᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readImport(this ref importReader r) => build_package.readImportᴍ(ref r);
+}
+// </GlyphForwarders>

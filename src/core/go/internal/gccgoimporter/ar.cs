@@ -185,7 +185,7 @@ partial struct seekerReadAt {
 
 } partial class gccgoimporter_package {
 
-internal static (nint, error) ReadAtᴍ(seekerReadAt sra, slice<byte> p, int64 off) {
+[GoMethodBody("ReadAt")] internal static (nint, error) ReadAtᴍ(seekerReadAt sra, slice<byte> p, int64 off) {
     var (_, err) = sra.seeker.Seek(off, io.SeekStart); if (err != nil) {
         return (0, err);
     }
@@ -193,9 +193,3 @@ internal static (nint, error) ReadAtᴍ(seekerReadAt sra, slice<byte> p, int64 o
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class gccgoimporterᴛseekerReadAt {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) ReadAt(this seekerReadAt sra, slice<byte> p, int64 off) => gccgoimporter_package.ReadAtᴍ(sra, p, off);
-}
-// </GlyphForwarders>

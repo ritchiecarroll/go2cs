@@ -48,12 +48,12 @@ partial struct dumpConn {
 
 } partial class httputil_package {
 
-internal static error Closeᴍ(ref dumpConn c) { return default; }
-internal static net.Addr LocalAddrᴍ(ref dumpConn c) { return default; }
-internal static net.Addr RemoteAddrᴍ(ref dumpConn c) { return default; }
-internal static error SetDeadlineᴍ(ref dumpConn c, time.Time t) { return default; }
-internal static error SetReadDeadlineᴍ(ref dumpConn c, time.Time t) { return default; }
-internal static error SetWriteDeadlineᴍ(ref dumpConn c, time.Time t) { return default; }
+[GoMethodBody("Close")] internal static error Closeᴍ(ref dumpConn c) { return default; }
+[GoMethodBody("LocalAddr")] internal static net.Addr LocalAddrᴍ(ref dumpConn c) { return default; }
+[GoMethodBody("RemoteAddr")] internal static net.Addr RemoteAddrᴍ(ref dumpConn c) { return default; }
+[GoMethodBody("SetDeadline")] internal static error SetDeadlineᴍ(ref dumpConn c, time.Time t) { return default; }
+[GoMethodBody("SetReadDeadline")] internal static error SetReadDeadlineᴍ(ref dumpConn c, time.Time t) { return default; }
+[GoMethodBody("SetWriteDeadline")] internal static error SetWriteDeadlineᴍ(ref dumpConn c, time.Time t) { return default; }
 
 } partial class httputil_package {
 
@@ -61,7 +61,7 @@ partial struct neverEnding /*num:byte*/;
 
 } partial class httputil_package {
 
-internal static (nint n, error err) Readᴍ(neverEnding b, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(neverEnding b, slice<byte> p) {
     foreach (var i in range(len(p))) {
         p[i] = (byte)b;
     }
@@ -211,7 +211,7 @@ partial struct delegateReader {
 
 } partial class httputil_package {
 
-internal static (nint, error) Readᴍ(ref delegateReader r, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref delegateReader r, slice<byte> p) {
     if (r.r == nil) {
         bool ok = default;
         (r.r, ok) = ᐸꟷ(r.c, ꟷ); if (!ok) {
@@ -346,8 +346,8 @@ partial struct failureToReadBody {
 
 } partial class httputil_package {
 
-internal static (nint, error) Readᴍ(failureToReadBody _Δp0, slice<byte> _Δp1) { return (0, errNoBody); }
-internal static error Closeᴍ(failureToReadBody _) { return default; }
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(failureToReadBody _Δp0, slice<byte> _Δp1) { return (0, errNoBody); }
+[GoMethodBody("Close")] internal static error Closeᴍ(failureToReadBody _) { return default; }
 
 } partial class httputil_package {
 
@@ -392,24 +392,3 @@ public static (slice<byte>, error) DumpResponse(ж<http.Response> Ꮡresp, bool 
 }
 
 } // end httputil_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class httputilᴛdumpConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref dumpConn c) => httputil_package.Closeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static net.Addr LocalAddr(this ref dumpConn c) => httputil_package.LocalAddrᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static net.Addr RemoteAddr(this ref dumpConn c) => httputil_package.RemoteAddrᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetDeadline(this ref dumpConn c, time.Time t) => httputil_package.SetDeadlineᴍ(ref c, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetReadDeadline(this ref dumpConn c, time.Time t) => httputil_package.SetReadDeadlineᴍ(ref c, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) => httputil_package.SetWriteDeadlineᴍ(ref c, t);
-}
-partial class httputilᴛneverEnding {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) => httputil_package.Readᴍ(b, p);
-}
-partial class httputilᴛdelegateReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) => httputil_package.Readᴍ(ref r, p);
-}
-partial class httputilᴛfailureToReadBody {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this failureToReadBody _Δp0, slice<byte> _Δp1) => httputil_package.Readᴍ(_Δp0, _Δp1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this failureToReadBody _) => httputil_package.Closeᴍ(_);
-}
-// </GlyphForwarders>

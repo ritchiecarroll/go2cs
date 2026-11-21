@@ -131,7 +131,7 @@ private static readonly @string exactˢᵇᴍunifyMode = "exact"u8;
 internal static ref readonly @string assignExactˢᴍunifyMode => ref assignExactˢᵇᴍunifyMode;
 private static readonly @string assignExactˢᵇᴍunifyMode = "assign, exact"u8;
 
-internal static @string Stringᴍ(unifyMode m) {
+[GoMethodBody("String")] internal static @string Stringᴍ(unifyMode m) {
     switch (m) {
     case var ᴛ when ᴛ == (unifyMode)(0): {
         return inexactˢᴍunifyMode;
@@ -153,11 +153,11 @@ internal static @string Stringᴍ(unifyMode m) {
 // unify attempts to unify x and y and reports whether it succeeded.
 // As a side-effect, types may be inferred for type parameters.
 // The mode parameter controls how types are compared.
-internal static bool unifyᴍ(ж<unifier> Ꮡu, Type x, Type y, unifyMode mode) {
+[GoMethodBody("unify")] internal static bool unifyᴍ(ж<unifier> Ꮡu, Type x, Type y, unifyMode mode) {
     return Ꮡu.nify(x, y, mode, nil);
 }
 
-internal static void tracefᴍ(ref unifier u, @string format, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("tracef")] internal static void tracefᴍ(ref unifier u, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     fmt.Println(strings.Repeat(".  ", u.depth) + sprintf(nil, default, true, format, args.ꓸꓸꓸ));
@@ -165,7 +165,7 @@ internal static void tracefᴍ(ref unifier u, @string format, params ꓸꓸꓸan
 
 // String returns a string representation of the current mapping
 // from type parameters to types.
-internal static @string Stringᴍ(ref unifier u) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ref unifier u) {
     // sort type parameters for reproducible strings
     var tparams = new typeParamsById(len(u.handles));
     nint i = 0;
@@ -196,16 +196,16 @@ partial struct typeParamsById /*[]ж<TypeParam>*/;
 
 } partial class types_package {
 
-internal static nint Lenᴍ(typeParamsById s) { return len(s); }
-internal static bool Lessᴍ(typeParamsById s, nint i, nint j) { return s[i].id < s[j].id; }
-internal static void Swapᴍ(typeParamsById s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
+[GoMethodBody("Len")] internal static nint Lenᴍ(typeParamsById s) { return len(s); }
+[GoMethodBody("Less")] internal static bool Lessᴍ(typeParamsById s, nint i, nint j) { return s[i].id < s[j].id; }
+[GoMethodBody("Swap")] internal static void Swapᴍ(typeParamsById s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
 } partial class types_package {
 
 // join unifies the given type parameters x and y.
 // If both type parameters already have a type associated with them
 // and they are not joined, join fails and returns false.
-internal static bool joinᴍ(ref unifier u, ж<TypeParam> x, ж<TypeParam> y) {
+[GoMethodBody("join")] internal static bool joinᴍ(ref unifier u, ж<TypeParam> x, ж<TypeParam> y) {
     if (traceInference) {
         u.tracef("%s ⇄ %s", x.OrTypedNil(), y.OrTypedNil());
     }
@@ -238,7 +238,7 @@ internal static bool joinᴍ(ref unifier u, ж<TypeParam> x, ж<TypeParam> y) {
 
 // asBoundTypeParam returns x.(*TypeParam) if x is a type parameter recorded with u.
 // Otherwise, the result is nil.
-internal static ж<TypeParam> asBoundTypeParamᴍ(ref unifier u, Type x) {
+[GoMethodBody("asBoundTypeParam")] internal static ж<TypeParam> asBoundTypeParamᴍ(ref unifier u, Type x) {
     var (xΔ1, _) = Unalias(x)._<ж<TypeParam>>(ᐧ); if (xΔ1 != nil) {
         var (_, found) = u.handles[xΔ1, ꟷ]; if (found) {
             return xΔ1;
@@ -249,7 +249,7 @@ internal static ж<TypeParam> asBoundTypeParamᴍ(ref unifier u, Type x) {
 
 // setHandle sets the handle for type parameter x
 // (and all its joined type parameters) to h.
-internal static void setHandleᴍ(ref unifier u, ж<TypeParam> x, ж<Type> h) {
+[GoMethodBody("setHandle")] internal static void setHandleᴍ(ref unifier u, ж<TypeParam> x, ж<Type> h) {
     var hx = u.handles[x];
     assert(hx != nil);
     foreach (var (y, hy) in u.handles) {
@@ -260,13 +260,13 @@ internal static void setHandleᴍ(ref unifier u, ж<TypeParam> x, ж<Type> h) {
 }
 
 // at returns the (possibly nil) type for type parameter x.
-internal static Type atᴍ(ref unifier u, ж<TypeParam> x) {
+[GoMethodBody("at")] internal static Type atᴍ(ref unifier u, ж<TypeParam> x) {
     return u.handles[x].ValueSlot;
 }
 
 // set sets the type t for type parameter x;
 // t must not be nil.
-internal static void setᴍ(ref unifier u, ж<TypeParam> x, Type t) {
+[GoMethodBody("set")] internal static void setᴍ(ref unifier u, ж<TypeParam> x, Type t) {
     assert(t != nil);
     if (traceInference) {
         u.tracef("%s ➞ %s", x.OrTypedNil(), t);
@@ -275,7 +275,7 @@ internal static void setᴍ(ref unifier u, ж<TypeParam> x, Type t) {
 }
 
 // unknowns returns the number of type parameters for which no type has been set yet.
-internal static nint unknownsᴍ(ref unifier u) {
+[GoMethodBody("unknowns")] internal static nint unknownsᴍ(ref unifier u) {
     nint n = 0;
     foreach (var (_, h) in u.handles) {
         if (h.ValueSlot == nil) {
@@ -289,7 +289,7 @@ internal static nint unknownsᴍ(ref unifier u) {
 // The result is never nil and has the same length as tparams; result types that
 // could not be inferred are nil. Corresponding type parameters and result types
 // have identical indices.
-internal static slice<Type> inferredᴍ(ref unifier u, slice<ж<TypeParam>> tparams) {
+[GoMethodBody("inferred")] internal static slice<Type> inferredᴍ(ref unifier u, slice<ж<TypeParam>> tparams) {
     var list = new slice<Type>(len(tparams));
     foreach (var (i, x) in range(tparams)) {
         list[i] = u.at(x);
@@ -316,7 +316,7 @@ internal static ж<Interface> /*i*/ asInterface(Type x) {
 // adapted version of Checker.identical. For changes to that
 // code the corresponding changes should be made here.
 // Must not be called directly from outside the unifier.
-internal static bool /*result*/ nifyᴍ(ж<unifier> Ꮡu, Type xʗp, Type yʗp, unifyMode mode, ж<ifacePair> Ꮡp) {
+[GoMethodBody("nify")] internal static bool /*result*/ nifyᴍ(ж<unifier> Ꮡu, Type xʗp, Type yʗp, unifyMode mode, ж<ifacePair> Ꮡp) {
     bool result = default;
     GoFrame ᒐ = default;
     try {
@@ -864,27 +864,3 @@ internal static bool /*result*/ nifyᴍ(ж<unifier> Ꮡu, Type xʗp, Type yʗp, 
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛunifyMode {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this unifyMode m) => types_package.Stringᴍ(m);
-}
-partial class typesᴛunifier {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool unify(this ж<unifier> Ꮡu, Type x, Type y, unifyMode mode) => types_package.unifyᴍ(Ꮡu, x, y, mode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void tracef(this ref unifier u, @string format, params ꓸꓸꓸany argsʗp) => types_package.tracefᴍ(ref u, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref unifier u) => types_package.Stringᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool join(this ref unifier u, ж<TypeParam> x, ж<TypeParam> y) => types_package.joinᴍ(ref u, x, y);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<TypeParam> asBoundTypeParam(this ref unifier u, Type x) => types_package.asBoundTypeParamᴍ(ref u, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setHandle(this ref unifier u, ж<TypeParam> x, ж<Type> h) => types_package.setHandleᴍ(ref u, x, h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type at(this ref unifier u, ж<TypeParam> x) => types_package.atᴍ(ref u, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this ref unifier u, ж<TypeParam> x, Type t) => types_package.setᴍ(ref u, x, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint unknowns(this ref unifier u) => types_package.unknownsᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Type> inferred(this ref unifier u, slice<ж<TypeParam>> tparams) => types_package.inferredᴍ(ref u, tparams);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*result*/ nify(this ж<unifier> Ꮡu, Type xʗp, Type yʗp, unifyMode mode, ж<ifacePair> Ꮡp) => types_package.nifyᴍ(Ꮡu, xʗp, yʗp, mode, Ꮡp);
-}
-partial class typesᴛtypeParamsById {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this typeParamsById s) => types_package.Lenᴍ(s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this typeParamsById s, nint i, nint j) => types_package.Lessᴍ(s, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Swap(this typeParamsById s, nint i, nint j) => types_package.Swapᴍ(s, i, j);
-}
-// </GlyphForwarders>

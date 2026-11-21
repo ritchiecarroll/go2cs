@@ -61,6 +61,16 @@ using static go.crypto.rc4_package;
 
 namespace go.crypto;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using alias = go.crypto.@internal.fips140.alias_package;
+using fips140only = go.crypto.@internal.fips140only_package;
+using errors = errors_package;
+using strconv = strconv_package;
+using go.crypto.@internal;
+using go.crypto.@internal.fips140;
+using static rc4_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("rc4")]
 public static partial class rc4_package
 {
@@ -98,3 +108,13 @@ public static partial class rc4_package
 [GoMethodHost(typeof(rc4_package.Cipher)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rc4ᴛCipher;
 [GoMethodHost(typeof(rc4_package.KeySizeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rc4ᴛKeySizeError;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class rc4ᴛKeySizeError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this KeySizeError k) => rc4_package.Errorᴍ(k);
+}
+partial class rc4ᴛCipher {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Cipher c) => rc4_package.Resetᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void XORKeyStream(this ref Cipher c, slice<byte> dst, slice<byte> src) => rc4_package.XORKeyStreamᴍ(ref c, dst, src);
+}
+// </GlyphForwarders>

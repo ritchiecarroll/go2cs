@@ -33,7 +33,7 @@ private static readonly @string ratScanInvalidSyntaxˢᵇᴍRat = "Rat.Scan: inv
 
 // Scan is a support routine for fmt.Scanner. It accepts the formats
 // 'e', 'E', 'f', 'F', 'g', 'G', and 'v'. All formats are equivalent.
-internal static error Scanᴍ(ж<Rat> Ꮡz, fmt.ScanState s, rune ch) {
+[GoMethodBody("Scan")] internal static error Scanᴍ(ж<Rat> Ꮡz, fmt.ScanState s, rune ch) {
     var (tok, err) = s.Token(true, ratTok);
     if (err != nil) {
         return err;
@@ -65,7 +65,7 @@ internal static error Scanᴍ(ж<Rat> Ꮡz, fmt.ScanState s, rune ch) {
 // is too large, the operation may fail.
 // The entire string, not just a prefix, must be valid for success. If the
 // operation failed, the value of z is undefined but the returned value is nil.
-internal static (ж<Rat>, bool) SetStringᴍ(ж<Rat> Ꮡz, @string s) {
+[GoMethodBody("SetString")] internal static (ж<Rat>, bool) SetStringᴍ(ж<Rat> Ꮡz, @string s) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -339,14 +339,14 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
 } partial class big_package {
 
 // String returns a string representation of x in the form "a/b" (even if b == 1).
-internal static @string Stringᴍ(ж<Rat> Ꮡx) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<Rat> Ꮡx) {
     return (@string)Ꮡx.marshal(default);
 }
 
 // marshal implements [Rat.String] returning a slice of bytes.
 // It appends the string representation of x in the form "a/b" (even if b == 1) to buf,
 // and returns the extended buffer.
-internal static slice<byte> marshalᴍ(ж<Rat> Ꮡx, slice<byte> buf) {
+[GoMethodBody("marshal")] internal static slice<byte> marshalᴍ(ж<Rat> Ꮡx, slice<byte> buf) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     buf = Ꮡx.Ꮡa.Append(buf, 10);
@@ -361,7 +361,7 @@ internal static slice<byte> marshalᴍ(ж<Rat> Ꮡx, slice<byte> buf) {
 
 // RatString returns a string representation of x in the form "a/b" if b != 1,
 // and in the form "a" if b == 1.
-internal static @string RatStringᴍ(ж<Rat> Ꮡx) {
+[GoMethodBody("RatString")] internal static @string RatStringᴍ(ж<Rat> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.IsInt()) {
@@ -373,7 +373,7 @@ internal static @string RatStringᴍ(ж<Rat> Ꮡx) {
 // FloatString returns a string representation of x in decimal form with prec
 // digits of precision after the radix point. The last digit is rounded to
 // nearest, with halves rounded away from zero.
-internal static @string FloatStringᴍ(ж<Rat> Ꮡx, nint prec) {
+[GoMethodBody("FloatString")] internal static @string FloatStringᴍ(ж<Rat> Ꮡx, nint prec) {
     GoFrame ᒐ = default;
     try {
         ref var x = ref Ꮡx.DerefOrNull();
@@ -453,7 +453,7 @@ internal static @string FloatStringᴍ(ж<Rat> Ꮡx, nint prec) {
 //	1/3    0    false    0       (0.333... rounded)
 //	1/4    2    true     0.25
 //	1/6    1    false    0.2     (0.166... rounded)
-internal static (nint n, bool exact) FloatPrecᴍ(ж<Rat> Ꮡx) {
+[GoMethodBody("FloatPrec")] internal static (nint n, bool exact) FloatPrecᴍ(ж<Rat> Ꮡx) {
     nint n = default;
     bool exact = default;
     GoFrame ᒐ = default;
@@ -531,15 +531,3 @@ internal static (nint n, bool exact) FloatPrecᴍ(ж<Rat> Ꮡx) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class bigᴛRat {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Scan(this ж<Rat> Ꮡz, fmt.ScanState s, rune ch) => big_package.Scanᴍ(Ꮡz, s, ch);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Rat>, bool) SetString(this ж<Rat> Ꮡz, @string s) => big_package.SetStringᴍ(Ꮡz, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Rat> Ꮡx) => big_package.Stringᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> marshal(this ж<Rat> Ꮡx, slice<byte> buf) => big_package.marshalᴍ(Ꮡx, buf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string RatString(this ж<Rat> Ꮡx) => big_package.RatStringᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string FloatString(this ж<Rat> Ꮡx, nint prec) => big_package.FloatStringᴍ(Ꮡx, prec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, bool exact) FloatPrec(this ж<Rat> Ꮡx) => big_package.FloatPrecᴍ(Ꮡx);
-}
-// </GlyphForwarders>

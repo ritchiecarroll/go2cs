@@ -91,7 +91,7 @@ partial struct printer {
 
 } partial class printer_package {
 
-internal static void internalErrorᴍ(ref printer p, params ꓸꓸꓸany msgʗp) {
+[GoMethodBody("internalError")] internal static void internalErrorᴍ(ref printer p, params ꓸꓸꓸany msgʗp) {
     var msg = msgʗp.sslice();
 
     if (debug) {
@@ -104,7 +104,7 @@ internal static void internalErrorᴍ(ref printer p, params ꓸꓸꓸany msgʗp)
 // commentsHaveNewline reports whether a list of comments belonging to
 // an *ast.CommentGroup contains newlines. Because the position information
 // may only be partially correct, we also have to read the comment text.
-internal static bool commentsHaveNewlineᴍ(ref printer p, slice<ж<ast.Comment>> list) {
+[GoMethodBody("commentsHaveNewline")] internal static bool commentsHaveNewlineᴍ(ref printer p, slice<ж<ast.Comment>> list) {
     // len(list) > 0
     nint line = p.lineFor(list[0].Pos());
     foreach (var (i, c) in range(list)) {
@@ -120,7 +120,7 @@ internal static bool commentsHaveNewlineᴍ(ref printer p, slice<ж<ast.Comment>
     return false;
 }
 
-internal static void nextCommentᴍ(ref printer p) {
+[GoMethodBody("nextComment")] internal static void nextCommentᴍ(ref printer p) {
     while (p.cindex < len(p.comments)) {
         var c = p.comments[p.cindex];
         p.cindex++;
@@ -140,13 +140,13 @@ internal static void nextCommentᴍ(ref printer p) {
 // commentBefore reports whether the current comment group occurs
 // before the next position in the source code and printing it does
 // not introduce implicit semicolons.
-internal static bool commentBeforeᴍ(ref printer p, token.Position next) {
+[GoMethodBody("commentBefore")] internal static bool commentBeforeᴍ(ref printer p, token.Position next) {
     return p.commentOffset < next.Offset && (!p.impliedSemi || !p.commentNewline);
 }
 
 // commentSizeBefore returns the estimated size of the
 // comments on the same line before the next position.
-internal static nint commentSizeBeforeᴍ(ж<printer> Ꮡp, token.Position next) {
+[GoMethodBody("commentSizeBefore")] internal static nint commentSizeBeforeᴍ(ж<printer> Ꮡp, token.Position next) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -173,7 +173,7 @@ internal static nint commentSizeBeforeᴍ(ж<printer> Ꮡp, token.Position next)
 // token in *linePtr. It is used to compute an accurate line number for a
 // formatted construct, independent of pending (not yet emitted) whitespace
 // or comments.
-internal static void recordLineᴍ(ref printer p, ж<nint> ᏑlinePtr) {
+[GoMethodBody("recordLine")] internal static void recordLineᴍ(ref printer p, ж<nint> ᏑlinePtr) {
     ref var linePtr = ref ᏑlinePtr.DerefOrNull();
 
     p.linePtr = ᏑlinePtr;
@@ -183,16 +183,16 @@ internal static void recordLineᴍ(ref printer p, ж<nint> ᏑlinePtr) {
 // output line and the line argument, ignoring any pending (not yet
 // emitted) whitespace or comments. It is used to compute an accurate
 // size (in number of lines) for a formatted construct.
-internal static nint linesFromᴍ(ref printer p, nint line) {
+[GoMethodBody("linesFrom")] internal static nint linesFromᴍ(ref printer p, nint line) {
     return p.@out.Line - line;
 }
 
-internal static token.Position posForᴍ(ref printer p, token.Pos pos) {
+[GoMethodBody("posFor")] internal static token.Position posForᴍ(ref printer p, token.Pos pos) {
     // not used frequently enough to cache entire token.Position
     return p.fset.PositionFor(pos, false /* absolute position */);
 }
 
-internal static nint lineForᴍ(ref printer p, token.Pos pos) {
+[GoMethodBody("lineFor")] internal static nint lineForᴍ(ref printer p, token.Pos pos) {
     if (pos != p.cachedPos) {
         p.cachedPos = pos;
         p.cachedLine = p.fset.PositionFor(pos, false /* absolute position */).Line;
@@ -201,7 +201,7 @@ internal static nint lineForᴍ(ref printer p, token.Pos pos) {
 }
 
 // writeLineDirective writes a //line directive if necessary.
-internal static void writeLineDirectiveᴍ(ref printer p, token.Position pos) {
+[GoMethodBody("writeLineDirective")] internal static void writeLineDirectiveᴍ(ref printer p, token.Position pos) {
     if (pos.IsValid() && (p.@out.Line != pos.Line || p.@out.Filename != pos.Filename)) {
         if (strings.ContainsAny(pos.Filename, "\r\n")) {
             if (p.sourcePosErr == nil) {
@@ -220,7 +220,7 @@ internal static void writeLineDirectiveᴍ(ref printer p, token.Position pos) {
 }
 
 // writeIndent writes indentation.
-internal static void writeIndentᴍ(ref printer p) {
+[GoMethodBody("writeIndent")] internal static void writeIndentᴍ(ref printer p) {
     // use "hard" htabs - indentation columns
     // must not be discarded by the tabwriter
     nint n = p.Config.Indent + p.indent; // include base indentation
@@ -236,7 +236,7 @@ internal static void writeIndentᴍ(ref printer p) {
 
 // writeByte writes ch n times to p.output and updates p.pos.
 // Only used to write formatting (white space) characters.
-internal static void writeByteᴍ(ref printer p, byte ch, nint n) {
+[GoMethodBody("writeByte")] internal static void writeByteᴍ(ref printer p, byte ch, nint n) {
     if (p.endAlignment) {
         // Ignore any alignment control character;
         // and at the end of the line, break with
@@ -286,7 +286,7 @@ internal static void writeByteᴍ(ref printer p, byte ch, nint n) {
 // needed (i.e., when we don't know that s contains no tabs or line breaks)
 // avoids processing extra escape characters and reduces run time of the
 // printer benchmark by up to 10%.
-internal static void writeStringᴍ(ref printer p, token.Position pos, @string s, bool isLit) {
+[GoMethodBody("writeString")] internal static void writeStringᴍ(ref printer p, token.Position pos, @string s, bool isLit) {
     if (p.@out.Column == 1) {
         if ((Mode)(p.Config.Mode & SourcePos) != 0) {
             p.writeLineDirective(pos);
@@ -355,7 +355,7 @@ internal static void writeStringᴍ(ref printer p, token.Position pos, @string s
 // pos is the comment position, next the position of the item
 // after all pending comments, prev is the previous comment in
 // a group of comments (or nil), and tok is the next token.
-internal static void writeCommentPrefixᴍ(ref printer p, token.Position pos, token.Position next, ж<ast.Comment> Ꮡprev, token.Token tok) {
+[GoMethodBody("writeCommentPrefix")] internal static void writeCommentPrefixᴍ(ref printer p, token.Position pos, token.Position next, ж<ast.Comment> Ꮡprev, token.Token tok) {
     ref var prev = ref Ꮡprev.DerefOrNull();
 
     if (len(p.output) == 0) {
@@ -655,7 +655,7 @@ internal static void stripCommonPrefix(slice<@string> lines) {
 internal static ref readonly @string linePrefixᶜᴍprinter => ref linePrefixᶜᵇᴍprinter;
 private static readonly @string linePrefixᶜᵇᴍprinter = "//line "u8;
 
-internal static void writeCommentᴍ(ж<printer> Ꮡp, ж<ast.Comment> Ꮡcomment) {
+[GoMethodBody("writeComment")] internal static void writeCommentᴍ(ж<printer> Ꮡp, ж<ast.Comment> Ꮡcomment) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -725,7 +725,7 @@ internal static void writeCommentᴍ(ж<printer> Ꮡp, ж<ast.Comment> Ꮡcommen
 // pending whitespace. The writeCommentSuffix result indicates if a
 // newline was written or if a formfeed was dropped from the whitespace
 // buffer.
-internal static (bool wroteNewline, bool droppedFF) writeCommentSuffixᴍ(ref printer p, bool needsLinebreak) {
+[GoMethodBody("writeCommentSuffix")] internal static (bool wroteNewline, bool droppedFF) writeCommentSuffixᴍ(ref printer p, bool needsLinebreak) {
     bool wroteNewline = default;
     bool droppedFF = default;
 
@@ -767,7 +767,7 @@ internal static (bool wroteNewline, bool droppedFF) writeCommentSuffixᴍ(ref pr
 }
 
 // containsLinebreak reports whether the whitespace buffer contains any line breaks.
-internal static bool containsLinebreakᴍ(ref printer p) {
+[GoMethodBody("containsLinebreak")] internal static bool containsLinebreakᴍ(ref printer p) {
     foreach (var (_, ch) in range(p.wsbuf)) {
         if (ch == newline || ch == formfeed) {
             return true;
@@ -784,7 +784,7 @@ internal static readonly object intersperseCommentsˢᴍprinter = (@string)"inte
 // that needs to be written before the next token). A heuristic is used to mix
 // the comments and whitespace. The intersperseComments result indicates if a
 // newline was written or if a formfeed was dropped from the whitespace buffer.
-internal static (bool wroteNewline, bool droppedFF) intersperseCommentsᴍ(ж<printer> Ꮡp, token.Position next, token.Token tok) {
+[GoMethodBody("intersperseComments")] internal static (bool wroteNewline, bool droppedFF) intersperseCommentsᴍ(ж<printer> Ꮡp, token.Position next, token.Token tok) {
     bool wroteNewline = default;
     bool droppedFF = default;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -864,7 +864,7 @@ internal static (bool wroteNewline, bool droppedFF) intersperseCommentsᴍ(ж<pr
 internal static readonly object negativeIndentationˢᴍprinter = (@string)"negative indentation:"u8;
 
 // writeWhitespace writes the first n whitespace entries.
-internal static void writeWhitespaceᴍ(ref printer p, nint n) {
+[GoMethodBody("writeWhitespace")] internal static void writeWhitespaceᴍ(ref printer p, nint n) {
     // write entries
     for (nint i = 0; i < n; i++) {
         var ch = p.wsbuf[i];
@@ -954,7 +954,7 @@ internal static bool /*b*/ mayCombine(token.Token prev, byte next) {
 
 } partial class printer_package {
 
-internal static void setPosᴍ(ref printer p, token.Pos pos) {
+[GoMethodBody("setPos")] internal static void setPosᴍ(ref printer p, token.Pos pos) {
     if (pos.IsValid()) {
         p.pos = p.posFor(pos); // accurate position of next item
     }
@@ -973,7 +973,7 @@ internal static readonly object whitespaceBufferNotEmptyˢᴍprinter = (@string)
 // taking into account the amount and structure of any pending white-
 // space for best comment placement. Then, any leftover whitespace is
 // printed, followed by the actual token.
-internal static void printᴍ(ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) {
+[GoMethodBody("print")] internal static void printᴍ(ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -1125,7 +1125,7 @@ internal static void printᴍ(ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) {
 // before the position of the next token tok. The flush result indicates
 // if a newline was written or if a formfeed was dropped from the whitespace
 // buffer.
-internal static (bool wroteNewline, bool droppedFF) flushᴍ(ж<printer> Ꮡp, token.Position next, token.Token tok) {
+[GoMethodBody("flush")] internal static (bool wroteNewline, bool droppedFF) flushᴍ(ж<printer> Ꮡp, token.Position next, token.Token tok) {
     bool wroteNewline = default;
     bool droppedFF = default;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -1200,7 +1200,7 @@ internal static ж<ast.CommentGroup> getLastComment(ast.Node n) {
 
 } partial class printer_package {
 
-internal static error printNodeᴍ(ж<printer> Ꮡp, any node) {
+[GoMethodBody("printNode")] internal static error printNodeᴍ(ж<printer> Ꮡp, any node) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // unpack *CommentedNode, if any
@@ -1334,7 +1334,7 @@ internal static UntypedInt inText => 2;     // inside text
 
 } partial class printer_package {
 
-internal static void resetSpaceᴍ(ref trimmer p) {
+[GoMethodBody("resetSpace")] internal static void resetSpaceᴍ(ref trimmer p) {
     p.state = inSpace;
     p.space = p.space[0..0];
 }
@@ -1350,7 +1350,7 @@ internal static slice<byte> aNewline = slice<byte>("\n"u8);
 
 } partial class printer_package {
 
-internal static (nint n, error err) Writeᴍ(ref trimmer p, slice<byte> data) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref trimmer p, slice<byte> data) {
     nint nΔ1 = default;
     error err = default;
 
@@ -1507,7 +1507,7 @@ internal static ж<printer> newPrinter(ref Config cfg, ж<token.FileSet> fset, m
 
 } partial class printer_package {
 
-internal static void freeᴍ(ж<printer> Ꮡp) {
+[GoMethodBody("free")] internal static void freeᴍ(ж<printer> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Hard limit on buffer size; see https://golang.org/issue/23199.
@@ -1521,7 +1521,7 @@ internal static void freeᴍ(ж<printer> Ꮡp) {
 } partial class printer_package {
 
 // fprint implements Fprint and takes a nodesSizes map for setting up the printer state.
-internal static error /*err*/ fprintᴍ(ж<Config> Ꮡcfg, io.Writer output, ж<token.FileSet> fset, any node, map<ast.Node, nint> nodeSizes) {
+[GoMethodBody("fprint")] internal static error /*err*/ fprintᴍ(ж<Config> Ꮡcfg, io.Writer output, ж<token.FileSet> fset, any node, map<ast.Node, nint> nodeSizes) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -1596,7 +1596,7 @@ partial struct CommentedNode {
 // Position information is interpreted relative to the file set fset.
 // The node type must be *[ast.File], *[CommentedNode], [][ast.Decl], [][ast.Stmt],
 // or assignment-compatible to [ast.Expr], [ast.Decl], [ast.Spec], or [ast.Stmt].
-internal static error Fprintᴍ(ж<Config> Ꮡcfg, io.Writer output, ж<token.FileSet> fset, any node) {
+[GoMethodBody("Fprint")] internal static error Fprintᴍ(ж<Config> Ꮡcfg, io.Writer output, ж<token.FileSet> fset, any node) {
     return Ꮡcfg.fprint(output, fset, node, new map<ast.Node, nint>());
 }
 
@@ -1611,40 +1611,3 @@ public static error Fprint(io.Writer output, ж<token.FileSet> fset, any node) {
 }
 
 } // end printer_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class printerᴛprinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void internalError(this ref printer p, params ꓸꓸꓸany msgʗp) => printer_package.internalErrorᴍ(ref p, msgʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool commentsHaveNewline(this ref printer p, slice<ж<ast.Comment>> list) => printer_package.commentsHaveNewlineᴍ(ref p, list);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void nextComment(this ref printer p) => printer_package.nextCommentᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool commentBefore(this ref printer p, token.Position next) => printer_package.commentBeforeᴍ(ref p, next);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint commentSizeBefore(this ж<printer> Ꮡp, token.Position next) => printer_package.commentSizeBeforeᴍ(Ꮡp, next);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void recordLine(this ref printer p, ж<nint> ᏑlinePtr) => printer_package.recordLineᴍ(ref p, ᏑlinePtr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint linesFrom(this ref printer p, nint line) => printer_package.linesFromᴍ(ref p, line);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Position posFor(this ref printer p, token.Pos pos) => printer_package.posForᴍ(ref p, pos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint lineFor(this ref printer p, token.Pos pos) => printer_package.lineForᴍ(ref p, pos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeLineDirective(this ref printer p, token.Position pos) => printer_package.writeLineDirectiveᴍ(ref p, pos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeIndent(this ref printer p) => printer_package.writeIndentᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeByte(this ref printer p, byte ch, nint n) => printer_package.writeByteᴍ(ref p, ch, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeString(this ref printer p, token.Position pos, @string s, bool isLit) => printer_package.writeStringᴍ(ref p, pos, s, isLit);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeCommentPrefix(this ref printer p, token.Position pos, token.Position next, ж<ast.Comment> Ꮡprev, token.Token tok) => printer_package.writeCommentPrefixᴍ(ref p, pos, next, Ꮡprev, tok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeComment(this ж<printer> Ꮡp, ж<ast.Comment> Ꮡcomment) => printer_package.writeCommentᴍ(Ꮡp, Ꮡcomment);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool wroteNewline, bool droppedFF) writeCommentSuffix(this ref printer p, bool needsLinebreak) => printer_package.writeCommentSuffixᴍ(ref p, needsLinebreak);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool containsLinebreak(this ref printer p) => printer_package.containsLinebreakᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool wroteNewline, bool droppedFF) intersperseComments(this ж<printer> Ꮡp, token.Position next, token.Token tok) => printer_package.intersperseCommentsᴍ(Ꮡp, next, tok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeWhitespace(this ref printer p, nint n) => printer_package.writeWhitespaceᴍ(ref p, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setPos(this ref printer p, token.Pos pos) => printer_package.setPosᴍ(ref p, pos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void print(this ж<printer> Ꮡp, params ꓸꓸꓸany argsʗp) => printer_package.printᴍ(Ꮡp, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool wroteNewline, bool droppedFF) flush(this ж<printer> Ꮡp, token.Position next, token.Token tok) => printer_package.flushᴍ(Ꮡp, next, tok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error printNode(this ж<printer> Ꮡp, any node) => printer_package.printNodeᴍ(Ꮡp, node);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void free(this ж<printer> Ꮡp) => printer_package.freeᴍ(Ꮡp);
-}
-partial class printerᴛtrimmer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void resetSpace(this ref trimmer p) => printer_package.resetSpaceᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref trimmer p, slice<byte> data) => printer_package.Writeᴍ(ref p, data);
-}
-partial class printerᴛConfig {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ fprint(this ж<Config> Ꮡcfg, io.Writer output, ж<token.FileSet> fset, any node, map<ast.Node, nint> nodeSizes) => printer_package.fprintᴍ(Ꮡcfg, output, fset, node, nodeSizes);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Fprint(this ж<Config> Ꮡcfg, io.Writer output, ж<token.FileSet> fset, any node) => printer_package.Fprintᴍ(Ꮡcfg, output, fset, node);
-}
-// </GlyphForwarders>

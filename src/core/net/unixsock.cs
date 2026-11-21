@@ -27,7 +27,7 @@ partial struct UnixAddr {
 
 // Network returns the address's network name, "unix", "unixgram" or
 // "unixpacket".
-internal static @string Networkᴍ(ref UnixAddr a) {
+[GoMethodBody("Network")] internal static @string Networkᴍ(ref UnixAddr a) {
     return a.Net;
 }
 
@@ -35,7 +35,7 @@ internal static @string Networkᴍ(ref UnixAddr a) {
 internal static ref readonly @string nilˢᴍUnixAddr => ref nilˢᵇᴍUnixAddr;
 private static readonly @string nilˢᵇᴍUnixAddr = "<nil>"u8;
 
-internal static @string Stringᴍ(ж<UnixAddr> Ꮡa) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<UnixAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -44,13 +44,13 @@ internal static @string Stringᴍ(ж<UnixAddr> Ꮡa) {
     return a.Name;
 }
 
-internal static bool isWildcardᴍ(ж<UnixAddr> Ꮡa) {
+[GoMethodBody("isWildcard")] internal static bool isWildcardᴍ(ж<UnixAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     return Ꮡa == nil || a.Name == ""u8;
 }
 
-internal static Addr opAddrᴍ(ж<UnixAddr> Ꮡa) {
+[GoMethodBody("opAddr")] internal static Addr opAddrᴍ(ж<UnixAddr> Ꮡa) {
     if (Ꮡa == nil) {
         return default;
     }
@@ -85,7 +85,7 @@ partial struct UnixConn {
 
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
-internal static (syscall.RawConn, error) SyscallConnᴍ(ж<UnixConn> Ꮡc) {
+[GoMethodBody("SyscallConn")] internal static (syscall.RawConn, error) SyscallConnᴍ(ж<UnixConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -96,7 +96,7 @@ internal static (syscall.RawConn, error) SyscallConnᴍ(ж<UnixConn> Ꮡc) {
 
 // CloseRead shuts down the reading side of the Unix domain connection.
 // Most callers should just use [UnixConn.Close].
-internal static error CloseReadᴍ(ж<UnixConn> Ꮡc) {
+[GoMethodBody("CloseRead")] internal static error CloseReadᴍ(ж<UnixConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -110,7 +110,7 @@ internal static error CloseReadᴍ(ж<UnixConn> Ꮡc) {
 
 // CloseWrite shuts down the writing side of the Unix domain connection.
 // Most callers should just use [UnixConn.Close].
-internal static error CloseWriteᴍ(ж<UnixConn> Ꮡc) {
+[GoMethodBody("CloseWrite")] internal static error CloseWriteᴍ(ж<UnixConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -123,7 +123,7 @@ internal static error CloseWriteᴍ(ж<UnixConn> Ꮡc) {
 }
 
 // ReadFromUnix acts like [UnixConn.ReadFrom] but returns a [UnixAddr].
-internal static (nint, ж<UnixAddr>, error) ReadFromUnixᴍ(ж<UnixConn> Ꮡc, slice<byte> b) {
+[GoMethodBody("ReadFromUnix")] internal static (nint, ж<UnixAddr>, error) ReadFromUnixᴍ(ж<UnixConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -137,7 +137,7 @@ internal static (nint, ж<UnixAddr>, error) ReadFromUnixᴍ(ж<UnixConn> Ꮡc, s
 }
 
 // ReadFrom implements the [PacketConn].ReadFrom method.
-internal static (nint, Addr, error) ReadFromᴍ(ж<UnixConn> Ꮡc, slice<byte> b) {
+[GoMethodBody("ReadFrom")] internal static (nint, Addr, error) ReadFromᴍ(ж<UnixConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -160,7 +160,7 @@ internal static (nint, Addr, error) ReadFromᴍ(ж<UnixConn> Ꮡc, slice<byte> b
 //
 // Note that if len(b) == 0 and len(oob) > 0, this function will still
 // read (and discard) 1 byte from the connection.
-internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) ReadMsgUnixᴍ(ж<UnixConn> Ꮡc, slice<byte> b, slice<byte> oob) {
+[GoMethodBody("ReadMsgUnix")] internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) ReadMsgUnixᴍ(ж<UnixConn> Ꮡc, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -179,7 +179,7 @@ internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) Re
 }
 
 // WriteToUnix acts like [UnixConn.WriteTo] but takes a [UnixAddr].
-internal static (nint, error) WriteToUnixᴍ(ж<UnixConn> Ꮡc, slice<byte> b, ж<UnixAddr> addr) {
+[GoMethodBody("WriteToUnix")] internal static (nint, error) WriteToUnixᴍ(ж<UnixConn> Ꮡc, slice<byte> b, ж<UnixAddr> addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -193,7 +193,7 @@ internal static (nint, error) WriteToUnixᴍ(ж<UnixConn> Ꮡc, slice<byte> b, �
 }
 
 // WriteTo implements the [PacketConn].WriteTo method.
-internal static (nint, error) WriteToᴍ(ж<UnixConn> Ꮡc, slice<byte> b, Addr addr) {
+[GoMethodBody("WriteTo")] internal static (nint, error) WriteToᴍ(ж<UnixConn> Ꮡc, slice<byte> b, Addr addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -216,7 +216,7 @@ internal static (nint, error) WriteToᴍ(ж<UnixConn> Ꮡc, slice<byte> b, Addr 
 //
 // Note that if len(b) == 0 and len(oob) > 0, this function will still
 // write 1 byte to the connection.
-internal static (nint n, nint oobn, error err) WriteMsgUnixᴍ(ж<UnixConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<UnixAddr> addr) {
+[GoMethodBody("WriteMsgUnix")] internal static (nint n, nint oobn, error err) WriteMsgUnixᴍ(ж<UnixConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<UnixAddr> addr) {
     nint n = default;
     nint oobn = default;
     error err = default;
@@ -279,7 +279,7 @@ partial struct UnixListener {
 
 } partial class net_package {
 
-internal static bool okᴍ(ж<UnixListener> Ꮡln) {
+[GoMethodBody("ok")] internal static bool okᴍ(ж<UnixListener> Ꮡln) {
     ref var ln = ref Ꮡln.DerefOrNull();
 
     return Ꮡln != nil && ln.fd != nil;
@@ -290,7 +290,7 @@ internal static bool okᴍ(ж<UnixListener> Ꮡln) {
 //
 // The returned [syscall.RawConn] only supports calling Control. Read and
 // Write return an error.
-internal static (syscall.RawConn, error) SyscallConnᴍ(ж<UnixListener> Ꮡl) {
+[GoMethodBody("SyscallConn")] internal static (syscall.RawConn, error) SyscallConnᴍ(ж<UnixListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -301,7 +301,7 @@ internal static (syscall.RawConn, error) SyscallConnᴍ(ж<UnixListener> Ꮡl) {
 
 // AcceptUnix accepts the next incoming call and returns the new
 // connection.
-internal static (ж<UnixConn>, error) AcceptUnixᴍ(ж<UnixListener> Ꮡl) {
+[GoMethodBody("AcceptUnix")] internal static (ж<UnixConn>, error) AcceptUnixᴍ(ж<UnixListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -316,7 +316,7 @@ internal static (ж<UnixConn>, error) AcceptUnixᴍ(ж<UnixListener> Ꮡl) {
 
 // Accept implements the Accept method in the [Listener] interface.
 // Returned connections will be of type [*UnixConn].
-internal static (Conn, error) Acceptᴍ(ж<UnixListener> Ꮡl) {
+[GoMethodBody("Accept")] internal static (Conn, error) Acceptᴍ(ж<UnixListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -331,7 +331,7 @@ internal static (Conn, error) Acceptᴍ(ж<UnixListener> Ꮡl) {
 
 // Close stops listening on the Unix address. Already accepted
 // connections are not closed.
-internal static error Closeᴍ(ж<UnixListener> Ꮡl) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<UnixListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -346,11 +346,11 @@ internal static error Closeᴍ(ж<UnixListener> Ꮡl) {
 // Addr returns the listener's network address.
 // The [Addr] returned is shared by all invocations of Addr, so
 // do not modify it.
-internal static Addr Addrᴍ(ref UnixListener l) { return l.fd.laddr; }
+[GoMethodBody("Addr")] internal static Addr Addrᴍ(ref UnixListener l) { return l.fd.laddr; }
 
 // SetDeadline sets the deadline associated with the listener.
 // A zero time value disables the deadline.
-internal static error SetDeadlineᴍ(ж<UnixListener> Ꮡl, time.Time t) {
+[GoMethodBody("SetDeadline")] internal static error SetDeadlineᴍ(ж<UnixListener> Ꮡl, time.Time t) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -369,7 +369,7 @@ internal static error SetDeadlineᴍ(ж<UnixListener> Ꮡl, time.Time t) {
 //
 // On Windows, the returned os.File's file descriptor is not
 // usable on other processes.
-internal static (ж<os.File> f, error err) Fileᴍ(ж<UnixListener> Ꮡl) {
+[GoMethodBody("File")] internal static (ж<os.File> f, error err) Fileᴍ(ж<UnixListener> Ꮡl) {
     ж<os.File> f = default;
     error err = default;
     ref var l = ref Ꮡl.DerefOrNull();
@@ -431,33 +431,3 @@ public static (ж<UnixConn>, error) ListenUnixgram(@string network, ж<UnixAddr>
 }
 
 } // end net_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class netᴛUnixAddr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Network(this ref UnixAddr a) => net_package.Networkᴍ(ref a);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<UnixAddr> Ꮡa) => net_package.Stringᴍ(Ꮡa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isWildcard(this ж<UnixAddr> Ꮡa) => net_package.isWildcardᴍ(Ꮡa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Addr opAddr(this ж<UnixAddr> Ꮡa) => net_package.opAddrᴍ(Ꮡa);
-}
-partial class netᴛUnixConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (syscall.RawConn, error) SyscallConn(this ж<UnixConn> Ꮡc) => net_package.SyscallConnᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CloseRead(this ж<UnixConn> Ꮡc) => net_package.CloseReadᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CloseWrite(this ж<UnixConn> Ꮡc) => net_package.CloseWriteᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, ж<UnixAddr>, error) ReadFromUnix(this ж<UnixConn> Ꮡc, slice<byte> b) => net_package.ReadFromUnixᴍ(Ꮡc, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, Addr, error) ReadFrom(this ж<UnixConn> Ꮡc, slice<byte> b) => net_package.ReadFromᴍ(Ꮡc, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) ReadMsgUnix(this ж<UnixConn> Ꮡc, slice<byte> b, slice<byte> oob) => net_package.ReadMsgUnixᴍ(Ꮡc, b, oob);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteToUnix(this ж<UnixConn> Ꮡc, slice<byte> b, ж<UnixAddr> addr) => net_package.WriteToUnixᴍ(Ꮡc, b, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteTo(this ж<UnixConn> Ꮡc, slice<byte> b, Addr addr) => net_package.WriteToᴍ(Ꮡc, b, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, nint oobn, error err) WriteMsgUnix(this ж<UnixConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<UnixAddr> addr) => net_package.WriteMsgUnixᴍ(Ꮡc, b, oob, addr);
-}
-partial class netᴛUnixListener {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool ok(this ж<UnixListener> Ꮡln) => net_package.okᴍ(Ꮡln);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (syscall.RawConn, error) SyscallConn(this ж<UnixListener> Ꮡl) => net_package.SyscallConnᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<UnixConn>, error) AcceptUnix(this ж<UnixListener> Ꮡl) => net_package.AcceptUnixᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Conn, error) Accept(this ж<UnixListener> Ꮡl) => net_package.Acceptᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<UnixListener> Ꮡl) => net_package.Closeᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Addr Addr(this ref UnixListener l) => net_package.Addrᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetDeadline(this ж<UnixListener> Ꮡl, time.Time t) => net_package.SetDeadlineᴍ(Ꮡl, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<os.File> f, error err) File(this ж<UnixListener> Ꮡl) => net_package.Fileᴍ(Ꮡl);
-}
-// </GlyphForwarders>

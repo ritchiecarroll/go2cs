@@ -52,7 +52,7 @@ internal static ref readonly @string traceRegionOutOfMemoryˢᴍtraceRegionAlloc
 private static readonly @string traceRegionOutOfMemoryˢᵇᴍtraceRegionAlloc = "traceRegion: out of memory"u8;
 
 // alloc allocates n-byte block. The block is always aligned to 8 bytes, regardless of platform.
-internal static ж<notInHeap> allocᴍ(ж<traceRegionAlloc> Ꮡa, uintptr n) {
+[GoMethodBody("alloc")] internal static ж<notInHeap> allocᴍ(ж<traceRegionAlloc> Ꮡa, uintptr n) {
     n = alignUp(n, 8);
     if (n > traceRegionAllocBlockData) {
         @throw(traceRegionAllocTooLargeˢᴍtraceRegionAlloc);
@@ -115,7 +115,7 @@ internal static ж<notInHeap> allocᴍ(ж<traceRegionAlloc> Ꮡa, uintptr n) {
 //
 // drop is not safe to call concurrently with other calls to drop or with calls to alloc. The caller
 // must ensure that it is not possible for anything else to be using the same structure.
-internal static void dropᴍ(ж<traceRegionAlloc> Ꮡa) {
+[GoMethodBody("drop")] internal static void dropᴍ(ж<traceRegionAlloc> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.Ꮡdropping.Store(true);
@@ -132,10 +132,3 @@ internal static void dropᴍ(ж<traceRegionAlloc> Ꮡa) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛtraceRegionAlloc {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<notInHeap> alloc(this ж<traceRegionAlloc> Ꮡa, uintptr n) => runtime_package.allocᴍ(Ꮡa, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void drop(this ж<traceRegionAlloc> Ꮡa) => runtime_package.dropᴍ(Ꮡa);
-}
-// </GlyphForwarders>

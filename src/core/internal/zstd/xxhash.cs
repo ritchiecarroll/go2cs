@@ -29,7 +29,7 @@ partial struct xxhash64 {
 
 // reset discards the current state and prepares to compute a new hash.
 // We assume a seed of 0 since that is what zstd uses.
-internal static void resetᴍ(ref xxhash64 xh) {
+[GoMethodBody("reset")] internal static void resetᴍ(ref xxhash64 xh) {
     xh.len = 0;
 
     // Separate addition for awkward constant overflow.
@@ -48,7 +48,7 @@ internal static void resetᴍ(ref xxhash64 xh) {
 }
 
 // update adds a buffer to the has.
-internal static void updateᴍ(ref xxhash64 xh, slice<byte> b) {
+[GoMethodBody("update")] internal static void updateᴍ(ref xxhash64 xh, slice<byte> b) {
     xh.len += (uint64)len(b);
 
     if (xh.cnt + len(b) < len(xh.buf)) {
@@ -82,7 +82,7 @@ internal static void updateᴍ(ref xxhash64 xh, slice<byte> b) {
 }
 
 // digest returns the final hash value.
-internal static uint64 digestᴍ(ref xxhash64 xh) {
+[GoMethodBody("digest")] internal static uint64 digestᴍ(ref xxhash64 xh) {
     uint64 h64 = default;
     if (xh.len < 32) {
         h64 = xh.v[2] + (uint64)xxhPrime64c5;
@@ -129,7 +129,7 @@ internal static uint64 digestᴍ(ref xxhash64 xh) {
 }
 
 // round updates a value.
-internal static uint64 roundᴍ(ref xxhash64 xh, uint64 v, uint64 n) {
+[GoMethodBody("round")] internal static uint64 roundᴍ(ref xxhash64 xh, uint64 v, uint64 n) {
     v += n * (uint64)xxhPrime64c2;
     v = bits.RotateLeft64(v, 31);
     v *= xxhPrime64c1;
@@ -137,7 +137,7 @@ internal static uint64 roundᴍ(ref xxhash64 xh, uint64 v, uint64 n) {
 }
 
 // mergeRound updates a value in the final round.
-internal static uint64 mergeRoundᴍ(ref xxhash64 xh, uint64 v, uint64 n) {
+[GoMethodBody("mergeRound")] internal static uint64 mergeRoundᴍ(ref xxhash64 xh, uint64 v, uint64 n) {
     n = xh.round(0, n);
     v ^= (uint64)(n);
     v = v * (uint64)xxhPrime64c1 + (uint64)xxhPrime64c4;
@@ -145,13 +145,3 @@ internal static uint64 mergeRoundᴍ(ref xxhash64 xh, uint64 v, uint64 n) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class zstdᴛxxhash64 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref xxhash64 xh) => zstd_package.resetᴍ(ref xh);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void update(this ref xxhash64 xh, slice<byte> b) => zstd_package.updateᴍ(ref xh, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 digest(this ref xxhash64 xh) => zstd_package.digestᴍ(ref xh);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 round(this ref xxhash64 xh, uint64 v, uint64 n) => zstd_package.roundᴍ(ref xh, v, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 mergeRound(this ref xxhash64 xh, uint64 v, uint64 n) => zstd_package.mergeRoundᴍ(ref xh, v, n);
-}
-// </GlyphForwarders>

@@ -69,7 +69,7 @@ private static readonly @string wrongHostNameˢᵇᴍplainAuth = "wrong host nam
 internal static ref readonly @string plainˢᴍplainAuth => ref plainˢᵇᴍplainAuth;
 private static readonly @string plainˢᵇᴍplainAuth = "PLAIN"u8;
 
-internal static (@string, slice<byte>, error) Startᴍ(ref plainAuth a, ж<ServerInfo> Ꮡserver) {
+[GoMethodBody("Start")] internal static (@string, slice<byte>, error) Startᴍ(ref plainAuth a, ж<ServerInfo> Ꮡserver) {
     ref var server = ref Ꮡserver.DerefOrNull();
 
     // Must have TLS, or else localhost server.
@@ -91,7 +91,7 @@ internal static (@string, slice<byte>, error) Startᴍ(ref plainAuth a, ж<Serve
 internal static ref readonly @string unexpectedServerˢᴍplainAuth => ref unexpectedServerˢᵇᴍplainAuth;
 private static readonly @string unexpectedServerˢᵇᴍplainAuth = "unexpected server challenge"u8;
 
-internal static (slice<byte>, error) Nextᴍ(ref plainAuth a, slice<byte> fromServer, bool more) {
+[GoMethodBody("Next")] internal static (slice<byte>, error) Nextᴍ(ref plainAuth a, slice<byte> fromServer, bool more) {
     if (more) {
         // We've already sent everything.
         return (default, errors.New(unexpectedServerˢᴍplainAuth));
@@ -119,11 +119,11 @@ public static Auth CRAMMD5Auth(@string username, @string secret) {
 internal static ref readonly @string cramMd5ˢᴍcramMD5Auth => ref cramMd5ˢᵇᴍcramMD5Auth;
 private static readonly @string cramMd5ˢᵇᴍcramMD5Auth = "CRAM-MD5"u8;
 
-internal static (@string, slice<byte>, error) Startᴍ(ref cramMD5Auth a, ж<ServerInfo> server) {
+[GoMethodBody("Start")] internal static (@string, slice<byte>, error) Startᴍ(ref cramMD5Auth a, ж<ServerInfo> server) {
     return (cramMd5ˢᴍcramMD5Auth, default, default);
 }
 
-internal static (slice<byte>, error) Nextᴍ(ref cramMD5Auth a, slice<byte> fromServer, bool more) {
+[GoMethodBody("Next")] internal static (slice<byte>, error) Nextᴍ(ref cramMD5Auth a, slice<byte> fromServer, bool more) {
     if (more) {
         var d = hmac.New(md5.New, slice<byte>(a.secret));
         d.Write(fromServer);
@@ -134,14 +134,3 @@ internal static (slice<byte>, error) Nextᴍ(ref cramMD5Auth a, slice<byte> from
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class smtpᴛplainAuth {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, slice<byte>, error) Start(this ref plainAuth a, ж<ServerInfo> Ꮡserver) => smtp_package.Startᴍ(ref a, Ꮡserver);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) Next(this ref plainAuth a, slice<byte> fromServer, bool more) => smtp_package.Nextᴍ(ref a, fromServer, more);
-}
-partial class smtpᴛcramMD5Auth {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, slice<byte>, error) Start(this ref cramMD5Auth a, ж<ServerInfo> server) => smtp_package.Startᴍ(ref a, server);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) Next(this ref cramMD5Auth a, slice<byte> fromServer, bool more) => smtp_package.Nextᴍ(ref a, fromServer, more);
-}
-// </GlyphForwarders>

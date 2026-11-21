@@ -213,7 +213,7 @@ internal static slice<byte> nl = [(byte)'\n'];
 
 } partial class pem_package {
 
-internal static (nint n, error err) Writeᴍ(ref lineBreaker l, slice<byte> b) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref lineBreaker l, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -243,7 +243,7 @@ internal static (nint n, error err) Writeᴍ(ref lineBreaker l, slice<byte> b) {
     return l.Write(b.slice(excess));
 }
 
-internal static error /*err*/ Closeᴍ(ref lineBreaker l) {
+[GoMethodBody("Close")] internal static error /*err*/ Closeᴍ(ref lineBreaker l) {
     error err = default;
 
     if (l.used > 0) {
@@ -355,10 +355,3 @@ public static slice<byte> EncodeToMemory(ж<Block> b) {
 }
 
 } // end pem_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class pemᴛlineBreaker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref lineBreaker l, slice<byte> b) => pem_package.Writeᴍ(ref l, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ Close(this ref lineBreaker l) => pem_package.Closeᴍ(ref l);
-}
-// </GlyphForwarders>

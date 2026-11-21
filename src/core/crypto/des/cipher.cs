@@ -25,7 +25,7 @@ partial struct KeySizeError /*num:nint*/;
 
 } partial class des_package {
 
-internal static @string Errorᴍ(KeySizeError k) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(KeySizeError k) {
     return "crypto/des: invalid key size "u8 + strconv.Itoa((nint)k);
 }
 
@@ -57,9 +57,9 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
 
 } partial class des_package {
 
-internal static nint BlockSizeᴍ(ref desCipher c) { return des.BlockSize; }
+[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref desCipher c) { return des.BlockSize; }
 
-internal static void Encryptᴍ(ref desCipher c, slice<byte> dst, slice<byte> src) {
+[GoMethodBody("Encrypt")] internal static void Encryptᴍ(ref desCipher c, slice<byte> dst, slice<byte> src) {
     if (len(src) < des.BlockSize) {
         throw panic("crypto/des: input not full block");
     }
@@ -72,7 +72,7 @@ internal static void Encryptᴍ(ref desCipher c, slice<byte> dst, slice<byte> sr
     cryptBlock(c.subkeys[..], dst, src, false);
 }
 
-internal static void Decryptᴍ(ref desCipher c, slice<byte> dst, slice<byte> src) {
+[GoMethodBody("Decrypt")] internal static void Decryptᴍ(ref desCipher c, slice<byte> dst, slice<byte> src) {
     if (len(src) < des.BlockSize) {
         throw panic("crypto/des: input not full block");
     }
@@ -115,9 +115,9 @@ public static (cipher.Block, error) NewTripleDESCipher(slice<byte> key) {
 
 } partial class des_package {
 
-internal static nint BlockSizeᴍ(ref tripleDESCipher c) { return des.BlockSize; }
+[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref tripleDESCipher c) { return des.BlockSize; }
 
-internal static void Encryptᴍ(ref tripleDESCipher c, slice<byte> dst, slice<byte> src) {
+[GoMethodBody("Encrypt")] internal static void Encryptᴍ(ref tripleDESCipher c, slice<byte> dst, slice<byte> src) {
     if (len(src) < des.BlockSize) {
         throw panic("crypto/des: input not full block");
     }
@@ -152,7 +152,7 @@ internal static void Encryptᴍ(ref tripleDESCipher c, slice<byte> dst, slice<by
     byteorder.BEPutUint64(dst, permuteFinalBlock(preOutput));
 }
 
-internal static void Decryptᴍ(ref tripleDESCipher c, slice<byte> dst, slice<byte> src) {
+[GoMethodBody("Decrypt")] internal static void Decryptᴍ(ref tripleDESCipher c, slice<byte> dst, slice<byte> src) {
     if (len(src) < des.BlockSize) {
         throw panic("crypto/des: input not full block");
     }
@@ -188,19 +188,3 @@ internal static void Decryptᴍ(ref tripleDESCipher c, slice<byte> dst, slice<by
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class desᴛKeySizeError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this KeySizeError k) => des_package.Errorᴍ(k);
-}
-partial class desᴛdesCipher {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref desCipher c) => des_package.BlockSizeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) => des_package.Encryptᴍ(ref c, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Decrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) => des_package.Decryptᴍ(ref c, dst, src);
-}
-partial class desᴛtripleDESCipher {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref tripleDESCipher c) => des_package.BlockSizeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) => des_package.Encryptᴍ(ref c, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Decrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) => des_package.Decryptᴍ(ref c, dst, src);
-}
-// </GlyphForwarders>

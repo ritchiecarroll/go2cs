@@ -20,7 +20,7 @@ internal const byte floatGobVersion = 1;
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
 // The [Float] value and all its attributes (precision,
 // rounding mode, accuracy) are marshaled.
-internal static (slice<byte>, error) GobEncodeᴍ(ж<Float> Ꮡx) {
+[GoMethodBody("GobEncode")] internal static (slice<byte>, error) GobEncodeᴍ(ж<Float> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
@@ -72,7 +72,7 @@ private static readonly @string floatGobDecodeBufferTooˢ2ᵇᴍFloat = "Float.G
 // The result is rounded per the precision and rounding mode of
 // z unless z's precision is 0, in which case z is set exactly
 // to the decoded value.
-internal static error GobDecodeᴍ(ж<Float> Ꮡz, slice<byte> buf) {
+[GoMethodBody("GobDecode")] internal static error GobDecodeᴍ(ж<Float> Ꮡz, slice<byte> buf) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (len(buf) == 0) {
@@ -121,7 +121,7 @@ internal static error GobDecodeᴍ(ж<Float> Ꮡz, slice<byte> buf) {
 // AppendText implements the [encoding.TextAppender] interface.
 // Only the [Float] value is marshaled (in full precision), other
 // attributes such as precision or accuracy are ignored.
-internal static (slice<byte>, error) AppendTextᴍ(ж<Float> Ꮡx, slice<byte> b) {
+[GoMethodBody("AppendText")] internal static (slice<byte>, error) AppendTextᴍ(ж<Float> Ꮡx, slice<byte> b) {
     if (Ꮡx == nil) {
         return (append(b, ((@string)"<nil>").ꓸꓸꓸ), default);
     }
@@ -131,7 +131,7 @@ internal static (slice<byte>, error) AppendTextᴍ(ж<Float> Ꮡx, slice<byte> b
 // MarshalText implements the [encoding.TextMarshaler] interface.
 // Only the [Float] value is marshaled (in full precision), other
 // attributes such as precision or accuracy are ignored.
-internal static (slice<byte> text, error err) MarshalTextᴍ(ж<Float> Ꮡx) {
+[GoMethodBody("MarshalText")] internal static (slice<byte> text, error err) MarshalTextᴍ(ж<Float> Ꮡx) {
     return Ꮡx.AppendText(default);
 }
 
@@ -139,7 +139,7 @@ internal static (slice<byte> text, error err) MarshalTextᴍ(ж<Float> Ꮡx) {
 // The result is rounded per the precision and rounding mode of z.
 // If z's precision is 0, it is changed to 64 before rounding takes
 // effect.
-internal static error UnmarshalTextᴍ(ж<Float> Ꮡz, slice<byte> text) {
+[GoMethodBody("UnmarshalText")] internal static error UnmarshalTextᴍ(ж<Float> Ꮡz, slice<byte> text) {
     // TODO(gri): get rid of the []byte/string conversion
     var (_, _, err) = Ꮡz.Parse((@string)text, 0);
     if (err != nil) {
@@ -149,13 +149,3 @@ internal static error UnmarshalTextᴍ(ж<Float> Ꮡz, slice<byte> text) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class bigᴛFloat {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) GobEncode(this ж<Float> Ꮡx) => big_package.GobEncodeᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error GobDecode(this ж<Float> Ꮡz, slice<byte> buf) => big_package.GobDecodeᴍ(Ꮡz, buf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendText(this ж<Float> Ꮡx, slice<byte> b) => big_package.AppendTextᴍ(Ꮡx, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> text, error err) MarshalText(this ж<Float> Ꮡx) => big_package.MarshalTextᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalText(this ж<Float> Ꮡz, slice<byte> text) => big_package.UnmarshalTextᴍ(Ꮡz, text);
-}
-// </GlyphForwarders>

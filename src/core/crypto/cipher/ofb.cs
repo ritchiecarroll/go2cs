@@ -56,7 +56,7 @@ public static Stream NewOFB(Block b, slice<byte> iv) {
 
 } partial class cipher_package {
 
-internal static void refillᴍ(ref ofb x) {
+[GoMethodBody("refill")] internal static void refillᴍ(ref ofb x) {
     nint bs = x.b.BlockSize();
     nint remain = len(x.@out) - x.outUsed;
     if (remain > x.outUsed) {
@@ -73,7 +73,7 @@ internal static void refillᴍ(ref ofb x) {
     x.outUsed = 0;
 }
 
-internal static void XORKeyStreamᴍ(ref ofb x, slice<byte> dst, slice<byte> src) {
+[GoMethodBody("XORKeyStream")] internal static void XORKeyStreamᴍ(ref ofb x, slice<byte> dst, slice<byte> src) {
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }
@@ -92,10 +92,3 @@ internal static void XORKeyStreamᴍ(ref ofb x, slice<byte> dst, slice<byte> src
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class cipherᴛofb {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void refill(this ref ofb x) => cipher_package.refillᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void XORKeyStream(this ref ofb x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStreamᴍ(ref x, dst, src);
-}
-// </GlyphForwarders>

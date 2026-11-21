@@ -22,7 +22,7 @@ partial struct Error {
 
 } partial class syntax_package {
 
-internal static @string Errorᴍ(ref Error e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref Error e) {
     return "error parsing regexp: "u8 + e.Code.String() + ": `"u8 + e.Expr + "`"u8;
 }
 
@@ -69,7 +69,7 @@ private static readonly ErrorCode ErrLargeᵇ = "expression too large"u8;
 
 } partial class syntax_package {
 
-internal static @string Stringᴍ(ErrorCode e) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ErrorCode e) {
     return (@string)e;
 }
 
@@ -155,7 +155,7 @@ partial struct parser {
 
 } partial class syntax_package {
 
-internal static ж<Regexp> newRegexpᴍ(ref parser p, Op op) {
+[GoMethodBody("newRegexp")] internal static ж<Regexp> newRegexpᴍ(ref parser p, Op op) {
     var re = p.free;
     if (re != nil) {
         p.free = re.Sub0[0];
@@ -168,7 +168,7 @@ internal static ж<Regexp> newRegexpᴍ(ref parser p, Op op) {
     return re;
 }
 
-internal static void reuseᴍ(ref parser p, ж<Regexp> Ꮡre) {
+[GoMethodBody("reuse")] internal static void reuseᴍ(ref parser p, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (p.height != nil) {
@@ -178,7 +178,7 @@ internal static void reuseᴍ(ref parser p, ж<Regexp> Ꮡre) {
     p.free = Ꮡre;
 }
 
-internal static void checkLimitsᴍ(ref parser p, ж<Regexp> re) {
+[GoMethodBody("checkLimits")] internal static void checkLimitsᴍ(ref parser p, ж<Regexp> re) {
     if (p.numRunes > maxRunes) {
         throw panic(ErrLarge);
     }
@@ -186,7 +186,7 @@ internal static void checkLimitsᴍ(ref parser p, ж<Regexp> re) {
     p.checkHeight(re);
 }
 
-internal static void checkSizeᴍ(ref parser p, ж<Regexp> Ꮡre) {
+[GoMethodBody("checkSize")] internal static void checkSizeᴍ(ref parser p, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (p.size == nil) {
@@ -230,7 +230,7 @@ internal static void checkSizeᴍ(ref parser p, ж<Regexp> Ꮡre) {
     }
 }
 
-internal static int64 calcSizeᴍ(ref parser p, ж<Regexp> Ꮡre, bool force) {
+[GoMethodBody("calcSize")] internal static int64 calcSizeᴍ(ref parser p, ж<Regexp> Ꮡre, bool force) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (!force) {
@@ -289,7 +289,7 @@ internal static int64 calcSizeᴍ(ref parser p, ж<Regexp> Ꮡre, bool force) {
     return size;
 }
 
-internal static void checkHeightᴍ(ref parser p, ж<Regexp> re) {
+[GoMethodBody("checkHeight")] internal static void checkHeightᴍ(ref parser p, ж<Regexp> re) {
     if (p.numRegexp < maxHeight) {
         return;
     }
@@ -304,7 +304,7 @@ internal static void checkHeightᴍ(ref parser p, ж<Regexp> re) {
     }
 }
 
-internal static nint calcHeightᴍ(ref parser p, ж<Regexp> Ꮡre, bool force) {
+[GoMethodBody("calcHeight")] internal static nint calcHeightᴍ(ref parser p, ж<Regexp> Ꮡre, bool force) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (!force) {
@@ -326,7 +326,7 @@ internal static nint calcHeightᴍ(ref parser p, ж<Regexp> Ꮡre, bool force) {
 // Parse stack manipulation.
 
 // push pushes the regexp re onto the parse stack and returns the regexp.
-internal static ж<Regexp> pushᴍ(ref parser p, ж<Regexp> Ꮡre) {
+[GoMethodBody("push")] internal static ж<Regexp> pushᴍ(ref parser p, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     p.numRunes += len(re.Rune);
@@ -367,7 +367,7 @@ internal static ж<Regexp> pushᴍ(ref parser p, ж<Regexp> Ꮡre) {
 // If r >= 0 and there's a node left over, maybeConcat uses it
 // to push r with the given flags.
 // maybeConcat reports whether r was pushed.
-internal static bool maybeConcatᴍ(ref parser p, rune r, Flags flags) {
+[GoMethodBody("maybeConcat")] internal static bool maybeConcatᴍ(ref parser p, rune r, Flags flags) {
     nint n = len(p.stack);
     if (n < 2) {
         return false;
@@ -396,7 +396,7 @@ internal static bool maybeConcatᴍ(ref parser p, rune r, Flags flags) {
 }
 
 // literal pushes a literal regexp for the rune r on the stack.
-internal static void literalᴍ(ref parser p, rune r) {
+[GoMethodBody("literal")] internal static void literalᴍ(ref parser p, rune r) {
     var re = p.newRegexp(OpLiteral);
     re.Flags = p.flags;
     if ((Flags)(p.flags & FoldCase) != 0) {
@@ -426,7 +426,7 @@ internal static rune minFoldRune(rune r) {
 
 // op pushes a regexp with the given op onto the stack
 // and returns that regexp.
-internal static ж<Regexp> opᴍ(ref parser p, Op op) {
+[GoMethodBody("op")] internal static ж<Regexp> opᴍ(ref parser p, Op op) {
     var re = p.newRegexp(op);
     re.Flags = p.flags;
     return p.push(re);
@@ -436,7 +436,7 @@ internal static ж<Regexp> opᴍ(ref parser p, Op op) {
 // before is the regexp suffix starting at the repetition operator.
 // after is the regexp suffix following after the repetition operator.
 // repeat returns an updated 'after' and an error, if any.
-internal static (@string, error) repeatᴍ(ref parser p, Op op, nint min, nint max, @string before, @string after, @string lastRepeat) {
+[GoMethodBody("repeat")] internal static (@string, error) repeatᴍ(ref parser p, Op op, nint min, nint max, @string before, @string after, @string lastRepeat) {
     var flags = p.flags;
     if ((Flags)(p.flags & PerlX) != 0) {
         if (len(after) > 0 && after[0] == '?') {
@@ -513,7 +513,7 @@ internal static bool repeatIsValid(ref Regexp re, nint n) {
 } partial class syntax_package {
 
 // concat replaces the top of the stack (above the topmost '|' or '(') with its concatenation.
-internal static ж<Regexp> concatᴍ(ref parser p) {
+[GoMethodBody("concat")] internal static ж<Regexp> concatᴍ(ref parser p) {
     p.maybeConcat(-1, 0);
 
     // Scan down to find pseudo-operator | or (.
@@ -533,7 +533,7 @@ internal static ж<Regexp> concatᴍ(ref parser p) {
 }
 
 // alternate replaces the top of the stack (above the topmost '(') with its alternation.
-internal static ж<Regexp> alternateᴍ(ref parser p) {
+[GoMethodBody("alternate")] internal static ж<Regexp> alternateᴍ(ref parser p) {
     // Scan down to find pseudo-operator (.
     // There are no | above (.
     nint i = len(p.stack);
@@ -592,7 +592,7 @@ internal static void cleanAlt(ж<Regexp> Ꮡre) {
 // If sub contains op nodes, they all get hoisted up
 // so that there is never a concat of a concat or an
 // alternate of an alternate.
-internal static ж<Regexp> collapseᴍ(ref parser p, slice<ж<Regexp>> subs, Op op) {
+[GoMethodBody("collapse")] internal static ж<Regexp> collapseᴍ(ref parser p, slice<ж<Regexp>> subs, Op op) {
     if (len(subs) == 1) {
         return subs[0];
     }
@@ -632,7 +632,7 @@ internal static ж<Regexp> collapseᴍ(ref parser p, slice<ж<Regexp>> subs, Op 
 // which simplifies by character class introduction to
 //
 //	A(B[CD]|EF)|BC[XY]
-internal static slice<ж<Regexp>> factorᴍ(ref parser p, slice<ж<Regexp>> sub) {
+[GoMethodBody("factor")] internal static slice<ж<Regexp>> factorᴍ(ref parser p, slice<ж<Regexp>> sub) {
     if (len(sub) < 2) {
         return sub;
     }
@@ -821,7 +821,7 @@ internal static slice<ж<Regexp>> factorᴍ(ref parser p, slice<ж<Regexp>> sub)
 
 // leadingString returns the leading literal string that re begins with.
 // The string refers to storage in re or its children.
-internal static (slice<rune>, Flags) leadingStringᴍ(ref parser p, ж<Regexp> Ꮡre) {
+[GoMethodBody("leadingString")] internal static (slice<rune>, Flags) leadingStringᴍ(ref parser p, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (re.Op == OpConcat && len(re.Sub) > 0) {
@@ -835,7 +835,7 @@ internal static (slice<rune>, Flags) leadingStringᴍ(ref parser p, ж<Regexp> �
 
 // removeLeadingString removes the first n leading runes
 // from the beginning of re. It returns the replacement for re.
-internal static ж<Regexp> removeLeadingStringᴍ(ref parser p, ж<Regexp> Ꮡre, nint n) {
+[GoMethodBody("removeLeadingString")] internal static ж<Regexp> removeLeadingStringᴍ(ref parser p, ж<Regexp> Ꮡre, nint n) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (re.Op == OpConcat && len(re.Sub) > 0) {
@@ -879,7 +879,7 @@ internal static ж<Regexp> removeLeadingStringᴍ(ref parser p, ж<Regexp> Ꮡre
 
 // leadingRegexp returns the leading regexp that re begins with.
 // The regexp refers to storage in re or its children.
-internal static ж<Regexp> leadingRegexpᴍ(ref parser p, ж<Regexp> Ꮡre) {
+[GoMethodBody("leadingRegexp")] internal static ж<Regexp> leadingRegexpᴍ(ref parser p, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (re.Op == OpEmptyMatch) {
@@ -898,7 +898,7 @@ internal static ж<Regexp> leadingRegexpᴍ(ref parser p, ж<Regexp> Ꮡre) {
 // removeLeadingRegexp removes the leading regexp in re.
 // It returns the replacement for re.
 // If reuse is true, it passes the removed regexp (if no longer needed) to p.reuse.
-internal static ж<Regexp> removeLeadingRegexpᴍ(ref parser p, ж<Regexp> Ꮡre, bool reuse) {
+[GoMethodBody("removeLeadingRegexp")] internal static ж<Regexp> removeLeadingRegexpᴍ(ref parser p, ж<Regexp> Ꮡre, bool reuse) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (re.Op == OpConcat && len(re.Sub) > 0) {
@@ -1217,7 +1217,7 @@ BigSwitch:
 // parseRepeat parses {min} (max=min) or {min,} (max=-1) or {min,max}.
 // If s is not of that form, it returns ok == false.
 // If s has the right form but the values are too big, it returns min == -1, ok == true.
-internal static (nint min, nint max, @string rest, bool ok) parseRepeatᴍ(ref parser p, @string s) {
+[GoMethodBody("parseRepeat")] internal static (nint min, nint max, @string rest, bool ok) parseRepeatᴍ(ref parser p, @string s) {
     nint min = default;
     nint max = default;
     @string rest = default;
@@ -1263,7 +1263,7 @@ internal static (nint min, nint max, @string rest, bool ok) parseRepeatᴍ(ref p
 // parsePerlFlags parses a Perl flag setting or non-capturing group or both,
 // like (?i) or (?: or (?i:.  It removes the prefix from s and updates the parse state.
 // The caller must have ensured that s begins with "(?".
-internal static (@string rest, error err) parsePerlFlagsᴍ(ref parser p, @string s) {
+[GoMethodBody("parsePerlFlags")] internal static (@string rest, error err) parsePerlFlagsᴍ(ref parser p, @string s) {
     error err = default;
 
     @string t = s;
@@ -1412,7 +1412,7 @@ internal static bool isValidCaptureName(@string name) {
 } partial class syntax_package {
 
 // parseInt parses a decimal integer.
-internal static (nint n, @string rest, bool ok) parseIntᴍ(ref parser p, @string s) {
+[GoMethodBody("parseInt")] internal static (nint n, @string rest, bool ok) parseIntᴍ(ref parser p, @string s) {
     nint n = default;
     @string rest = default;
     bool ok = default;
@@ -1477,7 +1477,7 @@ internal static bool matchRune(ref Regexp re, rune r) {
 } partial class syntax_package {
 
 // parseVerticalBar handles a | in the input.
-internal static void parseVerticalBarᴍ(ref parser p) {
+[GoMethodBody("parseVerticalBar")] internal static void parseVerticalBarᴍ(ref parser p) {
     p.concat();
 
     // The concatenation we just parsed is on top of the stack.
@@ -1533,7 +1533,7 @@ internal static void mergeCharClass(ref Regexp dst, ref Regexp src) {
 // If the top of the stack is an element followed by an opVerticalBar
 // swapVerticalBar swaps the two and returns true.
 // Otherwise it returns false.
-internal static bool swapVerticalBarᴍ(ref parser p) {
+[GoMethodBody("swapVerticalBar")] internal static bool swapVerticalBarᴍ(ref parser p) {
     // If above and below vertical bar are literal or char class,
     // can merge into a single char class.
     nint n = len(p.stack);
@@ -1569,7 +1569,7 @@ internal static bool swapVerticalBarᴍ(ref parser p) {
 }
 
 // parseRightParen handles a ) in the input.
-internal static error parseRightParenᴍ(ref parser p) {
+[GoMethodBody("parseRightParen")] internal static error parseRightParenᴍ(ref parser p) {
     p.concat();
     if (p.swapVerticalBar()) {
         // pop vertical bar
@@ -1603,7 +1603,7 @@ internal static error parseRightParenᴍ(ref parser p) {
 
 // parseEscape parses an escape sequence at the beginning of s
 // and returns the rune.
-internal static (rune r, @string rest, error err) parseEscapeᴍ(ref parser p, @string s) {
+[GoMethodBody("parseEscape")] internal static (rune r, @string rest, error err) parseEscapeᴍ(ref parser p, @string s) {
     rune r = default;
     error err = default;
 
@@ -1735,7 +1735,7 @@ Switch:
 
 // parseClassChar parses a character class character at the beginning of s
 // and returns it.
-internal static (rune r, @string rest, error err) parseClassCharᴍ(ref parser p, @string s, @string wholeClass) {
+[GoMethodBody("parseClassChar")] internal static (rune r, @string rest, error err) parseClassCharᴍ(ref parser p, @string s, @string wholeClass) {
     if (s == ""u8) {
         return (0, "", new Errorжerror(Ꮡ(new Error(Code: ErrMissingBracket, Expr: wholeClass))));
     }
@@ -1763,7 +1763,7 @@ partial struct charGroup {
 // parsePerlClassEscape parses a leading Perl character class escape like \d
 // from the beginning of s. If one is present, it appends the characters to r
 // and returns the new slice r and the remainder of the string.
-internal static (slice<rune> @out, @string rest) parsePerlClassEscapeᴍ(ж<parser> Ꮡp, @string s, slice<rune> r) {
+[GoMethodBody("parsePerlClassEscape")] internal static (slice<rune> @out, @string rest) parsePerlClassEscapeᴍ(ж<parser> Ꮡp, @string s, slice<rune> r) {
     slice<rune> @out = default;
     @string rest = default;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -1781,7 +1781,7 @@ internal static (slice<rune> @out, @string rest) parsePerlClassEscapeᴍ(ж<pars
 // parseNamedClass parses a leading POSIX named character class like [:alnum:]
 // from the beginning of s. If one is present, it appends the characters to r
 // and returns the new slice r and the remainder of the string.
-internal static (slice<rune> @out, @string rest, error err) parseNamedClassᴍ(ж<parser> Ꮡp, @string s, slice<rune> r) {
+[GoMethodBody("parseNamedClass")] internal static (slice<rune> @out, @string rest, error err) parseNamedClassᴍ(ж<parser> Ꮡp, @string s, slice<rune> r) {
     slice<rune> @out = default;
     @string rest = default;
     error err = default;
@@ -1805,7 +1805,7 @@ internal static (slice<rune> @out, @string rest, error err) parseNamedClassᴍ(�
     return (Ꮡp.appendGroup(r, g), s, default);
 }
 
-internal static slice<rune> appendGroupᴍ(ж<parser> Ꮡp, slice<rune> r, charGroup g) {
+[GoMethodBody("appendGroup")] internal static slice<rune> appendGroupᴍ(ж<parser> Ꮡp, slice<rune> r, charGroup g) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if ((Flags)(p.flags & FoldCase) == 0) {
@@ -1961,7 +1961,7 @@ internal static (ж<unicode.RangeTable> tab, ж<unicode.RangeTable> fold, nint s
 // parseUnicodeClass parses a leading Unicode character class like \p{Han}
 // from the beginning of s. If one is present, it appends the characters to r
 // and returns the new slice r and the remainder of the string.
-internal static (slice<rune> @out, @string rest, error err) parseUnicodeClassᴍ(ж<parser> Ꮡp, @string s, slice<rune> r) {
+[GoMethodBody("parseUnicodeClass")] internal static (slice<rune> @out, @string rest, error err) parseUnicodeClassᴍ(ж<parser> Ꮡp, @string s, slice<rune> r) {
     slice<rune> @out = default;
     @string rest = default;
     error err = default;
@@ -2043,7 +2043,7 @@ internal static (slice<rune> @out, @string rest, error err) parseUnicodeClassᴍ
 
 // parseClass parses a character class at the beginning of s
 // and pushes it onto the parse stack.
-internal static (@string rest, error err) parseClassᴍ(ж<parser> Ꮡp, @string s) {
+[GoMethodBody("parseClass")] internal static (@string rest, error err) parseClassᴍ(ж<parser> Ꮡp, @string s) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     @string t = s[1..]; // chop [
@@ -2400,18 +2400,18 @@ partial struct ranges {
 
 } partial class syntax_package {
 
-internal static bool Lessᴍ(ranges ra, nint i, nint j) {
+[GoMethodBody("Less")] internal static bool Lessᴍ(ranges ra, nint i, nint j) {
     var p = ra.p.ValueSlot;
     i *= 2;
     j *= 2;
     return p[i] < p[j] || p[i] == p[j] && p[i + 1] > p[j + 1];
 }
 
-internal static nint Lenᴍ(ranges ra) {
+[GoMethodBody("Len")] internal static nint Lenᴍ(ranges ra) {
     return len(ra.p.ValueSlot) / 2;
 }
 
-internal static void Swapᴍ(ranges ra, nint i, nint j) {
+[GoMethodBody("Swap")] internal static void Swapᴍ(ranges ra, nint i, nint j) {
     var p = ra.p.ValueSlot;
     i *= 2;
     j *= 2;
@@ -2459,52 +2459,3 @@ internal static rune unhex(rune c) {
 }
 
 } // end syntax_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class syntaxᴛError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref Error e) => syntax_package.Errorᴍ(ref e);
-}
-partial class syntaxᴛErrorCode {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ErrorCode e) => syntax_package.Stringᴍ(e);
-}
-partial class syntaxᴛparser {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Regexp> newRegexp(this ref parser p, Op op) => syntax_package.newRegexpᴍ(ref p, op);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reuse(this ref parser p, ж<Regexp> Ꮡre) => syntax_package.reuseᴍ(ref p, Ꮡre);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkLimits(this ref parser p, ж<Regexp> re) => syntax_package.checkLimitsᴍ(ref p, re);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkSize(this ref parser p, ж<Regexp> Ꮡre) => syntax_package.checkSizeᴍ(ref p, Ꮡre);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 calcSize(this ref parser p, ж<Regexp> Ꮡre, bool force) => syntax_package.calcSizeᴍ(ref p, Ꮡre, force);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkHeight(this ref parser p, ж<Regexp> re) => syntax_package.checkHeightᴍ(ref p, re);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint calcHeight(this ref parser p, ж<Regexp> Ꮡre, bool force) => syntax_package.calcHeightᴍ(ref p, Ꮡre, force);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Regexp> push(this ref parser p, ж<Regexp> Ꮡre) => syntax_package.pushᴍ(ref p, Ꮡre);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool maybeConcat(this ref parser p, rune r, Flags flags) => syntax_package.maybeConcatᴍ(ref p, r, flags);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void literal(this ref parser p, rune r) => syntax_package.literalᴍ(ref p, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Regexp> op(this ref parser p, Op op) => syntax_package.opᴍ(ref p, op);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) repeat(this ref parser p, Op op, nint min, nint max, @string before, @string after, @string lastRepeat) => syntax_package.repeatᴍ(ref p, op, min, max, before, after, lastRepeat);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Regexp> concat(this ref parser p) => syntax_package.concatᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Regexp> alternate(this ref parser p) => syntax_package.alternateᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Regexp> collapse(this ref parser p, slice<ж<Regexp>> subs, Op op) => syntax_package.collapseᴍ(ref p, subs, op);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ж<Regexp>> factor(this ref parser p, slice<ж<Regexp>> sub) => syntax_package.factorᴍ(ref p, sub);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<rune>, Flags) leadingString(this ref parser p, ж<Regexp> Ꮡre) => syntax_package.leadingStringᴍ(ref p, Ꮡre);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Regexp> removeLeadingString(this ref parser p, ж<Regexp> Ꮡre, nint n) => syntax_package.removeLeadingStringᴍ(ref p, Ꮡre, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Regexp> leadingRegexp(this ref parser p, ж<Regexp> Ꮡre) => syntax_package.leadingRegexpᴍ(ref p, Ꮡre);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Regexp> removeLeadingRegexp(this ref parser p, ж<Regexp> Ꮡre, bool reuse) => syntax_package.removeLeadingRegexpᴍ(ref p, Ꮡre, reuse);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint min, nint max, @string rest, bool ok) parseRepeat(this ref parser p, @string s) => syntax_package.parseRepeatᴍ(ref p, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string rest, error err) parsePerlFlags(this ref parser p, @string s) => syntax_package.parsePerlFlagsᴍ(ref p, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, @string rest, bool ok) parseInt(this ref parser p, @string s) => syntax_package.parseIntᴍ(ref p, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parseVerticalBar(this ref parser p) => syntax_package.parseVerticalBarᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool swapVerticalBar(this ref parser p) => syntax_package.swapVerticalBarᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseRightParen(this ref parser p) => syntax_package.parseRightParenᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (rune r, @string rest, error err) parseEscape(this ref parser p, @string s) => syntax_package.parseEscapeᴍ(ref p, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (rune r, @string rest, error err) parseClassChar(this ref parser p, @string s, @string wholeClass) => syntax_package.parseClassCharᴍ(ref p, s, wholeClass);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<rune> @out, @string rest) parsePerlClassEscape(this ж<parser> Ꮡp, @string s, slice<rune> r) => syntax_package.parsePerlClassEscapeᴍ(Ꮡp, s, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<rune> @out, @string rest, error err) parseNamedClass(this ж<parser> Ꮡp, @string s, slice<rune> r) => syntax_package.parseNamedClassᴍ(Ꮡp, s, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<rune> appendGroup(this ж<parser> Ꮡp, slice<rune> r, charGroup g) => syntax_package.appendGroupᴍ(Ꮡp, r, g);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<rune> @out, @string rest, error err) parseUnicodeClass(this ж<parser> Ꮡp, @string s, slice<rune> r) => syntax_package.parseUnicodeClassᴍ(Ꮡp, s, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string rest, error err) parseClass(this ж<parser> Ꮡp, @string s) => syntax_package.parseClassᴍ(Ꮡp, s);
-}
-partial class syntaxᴛranges {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this ranges ra, nint i, nint j) => syntax_package.Lessᴍ(ra, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this ranges ra) => syntax_package.Lenᴍ(ra);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Swap(this ranges ra, nint i, nint j) => syntax_package.Swapᴍ(ra, i, j);
-}
-// </GlyphForwarders>

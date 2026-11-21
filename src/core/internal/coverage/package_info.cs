@@ -61,6 +61,10 @@ using static go.@internal.coverage_package;
 
 namespace go.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using static coverage_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("coverage")]
 public static partial class coverage_package
 {
@@ -104,3 +108,12 @@ public static partial class coverage_package
 [GoMethodHost(typeof(coverage_package.CounterGranularity)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class coverageᴛCounterGranularity;
 [GoMethodHost(typeof(coverage_package.CounterMode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class coverageᴛCounterMode;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class coverageᴛCounterMode {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this CounterMode cm) => coverage_package.Stringᴍ(cm);
+}
+partial class coverageᴛCounterGranularity {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this CounterGranularity cm) => coverage_package.Stringᴍ(cm);
+}
+// </GlyphForwarders>

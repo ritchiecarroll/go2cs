@@ -15,7 +15,7 @@ partial class profile_package {
 // Prune removes all nodes beneath a node matching dropRx, and not
 // matching keepRx. If the root node of a Sample matches, the sample
 // will have an empty stack.
-internal static void Pruneᴍ(ref Profile p, ж<regexp.Regexp> dropRx, ж<regexp.Regexp> keepRx) {
+[GoMethodBody("Prune")] internal static void Pruneᴍ(ref Profile p, ж<regexp.Regexp> dropRx, ж<regexp.Regexp> keepRx) {
     var prune = new map<uint64, bool>();
     var pruneBeneath = new map<uint64, bool>();
 
@@ -79,7 +79,7 @@ internal static void Pruneᴍ(ref Profile p, ж<regexp.Regexp> dropRx, ж<regexp
 
 // RemoveUninteresting prunes and elides profiles using built-in
 // tables of uninteresting function names.
-internal static error RemoveUninterestingᴍ(ref Profile p) {
+[GoMethodBody("RemoveUninteresting")] internal static error RemoveUninterestingᴍ(ref Profile p) {
     ж<regexp.Regexp> keep = default;
     ж<regexp.Regexp> drop = default;
     error err = default;
@@ -99,10 +99,3 @@ internal static error RemoveUninterestingᴍ(ref Profile p) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class profileᴛProfile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Prune(this ref Profile p, ж<regexp.Regexp> dropRx, ж<regexp.Regexp> keepRx) => profile_package.Pruneᴍ(ref p, dropRx, keepRx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error RemoveUninteresting(this ref Profile p) => profile_package.RemoveUninterestingᴍ(ref p);
-}
-// </GlyphForwarders>

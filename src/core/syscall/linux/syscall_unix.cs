@@ -47,7 +47,7 @@ partial struct mmapper {
 
 } partial class syscall_package {
 
-internal static (slice<byte> data, error err) Mmapᴍ(ж<mmapper> Ꮡm, nint fd, int64 offset, nint length, nint prot, nint flags) {
+[GoMethodBody("Mmap")] internal static (slice<byte> data, error err) Mmapᴍ(ж<mmapper> Ꮡm, nint fd, int64 offset, nint length, nint prot, nint flags) {
     slice<byte> data = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -79,7 +79,7 @@ internal static (slice<byte> data, error err) Mmapᴍ(ж<mmapper> Ꮡm, nint fd,
     ᒐdone: return (data, err);
 }
 
-internal static error /*err*/ Munmapᴍ(ж<mmapper> Ꮡm, slice<byte> data) {
+[GoMethodBody("Munmap")] internal static error /*err*/ Munmapᴍ(ж<mmapper> Ꮡm, slice<byte> data) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -130,7 +130,7 @@ partial struct Errno /*num:uintptr*/;
 
 } partial class syscall_package {
 
-internal static @string Errorᴍ(Errno e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(Errno e) {
     if (0 <= (nint)e && (nint)e < len(errors)) {
         @string s = errors[e];
         if (s != ""u8) {
@@ -140,7 +140,7 @@ internal static @string Errorᴍ(Errno e) {
     return "errno "u8 + strconv.Itoa((nint)e);
 }
 
-internal static bool Isᴍ(Errno e, error target) {
+[GoMethodBody("Is")] internal static bool Isᴍ(Errno e, error target) {
     switch (target) {
     case var ᴛ when AreEqual(ᴛ, oserror.ErrPermission): {
         return e == EACCES || e == EPERM;
@@ -157,11 +157,11 @@ internal static bool Isᴍ(Errno e, error target) {
     return false;
 }
 
-internal static bool Temporaryᴍ(Errno e) {
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(Errno e) {
     return e == EINTR || e == EMFILE || e == ENFILE || e.Timeout();
 }
 
-internal static bool Timeoutᴍ(Errno e) {
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(Errno e) {
     return e == EAGAIN || e == EWOULDBLOCK || e == ETIMEDOUT;
 }
 
@@ -198,9 +198,9 @@ partial struct Signal /*num:nint*/;
 
 } partial class syscall_package {
 
-internal static void Signalᴍ(Signal s) { }
+[GoMethodBody("Signal")] internal static void Signalᴍ(Signal s) { }
 
-internal static @string Stringᴍ(Signal s) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Signal s) {
     if (0 <= s && (nint)s < len(signals)) {
         @string str = signals[s];
         if (str != ""u8) {
@@ -570,20 +570,3 @@ internal static readonly ж<int64> ᏑioSync = new StaticBox<int64>(default(int6
 internal static ref int64 ioSync => ref ((StaticBox<int64>)ᏑioSync).ValueSlot;
 
 } // end syscall_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class syscallᴛmmapper {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte> data, error err) Mmap(this ж<mmapper> Ꮡm, nint fd, int64 offset, nint length, nint prot, nint flags) => syscall_package.Mmapᴍ(Ꮡm, fd, offset, length, prot, flags);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) => syscall_package.Munmapᴍ(Ꮡm, data);
-}
-partial class syscallᴛErrno {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this Errno e) => syscall_package.Errorᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Is(this Errno e, error target) => syscall_package.Isᴍ(e, target);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Temporary(this Errno e) => syscall_package.Temporaryᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this Errno e) => syscall_package.Timeoutᴍ(e);
-}
-partial class syscallᴛSignal {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Signal(this Signal s) => syscall_package.Signalᴍ(s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Signal s) => syscall_package.Stringᴍ(s);
-}
-// </GlyphForwarders>

@@ -48,7 +48,7 @@ private static readonly @string running0ˢᵇᴍsynctestBubble = "running < 0"u8
 
 // changegstatus is called when the non-lock status of a g changes.
 // It is never called with a Gscanstatus.
-internal static void changegstatusᴍ(ж<synctestBubble> Ꮡbubble, ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
+[GoMethodBody("changegstatus")] internal static void changegstatusᴍ(ж<synctestBubble> Ꮡbubble, ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
     ref var gp = ref Ꮡgp.DerefOrNull();
 
@@ -125,7 +125,7 @@ internal static void changegstatusᴍ(ж<synctestBubble> Ꮡbubble, ж<g> Ꮡgp,
 
 // incActive increments the active-count for the bubble.
 // A bubble does not become durably blocked while the active-count is non-zero.
-internal static void incActiveᴍ(ж<synctestBubble> Ꮡbubble) {
+[GoMethodBody("incActive")] internal static void incActiveᴍ(ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     @lock(Ꮡbubble.Ꮡmu);
@@ -138,7 +138,7 @@ internal static ref readonly @string active0ˢᴍsynctestBubble => ref active0ˢ
 private static readonly @string active0ˢᵇᴍsynctestBubble = "active < 0"u8;
 
 // decActive decrements the active-count for the bubble.
-internal static void decActiveᴍ(ж<synctestBubble> Ꮡbubble) {
+[GoMethodBody("decActive")] internal static void decActiveᴍ(ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     @lock(Ꮡbubble.Ꮡmu);
@@ -154,7 +154,7 @@ internal static void decActiveᴍ(ж<synctestBubble> Ꮡbubble) {
 }
 
 // maybeWakeLocked returns a g to wake if the bubble is durably blocked.
-internal static ж<g> maybeWakeLockedᴍ(ж<synctestBubble> Ꮡbubble) {
+[GoMethodBody("maybeWakeLocked")] internal static ж<g> maybeWakeLockedᴍ(ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     if (bubble.running > 0 || bubble.active > 0) {
@@ -184,7 +184,7 @@ internal static ж<g> maybeWakeLockedᴍ(ж<synctestBubble> Ꮡbubble) {
     return bubble.root;
 }
 
-internal static @unsafe.Pointer raceaddrᴍ(ж<synctestBubble> Ꮡbubble) {
+[GoMethodBody("raceaddr")] internal static @unsafe.Pointer raceaddrᴍ(ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     // Address used to record happens-before relationships created by the bubble.
@@ -320,7 +320,7 @@ partial struct synctestDeadlockError {
 
 } partial class runtime_package {
 
-internal static @string Errorᴍ(synctestDeadlockError e) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(synctestDeadlockError e) {
     return e.reason;
 }
 
@@ -528,16 +528,3 @@ internal static bool synctest_isAssociated(@unsafe.Pointer p) {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛsynctestBubble {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void changegstatus(this ж<synctestBubble> Ꮡbubble, ж<g> Ꮡgp, uint32 oldval, uint32 newval) => runtime_package.changegstatusᴍ(Ꮡbubble, Ꮡgp, oldval, newval);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void incActive(this ж<synctestBubble> Ꮡbubble) => runtime_package.incActiveᴍ(Ꮡbubble);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void decActive(this ж<synctestBubble> Ꮡbubble) => runtime_package.decActiveᴍ(Ꮡbubble);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<g> maybeWakeLocked(this ж<synctestBubble> Ꮡbubble) => runtime_package.maybeWakeLockedᴍ(Ꮡbubble);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer raceaddr(this ж<synctestBubble> Ꮡbubble) => runtime_package.raceaddrᴍ(Ꮡbubble);
-}
-partial class runtimeᴛsynctestDeadlockError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this synctestDeadlockError e) => runtime_package.Errorᴍ(e);
-}
-// </GlyphForwarders>

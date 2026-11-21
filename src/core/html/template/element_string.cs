@@ -25,7 +25,7 @@ internal static array<uint8> _element_index = new uint8[]{0, 11, 24, 36, 51, 63,
 
 } partial class template_package {
 
-internal static @string Stringᴍ(element i) {
+[GoMethodBody("String")] internal static @string Stringᴍ(element i) {
     if (i >= ((element)(uint8)(len(_element_index) - 1))) {
         return "element("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -33,9 +33,3 @@ internal static @string Stringᴍ(element i) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class templateᴛelement {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this element i) => template_package.Stringᴍ(i);
-}
-// </GlyphForwarders>

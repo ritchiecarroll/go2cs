@@ -64,6 +64,17 @@ using static go.@internal.lazytemplate_package;
 
 namespace go.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using io = io_package;
+using os = os_package;
+using strings = strings_package;
+using sync = go.sync_package;
+using template = text.template_package;
+using go;
+using text;
+using static lazytemplate_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("lazytemplate")]
 public static partial class lazytemplate_package
 {
@@ -101,3 +112,11 @@ public static partial class lazytemplate_package
 // <MethodHolders>
 [GoMethodHost(typeof(lazytemplate_package.Template)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class lazytemplateᴛTemplate;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class lazytemplateᴛTemplate {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<template.Template> tp(this ж<Template> Ꮡr) => lazytemplate_package.tpᴍ(Ꮡr);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void build(this ref Template r) => lazytemplate_package.buildᴍ(ref r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Execute(this ж<Template> Ꮡr, io.Writer w, any data) => lazytemplate_package.Executeᴍ(Ꮡr, w, data);
+}
+// </GlyphForwarders>

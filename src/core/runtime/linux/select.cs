@@ -564,7 +564,7 @@ sclose:
 
 } partial class runtime_package {
 
-internal static uintptr sortkeyᴍ(ж<hchan> Ꮡc) {
+[GoMethodBody("sortkey")] internal static uintptr sortkeyᴍ(ж<hchan> Ꮡc) {
     return (uintptr)Ꮡc;
 }
 
@@ -654,7 +654,7 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
 
 } partial class runtime_package {
 
-internal static void dequeueSudoGᴍ(ref waitq q, ж<sudog> Ꮡsgp) {
+[GoMethodBody("dequeueSudoG")] internal static void dequeueSudoGᴍ(ref waitq q, ж<sudog> Ꮡsgp) {
     ref var sgp = ref Ꮡsgp.DerefOrNull();
 
     var x = sgp.prev;
@@ -691,12 +691,3 @@ internal static void dequeueSudoGᴍ(ref waitq q, ж<sudog> Ꮡsgp) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛhchan {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr sortkey(this ж<hchan> Ꮡc) => runtime_package.sortkeyᴍ(Ꮡc);
-}
-partial class runtimeᴛwaitq {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void dequeueSudoG(this ref waitq q, ж<sudog> Ꮡsgp) => runtime_package.dequeueSudoGᴍ(ref q, Ꮡsgp);
-}
-// </GlyphForwarders>

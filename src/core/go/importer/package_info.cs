@@ -62,6 +62,20 @@ using static go.go.importer_package;
 
 namespace go.go;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using Δbuild = global::go.go.build_package;
+using gccgoimporter = global::go.go.@internal.gccgoimporter_package;
+using gcimporter = global::go.go.@internal.gcimporter_package;
+using srcimporter = global::go.go.@internal.srcimporter_package;
+using token = global::go.go.token_package;
+using types = global::go.go.types_package;
+using io = io_package;
+using runtime = runtime_package;
+using global::go.go;
+using global::go.go.@internal;
+using static importer_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("importer")]
 public static partial class importer_package
 {
@@ -104,3 +118,14 @@ public static partial class importer_package
 [GoMethodHost(typeof(importer_package.gccgoimports)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class importerᴛgccgoimports;
 [GoMethodHost(typeof(importer_package.gcimports)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class importerᴛgcimports;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class importerᴛgcimports {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package>, error) Import(this ref gcimports m, @string path) => importer_package.Importᴍ(ref m, path);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package>, error) ImportFrom(this ref gcimports m, @string path, @string srcDir, types.ImportMode mode) => importer_package.ImportFromᴍ(ref m, path, srcDir, mode);
+}
+partial class importerᴛgccgoimports {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package>, error) Import(this ref gccgoimports m, @string path) => importer_package.Importᴍ(ref m, path);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package>, error) ImportFrom(this ref gccgoimports m, @string path, @string srcDir, types.ImportMode mode) => importer_package.ImportFromᴍ(ref m, path, srcDir, mode);
+}
+// </GlyphForwarders>

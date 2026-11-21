@@ -152,28 +152,16 @@ public static nint SearchStrings(slice<@string> a, @string x) {
 } partial class sort_package {
 
 // Search returns the result of applying [SearchInts] to the receiver and x.
-internal static nint Searchᴍ(IntSlice p, nint x) { return SearchInts(p, x); }
+[GoMethodBody("Search")] internal static nint Searchᴍ(IntSlice p, nint x) { return SearchInts(p, x); }
 
 } partial class sort_package {
 
 // Search returns the result of applying [SearchFloat64s] to the receiver and x.
-internal static nint Searchᴍ(Float64Slice p, float64 x) { return SearchFloat64s(p, x); }
+[GoMethodBody("Search")] internal static nint Searchᴍ(Float64Slice p, float64 x) { return SearchFloat64s(p, x); }
 
 } partial class sort_package {
 
 // Search returns the result of applying [SearchStrings] to the receiver and x.
-internal static nint Searchᴍ(StringSlice p, @string x) { return SearchStrings(p, x); }
+[GoMethodBody("Search")] internal static nint Searchᴍ(StringSlice p, @string x) { return SearchStrings(p, x); }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class sortᴛIntSlice {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Search(this IntSlice p, nint x) => sort_package.Searchᴍ(p, x);
-}
-partial class sortᴛFloat64Slice {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Search(this Float64Slice p, float64 x) => sort_package.Searchᴍ(p, x);
-}
-partial class sortᴛStringSlice {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Search(this StringSlice p, @string x) => sort_package.Searchᴍ(p, x);
-}
-// </GlyphForwarders>

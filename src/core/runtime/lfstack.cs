@@ -23,7 +23,7 @@ partial struct lfstack /*num:uint64*/;
 
 } partial class runtime_package {
 
-internal static void pushᴍ(ж<lfstack> Ꮡhead, ж<lfnode> Ꮡnode) {
+[GoMethodBody("push")] internal static void pushᴍ(ж<lfstack> Ꮡhead, ж<lfnode> Ꮡnode) {
     ref var node = ref Ꮡnode.DerefOrNull();
 
     node.pushcnt++;
@@ -37,7 +37,7 @@ internal static void pushᴍ(ж<lfstack> Ꮡhead, ж<lfnode> Ꮡnode) {
     }
 }
 
-internal static @unsafe.Pointer popᴍ(ж<lfstack> Ꮡhead) {
+[GoMethodBody("pop")] internal static @unsafe.Pointer popᴍ(ж<lfstack> Ꮡhead) {
     uint32 backoff = default;
     // TODO: tweak backoff parameters on other architectures.
     if (GOARCH == "arm64"u8) {
@@ -65,7 +65,7 @@ internal static @unsafe.Pointer popᴍ(ж<lfstack> Ꮡhead) {
     }
 }
 
-internal static bool emptyᴍ(ж<lfstack> Ꮡhead) {
+[GoMethodBody("empty")] internal static bool emptyᴍ(ж<lfstack> Ꮡhead) {
     return atomic.Load64(Ꮡhead.Reinterpret<lfstack, uint64>()) == 0;
 }
 
@@ -93,11 +93,3 @@ internal static ж<lfnode> lfstackUnpack(uint64 val) {
 }
 
 } // end runtime_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛlfstack {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void push(this ж<lfstack> Ꮡhead, ж<lfnode> Ꮡnode) => runtime_package.pushᴍ(Ꮡhead, Ꮡnode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer pop(this ж<lfstack> Ꮡhead) => runtime_package.popᴍ(Ꮡhead);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty(this ж<lfstack> Ꮡhead) => runtime_package.emptyᴍ(Ꮡhead);
-}
-// </GlyphForwarders>

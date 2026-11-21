@@ -66,6 +66,27 @@ using static go.testing.@internal.testdeps_package;
 
 namespace go.testing.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using bufio = bufio_package;
+using context = context_package;
+using fuzz = global::go.@internal.fuzz_package;
+using testlog = global::go.@internal.testlog_package;
+using io = io_package;
+using os = os_package;
+using signal = global::go.os.signal_package;
+using reflect = reflect_package;
+using regexp = regexp_package;
+using pprof = runtime.pprof_package;
+using strings = strings_package;
+using sync = sync_package;
+using time = time_package;
+using global::go.@internal;
+using global::go.os;
+using runtime;
+using testdeps = testdeps_package;
+using static testdeps_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("testdeps")]
 public static partial class testdeps_package
 {
@@ -113,3 +134,31 @@ public static partial class testdeps_package
 [GoMethodHost(typeof(testdeps_package.TestDeps)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testdepsᴛTestDeps;
 [GoMethodHost(typeof(testdeps_package.testLog)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testdepsᴛtestLog;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class testdepsᴛTestDeps {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (bool result, error err) MatchString(this TestDeps _, @string pat, @string str) => testdeps_package.MatchStringᴍ(_, pat, str);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error StartCPUProfile(this TestDeps _, io.Writer w) => testdeps_package.StartCPUProfileᴍ(_, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StopCPUProfile(this TestDeps _) => testdeps_package.StopCPUProfileᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteProfileTo(this TestDeps _, @string name, io.Writer w, nint debug) => testdeps_package.WriteProfileToᴍ(_, name, w, debug);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string ImportPath(this TestDeps _) => testdeps_package.ImportPathᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string ModulePath(this TestDeps _) => testdeps_package.ModulePathᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StartTestLog(this TestDeps _, io.Writer w) => testdeps_package.StartTestLogᴍ(_, w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error StopTestLog(this TestDeps _) => testdeps_package.StopTestLogᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetPanicOnExit0(this TestDeps _, bool v) => testdeps_package.SetPanicOnExit0ᴍ(_, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error /*err*/ CoordinateFuzzing(this TestDeps _, time.Duration timeout, int64 limit, time.Duration minimizeTimeout, int64 minimizeLimit, nint parallel, slice<fuzzꓸCorpusEntry> seed, slice<reflect.Type> types, @string corpusDir, @string cacheDir) => testdeps_package.CoordinateFuzzingᴍ(_, timeout, limit, minimizeTimeout, minimizeLimit, parallel, seed, types, corpusDir, cacheDir);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error RunFuzzWorker(this TestDeps _, Func<fuzzꓸCorpusEntry, error> fn) => testdeps_package.RunFuzzWorkerᴍ(_, fn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<fuzzꓸCorpusEntry>, error) ReadCorpus(this TestDeps _, @string dir, slice<reflect.Type> types) => testdeps_package.ReadCorpusᴍ(_, dir, types);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CheckCorpus(this TestDeps _, slice<any> vals, slice<reflect.Type> types) => testdeps_package.CheckCorpusᴍ(_, vals, types);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ResetCoverage(this TestDeps _) => testdeps_package.ResetCoverageᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SnapshotCoverage(this TestDeps _) => testdeps_package.SnapshotCoverageᴍ(_);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string mode, Func<@string, @string, (@string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage(this TestDeps _) => testdeps_package.InitRuntimeCoverageᴍ(_);
+}
+partial class testdepsᴛtestLog {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Getenv(this ж<testLog> Ꮡl, @string key) => testdeps_package.Getenvᴍ(Ꮡl, key);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Open(this ж<testLog> Ꮡl, @string name) => testdeps_package.Openᴍ(Ꮡl, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Stat(this ж<testLog> Ꮡl, @string name) => testdeps_package.Statᴍ(Ꮡl, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Chdir(this ж<testLog> Ꮡl, @string name) => testdeps_package.Chdirᴍ(Ꮡl, name);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ж<testLog> Ꮡl, @string op, @string name) => testdeps_package.addᴍ(Ꮡl, op, name);
+}
+// </GlyphForwarders>

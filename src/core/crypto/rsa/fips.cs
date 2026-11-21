@@ -45,11 +45,11 @@ partial struct PSSOptions {
 } partial class rsa_package {
 
 // HashFunc returns opts.Hash so that [PSSOptions] implements [crypto.SignerOpts].
-internal static crypto.Hash HashFuncᴍ(ref PSSOptions opts) {
+[GoMethodBody("HashFunc")] internal static crypto.Hash HashFuncᴍ(ref PSSOptions opts) {
     return opts.Hash;
 }
 
-internal static nint saltLengthᴍ(ж<PSSOptions> Ꮡopts) {
+[GoMethodBody("saltLength")] internal static nint saltLengthᴍ(ж<PSSOptions> Ꮡopts) {
     ref var opts = ref Ꮡopts.DerefOrNull();
 
     if (Ꮡopts == nil) {
@@ -529,10 +529,3 @@ internal static error checkFIPS140OnlyPrivateKey(ref PrivateKey priv) {
 }
 
 } // end rsa_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class rsaᴛPSSOptions {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static crypto.Hash HashFunc(this ref PSSOptions opts) => rsa_package.HashFuncᴍ(ref opts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint saltLength(this ж<PSSOptions> Ꮡopts) => rsa_package.saltLengthᴍ(Ꮡopts);
-}
-// </GlyphForwarders>

@@ -21,7 +21,7 @@ partial struct rawConn {
 internal static ref readonly @string syscallConnControlˢᴍrawConn => ref syscallConnControlˢᵇᴍrawConn;
 private static readonly @string syscallConnControlˢᵇᴍrawConn = "SyscallConn.Control"u8;
 
-internal static error Controlᴍ(ref rawConn c, Action<uintptr> f) {
+[GoMethodBody("Control")] internal static error Controlᴍ(ref rawConn c, Action<uintptr> f) {
     var errΔ1 = c.@file.checkValid(syscallConnControlˢᴍrawConn); if (errΔ1 != nil) {
         return errΔ1;
     }
@@ -34,7 +34,7 @@ internal static error Controlᴍ(ref rawConn c, Action<uintptr> f) {
 internal static ref readonly @string syscallConnReadˢᴍrawConn => ref syscallConnReadˢᵇᴍrawConn;
 private static readonly @string syscallConnReadˢᵇᴍrawConn = "SyscallConn.Read"u8;
 
-internal static error Readᴍ(ref rawConn c, Func<uintptr, bool> f) {
+[GoMethodBody("Read")] internal static error Readᴍ(ref rawConn c, Func<uintptr, bool> f) {
     var errΔ1 = c.@file.checkValid(syscallConnReadˢᴍrawConn); if (errΔ1 != nil) {
         return errΔ1;
     }
@@ -47,7 +47,7 @@ internal static error Readᴍ(ref rawConn c, Func<uintptr, bool> f) {
 internal static ref readonly @string syscallConnWriteˢᴍrawConn => ref syscallConnWriteˢᵇᴍrawConn;
 private static readonly @string syscallConnWriteˢᵇᴍrawConn = "SyscallConn.Write"u8;
 
-internal static error Writeᴍ(ref rawConn c, Func<uintptr, bool> f) {
+[GoMethodBody("Write")] internal static error Writeᴍ(ref rawConn c, Func<uintptr, bool> f) {
     var errΔ1 = c.@file.checkValid(syscallConnWriteˢᴍrawConn); if (errΔ1 != nil) {
         return errΔ1;
     }
@@ -63,11 +63,3 @@ internal static (ж<rawConn>, error) newRawConn(ж<File> @file) {
 }
 
 } // end os_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class osᴛrawConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Control(this ref rawConn c, Action<uintptr> f) => os_package.Controlᴍ(ref c, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Read(this ref rawConn c, Func<uintptr, bool> f) => os_package.Readᴍ(ref c, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Write(this ref rawConn c, Func<uintptr, bool> f) => os_package.Writeᴍ(ref c, f);
-}
-// </GlyphForwarders>

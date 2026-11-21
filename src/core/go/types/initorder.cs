@@ -26,7 +26,7 @@ internal static readonly object processingNodesˢᴍChecker = (@string)"Processi
 internal static readonly object initializationOrderˢᴍChecker = (@string)"Initialization order:"u8;
 
 // initOrder computes the Info.InitOrder for package variables.
-internal static void initOrderᴍ(ж<Checker> Ꮡcheck) {
+[GoMethodBody("initOrder")] internal static void initOrderᴍ(ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // An InitOrder may already have been computed if a package is
@@ -179,7 +179,7 @@ internal static slice<Object> findPath(map<Object, ж<declInfo>> objMap, Object 
 } partial class types_package {
 
 // reportCycle reports an error for the given cycle.
-internal static void reportCycleᴍ(ж<Checker> Ꮡcheck, slice<Object> cycle) {
+[GoMethodBody("reportCycle")] internal static void reportCycleᴍ(ж<Checker> Ꮡcheck, slice<Object> cycle) {
     var obj = cycle[0];
 
     // report a more concise error for self references
@@ -229,7 +229,7 @@ partial struct graphNode {
 
 // cost returns the cost of removing this node, which involves copying each
 // predecessor to each successor (and vice-versa).
-internal static nint costᴍ(ref graphNode n) {
+[GoMethodBody("cost")] internal static nint costᴍ(ref graphNode n) {
     return len(n.pred) * len(n.succ);
 }
 
@@ -239,7 +239,7 @@ partial struct nodeSet /*map[ж<graphNode>, bool]*/;
 
 } partial class types_package {
 
-internal static void addᴍ(ref nodeSet s, ж<graphNode> p) {
+[GoMethodBody("add")] internal static void addᴍ(ref nodeSet s, ж<graphNode> p) {
     if (s == nil) {
         s = new nodeSet(0);
     }
@@ -340,15 +340,15 @@ partial struct nodeQueue /*[]ж<graphNode>*/;
 
 } partial class types_package {
 
-internal static nint Lenᴍ(nodeQueue a) { return len(a); }
+[GoMethodBody("Len")] internal static nint Lenᴍ(nodeQueue a) { return len(a); }
 
-internal static void Swapᴍ(nodeQueue a, nint i, nint j) {
+[GoMethodBody("Swap")] internal static void Swapᴍ(nodeQueue a, nint i, nint j) {
     var (x, y) = (a[i], a[j]);
     (a[i], a[j]) = (y, x);
     (x.index, y.index) = (j, i);
 }
 
-internal static bool Lessᴍ(nodeQueue a, nint i, nint j) {
+[GoMethodBody("Less")] internal static bool Lessᴍ(nodeQueue a, nint i, nint j) {
     var (x, y) = (a[i], a[j]);
 
     // Prioritize all constants before non-constants. See go.dev/issue/66575/.
@@ -363,11 +363,11 @@ internal static bool Lessᴍ(nodeQueue a, nint i, nint j) {
     return x.ndeps < y.ndeps || x.ndeps == y.ndeps && x.obj.order() < y.obj.order();
 }
 
-internal static void Pushᴍ(ref nodeQueue a, any x) {
+[GoMethodBody("Push")] internal static void Pushᴍ(ref nodeQueue a, any x) {
     throw panic("unreachable");
 }
 
-internal static any Popᴍ(ref nodeQueue a) {
+[GoMethodBody("Pop")] internal static any Popᴍ(ref nodeQueue a) {
     nint n = len(a);
     var x = (a)[n - 1];
     x.index = -1; // for safety
@@ -376,23 +376,3 @@ internal static any Popᴍ(ref nodeQueue a) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initOrder(this ж<Checker> Ꮡcheck) => types_package.initOrderᴍ(Ꮡcheck);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reportCycle(this ж<Checker> Ꮡcheck, slice<Object> cycle) => types_package.reportCycleᴍ(Ꮡcheck, cycle);
-}
-partial class typesᴛgraphNode {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint cost(this ref graphNode n) => types_package.costᴍ(ref n);
-}
-partial class typesᴛnodeSet {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ref nodeSet s, ж<graphNode> p) => types_package.addᴍ(ref s, p);
-}
-partial class typesᴛnodeQueue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this nodeQueue a) => types_package.Lenᴍ(a);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Swap(this nodeQueue a, nint i, nint j) => types_package.Swapᴍ(a, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this nodeQueue a, nint i, nint j) => types_package.Lessᴍ(a, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Push(this ref nodeQueue a, any x) => types_package.Pushᴍ(ref a, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Pop(this ref nodeQueue a) => types_package.Popᴍ(ref a);
-}
-// </GlyphForwarders>

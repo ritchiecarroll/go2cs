@@ -61,6 +61,17 @@ using static go.vendor.golang.org.x.text.secure.bidirule_package;
 
 namespace go.vendor.golang.org.x.text.secure;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using errors = errors_package;
+using utf8 = go.unicode.utf8_package;
+using transform = go.vendor.golang.org.x.text.transform_package;
+using bidi = go.vendor.golang.org.x.text.unicode.bidi_package;
+using go.unicode;
+using go.vendor.golang.org.x.text;
+using go.vendor.golang.org.x.text.unicode;
+using static bidirule_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("bidirule", ImportPath = "vendor/golang.org/x/text/secure/bidirule")]
 public static partial class bidirule_package
 {
@@ -99,3 +110,17 @@ public static partial class bidirule_package
 // <MethodHolders>
 [GoMethodHost(typeof(bidirule_package.Transformer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bidiruleᴛTransformer;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class bidiruleᴛTransformer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isRTL(this ref Transformer t) => bidirule_package.isRTLᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Transformer t) => bidirule_package.Resetᴍ(ref t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint nDst, nint nSrc, error err) Transform(this ref Transformer t, slice<byte> dst, slice<byte> src, bool atEOF) => bidirule_package.Transformᴍ(ref t, dst, src, atEOF);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Span(this ref Transformer t, slice<byte> src, bool atEOF) => bidirule_package.Spanᴍ(ref t, src, atEOF);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, bool ok) advance(this ref Transformer t, slice<byte> s) => bidirule_package.advanceᴍ(ref t, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, bool ok) advanceString(this ref Transformer t, @string s) => bidirule_package.advanceStringᴍ(ref t, s);
+}
+partial class bidiruleᴛTransformer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isFinal(this ref Transformer t) => bidirule_package.isFinalᴍ(ref t);
+}
+// </GlyphForwarders>

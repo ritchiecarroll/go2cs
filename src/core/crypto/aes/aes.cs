@@ -31,7 +31,7 @@ partial struct KeySizeError /*num:nint*/;
 
 } partial class aes_package {
 
-internal static @string Errorᴍ(KeySizeError k) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(KeySizeError k) {
     return "crypto/aes: invalid key size "u8 + strconv.Itoa((nint)k);
 }
 
@@ -59,9 +59,3 @@ public static (cipher.Block, error) NewCipher(slice<byte> key) {
 }
 
 } // end aes_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class aesᴛKeySizeError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this KeySizeError k) => aes_package.Errorᴍ(k);
-}
-// </GlyphForwarders>

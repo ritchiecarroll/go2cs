@@ -22,7 +22,7 @@ public partial struct term {
 
 } partial class types_package {
 
-internal static @string Stringᴍ(ж<term> Ꮡx) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<term> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     switch (ᐧ) {
@@ -41,7 +41,7 @@ internal static @string Stringᴍ(ж<term> Ꮡx) {
 }
 
 // equal reports whether x and y represent the same type set.
-internal static bool equalᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
+[GoMethodBody("equal")] internal static bool equalᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -59,7 +59,7 @@ internal static bool equalᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
 }
 
 // union returns the union x ∪ y: zero, one, or two non-nil terms.
-internal static (ж<term>, ж<term>) unionᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
+[GoMethodBody("union")] internal static (ж<term>, ж<term>) unionᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -98,7 +98,7 @@ internal static (ж<term>, ж<term>) unionᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
 }
 
 // intersect returns the intersection x ∩ y.
-internal static ж<term> intersectᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
+[GoMethodBody("intersect")] internal static ж<term> intersectᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -131,7 +131,7 @@ internal static ж<term> intersectᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
 }
 
 // includes reports whether t ∈ x.
-internal static bool includesᴍ(ж<term> Ꮡx, Type t) {
+[GoMethodBody("includes")] internal static bool includesᴍ(ж<term> Ꮡx, Type t) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // easy cases
@@ -152,7 +152,7 @@ internal static bool includesᴍ(ж<term> Ꮡx, Type t) {
 }
 
 // subsetOf reports whether x ⊆ y.
-internal static bool subsetOfᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
+[GoMethodBody("subsetOf")] internal static bool subsetOfᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -186,7 +186,7 @@ internal static bool subsetOfᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
 
 // disjoint reports whether x ∩ y == ∅.
 // x.typ and y.typ must not be nil.
-internal static bool disjointᴍ(ref term x, ж<term> Ꮡy) {
+[GoMethodBody("disjoint")] internal static bool disjointᴍ(ref term x, ж<term> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     if (debug && (x.typ == nil || y.typ == nil)) {
@@ -204,15 +204,3 @@ internal static bool disjointᴍ(ref term x, ж<term> Ꮡy) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛterm {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<term> Ꮡx) => types_package.Stringᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool equal(this ж<term> Ꮡx, ж<term> Ꮡy) => types_package.equalᴍ(Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<term>, ж<term>) union(this ж<term> Ꮡx, ж<term> Ꮡy) => types_package.unionᴍ(Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<term> intersect(this ж<term> Ꮡx, ж<term> Ꮡy) => types_package.intersectᴍ(Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool includes(this ж<term> Ꮡx, Type t) => types_package.includesᴍ(Ꮡx, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool subsetOf(this ж<term> Ꮡx, ж<term> Ꮡy) => types_package.subsetOfᴍ(Ꮡx, Ꮡy);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool disjoint(this ref term x, ж<term> Ꮡy) => types_package.disjointᴍ(ref x, Ꮡy);
-}
-// </GlyphForwarders>

@@ -60,6 +60,12 @@ using static go.crypto.@internal.fips140deps.godebug_package;
 
 namespace go.crypto.@internal.fips140deps;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using godebug = go.@internal.godebug_package;
+using go.@internal;
+using static godebug_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("godebug")]
 public static partial class godebug_package
 {
@@ -93,3 +99,9 @@ public static partial class godebug_package
 // <MethodHolders>
 [GoMethodHost(typeof(godebug_package.Setting)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class godebugᴛSetting;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class godebugᴛSetting {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Value(this ж<Setting> Ꮡs) => godebug_package.Valueᴍ(Ꮡs);
+}
+// </GlyphForwarders>

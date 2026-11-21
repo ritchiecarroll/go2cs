@@ -66,6 +66,25 @@ using static go.crypto.ed25519_package;
 
 namespace go.crypto;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using crypto = crypto_package;
+using ed25519 = go.crypto.@internal.fips140.ed25519_package;
+using fips140cache = go.crypto.@internal.fips140cache_package;
+using fips140only = go.crypto.@internal.fips140only_package;
+using rand = go.crypto.@internal.rand_package;
+using cryptorand = go.crypto.rand_package;
+using subtle = go.crypto.subtle_package;
+using errors = errors_package;
+using godebug = go.@internal.godebug_package;
+using io = io_package;
+using strconv = strconv_package;
+using go.@internal;
+using go.crypto;
+using go.crypto.@internal;
+using go.crypto.@internal.fips140;
+using static ed25519_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("ed25519")]
 public static partial class ed25519_package
 {
@@ -113,3 +132,18 @@ public static partial class ed25519_package
 [GoMethodHost(typeof(ed25519_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519ᴛPrivateKey;
 [GoMethodHost(typeof(ed25519_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519ᴛPublicKey;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class ed25519ᴛPublicKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this PublicKey pub, cryptoꓸPublicKey x) => ed25519_package.Equalᴍ(pub, x);
+}
+partial class ed25519ᴛPrivateKey {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static cryptoꓸPublicKey Public(this PrivateKey priv) => ed25519_package.Publicᴍ(priv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this PrivateKey priv, cryptoꓸPrivateKey x) => ed25519_package.Equalᴍ(priv, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Seed(this PrivateKey priv) => ed25519_package.Seedᴍ(priv);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> signature, error err) Sign(this PrivateKey priv, io.Reader rand, slice<byte> message, crypto.SignerOpts opts) => ed25519_package.Signᴍ(priv, rand, message, opts);
+}
+partial class ed25519ᴛOptions {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static crypto.Hash HashFunc(this ref Options o) => ed25519_package.HashFuncᴍ(ref o);
+}
+// </GlyphForwarders>

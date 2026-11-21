@@ -148,7 +148,7 @@ private static readonly @string pageCachePagesLeakedTestˢᵇᴍtraceV1Converter
 internal static ref readonly @string resetDebugLogTestˢᴍtraceV1Converter => ref resetDebugLogTestˢᵇᴍtraceV1Converter;
 private static readonly @string resetDebugLogTestˢᵇᴍtraceV1Converter = "ResetDebugLog (test)"u8;
 
-internal static error initᴍ(ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
+[GoMethodBody("init")] internal static error initᴍ(ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
     ref var it = ref Ꮡit.DerefOrNull();
 
     it.trace = pr;
@@ -265,7 +265,7 @@ internal static error initᴍ(ж<traceV1Converter> Ꮡit, tracev1.Trace pr) {
 
 // next returns the next event, io.EOF if there are no more events, or a
 // descriptive error for invalid events.
-internal static (Event, error) nextᴍ(ж<traceV1Converter> Ꮡit) {
+[GoMethodBody("next")] internal static (Event, error) nextᴍ(ж<traceV1Converter> Ꮡit) {
     ref var it = ref Ꮡit.DerefOrNull();
 
     if (len(it.extra) > 0) {
@@ -319,7 +319,7 @@ internal static error errSkip = errors.New("skip event");
 // returns the first event and stores additional events in it.extra. When
 // encountering events that tracev1 shouldn't be able to emit, ocnvertEvent
 // returns a descriptive error.
-internal static (Event OUT, error ERR) convertEventᴍ(ж<traceV1Converter> Ꮡit, ж<tracev1.Event> Ꮡev) {
+[GoMethodBody("convertEvent")] internal static (Event OUT, error ERR) convertEventᴍ(ж<traceV1Converter> Ꮡit, ж<tracev1.Event> Ꮡev) {
     ref var it = ref Ꮡit.DerefOrNull();
     ref var ev = ref Ꮡev.DerefOrNull();
 
@@ -721,11 +721,3 @@ internal static ж<traceV1Converter> convertV1Trace(tracev1.Trace pr) {
 }
 
 } // end trace_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class traceᴛtraceV1Converter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error init(this ж<traceV1Converter> Ꮡit, tracev1.Trace pr) => trace_package.initᴍ(Ꮡit, pr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Event, error) next(this ж<traceV1Converter> Ꮡit) => trace_package.nextᴍ(Ꮡit);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Event OUT, error ERR) convertEvent(this ж<traceV1Converter> Ꮡit, ж<tracev1.Event> Ꮡev) => trace_package.convertEventᴍ(Ꮡit, Ꮡev);
-}
-// </GlyphForwarders>

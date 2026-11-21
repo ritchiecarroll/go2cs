@@ -52,7 +52,7 @@ partial struct nameSpace {
 
 // Templates returns a slice of the templates associated with t, including t
 // itself.
-internal static slice<ж<Template>> Templatesᴍ(ж<Template> Ꮡt) {
+[GoMethodBody("Templates")] internal static slice<ж<Template>> Templatesᴍ(ж<Template> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -90,7 +90,7 @@ internal static slice<ж<Template>> Templatesᴍ(ж<Template> Ꮡt) {
 //		The operation returns the zero value for the map type's element.
 //	"missingkey=error"
 //		Execution stops immediately with an error.
-internal static ж<Template> Optionᴍ(ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) {
+[GoMethodBody("Option")] internal static ж<Template> Optionᴍ(ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) {
     var opt = optʗp.sslice();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -100,7 +100,7 @@ internal static ж<Template> Optionᴍ(ж<Template> Ꮡt, params ꓸꓸꓸstring
 
 // checkCanParse checks whether it is OK to parse templates.
 // If not, it returns an error.
-internal static error checkCanParseᴍ(ж<Template> Ꮡt) {
+[GoMethodBody("checkCanParse")] internal static error checkCanParseᴍ(ж<Template> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -120,7 +120,7 @@ internal static error checkCanParseᴍ(ж<Template> Ꮡt) {
 }
 
 // escape escapes all associated templates.
-internal static error escapeᴍ(ж<Template> Ꮡt) {
+[GoMethodBody("escape")] internal static error escapeᴍ(ж<Template> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -151,7 +151,7 @@ internal static error escapeᴍ(ж<Template> Ꮡt) {
 // the output writer.
 // A template may be executed safely in parallel, although if parallel
 // executions share a Writer the output may be interleaved.
-internal static error Executeᴍ(ж<Template> Ꮡt, io.Writer wr, any data) {
+[GoMethodBody("Execute")] internal static error Executeᴍ(ж<Template> Ꮡt, io.Writer wr, any data) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var err = Ꮡt.escape(); if (err != nil) {
@@ -167,7 +167,7 @@ internal static error Executeᴍ(ж<Template> Ꮡt, io.Writer wr, any data) {
 // the output writer.
 // A template may be executed safely in parallel, although if parallel
 // executions share a Writer the output may be interleaved.
-internal static error ExecuteTemplateᴍ(ж<Template> Ꮡt, io.Writer wr, @string name, any data) {
+[GoMethodBody("ExecuteTemplate")] internal static error ExecuteTemplateᴍ(ж<Template> Ꮡt, io.Writer wr, @string name, any data) {
     var (tmpl, err) = Ꮡt.lookupAndEscapeTemplate(name);
     if (err != nil) {
         return err;
@@ -178,7 +178,7 @@ internal static error ExecuteTemplateᴍ(ж<Template> Ꮡt, io.Writer wr, @strin
 // lookupAndEscapeTemplate guarantees that the template with the given name
 // is escaped, or returns an error if it cannot be. It returns the named
 // template.
-internal static (ж<Template> tmpl, error err) lookupAndEscapeTemplateᴍ(ж<Template> Ꮡt, @string name) {
+[GoMethodBody("lookupAndEscapeTemplate")] internal static (ж<Template> tmpl, error err) lookupAndEscapeTemplateᴍ(ж<Template> Ꮡt, @string name) {
     ж<Template> tmpl = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -213,7 +213,7 @@ internal static (ж<Template> tmpl, error err) lookupAndEscapeTemplateᴍ(ж<Tem
 // DefinedTemplates returns a string listing the defined templates,
 // prefixed by the string "; defined templates are: ". If there are none,
 // it returns the empty string. Used to generate an error message.
-internal static @string DefinedTemplatesᴍ(ref Template t) {
+[GoMethodBody("DefinedTemplates")] internal static @string DefinedTemplatesᴍ(ref Template t) {
     return t.text.DefinedTemplates();
 }
 
@@ -228,7 +228,7 @@ internal static @string DefinedTemplatesᴍ(ref Template t) {
 // is considered empty and will not replace an existing template's body.
 // This allows using Parse to add new named template definitions without
 // overwriting the main template body.
-internal static (ж<Template>, error) Parseᴍ(ж<Template> Ꮡt, @string text) {
+[GoMethodBody("Parse")] internal static (ж<Template>, error) Parseᴍ(ж<Template> Ꮡt, @string text) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -266,7 +266,7 @@ internal static (ж<Template>, error) Parseᴍ(ж<Template> Ꮡt, @string text) 
 // and associates it with t.
 //
 // It returns an error if t or any associated template has already been executed.
-internal static (ж<Template>, error) AddParseTreeᴍ(ж<Template> Ꮡt, @string name, ж<parse.Tree> tree) {
+[GoMethodBody("AddParseTree")] internal static (ж<Template>, error) AddParseTreeᴍ(ж<Template> Ꮡt, @string name, ж<parse.Tree> tree) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -302,7 +302,7 @@ internal static (ж<Template>, error) AddParseTreeᴍ(ж<Template> Ꮡt, @string
 // by adding the variants after the clone is made.
 //
 // It returns an error if t has already been executed.
-internal static (ж<Template>, error) Cloneᴍ(ж<Template> Ꮡt) {
+[GoMethodBody("Clone")] internal static (ж<Template>, error) Cloneᴍ(ж<Template> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -371,7 +371,7 @@ public static ж<Template> New(@string name) {
 // If a template with the given name already exists, the new HTML template
 // will replace it. The existing template will be reset and disassociated with
 // t.
-internal static ж<Template> Newᴍ(ж<Template> Ꮡt, @string name) {
+[GoMethodBody("New")] internal static ж<Template> Newᴍ(ж<Template> Ꮡt, @string name) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -385,7 +385,7 @@ internal static ж<Template> Newᴍ(ж<Template> Ꮡt, @string name) {
 }
 
 // new is the implementation of New, without the lock.
-internal static ж<Template> @newᴍ(ref Template t, @string name) {
+[GoMethodBody("new")] internal static ж<Template> @newᴍ(ref Template t, @string name) {
     var tmpl = Ꮡ(new Template(
         default,
         t.text.New(name),
@@ -401,7 +401,7 @@ internal static ж<Template> @newᴍ(ref Template t, @string name) {
 }
 
 // Name returns the name of the template.
-internal static @string Nameᴍ(ref Template t) {
+[GoMethodBody("Name")] internal static @string Nameᴍ(ref Template t) {
     return t.text.Name();
 }
 
@@ -410,7 +410,7 @@ internal static @string Nameᴍ(ref Template t) {
 // It panics if a value in the map is not a function with appropriate return
 // type. However, it is legal to overwrite elements of the map. The return
 // value is the template, so calls can be chained.
-internal static ж<Template> Funcsᴍ(ж<Template> Ꮡt, FuncMap funcMap) {
+[GoMethodBody("Funcs")] internal static ж<Template> Funcsᴍ(ж<Template> Ꮡt, FuncMap funcMap) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.text.Funcs((template.FuncMap)funcMap);
@@ -422,7 +422,7 @@ internal static ж<Template> Funcsᴍ(ж<Template> Ꮡt, FuncMap funcMap) {
 // definitions will inherit the settings. An empty delimiter stands for the
 // corresponding default: {{ or }}.
 // The return value is the template, so calls can be chained.
-internal static ж<Template> Delimsᴍ(ж<Template> Ꮡt, @string left, @string right) {
+[GoMethodBody("Delims")] internal static ж<Template> Delimsᴍ(ж<Template> Ꮡt, @string left, @string right) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.text.Delims(left, right);
@@ -431,7 +431,7 @@ internal static ж<Template> Delimsᴍ(ж<Template> Ꮡt, @string left, @string 
 
 // Lookup returns the template with the given name that is associated with t,
 // or nil if there is no such template.
-internal static ж<Template> Lookupᴍ(ж<Template> Ꮡt, @string name) {
+[GoMethodBody("Lookup")] internal static ж<Template> Lookupᴍ(ж<Template> Ꮡt, @string name) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -483,7 +483,7 @@ public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸstring filenames�
 // the last one mentioned will be the one that results.
 //
 // ParseFiles returns an error if t or any associated template has already been executed.
-internal static (ж<Template>, error) ParseFilesᴍ(ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
+[GoMethodBody("ParseFiles")] internal static (ж<Template>, error) ParseFilesᴍ(ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.sslice();
 
     return parseFiles(Ꮡt, readFileOS, filenames.ꓸꓸꓸ);
@@ -561,7 +561,7 @@ public static (ж<Template>, error) ParseGlob(@string pattern) {
 // the last one mentioned will be the one that results.
 //
 // ParseGlob returns an error if t or any associated template has already been executed.
-internal static (ж<Template>, error) ParseGlobᴍ(ж<Template> Ꮡt, @string pattern) {
+[GoMethodBody("ParseGlob")] internal static (ж<Template>, error) ParseGlobᴍ(ж<Template> Ꮡt, @string pattern) {
     return parseGlob(Ꮡt, pattern);
 }
 
@@ -605,7 +605,7 @@ public static (ж<Template>, error) ParseFS(fs.FS fsΔ1, params ꓸꓸꓸstring 
 // instead of the host operating system's file system.
 // It accepts a list of glob patterns.
 // (Note that most file names serve as glob patterns matching only themselves.)
-internal static (ж<Template>, error) ParseFSᴍ(ж<Template> Ꮡt, fs.FS fsΔ1, params ꓸꓸꓸstring patternsʗp) {
+[GoMethodBody("ParseFS")] internal static (ж<Template>, error) ParseFSᴍ(ж<Template> Ꮡt, fs.FS fsΔ1, params ꓸꓸꓸstring patternsʗp) {
     var patterns = patternsʗp.slice();
 
     return parseFS(Ꮡt, fsΔ1, patterns);
@@ -650,28 +650,3 @@ internal static Func<@string, (@string, slice<byte>, error)> readFileFS(fs.FS fs
 }
 
 } // end template_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class templateᴛTemplate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<ж<Template>> Templates(this ж<Template> Ꮡt) => template_package.Templatesᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) => template_package.Optionᴍ(Ꮡt, optʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error checkCanParse(this ж<Template> Ꮡt) => template_package.checkCanParseᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error escape(this ж<Template> Ꮡt) => template_package.escapeᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Execute(this ж<Template> Ꮡt, io.Writer wr, any data) => template_package.Executeᴍ(Ꮡt, wr, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error ExecuteTemplate(this ж<Template> Ꮡt, io.Writer wr, @string name, any data) => template_package.ExecuteTemplateᴍ(Ꮡt, wr, name, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Template> tmpl, error err) lookupAndEscapeTemplate(this ж<Template> Ꮡt, @string name) => template_package.lookupAndEscapeTemplateᴍ(Ꮡt, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string DefinedTemplates(this ref Template t) => template_package.DefinedTemplatesᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) Parse(this ж<Template> Ꮡt, @string text) => template_package.Parseᴍ(Ꮡt, text);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) AddParseTree(this ж<Template> Ꮡt, @string name, ж<parse.Tree> tree) => template_package.AddParseTreeᴍ(Ꮡt, name, tree);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) => template_package.Cloneᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Template> New(this ж<Template> Ꮡt, @string name) => template_package.Newᴍ(Ꮡt, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Template> @new(this ref Template t, @string name) => template_package.@newᴍ(ref t, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Name(this ref Template t) => template_package.Nameᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Template> Funcs(this ж<Template> Ꮡt, FuncMap funcMap) => template_package.Funcsᴍ(Ꮡt, funcMap);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Template> Delims(this ж<Template> Ꮡt, @string left, @string right) => template_package.Delimsᴍ(Ꮡt, left, right);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Template> Lookup(this ж<Template> Ꮡt, @string name) => template_package.Lookupᴍ(Ꮡt, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) ParseFiles(this ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) => template_package.ParseFilesᴍ(Ꮡt, filenamesʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) ParseGlob(this ж<Template> Ꮡt, @string pattern) => template_package.ParseGlobᴍ(Ꮡt, pattern);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsΔ1, params ꓸꓸꓸstring patternsʗp) => template_package.ParseFSᴍ(Ꮡt, fsΔ1, patternsʗp);
-}
-// </GlyphForwarders>

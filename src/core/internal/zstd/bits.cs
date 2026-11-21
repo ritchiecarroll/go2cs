@@ -26,7 +26,7 @@ partial struct bitReader {
 } partial class zstd_package {
 
 // makeBitReader makes a bit reader starting at off.
-internal static bitReader makeBitReaderᴍ(ж<Reader> Ꮡr, block data, nint off) {
+[GoMethodBody("makeBitReader")] internal static bitReader makeBitReaderᴍ(ж<Reader> Ꮡr, block data, nint off) {
     return new bitReader(
         r: Ꮡr,
         data: data,
@@ -38,7 +38,7 @@ internal static bitReader makeBitReaderᴍ(ж<Reader> Ꮡr, block data, nint off
 
 // moreBits is called to read more bits.
 // This ensures that at least 16 bits are available.
-internal static error moreBitsᴍ(ref bitReader br) {
+[GoMethodBody("moreBits")] internal static error moreBitsᴍ(ref bitReader br) {
     while (br.cnt < 16) {
         if (br.off >= (uint32)len(br.data)) {
             return br.r.makeEOFError((nint)br.off);
@@ -52,7 +52,7 @@ internal static error moreBitsᴍ(ref bitReader br) {
 }
 
 // val is called to fetch a value of b bits.
-internal static uint32 valᴍ(ref bitReader br, uint8 b) {
+[GoMethodBody("val")] internal static uint32 valᴍ(ref bitReader br, uint8 b) {
     var r = br.bits & ((((uint32)1).Lsh((uint64)(b))) - 1);
     br.bits.RshAssign((uint64)(b));
     br.cnt -= (uint32)b;
@@ -60,7 +60,7 @@ internal static uint32 valᴍ(ref bitReader br, uint8 b) {
 }
 
 // backup steps back to the last byte we used.
-internal static void backupᴍ(ref bitReader br) {
+[GoMethodBody("backup")] internal static void backupᴍ(ref bitReader br) {
     while (br.cnt >= 8) {
         br.off--;
         br.cnt -= 8;
@@ -68,7 +68,7 @@ internal static void backupᴍ(ref bitReader br) {
 }
 
 // makeError returns an error at the current offset wrapping a string.
-internal static error makeErrorᴍ(ref bitReader br, @string msg) {
+[GoMethodBody("makeError")] internal static error makeErrorᴍ(ref bitReader br, @string msg) {
     return br.r.makeError((nint)br.off, msg);
 }
 
@@ -93,7 +93,7 @@ private static readonly @string zeroByteAtReverseBitˢᵇᴍReader = "zero byte 
 // makeReverseBitReader makes a reverseBitReader reading backward
 // from off to start. The bitstream starts with a 1 bit in the last
 // byte, at off.
-internal static (reverseBitReader, error) makeReverseBitReaderᴍ(ж<Reader> Ꮡr, block data, nint off, nint start) {
+[GoMethodBody("makeReverseBitReader")] internal static (reverseBitReader, error) makeReverseBitReaderᴍ(ж<Reader> Ꮡr, block data, nint off, nint start) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var streamStart = data[off];
@@ -114,7 +114,7 @@ internal static (reverseBitReader, error) makeReverseBitReaderᴍ(ж<Reader> Ꮡ
 } partial class zstd_package {
 
 // val is called to fetch a value of b bits.
-internal static (uint32, error) valᴍ(ref reverseBitReader rbr, uint8 b) {
+[GoMethodBody("val")] internal static (uint32, error) valᴍ(ref reverseBitReader rbr, uint8 b) {
     if (!rbr.fetch(b)) {
         return (0, rbr.r.makeEOFError((nint)rbr.off));
     }
@@ -127,7 +127,7 @@ internal static (uint32, error) valᴍ(ref reverseBitReader rbr, uint8 b) {
 // fetch is called to ensure that at least b bits are available.
 // It reports false if this can't be done,
 // in which case only rbr.cnt bits are available.
-internal static bool fetchᴍ(ref reverseBitReader rbr, uint8 b) {
+[GoMethodBody("fetch")] internal static bool fetchᴍ(ref reverseBitReader rbr, uint8 b) {
     while (rbr.cnt < (uint32)b) {
         if (rbr.off <= rbr.start) {
             return false;
@@ -142,26 +142,8 @@ internal static bool fetchᴍ(ref reverseBitReader rbr, uint8 b) {
 }
 
 // makeError returns an error at the current offset wrapping a string.
-internal static error makeErrorᴍ(ref reverseBitReader rbr, @string msg) {
+[GoMethodBody("makeError")] internal static error makeErrorᴍ(ref reverseBitReader rbr, @string msg) {
     return rbr.r.makeError((nint)rbr.off, msg);
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class zstdᴛReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bitReader makeBitReader(this ж<Reader> Ꮡr, block data, nint off) => zstd_package.makeBitReaderᴍ(Ꮡr, data, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (reverseBitReader, error) makeReverseBitReader(this ж<Reader> Ꮡr, block data, nint off, nint start) => zstd_package.makeReverseBitReaderᴍ(Ꮡr, data, off, start);
-}
-partial class zstdᴛbitReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error moreBits(this ref bitReader br) => zstd_package.moreBitsᴍ(ref br);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 val(this ref bitReader br, uint8 b) => zstd_package.valᴍ(ref br, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void backup(this ref bitReader br) => zstd_package.backupᴍ(ref br);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error makeError(this ref bitReader br, @string msg) => zstd_package.makeErrorᴍ(ref br, msg);
-}
-partial class zstdᴛreverseBitReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint32, error) val(this ref reverseBitReader rbr, uint8 b) => zstd_package.valᴍ(ref rbr, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool fetch(this ref reverseBitReader rbr, uint8 b) => zstd_package.fetchᴍ(ref rbr, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error makeError(this ref reverseBitReader rbr, @string msg) => zstd_package.makeErrorᴍ(ref rbr, msg);
-}
-// </GlyphForwarders>

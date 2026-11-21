@@ -343,7 +343,7 @@ private static readonly @string scavengerStateIsAlreadyˢᵇᴍscavengerState = 
 // init initializes a scavenger state and wires to the current G.
 //
 // Must be called from a regular goroutine that can allocate.
-internal static void initᴍ(ж<scavengerState> Ꮡs) {
+[GoMethodBody("init")] internal static void initᴍ(ж<scavengerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.g != nil) {
@@ -409,7 +409,7 @@ internal static ref readonly @string triedToParkScavengerFromˢᴍscavengerState
 private static readonly @string triedToParkScavengerFromˢᵇᴍscavengerState = "tried to park scavenger from another goroutine"u8;
 
 // park parks the scavenger goroutine.
-internal static void parkᴍ(ж<scavengerState> Ꮡs) {
+[GoMethodBody("park")] internal static void parkᴍ(ж<scavengerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     @lock(Ꮡs.Ꮡlock);
@@ -421,14 +421,14 @@ internal static void parkᴍ(ж<scavengerState> Ꮡs) {
 }
 
 // ready signals to sysmon that the scavenger should be awoken.
-internal static void readyᴍ(ж<scavengerState> Ꮡs) {
+[GoMethodBody("ready")] internal static void readyᴍ(ж<scavengerState> Ꮡs) {
     Ꮡs.ᏑsysmonWake.Store(1);
 }
 
 // wake immediately unparks the scavenger if necessary.
 //
 // Safe to run without a P.
-internal static void wakeᴍ(ж<scavengerState> Ꮡs) {
+[GoMethodBody("wake")] internal static void wakeᴍ(ж<scavengerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     @lock(Ꮡs.Ꮡlock);
@@ -463,7 +463,7 @@ private static readonly @string triedToSleepScavengerˢᵇᴍscavengerState = "t
 //
 // The scavenger may be woken up earlier by a pacing change, and it may not go
 // to sleep at all if there's a pending pacing change.
-internal static void sleepᴍ(ж<scavengerState> Ꮡs, float64 worked) {
+[GoMethodBody("sleep")] internal static void sleepᴍ(ж<scavengerState> Ꮡs, float64 worked) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     @lock(Ꮡs.Ꮡlock);
@@ -564,7 +564,7 @@ internal static void sleepᴍ(ж<scavengerState> Ꮡs, float64 worked) {
 
 // controllerFailed indicates that the scavenger's scheduling
 // controller failed.
-internal static void controllerFailedᴍ(ж<scavengerState> Ꮡs) {
+[GoMethodBody("controllerFailed")] internal static void controllerFailedᴍ(ж<scavengerState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     @lock(Ꮡs.Ꮡlock);
@@ -584,7 +584,7 @@ private static readonly @string releasedLessThanOneˢᵇᴍscavengerState = "rel
 // releasing those bytes.
 //
 // Must be run on the scavenger goroutine.
-internal static (uintptr released, float64 worked) runᴍ(ж<scavengerState> Ꮡs) {
+[GoMethodBody("run")] internal static (uintptr released, float64 worked) runᴍ(ж<scavengerState> Ꮡs) {
     uintptr released = default;
     float64 worked = default;
     ref var s = ref Ꮡs.DerefOrNull();
@@ -691,7 +691,7 @@ internal static void bgscavenge(channel<nint> c) {
 //
 // scavenge always tries to scavenge nbytes worth of memory, and will
 // only fail to do so if the heap is exhausted for now.
-internal static uintptr scavengeᴍ(ж<pageAlloc> Ꮡp, uintptr nbytes, Func<bool> shouldStop, bool force) {
+[GoMethodBody("scavenge")] internal static uintptr scavengeᴍ(ж<pageAlloc> Ꮡp, uintptr nbytes, Func<bool> shouldStop, bool force) {
     var released = (uintptr)0;
     while (released < nbytes) {
         var (ci, pageIdx) = Ꮡp.Ꮡscav.of(pageAlloc_scav.Ꮡindex).find(force);
@@ -751,7 +751,7 @@ internal static void printScavTrace(uintptr releasedBg, uintptr releasedEager, b
 // Must run on the systemstack because it acquires p.mheapLock.
 //
 //go:systemstack
-internal static uintptr scavengeOneᴍ(ref pageAlloc p, chunkIdx ci, nuint searchIdx, uintptr max) {
+[GoMethodBody("scavengeOne")] internal static uintptr scavengeOneᴍ(ref pageAlloc p, chunkIdx ci, nuint searchIdx, uintptr max) {
     // Calculate the maximum number of pages to scavenge.
     //
     // This should be alignUp(max, pageSize) / pageSize but max can and will
@@ -941,7 +941,7 @@ private static readonly @string minTooLargeˢᵇᴍpallocData = "min too large"u
 // will round up). That is, even if max is small, the returned size is not guaranteed
 // to be equal to max. max is allowed to be less than min, in which case it is as if
 // max == min.
-internal static (nuint, nuint) findScavengeCandidateᴍ(ref pallocData m, nuint searchIdx, uintptr minimum, uintptr max) {
+[GoMethodBody("findScavengeCandidate")] internal static (nuint, nuint) findScavengeCandidateᴍ(ref pallocData m, nuint searchIdx, uintptr minimum, uintptr max) {
     if ((uintptr)(minimum & (minimum - 1)) != 0 || minimum == 0) {
         print((@string)"runtime: min = ", minimum, (@string)"\n");
         @throw(minMustBeANonZeroPowerOfˢᴍpallocData);
@@ -1103,7 +1103,7 @@ partial struct scavengeIndex {
 // init initializes the scavengeIndex.
 //
 // Returns the amount added to sysStat.
-internal static uintptr initᴍ(ж<scavengeIndex> Ꮡs, bool test, ж<sysMemStat> sysStat) {
+[GoMethodBody("init")] internal static uintptr initᴍ(ж<scavengeIndex> Ꮡs, bool test, ж<sysMemStat> sysStat) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     Ꮡs.ᏑsearchAddrBg.Clear();
@@ -1116,7 +1116,7 @@ internal static uintptr initᴍ(ж<scavengeIndex> Ꮡs, bool test, ж<sysMemStat
 // sysGrow updates the index's backing store in response to a heap growth.
 //
 // Returns the amount of memory added to sysStat.
-internal static uintptr growᴍ(ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> sysStat) {
+[GoMethodBody("grow")] internal static uintptr growᴍ(ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> sysStat) {
     // Update minHeapIdx. Note that even if there's no mapping work to do,
     // we may still have a new, lower minimum heap address.
     var minHeapIdx = Ꮡs.ᏑminHeapIdx.Load();
@@ -1128,7 +1128,7 @@ internal static uintptr growᴍ(ж<scavengeIndex> Ꮡs, uintptr @base, uintptr l
 
 // find returns the highest chunk index that may contain pages available to scavenge.
 // It also returns an offset to start searching in the highest chunk.
-internal static (chunkIdx, nuint) findᴍ(ж<scavengeIndex> Ꮡs, bool force) {
+[GoMethodBody("find")] internal static (chunkIdx, nuint) findᴍ(ж<scavengeIndex> Ꮡs, bool force) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var cursor = Ꮡs.ᏑsearchAddrBg;
@@ -1184,7 +1184,7 @@ internal static (chunkIdx, nuint) findᴍ(ж<scavengeIndex> Ꮡs, bool force) {
 // eagerly collapsing).
 //
 // alloc may only run concurrently with find.
-internal static void allocᴍ(ref scavengeIndex s, chunkIdx ci, nuint npages) {
+[GoMethodBody("alloc")] internal static void allocᴍ(ref scavengeIndex s, chunkIdx ci, nuint npages) {
     var sc = Ꮡ(s.chunks, ci).load();
     sc.alloc(npages, s.gen);
     // TODO(mknyszek): Consider eagerly backing memory with huge pages
@@ -1199,7 +1199,7 @@ internal static void allocᴍ(ref scavengeIndex s, chunkIdx ci, nuint npages) {
 // a free of npages occurred.
 //
 // free may only run concurrently with find.
-internal static void freeᴍ(ж<scavengeIndex> Ꮡs, chunkIdx ci, nuint page, nuint npages) {
+[GoMethodBody("free")] internal static void freeᴍ(ж<scavengeIndex> Ꮡs, chunkIdx ci, nuint page, nuint npages) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var sc = Ꮡ(s.chunks, ci).load();
@@ -1227,7 +1227,7 @@ internal static void freeᴍ(ж<scavengeIndex> Ꮡs, chunkIdx ci, nuint page, nu
 // to be released.
 //
 // nextGen may only run concurrently with find.
-internal static void nextGenᴍ(ж<scavengeIndex> Ꮡs) {
+[GoMethodBody("nextGen")] internal static void nextGenᴍ(ж<scavengeIndex> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.gen++;
@@ -1243,7 +1243,7 @@ internal static void nextGenᴍ(ж<scavengeIndex> Ꮡs) {
 // at the same chunk.
 //
 // setEmpty may only run concurrently with find.
-internal static void setEmptyᴍ(ref scavengeIndex s, chunkIdx ci) {
+[GoMethodBody("setEmpty")] internal static void setEmptyᴍ(ref scavengeIndex s, chunkIdx ci) {
     var val = Ꮡ(s.chunks, ci).load();
     val.scavChunkFlags.setEmpty();
     Ꮡ(s.chunks, ci).store(val);
@@ -1260,13 +1260,13 @@ partial struct atomicScavChunkData {
 } partial class runtime_package {
 
 // load loads and unpacks a scavChunkData.
-internal static scavChunkData loadᴍ(ж<atomicScavChunkData> Ꮡsc) {
+[GoMethodBody("load")] internal static scavChunkData loadᴍ(ж<atomicScavChunkData> Ꮡsc) {
     return unpackScavChunkData(Ꮡsc.Ꮡvalue.Load());
 }
 
 // store packs and writes a new scavChunkData. store must be serialized
 // with other calls to store.
-internal static void storeᴍ(ж<atomicScavChunkData> Ꮡsc, scavChunkData ssc) {
+[GoMethodBody("store")] internal static void storeᴍ(ж<atomicScavChunkData> Ꮡsc, scavChunkData ssc) {
     Ꮡsc.Ꮡvalue.Store(ssc.pack());
 }
 
@@ -1309,7 +1309,7 @@ internal static scavChunkData unpackScavChunkData(uint64 sc) {
 } partial class runtime_package {
 
 // pack returns sc packed into a uint64.
-internal static uint64 packᴍ(scavChunkData sc) {
+[GoMethodBody("pack")] internal static uint64 packᴍ(scavChunkData sc) {
     return (uint64)sc.inUse | ((uint64)sc.lastInUse << 16) | ((uint64)sc.scavChunkFlags << (int)(16 + logScavChunkInUseMax)) | ((uint64)sc.gen << 32);
 }
 
@@ -1339,17 +1339,17 @@ partial struct scavChunkFlags /*num:uint8*/;
 } partial class runtime_package {
 
 // isEmpty returns true if the hasFree flag is unset.
-internal static bool isEmptyᴍ(ref scavChunkFlags sc) {
+[GoMethodBody("isEmpty")] internal static bool isEmptyᴍ(ref scavChunkFlags sc) {
     return (scavChunkFlags)((sc) & scavChunkHasFree) == 0;
 }
 
 // setEmpty clears the hasFree flag.
-internal static void setEmptyᴍ(ref scavChunkFlags sc) {
+[GoMethodBody("setEmpty")] internal static void setEmptyᴍ(ref scavChunkFlags sc) {
     sc &= unchecked((scavChunkFlags)~(scavChunkFlags)(scavChunkHasFree));
 }
 
 // setNonEmpty sets the hasFree flag.
-internal static void setNonEmptyᴍ(ref scavChunkFlags sc) {
+[GoMethodBody("setNonEmpty")] internal static void setNonEmptyᴍ(ref scavChunkFlags sc) {
     sc |= (scavChunkFlags)(scavChunkHasFree);
 }
 
@@ -1357,7 +1357,7 @@ internal static void setNonEmptyᴍ(ref scavChunkFlags sc) {
 
 // shouldScavenge returns true if the corresponding chunk should be interrogated
 // by the scavenger.
-internal static bool shouldScavengeᴍ(scavChunkData sc, uint32 currGen, bool force) {
+[GoMethodBody("shouldScavenge")] internal static bool shouldScavengeᴍ(scavChunkData sc, uint32 currGen, bool force) {
     if (sc.scavChunkFlags.isEmpty()) {
         // Nothing to scavenge.
         return false;
@@ -1382,7 +1382,7 @@ internal static ref readonly @string tooManyPagesAllocatedInˢᴍscavChunkData =
 private static readonly @string tooManyPagesAllocatedInˢᵇᴍscavChunkData = "too many pages allocated in chunk?"u8;
 
 // alloc updates sc given that npages were allocated in the corresponding chunk.
-internal static void allocᴍ(ref scavChunkData sc, nuint npages, uint32 newGen) {
+[GoMethodBody("alloc")] internal static void allocᴍ(ref scavChunkData sc, nuint npages, uint32 newGen) {
     if ((nuint)sc.inUse + npages > pallocChunkPages) {
         print((@string)"runtime: inUse=", sc.inUse, (@string)" npages=", npages, (@string)"\n");
         @throw(tooManyPagesAllocatedInˢᴍscavChunkData);
@@ -1403,7 +1403,7 @@ internal static ref readonly @string allocatedPagesBelowZeroˢᴍscavChunkData =
 private static readonly @string allocatedPagesBelowZeroˢᵇᴍscavChunkData = "allocated pages below zero?"u8;
 
 // free updates sc given that npages was freed in the corresponding chunk.
-internal static void freeᴍ(ref scavChunkData sc, nuint npages, uint32 newGen) {
+[GoMethodBody("free")] internal static void freeᴍ(ref scavChunkData sc, nuint npages, uint32 newGen) {
     if ((nuint)sc.inUse < npages) {
         print((@string)"runtime: inUse=", sc.inUse, (@string)" npages=", npages, (@string)"\n");
         @throw(allocatedPagesBelowZeroˢᴍscavChunkData);
@@ -1445,7 +1445,7 @@ partial struct piController {
 //
 // In the specific case of an error overflow occurs, the errOverflow field will be
 // set and the rest of the controller's internal state will be fully reset.
-internal static (float64, bool) nextᴍ(ref piController c, float64 input, float64 setpoint, float64 period) {
+[GoMethodBody("next")] internal static (float64, bool) nextᴍ(ref piController c, float64 input, float64 setpoint, float64 period) {
     // Compute the raw output value.
     var prop = c.kp * (setpoint - input);
     var rawOutput = prop + c.errIntegral;
@@ -1482,55 +1482,8 @@ internal static (float64, bool) nextᴍ(ref piController c, float64 input, float
 }
 
 // reset resets the controller state, except for controller error flags.
-internal static void resetᴍ(ref piController c) {
+[GoMethodBody("reset")] internal static void resetᴍ(ref piController c) {
     c.errIntegral = 0D;
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛscavengerState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ж<scavengerState> Ꮡs) => runtime_package.initᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void park(this ж<scavengerState> Ꮡs) => runtime_package.parkᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ready(this ж<scavengerState> Ꮡs) => runtime_package.readyᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void wake(this ж<scavengerState> Ꮡs) => runtime_package.wakeᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sleep(this ж<scavengerState> Ꮡs, float64 worked) => runtime_package.sleepᴍ(Ꮡs, worked);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void controllerFailed(this ж<scavengerState> Ꮡs) => runtime_package.controllerFailedᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uintptr released, float64 worked) run(this ж<scavengerState> Ꮡs) => runtime_package.runᴍ(Ꮡs);
-}
-partial class runtimeᴛpageAlloc {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr scavenge(this ж<pageAlloc> Ꮡp, uintptr nbytes, Func<bool> shouldStop, bool force) => runtime_package.scavengeᴍ(Ꮡp, nbytes, shouldStop, force);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr scavengeOne(this ref pageAlloc p, chunkIdx ci, nuint searchIdx, uintptr max) => runtime_package.scavengeOneᴍ(ref p, ci, searchIdx, max);
-}
-partial class runtimeᴛpallocData {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nuint, nuint) findScavengeCandidate(this ref pallocData m, nuint searchIdx, uintptr minimum, uintptr max) => runtime_package.findScavengeCandidateᴍ(ref m, searchIdx, minimum, max);
-}
-partial class runtimeᴛscavengeIndex {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr init(this ж<scavengeIndex> Ꮡs, bool test, ж<sysMemStat> sysStat) => runtime_package.initᴍ(Ꮡs, test, sysStat);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr grow(this ж<scavengeIndex> Ꮡs, uintptr @base, uintptr limit, ж<sysMemStat> sysStat) => runtime_package.growᴍ(Ꮡs, @base, limit, sysStat);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (chunkIdx, nuint) find(this ж<scavengeIndex> Ꮡs, bool force) => runtime_package.findᴍ(Ꮡs, force);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void alloc(this ref scavengeIndex s, chunkIdx ci, nuint npages) => runtime_package.allocᴍ(ref s, ci, npages);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void free(this ж<scavengeIndex> Ꮡs, chunkIdx ci, nuint page, nuint npages) => runtime_package.freeᴍ(Ꮡs, ci, page, npages);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void nextGen(this ж<scavengeIndex> Ꮡs) => runtime_package.nextGenᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setEmpty(this ref scavengeIndex s, chunkIdx ci) => runtime_package.setEmptyᴍ(ref s, ci);
-}
-partial class runtimeᴛatomicScavChunkData {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static scavChunkData load(this ж<atomicScavChunkData> Ꮡsc) => runtime_package.loadᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void store(this ж<atomicScavChunkData> Ꮡsc, scavChunkData ssc) => runtime_package.storeᴍ(Ꮡsc, ssc);
-}
-partial class runtimeᴛscavChunkData {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 pack(this scavChunkData sc) => runtime_package.packᴍ(sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool shouldScavenge(this scavChunkData sc, uint32 currGen, bool force) => runtime_package.shouldScavengeᴍ(sc, currGen, force);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void alloc(this ref scavChunkData sc, nuint npages, uint32 newGen) => runtime_package.allocᴍ(ref sc, npages, newGen);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void free(this ref scavChunkData sc, nuint npages, uint32 newGen) => runtime_package.freeᴍ(ref sc, npages, newGen);
-}
-partial class runtimeᴛscavChunkFlags {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isEmpty(this ref scavChunkFlags sc) => runtime_package.isEmptyᴍ(ref sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setEmpty(this ref scavChunkFlags sc) => runtime_package.setEmptyᴍ(ref sc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setNonEmpty(this ref scavChunkFlags sc) => runtime_package.setNonEmptyᴍ(ref sc);
-}
-partial class runtimeᴛpiController {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (float64, bool) next(this ref piController c, float64 input, float64 setpoint, float64 period) => runtime_package.nextᴍ(ref c, input, setpoint, period);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref piController c) => runtime_package.resetᴍ(ref c);
-}
-// </GlyphForwarders>

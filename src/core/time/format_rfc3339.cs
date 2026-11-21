@@ -18,7 +18,7 @@ partial class time_package {
 // with the second most popular format only being used 8% of the time.
 // The overwhelming use of RFC 3339 compared to all other formats justifies
 // the addition of logic to optimize formatting and parsing.
-internal static slice<byte> appendFormatRFC3339ᴍ(Time t, slice<byte> b, bool nanos) {
+[GoMethodBody("appendFormatRFC3339")] internal static slice<byte> appendFormatRFC3339ᴍ(Time t, slice<byte> b, bool nanos) {
     var (_, offset, abs) = t.locabs();
 
     // Format date.
@@ -68,7 +68,7 @@ private static readonly @string yearOutsideOfRange09999ˢᵇᴍTime = "year outs
 internal static ref readonly @string timezoneHourOutsideOfˢᴍTime => ref timezoneHourOutsideOfˢᵇᴍTime;
 private static readonly @string timezoneHourOutsideOfˢᵇᴍTime = "timezone hour outside of range [0,23]"u8;
 
-internal static (slice<byte>, error) appendStrictRFC3339ᴍ(Time t, slice<byte> b) {
+[GoMethodBody("appendStrictRFC3339")] internal static (slice<byte>, error) appendStrictRFC3339ᴍ(Time t, slice<byte> b) {
     nint n0 = len(b);
     b = t.appendFormatRFC3339(b, true);
 
@@ -210,10 +210,3 @@ internal static (Time, error) parseStrictRFC3339(slice<byte> b) {
 }
 
 } // end time_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class timeᴛTime {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendFormatRFC3339(this Time t, slice<byte> b, bool nanos) => time_package.appendFormatRFC3339ᴍ(t, b, nanos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) appendStrictRFC3339(this Time t, slice<byte> b) => time_package.appendStrictRFC3339ᴍ(t, b);
-}
-// </GlyphForwarders>

@@ -111,7 +111,7 @@ internal static void removeAnonymousField(@string name, ref ast.InterfaceType it
 // in place and reports whether fields were removed. Anonymous fields are
 // recorded with the parent type. filterType is called with the types of
 // all remaining fields.
-internal static bool /*removedFields*/ filterFieldListᴍ(ref reader r, ж<namedType> parent, ж<ast.FieldList> Ꮡfields, ж<ast.InterfaceType> ityp) {
+[GoMethodBody("filterFieldList")] internal static bool /*removedFields*/ filterFieldListᴍ(ref reader r, ж<namedType> parent, ж<ast.FieldList> Ꮡfields, ж<ast.InterfaceType> ityp) {
     bool removedFields = default;
     ref var fields = ref Ꮡfields.DerefOrNull();
 
@@ -166,7 +166,7 @@ internal static bool /*removedFields*/ filterFieldListᴍ(ref reader r, ж<named
 }
 
 // filterParamList applies filterType to each parameter type in fields.
-internal static void filterParamListᴍ(ref reader r, ж<ast.FieldList> Ꮡfields) {
+[GoMethodBody("filterParamList")] internal static void filterParamListᴍ(ref reader r, ж<ast.FieldList> Ꮡfields) {
     ref var fields = ref Ꮡfields.DerefOrNull();
 
     if (Ꮡfields != nil) {
@@ -179,7 +179,7 @@ internal static void filterParamListᴍ(ref reader r, ж<ast.FieldList> Ꮡfield
 // filterType strips any unexported struct fields or method types from typ
 // in place. If fields (or methods) have been removed, the corresponding
 // struct or interface type has the Incomplete field set to true.
-internal static void filterTypeᴍ(ref reader r, ж<namedType> parent, ast.Expr typ) {
+[GoMethodBody("filterType")] internal static void filterTypeᴍ(ref reader r, ж<namedType> parent, ast.Expr typ) {
     switch (typ.type()) {
     case ж<ast.Ident> t: {
         // nothing to do
@@ -239,7 +239,7 @@ internal static void filterTypeᴍ(ref reader r, ж<namedType> parent, ast.Expr 
     }}
 }
 
-internal static bool filterSpecᴍ(ref reader r, ast.Spec spec) {
+[GoMethodBody("filterSpec")] internal static bool filterSpecᴍ(ref reader r, ast.Spec spec) {
     switch (spec.type()) {
     case ж<ast.ImportSpec> s: {
         // always keep imports so we can collect them
@@ -309,7 +309,7 @@ internal static ast.Expr copyConstType(ast.Expr typ, token.Pos pos) {
 
 } partial class doc_package {
 
-internal static slice<ast.Spec> filterSpecListᴍ(ref reader r, slice<ast.Spec> list, token.Token tok) {
+[GoMethodBody("filterSpecList")] internal static slice<ast.Spec> filterSpecListᴍ(ref reader r, slice<ast.Spec> list, token.Token tok) {
     if (tok == token.CONST) {
         // Propagate any type information that would get lost otherwise
         // when unexported constants are filtered.
@@ -339,7 +339,7 @@ internal static slice<ast.Spec> filterSpecListᴍ(ref reader r, slice<ast.Spec> 
     return list.slice(0, j);
 }
 
-internal static bool filterDeclᴍ(ref reader r, ast.Decl decl) {
+[GoMethodBody("filterDecl")] internal static bool filterDeclᴍ(ref reader r, ast.Decl decl) {
     switch (decl.type()) {
     case ж<ast.GenDecl> d: {
         d.Specs = r.filterSpecList(d.Specs, d.Tok);
@@ -356,7 +356,7 @@ internal static bool filterDeclᴍ(ref reader r, ast.Decl decl) {
 }
 
 // fileExports removes unexported declarations from src in place.
-internal static void fileExportsᴍ(ref reader r, ж<ast.File> Ꮡsrc) {
+[GoMethodBody("fileExports")] internal static void fileExportsᴍ(ref reader r, ж<ast.File> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     nint j = 0;
@@ -370,15 +370,3 @@ internal static void fileExportsᴍ(ref reader r, ж<ast.File> Ꮡsrc) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class docᴛreader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<namedType> parent, ж<ast.FieldList> Ꮡfields, ж<ast.InterfaceType> ityp) => doc_package.filterFieldListᴍ(ref r, parent, Ꮡfields, ityp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void filterParamList(this ref reader r, ж<ast.FieldList> Ꮡfields) => doc_package.filterParamListᴍ(ref r, Ꮡfields);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void filterType(this ref reader r, ж<namedType> parent, ast.Expr typ) => doc_package.filterTypeᴍ(ref r, parent, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool filterSpec(this ref reader r, ast.Spec spec) => doc_package.filterSpecᴍ(ref r, spec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ast.Spec> filterSpecList(this ref reader r, slice<ast.Spec> list, token.Token tok) => doc_package.filterSpecListᴍ(ref r, list, tok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool filterDecl(this ref reader r, ast.Decl decl) => doc_package.filterDeclᴍ(ref r, decl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fileExports(this ref reader r, ж<ast.File> Ꮡsrc) => doc_package.fileExportsᴍ(ref r, Ꮡsrc);
-}
-// </GlyphForwarders>

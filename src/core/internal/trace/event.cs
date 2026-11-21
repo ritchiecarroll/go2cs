@@ -92,7 +92,7 @@ public static EventKind EventExperimental => 14;
 } partial class trace_package {
 
 // String returns a string form of the EventKind.
-internal static @string Stringᴍ(EventKind e) {
+[GoMethodBody("String")] internal static @string Stringᴍ(EventKind e) {
     if ((nint)e >= len(eventKindStrings)) {
         return eventKindStrings[0];
     }
@@ -145,7 +145,7 @@ partial struct Time /*num:int64*/;
 } partial class trace_package {
 
 // Sub subtracts t0 from t, returning the duration in nanoseconds.
-internal static time.Duration Subᴍ(Time t, Time t0) {
+[GoMethodBody("Sub")] internal static time.Duration Subᴍ(Time t, Time t0) {
     return (time.Duration)((int64)t - (int64)t0);
 }
 
@@ -282,7 +282,7 @@ partial struct Stack {
 } partial class trace_package {
 
 // Frames is an iterator over the frames in a Stack.
-internal static iter.Seq<StackFrame> Framesᴍ(Stack s) {
+[GoMethodBody("Frames")] internal static iter.Seq<StackFrame> Framesᴍ(Stack s) {
     var sʗ1 = s;
     return (Func<StackFrame, bool> yield) => {
         if (sʗ1.id == 0) {
@@ -307,7 +307,7 @@ internal static iter.Seq<StackFrame> Framesᴍ(Stack s) {
 // String returns the stack as a human-readable string.
 //
 // The format of the string is intended for debugging and is subject to change.
-internal static @string Stringᴍ(Stack s) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Stack s) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     printStack(new strings_BuilderжWriter(Ꮡsb), ""u8, s.Frames());
     return sb.String();
@@ -362,7 +362,7 @@ internal static ref readonly @string stringˢᴍExperimentalEvent => ref string�
 private static readonly @string stringˢᵇᴍExperimentalEvent = "string"u8;
 
 // ArgValue returns a typed Value for the i'th argument in the experimental event.
-internal static Value ArgValueᴍ(ExperimentalEvent e, nint i) {
+[GoMethodBody("ArgValue")] internal static Value ArgValueᴍ(ExperimentalEvent e, nint i) {
     if (i < 0 || i >= len(e.Args)) {
         throw panic(fmt.Sprintf("experimental event argument index %d out of bounds [0, %d)"u8, i, len(e.Args)));
     }
@@ -954,14 +954,14 @@ partial struct Event {
 } partial class trace_package {
 
 // Kind returns the kind of event that this is.
-internal static EventKind Kindᴍ(Event e) {
+[GoMethodBody("Kind")] internal static EventKind Kindᴍ(Event e) {
     e = e.ΔClone();
 
     return tracev2Type2Kind[e.@base.typ];
 }
 
 // Time returns the timestamp of the event.
-internal static Time Timeᴍ(Event e) {
+[GoMethodBody("Time")] internal static Time Timeᴍ(Event e) {
     e = e.ΔClone();
 
     return e.@base.time;
@@ -976,7 +976,7 @@ internal static Time Timeᴍ(Event e) {
 // starting to run on this thread and/or proc, then this will return
 // NoGoroutine. In this case, the goroutine starting to run will be
 // can be found at Event.StateTransition().Resource.
-internal static GoID Goroutineᴍ(Event e) {
+[GoMethodBody("Goroutine")] internal static GoID Goroutineᴍ(Event e) {
     e = e.ΔClone();
 
     return e.ctx.G;
@@ -987,7 +987,7 @@ internal static GoID Goroutineᴍ(Event e) {
 // Note that for proc state transitions this always refers to the
 // state before the transition. For example, if a proc is just
 // starting to run on this thread, then this will return NoProc.
-internal static ProcID Procᴍ(Event e) {
+[GoMethodBody("Proc")] internal static ProcID Procᴍ(Event e) {
     e = e.ΔClone();
 
     return e.ctx.P;
@@ -1003,7 +1003,7 @@ internal static ProcID Procᴍ(Event e) {
 // will always return a valid thread ID. However thread state transitions
 // may be tracked in the future, and callers must be robust to this
 // possibility.
-internal static ThreadID Threadᴍ(Event e) {
+[GoMethodBody("Thread")] internal static ThreadID Threadᴍ(Event e) {
     e = e.ΔClone();
 
     return e.ctx.M;
@@ -1013,7 +1013,7 @@ internal static ThreadID Threadᴍ(Event e) {
 //
 // This represents a stack trace at the current moment in time for
 // the current execution context.
-internal static Stack Stackᴍ(Event e) {
+[GoMethodBody("Stack")] internal static Stack Stackᴍ(Event e) {
     e = e.ΔClone();
 
     if (e.@base.typ == evSync) {
@@ -1047,7 +1047,7 @@ private static readonly @string gcHeapGoalBytesˢᵇᴍEvent = "/gc/heap/goal:by
 // Metric returns details about a Metric event.
 //
 // Panics if Kind != EventMetric.
-internal static Metric Metricᴍ(Event e) {
+[GoMethodBody("Metric")] internal static Metric Metricᴍ(Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventMetric) {
@@ -1080,7 +1080,7 @@ internal static Metric Metricᴍ(Event e) {
 // Label returns details about a Label event.
 //
 // Panics if Kind != EventLabel.
-internal static Label Labelᴍ(Event e) {
+[GoMethodBody("Label")] internal static Label Labelᴍ(Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventLabel) {
@@ -1106,7 +1106,7 @@ private static readonly @string gcMarkAssistˢᵇᴍEvent = "GC mark assist"u8;
 // Range returns details about an EventRangeBegin, EventRangeActive, or EventRangeEnd event.
 //
 // Panics if Kind != EventRangeBegin, Kind != EventRangeActive, and Kind != EventRangeEnd.
-internal static Range Rangeᴍ(Event e) {
+[GoMethodBody("Range")] internal static Range Rangeᴍ(Event e) {
     e = e.ΔClone();
 
     var kind = e.Kind(); if (kind != EventRangeBegin && kind != EventRangeActive && kind != EventRangeEnd) {
@@ -1156,7 +1156,7 @@ internal static Range Rangeᴍ(Event e) {
 // RangeAttributes returns attributes for a completed range.
 //
 // Panics if Kind != EventRangeEnd.
-internal static slice<RangeAttribute> RangeAttributesᴍ(Event e) {
+[GoMethodBody("RangeAttributes")] internal static slice<RangeAttribute> RangeAttributesᴍ(Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventRangeEnd) {
@@ -1180,7 +1180,7 @@ internal static slice<RangeAttribute> RangeAttributesᴍ(Event e) {
 // Task returns details about a TaskBegin or TaskEnd event.
 //
 // Panics if Kind != EventTaskBegin and Kind != EventTaskEnd.
-internal static Task Taskᴍ(Event e) {
+[GoMethodBody("Task")] internal static Task Taskᴍ(Event e) {
     e = e.ΔClone();
 
     var kind = e.Kind(); if (kind != EventTaskBegin && kind != EventTaskEnd) {
@@ -1213,7 +1213,7 @@ internal static Task Taskᴍ(Event e) {
 // Region returns details about a RegionBegin or RegionEnd event.
 //
 // Panics if Kind != EventRegionBegin and Kind != EventRegionEnd.
-internal static Region Regionᴍ(Event e) {
+[GoMethodBody("Region")] internal static Region Regionᴍ(Event e) {
     e = e.ΔClone();
 
     var kind = e.Kind(); if (kind != EventRegionBegin && kind != EventRegionEnd) {
@@ -1231,7 +1231,7 @@ internal static Region Regionᴍ(Event e) {
 // Log returns details about a Log event.
 //
 // Panics if Kind != EventLog.
-internal static Log Logᴍ(Event e) {
+[GoMethodBody("Log")] internal static Log Logᴍ(Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventLog) {
@@ -1250,7 +1250,7 @@ internal static Log Logᴍ(Event e) {
 // StateTransition returns details about a StateTransition event.
 //
 // Panics if Kind != EventStateTransition.
-internal static StateTransition StateTransitionᴍ(Event e) {
+[GoMethodBody("StateTransition")] internal static StateTransition StateTransitionᴍ(Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventStateTransition) {
@@ -1357,7 +1357,7 @@ internal static StateTransition StateTransitionᴍ(Event e) {
 
 // Sync returns details that are relevant for the following events, up to but excluding the
 // next EventSync event.
-internal static Sync Syncᴍ(Event e) {
+[GoMethodBody("Sync")] internal static Sync Syncᴍ(Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventSync) {
@@ -1416,7 +1416,7 @@ partial struct ClockSnapshot {
 // Experimental returns a view of the raw event for an experimental event.
 //
 // Panics if Kind != EventExperimental.
-internal static ExperimentalEvent Experimentalᴍ(Event e) {
+[GoMethodBody("Experimental")] internal static ExperimentalEvent Experimentalᴍ(Event e) {
     e = e.ΔClone();
 
     if (e.Kind() != EventExperimental) {
@@ -1527,7 +1527,7 @@ internal static readonly object stackˢᴍEvent = (@string)"Stack="u8;
 // String returns the event as a human-readable string.
 //
 // The format of the string is intended for debugging and is subject to change.
-internal static @string Stringᴍ(Event e) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Event e) {
     e = e.ΔClone();
 
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
@@ -1636,7 +1636,7 @@ internal static @string Stringᴍ(Event e) {
 
 // validateTableIDs checks to make sure lookups in e.table
 // will work.
-internal static error validateTableIDsᴍ(Event e) {
+[GoMethodBody("validateTableIDs")] internal static error validateTableIDsᴍ(Event e) {
     e = e.ΔClone();
 
     if (e.@base.typ == evSync) {
@@ -1686,39 +1686,3 @@ internal static Event syncEvent(ж<evTable> table, Time ts, nint n) {
 }
 
 } // end trace_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class traceᴛEventKind {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this EventKind e) => trace_package.Stringᴍ(e);
-}
-partial class traceᴛTime {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static time.Duration Sub(this Time t, Time t0) => trace_package.Subᴍ(t, t0);
-}
-partial class traceᴛStack {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static iter.Seq<StackFrame> Frames(this Stack s) => trace_package.Framesᴍ(s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Stack s) => trace_package.Stringᴍ(s);
-}
-partial class traceᴛExperimentalEvent {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Value ArgValue(this ExperimentalEvent e, nint i) => trace_package.ArgValueᴍ(e, i);
-}
-partial class traceᴛEvent {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static EventKind Kind(this Event e) => trace_package.Kindᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time Time(this Event e) => trace_package.Timeᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static GoID Goroutine(this Event e) => trace_package.Goroutineᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ProcID Proc(this Event e) => trace_package.Procᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ThreadID Thread(this Event e) => trace_package.Threadᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Stack Stack(this Event e) => trace_package.Stackᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Metric Metric(this Event e) => trace_package.Metricᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Label Label(this Event e) => trace_package.Labelᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Range Range(this Event e) => trace_package.Rangeᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<RangeAttribute> RangeAttributes(this Event e) => trace_package.RangeAttributesᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Task Task(this Event e) => trace_package.Taskᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Region Region(this Event e) => trace_package.Regionᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Log Log(this Event e) => trace_package.Logᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static StateTransition StateTransition(this Event e) => trace_package.StateTransitionᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Sync Sync(this Event e) => trace_package.Syncᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ExperimentalEvent Experimental(this Event e) => trace_package.Experimentalᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Event e) => trace_package.Stringᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error validateTableIDs(this Event e) => trace_package.validateTableIDsᴍ(e);
-}
-// </GlyphForwarders>

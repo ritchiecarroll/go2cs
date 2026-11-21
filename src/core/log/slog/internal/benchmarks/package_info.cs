@@ -63,6 +63,19 @@ using static go.log.slog.@internal.benchmarks_package;
 
 namespace go.log.slog.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using context = context_package;
+using fmt = fmt_package;
+using io = io_package;
+using slog = go.log.slog_package;
+using buffer = go.log.slog.@internal.buffer_package;
+using strconv = strconv_package;
+using time = time_package;
+using go.log;
+using go.log.slog.@internal;
+using static benchmarks_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("benchmarks")]
 public static partial class benchmarks_package
 {
@@ -108,3 +121,26 @@ public static partial class benchmarks_package
 [GoMethodHost(typeof(benchmarks_package.disabledHandler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class benchmarksᴛdisabledHandler;
 [GoMethodHost(typeof(benchmarks_package.fastTextHandler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class benchmarksᴛfastTextHandler;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class benchmarksᴛfastTextHandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Enabled(this ref fastTextHandler h, context.Context _Δp1, slog.Level _Δp2) => benchmarks_package.Enabledᴍ(ref h, _Δp1, _Δp2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Handle(this ж<fastTextHandler> Ꮡh, context.Context _Δp1, slog.Record r) => benchmarks_package.Handleᴍ(Ꮡh, _Δp1, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void appendValue(this ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, slog.Value v) => benchmarks_package.appendValueᴍ(ref h, Ꮡbuf, v);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void appendTime(this ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, time.Time t) => benchmarks_package.appendTimeᴍ(ref h, Ꮡbuf, t);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithAttrs(this ref fastTextHandler h, slice<slog.Attr> _) => benchmarks_package.WithAttrsᴍ(ref h, _);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithGroup(this ref fastTextHandler _Δp0, @string _Δp1) => benchmarks_package.WithGroupᴍ(ref _Δp0, _Δp1);
+}
+partial class benchmarksᴛasyncHandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Enabled(this ref asyncHandler _Δp0, context.Context _Δp1, slog.Level _Δp2) => benchmarks_package.Enabledᴍ(ref _Δp0, _Δp1, _Δp2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Handle(this ref asyncHandler h, context.Context _, slog.Record r) => benchmarks_package.Handleᴍ(ref h, _, r);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithAttrs(this ref asyncHandler _Δp0, slice<slog.Attr> _Δp1) => benchmarks_package.WithAttrsᴍ(ref _Δp0, _Δp1);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithGroup(this ref asyncHandler _Δp0, @string _Δp1) => benchmarks_package.WithGroupᴍ(ref _Δp0, _Δp1);
+}
+partial class benchmarksᴛdisabledHandler {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Enabled(this disabledHandler _Δp0, context.Context _Δp1, slog.Level _Δp2) => benchmarks_package.Enabledᴍ(_Δp0, _Δp1, _Δp2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Handle(this disabledHandler _Δp0, context.Context _Δp1, slog.Record _Δp2) => benchmarks_package.Handleᴍ(_Δp0, _Δp1, _Δp2);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithAttrs(this disabledHandler _Δp0, slice<slog.Attr> _Δp1) => benchmarks_package.WithAttrsᴍ(_Δp0, _Δp1);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slog.Handler WithGroup(this disabledHandler _Δp0, @string _Δp1) => benchmarks_package.WithGroupᴍ(_Δp0, _Δp1);
+}
+// </GlyphForwarders>

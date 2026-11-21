@@ -108,42 +108,26 @@ internal static Timeval setTimeval(int64 sec, int64 usec) {
 
 } partial class syscall_package {
 
-internal static uint64 PCᴍ(ref PtraceRegs r) { return r.Rip; }
+[GoMethodBody("PC")] internal static uint64 PCᴍ(ref PtraceRegs r) { return r.Rip; }
 
-internal static void SetPCᴍ(ref PtraceRegs r, uint64 pc) { r.Rip = pc; }
+[GoMethodBody("SetPC")] internal static void SetPCᴍ(ref PtraceRegs r, uint64 pc) { r.Rip = pc; }
 
 } partial class syscall_package {
 
-internal static void SetLenᴍ(ref Iovec iov, nint length) {
+[GoMethodBody("SetLen")] internal static void SetLenᴍ(ref Iovec iov, nint length) {
     iov.Len = (uint64)length;
 }
 
 } partial class syscall_package {
 
-internal static void SetControllenᴍ(ref Msghdr msghdr, nint length) {
+[GoMethodBody("SetControllen")] internal static void SetControllenᴍ(ref Msghdr msghdr, nint length) {
     msghdr.Controllen = (uint64)length;
 }
 
 } partial class syscall_package {
 
-internal static void SetLenᴍ(ref Cmsghdr cmsg, nint length) {
+[GoMethodBody("SetLen")] internal static void SetLenᴍ(ref Cmsghdr cmsg, nint length) {
     cmsg.Len = (uint64)length;
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class syscallᴛPtraceRegs {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 PC(this ref PtraceRegs r) => syscall_package.PCᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetPC(this ref PtraceRegs r, uint64 pc) => syscall_package.SetPCᴍ(ref r, pc);
-}
-partial class syscallᴛIovec {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetLen(this ref Iovec iov, nint length) => syscall_package.SetLenᴍ(ref iov, length);
-}
-partial class syscallᴛMsghdr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetControllen(this ref Msghdr msghdr, nint length) => syscall_package.SetControllenᴍ(ref msghdr, length);
-}
-partial class syscallᴛCmsghdr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetLen(this ref Cmsghdr cmsg, nint length) => syscall_package.SetLenᴍ(ref cmsg, length);
-}
-// </GlyphForwarders>

@@ -23,7 +23,7 @@ partial struct window {
 } partial class zstd_package {
 
 // reset clears stored data and configures window size.
-internal static void resetᴍ(ref window w, nint size) {
+[GoMethodBody("reset")] internal static void resetᴍ(ref window w, nint size) {
     var b = w.data[..0];
     if (cap(b) < size) {
         b = new slice<byte>(0, size);
@@ -34,12 +34,12 @@ internal static void resetᴍ(ref window w, nint size) {
 }
 
 // len returns the number of stored bytes.
-internal static uint32 lenᴍ(ref window w) {
+[GoMethodBody("len")] internal static uint32 lenᴍ(ref window w) {
     return (uint32)builtin.len(w.data);
 }
 
 // save stores up to size last bytes from the buf.
-internal static void saveᴍ(ref window w, slice<byte> buf) {
+[GoMethodBody("save")] internal static void saveᴍ(ref window w, slice<byte> buf) {
     if (w.size == 0) {
         return;
     }
@@ -75,7 +75,7 @@ internal static void saveᴍ(ref window w, slice<byte> buf) {
 
 // appendTo appends stored bytes between from and to indices to the buf.
 // Index from must be less or equal to index to and to must be less or equal to w.len().
-internal static slice<byte> appendToᴍ(ref window w, slice<byte> buf, uint32 from, uint32 to) {
+[GoMethodBody("appendTo")] internal static slice<byte> appendToᴍ(ref window w, slice<byte> buf, uint32 from, uint32 to) {
     var dataLen = (uint32)builtin.len(w.data);
     from += (uint32)w.off;
     to += (uint32)w.off;
@@ -99,12 +99,3 @@ internal static slice<byte> appendToᴍ(ref window w, slice<byte> buf, uint32 fr
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class zstdᴛwindow {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref window w, nint size) => zstd_package.resetᴍ(ref w, size);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 len(this ref window w) => zstd_package.lenᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void save(this ref window w, slice<byte> buf) => zstd_package.saveᴍ(ref w, buf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendTo(this ref window w, slice<byte> buf, uint32 from, uint32 to) => zstd_package.appendToᴍ(ref w, buf, from, to);
-}
-// </GlyphForwarders>

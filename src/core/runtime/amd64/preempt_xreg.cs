@@ -140,7 +140,7 @@ internal static void xRegRestore(ж<g> Ꮡgp) {
 
 } partial class runtime_package {
 
-internal static void freeᴍ(ref xRegPerP xRegs) {
+[GoMethodBody("free")] internal static void freeᴍ(ref xRegPerP xRegs) {
     if (xRegs.cache != nil) {
         @lock(ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡlock));
         ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡalloc).free(@unsafe.Pointer.FromPinnedBox(xRegs.cache));
@@ -150,9 +150,3 @@ internal static void freeᴍ(ref xRegPerP xRegs) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛxRegPerP {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void free(this ref xRegPerP xRegs) => runtime_package.freeᴍ(ref xRegs);
-}
-// </GlyphForwarders>

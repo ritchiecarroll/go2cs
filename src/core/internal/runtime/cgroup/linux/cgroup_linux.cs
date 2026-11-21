@@ -34,7 +34,7 @@ partial struct CPU {
 internal static ref readonly @string impossibleCgroupVersionˢᴍCPU => ref impossibleCgroupVersionˢᵇᴍCPU;
 private static readonly @string impossibleCgroupVersionˢᵇᴍCPU = "impossible cgroup version"u8;
 
-internal static void Closeᴍ(CPU c) {
+[GoMethodBody("Close")] internal static void Closeᴍ(CPU c) {
     switch (c.version) {
     case var ᴛ when ᴛ == V1: {
         linux.Close(c.quotaFD);
@@ -307,9 +307,3 @@ public static (nint, error) FindCPUMountPoint(slice<byte> @out, slice<byte> cgro
 }
 
 } // end cgroup_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class cgroupᴛCPU {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Close(this CPU c) => cgroup_package.Closeᴍ(c);
-}
-// </GlyphForwarders>

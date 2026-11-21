@@ -207,7 +207,7 @@ partial struct xorshift /*num:uint64*/;
 
 } partial class slices_package {
 
-internal static uint64 Nextᴍ(ref xorshift r) {
+[GoMethodBody("Next")] internal static uint64 Nextᴍ(ref xorshift r) {
     r ^= (xorshift)((r << 13));
     r ^= (xorshift)((r >> 7));
     r ^= (xorshift)((r << 17));
@@ -229,9 +229,3 @@ internal static bool isNaN<T>(T x)
 }
 
 } // end slices_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class slicesᴛxorshift {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 Next(this ref xorshift r) => slices_package.Nextᴍ(ref r);
-}
-// </GlyphForwarders>

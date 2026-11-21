@@ -46,7 +46,7 @@ private static readonly @string vTraceWithoutArgumentsˢᵇᴍChecker = "%v: tra
 // reports whether the call is valid, with *x holding the result;
 // but x.expr is not set. If the call is invalid, the result is
 // false, and *x is undefined.
-internal static bool /*_*/ Δbuiltinᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall, builtinId id) {
+[GoMethodBody("Δbuiltin")] internal static bool /*_*/ Δbuiltinᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall, builtinId id) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -736,7 +736,7 @@ internal static bool /*_*/ Δbuiltinᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, 
             // (no argument evaluated yet)
             var arg = argList[0];
             Ꮡcheck.exprOrType(Ꮡx, arg, false);
-            Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(1 << (int)(novalue)) | (nuint)(1 << (int)(types_package.Δbuiltin))));
+            Ꮡcheck.exclude(Ꮡx, (nuint)((nuint)(1 << (int)(novalue)) | (nuint)(1 << (int)(types_package.Δbuiltinᴍ))));
             switch (x.mode) {
             case var ᴛ2 when ᴛ2 == invalid: {
                 return default;
@@ -1188,7 +1188,7 @@ internal static bool /*varSized*/ hasVarSize(Type t, map<ж<Named>, bool> seen) 
 // of x. If any of these applications of f return nil,
 // applyTypeFunc returns nil.
 // If x is not a type parameter, the result is f(x).
-internal static Type applyTypeFuncᴍ(ж<Checker> Ꮡcheck, Func<Type, Type> f, ж<operand> Ꮡx, builtinId id) {
+[GoMethodBody("applyTypeFunc")] internal static Type applyTypeFuncᴍ(ж<Checker> Ꮡcheck, Func<Type, Type> f, ж<operand> Ꮡx, builtinId id) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -1280,10 +1280,3 @@ internal static Type arrayPtrDeref(Type typ) {
 }
 
 } // end types_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*_*/ Δbuiltin(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall, builtinId id) => types_package.Δbuiltinᴍ(Ꮡcheck, Ꮡx, Ꮡcall, id);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type applyTypeFunc(this ж<Checker> Ꮡcheck, Func<Type, Type> f, ж<operand> Ꮡx, builtinId id) => types_package.applyTypeFuncᴍ(Ꮡcheck, f, Ꮡx, id);
-}
-// </GlyphForwarders>

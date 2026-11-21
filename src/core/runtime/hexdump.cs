@@ -52,7 +52,7 @@ partial struct hexdumpMarker {
 
 } partial class runtime_package {
 
-internal static void writeᴍ(ref hexdumper h, slice<byte> data) {
+[GoMethodBody("write")] internal static void writeᴍ(ref hexdumper h, slice<byte> data) {
     if (h.ready == 0) {
         h.init();
     }
@@ -79,7 +79,7 @@ internal static void writeᴍ(ref hexdumper h, slice<byte> data) {
     h.dataPos = (uint8)copy(h.dataBuf[..], data);
 }
 
-internal static void closeᴍ(ref hexdumper h) {
+[GoMethodBody("close")] internal static void closeᴍ(ref hexdumper h) {
     if (h.dataPos > 0) {
         h.flushLine(h.dataBuf.slice(0, h.dataPos));
     }
@@ -91,7 +91,7 @@ private static readonly @string invalidAddrBytesˢᵇᴍhexdumper = "invalid add
 internal static ref readonly @string invalidWordBytesˢᴍhexdumper => ref invalidWordBytesˢᵇᴍhexdumper;
 private static readonly @string invalidWordBytesˢᵇᴍhexdumper = "invalid wordBytes"u8;
 
-internal static void initᴍ(ref hexdumper h) {
+[GoMethodBody("init")] internal static void initᴍ(ref hexdumper h) {
     const nint bytesPerLine = /* len(h.dataBuf) */ 16;
 
     if (h.addrBytes == 0) {
@@ -142,7 +142,7 @@ private static readonly @string addrSepᶜᵇᴍhexdumper = ": "u8;
 internal static ref readonly @string asciiSepᶜᴍhexdumper => ref asciiSepᶜᵇᴍhexdumper;
 private static readonly @string asciiSepᶜᵇᴍhexdumper = "  "u8;
 
-internal static void flushLineᴍ(ref hexdumper h, slice<byte> data) {
+[GoMethodBody("flushLine")] internal static void flushLineᴍ(ref hexdumper h, slice<byte> data) {
     const nint bytesPerLine = /* len(h.dataBuf) */ 16;
 
     UntypedInt maxAddrChars = /* 2 * goarch.PtrSize */ 16;
@@ -231,7 +231,7 @@ private static readonly @string digᶜᵇᴍhexdumper = "0123456789abcdef"u8;
 
 // fmtHex formats v in base 16 into buf. It fills all of buf. If buf is too
 // small to represent v, it the output will start with '*'.
-internal static void fmtHexᴍ(ref hexdumper h, slice<byte> buf, uint64 v) {
+[GoMethodBody("fmtHex")] internal static void fmtHexᴍ(ref hexdumper h, slice<byte> buf, uint64 v) {
     @string dig = digᶜᴍhexdumper;
     nint i = len(buf) - 1;
     for (; i >= 0; i--) {
@@ -246,7 +246,7 @@ internal static void fmtHexᴍ(ref hexdumper h, slice<byte> buf, uint64 v) {
 
 } partial class runtime_package {
 
-internal static void startᴍ(hexdumpMarker m) {
+[GoMethodBody("start")] internal static void startᴍ(hexdumpMarker m) {
     array<byte> spaces = new(64);
     foreach (var i in range(len(spaces))) {
         spaces[i] = (byte)' ';
@@ -260,16 +260,3 @@ internal static void startᴍ(hexdumpMarker m) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class runtimeᴛhexdumper {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void write(this ref hexdumper h, slice<byte> data) => runtime_package.writeᴍ(ref h, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void close(this ref hexdumper h) => runtime_package.closeᴍ(ref h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref hexdumper h) => runtime_package.initᴍ(ref h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void flushLine(this ref hexdumper h, slice<byte> data) => runtime_package.flushLineᴍ(ref h, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fmtHex(this ref hexdumper h, slice<byte> buf, uint64 v) => runtime_package.fmtHexᴍ(ref h, buf, v);
-}
-partial class runtimeᴛhexdumpMarker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void start(this hexdumpMarker m) => runtime_package.startᴍ(m);
-}
-// </GlyphForwarders>

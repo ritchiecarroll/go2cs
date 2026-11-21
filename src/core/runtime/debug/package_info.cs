@@ -70,6 +70,15 @@ using static go.runtime.debug_package;
 
 namespace go.runtime;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using fmt = fmt_package;
+using runtime = runtime_package;
+using strconv = strconv_package;
+using strings = strings_package;
+using io = io_package;
+using static debug_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("debug")]
 public static partial class debug_package
 {
@@ -114,3 +123,9 @@ public static partial class debug_package
 // <MethodHolders>
 [GoMethodHost(typeof(debug_package.BuildInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class debugᴛBuildInfo;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class debugᴛBuildInfo {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref BuildInfo bi) => debug_package.Stringᴍ(ref bi);
+}
+// </GlyphForwarders>

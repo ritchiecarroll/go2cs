@@ -46,7 +46,7 @@ public static Form NFKD => 3;
 } partial class norm_package {
 
 // Bytes returns f(b). May return b if f(b) = b.
-internal static slice<byte> Bytesᴍ(Form f, slice<byte> b) {
+[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(Form f, slice<byte> b) {
     var src = inputBytes(b);
     var ft = formTable[f];
     var (n, ok) = ft.quickSpan(src, 0, len(b), true);
@@ -60,7 +60,7 @@ internal static slice<byte> Bytesᴍ(Form f, slice<byte> b) {
 }
 
 // String returns f(s).
-internal static @string Stringᴍ(Form f, @string s) {
+[GoMethodBody("String")] internal static @string Stringᴍ(Form f, @string s) {
     var src = inputString(s);
     var ft = formTable[f];
     var (n, ok) = ft.quickSpan(src, 0, len(s), true);
@@ -74,7 +74,7 @@ internal static @string Stringᴍ(Form f, @string s) {
 }
 
 // IsNormal returns true if b == f(b).
-internal static bool IsNormalᴍ(Form f, slice<byte> b) {
+[GoMethodBody("IsNormal")] internal static bool IsNormalᴍ(Form f, slice<byte> b) {
     var src = inputBytes(b);
     var ft = formTable[f];
     var (bp, ok) = ft.quickSpan(src, 0, len(b), true);
@@ -119,7 +119,7 @@ internal static bool cmpNormalBytes(ж<reorderBuffer> Ꮡrb) {
 } partial class norm_package {
 
 // IsNormalString returns true if s == f(s).
-internal static bool IsNormalStringᴍ(Form f, @string s) {
+[GoMethodBody("IsNormalString")] internal static bool IsNormalStringᴍ(Form f, @string s) {
     var src = inputString(s);
     var ft = formTable[f];
     var (bp, ok) = ft.quickSpan(src, 0, len(s), true);
@@ -208,13 +208,13 @@ internal static nint appendQuick(ж<reorderBuffer> Ꮡrb, nint i) {
 
 // Append returns f(append(out, b...)).
 // The buffer out must be nil, empty, or equal to f(out).
-internal static slice<byte> Appendᴍ(Form f, slice<byte> @out, params ꓸꓸꓸbyte srcʗp) {
+[GoMethodBody("Append")] internal static slice<byte> Appendᴍ(Form f, slice<byte> @out, params ꓸꓸꓸbyte srcʗp) {
     var src = srcʗp.slice();
 
     return f.doAppend(@out, inputBytes(src), len(src));
 }
 
-internal static slice<byte> doAppendᴍ(Form f, slice<byte> @out, input src, nint n) {
+[GoMethodBody("doAppend")] internal static slice<byte> doAppendᴍ(Form f, slice<byte> @out, input src, nint n) {
     if (n == 0) {
         return @out;
     }
@@ -287,20 +287,20 @@ internal static slice<byte> doAppendInner(ж<reorderBuffer> Ꮡrb, nint p) {
 
 // AppendString returns f(append(out, []byte(s))).
 // The buffer out must be nil, empty, or equal to f(out).
-internal static slice<byte> AppendStringᴍ(Form f, slice<byte> @out, @string src) {
+[GoMethodBody("AppendString")] internal static slice<byte> AppendStringᴍ(Form f, slice<byte> @out, @string src) {
     return f.doAppend(@out, inputString(src), len(src));
 }
 
 // QuickSpan returns a boundary n such that b[0:n] == f(b[0:n]).
 // It is not guaranteed to return the largest such n.
-internal static nint QuickSpanᴍ(Form f, slice<byte> b) {
+[GoMethodBody("QuickSpan")] internal static nint QuickSpanᴍ(Form f, slice<byte> b) {
     var (n, _) = formTable[f].quickSpan(inputBytes(b), 0, len(b), true);
     return n;
 }
 
 // Span implements transform.SpanningTransformer. It returns a boundary n such
 // that b[0:n] == f(b[0:n]). It is not guaranteed to return the largest such n.
-internal static (nint n, error err) Spanᴍ(Form f, slice<byte> b, bool atEOF) {
+[GoMethodBody("Span")] internal static (nint n, error err) Spanᴍ(Form f, slice<byte> b, bool atEOF) {
     nint n = default;
     error err = default;
 
@@ -317,7 +317,7 @@ internal static (nint n, error err) Spanᴍ(Form f, slice<byte> b, bool atEOF) {
 
 // SpanString returns a boundary n such that s[0:n] == f(s[0:n]).
 // It is not guaranteed to return the largest such n.
-internal static (nint n, error err) SpanStringᴍ(Form f, @string s, bool atEOF) {
+[GoMethodBody("SpanString")] internal static (nint n, error err) SpanStringᴍ(Form f, @string s, bool atEOF) {
     nint n = default;
     error err = default;
 
@@ -338,7 +338,7 @@ internal static (nint n, error err) SpanStringᴍ(Form f, @string s, bool atEOF)
 // whether any non-normalized parts were found. If atEOF is false, n will
 // not point past the last segment if this segment might be become
 // non-normalized by appending other runes.
-internal static (nint n, bool ok) quickSpanᴍ(ref formInfo f, input src, nint i, nint end, bool atEOF) {
+[GoMethodBody("quickSpan")] internal static (nint n, bool ok) quickSpanᴍ(ref formInfo f, input src, nint i, nint end, bool atEOF) {
     nint n = default;
 
     uint8 lastCC = default;
@@ -401,18 +401,18 @@ internal static (nint n, bool ok) quickSpanᴍ(ref formInfo f, input src, nint i
 
 // QuickSpanString returns a boundary n such that s[0:n] == f(s[0:n]).
 // It is not guaranteed to return the largest such n.
-internal static nint QuickSpanStringᴍ(Form f, @string s) {
+[GoMethodBody("QuickSpanString")] internal static nint QuickSpanStringᴍ(Form f, @string s) {
     var (n, _) = formTable[f].quickSpan(inputString(s), 0, len(s), true);
     return n;
 }
 
 // FirstBoundary returns the position i of the first boundary in b
 // or -1 if b contains no boundary.
-internal static nint FirstBoundaryᴍ(Form f, slice<byte> b) {
+[GoMethodBody("FirstBoundary")] internal static nint FirstBoundaryᴍ(Form f, slice<byte> b) {
     return f.firstBoundary(inputBytes(b), len(b));
 }
 
-internal static nint firstBoundaryᴍ(Form f, input src, nint nsrc) {
+[GoMethodBody("firstBoundary")] internal static nint firstBoundaryᴍ(Form f, input src, nint nsrc) {
     nint i = src.skipContinuationBytes(0);
     if (i >= nsrc) {
         return -1;
@@ -442,25 +442,25 @@ internal static nint firstBoundaryᴍ(Form f, input src, nint nsrc) {
 
 // FirstBoundaryInString returns the position i of the first boundary in s
 // or -1 if s contains no boundary.
-internal static nint FirstBoundaryInStringᴍ(Form f, @string s) {
+[GoMethodBody("FirstBoundaryInString")] internal static nint FirstBoundaryInStringᴍ(Form f, @string s) {
     return f.firstBoundary(inputString(s), len(s));
 }
 
 // NextBoundary reports the index of the boundary between the first and next
 // segment in b or -1 if atEOF is false and there are not enough bytes to
 // determine this boundary.
-internal static nint NextBoundaryᴍ(Form f, slice<byte> b, bool atEOF) {
+[GoMethodBody("NextBoundary")] internal static nint NextBoundaryᴍ(Form f, slice<byte> b, bool atEOF) {
     return f.nextBoundary(inputBytes(b), len(b), atEOF);
 }
 
 // NextBoundaryInString reports the index of the boundary between the first and
 // next segment in b or -1 if atEOF is false and there are not enough bytes to
 // determine this boundary.
-internal static nint NextBoundaryInStringᴍ(Form f, @string s, bool atEOF) {
+[GoMethodBody("NextBoundaryInString")] internal static nint NextBoundaryInStringᴍ(Form f, @string s, bool atEOF) {
     return f.nextBoundary(inputString(s), len(s), atEOF);
 }
 
-internal static nint nextBoundaryᴍ(Form f, input src, nint nsrc, bool atEOF) {
+[GoMethodBody("nextBoundary")] internal static nint nextBoundaryᴍ(Form f, input src, nint nsrc, bool atEOF) {
     if (nsrc == 0) {
         if (atEOF) {
             return 0;
@@ -500,7 +500,7 @@ internal static nint nextBoundaryᴍ(Form f, input src, nint nsrc, bool atEOF) {
 
 // LastBoundary returns the position i of the last boundary in b
 // or -1 if b contains no boundary.
-internal static nint LastBoundaryᴍ(Form f, slice<byte> b) {
+[GoMethodBody("LastBoundary")] internal static nint LastBoundaryᴍ(Form f, slice<byte> b) {
     return lastBoundary(ref (formTable[f]).DerefOrNull(), b);
 }
 
@@ -665,29 +665,3 @@ internal static void decomposeToLastBoundary(ж<reorderBuffer> Ꮡrb) {
 }
 
 } // end norm_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class normᴛForm {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this Form f, slice<byte> b) => norm_package.Bytesᴍ(f, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Form f, @string s) => norm_package.Stringᴍ(f, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsNormal(this Form f, slice<byte> b) => norm_package.IsNormalᴍ(f, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsNormalString(this Form f, @string s) => norm_package.IsNormalStringᴍ(f, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Append(this Form f, slice<byte> @out, params ꓸꓸꓸbyte srcʗp) => norm_package.Appendᴍ(f, @out, srcʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> doAppend(this Form f, slice<byte> @out, input src, nint n) => norm_package.doAppendᴍ(f, @out, src, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> AppendString(this Form f, slice<byte> @out, @string src) => norm_package.AppendStringᴍ(f, @out, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint QuickSpan(this Form f, slice<byte> b) => norm_package.QuickSpanᴍ(f, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Span(this Form f, slice<byte> b, bool atEOF) => norm_package.Spanᴍ(f, b, atEOF);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) SpanString(this Form f, @string s, bool atEOF) => norm_package.SpanStringᴍ(f, s, atEOF);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint QuickSpanString(this Form f, @string s) => norm_package.QuickSpanStringᴍ(f, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint FirstBoundary(this Form f, slice<byte> b) => norm_package.FirstBoundaryᴍ(f, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint firstBoundary(this Form f, input src, nint nsrc) => norm_package.firstBoundaryᴍ(f, src, nsrc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint FirstBoundaryInString(this Form f, @string s) => norm_package.FirstBoundaryInStringᴍ(f, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NextBoundary(this Form f, slice<byte> b, bool atEOF) => norm_package.NextBoundaryᴍ(f, b, atEOF);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NextBoundaryInString(this Form f, @string s, bool atEOF) => norm_package.NextBoundaryInStringᴍ(f, s, atEOF);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint nextBoundary(this Form f, input src, nint nsrc, bool atEOF) => norm_package.nextBoundaryᴍ(f, src, nsrc, atEOF);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint LastBoundary(this Form f, slice<byte> b) => norm_package.LastBoundaryᴍ(f, b);
-}
-partial class normᴛformInfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, bool ok) quickSpan(this ref formInfo f, input src, nint i, nint end, bool atEOF) => norm_package.quickSpanᴍ(ref f, src, i, end, atEOF);
-}
-// </GlyphForwarders>

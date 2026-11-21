@@ -47,7 +47,7 @@ internal static array<uint8> _SignatureScheme_index_8 = new uint8[]{0, 13, 26, 3
 
 } partial class tls_package {
 
-internal static @string Stringᴍ(SignatureScheme i) {
+[GoMethodBody("String")] internal static @string Stringᴍ(SignatureScheme i) {
     switch (ᐧ) {
     case {} when i == 513: {
         return _SignatureScheme_name_0;
@@ -109,7 +109,7 @@ internal static array<uint8> _CurveID_index_2 = new uint8[]{0, 17, 31, 49}.array
 
 } partial class tls_package {
 
-internal static @string Stringᴍ(CurveID i) {
+[GoMethodBody("String")] internal static @string Stringᴍ(CurveID i) {
     switch (ᐧ) {
     case {} when 23 <= i && i <= 25: {
         i -= 23;
@@ -147,7 +147,7 @@ internal static array<uint8> _ClientAuthType_index = new uint8[]{0, 12, 29, 49, 
 
 } partial class tls_package {
 
-internal static @string Stringᴍ(ClientAuthType i) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ClientAuthType i) {
     if (i < 0 || i >= ((ClientAuthType)(len(_ClientAuthType_index) - 1))) {
         return "ClientAuthType("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -155,15 +155,3 @@ internal static @string Stringᴍ(ClientAuthType i) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tlsᴛSignatureScheme {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SignatureScheme i) => tls_package.Stringᴍ(i);
-}
-partial class tlsᴛCurveID {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this CurveID i) => tls_package.Stringᴍ(i);
-}
-partial class tlsᴛClientAuthType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ClientAuthType i) => tls_package.Stringᴍ(i);
-}
-// </GlyphForwarders>

@@ -149,14 +149,8 @@ partial struct MapIter {
 // TODO: undo when the inliner is no longer bottom-up only.
 //
 //go:noinline
-internal static partial void panicNotMapᴍ(flag f) {
+[GoMethodBody("panicNotMap")] internal static partial void panicNotMapᴍ(flag f) {
     f.mustBe(Map);
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class reflectᴛflag {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void panicNotMap(this flag f) => reflect_package.panicNotMapᴍ(f);
-}
-// </GlyphForwarders>

@@ -51,7 +51,7 @@ partial struct State {
 // with per-m data without holding the per-m lock.
 //
 //go:nosplit
-internal static (uint64, bool) Nextᴍ(ref State s) {
+[GoMethodBody("Next")] internal static (uint64, bool) Nextᴍ(ref State s) {
     var i = s.i;
     if (i >= s.n) {
         return (0, false);
@@ -61,7 +61,7 @@ internal static (uint64, bool) Nextᴍ(ref State s) {
 }
 
 // Init seeds the State with the given seed value.
-internal static void Initᴍ(ж<State> Ꮡs, /*[32]*/ array<byte> seed) {
+[GoMethodBody("Init")] internal static void Initᴍ(ж<State> Ꮡs, /*[32]*/ array<byte> seed) {
     seed = seed.Clone();
 
     Ꮡs.Init64(new uint64[]{
@@ -73,7 +73,7 @@ internal static void Initᴍ(ж<State> Ꮡs, /*[32]*/ array<byte> seed) {
 }
 
 // Init64 seeds the state with the given seed value.
-internal static void Init64ᴍ(ж<State> Ꮡs, /*[4]*/ array<uint64> seed) {
+[GoMethodBody("Init64")] internal static void Init64ᴍ(ж<State> Ꮡs, /*[4]*/ array<uint64> seed) {
     seed = seed.Clone();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -87,7 +87,7 @@ internal static void Init64ᴍ(ж<State> Ꮡs, /*[4]*/ array<uint64> seed) {
 // Refill refills the state with more random values.
 // After a call to Refill, an immediate call to Next will succeed
 // (unless multiple goroutines are incorrectly sharing a state).
-internal static void Refillᴍ(ж<State> Ꮡs) {
+[GoMethodBody("Refill")] internal static void Refillᴍ(ж<State> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.c += ctrInc;
@@ -117,7 +117,7 @@ internal static void Refillᴍ(ж<State> Ꮡs) {
 // After a call to Reseed, any previously returned random values
 // have been erased from the memory of the state and cannot be
 // recovered.
-internal static void Reseedᴍ(ж<State> Ꮡs) {
+[GoMethodBody("Reseed")] internal static void Reseedᴍ(ж<State> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     array<uint64> seed = new(4);
@@ -163,7 +163,7 @@ partial struct errUnmarshalChaCha8 {
 internal static ref readonly @string invalidChaCha8EncodingˢᴍerrUnmarshalChaCha8 => ref invalidChaCha8EncodingˢᵇᴍerrUnmarshalChaCha8;
 private static readonly @string invalidChaCha8EncodingˢᵇᴍerrUnmarshalChaCha8 = "invalid ChaCha8 encoding"u8;
 
-internal static @string Errorᴍ(ref errUnmarshalChaCha8 _) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref errUnmarshalChaCha8 _) {
     return invalidChaCha8EncodingˢᴍerrUnmarshalChaCha8;
 }
 
@@ -194,16 +194,3 @@ public static error Unmarshal(ж<State> Ꮡs, slice<byte> data) {
 }
 
 } // end chacha8rand_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class chacha8randᴛState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (uint64, bool) Next(this ref State s) => chacha8rand_package.Nextᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Init(this ж<State> Ꮡs, /*[32]*/ array<byte> seed) => chacha8rand_package.Initᴍ(Ꮡs, seed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Init64(this ж<State> Ꮡs, /*[4]*/ array<uint64> seed) => chacha8rand_package.Init64ᴍ(Ꮡs, seed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Refill(this ж<State> Ꮡs) => chacha8rand_package.Refillᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reseed(this ж<State> Ꮡs) => chacha8rand_package.Reseedᴍ(Ꮡs);
-}
-partial class chacha8randᴛerrUnmarshalChaCha8 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref errUnmarshalChaCha8 _) => chacha8rand_package.Errorᴍ(ref _);
-}
-// </GlyphForwarders>

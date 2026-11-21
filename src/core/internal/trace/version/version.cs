@@ -39,7 +39,7 @@ internal static map<Version, slice<tracev2.EventSpec>> versions = new map<Versio
 } partial class version_package {
 
 // Specs returns the set of event.Specs for this version.
-internal static slice<tracev2.EventSpec> Specsᴍ(Version v) {
+[GoMethodBody("Specs")] internal static slice<tracev2.EventSpec> Specsᴍ(Version v) {
     return versions[v];
 }
 
@@ -51,7 +51,7 @@ private static readonly @string v1TraceEventTypeˢᵇᴍVersion = "<v1 trace eve
 
 // EventName returns a string name of a wire format event
 // for a particular trace version.
-internal static @string EventNameᴍ(Version v, tracev2.EventType typ) {
+[GoMethodBody("EventName")] internal static @string EventNameᴍ(Version v, tracev2.EventType typ) {
     if (!v.Valid()) {
         return invalidTraceVersionˢᴍVersion;
     }
@@ -65,7 +65,7 @@ internal static @string EventNameᴍ(Version v, tracev2.EventType typ) {
     return fmt.Sprintf("Invalid(%d)"u8, typ);
 }
 
-internal static bool Validᴍ(Version v) {
+[GoMethodBody("Valid")] internal static bool Validᴍ(Version v) {
     var (_, ok) = versions[v, ꟷ];
     return ok;
 }
@@ -96,11 +96,3 @@ public static (nint, error) WriteHeader(io.Writer w, Version v) {
 }
 
 } // end version_package
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class versionᴛVersion {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<tracev2.EventSpec> Specs(this Version v) => version_package.Specsᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string EventName(this Version v, tracev2.EventType typ) => version_package.EventNameᴍ(v, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Valid(this Version v) => version_package.Validᴍ(v);
-}
-// </GlyphForwarders>

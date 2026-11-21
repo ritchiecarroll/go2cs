@@ -78,7 +78,7 @@ public static (ж<Writer>, error) NewWriterLevelDict(io.Writer w, nint level, sl
 // Reset clears the state of the [Writer] z such that it is equivalent to its
 // initial state from [NewWriterLevel] or [NewWriterLevelDict], but instead writing
 // to w.
-internal static void Resetᴍ(ref Writer z, io.Writer w) {
+[GoMethodBody("Reset")] internal static void Resetᴍ(ref Writer z, io.Writer w) {
     z.w = w;
     // z.level and z.dict left unchanged.
     if (z.compressor != nil) {
@@ -93,7 +93,7 @@ internal static void Resetᴍ(ref Writer z, io.Writer w) {
 }
 
 // writeHeader writes the ZLIB header.
-internal static error /*err*/ writeHeaderᴍ(ref Writer z) {
+[GoMethodBody("writeHeader")] internal static error /*err*/ writeHeaderᴍ(ref Writer z) {
     error err = default;
 
     z.wroteHeader = true;
@@ -155,7 +155,7 @@ internal static error /*err*/ writeHeaderᴍ(ref Writer z) {
 // Write writes a compressed form of p to the underlying [io.Writer]. The
 // compressed bytes are not necessarily flushed until the [Writer] is closed or
 // explicitly flushed.
-internal static (nint n, error err) Writeᴍ(ref Writer z, slice<byte> p) {
+[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref Writer z, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -178,7 +178,7 @@ internal static (nint n, error err) Writeᴍ(ref Writer z, slice<byte> p) {
 }
 
 // Flush flushes the Writer to its underlying [io.Writer].
-internal static error Flushᴍ(ref Writer z) {
+[GoMethodBody("Flush")] internal static error Flushᴍ(ref Writer z) {
     if (!z.wroteHeader) {
         z.err = z.writeHeader();
     }
@@ -191,7 +191,7 @@ internal static error Flushᴍ(ref Writer z) {
 
 // Close closes the Writer, flushing any unwritten data to the underlying
 // [io.Writer], but does not close the underlying io.Writer.
-internal static error Closeᴍ(ref Writer z) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref Writer z) {
     if (!z.wroteHeader) {
         z.err = z.writeHeader();
     }
@@ -210,13 +210,3 @@ internal static error Closeᴍ(ref Writer z) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class zlibᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Writer z, io.Writer w) => zlib_package.Resetᴍ(ref z, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ writeHeader(this ref Writer z) => zlib_package.writeHeaderᴍ(ref z);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ref Writer z, slice<byte> p) => zlib_package.Writeᴍ(ref z, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Flush(this ref Writer z) => zlib_package.Flushᴍ(ref z);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Writer z) => zlib_package.Closeᴍ(ref z);
-}
-// </GlyphForwarders>

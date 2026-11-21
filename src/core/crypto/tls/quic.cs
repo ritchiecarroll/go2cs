@@ -33,7 +33,7 @@ private static readonly @string handshakeˢᵇᴍQUICEncryptionLevel = "Handshak
 internal static ref readonly @string applicationˢᴍQUICEncryptionLevel => ref applicationˢᵇᴍQUICEncryptionLevel;
 private static readonly @string applicationˢᵇᴍQUICEncryptionLevel = "Application"u8;
 
-internal static @string Stringᴍ(QUICEncryptionLevel l) {
+[GoMethodBody("String")] internal static @string Stringᴍ(QUICEncryptionLevel l) {
     switch (l) {
     case var ᴛ when ᴛ == QUICEncryptionLevelInitial: {
         return initialˢᴍQUICEncryptionLevel;
@@ -227,7 +227,7 @@ private static readonly @string tlsConfigMinVersionMustˢᵇᴍQUICConn = "tls: 
 // It may produce connection events, which may be read with [QUICConn.NextEvent].
 //
 // Start must be called at most once.
-internal static partial error Startᴍ(ж<QUICConn> Ꮡq, context.Context ctx) {
+[GoMethodBody("Start")] internal static partial error Startᴍ(ж<QUICConn> Ꮡq, context.Context ctx) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     if (q.conn.quic.started) {
@@ -246,7 +246,7 @@ internal static partial error Startᴍ(ж<QUICConn> Ꮡq, context.Context ctx) {
 
 // NextEvent returns the next event occurring on the connection.
 // It returns an event with a Kind of [QUICNoEvent] when no events are available.
-internal static QUICEvent NextEventᴍ(ref QUICConn q) {
+[GoMethodBody("NextEvent")] internal static QUICEvent NextEventᴍ(ref QUICConn q) {
     var qs = q.conn.quic;
     nint last = qs.nextEvent - 1; if (last >= 0 && len(qs.events[last].Data) > 0) {
         // Write over some of the previous event's data,
@@ -279,7 +279,7 @@ internal static QUICEvent NextEventᴍ(ref QUICConn q) {
 }
 
 // Close closes the connection and stops any in-progress handshake.
-internal static error Closeᴍ(ref QUICConn q) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref QUICConn q) {
     if (q.conn.quic.ctx == nil) {
         return default; // never started
     }
@@ -297,7 +297,7 @@ private static readonly @string tlsHandshakeDataReceivedˢᵇᴍQUICConn = "tls:
 
 // HandleData handles handshake bytes received from the peer.
 // It may produce connection events, which may be read with [QUICConn.NextEvent].
-internal static error HandleDataᴍ(ж<QUICConn> Ꮡq, QUICEncryptionLevel level, slice<byte> data) {
+[GoMethodBody("HandleData")] internal static error HandleDataᴍ(ж<QUICConn> Ꮡq, QUICEncryptionLevel level, slice<byte> data) {
     GoFrame ᒐ = default;
     try {
         ref var q = ref Ꮡq.DerefOrNull();
@@ -363,7 +363,7 @@ private static readonly @string tlsSendSessionTicketˢ3ᵇᴍQUICConn = "tls: Se
 // SendSessionTicket sends a session ticket to the client.
 // It produces connection events, which may be read with [QUICConn.NextEvent].
 // Currently, it can only be called once.
-internal static error SendSessionTicketᴍ(ref QUICConn q, QUICSessionTicketOptions opts) {
+[GoMethodBody("SendSessionTicket")] internal static error SendSessionTicketᴍ(ref QUICConn q, QUICSessionTicketOptions opts) {
     var c = q.conn;
     if (c.config.SessionTicketsDisabled) {
         return default;
@@ -389,7 +389,7 @@ private static readonly @string tlsStoreSessionTicketˢᵇᴍQUICConn = "tls: St
 // in the ClientSessionCache.
 // The application may process additional events or modify the SessionState
 // before storing the session.
-internal static error StoreSessionᴍ(ref QUICConn q, ж<SessionState> session) {
+[GoMethodBody("StoreSession")] internal static error StoreSessionᴍ(ref QUICConn q, ж<SessionState> session) {
     var c = q.conn;
     if (!c.isClient) {
         return quicError(errors.New(tlsStoreSessionTicketˢᴍQUICConn));
@@ -404,7 +404,7 @@ internal static error StoreSessionᴍ(ref QUICConn q, ж<SessionState> session) 
 }
 
 // ConnectionState returns basic TLS details about the connection.
-internal static ConnectionState ConnectionStateᴍ(ref QUICConn q) {
+[GoMethodBody("ConnectionState")] internal static ConnectionState ConnectionStateᴍ(ref QUICConn q) {
     return q.conn.ConnectionState();
 }
 
@@ -412,7 +412,7 @@ internal static ConnectionState ConnectionStateᴍ(ref QUICConn q) {
 //
 // Server connections may delay setting the transport parameters until after
 // receiving the client's transport parameters. See [QUICTransportParametersRequired].
-internal static void SetTransportParametersᴍ(ref QUICConn q, slice<byte> @params) {
+[GoMethodBody("SetTransportParameters")] internal static void SetTransportParametersᴍ(ref QUICConn q, slice<byte> @params) {
     if (@params == nil) {
         @params = [];
     }
@@ -445,7 +445,7 @@ internal static error quicError(error err) {
 
 } partial class tls_package {
 
-internal static error quicReadHandshakeBytesᴍ(ж<Conn> Ꮡc, nint n) {
+[GoMethodBody("quicReadHandshakeBytes")] internal static error quicReadHandshakeBytesᴍ(ж<Conn> Ꮡc, nint n) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     while (c.hand.Len() < n) {
@@ -456,7 +456,7 @@ internal static error quicReadHandshakeBytesᴍ(ж<Conn> Ꮡc, nint n) {
     return default;
 }
 
-internal static error quicSetReadSecretᴍ(ж<Conn> Ꮡc, QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
+[GoMethodBody("quicSetReadSecret")] internal static error quicSetReadSecretᴍ(ж<Conn> Ꮡc, QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Ensure that there are no buffered handshake messages before changing the
@@ -476,7 +476,7 @@ internal static error quicSetReadSecretᴍ(ж<Conn> Ꮡc, QUICEncryptionLevel le
     return default;
 }
 
-internal static void quicSetWriteSecretᴍ(ref Conn c, QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
+[GoMethodBody("quicSetWriteSecret")] internal static void quicSetWriteSecretᴍ(ref Conn c, QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
     c.quic.events = append(c.quic.events, new QUICEvent(
         Kind: QUICSetWriteSecret,
         Level: level,
@@ -485,7 +485,7 @@ internal static void quicSetWriteSecretᴍ(ref Conn c, QUICEncryptionLevel level
     ));
 }
 
-internal static void quicWriteCryptoDataᴍ(ref Conn c, QUICEncryptionLevel level, slice<byte> data) {
+[GoMethodBody("quicWriteCryptoData")] internal static void quicWriteCryptoDataᴍ(ref Conn c, QUICEncryptionLevel level, slice<byte> data) {
     ж<QUICEvent> last = default;
     if (len(c.quic.events) > 0) {
         last = Ꮡ(c.quic.events, len(c.quic.events) - 1);
@@ -500,7 +500,7 @@ internal static void quicWriteCryptoDataᴍ(ref Conn c, QUICEncryptionLevel leve
     last.Data = appendꓸꓸꓸ(last.Data, data);
 }
 
-internal static error quicResumeSessionᴍ(ж<Conn> Ꮡc, ж<SessionState> session) {
+[GoMethodBody("quicResumeSession")] internal static error quicResumeSessionᴍ(ж<Conn> Ꮡc, ж<SessionState> session) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.quic.events = append(c.quic.events, new QUICEvent(
@@ -516,21 +516,21 @@ internal static error quicResumeSessionᴍ(ж<Conn> Ꮡc, ж<SessionState> sessi
     return default;
 }
 
-internal static void quicStoreSessionᴍ(ref Conn c, ж<SessionState> session) {
+[GoMethodBody("quicStoreSession")] internal static void quicStoreSessionᴍ(ref Conn c, ж<SessionState> session) {
     c.quic.events = append(c.quic.events, new QUICEvent(
         Kind: QUICStoreSession,
         SessionState: session
     ));
 }
 
-internal static void quicSetTransportParametersᴍ(ref Conn c, slice<byte> @params) {
+[GoMethodBody("quicSetTransportParameters")] internal static void quicSetTransportParametersᴍ(ref Conn c, slice<byte> @params) {
     c.quic.events = append(c.quic.events, new QUICEvent(
         Kind: QUICTransportParameters,
         Data: @params
     ));
 }
 
-internal static (slice<byte>, error) quicGetTransportParametersᴍ(ж<Conn> Ꮡc) {
+[GoMethodBody("quicGetTransportParameters")] internal static (slice<byte>, error) quicGetTransportParametersᴍ(ж<Conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.quic.transportParams == nil) {
@@ -546,13 +546,13 @@ internal static (slice<byte>, error) quicGetTransportParametersᴍ(ж<Conn> Ꮡc
     return (c.quic.transportParams, default);
 }
 
-internal static void quicHandshakeCompleteᴍ(ref Conn c) {
+[GoMethodBody("quicHandshakeComplete")] internal static void quicHandshakeCompleteᴍ(ref Conn c) {
     c.quic.events = append(c.quic.events, new QUICEvent(
         Kind: QUICHandshakeDone
     ));
 }
 
-internal static void quicRejectedEarlyDataᴍ(ref Conn c) {
+[GoMethodBody("quicRejectedEarlyData")] internal static void quicRejectedEarlyDataᴍ(ref Conn c) {
     c.quic.events = append(c.quic.events, new QUICEvent(
         Kind: QUICRejectedEarlyData
     ));
@@ -563,7 +563,7 @@ internal static void quicRejectedEarlyDataᴍ(ref Conn c) {
 //
 // The handshake may become blocked waiting for handshake bytes
 // or for the user to provide transport parameters.
-internal static error quicWaitForSignalᴍ(ж<Conn> Ꮡc) {
+[GoMethodBody("quicWaitForSignal")] internal static error quicWaitForSignalᴍ(ж<Conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -594,32 +594,3 @@ internal static error quicWaitForSignalᴍ(ж<Conn> Ꮡc) {
 }
 
 }
-
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies above)
-partial class tlsᴛQUICEncryptionLevel {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this QUICEncryptionLevel l) => tls_package.Stringᴍ(l);
-}
-partial class tlsᴛQUICConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Start(this ж<QUICConn> Ꮡq, context.Context ctx) => tls_package.Startᴍ(Ꮡq, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static QUICEvent NextEvent(this ref QUICConn q) => tls_package.NextEventᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref QUICConn q) => tls_package.Closeᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error HandleData(this ж<QUICConn> Ꮡq, QUICEncryptionLevel level, slice<byte> data) => tls_package.HandleDataᴍ(Ꮡq, level, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SendSessionTicket(this ref QUICConn q, QUICSessionTicketOptions opts) => tls_package.SendSessionTicketᴍ(ref q, opts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error StoreSession(this ref QUICConn q, ж<SessionState> session) => tls_package.StoreSessionᴍ(ref q, session);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ConnectionState ConnectionState(this ref QUICConn q) => tls_package.ConnectionStateᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetTransportParameters(this ref QUICConn q, slice<byte> @params) => tls_package.SetTransportParametersᴍ(ref q, @params);
-}
-partial class tlsᴛConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error quicReadHandshakeBytes(this ж<Conn> Ꮡc, nint n) => tls_package.quicReadHandshakeBytesᴍ(Ꮡc, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error quicSetReadSecret(this ж<Conn> Ꮡc, QUICEncryptionLevel level, uint16 suite, slice<byte> secret) => tls_package.quicSetReadSecretᴍ(Ꮡc, level, suite, secret);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void quicSetWriteSecret(this ref Conn c, QUICEncryptionLevel level, uint16 suite, slice<byte> secret) => tls_package.quicSetWriteSecretᴍ(ref c, level, suite, secret);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void quicWriteCryptoData(this ref Conn c, QUICEncryptionLevel level, slice<byte> data) => tls_package.quicWriteCryptoDataᴍ(ref c, level, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error quicResumeSession(this ж<Conn> Ꮡc, ж<SessionState> session) => tls_package.quicResumeSessionᴍ(Ꮡc, session);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void quicStoreSession(this ref Conn c, ж<SessionState> session) => tls_package.quicStoreSessionᴍ(ref c, session);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void quicSetTransportParameters(this ref Conn c, slice<byte> @params) => tls_package.quicSetTransportParametersᴍ(ref c, @params);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) quicGetTransportParameters(this ж<Conn> Ꮡc) => tls_package.quicGetTransportParametersᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void quicHandshakeComplete(this ref Conn c) => tls_package.quicHandshakeCompleteᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void quicRejectedEarlyData(this ref Conn c) => tls_package.quicRejectedEarlyDataᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error quicWaitForSignal(this ж<Conn> Ꮡc) => tls_package.quicWaitForSignalᴍ(Ꮡc);
-}
-// </GlyphForwarders>
