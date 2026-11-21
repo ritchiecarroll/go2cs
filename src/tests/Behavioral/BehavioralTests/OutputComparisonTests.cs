@@ -662,6 +662,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckEnvironBlockWalk() => CheckTarget("EnvironBlockWalk");
 
     [TestMethod]
+    public void CheckErrorMethodPanicFormat() => CheckTarget("ErrorMethodPanicFormat");
+
+    [TestMethod]
     public void CheckErrorfFormatting() => CheckTarget("ErrorfFormatting");
 
     [TestMethod]
