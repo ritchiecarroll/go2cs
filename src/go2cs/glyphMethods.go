@@ -58,6 +58,7 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 	current := ""
 	var forwarders []glyphForwarder
 	switches := map[int]string{} // line index of each holder switch → the holder it opened
+	transformed := map[string]bool{}
 
 	for i, line := range lines {
 		trimmed := strings.TrimRight(line, "\r")
@@ -117,6 +118,7 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 		}
 
 		forwarders = append(forwarders, glyphForwarder{holder: holder, receiverType: forwarder.receiverType, text: forwarder.text})
+		transformed[forwarder.name] = true
 	}
 
 	if len(forwarders) == 0 {
@@ -124,6 +126,7 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 	}
 
 	glyphRenameHolderHoists(lines, packageClass, switches)
+	glyphBindMethodExpressions(lines, packageClass, transformed)
 
 	// A file whose methods were in the package class (package main under the main-holders rule) reads its own
 	// package's names bare only inside that class: the forwarders, outside it, need the class's static using.
@@ -190,6 +193,7 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 }
 
 type glyphForwarderText struct {
+	name         string
 	receiverType string
 	text         string
 	head, tail   string // text split before ` => `, so constraint clauses on the following lines can be inserted
@@ -384,7 +388,7 @@ done:
 	fwdHead := forwarder.String()
 	fwdTail := fmt.Sprintf(" => %s%s.%s%s%s(%s);", callPrefix, packageClass, name, GlyphMethodSuffix, typeParams, strings.Join(args, ", "))
 
-	return body.String(), glyphForwarderText{receiverType: receiverType, text: fwdHead + fwdTail, head: fwdHead, tail: fwdTail}, true
+	return body.String(), glyphForwarderText{name: name, receiverType: receiverType, text: fwdHead + fwdTail, head: fwdHead, tail: fwdTail}, true
 }
 
 // glyphBodyStart finds where the body begins after a parameter list: ` {`, `{`, or `=>`, outside any brackets.
@@ -679,4 +683,45 @@ func glyphRenameHoistTokens(line string, tag string) string {
 	}
 
 	return out.String()
+}
+
+// A method expression names its method through the package class: a method group under the delegate cast,
+// `((Func<ж<counter>, nint, nint>)(main_package.add))`, and the call inside a method-expression wrapper,
+// `[GoWrapper("(*T).value")] (p0) => main_package.value(panicwrapRecv(p0, …))` (package main's forms). That name is
+// now the body's, so the expression binds the body with no forwarder between; the cast already names the receiver
+// type. Only those two shapes, and only for methods this file transformed: a package FUNCTION may share a method's
+// name, and its calls (`time_package.Now()`) are left alone.
+func glyphBindMethodExpressions(lines []string, packageClass string, transformed map[string]bool) {
+	if len(transformed) == 0 {
+		return
+	}
+
+	group := regexp.MustCompile(`\(` + regexp.QuoteMeta(packageClass) + `\.([\p{L}_@][\p{L}\p{N}_]*)\)`)
+	wrapperCall := regexp.MustCompile(`=> ` + regexp.QuoteMeta(packageClass) + `\.([\p{L}_@][\p{L}\p{N}_]*)\(`)
+
+	rename := func(pattern *regexp.Regexp, line string, prefix, suffix string) string {
+		return pattern.ReplaceAllStringFunc(line, func(match string) string {
+			name := pattern.FindStringSubmatch(match)[1]
+
+			if !transformed[name] {
+				return match
+			}
+
+			return prefix + packageClass + "." + name + GlyphMethodSuffix + suffix
+		})
+	}
+
+	for i, line := range lines {
+		if !strings.Contains(line, packageClass+".") {
+			continue
+		}
+
+		line = rename(group, line, "(", ")")
+
+		if strings.Contains(line, "[GoWrapper(") {
+			line = rename(wrapperCall, line, "=> ", "(")
+		}
+
+		lines[i] = line
+	}
 }
