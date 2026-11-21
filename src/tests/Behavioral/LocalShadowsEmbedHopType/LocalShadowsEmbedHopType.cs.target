@@ -40,6 +40,15 @@ partial struct DeepHash {
     /*embed*/ internal deep deep;
 }
 
+partial struct side {
+    internal nint inner;
+}
+
+partial struct TwinHash {
+    /*embed*/ internal acc acc;
+    /*embed*/ internal side side;
+}
+
 public static void Write(this ref Hash h, slice<byte> p) {
     h.acc.inner.Add(p);
 }
@@ -67,7 +76,13 @@ public static bool Verify(this ref DeepHash d, slice<byte> expected) {
 
 internal static array<byte> resetVia(ж<DeepHash> p) {
     ref var acc = ref heap(new array<byte>(4), out var Ꮡacc);
-    p.Ꮡdeep.of(deep.Ꮡacc).of(main_package.acc.Ꮡinner).Store(Ꮡacc);
+    p.Ꮡdeep.of(deep.Ꮡinner).Store(Ꮡacc);
+    return acc.Clone();
+}
+
+internal static array<byte> twinVia(ж<TwinHash> t) {
+    ref var acc = ref heap(new array<byte>(4), out var Ꮡacc);
+    t.of(TwinHash.Ꮡacc).of(main_package.acc.Ꮡinner).Store(Ꮡacc);
     return acc.Clone();
 }
 
@@ -78,13 +93,17 @@ internal static void main() {
     fmt.Println(h.finalized);
 
     var d = Ꮡ(new DeepHash());
-    d.Ꮡdeep.of(deep.Ꮡacc).of(acc.Ꮡinner).Add(slice<byte>("go2cs"u8));
+    d.Ꮡdeep.of(deep.Ꮡinner).Add(slice<byte>("go2cs"u8));
     ref var @out = ref heap(new array<byte>(4), out var Ꮡout);
-    d.Ꮡdeep.of(deep.Ꮡacc).of(acc.Ꮡinner).Store(Ꮡout);
+    d.Ꮡdeep.of(deep.Ꮡinner).Store(Ꮡout);
     fmt.Println(@out);
     fmt.Println(d.Verify(@out[..]));
     fmt.Println(d.Verify([0, 0]));
     fmt.Println(resetVia(d));
+
+    var t = Ꮡ(new TwinHash());
+    t.of(TwinHash.Ꮡacc).of(acc.Ꮡinner).Add(slice<byte>("go"u8));
+    fmt.Println(twinVia(t), t.side.inner);
 }
 
 } // end main_package
