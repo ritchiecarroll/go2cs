@@ -1003,6 +1003,8 @@
     <Project Path="tests/Behavioral/P384CurveBytes/P384CurveBytes.csproj" />
     <Project Path="tests/Behavioral/P521CurveBytes/P521CurveBytes.csproj" />
     <Project Path="tests/Behavioral/PackageAliasRootedTypeArgs/PackageAliasRootedTypeArgs.csproj" />
+    <Project Path="tests/Behavioral/PackageInfoUsingsClash/PackageInfoUsingsClash.csproj" />
+    <Project Path="tests/Behavioral/PackageInfoUsingsClash/clashlib/PackageInfoUsingsClash.clashlib.csproj" />
     <Project Path="tests/Behavioral/PackageNameShadowing/PackageNameShadowing.csproj" />
     <Project Path="tests/Behavioral/PackageShadowParam/PackageShadowParam.csproj" />
     <Project Path="tests/Behavioral/PackageShadowPointerParam/PackageShadowPointerParam.csproj" />

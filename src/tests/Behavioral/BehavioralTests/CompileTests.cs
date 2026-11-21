@@ -1909,6 +1909,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPackageAliasRootedTypeArgs() => CheckTarget("PackageAliasRootedTypeArgs");
 
     [TestMethod]
+    public void CheckPackageInfoUsingsClash() => CheckTarget("PackageInfoUsingsClash");
+
+    [TestMethod]
     public void CheckPackageNameNotDirName() => CheckTarget("PackageNameNotDirName");
 
     [TestMethod]

@@ -1912,6 +1912,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPackageAliasRootedTypeArgs() => CheckTarget("PackageAliasRootedTypeArgs");
 
     [TestMethod]
+    public void CheckPackageInfoUsingsClash() => CheckTarget("PackageInfoUsingsClash");
+
+    [TestMethod]
     public void CheckPackageNameNotDirName() => CheckTarget("PackageNameNotDirName");
 
     [TestMethod]
