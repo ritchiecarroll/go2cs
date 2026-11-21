@@ -340,6 +340,11 @@ const cgoP3GoMemory = "increment 3.2"
 // for every typed pointer parameter): a native box minted over managed storage. Its text names no increment.
 const cgoP3WriteThrough = "which C must not write through"
 
+// cgoP3Layout is in the refusal of a read of native memory as a Go struct whose CLR layout is not its Go layout
+// (golib RuntimeErrorPanic.cs: "cannot read native memory as {0}: its CLR layout is not its Go layout ({1})"). Its text
+// names no increment. Increment 3.2 retires it: each row asserting it becomes a row with no csFails when 3.2 reads it.
+const cgoP3Layout = "its CLR layout is not its Go layout"
+
 // cgoP3Arms are the end-to-end program's arms. An arm with neither goFails nor csFails prints the same lines and exits
 // 0 both ways. The arms with csFails hand C or a helper a pointer into Go memory: Go runs each to its end, and go2cs
 // refuses each by name, naming the increment that admits it. innerdefer and innergo are the controls of goinnerdefer
@@ -393,13 +398,14 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "goviewnameadd", csFails: cgoP3GoMemory},
 		{name: "goviewnameslice", csFails: cgoP3GoMemory},
 		{name: "goviewnamedata", csFails: cgoP3WriteThrough},
-		// Increment 3.2's first reds (section 6): asserted as Go prints them, so what go2cs does today is READ on the
-		// hosted legs before 3.2 changes anything.
+		// Increment 3.2's first reds (section 6). s6field, s6reinterp and s6slice print as Go does. The four with csFails
+		// are pinned to go2cs's refusal as the hosted legs read it, the same on all five targets (os-matrix run
+		// 44883224786); 3.2 retires each pin, and that change is 3.2's red.
 		{name: "s6field"},
-		{name: "s6next"},
-		{name: "s6nextnil"},
-		{name: "s6nextdirect"},
-		{name: "s6name"},
+		{name: "s6next", csFails: cgoP3Layout},
+		{name: "s6nextnil", csFails: cgoP3Layout},
+		{name: "s6nextdirect", csFails: cgoP3Layout},
+		{name: "s6name", csFails: cgoP3Layout},
 		{name: "s6reinterp"},
 		{name: "s6slice"},
 		// Their twins over C memory, which run to their end both ways.
