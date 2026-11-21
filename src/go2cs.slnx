@@ -846,6 +846,15 @@
     <Project Path="tests/Behavioral/MinMaxBuiltin/MinMaxBuiltin.csproj" />
     <Project Path="tests/Behavioral/MixedEmbedKindPromotion/MixedEmbedKindPromotion.csproj" />
     <Project Path="tests/Behavioral/MixedUntypedConstArithmetic/MixedUntypedConstArithmetic.csproj" />
+    <Project Path="tests/Behavioral/MnBlockedIO/MnBlockedIO.csproj" />
+    <Project Path="tests/Behavioral/MnIfaceTwin/MnIfaceTwin.csproj" />
+    <Project Path="tests/Behavioral/MnDeepUnwind/MnDeepUnwind.csproj" />
+    <Project Path="tests/Behavioral/MnFuncPair/MnFuncPair.csproj" />
+    <Project Path="tests/Behavioral/MnBoxAlias/MnBoxAlias.csproj" />
+    <Project Path="tests/Behavioral/MnParkedCallers/MnParkedCallers.csproj" />
+    <Project Path="tests/Behavioral/MnAotGeneric/MnAotGeneric.csproj" />
+    <Project Path="tests/Behavioral/MnMainExit/MnMainExit.csproj" />
+    <Project Path="tests/Behavioral/MnMixedStorm/MnMixedStorm.csproj" />
     <Project Path="tests/Behavioral/MultiFileInitOrder/MultiFileInitOrder.csproj" />
     <Project Path="tests/Behavioral/MultiPointerEmbedPromotion/MultiPointerEmbedPromotion.csproj" />
     <Project Path="tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.csproj" />

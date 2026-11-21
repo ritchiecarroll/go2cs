@@ -1,0 +1,20 @@
+FACTORIES (fix 1, synchronous twins, leaf; over the arm's set=true) 204
+canpark ./cmd/checkdemo goos=windows exclude-runtime=true long-only=true static-only=false no-func-values=true
+FUNCTIONS 16881 can-park 9307 share 55.1% (direct parkers 45)
+DIRECT BY LEAF map[chan-recv:31 chan-send:21 netpoll-wait:2 select:20 sync-cond:1 sync-wait:1 time-sleep:2]
+SEEDS (-seed-func-calls=true leaf-only=false) 1305, declared 578; CAN-PARK SSA INSTRUCTIONS 360360
+CLOSURES 1464 can-park 845
+GO STATEMENTS 29 can-park 28 unresolved 1
+INTERFACE CALLS 2453 can-park 672 unresolved 239
+FUNC-VALUE CALLS 2150 can-park 1214 unresolved 305
+PACKAGES 172; top 10 by can-park:
+  github.com/microsoft/TypeScript/tsc/internal/checker   2125 /   2881   73.8%
+  github.com/microsoft/TypeScript/tsc/internal/ast   1200 /   2226   53.9%
+  golang.org/x/sys/windows                    723 /    848   85.3%
+  github.com/microsoft/TypeScript/tsc/internal/printer    556 /    768   72.4%
+  github.com/microsoft/TypeScript/tsc/internal/parser    442 /    514   86.0%
+  net                                         344 /    582   59.1%
+  github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms    343 /    406   84.5%
+  syscall                                     257 /    344   74.7%
+  os                                          221 /    323   68.4%
+  github.com/microsoft/TypeScript/tsc/internal/compiler    213 /    339   62.8%

@@ -51,7 +51,7 @@ namespace go;
 /// Design: <c>docs/Phase4/DESIGN-closure-emission.md</c> §4.
 /// </para>
 /// </remarks>
-[EditorBrowsable(EditorBrowsableState.Never)] public ref struct GoFrame
+[EditorBrowsable(EditorBrowsableState.Never)] public partial struct GoFrame // M:N SPIKE: not a ref struct, so a twin's frame can live across an await
 {
     // Inline slots for the common defer arities; m_overflow is the correctness tail past them.
     // FOUR comes from a census of the Go standard library, not from a guess: of its 1,454 deferring
@@ -499,7 +499,7 @@ namespace go;
         if (deferred.Target is RecoveringCall recovering)
             deferred = recovering.Call;
 
-        return catcher is not null && catcher != RunMethod && deferred.Method == catcher;
+        return catcher is not null && catcher != RunMethod && golib.GoFuncPair.Underlying(deferred).Method == catcher;
     }
 
     // GO'S DIRECT-CALL RULE FOR recover (COORD ruling 2026-10-22, Option B). recover returns nil unless it is called

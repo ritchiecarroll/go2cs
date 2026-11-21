@@ -1,0 +1,771 @@
+FACTORIES (fix 1, synchronous twins, leaf; over the arm's set=true) 280
+canpark ./cmd/checkdemo goos=windows exclude-runtime=true long-only=true static-only=false no-func-values=true
+FUNCTIONS 16881 can-park 8315 share 49.3% (direct parkers 45)
+DIRECT BY LEAF map[chan-recv:31 chan-send:21 netpoll-wait:2 select:20 sync-cond:1 sync-wait:1 time-sleep:2]
+SEEDS (-seed-func-calls=true leaf-only=false opt-out=true) 665, declared 393; CAN-PARK SSA INSTRUCTIONS 336510
+OPT-OUT functions wholly opted out 649, seeded but with callback-only sites 18; fallback sites 1010
+OPT-OUT sites a REALLY parking value reaches (the opt-out's real cost): 94
+    (*flag.FlagSet).VisitAll at <goroot>\src\flag\flag.go:458:5 reaches parking (*flag.FlagSet).PrintDefaults$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, []string]).Keys$1 at <tsc>\internal\collections\ordered_map.go:138:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, []string]).Keys$1 at <tsc>\internal\collections\ordered_map.go:138:13 reaches parking testing.parseCpuList$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, any]).Entries$1 at <tsc>\internal\collections\ordered_map.go:174:13 reaches parking github.com/microsoft/TypeScript/tsc/internal/tsoptions.convertOptionsFromJson$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, any]).Entries$1 at <tsc>\internal\collections\ordered_map.go:174:13 reaches parking github.com/microsoft/TypeScript/tsc/internal/tsoptions.convertOptionsFromJson[*github.com/microsoft/TypeScript/tsc/internal/tsoptions.compilerOptionsParser]$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, any]).Entries$1 at <tsc>\internal\collections\ordered_map.go:174:13 reaches parking github.com/microsoft/TypeScript/tsc/internal/tsoptions.convertOptionsFromJson[*github.com/microsoft/TypeScript/tsc/internal/tsoptions.typeAcquisitionParser]$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, any]).Keys$1 at <tsc>\internal\collections\ordered_map.go:138:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, any]).Keys$1 at <tsc>\internal\collections\ordered_map.go:138:13 reaches parking testing.parseCpuList$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/json.Value]).Keys$1 at <tsc>\internal\collections\ordered_map.go:138:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/json.Value]).Keys$1 at <tsc>\internal\collections\ordered_map.go:138:13 reaches parking testing.parseCpuList$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/packagejson.ExportsOrImports]).Keys$1 at <tsc>\internal\collections\ordered_map.go:138:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/packagejson.ExportsOrImports]).Keys$1 at <tsc>\internal\collections\ordered_map.go:138:13 reaches parking testing.parseCpuList$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/packagejson.JSONValue]).Keys$1 at <tsc>\internal\collections\ordered_map.go:138:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/packagejson.JSONValue]).Keys$1 at <tsc>\internal\collections\ordered_map.go:138:13 reaches parking testing.parseCpuList$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, string]).Values$1 at <tsc>\internal\collections\ordered_map.go:156:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, string]).Values$1 at <tsc>\internal\collections\ordered_map.go:156:13 reaches parking testing.parseCpuList$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, struct{}]).Keys$1 at <tsc>\internal\collections\ordered_map.go:138:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, struct{}]).Keys$1 at <tsc>\internal\collections\ordered_map.go:138:13 reaches parking testing.parseCpuList$1
+    (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).tryLoadModuleUsingPaths at <tsc>\internal\module\resolver.go:1290:22 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromSpecificNodeModulesDirectory$1
+    (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).tryLoadModuleUsingPaths at <tsc>\internal\module\resolver.go:1290:22 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadNodeModuleFromDirectoryWorker$1
+    (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).tryLoadModuleUsingPaths at <tsc>\internal\module\resolver.go:1290:22 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).tryLoadModuleUsingPathsIfEligible$1
+    (*github.com/microsoft/TypeScript/tsc/internal/tsoptions.ParsedCommandLine).GetOutputFileNames$1 at <tsc>\internal\tsoptions\parsedcommandline.go:220:14 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    (*github.com/microsoft/TypeScript/tsc/internal/tsoptions.ParsedCommandLine).GetOutputFileNames$1 at <tsc>\internal\tsoptions\parsedcommandline.go:220:14 reaches parking testing.parseCpuList$1
+    (*github.com/microsoft/TypeScript/tsc/internal/tsoptions.ParsedCommandLine).GetOutputFileNames$1 at <tsc>\internal\tsoptions\parsedcommandline.go:226:16 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    (*github.com/microsoft/TypeScript/tsc/internal/tsoptions.ParsedCommandLine).GetOutputFileNames$1 at <tsc>\internal\tsoptions\parsedcommandline.go:226:16 reaches parking testing.parseCpuList$1
+    (*github.com/microsoft/TypeScript/tsc/internal/tsoptions.ParsedCommandLine).GetOutputFileNames$1 at <tsc>\internal\tsoptions\parsedcommandline.go:238:15 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    (*github.com/microsoft/TypeScript/tsc/internal/tsoptions.ParsedCommandLine).GetOutputFileNames$1 at <tsc>\internal\tsoptions\parsedcommandline.go:238:15 reaches parking testing.parseCpuList$1
+    (*github.com/microsoft/TypeScript/tsc/internal/tsoptions.ParsedCommandLine).GetOutputFileNames$1 at <tsc>\internal\tsoptions\parsedcommandline.go:243:16 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    (*github.com/microsoft/TypeScript/tsc/internal/tsoptions.ParsedCommandLine).GetOutputFileNames$1 at <tsc>\internal\tsoptions\parsedcommandline.go:243:16 reaches parking testing.parseCpuList$1
+    (*internal/poll.FD).RawRead at <goroot>\src\internal\poll\fd_windows.go:1306:7 reaches parking net.sendFile$1
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/compiler.checkerPool).createCheckers$1
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/contentmapper.projectLease).Close$1
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/contentmapper.retainedProject).Close$1
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/tsoptions.ParsedBuildCommandLine).Locale$1
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/tsoptions.ParsedCommandLine).Locale$1
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*net.nsswitchConfig).init
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*testing.B).Run$1
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*testing.B).run$1
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*testing.M).after$1
+    (*sync.Once).doSlow at <goroot>\src\sync\once.go:78:4 reaches parking (*testing.common).ArtifactDir$1
+    (*testing/fstest.fsTester).checkBadPath at <goroot>\src\testing\fstest\testfs.go:636:17 reaches parking (*testing/fstest.fsTester).checkFile$1
+    (github.com/go-json-experiment/json/jsontext.Pointer).Tokens$1 at <gomodcache>\github.com\go-json-experiment\json@v0.0.0-20260820222146-c27c302e5fc3\jsontext\state.go:147:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    (github.com/go-json-experiment/json/jsontext.Pointer).Tokens$1 at <gomodcache>\github.com\go-json-experiment\json@v0.0.0-20260820222146-c27c302e5fc3\jsontext\state.go:147:13 reaches parking testing.parseCpuList$1
+    github.com/microsoft/TypeScript/tsc/internal/compiler.GetDiagnosticsOfAnyProgram$1 at <tsc>\internal\compiler\program.go:1972:45 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/compiler.Program).GetBindDiagnostics
+    github.com/microsoft/TypeScript/tsc/internal/compiler.GetDiagnosticsOfAnyProgram$1 at <tsc>\internal\compiler\program.go:1972:45 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/compiler.Program).GetDeclarationDiagnostics
+    github.com/microsoft/TypeScript/tsc/internal/compiler.GetDiagnosticsOfAnyProgram$1 at <tsc>\internal\compiler\program.go:1972:45 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/compiler.Program).GetSemanticDiagnostics
+    github.com/microsoft/TypeScript/tsc/internal/compiler.GetDiagnosticsOfAnyProgram$1 at <tsc>\internal\compiler\program.go:1972:45 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/compiler.Program).GetSyntacticDiagnostics
+    github.com/microsoft/TypeScript/tsc/internal/compiler.GetDiagnosticsOfAnyProgram$1 at <tsc>\internal\compiler\program.go:1975:52 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/compiler.Program).GetBindDiagnostics
+    github.com/microsoft/TypeScript/tsc/internal/compiler.GetDiagnosticsOfAnyProgram$1 at <tsc>\internal\compiler\program.go:1975:52 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/compiler.Program).GetDeclarationDiagnostics
+    github.com/microsoft/TypeScript/tsc/internal/compiler.GetDiagnosticsOfAnyProgram$1 at <tsc>\internal\compiler\program.go:1975:52 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/compiler.Program).GetSemanticDiagnostics
+    github.com/microsoft/TypeScript/tsc/internal/compiler.GetDiagnosticsOfAnyProgram$1 at <tsc>\internal\compiler\program.go:1975:52 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/compiler.Program).GetSyntacticDiagnostics
+    github.com/microsoft/TypeScript/tsc/internal/core.MapFiltered[string, any] at <tsc>\internal\core\core.go:131:18 reaches parking github.com/microsoft/TypeScript/tsc/internal/tsoptions.ParseListTypeOption$1
+    github.com/microsoft/TypeScript/tsc/internal/core.MapFiltered[string, any] at <tsc>\internal\core\core.go:131:18 reaches parking github.com/microsoft/TypeScript/tsc/internal/tsoptions.ParseListTypeOption$2
+    github.com/microsoft/TypeScript/tsc/internal/core.MapIndex[any, any] at <tsc>\internal\core\core.go:112:16 reaches parking github.com/microsoft/TypeScript/tsc/internal/tsoptions.convertJsonOptionOfListType$1
+    github.com/microsoft/TypeScript/tsc/internal/tsoptions.tryReadFile at <tsc>\internal\tsoptions\commandlineparser.go:226:21 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/bundled.wrappedFS).ReadFile
+    github.com/microsoft/TypeScript/tsc/internal/tsoptions.tryReadFile at <tsc>\internal\tsoptions\commandlineparser.go:226:21 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/tsoptions.commandLineParser).parseResponseFile$1
+    github.com/microsoft/TypeScript/tsc/internal/tsoptions.tryReadFile at <tsc>\internal\tsoptions\commandlineparser.go:226:21 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/vfs/cachedvfs.FS).ReadFile
+    github.com/microsoft/TypeScript/tsc/internal/tspath.ForEachAncestorDirectory[*github.com/microsoft/TypeScript/tsc/internal/module.resolved] at <tsc>\internal\tspath\path.go:1118:27 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromNearestNodeModulesDirectoryWorker$1
+    io/fs.WalkDir at <goroot>\src\io\fs\walk.go:120:11 reaches parking os.CopyFS$1
+    io/fs.walkDir at <goroot>\src\io\fs\walk.go:73:21 reaches parking os.CopyFS$1
+    io/fs.walkDir at <goroot>\src\io\fs\walk.go:84:18 reaches parking os.CopyFS$1
+    maps.Keys[map[string]any, string, any]$1 at <goroot>\src\maps\iter.go:28:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    maps.Keys[map[string]any, string, any]$1 at <goroot>\src\maps\iter.go:28:13 reaches parking testing.parseCpuList$1
+    maps.Keys[map[string]bool, string, bool]$1 at <goroot>\src\maps\iter.go:28:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    maps.Keys[map[string]bool, string, bool]$1 at <goroot>\src\maps\iter.go:28:13 reaches parking testing.parseCpuList$1
+    maps.Keys[map[string]github.com/microsoft/TypeScript/tsc/internal/checker.TypeFacts, string, github.com/microsoft/TypeScript/tsc/internal/checker.TypeFacts]$1 at <goroot>\src\maps\iter.go:28:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    maps.Keys[map[string]github.com/microsoft/TypeScript/tsc/internal/checker.TypeFacts, string, github.com/microsoft/TypeScript/tsc/internal/checker.TypeFacts]$1 at <goroot>\src\maps\iter.go:28:13 reaches parking testing.parseCpuList$1
+    maps.Keys[map[string]string, string, string]$1 at <goroot>\src\maps\iter.go:28:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    maps.Keys[map[string]string, string, string]$1 at <goroot>\src\maps\iter.go:28:13 reaches parking testing.parseCpuList$1
+    maps.Keys[map[string]struct{}, string, struct{}]$1 at <goroot>\src\maps\iter.go:28:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    maps.Keys[map[string]struct{}, string, struct{}]$1 at <goroot>\src\maps\iter.go:28:13 reaches parking testing.parseCpuList$1
+    maps.Keys[testing/fstest.MapFS, string, *testing/fstest.MapFile]$1 at <goroot>\src\maps\iter.go:28:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    maps.Keys[testing/fstest.MapFS, string, *testing/fstest.MapFile]$1 at <goroot>\src\maps\iter.go:28:13 reaches parking testing.parseCpuList$1
+    net.init$1 at <goroot>\src\net\hook.go:21:12 reaches parking (*net.Resolver).lookupIP
+    os.readFileContents at <goroot>\src\os\file.go:908:17 reaches parking (*os.File).Read
+    slices.Values[[]string, string]$1 at <goroot>\src\slices\iter.go:40:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    slices.Values[[]string, string]$1 at <goroot>\src\slices\iter.go:40:13 reaches parking testing.parseCpuList$1
+    strings.FieldsFuncSeq$1 at <goroot>\src\strings\iter.go:123:15 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    strings.FieldsFuncSeq$1 at <goroot>\src\strings\iter.go:123:15 reaches parking testing.parseCpuList$1
+    strings.FieldsFuncSeq$1 at <goroot>\src\strings\iter.go:134:9 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    strings.FieldsFuncSeq$1 at <goroot>\src\strings\iter.go:134:9 reaches parking testing.parseCpuList$1
+    strings.FieldsSeq$1 at <goroot>\src\strings\iter.go:107:9 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    strings.FieldsSeq$1 at <goroot>\src\strings\iter.go:107:9 reaches parking testing.parseCpuList$1
+    strings.FieldsSeq$1 at <goroot>\src\strings\iter.go:96:15 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    strings.FieldsSeq$1 at <goroot>\src\strings\iter.go:96:15 reaches parking testing.parseCpuList$1
+    strings.Lines$1 at <goroot>\src\strings\iter.go:27:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    strings.Lines$1 at <goroot>\src\strings\iter.go:27:13 reaches parking testing.parseCpuList$1
+    strings.splitSeq$1 at <goroot>\src\strings\iter.go:41:14 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    strings.splitSeq$1 at <goroot>\src\strings\iter.go:41:14 reaches parking testing.parseCpuList$1
+    strings.splitSeq$1 at <goroot>\src\strings\iter.go:54:13 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    strings.splitSeq$1 at <goroot>\src\strings\iter.go:54:13 reaches parking testing.parseCpuList$1
+    strings.splitSeq$1 at <goroot>\src\strings\iter.go:59:8 reaches parking (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).loadModuleFromTargetExportOrImport$2
+    strings.splitSeq$1 at <goroot>\src\strings\iter.go:59:8 reaches parking testing.parseCpuList$1
+    testing.tRunner at <goroot>\src\testing\testing.go:2036:4 reaches parking testing.runTests$1
+OPT-OUT wholly opted-out functions:
+    (*flag.FlagSet).Visit
+    (*flag.FlagSet).VisitAll
+    (*fmt.ss).token
+    (*github.com/go-json-experiment/json/jsontext.encoderState).AppendRaw
+    (*github.com/microsoft/TypeScript/tsc/internal/binder.Binder).bindBreakOrContinueStatement
+    (*github.com/microsoft/TypeScript/tsc/internal/binder.Binder).doWithConditionalBranches
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).ForEachExportAndPropertyOfModule
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).applyToParameterTypes
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).areTypeParametersIdentical
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).checkNonNullTypeWithReporter
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).compareProperties
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).compareSignaturesIdentical
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).compareTypePredicateRelatedTo
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).compareTypePredicatesIdentical
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).elaborateIterableOrArrayLikeTargetElementwise
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).findLeftmostType
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).forEachEnclosingClass
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).forEachMappedTypePropertyKeyTypeAndIndexSignatureKeyType
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).forEachProperty
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).generateJsxChildren$1
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).getBaseTypesIfUnrelated
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).inferFromMatchingTypes
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).invokeOnce
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).mapTypeEx
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).narrowTypeByDiscriminant
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).someSymbolTableInScope
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Checker).transformTypeOfMembers
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.NodeBuilderImpl).enterNewScope$1
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.NodeBuilderImpl).enterNewScope$5
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.NodeBuilderImpl).visitAndTransformType
+    (*github.com/microsoft/TypeScript/tsc/internal/checker.Relater).isPropertySymbolTypeRelated
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[*github.com/microsoft/TypeScript/tsc/internal/ast.FunctionDeclarationNode, struct{}]).Entries$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[*github.com/microsoft/TypeScript/tsc/internal/ast.FunctionDeclarationNode, struct{}]).Keys$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[*github.com/microsoft/TypeScript/tsc/internal/ast.FunctionDeclarationNode, struct{}]).Values$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[*github.com/microsoft/TypeScript/tsc/internal/ast.Node, *github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms.memberInfo]).Entries$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol, struct{}]).Entries$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol, struct{}]).Keys$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol, struct{}]).Values$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[*github.com/microsoft/TypeScript/tsc/internal/printer.EmitHelper, struct{}]).Entries$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[*github.com/microsoft/TypeScript/tsc/internal/printer.EmitHelper, struct{}]).Keys$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[*github.com/microsoft/TypeScript/tsc/internal/printer.EmitHelper, struct{}]).Values$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[K, V]).Entries$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[K, V]).Values$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, *github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]).Values$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, []string]).Entries$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, []string]).Keys$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, []string]).Values$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, any]).Entries$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, any]).Keys$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, any]).Values$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/json.Value]).Entries$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/json.Value]).Keys$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/json.Value]).Values$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/packagejson.ExportsOrImports]).Entries$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/packagejson.ExportsOrImports]).Keys$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/packagejson.ExportsOrImports]).Values$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/packagejson.JSONValue]).Entries$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/packagejson.JSONValue]).Keys$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, github.com/microsoft/TypeScript/tsc/internal/packagejson.JSONValue]).Values$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, map[string]*github.com/microsoft/TypeScript/tsc/internal/ast.Node]).Entries$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, string]).Values$1
+    (*github.com/microsoft/TypeScript/tsc/internal/collections.OrderedMap[string, struct{}]).Keys$1
+    (*github.com/microsoft/TypeScript/tsc/internal/compiler.FileIncludeReason).computeDiagnostic
+    (*github.com/microsoft/TypeScript/tsc/internal/compiler.FileIncludeReason).computeReferenceFileDiagnostic
+    (*github.com/microsoft/TypeScript/tsc/internal/compiler.includeProcessor).explainRedirectAndImpliedFormat
+    (*github.com/microsoft/TypeScript/tsc/internal/compiler.projectReferenceFileMapper).rangeResolvedReferenceWorker
+    (*github.com/microsoft/TypeScript/tsc/internal/module.resolutionState).tryLoadModuleUsingPaths
+    (*github.com/microsoft/TypeScript/tsc/internal/packagejson.DependencyFields).RangeDependencies
+    (*github.com/microsoft/TypeScript/tsc/internal/parser.Parser).lookAhead
+    (*github.com/microsoft/TypeScript/tsc/internal/parser.Parser).parseDelimitedList
+    (*github.com/microsoft/TypeScript/tsc/internal/parser.Parser).parseFunctionOrConstructorTypeToError
+    (*github.com/microsoft/TypeScript/tsc/internal/parser.Parser).parseListIndex
+    (*github.com/microsoft/TypeScript/tsc/internal/parser.Parser).parseSimpleTag
+    (*github.com/microsoft/TypeScript/tsc/internal/parser.Parser).parseUnionOrIntersectionType
+    (*github.com/microsoft/TypeScript/tsc/internal/printer.EmitContext).MoveEmitHelpers
+    (*github.com/microsoft/TypeScript/tsc/internal/printer.Printer).emitListItems
+    (*github.com/microsoft/TypeScript/tsc/internal/printer.Printer).getEffectiveLines
+    (*github.com/microsoft/TypeScript/tsc/internal/scanner.Scanner).scanASCIIWhile
+    (*github.com/microsoft/TypeScript/tsc/internal/scanner.Scanner).scanIdentifierEscape
+    (*github.com/microsoft/TypeScript/tsc/internal/sourcemap.MappingsDecoder).Values$1
+    (*github.com/microsoft/TypeScript/tsc/internal/symlinks.KnownSymlinks).SetSymlinksFromResolutions
+    (*github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms.asyncTransformer).doWithContext
+    (*github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms.classFieldsTransformer).setCurrentClassElementAnd
+    (*github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms.classFieldsTransformer).setInIterationStatementAnd
+    (*github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms.classFieldsTransformer).visitInNewClassLexicalEnvironment
+    (*github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms.forawaitTransformer).doWithHierarchyFacts
+    (*github.com/microsoft/TypeScript/tsc/internal/tsoptions.ParsedCommandLine).GetOutputFileNames$1
+    (*github.com/microsoft/TypeScript/tsc/internal/tsoptions.ParsedCommandLine).getOutputDeclarationAndSourceFileNames$1
+    (*github.com/microsoft/TypeScript/tsc/internal/vfs/vfstest.MapFS).Entries$1
+    (*internal/poll.FD).Accept
+    (*internal/poll.FD).RawControl
+    (*internal/poll.FD).RawRead
+    (*internal/poll.FD).RawWrite
+    (*internal/poll.FD).execIO
+    (*internal/singleflight.Group).doCall
+    (*internal/sync.HashTrieMap[any, any]).iter
+    (*internal/sync.entry[any, any]).compareAndDelete
+    (*internal/sync.entry[any, any]).compareAndSwap
+    (*internal/synctest.Bubble).Run
+    (*log.Logger).output
+    (*math/rand.Rand).Shuffle
+    (*math/rand/v2.Rand).Shuffle
+    (*net.Resolver).lookupIPAddr$2
+    (*os.Process).withHandle
+    (*reflect.rtype).Fields$1
+    (*reflect.rtype).Ins$1
+    (*reflect.rtype).Methods$1
+    (*reflect.rtype).Outs$1
+    (*reflect.structType).FieldByNameFunc
+    (*regexp.Regexp).allMatches
+    (*regexp.Regexp).replaceAll
+    (*sync.Once).doSlow
+    (*testing/fstest.fsTester).checkBadPath
+    (flag.boolFuncValue).Set
+    (flag.funcValue).Set
+    (github.com/go-json-experiment/json/jsontext.Pointer).Tokens$1
+    (github.com/microsoft/TypeScript/tsc/internal/contentmapper.SpawnerFunc).Spawn
+    (net.addrList).first
+    (net.addrList).partition
+    (reflect.Value).Fields$1
+    (reflect.Value).Methods$1
+    (reflect.Value).Seq$2
+    (reflect.Value).Seq$3
+    (reflect.Value).Seq$4
+    (reflect.Value).Seq$5
+    (reflect.Value).Seq$6
+    (reflect.Value).Seq2$2
+    (reflect.Value).Seq2$3
+    (reflect.Value).Seq2$4
+    (reflect.Value).Seq2$5
+    (testing.matchStringOnly).MatchString
+    (testing.simpleMatch).matches
+    (testing.simpleMatch).verify
+    bytes.FieldsFunc
+    bytes.FieldsSeq$1
+    bytes.Lines$1
+    bytes.Map
+    bytes.indexFunc
+    bytes.lastIndexFunc
+    bytes.splitSeq$1
+    crypto/fips140.WithoutEnforcement
+    crypto/internal/fips140.CAST
+    crypto/internal/fips140.PCT
+    crypto/internal/fips140/hmac.New
+    crypto/internal/fips140/hmac.New[*crypto/internal/fips140/sha256.Digest]
+    crypto/subtle.WithDataIndependentTiming
+    embed.sortSearch
+    github.com/Microsoft/go-winio.RunWithPrivileges
+    github.com/microsoft/TypeScript/tsc/internal/ast.CreateModifiersFromModifierFlags
+    github.com/microsoft/TypeScript/tsc/internal/ast.FindAncestor
+    github.com/microsoft/TypeScript/tsc/internal/ast.FindAncestorOrQuit
+    github.com/microsoft/TypeScript/tsc/internal/ast.ForEachDynamicImportOrRequireCall
+    github.com/microsoft/TypeScript/tsc/internal/ast.isCalleeWorker
+    github.com/microsoft/TypeScript/tsc/internal/ast.propagateNodeListSubtreeFacts
+    github.com/microsoft/TypeScript/tsc/internal/ast.visit
+    github.com/microsoft/TypeScript/tsc/internal/ast.visitNodes
+    github.com/microsoft/TypeScript/tsc/internal/checker.arrayIsHomogeneous
+    github.com/microsoft/TypeScript/tsc/internal/checker.arrayIsHomogeneous[github.com/microsoft/TypeScript/tsc/internal/checker.seenName]
+    github.com/microsoft/TypeScript/tsc/internal/checker.everyContainedType
+    github.com/microsoft/TypeScript/tsc/internal/checker.everyType
+    github.com/microsoft/TypeScript/tsc/internal/checker.findInMap
+    github.com/microsoft/TypeScript/tsc/internal/checker.findInMap[string, *github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/checker.forEachType
+    github.com/microsoft/TypeScript/tsc/internal/checker.instantiateList
+    github.com/microsoft/TypeScript/tsc/internal/checker.instantiateList[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/checker.instantiateList[*github.com/microsoft/TypeScript/tsc/internal/checker.IndexInfo]
+    github.com/microsoft/TypeScript/tsc/internal/checker.instantiateList[*github.com/microsoft/TypeScript/tsc/internal/checker.Signature]
+    github.com/microsoft/TypeScript/tsc/internal/checker.instantiateList[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/checker.minAndMax
+    github.com/microsoft/TypeScript/tsc/internal/checker.minAndMax[*github.com/microsoft/TypeScript/tsc/internal/checker.Signature]
+    github.com/microsoft/TypeScript/tsc/internal/checker.runWithoutResolvedSignatureCaching
+    github.com/microsoft/TypeScript/tsc/internal/checker.runWithoutResolvedSignatureCaching[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/checker.runWithoutResolvedSignatureCaching[[]*github.com/microsoft/TypeScript/tsc/internal/checker.Signature]
+    github.com/microsoft/TypeScript/tsc/internal/checker.runWithoutResolvedSignatureCaching[github.com/microsoft/TypeScript/tsc/internal/checker.result]
+    github.com/microsoft/TypeScript/tsc/internal/checker.someSignature
+    github.com/microsoft/TypeScript/tsc/internal/checker.someType
+    github.com/microsoft/TypeScript/tsc/internal/collections.GroupBy
+    github.com/microsoft/TypeScript/tsc/internal/collections.GroupBy[bool, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/compiler.GetDiagnosticsOfAnyProgram$1
+    github.com/microsoft/TypeScript/tsc/internal/compiler.forEachResolution
+    github.com/microsoft/TypeScript/tsc/internal/compiler.forEachResolution[*github.com/microsoft/TypeScript/tsc/internal/module.ResolvedModule]
+    github.com/microsoft/TypeScript/tsc/internal/compiler.forEachResolution[*github.com/microsoft/TypeScript/tsc/internal/module.ResolvedTypeReferenceDirective]
+    github.com/microsoft/TypeScript/tsc/internal/contentmapper.CheckSupplementalFileNameCollisions
+    github.com/microsoft/TypeScript/tsc/internal/core.BinarySearchUniqueFunc
+    github.com/microsoft/TypeScript/tsc/internal/core.BinarySearchUniqueFunc[[]*github.com/microsoft/TypeScript/tsc/internal/ast.Node, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.ComputeECMALineStartsSeq$1
+    github.com/microsoft/TypeScript/tsc/internal/core.CountWhere
+    github.com/microsoft/TypeScript/tsc/internal/core.CountWhere[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.CountWhere[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/core.CountWhere[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.CountWhere[github.com/microsoft/TypeScript/tsc/internal/checker.TupleElementInfo]
+    github.com/microsoft/TypeScript/tsc/internal/core.DeduplicateSorted
+    github.com/microsoft/TypeScript/tsc/internal/core.DeduplicateSorted[*github.com/microsoft/TypeScript/tsc/internal/sourcemap.SourceMappedPosition]
+    github.com/microsoft/TypeScript/tsc/internal/core.Every
+    github.com/microsoft/TypeScript/tsc/internal/core.Every[*github.com/microsoft/TypeScript/tsc/internal/ast.ParameterDeclarationNode]
+    github.com/microsoft/TypeScript/tsc/internal/core.Every[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/core.Every[*github.com/microsoft/TypeScript/tsc/internal/checker.InferenceInfo]
+    github.com/microsoft/TypeScript/tsc/internal/core.Every[*github.com/microsoft/TypeScript/tsc/internal/checker.Signature]
+    github.com/microsoft/TypeScript/tsc/internal/core.Every[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.Every[any]
+    github.com/microsoft/TypeScript/tsc/internal/core.Every[string]
+    github.com/microsoft/TypeScript/tsc/internal/core.Filter
+    github.com/microsoft/TypeScript/tsc/internal/core.FilterIndex
+    github.com/microsoft/TypeScript/tsc/internal/core.Filter[*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    github.com/microsoft/TypeScript/tsc/internal/core.Filter[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.Filter[*github.com/microsoft/TypeScript/tsc/internal/ast.PatternAmbientModule]
+    github.com/microsoft/TypeScript/tsc/internal/core.Filter[*github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile]
+    github.com/microsoft/TypeScript/tsc/internal/core.Filter[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/core.Filter[*github.com/microsoft/TypeScript/tsc/internal/checker.IndexInfo]
+    github.com/microsoft/TypeScript/tsc/internal/core.Filter[*github.com/microsoft/TypeScript/tsc/internal/checker.InferenceInfo]
+    github.com/microsoft/TypeScript/tsc/internal/core.Filter[*github.com/microsoft/TypeScript/tsc/internal/checker.Signature]
+    github.com/microsoft/TypeScript/tsc/internal/core.Filter[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.Filter[any]
+    github.com/microsoft/TypeScript/tsc/internal/core.Filter[string]
+    github.com/microsoft/TypeScript/tsc/internal/core.Find
+    github.com/microsoft/TypeScript/tsc/internal/core.FindBestPatternMatch
+    github.com/microsoft/TypeScript/tsc/internal/core.FindBestPatternMatch[*github.com/microsoft/TypeScript/tsc/internal/ast.PatternAmbientModule]
+    github.com/microsoft/TypeScript/tsc/internal/core.FindBestPatternMatch[github.com/microsoft/TypeScript/tsc/internal/core.Pattern]
+    github.com/microsoft/TypeScript/tsc/internal/core.FindIndex
+    github.com/microsoft/TypeScript/tsc/internal/core.FindIndex[*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    github.com/microsoft/TypeScript/tsc/internal/core.FindIndex[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.FindIndex[*github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile]
+    github.com/microsoft/TypeScript/tsc/internal/core.FindIndex[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/core.FindIndex[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.FindIndex[github.com/microsoft/TypeScript/tsc/internal/checker.TupleElementInfo]
+    github.com/microsoft/TypeScript/tsc/internal/core.FindLast
+    github.com/microsoft/TypeScript/tsc/internal/core.FindLastIndex
+    github.com/microsoft/TypeScript/tsc/internal/core.FindLastIndex[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.FindLastIndex[*github.com/microsoft/TypeScript/tsc/internal/checker.TypeMapper]
+    github.com/microsoft/TypeScript/tsc/internal/core.FindLast[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.Find[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.Find[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/core.Find[*github.com/microsoft/TypeScript/tsc/internal/checker.InferenceInfo]
+    github.com/microsoft/TypeScript/tsc/internal/core.Find[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.Find[*github.com/microsoft/TypeScript/tsc/internal/tsoptions.CommandLineOption]
+    github.com/microsoft/TypeScript/tsc/internal/core.FirstNonNil
+    github.com/microsoft/TypeScript/tsc/internal/core.FirstNonNil[*github.com/microsoft/TypeScript/tsc/internal/ast.Node, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.FirstNonNil[*github.com/microsoft/TypeScript/tsc/internal/ast.Node, *github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/core.FirstNonNil[*github.com/microsoft/TypeScript/tsc/internal/checker.Signature, *github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/core.FlatMap
+    github.com/microsoft/TypeScript/tsc/internal/core.FlatMap[*github.com/microsoft/TypeScript/tsc/internal/ast.Node, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.FlatMap[*github.com/microsoft/TypeScript/tsc/internal/contentmapper.Mapper, string]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map
+    github.com/microsoft/TypeScript/tsc/internal/core.MapFiltered
+    github.com/microsoft/TypeScript/tsc/internal/core.MapFiltered[*github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile, string]
+    github.com/microsoft/TypeScript/tsc/internal/core.MapFiltered[string, any]
+    github.com/microsoft/TypeScript/tsc/internal/core.MapIndex
+    github.com/microsoft/TypeScript/tsc/internal/core.MapIndex[*github.com/microsoft/TypeScript/tsc/internal/checker.Type, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.MapIndex[*github.com/microsoft/TypeScript/tsc/internal/checker.Type, *github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/core.MapIndex[*github.com/microsoft/TypeScript/tsc/internal/checker.Type, *github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.MapIndex[*github.com/microsoft/TypeScript/tsc/internal/checker.Type, func() *github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.MapIndex[any, any]
+    github.com/microsoft/TypeScript/tsc/internal/core.MapIndex[github.com/microsoft/TypeScript/tsc/internal/checker.TupleElementInfo, string]
+    github.com/microsoft/TypeScript/tsc/internal/core.MapNonNil
+    github.com/microsoft/TypeScript/tsc/internal/core.MapNonNil[*github.com/microsoft/TypeScript/tsc/internal/ast.Node, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.MapNonNil[*github.com/microsoft/TypeScript/tsc/internal/ast.Node, *github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/core.MapNonNil[*github.com/microsoft/TypeScript/tsc/internal/checker.Signature, *github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/core.MapNonNil[*github.com/microsoft/TypeScript/tsc/internal/checker.Signature, *github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.MapNonNil[*github.com/microsoft/TypeScript/tsc/internal/checker.Type, *github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/core.MapNonNil[github.com/microsoft/TypeScript/tsc/internal/checker.IterationTypes, *github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.MapNonNil[int, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/ast.FileReference, github.com/microsoft/TypeScript/tsc/internal/transformers/declarations.ReferencedFilePair]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/ast.Node, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/ast.Node, *github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/ast.Node, github.com/microsoft/TypeScript/tsc/internal/checker.TupleElementInfo]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol, *github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol, github.com/microsoft/TypeScript/tsc/internal/checker.sortedSymbolNamePair]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol, string]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/checker.IndexInfo, *github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/checker.InferenceInfo, *github.com/microsoft/TypeScript/tsc/internal/checker.InferenceInfo]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/checker.InferenceInfo, *github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/checker.Signature, *github.com/microsoft/TypeScript/tsc/internal/checker.Signature]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/checker.Signature, *github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/checker.Type, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/checker.Type, *github.com/microsoft/TypeScript/tsc/internal/checker.InferenceInfo]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/checker.Type, *github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/checker.Type, []*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/checker.Type, []*github.com/microsoft/TypeScript/tsc/internal/checker.Signature]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/checker.Type, bool]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/checker.Type, github.com/microsoft/TypeScript/tsc/internal/checker.TupleElementInfo]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/compiler.emitter, *github.com/microsoft/TypeScript/tsc/internal/compiler.EmitResult]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[*github.com/microsoft/TypeScript/tsc/internal/core.ProjectReference, string]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[any, any]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[any, string]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[github.com/microsoft/TypeScript/tsc/internal/contentmapper.OptionDiagnostic, *github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedPosition, github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedSpan]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[string, *github.com/microsoft/TypeScript/tsc/internal/ast.ImportSpecifierNode]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[string, *github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[string, *github.com/microsoft/TypeScript/tsc/internal/compiler.projectReferenceParseTask]
+    github.com/microsoft/TypeScript/tsc/internal/core.Map[string, string]
+    github.com/microsoft/TypeScript/tsc/internal/core.MinAllFunc
+    github.com/microsoft/TypeScript/tsc/internal/core.SameMap
+    github.com/microsoft/TypeScript/tsc/internal/core.SameMapIndex
+    github.com/microsoft/TypeScript/tsc/internal/core.SameMapIndex[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.SameMap[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.SameMap[*github.com/microsoft/TypeScript/tsc/internal/checker.IndexInfo]
+    github.com/microsoft/TypeScript/tsc/internal/core.SameMap[*github.com/microsoft/TypeScript/tsc/internal/checker.Signature]
+    github.com/microsoft/TypeScript/tsc/internal/core.SameMap[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.SameMap[github.com/microsoft/TypeScript/tsc/internal/checker.TupleElementInfo]
+    github.com/microsoft/TypeScript/tsc/internal/core.SameMap[string]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[*github.com/microsoft/TypeScript/tsc/internal/ast.PatternAmbientModule]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[*github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[*github.com/microsoft/TypeScript/tsc/internal/checker.IndexInfo]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[*github.com/microsoft/TypeScript/tsc/internal/checker.InferenceInfo]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[*github.com/microsoft/TypeScript/tsc/internal/checker.Signature]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[*github.com/microsoft/TypeScript/tsc/internal/pseudochecker.PseudoType]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[*string]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[[]*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[github.com/microsoft/TypeScript/tsc/internal/checker.VarianceFlags]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[github.com/microsoft/TypeScript/tsc/internal/modulespecifiers.ModulePath]
+    github.com/microsoft/TypeScript/tsc/internal/core.Some[github.com/microsoft/TypeScript/tsc/internal/modulespecifiers.specPair]
+    github.com/microsoft/TypeScript/tsc/internal/core.TryMap
+    github.com/microsoft/TypeScript/tsc/internal/core.getSpellingSuggestion
+    github.com/microsoft/TypeScript/tsc/internal/core.getSpellingSuggestion[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    github.com/microsoft/TypeScript/tsc/internal/core.getSpellingSuggestion[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    github.com/microsoft/TypeScript/tsc/internal/core.getSpellingSuggestion[*github.com/microsoft/TypeScript/tsc/internal/tsoptions.CommandLineOption]
+    github.com/microsoft/TypeScript/tsc/internal/core.getSpellingSuggestion[string]
+    github.com/microsoft/TypeScript/tsc/internal/evaluator.evaluateTemplateExpression
+    github.com/microsoft/TypeScript/tsc/internal/outputpaths.ForEachEmittedFile
+    github.com/microsoft/TypeScript/tsc/internal/parser.doInContext
+    github.com/microsoft/TypeScript/tsc/internal/parser.doInContext[*github.com/microsoft/TypeScript/tsc/internal/ast.Expression]
+    github.com/microsoft/TypeScript/tsc/internal/printer.findSpanEnd
+    github.com/microsoft/TypeScript/tsc/internal/printer.findSpanEndWithEmitContext
+    github.com/microsoft/TypeScript/tsc/internal/printer.findSpanEndWithEmitContext[*github.com/microsoft/TypeScript/tsc/internal/ast.Statement]
+    github.com/microsoft/TypeScript/tsc/internal/printer.findSpanEnd[*github.com/microsoft/TypeScript/tsc/internal/ast.Statement]
+    github.com/microsoft/TypeScript/tsc/internal/printer.init$2
+    github.com/microsoft/TypeScript/tsc/internal/printer.init$3
+    github.com/microsoft/TypeScript/tsc/internal/scanner.iterateCommentRanges$1
+    github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms.flattenCommaListWorker
+    github.com/microsoft/TypeScript/tsc/internal/transformers/jsxtransforms.insertStatementAfterPrologue
+    github.com/microsoft/TypeScript/tsc/internal/transformers/jsxtransforms.insertStatementAfterPrologue[*github.com/microsoft/TypeScript/tsc/internal/transformers/jsxtransforms.JSXTransformer]
+    github.com/microsoft/TypeScript/tsc/internal/tsoptions.ForEachCompilerOptionValue
+    github.com/microsoft/TypeScript/tsc/internal/tsoptions.ForEachPropertyAssignment
+    github.com/microsoft/TypeScript/tsc/internal/tsoptions.ForEachPropertyAssignment[github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    github.com/microsoft/TypeScript/tsc/internal/tsoptions.ForEachPropertyAssignment[github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    github.com/microsoft/TypeScript/tsc/internal/tsoptions.ForEachPropertyAssignment[github.com/microsoft/TypeScript/tsc/internal/ast.PropertyAssignment]
+    github.com/microsoft/TypeScript/tsc/internal/tsoptions.ForEachPropertyAssignment[github.com/microsoft/TypeScript/tsc/internal/ast.StringLiteral]
+    github.com/microsoft/TypeScript/tsc/internal/tsoptions.hasFileWithHigherPriorityExtension
+    github.com/microsoft/TypeScript/tsc/internal/tsoptions.removeWildcardFilesWithLowerPriorityExtension
+    github.com/microsoft/TypeScript/tsc/internal/tsoptions.tryReadFile
+    github.com/microsoft/TypeScript/tsc/internal/tspath.ForEachAncestorDirectory
+    github.com/microsoft/TypeScript/tsc/internal/tspath.ForEachAncestorDirectory[*github.com/microsoft/TypeScript/tsc/internal/module.resolved]
+    github.com/microsoft/TypeScript/tsc/internal/tspath.ForEachAncestorDirectory[*github.com/microsoft/TypeScript/tsc/internal/packagejson.InfoCacheEntry]
+    github.com/microsoft/TypeScript/tsc/internal/tspath.ForEachAncestorDirectory[any]
+    github.com/microsoft/TypeScript/tsc/internal/tspath.ForEachAncestorDirectory[bool]
+    github.com/microsoft/TypeScript/tsc/internal/tspath.GetCommonParents
+    github.com/microsoft/TypeScript/tsc/internal/tspath.tryGetExtensionFromPath
+    github.com/zeebo/xxh3.withAVX2
+    github.com/zeebo/xxh3.withAVX512
+    github.com/zeebo/xxh3.withGeneric
+    github.com/zeebo/xxh3.withSSE2
+    golang.org/x/sys/windows.getUILanguages
+    internal/poll.ignoringEINTR
+    internal/poll.ignoringEINTR2
+    internal/syscall/windows.withPrivilege
+    io/fs.WalkDir
+    io/fs.walkDir
+    maps.All$1
+    maps.DeleteFunc
+    maps.EqualFunc
+    maps.EqualFunc[map[github.com/microsoft/TypeScript/tsc/internal/tspath.Path]*github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile, map[github.com/microsoft/TypeScript/tsc/internal/tspath.Path]*github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile, github.com/microsoft/TypeScript/tsc/internal/tspath.Path, *github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile, *github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile]
+    maps.EqualFunc[map[github.com/microsoft/TypeScript/tsc/internal/tspath.Path]*github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile, map[github.com/microsoft/TypeScript/tsc/internal/tspath.Path]*github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile, github.com/microsoft/TypeScript/tsc/internal/tspath.Path, *github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile, *github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile]
+    maps.Insert
+    maps.Keys$1
+    maps.Keys[map[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]string, *github.com/microsoft/TypeScript/tsc/internal/ast.Symbol, string]$1
+    maps.Keys[map[string]any, string, any]$1
+    maps.Keys[map[string]bool, string, bool]$1
+    maps.Keys[map[string]github.com/microsoft/TypeScript/tsc/internal/checker.TypeFacts, string, github.com/microsoft/TypeScript/tsc/internal/checker.TypeFacts]$1
+    maps.Keys[map[string]string, string, string]$1
+    maps.Keys[map[string]struct{}, string, struct{}]$1
+    maps.Keys[testing/fstest.MapFS, string, *testing/fstest.MapFile]$1
+    maps.Values$1
+    maps.Values[github.com/microsoft/TypeScript/tsc/internal/ast.SymbolTable, string, *github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]$1
+    maps.Values[github.com/microsoft/TypeScript/tsc/internal/tsoptions.CommandLineOptionNameMap, string, *github.com/microsoft/TypeScript/tsc/internal/tsoptions.CommandLineOption]$1
+    maps.Values[map[github.com/microsoft/TypeScript/tsc/internal/ast.NodeId]*github.com/microsoft/TypeScript/tsc/internal/ast.Node, github.com/microsoft/TypeScript/tsc/internal/ast.NodeId, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]$1
+    maps.Values[map[github.com/microsoft/TypeScript/tsc/internal/checker.CacheHashKey]*github.com/microsoft/TypeScript/tsc/internal/checker.Type, github.com/microsoft/TypeScript/tsc/internal/checker.CacheHashKey, *github.com/microsoft/TypeScript/tsc/internal/checker.Type]$1
+    maps.Values[map[github.com/microsoft/TypeScript/tsc/internal/tspath.Path]*github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile, github.com/microsoft/TypeScript/tsc/internal/tspath.Path, *github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile]$1
+    maps.Values[map[string]*github.com/microsoft/TypeScript/tsc/internal/ast.Node, string, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]$1
+    maps.Values[map[string][]github.com/microsoft/TypeScript/tsc/internal/checker.seenName, string, []github.com/microsoft/TypeScript/tsc/internal/checker.seenName]$1
+    maps.Values[map[string]github.com/microsoft/TypeScript/tsc/internal/modulespecifiers.ModulePath, string, github.com/microsoft/TypeScript/tsc/internal/modulespecifiers.ModulePath]$1
+    net.foreachField
+    net.init$1
+    os.Expand
+    os.ignoringEINTR
+    os.ignoringEINTR2
+    os.ignoringEINTR2[string]
+    os.readFileContents
+    path/filepath.Walk
+    path/filepath.WalkDir
+    path/filepath.toNorm
+    path/filepath.walkDir
+    reflect.rangeNum$1
+    reflect.rangeNum[int, int64]$1
+    reflect.rangeNum[int16, int64]$1
+    reflect.rangeNum[int32, int64]$1
+    reflect.rangeNum[int64, int64]$1
+    reflect.rangeNum[int8, int64]$1
+    reflect.rangeNum[uint, uint64]$1
+    reflect.rangeNum[uint16, uint64]$1
+    reflect.rangeNum[uint32, uint64]$1
+    reflect.rangeNum[uint64, uint64]$1
+    reflect.rangeNum[uint8, uint64]$1
+    reflect.rangeNum[uintptr, uint64]$1
+    slices.All$1
+    slices.AppendSeq
+    slices.AppendSeq[[]*github.com/microsoft/TypeScript/tsc/internal/ast.Node, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    slices.AppendSeq[[]*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol, *github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    slices.AppendSeq[[]*github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile, *github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile]
+    slices.AppendSeq[[]*github.com/microsoft/TypeScript/tsc/internal/printer.EmitHelper, *github.com/microsoft/TypeScript/tsc/internal/printer.EmitHelper]
+    slices.AppendSeq[[]any, any]
+    slices.AppendSeq[[]github.com/microsoft/TypeScript/tsc/internal/ast.CommentRange, github.com/microsoft/TypeScript/tsc/internal/ast.CommentRange]
+    slices.AppendSeq[[]github.com/microsoft/TypeScript/tsc/internal/core.TextPos, github.com/microsoft/TypeScript/tsc/internal/core.TextPos]
+    slices.AppendSeq[[]github.com/microsoft/TypeScript/tsc/internal/modulespecifiers.ModulePath, github.com/microsoft/TypeScript/tsc/internal/modulespecifiers.ModulePath]
+    slices.AppendSeq[[]github.com/microsoft/TypeScript/tsc/internal/tspath.Path, github.com/microsoft/TypeScript/tsc/internal/tspath.Path]
+    slices.AppendSeq[[]string, string]
+    slices.Backward$1
+    slices.BinarySearchFunc
+    slices.BinarySearchFunc[[]*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic, *github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic, *github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    slices.BinarySearchFunc[[]*github.com/microsoft/TypeScript/tsc/internal/ast.Node, *github.com/microsoft/TypeScript/tsc/internal/ast.Node, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    slices.BinarySearchFunc[[]*github.com/microsoft/TypeScript/tsc/internal/checker.Type, *github.com/microsoft/TypeScript/tsc/internal/checker.Type, *github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    slices.BinarySearchFunc[[]*github.com/microsoft/TypeScript/tsc/internal/sourcemap.MappedPosition, *github.com/microsoft/TypeScript/tsc/internal/sourcemap.MappedPosition, int]
+    slices.BinarySearchFunc[[]github.com/microsoft/TypeScript/tsc/internal/spanmap.Segment, github.com/microsoft/TypeScript/tsc/internal/spanmap.Segment, github.com/microsoft/TypeScript/tsc/internal/core.TextPos]
+    slices.BinarySearchFunc[[]string, string, string]
+    slices.Chunk$1
+    slices.CompactFunc
+    slices.CompactFunc[[]*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic, *github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    slices.CompareFunc
+    slices.CompareFunc[[]string, []string, string, string]
+    slices.DeleteFunc[[]github.com/microsoft/TypeScript/tsc/internal/ast.CommentRange, github.com/microsoft/TypeScript/tsc/internal/ast.CommentRange]
+    slices.EqualFunc
+    slices.EqualFunc[[]*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic, []*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic, *github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic, *github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    slices.EqualFunc[[]*github.com/microsoft/TypeScript/tsc/internal/ast.FileReference, []*github.com/microsoft/TypeScript/tsc/internal/ast.FileReference, *github.com/microsoft/TypeScript/tsc/internal/ast.FileReference, *github.com/microsoft/TypeScript/tsc/internal/ast.FileReference]
+    slices.EqualFunc[[]*github.com/microsoft/TypeScript/tsc/internal/ast.LiteralLikeNode, []*github.com/microsoft/TypeScript/tsc/internal/ast.LiteralLikeNode, *github.com/microsoft/TypeScript/tsc/internal/ast.Node, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    slices.EqualFunc[[]*regexp/syntax.Regexp, []*regexp/syntax.Regexp, *regexp/syntax.Regexp, *regexp/syntax.Regexp]
+    slices.IndexFunc
+    slices.IndexFunc[[]*github.com/microsoft/TypeScript/tsc/internal/ast.Node, *github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    slices.IndexFunc[[]*github.com/microsoft/TypeScript/tsc/internal/checker.Type, *github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    slices.IndexFunc[[]*github.com/microsoft/TypeScript/tsc/internal/compiler.FileIncludeReason, *github.com/microsoft/TypeScript/tsc/internal/compiler.FileIncludeReason]
+    slices.IndexFunc[[]github.com/microsoft/TypeScript/tsc/internal/ast.CommentRange, github.com/microsoft/TypeScript/tsc/internal/ast.CommentRange]
+    slices.IndexFunc[[]github.com/microsoft/TypeScript/tsc/internal/printer.SynthesizedComment, github.com/microsoft/TypeScript/tsc/internal/printer.SynthesizedComment]
+    slices.IndexFunc[[]string, string]
+    slices.IsSortedFunc
+    slices.IsSortedFunc[[]string, string]
+    slices.MaxFunc
+    slices.MinFunc
+    slices.Values$1
+    slices.Values[[]*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol, *github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]$1
+    slices.Values[[]string, string]$1
+    slices.insertionSortCmpFunc
+    slices.insertionSortCmpFunc[*flag.Flag]
+    slices.insertionSortCmpFunc[*github.com/go-json-experiment/json.structField]
+    slices.insertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    slices.insertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    slices.insertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile]
+    slices.insertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    slices.insertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    slices.insertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile]
+    slices.insertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/printer.EmitHelper]
+    slices.insertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/sourcemap.SourceMappedPosition]
+    slices.insertionSortCmpFunc[*net.MX]
+    slices.insertionSortCmpFunc[*net.SRV]
+    slices.insertionSortCmpFunc[[]*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    slices.insertionSortCmpFunc[github.com/go-json-experiment/json.member]
+    slices.insertionSortCmpFunc[github.com/go-json-experiment/json.structField]
+    slices.insertionSortCmpFunc[github.com/go-json-experiment/json/jsontext.objectMember]
+    slices.insertionSortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/checker.sortedSymbolNamePair]
+    slices.insertionSortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/contentmapper.indexedDirective]
+    slices.insertionSortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/modulespecifiers.ModulePath]
+    slices.insertionSortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedPosition]
+    slices.insertionSortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedSpan]
+    slices.insertionSortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.Segment]
+    slices.insertionSortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/tracing.TraceRecord]
+    slices.insertionSortCmpFunc[internal/fmtsort.KeyValue]
+    slices.insertionSortCmpFunc[net.byRFC6724Info]
+    slices.insertionSortCmpFunc[os.DirEntry]
+    slices.insertionSortCmpFunc[string]
+    slices.insertionSortCmpFunc[testing/fstest.mapFileInfo]
+    slices.order2CmpFunc
+    slices.order2CmpFunc[*flag.Flag]
+    slices.order2CmpFunc[*github.com/go-json-experiment/json.structField]
+    slices.order2CmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    slices.order2CmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    slices.order2CmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile]
+    slices.order2CmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    slices.order2CmpFunc[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    slices.order2CmpFunc[*github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile]
+    slices.order2CmpFunc[*github.com/microsoft/TypeScript/tsc/internal/sourcemap.SourceMappedPosition]
+    slices.order2CmpFunc[*net.MX]
+    slices.order2CmpFunc[*net.SRV]
+    slices.order2CmpFunc[github.com/go-json-experiment/json.member]
+    slices.order2CmpFunc[github.com/go-json-experiment/json.structField]
+    slices.order2CmpFunc[github.com/go-json-experiment/json/jsontext.objectMember]
+    slices.order2CmpFunc[github.com/microsoft/TypeScript/tsc/internal/contentmapper.indexedDirective]
+    slices.order2CmpFunc[github.com/microsoft/TypeScript/tsc/internal/modulespecifiers.ModulePath]
+    slices.order2CmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedPosition]
+    slices.order2CmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedSpan]
+    slices.order2CmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.Segment]
+    slices.order2CmpFunc[github.com/microsoft/TypeScript/tsc/internal/tracing.TraceRecord]
+    slices.order2CmpFunc[os.DirEntry]
+    slices.order2CmpFunc[string]
+    slices.order2CmpFunc[testing/fstest.mapFileInfo]
+    slices.partialInsertionSortCmpFunc
+    slices.partialInsertionSortCmpFunc[*flag.Flag]
+    slices.partialInsertionSortCmpFunc[*github.com/go-json-experiment/json.structField]
+    slices.partialInsertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    slices.partialInsertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    slices.partialInsertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile]
+    slices.partialInsertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    slices.partialInsertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    slices.partialInsertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile]
+    slices.partialInsertionSortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/sourcemap.SourceMappedPosition]
+    slices.partialInsertionSortCmpFunc[*net.MX]
+    slices.partialInsertionSortCmpFunc[*net.SRV]
+    slices.partialInsertionSortCmpFunc[github.com/go-json-experiment/json.member]
+    slices.partialInsertionSortCmpFunc[github.com/go-json-experiment/json.structField]
+    slices.partialInsertionSortCmpFunc[github.com/go-json-experiment/json/jsontext.objectMember]
+    slices.partialInsertionSortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/contentmapper.indexedDirective]
+    slices.partialInsertionSortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/modulespecifiers.ModulePath]
+    slices.partialInsertionSortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedPosition]
+    slices.partialInsertionSortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedSpan]
+    slices.partialInsertionSortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.Segment]
+    slices.partialInsertionSortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/tracing.TraceRecord]
+    slices.partialInsertionSortCmpFunc[os.DirEntry]
+    slices.partialInsertionSortCmpFunc[string]
+    slices.partialInsertionSortCmpFunc[testing/fstest.mapFileInfo]
+    slices.partitionCmpFunc
+    slices.partitionCmpFunc[*flag.Flag]
+    slices.partitionCmpFunc[*github.com/go-json-experiment/json.structField]
+    slices.partitionCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    slices.partitionCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    slices.partitionCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile]
+    slices.partitionCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    slices.partitionCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    slices.partitionCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile]
+    slices.partitionCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/sourcemap.SourceMappedPosition]
+    slices.partitionCmpFunc[*net.MX]
+    slices.partitionCmpFunc[*net.SRV]
+    slices.partitionCmpFunc[github.com/go-json-experiment/json.member]
+    slices.partitionCmpFunc[github.com/go-json-experiment/json.structField]
+    slices.partitionCmpFunc[github.com/go-json-experiment/json/jsontext.objectMember]
+    slices.partitionCmpFunc[github.com/microsoft/TypeScript/tsc/internal/contentmapper.indexedDirective]
+    slices.partitionCmpFunc[github.com/microsoft/TypeScript/tsc/internal/modulespecifiers.ModulePath]
+    slices.partitionCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedPosition]
+    slices.partitionCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedSpan]
+    slices.partitionCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.Segment]
+    slices.partitionCmpFunc[github.com/microsoft/TypeScript/tsc/internal/tracing.TraceRecord]
+    slices.partitionCmpFunc[os.DirEntry]
+    slices.partitionCmpFunc[string]
+    slices.partitionCmpFunc[testing/fstest.mapFileInfo]
+    slices.partitionEqualCmpFunc
+    slices.partitionEqualCmpFunc[*flag.Flag]
+    slices.partitionEqualCmpFunc[*github.com/go-json-experiment/json.structField]
+    slices.partitionEqualCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    slices.partitionEqualCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    slices.partitionEqualCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile]
+    slices.partitionEqualCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    slices.partitionEqualCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    slices.partitionEqualCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile]
+    slices.partitionEqualCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/sourcemap.SourceMappedPosition]
+    slices.partitionEqualCmpFunc[*net.MX]
+    slices.partitionEqualCmpFunc[*net.SRV]
+    slices.partitionEqualCmpFunc[github.com/go-json-experiment/json.member]
+    slices.partitionEqualCmpFunc[github.com/go-json-experiment/json.structField]
+    slices.partitionEqualCmpFunc[github.com/go-json-experiment/json/jsontext.objectMember]
+    slices.partitionEqualCmpFunc[github.com/microsoft/TypeScript/tsc/internal/contentmapper.indexedDirective]
+    slices.partitionEqualCmpFunc[github.com/microsoft/TypeScript/tsc/internal/modulespecifiers.ModulePath]
+    slices.partitionEqualCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedPosition]
+    slices.partitionEqualCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedSpan]
+    slices.partitionEqualCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.Segment]
+    slices.partitionEqualCmpFunc[github.com/microsoft/TypeScript/tsc/internal/tracing.TraceRecord]
+    slices.partitionEqualCmpFunc[os.DirEntry]
+    slices.partitionEqualCmpFunc[string]
+    slices.partitionEqualCmpFunc[testing/fstest.mapFileInfo]
+    slices.pdqsortCmpFunc[*flag.Flag]
+    slices.pdqsortCmpFunc[*github.com/go-json-experiment/json.structField]
+    slices.pdqsortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    slices.pdqsortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    slices.pdqsortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile]
+    slices.pdqsortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    slices.pdqsortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    slices.pdqsortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile]
+    slices.pdqsortCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/sourcemap.SourceMappedPosition]
+    slices.pdqsortCmpFunc[*net.MX]
+    slices.pdqsortCmpFunc[*net.SRV]
+    slices.pdqsortCmpFunc[github.com/go-json-experiment/json.member]
+    slices.pdqsortCmpFunc[github.com/go-json-experiment/json.structField]
+    slices.pdqsortCmpFunc[github.com/go-json-experiment/json/jsontext.objectMember]
+    slices.pdqsortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/contentmapper.indexedDirective]
+    slices.pdqsortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/modulespecifiers.ModulePath]
+    slices.pdqsortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedPosition]
+    slices.pdqsortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedSpan]
+    slices.pdqsortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.Segment]
+    slices.pdqsortCmpFunc[github.com/microsoft/TypeScript/tsc/internal/tracing.TraceRecord]
+    slices.pdqsortCmpFunc[os.DirEntry]
+    slices.pdqsortCmpFunc[string]
+    slices.pdqsortCmpFunc[testing/fstest.mapFileInfo]
+    slices.siftDownCmpFunc
+    slices.siftDownCmpFunc[*flag.Flag]
+    slices.siftDownCmpFunc[*github.com/go-json-experiment/json.structField]
+    slices.siftDownCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    slices.siftDownCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Node]
+    slices.siftDownCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.SourceFile]
+    slices.siftDownCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    slices.siftDownCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    slices.siftDownCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/compiler.redirectsFile]
+    slices.siftDownCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/sourcemap.SourceMappedPosition]
+    slices.siftDownCmpFunc[*net.MX]
+    slices.siftDownCmpFunc[*net.SRV]
+    slices.siftDownCmpFunc[github.com/go-json-experiment/json.member]
+    slices.siftDownCmpFunc[github.com/go-json-experiment/json.structField]
+    slices.siftDownCmpFunc[github.com/go-json-experiment/json/jsontext.objectMember]
+    slices.siftDownCmpFunc[github.com/microsoft/TypeScript/tsc/internal/contentmapper.indexedDirective]
+    slices.siftDownCmpFunc[github.com/microsoft/TypeScript/tsc/internal/modulespecifiers.ModulePath]
+    slices.siftDownCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedPosition]
+    slices.siftDownCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.MappedSpan]
+    slices.siftDownCmpFunc[github.com/microsoft/TypeScript/tsc/internal/spanmap.Segment]
+    slices.siftDownCmpFunc[github.com/microsoft/TypeScript/tsc/internal/tracing.TraceRecord]
+    slices.siftDownCmpFunc[os.DirEntry]
+    slices.siftDownCmpFunc[string]
+    slices.siftDownCmpFunc[testing/fstest.mapFileInfo]
+    slices.symMergeCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/ast.Diagnostic]
+    slices.symMergeCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/checker.Type]
+    slices.symMergeCmpFunc[*github.com/microsoft/TypeScript/tsc/internal/printer.EmitHelper]
+    slices.symMergeCmpFunc[[]*github.com/microsoft/TypeScript/tsc/internal/ast.Symbol]
+    slices.symMergeCmpFunc[github.com/go-json-experiment/json.structField]
+    slices.symMergeCmpFunc[github.com/microsoft/TypeScript/tsc/internal/checker.sortedSymbolNamePair]
+    slices.symMergeCmpFunc[internal/fmtsort.KeyValue]
+    slices.symMergeCmpFunc[net.byRFC6724Info]
+    slices.symMergeCmpFunc[string]
+    sort.Find
+    sort.Search
+    sort.SliceIsSorted
+    strings.FieldsFunc
+    strings.FieldsSeq$1
+    strings.Lines$1
+    strings.Map
+    strings.indexFunc
+    strings.lastIndexFunc
+    strings.splitSeq$1
+    testing.AllocsPerRun
+    testing.fRunner
+    testing.listTests
+    testing.tRunner
+CLOSURES 1464 can-park 754
+GO STATEMENTS 29 can-park 28 unresolved 1
+INTERFACE CALLS 2453 can-park 571 unresolved 239
+FUNC-VALUE CALLS 2150 can-park 1066 unresolved 305
+PACKAGES 172; top 15 by can-park:
+  github.com/microsoft/TypeScript/tsc/internal/checker   2009 /   2881   69.7%
+  github.com/microsoft/TypeScript/tsc/internal/ast    983 /   2226   44.2%
+  golang.org/x/sys/windows                    719 /    848   84.8%
+  github.com/microsoft/TypeScript/tsc/internal/printer    539 /    768   70.2%
+  github.com/microsoft/TypeScript/tsc/internal/parser    406 /    514   79.0%
+  github.com/microsoft/TypeScript/tsc/internal/transformers/estransforms    332 /    406   81.8%
+  net                                         324 /    582   55.7%
+  syscall                                     256 /    344   74.4%
+  os                                          210 /    323   65.0%
+  math/big                                    154 /    298   51.7%
+  github.com/microsoft/TypeScript/tsc/internal/compiler    152 /    339   44.8%
+  github.com/Microsoft/go-winio               122 /    161   75.8%
+  github.com/microsoft/TypeScript/tsc/internal/transformers/declarations    118 /    180   65.6%
+  github.com/microsoft/TypeScript/tsc/internal/transformers/tstransforms    112 /    141   79.4%
+  github.com/microsoft/TypeScript/tsc/internal/binder    107 /    195   54.9%

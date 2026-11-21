@@ -275,7 +275,8 @@ namespace go.golib;
         if (elapsed.TotalMilliseconds <= SlowCallbackMilliseconds)
             return;
 
-        string name = $"{timer.m_callback.Method.DeclaringType?.FullName}.{timer.m_callback.Method.Name}";
+        System.Reflection.MethodInfo callback = global::go.golib.GoFuncPair.Underlying(timer.m_callback).Method;
+        string name = $"{callback.DeclaringType?.FullName}.{callback.Name}";
         Interlocked.Increment(ref s_slowCallbacks);
         Volatile.Write(ref s_lastSlowCallback, name);
         Debug.WriteLine($"GoTimer: callback {name} ran {elapsed.TotalMilliseconds:F1} ms on the timer service thread; a timer callback must not block");
