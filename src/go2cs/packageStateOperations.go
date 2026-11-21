@@ -109,6 +109,7 @@ func resetPackageState(pkg *packages.Package) {
 	importedValueCloneLiftNames = make(map[string]map[string]bool)
 	importedStructLiftTargets = make(map[string]string)
 	importedLiftAdmissionStamps = make(map[string]*inlineArrayStamp)
+	liftRecordsRead = make(map[string]bool)
 	packageConstraintLiftNames = make(map[string]string)
 	resetInlineConstraintState()
 	packageLiftedTypeNames = hashset.HashSet[string]{}

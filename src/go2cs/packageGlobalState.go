@@ -501,6 +501,10 @@ var importedStructLiftTargets map[string]string
 // reset per package by resetPackageState.
 var importedLiftAdmissionStamps map[string]*inlineArrayStamp
 
+// liftRecordsRead records, per cleaned source directory, the transitive imports whose lift records
+// loadImportLiftRecords has read (or tried to read) from their package_info.cs, so each is read once per package.
+var liftRecordsRead map[string]bool
+
 // packageConstraintLiftNames maps a generic type's inline-constraint DECLARATION (constraintLiftKey)
 // to its lift, for the methods whose receiver copy of the constraint no signature key may name.
 var packageConstraintLiftNames = map[string]string{}

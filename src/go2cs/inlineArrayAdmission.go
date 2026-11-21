@@ -238,8 +238,9 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 
 	// The SELECTED types: each a seed whose by-value closure must be inline, with the position that selected it.
 	type selection struct {
-		t   types.Type
-		pos token.Pos
+		t      types.Type
+		pos    token.Pos
+		seeded bool // an -inline-arrays or importer seed (OVERRIDE): admitted even when its closure holds no array
 	}
 
 	var seeds []selection
@@ -280,21 +281,21 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 			case *ast.StructType:
 				if a.forced && !specBodies[node] {
 					if st, ok := info.TypeOf(node).(*types.Struct); ok && structHoldsArray(st, 0) {
-						seeds = append(seeds, selection{st, node.Pos()})
+						seeds = append(seeds, selection{st, node.Pos(), false})
 					}
 				}
 			case *ast.TypeSpec:
 				if a.forced {
 					if obj, ok := info.Defs[node.Name].(*types.TypeName); ok && obj.Pkg() == pkg {
 						if st, ok := obj.Type().Underlying().(*types.Struct); ok && structHoldsArray(st, 0) && node.TypeParams == nil {
-							seeds = append(seeds, selection{obj.Type(), node.Pos()})
+							seeds = append(seeds, selection{obj.Type(), node.Pos(), false})
 						}
 					}
 				} else if slices.Contains(seedNames, node.Name.Name) {
 					// A -inline-arrays seed: selected as a whole-struct conversion would select it (OVERRIDE, above).
 					if obj, ok := info.Defs[node.Name].(*types.TypeName); ok && obj.Pkg() == pkg && obj.Parent() == pkg.Scope() && node.TypeParams == nil {
 						if _, ok := obj.Type().Underlying().(*types.Struct); ok {
-							seeds = append(seeds, selection{obj.Type(), node.Pos()})
+							seeds = append(seeds, selection{obj.Type(), node.Pos(), true})
 
 							if !slices.Contains(a.seeded, obj.Name()) {
 								a.seeded = append(a.seeded, obj.Name())
@@ -306,7 +307,7 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 				target, pair, ok := unsafePointerConversion(node, info)
 
 				if ok && !holdsTypeParameter(target, 0) {
-					seeds = append(seeds, selection{target, node.Pos()})
+					seeds = append(seeds, selection{target, node.Pos(), false})
 				}
 
 				if pair != nil {
@@ -372,8 +373,11 @@ func computeInlineArrayAdmission(files []*ast.File, fset *token.FileSet, pkg *ty
 			continue
 		}
 
-		// A closure holding no array needs no inline storage: the struct is laid out as Go's already.
-		holdsAny := false
+		// A closure holding no array needs no inline storage: the struct is laid out as Go's already. A SEED is admitted
+		// all the same: it exists so that this package's lift of the type agrees with an importer that admits it (an
+		// array-free struct held by an admitted one is admitted with it there), and an array-free struct's admitted
+		// layout is Go's, so admitting it changes no field.
+		holdsAny := seed.seeded
 
 		for _, member := range closure {
 			if st, isStruct := member.Underlying().(*types.Struct); isStruct && structHoldsArray(st, 0) {
