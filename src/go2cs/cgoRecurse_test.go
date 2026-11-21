@@ -180,3 +180,47 @@ func TestARecurseNugetConversionTakesACgoPackageThroughTheCgoRoute(t *testing.T)
 		}
 	}
 }
+
+// End to end: the same module under -recurse -cgo against this tree (no published go.* needed), built and run, prints
+// what Go prints. GO2CS_INLINE_BUILD=1 runs it, with a C compiler for both sides.
+func TestARecurseCgoModuleReadsAsGo(t *testing.T) {
+	requireHostCC(t)
+	dotnet := requireInlineBuild(t)
+	files := map[string]string{"cptr/cptr.go": cgoRecurseCptr, "main.go": cgoRecurseMain}
+
+	dir := t.TempDir()
+	writeModuleFile(t, filepath.Join(dir, "go.mod"), "module example.com/cgorecurse\n\ngo 1.26\n")
+
+	for file, source := range files {
+		writeModuleFile(t, filepath.Join(dir, file), source)
+	}
+
+	goRun := exec.Command("go", "run", ".")
+	goRun.Dir = dir
+	goRun.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=1")
+	wantBytes, err := goRun.CombinedOutput()
+
+	if err != nil {
+		t.Fatalf("go did not run the module: %v\n%s", err, wantBytes)
+	}
+
+	want := strings.TrimSpace(strings.ReplaceAll(string(wantBytes), "\r\n", "\n"))
+	combined, output, err := convertCgoRecurse(t, files, "-recurse", "-cgo=true")
+
+	if err != nil {
+		t.Fatalf("the conversion failed: %v\n%s", err, combined)
+	}
+
+	out := filepath.Join(output, "src", "example.com", "cgorecurse")
+
+	if built, err := buildConvertedInlineModule(t, dotnet, out); err != nil {
+		t.Fatalf("the converted module does not build: %v\n%s", err, built)
+	}
+
+	got := runConvertedInlineModule(t, dotnet, out)
+	t.Logf("READING go prints: %s; go2cs prints: %s", want, got)
+
+	if got != want || want == "" {
+		t.Fatalf("go2cs differs from go:\n   go: %s\ngo2cs: %s", want, got)
+	}
+}

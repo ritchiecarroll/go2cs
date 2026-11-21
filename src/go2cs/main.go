@@ -663,7 +663,7 @@ Examples:
 		log.Fatalln("-dual-recv-params requires -dual-recv: it lowers the parameters of the by-reference forms that -dual-recv emits")
 	}
 
-	if err := checkCgoFlag(options.parseCgoTargets, convertStdLib, options.convertTests, recurseVal.enabled); err != nil {
+	if err := checkCgoFlag(options.parseCgoTargets, convertStdLib, options.convertTests); err != nil {
 		log.Fatalln(err)
 	}
 

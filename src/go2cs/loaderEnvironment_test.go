@@ -131,14 +131,18 @@ func hostTarget(t *testing.T) (string, string) {
 	return fields[0], fields[1]
 }
 
-// -cgo makes the single-package driver's own load cgo-on, so it is refused wherever it would be silently ignored (a
-// driver whose loads it does not reach) and wherever the environment asks for the opposite load.
+// -cgo makes the conversion's loads cgo-on, so it is refused wherever it would be silently ignored (a driver whose loads
+// it does not reach) and wherever the environment asks for the opposite load.
+//
+// RE-CITED for the cgo-against-go.* item (INC 1, C2 ca1fd3a4e): -cgo beside -recurse was refused here ("the module
+// driver's loads stay at CGO_ENABLED=0"). The module driver now loads cgo-on under -cgo (moduleConverter.go), so the row
+// reads accepted; TestARecurseNugetConversionTakesACgoPackageThroughTheCgoRoute holds what it then converts.
 func TestCheckCgoFlagRefusesWhatItCannotHonour(t *testing.T) {
 	cases := []struct {
-		name                        string
-		cgo, stdlib, tests, recurse bool
-		env                         string // "-" leaves CGO_ENABLED unset
-		refused                     string
+		name               string
+		cgo, stdlib, tests bool
+		env                string // "-" leaves CGO_ENABLED unset
+		refused            string
 	}{
 		{name: "off", env: "0"},
 		{name: "on, unset", cgo: true, env: "-"},
@@ -147,7 +151,7 @@ func TestCheckCgoFlagRefusesWhatItCannotHonour(t *testing.T) {
 		{name: "on, 0", cgo: true, env: "0", refused: "CGO_ENABLED=0"},
 		{name: "stdlib", cgo: true, stdlib: true, env: "-", refused: "-stdlib"},
 		{name: "tests", cgo: true, tests: true, env: "-", refused: "-tests"},
-		{name: "recurse", cgo: true, recurse: true, env: "-", refused: "-recurse"},
+		{name: "recurse is accepted", cgo: true, env: "-"},
 	}
 
 	for _, c := range cases {
@@ -158,7 +162,7 @@ func TestCheckCgoFlagRefusesWhatItCannotHonour(t *testing.T) {
 				t.Setenv("CGO_ENABLED", c.env)
 			}
 
-			err := checkCgoFlag(c.cgo, c.stdlib, c.tests, c.recurse)
+			err := checkCgoFlag(c.cgo, c.stdlib, c.tests)
 
 			switch {
 			case c.refused == "" && err != nil:

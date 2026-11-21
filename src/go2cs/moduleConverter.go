@@ -270,6 +270,13 @@ func (m *ModuleConverter) loadClosure(moduleDir string) (map[string]*packages.Pa
 		cfg.Env = converterLoaderEnv("GOOS="+targetParts[0], "GOARCH="+targetParts[1])
 	}
 
+	// Under -recurse -cgo the closure is loaded cgo-ON, as Go builds it: a cgo-only package (every file imports "C")
+	// has no cgo-off files, so its importers would not type-check against it otherwise. Each package's own load is
+	// cgo-on too (processConversion), and a package whose selected files import "C" takes the cgo route there.
+	if m.options.parseCgoTargets {
+		cfg.Env = append(cfg.Env, "CGO_ENABLED=1")
+	}
+
 	pkgs, err := packages.Load(cfg, "./...")
 
 	if err != nil {
