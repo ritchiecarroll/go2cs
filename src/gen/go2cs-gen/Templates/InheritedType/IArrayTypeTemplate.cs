@@ -68,13 +68,26 @@ internal static class IArrayTypeTemplate
 
     internal static string AssignMethod(ICollection<string> goMethods) => goMethods.Contains("Assign") ? "ΔAssign" : "Assign";
 
+    // The members this wrapper declares for its own use under an ASCII name a Go method can also declare (R7; the slice
+    // template's ClaimableMembers says why a Go method of the same name must win). A claimed member moves to its explicit
+    // golib interface form (IArray, IArray<T>, ISupportMake<TSelf>), or, for Slice, which no interface declares, to
+    // ΔSlice. Clone and Assign keep their own rules above. GenTests' NamedSliceArrayClaimedMemberTests guards the list.
+    internal static readonly string[] ClaimableMembers = ["Assign", "Clone", "GetEnumerator", "Length", "Make", "Slice", "Source", "ToSpan"];
+
+    private static string Claimable(ICollection<string> goMethods, string name, string own, string claimed) =>
+        goMethods.Contains(name) ? claimed : own;
+
     public static string Generate(string structName, string typeName, string targetTypeName, string? targetTypeSize, ICollection<string> goMethods) =>
         $$"""
-                
-                public {{targetTypeName}}[] Source => {{ValueMember(structName)}};
-                
-                public nint Length => {{ValueMember(structName)}}.Length;
-                
+
+                {{Claimable(goMethods, "Source",
+                    $"public {targetTypeName}[] Source => {ValueMember(structName)};",
+                    $"{targetTypeName}[] IArray<{targetTypeName}>.Source => {ValueMember(structName)};")}}
+
+                {{Claimable(goMethods, "Length",
+                    $"public nint Length => {ValueMember(structName)}.Length;",
+                    $"nint IArray.Length => {ValueMember(structName)}.Length;")}}
+
                 global::System.Array IArray.Source => ((IArray){{ValueMember(structName)}}).Source!;
                 
                 object? IArray.this[nint index]
@@ -112,16 +125,19 @@ internal static class IArrayTypeTemplate
                 // the 2-index forms are (a pointer to this type is sliced as `p.Value.slice(…)`).
                 public slice<{{targetTypeName}}> slice(nint low, nint high, nint max) => {{ValueMember(structName)}}.slice(low, high, max);
 
-                public slice<{{targetTypeName}}> Slice(nint start, nint length) => {{ValueMember(structName)}}.Slice(start, length);
+                public slice<{{targetTypeName}}> {{(goMethods.Contains("Slice") ? "ΔSlice" : "Slice")}}(nint start, nint length) => {{ValueMember(structName)}}.Slice(start, length);
 
-                public global::System.Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
+                public global::System.Span<{{targetTypeName}}> {{EllipsisOperator}} => {{ValueMember(structName)}}.ToSpan();
 
-                public global::System.Span<{{targetTypeName}}> ToSpan() => {{ValueMember(structName)}}.ToSpan();
+                {{Claimable(goMethods, "ToSpan",
+                    $"public global::System.Span<{targetTypeName}> ToSpan() => {ValueMember(structName)}.ToSpan();",
+                    $"global::System.Span<{targetTypeName}> IArray<{targetTypeName}>.ToSpan() => {ValueMember(structName)}.ToSpan();")}}
 
                 // Forwards the CONCRETE struct enumerator over the VALUES, as array<T> enumerates them:
                 // `foreach` binds GetEnumerator by pattern, so a named array type enumerates with zero heap
-                // traffic exactly like the array<T> it wraps. Go's range pairs are builtin.range(x).
-                public global::go.array<{{targetTypeName}}>.Enumerator GetEnumerator() => {{ValueMember(structName)}}.GetEnumerator();
+                // traffic exactly like the array<T> it wraps. Go's range pairs are builtin.range(x). A Go method
+                // named GetEnumerator takes it away; the explicit IEnumerable forms below remain.
+                {{Claimable(goMethods, "GetEnumerator", $"public global::go.array<{targetTypeName}>.Enumerator GetEnumerator() => {ValueMember(structName)}.GetEnumerator();", "")}}
 
                 global::System.Collections.Generic.IEnumerator<{{targetTypeName}}> global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>.GetEnumerator() => ((global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>){{ValueMember(structName)}}).GetEnumerator();
 
@@ -138,6 +154,8 @@ internal static class IArrayTypeTemplate
 
                 {{AssignMembers(structName, goMethods)}}
 
-                public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}();
+                {{Claimable(goMethods, "Make",
+                    $"public static {structName} Make(nint p1 = 0, nint p2 = -1) => new {structName}();",
+                    $"static {structName} ISupportMake<{structName}>.Make(nint p1, nint p2) => new {structName}();")}}
         """;
 }

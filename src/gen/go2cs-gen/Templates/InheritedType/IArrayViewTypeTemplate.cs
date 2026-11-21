@@ -28,6 +28,15 @@ namespace go2cs.Templates.InheritedType;
 /// </remarks>
 internal static class IArrayViewTypeTemplate
 {
+    // The members this wrapper declares for its own use under an ASCII name a Go method can also declare (R7; see
+    // ISliceTypeTemplate.ClaimableMembers): a claimed member moves to its explicit IArray / IArray<T> form, or to ΔSlice,
+    // and a claimed Clone leaves the copy to ValueCloneMethod alone, the spelling the converter then uses at its copy sites
+    // (valueCloneSuffix), exactly as IArrayTypeTemplate.CloneMembers does. GenTests' NamedSliceArrayClaimedMemberTests.
+    internal static readonly string[] ClaimableMembers = ["Assign", "Clone", "GetEnumerator", "Length", "Slice", "Source", "ToSpan"];
+
+    private static string Claimable(ICollection<string> goMethods, string name, string own, string claimed) =>
+        goMethods.Contains(name) ? claimed : own;
+
     public static string Generate(string objectName, string typeName, string targetTypeName, ICollection<string> goMethods) =>
         $$"""
 
@@ -45,9 +54,9 @@ internal static class IArrayViewTypeTemplate
                     }
                 }
 
-                public {{targetTypeName}}[] Source => view.Source;
+                {{Claimable(goMethods, "Source", $"public {targetTypeName}[] Source => view.Source;", $"{targetTypeName}[] IArray<{targetTypeName}>.Source => view.Source;")}}
 
-                public nint Length => view.Length;
+                {{Claimable(goMethods, "Length", "public nint Length => view.Length;", "nint IArray.Length => view.Length;")}}
 
                 global::System.Array IArray.Source => ((IArray)view).Source!;
 
@@ -78,14 +87,16 @@ internal static class IArrayViewTypeTemplate
 
                 public slice<{{targetTypeName}}> slice(nint low, nint high, nint max) => view.slice(low, high, max);
 
-                public slice<{{targetTypeName}}> Slice(nint start, nint length) => view.Slice(start, length);
+                public slice<{{targetTypeName}}> {{(goMethods.Contains("Slice") ? "ΔSlice" : "Slice")}}(nint start, nint length) => view.Slice(start, length);
 
-                public global::System.Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
+                public global::System.Span<{{targetTypeName}}> {{EllipsisOperator}} => view.ToSpan();
 
-                public global::System.Span<{{targetTypeName}}> ToSpan() => view.ToSpan();
+                {{Claimable(goMethods, "ToSpan",
+                    $"public global::System.Span<{targetTypeName}> ToSpan() => view.ToSpan();",
+                    $"global::System.Span<{targetTypeName}> IArray<{targetTypeName}>.ToSpan() => view.ToSpan();")}}
 
                 // Forwards the CONCRETE struct enumerator over the VALUES — see IArrayTypeTemplate.
-                public global::go.array<{{targetTypeName}}>.Enumerator GetEnumerator() => view.GetEnumerator();
+                {{Claimable(goMethods, "GetEnumerator", $"public global::go.array<{targetTypeName}>.Enumerator GetEnumerator() => view.GetEnumerator();", "")}}
 
                 global::System.Collections.Generic.IEnumerator<{{targetTypeName}}> global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>.GetEnumerator() => ((global::System.Collections.Generic.IEnumerable<{{targetTypeName}}>)view).GetEnumerator();
 
@@ -94,13 +105,9 @@ internal static class IArrayViewTypeTemplate
                 // Go's range-expression copy — see IArrayTypeTemplate.
                 public global::go.array<{{targetTypeName}}>.RangeSnapshot {{RangeSnapshotMethod}}() => view.{{RangeSnapshotMethod}}();
 
-                public {{objectName}} Clone() => new {{objectName}}(view.Clone());
-
-                // Uniform value-copy member name a generated struct clone calls on every
-                // clone-needing field (see GoValueCloneAttribute); copy SITES use Clone().
-                public {{objectName}} {{ValueCloneMethod}}() => Clone();
-
-                object global::System.ICloneable.Clone() => Clone();
+                {{(goMethods.Contains("Clone") ?
+                    $"public {objectName} {ValueCloneMethod}() => new {objectName}(view.Clone());\r\n\r\n        object global::System.ICloneable.Clone() => {ValueCloneMethod}();" :
+                    $"public {objectName} Clone() => new {objectName}(view.Clone());\r\n\r\n        // Uniform value-copy member name a generated struct clone calls on every\r\n        // clone-needing field (see GoValueCloneAttribute); copy SITES use Clone().\r\n        public {objectName} {ValueCloneMethod}() => Clone();\r\n\r\n        object global::System.ICloneable.Clone() => Clone();")}}
 
                 // Go's whole assignment into this array's own storage, through `view` so the underlying wrapper's lazy
                 // backing lands in THIS wrapper's field (see IArrayTypeTemplate's Assign; P5's Q2).
