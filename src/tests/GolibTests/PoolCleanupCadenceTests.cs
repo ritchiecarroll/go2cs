@@ -40,6 +40,12 @@ namespace GolibTests;
 /// still answers after it and is gone after a second one, which is the shape sync's own TestPool
 /// reads (3). Each pool below is the arm's own, so no other test's use can move it.
 /// </para>
+/// <para>
+/// THE GENERATION. Arm 1 ends each round with a full collection, so it is green on a cadence that
+/// fires only at gen2. Arms 4 and 5 run gen0 collections and nothing else, so they are the arms that
+/// tell the per-collection cadence from a gen2 one: both red when the sentinel re-registers itself
+/// (<c>GC.ReRegisterForFinalize(this)</c>) instead of allocating a fresh one.
+/// </para>
 /// </remarks>
 [TestClass]
 public class PoolCleanupCadenceTests
@@ -52,6 +58,7 @@ public class PoolCleanupCadenceTests
     private static sync.Pool s_abandoned;
     private static sync.Pool s_gcOff;
     private static sync.Pool s_onceNotTwice;
+    private static sync.Pool s_gen0Only;
 
     private static void EphemeralCollection()
     {
@@ -183,5 +190,83 @@ public class PoolCleanupCadenceTests
 
         Assert.IsNull(s_onceNotTwice.Get(),
             "after further runtime.GC() calls the pool still answered: runtime.GC() is not aging the pool at all.");
+    }
+
+    /// <summary>
+    /// The GEN0 arm: ephemeral collections alone, with no full collection anywhere in the arm, age
+    /// the pool, so an item put and never taken back is gone from it.
+    /// </summary>
+    /// <remarks>
+    /// The arm reads the pool (<c>Get</c>), not the item's reachability: an item promoted out of gen0
+    /// is not freed by a gen0 collection whatever the pool did, but two agings take it out of the pool
+    /// (local to victim, victim dropped). The full collection before the Put only settles the heap; a
+    /// sentinel that re-registers itself is in gen2 after it and never fires here.
+    /// </remarks>
+    [TestMethod]
+    public void AnAbandonedItemIsReleasedByGen0CollectionsAlone()
+    {
+        FullCollection();
+
+        s_gen0Only.Put("abandoned");
+
+        int rounds = 0;
+        object? got = "abandoned";
+
+        while (rounds < Rounds)
+        {
+            rounds++;
+            EphemeralCollection();
+            EphemeralCollection();
+            EphemeralCollection();
+
+            if (rounds >= 2)
+            {
+                got = s_gen0Only.Get();
+
+                if (got is null)
+                    break;
+
+                s_gen0Only.Put(got);
+            }
+        }
+
+        Console.WriteLine($"[PoolCleanupCadence] gen0-only: pool answered {got ?? "nothing"} after {rounds} round(s) " +
+                          $"of three gen0 collections; gen0 count {GC.CollectionCount(0)}, agings {Δruntime.GoPoolCleanupAgings}.");
+
+        Assert.IsNull(got,
+            $"the pool still held an item put before {Rounds * 3} gen0 collections, with no full collection and no " +
+            "runtime.GC(). The cleanup is not running at every collection: a cadence that fires only at gen2 (a " +
+            "sentinel that re-registers itself) never ages a pool between full collections.");
+    }
+
+    /// <summary>
+    /// The COUNTER arm: the cadence's aging count advances under gen0 collections, and its failure
+    /// count does not.
+    /// </summary>
+    /// <remarks>
+    /// The finalizer swallows a cleanup that throws, so the failure count is the only trace of one.
+    /// </remarks>
+    [TestMethod]
+    public void AgingsAdvanceUnderGen0Collections()
+    {
+        FullCollection();
+
+        long agings = Δruntime.GoPoolCleanupAgings;
+        long failures = Δruntime.GoPoolCleanupFailures;
+
+        for (int i = 0; i < 6; i++)
+            EphemeralCollection();
+
+        long agingsAfter = Δruntime.GoPoolCleanupAgings;
+        long failuresAfter = Δruntime.GoPoolCleanupFailures;
+
+        Console.WriteLine($"[PoolCleanupCadence] agings {agings} -> {agingsAfter}, failures {failures} -> {failuresAfter} " +
+                          "over six gen0 collections.");
+
+        Assert.IsTrue(agingsAfter > agings,
+            $"six gen0 collections ran no pool cleanup from the cadence (agings {agings} -> {agingsAfter}).");
+
+        Assert.AreEqual(failures, failuresAfter,
+            "the pool cleanup threw from the cadence's finalizer during six gen0 collections.");
     }
 }

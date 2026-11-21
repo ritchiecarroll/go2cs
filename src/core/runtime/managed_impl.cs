@@ -787,6 +787,16 @@ partial class runtime_package
     {
         private static int s_armed;
         private static long s_servedThrough;
+        private static long s_agings;
+        private static long s_failures;
+
+        // How many cleanups this cadence has run, and how many threw. The finalizer swallows a failure (below), so a
+        // cleanup that throws every time would leave the pools unaged with nothing to show for it but the memory
+        // growth; the second count makes that visible. Agings over CollectionCount(0) is the delivery ratio: how many
+        // collections the one finalizer thread served. runtime.GC()'s own cleanup is not counted here.
+        internal static long Agings => Interlocked.Read(ref s_agings);
+
+        internal static long Failures => Interlocked.Read(ref s_failures);
 
         internal static void Arm()
         {
@@ -820,7 +830,10 @@ partial class runtime_package
                 Interlocked.Exchange(ref s_servedThrough, count);
 
                 if (poolcleanup != default!)
+                {
                     poolcleanup();
+                    Interlocked.Increment(ref s_agings);
+                }
             }
             finally
             {
@@ -840,8 +853,14 @@ partial class runtime_package
                 }
                 catch
                 {
+                    Interlocked.Increment(ref s_failures);
                 }
 
+                // A NEW object, never GC.ReRegisterForFinalize(this) as BoringCaches does: this object has
+                // survived the collection that condemned it (finalization keeps it reachable), so it is promoted,
+                // and re-registered it would fire only when its older generation is collected, at last once per
+                // gen2. A fresh one starts in gen0 and fires at the next collection (GolibTests'
+                // AnAbandonedItemIsReleasedByGen0CollectionsAlone reds on the re-registered form).
                 if (!Environment.HasShutdownStarted)
                     _ = new Sentinel();
             }
@@ -891,6 +910,12 @@ partial class runtime_package
     // TEST SEAM (A15): Go's export_test.go `var ForceGCPeriod = &forcegcperiod`, which
     // runtime's TestPeriodicGC writes. GolibTests is outside runtime's InternalsVisibleTo grant.
     public static ref int64 GoForceGCPeriod => ref forcegcperiod;
+
+    // TEST SEAMS (sync.Pool aging): the per-collection cadence's two counters (PoolCleanupCadence.Agings and
+    // .Failures, beside registerPoolCleanup). GolibTests is outside runtime's InternalsVisibleTo grant.
+    public static long GoPoolCleanupAgings => PoolCleanupCadence.Agings;
+
+    public static long GoPoolCleanupFailures => PoolCleanupCadence.Failures;
 
     // TEST SEAMS (print fidelity): the runtime's print backlog, and a goroutine writebuf capture
     // around a body -- the two places Go's print lands. GolibTests is outside runtime's
