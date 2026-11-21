@@ -105,14 +105,16 @@ function Write-NugetgoZipEntry([System.IO.Compression.ZipArchive]$Zip, [string]$
 
 # Rewrite a packed package into the RID-specific layout: lib/<tfm>/ takes the reference flavor's assemblies, and each
 # RID's runtimes/<rid>/lib/<tfm>/ its own flavor's. The package's lib/<tfm>/*.dll set must be the flavors' assembly
-# set; anything else is refused by name rather than packed half-promoted.
+# set; anything else is refused by name rather than packed half-promoted. A -Cgo pack (NugetgoCgo.psm1) passes its own
+# -RidFlavors, and -LibAssemblies for lib/: the reference flavor's REFERENCE assemblies, never an implementation.
 function Set-NugetgoRidAssets {
     [CmdletBinding()]
-    param([Parameter(Mandatory)][string]$Package, [Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$TargetFramework)
+    param([Parameter(Mandatory)][string]$Package, [Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$TargetFramework,
+        $RidFlavors = (Get-NugetgoRidFlavors), $LibAssemblies = $null)
 
     Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
-    $rids = Get-NugetgoRidFlavors
-    $reference = $Assemblies[(Get-NugetgoReferenceFlavor)]
+    $rids = $RidFlavors
+    $reference = if ($null -ne $LibAssemblies) { $LibAssemblies } else { $Assemblies[(Get-NugetgoReferenceFlavor)] }
     $zip = [System.IO.Compression.ZipFile]::Open($Package, 'Update')
     try {
         $lib = @($zip.Entries | Where-Object { $_.FullName -like "lib/$TargetFramework/*.dll" } | ForEach-Object { $_.Name } | Sort-Object)
@@ -129,12 +131,15 @@ function Set-NugetgoRidAssets {
 
 # The read-back of a RID-specific package: lib/ is the reference flavor, every shipped RID carries the full assembly
 # set of its flavor and nothing else, and RIDs that share a flavor carry the same bytes. No reason means accepted.
+# -RidFlavors and -LibAssemblies as Set-NugetgoRidAssets takes them.
 function Test-NugetgoRidLayout {
     [CmdletBinding()]
-    param([Parameter(Mandatory)][string]$Package, [Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$TargetFramework)
+    param([Parameter(Mandatory)][string]$Package, [Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$TargetFramework,
+        $RidFlavors = (Get-NugetgoRidFlavors), $LibAssemblies = $null)
 
     Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
-    $rids = Get-NugetgoRidFlavors
+    $rids = $RidFlavors
+    $libSet = if ($null -ne $LibAssemblies) { $LibAssemblies } else { $Assemblies[(Get-NugetgoReferenceFlavor)] }
     $reasons = New-Object System.Collections.Generic.List[string]
     $zip = [System.IO.Compression.ZipFile]::OpenRead($Package)
     try {
@@ -146,7 +151,7 @@ function Test-NugetgoRidLayout {
     $names = @($Assemblies[(Get-NugetgoReferenceFlavor)].Keys | Sort-Object)
     $same = { param($a, $b) $null -ne $a -and $null -ne $b -and [System.Linq.Enumerable]::SequenceEqual([byte[]]$a, [byte[]]$b) }
     foreach ($name in $names) {
-        if (-not (& $same $entries["lib/$TargetFramework/$name"] $Assemblies[(Get-NugetgoReferenceFlavor)][$name])) { $reasons.Add("lib/$TargetFramework/$name is not the reference ($(Get-NugetgoReferenceFlavor)) flavor") }
+        if (-not (& $same $entries["lib/$TargetFramework/$name"] $libSet[$name])) { $reasons.Add("lib/$TargetFramework/$name is not the reference ($(Get-NugetgoReferenceFlavor)) flavor's $(if ($null -ne $LibAssemblies) { 'reference assembly' } else { 'assembly' })") }
     }
     foreach ($rid in $rids.Keys) {
         $folder = "runtimes/$rid/lib/$TargetFramework/"

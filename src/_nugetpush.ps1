@@ -61,6 +61,24 @@ function Get-GoNuGetPackageIdentity([string]$Path) {
     [pscustomobject]@{ Id = "$($meta.id)".Trim(); Version = "$($meta.version)".Trim() }
 }
 
+# Is the package a -Cgo pack (src/tools/nugetgo/nugetgo-pack.ps1 -Cgo)? Its build/<id>.targets carries the RID guard's
+# error code, NUGETGOCGO001 (src/tools/nugetgo/NugetgoCgo.psm1).
+function Test-GoNuGetCgoPackage([string]$Path) {
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($Path)
+
+    try {
+        foreach ($entry in @($zip.Entries | Where-Object { $_.FullName -match '^build(Transitive)?/[^/]+\.targets$' })) {
+            $reader = New-Object System.IO.StreamReader($entry.Open())
+            try { if ($reader.ReadToEnd().Contains('NUGETGOCGO001')) { return $true } } finally { $reader.Dispose() }
+        }
+    }
+    finally {
+        $zip.Dispose()
+    }
+
+    $false
+}
+
 # NuGet's normalized version, the form the flat container keys a version by: build metadata dropped, numeric parts
 # without leading zeros, at least three of them, a fourth part of 0 dropped, and lower case. 1.26.10.0 is 1.26.10.
 function ConvertTo-GoNuGetNormalizedVersion([string]$Version) {
@@ -175,6 +193,11 @@ function Invoke-GoNuGetPush {
         [int] $MaxWaitsPerPackage = 6,
         [switch] $StopOnRateLimit
     )
+
+    # No -Cgo pack is pushed to any feed until the run-time RID check (A6, cgo-against-go.* INC 3) lands (COORD's ruling
+    # (a), condition 3). The whole set is refused before the first push, so a refusal never leaves a half-pushed release.
+    $cgoPacks = @($Packages | Where-Object { Test-GoNuGetCgoPackage $_.FullName } | ForEach-Object { $_.Name })
+    if ($cgoPacks.Count) { throw "REFUSED: $($cgoPacks -join ', ') $(if ($cgoPacks.Count -eq 1) { 'is a -Cgo pack' } else { 'are -Cgo packs' }) (build/<id>.targets carries NUGETGOCGO001), and no -Cgo pack is pushed until the run-time RID check (A6) lands; nothing was pushed" }
 
     $pushed = 0
     $published = 0

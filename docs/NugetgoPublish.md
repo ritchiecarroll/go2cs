@@ -136,6 +136,28 @@ RID's flavor, with every flavor's `go.*` dependencies. The pack prints which it 
 the pack builds a converter from its own tree. That matches `G` only when `G` was built from the same directory with
 the same toolchain.
 
+**Cgo** (COORD's ruling (a), 2026-11-21; *not yet publishable*). A module with a cgo package packs with `-Cgo -Zig
+<zig>`, where `<zig>` is the pinned zig of `.github/cgo-toolchain.ps1` (0.17.0), and `PR` converted with
+`-recurse=nuget -cgo`. Each flavor converts with `-cgo`, and its `CC` is that zig with the flavor's target
+(`x86_64-windows-gnu`, `x86_64-linux-gnu`, `x86_64-macos`, `aarch64-linux-gnu`). A cgo package's C binding is per
+target, so the package is always RID-specific, and differs from the layout above in three ways:
+- It carries win-x64, linux-x64, osx-x64 and linux-arm64. **osx-arm64 is left out by name**: the `go.*` packages ship
+  it their darwin/amd64 flavor, so it waits for true darwin/arm64 `go.*` assets. This amends the cgo plan's R3, which
+  refused to pack a cgo package for fewer RIDs than the release ships, for this one exclusion only. It is stated in
+  VALIDATION.md and in `go2cs/source-metadata.txt`.
+- `lib/<tfm>/` holds the windows flavor's **reference** assemblies, never an implementation. NuGet falls back to
+  `lib/` for a RID with no `runtimes/` folder of its own, and a reference assembly refuses to load there, where an
+  implementation would bind another target's C.
+- `build/<id>.targets` fails a consumer build with `NUGETGOCGO001` when the build's RID has no `runtimes/<rid>/lib/`
+  folder in the package. That RID is `-r`'s, or the .NET SDK's own for a portable build, so a portable build on an
+  osx-arm64 host is refused even when it will run elsewhere: build with `-r` and a packed RID. The guard reads the set
+  from the package's folders, so osx-arm64 joins by being packed, with no change to the guard.
+
+The read-back also checks R7: each RID's assembly has exactly the public surface of `lib/`'s reference assembly
+(ApiCompat, strict mode). **No `-Cgo` pack is pushed** until the run-time RID check (A6) lands: `src/_nugetpush.ps1`
+refuses a package whose `build/<id>.targets` carries `NUGETGOCGO001`, before it pushes anything. `-Cgo` runs under
+PowerShell 7 only.
+
 The package README is `PR/src/M/nuget/README.md`, in the style of the `go.*` packages (owner, 2026-10-10). The pack
 writes it on the first pack (see *Customizing the package page* below). Its generated block holds the description,
 whose module path links the Go source at its version, a badge row, and the license line. There is no "PROOF:" in it

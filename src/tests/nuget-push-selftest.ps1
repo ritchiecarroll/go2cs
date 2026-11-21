@@ -191,6 +191,34 @@ try {
     $ordered = @(Get-GoNuGetPushOrder $unordered | ForEach-Object { $_.Name -replace "\.$([regex]::Escape($version))\.nupkg$", '' })
     Check (($ordered -join ',') -eq 'go.gen,go.lib,go.a,go2cs.win-x64,go2cs.linux-arm64,go2cs') "order: $($ordered -join ', '); want go.gen, go.lib, go.a, go2cs.win-x64, go2cs.linux-arm64, go2cs"
 
+    # ---- cgo ------------------------------------------------------------------------------------------------------
+    # A -Cgo pack (nugetgo-pack.ps1 -Cgo: its build/<id>.targets carries NUGETGOCGO001) is refused before anything is
+    # PUT, until the run-time RID check (A6, cgo-against-go.* INC 3) lands (COORD's ruling (a), condition 3). Both
+    # routes: the http feed and a folder feed.
+    $cgoDir = Join-Path $work 'cgo'
+    New-Item -ItemType Directory -Path $cgoDir | Out-Null
+    $plain = New-FakePackage 'nugetgo.plain' $version $cgoDir
+    $cgoPack = New-FakePackage 'nugetgo.cgo' $version $cgoDir
+    $zip = [System.IO.Compression.ZipFile]::Open($cgoPack.FullName, 'Update')
+    try {
+        $writer = New-Object System.IO.StreamWriter($zip.CreateEntry('build/nugetgo.cgo.targets').Open())
+        try { $writer.Write('<Project><Target Name="G"><Error Code="NUGETGOCGO001" Text="x" /></Target></Project>') } finally { $writer.Dispose() }
+    }
+    finally { $zip.Dispose() }
+    $state.Puts.Clear()
+    $thrown = $null
+    try { [void](Invoke-Case @($plain, $cgoPack)) } catch { $thrown = "$_" }
+    Check ($null -ne $thrown -and $thrown -match 'nugetgo\.cgo' -and $thrown -match 'A6') "cgo: a -Cgo pack was not refused by name, with A6: $thrown"
+    Check ($state.Puts.Count -eq 0) "cgo: $($state.Puts.Count) package(s) were PUT before the refusal: $(@($state.Puts) -join ', ')"
+    $folderFeed = Join-Path $work 'cgo-folder-feed'
+    New-Item -ItemType Directory -Path $folderFeed | Out-Null
+    $thrown = $null
+    try { [void](Invoke-GoNuGetPush -Packages @($plain, $cgoPack) -Source $folderFeed -ApiKey 'selftest-key') } catch { $thrown = "$_" }
+    Check ($null -ne $thrown -and $thrown -match 'nugetgo\.cgo') "cgo: a folder feed took a -Cgo pack: $thrown"
+    Check (@(Get-ChildItem -LiteralPath $folderFeed -Recurse -File).Count -eq 0) "cgo: the folder feed holds $(@(Get-ChildItem -LiteralPath $folderFeed -Recurse -File).Count) file(s) after the refusal"
+    # The control is every other case here: each pushes packages with no NUGETGOCGO001 through the same function.
+    $state.Puts.Clear()
+
     # ---- quota ----------------------------------------------------------------------------------------------------
     $state.Published["go.a/$version"] = $true
     [void]$state.Script.Add(@{ Status = 201 })
