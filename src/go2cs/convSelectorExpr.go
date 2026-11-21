@@ -1500,8 +1500,14 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		// `recv.M()` only, never as a method group), and inside one it could bind a package function of
 		// the same name. The holder is derived from the method's own receiver type through go/types, never
 		// from the Go spelling: a dot-imported type is a bare ident (`Reader`) with no selector to peel.
+		//
+		// A method in the suffix form (GlyphMethodSuffix) of this package is bound at its BODY where the body takes the
+		// delegate's receiver as declared (methodExpressionBody): `main_package.Len⁔`, so the delegate's frame is the
+		// method's own, with no forwarder between.
 		if fn, ok := sel.Obj().(*types.Func); ok {
-			if holder := v.methodHolderRef(fn); holder != "" {
+			if body := v.methodExpressionBody(fn); body != "" {
+				methodName = body
+			} else if holder := v.methodHolderRef(fn); holder != "" {
 				methodName = holder + "." + methodName
 			}
 		}

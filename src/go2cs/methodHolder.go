@@ -52,6 +52,39 @@ const methodHolderAttributes = "global::System.ComponentModel.EditorBrowsable(gl
 // variant by resetPackageState; written under packageLock.
 var packageMethodHolders map[string]string
 
+// GlyphMethodSuffix ends the name of a Go method's BODY in its package class: U+2054 INVERTED UNDERTIE, connector
+// punctuation, which a C# identifier admits and a Go identifier cannot spell (Go's letter is a Unicode L* code
+// point or `_`). A method takes the suffix form exactly when it has a method holder (methodHolderClass): every
+// method of a library package, and in package main only a method on P1's clash list. Its body is then a plain
+// static `<Name>⁔(/*this*/ recv, …)` beside its type, and the Go-named extension method its holder declares is a
+// one-line forwarder the converter writes into package_info.cs (MethodForwarderSection). Owner ruling 2026-11-21
+// (COORD 20261121T151802Z): the body reads where Go wrote it, the forwarder keeps every caller and every
+// go2cs-gen reader of the holder's extension methods unchanged, and the runtime names a frame by stripping the
+// suffix (runtime managed_impl.cs, golib GoSyntheticPC).
+const GlyphMethodSuffix = "\u2054"
+
+// MethodForwarderSection names the package_info.cs marker section holding the Go-named forwarders of the
+// emission unit's suffix-form method bodies, one `partial class <holder> { … }` block per holder.
+const MethodForwarderSection = "MethodForwarders"
+
+// methodForwarderAttributes leads every forwarder: inlined into its callers, and hidden from every stack walk
+// (Exception.StackTrace drops [StackTraceHidden]; runtime.Callers skips it through isGoSourceFrame) and from the
+// debugger's step-into, so the body's frame is the Go method's one frame.
+const methodForwarderAttributes = "global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough"
+
+// methodForwarder is one recorded forwarder: its holder, its line, and a key ordering it as Go declares the
+// method (file, then offset), so a whole-package write is deterministic whatever order the files convert in.
+type methodForwarder struct {
+	holder string
+	key    string
+	line   string
+}
+
+// packageMethodForwarders holds the forwarders of this emission unit's suffix-form methods. The section writes
+// those whose holder the unit declares (packageMethodHolders), so a -tests variant swap of the holder map
+// carries its forwarders with it. Reset per package by resetPackageState; written under packageLock.
+var packageMethodForwarders []methodForwarder
+
 // receiverNamed answers the named type a method declaration is declared on: the receiver's type with a
 // pointer and an alias read through, or nil for a function.
 func receiverNamed(info *types.Info, funcDecl *ast.FuncDecl) *types.Named {
@@ -293,11 +326,46 @@ func (v *Visitor) testHolderSuffix(method types.Object, typeObj types.Object) st
 // funcDeclClass names the class funcDecl is emitted into: its receiver type's method holder, or the
 // file's own class for a function.
 func (v *Visitor) funcDeclClass(funcDecl *ast.FuncDecl) string {
+	// A Go method's body is a member of the file's own class: a method with a holder takes the suffix form,
+	// whose body sits in the package class beside its type (GlyphMethodSuffix), and a method of package main
+	// with no holder is a plain extension method there (methodsStayInPackageClass).
+	if funcDecl.Recv != nil {
+		return v.fileClassName
+	}
+
 	if holder := v.useMethodHolder(receiverNamed(v.info, funcDecl), v.info.Defs[funcDecl.Name]); holder != "" {
 		return holder
 	}
 
 	return v.fileClassName
+}
+
+// suffixMethodHolder answers the holder of funcDecl when it is a Go method that takes the suffix form
+// (GlyphMethodSuffix), registering the holder's declaration for package_info.cs, and "" otherwise. Registration
+// does not mark the file as writing a holder block: the body sits in the file's own class, and the holder's
+// only members are the forwarders package_info.cs declares.
+func (v *Visitor) suffixMethodHolder(funcDecl *ast.FuncDecl) string {
+	if funcDecl == nil || funcDecl.Recv == nil {
+		return ""
+	}
+
+	named := receiverNamed(v.info, funcDecl)
+	holder, typeofTarget := v.methodHolderClass(named, v.info.Defs[funcDecl.Name])
+
+	if holder == "" {
+		return ""
+	}
+
+	// A hand-owned file's Go source may declare a type its C# replacement drops; the holder's declaration names
+	// its type in `typeof`, so it is written only where the package's C# sources declare the type (as
+	// useMethodHolder).
+	if v.handOwnedTypeNames == nil || v.handOwnedTypeNames[named.Obj().Name()] {
+		packageLock.Lock()
+		packageMethodHolders[holder] = typeofTarget
+		packageLock.Unlock()
+	}
+
+	return holder
 }
 
 // useMethodHolder answers the method holder a method of named's is emitted into, recording the holder for
@@ -1021,21 +1089,363 @@ func (v *Visitor) methodHolderRef(fn *types.Func) string {
 	return holder
 }
 
-// hoistClassKey keys a hoisted literal's field by the class its user is emitted into: "" and a separator
-// for a function, and the receiver type's name, marked for a `_test.go` method, for a method. A seeded
-// literal has the one key, whatever class reads it.
-func hoistClassKey(info *types.Info, funcDecl *ast.FuncDecl, seeded bool) string {
-	const separator = "\x00"
+// hoistClassKey keys a hoisted literal's field by the class its user is emitted into. Every Go function and
+// every Go method body is a member of the file's own class (funcDeclClass: a suffix-form body sits beside its
+// type, GlyphMethodSuffix), so the key is the one separator for every user, seeded or not.
+func hoistClassKey(_ *types.Info, _ *ast.FuncDecl, _ bool) string {
+	return "\x00"
+}
 
-	if seeded {
-		return separator
+// methodExpressionBody answers the suffix-form body a method expression binds directly, `<class>.<Name>⁔`, or ""
+// when the expression keeps its holder's forwarder (methodHolderRef). The body is bound where its parameter list
+// takes the delegate's receiver as declared: a value receiver, and a pointer receiver declared on the box itself
+// (packageDirectBoxReceiverMethods). A pointer receiver's body takes `ref T`, and the expression's delegate takes
+// ж<T>, which only RecvGenerator's twin of the holder's forwarder answers, so it keeps the holder. So does a method
+// of another package (its body is internal to that assembly), a method of the -tests production or bridge class,
+// a hand-owned method (no body is converted), and an sstring twin (its delegate reads the @string companion
+// StrGenerator mints beside the forwarder).
+func (v *Visitor) methodExpressionBody(fn *types.Func) string {
+	if fn == nil || fn.Pkg() != v.pkg || v.whiteboxProductionObject(fn) || v.whiteboxBridgeObject(fn) {
+		return ""
 	}
 
-	named := receiverNamed(info, funcDecl)
+	origin := fn.Origin()
 
-	if named == nil || methodsStayInPackageClass(named) {
-		return separator
+	if packageHandOwnedMethods[origin] || len(sstringTwinIndices(origin)) > 0 {
+		return ""
 	}
 
-	return named.Obj().Name() + separator
+	sig, ok := origin.Type().(*types.Signature)
+
+	if !ok || sig.Recv() == nil {
+		return ""
+	}
+
+	recvType := types.Unalias(sig.Recv().Type())
+
+	if ptr, isPtr := recvType.(*types.Pointer); isPtr {
+		if !packageDirectBoxReceiverMethods[origin] {
+			return ""
+		}
+
+		recvType = types.Unalias(ptr.Elem())
+	}
+
+	named, ok := recvType.(*types.Named)
+
+	if !ok {
+		return ""
+	}
+
+	if holder, _ := v.methodHolderClass(named, origin); holder == "" {
+		return ""
+	}
+
+	return v.packageScopeClassName(origin) + "." + suffixBodyName(getSanitizedFunctionName(origin.Name()))
+}
+
+// suffixBodyName is the C# name of a suffix-form method's body: the method's name, any verbatim `@` dropped (the
+// suffixed name is no keyword), and GlyphMethodSuffix.
+func suffixBodyName(csMethodName string) string {
+	return strings.TrimPrefix(csMethodName, "@") + GlyphMethodSuffix
+}
+
+// recordMethodForwarder records the Go-named forwarder of a suffix-form body, built from the pieces the body's
+// own declaration is written from: the method's access, `unsafe`, result, name, type parameters, parameter list
+// (with its `this` receiver, as the method was declared before the suffix form) and constraint clauses. The
+// forwarder calls the body in the file's class with the same type arguments and arguments.
+func (v *Visitor) recordMethodForwarder(funcDecl *ast.FuncDecl, holder string, access string, isUnsafe bool, result string, name string, typeParams string, params string, constraints string) {
+	modifiers := access + " static"
+
+	if isUnsafe {
+		modifiers += " unsafe"
+	}
+
+	call := fmt.Sprintf("%s.%s%s(%s)", v.fileClassName, suffixBodyName(name), forwarderTypeArguments(typeParams), forwarderArguments(params))
+
+	if strings.HasPrefix(result, "ref ") {
+		call = "ref " + call
+	}
+
+	line := fmt.Sprintf("[%s] %s %s %s%s(%s)%s => %s;", methodForwarderAttributes, modifiers, result, name, typeParams, params, flattenConstraints(constraints), call)
+
+	position := v.fset.Position(funcDecl.Pos())
+	key := fmt.Sprintf("%s\x00%010d", filepath.Base(position.Filename), position.Offset)
+
+	v.recordForwarderTypeQualifiers(funcDecl)
+
+	packageLock.Lock()
+	packageMethodForwarders = append(packageMethodForwarders, methodForwarder{holder: holder, key: key, line: line})
+	packageLock.Unlock()
+}
+
+// recordForwarderTypeQualifiers registers, for package_info.cs, the import qualifier of every other package's
+// named type the forwarder's signature spells (its receiver, parameters and results, through every wrapper and
+// type argument), so package_info.cs resolves it through a file-local `using` exactly as the converted file does
+// (conversionPackageUsings). No file's own usings are copied.
+func (v *Visitor) recordForwarderTypeQualifiers(funcDecl *ast.FuncDecl) {
+	fn, ok := v.info.Defs[funcDecl.Name].(*types.Func)
+
+	if !ok {
+		return
+	}
+
+	signature, ok := fn.Type().(*types.Signature)
+
+	if !ok {
+		return
+	}
+
+	visited := map[types.Type]bool{}
+	var walk func(t types.Type)
+
+	walk = func(t types.Type) {
+		if t == nil || visited[t] {
+			return
+		}
+
+		visited[t] = true
+
+		switch t := t.(type) {
+		case *types.Alias:
+			walk(types.Unalias(t))
+		case *types.Pointer:
+			walk(t.Elem())
+		case *types.Slice:
+			walk(t.Elem())
+		case *types.Array:
+			walk(t.Elem())
+		case *types.Map:
+			walk(t.Key())
+			walk(t.Elem())
+		case *types.Chan:
+			walk(t.Elem())
+		case *types.Signature:
+			walkTuple(t.Params(), walk)
+			walkTuple(t.Results(), walk)
+		case *types.Named:
+			v.recordConversionPackageUsing(t)
+		}
+	}
+
+	if recv := signature.Recv(); recv != nil {
+		walk(recv.Type())
+	}
+
+	walkTuple(signature.Params(), walk)
+	walkTuple(signature.Results(), walk)
+}
+
+func walkTuple(tuple *types.Tuple, walk func(types.Type)) {
+	if tuple == nil {
+		return
+	}
+
+	for i := 0; i < tuple.Len(); i++ {
+		walk(tuple.At(i).Type())
+	}
+}
+
+// forwarderTypeArguments answers the type argument list a forwarder passes its body: the declaration's type
+// parameter list with any attribute dropped.
+func forwarderTypeArguments(typeParams string) string {
+	if typeParams == "" {
+		return ""
+	}
+
+	return forwarderAttributeList.ReplaceAllString(typeParams, "")
+}
+
+var forwarderAttributeList = regexp.MustCompile(`\[[^\[\]]*\]\s*`)
+
+// flattenConstraints answers a declaration's constraint clauses on one line, as a forwarder's single line carries
+// them: every run of whitespace (the clauses' newlines and indentation) becomes one space.
+func flattenConstraints(constraints string) string {
+	if strings.TrimSpace(constraints) == "" {
+		return ""
+	}
+
+	return " " + strings.Join(strings.Fields(constraints), " ")
+}
+
+// forwarderArguments answers the arguments a forwarder passes its body for a parameter list the converter wrote:
+// each parameter's name, with the `ref`, `out` or `in` its declaration carries (`ref readonly` passes as `in`).
+// The list is split at its top-level commas; a parameter's attributes, `this`, `scoped`, `params` and type are
+// not arguments.
+func forwarderArguments(params string) string {
+	var args []string
+
+	for _, param := range splitTopLevelParameters(params) {
+		param = strings.TrimSpace(forwarderAttributeList.ReplaceAllString(param, ""))
+
+		if param == "" {
+			continue
+		}
+
+		fields := strings.Fields(param)
+		name := fields[len(fields)-1]
+		modifier := ""
+
+		// The keywords lead the parameter, and no C# type spells one, so a scan of every token ahead of the name
+		// finds them.
+		for i, field := range fields[:len(fields)-1] {
+			switch field {
+			case "ref":
+				modifier = "ref "
+
+				if i+1 < len(fields)-1 && fields[i+1] == "readonly" {
+					modifier = "in "
+				}
+			case "out":
+				modifier = "out "
+			case "in":
+				modifier = "in "
+			}
+		}
+
+		args = append(args, modifier+name)
+	}
+
+	return strings.Join(args, ", ")
+}
+
+// splitTopLevelParameters splits a C# parameter list at the commas outside any bracket.
+func splitTopLevelParameters(params string) []string {
+	var parts []string
+	depth, start := 0, 0
+
+	for i, r := range params {
+		switch r {
+		case '<', '(', '[', '{':
+			depth++
+		case '>', ')', ']', '}':
+			depth--
+		case ',':
+			if depth == 0 {
+				parts = append(parts, params[start:i])
+				start = i + 1
+			}
+		}
+	}
+
+	return append(parts, params[start:])
+}
+
+// methodForwarderProseLines introduce the forwarder section in package_info.cs.
+func methodForwarderProseLines() []string {
+	return []string{
+		"// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),",
+		"// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line",
+		"// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names",
+		"// the body's frame as the Go method.",
+	}
+}
+
+// applyMethodForwarderSection writes the forwarders of this emission unit's suffix-form methods into
+// package_info.cs, after the holder declarations, with the merge semantics of the holder section: a whole-package
+// conversion rebuilds the section from this run's forwarders, and a merging write keeps the lines this pass did
+// not write again. Only forwarders whose holder this unit declares are written (packageMethodHolders), so a
+// -tests variant's forwarders go where its holders go.
+func applyMethodForwarderSection(packageInfoLines []string, mergeExisting bool) []string {
+	startLineIndex, endLineIndex := -1, -1
+
+	for i, line := range packageInfoLines {
+		if strings.Contains(line, "<"+MethodForwarderSection+">") {
+			startLineIndex = i
+			continue
+		}
+
+		if strings.Contains(line, "</"+MethodForwarderSection+">") {
+			endLineIndex = i
+			break
+		}
+	}
+
+	hasSection := startLineIndex >= 0 && endLineIndex > startLineIndex
+	byHolder := map[string][]string{}
+	seen := map[string]bool{}
+
+	if mergeExisting && hasSection {
+		holder := ""
+
+		for i := startLineIndex + 1; i < endLineIndex; i++ {
+			line := strings.TrimSpace(packageInfoLines[i])
+
+			switch {
+			case strings.HasPrefix(line, "partial class ") && strings.HasSuffix(line, "{"):
+				holder = strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(line, "partial class "), "{"))
+			case line == "}":
+				holder = ""
+			case holder != "" && line != "":
+				if !seen[holder+"\x00"+line] {
+					seen[holder+"\x00"+line] = true
+					byHolder[holder] = append(byHolder[holder], line)
+				}
+			}
+		}
+	}
+
+	packageLock.Lock()
+	recorded := append([]methodForwarder(nil), packageMethodForwarders...)
+	packageLock.Unlock()
+
+	sort.SliceStable(recorded, func(i, j int) bool { return recorded[i].key < recorded[j].key })
+
+	for _, forwarder := range recorded {
+		if _, declared := packageMethodHolders[forwarder.holder]; !declared {
+			continue
+		}
+
+		if !seen[forwarder.holder+"\x00"+forwarder.line] {
+			seen[forwarder.holder+"\x00"+forwarder.line] = true
+			byHolder[forwarder.holder] = append(byHolder[forwarder.holder], forwarder.line)
+		}
+	}
+
+	if hasSection {
+		// The section and the prose and blank line above it are rebuilt below.
+		from := startLineIndex
+
+		for from > 0 && strings.HasPrefix(strings.TrimSpace(packageInfoLines[from-1]), "//") && !strings.Contains(packageInfoLines[from-1], "</") {
+			from--
+		}
+
+		if from > 0 && strings.TrimSpace(packageInfoLines[from-1]) == "" {
+			from--
+		}
+
+		packageInfoLines = append(packageInfoLines[:from:from], packageInfoLines[endLineIndex+1:]...)
+	}
+
+	if len(byHolder) == 0 {
+		return packageInfoLines
+	}
+
+	holders := make([]string, 0, len(byHolder))
+
+	for holder := range byHolder {
+		holders = append(holders, holder)
+	}
+
+	sort.Strings(holders)
+
+	for len(packageInfoLines) > 0 && strings.TrimSpace(packageInfoLines[len(packageInfoLines)-1]) == "" {
+		packageInfoLines = packageInfoLines[:len(packageInfoLines)-1]
+	}
+
+	packageInfoLines = append(packageInfoLines, "")
+	packageInfoLines = append(packageInfoLines, methodForwarderProseLines()...)
+	packageInfoLines = append(packageInfoLines, "// <"+MethodForwarderSection+">")
+
+	for _, holder := range holders {
+		packageInfoLines = append(packageInfoLines, "partial class "+holder+" {")
+
+		for _, line := range byHolder[holder] {
+			packageInfoLines = append(packageInfoLines, "    "+line)
+		}
+
+		packageInfoLines = append(packageInfoLines, "}")
+	}
+
+	return append(packageInfoLines, "// </"+MethodForwarderSection+">")
 }

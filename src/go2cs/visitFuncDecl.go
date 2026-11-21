@@ -601,15 +601,19 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.currentFuncName = csFunctionName
 	v.currentFuncPrefix = &strings.Builder{}
 	v.currentFuncHoists = nil
-	v.currentHolderNamed = holderNamed(receiverNamed(v.info, funcDecl))
+	// Every Go method's body is a member of the file's own class (funcDeclClass). A method with a holder
+	// takes the suffix form (GlyphMethodSuffix): its body is `<Name>⁔` beside its type, and the Go-named
+	// extension method its holder declares is a forwarder package_info.cs carries (recordMethodForwarder).
+	// No body is emitted in a holder, so no body reads names against a holder's methods.
+	suffixHolder := v.suffixMethodHolder(funcDecl)
+	v.currentHolderNamed = nil
 
-	// The holder ends with its method: a declaration that follows in file order (a package-level
-	// variable holding a function literal, a type) stands in the package class again.
 	defer v.leaveHolder()
 
-	if v.currentHolderNamed != nil {
-		v.currentFuncHoists = &strings.Builder{}
-		v.currentHolderInTestFile = v.declaredInTestFile(v.info.Defs[funcDecl.Name])
+	// The forwarder repeats the body's signature in package_info.cs, outside the package class, where a namespace in
+	// view hides a package type of the same name (`this ref sync s` binds `go.sync`, CS0118). Such a type is spelled
+	// through its class in the signature (holderHiddenTypes), which the body in the package class reads the same.
+	if suffixHolder != "" {
 		holderHiddenTypeClasses = v.holderHiddenTypes(funcDecl)
 	}
 
@@ -818,7 +822,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		}
 	}
 
-	v.writeOutput("%s%s static%s%s %s %s%s(%s)%s%s", functionAttributeMarker, functionAccessMarker, functionUnsafeMarker, functionPartialMarker, resultSignature, csFunctionName, typeParams, functionParametersMarker, constraints, functionExecContextMarker)
+	declaredName := csFunctionName
+
+	if suffixHolder != "" {
+		declaredName = suffixBodyName(csFunctionName)
+	}
+
+	v.writeOutput("%s%s static%s%s %s %s%s(%s)%s%s", functionAttributeMarker, functionAccessMarker, functionUnsafeMarker, functionPartialMarker, resultSignature, declaredName, typeParams, functionParametersMarker, constraints, functionExecContextMarker)
 
 	// The CONVERTED body text (for detecting whether a pointer parameter's deref VALUE alias is
 	// actually referenced — a param used only through its box gets no alias; see below). Captured
@@ -1452,8 +1462,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		}
 	}
 
-	// Replace function markers
-	v.replaceMarker(functionAccessMarker, functionAccess)
+	// Replace function markers. A suffix-form body is internal: the forwarder carries the method's own access.
+	if suffixHolder != "" {
+		v.replaceMarker(functionAccessMarker, "internal")
+	} else {
+		v.replaceMarker(functionAccessMarker, functionAccess)
+	}
 
 	if v.useUnsafeFunc {
 		v.replaceMarker(functionUnsafeMarker, " unsafe")
@@ -1561,11 +1575,27 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// file keeps one method per Go function.
 	twinFunc, _ := v.info.ObjectOf(funcDecl.Name).(*types.Func)
 
+	declaredParameters := parameterSignature
+
 	if twinIndices := sstringTwinIndices(twinFunc); len(twinIndices) > 0 {
 		v.validateSStringTwin(funcDecl, twinFunc, twinIndices)
-		v.replaceMarker(functionParametersMarker, sstringTwinSignature(sstringTwinKey(twinFunc), parameterSignature, twinIndices, funcDecl.Recv != nil))
+		declaredParameters = sstringTwinSignature(sstringTwinKey(twinFunc), parameterSignature, twinIndices, funcDecl.Recv != nil)
+	}
+
+	// A suffix-form body is a plain static whose first parameter is the receiver, marked where `this` stood; its
+	// forwarder keeps the method's declaration as it was, `this` included, so every caller, interface adapter and
+	// generator reading the holder's extension methods binds it unchanged. An sstring twin's forwarder keeps the
+	// twin's parameter list, so StrGenerator mints the @string companion beside it in the holder as before.
+	if suffixHolder != "" {
+		v.replaceMarker(functionParametersMarker, "/*this*/ "+strings.TrimPrefix(declaredParameters, "this "))
+
+		// A hand-owned file's methods keep their hand-written extension methods (its `.cs.auto` review sibling shows
+		// the body the converter would write), so no forwarder is recorded for them.
+		if !v.manualConversion {
+			v.recordMethodForwarder(funcDecl, suffixHolder, functionAccess, v.useUnsafeFunc, resultSignature, csFunctionName, typeParams, declaredParameters, constraints)
+		}
 	} else {
-		v.replaceMarker(functionParametersMarker, parameterSignature)
+		v.replaceMarker(functionParametersMarker, declaredParameters)
 	}
 
 	// The forwarder's marker, the first token of its declaration line (see linknameForwarder above).

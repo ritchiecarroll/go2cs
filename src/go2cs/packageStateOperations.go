@@ -152,9 +152,11 @@ func resetPackageState(pkg *packages.Package) {
 	packageImportForces = hashset.HashSet[string]{}
 	packageImportInits = map[string]string{}
 	packageMethodHolders = map[string]string{}
+	packageMethodForwarders = nil
 	packageRefLoweringResult = nil
 	packageHandOwnedTypes = map[*types.TypeName]bool{}
 	packageHandOwnedVars = map[*types.Var]bool{}
+	packageHandOwnedMethods = map[*types.Func]bool{}
 
 	// Capture the package's own source directory for the README's validation badge, which has to
 	// look at the Go sources the conversion never compiles (the `_test.go` files) to tell a package
