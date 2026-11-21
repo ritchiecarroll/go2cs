@@ -474,6 +474,66 @@ output-compared against `go run`, and by the converter test `TestGenericHolderIs
      instantiated-generic arm of getAliasQualifiedTypeName already spelled the name getSanitizedIdentifier(name);
      src/go2cs/methodHolder.go holderTypeName now takes that spelling for every generic type. -->
 
+### `package_info.cs` names its System attributes through usings, unless the package declares one of their names
+
+A method holder's declaration carries `EditorBrowsable(EditorBrowsableState.Never)`, and each forwarder in the
+`<MethodForwarders>` section carries `MethodImpl(MethodImplOptions.AggressiveInlining)`, `StackTraceHidden` and
+`DebuggerStepThrough`. `package_info.cs` spells them short and reads them through `using` directives it adds to its
+own compilation-unit directives, after `using go;` and `using static <ns>.<pkg>_package;`: `using System.ComponentModel;`
+when the file declares a holder, `using System.Diagnostics;` and `using System.Runtime.CompilerServices;` when it
+writes a forwarder.
+
+<!-- illustration: the short spelling of a package with no clashing name; no committed package_info.cs carries it until the corpus is regenerated -->
+```csharp
+using go;
+using static go.example.com.app_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+…
+[GoMethodHost(typeof(app_package.Box)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class appᴛBox;
+…
+partial class appᴛBox {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Get(this Box b) => app_package.Get⁔(b);
+}
+```
+
+`using static <pkg>_package;` and a namespace `using` are searched at the same stage, so a package-scope type named
+like a type of one of those three namespaces would be ambiguous wherever the file names it bare (CS0104, as in a
+forwarder's `this StackTrace s`), and a type named like an attribute's short name counts too, since `[MethodImpl]`
+looks up `MethodImpl` as well as `MethodImplAttribute`. A package that declares such a type keeps
+the `global::` spelling for the whole file and adds none of the usings, and the converter names the clashing names on
+stderr. The two enums the attribute arguments read count even when the package declares them as something other than
+a type, and so does a method of either name, because its forwarder is a member of the holder whose attributes read
+the enum. The names are those of .NET 10's reference assemblies (`src/go2cs/glyphSystemNames.go`, each attribute
+under both of its names); an external test package's file also counts the names of the package it tests, whose
+class it reads through `using static` as well. A merging write (`-tests`) respells every holder and forwarder line in
+whichever direction the decision takes, so a file is never left with both spellings.
+
+<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:88-91 -->
+```csharp
+// <MethodHolders>
+[GoMethodHost(typeof(clashlib_package.MethodImpl)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class clashlibᴛMethodImpl;
+[GoMethodHost(typeof(clashlib_package.StackTrace)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class clashlibᴛStackTrace;
+// </MethodHolders>
+```
+
+<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:97-101 -->
+```csharp
+// <MethodForwarders>
+partial class clashlibᴛMethodImpl {
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Get(this MethodImpl m) => clashlib_package.Get⁔(m);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Bump(this ref MethodImpl m, nint by) => clashlib_package.Bump⁔(ref m, by);
+}
+```
+
+The library above declares `MethodImpl` and `StackTrace`, so its file keeps `global::`; a package with no such name
+takes the usings. (Guarded by the `PackageInfoUsingsClash` behavioral test, whose `clashlib` sub-package declares
+both types with value and pointer methods and is called from `main`, output-compared against `go run`, and by the
+converter tests `TestAPackageDeclaringASystemTypeNameKeepsTheGlobalSpelling`,
+`TestSystemUsingClashesCountTheAttributeArgumentsEnumsAsAnyMember` and
+`TestMergingWriteRespellsSystemAttributesInBothDirections`.)
+
 ### A nested closure must not clobber the enclosing closure's capture state
 The per-lambda conversion state — `conversionInLambda` (are we inside a closure body?) plus the capture-name maps (`currentLambdaVars`/`currentLambdaVarObjs`) — is what makes closure-body emission rewrite captured references to their box/copy forms: a captured local `s` reads as `sʗ1`, and the current method's **direct-ж receiver** (`func (s *Stmt) …` emitted `this ж<Stmt> Ꮡs`, whose body alias `ref var s = ref Ꮡs.DerefOrNull()` is a `ref`-local that **cannot** be captured by a C# closure) reads through its box as `Ꮡs.Value`. `enterLambdaConversion`/`exitLambdaConversion` are a **LIFO save/restore stack** (`conversionStack`): entering pushes the current state and installs fresh state; exiting **restores the enclosing closure's** state rather than resetting it. Reset on exit, a closure containing an **inner** closure would lose its state the moment the inner one finished, and every reference in the *outer* body **after** it would fall back to the bare, un-rewritten name: `database/sql (*Stmt).QueryContext`'s `s.db.retry(func(){ …; rows.releaseConn = func(err){…}; if s.cg != nil { … } })`, where `s.cg` sits after the inner `releaseConn` closure, would emit `s.cg` (CS8175, "cannot use ref local `s` inside an anonymous method/lambda"), and a captured local would silently split between its bare form and its `ʗ1` copy. A closure at top level restores to `false`/empty, so the stack matters only where a closure body continues after a nested closure — there the receiver box-read (`Ꮡs.Value.cg`, `Ꮡs.Value.cg.txCtx()`) and the captured-local copy name apply consistently across the whole body. (Guarded by the `NestedLambdaReceiverField` behavioral test — a direct-ж receiver method whose closure holds a nested closure followed by a non-call receiver field read, a field-method call, and another field read, all verified to render `Ꮡs.Value.<field>` and output-compared vs Go; `DeferValueFieldPtrReceiver`'s defer-then-body sequence exercises the same restore.)
 
