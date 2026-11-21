@@ -1252,7 +1252,7 @@ interface from a **directly imported** package (checked with `types.Implements`)
 emits real C# inheritance at the declaration and **skips re-declaring the covered members**
 (redeclaring would HIDE the base member — implementers would need both):
 
-<!-- source: src/core/io/fs/fs.cs:99-103 -->
+<!-- source: src/core/io/fs/fs.cs:98-102 -->
 ```csharp
 partial interface File :
     io.ReadCloser
@@ -1429,7 +1429,7 @@ result list — C# tuple conversions do not consult user conversions element-wis
 converter deconstructs into temps and converts each element through the usual interface
 machinery (which also records the `GoImplement` pairing):
 
-<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:121-122 -->
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:120-121 -->
 ```csharp
 var (ᴛ1, ᴛ2) = makeRelay();
 return (new relayжReporter(ᴛ1), ᴛ2);
@@ -1443,7 +1443,7 @@ Go lets a MULTI-VALUE call fill the parameters of an enclosing call — `r := t.
 where `parseControl` returns five values feeding `newRange`'s five parameters. C# has no splat, so the inner
 call is deconstructed into markers and passed expanded (`rangeˢ` is the hoisted `"range"` literal):
 
-<!-- source: src/core/text/template/parse/parse.cs:781-782 -->
+<!-- source: src/core/text/template/parse/parse.cs:754-755 -->
 ```csharp
     var (ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10) = Ꮡt.parseControl(rangeˢ);
     var r = Ꮡt.newRange(ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10);
@@ -1639,7 +1639,7 @@ type therefore share one lift, in that file and in later files of the package (g
 Emitted form:
 The declaring file, `batch.cs`:
 
-<!-- source: src/core/internal/trace/batch.cs:54-58 -->
+<!-- source: src/core/internal/trace/batch.cs:49-53 -->
 ```csharp
 internal partial interface readBatch_r /*dyn*/ :
     io.Reader,
@@ -1657,7 +1657,7 @@ The cast site in another file, `generation.cs`:
 
 And the record in `package_info.cs`:
 
-<!-- source: src/core/internal/trace/package_info.cs:43 -->
+<!-- source: src/core/internal/trace/package_info.cs:47 -->
 ```csharp
 [assembly: GoImplement<bufio_package.Reader, readBatch_r>(Pointer = true)]
 ```
@@ -1694,7 +1694,7 @@ func With(n int) interface {
 
 The producer's lift:
 
-<!-- source: src/tests/Behavioral/AnonIfaceEmbedCrossPackage/embedlib/lib.cs:27-31 -->
+<!-- source: src/tests/Behavioral/AnonIfaceEmbedCrossPackage/embedlib/lib.cs:21-25 -->
 ```csharp
 public partial interface With_R0 /*dyn*/ :
     Option,

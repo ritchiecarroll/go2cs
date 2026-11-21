@@ -1232,7 +1232,7 @@ Because a named result lives in the literal's OWN scope, a reference to it in th
 
 ## Deferred calls whose callee returns a value take the lambda form
 The no-arg defer arm passes a bare method group (`defer(k.Close, ref ᒐ)`) only when the callee returns VOID -- an error-returning method (`defer k.Close()`, registry `Key.Close`) is a `Func<error>` method group that cannot bind the golib `defer(Action, ref GoFrame)` (CS1503). The lambda form discards the result, exactly Go's deferred-call semantics:
-<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:69 -->
+<!-- source: src/tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.cs:68 -->
 ```csharp
 defer(() => hʗ1.close(), ref ᒐ);
 ```
@@ -1333,7 +1333,7 @@ defer(Ꮡstate.free, ref ᒐ);          // binds the live variable's box
 This is not merely a compile fix — a value snapshot is taken at defer time, so it would miss any mutation the body makes to `state` before the deferred call runs; binding `Ꮡstate` matches Go's semantics of deferring against the *live* variable. Gated to an escaping local (a non-escaping one has no `Ꮡ` box and keeps the compiling `Ꮡ(copy)` form) used as a value receiver whose type is exactly the method's pointer-receiver pointee (an already-pointer receiver's box group is the pointer variable itself, whose snapshot name IS declared, so it is excluded). The same generalization silently corrects the closure form (`func(){ x.mutate() }` on an escaping value local previously mutated a lost copy — go/types conversions.go/typeset.go) and removes now-dead `var xʗ1 = x;` snapshots wherever the box was already used. (Guarded by the `DeferHeapLocalPtrMethod` behavioral test — a value local deferring a pointer-receiver method, mutated after the defer, with the deferred method observing the final value, output-compared vs Go.)
 
 The same box-ref treatment covers a **promoted** pointer-receiver method reached through **value embeds** — `lazyCert.Do(…)` on `var lazyCert struct { sync.Once; v *Certificate }` (crypto/x509 `AppendCertsFromPEM`): Go takes `&lazyCert.Once`, an address into the variable's own storage, so the closure must share the original variable. The detection resolves the call through `info.Selections` and walks the selection's embedded-field index path — only **value** embeds along the path root the address at the variable (a **pointer** embed re-roots it at that pointer's target, where the snapshot, which copies the pointer, stays sound). Emission then renders the promoted call through the box's field projection and field uses through the box read; the snapshot form had referenced a never-declared snapshot box (`ᏑlazyCertʗ1`, CS0103) *and* divorced the closure's writes from the original:
-<!-- source: src/core/crypto/x509/cert_pool.cs:273-278 -->
+<!-- source: src/core/crypto/x509/cert_pool.cs:262-267 -->
 ```csharp
 ᏑlazyCert.of(AppendCertsFromPEM_lazyCert.ᏑOnce).Do(() => {
     // This can't fail, as the same bytes already parsed above.
@@ -1351,7 +1351,7 @@ var prʗ1 = pr;                                 // snapshot copy — WRONG
 defer(Ꮡprʗ1.of(pkgReader.Ꮡfake).setLines, ref ᒐ);    // Ꮡprʗ1 never declared → CS0103
 ```
 The capture analysis matches the single field-projection receiver (a FIELD selected on the var's own value-struct storage — the same `&m.field` form `lambdaBoxRefAddressForm` emits — whose type is exactly the method's pointer-receiver pointee and NAMED) as the same implicit address-of, marks the local box-ref, and the defer binds the live box's field view:
-<!-- source: src/core/go/internal/gcimporter/ureader.cs:70 -->
+<!-- source: src/core/go/internal/gcimporter/ureader.cs:65 -->
 ```csharp
 defer(Ꮡpr.Ꮡfake.setLines, ref ᒐ);
 ```

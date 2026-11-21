@@ -92,7 +92,7 @@ converter test `TestSwitchAndSelectTempsAreNamedAfterTheIdentifier`.
 
 ## A switch on a `static readonly` constant tag compares in `when` guards
 A switch TAG that is itself a constant emitted as `static readonly` -- an untyped const's `UntypedInt` wrapper (`switch goarch.PtrSize`, reflect abi.go) or a `uintptr`-struct const -- cannot govern a C# switch on constant labels: the int case labels are not constants OF the wrapper struct type, and a constant pattern fails the same way (CS9135). The recorded tag type is no help (go/types records the untyped constant's DEFAULT type in tag position), so the gate is on the object resolution: a constant-valued tag that is not a true C# `const` takes the pattern switch with every clause in a `when` guard (the wrapper's `==` operators) and no constant pattern:
-<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:205-206 -->
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:204-205 -->
 ```csharp
 switch (CrossPkgLib.Precision) {
 case var ᴛ when ᴛ == 1: {
@@ -307,7 +307,7 @@ default:
 The `break` case is not a Go terminating statement, so in the if-chain the default keeps its `else`. As a
 pattern switch, each clause is its own `case`, so there is no `else` to lose:
 
-<!-- source: src/core/os/windows/exec_windows.cs:49-59 -->
+<!-- source: src/core/os/windows/exec_windows.cs:45-55 -->
 ```csharp
         switch (s) {
         case var ᴛ when ᴛ == syscall.WAIT_OBJECT_0: {
@@ -358,7 +358,7 @@ reached the end of the body" *is* "the fallthrough statement was reached" — wh
 be raised at the end rather than at the statement. In a break-wrapped case that equivalence holds only
 **inside** the wrapper, so the assignment goes there and a `break` skips it:
 
-<!-- source: src/core/time/format.cs:1374-1381 -->
+<!-- source: src/core/time/format.cs:1364-1371 -->
 ```csharp
             do {
                 if (len(value) >= 1 && value[0] == 'Z') {

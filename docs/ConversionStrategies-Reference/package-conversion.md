@@ -971,7 +971,7 @@ Resolving *where* an imported package lives is **module-aware**: the standard li
 
 **Exported type aliases cross packages.** A package-level Go type alias that is exported — `type Temperature = Celsius` — is recorded in that package's `package_info.cs` as an assembly attribute in its `<ExportedTypeAliases>` block:
 
-<!-- source: src/tests/Behavioral/CrossPkgLib/package_info.cs:29, 30, 32 -->
+<!-- source: src/tests/Behavioral/CrossPkgLib/package_info.cs:32-35 -->
 ```csharp
 // <ExportedTypeAliases>
 …
@@ -996,7 +996,7 @@ The consumer's converted code then refers to the alias as `CrossPkgLibꓸTempera
 **An empty-interface type's alias resolves to `object`.** encoding/json's `type Token any` is exported as an
 alias of `object`, the C# spelling of an empty interface, and a consumer imports that target bare:
 
-<!-- source: src/core/encoding/json/package_info.cs:30 -->
+<!-- source: src/core/encoding/json/package_info.cs:35 -->
 ```csharp
 [assembly: GoTypeAlias("Token", "object")]
 ```
@@ -1067,7 +1067,7 @@ A pull whose direct reference would close a project cycle is instead reached **l
 golib's `LinknameVar<T>` — the same storage, with no `ProjectReference`. math/bits is that case at Go 1.26,
 because `runtime` imports `math/bits`:
 
-<!-- source: src/core/runtime/amd64/panic.cs:343 -->
+<!-- source: src/core/runtime/amd64/panic.cs:342 -->
 ```csharp
 public static error overflowError = ((error)((errorString)(@string)"integer overflow"));
 ```
@@ -1946,7 +1946,7 @@ and every consumer would mint its own `binary_bigEndianᴠByteOrder` adapter. Th
 the file visits and before `writePackageInfoFile`) walks the package scope and records the VALUE-form
 pairs the package satisfies. `encoding/binary`'s metadata carries:
 
-<!-- source: src/core/encoding/binary/package_info.cs:38-45 -->
+<!-- source: src/core/encoding/binary/package_info.cs:42-49 -->
 ```csharp
 // <InterfaceImplementations>
 [assembly: GoImplement<bigEndian, AppendByteOrder>]

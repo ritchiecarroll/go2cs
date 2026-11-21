@@ -497,7 +497,7 @@ promotes `byte`/`ushort` to `int` first, so bare `~x` is `-6`: identical in the 
 ```go
 	w.writeBits(int32(^uint16(length)), 16)
 ```
-<!-- source: src/core/compress/flate/huffman_bit_writer.cs:419 -->
+<!-- source: src/core/compress/flate/huffman_bit_writer.cs:416 -->
 ```csharp
     w.writeBits((int32)(((uint16)(~(uint16)length))), 16);
 ```
@@ -522,7 +522,7 @@ section count against, seven times in one file:
 ```go
 if len(m.Questions) > int(^uint16(0)) {     // vendor/golang.org/x/net/dns/dnsmessage
 ```
-<!-- source: src/core/vendor/golang.org/x/net/dns/dnsmessage/message.cs:1155 -->
+<!-- source: src/core/vendor/golang.org/x/net/dns/dnsmessage/message.cs:1113 -->
 ```csharp
 if (len(m.Questions) > (nint)(unchecked((uint16)(~(uint16)0)))) {
 ```

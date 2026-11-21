@@ -101,7 +101,7 @@ The deeper remedy — the converter stating the access modifier in source itself
 
 The blind spot above is closed at the root without touching a converted `.cs`:<!-- 2026-07-25 --> `package_info.cs` carries a **`TypeAccessibility`** section, emitted **inside the package class body** (its entries are type declarations, and the types they name are nested in that class), carrying one condensed single-line partial declaration per converter-emitted converted type:
 
-<!-- source: src/core/io/package_info.cs:103-105, 112-113, 117, 125, 132, 144, 149, 161 (an excerpt of the section) -->
+<!-- source: src/core/io/package_info.cs:108-166 (an excerpt of the section) -->
 ```csharp
 [GoPackage("io")]
 public static partial class io_package
@@ -224,7 +224,7 @@ generator builds one from the comment. `num:int64` says "a number over `int64`",
 slice, a map, a channel, a pointer or another named type the same way. If the comment is deleted the type loses
 its arithmetic and conversions, and the build fails rather than running wrong.
 
-<!-- source: src/core/time/time.cs:976 -->
+<!-- source: src/core/time/time.cs:936 -->
 ```csharp
 partial struct Duration /*num:int64*/;
 ```

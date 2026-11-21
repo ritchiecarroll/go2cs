@@ -151,7 +151,7 @@ so a nil `p` ranges N times as in Go, and a deref-aliased pointer parameter or r
 
 **Named-slice pointer reinterpret (`(*[][]byte)(buf)` with `buf *Buffers`).** Go converts a pointer-to-named-slice to a pointer to its underlying slice type freely — net's `fd.pfd.Writev((*[][]byte)(buf))`, where poll's `Writev` *reslices the header through the pointer* (`consume` advances `*v`), and the caller must observe it. The C# boxes `ж<Buffers>` and `ж<slice<slice<byte>>>` are unrelated generic instantiations (CS0030), so the conversion emits a **field view over the wrapper's own backing slice**:
 
-<!-- source: src/core/net/windows/fd_windows.cs:262 -->
+<!-- source: src/core/net/windows/fd_windows.cs:255 -->
 ```csharp
     var (n, err) = Ꮡfd.Ꮡpfd.Writev(buf.of(Buffers.Ꮡm_value));
 ```
@@ -2061,7 +2061,7 @@ read/write vs Go.)
 
 ## Appending to an interface-typed slice casts the element
 A value appended to a `[]Iface` slice whose type is not already the interface -- a pointer rendering as the `*T`-to-interface adapter ctor, or a raw struct value -- leaves both golib `append` overloads applicable (`append<T>(ISlice, params T[])` infers the concrete/adapter type; `append<T>(slice<T>, params Span<T>)` infers the interface -- CS0121). The converter casts such elements to the element interface type:
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:160-161 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:159-160 -->
 ```csharp
     pack = append(packᴷ, pack, (Animal)(new CatжAnimal(Ꮡ(new Cat()))));
     pack = append(pack, (Animal)(new Dog()));

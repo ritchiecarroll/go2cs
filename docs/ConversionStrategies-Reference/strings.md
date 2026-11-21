@@ -176,7 +176,7 @@ But neither is more specific than the other.
 %[2]s matches %[5]q, but %[1]s doesn't.`,
 	p1, p2, commonPath(p1, p2), differencePath(p1, p2), differencePath(p2, p1))
 ```
-<!-- source: src/core/net/http/pattern.cs:471-477 -->
+<!-- source: src/core/net/http/pattern.cs:462-468 -->
 ```csharp
         return fmt.Sprintf("""
 %[1]s and %[2]s both match some paths, like %[3]q.
@@ -313,7 +313,7 @@ func Atoi(s string) (int, error) {
 	…
 }
 ```
-<!-- source: src/core/internal/strconv/atoi.cs:266-282 -->
+<!-- source: src/core/internal/strconv/atoi.cs:260-276 -->
 ```csharp
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
 internal static ref readonly @string fnAtoiᶜ => ref fnAtoiᶜᵇ;
@@ -416,7 +416,7 @@ A `string` parameter is an `@string`, so every literal argument is copied into o
 
 - **The converter** emits the member that carries the Go body, with each registered parameter typed `sstring`:
 
-  <!-- source: src/core/fmt/print.cs:277-285 -->
+  <!-- source: src/core/fmt/print.cs:268-276 -->
   ```csharp
   public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
       …
@@ -456,7 +456,7 @@ Funcꓸꓸꓸ<@string, any, error> noVetErrorf = fmt.Errorfᶠ;
 
 **Records.** `package_info.cs` publishes each exported package-level twin to other packages:
 
-<!-- source: src/core/fmt/package_info.cs:51-59 -->
+<!-- source: src/core/fmt/package_info.cs:55-63 -->
 ```csharp
 // <SStringTwins>
 …

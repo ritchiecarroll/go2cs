@@ -402,7 +402,7 @@ acc := &accum{}
 bindAdd(acc)
 fmt.Println("accum total:", acc.total) // 12
 ```
-<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:37-39 -->
+<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:36-38 -->
 ```csharp
 …
     var acc = Ꮡ(new accum());
@@ -434,7 +434,8 @@ code, and the section that explains it in full.
 | `Δ1` suffix | A second declaration of the same name: a variable that shadows an outer one, or a repeated `init` function | `hourΔ1`, `initΔ1` | [Shadowing](#short-variable-redeclaration-shadowing); repeated `init`: [Functions and Methods](#functions-and-methods) |
 | `ʗ1` suffix | A copy of a variable, taken for the lambda that uses it | `var f1ʗ1 = f1;` | [Function Values and Closures](#function-values-and-closures) |
 | `ʗp` suffix | The raw incoming parameter, when the body copies it into a local of the Go name: a variadic pack becomes a slice, or a value whose address is taken moves into a heap box with `heap(…)` | `params ꓸꓸꓸerror errsʗp`; `readOnlyParam(Rect rʗp)` then `ref var r = ref heap(rʗp, out var Ꮡr);` | [Slices and Arrays](#slices-and-arrays) (variadic); [Pointers](#pointers) (address taken, the same `heap(…)` pattern as a local) |
-| `ᴛ` | A name the converter makes up: a temporary, a lambda parameter, an init helper, a lazy var's holder class, or the class that holds a type's methods | `ᴛ1`, `chᴛ2`, `initᴛsingle`, `lazyᴛ_Lu`, `timeᴛTime` | [Multi-Assignment](#multi-assignment-and-evaluation-order); init helpers: [Initialization Order](#package-level-variable-initialization-order); method holders: [Functions and Methods](#functions-and-methods) |
+| `ᴛ` | A name the converter makes up: a temporary, a lambda parameter, an init helper, a lazy var's holder class, or the class that holds a type's method forwarders | `ᴛ1`, `chᴛ2`, `initᴛsingle`, `lazyᴛ_Lu`, `timeᴛTime` | [Multi-Assignment](#multi-assignment-and-evaluation-order); init helpers: [Initialization Order](#package-level-variable-initialization-order); method holders: [Functions and Methods](#functions-and-methods) |
+| `⁔` suffix | A Go method's body, in its package class beside its type. No Go identifier can spell U+2054, so the body's name never meets a Go name; the Go-named method is a one-line forwarder to it, in `package_info.cs` | `Month⁔(/*this*/ Time t)`, `len⁔(/*this*/ ref box b)` | [Functions and Methods](#functions-and-methods) |
 | `ˢ`, `ᶜ` suffix | A string literal (`ˢ`) or a local constant (`ᶜ`), stored once in a static field whose declaration sits in the same file | `namedStringConversionˢ`, `fnAtoiᶜ` | [Strings](#strings-string-and-sstring) |
 | `ꓸ` | A dot inside one name, such as a package-qualified alias | `driverꓸValue` | [Type Aliasing](#type-aliasing) |
 | `ꓸꓸꓸ` in a type or name | Go's `...`: `ꓸꓸꓸT` aliases `Span<T>` for a variadic parameter; `s.ꓸꓸꓸ` and `appendꓸꓸꓸ` spread a slice; `Funcꓸꓸꓸ<…>` is a variadic func type | `using ꓸꓸꓸerror = Span<error>;`, `fmt.Sprintf(format, a.ꓸꓸꓸ)`, `appendꓸꓸꓸ(all, batch)` | [Slices and Arrays](#slices-and-arrays) |
@@ -492,21 +493,22 @@ partial struct Outer {
 For example, `GoFrame` is the golib type of the local that runs a function's deferred calls
 ([Defer / Panic / Recover](#defer--panic--recover)), so a Go struct named `GoFrame` becomes `ΔGoFrame`:
 
-<!-- reserved-name list: src/go2cs/identifierNaming.go:171-181#9e0a65; a type named like a method keeps its name: src/core/time/time.cs:332 `partial struct Month /*num:nint*/;` (Go type Month; the method Time.Month is in the holder opened at :171 `} partial class timeᴛTime {`); the same test's deferInShadowedPackage (ReservedNameShadows/main.cs.target:44-55#9ee30e) declares golib's `GoFrame ᒐ` beside the renamed `ΔGoFrame` local type -->
+<!-- reserved-name list: src/go2cs/identifierNaming.go:171-181#9e0a65; a type named like a method keeps its name: src/core/time/time.cs:326 `partial struct Month /*num:nint*/;` (Go type Month; the method Time.Month's body is :839 `internal static Month Month⁔(/*this*/ Time t) {`, and its forwarder src/core/time/linux/package_info.cs:223 `public static Month Month(this Time t) => time_package.Month⁔(t);`); the same test's deferInShadowedPackage (ReservedNameShadows/main.cs.target:44-55#9ee30e) declares golib's `GoFrame ᒐ` beside the renamed `ΔGoFrame` local type -->
 <!-- source: src/tests/Behavioral/ReservedNameShadows/main.go:45 -->
 ```go
 type GoFrame struct{ k int }
 ```
-<!-- source: src/tests/Behavioral/ReservedNameShadows/main.cs.target:40-42 -->
+<!-- source: src/tests/Behavioral/ReservedNameShadows/main.cs.target:39-41 -->
 ```csharp
 partial struct ΔGoFrame {
     internal nint k;
 }
 ```
 
-A Go type that shares its name with a method keeps its name. A method is an extension method in a class of
-its own, its receiver type's method holder (`timeᴛTime` holds the methods of the time package's `Time`), so
-the type `Month` and the method `Time.Month` are never in one class. A Go function named `Main` becomes
+A Go type that shares its name with a method keeps its name. A method's body is named `<Name>⁔`, a name no
+Go identifier can spell, and its Go name belongs to a forwarder in its receiver type's method holder
+(`timeᴛTime` holds the forwarders of the time package's `Time`), so the type `Month` and the method
+`Time.Month` never meet. A Go function named `Main` becomes
 `ΔMain`, since `Main` is the entry point go2cs-gen generates for a program.
 
 **A capitalized Go name becomes `public`; any other name becomes `internal`.** This is Go's export rule in C#
@@ -522,7 +524,7 @@ func GetPrintLn() func(string) {
 	}
 }
 ```
-<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:62-66 -->
+<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:57-61 -->
 ```csharp
 public static Action<@string> GetPrintLn() {
     return (@string src) => {
@@ -1877,7 +1879,7 @@ const (
 	flushBuffer        = 1 << maxWidth
 )
 ```
-<!-- source: src/core/compress/lzw/reader.cs:37-39 -->
+<!-- source: src/core/compress/lzw/reader.cs:36-38 -->
 ```csharp
 internal static UntypedInt maxWidth => 12;
 internal static UntypedInt decoderInvalidCode => 0xffff;
@@ -2017,7 +2019,7 @@ package's `windows/` folder, which holds the files that differ between target op
 ```go
 	O_RDONLY int = syscall.O_RDONLY // open the file read-only.
 ```
-<!-- source: src/core/os/windows/file.cs:90 -->
+<!-- source: src/core/os/windows/file.cs:84 -->
 ```csharp
 public const nint O_RDONLY = /* syscall.O_RDONLY */ 0; // open the file read-only.
 ```
@@ -2030,7 +2032,7 @@ the property form instead. `unchecked` lets C# accept a cast to `nint` of a valu
 ```go
 const maxInt = int(^uint(0) >> 1)
 ```
-<!-- source: src/core/strings/strings.cs:22 -->
+<!-- source: src/core/strings/strings.cs:21 -->
 ```csharp
 internal static nint maxInt => /* int(^uint(0) >> 1) */ unchecked((nint)9223372036854775807);
 ```
@@ -2071,7 +2073,7 @@ const (
 	MSB
 )
 ```
-<!-- source: src/core/compress/lzw/reader.cs:29-35 -->
+<!-- source: src/core/compress/lzw/reader.cs:28-34 -->
 ```csharp
 partial struct Order /*num:nint*/;
 
@@ -2523,7 +2525,7 @@ calls golib's `quo` or `rem`. Each checks for -1 and otherwise uses C#'s own `/`
 ```go
 return Point{p.X / k, p.Y / k}
 ```
-<!-- source: src/core/image/geom.cs:44 -->
+<!-- source: src/core/image/geom.cs:41 -->
 ```csharp
 return new Point(quo(p.X, k), quo(p.Y, k));
 ```
@@ -2707,7 +2709,7 @@ const (
 	December
 )
 ```
-<!-- source: src/core/time/time.cs:332-345 -->
+<!-- source: src/core/time/time.cs:326-339 -->
 ```csharp
 partial struct Month /*num:nint*/;
 
@@ -3350,12 +3352,10 @@ b.Name = "a";
 The `"a"` is a plain C# literal, the form go2cs uses for a Go string literal in a `string` slot
 ([Strings](#strings-string-and-sstring)).
 
-**A method named like a built-in makes calls inside its own holder write `builtin.<name>`.** A Go
-type with such a method keeps its methods in a static C# class of its own, its method holder, even in
-package `main` ([Functions and Methods](#functions-and-methods)). C# looks in that class before it looks at
-`using static go.builtin`, so a method named `len` hides the built-in `len` inside that holder only.
-The converter writes `builtin.len(…)` there, and leaves the plain `len(…)` everywhere else, such as in
-`freeLen`, which lives in the package class
+**A method named like a built-in does not hide it.** A Go type of `main` with such a method takes the `⁔`
+form ([Functions and Methods](#functions-and-methods)): the method's body is `len⁔`, and only its forwarder, in
+the type's method holder, is named `len`. So the body reads the built-in `len` bare, as `freeLen` in the
+package class does
 ([detail](ConversionStrategies-Reference/shadowing.md#short-variable-redeclaration-shadowing)):
 
 <!-- source: src/tests/Behavioral/ReservedNameShadows/main.go:53-62 -->
@@ -3369,17 +3369,13 @@ func freeLen() int {
 	return len(s)
 }
 ```
-<!-- source: src/tests/Behavioral/ReservedNameShadows/main.cs.target:57-70 -->
+<!-- source: src/tests/Behavioral/ReservedNameShadows/main.cs.target:56-66 -->
 ```csharp
 partial struct box {
     internal slice<nint> items;
 }
 
-} partial class mainᴛbox {
-
-internal static nint len(this ref box b) { return builtin.len(b.items) + 1; }
-
-} partial class main_package {
+internal static nint len⁔(/*this*/ ref box b) { return len(b.items) + 1; }
 
 internal static nint freeLen() {
     var s = slice<nint>([1, 2, 3]);
@@ -3387,9 +3383,9 @@ internal static nint freeLen() {
 }
 ```
 
-`partial struct box` is a converted Go type ([Struct Types](#struct-types)), and `mainᴛbox` is its
-method holder. In the method, `this ref box b` is its receiver: the method gets the `box` by reference, which is how go2cs writes a
-pointer receiver. The method call itself stays `b.len()`.
+`partial struct box` is a converted Go type ([Struct Types](#struct-types)). In the method, `/*this*/ ref box b`
+is its receiver: the method gets the `box` by reference, which is how go2cs writes a pointer receiver. The
+method call itself stays `b.len()`, through the forwarder.
 
 **A local that shadows a built-in needs no prefix.** When Go code declares a local variable or
 function named like a built-in, such as `make := func(…)`, Go calls the local too. So C# emits a
@@ -4133,7 +4129,7 @@ func ReadAtLeast(r Reader, buf []byte, min int) (n int, err error) {
 	return
 }
 ```
-<!-- source: src/core/io/io.cs:338-356 -->
+<!-- source: src/core/io/io.cs:337-355 -->
 ```csharp
 public static (nint n, error err) ReadAtLeast(Reader r, slice<byte> buf, nint min) {
     nint n = default;
@@ -5119,7 +5115,7 @@ fmt.Println(fmt.Sprintf("xxx"u8));
 
 Go's `func Sprintf(format string, a ...any) string` is declared this way in the converted `fmt` package:
 
-<!-- source: src/core/fmt/print.cs:277-285 -->
+<!-- source: src/core/fmt/print.cs:268-276 -->
 ```csharp
 public static @string Sprintf(sstring format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
@@ -6207,30 +6203,49 @@ A Go package becomes a C# `partial class` named `<name>_package` ([Package Conve
 Each Go function becomes a `static` method of that class. Each Go method becomes a C# extension method:
 the receiver is the first parameter, marked `this`, so a call such as `d.speak()` reads the same in both languages.
 
-**A library type's methods live in its method holder.** The holder is a static partial class beside the
-package class, named for the package and the receiver type: `timeᴛTime` holds the methods of `time.Time`.
-`package_info.cs` declares each holder, and a converted file closes the package class and opens the holder
-where the type's methods begin (`} partial class timeᴛTime {`), so the methods stay in Go's order. A holder
-that the file's last method leaves open closes with a bare `}`; the package class closes with
-`} // end time_package`. A file with a holder also has `using static <pkg>_package;`, so a method body
-names the package's functions, types and variables as Go does. Go keeps a method in its type's method set
-and never in the package scope, so a method can share its name with a package-level type, constant,
-variable or function; the holder gives C# the same separation, and none of those names is renamed. Where a
-method body names a package-level declaration that one of its holder's methods shares a name with, C#
-would find the method first. The converter then gives the file an alias of its own package and writes the
-name through it, as Go code outside the package would (`using time = time_package;` and `time.Now()`),
-or through the package class (`time_package.Now()`) where a local of the alias's name hides it.
+**A library method's body stands in the package class, named `<Name>⁔`.** The body is the Go method as
+written: a static method beside its type, its receiver the first parameter (`/*this*/` marks it), and its name
+the Go name with U+2054 appended, a character no Go identifier can spell. So it shares the package class with
+the package's functions, types, constants and variables without colliding with any of them, and reads each of
+them bare, as Go does. A frame of the body is reported as the Go method (`time.Time.Month`), never with the
+suffix. The Go-named method is a one-line forwarder in the receiver type's **method holder**, a static class
+named for the package and the type (`timeᴛTime` holds the forwarders of `time.Time`). `package_info.cs`
+declares each holder and writes its forwarders, marked inlined and hidden from stack walks and the debugger's
+step-into, so every call, interface and method set reads the forwarder while the body is the method's one
+frame:
+
+<!-- source: src/tests/Behavioral/CrossPkgLib/lib.go:30 -->
+```go
+func (c Celsius) Add(d Celsius) Celsius { return c + d }
+```
+<!-- source: src/tests/Behavioral/CrossPkgLib/lib.cs.target:18 -->
+```csharp
+internal static Celsius Add⁔(/*this*/ Celsius c, Celsius d) { return c + d; }
+```
+<!-- source: src/tests/Behavioral/CrossPkgLib/package_info.cs:155-157 -->
+```csharp
+partial class CrossPkgLibᴛCelsius {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Celsius Add(this Celsius c, Celsius d) => CrossPkgLib_package.Add⁔(c, d);
+}
+```
+
+The forwarder repeats the body's spelling, which `package_info.cs` reads through a `using static` of the package
+class repeated right after its namespace declaration, as each converted file declares it; a type the namespace
+hides is written through its class ([Reference → Shadowing](ConversionStrategies-Reference/shadowing.md)). A
+method expression (`Celsius.Add`) binds the body directly where the delegate's receiver matches it, and the
+forwarder's `ж<T>` twin otherwise. The forwarder and its twin are what go2cs-gen reads a Go method set from; the
+body is an ordinary static method, in no method set.
 
 **Package `main` keeps its methods in the package class.** A program has no consumer of its classes, so a
 type of `main` has its methods beside the package's functions, as the Go file reads. A method expression
 names the method through the package class, as Go names it through its type, under the delegate cast that
 picks its receiver (`((Func<ж<counter>, nint, nint>)(main_package.add))`): a bare name would bind a local of
-its name first. A type of `main` keeps a holder, `mainᴛ<Type>`, only where one of its methods is named like
-something the package's files read bare, which the method would hide from the whole package: a package-level
-name of `main`, a universe name such as `len`, the name of an import or a name a dot-imported package
-declares, or a member of golib's `builtin` class. The names the package's test files add count too, so the
-program and its tests agree on every holder. In the package class, `func (w words) len() int { return len(w) }` would
-call itself; in its holder the call is written `builtin.len(w)`.
+its name first. A type of `main` takes a holder, and its methods the `⁔` form, only where one of its methods
+is named like something the package's files read bare, which the method would hide from the whole package: a
+package-level name of `main`, a universe name such as `len`, the name of an import or a name a dot-imported
+package declares, or a member of golib's `builtin` class. The names the package's test files add count too, so
+the program and its tests agree on every holder. In the package class, `func (w words) len() int { return len(w) }`
+would call itself; as `len⁔` its body reads the built-in `len` bare.
 
 The receiver's C# form shows how the method uses it:
 
@@ -6473,7 +6488,7 @@ after the call's arguments are evaluated, which is when Go takes the copy. golib
 	…
 	fmt.Println(pb.Len()) // 3
 ```
-<!-- source: src/tests/Behavioral/SortArrayType/SortArrayType.cs.target:215-217 -->
+<!-- source: src/tests/Behavioral/SortArrayType/SortArrayType.cs.target:206-208 -->
 ```csharp
     var pb = @new<PeopleByAge>();
     …
@@ -8615,7 +8630,7 @@ func main() {
 	…
 }
 ```
-<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:9-42 -->
+<!-- source: src/tests/Behavioral/GoCallVariations/GoCallVariations.cs.target:8-41 -->
 ```csharp
 internal static partial void main() {
     …
@@ -9734,7 +9749,7 @@ type outer struct {
 	o.bump(5)           // promoted: (&o.inner).bump(5)
 	o.bump(3)
 ```
-<!-- source: src/tests/Behavioral/EmbeddedValuePointerMethod/main.cs.target:8-59 -->
+<!-- source: src/tests/Behavioral/EmbeddedValuePointerMethod/main.cs.target:7-54 -->
 ```csharp
 partial struct inner {
     internal nint n;
@@ -9869,7 +9884,7 @@ type rdCloser interface {
 	clsr
 }
 ```
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:241-252 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:236-247 -->
 ```csharp
 partial interface rdr {
     @string read();
@@ -9909,7 +9924,7 @@ func f() error {
 	return MyError{"foo"}
 }
 ```
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:8-18 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:7-17 -->
 ```csharp
 partial struct MyError {
     internal @string description;
@@ -10020,7 +10035,7 @@ type Incrementer interface {
 	Total() int
 }
 ```
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:52-78 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:51-77 -->
 ```csharp
 partial struct Counter {
     internal nint n;
@@ -10073,7 +10088,7 @@ back, ok := inc.(*Counter) // assert back to the pointer
 back.Inc()
 fmt.Println("assert-back:", ok, c.Total(), back == c) // true 11 true
 ```
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:130-141 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:129-140 -->
 ```csharp
 …
 var c = Ꮡ(new Counter());
@@ -12148,7 +12163,7 @@ func registerLoadFromEmbeddedTZData(f func(string) (string, error)) {
 	loadFromEmbeddedTZData = f
 }
 ```
-<!-- source: src/core/time/zoneinfo_read.cs:20-26 -->
+<!-- source: src/core/time/zoneinfo_read.cs:19-25 -->
 ```csharp
 // registerLoadFromEmbeddedTZData is called by the time/tzdata package,
 // if it is imported.
@@ -12357,7 +12372,7 @@ func Gosched() {
 
 The converted `proc.cs` keeps only a placeholder where `Gosched` would be:
 
-<!-- source: src/core/runtime/windows/proc.cs:411 -->
+<!-- source: src/core/runtime/windows/proc.cs:410 -->
 ```csharp
 // go2cs generated this placeholder — func Gosched is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 ```
@@ -12659,7 +12674,7 @@ A Go `panic` becomes `throw panic(...)` ([Defer / Panic / Recover](#defer--panic
 straight to `panic` stays inline as a plain C# string instead of becoming a hoisted `ˢ` field. The tuple
 result is unpacked with `var (p, err) = …`. `crypto/elliptic`'s `ScalarBaseMult` shows both:
 
-<!-- source: src/core/crypto/elliptic/nistec.cs:245-248 -->
+<!-- source: src/core/crypto/elliptic/nistec.cs:242-245 -->
 ```csharp
     var (p, err) = curve.newPoint().ScalarBaseMult(scalar);
     if (err != nil) {
