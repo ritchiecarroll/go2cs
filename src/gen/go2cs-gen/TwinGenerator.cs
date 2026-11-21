@@ -506,8 +506,28 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 symbol.ReturnType.TypeKind is TypeKind.Pointer or TypeKind.FunctionPointer)
                 return false;
 
-            return symbol.Parameters.All(parameter => parameter.RefKind == RefKind.None && !parameter.Type.IsRefLikeType);
+            for (int i = 0; i < symbol.Parameters.Length; i++)
+            {
+                IParameterSymbol parameter = symbol.Parameters[i];
+
+                if (IsBoxedReceiver(symbol, i))
+                    continue;
+
+                if (parameter.RefKind != RefKind.None || parameter.Type.IsRefLikeType && !IsSString(parameter.Type))
+                    return false;
+            }
+
+            return true;
         }
+
+        // The plain lowerings a forwarder gives back their Go shape (section 4): a pointer receiver, `this ref T`, takes
+        // its box (F3), and an sstring-pilot parameter its @string (F5), so the twin is the same whichever lowering the
+        // plain member got (P8).
+        internal static bool IsBoxedReceiver(IMethodSymbol symbol, int index) =>
+            index == 0 && symbol.IsExtensionMethod && symbol.Parameters[0].RefKind == RefKind.Ref;
+
+        internal static bool IsSString(ITypeSymbol type) =>
+            type is INamedTypeSymbol { Name: "sstring", ContainingNamespace: { Name: "go", ContainingNamespace.IsGlobalNamespace: true } };
 
         // Whether the method's type holds a twin of it: a hand-written golib twin, or a generated twin of a
         // referenced assembly, which is how a call crosses assemblies.

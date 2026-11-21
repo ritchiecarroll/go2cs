@@ -245,8 +245,33 @@ public sealed partial class TwinGenerator
             bool isVoid = method.ReturnType is PredefinedTypeSyntax predefined && predefined.Keyword.IsKind(SyntaxKind.VoidKeyword);
             string returnType = method.ReturnType.WithoutTrivia().ToFullString();
             string modifiers = string.Join(" ", method.Modifiers.Where(modifier => !modifier.IsKind(SyntaxKind.PartialKeyword)).Select(modifier => modifier.Text));
-            string parameters = method.ParameterList.WithoutTrivia().ToFullString();
-            string call = method.Identifier.Text + "(" + string.Join(", ", method.ParameterList.Parameters.Select(parameter => parameter.Identifier.Text)) + ")";
+            List<string> declared = [], arguments = [];
+
+            for (int i = 0; i < method.ParameterList.Parameters.Count; i++)
+            {
+                ParameterSyntax parameter = method.ParameterList.Parameters[i];
+                ITypeSymbol type = candidate.Symbol.Parameters[i].Type;
+
+                if (IsBoxedReceiver(candidate.Symbol, i) && parameter.Type is { } receiverType)
+                {
+                    string box = "Ꮡ" + parameter.Identifier.ValueText;
+                    declared.Add("this global::go.ж<" + receiverType.WithoutTrivia().ToFullString() + "> " + box);
+                    arguments.Add("ref " + box + ".DerefOrNull()");
+                }
+                else if (IsSString(type) && parameter.Type is not null)
+                {
+                    declared.Add(parameter.WithType(SyntaxFactory.ParseTypeName("global::go.@string").WithTrailingTrivia(SyntaxFactory.Space)).WithoutTrivia().ToFullString());
+                    arguments.Add(parameter.Identifier.Text);
+                }
+                else
+                {
+                    declared.Add(parameter.WithoutTrivia().ToFullString());
+                    arguments.Add(parameter.Identifier.Text);
+                }
+            }
+
+            string parameters = "(" + string.Join(", ", declared) + ")";
+            string call = method.Identifier.Text + "(" + string.Join(", ", arguments) + ")";
 
             string declaration = modifiers + " " + (isVoid ? "global::go.golib.GoTask" : "global::go.golib.GoTask<" + returnType + ">") + " " +
                                  method.Identifier.Text + Suffix + parameters;

@@ -339,3 +339,20 @@ F2, F6; F3, F5; F4, F11; F7, F8; the guard (F9) and O2 (F10); P8; then the closu
   parking nowhere) has no `ꞏtwin` member at all. R3 gives it a forwarder by design, so the prediction should have
   named them. Each row now asserts what it guards: exactly one `ꞏtwin`, a forwarder, with no state machine and no
   await of it (`TwinSurfaceTests.AssertForwarderOnly`). GenTests: 698 of 698 (693 + 5 new).
+- **COORD's ruling on the four rows (2026-11-20): ACCEPTED**, on condition that each still guards its reason. Read
+  at 57de4a48b2: each row keeps every assertion it had except the replaced "no `ꞏtwin`" line. The two "by name"
+  rows still assert their report refusal row (`|locked|await-in-lock`, `|stale|ref-unrederivable`). They never
+  asserted a Roslyn diagnostic: the refusal is named in the report, and a test for one would be a new row. The
+  unboxed row still asserts `|sPark|v`. Pairs-off still asserts `callerꞏtwin(`, `mainꞏtwin(` and no `GoFuncPair`.
+  The replacement is stronger than the line it replaced: exactly one line naming `Mꞏtwin(` also rules out an await
+  of it. P3 reads these four rows at 7a READY.
+- **repoguard at 57de4a48b2:** 13 provenance notes are red. They cite lines that the M:N delta moved on this branch,
+  and they are item 13's landing re-cite job, not 7a's: manual-conversions.md:3830 (managed_impl.cs :5112, :5120),
+  source-generators.md:485 (ImplementGenerator.cs:1608), ConversionStrategies.md:8718 (Goroutine.cs:1345) and :11879
+  (managed_impl.cs:5129), DESIGN-goexit-main.md:45, 87, 88, 89 (Goroutine.cs :540, :1496, :1096, :1162),
+  Limitations.md:101, 107, 115, 116 (Goroutine.cs :1345 twice, :1089, :1162). The two nuget suites were red only
+  because the shell running them had no .NET on PATH.
+- **Step 2, F3 and F5:** a forwarder gives a plain lowering its Go shape back. A pointer receiver (`this ref T`) takes
+  its box, `Mꞏtwin(this ж<T> Ꮡt, ...)`, and calls `M(ref Ꮡt.DerefOrNull(), ...)`. An sstring-pilot parameter takes
+  `@string`, and the call binds the body member through the implicit view. Both rows went red before the code.
+  GenTests 700 of 700, with no earlier row changed.

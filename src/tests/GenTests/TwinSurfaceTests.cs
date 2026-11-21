@@ -93,6 +93,68 @@ public class TwinSurfaceTests
 
         """;
 
+    // F3: pointer receivers with no box twin: an expression body (byref-recv), one that parks nowhere, and a copy-bound
+    // one that parks (byref-recv); a parking caller of the last through a box.
+    private const string PointerReceivers = """
+            public static nint px(this ref T t) => t.x;
+
+            public static void pset(this ref T t, nint v) { t.x = v; }
+
+            [GoCopyBound]
+            public static void pcb(this ref T t) { ᐸꟷ(ch); }
+
+            public static void callP(ж<T> Ꮡp)
+            {
+                Ꮡp.pcb();
+                ᐸꟷ(ch);
+            }
+
+        """;
+
+    // F5: sstring-pilot members (the converter writes the sstring member; StrGenerator adds its @string companion).
+    private const string SStringPilot = """
+            public static nint slen(sstring s) => 0;
+
+            public static void sput(sstring s, nint n) { ᐸꟷ(ch); }
+
+            public static void sw(this ref T t, sstring s) { t.x = 1; }
+
+        """;
+
+    private static int Lines(string twins, string text) => twins.Split('\n').Count(line => line.Contains(text, StringComparison.Ordinal));
+
+    [TestMethod]
+    public void F3_APointerReceiverWithNoBoxTwinGetsABoxForwarder()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(null, null, PointerReceivers);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "global::go.golib.GoTask<nint> pxꞏtwin(this global::go.ж<T> Ꮡt) => new global::go.golib.GoTask<nint>(px(ref Ꮡt.DerefOrNull()));",
+            "an expression body: the forwarder takes the box and calls through DerefOrNull");
+        StringAssert.Contains(twins, "global::go.golib.GoTask psetꞏtwin(this global::go.ж<T> Ꮡt, nint v) { pset(ref Ꮡt.DerefOrNull(), v); return default; }",
+            "a receiver that parks nowhere");
+        AssertForwarderOnly(twins, "pcb", "a copy-bound receiver is refused its box twin");
+        StringAssert.Contains(twins, "pcbꞏtwin(this global::go.ж<T> Ꮡt)", "its forwarder takes the box all the same");
+        StringAssert.Contains(twins, "callPꞏtwin(", "the caller parks: a twin, which calls pcb plain");
+    }
+
+    [TestMethod]
+    public void F5_AnSStringPilotMemberGetsOneTwinOnItsStringMember()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(null, null, SStringPilot);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        StringAssert.Contains(twins, "global::go.golib.GoTask<nint> slenꞏtwin(global::go.@string s) => new global::go.golib.GoTask<nint>(slen(s));",
+            "the twin hangs on the @string member");
+        StringAssert.Contains(twins, "global::go.golib.GoTask sputꞏtwin(global::go.@string s, nint n) { sput(s, n); return default; }",
+            "a pilot member that parks: a forwarder until the rewriter retypes its body");
+        StringAssert.Contains(twins, "swꞏtwin(this global::go.ж<T> Ꮡt, global::go.@string s) { sw(ref Ꮡt.DerefOrNull(), s); return default; }",
+            "a pointer receiver and an sstring parameter together");
+        Assert.AreEqual(1, Lines(twins, "slenꞏtwin("), "one twin per Go function");
+        Assert.AreEqual(0, twins.Split('\n').Count(line => line.Contains("ꞏtwin(", StringComparison.Ordinal) && line.Contains("sstring", StringComparison.Ordinal)),
+            "no twin on the sstring member (RecvGenerator's plain box overload of sw keeps its sstring, as it should)");
+    }
+
     [TestMethod]
     public void F1_APublicFunctionThatCannotParkGetsAForwarder()
     {
