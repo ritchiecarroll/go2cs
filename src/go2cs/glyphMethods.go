@@ -57,8 +57,8 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 	lines := strings.Split(text, "\n")
 	current := ""
 	var forwarders []glyphForwarder
-	switches := map[int]string{} // line index of each holder switch → the holder it opened
-	transformed := map[string]bool{}
+	switches := map[int]string{}       // line index of each holder switch → the holder it opened
+	transformed := map[string]string{} // method → "" (bind the body) or the holder class whose ж twin a ref receiver's expression binds
 
 	for i, line := range lines {
 		trimmed := strings.TrimRight(line, "\r")
@@ -118,7 +118,13 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 		}
 
 		forwarders = append(forwarders, glyphForwarder{holder: holder, receiverType: forwarder.receiverType, text: forwarder.text})
-		transformed[forwarder.name] = true
+		// A pointer receiver's body takes `ref T`, and its method expression's delegate takes ж<T>, which only
+		// RecvGenerator's twin of the forwarder answers (P3's SHOULD 3): such an expression keeps the Go name.
+		if !forwarder.byRefReceiver {
+			transformed[forwarder.name] = ""
+		} else {
+			transformed[forwarder.name] = glyphHolderClassName(holder, packageClass, forwarder.receiverType, fileName)
+		}
 	}
 
 	if len(forwarders) == 0 {
@@ -165,8 +171,6 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 		groups[key] = append(groups[key], f)
 	}
 
-	stem := strings.TrimSuffix(packageClass, PackageSuffix)
-
 	for _, key := range order {
 		group := groups[key]
 
@@ -176,7 +180,7 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 			// No holder was declared for this type (its methods sat in the package class), so this file declares one of
 			// its own: a per-file name, because a type's methods may span files and each declaration carries the mark.
 			core := key[1:]
-			fmt.Fprintf(&tail, "[GoMethodHost(typeof(%s.%s))] static partial class %sᴛ%sᴍ%s {\n", packageClass, glyphOpenGeneric(core), stem, glyphBareName(core), glyphFileTag(fileName))
+			fmt.Fprintf(&tail, "[GoMethodHost(typeof(%s.%s))] static partial class %s {\n", packageClass, glyphOpenGeneric(core), glyphHolderClassName("", packageClass, group[0].receiverType, fileName))
 		}
 
 		for _, f := range group {
@@ -193,10 +197,11 @@ func applyGlyphMethods(text string, packageClass string, fileName string) string
 }
 
 type glyphForwarderText struct {
-	name         string
-	receiverType string
-	text         string
-	head, tail   string // text split before ` => `, so constraint clauses on the following lines can be inserted
+	name          string
+	byRefReceiver bool
+	receiverType  string
+	text          string
+	head, tail    string // text split before ` => `, so constraint clauses on the following lines can be inserted
 }
 
 // glyphRewriteHeader recognizes a converted method header at column 0 (`[attrs] mods ret Name<T>(this R r, ...)...`)
@@ -388,7 +393,7 @@ done:
 	fwdHead := forwarder.String()
 	fwdTail := fmt.Sprintf(" => %s%s.%s%s%s(%s);", callPrefix, packageClass, name, GlyphMethodSuffix, typeParams, strings.Join(args, ", "))
 
-	return body.String(), glyphForwarderText{name: name, receiverType: receiverType, text: fwdHead + fwdTail, head: fwdHead, tail: fwdTail}, true
+	return body.String(), glyphForwarderText{name: name, byRefReceiver: strings.HasPrefix(strings.TrimSpace(paramList[0]), "this ref "), receiverType: receiverType, text: fwdHead + fwdTail, head: fwdHead, tail: fwdTail}, true
 }
 
 // glyphBodyStart finds where the body begins after a parameter list: ` {`, `{`, or `=>`, outside any brackets.
@@ -691,7 +696,7 @@ func glyphRenameHoistTokens(line string, tag string) string {
 // now the body's, so the expression binds the body with no forwarder between; the cast already names the receiver
 // type. Only those two shapes, and only for methods this file transformed: a package FUNCTION may share a method's
 // name, and its calls (`time_package.Now()`) are left alone.
-func glyphBindMethodExpressions(lines []string, packageClass string, transformed map[string]bool) {
+func glyphBindMethodExpressions(lines []string, packageClass string, transformed map[string]string) {
 	if len(transformed) == 0 {
 		return
 	}
@@ -702,9 +707,14 @@ func glyphBindMethodExpressions(lines []string, packageClass string, transformed
 	rename := func(pattern *regexp.Regexp, line string, prefix, suffix string) string {
 		return pattern.ReplaceAllStringFunc(line, func(match string) string {
 			name := pattern.FindStringSubmatch(match)[1]
+			holder, ok := transformed[name]
 
-			if !transformed[name] {
+			if !ok {
 				return match
+			}
+
+			if holder != "" {
+				return prefix + holder + "." + name + suffix
 			}
 
 			return prefix + packageClass + "." + name + GlyphMethodSuffix + suffix
@@ -724,4 +734,14 @@ func glyphBindMethodExpressions(lines []string, packageClass string, transformed
 
 		lines[i] = line
 	}
+}
+
+// glyphHolderClassName answers the holder class a forwarder goes into: the type's declared holder, or for a type whose
+// methods sat in the package class, this file's own holder for it.
+func glyphHolderClassName(holder string, packageClass string, receiverType string, fileName string) string {
+	if holder != "" {
+		return holder
+	}
+
+	return fmt.Sprintf("%sᴛ%sᴍ%s", strings.TrimSuffix(packageClass, PackageSuffix), glyphBareName(glyphReceiverCore(receiverType)), glyphFileTag(fileName))
 }
