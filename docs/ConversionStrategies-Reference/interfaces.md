@@ -1630,7 +1630,15 @@ type must be public) reuses a registered lift only if that lift was DECLARED pub
 (`liftDeclaredPublic`, which reads the access modifier recorded when the lift was emitted, not a
 guess from its name). An exported function's anonymous result and an exported field of the same
 type therefore share one lift, in that file and in later files of the package (guarded by
-`AnonLiftOnePerType`; the struct twin is in [struct-types.md](struct-types.md)). Emitted form:
+`AnonLiftOnePerType`; the struct twin is in [struct-types.md](struct-types.md)).
+<!-- Board (jj), 2026-11-20. Design premise corrected before the cut: file visits within a package are SEQUENTIAL, in
+     sorted file order (conversionDriver.go, "Convert files SEQUENTIALLY"), not concurrent, so the design's part B
+     (making the winner deterministic) had nothing to fix and was dropped; the cut is part A, the recorded declared
+     accessibility. Residual: when a type's first lift is internal and a later exported site needs it public (and the
+     publicize pre-pass did not make it public), the later site still mints its own public lift. Measured: -stdlib
+     footprint 0 files on windows/amd64, linux/amd64, darwin/amd64 and linux/arm64; CNR moved AnonLiftOnePerType and
+     InlineConstraintLift only. -->
+Emitted form:
 The declaring file, `batch.cs`:
 
 <!-- source: src/core/internal/trace/batch.cs:54-58 -->

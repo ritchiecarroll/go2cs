@@ -78,6 +78,12 @@ These can change in any release. At this release no package marks them and no bu
 - **Go `internal` and `vendor` packages.** They are public to .NET, as Go's import rule has no .NET equivalent, but
   Go changes them freely between releases. Do not reference them.
 - **Glyph-named temporaries** in converted code, and everything a build writes under `obj/`.
+- **Generated names for anonymous types.** A Go struct or interface type written without a name becomes a C# type
+  whose name the converter makes up, such as `With_R0`. Each such Go type is one C# type per package, and the name
+  can change between releases. Name the declared Go type instead.
+  <!-- COORD ruling 2026-11-20 (20261120T174811Z, on board (jj)): a generated lift name (Box_T, pair_T, With_R0) is not a
+       stable public surface; it names an anonymous Go type the Go source never names. The (jj) cut removed
+       InlineConstraintLift's Box_T and pair_T, which now reuse Show_T. -->
 - **Tuple element names.** A Go result rename changes them. Use positional deconstruction when it matters.
 - **Thread identity.** Which OS thread runs a goroutine, and whether code after a blocking call resumes on the same
   thread. `runtime.LockOSThread` is the way to pin a goroutine to its thread.

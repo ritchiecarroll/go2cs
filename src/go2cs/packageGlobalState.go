@@ -468,7 +468,7 @@ var packageLock = sync.Mutex{}
 // their own `liftedTypeMap`, but cross-file references (e.g. taking the address
 // of a field of a package-global anonymous-struct var declared in another file)
 // can't see that per-file map. This package-level registry, resolved after the
-// concurrent file-visit barrier, bridges that gap. Guarded by packageLock.
+// file-visit barrier (files are visited sequentially), bridges that gap. Guarded by packageLock.
 var packageDynamicTypeNames map[string]string
 
 // packagePublicLiftNames holds the package-level lifts this package has DECLARED public: publicized
