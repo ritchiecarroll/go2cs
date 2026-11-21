@@ -85,7 +85,30 @@ then 3 timing rounds alternating.
   every view-carrying box, about +1.4 GB on checkdemo) for a micro-benchmark line.
 - No further tuning.
 
-## 5. Notes
+## 5. Final reading at the merge tree (2026-11-21, after train 1)
+
+The seat merged master `f604d2ae89` (train 1) cleanly at `7170a65e86`, so these readings take master `f604d2ae89` as the base.
+The method is the same as in section 3: the item-0 checkdemo with `golib.dll` swapped, one gc-verbose trace per arm, then 3
+timing rounds alternating. Stdout was identical in every run (`3EB1134A0D5BFF02`).
+
+| | master `f604d2ae89` | seat `7170a65e86` | change |
+|---|---|---|---|
+| `ViewEntry` (trace) | 3,604.9 MB | 336.1 MB | -90.7% |
+| allocated (whole trace) | 16,533.6 MB | 13,237.2 MB | -19.9% |
+| work, 3 rounds (ms) | 96,219 / 98,743 / 89,239 | 93,435 / 92,733 / 89,364 | median -3.6% |
+| bind + check, 3 rounds (ms) | 39,119 / 39,496 / 36,840 | 39,631 / 37,765 / 35,532 | median -3.5% |
+
+- These numbers are a second reading. They do not change the scores in section 4, which stand as scored.
+- The whole-trace allocation (-19.9%) is not the same measure as section 3's work-phase -20.3%.
+- Type-check came in at -3.5% this time, inside P3's band. Paired by round it reads +1.3%, -4.4% and -3.6%. Bind fell here
+  (median -7.9%) where it rose at the draft, and check rose (+3.5%). Session noise on this box is the size of the effect, so
+  this reading does not root the section 4 note about bind.
+- GolibTests at the seat: Release 3014/0/56 and Debug 2989/0/81, Total 3070 each. Master `f604d2ae89` reads the same in both
+  configurations, which meets the prediction posted before master's run (item 2 adds no tests).
+- Repoguard at the seat named 2 provenance notes in `docs/ConversionStrategies.md` that cite `ж.FieldRefBox.cs`. Both had moved
+  5 and 11 lines when the `ViewToken` member was added. They are re-cited with their fingerprints unchanged.
+
+## 6. Notes
 
 - P3: after C2's item 1b (one view per forwarder chain instead of one per level), item 2 saves less on those chains. It
   stays correct.
