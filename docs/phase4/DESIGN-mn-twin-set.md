@@ -409,3 +409,48 @@ F2, F6; F3, F5; F4, F11; F7, F8; the guard (F9) and O2 (F10); P8; then the closu
   `GoTwinsGuardWarn=true` reports GO2CS0017 as a warning, so a census build runs to the end. Their rows (refused
   outside an arm; each does what it says) were written after the code: they are arm tooling, not a gate.
   GenTests 714 of 714.
+
+### 12.5 The closure arms (dated block, 2026-11-21)
+
+MnHttpClosure reconverted with this tree's converter (go1.26.11), 186 projects. Arms on one tree, interleaved:
+B0 (arm B's rule as an arm, `GoTwinsForwarders=false`: the build before 7a, the control), B7 (arm B's rule,
+forwarders on), S (the shipping rule: no switch). Kit: `C:\go2cs\scratch\mn2\proto\7a` (G-LAPTOP).
+
+**Build readings (they stand; they come from the 184 library projects, which were twinned):**
+
+| # | reading | verdict |
+|---|---|---|
+| Q1 | the 7b kit: 18 of 20 green at first (MnIfaceTwin twins and ifhall red on GO2CS0017: its `hand.cs` was read as converted); 20 of 20 after the rename to `hand_impl.cs`. Every twin run with a plain twin prints its plain output. A twins build and its ifhall build give the SAME assembly sha (MnAotGeneric, MnIfaceTwin): the default IS the old switch pair | MISSED as worded, then met |
+| Q2 | GO2CS0017 = 0 under arm B's rule (B7, twice) and under the shipping rule (S2, S3, S4) | MET |
+| Q3 | forwarders 2586 of 3691 = 70.1% (marked 2554, 69.2%; unmarked 32, 0.9%); E1 77 (2.1%); twins 1028 (27.9%) | MET |
+| — | extra caller state machines from unmarked forwarders (COORD's ask): 0 (twinned 3331 with and without forwarders) | reading |
+| Q4 | go.*.dll 83,848,192 (B0) to 84,227,072 (B7) = +0.45%; S (hidden shape) 84,275,200 = +0.51%. Identical across repeats | MISSED LOW (predicted +2 to +5%) |
+| Q5 | wall B0 406/406 s, B7 410/415 s: 1.016x | MET |
+| Q6 | GUARD 0 on converted public members | MET |
+| Q7 | GenTests: every 12.2 row green; earlier rows changed only as recorded in 12.4 | MET as amended |
+
+**Arm S failed to build at first (20 CS0535).** F10's default (the hidden shape, a slot for every member) had never
+been built at closure scale: an implementer that forwards one slot declared `: Iꞏtwin` and left the rest
+unimplemented. Fixed at aef7d06a9d (`Iꞏtwin : I`, slot bodies calling the plain member), red row first.
+
+**CORRECTION (2026-11-21): the first closure runs were NOT M:N runs.** `7a/out` lacked stage (c)'s harness import of
+the tree's `Directory.Build.targets`, so the program was not twinned and its `main` ran plain.
+- ~~Runs: B0 and B7, 3 each per arm, all EQUAL to Go.~~ (posted, retracted: no scheduler ran)
+- ~~S2: 3 runs EQUAL to Go.~~ (the same)
+- Corrected: with the import, the program twinned (entry `RunMainꞏtwin`), S3 on aef7d06a9d HUNG under
+  `GO2CS_MN=1`, 3 of 3. So did B0c (the pre-7a rule) and B7c: not 7a. No scheduler runtime switch ended it.
+- Cause, P3's suspect confirmed from a dump of the hung process: main's twin parked on `SyncMutexLock`, before its
+  first `go` statement. sync's hand twin `Lockꞏtwin` ran the protocol before W9a; on a free mutex it parked forever
+  (step 11). Fixed at 6fa1b16a21: the twin takes the lock through Lock. Red row `MnMutexTwin`: rc 124 and 0 lines
+  before, Go's 3 lines and a READING line after.
+- The sweep of hand twins against a rewritten primitive: sync's `Lockꞏtwin` (W9a: fixed) and time's `Sleepꞏtwin`
+  (its own timer: unaffected). No other hand twin outside golib.
+- The kit now checks both preconditions on every arm: a twin entry naming `RunMainꞏtwin`, and per run either a
+  READING line or a named failure (timeout, a hang; no READING, the scheduler did not run). The entry check was made
+  to fail once (a folder with no entry). The per-run check's two failures are the two this kit already hit (the red
+  row's timeout; S2's missing READING); its rewritten labels have not yet read a failure.
+
+S4 (6fa1b16a21, the shipping rule, under `GO2CS_MN=1`): GREEN. Build 429 s, GO2CS0017=0, 185 reports, entry
+  `RunMainꞏtwin` (precondition OK). Three runs, each rc 0, EQUAL to Go, with a READING line: 2.0, 2.3 and 2.0 s;
+  steps=74, parks=36 and thread-blocks=0 every run; peak carriers 22-24; injections 7-13. go.*.dll 84,274,176
+  (S3 less 1,024: the smaller Lockꞏtwin).
