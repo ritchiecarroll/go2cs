@@ -178,38 +178,41 @@ func liftCodeName(pkg *types.Package, name string) string {
 }
 
 // loadImportLiftRecords loads the lift records of pkg, a transitive import this package does not import directly (a
-// direct import's records are loaded with its aliases), from pkg's own package_info.cs. It reports whether pkg's
-// records are loaded. Only the lift records are read: pkg's aliases are not this package's to use.
+// direct import's records are loaded with its aliases), from wherever pkg's records live (importPackageInfoLines). It
+// reports whether pkg's records are loaded. Only the lift records are read: pkg's aliases are not this package's to use.
 func (v *Visitor) loadImportLiftRecords(pkg *types.Package, meta importedPackageMeta) bool {
 	key := filepath.Clean(meta.Dir)
 
+	// One lock for the check and the mark, so two goroutines cannot both read the records (P3 review 2.4).
 	packageLock.Lock()
 	_, loaded := importedDynamicTypeNames[key]
 	tried := liftRecordsRead[key]
+
+	if !loaded && !tried {
+		if liftRecordsRead == nil {
+			liftRecordsRead = map[string]bool{}
+		}
+
+		liftRecordsRead[key] = true
+	}
+
 	packageLock.Unlock()
 
 	if loaded || tried {
 		return loaded
 	}
 
-	packageLock.Lock()
-
-	if liftRecordsRead == nil {
-		liftRecordsRead = map[string]bool{}
-	}
-
-	liftRecordsRead[key] = true
-	packageLock.Unlock()
-
 	info, ok := getImportPackageInfo([]string{pkg.Path()}, v.options)[pkg.Path()]
 
-	if !ok || info.Err != nil || info.TargetDir == "" {
+	if !ok || info.Err != nil {
 		return false
 	}
 
-	lines, err := readPackageInfoLines(platformPackageInfoPath(info.TargetDir, v.options.targetPlatform))
+	// The one reader that knows every source of a package's records: a NuGet-substituted package's self-description, the
+	// package_info.cs in the root, a published std package's embedded record (P3 review 2.1).
+	lines, ok := importPackageInfoLines(info, v.options)
 
-	if err != nil {
+	if !ok {
 		return false
 	}
 

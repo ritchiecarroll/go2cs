@@ -55,54 +55,25 @@ func importerInlineArraySeeds(queue []string, closure map[string]*packages.Packa
 	}
 
 	derived := map[string]map[string]bool{}
+	converged := false
+	var lastAdded []string
 
 	for pass := 0; pass < importerSeedMaxPasses; pass++ {
-		stamps := map[string]inlineArrayStamp{}
-		changed := false
+		added := importerSeedPass(pass, queue, closure, options, inSet, derived)
 
-		restore := lookupInlineArrayStamp
-
-		// A convert-set package's stamp is the one this pass computed (its record on disk, if any, is stale); any other
-		// import's (std's) is read where the conversion reads it.
-		lookupInlineArrayStamp = func(importPath string, options Options) (inlineArrayStamp, bool) {
-			if inSet[importPath] {
-				stamp, ok := stamps[importPath]
-				return stamp, ok
-			}
-
-			return restore(importPath, options)
-		}
-
-		for _, path := range queue {
-			pkg := closure[path]
-
-			if pkg == nil || pkg.Types == nil || pkg.TypesInfo == nil || len(pkg.Syntax) == 0 {
-				continue
-			}
-
-			packageOptions := options
-			packageOptions.inlineArrays = withImporterSeeds(options.inlineArrays, path, derived[path])
-			admission := computeInlineArrayAdmission(pkg.Syntax, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, packageOptions)
-			stamps[path] = inlineArrayStampOf(admission, inlineArrayMode(path, pkg.Dir, packageOptions))
-
-			for _, demand := range importerSeedDemands(admission, pkg.Types, inSet, stamps) {
-				if derived[demand.pkgPath] == nil {
-					derived[demand.pkgPath] = map[string]bool{}
-				}
-
-				if !derived[demand.pkgPath][demand.name] {
-					derived[demand.pkgPath][demand.name] = true
-					changed = true
-					traceImporterSeed(pass+1, path, demand)
-				}
-			}
-		}
-
-		lookupInlineArrayStamp = restore
-
-		if !changed {
+		if len(added) == 0 {
+			converged = true
 			break
 		}
+
+		lastAdded = added
+	}
+
+	// The cap ended the loop while a pass was still adding seeds: these are not the fixed point, and any demand a
+	// further pass would make is dropped (P3 review 2.2). Said by name rather than used silently.
+	if !converged && len(lastAdded) > 0 {
+		showWarning("@importerSeeds - the -recurse importer-seed derivation stopped at its cap of %d passes while pass %d was still adding seeds (%s); the seeds are not the fixed point, and any demand a further pass would make is dropped",
+			importerSeedMaxPasses, importerSeedMaxPasses, strings.Join(lastAdded, ", "))
 	}
 
 	seeds := make(map[string][]string, len(derived))
@@ -112,6 +83,56 @@ func importerInlineArraySeeds(queue []string, closure map[string]*packages.Packa
 	}
 
 	return seeds
+}
+
+// importerSeedPass computes every convert-set package's admission once, in dependency order, against this pass's
+// in-memory stamps of the convert-set (and the conversion's own reader for any other import), adds each new demand to
+// derived, and returns the seeds it added as path#name. The stamp lookup is swapped for the pass and restored by a
+// deferred call, so a panic inside an admission cannot leave the pass's closure in the global (P3 review 2.3).
+func importerSeedPass(pass int, queue []string, closure map[string]*packages.Package, options Options, inSet map[string]bool, derived map[string]map[string]bool) []string {
+	stamps := map[string]inlineArrayStamp{}
+	var added []string
+
+	restore := lookupInlineArrayStamp
+	defer func() { lookupInlineArrayStamp = restore }()
+
+	// A convert-set package's stamp is the one this pass computed (its record on disk, if any, is stale); any other
+	// import's (std's) is read where the conversion reads it.
+	lookupInlineArrayStamp = func(importPath string, options Options) (inlineArrayStamp, bool) {
+		if inSet[importPath] {
+			stamp, ok := stamps[importPath]
+			return stamp, ok
+		}
+
+		return restore(importPath, options)
+	}
+
+	for _, path := range queue {
+		pkg := closure[path]
+
+		if pkg == nil || pkg.Types == nil || pkg.TypesInfo == nil || len(pkg.Syntax) == 0 {
+			continue
+		}
+
+		packageOptions := options
+		packageOptions.inlineArrays = withImporterSeeds(options.inlineArrays, path, derived[path])
+		admission := computeInlineArrayAdmission(pkg.Syntax, pkg.Fset, pkg.Types, pkg.TypesInfo, pkg.Dir, packageOptions)
+		stamps[path] = inlineArrayStampOf(admission, inlineArrayMode(path, pkg.Dir, packageOptions))
+
+		for _, demand := range importerSeedDemands(admission, pkg.Types, inSet, stamps) {
+			if derived[demand.pkgPath] == nil {
+				derived[demand.pkgPath] = map[string]bool{}
+			}
+
+			if !derived[demand.pkgPath][demand.name] {
+				derived[demand.pkgPath][demand.name] = true
+				added = append(added, demand.pkgPath+"#"+demand.name)
+				traceImporterSeed(pass+1, path, demand)
+			}
+		}
+	}
+
+	return added
 }
 
 // importerSeedDemand is one alias an importer needs its declaring package to admit.
