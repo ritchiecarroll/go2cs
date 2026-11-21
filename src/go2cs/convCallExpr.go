@@ -3674,6 +3674,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			if funIdent := getCallFunIdent(callExpr.Fun); funIdent != nil {
 				if instance, ok := v.info.Instances[funIdent]; ok && instance.TypeArgs != nil &&
 					(v.calleeHasConstraintOnlyTypeParam(funIdent) || v.callHasMethodGroupArg(callExpr) ||
+						shapeWitnessDeclFor(v.info.ObjectOf(funIdent)) != nil ||
 						v.calleeTypeParamUnsuppliedByCall(callExpr, funIdent) ||
 						v.calleeReadsDescriptorName(funIdent) ||
 						v.calleeCarriesArrayDims(funIdent) ||
@@ -4247,6 +4248,18 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// at entry (stackAppendHints.go).
 			if buffer := packageStackAppendSites[callExpr]; buffer != nil {
 				expr = v.stackAppendBufferName(buffer) + ", " + expr
+			}
+
+			// A method call through a WITNESSED type parameter goes through its witness, receiver first: `s.Text()` is
+			// `TΔScript.Text(s)` (shapeWitness.go).
+			if witnessFunc, receiver, ok := v.shapeWitnessCallParts(callExpr); ok {
+				funcName = witnessFunc
+
+				if expr == "" {
+					expr = receiver
+				} else {
+					expr = receiver + ", " + expr
+				}
 			}
 
 			if door, ok := v.typedPointerDoorCallEmission(callExpr, constructType, funcName, expr); ok {
@@ -5520,6 +5533,10 @@ func (v *Visitor) typedPointerDoorEmission(callExpr *ast.CallExpr, arg ast.Expr,
 	}
 
 	pointee := targetTypeName[len(prefix) : len(targetTypeName)-1]
+
+	if door, ok := v.keptArrayDoorEmission(callExpr, arg, pointee, expr); ok {
+		return door, true
+	}
 
 	return fmt.Sprintf("%s<%s>(%s)", typedPointerDoor, pointee, expr), true
 }

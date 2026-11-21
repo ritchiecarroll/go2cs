@@ -115,12 +115,12 @@ internal static @unsafe.Pointer runtime_mapaccess1(ж<abi.MapType> Ꮡtyp, ж<Ma
             @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
             @unsafe.Pointer slotKeyOrig = slotKey;
             if (typ.IndirectKey()) {
-                slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
+                slotKey = @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)));
             }
             if (typ.Key.Equal(key, slotKey)) {
                 @unsafe.Pointer slotElem = @unsafe.Add(slotKeyOrig, typ.ElemOff);
                 if (typ.IndirectElem()) {
-                    slotElem = (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value;
+                    slotElem = @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)));
                 }
                 return slotElem;
             }
@@ -193,12 +193,12 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2(ж<abi.MapType> Ꮡty
             @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
             @unsafe.Pointer slotKeyOrig = slotKey;
             if (typ.IndirectKey()) {
-                slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
+                slotKey = @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)));
             }
             if (typ.Key.Equal(key, slotKey)) {
                 @unsafe.Pointer slotElem = @unsafe.Add(slotKeyOrig, typ.ElemOff);
                 if (typ.IndirectElem()) {
-                    slotElem = (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value;
+                    slotElem = @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)));
                 }
                 return (slotElem, true);
             }
@@ -295,7 +295,7 @@ outer:
                 @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
                 @unsafe.Pointer slotKeyOrig = slotKey;
                 if (typ.IndirectKey()) {
-                    slotKey = (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value;
+                    slotKey = @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)));
                 }
                 if (typ.Key.Equal(key, slotKey)) {
                     if (typ.NeedKeyUpdate()) {
@@ -304,7 +304,7 @@ outer:
 
                     slotElem = @unsafe.Add(slotKeyOrig, typ.ElemOff);
                     if (typ.IndirectElem()) {
-                        slotElem = (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value;
+                        slotElem = @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)));
                     }
 
                     t.checkInvariants(Ꮡtyp, Ꮡm);
@@ -339,7 +339,7 @@ outer:
                     @unsafe.Pointer slotKeyOrig = slotKey;
                     if (typ.IndirectKey()) {
                         @unsafe.Pointer kmem = newobject(typ.Key);
-                        (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value = kmem;
+                        @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(slotKey), kmem);
                         slotKey = kmem;
                     }
                     typedmemmove(typ.Key, slotKey, key);
@@ -347,7 +347,7 @@ outer:
                     slotElem = @unsafe.Add(slotKeyOrig, typ.ElemOff);
                     if (typ.IndirectElem()) {
                         @unsafe.Pointer emem = newobject(typ.Elem);
-                        (@unsafe.Pointer.To<@unsafe.Pointer>(slotElem)).Value = emem;
+                        @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(slotElem), emem);
                         slotElem = emem;
                     }
 

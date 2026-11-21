@@ -1,8 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸnint = variadic<nint>;
-using static main_package;
+using ꓸꓸꓸnint = Span<nint>;
 
 partial class main_package {
 
@@ -60,14 +59,10 @@ partial struct counter {
     internal nint n;
 }
 
-} partial class mainᴛcounter {
-
 internal static nint bump(this ref counter c, nint d) {
     c.n += d;
     return c.n;
 }
-
-} partial class main_package {
 
 internal static void blankFuncValues() {
     _ = (Func<@string, nint, (@string, error)>)(pair);

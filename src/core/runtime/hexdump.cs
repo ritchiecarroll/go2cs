@@ -259,4 +259,4 @@ internal static void start(this hexdumpMarker m) {
     print((@string)"^ ");
 }
 
-} // end runtimeᴛhexdumpMarker
+}

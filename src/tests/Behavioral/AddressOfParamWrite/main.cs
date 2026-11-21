@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -69,8 +68,6 @@ internal static void bumpBox(ref Box b) {
     b.Tag += 10;
 }
 
-} partial class mainᴛBox {
-
 public static nint BumpedRecv(this Box b) {
     bumpBox(ref b);
     return b.Tag;
@@ -81,8 +78,6 @@ public static (nint, nint) ClippedRecv(this Box b) {
     return (b.R.Min, b.R.Max);
 }
 
-} partial class mainᴛTrio {
-
 public static (nint, nint, nint) BumpedElemRecv(this Trio a) {
     a = a.Clone();
 
@@ -90,14 +85,10 @@ public static (nint, nint, nint) BumpedElemRecv(this Trio a) {
     return (a[0], a[1], a[2]);
 }
 
-} partial class mainᴛNums {
-
 public static nint BumpedElemSliceRecv(this Nums n) {
     bump(ref n[1]);
     return n[1];
 }
-
-} partial class mainᴛBox {
 
 public static (nint, nint) ReadOnlyRecv(this Box bʗp) {
     ref var b = ref heap(bʗp, out var Ꮡb);
@@ -117,8 +108,6 @@ public static nint PlainRecv(this Box b) {
     return b.Tag;
 }
 
-} partial class main_package {
-
 partial interface Bumper {
     nint BumpedRecv();
 }
@@ -130,7 +119,7 @@ internal static void main() {
     var b = bumpParamField(new Box(new Rect(1, 2), 3));
     fmt.Println("param field :", b.R.Min, b.R.Max, b.Tag);
 
-    var a = bumpParamElem(new nint[]{7, 8, 9}.array());
+    var a = bumpParamElem(array<nint>([7, 8, 9]));
     fmt.Println("param elem  :", a[0], a[1], a[2]);
 
     var (lo, hi) = readOnlyParam(new Rect(3, 4));

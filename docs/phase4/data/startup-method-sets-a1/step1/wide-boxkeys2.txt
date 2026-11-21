@@ -1,0 +1,142 @@
+B3PROBE marks:
+B3PROBE   main-enter at 378 ms after process start; assemblies loaded 82; methods jitted 3374; jit time 2105 ms
+B3PROBE   exit at 633 ms after process start; assemblies loaded 87; methods jitted 5744; jit time 2459 ms
+B3PROBE site	calls	inclusive ms	items
+B3PROBE StructurallyImplements	28	53.3	8
+B3PROBE GoDeferredRegistrations.Run(Adapters)	1	52.9	22
+B3PROBE CollectGoMethodSetCandidates	14	51.8	197
+B3PROBE HomedIn.by	16	44.9	22
+B3PROBE GetExtensionMethodsHomedIn	16	42.4	255
+B3PROBE Collect Duration	1	40.6	11
+B3PROBE HomedIn.call#1 (read)	1	36.6	22
+B3PROBE HomedIn.walk	16	27.3	9648
+B3PROBE LoadAssemblyExtensionHosts	87	23.2	603
+B3PROBE AdapterBinder.BuildFactory	8	15.4	8
+B3PROBE HomedIn.gc	16	13.2	0
+B3PROBE HomedIn.pass	16	12.9	255
+B3PROBE ExtensionHost.Methods(read)	14	10.0	207
+B3PROBE HomedIn.pass call#1	1	7.4	22
+B3PROBE HomedIn.call#7+	10	4.9	154
+B3PROBE HomedIn.pass call#7+	10	3.9	154
+B3PROBE ExtensionMethodsOf	1	3.1	0
+B3PROBE Collect *Duration	1	1.9	11
+B3PROBE Collect *rtype	1	1.6	51
+B3PROBE Collect *URL	1	1.2	35
+B3PROBE Collect *Token	1	1.2	5
+B3PROBE HomedIn.call#6 (read)	1	1.1	10
+B3PROBE HomedIn.call#3 (read)	1	1.0	35
+B3PROBE Collect errorString	1	1.0	2
+B3PROBE HomedIn.pass call#3	1	0.9	35
+B3PROBE Collect *Buffer	1	0.8	55
+B3PROBE Collect Kind	1	0.8	1
+B3PROBE Collect *TypeAssertionError	1	0.8	4
+B3PROBE Collect Pos	1	0.6	1
+B3PROBE HomedIn.call#4 (read)	1	0.5	2
+B3PROBE Collect Token	1	0.5	5
+B3PROBE HomedIn.call#2 (read)	1	0.4	22
+B3PROBE HomedIn.call#5 (read)	1	0.4	10
+B3PROBE ExtensionHost.Type(resolve)	14	0.4	0
+B3PROBE Collect *Ident	1	0.4	9
+B3PROBE Collect *PathError	1	0.3	6
+B3PROBE Collect *Kind	1	0.3	1
+B3PROBE HomedIn.pass call#4	1	0.3	2
+B3PROBE HomedIn.pass call#5	1	0.3	10
+B3PROBE HomedIn.pass call#2	1	0.3	22
+B3PROBE HomedIn.pass call#6	1	0.1	10
+B3PROBE keys CollectGoMethodSetCandidates: 14 distinct
+B3PROBE   *go.bytes_package+Buffer x1
+B3PROBE   *go.go.ast_package+Ident x1
+B3PROBE   *go.go.token_package+Token x1
+B3PROBE   *go.io.fs_package+PathError x1
+B3PROBE   *go.net.url_package+URL x1
+B3PROBE   *go.reflect_package+Kind x1
+B3PROBE   *go.reflect_package+rtype x1
+B3PROBE   *go.runtime_package+TypeAssertionError x1
+B3PROBE   *go.time_package+Duration x1
+B3PROBE   go.go.token_package+Pos x1
+B3PROBE   go.go.token_package+Token x1
+B3PROBE   go.reflect_package+Kind x1
+B3PROBE   go.runtime_package+errorString x1
+B3PROBE   go.time_package+Duration x1
+B3PROBE keys ExtensionHost.Methods(read): 14 distinct
+B3PROBE   go.bytesᴛBuffer x1
+B3PROBE   go.go.astᴛIdent x1
+B3PROBE   go.go.astᴛinspector x1
+B3PROBE   go.go.tokenᴛPos x1
+B3PROBE   go.go.tokenᴛToken x1
+B3PROBE   go.io.fsᴛPathError x1
+B3PROBE   go.net.urlᴛURL x1
+B3PROBE   go.reflectᴛKind x1
+B3PROBE   go.reflectᴛrtype x1
+B3PROBE   go.runtime_package_asserts x1
+B3PROBE   go.runtimeᴛerrorString x1
+B3PROBE   go.runtimeᴛmetricReader x1
+B3PROBE   go.runtimeᴛTypeAssertionError x1
+B3PROBE   go.timeᴛDuration x1
+B3PROBE keys StructurallyImplements: 28 distinct
+B3PROBE   go.FieldRefBox`1[go.reflect_package+rtype] -> go.error = False x1
+B3PROBE   go.FieldRefBox`1[go.reflect_package+rtype] -> go.fmt_package+Formatter = False x1
+B3PROBE   go.FieldRefBox`1[go.reflect_package+rtype] -> go.fmt_package+Stringer = True x1
+B3PROBE   go.go.token_package+Pos -> go.error = False x1
+B3PROBE   go.go.token_package+Pos -> go.fmt_package+Formatter = False x1
+B3PROBE   go.go.token_package+Pos -> go.fmt_package+Stringer = False x1
+B3PROBE   go.go.token_package+Token -> go.error = False x1
+B3PROBE   go.go.token_package+Token -> go.fmt_package+Formatter = False x1
+B3PROBE   go.go.token_package+Token -> go.fmt_package+Stringer = True x1
+B3PROBE   go.reflect_package+Kind -> go.error = False x1
+B3PROBE   go.reflect_package+Kind -> go.fmt_package+Formatter = False x1
+B3PROBE   go.reflect_package+Kind -> go.fmt_package+Stringer = True x1
+B3PROBE   go.runtime_package+errorString -> go.fmt_package+Formatter = False x1
+B3PROBE   go.StandardBox`1[go.bytes_package+Buffer] -> go.error = False x1
+B3PROBE   go.StandardBox`1[go.bytes_package+Buffer] -> go.fmt_package+Formatter = False x1
+B3PROBE   go.StandardBox`1[go.bytes_package+Buffer] -> go.fmt_package+Stringer = True x1
+B3PROBE   go.StandardBox`1[go.go.ast_package+Ident] -> go.error = False x1
+B3PROBE   go.StandardBox`1[go.go.ast_package+Ident] -> go.fmt_package+Formatter = False x1
+B3PROBE   go.StandardBox`1[go.go.ast_package+Ident] -> go.fmt_package+Stringer = True x1
+B3PROBE   go.StandardBox`1[go.io.fs_package+PathError] -> go.fmt_package+Formatter = False x1
+B3PROBE   go.StandardBox`1[go.net.url_package+URL] -> go.error = False x1
+B3PROBE   go.StandardBox`1[go.net.url_package+URL] -> go.fmt_package+Formatter = False x1
+B3PROBE   go.StandardBox`1[go.net.url_package+URL] -> go.fmt_package+Stringer = True x1
+B3PROBE   go.StandardBox`1[go.runtime_package+TypeAssertionError] -> go.error = True x1
+B3PROBE   go.StandardBox`1[go.runtime_package+TypeAssertionError] -> go.fmt_package+Formatter = False x1
+B3PROBE   go.time_package+Duration -> go.error = False x1
+B3PROBE   go.time_package+Duration -> go.fmt_package+Formatter = False x1
+B3PROBE   go.time_package+Duration -> go.fmt_package+Stringer = True x1
+B3PROBE keys HomedIn.gc: 16 distinct
+B3PROBE   call 1: gen0 0, gen1 0, gen2 0, allocated 24 KB, heap 2157 KB x1
+B3PROBE   call 10: gen0 0, gen1 0, gen2 0, allocated 8 KB, heap 2509 KB x1
+B3PROBE   call 11: gen0 0, gen1 0, gen2 0, allocated 16 KB, heap 2573 KB x1
+B3PROBE   call 12: gen0 0, gen1 0, gen2 0, allocated 8 KB, heap 2605 KB x1
+B3PROBE   call 13: gen0 0, gen1 0, gen2 0, allocated 8 KB, heap 2629 KB x1
+B3PROBE   call 14: gen0 0, gen1 0, gen2 0, allocated 0 KB, heap 2637 KB x1
+B3PROBE   call 15: gen0 0, gen1 0, gen2 0, allocated 8 KB, heap 2669 KB x1
+B3PROBE   call 16: gen0 0, gen1 0, gen2 0, allocated 32 KB, heap 2733 KB x1
+B3PROBE   call 2: gen0 0, gen1 0, gen2 0, allocated 8 KB, heap 2197 KB x1
+B3PROBE   call 3: gen0 0, gen1 0, gen2 0, allocated 24 KB, heap 2253 KB x1
+B3PROBE   call 4: gen0 0, gen1 0, gen2 0, allocated 0 KB, heap 2293 KB x1
+B3PROBE   call 5: gen0 0, gen1 0, gen2 0, allocated 0 KB, heap 2325 KB x1
+B3PROBE   call 6: gen0 0, gen1 0, gen2 0, allocated 8 KB, heap 2349 KB x1
+B3PROBE   call 7: gen0 0, gen1 0, gen2 0, allocated 32 KB, heap 2413 KB x1
+B3PROBE   call 8: gen0 0, gen1 0, gen2 0, allocated 0 KB, heap 2461 KB x1
+B3PROBE   call 9: gen0 0, gen1 0, gen2 0, allocated 7 KB, heap 2485 KB x1
+B3PROBE keys AdapterBinder.BuildFactory: 8 distinct
+B3PROBE   go.FieldRefBox`1[go.reflect_package+rtype] -> go.fmt_package+Stringer x1
+B3PROBE   go.go.token_package+Token -> go.fmt_package+Stringer x1
+B3PROBE   go.reflect_package+Kind -> go.fmt_package+Stringer x1
+B3PROBE   go.StandardBox`1[go.bytes_package+Buffer] -> go.fmt_package+Stringer x1
+B3PROBE   go.StandardBox`1[go.go.ast_package+Ident] -> go.fmt_package+Stringer x1
+B3PROBE   go.StandardBox`1[go.net.url_package+URL] -> go.fmt_package+Stringer x1
+B3PROBE   go.StandardBox`1[go.runtime_package+TypeAssertionError] -> go.error x1
+B3PROBE   go.time_package+Duration -> go.fmt_package+Stringer x1
+B3PROBE keys HomedIn.pass: 3 distinct
+B3PROBE   attempt 1, hosts 1 x11
+B3PROBE   attempt 1, hosts 2 x4
+B3PROBE   attempt 1, hosts 3 x1
+B3PROBE keys HomedIn.by: 5 distinct
+B3PROBE   keyed hosts=1 homes=3 via TypeExtensions.GetExtensionMethodsFor < TypeExtensions.CollectGoMethodSetCandidatesB3 < TypeExtensions.CollectGoMethodSetCandidates < <>c.<GetGoMethodSetCandidates>b__92_0 < ConcurrentDictionary`2.GetOrAdd < TypeExtensions.GetGoMethodSetCandidates x11
+B3PROBE   keyed hosts=2 homes=3 via TypeExtensions.GetBoxExtensionMethod < ErrorBinding.PointerMethod < error`1..cctor < RuntimeHelpers.RunClassConstructor < AdapterBinder.BuildGenericShellFactory < AdapterBinder.BuildFactory x1
+B3PROBE   keyed hosts=2 homes=3 via TypeExtensions.GetExtensionMethodsFor < TypeExtensions.CollectGoMethodSetCandidatesB3 < TypeExtensions.CollectGoMethodSetCandidates < <>c.<GetGoMethodSetCandidates>b__92_0 < ConcurrentDictionary`2.GetOrAdd < TypeExtensions.GetGoMethodSetCandidates x2
+B3PROBE   keyed hosts=2 homes=3 via TypeExtensions.GetExtensionMethodsFor < TypeExtensions.ExtensionMethodsOfB3 < TypeExtensions.ExtensionMethodsOf < <>c.<GetExtensionMethods>b__55_0 < ConcurrentDictionary`2.GetOrAdd < TypeExtensions.GetExtensionMethods x1
+B3PROBE   keyed hosts=3 homes=3 via TypeExtensions.GetExtensionMethodsFor < TypeExtensions.CollectGoMethodSetCandidatesB3 < TypeExtensions.CollectGoMethodSetCandidates < <>c.<GetGoMethodSetCandidates>b__92_0 < ConcurrentDictionary`2.GetOrAdd < TypeExtensions.GetGoMethodSetCandidates x1
+B3PROBE keys ExtensionMethodsOf: 1 distinct
+B3PROBE   go.runtime_package+TypeAssertionError x1

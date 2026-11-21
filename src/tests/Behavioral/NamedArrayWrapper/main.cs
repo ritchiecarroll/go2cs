@@ -3,7 +3,6 @@ global using feAlias = go.array<ulong>;
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -14,12 +13,8 @@ partial struct tb /*[4]byte*/;
 
 internal static void zeroTB(ref tb buf) { buf.Assign(new tb(new byte[4].array())); }
 
-} partial class mainᴛpageBits {
-
 internal static void set(this ref pageBits b, nuint i, uint64 v) { b.Value[i] = v; }
 internal static uint64 get(this ref pageBits b, nuint i) { return b.Value[i]; }
-
-} partial class mainᴛpallocBits {
 
 internal static void fill(this ж<pallocBits> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -28,8 +23,6 @@ internal static void fill(this ж<pallocBits> Ꮡb) {
         b.Value[i] = (uint64)(i * 10 + 1);
     }
 }
-
-} partial class main_package {
 
 internal static void main() {
     var wᴷ = new stackAppend<uint32>();
@@ -40,7 +33,7 @@ internal static void main() {
     (Ꮡe.Reinterpret<pallocBits, pageBits>()).set(1, 99);
     fmt.Println(e[1]);
 
-    var arr = new uint32[]{10, 20, 30, 40, 50, 60}.array();
+    var arr = array<uint32>([10, 20, 30, 40, 50, 60]);
     var p = (pm)(arr[2..5]);
     var d = new slice<uint32>(3);
     nint n = copy(d, p);
@@ -50,7 +43,7 @@ internal static void main() {
     nint n2 = copy(arr2[3..], new pm(new uint32[]{7, 8, 9}.slice()));
     fmt.Println(n2, arr2[3], arr2[4], arr2[5], arr2[0]);
 
-    var arr3 = new uint32[]{1, 2, 3, 4, 5, 6}.array();
+    var arr3 = array<uint32>([1, 2, 3, 4, 5, 6]);
     var ov = (pm)(arr3[0..4]);
     nint n3 = copy(arr3[2..6], ov);
     fmt.Println(n3, arr3[2], arr3[3], arr3[4], arr3[5]);
@@ -143,15 +136,11 @@ public partial struct unit /*num:nint*/;
 
 partial struct Grid /*[3]unit*/;
 
-} partial class mainᴛGrid {
-
 public static nint Total(this Grid g) {
     g = g.Clone();
 
     return (nint)g[0] + (nint)g[1] + (nint)g[2];
 }
-
-} partial class main_package {
 
 partial struct mont /*[4]uint64*/;
 partial struct nonMont /*[4]uint64*/;
@@ -183,30 +172,20 @@ partial struct slot {
 
 partial struct slots /*[4]slot*/;
 
-} partial class mainᴛslots {
-
 internal static ж<slot> at(this ref slots s, nint i) { return Ꮡ(s.Value, i); }
 
 internal static nint sum(this ref slots s) { return s.Value[0].v + s.Value[1].v + s.Value[2].v + s.Value[3].v; }
 
-} partial class main_package {
-
 partial struct counter2 {
     internal int32 n;
 }
-
-} partial class mainᴛcounter2 {
 
 internal static int32 bump(this ref counter2 c) {
     c.n++;
     return c.n;
 }
 
-} partial class main_package {
-
 partial struct counters /*[3]counter2*/;
-
-} partial class mainᴛcounters {
 
 internal static ж<counters> bumpAll(this ж<counters> Ꮡc) {
     Ꮡc.at<counter2>(0).bump();
@@ -214,8 +193,6 @@ internal static ж<counters> bumpAll(this ж<counters> Ꮡc) {
     Ꮡc.at<counter2>(2).bump();
     return Ꮡc;
 }
-
-} partial class main_package {
 
 internal static int32 bumpVia(ж<counters> c, nint i) { return c.at<counter2>(i).bump(); }
 

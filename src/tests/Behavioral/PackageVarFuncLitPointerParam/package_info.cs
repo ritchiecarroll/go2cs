@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA1CAAESgoKotLSGlKaClJSUgg==", "55-55:1")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAxCAAESgoKolJSGlKaClJSUgg==", "55-55:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -90,5 +90,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.request)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛrequest;
 // </MethodHolders>

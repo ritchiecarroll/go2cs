@@ -109,4 +109,4 @@ internal static void walk(this ref visibleFieldsWalker w, Type t) {
     delete(w.visiting, t);
 }
 
-} // end reflectᴛvisibleFieldsWalker
+}

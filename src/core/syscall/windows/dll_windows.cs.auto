@@ -445,4 +445,4 @@ public static (uintptr r1, uintptr r2, error lastErr) Call(this ж<LazyProc> Ꮡ
     return p.proc.Call(a.ꓸꓸꓸ);
 }
 
-} // end syscallᴛLazyProc
+}

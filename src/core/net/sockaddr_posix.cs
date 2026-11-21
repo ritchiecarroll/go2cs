@@ -62,4 +62,4 @@ internal static Func<syscall.Sockaddr, Addr> addrFunc(this ref netFD fd) {
     return (syscall.Sockaddr _) => default;
 }
 
-} // end netᴛnetFD
+}

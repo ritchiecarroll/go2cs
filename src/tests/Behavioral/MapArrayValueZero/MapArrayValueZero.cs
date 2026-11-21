@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static map<@string, array<rune>> entity2 = new map<@string, array<rune>>{
-    ["NotEqualTilde;"] = new rune[]{'≂', '̸'}.array()
+    ["NotEqualTilde;"] = array<rune>(['≂', '̸'])
 };
 
 internal static void mapMiss() {
@@ -22,7 +22,7 @@ internal static void mapMiss() {
     fmt.Println("commaok hit:", ok2, len(w), w[0], w[1]);
 }
 
-internal static map<@string, array<array<nint>>> nested = new map<@string, array<array<nint>>>{["a"] = new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array()};
+internal static map<@string, array<array<nint>>> nested = new map<@string, array<array<nint>>>{["a"] = new array<nint>[]{array<nint>([1, 2, 3]), array<nint>([4, 5, 6])}.array()};
 
 internal static void mapMissNested() {
     var n = nested["zzz", () => new array<array<nint>>(2, () => new(3))].Clone();
@@ -43,7 +43,7 @@ internal static void namedMap() {
     var e = empty[9, () => new array<byte>(4)].Clone();
     fmt.Println("empty named:", len(e), e[0], e[3]);
 
-    empty[9] = new byte[]{(byte)'a', (byte)'b', (byte)'c', (byte)'d'}.array();
+    empty[9] = array<byte>([(byte)'a', (byte)'b', (byte)'c', (byte)'d']);
     var (got, ok) = empty[9, () => new array<byte>(4), ꟷ];
     fmt.Println("named hit:", ok, len(got), got[0], got[3]);
 }
@@ -60,7 +60,7 @@ internal static void plainNilAndEmpty() {
 
 internal static void storeThenRead() {
     var m = new map<@string, array<rune>>();
-    m["k"] = new rune[]{'q', 'r'}.array();
+    m["k"] = array<rune>(['q', 'r']);
     fmt.Println("stored:", len(m["k", () => new array<rune>(2)]), m["k", () => new array<rune>(2)][0], m["k", () => new array<rune>(2)][1]);
     fmt.Println("other:", len(m["other", () => new array<rune>(2)]), m["other", () => new array<rune>(2)][0]);
 }

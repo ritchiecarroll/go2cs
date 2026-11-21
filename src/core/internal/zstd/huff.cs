@@ -219,4 +219,4 @@ internal static (nint tableBits, nint roff, error err) readHuff(this ж<Reader> 
     return (tableBits, off, default);
 }
 
-} // end zstdᴛReader
+}

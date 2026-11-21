@@ -375,4 +375,4 @@ internal static void convertUntyped(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx,
     }
 }
 
-} // end typesᴛChecker
+}

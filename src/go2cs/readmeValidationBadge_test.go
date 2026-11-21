@@ -615,7 +615,7 @@ func TestCSharpSourceBadgeOmittedWithoutAPublishedVersion(t *testing.T) {
 
 // readmeGo2csBadge is the converted-by-go2cs badge, pinned as a literal for the same reason the break
 // is: the constant is the thing under test.
-const readmeGo2csBadge = "[![converted by go2cs](https://go2cs.net/images/go2cs-badge.svg)](https://go2cs.net)"
+const readmeGo2csBadge = "[![converted by go2cs](https://cdn.jsdelivr.net/gh/ritchiecarroll/go2cs@master/docs/images/go2cs-badge.svg)](https://go2cs.net)"
 
 // The badge paragraph is the five badges in order — converted-by-go2cs, Tests, Docs, then the Source
 // pair in convert-from → convert-to order — over TWO lines: go2cs, Tests and Docs share the first

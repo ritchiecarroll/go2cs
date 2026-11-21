@@ -19,4 +19,4 @@ partial struct UnixAddr {
 public static @string Network(this ref UnixAddr a) { return a.Net; }
 public static @string String(this ref UnixAddr a) { return a.Name; }
 
-} // end addrlibᴛUnixAddr
+}

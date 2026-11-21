@@ -91,7 +91,7 @@ internal static void main() {
     fmt.Println("call:", takeC128(3D), takeC64(5F), takeMany(1D, 2D, 3D), retC128(), retC64(), x, y);
 
     var s = slice<C128>([1D, 2D, 3D.i()]);
-    var arr = new C64[]{1F, 2F}.array();
+    var arr = array<C64>([1F, 2F]);
     var p = new pair(a: 4D, b: 5F);
     var mv = new map<@string, C64>{["k"] = 9F};
     fmt.Println("composite:", s, arr, p, mv["k"]);

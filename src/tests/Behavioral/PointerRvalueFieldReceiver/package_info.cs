@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("PointerRvalueFieldReceiver.go", "PointerRvalueFieldReceiver.cs", "AA0SAAcUlvq0hIKWgoKCgoKWgoIAARCCgg==")]
+[assembly: GoPositionMap("PointerRvalueFieldReceiver.go", "PointerRvalueFieldReceiver.cs", "AAoSAAUUltqUhIKWgoKCgoKWgoIAARCCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -92,6 +92,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.queue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛqueue;
-[GoMethodHost(typeof(main_package.slot)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛslot;
 // </MethodHolders>

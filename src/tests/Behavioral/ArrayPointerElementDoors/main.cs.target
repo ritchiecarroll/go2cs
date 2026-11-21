@@ -122,7 +122,7 @@ internal static void nativeMemory() {
     fmt.Println("struct element          :", whole, peek(p + 8, 8));
 
     p = native(xs);
-    @unsafe.Pointer.StoreArray<byte>((@unsafe.Pointer)p, 2, new byte[]{(byte)'C', 0}.array());
+    @unsafe.Pointer.StoreArray<byte>((@unsafe.Pointer)p, 2, array<byte>([(byte)'C', 0]));
     fmt.Println("whole array stored      :", peek(p, 8));
 
     p = native("abcdefgh");
@@ -200,14 +200,14 @@ internal static void goMemory() {
 
     var y = @new<uint32>();
     @unsafe.Pointer yp = @unsafe.Pointer.FromPinnedBox(y);
-    @unsafe.Pointer.StoreArray<byte>(yp, 4, new byte[]{1, 2, 3, 4}.array());
+    @unsafe.Pointer.StoreArray<byte>(yp, 4, array<byte>([1, 2, 3, 4]));
     var stored = y.Value;
     var loaded = @unsafe.Pointer.LoadArray<byte>(yp, 4);
     y.Value = 0;
     fmt.Printf("whole array, a uint32   : %#x %v\n"u8, stored, loaded);
 
     ref var dst = ref heap(new array<int32>(4), out var Ꮡdst);
-    @unsafe.Pointer.StoreArray<int32>(ptr((uintptr)Ꮡdst), 4, new int32[]{1, 2, 3, 4}.array());
+    @unsafe.Pointer.StoreArray<int32>(ptr((uintptr)Ꮡdst), 4, array<int32>([1, 2, 3, 4]));
     fmt.Println("whole array, by number  :", dst);
 }
 

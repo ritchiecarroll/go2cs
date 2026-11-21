@@ -623,4 +623,4 @@ internal static void unroll(this ref Pipe p, Reg n, nint factor, Action<slice<sl
     a.Label(label + "done"u8);
 }
 
-} // end asmgenᴛPipe
+}

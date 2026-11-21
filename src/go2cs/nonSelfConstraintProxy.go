@@ -199,6 +199,11 @@ func (v *Visitor) sliceWideningRoute(callExpr *ast.CallExpr, typeParam *types.Ty
 		return wideningToConstraint
 	}
 
+	// A shape-witness position binds the caller's slice as it is: T is the element itself (shapeWitness.go).
+	if shapeWitnessed(fn.Origin(), index) {
+		return wideningNone
+	}
+
 	if !typeParamReachedBesideSliceParameters(signature, typeParam) {
 		return wideningToConstraint
 	}

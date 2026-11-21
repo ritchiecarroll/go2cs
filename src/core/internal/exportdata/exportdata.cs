@@ -354,7 +354,7 @@ notfound:
     return ("", path, fmt.Errorf("can't find import: %q: %w"u8, path, err));
 }
 
-internal static array<@string> pkgExts = new @string[]{".a", ".o"}.array(); // a file from the build cache will have no extension
+internal static array<@string> pkgExts = array<@string>([".a", ".o"]); // a file from the build cache will have no extension
 
 internal static readonly ж<sync.Map> ᏑexportMap = new StaticBox<sync.Map>(default(sync.Map));
 internal static ref sync.Map exportMap => ref ((StaticBox<sync.Map>)ᏑexportMap).ValueSlot; // package dir → func() (string, error)

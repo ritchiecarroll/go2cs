@@ -111,4 +111,4 @@ internal static slice<error> Unwrap(this ref wrapErrors e) {
     return e.errs;
 }
 
-} // end fmtᴛwrapErrors
+}

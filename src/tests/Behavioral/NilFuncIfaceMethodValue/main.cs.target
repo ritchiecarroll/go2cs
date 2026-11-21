@@ -2,13 +2,10 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
-using static main_package;
 
 partial class main_package {
 
 public delegate @string Greeter();
-
-} partial class mainᴛGreeter {
 
 public static @string Greet(this Greeter g) {
     if (g == nil) {
@@ -18,8 +15,6 @@ public static @string Greet(this Greeter g) {
 }
 
 public static @string Shout(this Greeter g) { return g() + "!"u8; }
-
-} partial class main_package {
 
 partial interface Greetable {
     @string Greet();

@@ -64,7 +64,7 @@ A package-level `var` takes it too:
 ```go
 var names = []string{"stdin", "stdout"}
 ```
-<!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:28 -->
+<!-- source: src/tests/Behavioral/PackageVarInitOrder/registry.cs.target:22 -->
 ```csharp
 internal static slice<@string> names = ["stdin", "stdout"];
 ```

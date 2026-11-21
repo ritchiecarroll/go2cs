@@ -4,10 +4,9 @@ using errors = errors_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using sort = sort_package;
-using ꓸꓸꓸany = variadic<any>;
-using ꓸꓸꓸnint = variadic<nint>;
-using ꓸꓸꓸstring = variadic<@string>;
-using static main_package;
+using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class main_package {
 
@@ -76,8 +75,6 @@ partial struct counter {
     internal nint @base;
 }
 
-} partial class mainᴛcounter {
-
 internal static nint Total(this counter c, params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.sslice();
 
@@ -87,8 +84,6 @@ internal static nint Total(this counter c, params ꓸꓸꓸnint valsʗp) {
     }
     return t;
 }
-
-} partial class main_package {
 
 internal static @string callString(any fn, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();

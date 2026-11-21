@@ -475,4 +475,4 @@ internal static error copyFromWindow(this ref Reader r, ж<reverseBitReader> Ꮡ
     return default;
 }
 
-} // end zstdᴛReader
+}

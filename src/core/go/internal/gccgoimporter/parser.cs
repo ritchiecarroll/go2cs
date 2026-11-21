@@ -1525,4 +1525,4 @@ internal static ж<types.Package> parsePackage(this ж<parser> Ꮡp) {
     return p.pkg;
 }
 
-} // end gccgoimporterᴛparser
+}

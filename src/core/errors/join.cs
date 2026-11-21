@@ -67,4 +67,4 @@ internal static slice<error> Unwrap(this ref joinError e) {
     return e.errs;
 }
 
-} // end errorsᴛjoinError
+}

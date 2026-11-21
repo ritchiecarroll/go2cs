@@ -448,6 +448,9 @@ type Visitor struct {
 	// func literals the same way, so a `var x T` inside a closure reads the enclosing declaration's
 	// companion.
 	currentFuncArrayDimsNames map[*types.TypeParam]string
+	// shapeWitnessTypeOwner is the generic named type whose declaration is being emitted, so a field naming a witness
+	// carrier (`Index[T]`) passes the declaring type's own witness parameter (shapeWitness.go).
+	shapeWitnessTypeOwner *types.Named
 	// closedConstraintsRecorded holds the (type argument, closed constraint) pairs
 	// recordClosedConstraintImplementation has recorded, so each records once. It is also what
 	// ends the recursion of a SELF-referential constraint, whose recording renders the closed
@@ -460,6 +463,10 @@ type Visitor struct {
 	// nativeFieldViewLocalCache memoizes isNativeFieldArrayViewLocal per local (nativeFieldArrayView.go);
 	// lazily initialized and never cleared, on the same per-object reasoning as the cache above.
 	nativeFieldViewLocalCache map[types.Object]bool
+	// keptArrayDoorConversions marks each `(*[N]E)(p)` rendered through door C's unnamed form, and
+	// keptArrayDoorLocalCache memoizes isKeptArrayDoorLocal per local (keptArrayDoor.go), on the same reasoning.
+	keptArrayDoorConversions map[*ast.CallExpr]bool
+	keptArrayDoorLocalCache  map[types.Object]bool
 	// fieldAccessLocalCache memoizes fieldAccessLocal per local (fieldAccess.go), on the same per-object
 	// reasoning: the pointee struct type of a local the provenance rule admits, or nil.
 	fieldAccessLocalCache map[types.Object]types.Type

@@ -1,9 +1,8 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸnint = variadic<nint>;
-using ꓸꓸꓸstring = variadic<@string>;
-using static main_package;
+using ꓸꓸꓸnint = Span<nint>;
+using ꓸꓸꓸstring = Span<@string>;
 
 partial class main_package {
 
@@ -25,8 +24,6 @@ partial struct counter {
     internal nint n;
 }
 
-} partial class mainᴛcounter {
-
 internal static void bump(this ref counter c, params ꓸꓸꓸnint deltasʗp) {
     var deltas = deltasʗp.sslice();
 
@@ -38,8 +35,6 @@ internal static void bump(this ref counter c, params ꓸꓸꓸnint deltasʗp) {
         c.n += d;
     }
 }
-
-} partial class main_package {
 
 internal static ж<counter> run() {
     GoFrame ᒐ = default;
@@ -60,7 +55,7 @@ internal static ж<counter> run() {
 
 internal static channel<EmptyStruct> defaultDone = new channel<EmptyStruct>(0);
 
-internal static void signalDone(params variadic<channel<EmptyStruct>> chansʗp) {
+internal static void signalDone(params Span<channel<EmptyStruct>> chansʗp) {
     var chans = chansʗp.sslice();
 
     if (len(chans) == 0) {

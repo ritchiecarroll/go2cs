@@ -329,4 +329,4 @@ public static error Scan(this ж<Int> Ꮡz, fmt.ScanState s, rune ch) {
     return err;
 }
 
-} // end bigᴛInt
+}

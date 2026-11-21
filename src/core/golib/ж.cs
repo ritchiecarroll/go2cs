@@ -278,11 +278,9 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
     private static class FieldRefWrappers<TElem>
     {
-        private static readonly ConditionalWeakTable<FieldRefFunc<T, TElem>, FieldRefFunc<TElem>> s_wrappers = new();
-
         public static FieldRefFunc<TElem> For(FieldRefFunc<T, TElem> fieldRefFunc)
         {
-            return s_wrappers.GetValue(fieldRefFunc, Wrap);
+            return (FieldRefFunc<TElem>)GoBoxTables.FieldRefWrappers.GetValue(fieldRefFunc, static accessor => Wrap((FieldRefFunc<T, TElem>)accessor));
         }
 
         private static FieldRefFunc<TElem> Wrap(FieldRefFunc<T, TElem> fieldRefFunc)
@@ -817,6 +815,17 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
     bool IHeldStorage.TryHeldExtent(out nuint start, out nuint end) => heldExtent(out start, out end);
 
+    bool IHeldStorage.TryHeldTarget(out object target, out nuint start, out nuint end)
+    {
+        target = null!;
+
+        if (!heldExtent(out start, out end) || m_pin?.PinnedTarget is not { } pinned)
+            return false;
+
+        target = pinned;
+        return true;
+    }
+
     // The storage this box holds still. Three facts, each of which must hold: this box owns a pin (m_pin, set at the
     // address-take and never cleared, released by its finalizer once the box is unreachable); the pinned object is
     // a managed array (the value slot, an element array, or the root's slot for a field or element view), whose
@@ -1142,7 +1151,21 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
     // box that keeps nothing, the box keeps what the pointer carried (NativeDerivation.Kept: nothing for C memory
     // alone). Every arm above the fall-through answers exactly as it does for a bare number, so the operator is
     // this method with nothing carried, and one conversion still mints one box.
-    internal static unsafe ж<T> FromNumber(uintptr value, object? carried)
+    internal static unsafe ж<T> FromNumber(uintptr value, object? carried) => FromNumber(value, carried, 0, null);
+
+    // DOOR C'S NATIVE ARM (docs/phase4/DESIGN-array-pointer-doors.md 20, D5). unsafe.Pointer.ToArray<E> passes the N of
+    // `(*[N]E)(p)` and the opener that builds the window; every other caller passes none, and this is the method above.
+    // Every arm runs in its own order and answers as it does without a length: the same-type alias (1), the zero base,
+    // the order token (2a, through the interior-alias step), the reinterpret, and token arithmetic (3), which still
+    // refuses. The opener replaces only what stood at arm 5: the refusal of an array view over a number no Go value
+    // owns (resolved null), and the fall-through to a NativeBox<array<E>> over a PINNED real address of another pointee
+    // (arm 2b), a box whose Value reads element bytes as an array header. A tagged number never reaches it: a token
+    // names no user memory and is not an address to open a window over. The opener cuts a window only over C memory or
+    // over Go storage a box holds still for all N elements, anchored on that box, and answers null otherwise; the
+    // conversion then runs on exactly as it does without a length. An address inside a Go value that nothing holds
+    // still (a field of a struct that holds a reference, which cannot be pinned) is no window: the collector may move
+    // the value, and a window over its old address would read and write whatever is there now.
+    internal static unsafe ж<T> FromNumber(uintptr value, object? carried, nint arrayLength, Func<nuint, nint, object?, object?, ж<T>?>? arrayOpener)
     {
         // A pointer to MANAGED storage has no address to have been converted from: what a
         // reflect projection handed out was an order token (see ManagedPointerTokens). Recover
@@ -1361,6 +1384,19 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         // memory, but 0 has no provenance record either, so this line refused it through both doors until the
         // conjunct below (NativeArrayViewFloorTests.ANilPointerAtAnArrayPointeeIsANilPointer, red before it).
         // The fall-through answers a null native box, as it does for every other pointee.
+        if (arrayOpener is not null && value.Value != 0 && !aliasesAnOrderToken && !ManagedPointerTokens.NamesNoUserMemory((nuint)value.Value))
+        {
+            // The opener answers null where no window may be cut: Go storage nothing holds still at this address,
+            // or fewer bytes of it than the window needs. The conversion then answers what To answers, below.
+            if (arrayOpener((nuint)value.Value, arrayLength, resolved, carried) is { } window)
+            {
+                if (KeptArrayDoorCensus.Enabled)
+                    KeptArrayDoorCensus.NativeArm(resolved is null, (nuint)value.Value, typeof(T));
+
+                return window;
+            }
+        }
+
         if (resolved is null && value.Value != 0 && s_isArrayShaped)
             throw RuntimeErrorPanic.NativeArrayViewWithoutElementStorage(typeof(T));
 

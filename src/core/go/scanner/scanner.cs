@@ -1168,4 +1168,4 @@ scanAgain:
     return (pos, tok, lit);
 }
 
-} // end scannerᴛScanner
+}

@@ -182,17 +182,17 @@ namespace go;
         // NOT a map, a channel, a string, a slice or an array value: golib's forms of those are value types that hold a
         // reference, so this test does not reach them. They stay the census's B2a value kinds below.
         //
-        // ONE EXEMPTION (COORD's ruling): unsafe.Pointer over MANAGED Go storage, a box that retains its source or carries
-        // a pin. `(*unsafe.Pointer)(p)` over a Go word is a shape the converted runtime emits (map.go's indirect key,
-        // atomic_pointer.go's atomicwb), and refusing it would refuse the runtime. Over C memory (no source, no pin) it
-        // is the cgo `void*` field, and it is refused like every other reference. The exempt read still stores and reads
-        // a reference in a word the collector does not scan: that hazard is named on the BOARD, and its cure, an
-        // unsafe.Pointer read and written as the word it is, is the section 18.2 design.
+        // NO EXEMPTION (W4, seat S-B1, docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.3-18.7). Until the word doors landed,
+        // unsafe.Pointer over MANAGED Go storage was exempt, because the converted runtime reaches `(*unsafe.Pointer)(p)`
+        // over a Go word (map.go's indirect key, atomic_pointer.go's atomicwb); the exempt read stored a CLR reference in a
+        // word the collector does not scan (the .5 BOARD row of 2026-11-16). The converter now emits `*p` and `*p = v` for a
+        // *unsafe.Pointer p as unsafe.Pointer.LoadWord / StoreWord, and the hand-owned atomic doors take the word doors, so
+        // a `.Value` read of such a box is reached only by code those doors did not rewrite, and it is refused by name.
         //
         // AFTER the named-array floor and B0' (whose population, a value-type struct, is disjoint from this one) and NOT for
         // the number 0, for the reason given there: a nil pointer to a Go pointer answers what every nil pointer answers.
         // BEFORE the census, so a refused read is never counted.
-        if (s_isReference && address != null && !(s_isUnsafePointer && (m_retainedSource is not null || m_pin is not null)))
+        if (s_isReference && address != null)
             throw RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(T), ManagedReferenceReason);
 
         // The dereference census (NativeBoxDereferenceCensus): a T that holds a reference and was not refused above, and
@@ -222,10 +222,8 @@ namespace go;
     private static readonly bool s_isReferenceBearingGoStruct =
         typeof(T).IsValueType && RuntimeHelpers.IsReferenceOrContainsReferences<T>() && GoReflect.KindOf(typeof(T)) == GoReflect.Struct;
 
-    // The reference floor's two facts about T, read by ValueAddress above. Decided once per T.
+    // The reference floor's fact about T, read by ValueAddress above. Decided once per T.
     private static readonly bool s_isReference = !typeof(T).IsValueType;
-
-    private static readonly bool s_isUnsafePointer = s_isReference && GoReflect.KindOf(typeof(T)) == GoReflect.UnsafePointer;
 
     private const string ManagedReferenceReason = "a managed reference where Go stores words";
 

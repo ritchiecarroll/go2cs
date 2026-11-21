@@ -988,11 +988,11 @@ internal static int64 initialReadLimitSize(this ref Server s) {
 // ReadTimeout, or WriteTimeout.
 internal static time.Duration tlsHandshakeTimeout(this ref Server s) {
     time.Duration ret = default;
-    foreach (var (_, v) in range(new time.Duration[]{
+    foreach (var (_, v) in range(array<time.Duration>([
         s.ReadHeaderTimeout,
         s.ReadTimeout,
         s.WriteTimeout
-    }.array())) {
+    ]))) {
         if (v <= 0) {
             continue;
         }

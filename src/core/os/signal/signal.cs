@@ -410,4 +410,4 @@ internal static bool Is(this signalError s, error target) {
     return false;
 }
 
-} // end signalᴛsignalError
+}

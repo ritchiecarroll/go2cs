@@ -57,7 +57,7 @@ func (p Person) IsAdult() bool {
 
 go2cs produces this C#:
 
-<!-- source: src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:9-12 and :20-22 -->
+<!-- source: src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:8-11 and :17-19 -->
 ```csharp
 partial struct Person {
     internal @string name;
@@ -102,7 +102,13 @@ Browse the whole set under [`src/core`](https://github.com/ritchiecarroll/go2cs/
 
 ## Requirements
 
-- **[.NET 10.0 SDK](https://dotnet.microsoft.com/download)**, to build and run the converted C#.
+- **[.NET 10.0 SDK](https://dotnet.microsoft.com/download)**, to build and run the converted C#. A newer .NET SDK
+  builds it too, and on a machine with no .NET 10 runtime a converted program runs on the newer one. The go.*
+  packages are validated on .NET 10; set `RollForward` to `Disable` or `LatestMinor` in your project to require .NET 10.
+  <!-- 2026-11-20, i9: go.lib's buildTransitive targets give an executable RollForward=Major (src/tests/PackageTests/RollForward;
+       docs/phase4/DATA-net11-sdk-usability.md). P3's review asked for this sentence: the change turns the launch refusal into a
+       run on a runtime the corpus is not validated on. -->
+
 - **No Go installation, with the go2cs dotnet tool.** The converter uses the Go toolchain to load and
   type-check the source it converts, so that source must already build with `go build`. The
   [dotnet tool](DotnetTool.md) downloads the Go release it converts with, Go 1.26.11, on first use.

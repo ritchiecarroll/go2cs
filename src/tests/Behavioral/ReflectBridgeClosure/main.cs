@@ -3,8 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using @unsafe = unsafe_package;
-using ꓸꓸꓸnint = variadic<nint>;
-using static main_package;
+using ꓸꓸꓸnint = Span<nint>;
 
 partial class main_package {
 
@@ -40,11 +39,7 @@ partial struct host {
 
 internal delegate error handler(nint _);
 
-} partial class mainᴛhandler {
-
 internal static error call(this handler h, nint n) { return h(n); }
-
-} partial class main_package {
 
 internal static void noArgs() { }
 internal static void oneIn(nint _) { }
@@ -107,7 +102,7 @@ internal static void main() {
     var plain = (namedPlainBytes)slice<byte>((@string)"ok"u8);
     fmt.Printf("bytes(namedPlainBytes)=%q\n"u8, (@string)reflect.ValueOf(plain).Bytes());
 
-    ref var arr = ref heap<array<byte>>(new byte[]{(byte)'a', (byte)'b', (byte)'c'}.array(), out var Ꮡarr);
+    ref var arr = ref heap<array<byte>>(array<byte>([(byte)'a', (byte)'b', (byte)'c']), out var Ꮡarr);
     fmt.Printf("bytes([3]byte)=%q\n"u8, (@string)reflect.ValueOf(Ꮡarr).Elem().Bytes());
 
     ref var dstPlain = ref heap<slice<byte>>(out var ᏑdstPlain);

@@ -67,6 +67,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
 
     [TestMethod]
+    public void CheckAnonIfaceEmbedCrossPackage() => CheckTarget("AnonIfaceEmbedCrossPackage");
+
+    [TestMethod]
     public void CheckAnonIfaceMethodSetWidening() => CheckTarget("AnonIfaceMethodSetWidening");
 
     [TestMethod]
@@ -161,6 +164,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckArrayCastDerefClone() => CheckTarget("ArrayCastDerefClone");
+
+    [TestMethod]
+    public void CheckArrayLiteralBuiltin() => CheckTarget("ArrayLiteralBuiltin");
 
     [TestMethod]
     public void CheckArrayLiteralDeclaredLength() => CheckTarget("ArrayLiteralDeclaredLength");
@@ -1243,6 +1249,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckKeywordNamedTypes() => CheckTarget("KeywordNamedTypes");
 
     [TestMethod]
+    public void CheckKeywordPackageAliases() => CheckTarget("KeywordPackageAliases");
+
+    [TestMethod]
     public void CheckKeywordTrueFalseIdent() => CheckTarget("KeywordTrueFalseIdent");
 
     [TestMethod]
@@ -2140,6 +2149,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPromotedTargetParam() => CheckTarget("PromotedTargetParam");
 
     [TestMethod]
+    public void CheckPromotedUnexportedEmbedChain() => CheckTarget("PromotedUnexportedEmbedChain");
+
+    [TestMethod]
     public void CheckPromotedValueEmbedExprRecv() => CheckTarget("PromotedValueEmbedExprRecv");
 
     [TestMethod]
@@ -2486,6 +2498,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckShadowedVarMethodCallLHS() => CheckTarget("ShadowedVarMethodCallLHS");
+
+    [TestMethod]
+    public void CheckShapeWitnessSamePackage() => CheckTarget("ShapeWitnessSamePackage");
 
     [TestMethod]
     public void CheckSharedEmbeddedInterfaceMember() => CheckTarget("SharedEmbeddedInterfaceMember");
@@ -2909,6 +2924,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnsafePointerTypeAlias() => CheckTarget("UnsafePointerTypeAlias");
+
+    [TestMethod]
+    public void CheckUnsafePointerWordNilSlot() => CheckTarget("UnsafePointerWordNilSlot");
 
     [TestMethod]
     public void CheckUnsafePointerWordRead() => CheckTarget("UnsafePointerWordRead");

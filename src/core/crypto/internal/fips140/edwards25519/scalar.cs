@@ -163,11 +163,11 @@ public static (ж<Scalar>, error) SetUniformBytes(this ж<Scalar> Ꮡs, slice<by
 // scalarTwo168 and scalarTwo336 are 2^168 and 2^336 modulo l, encoded as a
 // fiatScalarMontgomeryDomainFieldElement, which is a little-endian 4-limb value
 // in the 2^256 Montgomery domain.
-internal static ж<Scalar> scalarTwo168 = Ꮡ(new Scalar(s: new uint64[]{0x5b8ab432eac74798UL, 0x38afddd6de59d5d7UL,
-    0xa2c131b399411b7cUL, 0x6329a7ed9ce5a30UL}.array()
+internal static ж<Scalar> scalarTwo168 = Ꮡ(new Scalar(s: array<uint64>([0x5b8ab432eac74798UL, 0x38afddd6de59d5d7UL,
+    0xa2c131b399411b7cUL, 0x6329a7ed9ce5a30UL])
 ));
-internal static ж<Scalar> scalarTwo336 = Ꮡ(new Scalar(s: new uint64[]{0xbd3d108e2b35ecc5UL, 0x5c3a3718bdf9c90bUL,
-    0x63aa97a331b4f2eeUL, 0x3d217f5be65cb5cUL}.array()
+internal static ж<Scalar> scalarTwo336 = Ꮡ(new Scalar(s: array<uint64>([0xbd3d108e2b35ecc5UL, 0x5c3a3718bdf9c90bUL,
+    0x63aa97a331b4f2eeUL, 0x3d217f5be65cb5cUL])
 ));
 
 } partial class edwards25519ᴛScalar {
@@ -219,7 +219,7 @@ public static (ж<Scalar>, error) SetCanonicalBytes(this ж<Scalar> Ꮡs, slice<
 } partial class edwards25519_package {
 
 // scalarMinusOneBytes is l - 1 in little endian.
-[GoLazy] partial class lazyᴛscalarMinusOneBytes { internal static array<byte> scalarMinusOneBytes = new byte[]{236, 211, 245, 92, 26, 99, 18, 88, 214, 156, 247, 162, 222, 249, 222, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16}.array(); }
+[GoLazy] partial class lazyᴛscalarMinusOneBytes { internal static array<byte> scalarMinusOneBytes = array<byte>([236, 211, 245, 92, 26, 99, 18, 88, 214, 156, 247, 162, 222, 249, 222, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16]); }
 
 // isReduced returns whether the given scalar in 32-byte little endian encoded
 // form is reduced modulo l.
@@ -413,4 +413,4 @@ internal static array<int8> signedRadix16(this ж<Scalar> Ꮡs) {
     return digits.Clone();
 }
 
-} // end edwards25519ᴛScalar
+}

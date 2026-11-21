@@ -1,0 +1,38 @@
+B3PROBE marks:
+B3PROBE   main-enter at 432 ms after process start; assemblies loaded 82; methods jitted 3360; jit time 2359 ms
+B3PROBE   exit at 739 ms after process start; assemblies loaded 87; methods jitted 5768; jit time 2773 ms
+B3PROBE site	calls	inclusive ms	items
+B3PROBE CollectGoMethodSetCandidates	14	70.2	197
+B3PROBE HomedIn.methodsFound	16	60.0	255
+B3PROBE HomedIn.hostsPassed	16	58.0	22
+B3PROBE ExtensionHost.Methods(read)	14	13.6	207
+B3PROBE keys ExtensionHost.Methods(read): 14 distinct
+B3PROBE   go.bytesᴛBuffer x1
+B3PROBE   go.go.astᴛIdent x1
+B3PROBE   go.go.astᴛinspector x1
+B3PROBE   go.go.tokenᴛPos x1
+B3PROBE   go.go.tokenᴛToken x1
+B3PROBE   go.io.fsᴛPathError x1
+B3PROBE   go.net.urlᴛURL x1
+B3PROBE   go.reflectᴛKind x1
+B3PROBE   go.reflectᴛrtype x1
+B3PROBE   go.runtime_package_asserts x1
+B3PROBE   go.runtimeᴛerrorString x1
+B3PROBE   go.runtimeᴛmetricReader x1
+B3PROBE   go.runtimeᴛTypeAssertionError x1
+B3PROBE   go.timeᴛDuration x1
+B3PROBE keys CollectGoMethodSetCandidates: 14 distinct
+B3PROBE   *go.bytes_package+Buffer x1
+B3PROBE   *go.go.ast_package+Ident x1
+B3PROBE   *go.go.token_package+Token x1
+B3PROBE   *go.io.fs_package+PathError x1
+B3PROBE   *go.net.url_package+URL x1
+B3PROBE   *go.reflect_package+Kind x1
+B3PROBE   *go.reflect_package+rtype x1
+B3PROBE   *go.runtime_package+TypeAssertionError x1
+B3PROBE   *go.time_package+Duration x1
+B3PROBE   go.go.token_package+Pos x1
+B3PROBE   go.go.token_package+Token x1
+B3PROBE   go.reflect_package+Kind x1
+B3PROBE   go.runtime_package+errorString x1
+B3PROBE   go.time_package+Duration x1

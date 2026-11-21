@@ -84,4 +84,4 @@ public static void Put<T>(this ref Bag<T> b, T v) { b.items = append(b.items, v)
 
 public static nint Count<T>(this ref Bag<T> b) { return len(b.items); }
 
-} // end collᴛBag
+}

@@ -330,16 +330,16 @@ internal static (slice<byte> tok, error err) Token(this ж<ss> Ꮡs, bool skipSp
 // space is a copy of the unicode.White_Space ranges,
 // to avoid depending on package unicode.
 [GoLazy] partial class lazyᴛspace { internal static slice<array<uint16>> space = GoReflect.WithElemDims(new array<uint16>[]{
-    new uint16[]{0x0009, 0x000d}.array(),
-    new uint16[]{0x0020, 0x0020}.array(),
-    new uint16[]{0x0085, 0x0085}.array(),
-    new uint16[]{0x00a0, 0x00a0}.array(),
-    new uint16[]{0x1680, 0x1680}.array(),
-    new uint16[]{0x2000, 0x200a}.array(),
-    new uint16[]{0x2028, 0x2029}.array(),
-    new uint16[]{0x202f, 0x202f}.array(),
-    new uint16[]{0x205f, 0x205f}.array(),
-    new uint16[]{0x3000, 0x3000}.array()
+    array<uint16>([0x0009, 0x000d]),
+    array<uint16>([0x0020, 0x0020]),
+    array<uint16>([0x0085, 0x0085]),
+    array<uint16>([0x00a0, 0x00a0]),
+    array<uint16>([0x1680, 0x1680]),
+    array<uint16>([0x2000, 0x200a]),
+    array<uint16>([0x2028, 0x2029]),
+    array<uint16>([0x202f, 0x202f]),
+    array<uint16>([0x205f, 0x205f]),
+    array<uint16>([0x3000, 0x3000])
 }.slice(), 2); }
 
 internal static bool isSpace(rune r) {
@@ -1548,4 +1548,4 @@ internal static (nint numProcessed, error err) doScanf(this ж<ss> Ꮡs, sstring
     return (numProcessed, Ꮡerr.ValueSlot);
 }
 
-} // end fmtᴛss
+}

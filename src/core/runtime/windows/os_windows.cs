@@ -143,10 +143,10 @@ internal static stdFunction _timeBeginPeriod;
 internal static stdFunction _timeEndPeriod;
 internal static stdFunction _ᴛ2ʗ;
 
-[GoLazy] partial class lazyᴛbcryptprimitivesdll { internal static array<uint16> bcryptprimitivesdll = new uint16[]{'b', 'c', 'r', 'y', 'p', 't', 'p', 'r', 'i', 'm', 'i', 't', 'i', 'v', 'e', 's', '.', 'd', 'l', 'l', 0}.array(); }
-internal static array<uint16> ntdlldll = new uint16[]{'n', 't', 'd', 'l', 'l', '.', 'd', 'l', 'l', 0}.array();
-internal static array<uint16> powrprofdll = new uint16[]{'p', 'o', 'w', 'r', 'p', 'r', 'o', 'f', '.', 'd', 'l', 'l', 0}.array();
-internal static array<uint16> winmmdll = new uint16[]{'w', 'i', 'n', 'm', 'm', '.', 'd', 'l', 'l', 0}.array();
+[GoLazy] partial class lazyᴛbcryptprimitivesdll { internal static array<uint16> bcryptprimitivesdll = array<uint16>(['b', 'c', 'r', 'y', 'p', 't', 'p', 'r', 'i', 'm', 'i', 't', 'i', 'v', 'e', 's', '.', 'd', 'l', 'l', 0]); }
+internal static array<uint16> ntdlldll = array<uint16>(['n', 't', 'd', 'l', 'l', '.', 'd', 'l', 'l', 0]);
+internal static array<uint16> powrprofdll = array<uint16>(['p', 'o', 'w', 'r', 'p', 'r', 'o', 'f', '.', 'd', 'l', 'l', 0]);
+internal static array<uint16> winmmdll = array<uint16>(['w', 'i', 'n', 'm', 'm', '.', 'd', 'l', 'l', 0]);
 
 // Function to be called by windows CreateThread
 // to start new os thread.
@@ -321,27 +321,7 @@ internal static void monitorSuspendResume() {
         (uintptr)Ꮡparams, (uintptr)@unsafe.Pointer.FromBox(Ꮡhandle));
 }
 
-internal static int32 getCPUCount() {
-    ref var mask = ref heap(new uintptr(), out var Ꮡmask);
-    ref var sysmask = ref heap(new uintptr(), out var Ꮡsysmask);
-    var ret = stdcall(_GetProcessAffinityMask, windows.CurrentProcess, (uintptr)@unsafe.Pointer.FromBox(Ꮡmask), (uintptr)@unsafe.Pointer.FromBox(Ꮡsysmask));
-    if (ret != 0) {
-        nint n = 0;
-        nint maskbits = (nint)(/* unsafe.Sizeof(mask) */ (uintptr)8 * 8);
-        for (nint i = 0; i < maskbits; i++) {
-            if ((uintptr)(mask & (((uintptr)1).Lsh((nuint)i))) != 0) {
-                n++;
-            }
-        }
-        if (n != 0) {
-            return (int32)n;
-        }
-    }
-    // use GetSystemInfo if GetProcessAffinityMask fails
-    ref var info = ref heap(new windows.SystemInfo(), out var Ꮡinfo);
-    stdcall(_GetSystemInfo, (uintptr)Ꮡinfo);
-    return (int32)info.NumberOfProcessors;
-}
+// go2cs generated this placeholder — func getCPUCount is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 internal static uintptr getPageSize() {
     ref var info = ref heap(new windows.SystemInfo(), out var Ꮡinfo);
@@ -687,7 +667,7 @@ internal static int32 semasleep(int64 ns) {
                 ms = 1;
             }
             result = stdcall(_WaitForMultipleObjects, 2,
-                (uintptr)Ꮡ(new uintptr[]{(~(~getg()).m).waitsema, (~(~getg()).m).resumesema}.array()),
+                (uintptr)Ꮡ(array<uintptr>([(~(~getg()).m).waitsema, (~(~getg()).m).resumesema])),
                 0, (uintptr)ms);
             if (result != (uintptr)(_WAIT_OBJECT_0 + 1)) {
                 // Not a suspend/resume event

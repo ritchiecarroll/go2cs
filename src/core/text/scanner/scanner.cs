@@ -925,4 +925,4 @@ public static @string TokenText(this ж<Scanner> Ꮡs) {
     return Ꮡs.ᏑtokBuf.String();
 }
 
-} // end scannerᴛScanner
+}

@@ -583,4 +583,4 @@ public static int64 InputOffset(this ref Decoder dec) {
     return dec.scanned + (int64)dec.scanp;
 }
 
-} // end jsonᴛDecoder
+}

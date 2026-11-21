@@ -238,4 +238,4 @@ internal static time.Duration systemTime(this ref ProcessState p) {
     return ftToDuration(p.rusage.ᏑKernelTime);
 }
 
-} // end osᴛProcessState
+}

@@ -29,4 +29,4 @@ public static void Raise(this ref Pitch p, nint by) { p.Hz += by; }
 
 public static @string Label(this ref Pitch p) { return fmt.Sprintf("pitch %d Hz"u8, p.Hz); }
 
-} // end toneᴛPitch
+}

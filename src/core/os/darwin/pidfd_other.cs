@@ -31,4 +31,4 @@ internal static error pidfdSendSignal(this ref Process _Δp0, syscall.Signal _Δ
     throw panic("unreachable");
 }
 
-} // end osᴛProcess
+}

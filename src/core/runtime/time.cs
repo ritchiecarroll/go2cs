@@ -243,7 +243,7 @@ internal static void trace1(this ж<timer> Ꮡt, @string op) {
     if (!timerDebug) {
         return;
     }
-    var bits = new @string[]{"h", "m", "z", "c"}.array();
+    var bits = array<@string>(["h", "m", "z", "c"]);
     foreach (var i in range(3)) {
         if ((uint8)(t.state & (((uint8)1).Lsh((int64)(i)))) == 0) {
             bits[i] = "-";

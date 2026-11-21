@@ -1,8 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸany = variadic<any>;
-using static main_package;
+using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
 
@@ -55,13 +54,9 @@ partial struct sink {
     internal @string tag;
 }
 
-} partial class mainᴛsink {
-
 internal static void take(this ref sink s, nint n, @string msg) {
     fmt.Println("  sink", s.tag, "took", n, msg);
 }
-
-} partial class main_package {
 
 internal static void deferSpread() {
     GoFrame ᒐ = default;
@@ -201,11 +196,11 @@ internal static void showAll(params ꓸꓸꓸany partsʗp) {
     fmt.Println("  showAll:", parts);
 }
 
-internal static array<nint> regs = new nint[]{1, 2, 3}.array();
+internal static array<nint> regs = array<nint>([1, 2, 3]);
 
 internal static (nint, nint, nint) setRegs(nint a, nint b, nint c) {
     var old = regs.Clone();
-    regs.Assign(new nint[]{a, b, c}.array());
+    regs.Assign(array<nint>([a, b, c]));
     fmt.Println("  setRegs: now", regs, "was", old);
     return (old[0], old[1], old[2]);
 }

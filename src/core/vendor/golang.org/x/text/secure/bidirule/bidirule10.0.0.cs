@@ -14,4 +14,4 @@ internal static bool isFinal(this ref Transformer t) {
     return t.state == ruleLTRFinal || t.state == ruleRTLFinal || t.state == ruleInitial;
 }
 
-} // end bidiruleᴛTransformer
+}

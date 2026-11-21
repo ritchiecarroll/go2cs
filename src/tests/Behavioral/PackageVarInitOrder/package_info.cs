@@ -56,7 +56,7 @@ using static go.main_package;
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("entries.go", "entries.cs", "AAUQqqiogAACEAADHg==")]
 [assembly: GoPositionMap("main.go", "main.cs", "AAcQvoKmgoKCgoKCgoKWgoKC")]
-[assembly: GoPositionMap("registry.go", "registry.cs", "AAsQgsaCgoLGlAAPJoI=")]
+[assembly: GoPositionMap("registry.go", "registry.cs", "AAkQgqaCgoKmlAAPJoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -97,5 +97,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.reg)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛreg;
 // </MethodHolders>

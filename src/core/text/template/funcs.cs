@@ -312,7 +312,7 @@ internal static (reflect.Value, error) Δslice(reflect.Value item, params ꓸꓸ
         return (new reflect.Value(), fmt.Errorf("can't slice item of type %s"u8, item.Type()));
     }}
     // set default values for cases item[:], item[i:].
-    var idx = new nint[]{0, item.Len()}.array(3);
+    var idx = array<nint>(3, [0, item.Len()]);
     foreach (var (i, index) in range(indexes)) {
         var (x, err) = indexArg(index, cap);
         if (err != nil) {

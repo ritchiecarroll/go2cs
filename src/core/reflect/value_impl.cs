@@ -1053,7 +1053,8 @@ public static Value Elem(this Value v) {
             // An OPAQUE managed handle, not a pointer box — the value-side twin of the descent
             // rule. KindOf reports Pointer for every managed reference it does not otherwise
             // recognize (one word wide, never looked inside), and a hand-owned shim's backing
-            // object is exactly that: sync.Mutex's SemaphoreSlim gate, sync.RWMutex's RWState.
+            // object is exactly that: sync.WaitGroup's WaitGroupState (sync.Mutex's SemaphoreSlim gate and
+            // sync.RWMutex's RWState were two more, until each took Go's layout).
             // Nothing behind such a handle has a Go representation, so there is no pointee to
             // hand back and the walk STOPS here with the invalid Value — the same answer a nil
             // pointer already gives. Reading a slot instead threw "Not a pointer box type" and

@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,11 +8,7 @@ partial struct counter {
     internal nint n;
 }
 
-} partial class mainᴛcounter {
-
 internal static nint start(this ref counter c) { return c.n; }
-
-} partial class main_package {
 
 internal static nint shadowedForInit() {
     var b = Ꮡ(new counter(n: 100));

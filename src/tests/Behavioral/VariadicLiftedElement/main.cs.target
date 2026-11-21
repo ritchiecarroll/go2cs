@@ -1,10 +1,9 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸbox = variadic<main_package.box>;
-using ꓸꓸꓸgreatestEnd_nodes = variadic<main_package.greatestEnd_nodes>;
-using ꓸꓸꓸsumPoints_points = variadic<main_package.sumPoints_points>;
-using static main_package;
+using ꓸꓸꓸbox = Span<main_package.box>;
+using ꓸꓸꓸgreatestEnd_nodes = Span<main_package.greatestEnd_nodes>;
+using ꓸꓸꓸsumPoints_points = Span<main_package.sumPoints_points>;
 
 partial class main_package {
 
@@ -12,11 +11,7 @@ partial struct span {
     internal nint end;
 }
 
-} partial class mainᴛspan {
-
 internal static nint End(this span s) { return s.end; }
-
-} partial class main_package {
 
 partial struct box {
     internal nint n;

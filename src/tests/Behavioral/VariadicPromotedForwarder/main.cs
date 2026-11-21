@@ -5,8 +5,7 @@ using reflect = reflect_package;
 using host = global::go.go.varhost_package;
 using global::go.go;
 using varhost = global::go.go.varhost_package;
-using ꓸꓸꓸany = variadic<any>;
-using static main_package;
+using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
 
@@ -14,8 +13,6 @@ partial struct cached {
     /*embed*/ public global::go.go.varhost_package.Host Host;
     internal nint hits;
 }
-
-} partial class mainᴛcached {
 
 // Go method set entry for the promoted 'Host.Trace()' - provided ONLY by the embedded
 // interface field in *cached's method set; see the pointer-only satisfaction record.
@@ -25,8 +22,6 @@ internal static @string Name(this ref cached c) {
     c.hits++;
     return fmt.Sprintf("cached(%d):%s"u8, c.hits, c.Host.Name());
 }
-
-} partial class main_package {
 
 internal static void main() {
     var c = Ꮡ(new cached(Host: new host.BaseжHost(Ꮡ(new host.Base(Tag: "t")))));

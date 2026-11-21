@@ -2749,4 +2749,4 @@ public static error CheckSignatureFrom(this ref RevocationList rl, ж<Certificat
     return parent.CheckSignature(rl.SignatureAlgorithm, rl.RawTBSRevocationList, rl.Signature);
 }
 
-} // end x509ᴛRevocationList
+}

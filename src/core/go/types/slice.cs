@@ -25,4 +25,4 @@ public static Type Elem(this ref Slice s) { return s.elem; }
 public static Type Underlying(this ж<Slice> Ꮡs) { return new SliceжType(Ꮡs); }
 public static @string String(this ж<Slice> Ꮡs) { return TypeString(new SliceжType(Ꮡs), default); }
 
-} // end typesᴛSlice
+}

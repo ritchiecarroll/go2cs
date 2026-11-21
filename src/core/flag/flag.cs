@@ -1493,4 +1493,4 @@ public static void Init(this ref FlagSet f, @string name, ErrorHandling errorHan
     f.errorHandling = errorHandling;
 }
 
-} // end flagᴛFlagSet
+}

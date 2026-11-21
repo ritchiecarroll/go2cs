@@ -43,7 +43,7 @@ internal static void main() {
     t3.Index(0).SetInt(99);
     fmt.Printf("slice3 aliases parent: %v\n"u8, full);
 
-    ref var arr = ref heap<array<nint>>(new nint[]{10, 11, 12, 13, 14, 15}.array(), out var Ꮡarr);
+    ref var arr = ref heap<array<nint>>(array<nint>([10, 11, 12, 13, 14, 15]), out var Ꮡarr);
     var ra = reflect.ValueOf(Ꮡarr).Elem();
     var a3 = ra.Slice3(1, 3, 5);
     fmt.Printf("slice3 array: len=%d cap=%d val=%v\n"u8, a3.Len(), a3.Cap(), a3.Interface());

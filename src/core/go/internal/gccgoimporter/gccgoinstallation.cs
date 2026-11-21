@@ -115,4 +115,4 @@ public static Func<map<@string, ж<types.Package>>, @string, @string, Func<@stri
     return gccgoimporter.GetImporter(append(appendꓸꓸꓸ(incpaths, inst.SearchPaths()), (@string)"."), initmap);
 }
 
-} // end gccgoimporterᴛGccgoInstallation
+}

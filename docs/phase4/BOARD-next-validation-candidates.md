@@ -40792,6 +40792,460 @@ converter stamps differ); CNR byte-identical over 1122 packages; gojq dry run ro
 
 — P2 (2026-11-19)
 
+## 2026-11-18 — P5 (B3 arm A1, receiver keys): under Native AOT every listed host class is still read for each question its homes admit; keying AOT needs go2cs-gen to list receivers
+
+Seat `claude/p5-b3-a1-keys` (record `docs/phase4/DATA-startup-method-sets-a1.md`). Arm A1 of
+`docs/phase4/DESIGN-startup-method-sets.md` reads a receiver key (module and type-definition token) for each
+extension method in golib's metadata walk, and a method-set question reads only the host classes that extend one of
+its element's keys or carry no key list. The walk needs the assembly's raw metadata, which Native AOT does not keep.
+Under AOT the scan reads go2cs-gen's build-time listing (`ExtensionHostListGenerator`, `[GoExtensionHost(typeof(H),
+Homes = ...)]`), which names each host's homes and no receivers, so every listed host has no key list and is read
+as before A1. AOT answers do not change; AOT gets none of A1's gain. COORD ruled the AOT half out of the seat
+(design amendment M1, 2026-11-17).
+
+**To key AOT:** `ExtensionHostListGenerator` writes each host's receiver types beside its homes, read through
+`ж<T>` and every pointer-box subclass to `T`, a generic type as its definition, and none for a receiver in the
+core library or golib. golib takes the UNION of every listing of a host, and a host is keyed only when every
+listing of it carries receivers (M1: a writer that cannot see a sibling generator's methods lists the class without
+receivers). The list guard (`ExtensionHostListTests`) then compares the listed receivers with the walk's.
+
+**Second, smaller item, same generator:** golib now homes and keys a receiver typed as a pointer-box subclass
+(`StandardBox<T>`, `SlottedStandardBox<T>`, `StaticBox<T>`, `NativeBox<T>`, `ElemRefBox<T>`) with `T`, as the
+method-set rule reads it (`ResolveReceiverElement`). The generator's home (`GeneratedSource.cs:111`) still reads
+through `ж<T>` by name only, so under AOT such a receiver is homed in golib and a question about `T` skips its
+class. No converted assembly declares such a receiver (the reachable-assembly guard reads 0 differences); the
+generator change above should take the same reading.
+
+— P5 (2026-11-18)
+
+## 2026-11-18 — i9 (lever E census, COORD scope ruling 00:21Z: (a) for the seat, (c) this row): two more golib static tables are per-type, `builtin.Itab<T>.s_entries` and `map<K,V>.s_sampledStorage` — OPEN, .5, not started
+
+**What it is.** Lever E (`claude/i9-lever-e`) moves the pointer boxes' seven per-type static tables into one
+non-generic holder, `GoBoxTables`, because a static table whose type names its class's own parameter is a new
+instantiation of the table's whole method set for every type argument, and Native AOT compiles each under its own
+symbol names. Its census (reflection over golib at `b2eaf5290a`: 336 generic type definitions, 51 static fields closed
+over their own parameter, 9 of them tables) found two more of the same shape outside the pointer box. The seat's guard,
+`PointerBoxStaticTableTests`, admits both by (type, field) with a reason, under a liveness arm that fails if either
+stops being a per-type table.
+
+- **`builtin.Itab<T>.s_entries`**, a `ConcurrentDictionary<Type, Entry>` (`Entry` is nested, so it carries `T`). One per
+  interface type a program asserts to: the type-assertion cache, behind a per-type monomorphic slot `s_last`. Moving it
+  keys one table by (interface type, dynamic type), a tuple hash on every miss of the slot, on the assertion hot path.
+  **Its own arm:** a JIT perf read of type assertions (hit and miss) before and after, as well as the AOT one.
+- **`map<K,V>.s_sampledStorage`**, a `ConditionalWeakTable<NilKeyDictionary, GoSampledStorage>`. One per map
+  instantiation, consulted only for a map the profiler sampled. Read since the census: `GoSampledStorage` holds two
+  `object?` fields and names neither `K` nor `V`, so moving it out of `map<K,V>` and keying one weak table by the store
+  is small. A TypeScript-shaped program reaches many map types, so it may carry more names than `Itab`.
+
+**The AOT arm that separates them.** On top of lever E (landed or seated): `parsedemo` (TypeScript `651c4ad147`, full
+trim, no native debug symbols, the B4 arm (a) command), one build per arm, one at a time: the lever E base, base +
+`map` only, base + `Itab` only. Read the symbol-name string table, the image and ILC peak for each, and check output
+against native Go on the demo and the corpus units. Each table is then priced alone. Score the two on their own numbers,
+not as a pair.
+
+**Guard.** Removing an entry from `PointerBoxStaticTableTests`' admitted list makes the guard red until the table moves.
+That is the cut's red-first arm.
+
+— i9 (2026-11-18)
+
+## 2026-11-18 — i9 (lever E seat, `claude/i9-lever-e`): the pointer boxes' seven per-type static tables move to one non-generic holder; converted TypeScript parsedemo AOT symbol names −29.2%, image −12.6%, ILC peak −24.6% — DONE (seated)
+
+**What moved.** `ж<T>`'s views table, `FieldRefWrappers<TElem>`'s wrappers, `ElemRefBox<T>`'s element boxes,
+`NilArrayBox<T>`'s typed nils, `FieldRefBox<T>`'s Go offsets and displacements, and `NativeSliceAnchors<T>`'s roots
+each declared a static table whose type named the class's own parameter, so every type argument a program reached
+instantiated the table's whole method set. All seven now live in `GoBoxTables` (`src/core/golib/GoBoxTables.cs`), keyed
+by reference (the nil-array table by (pointee type, dims)). Guard: `PointerBoxStaticTableTests`, red at the base naming
+exactly the seven, green at the cut; it admits `builtin.Itab<T>.s_entries` and `map<K,V>.s_sampledStorage` by name
+(the row above).
+
+**AOT, `parsedemo`** (one TypeScript conversion at `f36b6b0d48`, the B4 arm (a) command, win-x64; the cut builds golib
+from the seat via `-p:go2csPath`, its own artifacts root):
+
+| | base `f36b6b0d48` | seat `2b80848c0a` | change |
+|---|---|---|---|
+| symbol string table | 671,917,360 B (31.3% of 2 GiB) | 475,883,681 B (22.2%) | −29.18% |
+| image | 290,183,168 B | 253,496,320 B | −12.64% |
+| ILC peak private | 18.12 GB | 13.67 GB | −24.56% |
+| symbol records | 7,886,766 | 6,873,836 | −12.84% |
+| IL3054 | 0 | 0 | |
+| output vs native Go | demo + 17,422/17,422 units | demo + 17,422/17,422 units | identical |
+
+**The census undershot, and why.** Charging every string-table name whose first `ConditionalWeakTable`2` /
+`ConcurrentDictionary`2` / `KeyValuePair`2` instantiation carries a moved table's per-T arguments read 26.7% of the base
+table and 24 MB of its section bytes, nearly all metadata (39% of all method tables, 41% of writable data, 40% of
+generic dictionaries; 37 unwind records). The cut removed more: per-kind, the extra is GC and non-GC statics and frozen
+objects, i.e. each generic OWNER's static storage and the table instance preinitialized into the image per type
+argument, named after `ElemRefBox<T>` or `FieldRefBox<T>`, never after the table. **A census of a per-type static table
+charges the field's owner as well as the field's type.**
+
+**JIT and allocation.** `PerfFieldView`, 30 interleaved pairs: the seat's median inside the base arm's own A/A spread.
+Process allocation total (startup hook, 10 runs per arm, checksums equal): about 53 KB lower per run at the seat on
+831.5 MB, ranges disjoint, gen0 count equal — a fixed saving consistent with one shared table per kind instead of one
+per type argument (per-run constant inferred, not measured across iteration counts). GolibTests' alloc guards green.
+
+**Gates at `2b80848c0a`.** GolibTests Release 2984 (2929 / 1 / 54) and Debug 2984 (2905 / 0 / 79), skip sets equal by
+name to the base; `go test ./...` green; CNR byte-identical across 1106 behavioral packages. The one Release failure,
+`GoroutinePoolTests.GoroutineExitingLocked_TakesItsThreadWithIt`, fails identically at the base on the same host (its
+own seat).
+
+— i9 (2026-11-18)
+
+## 2026-11-18 — i9 (COORD 03:24Z item 1): `GoroutinePoolTests.GoroutineExitingLocked_TakesItsThreadWithIt` assumed room in the goroutine pool's idle set, so its control read red when the suite ran it right after a burst — DONE (seated)
+
+**What it was.** The test's control asserts that an unlocked goroutine's thread stays alive, idle, for the next one.
+`GoroutineThreadPool` keeps at most `MaxIdle` (64) idle workers, and a worker that finishes with the set full exits by
+design. When the test ran just after a burst (the set at the cap, the burst's last workers still returning), one of
+those workers took the last slot, the control's worker counted 65 and exited, and the control failed in under a
+millisecond. A host- and suite-order dependence, not a pool defect: the cap did exactly what it says.
+
+**Where it read red.** The unfiltered Release suite on the i9: 3 of 6 runs (the lever E base control at `f36b6b0d48`
+and both lever E gate runs; then three greens, two with a diagnostic in place and one unmodified). Never on the
+coordinator's battery. A burst-then-test sequence reproduces it on demand: red 4 runs of 5 at the base, the idle count
+reading 64 right after the burst.
+
+**The fix (test-only).** Before the control, the test waits until the idle set is settled (no worker still returning)
+and below the cap, by both the count the cap reads and the workers actually idle, bounded by `IdleTimeout` + 5 s; past
+that it reports Inconclusive by name instead of red. A new arm, `GoroutineExitingLocked_HoldsRightAfterABurst`, runs
+the burst and then the test at once, so removing the precondition goes red on demand rather than by suite order.
+
+— i9 (2026-11-18)
+
+
+## 2026-11-17 — P2 (the SetDefaultGOMAXPROCS seat; COORD ruling 14:03Z: a row, queued for .5): GOMAXPROCS never follows a CPU or cgroup change after start-up, because Go's automatic update does not run — OPEN, .5
+
+**What Go does.** While the setting is not custom (no `GOMAXPROCS` in the environment, no `runtime.GOMAXPROCS(n)`
+call, or a `runtime.SetDefaultGOMAXPROCS()` since), sysmon re-reads the default at most once a second
+(`proc.go:6586-6590`, `debug.updatemaxprocs`, on by default from go 1.25) and applies it through
+`sysmonUpdateGOMAXPROCS`. A process whose affinity mask or cgroup CPU limit changes while it runs follows it.
+Go's own tests: `TestCgroupGOMAXPROCSUpdate`, `TestCgroupGOMAXPROCSDontUpdate` and windows' `TestGOMAXPROCSUpdate`,
+all through a Go-built testprog (so none reads the converted runtime) and all skipped under `-short`.
+
+**What a converted program does.** Nothing calls `sysmonUpdateGOMAXPROCS` (the converted sysmon never runs), so the
+value set at start-up, or by the last `SetDefaultGOMAXPROCS`, stays until the program changes it. Read, not run.
+Disclosed in `docs/ConversionStrategies-Reference/manual-conversions.md`, the `SetDefaultGOMAXPROCS` row.
+
+**Size M.** A background timer in `managed_impl.cs` (or the M:N scheduler's sysmon equivalent, if that lands first),
+taking `defaultGOMAXPROCS(0)` once a second while `sched.customGOMAXPROCS` is false and `debug.updatemaxprocs` is
+set, through the same setter `GOMAXPROCS` uses. Its arm needs a cgroup whose limit the test changes while the process
+runs, which a linux box with a writable cgroup v1 cpu controller allows (the seat above used one).
+
+— P2 (2026-11-17)
+
+### 2026-11-18 — P2: the GOMAXPROCS automatic update row above is CLOSED (W-gmp-e)
+
+`runtime/managed_impl.cs` now carries Go's arm on the managed sysmon tick: `sysmonCheckGOMAXPROCS` re-reads
+`defaultGOMAXPROCS(0)` at most once a second while `sched.customGOMAXPROCS` is false and `debug.updatemaxprocs` is
+set, and a changed value is set by a thread-pool work item that stops the world (Go's `updateMaxProcsGoroutine`).
+Go's `computeMaxProcsLock` handshake with `GOMAXPROCS(n)` is kept. Three Go rules the row's first wording missed,
+each read in Go 1.26.11 and run against a Go oracle: the non-default counter for `updatemaxprocs=0` reads 0
+(runtime.main increments it before any counter registers); `SetDefaultGOMAXPROCS` takes no lock; and a setting
+that turns custom between sysmon's read and the stop ends Go's helper for good.
+
+**Measured (linux, 4 CPUs).** GolibTests `RuntimeGOMAXPROCSUpdateTests`: an affinity shrink to 1 CPU is followed
+in 101 ms and the restore in 1003-1007 ms (3 runs), red before the fix. A converted copy of the Go oracle matches
+Go on all four arms (cgroup quota 1.5 -> 3.5 gives 2 -> 4; `GOMAXPROCS=3` stays 3; `updatemaxprocs=0` stays 2;
+`taskset -a -c 0-1` gives 4 -> 2); before the fix it never changed.
+
+**Cost, and the one difference.** Go's sysmon parks while every P is idle, so an idle Go program reads 0 CPU over
+a 15 s window and runs no check. The managed tick keeps running, as it already did for the periodic GC: an idle
+converted program read 0.80-0.88 ms of CPU a second before the fix and 0.86-1.00 after, once warm (t=40-55 s, 3
+runs each); in the first 20 s, before the JIT promotes the once-a-second call, the cut read +0.3 ms a second.
+The prediction was under 0.1 ms a second: MISSED in the cold window, at the noise floor warm.
+
+— P2 (2026-11-18)
+
+## 2026-11-14 — P1 (Tour visual-parity item 4): array literals read `array<T>([…])`; one consumer-visible break, disclosed; committed converted tests keep the old form until the next `-tests` reconvert
+
+Seat `claude/p1-vp-array-literal`. An unkeyed, non-empty literal of an unnamed or alias array type now calls golib's
+new `builtin.array<T>(T[])` or `builtin.array<T>(nint, T[])` over a C# collection expression:
+`[6]int{2, 3, 5, 7, 11, 13}` is `array<nint>([2, 3, 5, 7, 11, 13])`, and a short literal passes its length first.
+Named, keyed, sparse, empty, array-of-arrays and factory-element literals keep their forms. The corpus regen is
+not in the seat yet; it waits for COORD's corpus slot.
+
+**The consumer-visible break.** In C# outside namespace `go` with both `using go;` and `using static go.builtin;`
+(the default `GoConsumerUsings` of every consuming project), `array<T>.Alias(…)` and `array<T>.AliasPointer(…)`
+now fail with CS0119: the builtin function is found before the type. `go.array<T>.Alias(…)` works. A probe against
+golib measured every shape: only the unqualified static member access fails; declarations, `new`, casts,
+`typeof`, `is`, `default` and a method-group conversion compile, and converted code (namespace `go`) is unaffected.
+`slice<T>` already fails the same way (`slice<nint>.Make(3)`, CS0119), so the rule is not new, only wider.
+Disclosed in docs/NEWS.md (the pending release's *Upgrading* list) and docs/PublicSurface.md.
+
+Census of hand-written C# that could reach it, at the seat's tip:
+- This repository outside `src/core`: 13 sites, all in GolibTests, all qualified in the seat. 2 more in GenTests
+  are generator input compiled inside namespace `go`, so they are unaffected. No other file outside namespace `go`
+  in src/tests, src/tools, src/utilities, src/gen or the archived examples has a hit.
+- docs/: 21 mentions of `array<T>.X(…)`. Every one describes converted code or names an instance member
+  (`Clone`, `GetEnumerator`). None is consumer code.
+- The converter emits `Alias` and `AliasPointer` only into converted code. No nugetgo template or sample in this
+  repository writes C# that uses them.
+- sqlite-cs at 726aeb8: no C# file is committed; 0 hits.
+- typescript-go-cs: not read; P1 stays off TypeScript-Go under the owner's standing rule. Owed to the lane that
+  holds that repository.
+
+Fix priced and not taken: move the two overloads to a static class that only converted projects import. That
+adds a `<Using>` line to every converted project file (the whole corpus and all 1054 behavioral projects) and a
+second golib type, and it would leave `slice<T>` as it is.
+
+**Committed converted `_test.cs` files** keep `new T[]{…}.array()` at about 936 sites (857 full, 65 multi-line,
+14 short), counted with the seat's census predicate, which undercounts literals passed to constructors. They take
+the new form on the next `-tests` reconvert; never hand-edit them.
+
+— P1 (2026-11-14)
+
+**2026-11-18, at master 4e46aef743 (after batches 311 and 312), amending the row above:** the corpus regen is now in
+the seat. Two seeded reconverts on all four targets, prediction posted before the measured run and met on every line
+and file: linux/amd64 112 files +574/-574, windows/amd64 115 +587/-587, darwin/amd64 112 +575/-575, linux/arm64 112
++574/-574 (124 files in all, +603/-603; no `GoPositionMap` or `using` line). Not applied, named:
+`runtime/mcleanup.cs.auto` and `runtime/mfinal.cs.auto`, review siblings of hand-owned files. The *Upgrading* item is
+no longer in a NEWS draft: the 1.26.11.1 draft is frozen and this seat ships after it, so the item belongs in the
+notes of the release that carries it. docs/PublicSurface.md still states the rule. The seat then merged master
+8a86140f79 (the .4 `-tests` regen and P5's holder fix; clean, no converter overlap). The committed `_test.cs` keep the
+old form, now 939 sites (860 full, 65 multi-line, 14 short) against 936 before the .4 regen. The comment census rises
+by one `in-composite-literal/anchor-differs` site (`html/escape.cs`), comments that now sit above `]);` instead of
+`}.array();`. One GolibTests file that landed after the seat's 11-14 gates (`ArrayAssignInPlaceTests.cs`) reached
+`array<T>.Alias` outside `namespace go` and hit the disclosed CS0119 at five sites; they now read `go.array<T>.Alias`.
+
+— P1 (2026-11-18)
+
+## 2026-11-18 — P2 (closes G's 2026-11-11 row "`sync.Mutex.Lock` has no try-first step: 230 ns and 64 bytes for an uncontended pair"; COORD ruling 14:11Z): cured on master by C2's fast path and W9a's CompareAndSwap — CLOSED; and `sync.RWMutex` is now Go's own code
+
+**The read.** One linux-x64 box with 4 CPUs, master `b63418fafc`, against Go 1.26.11's own build of the same loops in
+the same hour (Go: `go test -bench -count 3 -cpu 1,2,4`; C#: Release, best of 5 runs of 20 million pairs):
+
+| uncontended pair | Go 1.26.11 | master |
+|---|---|---|
+| `sync.Mutex` `Lock` + `Unlock`, through a box | 14.3 to 15.8 ns, 0 B | 15.2 ns, 0 B |
+| `sync.Mutex` in C memory | | 13.4 ns, 0 B |
+| floor in C#: one CompareAndSwap and one exchange | | 15.6 ns |
+
+G's 230 ns and 64 bytes were read on Windows before both changes landed: C2's fast path
+(`claude/c2-mutex-fastpath`, ruled (a) on 2026-11-12) put a try-first step ahead of the park bracket, and W9a
+(batch 310) replaced the gate with Go's eight bytes and Go's `CompareAndSwap(0, mutexLocked)`. The other waits the
+row named already try first: `WaitGroup.Wait` returns at a zero count before it parks (17.5 ns), and `Cond.Wait`
+always blocks, in Go too.
+
+**`sync.RWMutex`, the same seat** (`claude/p2-rwmutex-go-layout`). The row's question asked of RWMutex found more
+than cost: it was hand-owned around one managed `RWState`, so a copy shared the original's state, a native box
+could not hold it, and `reflect.DeepEqual` read a held lock equal to a free one. `rwmutex.cs` is now the converter's
+emission of Go's `rwmutex.go` over W9a's Mutex and golib's `RuntimeSemaphore`. Same box: `RLock` + `RUnlock` 64.7 to
+22.8 ns (Go 14.8 to 15.8), `Lock` + `Unlock` 65.6 to 37.9 ns (Go 22 to 30), readers on 4 threads 576 to 98.6 ns a
+pair (Go 67 to 73). COORD's condition on the semaphore table (it never removed a bucket, so every RWMutex that
+blocked would have kept one, and its owner, for the process) is met in the seat: an empty bucket is retired by
+whoever empties it, and 10,000 RWMutexes that each blocked one reader once leave the table at its starting size.
+Record: `docs/ConversionStrategies-Reference/manual-conversions.md`, the section "`sync.RWMutex` is Go's own code".
+
+**Still open from the neighbourhood.** `sync.WaitGroup` holds the same kind of managed state (`WaitGroupState`); it
+is its own piece, because Go keeps a WaitGroup's synctest bubble in a runtime special on its heap object and golib
+keeps it in that state. C2's 2026-11-12 row (no starvation mode) is unchanged.
+
+— P2 (2026-11-18)
+
+## 2026-11-19 — P5 (measure only, master `ec3e170e4b`): the osx-x64 barrier pair is a ROW effect, not the pair's own cost
+
+**Appended to P5's .4 final re-bank entry above (runtime osx-x64 does not bank at .4).** COORD asked for the pair's
+per-test wall alone on three hosted osx-x64 runs and an osx-arm64 control.
+
+**Instrument.** os-matrix `stack-probe`, filter
+`runtime;test=^(TestChanSendBarrier|TestChanSendSelectBarrier)$;at=1200,2400,3300`, Release, CGO off; darwin fans
+out to both mac runners, so each run carries its arm64 control. A filtered row is never a bank.
+
+| run | osx-x64 row wall | osx-x64 test host at 1200 s | osx-arm64 row wall | osx-arm64 test host at 1200 s |
+|---|---|---|---|---|
+| `44580168385` | 1571 s | exited before | 1641 s | exited before |
+| `44580301692` | 1415 s | exited before | 1087 s | exited before |
+| `44580501068` | 1915 s | exited before | 1298 s | exited before |
+
+On all six legs both tests matched Go (2 verdicts, PASS). The row wall includes conversion and build. The converted
+test host exited before the first dump offset every time, so **alone, each test finishes in under 20 min on osx-x64,
+3 of 3**, a margin of at least 40 min to the 60 m deadline. These are upper bounds: the probe step's read of the
+tests' own output from the row's results file printed 0 lines on all six legs, and the artifact carries no per-test
+elapsed.
+
+**In-row** (the reads in the entry above): DW-1 (`44449541821`) passed both with reported elapsed 3953.2 s and
+3959.9 s; DW-1R (`44464066634`) abandoned both at 3600.09 s.
+
+**Clock rule, inferred from the code and not measured** (`src/core/testing/TestExecution.cs:166-174` at
+`ec3e170e4b`): the per-test deadline clock starts when a parallel test resumes holding its `-parallel` slot and
+pauses while it is parked. Both tests call `t.Parallel`, so the 3953 s PASS (past 60 m) says the reported elapsed
+includes parked time the deadline does not charge, and the abandon at 3600.09 s says the charged clock did reach
+60 m in DW-1R.
+
+**Reading (COORD, 2026-11-19).** Alone the pair is far inside the deadline; inside the full runtime row, on the
+osx-x64 runner's 4 logical cores beside the row's other long parallel tests, it sits on the 60 m edge. The cause is
+contention in the row. The M:N seat's target shape is the in-row case. No shard change: re-dealing the row to steer
+the pair would configure the host to pass a test. The cell banks when the converted pair finishes inside the
+deadline in its own row.
+
+— P5 (2026-11-19)
+
+## 2026-11-15 — H (cgo 3.2's flip list, COORD's ruling): a one-expression uintptr round trip is emitted as a NUMBER, so Go-valid code is refused at the void door — OPEN, fidelity gap, .5
+
+**What.** `C.f(unsafe.Pointer(uintptr(unsafe.Pointer(&x))))`, a pointer converted to `uintptr` and back in ONE
+expression with no arithmetic, is Go-valid. go2cs emits it as `new @unsafe.Pointer((uintptr)@unsafe.Pointer.FromPinnedBox(Ꮡx))`,
+a bare number that carries no box. Under cgo 3.2's ruling (numbers stay refused) the void door refuses it, where Go
+runs it. The arm is `govoidexpr` (`src/go2cs/testdata/cgo/p3`), read refused on linux, windows and darwin (cgo-e2e
+43765795991, 43765805154, 43765814200), while its twin `govoid` (`unsafe.Pointer(&x)`) crosses in 3.2
+(DESIGN-cgo-phase3-marshaling section 18.1).
+
+**Not the ruling's target.** The ruling refuses numbers because Go-INVALID code holds them, across statements. This
+number exists only because the conversion is spelled out. The form with arithmetic already converts to `unsafe.Add`
+(`src/go2cs/pointerArithmetic.go`), which keeps the box.
+
+**The direction, NOT proposed now** (COORD, 2026-11-15): a converter fold of the identity round trip
+`unsafe.Pointer(uintptr(p))` to `p`, which keeps the box. It is an emission change that every package can reach, so its
+corpus cost (the two-seeded comparison on four targets) is UNMEASURED. Measure it when a consumer's census shows the
+shape. Until then it stays refused by name, as a number.
+
+**State.** OPEN, owner H, .5.
+
+— H (2026-11-15)
+
+## 2026-11-17 — H (COORD rulings on DESIGN-cgo-phase3-marshaling 18.6, before code): a self or mutual value-type cycle through W2-stored `unsafe.Pointer` words is retained until a word in the cycle is overwritten or cleared — NAMED LEAK, bounded, .5
+
+**The shapes.** All are managed WORD storage written through W2 (`StoreWord`, design 18.3), with value-type
+referents.
+- SELF: a slot in backing `K` stores `K`'s own address.
+- MUTUAL: a slot in `A` stores `B`'s address, and a slot in `B` stores `A`'s.
+- Each word's entry holds its referent's box, and that box keeps its pin-only hold (18.6 finding 1). So the entry's
+  pin, a strong `GCHandle`, roots a backing that is itself an entry table's `ConditionalWeakTable` key. In the self
+  case that is the entry's own key; in the mutual case, the other backing's key. No backing in the cycle is collected
+  while its words are published.
+
+**Why it is accepted.** The alternative is an unpinned word, whose number goes stale when the referent moves. That
+opens three holes P3 found:
+- C reads a stale address;
+- 3.2's number rule takes a stale word for C memory and dereferences it raw;
+- a reused address makes one number name two objects (CAS, memequal, memhash).
+COORD ruled a bounded leak the lesser harm than silent corruption, before any code, first for the mutual cycle (c4),
+then for the self case (ruling (B)), so that "one number names one live object" holds with no exception.
+
+**The bound.** The leak lasts until a word in the cycle is overwritten through W2 or cleared by a clear door (18.5
+finding 5). That drops the entry, releases its pin, and the cycle is collected.
+
+**The shape is rare.** It is reached only through W2 into managed word storage, which means the runtime's own word
+slots. `container/list`'s `root.next = &root` is a CLR reference field, outside the table, and never leaks this way.
+
+**Measured by** B-4's known-limit arms at the cut, c3 (self) and c4 (mutual):
+- every backing reads ALIVE after the drop and the forced collections;
+- after one word is overwritten through W2, every backing reads DEAD.
+A first-step reading of dead is news and is posted, not a pass.
+
+**Procedure (design 18.7 finding 3, 2026-11-17).**
+- c2, c3 and c4 run in ONE test. c2, with no cycle, is the control that the loop collects, and it must read dead.
+- A round is a forced, blocking, compacting full collection followed by `WaitForPendingFinalizers`. The cap is 10
+  rounds for both steps.
+- Step two reaches the slot through the `WeakReference`'s target, which is alive because of the leak. It does this in
+  a `NoInlining` helper, so no frame roots a backing.
+- c4 frees in stages, so the round in which each backing dies is posted.
+
+— H (2026-11-17)
+
+## 2026-11-20 — H (amends the 2026-11-17 NAMED LEAK row; COORD ruled c1 inside it): the leak's general form, and its third instance, c1 — NAMED LEAK, bounded, .5
+
+**The general form.** A published word whose referent reaches the box that pins the destination's storage.
+- The destination slot's storage is held still by a pin, a strong `GCHandle` owned by the box that pins it. W2 takes
+  that pin when it projects the slot, and the box's finalizer frees it.
+- The word's entry holds its referent strongly, so the referent reaches that box.
+- The box therefore never finalizes. Its pin roots the storage, which is the entry table's `ConditionalWeakTable` key,
+  and the key keeps the table and the entry. Nothing in the loop is collected while the word is published.
+- The 2026-11-17 row's two shapes are instances in which the referent IS such a box: SELF (c3), a word naming its own
+  backing, and MUTUAL (c4), two backings naming each other. Both have value-type referents.
+
+**The third instance, c1.** A REFERENCE-BEARING referent, published as its order token rather than a pinned address,
+that holds the destination's own box. Measured in the same B-4 test as c3 and c4: ALIVE after the drop and the cap,
+DEAD after its word is overwritten through W2. COORD ruled it inside the named leak rather than a fourth hole
+(2026-11-20).
+
+**Unchanged.**
+- The bound: a word of the loop overwritten through W2, or cleared by a clear door, drops the entry. The box then
+  finalizes, the pin is freed, and the loop is collected.
+- The reason it is accepted.
+- The procedure: one test, the c2 control dead within the 10-round cap.
+
+**Where it is stated.** `golib/GoPointerWords.cs` (THE NAMED LEAK remark) and design 18.8.
+
+— H (2026-11-20)
+
+## 2026-11-20 — C1 (board pp, filed beside it): a pointer-first chain through a foreign unexported value embed
+
+Found by P3's review of board (pp) at `07fb8a0e4e` (SHOULD 2, COORD ruling 2026-11-20 13:25Z: count it, file it here,
+no route change in the pp seat). A promoted POINTER-receiver method whose chain starts with a POINTER embed and then
+passes an UNEXPORTED value embed of another package takes `convSelectorExpr.go`'s pointer-then-value arm, which spells
+each tail hop as `.of(<Owner>.Ꮡ<embed>)` through the embed's `internal` accessor. Seen from another assembly that is
+the same CS0117/CS0122 pp fixed for all-value chains. Shape: `type T struct{ *lib.Outer }` over
+`type Outer struct{ node }` (unexported, in lib) whose `(*node).Bump` is called as `t.Bump()`.
+
+**Measured, census kind `ptrtail`** (`TestPromotedUnexportedEmbedCensus`, on the pp seat): standard library 0 sites on
+windows, linux and darwin; behavioral corpus 0 sites in all 1034 modules at master `429b8fccb4`; positive control 2 sites
+for the 2 calls of the shape above. So nothing in the corpus reaches it today; a user module can.
+
+**Likely fix** (not taken): the pp route, keyed on the tail. The outer type gets the promoted forwarder through the
+pointer embed (`pathHasPointer`), so the call on the outer value should bind as pp's does; a red-first behavioral arm
+decides it. Unmeasured: whether the forwarder is public through a pointer hop for a method of an unexported type.
+
+— C1 (2026-11-20)
+
+## 2026-11-20 — H (found during seat S-B1; recorded, NOT fixed): a store of a pointer word INTO a func variable lands in a fresh box, so the func variable is never set — LOST WRITE, runtime, .5
+
+**The Go line.** Go builds a func value by hand: it stores a `*funcval` as the func variable's word.
+
+```go
+// runtime/debugcall.go (debugCallWrap2); runtime/cgocall.go (cgocallbackg1) is the same line over cb and cbFV
+dispatchFV := funcval{dispatch}
+*(*unsafe.Pointer)(unsafe.Pointer(&dispatchF)) = noescape(unsafe.Pointer(&dispatchFV))
+```
+
+**The emission at master `429b8fccb4`.** S-B1's word door does not change it: its narrowing returns exactly these
+lines to this text.
+
+<!-- illustration: the committed emission, src/core/runtime/debugcall.cs:266-268 and src/core/runtime/{windows,linux,darwin}/cgocall.cs:480-482 at 429b8fccb4 -->
+```csharp
+ref var dispatchF = ref heap<Action>(out var ᏑdispatchF);
+ref var dispatchFV = ref heap<funcval>(new funcval(dispatch), out var ᏑdispatchFV);
+(Ꮡ(@unsafe.Pointer.OfFunc(dispatchF))).Value = noescape(@unsafe.Pointer.FromPinnedBox(ᏑdispatchFV));
+```
+
+**Why the write is lost.**
+- The reinterpret carrying arm reads a func source's word as `OfFunc(f)`, the func's cookie, and wraps it in a fresh
+  `Ꮡ(…)` box (`reinterpretManagedEmission`, convCallExpr.go).
+- A READ through that form is right: it reads the word.
+- A STORE through it writes into the fresh box, which nothing else reads. So `dispatchF` / `cb` stays nil, and the
+  call through it on the next line is a nil func call.
+- The carrying arm's own comment names this: a store "owes a statement-level emission of its own, named as a
+  follow-up rather than approximated here".
+
+**The sites.** `runtime/debugcall.cs` (`debugCallWrap2`'s `dispatchF`) and the per-OS `runtime/cgocall.cs`
+(`cgocallbackg1`'s `cb`). Both are dormant in the managed model:
+- debugCallWrap2 is the debugger call-injection path;
+- cgocallbackg1 is the C-to-Go callback path, which is Phase 5.
+
+**Why nothing takes the shape today.**
+- The word door (W2) does not: over a fresh box it would store into that box just the same.
+- `funcWordOperations` (funcWordOperations.go) does not either. Its three stores are:
+  - w1 `*(*uintptr)(unsafe.Pointer(&f)) = x` → `f = GoFuncCookie.Func<F>(x)`, whose element test
+    (`isFuncWordType`) is `uintptr` only;
+  - w2, a func stored into a `uintptr` lvalue;
+  - w3 `*(*F)(e) = fn`, a FUNC stored through an `unsafe.Pointer`.
+  Here the element is `unsafe.Pointer` and the stored value is a pointer, so none of the three matches. The file's
+  header says the `*unsafe.Pointer` forms keep the reinterpret.
+
+**The likely fix direction (not applied).**
+- Widen w1 to the `*unsafe.Pointer` spelling.
+- The stored pointer names a `funcval` whose `fn` word names the code, so `f` takes the delegate that word names,
+  as w1 does for a `uintptr` word. That holds where the word is a GoFuncCookie. A word handed in from C is Phase 5's
+  question.
+- It owes a red arm that calls through `f` after the store.
+
+**The silent case beside the loud ones.** This store is the one `*unsafe.Pointer` shape whose failure is SILENT.
+P3's review of seat S-B1 (2026-11-20) lists the shapes that refuse at run time BY NAME, as designed:
+- a tuple target `*p, x = ..` over a native slot, which keeps `.Value` (the word door's header);
+- hand-written `.Value` on a native `*unsafe.Pointer` box (`mfinal.cs` takes the door by hand; hand-owned files were
+  not censused);
+- a Go pointer stored into or read out of C memory, `runtime.Pinner` included (design deviation 8(b)).
+
+**Owner.** Unassigned; for COORD to route.
+
+— H (2026-11-20)
 ## 2026-11-20 — P2 (wall E, .5): Go's spread hands the callee the slice itself; go2cs copied it
 
 Found by sqlite-cs (P5's TestPreUpdateHook divergence): a row scan wrote through `dest...` into a slice its caller

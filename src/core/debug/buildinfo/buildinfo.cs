@@ -657,4 +657,4 @@ internal static (io.ReaderAt, error) DataReader(this ref plan9objExe x, uint64 a
     return (default, errors.New(addressNotMappedˢ));
 }
 
-} // end buildinfoᴛplan9objExe
+}

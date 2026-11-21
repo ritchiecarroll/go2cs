@@ -64,7 +64,7 @@ public class ElemBoxPersistTests
     public void AWindowOverTheSameBackingAnswersTheBackingsBox()
     {
         array<cell> table = new(8);
-        array<cell> window = array<cell>.Alias(new slice<cell>(table.Source, 2, 6), 4);
+        array<cell> window = go.array<cell>.Alias(new slice<cell>(table.Source, 2, 6), 4);
 
         Assert.IsTrue(ReferenceEquals(Ꮡ(table, 3), Ꮡ(window, 1)), "window[1] is table[3]: one storage location, one box");
         Assert.IsFalse(ReferenceEquals(Ꮡ(table, 1), Ꮡ(window, 1)), "the window's own index does not name the backing's slot");

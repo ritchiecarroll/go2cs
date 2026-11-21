@@ -7,7 +7,7 @@
 // Additional permission for emitted output: see LICENSE-EXCEPTION (AGPL section 7).
 
 // Guards seat #43 (item 3 of the comment-parity residue): a blank import's Go trailing comment stays its own `//`
-// comment on the import's line. The converter notes a blank import with a `// blank import: ...` line, and the Go
+// comment on the import's line. The converter notes a blank import with a `// import _ "..." (...)` line, and the Go
 // comment (`_ "unsafe" // for linkname`) used to follow it as text inside that one `//` comment. With a Go comment the
 // note is a block comment; without one it keeps its `//` form.
 
@@ -77,7 +77,7 @@ func other() int { return 1 }
 	}
 
 	outDir := filepath.Join(options.go2csPath, "src", "example.com", "bitc")
-	const note = "blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)"
+	const note = `import _ "unsafe" (nothing to initialize)`
 
 	// noteLine returns the one line of a generated file that carries the blank-import note.
 	noteLine := func(file string) string {

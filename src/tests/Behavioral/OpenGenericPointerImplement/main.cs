@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -10,8 +9,6 @@ partial interface Iter {
 }
 
 partial struct sliceIter<T> /*[]T*/;
-
-} partial class mainᴛsliceIter {
 
 internal static (any, bool) Next<T>(this ref sliceIter<T> it) {
     if (len(it) == 0) {
@@ -22,9 +19,7 @@ internal static (any, bool) Next<T>(this ref sliceIter<T> it) {
     return ((v).OrTypedNilOf(), true);
 }
 
-} partial class main_package {
-
-public static Iter NewIter<T>(params variadic<T> valuesʗp) {
+public static Iter NewIter<T>(params Span<T> valuesʗp) {
     var values = valuesʗp.slice();
 
     ref var it = ref heap<sliceIter<T>>((sliceIter<T>)values, out var Ꮡit);
@@ -40,11 +35,7 @@ partial struct pair<K, V> {
     internal V v;
 }
 
-} partial class mainᴛpair {
-
 internal static @string Name<K, V>(this pair<K, V> p) { return fmt.Sprint((p.k).OrTypedNilOf(), "=", (p.v).OrTypedNilOf()); }
-
-} partial class main_package {
 
 internal static Namer asNamer<K, V>(K k, V v) { return new pair<K, V>(k, v); }
 
@@ -53,8 +44,6 @@ partial struct counter<T> {
     internal T last;
 }
 
-} partial class mainᴛcounter {
-
 internal static (any, bool) Next<T>(this ref counter<T> c) {
     if (c.n == 2) {
         return (default, false);
@@ -62,8 +51,6 @@ internal static (any, bool) Next<T>(this ref counter<T> c) {
     c.n++;
     return (fmt.Sprint((c.last).OrTypedNilOf(), "#", c.n), true);
 }
-
-} partial class main_package {
 
 internal static Iter innerIter<T>(T v) { return new counterжIter<T>(Ꮡ(new counter<T>(last: v))); }
 

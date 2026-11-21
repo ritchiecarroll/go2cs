@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,11 +8,7 @@ partial struct ValueType {
     internal @string unit;
 }
 
-} partial class mainᴛValueType {
-
 internal static @string describe(this ValueType v) { return v.unit; }
-
-} partial class main_package {
 
 partial interface message {
     @string describe();

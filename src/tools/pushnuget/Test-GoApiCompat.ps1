@@ -505,6 +505,90 @@ try {
         Check 'a floor that does not parse reads red' ((PackFloorFailures $rehearsal '').Count -eq 1 -and (PackFloorFailures $rehearsal 'x').Count -eq 1) 'it passed'
     }
 
+    # A MODULE'S BASELINE BELOW THE BREAK FLOOR (W-ng-apicompat, COORD 20261119T230653Z, option A). The 1.26.11.1 wave
+    # rebuilds every module on go.* 1.26.11.1, and the guard compared each with its previous revision, built on
+    # 1.26.10.3: hashset rev 6 refused on 56 CP0002 (every method moved to its type's holder class) and uuid rev 4 on
+    # 65 CP0002 and 4 CP0001. go.lib 1.26.11.1's floor refuses that baseline to every consumer (GO2CS3002), so its
+    # surface binds nobody: a baseline whose go.lib range starts below the CURRENT floor is reported and not compared.
+    # A baseline at the floor is compared and refuses as before, and a go.lib range that cannot be read refuses.
+    Write-Host 'a module baseline built below the break floor is reported, not compared; at the floor it is compared'
+    $baselineFloor = Get-Command Test-GoApiCompatBaselineFloor -ErrorAction SilentlyContinue
+    Check 'the module exports Test-GoApiCompatBaselineFloor' ([bool]$baselineFloor) 'not exported'
+    function Nuspec([string[]]$Dependencies) {
+        $deps = ($Dependencies | ForEach-Object { "<dependency $_ exclude=`"Build,Analyzers`" />" }) -join ''
+        # The comma keeps the byte[] whole: a function's output is enumerated, and New-Package reads only a byte[] as bytes.
+        ,[System.Text.Encoding]::UTF8.GetBytes("<?xml version=`"1.0`" encoding=`"utf-8`"?><package xmlns=`"http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd`"><metadata><id>fixture.widget</id><version>1.0.300.2</version><dependencies><group targetFramework=`"net10.0`">$deps</group></dependencies></metadata></package>")
+    }
+    function FloorPackage([string]$Name, [string[]]$Dependencies) {
+        New-Package $Name @{ $lib = 'widget-base.dll'; 'fixture.widget.nuspec' = (Nuspec $Dependencies) }
+    }
+    function BaselineFloor([string]$Package, [string]$Floor) {
+        if (-not $baselineFloor) { return [pscustomobject]@{ Skip = $false; Line = $null; Failure = '<no Test-GoApiCompatBaselineFloor>' } }
+        Test-GoApiCompatBaselineFloor -Baseline $Package -BaselineVersion '1.0.300.2' -Floor $Floor
+    }
+    function Compared($r) { -not $r.Skip -and -not $r.Failure }
+    function Refused($r, [string]$fragment) { -not $r.Skip -and $r.Failure -and $r.Failure.Contains($fragment) }
+    $below = FloorPackage 'floor-below' @('id="go.fmt" version="[1.26.11.1, 1.27.0)"', 'id="go.lib" version="[1.26.10.3, 1.27.0)"')
+    $atFloor = FloorPackage 'floor-at' @('id="go.lib" version="[1.26.11.1, 1.27.0)"')
+
+    $r = BaselineFloor $below '1.26.11.1'
+    Check 'a baseline built on go.* 1.26.10.3 is skipped under the floor 1.26.11.1' ($r.Skip -and -not $r.Failure) "skip $($r.Skip); $($r.Failure)"
+    Check 'the skip line names the baseline, the floor and the go.lib range, and says it was not compared' (
+        $r.Line -ceq 'baseline 1.0.300.2 built below the break floor 1.26.11.1 (go.lib [1.26.10.3, 1.27.0)): not compared (reported, not gated)') "$($r.Line)"
+    Check 'the floor reads go.lib, not the first go.* dependency' ($r.Line -and $r.Line.Contains('[1.26.10.3,')) "$($r.Line)"
+    $r = BaselineFloor $atFloor '1.26.11.1'
+    Check 'a baseline built at the floor is compared' (Compared $r) "skip $($r.Skip); $($r.Failure)"
+    $r = BaselineFloor (FloorPackage 'floor-above' @('id="go.lib" version="[1.26.11.2, 1.27.0)"')) '1.26.11.1'
+    Check 'a baseline built above the floor is compared' (Compared $r) "skip $($r.Skip); $($r.Failure)"
+    $r = BaselineFloor (FloorPackage 'floor-pre' @('id="go.lib" version="[1.26.11.1-ci.4, 1.27.0)"')) '1.26.11.1'
+    Check 'a prerelease lower bound reads as its release, as go.lib.targets reads it: at the floor, compared' (Compared $r) "skip $($r.Skip); $($r.Failure)"
+    $r = BaselineFloor (FloorPackage 'floor-bare' @('id="go.lib" version="1.26.10.3"')) '1.26.11.1'
+    Check 'a bare minimum version is an inclusive lower bound: below the floor, skipped' ($r.Skip -and -not $r.Failure) "skip $($r.Skip); $($r.Failure)"
+    $r = BaselineFloor (FloorPackage 'floor-case' @('id="Go.Lib" version="[1.26.10.3, 1.27.0)"')) '1.26.11.1'
+    Check 'the go.lib id is matched ignoring case, as NuGet matches ids' ($r.Skip -and -not $r.Failure) "skip $($r.Skip); $($r.Failure)"
+
+    Write-Host 'THE NEGATIVE CONTROL: an at-floor baseline is compared, and a planted removal still refuses'
+    $plantedRemoval = New-Package 'floor-internal' @{ $lib = 'widget-internal.dll' }
+    $r = Compare-Fixture $atFloor $plantedRemoval $null
+    Check 'the at-floor baseline against a member made internal reads red, naming it' (
+        $r.Failures.Count -eq 1 -and $r.Failures[0].Contains('Fixture.Widget.Instance') -and $r.Failures[0].Contains('CP0002') -and $r.Compared -eq 1) "compared $($r.Compared); $($r.Failures -join '; ')"
+    $r = Compare-Fixture $atFloor $atFloor $null
+    Check 'restored, it reads green' ($r.Failures.Count -eq 0 -and $r.Compared -eq 1) "compared $($r.Compared); $($r.Failures -join '; ')"
+
+    Write-Host 'a baseline the floor cannot read refuses, never skips'
+    $r = BaselineFloor (FloorPackage 'floor-nolib' @('id="go.fmt" version="[1.26.10.3, 1.27.0)"')) '1.26.11.1'
+    Check 'a nuspec with no go.lib dependency refuses' (Refused $r 'no go.lib dependency') "skip $($r.Skip); $($r.Failure)"
+    $r = BaselineFloor (FloorPackage 'floor-excl' @('id="go.lib" version="(1.26.10.3, 1.27.0)"')) '1.26.11.1'
+    Check 'an exclusive lower bound refuses' (Refused $r '(1.26.10.3, 1.27.0)') "skip $($r.Skip); $($r.Failure)"
+    $r = BaselineFloor (FloorPackage 'floor-garbled' @('id="go.lib" version="latest"')) '1.26.11.1'
+    Check 'a range that does not parse refuses' (Refused $r "'latest'") "skip $($r.Skip); $($r.Failure)"
+    $r = BaselineFloor (FloorPackage 'floor-noversion' @('id="go.lib"')) '1.26.11.1'
+    Check 'a go.lib dependency with no version refuses' (Refused $r "''") "skip $($r.Skip); $($r.Failure)"
+    $r = BaselineFloor (FloorPackage 'floor-two' @('id="go.lib" version="[1.26.11.1, 1.27.0)"', 'id="go.lib" version="junk"')) '1.26.11.1'
+    Check 'one unreadable go.lib range among several refuses' (Refused $r "'junk'") "skip $($r.Skip); $($r.Failure)"
+    $r = BaselineFloor (New-Package 'floor-nonuspec' @{ $lib = 'widget-base.dll' }) '1.26.11.1'
+    Check 'a baseline with no nuspec refuses' (Refused $r 'nuspec') "skip $($r.Skip); $($r.Failure)"
+    foreach ($bad in @('', '1.26.11', 'x')) {
+        $r = BaselineFloor $below $bad
+        Check "a floor of '$bad' refuses, never skips" (Refused $r 'break floor') "skip $($r.Skip); $($r.Failure)"
+    }
+
+    Write-Host 'the guard and the module pack run it'
+    $guardTakesFloor = (Get-Command Invoke-GoApiCompatGuard).Parameters.ContainsKey('BreakFloor')
+    Check 'the guard takes the break floor from its caller' $guardTakesFloor 'Invoke-GoApiCompatGuard has no -BreakFloor'
+    $floorAt = $module.IndexOf('Test-GoApiCompatBaselineFloor -Baseline')
+    $compareAt = $module.IndexOf('$result = Test-GoApiCompatPackage')
+    Check 'the guard judges the baseline against the floor before it compares' ($floorAt -ge 0 -and $compareAt -gt $floorAt) "floor at $floorAt, compare at $compareAt"
+    Check 'the guard returns the baselines it did not compare' ($module.Contains('BelowFloor = @($belowFloor)')) 'no BelowFloor in the result'
+    $packText = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/tools/nugetgo/nugetgo-pack.ps1'))
+    Check 'nugetgo-pack.ps1 reads the floor from the go.lib it restored' ($packText -match '\$breakFloor = Get-GoBreakFloor ') 'no floor read'
+    Check 'nugetgo-pack.ps1 passes the floor to the guard' ($packText -match 'Invoke-GoApiCompatGuard [^\r\n]*-BreakFloor \$breakFloor') 'no -BreakFloor'
+    Check 'nugetgo-pack.ps1 reports a baseline below the floor' ($packText.Contains('$apiCompat.BelowFloor')) 'no report'
+    $pushText = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/push-nuget.ps1'))
+    Check 'push-nuget.ps1 (the standard library) does not pass -BreakFloor: a go.* break is held by its suppressions' (-not $pushText.Contains('-BreakFloor')) 'push-nuget.ps1 passes -BreakFloor'
+    $repackText = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/tools/nugetgo/Invoke-NugetgoRepack.ps1'))
+    Check 'Invoke-NugetgoRepack.ps1 passes -ApiCompatSuppressions to the pack' ($repackText -match "packArgs \+= @\('-ApiCompatSuppressions', \`$ApiCompatSuppressions\)") 'no pass-through'
+
     Write-Host 'the release path runs it'
     $push = [System.IO.File]::ReadAllText((Join-Path $repoRoot 'src/push-nuget.ps1'))
     Check 'push-nuget.ps1 restores the pinned tool' ($push.Contains('Initialize-GoApiCompatTool')) 'no restore call'
