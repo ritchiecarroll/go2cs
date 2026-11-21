@@ -249,4 +249,4 @@ internal static uint64 Uint64(this ref rngSource rng) {
     return (uint64)x;
 }
 
-} // end randᴛrngSource
+}

@@ -13,11 +13,7 @@ partial struct Driver {
     internal @string name;
 }
 
-} partial class mainᴛDriver {
-
 public static (driver.Conn, error) Open(this ref Driver d, @string _) { return (default, default); }
-
-} partial class main_package {
 
 partial interface Connector {
     Driver Driver();

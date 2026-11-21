@@ -237,7 +237,7 @@ that never goes through a pointer). Otherwise it is `a * 0`, so `f() % -1` still
 ```go
 arm("int64", func() string { return fmt.Sprint(i64/int64(m1), " ", i64%int64(m1)) })
 ```
-<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:123 -->
+<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:118 -->
 ```csharp
 arm("int64", () => fmt.Sprint(quo(i64, (int64)m1), " ", rem(i64, (int64)m1)));
 ```
@@ -260,7 +260,7 @@ prints its result under the label.
 ```go
 sl[counted(1)] /= m1
 ```
-<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:158 -->
+<!-- source: src/tests/Behavioral/MinIntDivide/main.cs.target:153 -->
 ```csharp
 sl[counted(1)].QuoAssign(m1);
 ```

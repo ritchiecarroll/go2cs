@@ -97,4 +97,4 @@ public static @string String(this SyncMarker i) {
     return _SyncMarker_name.slice(_SyncMarker_index[i], _SyncMarker_index[i + 1]);
 }
 
-} // end pkgbitsᴛSyncMarker
+}

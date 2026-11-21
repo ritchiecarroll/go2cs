@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -17,13 +16,9 @@ internal static Action<ж<State>, nint> adder() {
     };
 }
 
-} partial class mainᴛState {
-
 internal static void apply(this ж<State> Ꮡs, nint x) {
     adder()(Ꮡs, x);
 }
-
-} partial class main_package {
 
 internal static void main() {
     var s = Ꮡ(new State());

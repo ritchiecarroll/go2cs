@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using @unsafe = unsafe_package;
-using static main_package;
 
 partial class main_package {
 
@@ -20,13 +19,9 @@ internal static group newGroup(slice<item> items) {
     return new group(ptr: @unsafe.SliceData(items), n: len(items));
 }
 
-} partial class mainᴛgroup {
-
 internal static slice<item> items(this group g) {
     return @unsafe.Slice(g.ptr, g.n);
 }
-
-} partial class main_package {
 
 internal static void show(@string label, slice<item> items) {
     fmt.Print(label, ":");

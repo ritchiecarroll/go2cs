@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -21,15 +20,11 @@ partial class intRef /*ж<int64>*/;
 
 partial struct tail /*@string*/;
 
-} partial class mainᴛtail {
-
 internal static byte chop(this ref tail t) {
     var b = (t)[0];
     t = (t)[1..];
     return b;
 }
-
-} partial class main_package {
 
 internal static @string consume(@string sʗp) {
     ref var s = ref heap(sʗp, out var Ꮡs);

@@ -4,7 +4,6 @@ using fmt = fmt_package;
 using os = os_package;
 using runtime = runtime_package;
 using time = time_package;
-using static main_package;
 
 partial class main_package {
 
@@ -12,13 +11,9 @@ partial struct E {
     internal nint n;
 }
 
-} partial class mainᴛE {
-
 public static void Bare(this ref E e) { }
 public static nint Value(this ref E e, nint a) { return a; }
 public static nint Pair(this ref E e, nint a, nint b) { return a + b; }
-
-} partial class main_package {
 
 internal static partial nint line() {
     var (_, _, l, _) = runtime.Caller(1);

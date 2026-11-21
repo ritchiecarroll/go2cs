@@ -19,7 +19,7 @@ func (p point) String() string { return fmt.Sprintf("(%d,%d)", p.x, p.y) }
 	var n Named = point{3, 4} // concrete point -> Named (defined over the Stringer interface)
 	fmt.Println(n.String())
 ```
-<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:11-21, 49-50 -->
+<!-- source: src/tests/Behavioral/DefinedTypeOverInterface/main.cs.target:10-18, 44-45 -->
 ```csharp
 partial interface Stringer {
     @string String();
@@ -28,8 +28,6 @@ partial interface Stringer {
 partial struct point {
     internal nint x, y;
 }
-
-} partial class mainᴛpoint {
 
 internal static @string String(this point p) { return fmt.Sprintf("(%d,%d)"u8, p.x, p.y); }
 …
@@ -64,7 +62,7 @@ An overridden member is untouched (it forwards to the struct's own method, `this
 
 **A converter-emitted promoted forwarder is one of its struct's methods: it takes the METHOD's spelling and stands in the struct's method holder.** When a struct satisfies an interface only through its pointer, the converter writes a forwarder for each method the embedded interface field still promotes into the VALUE method set (`// Go method set entry for the promoted 'Connector.Driver()'`). The forwarder's name and the member it calls come from the method spelling (`getSanitizedFunctionName`), which is how the interface declares the member and how every call site reads it. A package-level struct's forwarders are written into the struct's method holder, beside the methods Go declares on it ([Type-vs-Method Name Collisions](shadowing.md#type-vs-method-name-collisions)), and go2cs-gen writes their pointer-receiver overloads there too. A package's types and its methods are then members of different classes, so a type and a method of one name keep both names:
 
-<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/main.cs.target:43-47 -->
+<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/main.cs.target:39-43 -->
 ```csharp
 } partial class mainᴛcounting {
 
@@ -73,7 +71,7 @@ An overridden member is untouched (it forwards to the struct's own method, `this
 internal static Driver Driver(this counting recvᴛ) => recvᴛ.Connector.Driver();
 ```
 
-<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/main.cs.target:75 -->
+<!-- source: src/tests/Behavioral/PromotedForwarderTypeNameCollision/main.cs.target:71 -->
 ```csharp
 internal static driver.Driver Driver(this fcounting recvᴛ) => recvᴛ.Connector.Driver();
 ```
@@ -471,7 +469,7 @@ A Go **type** whose name is a C# reserved keyword (`type fixed struct{…}`, `ty
 Emitted form (from the `KeywordNamedTypes` goldens and its generated adapters):
 At a cast site the converter composes the adapter's name, with no marker:
 
-<!-- source: src/tests/Behavioral/KeywordNamedTypes/main.cs.target:99-105 -->
+<!-- source: src/tests/Behavioral/KeywordNamedTypes/main.cs.target:94-100 -->
 ```csharp
 sizer p = new fixedжsizer(Ꮡf);
 …
@@ -539,7 +537,7 @@ The `Ꮡ` prefix already de-keywords the composed name (the keyword + affix rule
 above rely on), so the field declaration strips the escape — matching every `&null` use site, which
 already composes `Ꮡnull` through `boxBaseName`. The var's own property keeps its escape (`@null`), and a
 use site reads the box:
-<!-- source: src/tests/Behavioral/HeapKeywordVar/main.cs.target:10-11, 45 -->
+<!-- source: src/tests/Behavioral/HeapKeywordVar/main.cs.target:9-10, 40 -->
 ```csharp
 internal static readonly ж<slice<byte>> Ꮡnull = new StaticBox<slice<byte>>(slice<byte>("null"u8));
 internal static ref slice<byte> @null => ref ((StaticBox<slice<byte>>)Ꮡnull).ValueSlot;
@@ -1224,7 +1222,7 @@ beside the `public` method (go-cmp's
 `func Reporter(r interface{ PushStep(PathStep); Report(Result); PopStep() }) Option`, CS0051 in production).
 `visitInterfaceType` consults `isPublicizedLiftedType` ahead of the function-local `internal` default:
 
-<!-- source: src/tests/Behavioral/AnonInterfaceParamPublic/AnonInterfaceParamPublic.cs.target:19 -->
+<!-- source: src/tests/Behavioral/AnonInterfaceParamPublic/AnonInterfaceParamPublic.cs.target:14 -->
 ```csharp
 public partial interface Report_r /*dyn*/ {
 ```
@@ -1292,7 +1290,7 @@ is ambiguous (CS0121). The interface therefore **redeclares each such method onc
 hides every inherited member of that name; every implementer fills the redeclaration with the same
 method that fills the inherited slots:
 
-<!-- source: src/tests/Behavioral/EmbeddedInterfaceMergedMethod/main.cs:21-27 -->
+<!-- source: src/tests/Behavioral/EmbeddedInterfaceMergedMethod/main.cs:20-26 -->
 ```csharp
 partial interface EmitHost :
     PrinterHost,
@@ -1431,7 +1429,7 @@ result list — C# tuple conversions do not consult user conversions element-wis
 converter deconstructs into temps and converts each element through the usual interface
 machinery (which also records the `GoImplement` pairing):
 
-<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:145-146 -->
+<!-- source: src/tests/Behavioral/CrossPkgUser/main.cs:121-122 -->
 ```csharp
 var (ᴛ1, ᴛ2) = makeRelay();
 return (new relayжReporter(ᴛ1), ᴛ2);
@@ -1676,7 +1674,7 @@ resolved after the file-visit barrier, so the lift named may live in any file of
 no lift claimed resolves to an empty line, and the marker on every other dyn member resolves to nothing.
 Emitted form:
 
-<!-- source: src/tests/Behavioral/GenericLiftedInterfaceField/GenericLiftedInterfaceField.cs.target:8-12, :17-18, :46-48 -->
+<!-- source: src/tests/Behavioral/GenericLiftedInterfaceField/GenericLiftedInterfaceField.cs.target:7-11, :16-17, :37-39 -->
 ```csharp
 partial interface constraints_permitted<T, V> /*dyn*/ {
     (T, bool) query(V _);
@@ -2059,7 +2057,7 @@ lp := lib.Pitch(o)
 op := other.Pitch(p)
 ```
 
-<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.cs:49-50 -->
+<!-- source: src/tests/Behavioral/ForeignPairStructConversion/main.cs:44-45 -->
 ```csharp
 var lp = libꓸPitch(o);
 var op = otherꓸPitch(p);

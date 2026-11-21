@@ -270,4 +270,4 @@ partial struct rlocker /*RWMutex*/;
 internal static void Lock(this ж<rlocker> Ꮡr) { (Ꮡr.Reinterpret<rlocker, RWMutex>()).RLock(); }
 internal static void Unlock(this ж<rlocker> Ꮡr) { (Ꮡr.Reinterpret<rlocker, RWMutex>()).RUnlock(); }
 
-} // end syncᴛrlocker
+}

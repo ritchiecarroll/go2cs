@@ -1494,7 +1494,8 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 
 		// A method expression names the method's STATIC form, which is a member of the method's HOLDER: the
 		// class of its receiver type beside the package class (methodHolder.go), in this package as in any
-		// other: `mainᴛwords.Len`, `global::go.net.httpᴛRequest.Write` for `(*http.Request).Write`. The
+		// other: `mainᴛwords.Len`, `global::go.net.httpᴛRequest.Write` for `(*http.Request).Write`, and the
+		// package class for a method of package main that stays there: `main_package.Size`. The
 		// bare name binds nothing outside the holder (a `using static` exposes an extension method for
 		// `recv.M()` only, never as a method group), and inside one it could bind a package function of
 		// the same name. The holder is derived from the method's own receiver type through go/types, never

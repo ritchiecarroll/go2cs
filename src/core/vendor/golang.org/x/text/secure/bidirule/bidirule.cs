@@ -362,4 +362,4 @@ internal static (nint n, bool ok) advanceString(this ref Transformer t, @string 
     return (n, true);
 }
 
-} // end bidiruleᴛTransformer
+}

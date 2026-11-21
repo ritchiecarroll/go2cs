@@ -269,4 +269,4 @@ public static @string String(this Attr i) {
     return "Attr("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
 }
 
-} // end dwarfᴛAttr
+}

@@ -1160,4 +1160,4 @@ internal static bool use1(this ж<Checker> Ꮡcheck, ast.Expr e, bool lhs) {
     return x.mode != invalid;
 }
 
-} // end typesᴛChecker
+}

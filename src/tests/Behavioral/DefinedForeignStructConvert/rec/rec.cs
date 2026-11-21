@@ -20,4 +20,4 @@ public static Hidden NewHidden(nint n, @string s) { return new Hidden(N: n, s: s
 
 public static @string S(this Hidden h) { return h.s; }
 
-} // end recᴛHidden
+}

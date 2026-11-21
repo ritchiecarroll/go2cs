@@ -61,4 +61,4 @@ internal static uint32 serverOffset(this ж<dnsConfig> Ꮡc) {
     return 0;
 }
 
-} // end netᴛdnsConfig
+}

@@ -3,7 +3,6 @@ namespace go;
 using fmt = fmt_package;
 using aliaslib = ExportedAliasUnexportedTarget.aliaslib_package;
 using ExportedAliasUnexportedTarget;
-using static main_package;
 
 partial class main_package {
 
@@ -11,8 +10,6 @@ partial struct Logger {
     internal aliaslibꓸMutexWrap mu;
     internal slice<@string> lines;
 }
-
-} partial class mainᴛLogger {
 
 public static void Log(this ж<Logger> Ꮡl, @string line) {
     GoFrame ᒐ = default;
@@ -28,8 +25,6 @@ public static void Log(this ж<Logger> Ꮡl, @string line) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { if (ᒐd1) Ꮡl.Ꮡmu.Unlock(); ᒐ.Run(); }
 }
-
-} partial class main_package {
 
 internal static void main() {
     ref var l = ref heap(new Logger(), out var Ꮡl);

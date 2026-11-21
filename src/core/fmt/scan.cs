@@ -1548,4 +1548,4 @@ internal static (nint numProcessed, error err) doScanf(this ж<ss> Ꮡs, sstring
     return (numProcessed, Ꮡerr.ValueSlot);
 }
 
-} // end fmtᴛss
+}

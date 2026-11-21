@@ -3,7 +3,6 @@ namespace go;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using Δsync = sync_package;
-using static main_package;
 
 partial class main_package {
 
@@ -16,11 +15,7 @@ partial struct Arr /*[3]nint*/;
 partial struct M {
 }
 
-} partial class mainᴛM {
-
 public static @string Do(this M _Δp0, nint _Δp1) { return ""; }
-
-} partial class main_package {
 
 partial struct typeError {
     public reflect.Type Type;

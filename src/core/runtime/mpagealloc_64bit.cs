@@ -277,4 +277,4 @@ internal static uintptr sysInit(this ref scavengeIndex s, bool test, ж<sysMemSt
     return 0; // All memory above is mapped Reserved.
 }
 
-} // end runtimeᴛscavengeIndex
+}

@@ -117,4 +117,4 @@ public static void Range(this ж<Map> Ꮡm, Func<any, any, bool> f) {
     Ꮡm.Ꮡm.Range(f);
 }
 
-} // end syncᴛMap
+}

@@ -57,7 +57,7 @@ func (p Person) IsAdult() bool {
 
 go2cs produces this C#:
 
-<!-- source: src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:9-12 and :20-22 -->
+<!-- source: src/tests/Behavioral/StructPromotion/StructPromotion.cs.target:8-11 and :17-19 -->
 ```csharp
 partial struct Person {
     internal @string name;

@@ -49,7 +49,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABAyAA4SAAkIgvyigoKCgpSmoqSClpCmkJKQpoKQpoKQqJCSkJKCkJSCkKaCkKaQkoKQkpCSkICk", "46-54:1;62-62:1;65-65:2;66-66:3;70-70:4;74-74:5;78-78:6;79-79:7;81-81:8;84-84:9;88-88:10;91-91:11;93-93:12;94-94:13;95-95:14", "", "", "", "54:21,55:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA0yAAoS2ILcooKCgoKUpqKkgpaQppCSkKaCkKaCkKiQkpCSgpCUgpCmgpCmkJKCkJKQkpCApA==", "46-54:1;62-62:1;65-65:2;66-66:3;70-70:4;74-74:5;78-78:6;79-79:7;81-81:8;84-84:9;88-88:10;91-91:11;93-93:12;94-94:13;95-95:14", "", "", "", "41:21,42:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -93,7 +93,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.circle)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcircle;
-[GoMethodHost(typeof(main_package.myErr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmyErr;
-[GoMethodHost(typeof(main_package.square)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛsquare;
 // </MethodHolders>

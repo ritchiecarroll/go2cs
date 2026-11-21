@@ -622,4 +622,4 @@ internal static void fmtFloat(this ref fmt f, float64 v, nint size, rune verb, n
     f.pad(num[1..]);
 }
 
-} // end fmtᴛfmt
+}

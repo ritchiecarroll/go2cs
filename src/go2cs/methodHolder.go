@@ -34,6 +34,9 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
+
+	"github.com/ritchiecarroll/hashset"
 )
 
 // MethodHolderSection names the package_info.cs marker section that declares the method-holder classes.
@@ -79,6 +82,132 @@ func receiverNamed(info *types.Info, funcDecl *ast.FuncDecl) *types.Named {
 	return named
 }
 
+// methodsStayInPackageClass reports whether named's methods are emitted into its package class, as functions are,
+// rather than into a holder: so for a type of package main, unless one of its methods is named like something a
+// file of the package reads bare, which the method would hide from every file of the package, as a holder's
+// method hides it in its own holder only (holderDeclares):
+//   - a package-level name of main (a type, function, constant or variable);
+//   - a name of the universe (`len`, `string`, `nil`), whose built-ins arrive through `using static go.builtin`;
+//   - a name a file imports (`sort`), or a name a dot-imported package declares, exported or not;
+//   - a member of golib's builtin class that converted code reads bare (`str`, `zero`; golibBuiltinMembers).
+//
+// The names a test file of the package adds count as well (mainTestScopeNames), so that a program converted on
+// its own and its -tests variants decide alike, and a type whose methods a test file's name would hide keeps its
+// holder in both, as does a type a test file declares a method on (mainTestMethodTypes).
+//
+// The methods counted are those the type declares and those a struct gets from an embedded interface, which the
+// converter writes as forwarders beside them (visitStructType.go). A library keeps every holder: its classes are
+// a public surface, and a consumer reads a type's methods there. A program has no consumer, and its methods then
+// read as the Go file does, beside its functions.
+func methodsStayInPackageClass(named *types.Named) bool {
+	if named == nil || named.Obj() == nil || named.Obj().Pkg() == nil || named.Obj().Pkg().Name() != "main" {
+		return false
+	}
+
+	origin := named.Origin()
+
+	if stays, known := packageClassMethodTypes.Load(origin); known {
+		return stays.(bool)
+	}
+
+	stays := methodsMayStayInPackageClass(origin)
+	packageClassMethodTypes.Store(origin, stays)
+
+	return stays
+}
+
+// holderNamed answers named, the receiver type of the method being emitted, where its methods are emitted into a
+// holder, and nil where they stay in the package class (methodsStayInPackageClass), which has no holder whose own
+// methods hide a name.
+func holderNamed(named *types.Named) *types.Named {
+	if methodsStayInPackageClass(named) {
+		return nil
+	}
+
+	return named
+}
+
+// packageClassMethodTypes caches methodsStayInPackageClass by a type's origin, which the converter asks of every
+// method reference.
+var packageClassMethodTypes sync.Map
+
+// mainTestScopeNames holds what the build-selected in-package `_test.go` files of the package being converted add
+// to its package scope or to a file scope of their own: their package-level names and their imports, read from
+// source (collectSiblingTestSignals). A plain conversion loads no test file, and the -tests flow compiles the
+// production files a plain conversion emitted, so both read the test files the same way; a -tests variant's own
+// scope holds nothing beyond these and the production files'. mainTestDotImport reports a dot import there, whose
+// names a parse cannot list: every type of the package then keeps its holder. mainTestMethodTypes names the types
+// a test file declares a method on: a -tests variant lists that method among the type's own and a plain conversion
+// does not, so such a type keeps its holder in both.
+var (
+	mainTestScopeNames  hashset.HashSet[string]
+	mainTestDotImport   bool
+	mainTestMethodTypes hashset.HashSet[string]
+)
+
+// methodsMayStayInPackageClass answers methodsStayInPackageClass for origin, a type of package main.
+func methodsMayStayInPackageClass(origin *types.Named) bool {
+	if mainTestDotImport || mainTestMethodTypes.Contains(origin.Obj().Name()) {
+		return false
+	}
+
+	scope := origin.Obj().Pkg().Scope()
+
+	clashes := func(name string) bool {
+		if name == "_" {
+			return false
+		}
+
+		if scope.Lookup(name) != nil || types.Universe.Lookup(name) != nil || golibBuiltinMembers[name] || mainTestScopeNames.Contains(name) {
+			return true
+		}
+
+		// A file scope holds the file's imports by name, and the exported names of each package it dot-imports;
+		// C#'s `using static` of a dot-imported package brings its unexported names too.
+		for i := range scope.NumChildren() {
+			fileScope := scope.Child(i)
+
+			if fileScope.Lookup(name) != nil {
+				return true
+			}
+
+			for _, fileName := range fileScope.Names() {
+				if obj := fileScope.Lookup(fileName); obj.Pkg() != nil && obj.Pkg() != origin.Obj().Pkg() {
+					if _, isImport := obj.(*types.PkgName); !isImport && obj.Pkg().Scope().Lookup(name) != nil {
+						return true
+					}
+				}
+			}
+		}
+
+		return false
+	}
+
+	for i := range origin.NumMethods() {
+		if clashes(origin.Method(i).Name()) {
+			return false
+		}
+	}
+
+	if _, isStruct := origin.Underlying().(*types.Struct); isStruct {
+		methodSet := types.NewMethodSet(types.NewPointer(origin))
+
+		for i := range methodSet.Len() {
+			fn, isFunc := methodSet.At(i).Obj().(*types.Func)
+
+			if !isFunc || len(methodSet.At(i).Index()) < 2 {
+				continue
+			}
+
+			if recv := fn.Type().(*types.Signature).Recv(); recv != nil && types.IsInterface(recv.Type()) && clashes(fn.Name()) {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
 // holderTypeName is a receiver type's own C# identifier, as the type's declaration spells it: without a
 // qualifier and without type arguments. escaped keeps a keyword's `@`, which a class name built from the
 // identifier drops.
@@ -105,7 +234,7 @@ func (v *Visitor) holderTypeName(named *types.Named) (escaped string) {
 // (`timeᴛMonth`). typeofTarget is the receiver type as package_info.cs spells it. It answers "" for a type
 // of another package, which declares no method here.
 func (v *Visitor) methodHolderClass(named *types.Named, method types.Object) (holder string, typeofTarget string) {
-	if named == nil || named.Obj() == nil || named.Obj().Pkg() != v.pkg || v.fileClassName == "" {
+	if named == nil || named.Obj() == nil || named.Obj().Pkg() != v.pkg || v.fileClassName == "" || methodsStayInPackageClass(named) {
 		return "", ""
 	}
 
@@ -824,7 +953,8 @@ func (v *Visitor) selectorSelIdents() map[*ast.Ident]bool {
 
 // methodHolderRef names the class that holds fn, a method a named type declares, for a static-form
 // reference from the file being converted: the bare class for a method of the file's own emission unit,
-// and the rooted class for any other. It answers "" for an interface's method, which has no static form.
+// and the rooted class for any other. For a method that stays in its package class, the package class is
+// that holder. It answers "" for an interface's method, which has no static form.
 func (v *Visitor) methodHolderRef(fn *types.Func) string {
 	if fn == nil || fn.Pkg() == nil {
 		return ""
@@ -848,9 +978,13 @@ func (v *Visitor) methodHolderRef(fn *types.Func) string {
 		return ""
 	}
 
+	// A method that stays in its package class is named through that class, as Go names it through its type: a
+	// bare name would bind a local, parameter or result of the method's name first, and binds nothing at all
+	// from a holder or from a test file's class.
+	stays := methodsStayInPackageClass(named)
 	bare := strings.TrimPrefix(v.holderTypeName(named), "@")
 
-	if bare == "" {
+	if bare == "" && !stays {
 		return ""
 	}
 
@@ -871,6 +1005,10 @@ func (v *Visitor) methodHolderRef(fn *types.Func) string {
 	default:
 		packageClass = v.packageScopeClassName(fn)
 		sharedClass = packageClass == v.packageScopeClassName(named.Obj())
+	}
+
+	if stays {
+		return packageClass
 	}
 
 	holder := strings.TrimSuffix(packageClass, PackageSuffix) + TempVarMarker + bare
@@ -894,7 +1032,7 @@ func hoistClassKey(info *types.Info, funcDecl *ast.FuncDecl, seeded bool) string
 
 	named := receiverNamed(info, funcDecl)
 
-	if named == nil {
+	if named == nil || methodsStayInPackageClass(named) {
 		return separator
 	}
 

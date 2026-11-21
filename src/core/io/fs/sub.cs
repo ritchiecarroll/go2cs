@@ -194,4 +194,4 @@ internal static (FS, error) Sub(this ж<subFS> Ꮡf, @string dir) {
     return (new subFSжFS(Ꮡ(new subFS(f.fsys, full))), default);
 }
 
-} // end fsᴛsubFS
+}

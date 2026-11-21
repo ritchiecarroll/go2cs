@@ -30,4 +30,4 @@ internal static @string String(this urlPart i) {
     return _urlPart_name.slice(_urlPart_index[i], _urlPart_index[i + 1]);
 }
 
-} // end templateᴛurlPart
+}

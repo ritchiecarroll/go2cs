@@ -32,4 +32,4 @@ public static @string String(this RoundingMode i) {
     return _RoundingMode_name.slice(_RoundingMode_index[i], _RoundingMode_index[i + 1]);
 }
 
-} // end bigᴛRoundingMode
+}

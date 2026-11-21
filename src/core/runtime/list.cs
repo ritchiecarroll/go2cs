@@ -144,4 +144,4 @@ internal static void remove(this ref listHead head, @unsafe.Pointer p) {
     pNode.next = default;
 }
 
-} // end runtimeᴛlistHead
+}

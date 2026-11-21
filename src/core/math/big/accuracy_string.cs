@@ -30,4 +30,4 @@ public static @string String(this Accuracy i) {
     return _Accuracy_name.slice(_Accuracy_index[i], _Accuracy_index[i + 1]);
 }
 
-} // end bigᴛAccuracy
+}

@@ -56,7 +56,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("IfaceChainPointerAssert.go", "IfaceChainPointerAssert.cs", "ABYwggAJCIK0hJaWgoKUqIKWlMS4gpSClKaAgpS2lLTEuIKClA==")]
+[assembly: GoPositionMap("IfaceChainPointerAssert.go", "IfaceChainPointerAssert.cs", "ABMwgtiClISWloKClKiClpTEuIKUgpSmgIKUtpS0xLiCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -96,6 +96,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.conn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛconn;
-[GoMethodHost(typeof(main_package.valConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛvalConn;
 // </MethodHolders>

@@ -266,4 +266,4 @@ internal static methodSet addOne(this methodSet s, ж<Func> Ꮡf, slice<nint> in
     return s;
 }
 
-} // end typesᴛmethodSet
+}

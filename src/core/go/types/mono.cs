@@ -380,4 +380,4 @@ internal static void addEdge(this ref monoGraph w, nint dst, nint src, nint weig
     ));
 }
 
-} // end typesᴛmonoGraph
+}

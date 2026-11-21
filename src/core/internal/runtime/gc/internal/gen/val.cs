@@ -184,4 +184,4 @@ internal static ж<op> getOp(this valAny v) {
     return v.op;
 }
 
-} // end genᴛvalAny
+}

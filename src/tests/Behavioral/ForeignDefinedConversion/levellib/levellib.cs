@@ -10,4 +10,4 @@ partial struct Level /*num:uint32*/;
 
 public static uint32 Double(this Level l) { return (uint32)l * 2; }
 
-} // end levellibᴛLevel
+}

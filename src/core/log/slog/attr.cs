@@ -115,4 +115,4 @@ internal static bool isEmpty(this Attr a) {
     return a.Key == ""u8 && a.Value.num == 0 && a.Value.any == nil;
 }
 
-} // end slogᴛAttr
+}

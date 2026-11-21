@@ -204,4 +204,4 @@ internal static slog.Handler WithGroup(this disabledHandler _Δp0, @string _Δp1
     throw panic("disabledHandler: WithGroup unimplemented");
 }
 
-} // end benchmarksᴛdisabledHandler
+}

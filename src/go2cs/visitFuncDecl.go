@@ -601,7 +601,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.currentFuncName = csFunctionName
 	v.currentFuncPrefix = &strings.Builder{}
 	v.currentFuncHoists = nil
-	v.currentHolderNamed = receiverNamed(v.info, funcDecl)
+	v.currentHolderNamed = holderNamed(receiverNamed(v.info, funcDecl))
 
 	// The holder ends with its method: a declaration that follows in file order (a package-level
 	// variable holding a function literal, a type) stands in the package class again.

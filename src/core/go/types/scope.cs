@@ -250,4 +250,4 @@ internal static bool sameId(this ref lazyObject _Δp0, ж<Package> _Δp1, @strin
 internal static token.Pos scopePos(this ref lazyObject _) { throw panic("unreachable"); }
 internal static void setScopePos(this ref lazyObject _Δp0, token.Pos _Δp1) { throw panic("unreachable"); }
 
-} // end typesᴛlazyObject
+}

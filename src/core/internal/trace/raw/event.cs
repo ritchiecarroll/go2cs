@@ -83,4 +83,4 @@ public static nint EncodedSize(this ref Event e) {
     return size;
 }
 
-} // end rawᴛEvent
+}

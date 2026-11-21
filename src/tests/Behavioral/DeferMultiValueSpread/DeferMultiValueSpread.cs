@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using ꓸꓸꓸany = Span<any>;
-using static main_package;
 
 partial class main_package {
 
@@ -55,13 +54,9 @@ partial struct sink {
     internal @string tag;
 }
 
-} partial class mainᴛsink {
-
 internal static void take(this ref sink s, nint n, @string msg) {
     fmt.Println("  sink", s.tag, "took", n, msg);
 }
-
-} partial class main_package {
 
 internal static void deferSpread() {
     GoFrame ᒐ = default;

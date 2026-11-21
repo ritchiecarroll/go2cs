@@ -26,4 +26,4 @@ public static error Fsync(this ж<FD> Ꮡfd) {
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-} // end pollᴛFD
+}

@@ -57,4 +57,4 @@ internal static @string String(this state i) {
     return _state_name.slice(_state_index[i], _state_index[i + 1]);
 }
 
-} // end templateᴛstate
+}

@@ -46,4 +46,4 @@ public static @string String(this Class i) {
     return _Class_name.slice(_Class_index[i], _Class_index[i + 1]);
 }
 
-} // end dwarfᴛClass
+}

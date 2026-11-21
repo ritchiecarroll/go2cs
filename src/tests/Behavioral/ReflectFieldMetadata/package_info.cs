@@ -51,7 +51,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("ReflectFieldMetadata.go", "ReflectFieldMetadata.cs", "ABxWACs6hIKEloKCgoKChIaCgoKYgoKCmoKCgoKCgoKWgoKUgoKC", "115-118:1")]
+[assembly: GoPositionMap("ReflectFieldMetadata.go", "ReflectFieldMetadata.cs", "ABhWACk6hIKEloKCgoKChIaCgoKYgoKCmoKCgoKCgoKWgoKUgoKC", "115-118:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -105,5 +105,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.@base)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbase;
 // </MethodHolders>

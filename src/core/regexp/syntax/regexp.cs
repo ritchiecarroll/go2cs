@@ -543,4 +543,4 @@ internal static void capNames(this ref Regexp re, slice<@string> names) {
     }
 }
 
-} // end syntaxᴛRegexp
+}

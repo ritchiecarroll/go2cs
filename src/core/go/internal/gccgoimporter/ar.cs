@@ -192,4 +192,4 @@ internal static (nint, error) ReadAt(this seekerReadAt sra, slice<byte> p, int64
     return sra.seeker.Read(p);
 }
 
-} // end gccgoimporterᴛseekerReadAt
+}

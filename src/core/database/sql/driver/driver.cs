@@ -567,4 +567,4 @@ public static (int64, error) RowsAffected(this noRows _) {
     return (0, errors.New(noRowsAffectedAvailableˢ));
 }
 
-} // end driverᴛnoRows
+}

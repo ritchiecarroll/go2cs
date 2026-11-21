@@ -129,4 +129,4 @@ public static @string String(this RelocTypeARM64 i) {
     return _RelocTypeARM64_name.slice(_RelocTypeARM64_index[i], _RelocTypeARM64_index[i + 1]);
 }
 
-} // end machoᴛRelocTypeARM64
+}

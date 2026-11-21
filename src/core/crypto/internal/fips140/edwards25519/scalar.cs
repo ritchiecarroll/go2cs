@@ -413,4 +413,4 @@ internal static array<int8> signedRadix16(this ж<Scalar> Ꮡs) {
     return digits.Clone();
 }
 
-} // end edwards25519ᴛScalar
+}

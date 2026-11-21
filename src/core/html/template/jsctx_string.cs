@@ -29,4 +29,4 @@ internal static @string String(this jsCtx i) {
     return _jsCtx_name.slice(_jsCtx_index[i], _jsCtx_index[i + 1]);
 }
 
-} // end templateᴛjsCtx
+}

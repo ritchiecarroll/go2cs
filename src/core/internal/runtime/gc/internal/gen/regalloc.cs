@@ -378,4 +378,4 @@ internal static map<ж<op>, loc> assignLocs(this ж<Func> Ꮡfn) {
     return locs;
 }
 
-} // end genᴛFunc
+}

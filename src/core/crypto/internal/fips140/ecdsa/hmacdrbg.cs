@@ -192,4 +192,4 @@ public static void Generate(this ref hmacDRBG d, slice<byte> @out) {
     d.reseedCounter++;
 }
 
-} // end ecdsaᴛhmacDRBG
+}

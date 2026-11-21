@@ -32,4 +32,4 @@ public static @string String(this Kind i) {
     return _Kind_name.slice(_Kind_index[i], _Kind_index[i + 1]);
 }
 
-} // end constantᴛKind
+}
