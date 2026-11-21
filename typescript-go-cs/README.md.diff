@@ -1,0 +1,12 @@
+--- a/README.md
++++ b/README.md
+@@ -39,6 +39,9 @@
+   cannot yet convert those views; a planned go2cs change removes the need for the fork.
+ - **No hand edits:** none of the converted C# is edited by hand.
+ 
++TypeScript's own Go tests, converted to C# and run against native `go test`, are tracked in [TESTS.md](TESTS.md): the
++unit tests of four compiler packages match native on go2cs's development tree, with fixes newer than 1.26.11.1.
++
+ ## What is not covered
+ 
+ - the language service and its LSP server
