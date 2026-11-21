@@ -22,7 +22,9 @@
 // Where the cache lives — the TYPE GATE (the spike's arm 3, measured 20.2 ns per call against 33.8
 // with the per-call allocation gone; the slot-on-every-box arm read 18.0 at +8 B on every box, the
 // weak-table-only arm 37.0):
-//   - a SlottedStandardBox<T> carries one ViewEntry? slot (+8 B). Ꮡ<T>() and @new<T>() mint it
+//   - a SlottedStandardBox<T> carries one view slot (+8 B): the box's FIRST view itself, and a ViewEntry list only
+//     once a second field is asked of the box (IFirstFieldView.ViewToken; a TypeScript AST node is asked one field per embedding
+//     level, so the list node was 22% of its run's allocated bytes). Ꮡ<T>() and @new<T>() mint it
 //     instead of a StandardBox<T> when BoxShape<T>.Slotted is set — by a [GoBoxViews] attribute on T
 //     at type init, or flipped lazily by the FIRST of() on any ж<T>;
 //   - a FieldRefBox<T> carries the slot too, so a CHAIN's inner hop (`Ꮡc.of(Conn.Ꮡin).of(halfConn.ᏑMutex)`)
@@ -42,6 +44,7 @@
 // lifetime (the parent → view → parent cycle collects together).
 
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -69,8 +72,13 @@ internal sealed class ViewEntry
 /// <summary>The weak-table value: a mutable head for a box that has no slot of its own.</summary>
 internal sealed class ViewTable
 {
-    internal ViewEntry? Head;
+    internal object? Head;
 }
+
+// A view slot holds null, ONE view (the first field asked of the box), or a ViewEntry list once a second field is asked.
+// Most boxes are only ever asked one field (TypeScript's AST nodes: one view per node per embedding level), so the first
+// view costs no list node. A single view is a FieldRefBox, read without its element type through IFirstFieldView's
+// ViewToken (the accessor token it was minted for).
 
 /// <summary>
 /// Marks a struct type whose boxes carry the field-view slot from their first mint (the
@@ -93,7 +101,8 @@ internal sealed class ViewTable
 /// <summary>A standard box that carries the view slot (a consumer type's box).</summary>
 [EditorBrowsable(EditorBrowsableState.Never)] public sealed class SlottedStandardBox<T> : StandardBox<T>
 {
-    internal ViewEntry? m_views;
+    // null, one view, or a ViewEntry list (see the note above GoBoxViewsAttribute).
+    internal object? m_views;
 
     // By value, and cleared after the base stores it: the rule StandardBox's constructor documents.
     public SlottedStandardBox(T value) : base(value)
@@ -122,7 +131,7 @@ public abstract partial class ж<T>
 {
     // Where this box's view list lives: a slot on the two kinds that carry one, the weak table
     // for every other kind.
-    private ref ViewEntry? viewsHead()
+    private ref object? viewsHead()
     {
         if (this is SlottedStandardBox<T> slotted)
             return ref slotted.m_views;
@@ -134,7 +143,7 @@ public abstract partial class ж<T>
         // `this is ElemRefBox<T>`: naming the element box of T in a method every ж<T> carries makes every
         // ж<T> reach array<T>, whose AliasPointer names ж<array<T>>, and Native AOT expands that loop to its
         // cut-off for every type a program touches (PointerBoxGenericCycleTests).
-        ref ViewEntry? element = ref ElementViews;
+        ref object? element = ref ElementViews;
 
         if (!Unsafe.IsNullRef(ref element))
             return ref element;
@@ -175,24 +184,36 @@ public abstract partial class ж<T>
     {
         if (!FieldViewCache.Disabled)
         {
-            ViewEntry? e = this is SlottedStandardBox<T> slotted ? slotted.m_views :
+            object? head = this is SlottedStandardBox<T> slotted ? slotted.m_views :
                 this is FieldRefBox<T> view ? view.m_views : elementViews();
 
-            for (; e is not null; e = e.Next)
+            // The LIST is tested first: ViewEntry is sealed and not generic, so the test is one exact type compare even in
+            // shared generic code, and a box with several views (PerfFieldView's points) pays nothing else master did
+            // not. Testing `is FieldRefBox<TElem>` first cost such a box a generic type test on every hit: PerfFieldView
+            // +5% under the JIT and +9% under Native AOT (R-LAPTOP, 2026-11-21).
+            if (head is ViewEntry list)
             {
-                if (ReferenceEquals(e.Token, fieldRefFunc))
-                    return (ж<TElem>)e.View;
+                for (ViewEntry? e = list; e is not null; e = e.Next)
+                {
+                    if (ReferenceEquals(e.Token, fieldRefFunc))
+                        return (ж<TElem>)e.View;
+                }
+            }
+            else if (head is FieldRefBox<TElem> single && ReferenceEquals(single.ViewToken, fieldRefFunc))
+            {
+                // The slot's one view. A view of another element type fails the test and takes the full lookup.
+                return single;
             }
         }
 
         return viewOfSlow(fieldRefFunc);
     }
 
-    // The element box's view list for the hit path, null for every other kind (see viewsHead).
+    // The element box's view slot for the hit path, null for every other kind (see viewsHead).
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ViewEntry? elementViews()
+    private object? elementViews()
     {
-        ref ViewEntry? element = ref ElementViews;
+        ref object? element = ref ElementViews;
 
         return Unsafe.IsNullRef(ref element) ? null : element;
     }
@@ -220,17 +241,29 @@ public abstract partial class ж<T>
         if (!BoxShape<T>.Slotted)
             BoxShape<T>.Slotted = true;
 
-        for (ViewEntry? e = viewsHead(); e is not null; e = e.Next)
+        view = findIn<TElem>(viewsHead(), token);
+
+        return view is not null;
+    }
+
+    // The view a slot holds for this token, or null: a walk of its list, or its one view. A token names one field, so a
+    // single view that can match it is a FieldRefBox<TElem>: exact type tests only, no interface cast. A view of
+    // another element type cannot be this token's. (Interface casts here cost PerfFieldView's fresh element boxes, three
+    // misses each, about 9% under Native AOT; R-LAPTOP, 2026-11-21.)
+    private static ж<TElem>? findIn<TElem>(object? head, Delegate token)
+    {
+        if (head is ViewEntry list)
         {
-            if (sameAccessor(e.Token, token))
+            for (ViewEntry? e = list; e is not null; e = e.Next)
             {
-                view = (ж<TElem>)e.View;
-                return true;
+                if (sameAccessor(e.Token, token))
+                    return (ж<TElem>)e.View;
             }
+
+            return null;
         }
 
-        view = null;
-        return false;
+        return head is FieldRefBox<TElem> single && sameAccessor(single.ViewToken, token) ? single : null;
     }
 
     // Delegate.Equals, answered without it. Every `&x.f` site converts the accessor method group to its
@@ -255,25 +288,35 @@ public abstract partial class ж<T>
 
     private ж<TElem> publishView<TElem>(Delegate token, FieldRefBox<TElem> view)
     {
-        ref ViewEntry? head = ref viewsHead();
+        // A view alone in the slot is found by its OWN token, so it must be the token it is published under.
+        Debug.Assert(ReferenceEquals(view.ViewToken, token), "a view is published under its own accessor token");
+
+        ref object? head = ref viewsHead();
 
         while (true)
         {
-            // Read the head ONCE, scan that exact list for a racer's entry with this token, and only
+            // Read the head ONCE, scan that exact slot for a racer's view with this token, and only
             // then compare-exchange against that same head: nothing can be published between the scan
             // and the CAS without the CAS failing. (The first form scanned only AFTER a failed CAS — a
             // caller whose miss preceded a racer's publish, and whose head read followed it, then
             // CAS-succeeded on top of the racer's entry and two views of one field existed. The guard's
             // concurrency arm read it on its first run, in both configurations.)
-            ViewEntry? seen = head;
+            object? seen = head;
 
-            for (ViewEntry? e = seen; e is not null; e = e.Next)
+            if (findIn<TElem>(seen, token) is { } racer)
+                return racer;
+
+            // The first view goes into the slot itself, with no list node. A second field turns the slot into a list
+            // that carries the first view as its tail entry: its token is read by exact type when the two fields share
+            // an element type (a point's x, y and z), and through IFirstFieldView only when they do not. So a box's
+            // SECOND field costs two list nodes where the list-only form paid one; the third and later cost one each.
+            object candidate = seen switch
             {
-                if (sameAccessor(e.Token, token))
-                    return (ж<TElem>)e.View;
-            }
-
-            ViewEntry candidate = new(token, view, seen);
+                null => view,
+                ViewEntry list => new ViewEntry(token, view, list),
+                FieldRefBox<TElem> same => new ViewEntry(token, view, new ViewEntry(same.ViewToken, same, null)),
+                _ => new ViewEntry(token, view, new ViewEntry(((IFirstFieldView)seen).ViewToken, seen, null))
+            };
 
             if (ReferenceEquals(Interlocked.CompareExchange(ref head, candidate, seen), seen))
                 return view;

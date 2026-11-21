@@ -104,6 +104,11 @@ internal interface IPlainHeapRoot
 internal interface IFirstFieldView
 {
     object? FirstFieldParent { get; }
+
+    // The accessor token the view was minted for, read without its element type: the view cache keeps a box's first view
+    // in the slot itself (ж.Views.cs) and matches it on this. On this interface, which only FieldRefBox implements,
+    // rather than a new one: a further interface on every view lengthened what Native AOT's casts walk.
+    Delegate ViewToken { get; }
 }
 
 [EditorBrowsable(EditorBrowsableState.Never)] public sealed class FieldRefBox<T> : ж<T>, INativeRooted, IInteriorPointer, IExactOrderToken, IFirstFieldView, IReinterpretView, IPackageLevelStorage
@@ -115,7 +120,13 @@ internal interface IFirstFieldView
     // The field-view cache's slot on a VIEW (ж.Views.cs): a chain's inner hop
     // (`Ꮡc.of(Conn.Ꮡin).of(halfConn.ᏑMutex)`) caches here at the slot's cost rather than the weak
     // table's — 8 B per distinct (box, field) pair, since a view exists only because an of() happened.
-    internal ViewEntry? m_views;
+    // The field views cached on this view (ж.Views.cs): null, one FieldRefBox of any element type, or a ViewEntry list.
+    internal object? m_views;
+
+    // The accessor token this view was minted for: what a cached view is matched on (ж.Views.cs).
+    internal Delegate ViewToken => m_token;
+
+    Delegate IFirstFieldView.ViewToken => m_token;
 
     // Create a new reference to a field in a heap allocated struct. fieldIdentity carries the
     // original accessor delegate when fieldRefFunc is a per-call closure wrapper (see the typed
