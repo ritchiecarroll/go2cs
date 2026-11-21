@@ -205,6 +205,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckArrayValueCopySites() => CheckTarget("ArrayValueCopySites");
 
     [TestMethod]
+    public void CheckArrayViewWholeAssign() => CheckTarget("ArrayViewWholeAssign");
+
+    [TestMethod]
     public void CheckArrayWideIndexAddress() => CheckTarget("ArrayWideIndexAddress");
 
     [TestMethod]

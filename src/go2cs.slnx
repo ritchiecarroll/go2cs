@@ -388,6 +388,7 @@
     <Project Path="tests/Behavioral/ArrayReassignUnsafe/ArrayReassignUnsafe.csproj" />
     <Project Path="tests/Behavioral/ArraySwitchCases/ArraySwitchCases.csproj" />
     <Project Path="tests/Behavioral/ArrayValueCopySites/ArrayValueCopySites.csproj" />
+    <Project Path="tests/Behavioral/ArrayViewWholeAssign/ArrayViewWholeAssign.csproj" />
     <Project Path="tests/Behavioral/ArrayWideIndexAddress/ArrayWideIndexAddress.csproj" />
     <Project Path="tests/Behavioral/AtomicFieldThroughPointer/AtomicFieldThroughPointer.csproj" />
     <Project Path="tests/Behavioral/AtomicPointerToNil/AtomicPointerToNil.csproj" />

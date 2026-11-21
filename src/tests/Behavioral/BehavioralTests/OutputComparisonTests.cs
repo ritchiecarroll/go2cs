@@ -203,6 +203,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckArrayValueCopySites() => CheckTarget("ArrayValueCopySites");
 
     [TestMethod]
+    public void CheckArrayViewWholeAssign() => CheckTarget("ArrayViewWholeAssign");
+
+    [TestMethod]
     public void CheckArrayWideIndexAddress() => CheckTarget("ArrayWideIndexAddress");
 
     [TestMethod]
