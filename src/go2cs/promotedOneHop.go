@@ -45,6 +45,8 @@ func (v *Visitor) promotedOneHopView(selectorExpr *ast.SelectorExpr, fieldAddr s
 		return "", false
 	}
 
+	// The first hop is read back out of its RENDERED text. Every mismatch below returns false and keeps the chain, which
+	// is the safe direction: the chain is the emission every caller had before. A later edit keeps it that way.
 	first := v.structFieldBoxName(&ast.Ident{Name: hopFields[0].Name()}, selectorExpr.X)
 	ofIndex := strings.LastIndex(fieldAddr, ".of(")
 
@@ -66,8 +68,62 @@ func (v *Visitor) promotedOneHopView(selectorExpr *ast.SelectorExpr, fieldAddr s
 		return "", false
 	}
 
+	// go2cs-gen counts a promoted field's depth by its own walk, which reads a FOREIGN embed through metadata: that
+	// type's promoted fields appear as its own ref properties, one level above their Go depth. Where the name occurs
+	// more than once across the outer type's embeds, its count can then disagree with Go's, and it declares no accessor
+	// Go's selector would name (P3's 1b review, finding 2: Outer{ lib.X; W } reaches lib.Z at Go depth 2 through lib.X
+	// and 1 through W; the generator reads both at depth 1, ambiguous, and Outer.ᏑZ is CS1929). The chain is kept there.
+	if foreign, occurrences := v.embedFieldCensus(outer, last.Name()); foreign && occurrences > 1 {
+		return "", false
+	}
+
 	owner := accessor[:len(accessor)-len(firstSuffix)]
 	lastName := v.structFieldBoxName(&ast.Ident{Name: last.Name()}, selectorExpr.X)
 
 	return fieldAddr[:ofIndex] + ".of(" + owner + "." + AddressPrefix + lastName + ")", true
+}
+
+// embedFieldCensus walks the embeds of named, at every depth, and reports whether any embedded type is declared in
+// another package, and how many fields named name the walk meets (each path counted, as Go's selector rule sees them).
+func (v *Visitor) embedFieldCensus(named *types.Named, name string) (foreign bool, occurrences int) {
+	var walk func(n *types.Named, path map[*types.Named]bool)
+
+	walk = func(n *types.Named, path map[*types.Named]bool) {
+		if path[n] {
+			return
+		}
+
+		st, ok := n.Underlying().(*types.Struct)
+
+		if !ok {
+			return
+		}
+
+		path[n] = true
+		defer delete(path, n)
+
+		for i := 0; i < st.NumFields(); i++ {
+			field := st.Field(i)
+
+			if n != named && field.Name() == name {
+				occurrences++
+			}
+
+			if !field.Embedded() {
+				continue
+			}
+
+			if inner := promotionNamed(field.Type()); inner != nil {
+				if inner.Obj().Pkg() != v.pkg {
+					foreign = true
+				}
+
+				walk(inner, path)
+			}
+		}
+	}
+
+	walk(named, map[*types.Named]bool{})
+
+	return foreign, occurrences
 }

@@ -165,12 +165,14 @@ func TestAPromotedCallThroughAPointerEmbedKeepsThePointerHop(t *testing.T) {
 	out := convertInlineModule(t, "app", map[string]string{"main.go": promotedOneHopPointerMain})
 	main := readGenerated(t, filepath.Join(out, "main.cs"))
 
-	if strings.Contains(main, ".of(A.ᏑD)") {
+	// The CALL is asserted, not the file: `&x.D` renders `x.of(A.ᏑD)` here too, and correctly, since Go's `&x.D` also
+	// reads the current x.B.C. The call goes through the outer type's forwarder, which takes the pointer hop itself.
+	if strings.Contains(main, ".of(A.ᏑD).Bump()") {
 		t.Errorf("the promoted call takes one view across a POINTER embed:\n%s", main)
 	}
 
-	if !strings.Contains(main, "Bump()") {
-		t.Errorf("the promoted call is missing:\n%s", main)
+	if !strings.Contains(main, "var p = x.Bump();") {
+		t.Errorf("the promoted call through the pointer embed is not the forwarder call `x.Bump()`:\n%s", main)
 	}
 }
 
