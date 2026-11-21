@@ -69,6 +69,14 @@ if ($SkipDotnet) { Write-Host "SKIPPED guard and surface (-SkipDotnet): NOT MEAS
 
 $work = Join-Path ([System.IO.Path]::GetTempPath()) ("nugetgo-cgo-" + [Guid]::NewGuid().ToString('N').Substring(0, 8))
 New-Item -ItemType Directory -Force $work | Out-Null
+# The work directory by its REAL path. macOS's temp directory is /var/folders/..., a symlink to /private/var/folders/...,
+# and there a consumer's restore read its project reference under the other spelling and left the referenced project
+# out of the consumer's package graph (hosted converter-cgo, both mac legs, 2026-11-21: App's assets listed no Lib and
+# no package, so the transitive arm measured nothing; linux, with no symlink, read it green).
+if (-not $IsWindows) {
+    $real = "$(& realpath $work 2>$null)".Trim()
+    if ($LASTEXITCODE -eq 0 -and $real) { $work = $real }
+}
 $savedNp = $env:NUGET_PACKAGES
 $env:NUGET_PACKAGES = Join-Path $work 'gpf'
 try {
