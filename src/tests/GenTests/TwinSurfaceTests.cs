@@ -292,10 +292,10 @@ public class TwinSurfaceTests
     [TestMethod]
     public void F10_TheClosureArmSwitchesDoWhatTheySay()
     {
-        // GoTwinsForwarders=false: no forwarder, the bytes-and-wall control. The guard names what lost one.
+        // GoTwinsForwarders=false: the bytes-and-wall control reproduces the build before 7a: no forwarder, and no guard.
         (string twins, _) = RunWith(null, new() { ["build_property.GoTwinsForwarders"] = "false", ["build_property.GoTwinsArm"] = "true" }, CannotPark);
         Assert.AreEqual(0, Lines(twins, Forwarder), "no forwarder");
-        Assert.AreEqual(2, Guard("GO2CS0017").Length, "add and note, each named");
+        Assert.AreEqual(0, Guard("GO2CS0017").Length, "and no guard");
 
         // GoTwinsGuardWarn=true: the guard reports as a warning, so a census build runs to the end.
         RunWith(null, new() { ["build_property.GoTwinsGuardDrop"] = "add", ["build_property.GoTwinsGuardWarn"] = "true", ["build_property.GoTwinsArm"] = "true" }, CannotPark);

@@ -298,7 +298,8 @@ public sealed partial class TwinGenerator : ISourceGenerator
                     !GuardDrop.Contains(candidate.Symbol.Name);
 
             // The guard (GO2CS0017, section 8): a member of the population that is neither twinned, forwarded nor E1.
-            if (m_populationAssembly)
+            // GoTwinsForwarders=false (an arm's control) reproduces the build before 7a: no forwarder, so no guard either.
+            if (m_populationAssembly && Forwarders)
             {
                 foreach (Candidate candidate in m_ordered.Where(InPopulation))
                 {
