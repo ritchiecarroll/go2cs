@@ -51,7 +51,11 @@ func (m *ModuleConverter) refuseCgoSplitSubstitutions(moduleDir string, substitu
 	listings := [2]map[string]string{}
 
 	for i, setting := range []string{"CGO_ENABLED=0", "CGO_ENABLED=1"} {
-		cmd := exec.Command("go", append([]string{"list", "-e", "-f", "{{.ImportPath}} {{join .GoFiles \",\"}} {{join .CgoFiles \",\"}}"}, pkgPaths...)...)
+		// The run's own build flags (-tags), as the closure load passes them: a split under the run's tag is invisible
+		// to a listing without it (P3's INC 1 CLEAR, one SHOULD).
+		args := append([]string{"list", "-e"}, m.options.loaderBuildFlags()...)
+		args = append(append(args, "-f", "{{.ImportPath}} {{join .GoFiles \",\"}} {{join .CgoFiles \",\"}}"), pkgPaths...)
+		cmd := exec.Command("go", args...)
 		cmd.Env = append(append([]string{}, env...), setting)
 		cmd.Dir = moduleDir
 		out, err := cmd.Output()
