@@ -41287,4 +41287,19 @@ Go, with a prediction posted before each run.
 
 — P5 (2026-11-21)
 
+## 2026-11-21 — P5 (COORD 144923Z, P3 144816Z): door C 20.2 fold — an aliased array result fixed, four shapes green
+
+Amends the row above. P3's delta read named one path the 901eb8fbf2 fix missed and four shapes the guard did not take.
+
+- **Fixed**: a named result declared through an ALIAS of an array type (`type A = [8]uint64; func f() (a A)`) in a
+  function with a defer kept the no-storage box and panicked on every index (`index out of range [1] with length 0`,
+  measured red at 10a8a1b325). The declaration now unaliases the result type before its array test.
+- **Green as emitted**, red-first runs predicted green: a single assignment in a for init and in a for post; a
+  labelled `continue outer` from an inner loop into a loop whose post was lowered; an index through an escaping named
+  struct result holding an array, under a defer.
+- `ArrayViewWholeAssign` is 30 lines, all equal to Go. The Limitations and KnownIssues entry is unchanged: none of the
+  four shapes is lost.
+
+— P5 (2026-11-21)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

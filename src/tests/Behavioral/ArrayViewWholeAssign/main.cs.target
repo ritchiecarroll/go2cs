@@ -1,3 +1,5 @@
+global using aliasArr = go.array<ulong>;
+
 namespace go;
 
 using fmt = fmt_package;
@@ -282,6 +284,84 @@ internal static array<uint64> /*a*/ namedResultIndex() {
     return Ꮡa.Value;
 }
 
+internal static void forSingle() {
+    ref var a = ref heap(new array<uint64>(8), out var Ꮡa);
+    var b = array<uint64>(8, [201, 202]);
+    var f = @unsafe.Pointer.ToArray<uint32>(@unsafe.Pointer.FromPinnedBox(Ꮡa), 16);
+    nint n = 0;
+    for (a.Assign(b); n < 1; n++) {
+        f.ElementRef(0) = 0xAAAA;
+    }
+    fmt.Println("for one :", a[0], f.ElementRef(2), n);
+}
+
+internal static void forSinglePost() {
+    ref var a = ref heap(new array<uint64>(8), out var Ꮡa);
+    var b = array<uint64>(8, [211, 212]);
+    var f = @unsafe.Pointer.ToArray<uint32>(@unsafe.Pointer.FromPinnedBox(Ꮡa), 16);
+    nint n = 0;
+    for (; n < 2; a.Assign(b)) {
+        n++;
+    }
+    f.ElementRef(0) = 0xAAAA;
+    fmt.Println("for 1pst:", a[0], f.ElementRef(2), n);
+}
+
+internal static void forLabelled() {
+    ref var a = ref heap(new array<uint64>(8), out var Ꮡa);
+    var b = array<uint64>(8, [221, 222]);
+    var f = @unsafe.Pointer.ToArray<uint32>(@unsafe.Pointer.FromPinnedBox(Ꮡa), 16);
+    nint n = 0;
+outer:
+    for (; n < 2; ) {
+        for (nint k = 0; k < 2; k++) {
+            if (k == 0) {
+                goto continue_outer;
+            }
+        }
+continue_outer:;
+        array<uint64> aᴛ1;
+        (aᴛ1, n) = (b.Clone(), n + 1); a.Assign(aᴛ1);
+    }
+break_outer:;
+    f.ElementRef(0) = 0xAAAA;
+    fmt.Println("for lbl :", a[0], f.ElementRef(2), n);
+}
+
+internal static holder /*h*/ namedStructResultIndex() {
+    heap<holder>(out var Ꮡh);
+    GoFrame ᒐ = default;
+    try {
+        ref var h = ref Ꮡh.Value;
+
+        var p = Ꮡh;
+        defer(() => {
+            Ꮡh.Value.x[0] = 0xDDDD;
+        }, ref ᒐ);
+        p.x[1] = 404;
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return Ꮡh.Value;
+}
+
+internal static aliasArr /*a*/ aliasedResultIndex() {
+    heap(new array<uint64>(8), out var Ꮡa);
+    GoFrame ᒐ = default;
+    try {
+        ref var a = ref Ꮡa.Value;
+
+        var p = Ꮡa;
+        defer(() => {
+            Ꮡa.Value[0] = 0xCCCC;
+        }, ref ᒐ);
+        p.Value[1] = 303;
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return Ꮡa.Value;
+}
+
 internal static void main() {
     variable();
     literal();
@@ -309,6 +389,13 @@ internal static void main() {
     recvOk();
     var r = namedResultIndex();
     fmt.Println("res idx :", r[0], r[1], len(r));
+    forSingle();
+    forSinglePost();
+    forLabelled();
+    var h = namedStructResultIndex();
+    fmt.Println("res sidx:", h.x[0], h.x[1], len(h.x));
+    var ra = aliasedResultIndex();
+    fmt.Println("res aidx:", ra[0], ra[1], len(ra));
 }
 
 } // end main_package

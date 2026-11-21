@@ -988,8 +988,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 								// An unnamed array result takes its storage here, as convertToHeapTypeDecl's array branch
 								// gives a local: `heap<array<T>>(out …)` boxes `default(array<T>)`, which has no backing,
 								// so every index through the result panicked with length 0 and a window cut over it
-								// (door C) threw at the cut. A named array type materializes its own backing.
-								if arrayType, isArray := param.Type().(*types.Array); isArray {
+								// (door C) threw at the cut. A named array type materializes its own backing. An alias of an
+								// unnamed array type (`type A = [8]uint64`) is the unnamed type, so it is unaliased first.
+								if arrayType, isArray := types.Unalias(param.Type()).(*types.Array); isArray {
 									v.writeString(resultDeclTarget, "%sheap(new array<%s>(%s), out var %s%s);", v.indent(v.indentLevel+1), v.getCSharpTypeName(arrayType.Elem()), v.arrayZeroValueArgs(fmt.Sprint(arrayType.Len()), arrayType), AddressPrefix, v.boxBaseName(ident))
 								} else {
 									v.writeString(resultDeclTarget, "%sheap<%s>(out var %s%s);", v.indent(v.indentLevel+1), v.getCSharpTypeName(param.Type()), AddressPrefix, v.boxBaseName(ident))

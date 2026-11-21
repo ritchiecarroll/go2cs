@@ -1256,6 +1256,13 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		// calls are handed to visitForStmt with the re-aliases. Without this a clause tuple replaced the array's storage,
 		// and a window cut over the old storage (door C, a field view) lost every later write
 		// (docs/phase4/DESIGN-array-pointer-doors.md 21).
+		//
+		// In the post clause the hoist buffer is that loop's own: visitForStmt sets v.inForPost only while it visits the
+		// post, and for exactly that span installs the post's own buffer as v.hoistedDecls, restoring both after (a for
+		// nested anywhere inside does the same for its own post). A post is one simple statement, so the only assignment
+		// that reaches here with v.inForPost set and outside statement position is the post itself: a statement in a
+		// function literal inside it is in statement position and installs its own buffer (convFuncLit clears the
+		// enclosing one), and a nested for's init clause takes the format.forInit path.
 		tupleStatementPos := format.useNewLine && format.includeSemiColon
 		tupleInForPost := !tupleStatementPos && !format.forInit && v.inForPost
 		tupleInPlaceOK := v.hoistedDecls != nil && (tupleStatementPos || format.forInit || v.inForPost)
