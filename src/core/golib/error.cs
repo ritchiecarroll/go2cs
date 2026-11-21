@@ -27,12 +27,12 @@ namespace go;
 /// <see cref="error{T}"/> IS the delegate-bound generic shell, and the attribute is how the binder
 /// finds it — a direct stamp rather than reflection over the static <c>As&lt;T&gt;</c> helpers below
 /// closed with <c>MakeGenericMethod</c>, which is what that lookup cost before and why
-/// <c>builtin.TryTypeAssert</c> no longer needs a reflective closure at all. No object shell is declared: the
-/// reflective tier would have to reproduce <see cref="error{T}"/>'s <c>%v</c>/<c>%T</c> formatting
-/// contract, so a VALUE-typed error still binds through the generic shell (AOT-graceful, exactly as
-/// before).
+/// <c>builtin.TryTypeAssert</c> no longer needs a reflective closure at all. <see cref="errorObjectShell"/> is
+/// the object shell, the tier that closes no generic type: the binder takes it first for a VALUE-typed error,
+/// and for a pointer box whenever <see cref="error{T}"/> cannot be closed over the box, which is every box
+/// Native AOT did not compile <see cref="error{T}"/> for ahead of time.
 /// </remarks>
-[GoInterfaceShell(typeof(error<>), null, nameof(Error))]
+[GoInterfaceShell(typeof(error<>), typeof(errorObjectShell), nameof(Error))]
 public interface error // : IFormattable
 {
     /// <summary>
@@ -224,6 +224,81 @@ internal interface IErrorTarget
     public static bool operator !=(NilType nil, error<T> value)
     {
         return value != nil;
+    }
+}
+
+/// <summary>
+/// The object shell for <see cref="error"/>: an <c>error</c> over a Go dynamic value that needs no generic
+/// type closed over that value.
+/// </summary>
+/// <remarks>
+/// <para>
+/// <see cref="AdapterBinder"/> builds it from the <see cref="GoInterfaceShellAttribute"/> stamp on
+/// <see cref="error"/>, exactly as it builds the object shell go2cs-gen emits for a converted interface
+/// (InterfaceShellEmitter's ObjectShell, which this mirrors): the value is held as <c>object</c>, the receiver
+/// box when pointer-sourced and the boxed value otherwise, and <see cref="Error"/> is forwarded through the
+/// <see cref="GoShellBinding"/> resolved once for the (type, <c>error</c>) pair.
+/// </para>
+/// <para>
+/// Without it, a value the binder reached for <c>error</c> could only be wrapped in <see cref="error{T}"/>
+/// closed with <c>MakeGenericType</c> over the value's type, and a Native AOT image has code for that
+/// instantiation only when it was compiled ahead of time. Under Native AOT,
+/// <c>var p any = new(runtime.PanicNilError); _, ok := p.(error)</c> answered <c>false</c>, Go's <c>true</c>
+/// being reached only under the JIT.
+/// </para>
+/// <para>
+/// The <c>%v</c>/<c>%T</c> formatting overload is <see cref="error{T}"/>'s, answered from the held value:
+/// <c>T</c> names the dynamic type (<c>*T</c> for a box), and <c>v</c> renders the pointee for a box, as Go's
+/// <c>%v</c> of an error renders through the value's own method rather than as a pointer.
+/// </para>
+/// </remarks>
+[EditorBrowsable(EditorBrowsableState.Never)] internal sealed class errorObjectShell : error, IInterfaceAdapter
+{
+    private readonly object m_target;
+    private readonly GoShellBinding m_binding;
+
+    public errorObjectShell(object target, GoShellBinding binding)
+    {
+        m_target = target;
+        m_binding = binding;
+    }
+
+    // The Go dynamic value, exactly as stored: the box when pointer-backed, the boxed value otherwise. The unwrap
+    // protocol (IInterfaceAdapter) keeps the shell invisible to equality, type switches, %T and re-asserts, as it does
+    // for error<T>.
+    object? IInterfaceAdapter.Value => m_target;
+
+    // 'error.Error' forwarder. A pointer source binds its ж-receiver method when it has one, else the value-receiver
+    // method on the pointee read at each call (GoShellBinding.Invoke), so a nil pointer with a pointer-receiver Error
+    // dispatches as Go's does, and one reached only through a value receiver panics as Go's does.
+    [DebuggerNonUserCode]
+    public @string Error() => (@string)m_binding.Invoke(0, m_target)!;
+
+    public string ToString(string? format, IFormatProvider? _)
+    {
+        switch (format)
+        {
+            case "T":
+            {
+                // As error<T>: the element's name, with a '*' for a box.
+                string typeName = GoReflect.TryBoxPointee(m_target.GetType(), out Type? pointee) ?
+                    "*" + GetGoTypeName(pointee) :
+                    GetGoTypeName(m_target.GetType());
+
+                return typeName.Replace("_package+", ".");
+            }
+            case "v":
+            {
+                // As error<T>: a box renders its pointee, whose ToString dispatches the Go method; a nil box renders
+                // <nil>, which is what Go's fmt prints when Error() panics on a nil pointer.
+                if (m_target is IGoReflectPointer box)
+                    return box is IGoReflectBox { IsNilPointer: true } ? "<nil>" : box.ReadReflectSlot()?.ToString() ?? "<nil>";
+
+                return m_target.ToString() ?? "<nil>";
+            }
+            default:
+                return ToString() ?? "<nil>";
+        }
     }
 }
 
