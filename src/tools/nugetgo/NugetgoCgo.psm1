@@ -29,6 +29,7 @@
 # guard, the same builds fail with its error, naming the RID; a build for a packed RID still builds.
 
 Import-Module (Join-Path $PSScriptRoot 'NugetgoFlavors.psm1')
+Import-Module (Join-Path $PSScriptRoot '../pushnuget/GoApiCompat.psm1')
 
 # The pinned C toolchain, .github/cgo-toolchain.ps1's (Test-NugetgoCgo.ps1 holds the two equal). Every flavor
 # cross-compiles with it: zig carries each target's C library headers and the darwin SDK stubs.
@@ -95,6 +96,7 @@ function Get-NugetgoCgoStatement([Parameter(Mandatory)][string]$PackageId) {
     foreach ($rid in $excluded.Keys) { $out += " $rid is not packed: $($excluded[$rid])." }
     $out += " A build for any other RID fails with NUGETGOCGO001. A portable build (no -r) is checked against the .NET SDK's own RID, so on a host the package does not carry it is refused even when it will run elsewhere: build with -r and one of the packed RIDs."
     $out += " lib/ holds reference assemblies only, so a portable build deployed to a RID the package does not carry fails at load, never binding another target's code."
+    $out += " One deployment neither check refuses yet: a portable build made on a packed host and run on linux-musl (Alpine) takes runtimes/linux-x64 by .NET's RID fallback, whose C binding is glibc's; the run-time check (A6) is what will refuse it. A build for linux-musl itself, -r or portable on such a host, is refused by NUGETGOCGO001."
     $out
 }
 
@@ -155,6 +157,9 @@ function Test-NugetgoCgoSurface {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$RepoRoot, [Parameter(Mandatory)][string]$WorkDir, [Parameter(Mandatory)]$Reference, [Parameter(Mandatory)]$Runtimes)
 
+    # The pinned tool, restored and its version checked, as the pack's own binary-compatibility guard does: a hosted leg
+    # has no restored tool until this runs (the first hosted read, converter-cgo 44954804095: "Run dotnet tool restore").
+    [void](Initialize-GoApiCompatTool -RepoRoot $RepoRoot)
     $clean = 'APICompat ran successfully without finding any breaking changes.'
     $breaks = 'API breaking changes found.'
     $reasons = New-Object System.Collections.Generic.List[string]

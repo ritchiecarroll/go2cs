@@ -216,6 +216,28 @@ try {
     try { [void](Invoke-GoNuGetPush -Packages @($plain, $cgoPack) -Source $folderFeed -ApiKey 'selftest-key') } catch { $thrown = "$_" }
     Check ($null -ne $thrown -and $thrown -match 'nugetgo\.cgo') "cgo: a folder feed took a -Cgo pack: $thrown"
     Check (@(Get-ChildItem -LiteralPath $folderFeed -Recurse -File).Count -eq 0) "cgo: the folder feed holds $(@(Get-ChildItem -LiteralPath $folderFeed -Recurse -File).Count) file(s) after the refusal"
+    # The second key (P3's INC 2b read, NIT 4): no guard file, but lib/ a reference assembly beside runtimes/.
+    function Add-FakeEntry([System.IO.FileInfo]$Package, [string]$Name, [string]$Text) {
+        $zip = [System.IO.Compression.ZipFile]::Open($Package.FullName, 'Update')
+        try { $w = New-Object System.IO.StreamWriter($zip.CreateEntry($Name).Open()); try { $w.Write($Text) } finally { $w.Dispose() } }
+        finally { $zip.Dispose() }
+    }
+    $refLayout = New-FakePackage 'nugetgo.reflayout' $version $cgoDir
+    Add-FakeEntry $refLayout 'lib/net10.0/A.dll' 'MZ...System.Runtime.CompilerServices ReferenceAssemblyAttribute...'
+    Add-FakeEntry $refLayout 'runtimes/win-x64/lib/net10.0/A.dll' 'MZ...an implementation...'
+    $state.Puts.Clear()
+    $thrown = $null
+    try { [void](Invoke-Case @($refLayout)) } catch { $thrown = "$_" }
+    Check ($null -ne $thrown -and $thrown -match 'nugetgo\.reflayout') "cgo: a package whose lib/ is a reference assembly beside runtimes/ was not refused: $thrown"
+    Check ($state.Puts.Count -eq 0) "cgo: the reference-layout package was PUT"
+    # Its control: the go.* RID-specific layout, an implementation in lib/ beside runtimes/, pushes.
+    $implLayout = New-FakePackage 'nugetgo.impllayout' $version $cgoDir
+    Add-FakeEntry $implLayout 'lib/net10.0/A.dll' 'MZ...an implementation...'
+    Add-FakeEntry $implLayout 'runtimes/win-x64/lib/net10.0/A.dll' 'MZ...an implementation...'
+    $state.Puts.Clear()
+    $thrown = $null
+    try { [void](Invoke-Case @($implLayout)) } catch { $thrown = "$_" }
+    Check ($null -eq $thrown -and $state.Puts.Count -eq 1) "cgo: the control (an implementation in lib/ beside runtimes/) did not push: $thrown; PUTs $($state.Puts.Count)"
     # The control is every other case here: each pushes packages with no NUGETGOCGO001 through the same function.
     $state.Puts.Clear()
 

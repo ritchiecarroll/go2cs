@@ -148,14 +148,18 @@ target, so the package is always RID-specific, and differs from the layout above
 - `lib/<tfm>/` holds the windows flavor's **reference** assemblies, never an implementation. NuGet falls back to
   `lib/` for a RID with no `runtimes/` folder of its own, and a reference assembly refuses to load there, where an
   implementation would bind another target's C.
-- `build/<id>.targets` fails a consumer build with `NUGETGOCGO001` when the build's RID has no `runtimes/<rid>/lib/`
+- `build/<id>.targets`, and the same file under `buildTransitive/` for a consumer that reaches the package through a
+  project reference, fails a consumer build with `NUGETGOCGO001` when the build's RID has no `runtimes/<rid>/lib/`
   folder in the package. That RID is `-r`'s, or the .NET SDK's own for a portable build, so a portable build on an
   osx-arm64 host is refused even when it will run elsewhere: build with `-r` and a packed RID. The guard reads the set
-  from the package's folders, so osx-arm64 joins by being packed, with no change to the guard.
+  from the package's folders, so osx-arm64 joins by being packed, with no change to the guard. One deployment neither
+  check refuses yet: a portable build made on a packed host and run on linux-musl takes `runtimes/linux-x64` by .NET's
+  RID fallback, whose C binding is glibc's. The run-time RID check (A6) is what will refuse it.
 
 The read-back also checks R7: each RID's assembly has exactly the public surface of `lib/`'s reference assembly
 (ApiCompat, strict mode). **No `-Cgo` pack is pushed** until the run-time RID check (A6) lands: `src/_nugetpush.ps1`
-refuses a package whose `build/<id>.targets` carries `NUGETGOCGO001`, before it pushes anything. `-Cgo` runs under
+refuses a package whose `build/<id>.targets` carries `NUGETGOCGO001`, or whose `lib/` holds a reference assembly
+beside `runtimes/`, before it pushes anything. `-Cgo` runs under
 PowerShell 7 only.
 
 The package README is `PR/src/M/nuget/README.md`, in the style of the `go.*` packages (owner, 2026-10-10). The pack

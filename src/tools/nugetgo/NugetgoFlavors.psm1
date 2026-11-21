@@ -174,6 +174,23 @@ function Test-NugetgoRidLayout {
     $reasons.ToArray()
 }
 
+# The read-back's layout decision, for every package nugetgo-pack.ps1 packs: a RID-specific package is read by
+# Test-NugetgoRidLayout (-RidFlavors and -LibAssemblies passed through), and a neutral package carries no runtimes/
+# entry at all. One call, so no branch of the pack can skip it. No reason means accepted.
+function Test-NugetgoPackedLayout {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Package, [Parameter(Mandatory)]$Assemblies, [Parameter(Mandatory)][string]$TargetFramework,
+        [switch]$RidSpecific, $RidFlavors = (Get-NugetgoRidFlavors), $LibAssemblies = $null)
+
+    if ($RidSpecific) { return @(Test-NugetgoRidLayout -Package $Package -Assemblies $Assemblies -TargetFramework $TargetFramework -RidFlavors $RidFlavors -LibAssemblies $LibAssemblies) }
+    Add-Type -AssemblyName System.IO.Compression, System.IO.Compression.FileSystem
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($Package)
+    try { $runtimes = @($zip.Entries | Where-Object { $_.FullName -like 'runtimes/*' } | ForEach-Object { $_.FullName }) }
+    finally { $zip.Dispose() }
+    if ($runtimes.Count) { return @("a neutral package carries runtimes/ entries ($($runtimes[0])$(if ($runtimes.Count -gt 1) { " and $($runtimes.Count - 1) more" }))") }
+    @()
+}
+
 # The package's third-party requires: the UNION of its flavors' (COORD ruling 2026-10-12, for cobra, whose command_win.go
 # imports mousetrap on windows only). NuGet declares dependencies per target framework, never per RID, so -- as the
 # go.* release does for its own dependencies -- every flavor's require is declared, and only the RID-matched assemblies
@@ -215,4 +232,4 @@ function Get-NugetgoFlavorDisclosure {
     "Flavors: this package carries RID-specific assemblies; its go2cs/source-metadata.txt describes the $ProofFlavor flavor's package metadata, and the $named flavors' metadata is not described."
 }
 
-Export-ModuleMember -Function Get-NugetgoRidFlavors, Get-NugetgoReferenceFlavor, Get-NugetgoFlavors, Get-NugetgoFlavorPlatforms, Get-NugetgoFlavorGoos, Get-NugetgoRidTarget, Get-NugetgoFlavorFolder, Get-NugetgoFlavorDecision, Set-NugetgoRidAssets, Test-NugetgoRidLayout, Merge-NugetgoFlavorRequires, Get-NugetgoFlavorDisclosure
+Export-ModuleMember -Function Get-NugetgoRidFlavors, Get-NugetgoReferenceFlavor, Get-NugetgoFlavors, Get-NugetgoFlavorPlatforms, Get-NugetgoFlavorGoos, Get-NugetgoRidTarget, Get-NugetgoFlavorFolder, Get-NugetgoFlavorDecision, Set-NugetgoRidAssets, Test-NugetgoRidLayout, Test-NugetgoPackedLayout, Merge-NugetgoFlavorRequires, Get-NugetgoFlavorDisclosure

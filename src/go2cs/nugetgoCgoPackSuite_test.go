@@ -9,6 +9,7 @@
 package main
 
 import (
+	"archive/zip"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -61,4 +62,93 @@ func TestNugetgoCgoPackSuiteOnThisHost(t *testing.T) {
 
 		t.Fatalf("Test-NugetgoCgo.ps1 failed (%v):\n%s", err, fails)
 	}
+}
+
+// A NON-CGO RID-SPECIFIC MODULE, PACKED END TO END (P3's INC 2b read, MUST 1). The -Cgo seat once put its block between
+// the pack's layout `if` and its `elseif`, and the pack then refused every non-cgo RID-specific package ("a neutral
+// package carries runtimes/ entries"): mousetrap v1.1.0's pack, measured at 326a7e7932, exited 1 there and 0 at the seat's
+// base. No suite ran a whole pack, so this row does: the repack driver's rehearsal pack of mousetrap v1.1.0 (no Go tests;
+// its trap_windows.go and trap_others.go are why its flavors differ), from this tree, against the published go.*
+// release. It needs go, dotnet, pwsh, the network and a few GB, so it runs where GO2CS_TESTS_E2E=1 (the cgo-e2e stage,
+// filtered to it).
+func TestNugetgoPackOfANonCgoRidSpecificModuleEndToEnd(t *testing.T) {
+	if os.Getenv(testsE2EEnv) != "1" {
+		t.Skip("opt-in on GO2CS_TESTS_E2E=1 (the cgo-e2e stage, filter ^TestNugetgoPackOfANonCgoRidSpecificModuleEndToEnd$): a whole pack against the published go.* release")
+	}
+
+	pwsh, err := exec.LookPath("pwsh")
+
+	if err != nil {
+		t.Fatal("pwsh is not on PATH, and GO2CS_TESTS_E2E=1 requires the pack to run")
+	}
+
+	tree, err := filepath.Abs(filepath.Join("..", ".."))
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	release, err := exec.Command("go", "run", ".", "-version").Output()
+
+	if err != nil {
+		t.Fatalf("go2cs -version: %v", err)
+	}
+
+	version := ""
+
+	for _, line := range strings.Split(string(release), "\n") {
+		if value, found := strings.CutPrefix(strings.TrimSpace(line), "go2cs.release="); found {
+			version = value
+		}
+	}
+
+	if version == "" {
+		t.Fatalf("go2cs -version names no release:\n%s", release)
+	}
+
+	work := filepath.Join(t.TempDir(), "work")
+	driver := filepath.Join(tree, "src", "tools", "nugetgo", "Invoke-NugetgoRepack.ps1")
+	command := exec.Command(pwsh, "-NoProfile", "-NonInteractive", "-File", driver, "-Module", "github.com/inconshreveable/mousetrap@v1.1.0",
+		"-Revision", "2", "-T", tree, "-Release", version, "-Work", work, "-Packs", "int1", "-FloorGB", "4")
+	command.Env = append(os.Environ(), "NO_COLOR=1", "DOTNET_ROLL_FORWARD=Major")
+	output, err := command.CombinedOutput()
+
+	if err != nil {
+		t.Fatalf("the rehearsal pack of mousetrap v1.1.0 against go.* %s failed (%v):\n%s", version, err, lastLines(string(output), 30))
+	}
+
+	packages, _ := filepath.Glob(filepath.Join(work, "kit", "nupkg", "*", "*.nupkg"))
+
+	if len(packages) == 0 {
+		packages, _ = filepath.Glob(filepath.Join(work, "out-int1", "*.nupkg"))
+	}
+
+	if len(packages) != 1 {
+		t.Fatalf("want one mousetrap package under %s, found %v", work, packages)
+	}
+
+	archive, err := zip.OpenReader(packages[0])
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer archive.Close()
+
+	entries := map[string]bool{}
+
+	for _, f := range archive.File {
+		entries[f.Name] = true
+	}
+
+	const assembly = "github.com.inconshreveable.mousetrap.dll"
+
+	for _, want := range []string{"lib/net10.0/" + assembly, "runtimes/win-x64/lib/net10.0/" + assembly, "runtimes/linux-x64/lib/net10.0/" + assembly,
+		"runtimes/osx-x64/lib/net10.0/" + assembly, "runtimes/osx-arm64/lib/net10.0/" + assembly, "runtimes/linux-arm64/lib/net10.0/" + assembly} {
+		if !entries[want] {
+			t.Errorf("the package lacks %s", want)
+		}
+	}
+
+	t.Logf("READING %s: %d entries, RID-specific, packed against go.* %s", filepath.Base(packages[0]), len(entries), version)
 }

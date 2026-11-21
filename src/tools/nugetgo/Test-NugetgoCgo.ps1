@@ -61,7 +61,7 @@ Check 'the pinned zig version is .github/cgo-toolchain.ps1''s' ($pin -and (Get-N
 
 Write-Host 'statement: what the pack says about its RIDs'
 $statement = Get-NugetgoCgoStatement -PackageId 'nugetgo.example.cgo'
-foreach ($rid in @($cgo.Keys) + @($excluded.Keys) + @('NUGETGOCGO001', '-r ', 'reference assemblies')) {
+foreach ($rid in @($cgo.Keys) + @($excluded.Keys) + @('NUGETGOCGO001', '-r ', 'reference assemblies', 'linux-musl', 'A6')) {
     Check "the statement names $rid" ($statement.Contains($rid)) $statement
 }
 
@@ -116,7 +116,7 @@ try {
     Write-Host "  host $hostRid$(if ($excluded.Contains($hostRid)) { ', a RID a -Cgo pack leaves out by name' } else { ', standing in for an unpacked RID' })"
     $feed = Join-Path $work 'feed'
     New-Item -ItemType Directory -Force $feed | Out-Null
-    function New-ProbePack([string]$version, [string[]]$rids) {
+    function New-ProbePack([string]$version, [string[]]$rids, [switch]$BuildOnly) {
         $nupkg = Join-Path $feed "nugetgo.cgo.probe.$version.nupkg"
         $zip = [System.IO.Compression.ZipFile]::Open($nupkg, 'Create')
         try {
@@ -124,8 +124,14 @@ try {
             try { $w.Write("<?xml version=`"1.0`"?><package><metadata><id>nugetgo.cgo.probe</id><version>$version</version><authors>selftest</authors><description>selftest</description></metadata></package>") } finally { $w.Dispose() }
             [void][System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $same.Ref, 'lib/net10.0/Probe.dll')
             foreach ($rid in $rids) { [void][System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $same.Impl, "runtimes/$rid/lib/net10.0/Probe.dll") }
-            $w = New-Object System.IO.StreamWriter($zip.CreateEntry('build/nugetgo.cgo.probe.targets').Open())
-            try { $w.Write((New-NugetgoCgoRidGuard -PackageId 'nugetgo.cgo.probe')) } finally { $w.Dispose() }
+            # The guard at build/ and buildTransitive/, as a -Cgo pack carries it, beside a build/<id>.props as every
+            # nugetgo pack carries its usings: a direct consumer must still import that props (Program.cs needs its constant).
+            foreach ($path in @('build/nugetgo.cgo.probe.targets') + @(if (-not $BuildOnly) { 'buildTransitive/nugetgo.cgo.probe.targets' })) {
+                $w = New-Object System.IO.StreamWriter($zip.CreateEntry($path).Open())
+                try { $w.Write((New-NugetgoCgoRidGuard -PackageId 'nugetgo.cgo.probe')) } finally { $w.Dispose() }
+            }
+            $w = New-Object System.IO.StreamWriter($zip.CreateEntry('build/nugetgo.cgo.probe.props').Open())
+            try { $w.Write('<Project><PropertyGroup><DefineConstants>$(DefineConstants);NUGETGO_PROBE_PROPS</DefineConstants></PropertyGroup></Project>') } finally { $w.Dispose() }
         }
         finally { $zip.Dispose() }
     }
@@ -137,7 +143,7 @@ try {
         New-Item -ItemType Directory -Force $dir | Out-Null
         Set-Content -LiteralPath (Join-Path $dir 'nuget.config') -Value "<?xml version=`"1.0`" encoding=`"utf-8`"?><configuration><packageSources><clear /><add key=`"probe`" value=`"$([System.Security.SecurityElement]::Escape($feed))`" /><add key=`"nuget`" value=`"https://api.nuget.org/v3/index.json`" /></packageSources></configuration>"
         Set-Content -LiteralPath (Join-Path $dir 'App.csproj') -Value "<Project Sdk=`"Microsoft.NET.Sdk`"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework></PropertyGroup><ItemGroup><PackageReference Include=`"nugetgo.cgo.probe`" Version=`"$version`" /></ItemGroup></Project>"
-        Set-Content -LiteralPath (Join-Path $dir 'Program.cs') -Value 'System.Console.WriteLine(Probe.P.Where());'
+        Set-Content -LiteralPath (Join-Path $dir 'Program.cs') -Value "#if !NUGETGO_PROBE_PROPS`n#error the package's build/ props was not imported`n#endif`nSystem.Console.WriteLine(Probe.P.Where());"
         $out = @(& dotnet build (Join-Path $dir 'App.csproj') -c Release --nologo -o (Join-Path $dir 'out') @buildArgs 2>&1 | ForEach-Object { "$_" })
         [pscustomobject]@{ Exit = $LASTEXITCODE; Text = ($out -join "`n"); Out = (Join-Path $dir 'out') }
     }
@@ -157,6 +163,28 @@ try {
         $runText = @(& dotnet (Join-Path $deployed.Out 'App.dll') 2>&1 | ForEach-Object { "$_" }); $runExit = $LASTEXITCODE
         Check "run on $hostRid, it fails at load on the reference assembly, never printing the implementation's answer" ($runExit -ne 0 -and ($runText -join ' ') -match 'BadImageFormatException' -and ($runText -join ' ') -match 'Reference assemblies' -and ($runText -join ' ') -notmatch '\bimpl\b') "exit ${runExit}: $(@($runText | Select-Object -First 2) -join ' | ')"
     }
+    # Through a project reference (P3's INC 2b read, SHOULD 2): App -> Lib -> the pack. Lib is built for a packed RID of its
+    # own (its project's RuntimeIdentifier), so its own guard passes, and App names the unpacked RID in its project: only
+    # buildTransitive/ reaches App, which references the package transitively. The control is a pack with the guard at
+    # build/ only, through which App builds.
+    New-ProbePack '1.0.2' $others -BuildOnly
+    function Invoke-Transitive([string]$name, [string]$version) {
+        $tdir = Join-Path $work "consumer-transitive-$name"
+        New-Item -ItemType Directory -Force (Join-Path $tdir 'Lib'), (Join-Path $tdir 'App') | Out-Null
+        Set-Content -LiteralPath (Join-Path $tdir 'nuget.config') -Value "<?xml version=`"1.0`" encoding=`"utf-8`"?><configuration><packageSources><clear /><add key=`"probe`" value=`"$([System.Security.SecurityElement]::Escape($feed))`" /><add key=`"nuget`" value=`"https://api.nuget.org/v3/index.json`" /></packageSources></configuration>"
+        Set-Content -LiteralPath (Join-Path $tdir 'Lib/Lib.csproj') -Value "<Project Sdk=`"Microsoft.NET.Sdk`"><PropertyGroup><TargetFramework>net10.0</TargetFramework><RuntimeIdentifier>$($others[0])</RuntimeIdentifier></PropertyGroup><ItemGroup><PackageReference Include=`"nugetgo.cgo.probe`" Version=`"$version`" /></ItemGroup></Project>"
+        Set-Content -LiteralPath (Join-Path $tdir 'Lib/Lib.cs') -Value 'namespace Lib; public static class L { public static string Where() => Probe.P.Where(); }'
+        Set-Content -LiteralPath (Join-Path $tdir 'App/App.csproj') -Value "<Project Sdk=`"Microsoft.NET.Sdk`"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><RuntimeIdentifier>$hostRid</RuntimeIdentifier><UseAppHost>false</UseAppHost></PropertyGroup><ItemGroup><ProjectReference Include=`"../Lib/Lib.csproj`" /></ItemGroup></Project>"
+        Set-Content -LiteralPath (Join-Path $tdir 'App/Program.cs') -Value 'System.Console.WriteLine(Lib.L.Where());'
+        $tout = @(& dotnet build (Join-Path $tdir 'App/App.csproj') -c Release --nologo 2>&1 | ForEach-Object { "$_" })
+        [pscustomobject]@{ Exit = $LASTEXITCODE; Text = $tout; App = @($tout | Where-Object { $_ -match 'NUGETGOCGO001' -and $_ -match '[\\/]App\.csproj\]' }).Count; Lib = @($tout | Where-Object { $_ -match 'NUGETGOCGO001' -and $_ -match '[\\/]Lib\.csproj\]' }).Count }
+    }
+    $both = Invoke-Transitive 'both' '1.0.0'
+    Check "App -> Lib ($($others[0])) -> the pack, App for ${hostRid}: App's own build fails with NUGETGOCGO001 (buildTransitive/), Lib's passes" ($both.Exit -ne 0 -and $both.App -ge 1 -and $both.Lib -eq 0) "exit $($both.Exit), App errors $($both.App), Lib errors $($both.Lib): $(@($both.Text | Where-Object { $_ -match 'error' } | Select-Object -First 2) -join ' | ')"
+    $buildOnly = Invoke-Transitive 'buildonly' '1.0.2'
+    Check 'control: with the guard at build/ only, the same App builds (the gap buildTransitive/ closes)' ($buildOnly.Exit -eq 0 -and $buildOnly.App -eq 0) "exit $($buildOnly.Exit): $(@($buildOnly.Text | Where-Object { $_ -match 'error' } | Select-Object -First 2) -join ' | ')"
+    $musl = Invoke-Consumer 'musl' '1.0.1' @('-r', 'linux-musl-x64')
+    Check '-r linux-musl-x64 fails with NUGETGOCGO001 (the pack has no runtimes/linux-musl-x64; only a portable build made elsewhere reaches musl, A6''s)' ($musl.Exit -ne 0 -and $musl.Text -match 'NUGETGOCGO001.*linux-musl-x64') "exit $($musl.Exit): $(@($musl.Text -split "`n" | Select-String 'error' | Select-Object -First 2) -join ' | ')"
     $joined = Invoke-Consumer 'joined' '1.0.1' @()
     Check "the same guard, in a pack that carries $hostRid, builds portably (the set is the pack's)" ($joined.Exit -eq 0) "exit $($joined.Exit): $(@($joined.Text -split "`n" | Select-String 'error' | Select-Object -First 2) -join ' | ')"
 

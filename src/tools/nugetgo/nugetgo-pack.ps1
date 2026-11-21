@@ -478,10 +478,12 @@ foreach ($flavor in Get-NugetgoFlavors) {
     $log = Join-Path $flavorDir "$(Get-NugetgoFlavorFolder $flavor).log"
     $target = if ($flavor -ceq $proofFlavor) { $proofTarget } else { $flavor }
     $cgoArgs = @()
-    $savedCc = @{ CC = $env:CC; CGO_ENABLED = $env:CGO_ENABLED }
+    $savedCc = @{ CC = $env:CC; CGO_ENABLED = $env:CGO_ENABLED; CGO_CFLAGS = $env:CGO_CFLAGS; CGO_CPPFLAGS = $env:CGO_CPPFLAGS; CGO_CXXFLAGS = $env:CGO_CXXFLAGS; CGO_LDFLAGS = $env:CGO_LDFLAGS }
     if ($Cgo) {
         # The flavor's own C compiler: the converter's R3 reads its triple back and refuses one that is not the target's.
+        # No flag the caller's shell carries reaches a flavor (P3's INC 2b read, NIT 5): each converts with the pin alone.
         $cgoArgs = @('-cgo=true'); $env:CC = Get-NugetgoCgoCompiler -Zig $Zig -Flavor $flavor; $env:CGO_ENABLED = '1'
+        foreach ($flag in 'CGO_CFLAGS', 'CGO_CPPFLAGS', 'CGO_CXXFLAGS', 'CGO_LDFLAGS') { Remove-Item "env:$flag" -ErrorAction SilentlyContinue }
         Write-Host "  cgo: $flavor converts at $target with CC=$env:CC"
     }
     try { & $converter -recurse=nuget @provenanceArgs -platforms $target @cgoArgs -go2cspath (Split-Path $flavorConverterDir) $moduleCacheDir $root *> $log; $convertCode = $LASTEXITCODE }
@@ -613,7 +615,11 @@ $pkgRefs = ((@($goRefs | ForEach-Object { "    <PackageReference Include=`"$_`" 
 $cgoGuardItem = ''
 if ($Cgo) {
     [System.IO.File]::WriteAllText((Join-Path $packDir 'nugetgo-cgo-rid-guard.targets'), (New-NugetgoCgoRidGuard -PackageId $id.Id), (New-Object System.Text.UTF8Encoding($false)))
-    $cgoGuardItem = "    <None Include=`"nugetgo-cgo-rid-guard.targets`" Pack=`"true`" PackagePath=`"build/$(& $esc $id.Id).targets`" />"
+    # build/ for a direct reference, buildTransitive/ for a consumer that reaches the package through a project reference
+    # (P3's INC 2b read, SHOULD 2). A direct consumer still imports the package's build/<id>.props beside them
+    # (Test-NugetgoCgo.ps1 measures both).
+    $cgoGuardItem = "    <None Include=`"nugetgo-cgo-rid-guard.targets`" Pack=`"true`" PackagePath=`"build/$(& $esc $id.Id).targets`" />`n" +
+        "    <None Include=`"nugetgo-cgo-rid-guard.targets`" Pack=`"true`" PackagePath=`"buildTransitive/$(& $esc $id.Id).targets`" />"
 }
 $pageItems = ($pages | ForEach-Object {
     $rel = $_.FullName.Substring($ValidationDir.TrimEnd('\', '/').Length + 1)
@@ -818,15 +824,18 @@ if ($presentation.Count) {
     throw "REFUSED: the package's nuget.org page -- $($presentation -join '; ')"
 }
 if ($badDeps.Count) { throw "go.* dependencies not at the B4 range: $(($badDeps | ForEach-Object { "$($_.id) $($_.version)" }) -join ', ')" }
-if ($ridSpecific) {
-    $layout = @(Test-NugetgoRidLayout -Package $nupkg -Assemblies $flavorAssemblies -TargetFramework 'net10.0' @layoutArgs)
-    if ($layout.Count) { Remove-Item -LiteralPath $nupkg; throw "REFUSED: the RID-specific layout -- $($layout -join '; ')" }
-}
+# The layout, one decision for every package (Test-NugetgoPackedLayout; Test-NugetgoFlavors.ps1 holds this call at top
+# level): a RID-specific package's runtimes/ and lib/, or no runtimes/ at all for a neutral one. P3's INC 2b read: a
+# -Cgo block once sat between this check's `if` and its `elseif`, and refused every non-cgo RID-specific pack.
+$layout = @(Test-NugetgoPackedLayout -Package $nupkg -Assemblies $flavorAssemblies -TargetFramework 'net10.0' -RidSpecific:$ridSpecific @layoutArgs)
+if ($layout.Count) { Remove-Item -LiteralPath $nupkg; throw "REFUSED: $(if ($ridSpecific) { 'the RID-specific layout -- ' })$($layout -join '; ')" }
 if ($Cgo) {
     # lib/ is reference assemblies only, the guard is packed, and R7: each RID's assembly has exactly lib/'s surface.
     $cgoReasons = New-Object System.Collections.Generic.List[string]
     foreach ($dll in $libFiles) { if (-not (Test-NugetgoReferenceAssembly ([System.IO.File]::ReadAllBytes($dll)))) { $cgoReasons.Add("lib/net10.0/$(Split-Path -Leaf $dll) is not a reference assembly") } }
-    if (@($entries | Where-Object { $_ -ceq "build/$($id.Id).targets" }).Count -ne 1) { $cgoReasons.Add("no build/$($id.Id).targets (the RID guard)") }
+    foreach ($guard in "build/$($id.Id).targets", "buildTransitive/$($id.Id).targets") {
+        if (@($entries | Where-Object { $_ -ceq $guard }).Count -ne 1) { $cgoReasons.Add("no $guard (the RID guard)") }
+    }
     $surfaceRuntimes = [ordered]@{}
     foreach ($rid in $ridFlavors.Keys) {
         $surfaceRuntimes[$rid] = @{}
@@ -841,9 +850,8 @@ if ($Cgo) {
     $expectedSurface = $ridFlavors.Count * $surfaceReference.Count
     if ($surface.Compared -ne $expectedSurface) { $cgoReasons.Add("R7 compared $($surface.Compared) of $expectedSurface assemblies") }
     if ($cgoReasons.Count) { Remove-Item -LiteralPath $nupkg; throw "REFUSED: the -Cgo pack -- $($cgoReasons -join '; ')" }
-    Write-Host "    cgo: lib/ reference assemblies only; build/$($id.Id).targets packed; R7 clean, $($surface.Compared) assemblies compared with lib/"
+    Write-Host "    cgo: lib/ reference assemblies only; build/ and buildTransitive/$($id.Id).targets packed; R7 clean, $($surface.Compared) assemblies compared with lib/"
 }
-elseif (@($entries | Where-Object { $_ -like 'runtimes/*' }).Count) { Remove-Item -LiteralPath $nupkg; throw 'REFUSED: a neutral package carries runtimes/ entries' }
 if (@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count -ne $libraries.Count) { throw "lib/ carries $(@($entries | Where-Object { $_ -like 'lib/*.dll' }).Count) assemblies for $($libraries.Count) packages" }
 # Each assembly's copyright and company, read from the dll taken back OUT of the nupkg: its version resource, the
 # values a file's properties show.
