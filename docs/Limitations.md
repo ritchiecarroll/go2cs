@@ -258,10 +258,13 @@ program that uses the converted package needs only the C library.
 
 **One machine.** A `-cgo` conversion is for the machine's own operating system and architecture, and the converted
 package refuses to call C anywhere else. A single-package conversion builds against a go2cs clone
-(`dotnet build -p:go2csPath=<go2cs>/src/`). Under `-recurse -cgo` a module's cgo packages convert with the module, and
-a package that imports a standard-library package Go builds from different files with cgo on is refused by name.
+(`dotnet build -p:go2csPath=<go2cs>/src/`). Under `-recurse -cgo` a module's cgo packages convert with the module.
 Packing a cgo package against the `go.*` packages for every platform is still to come ([Roadmap](Roadmap.md#cgo)).
-The standard library itself is converted with `CGO_ENABLED=0`.
+The standard library itself is converted with `CGO_ENABLED=0`, and a module converted with `-recurse -cgo` uses it as
+it is. So a package that imports `net` or `os/user` gets their builds without cgo, the ones Go itself uses with
+`CGO_ENABLED=0`: `net` resolves host names with Go's own resolver, not the C library's, and `os/user` reads the user
+database files directly. Converting the `net` resolver with cgo is planned, and is what will change this. A package
+that imports `runtime/cgo` or `plugin` is refused by name: without cgo they are not working builds.
 <!-- src/go2cs/main.go:306 (`Not combinable with -stdlib or -tests. With -recurse, every non-standard-library package of the module loads cgo-on and each cgo package converts this way`); src/go2cs/csproj-template.xml:135 (`<ProjectReference Include="$(go2csPath)gen/go2cs-gen/go2cs-gen.csproj"`) and src/go2cs/csproj-template.xml:187 (`<ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />`). COORD's ruling O2, 2026-11-14 (cgo 3.1's release-path seat). -->
 
 **What is refused, by name, with the phase that will cover it:**

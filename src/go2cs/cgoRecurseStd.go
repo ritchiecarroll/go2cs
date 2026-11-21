@@ -22,10 +22,15 @@ import (
 
 // Under -recurse -cgo every non-std package converts from its cgo-ON load, as Go's cgo build compiles it, while the
 // standard library is the go.* packages, converted cgo-OFF by ruling (.claude/rules/corpus.md). Where Go builds a std
-// package from DIFFERENT files with cgo on, a converted package importing it would bind the cgo-off build Go's cgo build
-// does not use: refused by name (R5; runtime/cgo is R5c, the same rule). The set is derived per target from the
-// toolchain, never a hand list: at go1.26.11 net, os/user, plugin and runtime/cgo on linux, plugin and runtime/cgo on
-// darwin, runtime/cgo on windows (cgo against go.* INC 1, C2 e95260f9fa).
+// package from DIFFERENT files with cgo on, a converted package importing it binds the cgo-off build. The divergent set
+// is derived per target from the toolchain: at go1.26.11 net, os/user, plugin and runtime/cgo on linux, plugin and
+// runtime/cgo on darwin, runtime/cgo on windows (cgo against go.* INC 1, C2 e95260f9fa).
+//
+// For most of that set it is a DISCLOSED divergence and converts (COORD's ruling on P3's INC 1 review, option b): net's
+// and os/user's cgo-off builds are working Go builds of the same API, the ones Go itself uses under CGO_ENABLED=0 or
+// the netgo / osusergo tags (net's pure-Go resolver; docs/Limitations.md). Refused by name (R5) are only the packages
+// of that set whose cgo-off build is NOT a working build of the same API: runtime/cgo (R5c) and plugin.
+var cgoRefusedDivergentStd = map[string]bool{"runtime/cgo": true, "plugin": true}
 
 var (
 	cgoStdDivergenceMutex sync.Mutex
@@ -34,6 +39,8 @@ var (
 
 // cgoDivergentStdPackages returns the importable std packages whose selected files differ between a cgo-off and a
 // cgo-on load for the load's target. It runs `go list std runtime/cgo` once per setting, in the load's own environment.
+// The cache is keyed by the target alone, though the listing also depends on the build tags: one run has one tag set
+// (loaderBuildFlags), so the target is the only thing that varies across the packages of a run.
 func cgoDivergentStdPackages(load cgoLoad, target string) (map[string]bool, error) {
 	cgoStdDivergenceMutex.Lock()
 	defer cgoStdDivergenceMutex.Unlock()
@@ -83,7 +90,7 @@ func cgoImportableStdPath(path string) bool {
 }
 
 // refuseCgoDivergentStdImports refuses a package, under -recurse -cgo, whose source files import a std package of
-// divergent, reporting each import site. Only the imports the package's OWN files declare count: cmd/cgo's output for
+// divergent that cgoRefusedDivergentStd names, reporting each import site. Only the imports the package's OWN files declare count: cmd/cgo's output for
 // any import "C" file imports runtime/cgo, syscall and unsafe itself, so pkg.Imports and the cgo-on load's syntax (its
 // compiled files) would refuse every cgo package for its own plumbing. The files are re-read imports-only.
 func refuseCgoDivergentStdImports(pkg *packages.Package, divergent map[string]bool) error {
@@ -92,7 +99,7 @@ func refuseCgoDivergentStdImports(pkg *packages.Package, divergent map[string]bo
 
 	message := func(path string) string {
 		return fmt.Sprintf("package %s imports %q, which Go builds from different files with cgo on; the go.* packages are the "+
-			"standard library converted cgo-off, so the converted package would not do what Go's cgo build does (R5)", pkg.PkgPath, path)
+			"standard library converted cgo-off, and %s's cgo-off build is not a working build of its cgo API (R5)", pkg.PkgPath, path, path)
 	}
 
 	for _, name := range pkg.GoFiles {
@@ -105,7 +112,7 @@ func refuseCgoDivergentStdImports(pkg *packages.Package, divergent map[string]bo
 		for _, spec := range file.Imports {
 			path := strings.Trim(spec.Path.Value, "\"`")
 
-			if divergent[path] {
+			if divergent[path] && cgoRefusedDivergentStd[path] {
 				hitSet[path] = true
 				reportDiagnostic(fset.Position(spec.Pos()).String(), diagnosticCgoRefused, message(path))
 			}
