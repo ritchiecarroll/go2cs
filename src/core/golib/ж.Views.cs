@@ -248,6 +248,10 @@ public abstract partial class ж<T>
     // native root). Null keeps today's route: a box that is not a native root, the nil box (address 0), and a field
     // whose Go layout cannot be known, which still gets its cached view. The first field asked of any ж<T> marks T a
     // view consumer here too, as tryFindView does, so the boxes of T minted afterwards are shaped as before.
+    //
+    // A field whose Go layout cannot be known asks GoFieldOffsetOf twice, here and again in nativeFieldView's
+    // FieldRefBox.NativeFieldBox on the view route, with the same original accessor; both lookups are memoized per
+    // accessor (GoBoxTables.GoOffsetsByAccessor, the -1 cached too), so the second costs one table read (P3's NIT 2).
     private ж<TElem>? nativeRootField<TElem>(Delegate token)
     {
         if (this is not NativeBox<T>)

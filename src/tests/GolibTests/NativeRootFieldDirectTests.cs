@@ -111,6 +111,11 @@ public class NativeRootFieldDirectTests
                 Assert.AreEqual((nuint)block + GoOffsetOfPort, field.NativeAddress, "at the field's GO offset, not its CLR slot");
                 Assert.AreEqual(expected, (ushort)field.Value, "reading the bytes at that offset");
             }
+
+            // Go's == on two pointers to one field: each request mints a fresh box, so equality is the ADDRESS, never the
+            // object (P3's NIT 1). Typed and untyped name the same field, so they compare equal too.
+            Assert.IsTrue(typed == root.of(ᏑPort), "&p.Port == &p.Port");
+            Assert.IsTrue(typed == untyped, "the typed and untyped accessors name one Go pointer");
         }
         finally
         {
