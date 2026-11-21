@@ -311,53 +311,6 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
         ref this is NativeBox<T> native ? ref native.FieldRef(fieldRefFunc) : ref fieldRefFunc(ref Value);
 
     /// <summary>
-    /// Reads a pointer field of a C struct (a struct carrying <see cref="GoCgoStructAttribute"/>): Go's <c>p.f</c>
-    /// for <c>f</c> a <c>*U</c>, the getter go2cs-gen emits for it (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9).
-    /// </summary>
-    /// <remarks>
-    /// A managed receiver, a C struct value Go allocated, reads its slot, as <see cref="field{TF}"/> does. A native
-    /// receiver reads the C word at the field's Go offset: 0 is nil, a word of C memory is a native box over it, and a
-    /// word that names Go memory is refused by name, since go2cs keeps no record of a Go pointer stored there.
-    /// </remarks>
-    public ж<U> cgoPointerField<U>(FieldRefFunc<T, ж<U>> fieldRefFunc) =>
-        this is NativeBox<T> native ? native.CgoPointerFieldRead(fieldRefFunc) : fieldRefFunc(ref Value);
-
-    /// <summary>
-    /// Stores into a pointer field of a C struct: Go's <c>p.f = v</c>, the setter go2cs-gen emits beside
-    /// <see cref="cgoPointerField{U}(FieldRefFunc{T, ж{U}})"/>.
-    /// </summary>
-    /// <remarks>
-    /// A managed receiver stores into its slot. A native receiver stores a C word at the field's Go offset: 0 for nil,
-    /// the address of a pointer to C memory, and a Go pointer is refused by name: C memory must not hold one, and a C
-    /// struct laid over Go memory does not record one in 3.2.
-    /// </remarks>
-    public void cgoPointerField<U>(FieldRefFunc<T, ж<U>> fieldRefFunc, ж<U> value)
-    {
-        if (this is NativeBox<T> native)
-            native.CgoPointerFieldWrite(fieldRefFunc, value);
-        else
-            fieldRefFunc(ref Value) = value;
-    }
-
-    /// <summary>
-    /// The address of a word field of a C struct, for <c>unsafe.Pointer.LoadWord</c> and <c>StoreWord</c>: the slot the
-    /// getter and setter go2cs-gen emits for an <c>unsafe.Pointer</c> field of a <see cref="GoCgoStructAttribute"/>
-    /// struct read and write through.
-    /// </summary>
-    /// <remarks>
-    /// It is <see cref="of{TElem}(FieldRefFunc{T, TElem})"/>, except that a native receiver whose field has no known Go
-    /// offset is refused by name. <c>of</c> keeps a managed view there, which the word doors would read at the CLR slot of
-    /// a struct in native memory: the wrong bytes, with no refusal.
-    /// </remarks>
-    public ж<TF> cgoWordField<TF>(FieldRefFunc<T, TF> fieldRefFunc)
-    {
-        if (this is NativeBox<T> native)
-            native.RequireGoFieldOffset(fieldRefFunc);
-
-        return of(fieldRefFunc);
-    }
-
-    /// <summary>
     /// Gets a pointer to a field that is itself accessed through a pointer-yielding accessor.
     /// </summary>
     public ж<TElem> of<TElem>(FieldPtrFunc<T, TElem> fieldPtrFunc)

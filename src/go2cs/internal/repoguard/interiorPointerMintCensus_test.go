@@ -125,6 +125,7 @@ var nativeMints = map[string]interiorMintRow{
 	mintGolib + "builtin.cs|NativeArrayPointer": {2, "carries: NativeArrayBox.Over is passed retainedSource. ShadowArrayBox.Over takes none: a reference-bearing " +
 		"element cannot alias native bytes, so its elements live in a managed store that shadows the block (the pointee rule, design 2.4)"},
 	mintGolib + "runtime/GoCgoArgs.cs|PointerMemberBack":    {1, "C memory: an address C stored in a mirror's pointer member, other than the one copied in"},
+	mintGolib + "ж.CgoFields.cs|CgoPointerFieldRead":        {1, "C memory: an address read out of a C struct's pointer field, a word Go memory does not name (cgo 3.2 seat 1a, docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9)"},
 	mintGolib + "slice.cs|OverNativeMemory":                 {1, "C memory: the two-argument form passes no anchor; no caller in golib or unsafe"},
 	mintGolib + "slice.cs|ReflectOverNativeMemory":          {4, "carries: the anchor for the root its caller passes (NativeSliceAnchors.For). One site mints. The other three only name the member: the three-argument member go.lib 1.26.10.3 published, kept for the binary-compat guard and forwarding to the rooted one, and the interface's default body (its declaration and its call, on one line)"},
 	mintGolib + "ж.ElemRefBox.cs|TryPinnedReinterpret":      {1, "carries: its pin and the element reference"},
