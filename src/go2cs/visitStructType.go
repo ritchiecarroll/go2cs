@@ -382,6 +382,10 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		valueCloneAttr = fmt.Sprintf("[GoValueClone(%s)] ", strings.Join(quotedFields, ", "))
 	}
 
+	// A struct cmd/cgo declared for a C struct with a pointer field carries the cgo marker (cgoStructMarker): go2cs-gen
+	// gives those fields GET/SET properties over the C word. Movable like the clone stamp, so it joins it below.
+	valueCloneAttr += cgoStructMarker(declaredStructType)
+
 	// Both stamps are MOVABLE: their consumers read them off the TYPE (go2cs-gen resolves the
 	// symbol's declarations, golib's reflection bridge reads the runtime Type), and C# unions the
 	// attributes of every partial declaration — so they belong on the package_info.cs accessibility
