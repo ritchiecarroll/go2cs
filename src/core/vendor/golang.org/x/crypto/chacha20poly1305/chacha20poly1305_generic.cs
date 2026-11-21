@@ -90,4 +90,4 @@ internal static (slice<byte>, error) openGeneric(this ref chacha20poly1305 c, sl
     return (ret, default);
 }
 
-} // end chacha20poly1305ᴛchacha20poly1305
+}

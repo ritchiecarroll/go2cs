@@ -72,7 +72,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("InterfaceCasting.go", "InterfaceCasting.cs", "AA0SgsiCAAsUggAJDIIACQyCAAkMggAIGILGooKmgsaCAAsigq6CgoKUgoK0goK0goK0yrSilJSUgoKmgoKCgpSClIKClIKUgoKmgoKCgoKCnIKCgoKCnKKCnoKSgpqCgpSUlJyCnIKcgoLYgoKUAA4cgrSCAA0YABUiAAkIgrQACxYAChKCgoKCgg==", "195-200:1")]
+[assembly: GoPositionMap("InterfaceCasting.go", "InterfaceCasting.cs", "AAsSgqiCAAkUgtyC3ILcggAGGIKmooKmgqaCAAsigq6CgoKUgoK0goK0goK0qpSilJSUgoKmgoKCgpSClIKClIKUgoKmgoKCgoKCnIKCgoKCnKKCnoKSgpqCgpSUlJyCnIKcgoLYgoKUAA4cgrSCAAsYABEi+IK0AAkWAAgSgoKCgoI=", "195-200:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -130,15 +130,6 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Cat)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛCat;
-[GoMethodHost(typeof(main_package.Counter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛCounter;
-[GoMethodHost(typeof(main_package.Dog)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛDog;
-[GoMethodHost(typeof(main_package.JavaProgrammer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛJavaProgrammer;
-[GoMethodHost(typeof(main_package.Llama)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛLlama;
-[GoMethodHost(typeof(main_package.MyError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛMyError;
 [GoMethodHost(typeof(main_package.badge)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbadge;
-[GoMethodHost(typeof(main_package.basin)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbasin;
 [GoMethodHost(typeof(main_package.fileRdr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfileRdr;
-[GoMethodHost(typeof(main_package.strRdr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛstrRdr;
-[GoMethodHost(typeof(main_package.wrapSink)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛwrapSink;
 // </MethodHolders>

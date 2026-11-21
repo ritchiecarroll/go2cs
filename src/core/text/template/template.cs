@@ -286,4 +286,4 @@ internal static bool associate(this ref Template t, ж<Template> Ꮡnew, ж<pars
     return true;
 }
 
-} // end templateᴛTemplate
+}

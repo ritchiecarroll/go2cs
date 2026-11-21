@@ -67,8 +67,8 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA0WAAoOgvaQlpDmqAAODJCUooKClAAQDJAADxCQ9sLqooKUpoKCgpSCgoKUgoKYgoKCloI=")]
-[assembly: GoPositionMap("ord.go", "ord.cs", "ABISkAALDAAJCKAACgg=")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAoW7oLWkJaQ5qgADAyQlKKCgpQADAyQAAsQkNbC6qKClKaCgoKUgoKClIKCmIKCgpaC")]
+[assembly: GoPositionMap("ord.go", "ord.cs", "AA4SkPzYoOg=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -122,13 +122,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Box<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛBox;
-[GoMethodHost(typeof(main_package.Ord<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛOrd;
-[GoMethodHost(typeof(main_package.age)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛage;
-[GoMethodHost(typeof(main_package.namer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛnamer;
-[GoMethodHost(typeof(main_package.node)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛnode;
-[GoMethodHost(typeof(main_package.pair<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛpair;
-[GoMethodHost(typeof(main_package.slot<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛslot;
-[GoMethodHost(typeof(main_package.tagged)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛtagged;
-[GoMethodHost(typeof(main_package.wrap<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛwrap;
 // </MethodHolders>

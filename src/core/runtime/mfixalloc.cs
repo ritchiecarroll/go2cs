@@ -120,4 +120,4 @@ internal static void free(this ref fixalloc f, @unsafe.Pointer p) {
     f.list = v;
 }
 
-} // end runtimeᴛfixalloc
+}

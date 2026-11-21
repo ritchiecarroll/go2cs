@@ -131,4 +131,4 @@ public static coverage.CounterGranularity Granularity(this ref Merger cm) {
     return cm.cgran;
 }
 
-} // end cmergeᴛMerger
+}

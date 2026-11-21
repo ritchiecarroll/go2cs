@@ -6,7 +6,7 @@ using @unsafe = unsafe_package;
 
 partial class runtime_package {
 
-[GoLazy] partial class lazyᴛmallocScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable = new Func<uintptr, ж<_type>, bool, @unsafe.Pointer>[]{
+[GoLazy] partial class lazyᴛmallocScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable = array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>>([
     mallocPanic,
     mallocgcSmallScanNoHeaderSC1,
     mallocgcSmallScanNoHeaderSC1,
@@ -520,9 +520,9 @@ partial class runtime_package {
     mallocgcSmallScanNoHeaderSC26,
     mallocgcSmallScanNoHeaderSC26,
     mallocgcSmallScanNoHeaderSC26
-}.array(); }
+]); }
 
-[GoLazy] partial class lazyᴛmallocNoScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocNoScanTable = new Func<uintptr, ж<_type>, bool, @unsafe.Pointer>[]{
+[GoLazy] partial class lazyᴛmallocNoScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocNoScanTable = array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>>([
     mallocPanic,
     mallocgcTinySize1,
     mallocgcTinySize2,
@@ -1036,6 +1036,6 @@ partial class runtime_package {
     mallocgcSmallNoScanSC26,
     mallocgcSmallNoScanSC26,
     mallocgcSmallNoScanSC26
-}.array(); }
+]); }
 
 } // end runtime_package

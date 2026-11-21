@@ -3,7 +3,6 @@ namespace go;
 using fmt = fmt_package;
 using Δmath = math_package;
 using os = os_package;
-using static main_package;
 
 partial class main_package {
 
@@ -33,11 +32,7 @@ partial struct holder {
     /*embed*/ internal ж<cell> cell;
 }
 
-} partial class mainᴛholder {
-
 internal static @string String(this holder h) { return fmt.Sprint(h.x); }
-
-} partial class main_package {
 
 internal static nint counted(nint i) {
     calls++;

@@ -212,6 +212,10 @@ var pointerMints = map[string]interiorMintRow{
 		"carrying nothing"},
 	mintUnsafe + "unsafe.cs|Moved":        {1, "token: token arithmetic over a source that holds a reference and so has no address; the root is kept"},
 	mintUnsafe + "unsafe.cs|FromReferent": {1, "token: the referent's registered order token"},
+	mintUnsafe + "unsafe.cs|FromWord": {1, "the LOADED word: the number is what StoreWord stored in the slot, the BaseOf projection of the " +
+		"stored pointer: a pinned address (YES, pinned by the slot's bag entry for as long as the word is stored) or an order token " +
+		"(token; the referent is the entry's), never FromBox's transient number; a number with no referent is read from a slot of C " +
+		"memory, and from a word of Go memory with NO entry (a raw uintptr store, or entries cleared by a copy from untabled storage)"},
 }
 
 // ---- arm 3: hand-owned casts

@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("DeferMultiValueSpread.go", "DeferMultiValueSpread.cs", "AAoYmIKCpoKCqIKCpoKCpoKmgqaCpoKmgoIACA6CyqKCgqKmooKCoqiigoKCgqKoooKCgqKoooKCkoKiqKKCgpSiqKKCgqKoooKCoqiCgoKCqoKCgoKmgoKmgoKCgoKCgoKCgoKCgoKmoqacgoKCgqiigoKiqqKCgpSiqKKCgqI=", "205-207:1", "", "", "70:21,81:21,92:21,105:21,106:21,119:21,132:25,144:21,164:15,171:15,217:21,228:21,241:21")]
+[assembly: GoPositionMap("DeferMultiValueSpread.go", "DeferMultiValueSpread.cs", "AAkYmIKCpoKCqIKCpoKCpoKmgqaCpoKmgoLugqqigoKipqKCgqKoooKCgoKiqKKCgoKiqKKCgpKCoqiigoKUoqiigoKiqKKCgqKogoKCgqqCgoKCpoKCpoKCgoKCgoKCgoKCgoKCpqKmnIKCgoKoooKCoqqigoKUoqiigoKi", "205-207:1", "", "", "65:21,76:21,87:21,100:21,101:21,114:21,127:25,139:21,159:15,166:15,212:21,223:21,236:21")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -90,5 +90,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.sink)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛsink;
 // </MethodHolders>

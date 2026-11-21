@@ -72,4 +72,4 @@ public static (@string, error) String(this StringTable st, uint32 start) {
     return (cstring(st.slice((nint)(start))), default);
 }
 
-} // end peᴛStringTable
+}

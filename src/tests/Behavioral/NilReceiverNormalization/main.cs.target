@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -12,8 +11,6 @@ partial struct loc {
 
 internal static readonly ж<loc> ᏑutcLoc = new StaticBox<loc>(new loc(name: "UTC", offset: 0));
 internal static ref loc utcLoc => ref ((StaticBox<loc>)ᏑutcLoc).ValueSlot;
-
-} partial class mainᴛloc {
 
 internal static ж<loc> get(this ж<loc> Ꮡl) {
     if (Ꮡl == nil) {
@@ -41,16 +38,12 @@ internal static @string rename(this ж<loc> Ꮡl, @string suffix) {
     return l.name;
 }
 
-} partial class main_package {
-
 internal static @string span(ж<loc> Ꮡl, nint width) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     Ꮡl = Ꮡl.get(); l = ref Ꮡl.DerefOrNull();
     return fmt.Sprintf("%s/%d"u8, l.name, l.offset + width);
 }
-
-} partial class mainᴛloc {
 
 internal static @string firstUseReads(this ж<loc> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
@@ -59,8 +52,6 @@ internal static @string firstUseReads(this ж<loc> Ꮡl) {
     Ꮡl = Ꮡl.get(); l = ref Ꮡl.DerefOrNull();
     return n + "/"u8 + l.name;
 }
-
-} partial class main_package {
 
 internal static void main() {
     ж<loc> nilLoc = default;

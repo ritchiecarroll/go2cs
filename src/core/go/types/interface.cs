@@ -266,4 +266,4 @@ internal static void interfaceType(this ж<Checker> Ꮡcheck, ж<Interface> Ꮡi
     }).describef(new ast_InterfaceTypeжpositioner(Ꮡiface), "compute type set for %s", Ꮡityp.OrTypedNil());
 }
 
-} // end typesᴛChecker
+}

@@ -465,4 +465,4 @@ internal static void StoreNoWB(this ж<atomicMSpanPointer> Ꮡp, ж<mspan> s) {
     Ꮡp.Ꮡp.StoreNoWB(@unsafe.Pointer.FromPinnedBox(s));
 }
 
-} // end runtimeᴛatomicMSpanPointer
+}

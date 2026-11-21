@@ -431,4 +431,4 @@ internal static void bigFloat(this ref Encoder w, ж<big.Float> v) {
 // Version reports the version of the bitstream.
 public static Version Version(this ref Encoder w) { return w.p.version; }
 
-} // end pkgbitsᴛEncoder
+}

@@ -4,17 +4,12 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using runtime = runtime_package;
 using sort = sort_package;
-using static main_package;
 
 partial class main_package {
 
 partial struct Direct /*map[nint, Direct]*/;
 
-} partial class mainᴛDirect {
-
 public static @string String(this Direct d) { return fmt.Sprintf("Direct(%d)"u8, len(d)); }
-
-} partial class main_package {
 
 partial struct DirectStr /*map[@string, DirectStr]*/;
 
@@ -96,7 +91,7 @@ internal static void viaNested() {
 }
 
 internal static void viaArray() {
-    var a = new ViaArray(new map<nint, array<ViaArray>>{[1] = new ViaArray[]{new ViaArray(new map<nint, array<ViaArray>>{[2] = new ViaArray[]{}.array(2)}), default}.array()});
+    var a = new ViaArray(new map<nint, array<ViaArray>>{[1] = array<ViaArray>([new ViaArray(new map<nint, array<ViaArray>>{[2] = new ViaArray[]{}.array(2)}), default])});
     fmt.Println("viaArray:", len(a), len(a[1, () => new array<ViaArray>(2)][0]), a[1, () => new array<ViaArray>(2)][1] == nil);
 }
 

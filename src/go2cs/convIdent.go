@@ -69,6 +69,8 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 	if pkgName, isPkg := v.identifierIsPackageName(ident); isPkg {
 		if renamed, ok := packageImportAliasRenames[pkgName]; ok {
 			return getSanitizedImport(renamed)
+		} else if csReservedTypeNames.Contains(pkgName) {
+			return "@" + pkgName // the alias's own spelling, as its `using @extension = …;` reads (identifierNaming.go)
 		}
 	}
 

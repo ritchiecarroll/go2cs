@@ -1,15 +1,12 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
 partial struct counter {
     internal nint n;
 }
-
-} partial class mainᴛcounter {
 
 internal static void bump(this ref counter c, nint delta) {
     c.n += delta;
@@ -18,8 +15,6 @@ internal static void bump(this ref counter c, nint delta) {
 internal static nint get(this ref counter c) {
     return c.n;
 }
-
-} partial class main_package {
 
 partial struct cachelike {
     internal counter flush;

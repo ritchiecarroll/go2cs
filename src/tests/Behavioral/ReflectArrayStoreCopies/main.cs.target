@@ -46,7 +46,7 @@ internal static void setMapIndexThenSetZero() {
     mv.SetMapIndex(keyP.Elem(), elemP.Elem());
     keyP.Elem().SetZero();
     elemP.Elem().SetZero();
-    var v = m[new @string[]{"x", "y"}.array(), () => new array<ж<float64>>(2)].Clone();
+    var v = m[array<@string>(["x", "y"]), () => new array<ж<float64>>(2)].Clone();
     fmt.Println("SetMapIndex then SetZero:", len(m), v[0] != nil && v[0].Value == 1.5D, v[1] != nil && v[1].Value == 2.5D);
 }
 
@@ -57,7 +57,7 @@ internal static void setMapIndexThenSet() {
     elemP.Elem().Index(0).SetInt(7);
     elemP.Elem().Index(1).SetInt(8);
     mv.SetMapIndex(reflect.ValueOf("k"), elemP.Elem());
-    elemP.Elem().Set(reflect.ValueOf(new nint[]{1, 2}.array()));
+    elemP.Elem().Set(reflect.ValueOf(array<nint>([1, 2])));
     fmt.Println("SetMapIndex then Set:", m["k", () => new array<nint>(2)]);
 }
 
@@ -111,8 +111,8 @@ internal static void gobRoundTrip() {
     ref var pi = ref heap<float64>(out var Ꮡpi);
     pi = 3.14159D;
     var @in = new marr(Marr: new map<array<@string>, array<ж<float64>>>{
-        [new @string[]{"string1", "string2"}.array()] = new ж<float64>[]{Ꮡpi, Ꮡe}.array(),
-        [new @string[]{"string2", "string1"}.array()] = new ж<float64>[]{Ꮡe, Ꮡpi}.array()
+        [array<@string>(["string1", "string2"])] = array<ж<float64>>([Ꮡpi, Ꮡe]),
+        [array<@string>(["string2", "string1"])] = array<ж<float64>>([Ꮡe, Ꮡpi])
     }
     );
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
@@ -129,7 +129,7 @@ internal static void gobRoundTrip() {
             return;
         }
     }
-    foreach (var (_, vᴛ1) in range(GoReflect.WithElemDims(new array<@string>[]{new @string[]{"string1", "string2"}.array(), new @string[]{"string2", "string1"}.array()}.slice(), 2))) {
+    foreach (var (_, vᴛ1) in range(GoReflect.WithElemDims(new array<@string>[]{array<@string>(["string1", "string2"]), array<@string>(["string2", "string1"])}.slice(), 2))) {
         var k = vᴛ1.Clone();
 
         var v = @out.Marr[k, () => new array<ж<float64>>(2)].Clone();

@@ -84,4 +84,4 @@ public static @string Name(this ref Basic b) { return b.name; }
 public static Type Underlying(this ж<Basic> Ꮡb) { return new BasicжType(Ꮡb); }
 public static @string String(this ж<Basic> Ꮡb) { return TypeString(new BasicжType(Ꮡb), default); }
 
-} // end typesᴛBasic
+}

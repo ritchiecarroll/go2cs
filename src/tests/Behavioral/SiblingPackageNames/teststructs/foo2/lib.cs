@@ -18,4 +18,4 @@ public static @string Join(this Triple t) {
     return t.A + t.B + t.C;
 }
 
-} // end fooᴛTriple
+}

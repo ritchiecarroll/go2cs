@@ -83,4 +83,4 @@ public static (nint n, error err) Read(this ref WriteSeeker sws, slice<byte> p) 
     return (amt, default);
 }
 
-} // end slicewriterᴛWriteSeeker
+}

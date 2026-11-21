@@ -6,7 +6,6 @@ using fmt = fmt_package;
 using lib = ForeignPairStructConversion.lib_package;
 using other = ForeignPairStructConversion.other_package;
 using ForeignPairStructConversion;
-using static main_package;
 
 partial class main_package {
 
@@ -32,11 +31,7 @@ internal static lib.Pitch result(other.Pitch o) { return libꓸPitch(o); }
 
 internal static other.Pitch back(lib.Pitch p) { return otherꓸPitch(p); }
 
-} partial class mainᴛholder {
-
 internal static lib.Pitch converted(this holder h) { return libꓸPitch(h.O); }
-
-} partial class main_package {
 
 internal static void report(@string label, lib.Pitch p) { fmt.Println(label, p.Hz); }
 
@@ -73,7 +68,7 @@ internal static partial void main() {
 
         var h = new holder(O: o, L: libꓸPitch(o));
         var s = slice<lib.Pitch>([libꓸPitch(o), libꓸPitch(h.O)]);
-        var a = new other.Pitch[]{otherꓸPitch(p), otherꓸPitch(s[0])}.array();
+        var a = array<other.Pitch>([otherꓸPitch(p), otherꓸPitch(s[0])]);
         var m = new map<@string, lib.Pitch>{["a"] = libꓸPitch(o)};
         var k = new map<lib.Pitch, @string>{[libꓸPitch(o)] = "key"};
         fmt.Println("field:", h.L.Hz);

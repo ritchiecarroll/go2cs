@@ -166,8 +166,6 @@ partial struct UncommonType {
     internal uint32 _;
 }
 
-} partial class mainᴛUncommonType {
-
 public static unsafe slice<Method> Methods(this ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -185,8 +183,6 @@ public static unsafe slice<Method> ExportedMethods(this ж<UncommonType> Ꮡt) {
     }
     return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, "t.xcount > 0")), (int)(t.Xcount)));
 }
-
-} partial class main_package {
 
 internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string whySafe) {
     return @unsafe.Add(p, x);
@@ -439,11 +435,9 @@ public static nint NumMethod(this ж<Type> Ꮡt) {
     return len(Ꮡt.ExportedMethods());
 }
 
-} partial class mainᴛInterfaceType {
+} partial class main_package {
 
 public static nint NumMethod(this ref InterfaceType t) { return len(t.Methods); }
-
-} partial class main_package {
 
 partial struct MapType {
     /*embed*/ public Type Type;
@@ -456,8 +450,6 @@ partial struct MapType {
     public uint16 BucketSize;
     public uint32 Flags;
 }
-
-} partial class mainᴛMapType {
 
 public static bool IndirectKey(this ref MapType mt) {
     return (mt.Flags & 1) != 0;
@@ -498,8 +490,6 @@ partial struct FuncType {
     public uint16 InCount;
     public uint16 OutCount;
 }
-
-} partial class mainᴛFuncType {
 
 public static ж<Type> In(this ж<FuncType> Ꮡt, nint i) {
     return Ꮡt.InSlice()[i];
@@ -547,8 +537,6 @@ public static bool IsVariadic(this ref FuncType t) {
     return (uint16)(t.OutCount & ((uint16)(1 << 15))) != 0;
 }
 
-} partial class main_package {
-
 partial struct PtrType {
     /*embed*/ public Type Type;
     public ж<Type> Elem;
@@ -560,13 +548,9 @@ partial struct StructField {
     public uintptr Offset;
 }
 
-} partial class mainᴛStructField {
-
 public static bool Embedded(this ref StructField f) {
     return f.Name.IsEmbedded();
 }
-
-} partial class main_package {
 
 partial struct StructType {
     /*embed*/ public Type Type;

@@ -308,4 +308,4 @@ internal static void shiftOffsets(this ref deflateFast e) {
     e.cur = maxMatchOffset + 1;
 }
 
-} // end flateᴛdeflateFast
+}

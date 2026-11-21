@@ -51,7 +51,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("LocalTypeAliasScope.go", "LocalTypeAliasScope.cs", "ABQ8AAsGggABGIKUtMgACwyCAAAalJSClLTIAAIcgoaUAAYogoaWgpSmgoKCgoKC")]
+[assembly: GoPositionMap("LocalTypeAliasScope.go", "LocalTypeAliasScope.cs", "ABE8AAkGggABGIKUtMgACwyCAAAalJSClLTIAAIcgoaUAAYogoaWgpSmgoKCgoKC")]
 [assembly: GoPositionMap("LocalTypeAliasScopeSecond.go", "LocalTypeAliasScopeSecond.cs", "AA4cggAAEpSUgoK4gIK2qoKY")]
 // </GoSourcePositionMaps>
 
@@ -95,5 +95,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Header)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛHeader;
 // </MethodHolders>

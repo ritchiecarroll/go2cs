@@ -151,4 +151,4 @@ internal static void remove(this ref listHeadManual head, @unsafe.Pointer p) {
     pNode.next = 0;
 }
 
-} // end runtimeᴛlistHeadManual
+}

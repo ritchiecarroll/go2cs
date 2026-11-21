@@ -64,9 +64,10 @@ partial class sync_package
         RuntimeSemaphore.Acquire(s, synctestDurable ? WaitReason.SynctestWaitGroupWait : WaitReason.SyncWaitGroupWait);
 
 
-    internal static partial void runtime_SemacquireRWMutex(ж<uint32> s, bool lifo, nint skipframes) => RuntimeSemaphore.Acquire(s, WaitReason.SyncRWMutexLock);
+    // lifo reaches the primitive, as Go's semacquire1 takes it (RWMutex passes false today).
+    internal static partial void runtime_SemacquireRWMutex(ж<uint32> s, bool lifo, nint skipframes) => RuntimeSemaphore.Acquire(s, lifo, WaitReason.SyncRWMutexLock);
 
-    internal static partial void runtime_SemacquireRWMutexR(ж<uint32> s, bool lifo, nint skipframes) => RuntimeSemaphore.Acquire(s, WaitReason.SyncRWMutexRLock);
+    internal static partial void runtime_SemacquireRWMutexR(ж<uint32> s, bool lifo, nint skipframes) => RuntimeSemaphore.Acquire(s, lifo, WaitReason.SyncRWMutexRLock);
 
     internal static partial void runtime_Semrelease(ж<uint32> s, bool handoff, nint skipframes) => RuntimeSemaphore.Release(s, handoff);
 

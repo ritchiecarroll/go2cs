@@ -5,7 +5,6 @@ using fmt = fmt_package;
 using Δio = io_package;
 using reflect = reflect_package;
 using strings = strings_package;
-using static main_package;
 
 partial class main_package {
 
@@ -13,16 +12,12 @@ partial struct Inner {
     internal nint n;
 }
 
-} partial class mainᴛInner {
-
 public static nint Bump(this ref Inner i) {
     i.n++;
     return i.n;
 }
 
 public static nint Get(this Inner i) { return i.n; }
-
-} partial class main_package {
 
 partial struct SameP {
     /*embed*/ public ж<Inner> Inner;

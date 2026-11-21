@@ -298,4 +298,4 @@ public static (nint n, error err) Read(this ref Reader z, slice<byte> p) {
 // fully consumed until the [io.EOF].
 public static error Close(this ref Reader z) { return z.decompressor.Close(); }
 
-} // end gzipᴛReader
+}

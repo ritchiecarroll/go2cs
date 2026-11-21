@@ -129,4 +129,4 @@ internal static void End(this ж<sequencer> Ꮡs, nuint id) {
     }
 }
 
-} // end textprotoᴛsequencer
+}

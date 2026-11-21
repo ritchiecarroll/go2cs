@@ -30,7 +30,7 @@ internal static partial void run() {
     u[6] = 5;
     fmt.Println(len(u), cap(u), u[6]);
 
-    var arr = new nint[]{0, 10, 20, 30, 40, 50}.array();
+    var arr = array<nint>([0, 10, 20, 30, 40, 50]);
     var f = arr[2..5];
     var g = f[1..3];
     g[0] = 31;

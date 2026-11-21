@@ -51,7 +51,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("SortArrayType.go", "SortArrayType.cs", "ADR+3oIADiiCAAoSAAkYgsaCpoKmooLGgqaCpoLGspSSlJSCgoKmgoKCppSmgoKClIKUgoKUloKWABs4lIKUgpqCmoKCmoKcgoKU")]
+[assembly: GoPositionMap("SortArrayType.go", "SortArrayType.cs", "ADR+3oIADiiCAAgSAAcYgsaCpoKmooLGgqaCpoLGspSSlJSCgoKmgoKCppSmgoKClIKUgoKUloKWABs4lIKUgpqCmoKCmoKcgoKU")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -95,6 +95,4 @@ public static partial class main_package
 
 // <MethodHolders>
 [GoMethodHost(typeof(main_package.PeopleByAge)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛPeopleByAge;
-[GoMethodHost(typeof(main_package.PeopleByShoeSize)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛPeopleByShoeSize;
-[GoMethodHost(typeof(main_package.Roster)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛRoster;
 // </MethodHolders>

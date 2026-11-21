@@ -3,7 +3,6 @@ namespace go;
 using errors = errors_package;
 using fmt = fmt_package;
 using runtime = runtime_package;
-using static main_package;
 
 partial class main_package {
 
@@ -12,11 +11,7 @@ partial struct celsius /*num:float64*/;
 partial struct myErr {
 }
 
-} partial class mainᴛmyErr {
-
 internal static @string Error(this ref myErr _) { return "myErr"; }
-
-} partial class main_package {
 
 partial interface shape {
     float64 area();
@@ -27,22 +22,14 @@ partial struct square {
     internal float64 side;
 }
 
-} partial class mainᴛsquare {
-
 internal static float64 perimeter(this square s) { return 4D * s.side; }
-
-} partial class main_package {
 
 partial struct circle {
     internal float64 r;
 }
 
-} partial class mainᴛcircle {
-
 internal static float64 area(this ref circle c) { return 3D * c.r * c.r; }
 internal static float64 perimeter(this ref circle c) { return 6D * c.r; }
-
-} partial class main_package {
 
 partial struct point {
     internal nint x, y;

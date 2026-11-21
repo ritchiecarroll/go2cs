@@ -23,13 +23,9 @@ partial struct Label {
     public nint Resource;
 }
 
-} partial class mainᴛLabel {
-
 internal static @string describe(this Label l) {
     return fmt.Sprintf("%s@%d"u8, l.ΔLabel, l.Resource);
 }
-
-} partial class main_package {
 
 internal static void main() {
     var e = new @event(kind: 7, label: "cpu");

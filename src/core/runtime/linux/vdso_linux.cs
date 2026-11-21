@@ -117,7 +117,7 @@ internal static void vdsoInitFromSysinfoEhdr(ref vdsoInfo info, ж<elfEhdr> Ꮡh
             break;
         }
         case var ᴛ when ᴛ == _PT_DYNAMIC: {
-            dyn = @unsafe.Pointer.To<array<elfDyn>>((@unsafe.Pointer)(info.loadAddr + (uintptr)ptΔ1.p_offset));
+            dyn = @unsafe.Pointer.ToArray<elfDyn>((@unsafe.Pointer)(info.loadAddr + (uintptr)ptΔ1.p_offset), unchecked((nint)70368744177663));
             break;
         }}
     }
@@ -139,23 +139,23 @@ internal static void vdsoInitFromSysinfoEhdr(ref vdsoInfo info, ж<elfEhdr> Ꮡh
         var p = info.loadOffset + (uintptr)dt.d_val;
         switch (dt.d_tag) {
         case var ᴛ when ᴛ == _DT_STRTAB: {
-            info.symstrings = @unsafe.Pointer.To<array<byte>>((@unsafe.Pointer)p);
+            info.symstrings = @unsafe.Pointer.ToArray<byte>((@unsafe.Pointer)p, unchecked((nint)1125899906842623));
             break;
         }
         case var ᴛ when ᴛ == _DT_SYMTAB: {
-            info.symtab = @unsafe.Pointer.To<array<elfSym>>((@unsafe.Pointer)p);
+            info.symtab = @unsafe.Pointer.ToArray<elfSym>((@unsafe.Pointer)p, unchecked((nint)46912496118442));
             break;
         }
         case var ᴛ when ᴛ == _DT_HASH: {
-            hash = @unsafe.Pointer.To<array<uint32>>((@unsafe.Pointer)p);
+            hash = @unsafe.Pointer.ToArray<uint32>((@unsafe.Pointer)p, unchecked((nint)281474976710655));
             break;
         }
         case var ᴛ when ᴛ == _DT_GNU_HASH: {
-            gnuhash = @unsafe.Pointer.To<array<uint32>>((@unsafe.Pointer)p);
+            gnuhash = @unsafe.Pointer.ToArray<uint32>((@unsafe.Pointer)p, unchecked((nint)281474976710655));
             break;
         }
         case var ᴛ when ᴛ == _DT_VERSYM: {
-            info.versym = @unsafe.Pointer.To<array<uint16>>((@unsafe.Pointer)p);
+            info.versym = @unsafe.Pointer.ToArray<uint16>((@unsafe.Pointer)p, unchecked((nint)562949953421311));
             break;
         }
         case var ᴛ when ᴛ == _DT_VERDEF: {

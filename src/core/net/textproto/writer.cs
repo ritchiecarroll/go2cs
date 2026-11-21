@@ -137,4 +137,4 @@ internal static error Close(this ж<dotWriter> Ꮡd) {
     return bw.Flush();
 }
 
-} // end textprotoᴛdotWriter
+}

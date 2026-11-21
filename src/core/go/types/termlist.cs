@@ -174,4 +174,4 @@ internal static bool subsetOf(this termlist xl, termlist yl) {
     return true;
 }
 
-} // end typesᴛtermlist
+}

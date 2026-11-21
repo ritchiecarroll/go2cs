@@ -498,4 +498,4 @@ internal static void closeConnChan(this ref Server s, net.Conn c, channel/*<-*/<
     }
 }
 
-} // end httptestᴛServer
+}

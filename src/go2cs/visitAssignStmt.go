@@ -722,6 +722,24 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		}
 	}
 
+	// `*p = v` with p a *unsafe.Pointer is the word door's store (unsafePointerWordDoor.go, W2).
+	if store, isStore := v.unsafePointerWordStore(assignStmt); isStore {
+		result.WriteString(store)
+
+		if hoistBuf != nil && hoistBuf.Len() > 0 {
+			v.outputBuilder.WriteString(hoistBuf.String())
+		} else if format.useNewLine {
+			v.outputBuilder.WriteString(v.newline)
+		}
+
+		if format.useIndent {
+			v.outputBuilder.WriteString(v.indent(v.indentLevel))
+		}
+
+		v.outputBuilder.WriteString(result.String())
+		return
+	}
+
 	// A func stored into a word slot, or a word stored into a func variable, stores the func's word
 	// or the func the word names (funcWordOperations.go, w2 and w1).
 	if store, isStore := v.funcWordStoreEmission(assignStmt); isStore {

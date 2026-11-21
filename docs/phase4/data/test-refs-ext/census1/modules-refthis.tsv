@@ -1,0 +1,22 @@
+golang.org/x/sync@v0.19.0	golang.org/x/sync/errgroup	refs=14	use_add=0		reference
+golang.org/x/sync@v0.19.0	golang.org/x/sync/semaphore	refs=11	use_add=0		reference
+golang.org/x/sync@v0.19.0	golang.org/x/sync/singleflight	refs=14	use_add=0		reference
+golang.org/x/sync@v0.19.0	golang.org/x/sync/syncmap	refs=10	use_add=0		reference
+golang.org/x/sync@v0.19.0	TOTAL	now=49	opt1=364	opt2=29	opt2f=3	use=0
+github.com/google/uuid@v1.6.0	github.com/google/uuid	refs=15	use_add=0		reference
+github.com/google/uuid@v1.6.0	TOTAL	now=15	opt1=104	opt2=11	opt2f=3	use=0
+github.com/golang-jwt/jwt/v5@v5.3.1	github.com/golang-jwt/jwt/v5	refs=28	use_add=0		reference
+github.com/golang-jwt/jwt/v5@v5.3.1	github.com/golang-jwt/jwt/v5/request	refs=11	use_add=0		reference
+github.com/golang-jwt/jwt/v5@v5.3.1	TOTAL	now=39	opt1=343	opt2=43	opt2f=7	use=0
+github.com/ritchiecarroll/hashset@v1.0.0	github.com/ritchiecarroll/hashset	refs=7	use_add=0		reference
+github.com/ritchiecarroll/hashset@v1.0.0	TOTAL	now=7	opt1=67	opt2=1	opt2f=1	use=0
+github.com/spf13/pflag@v1.0.9	github.com/spf13/pflag	refs=18	use_add=0		reference
+github.com/spf13/pflag@v1.0.9	TOTAL	now=18	opt1=67	opt2=8	opt2f=1	use=0
+github.com/spf13/cobra@v1.10.2	github.com/spf13/cobra	refs=18	use_add=0		reference
+github.com/spf13/cobra@v1.10.2	github.com/spf13/cobra/doc	refs=14	use_add=0		reference
+github.com/spf13/cobra@v1.10.2	TOTAL	now=32	opt1=156	opt2=19	opt2f=2	use=0
+github.com/itchyny/timefmt-go@v0.1.8	github.com/itchyny/timefmt-go	refs=8	use_add=0		reference
+github.com/itchyny/timefmt-go@v0.1.8	TOTAL	now=8	opt1=67	opt2=2	opt2f=0	use=0
+github.com/itchyny/gojq@v0.12.19	github.com/itchyny/gojq	refs=16	use_add=0		reference
+github.com/itchyny/gojq@v0.12.19	github.com/itchyny/gojq/cli	refs=15	use_add=0		reference
+github.com/itchyny/gojq@v0.12.19	TOTAL	now=31	opt1=157	opt2=17	opt2f=3	use=0

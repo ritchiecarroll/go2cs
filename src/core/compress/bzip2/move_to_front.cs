@@ -59,4 +59,4 @@ internal static byte First(this moveToFrontDecoder m) {
     return m[0];
 }
 
-} // end bzip2ᴛmoveToFrontDecoder
+}

@@ -25,4 +25,4 @@ public static Type Elem(this ref Pointer p) { return p.@base; }
 public static Type Underlying(this ж<Pointer> Ꮡp) { return new PointerжType(Ꮡp); }
 public static @string String(this ж<Pointer> Ꮡp) { return TypeString(new PointerжType(Ꮡp), default); }
 
-} // end typesᴛPointer
+}
