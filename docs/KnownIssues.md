@@ -355,6 +355,29 @@ framework-dependent build run the same code under the JIT.
      scenarios (src/tests/PackageTests) read rc 2 at the base and rc 0 at the fix under Native AOT on win-x64 (G-LAPTOP),
      and on linux-x64 (ubuntu) and osx-arm64 (macos-15) hosted runners, run 40611703805, each equal to the JIT run. -->
 
+## Under Native AOT, a type assertion to `error` that the method set decides can answer false
+
+**Symptom.** In a Native AOT executable (`PublishAot`), a Go type assertion to `error` answers `ok == false` for a value
+whose method set has `Error() string` when no compile-time adapter for that pair exists. Measured with
+`var p any = new(runtime.PanicNilError); _, ok := p.(error)`: Go and the JIT answer `true`, Native AOT answers `false`.
+No exception is raised, so the program goes on with the wrong answer. A failing assertion still answers correctly.
+
+**Cause.** The runtime library finds the method (its method-set check answers `true`), then builds the interface value
+from `error`'s run-time shell, `error<T>`, closed over the value's type with `MakeGenericType`. Native AOT has no code
+for that instantiation, and `error` declares no second shell that needs none, so the assertion reads as a miss.
+Inferred from the code, not measured: interfaces the converter generates declare that second shell, so this reaches
+`error` and not them.
+
+**Workaround.** Publish without Native AOT: the converted project's default `dotnet publish` (ReadyToRun) and a
+framework-dependent build run the same code under the JIT, which answers as Go does.
+
+<!-- Found 2026-11-21 by P2 while adding a judged true line to the os-matrix aot-smoke consumer
+     (src/tests/PackageTests/PackageSymbols) for the train 1 ReceiverKeyOf crash fix. linux-x64, ILC 10.0.14: the
+     consumer read "false" for the PanicNilError assertion at the fix, at master before train 1 (1fa80494ee) and
+     "true" under the JIT. A diagnostic image read builtin.Implements<error> true, p.(runtime.Error) true (a compile-time
+     adapter) and p.(error) false. error.cs, AdapterBinder.cs and builtin.cs are unchanged between nuget-1.26.11.1 and
+     1fa80494ee, so the go.* 1.26.11.1 packages carry it (inferred). Its fix is seat claude/p2-aot-structural-hit. -->
+
 ## A Native AOT publish of a program that references the packages is slow and large
 
 <!-- Measured 2026-10-06 against go.* 1.24.13.4 from nuget.org by C1 (mailbox bdfb01d50d, d543355364,
