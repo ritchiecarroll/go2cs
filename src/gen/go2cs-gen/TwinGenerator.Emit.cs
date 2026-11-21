@@ -29,7 +29,7 @@ public sealed partial class TwinGenerator
         {
             HashSet<string> hints = new(StringComparer.OrdinalIgnoreCase);
 
-            foreach (IGrouping<SyntaxTree, Candidate> file in m_ordered.Where(candidate => candidate.Twinned).GroupBy(candidate => candidate.Syntax.SyntaxTree))
+            foreach (IGrouping<SyntaxTree, Candidate> file in m_ordered.Where(candidate => candidate.Twinned || candidate.Forwarded).GroupBy(candidate => candidate.Syntax.SyntaxTree))
             {
                 CompilationUnitSyntax unit = (CompilationUnitSyntax)file.Key.GetRoot(Context.CancellationToken);
                 StringBuilder source = new();
@@ -70,7 +70,7 @@ public sealed partial class TwinGenerator
                     }
 
                     foreach (Candidate candidate in group)
-                        source.Append(TwinText(candidate, indent));
+                        source.Append(candidate.Twinned ? TwinText(candidate, indent) : ForwarderText(candidate, indent));
 
                     for (int i = chain.Count - 1; i >= 0; i--)
                     {
@@ -237,6 +237,27 @@ public sealed partial class TwinGenerator
                    string.Concat(rewriter.CacheFields.Select(field => indent + field + "\r\n"));
         }
 
+        // 7a (12.1, R3): a forwarder keeps the plain member's modifiers (`partial` dropped) and parameters, calls it, and
+        // returns a completed task. No #line: it holds no line of the source.
+        private static string ForwarderText(Candidate candidate, string indent)
+        {
+            MethodDeclarationSyntax method = candidate.Syntax;
+            bool isVoid = method.ReturnType is PredefinedTypeSyntax predefined && predefined.Keyword.IsKind(SyntaxKind.VoidKeyword);
+            string returnType = method.ReturnType.WithoutTrivia().ToFullString();
+            string modifiers = string.Join(" ", method.Modifiers.Where(modifier => !modifier.IsKind(SyntaxKind.PartialKeyword)).Select(modifier => modifier.Text));
+            string parameters = method.ParameterList.WithoutTrivia().ToFullString();
+            string call = method.Identifier.Text + "(" + string.Join(", ", method.ParameterList.Parameters.Select(parameter => parameter.Identifier.Text)) + ")";
+
+            string declaration = modifiers + " " + (isVoid ? "global::go.golib.GoTask" : "global::go.golib.GoTask<" + returnType + ">") + " " +
+                                 method.Identifier.Text + Suffix + parameters;
+
+            string body = isVoid ? " { " + call + "; return default; }" : " => new global::go.golib.GoTask<" + returnType + ">(" + call + ");";
+
+            return indent + "[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]\r\n" +
+                   indent + "[global::go.golib.GoParkForwarder]\r\n" +
+                   indent + declaration + body + "\r\n";
+        }
+
         // A program built with twins starts here: main's twin runs multiplexed when the scheduler is on, and
         // main itself runs when it is off. The entry is a sealed class, not a static one: it can hold no
         // extension method, so the extension-host list has nothing to say about it.
@@ -279,6 +300,7 @@ public sealed partial class TwinGenerator
             report.Append("// go-propagation=").Append(goSites ? "on" : "off").Append("\r\n");
             report.Append("// candidates=").Append(m_ordered.Count).Append(" twinned=").Append(twinned.Count)
                 .Append(" go-only=").Append(twinned.Count(candidate => candidate.GoOnly)).Append("\r\n");
+            report.Append("// forwarders=").Append(m_ordered.Count(candidate => candidate.Forwarded)).Append("\r\n");
             report.Append("// await-sites=").Append(m_awaitSites).Append(" go-twinned=").Append(m_goTwinned).Append(" go-literals=").Append(m_goLiterals)
                 .Append(" ref-unrederivable=").Append(m_unrederivable).Append(" ref-spills=").Append(m_spills)
                 .Append(" ref-blocked=").Append(m_refBlocked).Append(" go-plain=").Append(GoPlain).Append("\r\n");

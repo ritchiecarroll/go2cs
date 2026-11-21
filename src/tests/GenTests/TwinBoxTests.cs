@@ -705,7 +705,7 @@ public class TwinBoxTests
     private static (string twins, Diagnostic[] errors) Run(Dictionary<string, string>? extra, params string[] shapes) =>
         RunWith(null, extra, shapes);
 
-    private static (string twins, Diagnostic[] errors) RunWith(string? library, Dictionary<string, string>? extra, params string[] shapes)
+    internal static (string twins, Diagnostic[] errors) RunWith(string? library, Dictionary<string, string>? extra, params string[] shapes)
     {
         CSharpParseOptions options = new(LanguageVersion.CSharp13);
         string source = Header + string.Concat(shapes) + Footer;
@@ -747,7 +747,7 @@ public class TwinBoxTests
         return (twins, emitted.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray());
     }
 
-    private static string Errors(Diagnostic[] errors) => string.Join("\n", errors.Select(error => error.ToString()));
+    internal static string Errors(Diagnostic[] errors) => string.Join("\n", errors.Select(error => error.ToString()));
 
     [TestMethod]
     public void ABoxTwinTakesTheBoxAndItsCallersHandItTheirs()
@@ -1433,7 +1433,7 @@ public class TwinBoxTests
         (string twins, Diagnostic[] errors) = Run(null, OnlyUnboxed);
 
         Assert.AreEqual(0, errors.Length, Errors(errors));
-        Assert.IsFalse(twins.Contains("onlyFꞏtwin(", StringComparison.Ordinal), "onlyF parks nowhere: no twin");
+        TwinSurfaceTests.AssertForwarderOnly(twins, "onlyF", "onlyF parks nowhere");
         StringAssert.Contains(twins, "|sPark|v", "its plain call to a box twin is named all the same (SN-7)");
     }
 

@@ -96,6 +96,10 @@ public sealed partial class TwinGenerator : ISourceGenerator
         public readonly Dictionary<string, string> PromoteRefused = new(System.StringComparer.Ordinal);
         public readonly List<Site> Sites = [];
         public bool Twinned => Refusal is null && Parks;
+
+        // 7a (DESIGN-mn-twin-set.md 12.1, R3): a member of the population with no state-machine twin gets a FORWARDER,
+        // `[GoParkForwarder] Mꞏtwin(...)`, which calls the plain member and returns a completed task.
+        public bool Forwarded;
     }
 
     public void Initialize(GeneratorInitializationContext context)
@@ -237,6 +241,11 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 else if (candidate.Twinned && BoxRecv && SharedMemberRef(candidate))
                     candidate.Refusal = "ref-shared-member";
             }
+
+            bool population = !Common.IsHandOwnedAssembly(Context.Compilation);
+
+            foreach (Candidate candidate in m_ordered)
+                candidate.Forwarded = population && !candidate.Twinned && Forwardable(candidate);
 
             foreach (Candidate candidate in m_ordered)
             {
@@ -466,6 +475,40 @@ public sealed partial class TwinGenerator : ISourceGenerator
         internal bool TwinVisible(IMethodSymbol twin) =>
             SymbolEqualityComparer.Default.Equals(twin.ContainingAssembly, m_augmented.Assembly) || twin.DeclaredAccessibility == Accessibility.Public;
 
+        // 7a (R3): a twin a caller may await -- visible, and not a forwarder. A forwarder only wraps its plain member, so a
+        // caller in any assembly calls that member plain and never awaits a completed task.
+        internal bool TwinBinds(IMethodSymbol twin) =>
+            TwinVisible(twin) && !twin.GetAttributes().Any(attribute =>
+                attribute.AttributeClass is { Name: "GoParkForwarderAttribute", ContainingNamespace: { Name: "golib", ContainingNamespace.Name: "go" } });
+
+        // 7a (12.1): whether a candidate with no state-machine twin gets a forwarder. The population (R1) is every PUBLIC
+        // method, its every containing type public, declared in a converted file of an assembly that is not hand-owned
+        // (the caller checks that), outside E1 (a generic method or a method of a generic type). A forwarder is written
+        // only into a partial host, for a static method with a plain signature; the rest of the population is the guard's
+        // (F9) to name, and the shapes that 12.1 lowers (a box receiver, `...T`) join it row by row (F3, F4).
+        private bool Forwardable(Candidate candidate)
+        {
+            IMethodSymbol symbol = candidate.Symbol;
+
+            if (candidate.Refusal is "has-twin" or "host-not-partial" or "interface-member" or "explicit-impl" or "instance" or "ref-return")
+                return false;
+
+            if (!symbol.IsStatic || symbol.IsGenericMethod || !Common.IsConvertedSourceFile(candidate.Syntax.SyntaxTree))
+                return false;
+
+            for (ISymbol? member = symbol; member is not null and not INamespaceSymbol; member = member.ContainingType)
+            {
+                if (member.DeclaredAccessibility != Accessibility.Public || member is INamedTypeSymbol { IsGenericType: true })
+                    return false;
+            }
+
+            if (symbol.ReturnsByRef || symbol.ReturnsByRefReadonly || symbol.ReturnType.IsRefLikeType ||
+                symbol.ReturnType.TypeKind is TypeKind.Pointer or TypeKind.FunctionPointer)
+                return false;
+
+            return symbol.Parameters.All(parameter => parameter.RefKind == RefKind.None && !parameter.Type.IsRefLikeType);
+        }
+
         // Whether the method's type holds a twin of it: a hand-written golib twin, or a generated twin of a
         // referenced assembly, which is how a call crosses assemblies.
         private bool HasTwinMember(IMethodSymbol definition)
@@ -477,7 +520,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
             {
                 foreach (IMethodSymbol twin in type.GetMembers(definition.Name + Suffix).OfType<IMethodSymbol>())
                 {
-                    if (!TwinVisible(twin) || twin.IsStatic != definition.IsStatic || twin.Parameters.Length != definition.Parameters.Length ||
+                    if (!TwinBinds(twin) || twin.IsStatic != definition.IsStatic || twin.Parameters.Length != definition.Parameters.Length ||
                         twin.TypeParameters.Length != definition.TypeParameters.Length)
                         continue;
 

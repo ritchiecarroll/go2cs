@@ -326,3 +326,16 @@ opted-in assembly get a twin, and in what shape. It changes nothing for an assem
 
 Size: 3.5-5.5 lane-days, as section 7 priced it. Order: `GoParkForwarderAttribute` and its `[mn-frozen]` lines; F1,
 F2, F6; F3, F5; F4, F11; F7, F8; the guard (F9) and O2 (F10); P8; then the closure arms.
+
+### 12.4 Readings, step 1 (dated block, 2026-11-20)
+
+- **Step 1 built:** `GoParkForwarderAttribute` (golib, `[mn-frozen]`: its ctor and a SHAPE line that now records
+  `AttributeUsage`; made to fail by setting `AllowMultiple = true`, restored byte-identical). F1, F2 and both F6 rows
+  went red before the code (the same-assembly F6 was green before, as the table says) and are green after.
+- **Q7 MISSED as written.** Four rows that were green went red:
+  `AFunctionThatParksOnlyThroughAnUnboxedCallIsStillNamed`,
+  `GoTwinsPairsOffEmitsTheCoreFreeTwins`, `AnAwaitInsideALockRefusesTheTwinByName` and
+  `AnUnrederivableRefLiveAcrossAnAwaitRefusesTheTwinByName`. Each asserted that a PUBLIC function refused a twin (or
+  parking nowhere) has no `ꞏtwin` member at all. R3 gives it a forwarder by design, so the prediction should have
+  named them. Each row now asserts what it guards: exactly one `ꞏtwin`, a forwarder, with no state machine and no
+  await of it (`TwinSurfaceTests.AssertForwarderOnly`). GenTests: 698 of 698 (693 + 5 new).

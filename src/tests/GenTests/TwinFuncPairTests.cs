@@ -267,7 +267,7 @@ public class TwinFuncPairTests
         StringAssert.Contains(twins, "callerꞏtwin(");
         StringAssert.Contains(twins, "mainꞏtwin(");
         Assert.IsFalse(twins.Contains("GoFuncPair", StringComparison.Ordinal), "no pair test and no pair class with the core off");
-        Assert.IsFalse(twins.Contains("onlyCallsꞏtwin(", StringComparison.Ordinal));
+        TwinSurfaceTests.AssertForwarderOnly(twins, "onlyCalls", "onlyCalls parks nowhere");
     }
 
     private static IEnumerable<MetadataReference> References()

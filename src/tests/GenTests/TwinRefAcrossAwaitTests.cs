@@ -409,7 +409,7 @@ public class TwinRefAcrossAwaitTests
         (string twins, Diagnostic[] errors) = Run(Locked);
 
         Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
-        Assert.IsFalse(twins.Contains("lockedꞏtwin(", StringComparison.Ordinal), "locked is refused a twin");
+        TwinSurfaceTests.AssertForwarderOnly(twins, "locked", "locked is refused a twin");
         StringAssert.Contains(twins, "|locked|await-in-lock", "the report's refusal row names it");
         StringAssert.Contains(twins, "callsLockedꞏtwin(", "its caller keeps its twin and calls it plain");
     }
@@ -420,7 +420,7 @@ public class TwinRefAcrossAwaitTests
         (string twins, Diagnostic[] errors) = Run(Stale);
 
         Assert.AreEqual(0, errors.Length, string.Join("\n", errors.Select(error => error.ToString())));
-        Assert.IsFalse(twins.Contains("staleꞏtwin(", StringComparison.Ordinal), "stale is refused a twin");
+        TwinSurfaceTests.AssertForwarderOnly(twins, "stale", "stale is refused a twin");
         StringAssert.Contains(twins, "|stale|ref-unrederivable", "the report's refusal row names the function and its reason");
     }
 

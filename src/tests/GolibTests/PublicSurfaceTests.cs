@@ -279,7 +279,8 @@ public class PublicSurfaceTests
     private static readonly string[] s_mnFrozenTypes =
     [
         "go.golib.GoTask", "go.golib.GoTask`1", "go.golib.GoTaskAwaiter", "go.golib.GoTaskAwaiter`1",
-        "go.golib.GoTaskBuilder", "go.golib.GoTaskBuilder`1", "go.golib.GoFuncPair"
+        "go.golib.GoTaskBuilder", "go.golib.GoTaskBuilder`1", "go.golib.GoFuncPair",
+        "go.golib.GoParkForwarderAttribute"
     ];
 
     private static readonly (string Type, string[] Names)[] s_mnFrozenMembers =
@@ -321,6 +322,11 @@ public class PublicSurfaceTests
         if (type.GetCustomAttributesData().FirstOrDefault(attribute => attribute.AttributeType.FullName == "System.Runtime.CompilerServices.AsyncMethodBuilderAttribute") is { } builder &&
             builder.ConstructorArguments is [{ Value: Type builderType }])
             parts.Add("builder " + TypeName(builderType));
+
+        // An attribute that generated code places (GoParkForwarder) freezes where it may go: a narrower target or a
+        // change to AllowMultiple breaks every twin-built assembly that carries it.
+        if (typeof(Attribute).IsAssignableFrom(type) && type.GetCustomAttribute<AttributeUsageAttribute>(inherit: false) is { } usage)
+            parts.Add($"usage {usage.ValidOn}, multiple {usage.AllowMultiple}, inherited {usage.Inherited}");
 
         return $"{TypeName(type)} :: shape {kind}" + (parts.Count > 0 ? "; " + string.Join("; ", parts) : "");
     }
