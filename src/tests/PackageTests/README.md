@@ -51,6 +51,39 @@ Against a go.lib published before the usings existed, `-TargetsFile src/core/gol
 imports the working-tree file explicitly. That is how the gate was read red-first, against the published
 1.24.13.3: without the file the first arm FAILS with CS0246 and CS0103; with it, both arms PASS.
 
+# `RollForward`: a program built against the packages runs on a newer major .NET
+
+`RollForward` is the consumer fixture for go.lib's roll-forward default in `buildTransitive/go.lib.targets`: an
+executable that references the packages gets `RollForward=Major`, so on a machine with only a newer .NET (no 10.0
+runtime) the program still starts, while a machine that has .NET 10 keeps running it on .NET 10.
+`test-roll-forward.ps1` restores it from ONE feed into a fresh package cache and reads the `runtimeconfig.json` each
+arm writes:
+
+- GREEN: an executable gets `"rollForward": "Major"`;
+- WINEXE: so does a Windows GUI executable;
+- TEST PROJECT: so does a test project shaped like a converted test host (`IsTestProject`, `OutputType` Exe);
+- USER WINS: a `RollForward` the project sets (LatestPatch, assigned in the project body from the fixture-only
+  `FixtureRollForward`) is kept. A `-p:RollForward` would be a global property, which no imported file can override,
+  so it could not test the clause;
+- TEMPLATE: with a `runtimeconfig.template.json` that sets `rollForward`, the template's value is the only key written;
+- LIBRARY: with `-p:OutputType=Library` the property stays unset;
+- CONTROL: a project-set `Disable` is written as such, proving the arm can fail.
+
+With `-DotnetRoot <root>`, a dotnet root with no 10.0 runtime, the GREEN build is also RUN there and must start on a
+newer major, and the CONTROL build must fail to start with the missing-framework error. With `-TargetsFile`, a
+PUBLISHED arm builds from the package as published, without the working-tree file, and a PUBLISH arm publishes
+self-contained with and without it and expects the same warnings.
+
+```text
+pwsh src/tests/PackageTests/RollForward/test-roll-forward.ps1 -Version <go.lib version> [-Source <feed dir or URL>] [-TargetsFile <go.lib.targets>] [-DotnetRoot <dotnet root without 10.0>]
+```
+
+Read red-first against the published 1.26.11.1 with an isolated .NET 11.0.100 SDK as `-DotnetRoot`: the PUBLISHED
+arm writes no `rollForward` and fails to start, and with the working-tree file every arm PASSES and GREEN runs on
+runtime 11. Each clause of the property's condition was removed on a copy of the file, and each turned exactly its own
+arm red: the empty-value clause USER WINS and CONTROL (the two project-set values), the template checks TEMPLATE (the
+SDK then writes `rollForward` twice), `WinExe` WINEXE, and the `OutputType` clause LIBRARY.
+
 # `BreakFloor`: a package built below the go.* break floor fails the build
 
 `BreakFloor` is the consumer fixture for go.lib's break floor: the `GoCheckBreakFloor` target in
