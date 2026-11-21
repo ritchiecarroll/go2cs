@@ -91,6 +91,7 @@
     <None Include="$(MSBuildThisFileDirectory)nugetSubstitution.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetSubstitution_test.go" />
     <None Include="$(MSBuildThisFileDirectory)openGenericImplementRecord_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)promotedOneHop.go" />
     <None Include="$(MSBuildThisFileDirectory)promotedOneHop_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeNamedIntType_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeNilPointerArray_test.go" />
