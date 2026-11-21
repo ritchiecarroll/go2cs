@@ -34,19 +34,28 @@ public static class Program
         return 0;
     }
 
-    // A type assertion the runtime settles from the value's method set, as a Go program's v.(I) does whenever the
+    // Two type assertions the runtime settles from the value's method set, as a Go program's v.(I) does whenever the
     // value's managed type does not declare I (P2, 2026-11-21, COORD ruling for train 2). In Go:
     //     var v any = sort.IntSlice{3, 1, 2}
     //     _, ok := v.(runtime.Error)    // false: IntSlice has no Error or RuntimeError method
-    // The miss reaches builtin.Implements, then StructurallyImplements and the extension-method scan, keyed by a
-    // type of a go.* package. Under Native AOT that scan read a metadata token the runtime does not have and threw
-    // (train 1, B3 A1), so every AOT program that took such an assertion died. Judged: the line must read false.
+    //     var p any = new(runtime.PanicNilError)
+    //     _, ok = p.(error)             // true: *PanicNilError has Error
+    // Both reach builtin.Implements, then StructurallyImplements and the extension-method scan, keyed by a type of a
+    // go.* package. Under Native AOT that scan read a metadata token the runtime does not have and threw (train 1, B3
+    // A1), so every AOT program that took such an assertion died. The second also needs an error shell over the
+    // pointer box, which declares no error: the generic shell is error<PanicNilError box>, a generic type closed at
+    // run time that Native AOT did not compile ahead, so it reads TRUE only through a shell that closes nothing.
+    // Judged: false, then true.
     private static string StructuralAssert()
     {
         object v = new sort_package.IntSlice(new nint[] { 3, 1, 2 }.slice());
-        (runtime_package.Error _, bool ok) = v._<runtime_package.Error>(ᐧ);
+        (runtime_package.Error _, bool miss) = v._<runtime_package.Error>(ᐧ);
 
-        return $"sort.IntSlice is runtime.Error: {(ok ? "true" : "false")}";
+        object p = @new<runtime_package.PanicNilError>();
+        (error _, bool hit) = p._<error>(ᐧ);
+
+        return $"sort.IntSlice is runtime.Error: {(miss ? "true" : "false")}; " +
+            $"*runtime.PanicNilError is error: {(hit ? "true" : "false")}";
     }
 
     // The Gosched escalation's clock as THIS deployment binds it (C1, 2026-11-08, COORD ruling for the .3 release

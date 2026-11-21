@@ -18,9 +18,9 @@
                  beside the application -- the off switch, and the proof the arms above can fail.
       AOT        (-Aot or -AotOnly; needs the ILCompiler packages and the platform's native toolchain) a Native AOT
                  publish of this consumer, which sets no trim mode of its own, RUNS: exit 0 and its PACKAGE-SYMBOLS line
-                 (the value printed, not judged), and its STRUCTURAL-ASSERT line reading false (judged: a type
-                 assertion settled from the method set, which Go answers false); the publish wall time and the .pdb
-                 it leaves are printed. Under
+                 (the value printed, not judged), and its STRUCTURAL-ASSERT line reading false, then true (judged:
+                 two type assertions settled from the method set, as Go answers them); the publish wall time and the
+                 .pdb it leaves are printed. Under
                  go.lib's TrimMode=partial the publish compiles every referenced go.* assembly whole, so it is long:
                  release-smoke leaves it out and the os-matrix aot-smoke stage runs it alone (-AotOnly).
 
@@ -240,12 +240,14 @@ if ($Aot -or $AotOnly) {
         if ($line -notlike 'PACKAGE-SYMBOLS:*') {
             return "FAIL (AOT): the Native AOT executable did not run to its frame line (exit $code$(if ($why) { "; $why" }))"
         }
-        # JUDGED (P2, 2026-11-21): a type assertion the runtime settles from the method set, which Go answers false.
-        # Train 1 threw there under Native AOT (a metadata token read in the extension-method scan) and nothing hosted
-        # ran one, so the release candidate carried it.
+        # JUDGED (P2, 2026-11-21): two type assertions the runtime settles from the method set, which Go answers false
+        # and true; the true one also needs an error shell built without closing a generic type at run time. Train 1
+        # threw there under Native AOT (a metadata token read in the extension-method scan) and nothing hosted ran one,
+        # so the release candidate carried it.
         $assert = "$(@($run | Where-Object { $_ -like 'STRUCTURAL-ASSERT:*' }) | Select-Object -First 1)"
-        if ($assert -ne 'STRUCTURAL-ASSERT: sort.IntSlice is runtime.Error: false') {
-            return "FAIL (AOT): the structural type assertion did not read false ('$assert', exit $code$(if ($why) { "; $why" }))"
+        $want = 'STRUCTURAL-ASSERT: sort.IntSlice is runtime.Error: false; *runtime.PanicNilError is error: true'
+        if ($assert -ne $want) {
+            return "FAIL (AOT): the structural type assertions did not read as Go's ('$assert', exit $code$(if ($why) { "; $why" }))"
         }
         if ($code -ne 0) {
             return "FAIL (AOT): the Native AOT executable exited $code after its assertion line$(if ($why) { "; $why" })"
