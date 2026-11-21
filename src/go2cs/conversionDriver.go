@@ -323,7 +323,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		var route *cgoRoute
 
 		if options.parseCgoTargets {
-			route = planCgoRoute(pkg, options, cgoLoad{env: cfg.Env, dir: cfg.Dir})
+			var routeErr error
+
+			// A route refusal goes through refusePackage: fatal for a single package, skipped and named under -recurse.
+			if route, routeErr = planCgoRoute(pkg, options, cgoLoad{env: cfg.Env, dir: cfg.Dir}); routeErr != nil {
+				return refusePackage(options, diagnosticCgoRefused, routeErr)
+			}
 		}
 
 		var err error
