@@ -57,4 +57,4 @@ private static readonly object tokˢ = (@string)"tok"u8;
 
 public static Token Token(this Reader _) { return tokˢ; }
 
-} // end libᴛReader
+}

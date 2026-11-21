@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -10,14 +9,10 @@ partial struct counter {
     internal @string tag;
 }
 
-} partial class mainᴛcounter {
-
 internal static void add(this ref counter c, nint k) {
     c.n += k;
     c.tag += "+"u8;
 }
-
-} partial class main_package {
 
 internal static void writeThrough(ref counter p, nint k) { p.n += k; }
 

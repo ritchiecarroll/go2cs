@@ -73,4 +73,4 @@ public static void SetLen(this ref Buffer b, nint n) {
     b = (b).slice(0, n);
 }
 
-} // end bufferᴛBuffer
+}

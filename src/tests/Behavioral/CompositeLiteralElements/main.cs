@@ -38,10 +38,10 @@ internal static void main() {
     var paExplicit = slice<ж<array<byte>>>([Ꮡ(new byte[]{}.array(4))]);
     fmt.Println("paExplicit:", len(paExplicit), len(paExplicit[0].Value), paExplicit[0].Value);
 
-    var paPop = slice<ж<array<byte>>>([Ꮡ(new byte[]{1, 2, 3, 4}.array())]);
+    var paPop = slice<ж<array<byte>>>([Ꮡ(array<byte>([1, 2, 3, 4]))]);
     fmt.Println("paPop:", len(paPop[0].Value), paPop[0].Value);
 
-    var paShort = slice<ж<array<byte>>>([Ꮡ(new byte[]{1, 2}.array(4))]);
+    var paShort = slice<ж<array<byte>>>([Ꮡ(array<byte>(4, [1, 2]))]);
     fmt.Println("paShort:", len(paShort[0].Value), paShort[0].Value);
 
     var pna = slice<ж<nb>>([Ꮡ(new nb(new byte[4].array()))]);
@@ -71,7 +71,7 @@ internal static void main() {
 
     var mpn = new map<@string, ж<nb>>{["a"] = Ꮡ(new nb(new byte[4].array()))};
     fmt.Println("mpn:", len(mpn), len(mpn["a"].Value), mpn["a"].Value);
-    var apn = new ж<nb>[]{Ꮡ(new nb(new byte[4].array())), Ꮡ(new nb(new byte[4].array()))}.array();
+    var apn = array<ж<nb>>([Ꮡ(new nb(new byte[4].array())), Ꮡ(new nb(new byte[4].array()))]);
     fmt.Println("apn:", len(apn), len(apn[0].Value), apn[0].Value, apn[1].Value);
 
     var pnest = slice<ж<array<array<nint>>>>([Ꮡ(new array<nint>[]{}.array(2, () => new(3)))]);
@@ -91,7 +91,7 @@ internal static void main() {
     var mp = new map<@string, ж<array<nint>>>{["a"] = Ꮡ(new nint[]{}.array(2))};
     fmt.Println("mp:", len(mp), len(mp["a"].Value), mp["a"].Value);
 
-    var ap = new ж<array<nint>>[]{Ꮡ(new nint[]{}.array(3)), Ꮡ(new nint[]{}.array(3))}.array();
+    var ap = array<ж<array<nint>>>([Ꮡ(new nint[]{}.array(3)), Ꮡ(new nint[]{}.array(3))]);
     fmt.Println("ap:", len(ap), len(ap[0].Value), ap[0].Value, ap[1].Value);
 
     var nested = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{}.array(2, () => new(3))}.slice(), 2, 3);
@@ -99,13 +99,13 @@ internal static void main() {
     nested[0][1][2] = 9;
     fmt.Printf("nested written: %v\n"u8, nested[0]);
 
-    var nestedPop = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array()}.slice(), 2, 3);
+    var nestedPop = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{array<nint>([1, 2, 3]), array<nint>([4, 5, 6])}.array()}.slice(), 2, 3);
     fmt.Println("nestedPop:", len(nestedPop[0]), len(nestedPop[0][0]), nestedPop[0]);
 
-    var nestedShort = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{new nint[]{1, 2, 3}.array()}.array(2, () => new(3))}.slice(), 2, 3);
+    var nestedShort = GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{array<nint>([1, 2, 3])}.array(2, () => new(3))}.slice(), 2, 3);
     fmt.Println("nestedShort:", len(nestedShort[0]), len(nestedShort[0][1]), nestedShort[0]);
 
-    var nestedKeyed = GoReflect.WithElemDims(new array<array<nint>>[]{new golib.SparseArray<array<nint>>{[1] = new nint[]{7, 8, 9}.array()}.array(2, () => new(3))}.slice(), 2, 3);
+    var nestedKeyed = GoReflect.WithElemDims(new array<array<nint>>[]{new golib.SparseArray<array<nint>>{[1] = array<nint>([7, 8, 9])}.array(2, () => new(3))}.slice(), 2, 3);
     fmt.Println("nestedKeyed:", len(nestedKeyed[0]), len(nestedKeyed[0][0]), nestedKeyed[0]);
 
     var structElem = GoReflect.WithElemDims(new array<withArray>[]{new withArray[]{}.array(2, () => new())}.slice(), 2);
@@ -150,13 +150,13 @@ internal static void main() {
     noLit[1][2] = 7;
     fmt.Printf("noWrite: %v\n"u8, noLit);
 
-    var nnPop = new nn(new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array());
+    var nnPop = new nn(new array<nint>[]{array<nint>([1, 2, 3]), array<nint>([4, 5, 6])}.array());
     fmt.Println("nnPop:", len(nnPop), len(nnPop[0]), nnPop);
 
-    var nnShort = new nn(new array<nint>[]{new nint[]{1, 2, 3}.array()}.array(2, () => new(3)));
+    var nnShort = new nn(new array<nint>[]{array<nint>([1, 2, 3])}.array(2, () => new(3)));
     fmt.Println("nnShort:", len(nnShort), len(nnShort[1]), nnShort);
 
-    var nnKeyed = new nn(new array<array<nint>>(2, () => new(3)){[1] = new nint[]{7, 8, 9}.array()});
+    var nnKeyed = new nn(new array<array<nint>>(2, () => new(3)){[1] = array<nint>([7, 8, 9])});
     fmt.Println("nnKeyed:", len(nnKeyed), len(nnKeyed[0]), nnKeyed);
 
     array<array<array<nint>>> ctrl = new(3, () => new(2, () => new(2)));

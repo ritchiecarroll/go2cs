@@ -8,7 +8,7 @@ All right-hand operands in assignment expressions in Go are evaluated before ass
 x, y = y, x+y
 ```
 the equivalent C# code operates as follows:
-<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs:34 -->
+<!-- source: src/tests/Behavioral/SelectStatement/SelectStatement.cs:33 -->
 ```csharp
 (x, y) = (y, x + y);
 ```
@@ -96,7 +96,7 @@ small, even := func(v int) bool { return v < n }, func(v int) bool { return v%2 
 d, t := double, triple
 ```
 
-<!-- source: src/tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.cs:30-31, 34-35 -->
+<!-- source: src/tests/Behavioral/MultiValueFuncLiteralDefine/MultiValueFuncLiteralDefine.cs:25-26, 29-30 -->
 ```csharp
 var small = (nint v) => v < n;
 var even = (nint v) => v % 2 == 0;
@@ -258,7 +258,7 @@ capturing closure (the pre-existing box-ref-var case) or anywhere in the current
 var swapped Animal = Dog{}
 replaceAnimal(&swapped)      // callee: *a = &Cat{}
 ```
-<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:194-197 -->
+<!-- source: src/tests/Behavioral/InterfaceCasting/InterfaceCasting.cs.target:166-169 -->
 ```csharp
 ref var swapped = ref heap<Animal>(out var Ꮡswapped);
 
@@ -338,7 +338,7 @@ func fromInt(v int64) (r Int128) {
 	return r
 }
 ```
-<!-- source: src/tests/Behavioral/NamedResultCaptureModeReceiver/main.cs:27-32 -->
+<!-- source: src/tests/Behavioral/NamedResultCaptureModeReceiver/main.cs:22-27 -->
 ```csharp
 internal static Int128 /*r*/ fromInt(int64 v) {
     ref var r = ref heap(new Int128(), out var Ꮡr);
@@ -379,7 +379,7 @@ func readOnlyParam(r Rect) (int, int) {
 	return p.Min, p.Max
 }
 ```
-<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:51-56 -->
+<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:50-55 -->
 ```csharp
 internal static (nint, nint) readOnlyParam(Rect rʗp) {
     ref var r = ref heap(rʗp, out var Ꮡr);
@@ -476,7 +476,7 @@ receiver folding its Go by-value clone into the box init exactly as an array par
 func (b Box) BumpedRecv() int { bumpBox(&b); return b.Tag }
 func (b Box) ReadOnlyRecv() (int, int) { p := &b; return p.R.Min, p.Tag }
 ```
-<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:74-77, 102-107 -->
+<!-- source: src/tests/Behavioral/AddressOfParamWrite/main.cs.target:71-74, 93-98 -->
 ```csharp
 public static nint BumpedRecv(this Box b) {
     bumpBox(ref b);
@@ -569,7 +569,7 @@ p := &x.val
 *p = 99
 return x.val                       // Go: 99
 ```
-<!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.cs:18-21 -->
+<!-- source: src/tests/Behavioral/LocalStructFieldAddr/main.cs:17-20 -->
 ```csharp
 ref var x = ref heap<Thing>(new Thing(val: 7), out var Ꮡx);
 var p = Ꮡx.Ꮡval;
@@ -612,7 +612,7 @@ the call routes through its identity box:
 	x.i.Store(7)
 	fmt.Println("anon:", x.i.Add(1))
 ```
-<!-- source: src/tests/Behavioral/CaptureModeFieldAddress/main.cs.target:62-64 -->
+<!-- source: src/tests/Behavioral/CaptureModeFieldAddress/main.cs.target:57-59 -->
 ```csharp
     ref var x = ref heap(new anonStruct_x(), out var Ꮡx);
     Ꮡx.of(anonStruct_x.Ꮡi).Store(7);

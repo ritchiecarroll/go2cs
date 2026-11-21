@@ -27,4 +27,4 @@ internal static (FileInfo, error) lstatat(this ж<File> Ꮡf, @string name) {
     return Ꮡf.lstatatNolog(name);
 }
 
-} // end osᴛFile
+}

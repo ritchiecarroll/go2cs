@@ -595,6 +595,18 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_capacity = max - low;
     }
 
+    // The window [low:high:max] of a managed backing whose bounds the caller has ALREADY proved (Window, after Go's checks
+    // and within a live slice's capacity): the fields alone. The checked constructor above is 152 IL bytes, over the JIT's
+    // inline limit without a trusted profile, so Window's call to it stayed a call. The unused flag only keeps this
+    // overload apart from that one.
+    private slice(T[] array, nint low, nint high, nint max, bool _)
+    {
+        m_array = array;
+        m_low = low;
+        m_length = high - low;
+        m_capacity = max - low;
+    }
+
     public slice(nint length, nint capacity = -1, nint low = 0)
     {
         // This is the `make([]T, len[, cap])` path: Go panics RECOVERABLY for a negative or
@@ -846,24 +858,39 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     }
 
     // The window [low:high:max] of this slice, relative to it, once a caller above has made Go's checks.
+    //
+    // A managed backing is the only inline statement, so this body stays under the JIT's 128-byte inline limit for a call
+    // site without a trusted profile, and a hot reslice inlines whether or not the JIT trusts the loop's on-stack-
+    // replacement profile. With every arm inline it was 146 IL bytes and inlined only with a trusted profile: PerfString
+    // read 2x slower whenever it did not (docs/phase4/DATA-pgo-window-inline.md). The other arms are WindowRare's.
     private slice<T> Window(nint low, nint high, nint max)
+    {
+        if (GoZeroSizeFacts<T>.IsZeroSize || m_nativeBase != 0 || m_array is null)
+            return WindowRare(m_array, m_nativeBase, m_low + low, m_low + high, m_low + max);
+
+        return new slice<T>(m_array, m_low + low, m_low + high, m_low + max, false);
+    }
+
+    // Window's arms other than a managed backing, over ABSOLUTE bounds. STATIC, and given the fields by value: as an
+    // instance method the call passes the slice by reference, and that alone cost the inlined fast path its speed (the
+    // same record), although the arm it reaches is cold.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static slice<T> WindowRare(T[]? array, nuint nativeBase, nint low, nint high, nint max)
     {
         // Zero-size backing: the Go bound check above is the WHOLE check — there is no storage whose
         // extent could disagree with it — so the window is rebuilt directly. Going through the
         // array-taking constructor would have measured the shared zerobase placeholder's length
         // instead of the slice's capacity.
         if (GoZeroSizeFacts<T>.IsZeroSize)
-            return new slice<T>(GoZeroSizeFacts<T>.Storage, m_low + low, m_low + high, m_low + max);
+            return new slice<T>(GoZeroSizeFacts<T>.Storage, low, high, max);
 
         // Native backing: same window arithmetic over the same base — reslicing never copies, so
         // the result aliases the identical memory and Ꮡ over it names the offset addresses.
-        if (m_nativeBase != 0)
-            return new slice<T>(m_nativeBase, m_low + low, m_low + high, m_low + max, m_array);
+        if (nativeBase != 0)
+            return new slice<T>(nativeBase, low, high, max, array);
 
-        if (m_array is null)
-            return default;
-
-        return new slice<T>(m_array, m_low + low, m_low + high, m_low + max);
+        // A nil slice resliced (legal only at 0:0:0) is the nil slice.
+        return default;
     }
 
     /// <summary>

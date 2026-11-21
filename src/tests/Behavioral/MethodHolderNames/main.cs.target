@@ -16,11 +16,7 @@ partial struct Kind /*num:nint*/;
 
 public static nint Scale(nint n) { return n * 10; }
 
-} partial class mainᴛKind {
-
 public static @string String(this Kind k) { return fmt.Sprintf("Kind(%d)"u8, (nint)k); }
-
-} partial class main_package {
 
 partial struct Box {
     internal nint n;

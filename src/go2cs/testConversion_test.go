@@ -5512,6 +5512,8 @@ func TestTestEnvironmentRecordRoundTrips(t *testing.T) {
 			record.OracleGoVersion = "go version go1.23.12 " + runtime.GOOS + "/" + runtime.GOARCH
 			// Terminal is the same kind of field: a driver observation, never derived from options.
 			record.Terminal = driverTerminalPresent
+			// OracleBuildTags is the third: filled by the caller from the package under test.
+			record.OracleBuildTags = &[]string{"purego"}
 
 			// The round trip: what a proof-page regeneration reads back is exactly what this
 			// comparison run recorded, byte for byte through JSON — not just equal Go values.
@@ -5524,7 +5526,7 @@ func TestTestEnvironmentRecordRoundTrips(t *testing.T) {
 			if err := json.Unmarshal(data, &roundTripped); err != nil {
 				t.Fatalf("unmarshal: %v", err)
 			}
-			if roundTripped != record {
+			if !reflect.DeepEqual(roundTripped, record) {
 				t.Errorf("round trip changed the record: %+v -> %s -> %+v", record, data, roundTripped)
 			}
 

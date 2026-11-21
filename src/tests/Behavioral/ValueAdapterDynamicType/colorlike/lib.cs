@@ -31,4 +31,4 @@ public static (uint32, uint32, uint32, uint32) RGBA(this Gray c) {
     return (y, y, y, 0xffff);
 }
 
-} // end colorlikeᴛGray
+}

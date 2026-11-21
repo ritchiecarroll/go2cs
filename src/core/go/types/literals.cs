@@ -428,4 +428,4 @@ internal static int64 indexedElts(this ж<Checker> Ꮡcheck, slice<ast.Expr> elt
     return max;
 }
 
-} // end typesᴛChecker
+}

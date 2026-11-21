@@ -4,7 +4,6 @@ global using Named = go.main_package.Stringer;
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -16,11 +15,7 @@ partial struct point {
     internal nint x, y;
 }
 
-} partial class mainᴛpoint {
-
 internal static @string String(this point p) { return fmt.Sprintf("(%d,%d)"u8, p.x, p.y); }
-
-} partial class main_package {
 
 internal static @string describe(Token t) {
     switch (t.type()) {

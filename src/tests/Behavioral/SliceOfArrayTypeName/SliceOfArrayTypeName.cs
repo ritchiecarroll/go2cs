@@ -25,7 +25,7 @@ internal static void main() {
     show("[][6]uint8", GoReflect.WithElemDims(new array<uint8>[]{new uint8[]{}.array(6)}.slice(), 6));
     show("[][3]int", GoReflect.WithElemDims(new array<nint>[]{new nint[]{}.array(3)}.slice(), 3));
     show("[2][3]int", new array<nint>[]{}.array(2, () => new(3)));
-    show("[][2][3]int", GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array()}.slice(), 2, 3));
+    show("[][2][3]int", GoReflect.WithElemDims(new array<array<nint>>[]{new array<nint>[]{array<nint>([1, 2, 3]), array<nint>([4, 5, 6])}.array()}.slice(), 2, 3));
     show("map[[2]int][]int", new map<array<nint>, slice<nint>>{[new nint[]{}.array(2)] = default});
     show("[]Grid", GoReflect.WithElemDims(new Grid[]{new nint[]{}.array(3)}.slice(), 3));
     show("[]*[4]byte", slice<ж<array<byte>>>([Ꮡ(new byte[]{}.array(4))]));

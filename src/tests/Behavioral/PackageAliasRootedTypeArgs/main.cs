@@ -28,7 +28,6 @@ namespace go;
 
 using fmt = fmt_package;
 using Δio = io_package;
-using static main_package;
 
 partial class main_package {
 
@@ -37,11 +36,7 @@ partial struct Header {
     public int64 Size;
 }
 
-} partial class mainᴛHeader {
-
 public static @string String(this Header h) { return fmt.Sprint(h.Name, "/", h.Size); }
-
-} partial class main_package {
 
 partial interface Stringish {
     @string String();
@@ -59,11 +54,7 @@ partial struct zed {
     internal nint v;
 }
 
-} partial class mainᴛzed {
-
 internal static nint Zed(this zed z) { return z.v; }
-
-} partial class main_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 private static readonly object twoˢ = (@string)"two"u8;
@@ -76,7 +67,7 @@ internal static void main() {
     cplx e = slice<complex64>([complex(1F, 2F)]);
     cplx2 e2 = slice<complex128>([complex(3D, 4D)]);
     chans f = new chans(1);
-    arr g = new @string[]{"a", "b", "c"}.array();
+    arr g = array<@string>(["a", "b", "c"]);
     hdrs h = slice<Header>([new(Name: "n", Size: 1)]);
     rdrs i = slice<Δio.Reader>([default]);
     ptrs j = slice<ж<Header>>([default]);

@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,25 +8,17 @@ public partial struct flagSet /*[2]uint8*/;
 
 /*[2]*/ partial class Features /*ж<flagSet>*/;
 
-} partial class mainᴛflagSet {
-
 internal static bool hasSetP(this ref flagSet s, ж<flagSet> Ꮡo) {
     ref var o = ref Ꮡo.DerefOrNull();
 
     return (uint8)(s.Value[0] & o[0]) == o[0];
 }
 
-} partial class main_package {
-
 partial struct CPU {
     internal flagSet fs;
 }
 
-} partial class mainᴛCPU {
-
 public static bool HasAll(this ref CPU c, Features f) { return c.fs.hasSetP(f); }
-
-} partial class main_package {
 
 internal static @string describe(Features f) {
     if (f == nil) {

@@ -1,15 +1,12 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
 partial struct tracker {
     internal slice<@string> lines;
 }
-
-} partial class mainᴛtracker {
 
 internal static void flush(this ref tracker t) {
     fmt.Printf("flush: %d lines\n"u8, len(t.lines));
@@ -18,8 +15,6 @@ internal static void flush(this ref tracker t) {
         fmt.Println("line:", l);
     }
 }
-
-} partial class main_package {
 
 partial struct parser {
     internal @string name;

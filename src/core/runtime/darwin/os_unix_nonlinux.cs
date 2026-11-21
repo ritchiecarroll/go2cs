@@ -25,4 +25,4 @@ internal static bool sigFromSeccomp(this ref sigctxt c) {
     return false;
 }
 
-} // end runtimeᴛsigctxt
+}

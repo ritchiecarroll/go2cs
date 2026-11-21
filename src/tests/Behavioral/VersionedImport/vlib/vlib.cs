@@ -41,4 +41,4 @@ public static nint IntN(this ref Rand r, nint n) {
     return (nint)(r.src.Uint64() % (uint64)n);
 }
 
-} // end vlibᴛRand
+}

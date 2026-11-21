@@ -282,6 +282,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		siblingTestMethodValues = siblingSignals.methodValues
 		siblingTestPublicizedTypeNames = siblingSignals.publicizedTypeNames
 		hasSiblingInternalTestFiles = siblingSignals.hasInternalTests
+		mainTestScopeNames, mainTestDotImport, mainTestMethodTypes = siblingSignals.scopeNames, siblingSignals.dotImport, siblingSignals.methodTypes
 		options.testFriendAssembly = hasSiblingInternalTestFiles
 
 		// Reset package level variables and capture the per-package inputs (packageDoc,
@@ -352,6 +353,13 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 			// Fatal for a single package; under -recurse the package is skipped and the run goes on (recurseRefusal.go).
 			return refusePackage(options, diagnosticCgoRefused, err)
+		}
+
+		// The narrow shape witness (shapeWitness.go): select its declarations into package state FIRST, so every proxy
+		// route and refusal below declines a witnessed position, and refuse what the current stage cannot place.
+		if refusal := prepareShapeWitness(pkg); refusal != nil {
+			refusal.report()
+			return refusePackage(options, diagnosticShapeWitnessRefused, refusal)
 		}
 
 		// Refuse, before any file is written as well, an instantiation whose constraint proxy could not
@@ -522,7 +530,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				// emission reads it; -debug surfaces the census.
 				performRefLoweringAnalysis(files, packageTypes, info, options)
 
-				emitAutoConversionSiblings(files, fset, packageTypes, info, map[*ast.Ident]string{}, map[string]*types.Var{}, packageOutputPath, options)
+				autoFileNames := emitAutoConversionSiblings(files, fset, packageTypes, info, map[*ast.Ident]string{}, map[string]*types.Var{}, packageOutputPath, options)
 
 				// UN-FREEZE this package's METADATA. Until now the `continue` below skipped
 				// writeProjectFile/writePackageInfoFile entirely, so the four packages whose
@@ -554,10 +562,21 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				}
 
 				if err := collectPublishedRefVerdicts(pkg, packageOutputPath); err != nil {
+					// The siblings' remembered record is process-wide and first-wins, so clear it on this return too
+					// (P3's review, 2026-11-19). Not a defer: this branch runs once per package inside the package loop.
+					restoreUnchangedMarkedSources(autoFileNames)
 					return err
 				}
 
 				writePackageInfoFile(packageInfoPath(packageOutputPath, isDir, options), !isDir)
+
+				// The siblings' deferred pointer-adapter markers resolve now that the GoImplement records are final, as
+				// the normal path does after its own writePackageInfoFile. This path wrote its siblings before the
+				// records, and until 2026-11-19 never ran this pass: internal/godebug's sibling kept the marker for
+				// `v.bisect.Stack(&stderr)` (runtimeStderr through bisect.Writer, pointer receiver). Then both marker
+				// passes have run, so an unchanged sibling gets its previous time back (incrementalWrites.go).
+				resolveAdapterNameMarkers(autoFileNames)
+				restoreUnchangedMarkedSources(autoFileNames)
 			} else {
 				showMessage("Skipping conversion: no target Go source files found for conversion in input path \"%s\"", packageInputPath)
 			}

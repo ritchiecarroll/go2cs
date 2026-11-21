@@ -14,11 +14,7 @@ internal static handle invalid => /* ^handle(0) */ unchecked((handle)18446744073
 internal static UntypedInt appErr => /* 1 << 29 */ 536870912;
 internal static handle big => /* appErr + 5 */ 536870917;
 
-} partial class mainᴛhandle {
-
 internal static nint idx(this handle h) { return (nint)(h - (handle)appErr); }
-
-} partial class main_package {
 
 internal static (ж<item>, error) find(slice<item> xs, nint want) {
     GoFrame ᒐ = default;
@@ -80,7 +76,7 @@ internal static void main() {
         fmt.Println(p != nil, err == nil);
         (_, err) = find(xs, 9);
         fmt.Println(err);
-        fmt.Println(first(new byte[]{7, 8, 9, 10}.array()));
+        fmt.Println(first(array<byte>([7, 8, 9, 10])));
         fmt.Println(big.idx());
         fmt.Println(invalid == big, invalid == invalid);
     }
@@ -99,4 +95,4 @@ internal static error close(this res h) {
     return default;
 }
 
-} // end mainᴛres
+}

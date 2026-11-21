@@ -3,7 +3,6 @@ namespace go;
 using fmt = fmt_package;
 using hue = ForeignValueImplementSuppression.hue_package;
 using ForeignValueImplementSuppression;
-using static main_package;
 
 partial class main_package {
 
@@ -11,11 +10,7 @@ partial struct Img {
     internal hue.Shade px;
 }
 
-} partial class mainᴛImg {
-
 public static hue.Tint At(this ref Img p) { return p.px; }
-
-} partial class main_package {
 
 internal static void main() {
     var p = Ꮡ(new Img(new hue.Shade(L: 0x99, A: 0xff)));

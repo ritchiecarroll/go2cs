@@ -34,18 +34,14 @@ partial struct holder {
     internal uint32 x, y;
 }
 
-} partial class mainᴛholder {
-
 internal static uint32 second(this ж<holder> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     return ~@unsafe.Pointer.To<uint32>(add((uintptr)@unsafe.Pointer.FromRef(ref h), /* unsafe.Sizeof(uint32(0)) */ (uintptr)4));
 }
 
-} partial class main_package {
-
 internal static void main() {
-    ref var vals = ref heap<array<uint32>>(new uint32[]{10, 20, 30, 40}.array(), out var Ꮡvals);
+    ref var vals = ref heap<array<uint32>>(array<uint32>([10, 20, 30, 40]), out var Ꮡvals);
     fmt.Println(step(Ꮡvals.at<uint32>(0)));
 
     @unsafe.Pointer p = @unsafe.Pointer.FromPinnedBox(Ꮡvals.at<uint32>(1));

@@ -1,220 +1,275 @@
 // Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
-// go2cs NATIVE IMPLEMENTATION (hand-owned; replaces the converted rwmutex.go output). Go's RWMutex
-// coordinates readers and a writer through two runtime sleeping semaphores plus an embedded Mutex —
-// the same runtime layer that cannot be emulated faithfully (see mutex.cs / runtime_impl.cs).
-// Reimplemented natively as a writer-preferring readers-writer lock over a single monitor: a pending
-// writer blocks new readers (Go's documented guarantee that the lock eventually reaches the writer),
-// and it is not goroutine-affine (any goroutine may release what another acquired). The RLocker/rlocker
-// interface witness is unchanged — it simply forwards to RLock/RUnlock.
-using System.Threading;
-// Aliased rather than imported wholesale: this file needs exactly two golib types, and a blanket
-// `using go.golib` would also pull that namespace's extension methods into a hand-owned file sitting
-// beside converted code.
-using Goroutine = go.golib.Goroutine;
-using WaitReason = go.golib.WaitReason;
-
-// Hand-owned native replacement of the converted rwmutex.go output — the marker makes a -stdlib
-// reconvert skip regenerating this file (see containsManualConversionMarker).
-[module: go.GoManualConversion]
-
 namespace go;
 
+using race = @internal.race_package;
+using atomic = go.sync.atomic_package;
+using @unsafe = unsafe_package;
+using @internal;
+using go.sync;
 using static sync_package;
 
 partial class sync_package {
 
+// There is a modified copy of this file in runtime/rwmutex.go.
+// If you make any changes here, see if you should make them there.
+
 // A RWMutex is a reader/writer mutual exclusion lock.
 // The lock can be held by an arbitrary number of readers or a single writer.
-// The zero value for a RWMutex is an unlocked mutex. A RWMutex must not be copied after first use.
-[GoType] public partial struct RWMutex {
-    // Lazily-created shared state; a RWMutex is always used through a pointer (ж<RWMutex>).
-    internal RWState? st;
+// The zero value for a RWMutex is an unlocked mutex.
+//
+// A RWMutex must not be copied after first use.
+//
+// If any goroutine calls [RWMutex.Lock] while the lock is already held by
+// one or more readers, concurrent calls to [RWMutex.RLock] will block until
+// the writer has acquired (and released) the lock, to ensure that
+// the lock eventually becomes available to the writer.
+// Note that this prohibits recursive read-locking.
+// A [RWMutex.RLock] cannot be upgraded into a [RWMutex.Lock],
+// nor can a [RWMutex.Lock] be downgraded into a [RWMutex.RLock].
+//
+// In the terminology of [the Go memory model],
+// the n'th call to [RWMutex.Unlock] “synchronizes before” the m'th call to Lock
+// for any n < m, just as for [Mutex].
+// For any call to RLock, there exists an n such that
+// the n'th call to Unlock “synchronizes before” that call to RLock,
+// and the corresponding call to [RWMutex.RUnlock] “synchronizes before”
+// the n+1'th call to Lock.
+//
+// [the Go memory model]: https://go.dev/ref/mem
+partial struct RWMutex {
+    internal Mutex w;                  // held if there are pending writers
+    internal uint32 writerSem;         // semaphore for writers to wait for completing readers
+    internal uint32 readerSem;         // semaphore for readers to wait for completing writers
+    internal atomic.Int32 readerCount; // number of pending readers
+    internal atomic.Int32 readerWait;  // number of departing readers
 }
 
-// RWState is the native backing: reader/writer bookkeeping guarded by one monitor (Gate). Writers are
-// preferred — a waiting writer stops new readers — matching Go's eventual-writer-progress guarantee.
-internal sealed class RWState {
-    internal readonly object Gate = new();
-    internal int Readers;        // active readers
-    internal int ReadersWaiting; // readers currently blocked on a pending/active writer
-    internal int WritersWaiting; // writers currently blocked
-    internal bool Writer;        // a writer holds the lock
-}
-
-internal static RWState rwStateOf(ж<RWMutex> Ꮡrw) {
-    ref var rw = ref Ꮡrw.Value;
-
-    RWState? s = Volatile.Read(ref rw.st);
-
-    if (s is not null) {
-        return s;
-    }
-
-    var created = new RWState();
-    return Interlocked.CompareExchange(ref rw.st, created, null) ?? created;
-}
+internal static UntypedInt rwmutexMaxReaders => /* 1 << 30 */ 1073741824;
 
 } partial class syncᴛRWMutex {
 
-// RLock locks rw for reading. It should not be used for recursive read locking; a blocked Lock call
-// excludes new readers from acquiring the lock.
+// Happens-before relationships are indicated to the race detector via:
+// - Unlock  -> Lock:  readerSem
+// - Unlock  -> RLock: readerSem
+// - RUnlock -> Lock:  writerSem
+//
+// The methods below temporarily disable handling of race synchronization
+// events in order to provide the more precise model above to the race
+// detector.
+//
+// For example, atomic.AddInt32 in RLock should not appear to provide
+// acquire-release semantics, which would incorrectly synchronize racing
+// readers, thus potentially missing races.
+
+// RLock locks rw for reading.
+//
+// It should not be used for recursive read locking; a blocked Lock
+// call excludes new readers from acquiring the lock. See the
+// documentation on the [RWMutex] type.
 public static void RLock(this ж<RWMutex> Ꮡrw) {
-    RWState s = rwStateOf(Ꮡrw);
-
-    lock (s.Gate) {
-        while (s.Writer || s.WritersWaiting > 0) {
-            s.ReadersWaiting++;
-
-            // Park accounting only — Monitor.Wait still owns the release-and-reacquire (Go's
-            // sync_runtime_SemacquireRWMutexR carries the same reason to the same effect).
-            using (Goroutine.Park(WaitReason.SyncRWMutexRLock)) {
-                Monitor.Wait(s.Gate);
-            }
-
-            s.ReadersWaiting--;
-        }
-
-        s.Readers++;
+    if (race.Enabled) {
+        race.Read(@unsafe.Pointer.FromPinnedBox(Ꮡrw.Ꮡw));
+        race.Disable();
+    }
+    if (Ꮡrw.ᏑreaderCount.Add(1) < 0) {
+        // A writer is pending, wait for it.
+        runtime_SemacquireRWMutexR(Ꮡrw.ᏑreaderSem, false, 0);
+    }
+    if (race.Enabled) {
+        race.Enable();
+        race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡrw.ᏑreaderSem));
     }
 }
 
 // TryRLock tries to lock rw for reading and reports whether it succeeded.
+//
+// Note that while correct uses of TryRLock do exist, they are rare,
+// and use of TryRLock is often a sign of a deeper problem
+// in a particular use of mutexes.
 public static bool TryRLock(this ж<RWMutex> Ꮡrw) {
-    RWState s = rwStateOf(Ꮡrw);
-
-    lock (s.Gate) {
-        if (s.Writer || s.WritersWaiting > 0) {
+    if (race.Enabled) {
+        race.Read(@unsafe.Pointer.FromPinnedBox(Ꮡrw.Ꮡw));
+        race.Disable();
+    }
+    for (;;) {
+        var c = Ꮡrw.ᏑreaderCount.Load();
+        if (c < 0) {
+            if (race.Enabled) {
+                race.Enable();
+            }
             return false;
         }
-
-        s.Readers++;
-        return true;
-    }
-}
-
-// RUnlock undoes a single RLock call; it does not affect other simultaneous readers.
-public static void RUnlock(this ж<RWMutex> Ꮡrw) {
-    RWState s = rwStateOf(Ꮡrw);
-
-    lock (s.Gate) {
-        if (s.Readers == 0) {
-            fatal("sync: RUnlock of unlocked RWMutex"u8);
-        }
-
-        s.Readers--;
-
-        if (s.Readers == 0) {
-            Monitor.PulseAll(s.Gate); // let a waiting writer proceed
-        }
-    }
-}
-
-// Lock locks rw for writing. If the lock is already locked for reading or writing, Lock blocks until
-// the lock is available.
-public static void Lock(this ж<RWMutex> Ꮡrw) {
-    RWState s = rwStateOf(Ꮡrw);
-
-    lock (s.Gate) {
-        s.WritersWaiting++;
-
-        while (s.Writer || s.Readers > 0) {
-            using (Goroutine.Park(WaitReason.SyncRWMutexLock)) {
-                Monitor.Wait(s.Gate);
+        if (Ꮡrw.ᏑreaderCount.CompareAndSwap(c, c + 1)) {
+            if (race.Enabled) {
+                race.Enable();
+                race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡrw.ᏑreaderSem));
             }
+            return true;
         }
+    }
+}
 
-        s.WritersWaiting--;
-        s.Writer = true;
+// RUnlock undoes a single [RWMutex.RLock] call;
+// it does not affect other simultaneous readers.
+// It is a run-time error if rw is not locked for reading
+// on entry to RUnlock.
+public static void RUnlock(this ж<RWMutex> Ꮡrw) {
+    if (race.Enabled) {
+        race.Read(@unsafe.Pointer.FromPinnedBox(Ꮡrw.Ꮡw));
+        race.ReleaseMerge(@unsafe.Pointer.FromPinnedBox(Ꮡrw.ᏑwriterSem));
+        race.Disable();
+    }
+    var r = Ꮡrw.ᏑreaderCount.Add(-1); if (r < 0) {
+        // Outlined slow-path to allow the fast-path to be inlined
+        Ꮡrw.rUnlockSlow(r);
+    }
+    if (race.Enabled) {
+        race.Enable();
+    }
+}
+
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string syncRUnlockOfUnlockedˢ => ref syncRUnlockOfUnlockedˢᵇ;
+private static readonly @string syncRUnlockOfUnlockedˢᵇ = "sync: RUnlock of unlocked RWMutex"u8;
+
+internal static void rUnlockSlow(this ж<RWMutex> Ꮡrw, int32 r) {
+    if (r + 1 == 0 || r + 1 == (int32)(-rwmutexMaxReaders)) {
+        race.Enable();
+        fatal(syncRUnlockOfUnlockedˢ);
+    }
+    // A writer is pending.
+    if (Ꮡrw.ᏑreaderWait.Add(-1) == 0) {
+        // The last reader unblocks the writer.
+        runtime_Semrelease(Ꮡrw.ᏑwriterSem, false, 1);
+    }
+}
+
+// Lock locks rw for writing.
+// If the lock is already locked for reading or writing,
+// Lock blocks until the lock is available.
+public static void Lock(this ж<RWMutex> Ꮡrw) {
+    ref var rw = ref Ꮡrw.DerefOrNull();
+
+    if (race.Enabled) {
+        race.Read(@unsafe.Pointer.FromPinnedBox(Ꮡrw.Ꮡw));
+        race.Disable();
+    }
+    // First, resolve competition with other writers.
+    rw.w.Lock();
+    // Announce to readers there is a pending writer.
+    var r = Ꮡrw.ᏑreaderCount.Add(-rwmutexMaxReaders) + (int32)rwmutexMaxReaders;
+    // Wait for active readers.
+    if (r != 0 && Ꮡrw.ᏑreaderWait.Add(r) != 0) {
+        runtime_SemacquireRWMutex(Ꮡrw.ᏑwriterSem, false, 0);
+    }
+    if (race.Enabled) {
+        race.Enable();
+        race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡrw.ᏑreaderSem));
+        race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡrw.ᏑwriterSem));
     }
 }
 
 // TryLock tries to lock rw for writing and reports whether it succeeded.
+//
+// Note that while correct uses of TryLock do exist, they are rare,
+// and use of TryLock is often a sign of a deeper problem
+// in a particular use of mutexes.
 public static bool TryLock(this ж<RWMutex> Ꮡrw) {
-    RWState s = rwStateOf(Ꮡrw);
+    ref var rw = ref Ꮡrw.DerefOrNull();
 
-    lock (s.Gate) {
-        if (s.Writer || s.Readers > 0 || s.WritersWaiting > 0) {
-            return false;
-        }
-
-        s.Writer = true;
-        return true;
+    if (race.Enabled) {
+        race.Read(@unsafe.Pointer.FromPinnedBox(Ꮡrw.Ꮡw));
+        race.Disable();
     }
+    if (!rw.w.TryLock()) {
+        if (race.Enabled) {
+            race.Enable();
+        }
+        return false;
+    }
+    if (!Ꮡrw.ᏑreaderCount.CompareAndSwap(0, -rwmutexMaxReaders)) {
+        rw.w.Unlock();
+        if (race.Enabled) {
+            race.Enable();
+        }
+        return false;
+    }
+    if (race.Enabled) {
+        race.Enable();
+        race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡrw.ᏑreaderSem));
+        race.Acquire(@unsafe.Pointer.FromPinnedBox(Ꮡrw.ᏑwriterSem));
+    }
+    return true;
 }
 
-// Unlock unlocks rw for writing. It is a run-time error if rw is not locked for writing on entry.
+// Hoisted @string literals (single allocation; Go keeps these in RODATA)
+internal static ref readonly @string syncUnlockOfUnlockedˢ => ref syncUnlockOfUnlockedˢᵇ;
+private static readonly @string syncUnlockOfUnlockedˢᵇ = "sync: Unlock of unlocked RWMutex"u8;
+
+// Unlock unlocks rw for writing. It is a run-time error if rw is
+// not locked for writing on entry to Unlock.
+//
+// As with Mutexes, a locked [RWMutex] is not associated with a particular
+// goroutine. One goroutine may [RWMutex.RLock] ([RWMutex.Lock]) a RWMutex and then
+// arrange for another goroutine to [RWMutex.RUnlock] ([RWMutex.Unlock]) it.
 public static void Unlock(this ж<RWMutex> Ꮡrw) {
-    RWState s = rwStateOf(Ꮡrw);
+    ref var rw = ref Ꮡrw.DerefOrNull();
 
-    lock (s.Gate) {
-        if (!s.Writer) {
-            fatal("sync: Unlock of unlocked RWMutex"u8);
-        }
+    if (race.Enabled) {
+        race.Read(@unsafe.Pointer.FromPinnedBox(Ꮡrw.Ꮡw));
+        race.Release(@unsafe.Pointer.FromPinnedBox(Ꮡrw.ᏑreaderSem));
+        race.Disable();
+    }
 
-        s.Writer = false;
-        Monitor.PulseAll(s.Gate); // release blocked readers and/or the next writer
+    // Announce to readers there is no active writer.
+    var r = Ꮡrw.ᏑreaderCount.Add(rwmutexMaxReaders);
+    if (r >= rwmutexMaxReaders) {
+        race.Enable();
+        fatal(syncUnlockOfUnlockedˢ);
+    }
+    // Unblock blocked readers, if any.
+    for (nint i = 0; i < (nint)r; i++) {
+        runtime_Semrelease(Ꮡrw.ᏑreaderSem, false, 0);
+    }
+    // Allow other writers to proceed.
+    rw.w.Unlock();
+    if (race.Enabled) {
+        race.Enable();
     }
 }
 
 } partial class sync_package {
 
-// syscall_hasWaitingReaders reports whether any goroutine is waiting to acquire a read lock on rw.
-// (syscall.ForkLock is an RWMutex and relies on this private linkname.)
+// syscall_hasWaitingReaders reports whether any goroutine is waiting
+// to acquire a read lock on rw. This exists because syscall.ForkLock
+// is an RWMutex, and we can't change that without breaking compatibility.
+// We don't need or want RWMutex semantics for ForkLock, and we use
+// this private API to avoid having to change the type of ForkLock.
+// For more details see the syscall package.
 //
 //go:linkname syscall_hasWaitingReaders syscall.hasWaitingReaders
-// PUBLIC, not internal: this is a linkname PUSH source (linknamePushSources — the registry row
-// syscall.hasWaitingReaders added 2026-08-22), and syscall's forkpipe2 forwarder calls it across
-// the assembly boundary. The converter emits push sources public automatically; this file is
-// hand-owned, so the access travels by hand — the regenerated form lives in rwmutex.cs.auto.
-public static bool syscall_hasWaitingReaders(ж<RWMutex> Ꮡrw) {
-    RWState s = rwStateOf(Ꮡrw);
-
-    lock (s.Gate) {
-        return s.ReadersWaiting > 0;
-    }
+public static bool syscall_hasWaitingReaders(ж<RWMutex> rw) {
+    var r = rw.ᏑreaderCount.Load();
+    return r < 0 && r + (int32)rwmutexMaxReaders > 0;
 }
 
 } partial class syncᴛRWMutex {
 
-// RLocker returns a Locker interface that implements Lock and Unlock by calling rw.RLock and rw.RUnlock.
-//
-// Go's RLocker is a pointer REINTERPRETATION — `(*rlocker)(rw)` — so the returned Locker shares rw's
-// storage. The C# form copy-boxes the RWMutex value into an rlocker (identical layout), which shares
-// rw's state only because `st` is a REFERENCE to the shared RWState. That reference has to exist
-// first: on a never-used RWMutex it is still null, the copy's own rwStateOf then installs a SECOND
-// RWState on the copy, and every RLock/RUnlock through the Locker operates on state the original
-// never sees — TestRLocker (whose `var wl RWMutex; rl = wl.RLocker()` calls it on a fresh mutex)
-// died with "sync: RUnlock of unlocked RWMutex". Forcing creation before the copy makes both sides
-// hold the one RWState, which is exactly what Go's shared storage gives.
+// RLocker returns a [Locker] interface that implements
+// the [Locker.Lock] and [Locker.Unlock] methods by calling rw.RLock and rw.RUnlock.
 public static Locker RLocker(this ж<RWMutex> Ꮡrw) {
-    rwStateOf(Ꮡrw);
-
-    ref var rw = ref Ꮡrw.Value;
-
-    return new rlockerжLocker(Ꮡ((rlocker)(rw)));
+    return new rlockerжLocker(Ꮡrw.Reinterpret<RWMutex, rlocker>());
 }
 
 } partial class sync_package {
 
-[GoType("RWMutex")] internal partial struct rlocker;
+partial struct rlocker /*RWMutex*/;
 
 } partial class syncᴛrlocker {
 
-internal static void Lock(this ж<rlocker> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
+internal static void Lock(this ж<rlocker> Ꮡr) { (Ꮡr.Reinterpret<rlocker, RWMutex>()).RLock(); }
+internal static void Unlock(this ж<rlocker> Ꮡr) { (Ꮡr.Reinterpret<rlocker, RWMutex>()).RUnlock(); }
 
-    (Ꮡ((RWMutex)(r))).RLock();
 }
-
-internal static void Unlock(this ж<rlocker> Ꮡr) {
-    ref var r = ref Ꮡr.Value;
-
-    (Ꮡ((RWMutex)(r))).RUnlock();
-}
-
-} partial class sync_package {
-
-} // end sync_package

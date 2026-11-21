@@ -9212,7 +9212,7 @@ public static ref slice<CaseRange> CaseRanges => ref ((StaticBox<slice<CaseRange
     [0xFF] = (uint8)((uint8)pLl | (uint8)pp)  // 'ÿ'
 }; }
 
-[GoLazy] partial class lazyᴛasciiFold { internal static array<uint16> asciiFold = new uint16[]{
+[GoLazy] partial class lazyᴛasciiFold { internal static array<uint16> asciiFold = array<uint16>([
     0x0000,
     0x0001,
     0x0002,
@@ -9341,7 +9341,7 @@ public static ref slice<CaseRange> CaseRanges => ref ((StaticBox<slice<CaseRange
     0x007D,
     0x007E,
     0x007F
-}.array(); }
+]); }
 
 [GoLazy] partial class lazyᴛcaseOrbit { internal static slice<foldPair> caseOrbit = [
     new(0x004B, 0x006B),

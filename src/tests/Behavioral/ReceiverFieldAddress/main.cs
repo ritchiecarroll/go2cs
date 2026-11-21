@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -14,8 +13,6 @@ internal static int32 bump(ref int32 p, int32 delta) {
     return p;
 }
 
-} partial class mainᴛCounter {
-
 public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -24,8 +21,6 @@ public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
 
 public static void Set(this ж<Counter> Ꮡc, int32 v) { (Ꮡc.Ꮡn).Value = v; }
 public static int32 Get(this ref Counter c) { return c.n; }
-
-} partial class main_package {
 
 internal static void main() {
     ref var c = ref heap(new Counter(), out var Ꮡc);

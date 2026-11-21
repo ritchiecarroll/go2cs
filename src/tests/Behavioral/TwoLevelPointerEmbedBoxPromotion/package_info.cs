@@ -61,7 +61,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABk+gpCSgsaigoKCppKAgKKCgviCAAoQgoKUgoIACxKAgKSCgpSmAAoUgoKWgoKCgoKCgoKCggAJEtKCgoIADxSCgoKUgoKCloKCgpSCgoKCmoKCgoKCgoI=", "32-32:1")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABY+gpCSgqaigoKCppKAgKKCgriCAAYQgoKUgoIABxKAgKSCgpSmAAgUgoKWgoKCgoKCgoKCggAHEtKCgoIADRSCgoKUgoKCloKCgpSCgoKCmoKCgoKCgoI=", "32-32:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -111,10 +111,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.addr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛaddr;
-[GoMethodHost(typeof(main_package.deadline)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛdeadline;
-[GoMethodHost(typeof(main_package.@file)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛfile;
-[GoMethodHost(typeof(main_package.msgPipe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmsgPipe;
-[GoMethodHost(typeof(main_package.pipe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛpipe;
-[GoMethodHost(typeof(main_package.rawFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛrawFile;
 // </MethodHolders>

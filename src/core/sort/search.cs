@@ -164,4 +164,4 @@ public static nint Search(this Float64Slice p, float64 x) { return SearchFloat64
 // Search returns the result of applying [SearchStrings] to the receiver and x.
 public static nint Search(this StringSlice p, @string x) { return SearchStrings(p, x); }
 
-} // end sortᴛStringSlice
+}

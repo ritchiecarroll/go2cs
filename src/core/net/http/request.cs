@@ -1789,4 +1789,4 @@ internal static bool requiresHTTP1(this ref Request r) {
     return hasToken(r.Header.Get(connectionˢ), upgradeˢ) && ascii.EqualFold(r.Header.Get(upgradeˢ2), websocketˢ);
 }
 
-} // end httpᴛRequest
+}

@@ -18,7 +18,7 @@ internal static void main() {
     swap((uintptr)Ꮡ(u, 0), (uintptr)Ꮡ(u, 1));
     fmt.Println(u);
 
-    ref var v = ref heap<array<int32>>(new int32[]{7, 8, 9}.array(), out var Ꮡv);
+    ref var v = ref heap<array<int32>>(array<int32>([7, 8, 9]), out var Ꮡv);
     rotate(@unsafe.Pointer.FromPinnedBox(Ꮡv.at<int32>(0)), @unsafe.Pointer.FromPinnedBox(Ꮡv.at<int32>(1)), @unsafe.Pointer.FromPinnedBox(Ꮡv.at<int32>(2)));
     fmt.Println(v);
 

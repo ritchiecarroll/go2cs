@@ -645,7 +645,7 @@ public static bool IsGlobalUnicast(this Addr ip) {
 
     // Match package net's IsGlobalUnicast logic. Notably private IPv4 addresses
     // and ULA IPv6 addresses are still considered "global unicast".
-    if (ip.Is4() && (ip == IPv4Unspecified() || ip == AddrFrom4(new byte[]{255, 255, 255, 255}.array()))) {
+    if (ip.Is4() && (ip == IPv4Unspecified() || ip == AddrFrom4(array<byte>([255, 255, 255, 255])))) {
         return false;
     }
 
@@ -1735,4 +1735,4 @@ public static @string String(this Prefix p) {
     return p.ip.String() + "/"u8 + strconv.Itoa(p.Bits());
 }
 
-} // end netipᴛPrefix
+}

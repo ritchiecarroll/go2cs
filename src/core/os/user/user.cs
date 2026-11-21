@@ -107,4 +107,4 @@ public static @string Error(this UnknownGroupError e) {
     return "group: unknown group "u8 + ((@string)e);
 }
 
-} // end userᴛUnknownGroupError
+}

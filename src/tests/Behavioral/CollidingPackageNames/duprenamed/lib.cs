@@ -27,4 +27,4 @@ partial struct Box<T> {
 
 public static T Get<T>(this Box<T> b) { return b.V; }
 
-} // end dupᴛBox
+}

@@ -15,7 +15,7 @@ internal static void main() {
 
     var typedSlice = slice<@string>([prefix + "-a"u8, prefix + "-b"u8]);
 
-    var typedArray = new @string[]{prefix + "-c"u8, prefix + "-d"u8}.array();
+    var typedArray = array<@string>([prefix + "-c"u8, prefix + "-d"u8]);
 
     var elided = slice<slice<@string>>([[prefix + "-e"u8]]);
 

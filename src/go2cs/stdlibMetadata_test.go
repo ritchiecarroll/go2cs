@@ -12,11 +12,14 @@ import (
 	"go/build"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
 
 	"go2cs/internal/stdlibmeta"
+
+	"golang.org/x/tools/go/packages"
 )
 
 const convertedStdLibRoot = "../core"
@@ -210,6 +213,149 @@ func TestPublishedStdLibScope(t *testing.T) {
 				t.Errorf("PublishedStdLib = %v, want %v", info.PublishedStdLib, testCase.want)
 			}
 		})
+	}
+}
+
+// TestPublishedStdLibRecordWinsOverAStaleRuntimeRoot pins the ORDER publishedStdLibRecord states: under -recurse=nuget
+// a published standard-library dependency is read from the embedded record even when the runtime root holds a
+// package_info.cs for it. The plant is the real stale shape a 2026-07-11 ~/go2cs deploy carried on i9 (pre-OQ2:
+// reflect's `Kind` and `Int` renamed against `Value.Kind()`/`Value.Int()`); read first, it emitted
+// `global using reflectꓸKind = go.reflect_package.ΔKind;` and `reflect.ΔInt`, and libc failed CS0426 against the
+// published go.reflect 1.26.11.1 (sqlite-cs, 2026-11-20). os's FileMode re-export is the control: the record still
+// applies what it carries.
+func TestPublishedStdLibRecordWinsOverAStaleRuntimeRoot(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	resetPackageState(&packages.Package{})
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	root := makeGo2CSRoot(t, t.TempDir())
+
+	options := Options{
+		goRoot:         goRoot,
+		goPath:         build.Default.GOPATH,
+		go2csPath:      root,
+		recurse:        true,
+		nugetRefs:      true,
+		targetPlatform: runtime.GOOS + "/" + runtime.GOARCH,
+	}
+
+	infos := getImportPackageInfo([]string{"reflect", "os"}, options)
+	reflectInfo, osInfo := infos["reflect"], infos["os"]
+
+	if !reflectInfo.PublishedStdLib || !osInfo.PublishedStdLib {
+		t.Fatalf("premise: reflect and os must be published standard-library imports under -recurse=nuget (got %v, %v)",
+			reflectInfo.PublishedStdLib, osInfo.PublishedStdLib)
+	}
+
+	// The plant sits exactly where the runtime-root read looks, so before the fix it is what got read.
+	stale := platformPackageInfoPath(reflectInfo.TargetDir, options.targetPlatform)
+
+	if !strings.HasPrefix(filepath.Clean(stale), filepath.Clean(root)) {
+		t.Fatalf("premise: reflect's package_info.cs path %q is not under the planted root %q", stale, root)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(stale), 0o755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+
+	plant := "// <ExportedTypeAliases>\n" +
+		"[assembly: GoTypeAlias(\"Int\", \"const:ΔInt\")]\n" +
+		"[assembly: GoTypeAlias(\"Kind\", \"ΔKind\")]\n" +
+		"// </ExportedTypeAliases>\n"
+
+	if err := os.WriteFile(stale, []byte(plant), 0o644); err != nil {
+		t.Fatalf("write the stale package_info.cs: %v", err)
+	}
+
+	loadImportedTypeAliases(reflectInfo, options)
+	loadImportedTypeAliases(osInfo, options)
+
+	for _, key := range []string{"reflect.Kind", "reflect.Int"} {
+		if target, read := importedTypeAliases[key]; read {
+			t.Errorf("%s was taken from the runtime root's stale package_info.cs (-> %q); the embedded record carries no such alias", key, target)
+		}
+	}
+
+	if lines, ok := importPackageInfoLines(reflectInfo, options); ok && strings.Contains(strings.Join(lines, "\n"), "ΔKind") {
+		t.Error("importPackageInfoLines read reflect from the runtime root's stale package_info.cs, not the embedded record")
+	}
+
+	if got, want := importedTypeAliases["os.FileMode"], RootNamespace+".io.fs"+PackageSuffix+".FileMode"; got != want {
+		t.Errorf("control: os.FileMode from the embedded record = %q, want %q", got, want)
+	}
+}
+
+// TestEveryPublishedStdLibPackageHasAnEmbeddedRecord closes the one silent fallback publishedStdLibRecord leaves: a
+// PublishedStdLib dependency the embedded record does not carry falls to its source-derived re-export aliases with no
+// message (P3's review of the nuget-precedence seat, 2026-11-20). The population is what push-nuget.ps1 packs, read the
+// way it reads it: every src/core project in go2cs-stdlib.slnx whose file name is its folder's dotted package path
+// (the converted-package shape). Projects that are not Go packages are left out: golib (go.lib) and any folder whose
+// first segment holds a dot (go.arrays, go2cs.CpuProfiler), which no standard-library import path has; vendored
+// packages start with `vendor` and stay in. Each must have a section in the record, flat or per flavor
+// (`<name>@<folder>`). TestStdLibMetadataInSync proves the record equals src/core's package_info.cs files; this proves no
+// packed package lacks one.
+//
+// The one exception is hand-owned `testing`, which carries no package_info.cs in src/core at all, so a source-
+// referencing conversion reads nothing for it either and the two modes already agree. The exception is held live: if
+// `testing` ever gains a section, it must leave this list.
+var publishedStdLibWithoutRecord = map[string]string{
+	"testing": "hand-owned; no package_info.cs in src/core, so clone mode reads none either",
+}
+
+func TestEveryPublishedStdLibPackageHasAnEmbeddedRecord(t *testing.T) {
+	solution, err := os.ReadFile(filepath.Join(convertedStdLibRoot, "..", "go2cs-stdlib.slnx"))
+
+	if err != nil {
+		t.Skipf("go2cs-stdlib.slnx not present: %v", err)
+	}
+
+	stdLibExportedMetadata("", "") // parse the asset once
+
+	recorded := map[string]bool{}
+
+	for name := range stdLibMetadataSections {
+		base, _, _ := strings.Cut(name, stdlibmeta.FlavorSeparator)
+		recorded[base] = true
+	}
+
+	projectPath := regexp.MustCompile(`Path="core/([^"]+)/([^"/]+)\.csproj"`)
+	published, missing := 0, []string{}
+
+	for _, match := range projectPath.FindAllStringSubmatch(string(solution), -1) {
+		dir, file := match[1], match[2]
+		dotted := strings.ReplaceAll(dir, "/", ".")
+
+		if first, _, _ := strings.Cut(dir, "/"); dir == "golib" || strings.Contains(first, ".") || file != dotted {
+			continue
+		}
+
+		published++
+
+		if _, excepted := publishedStdLibWithoutRecord[dotted]; excepted {
+			if recorded[dotted] {
+				t.Errorf("%s now has a section in the embedded record; remove it from publishedStdLibWithoutRecord", dotted)
+			}
+
+			continue
+		}
+
+		if !recorded[dotted] {
+			missing = append(missing, dotted)
+		}
+	}
+
+	if published < 250 {
+		t.Fatalf("premise: only %d converted-package projects read from go2cs-stdlib.slnx; the reader is not seeing the solution", published)
+	}
+
+	if len(missing) > 0 {
+		t.Errorf("%d of %d published standard-library packages have no section in the embedded record, so -recurse=nuget "+
+			"would describe them from source-derived aliases only: %s", len(missing), published, strings.Join(missing, ", "))
 	}
 }
 

@@ -147,4 +147,4 @@ internal static (ж<types.Package>, error) ImportFrom(this ref gccgoimports m, @
     return m.importer(m.packages, path, srcDir, m.lookup);
 }
 
-} // end importerᴛgccgoimports
+}

@@ -104,4 +104,4 @@ internal static (nint nDst, nint nSrc, error err) transform(this Form f, slice<b
     }
 }
 
-} // end normᴛForm
+}

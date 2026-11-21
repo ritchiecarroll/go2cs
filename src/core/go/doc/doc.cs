@@ -421,4 +421,4 @@ public static slice<byte> Text(this ж<Package> Ꮡp, @string text) {
     return p.Printer().Text(Ꮡp.Parser().Parse(text));
 }
 
-} // end docᴛPackage
+}

@@ -391,4 +391,4 @@ Match:
     return dstCap;
 }
 
-} // end regexpᴛRegexp
+}

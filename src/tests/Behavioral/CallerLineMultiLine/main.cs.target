@@ -5,7 +5,6 @@ using os = os_package;
 using runtime = runtime_package;
 using ꓸꓸꓸany = Span<any>;
 using ꓸꓸꓸstring = Span<@string>;
-using static main_package;
 
 partial class main_package {
 
@@ -28,8 +27,6 @@ partial struct chain {
     internal slice<nint> lines;
 }
 
-} partial class mainᴛchain {
-
 internal static partial ж<chain> Add(this ж<chain> Ꮡc, nint n) {
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -44,19 +41,13 @@ internal static partial void Done(this ref chain c, @string label) {
     show(true, label + "-terminal", l);
 }
 
-} partial class main_package {
-
 partial struct impl {
 }
-
-} partial class mainᴛimpl {
 
 internal static partial nint Line(this impl _Δp0) {
     var (_, _, l, _) = runtime.Caller(1);
     return l;
 }
-
-} partial class main_package {
 
 internal static slice<nint> three(nint a, nint b, nint c) { return [a, b, c]; }
 
@@ -71,14 +62,10 @@ internal static ж<runner> command(params ꓸꓸꓸstring argsʗp) {
     return Ꮡ(new runner());
 }
 
-} partial class mainᴛrunner {
-
 internal static partial nint Run(this ref runner _Δp0) {
     var (_, _, l, _) = runtime.Caller(1);
     return l;
 }
-
-} partial class main_package {
 
 internal static slice<nint> recorded;
 

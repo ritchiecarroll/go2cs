@@ -64,7 +64,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("StructPointerPromotionWithInterface.go", "StructPointerPromotionWithInterface.cs", "ABk0gsaCAAoSgoIAHDCCpoIACxqCgqaCABo2ogAMEgAJCAAULIKClIKUgoKUgpaCloKYgoKCgoKWgpSYgoKCmIKC")]
+[assembly: GoPositionMap("StructPointerPromotionWithInterface.go", "StructPointerPromotionWithInterface.cs", "ABY0gqaCAAYSgoIAGDCCpoIABxqCgqaCABg2ogAKEtgAEiyCgpSClIKClIKWgpaCmIKCgoKCloKUmIKCgpiCgg==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -123,11 +123,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Device)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛDevice;
-[GoMethodHost(typeof(main_package.MyCustomError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛMyCustomError;
-[GoMethodHost(typeof(main_package.MyError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛMyError;
-[GoMethodHost(typeof(main_package.core)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcore;
-[GoMethodHost(typeof(main_package.leftSide)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛleftSide;
-[GoMethodHost(typeof(main_package.meta)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛmeta;
-[GoMethodHost(typeof(main_package.rightSide)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛrightSide;
 // </MethodHolders>

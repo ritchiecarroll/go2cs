@@ -855,4 +855,4 @@ public static @string Error(this ref DecodingError e) {
     return msg;
 }
 
-} // end gosymᴛDecodingError
+}

@@ -124,4 +124,4 @@ internal static @string String(this dirEntry de) {
     return fs.FormatDirEntry(de);
 }
 
-} // end osᴛdirEntry
+}

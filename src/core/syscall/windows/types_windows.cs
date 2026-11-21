@@ -1065,7 +1065,7 @@ public static readonly ж<GUID> ᏑWSAID_CONNECTEX = new StaticBox<GUID>(new GUI
     0x25a207b9,
     0xddf3,
     0x4660,
-    new byte[]{0x8e, 0xe9, 0x76, 0xe5, 0x8c, 0x74, 0x06, 0x3e}.array()
+    array<byte>([0x8e, 0xe9, 0x76, 0xe5, 0x8c, 0x74, 0x06, 0x3e])
 ));
 public static ref GUID WSAID_CONNECTEX => ref ((StaticBox<GUID>)ᏑWSAID_CONNECTEX).ValueSlot;
 

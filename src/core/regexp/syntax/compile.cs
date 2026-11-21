@@ -335,4 +335,4 @@ internal static frag rune(this ref compiler c, slice<rune> r, Flags flags) {
     return f;
 }
 
-} // end syntaxᴛcompiler
+}

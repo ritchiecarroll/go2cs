@@ -274,4 +274,4 @@ internal static (uint32, error) decodeBits(this ref decoder d, int32 n) {
     return (ret, default);
 }
 
-} // end jpegᴛdecoder
+}

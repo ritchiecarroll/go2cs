@@ -4,7 +4,6 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using typelib = NilFuncInterfaceReads.typelib_package;
 using NilFuncInterfaceReads;
-using static main_package;
 
 partial class main_package {
 
@@ -14,21 +13,13 @@ partial interface namer {
 
 internal delegate nint localStep(nint _);
 
-} partial class mainᴛlocalStep {
-
 internal static @string Name(this localStep s) { return "local"; }
 
-} partial class main_package {
-
 internal delegate nint localStepE(nint _);
-
-} partial class mainᴛlocalStepE {
 
 internal static @string Name(this localStepE s) { return "locale"; }
 
 internal static @string Error(this localStepE s) { return "locale error"; }
-
-} partial class main_package {
 
 partial struct probe {
     internal @string name;

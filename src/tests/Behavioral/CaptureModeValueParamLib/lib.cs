@@ -40,4 +40,4 @@ public static @string Trace(this ref Config cfg) {
     return cfg.trace;
 }
 
-} // end CaptureModeValueParamLibᴛConfig
+}

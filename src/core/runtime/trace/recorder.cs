@@ -164,4 +164,4 @@ internal static time.Duration Sub(this eventTime t, eventTime t0) {
     return (time.Duration)((int64)t - (int64)t0);
 }
 
-} // end traceᴛeventTime
+}

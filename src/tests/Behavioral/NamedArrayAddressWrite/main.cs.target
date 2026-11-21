@@ -44,7 +44,7 @@ internal static void main() {
     fmt.Println("ld", x.Value[0]);
 
     ref var dst = ref heap(new small(), out var Ꮡdst);
-    ref var src = ref heap<array<byte>>(new byte[]{1, 2, 3, 4, 5, 6, 7, 8}.array(), out var Ꮡsrc);
+    ref var src = ref heap<array<byte>>(array<byte>([1, 2, 3, 4, 5, 6, 7, 8]), out var Ꮡsrc);
     memcpy((uintptr)Ꮡdst, (uintptr)Ꮡsrc, 8);
     fmt.Println("le", dst);
 

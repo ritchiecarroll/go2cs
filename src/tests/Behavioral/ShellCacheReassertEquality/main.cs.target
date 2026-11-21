@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,19 +8,11 @@ partial struct box {
     internal nint n;
 }
 
-} partial class mainᴛbox {
-
 internal static nint Len(this ref box b) { return b.n; }
-
-} partial class main_package {
 
 partial struct counter /*num:nint*/;
 
-} partial class mainᴛcounter {
-
 internal static nint Len(this counter c) { return (nint)c; }
-
-} partial class main_package {
 
 internal partial interface lener_R0 /*dyn*/ {
     nint Len();

@@ -308,4 +308,4 @@ internal static error Close(this ж<pipe> Ꮡp) {
     return default;
 }
 
-} // end netᴛpipe
+}

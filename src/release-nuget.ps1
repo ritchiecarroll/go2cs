@@ -238,6 +238,22 @@ if ($sdk.ExitCode -ne 0) {
 $dotnetPath = (Get-Command dotnet).Source
 Write-Host "  .NET SDK         : $($sdk.Output[-1]) ($dotnetPath; global.json $($sdkWanted.version), rollForward $($sdkWanted.rollForward))"
 
+# A resolution that SUCCEEDS can still be the wrong SDK (2026-11-20, the latestMajor pin): global.json takes the
+# highest installed SDK at or above its floor, newer majors included, and a machine install puts an 11.x SDK in the
+# same root as 10.0.4xx. A release packs with the SDK of its own framework's major, read from the hoisted
+# <TargetFramework> in src/Directory.Build.props (net10.0 -> 10), so a hop moves this check with the framework.
+$tfmMatch = [regex]::Match((Get-Content -Raw (Join-Path $SrcRoot 'Directory.Build.props')), '<TargetFramework\b[^>]*>net(\d+)\.\d+</TargetFramework>')
+if (-not $tfmMatch.Success) {
+    Die 'src/Directory.Build.props names no netN.M <TargetFramework>, so Phase 0 cannot tell which SDK major this release packs with. Nothing was bumped, tagged, frozen or packed.'
+}
+$releaseMajor = $tfmMatch.Groups[1].Value
+$sdkVersion = "$($sdk.Output[-1])".Trim()
+if ($sdkVersion.Split('.')[0] -ne $releaseMajor) {
+    Die ("The .NET SDK that resolves from the repository root is $sdkVersion ($dotnetPath), not a $releaseMajor.x SDK: the release packs net$releaseMajor.0 " +
+         "with the SDK of that major. global.json's latestMajor takes the highest SDK installed, so put a root holding only the $releaseMajor.x SDK first on PATH, " +
+         "confirm with 'dotnet --version' from $RepoRoot, and re-run. Nothing was bumped, tagged, frozen or packed.")
+}
+
 # Phase 1b cross-compiles the go2cs dotnet tool with the go on PATH, and a go2cs built with any Go other than the
 # release src/go2cs/go.mod names provisions none, so that Go is read here, before anything is bumped. GOTOOLCHAIN
 # is local for the read as for the build: under auto an older go would fetch the named release and answer for it.

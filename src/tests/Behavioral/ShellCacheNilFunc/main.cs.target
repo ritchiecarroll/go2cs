@@ -1,13 +1,10 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
 internal delegate nint fn();
-
-} partial class mainᴛfn {
 
 internal static nint Len(this fn f) {
     if (f == nil) {
@@ -16,8 +13,6 @@ internal static nint Len(this fn f) {
 
     return f();
 }
-
-} partial class main_package {
 
 internal partial interface main_type /*dyn*/ {
     nint Len();
