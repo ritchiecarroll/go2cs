@@ -141,6 +141,26 @@ func hashLoop(c chan int, chunks int) int {
 	return int(n / 512)
 }
 
+// ponger and pingLoop are the park step (row 6 of the .5 plan, the successor of MnStormTwin's hand-twin ping): one
+// round trip is a send to the ponger and a receive of its answer over two unbuffered channels. With twins on, each
+// side parks once per round trip: main on the answer, the ponger on the next request.
+func ponger(a, b chan int) {
+	for v := range a {
+		b <- v + 1
+	}
+}
+
+func pingLoop(a, b chan int, n int) int {
+	sum := 0
+
+	for i := 0; i < n; i++ {
+		a <- i
+		sum += <-b
+	}
+
+	return sum
+}
+
 // begin and end bracket one timed repetition. The timed call sits in main itself, between the two: a call made
 // through a func value runs the function's plain body under either build, and would time no twin at all.
 func begin() (uint64, time.Time) {
@@ -176,6 +196,12 @@ func main() {
 		reps = 0
 	}
 
+	pa, pb := make(chan int), make(chan int)
+
+	if mode == "ping" {
+		go ponger(pa, pb)
+	}
+
 	for rep := 0; rep < reps; rep++ {
 		got := 0
 		alloc, start := begin()
@@ -191,6 +217,8 @@ func main() {
 			got = copyLoop(c, n)
 		case "hash":
 			got = hashLoop(c, n)
+		case "ping":
+			got = pingLoop(pa, pb, n)
 		}
 
 		end(mode, rep, n, got, alloc, start)

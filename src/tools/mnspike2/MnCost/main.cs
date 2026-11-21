@@ -149,6 +149,23 @@ internal static nint hashLoop(channel<nint> c, nint chunks) {
     return (nint)(n / 512);
 }
 
+internal static void ponger(channel<nint> a, channel<nint> b) {
+    foreach (var v in a) {
+        b.ᐸꟷ(v + 1);
+    }
+}
+
+internal static nint pingLoop(channel<nint> a, channel<nint> b, nint n) {
+    nint sum = 0;
+
+    for (nint i = 0; i < n; i++) {
+        a.ᐸꟷ(i);
+        sum += ᐸꟷ(b);
+    }
+
+    return sum;
+}
+
 internal static (uint64, time.Time) begin() {
     ref var m = ref heap(new runtime.MemStats(), out var Ꮡm);
 
@@ -167,7 +184,7 @@ internal static void end(@string mode, nint rep, nint n, nint got, uint64 alloc,
         (float64)took.Nanoseconds() / (float64)n, (float64)(m.TotalAlloc - alloc) / (float64)n);
 }
 
-internal static void main() {
+internal static partial void main() {
     @string mode = os.Getenv("MN_COST_MODE");
     nint n = envInt("MN_COST_N", 1000);
     var c = new channel<nint>(0);
@@ -182,30 +199,39 @@ internal static void main() {
         reps = 0;
     }
 
+    var (pa, pb) = (new channel<nint>(0), new channel<nint>(0));
+
+    if (mode == "ping"u8) {
+        goǃ(ponger, pa, pb);
+    }
+
     for (nint rep = 0; rep < reps; rep++) {
         nint got = 0;
         var (alloc, start) = begin();
 
-        var exprᴛ1 = mode;
         switch (ᐧ) {
-        case {} when exprᴛ1 == "call"u8: {
+        case {} when mode == "call"u8: {
             got = callLoop(c, n);
             break;
         }
-        case {} when exprᴛ1 == "mutex"u8: {
+        case {} when mode == "mutex"u8: {
             got = mutexLoop(mu, c, n);
             break;
         }
-        case {} when exprᴛ1 == "defer"u8: {
+        case {} when mode == "defer"u8: {
             got = deferLoop(c, n);
             break;
         }
-        case {} when exprᴛ1 == "copy"u8: {
+        case {} when mode == "copy"u8: {
             got = copyLoop(c, n);
             break;
         }
-        case {} when exprᴛ1 == "hash"u8: {
+        case {} when mode == "hash"u8: {
             got = hashLoop(c, n);
+            break;
+        }
+        case {} when mode == "ping"u8: {
+            got = pingLoop(pa, pb, n);
             break;
         }}
 
