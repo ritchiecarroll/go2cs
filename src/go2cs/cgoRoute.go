@@ -1507,6 +1507,14 @@ func cgoHostTarget(load cgoLoad, target string) error {
 
 	triple, err := cgoCompilerTriple(load, target)
 
+	// A C compiler that does not resolve at all is the case where cmd/cgo itself cannot run: R3 steps aside, and the
+	// no-compiler contract holds unchanged (a plain cgo-tag file converts; a raw cgo source is refused naming its file;
+	// "cmd/cgo did not run"). R3 guards against a compiler that TARGETS the wrong platform, so one that resolves and
+	// fails, or answers another triple, is still refused (COORD's ruling on the train 3 red: the i7, no gcc on PATH).
+	if errors.Is(err, exec.ErrNotFound) {
+		return nil
+	}
+
 	if err != nil {
 		return fmt.Errorf("cgo: R3: this -cgo conversion asks for %s (the host is %s), and the C compiler go env CC names in its load did not answer -dumpmachine: %w", target, hostTarget, err)
 	}
