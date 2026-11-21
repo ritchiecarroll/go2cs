@@ -4,9 +4,9 @@ using errors = errors_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using sort = sort_package;
-using ꓸꓸꓸany = Span<any>;
-using ꓸꓸꓸnint = Span<nint>;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸany = variadic<any>;
+using ꓸꓸꓸnint = variadic<nint>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class main_package {
 

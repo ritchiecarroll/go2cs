@@ -4,8 +4,8 @@ using fmt = fmt_package;
 using lib = ForeignAndUnnamedStructConversion.lib_package;
 using other = ForeignAndUnnamedStructConversion.other_package;
 using ForeignAndUnnamedStructConversion;
-using ꓸꓸꓸanonBox_V = Span<main_package.anonBox_V>;
-using ꓸꓸꓸlibꓸPitch = Span<ForeignAndUnnamedStructConversion.lib_package.Pitch>;
+using ꓸꓸꓸanonBox_V = variadic<main_package.anonBox_V>;
+using ꓸꓸꓸlibꓸPitch = variadic<ForeignAndUnnamedStructConversion.lib_package.Pitch>;
 
 partial class main_package {
 

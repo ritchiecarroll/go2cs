@@ -3,7 +3,7 @@ global using EmptyInterface = object;
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class main_package {
 

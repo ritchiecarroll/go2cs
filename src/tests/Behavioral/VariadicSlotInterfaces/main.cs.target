@@ -1,8 +1,8 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸShape = Span<main_package.Shape>;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸShape = variadic<main_package.Shape>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class main_package {
 

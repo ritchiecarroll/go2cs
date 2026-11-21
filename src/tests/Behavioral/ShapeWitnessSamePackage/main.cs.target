@@ -4,7 +4,7 @@ using fmt = fmt_package;
 using stdio = io_package;
 using strings = strings_package;
 using Δio = io_package;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class main_package {
 

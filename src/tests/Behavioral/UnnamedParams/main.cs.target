@@ -1,9 +1,9 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸbyte = Span<byte>;
-using ꓸꓸꓸnint = Span<nint>;
-using ꓸꓸꓸstring = Span<@string>;
+using ꓸꓸꓸbyte = variadic<byte>;
+using ꓸꓸꓸnint = variadic<nint>;
+using ꓸꓸꓸstring = variadic<@string>;
 
 partial class main_package {
 

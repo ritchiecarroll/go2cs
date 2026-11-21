@@ -16,7 +16,7 @@ using System.Runtime.InteropServices;
 using XpkgPromotedInnerLib = XpkgPromotedInnerLib_package;
 using XpkgPromotedMidLib = XpkgPromotedMidLib_package;
 using encoding;
-using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸany = variadic<any>;
 
 partial class main_package {
 
