@@ -567,7 +567,7 @@ func TestCgoStructWithAPointerFieldCarriesTheCgoMarker(t *testing.T) {
 		}
 
 		for _, line := range strings.Split(readConverted(t, output, file), "\n") {
-			if !strings.Contains(line, "[GoCgoStruct]") {
+			if !strings.Contains(line, "GoCgoStruct]") {
 				continue
 			}
 

@@ -334,5 +334,7 @@ func cgoStructMarker(declared types.Type) string {
 	return ""
 }
 
-// cgoStructMarkerAttr is the marker's spelling, golib's GoCgoStructAttribute.
-const cgoStructMarkerAttr = "[GoCgoStruct] "
+// cgoStructMarkerAttr is the marker's spelling, golib's GoCgoStructAttribute. It is qualified because the stamp
+// rides package_info.cs's accessibility record, which takes no `using go.golib;`, and golib's PublicSurface keeps a
+// new type that is not a Go name out of namespace go.
+const cgoStructMarkerAttr = "[global::go.golib.GoCgoStruct] "

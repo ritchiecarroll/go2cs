@@ -284,6 +284,75 @@ namespace go;
         return ref Unsafe.AsRef<TF>((byte*)DereferenceableAddress() + offset);
     }
 
+    // ---- cgo 3.2, seat 1a (docs/phase4/DESIGN-cgo-phase3-marshaling.md 18.9): a pointer field of a C struct ----
+
+    // The refusals, each by name. A load and a store over C memory take S-B1's wording (unsafe.cs: LoadFromCText,
+    // StoreIntoCText); a C struct laid over Go memory has texts of its own, since that memory is Go's; and a slot over Go
+    // storage that no pin holds still is S-B1's UnheldSlotText, word for word.
+    private const string CgoFieldLoadFromCText = "cgo struct field load: a Go pointer read out of C memory is refused (C memory must not hold a Go pointer)";
+    private const string CgoFieldStoreIntoCText = "cgo struct field store: storing a Go pointer into C memory is refused (C memory must not hold a Go pointer)";
+    private const string CgoFieldLoadOverGoText = "cgo struct field load: a Go pointer in a C struct laid over Go memory is not read in 3.2 (go2cs keeps no record of the pointer stored there)";
+    private const string CgoFieldStoreOverGoText = "cgo struct field store: a Go pointer stored into a C struct laid over Go memory is not supported in 3.2";
+    private const string CgoFieldUnheldText = "unsafe.Pointer word: the slot is a native box over Go storage that nothing holds still";
+
+    /// <summary>Refuses by name a field with no known Go offset: its CLR slot is not where the field's bytes are.</summary>
+    internal void RequireGoFieldOffset<TF>(FieldRefFunc<T, TF> fieldRefFunc)
+    {
+        if (m_nativeAddr == 0)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
+        if (FieldRefBox<TF>.GoFieldOffsetOf(this, fieldRefFunc) < 0)
+            throw RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(T), $"field {FieldRefBox<TF>.FieldNameOf(fieldRefFunc)} has no known Go offset");
+    }
+
+    // The field's word slot, and which memory it is in (GoPointerWords.Classify): C memory alone, Go memory a pin holds
+    // still, or neither. Unheld is refused here, for a read and a store alike.
+    private NativeBox<ж<U>> CgoPointerFieldSlot<U>(FieldRefFunc<T, ж<U>> fieldRefFunc, out GoPointerWords.SlotKind kind)
+    {
+        RequireGoFieldOffset(fieldRefFunc);
+
+        ж<ж<U>> slot = of(fieldRefFunc);
+        kind = GoPointerWords.Classify(slot);
+
+        return kind switch
+        {
+            GoPointerWords.SlotKind.CMemory or GoPointerWords.SlotKind.GoMemory => (NativeBox<ж<U>>)slot,
+            GoPointerWords.SlotKind.Unheld => throw RuntimeErrorPanic.RuntimeRaised(CgoFieldUnheldText),
+            _ => throw RuntimeErrorPanic.NativeStructLayoutMismatch(typeof(T), $"field {FieldRefBox<ж<U>>.FieldNameOf(fieldRefFunc)} has no known Go offset")
+        };
+    }
+
+    /// <summary>The read half of <see cref="ж{T}.cgoPointerField{U}(FieldRefFunc{T, ж{U}})"/> for a native receiver.</summary>
+    internal unsafe ж<U> CgoPointerFieldRead<U>(FieldRefFunc<T, ж<U>> fieldRefFunc)
+    {
+        NativeBox<ж<U>> slot = CgoPointerFieldSlot(fieldRefFunc, out GoPointerWords.SlotKind kind);
+        nuint word = *(nuint*)slot.NativeAddress;
+
+        if (word == 0)
+            return null!;
+
+        if (GoPointerWords.NamesGoMemory(word))
+            throw RuntimeErrorPanic.RuntimeRaised(kind == GoPointerWords.SlotKind.CMemory ? CgoFieldLoadFromCText : CgoFieldLoadOverGoText);
+
+        return new NativeBox<U>(word);
+    }
+
+    /// <summary>The store half of <see cref="ж{T}.cgoPointerField{U}(FieldRefFunc{T, ж{U}}, ж{U})"/> for a native receiver.</summary>
+    internal unsafe void CgoPointerFieldWrite<U>(FieldRefFunc<T, ж<U>> fieldRefFunc, ж<U> value)
+    {
+        NativeBox<ж<U>> slot = CgoPointerFieldSlot(fieldRefFunc, out GoPointerWords.SlotKind kind);
+        nuint word;
+
+        if (value is null || value.IsNilPointer)
+            word = 0;
+        else if (value is NativeBox<U> native && GoPointerWords.IsCMemoryAlone(native))
+            word = native.NativeAddress;
+        else
+            throw RuntimeErrorPanic.RuntimeRaised(kind == GoPointerWords.SlotKind.CMemory ? CgoFieldStoreIntoCText : CgoFieldStoreOverGoText);
+
+        *(nuint*)slot.NativeAddress = word;
+    }
+
     // Whether a field of type TF can be read in place out of native bytes: null when it can, "" when TF holds a
     // managed reference, else the reason TF's own CLR layout is not its Go layout. Decided once per TF.
     private static class NativeFieldLayout<TF>
