@@ -9,6 +9,7 @@
 package main
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -69,7 +70,7 @@ func main() {
 func TestAdmittedImporterKeepsItsOwnLiftOverAnUnadmittedForeignLift(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
-	emitted := convertModuleMainWithLib(t, "lib", admissionLiftLib, admissionLiftMain)
+	emitted := convertMainWithLibAdmissionOff(t, admissionLiftLib, admissionLiftMain)
 
 	if strings.Contains(emitted, "lib_package.Fsidᴛ1") {
 		t.Errorf("an admitted struct's field names the import's UNADMITTED lift (CS8377 on the admitted holder):\n%s", emitted)
@@ -188,7 +189,7 @@ func main() {
 func TestAdmittedUnionKeepsItsOwnLiftOverAnUnadmittedForeignUnion(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
-	emitted := convertModuleMainWithLib(t, "lib", aliasSpelledLib, admittedUnionMain)
+	emitted := convertMainWithLibAdmissionOff(t, aliasSpelledLib, admittedUnionMain)
 
 	if strings.Contains(emitted, "lib_package.largeIntegerᴛ1") {
 		t.Errorf("an admitted union names the import's UNADMITTED lift (offset 32 where Go lays the field at 0):\n%s", emitted)
@@ -336,7 +337,7 @@ func main() {
 func TestReusedLiftWhoseFieldKeepsItsOwnLiftIsNotReused(t *testing.T) {
 	isolateConverterPathGlobals(t)
 
-	emitted := convertModuleMainWithLib(t, "lib", transitiveLiftLib, transitiveLiftMain)
+	emitted := convertMainWithLibAdmissionOff(t, transitiveLiftLib, transitiveLiftMain)
 
 	if strings.Contains(emitted, "lib_package.ITVᴛ1") {
 		t.Errorf("depth 1: Titv names lib's lift while its field type Ttv keeps main's own admitted lift (CS1503 at the literal):\n%s", emitted)
@@ -395,4 +396,17 @@ func TestTransitiveLiftReuseBuildsAndReadsAsGo(t *testing.T) {
 	if got != want || want == "" {
 		t.Fatalf("go2cs differs from go:\n   go: %s\ngo2cs: %s", want, got)
 	}
+}
+
+// convertMainWithLibAdmissionOff converts lib and main the way -recurse does, with lib's inline-array admission turned
+// OFF (-inline-arrays=-example.com/app/lib), and returns main.cs. Since the -recurse importer seed (W18 ruling C, item 3)
+// an import whose importer admits a twin is seeded and admits it too, so the KEEP-OWN outcome these arms pin (ruling A:
+// an importer whose import does not admit the struct keeps its own lift) is reached only where the import cannot be
+// seeded: admission off here, or an import converted on its own (a stand-alone package).
+func convertMainWithLibAdmissionOff(t *testing.T, libSource, mainSource string) string {
+	t.Helper()
+
+	out := convertInlineModuleWith(t, "app", map[string]string{"lib/lib.go": libSource, "main.go": mainSource}, "-example.com/app/lib")
+
+	return strings.ReplaceAll(readGenerated(t, filepath.Join(out, "main.cs")), "\r", "")
 }

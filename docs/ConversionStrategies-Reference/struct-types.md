@@ -955,6 +955,29 @@ Go's, by `TestEachNamedUnnamedStructMoveRecordsItsConversion` in the converter, 
 - an exported package-level declaration that reuses an unexported declaration's lift in one file
   (CS0050/CS0052/CS0053: the reused lift is less accessible than the member that names it).
 
+<!-- one lift per anonymous type across a package's files: recorded declared accessibility, 2026-11-20 -->
+A site that needs a public type reuses a registered lift when that lift was
+declared public, read from the access modifier recorded at its declaration (`liftDeclaredPublic`),
+so an exported function's anonymous result and the exported fields that repeat its type share one
+lift, across the package's files. Guarded by `AnonLiftOnePerType`:
+
+<!-- source: src/tests/Behavioral/AnonLiftOnePerType/lib/a.cs:43-45, 50-52 -->
+```csharp
+public partial struct Pair_R0 /*dyn*/ {
+    public nint X, Y;
+}
+…
+partial struct Box {
+    public Pair_R0 P;
+}
+```
+
+The later file `lib/b.cs` declares `Box2` with `public Pair_R0 Q;`, the same lift.
+
+The residual: when the first lift of a type is internal and a later exported site needs it public,
+the later site still mints its own public lift: two C# types for one Go type, which fails to
+compile only where a value crosses from one to the other.
+
 An unnamed struct inside a FUNC type (a variable, field, parameter or result of func type, or a named func type)
 gets no lift at all and the conversion stops with `Unresolved dynamic struct type`; a declared function taken as
 a value and a called func literal convert.

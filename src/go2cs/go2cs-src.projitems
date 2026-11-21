@@ -93,6 +93,8 @@
     <None Include="$(MSBuildThisFileDirectory)nugetSubstitution.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetSubstitution_test.go" />
     <None Include="$(MSBuildThisFileDirectory)openGenericImplementRecord_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)promotedOneHop.go" />
+    <None Include="$(MSBuildThisFileDirectory)promotedOneHop_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeNamedIntType_test.go" />
     <None Include="$(MSBuildThisFileDirectory)rangeNilPointerArray_test.go" />
     <None Include="$(MSBuildThisFileDirectory)solutionProjectPaths_test.go" />
@@ -134,6 +136,7 @@
     <None Include="$(MSBuildThisFileDirectory)cliPaths_test.go" />
     <None Include="$(MSBuildThisFileDirectory)closedCarrier.go" />
     <None Include="$(MSBuildThisFileDirectory)closedCarrier_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)closureRepointedParams.go" />
     <None Include="$(MSBuildThisFileDirectory)collapsedLambdaTrailingComment_test.go" />
     <None Include="$(MSBuildThisFileDirectory)collectionExpressionTargets.go" />
     <None Include="$(MSBuildThisFileDirectory)collectionExpressionTargets_test.go" />
@@ -360,6 +363,10 @@
     <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayFaces_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayForeignSlice_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayImporterSeed.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayImporterSeed_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayLiftChain.go" />
+    <None Include="$(MSBuildThisFileDirectory)inlineArrayLiftChain_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayOverCap_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArraySeed_test.go" />
     <None Include="$(MSBuildThisFileDirectory)inlineArrayStamp.go" />

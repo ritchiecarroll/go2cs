@@ -45,6 +45,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	var preLiftIndentLevel int
 	var structPrefix *strings.Builder
 	var liftedIsPublicized bool
+	registeredLift := "" // a fresh lift this call registered for reuse (recordLiftDeclaredPublic, after its access is known)
 
 	// Intra-function type declarations are not allowed in C#
 	if lifted {
@@ -151,26 +152,22 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		// check fails is always safe — it only forgoes a dedup opportunity, never breaks one.
 		//
 		// A THIRD disjunct used to also allow reuse whenever generatedTypeScope(existing) read
-		// "public" — trusting the CANDIDATE's own name-based accessibility guess as a stand-in for
-		// its real recorded accessibility. That guess cannot see localTypeAccess's override: a
-		// package-wide-registered function-local type is ALWAYS internal regardless of what its
-		// mangled name's capitalization suggests (localTypeAccess's own doc comment), so the guess
-		// reads "public" for any such type whose enclosing function happens to be exported —
-		// exactly reflect's `TestTypeFieldOutOfRangePanic_i` (all_test.go, function-local, always
-		// internal) reused by `Δtypeᴛ37`'s public field `A` (visiblefields_test.go): CS0052/50/51.
-		// 0d6549ae5 widened package-wide registration to call-boundary function-local lifts, which
-		// is what first let a name-mangling-inherits-the-enclosing-function registrant reach this
-		// check at all — the guess itself was always unsound here, just never exercised against
-		// one before. Removed rather than repaired: a truthful check needs the candidate's REAL
-		// recorded accessibility, which means seeing past this file's own visit (cross-file,
-		// concurrent, no barrier here the way deferredDynamicTypeName's marker path has), and the
-		// fallback is unconditionally safe regardless. Measured before removing it (i9's
-		// cross-tier census, 2026-09-01): 0 hits in the whole `-stdlib` corpus, 2 in reflect's own
-		// `-tests` (both false — guess public, actual internal), 0 in the five reflect-importer
-		// canaries' `-tests` — this removal costs no currently-safe dedup anywhere measured.
+		// "public": a guess from the candidate's NAME, which cannot see localTypeAccess's override (a
+		// package-wide-registered function-local type is always internal), so reflect's
+		// `TestTypeFieldOutOfRangePanic_i` reused by a public field was CS0052/50/51. It was removed
+		// 2026-09-01. Its full account and census moved verbatim to visitInterfaceType's twin comment
+		// on 2026-11-20, which keeps this file's later lines at the places the docs cite.
+		//
+		// RESTORED on the truthful fact: liftDeclaredPublic reads the access modifier each lift was
+		// DECLARED with (recordLiftDeclaredPublic, once `access` is known below), so the override is
+		// seen. File visits within a package are sequential (conversionDriver), so a lift from an
+		// earlier file is recorded before this check runs. Without it an exported field repeating an
+		// exported signature's anonymous struct minted a second, identical lift; AnonLiftOnePerType
+		// guards the one-lift result.
+		// This disjunct never admits a candidate with no record (declared internal, or not yet seen).
 		if anonLiftKey != "" {
 			existing := lookupDynamicTypeName(structSignatureType.String())
-			admissible := existing != "" && (v.inFunction || !liftNameNeedsPublicType(name))
+			admissible := existing != "" && (v.inFunction || !liftNameNeedsPublicType(name) || liftDeclaredPublic(existing))
 
 			// The reference-model `-tests` sibling of the same-pass check above: a name
 			// PRODUCTION already lifted and published via GoDynamicTypeLift for this exact
@@ -261,6 +258,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		// win the name and the second side simply reuse it via the wide lookup below.
 		if (!v.inFunction || v.liftAtCallBoundary) && structSignatureType != nil {
 			registerDynamicTypeName(structSignatureType.String(), structTypeName)
+			registeredLift = structTypeName
 		}
 
 		// A lifted anonymous struct referenced by a PUBLICIZED interface method (or an exported
@@ -363,6 +361,8 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	if access == "" {
 		access = v.localTypeAccess()
 	}
+
+	recordLiftDeclaredPublic(registeredLift, access)
 
 	// A struct carrying FIXED-SIZE ARRAY fields (directly, or through another such struct) is not
 	// completely copied by a plain C# struct assignment — `array<T>` is a struct over a shared T[]
