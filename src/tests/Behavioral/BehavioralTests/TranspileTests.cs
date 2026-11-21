@@ -2056,6 +2056,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerParamCapturedInClosure() => CheckTarget("PointerParamCapturedInClosure");
 
     [TestMethod]
+    public void CheckPointerParamClosureRepoint() => CheckTarget("PointerParamClosureRepoint");
+
+    [TestMethod]
     public void CheckPointerParamInClosure() => CheckTarget("PointerParamInClosure");
 
     [TestMethod]

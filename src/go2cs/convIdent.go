@@ -236,6 +236,16 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		return name
 	}
 
+	// A pointer parameter a func literal repoints has no entry alias and is read through its box in
+	// the body as well as in the literal (see closureRepointedPointerParams). Address uses take the
+	// box from the pointer-context arm above. A value read takes the accessor the alias it replaces
+	// was declared with, the nil-DEFERRING DerefOrNull (see NilDeferringDerefAccessor): a nil pointer
+	// stays legal to hold and to pass to a pointer method, which runs and faults at its own first
+	// dereference, as in Go. The strict `.Value` would fault at the read, before the method ran.
+	if v.paramReadsThroughBox(v.info.ObjectOf(ident)) {
+		return AddressPrefix + v.boxBaseName(ident) + "." + NilDeferringDerefAccessor
+	}
+
 	// A heap-boxed local captured by-box inside a lambda is read through its box: the ref-local
 	// alias `ref var m = ref Ꮡm.Value` can't be captured by the closure (CS8175), so a value use must
 	// deref the box directly (`Ꮡm.Value`). The box `Ꮡm` is a capturable reference. Address uses
