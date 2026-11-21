@@ -80,6 +80,10 @@ type methodForwarder struct {
 	holder string
 	key    string
 	line   string
+
+	// aliases maps each file-local alias of the body's file the line names (a variadic parameter's `ꓸꓸꓸT`) to its
+	// referent, for package_info.cs to declare (forwarderAliasUsings).
+	aliases map[string]string
 }
 
 // packageMethodForwarders holds the forwarders of this emission unit's suffix-form methods. The section writes
@@ -1182,7 +1186,13 @@ func (v *Visitor) recordForwarder(pos token.Pos, holder string, access string, i
 		call = "ref " + call
 	}
 
-	line := fmt.Sprintf("[%s] %s %s %s%s(%s)%s => %s;", methodForwarderAttributes, modifiers, result, name, typeParams, params, flattenConstraints(constraints), call)
+	// The call reads the body's own parameter names, so the declaration is respelled for namespace scope after it.
+	typeParamNames := forwarderTypeParameterNames(typeParams)
+	result = v.qualifyForwarderLocalTypes(result, typeParamNames, true)
+	params = v.qualifyForwarderLocalTypes(params, typeParamNames, false)
+	constraints = v.qualifyForwarderLocalTypes(flattenConstraints(constraints), typeParamNames, false)
+
+	line := fmt.Sprintf("[%s] %s %s %s%s(%s)%s => %s;", methodForwarderAttributes, modifiers, result, name, typeParams, params, constraints, call)
 
 	position := v.fset.Position(pos)
 	key := fmt.Sprintf("%s\x00%010d\x00%s", filepath.Base(position.Filename), position.Offset, name)
@@ -1190,8 +1200,174 @@ func (v *Visitor) recordForwarder(pos token.Pos, holder string, access string, i
 	v.recordForwarderTypeQualifiers(signature)
 
 	packageLock.Lock()
-	packageMethodForwarders = append(packageMethodForwarders, methodForwarder{holder: holder, key: key, line: line})
+	packageMethodForwarders = append(packageMethodForwarders, methodForwarder{holder: holder, key: key, line: line, aliases: v.forwarderFileAliases(line)})
 	packageLock.Unlock()
+}
+
+// forwarderTypeParameterNames answers the names a declaration's type parameter list (`<T, [GoType] U>`) declares.
+func forwarderTypeParameterNames(typeParams string) map[string]bool {
+	names := map[string]bool{}
+
+	for _, name := range strings.Split(strings.Trim(forwarderTypeArguments(typeParams), "<> "), ",") {
+		if name = strings.TrimSpace(name); name != "" {
+			names[name] = true
+		}
+	}
+
+	return names
+}
+
+// qualifyForwarderLocalTypes respells a forwarder's result, parameter list or constraint clauses for package_info.cs.
+// A body reads its package's types bare: it is a member of the package class, whose nested types its lookup finds
+// first. A forwarder stands at namespace scope, where a bare name is looked up in the enclosing namespaces before any
+// using (a type named like one of the root namespace's binds to that one) and then among the usings, where System's
+// `Buffer` or `Type` makes the package's own ambiguous (CS0104). So the forwarder names each of its package's types
+// through the class that declares it, as the holder's typeof does. A name already qualified, a type parameter, an
+// alias (declared at namespace scope already) and a parameter's or a tuple element's own name are left as written.
+func (v *Visitor) qualifyForwarderLocalTypes(text string, typeParamNames map[string]bool, isResult bool) string {
+	if v.pkg == nil || strings.TrimSpace(text) == "" {
+		return text
+	}
+
+	qualify := func(typeText string) string {
+		return packageQualifiedNameRegex.ReplaceAllStringFunc(typeText, func(match string) string {
+			if strings.Contains(match, ".") || typeParamNames[match] {
+				return match
+			}
+
+			typeName, ok := v.pkg.Scope().Lookup(strings.TrimPrefix(match, "@")).(*types.TypeName)
+
+			if !ok || typeName.IsAlias() {
+				return match
+			}
+
+			return v.packageScopeClassName(typeName) + "." + match
+		})
+	}
+
+	// A named element (`ref Buffer b`, a tuple's `Buffer b`) ends in its name, after the last space outside any
+	// bracket; an unnamed tuple element (`map<@string, nint>`) has none. Leading attributes are not types.
+	qualifyNamed := func(element string) string {
+		attributes := forwarderLeadingAttributes.FindString(element)
+		rest := element[len(attributes):]
+		split, depth := -1, 0
+
+		for i, r := range strings.TrimRight(rest, " \t") {
+			switch r {
+			case '<', '(', '[', '{':
+				depth++
+			case '>', ')', ']', '}':
+				depth--
+			case ' ', '\t':
+				if depth == 0 && strings.TrimSpace(rest[:i]) != "" {
+					split = i
+				}
+			}
+		}
+
+		if split < 0 {
+			return attributes + qualify(rest)
+		}
+
+		return attributes + qualify(rest[:split]) + rest[split:]
+	}
+
+	qualifyList := func(list string) string {
+		parts := splitTopLevelParameters(list)
+
+		for i, part := range parts {
+			parts[i] = qualifyNamed(part)
+		}
+
+		return strings.Join(parts, ",")
+	}
+
+	if !isResult {
+		if strings.HasPrefix(strings.TrimSpace(text), "where ") {
+			return qualify(text)
+		}
+
+		return qualifyList(text)
+	}
+
+	// A tuple result may name its elements.
+	if inner, isTuple := strings.CutPrefix(text, "("); isTuple && strings.HasSuffix(inner, ")") {
+		return "(" + qualifyList(strings.TrimSuffix(inner, ")")) + ")"
+	}
+
+	return qualify(text)
+}
+
+var forwarderLeadingAttributes = regexp.MustCompile(`^\s*(?:\[[^\[\]]*\]\s*)*`)
+
+// forwarderFileAliases answers the file-local aliases of the converting file a forwarder line names, with their
+// referents: a variadic parameter's `ꓸꓸꓸT` (variadicParamType), whose referent is written for namespace scope.
+func (v *Visitor) forwarderFileAliases(line string) map[string]string {
+	var aliases map[string]string
+
+	for _, token := range packageQualifiedNameRegex.FindAllString(line, -1) {
+		if !strings.HasPrefix(token, EllipsisOperator) || aliases[token] != "" {
+			continue
+		}
+
+		for _, using := range v.requiredUsings.Keys() {
+			if referent, ok := strings.CutPrefix(using, token+" = "); ok {
+				if aliases == nil {
+					aliases = map[string]string{}
+				}
+
+				aliases[token] = referent
+				break
+			}
+		}
+	}
+
+	return aliases
+}
+
+// forwarderAliasUsings answers the file-local aliases package_info.cs declares for the forwarders it writes (those
+// whose holder the unit declares), and the alias names two files bind to different referents: a forwarder spells
+// one of those through its referent instead (applyMethodForwarderSection), since package_info.cs can bind a name once.
+func forwarderAliasUsings() (usings map[string]string, inline map[string]bool) {
+	usings, inline = map[string]string{}, map[string]bool{}
+
+	packageLock.Lock()
+	defer packageLock.Unlock()
+
+	for _, forwarder := range packageMethodForwarders {
+		if _, declared := packageMethodHolders[forwarder.holder]; !declared {
+			continue
+		}
+
+		for alias, referent := range forwarder.aliases {
+			if bound, ok := usings[alias]; ok && bound != referent {
+				inline[alias] = true
+			}
+
+			usings[alias] = referent
+		}
+	}
+
+	for alias := range inline {
+		delete(usings, alias)
+	}
+
+	return usings, inline
+}
+
+// inlineForwarderAliases spells each alias of line that inline names through its referent.
+func inlineForwarderAliases(line string, aliases map[string]string, inline map[string]bool) string {
+	if len(inline) == 0 || len(aliases) == 0 {
+		return line
+	}
+
+	return packageQualifiedNameRegex.ReplaceAllStringFunc(line, func(token string) string {
+		if inline[token] && aliases[token] != "" {
+			return aliases[token]
+		}
+
+		return token
+	})
 }
 
 // recordForwarderTypeQualifiers registers, for package_info.cs, the import qualifier of every other package's
@@ -1402,14 +1578,18 @@ func applyMethodForwarderSection(packageInfoLines []string, mergeExisting bool) 
 
 	sort.SliceStable(recorded, func(i, j int) bool { return recorded[i].key < recorded[j].key })
 
+	_, inlineAliases := forwarderAliasUsings()
+
 	for _, forwarder := range recorded {
 		if _, declared := packageMethodHolders[forwarder.holder]; !declared {
 			continue
 		}
 
-		if !seen[forwarder.holder+"\x00"+forwarder.line] {
-			seen[forwarder.holder+"\x00"+forwarder.line] = true
-			byHolder[forwarder.holder] = append(byHolder[forwarder.holder], forwarder.line)
+		line := inlineForwarderAliases(forwarder.line, forwarder.aliases, inlineAliases)
+
+		if !seen[forwarder.holder+"\x00"+line] {
+			seen[forwarder.holder+"\x00"+line] = true
+			byHolder[forwarder.holder] = append(byHolder[forwarder.holder], line)
 		}
 	}
 

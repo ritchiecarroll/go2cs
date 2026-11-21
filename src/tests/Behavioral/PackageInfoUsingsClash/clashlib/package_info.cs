@@ -96,11 +96,11 @@ public static partial class clashlib_package
 // the body's frame as the Go method.
 // <MethodForwarders>
 partial class clashlibᴛMethodImpl {
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Get(this MethodImpl m) => clashlib_package.Get⁔(m);
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Bump(this ref MethodImpl m, nint by) => clashlib_package.Bump⁔(ref m, by);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Get(this clashlib_package.MethodImpl m) => clashlib_package.Get⁔(m);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Bump(this ref clashlib_package.MethodImpl m, nint by) => clashlib_package.Bump⁔(ref m, by);
 }
 partial class clashlibᴛStackTrace {
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this StackTrace s) => clashlib_package.String⁔(s);
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Push(this ref StackTrace s, @string frame) => clashlib_package.Push⁔(ref s, frame);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this clashlib_package.StackTrace s) => clashlib_package.String⁔(s);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Push(this ref clashlib_package.StackTrace s, @string frame) => clashlib_package.Push⁔(ref s, frame);
 }
 // </MethodForwarders>

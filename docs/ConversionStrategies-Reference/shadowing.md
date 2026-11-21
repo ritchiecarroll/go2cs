@@ -494,14 +494,18 @@ using System.Runtime.CompilerServices;
 [GoMethodHost(typeof(app_package.Box)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class appᴛBox;
 …
 partial class appᴛBox {
-    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Get(this Box b) => app_package.Get⁔(b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Get(this app_package.Box b) => app_package.Get⁔(b);
 }
 ```
 
-`using static <pkg>_package;` and a namespace `using` are searched at the same stage, so a package-scope type named
-like a type of one of those three namespaces would be ambiguous wherever the file names it bare (CS0104, as in a
-forwarder's `this StackTrace s`), and a type named like an attribute's short name counts too, since `[MethodImpl]`
-looks up `MethodImpl` as well as `MethodImplAttribute`. A package that declares such a type keeps
+A forwarder names its own package's types through the package class (`this app_package.Box b`), as the holder's
+`typeof` does: it stands at namespace scope, where a bare name is looked up in the enclosing namespaces before any
+`using`, and then among the usings, where the project's `using System;` makes a package's `Buffer` or `Type`
+ambiguous with System's (CS0104). The rest of the file still names the package's types bare: an interface record
+reads `[assembly: GoImplement<StackTrace, …>]`. `using static <pkg>_package;` and a namespace `using` are searched at
+the same stage, so a package-scope type named like a type of one of those three namespaces would be ambiguous there,
+and a type named like an attribute's short name counts too, since `[MethodImpl]` looks up `MethodImpl` as well as
+`MethodImplAttribute`. A package that declares such a type keeps
 the `global::` spelling for the whole file and adds none of the usings, and the converter names the clashing names on
 stderr. The two enums the attribute arguments read count even when the package declares them as something other than
 a type, and so does a method of either name, because its forwarder is a member of the holder whose attributes read
@@ -522,8 +526,8 @@ whichever direction the decision takes, so a file is never left with both spelli
 ```csharp
 // <MethodForwarders>
 partial class clashlibᴛMethodImpl {
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Get(this MethodImpl m) => clashlib_package.Get⁔(m);
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Bump(this ref MethodImpl m, nint by) => clashlib_package.Bump⁔(ref m, by);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Get(this clashlib_package.MethodImpl m) => clashlib_package.Get⁔(m);
+    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Bump(this ref clashlib_package.MethodImpl m, nint by) => clashlib_package.Bump⁔(ref m, by);
 }
 ```
 

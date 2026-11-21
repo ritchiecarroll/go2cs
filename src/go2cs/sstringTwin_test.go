@@ -185,7 +185,7 @@ func TestSStringTwinEmission(t *testing.T) {
 
 	// the method's forwarder in its holder keeps the twin's parameter list, so StrGenerator mints the @string
 	// companion beside it in the holder, as it did beside the method
-	if want := "internal static void write(this ref buf b, sstring s) => twin_package.write⁔(ref b, s);"; !strings.Contains(packageInfo, want) {
+	if want := "internal static void write(this ref twin_package.buf b, sstring s) => twin_package.write⁔(ref b, s);"; !strings.Contains(packageInfo, want) {
 		t.Errorf("want the forwarder %q in package_info.cs:\n%s", want, packageInfo)
 	}
 

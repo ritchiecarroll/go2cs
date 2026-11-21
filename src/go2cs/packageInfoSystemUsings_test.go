@@ -72,7 +72,7 @@ func TestAPackageDeclaringASystemTypeNameKeepsTheGlobalSpelling(t *testing.T) {
 	requireEmitted(t, "package_info.cs", sibling, []string{
 		"using go;\nusing static go.example.com.app_package;\nusing System.ComponentModel;\nusing System.Diagnostics;\nusing System.Runtime.CompilerServices;\n\n",
 		"[GoMethodHost(typeof(app_package.Box)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class appᴛBox;\n",
-		"    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Get(this Box b) => app_package.Get⁔(b);\n",
+		"    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Get(this app_package.Box b) => app_package.Get⁔(b);\n",
 	}, []string{"global::System.ComponentModel", "global::System.Diagnostics", "global::System.Runtime.CompilerServices"})
 
 	var clash string
@@ -84,7 +84,7 @@ func TestAPackageDeclaringASystemTypeNameKeepsTheGlobalSpelling(t *testing.T) {
 	requireEmitted(t, "package_info.cs", clash, []string{
 		"using go;\nusing static go.example.com.app_package;\n\n",
 		"[GoMethodHost(typeof(app_package.MethodImpl)), " + methodHolderAttributes + "] public static partial class appᴛMethodImpl;\n",
-		"    [" + methodForwarderAttributes + "] public static nint Get(this MethodImpl m) => app_package.Get⁔(m);\n",
+		"    [" + methodForwarderAttributes + "] public static nint Get(this app_package.MethodImpl m) => app_package.Get⁔(m);\n",
 	}, []string{"using System.", methodHolderAttributesShort, methodForwarderAttributesShort})
 
 	if want := "package_info.cs of example.com/app keeps the global:: spelling of its System attributes: the package declares MethodImpl, StackTrace\n"; !strings.Contains(stderr, want) {
@@ -132,7 +132,7 @@ func TestMergingWriteRespellsSystemAttributesInBothDirections(t *testing.T) {
 		"// </MethodHolders>",
 		"// <MethodForwarders>",
 		"partial class appᴛBox {",
-		"    [" + methodForwarderAttributesShort + "] public static nint Get(this Box b) => app_package.Get⁔(b);",
+		"    [" + methodForwarderAttributesShort + "] public static nint Get(this app_package.Box b) => app_package.Get⁔(b);",
 		"}",
 		"// </MethodForwarders>",
 	}
@@ -147,7 +147,7 @@ func TestMergingWriteRespellsSystemAttributesInBothDirections(t *testing.T) {
 		"// </MethodHolders>",
 		"// <MethodForwarders>",
 		"partial class appᴛBox {",
-		"    [" + methodForwarderAttributes + "] public static nint Get(this Box b) => app_package.Get⁔(b);",
+		"    [" + methodForwarderAttributes + "] public static nint Get(this app_package.Box b) => app_package.Get⁔(b);",
 		"}",
 		"// </MethodForwarders>",
 	}
@@ -182,7 +182,7 @@ func TestMergingWriteKeepsOneForwarderWhateverItsEarlierSpelling(t *testing.T) {
 	savedHolders, savedForwarders := packageMethodHolders, packageMethodForwarders
 	t.Cleanup(func() { packageMethodHolders, packageMethodForwarders = savedHolders, savedForwarders })
 
-	line := "public static nint Get(this Box b) => app_package.Get⁔(b);"
+	line := "public static nint Get(this app_package.Box b) => app_package.Get⁔(b);"
 	packageMethodHolders = map[string]string{"appᴛBox": "app_package.Box"}
 	packageMethodForwarders = []methodForwarder{{holder: "appᴛBox", key: "a", line: "[" + methodForwarderAttributes + "] " + line}}
 

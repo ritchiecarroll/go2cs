@@ -197,9 +197,9 @@ func TestMethodsTakeTheSuffixFormWithAForwarderInTheirHolder(t *testing.T) {
 		"[GoMethodHost(typeof(main_package.Box)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛBox;\n",
 		"// </MethodHolders>\n",
 		"// <MethodForwarders>\npartial class mainᴛBox {\n",
-		"    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Limit(this Box b) => main_package.Limit⁔(b);\n",
-		"    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Count(this ref Box b) => main_package.Count⁔(ref b);\n",
-		"    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Kind Kind(this Box b) => main_package.Kind⁔(b);\n",
+		"    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Limit(this main_package.Box b) => main_package.Limit⁔(b);\n",
+		"    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Count(this ref main_package.Box b) => main_package.Count⁔(ref b);\n",
+		"    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static main_package.Kind Kind(this main_package.Box b) => main_package.Kind⁔(b);\n",
 		"}\n// </MethodForwarders>\n",
 	}, nil)
 }
@@ -369,7 +369,7 @@ func Play(n int) int { return tone(n).Base() }
 
 	requireEmitted(t, "package_info.cs", packageInfo, []string{
 		"partial class toneᴛtone {\n",
-		"internal static nint Base(this tone t) => tone_package.Base⁔(t);\n",
+		"internal static nint Base(this tone_package.tone t) => tone_package.Base⁔(t);\n",
 	}, nil)
 }
 
@@ -718,12 +718,13 @@ func TestASignatureKeepsATypeNoNamespaceHidesBare(t *testing.T) {
 		"app_package.sync",
 	})
 
+	// The forwarders stand at namespace scope, where a forwarder names every type of its package through the
+	// package class (qualifyForwarderLocalTypes), whether or not a namespace hides it.
 	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
-		"bump(this ref sync s, ",
-		"internal static sync again(this sync s) => app_package.again⁔(s);",
+		"bump(this ref app_package.sync s, ",
+		"internal static app_package.sync again(this app_package.sync s) => app_package.again⁔(s);",
 	}, []string{
-		"ref app_package.sync s",
-		"app_package.sync again(",
+		" sync s",
 	})
 }
 
@@ -864,8 +865,8 @@ func TestPromotedForwarderTakesTheSuffixFormInItsStructsHolder(t *testing.T) {
 
 	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
 		"[GoMethodHost(typeof(main_package.counting)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛcounting;\n",
-		"internal static Driver Driver(this counting recvᴛ) => main_package.Driver⁔(recvᴛ);\n",
-		"internal static @string Name(this ref counting c) => main_package.Name⁔(ref c);\n",
+		"internal static main_package.Driver Driver(this main_package.counting recvᴛ) => main_package.Driver⁔(recvᴛ);\n",
+		"internal static @string Name(this ref main_package.counting c) => main_package.Name⁔(ref c);\n",
 	}, nil)
 }
 
@@ -934,7 +935,7 @@ func TestABodyReadsAnOwnNameADotImportedPackageAlsoDeclaresBare(t *testing.T) {
 	})
 
 	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
-		"Sum(this prog_package.pair p, single q) => prog_package.Sum⁔(p, q);",
+		"Sum(this prog_package.pair p, prog_package.single q) => prog_package.Sum⁔(p, q);",
 	}, nil)
 }
 
@@ -1291,8 +1292,50 @@ func TestGenericHolderIsNamedByTheTypeWhateverItsConstraint(t *testing.T) {
 		"[GoMethodHost(typeof(iterators_package.Window<,>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iteratorsᴛWindow;\n",
 		"partial class iteratorsᴛIterator {\n",
 		"partial class iteratorsᴛWindow {\n",
-		"public static void SetText<T>(this ref Iterator<T> it, T data) where T : /* lib.Text */ IByteSeq<T, byte>, new() => iterators_package.SetText⁔<T>(ref it, data);\n",
+		"public static void SetText<T>(this ref iterators_package.Iterator<T> it, T data) where T : /* lib.Text */ IByteSeq<T, byte>, new() => iterators_package.SetText⁔<T>(ref it, data);\n",
 	}, []string{
 		"Text>",
+	})
+}
+
+const forwarderNamespaceScopeSource = `package buf
+
+type Buffer struct{ n int }
+
+type Type int
+
+func (b Buffer) Grow(t Type) Buffer { return Buffer{n: b.n + int(t)} }
+
+func (b *Buffer) Add(xs ...any) int {
+	b.n += len(xs)
+	return b.n
+}
+
+func (b Buffer) Many(ts ...Type) int { return len(ts) + b.n }
+`
+
+// A forwarder stands at namespace scope in package_info.cs, where a bare name is looked up in the enclosing
+// namespaces before any using: `Buffer` and `Type` there are System's as much as the package's (CS0104), and a type
+// named like one of the root namespace's would bind to it without a word. So a forwarder names each of its package's
+// types through the package class, as the holder's typeof does, while the body keeps the bare names its package class
+// resolves. A variadic parameter's `ꓸꓸꓸT` alias is a using of the body's file, so package_info.cs declares the ones
+// its forwarders name.
+func TestAForwarderNamesItsPackagesTypesAndVariadicAliasesForNamespaceScope(t *testing.T) {
+	emitted := convertMethodHolderFixture(t, map[string]string{"buf.go": forwarderNamespaceScopeSource})
+
+	requireEmitted(t, "buf.cs", emitted["buf.cs"], []string{
+		"internal static Buffer Grow⁔(/*this*/ Buffer b, Type t)",
+		"using ꓸꓸꓸany = Span<any>;",
+	}, nil)
+
+	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
+		"public static buf_package.Buffer Grow(this buf_package.Buffer b, buf_package.Type t) => buf_package.Grow⁔(b, t);\n",
+		"public static nint Add(this ref buf_package.Buffer b, params ꓸꓸꓸany xsʗp) => buf_package.Add⁔(ref b, xsʗp);\n",
+		"public static nint Many(this buf_package.Buffer b, params ꓸꓸꓸType tsʗp) => buf_package.Many⁔(b, tsʗp);\n",
+		"\nusing ꓸꓸꓸany = Span<any>;\n",
+		"\nusing ꓸꓸꓸType = Span<buf_package.Type>;\n",
+	}, []string{
+		"(this Buffer b",
+		"(this ref Buffer b",
 	})
 }
