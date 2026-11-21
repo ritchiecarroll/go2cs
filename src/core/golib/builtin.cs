@@ -3618,7 +3618,9 @@ public static partial class builtin
                     // Create a new instance of the asserted type — held BOXED for the copy:
                     // FieldInfo.SetValue on an unboxed struct mutates a fresh transient box per
                     // call and the writes vanish (the copy came back all zeros).
-                    object newInstance = Activator.CreateInstance(typeOfT)!;
+                    // typeof(T), not typeOfT: the trim analyzer follows T's member annotations from typeof(T), and not
+                    // through AssertFacts<T>.Type, a field.
+                    object newInstance = Activator.CreateInstance(typeof(T))!;
 
                     // Copy the values of the fields from the target to the new instance. The
                     // lookup must span NONPUBLIC fields: an unexported Go field emits `internal`,
@@ -3630,7 +3632,7 @@ public static partial class builtin
                     const BindingFlags CopyFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
                     foreach (string field in typeOfTFieldNames)
-                        typeOfT.GetField(field, CopyFlags)!.SetValue(newInstance, targetType.GetField(field, CopyFlags)!.GetValue(target));
+                        typeof(T).GetField(field, CopyFlags)!.SetValue(newInstance, targetType.GetField(field, CopyFlags)!.GetValue(target));
                 #pragma warning restore IL2075
 
                     value = (T)newInstance;
