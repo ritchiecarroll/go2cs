@@ -355,6 +355,20 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			return refusePackage(options, diagnosticCgoRefused, err)
 		}
 
+		// Under -recurse -cgo, a package importing a std package Go builds from different files with cgo on is refused:
+		// the go.* packages are the standard library converted cgo-off (R5, cgoRecurseStd.go).
+		if options.parseCgoTargets && options.recurse {
+			divergent, err := cgoDivergentStdPackages(cgoLoad{env: cfg.Env, dir: cfg.Dir}, options.targetPlatform)
+
+			if err == nil {
+				err = refuseCgoDivergentStdImports(pkg, divergent)
+			}
+
+			if err != nil {
+				return refusePackage(options, diagnosticCgoRefused, err)
+			}
+		}
+
 		// The narrow shape witness (shapeWitness.go): select its declarations into package state FIRST, so every proxy
 		// route and refusal below declines a witnessed position, and refuse what the current stage cannot place.
 		if refusal := prepareShapeWitness(pkg); refusal != nil {
