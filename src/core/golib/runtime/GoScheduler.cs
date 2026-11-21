@@ -262,6 +262,7 @@ public static class GoScheduler
     private static int s_peakThreads;
     private static long s_steps;
     private static long s_parks;
+    private static long s_goschedYields;
     private static long s_migrations;
     private static long s_migrated;
     private static long s_handoffs;
@@ -455,7 +456,8 @@ public static class GoScheduler
                $" pins={Interlocked.Read(ref s_pins)} pinned-wakes={Interlocked.Read(ref s_pinnedWakes)}" +
                $" pin-retired={Interlocked.Read(ref s_pinRetired)} peak-pinned-waiting={Volatile.Read(ref s_peakPinnedWaiting)}" +
                $" off-carrier-locks={Interlocked.Read(ref s_offCarrierLocks)} idle-handoffs={Interlocked.Read(ref s_idleHandoffs)} idle-set-violations={Interlocked.Read(ref s_idleSetViolations)} shared-floor-violations={Interlocked.Read(ref s_sharedFloorViolations)} pinned-blocked-violations={Interlocked.Read(ref s_pinnedBlockedViolations)}" +
-               $" context={(s_contextSwap ? "goroutine" : "off")}" + Goroutine.MainReading() + Goroutine.MountReading();
+               $" context={(s_contextSwap ? "goroutine" : "off")}" + Goroutine.MainReading() + Goroutine.MountReading() +
+               $" gosched-yields={Interlocked.Read(ref s_goschedYields)}";
     }
 
     private static void SampleThreads()
@@ -477,6 +479,26 @@ public static class GoScheduler
             // A reading, never a failure.
         }
     }
+
+    // The Gosched-park seat (COORD's ruling of 2026-11-21, docs/phase4/inbox/G/20261121T231225Z-COORD.md): a twin's
+    // runtime.Gosched is a park point that requeues the goroutine at the GLOBAL run queue's tail, as Go's goschedImpl
+    // puts it on the global queue, so a goroutine that spins on Gosched ends its step and every goroutine queued
+    // before it runs first (S2 arm 1, MnSpinCap: spinners beyond the P count starved parked goroutines while Gosched
+    // was a thread yield). Off a carrier (the scheduler off, a plain thread) it is runtime.Gosched's own thread yield.
+    internal static GoTask GoschedTwin()
+    {
+        if (t_carrier is not { Mounted: not null } carrier)
+        {
+            GoschedBackoff.Yield();
+            return default;
+        }
+
+        carrier.PendingYield = true;
+        return YieldPark();
+    }
+
+    // A park on a slot nobody wakes: the carrier sees PendingYield and requeues the goroutine itself (RunStep).
+    private static async GoTask YieldPark() => await new GoParkSlot();
 
     // Records the park of the goroutine mounted on this carrier. The carrier commits it after the unmount.
     internal static void ParkPending(GoParkSlot slot, Action continuation)
@@ -769,6 +791,9 @@ public static class GoScheduler
         internal Goroutine? Mounted;
         internal GoParkSlot? PendingSlot;
         internal Action? PendingContinuation;
+
+        // The pending park is a Gosched yield (GoschedTwin): requeued at the global queue's tail, not committed to its slot.
+        internal bool PendingYield;
         internal long RunningSince;
         internal long PauseAtStart;
         internal volatile bool Injected;
@@ -1126,7 +1151,22 @@ public static class GoScheduler
                         s_pinnedCount--;
                 }
 
-                slot.Commit(goroutine, continuation);
+                // A Gosched yield goes to the GLOBAL queue's tail (Go's goschedImpl -> globrunqput), never the run-next
+                // slot, so every goroutine queued before it runs first. A pinned goroutine goes back to its own carrier.
+                if (PendingYield)
+                {
+                    PendingYield = false;
+                    Interlocked.Increment(ref s_goschedYields);
+
+                    if (goroutine.m_pin is Carrier pin)
+                        pin.Deliver(continuation);
+                    else
+                        Enqueue(goroutine, continuation);
+                }
+                else
+                {
+                    slot.Commit(goroutine, continuation);
+                }
             }
             else if (m_pinned is not null || locked)
             {

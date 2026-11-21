@@ -328,6 +328,10 @@ public sealed partial class TwinGenerator
                 ? m_run.IfaceCall(site.IfaceTarget!, visited)
                 : visited.WithExpression(Rename(visited.Expression)).WithoutTrivia();
 
+            // The Gosched-park seat: runtime.Gosched's twin is golib's builtin.Goschedꞏtwin, not a member of runtime.
+            if (m_run.IsGoschedIntrinsic(site.Target))
+                call = call.WithExpression(ParseExpression("global::go.builtin.Goschedꞏtwin"));
+
             // N2: a call to a box twin through a `this ref` receiver hands the twin the receiver's box (9.1) instead.
             if (site.BoxOf is { } box && !site.ViaBoxOverload && m_run.IsBoxTwinTarget(site.Target) && call.Expression is MemberAccessExpressionSyntax member)
             {
