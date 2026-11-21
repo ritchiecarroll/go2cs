@@ -154,6 +154,13 @@ func (m *ModuleConverter) ConvertModule(moduleDir string) error {
 		}
 
 		m.nugetDecisions, m.nugetWarnings = decisions, append(warnings, substitutionWarnings...)
+
+		// Under -recurse -cgo a substituted module's published package was converted cgo-OFF while the closure
+		// type-checks cgo-ON: a package of it built from different files with cgo on is refused (cgoRecurseSubstitution.go).
+		if err := m.refuseCgoSplitSubstitutions(moduleDir, substitutions); err != nil {
+			return err
+		}
+
 		m.divertNuGetSubstitutions(substitutions)
 		nugetSubstitutions = substitutions
 	}

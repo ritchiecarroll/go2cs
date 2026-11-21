@@ -225,10 +225,12 @@ func TestARecurseCgoModuleReadsAsGo(t *testing.T) {
 	}
 }
 
-// R5 and R5c: the go.* packages are the standard library converted cgo-OFF (the corpus ruling), so a converted package
-// that imports a std package Go builds from DIFFERENT files with cgo on would not do what the cgo build does. The set
-// is derived per target from `go list std` both ways, never a hand list: today net, os/user and plugin on linux, plugin
-// on darwin, and runtime/cgo everywhere. Refused by name (GO2CS2001), the package skipped.
+// R5 (COORD's ruling on P3's INC 1 review, option b). The go.* packages are the standard library converted cgo-OFF
+// (the corpus ruling). For most std packages Go builds differently with cgo on, that is a DISCLOSED divergence and not a
+// refusal: a converted package importing net binds the cgo-off build, exactly as Go itself does under CGO_ENABLED=0 or
+// the netgo tag, the pure-Go resolver (docs/Limitations.md). Refused by name (GO2CS2001), the package skipped and the
+// rest of the module converted, are only the packages whose cgo-off build is NOT a working Go build of the same API:
+// runtime/cgo (R5c) and plugin. The divergence set is still derived per target from `go list std` both ways.
 const cgoRecurseNetUser = `package netuser
 
 import "net"
@@ -257,27 +259,58 @@ func Round(v int) int {
 }
 `
 
-func TestARecurseCgoConversionRefusesAnImportOfNetOnLinux(t *testing.T) {
+const cgoRecursePluginUser = `package pluginuser
+
+import "plugin"
+
+// Open opens a plugin by path.
+func Open(path string) error {
+	_, err := plugin.Open(path)
+	return err
+}
+`
+
+// cgoRecurseConverted reports whether the conversion under output wrote a .cs file for the package directory part.
+func cgoRecurseConverted(t *testing.T, output, part string) bool {
+	t.Helper()
+
+	return len(cgoRecurseWritten(t, output, part+"/", ".cs")) > 0
+}
+
+// The refusal skips the one package and not the module: cptr and main convert in the same run.
+func requireCgoRecurseRestConverted(t *testing.T, output, combined string) {
+	t.Helper()
+
+	if !cgoRecurseConverted(t, output, "cptr") {
+		t.Errorf("cptr was not converted in the run that refused another package:\n%s", combined)
+	}
+
+	if len(cgoRecurseWritten(t, output, "cgorecurse/main.cs", "")) == 0 && len(cgoRecurseWritten(t, output, "main.cs", ".cs")) == 0 {
+		t.Errorf("main was not converted in the run that refused another package:\n%s", combined)
+	}
+}
+
+func TestARecurseCgoConversionConvertsAPackageThatImportsNet(t *testing.T) {
 	requireHostCC(t)
 
-	if runtime.GOOS != "linux" {
-		t.Skipf("net is built from the same files cgo-on and cgo-off on %s; the row is linux's: NOT MEASURED", runtime.GOOS)
-	}
-
-	combined, _, _ := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "netuser/netuser.go": cgoRecurseNetUser, "main.go": cgoRecurseMain},
+	combined, output, err := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "netuser/netuser.go": cgoRecurseNetUser, "main.go": cgoRecurseMain},
 		"-recurse=nuget", "-cgo=true")
 
-	for _, want := range []string{"GO2CS2001", "example.com/cgorecurse/netuser", `"net"`} {
-		if !strings.Contains(combined, want) {
-			t.Errorf("the refusal does not name %q:\n%s", want, combined)
-		}
+	if err != nil {
+		t.Fatalf("a module whose package imports net (a disclosed divergence) did not convert: %v\n%s", err, combined)
 	}
+
+	if !cgoRecurseConverted(t, output, "netuser") {
+		t.Errorf("netuser was not converted:\n%s", combined)
+	}
+
+	requireCgoRecurseRestConverted(t, output, combined)
 }
 
 func TestARecurseCgoConversionRefusesAnImportOfRuntimeCgo(t *testing.T) {
 	requireHostCC(t)
 
-	combined, _, _ := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "handleuser/handleuser.go": cgoRecurseHandleUser, "main.go": cgoRecurseMain},
+	combined, output, _ := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "handleuser/handleuser.go": cgoRecurseHandleUser, "main.go": cgoRecurseMain},
 		"-recurse=nuget", "-cgo=true")
 
 	for _, want := range []string{"GO2CS2001", "example.com/cgorecurse/handleuser", `"runtime/cgo"`} {
@@ -285,10 +318,37 @@ func TestARecurseCgoConversionRefusesAnImportOfRuntimeCgo(t *testing.T) {
 			t.Errorf("the refusal does not name %q:\n%s", want, combined)
 		}
 	}
+
+	if cgoRecurseConverted(t, output, "handleuser") {
+		t.Errorf("the refused handleuser was written:\n%s", combined)
+	}
+
+	requireCgoRecurseRestConverted(t, output, combined)
 }
 
-// R6, an ASSERTION in this shape: every non-std package loads cgo-on, so a file pair split by the cgo build tag with no
-// import "C" converts its cgo-on file, as Go's cgo build does; no package is converted cgo-off beside a cgo-on one.
+func TestARecurseCgoConversionRefusesAnImportOfPlugin(t *testing.T) {
+	requireHostCC(t)
+
+	if runtime.GOOS == "windows" {
+		t.Skip("plugin is built from the same files cgo-on and cgo-off on windows; the row is linux's and darwin's: NOT MEASURED")
+	}
+
+	combined, output, _ := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "pluginuser/pluginuser.go": cgoRecursePluginUser, "main.go": cgoRecurseMain},
+		"-recurse=nuget", "-cgo=true")
+
+	for _, want := range []string{"GO2CS2001", "example.com/cgorecurse/pluginuser", `"plugin"`} {
+		if !strings.Contains(combined, want) {
+			t.Errorf("the refusal does not name %q:\n%s", want, combined)
+		}
+	}
+
+	requireCgoRecurseRestConverted(t, output, combined)
+}
+
+// R6, an ASSERTION in this shape: every package the run CONVERTS loads cgo-on, so a file pair split by the cgo build tag
+// with no import "C" converts its cgo-on file, as Go's cgo build does. A package the run does NOT convert -- one of a
+// module SUBSTITUTED by a published package under -recurse=nuget, converted cgo-off -- is held by the substitution
+// refusal instead (cgoRecurseSubstitution.go; P3's INC 1 review, finding 1).
 const cgoRecursePairOn = `//go:build cgo
 
 package pair
