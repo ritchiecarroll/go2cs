@@ -723,6 +723,7 @@ func analyze(p pair, r *results, verbose bool) {
 			matchedStarts := map[int]bool{}
 			separator := preludeSeparator(cs, g, cOpen, cEnd, lb, rb)
 			cur := cOpen + 1
+			lastL := lb // the Go line the search resumes after: cur is the C# line after its translation
 			for L := lb + 1; L < rb; L++ {
 				if !g.blank[L-1] || g.blank[L] {
 					continue
@@ -731,20 +732,27 @@ func analyze(p pair, r *results, verbose bool) {
 				csLine := 0
 				if ci, ok := lineCS[L]; ok && cs.comments[ci].line > cOpen && cs.comments[ci].line < cEnd {
 					csLine = cs.comments[ci].line
-				} else if ids := goBlankAnchorIdents(g, L); len(ids) > 0 {
+				} else if ids, anchorL := goBlankAnchorIdents(g, L); len(ids) > 0 {
+					// An anchor the unsafe doors weakened can also be the identifiers of an earlier Go line in the gap
+					// (runtime/sema.go's two `if` lines that differ only in their operator); the C# lines those take
+					// come first, so the search passes over one match for each.
+					skip := 0
+					if unsafeDoorLine(g.src[anchorL-1]) {
+						for M := lastL + 1; M < anchorL; M++ {
+							if holdsAll(goLineAnchorIdents(g, M), ids) {
+								skip++
+							}
+						}
+					}
 					for c := cur; c < cEnd; c++ {
 						if !cs.codeOnLine[c-1] {
 							continue
 						}
-						ci := csIdents(cs.codeText[c-1])
-						all := true
-						for k := range ids {
-							if !ci[k] {
-								all = false
-								break
+						if holdsAll(csIdents(cs.codeText[c-1]), ids) {
+							if skip > 0 {
+								skip--
+								continue
 							}
-						}
-						if all {
 							csLine = c
 							break
 						}
@@ -756,6 +764,7 @@ func analyze(p pair, r *results, verbose bool) {
 					continue
 				}
 				cur = csLine + 1
+				lastL = L
 				// The walk back crosses what the converter writes ahead of L's own translation: comments, attributes, and
 				// the lines that are only a prefix of L (walkScaffoldRe), so an escaping local's bare heap box above its
 				// assignment is part of L. For an `if` or `switch` with an initializer it also crosses the lone `{` of
@@ -854,7 +863,7 @@ func preludeSeparator(cs *csFile, g *goFile, cOpen, cEnd, lb, rb int) int {
 		}
 		return 0
 	}
-	ids := goAnchorIdents(g.idents[lb+1])
+	ids := goLineAnchorIdents(g, lb+1)
 	for l := c + 1; l < cEnd && !isBlankCS(cs, l); l++ {
 		if !cs.codeOnLine[l-1] {
 			continue
@@ -887,25 +896,25 @@ var respelledBuiltins = map[string]bool{"make": true, "new": true}
 // identifier of its own.
 var groupOpenerRe = regexp.MustCompile(`^(const|var|type)\s*\($`)
 
-// goBlankAnchorIdents returns the identifiers that place the Go blank line above line L: L's own, or, when L opens
-// a declaration group, those of the group's first spec. The converter lowers such a group into one C# declaration
+// goBlankAnchorIdents returns the identifiers that place the Go blank line above line L, and the line they are
+// read from: L's own, or, when L opens a declaration group, those of the group's first spec. The converter lowers such a group into one C# declaration
 // per spec, so the first of them is where the group begins.
 //
 // When L is an `if` or `switch` with an initializer that declares names (`if err := f(x); err != nil {`), the
 // translation opens a scope block and renames them (`{` then `var errΔ7 = f(x); if (errΔ7 != default!) {`), so
 // the declared names are left out: the initializer's other identifiers place the line.
-func goBlankAnchorIdents(g *goFile, L int) map[string]bool {
+func goBlankAnchorIdents(g *goFile, L int) (map[string]bool, int) {
 	text := strings.TrimSpace(g.src[L-1])
 	if groupOpenerRe.MatchString(text) && L < len(g.src) {
-		return goAnchorIdents(g.idents[L+1])
+		return goLineAnchorIdents(g, L+1), L + 1
 	}
-	ids := goAnchorIdents(g.idents[L])
+	ids := goLineAnchorIdents(g, L)
 	if m := scopedInitRe.FindStringSubmatch(text); m != nil {
 		for _, name := range strings.Split(m[2], ",") {
 			delete(ids, strings.TrimSpace(name))
 		}
 	}
-	return ids
+	return ids, L
 }
 
 // scopedInitRe matches an `if` or `switch` whose initializer declares names, capturing them.
@@ -919,6 +928,36 @@ func goAnchorIdents(ids []string) map[string]bool {
 		delete(m, name)
 	}
 	return m
+}
+
+// goLineAnchorIdents is goAnchorIdents for Go line L, less the conversions the unsafe doors leave unspelled. The
+// converter writes pointer arithmetic through the doors: `unsafe.Pointer(uintptr(p) + n)` is `@unsafe.Add(p, n)` and
+// `uintptr(unsafe.Pointer(&r))` is `(uintptr)Ꮡr`. So a line holding `unsafe.Pointer(` does not require `Pointer`, nor
+// `uintptr` when it also holds `uintptr(`. Only the line's own text decides: elsewhere, go/types' `Pointer` and a
+// `uintptr` conversion are still required.
+func goLineAnchorIdents(g *goFile, L int) map[string]bool {
+	ids := goAnchorIdents(g.idents[L])
+	if text := g.src[L-1]; unsafeDoorLine(text) {
+		delete(ids, "Pointer")
+		if strings.Contains(text, "uintptr(") {
+			delete(ids, "uintptr")
+		}
+	}
+	return ids
+}
+
+// unsafeDoorLine reports whether a Go line holds an `unsafe.Pointer(` conversion, whose name its translation may not
+// spell (goLineAnchorIdents).
+func unsafeDoorLine(text string) bool { return strings.Contains(text, "unsafe.Pointer(") }
+
+// holdsAll reports whether have holds every name in want.
+func holdsAll(have, want map[string]bool) bool {
+	for k := range want {
+		if !have[k] {
+			return false
+		}
+	}
+	return true
 }
 
 var preludeRe = regexp.MustCompile(`(DerefOrNull\(\);|heap<.*>\(out var \S+\);|= \S+\.Clone\(\);|\.sslice\(\);|= GoZero<.*>\(\);|= nonnil\(ref .*;|= default!?;)$`)
