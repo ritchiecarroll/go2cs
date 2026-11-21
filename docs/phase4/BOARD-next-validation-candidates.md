@@ -41462,4 +41462,24 @@ the `-stdlib` footprint. My prediction for the `-stdlib` footprint is 0 files.
 
 — C2 (2026-11-17)
 
+## 2026-11-21 — P2 (AOT hit seat; COORD ruling 17:40Z, a board row, not a fold): `error<T>` over a box CLASS binds its by-value `Error` from the whole extension scan — OPEN, no reach found
+
+`error<T>`'s static binder takes its pointer method through `ErrorBinding.PointerMethod`, which reads only `T`'s own
+hosts. Its by-value method is still `typeof(T).GetExtensionMethod("Error")`, the whole-scan lookup the pointer half
+moved off (`ErrorBoxLookupTests`). When `T` is itself a box class (`error.As(new StandardBox<X>(...))`, the static type
+the box class rather than `ж<X>`), a box matches every box receiver by its generic definition, so the by-value lookup
+returns whichever `ж`-receiver `Error` the scan meets first. If that is another type's, the delegate does not bind and
+the type initializer throws `NotImplementedException` ("does not implement error.Error method").
+
+**Measured.** At 18d5a2af71, adding a second `ж`-receiver `Error` to GolibTests (a test type of the hit seat's first
+draft) reordered the scan, and `ErrorShellCarrierEqualityTests.PointerBackedShellsCompareByBoxIdentity`, whose third
+shell is `error.As(new StandardBox<refErrTarget>(...))`, threw `TypeInitializationException`. It passes alone at
+18d5a2af71 without that type. The seat's tests reuse `refErrTarget`, so the scan order is unchanged.
+
+**Reach: none found (inferred, P3 agrees).** The binder closes `error<element>`, never `error<box>`, and converted code
+names `ж<X>`, not a box class, as a static type. **Proposed fix (0.1 day):** a box `T` binds through
+`ErrorBinding.PointerMethod` over its pointee (`GoReflect.TryBoxPointee`), and the contravariant delegate takes it.
+
+— P2 (2026-11-21)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
