@@ -40818,4 +40818,76 @@ generator change above should take the same reading.
 
 — P5 (2026-11-18)
 
+## 2026-11-18 — i9 (lever E census, COORD scope ruling 00:21Z: (a) for the seat, (c) this row): two more golib static tables are per-type, `builtin.Itab<T>.s_entries` and `map<K,V>.s_sampledStorage` — OPEN, .5, not started
+
+**What it is.** Lever E (`claude/i9-lever-e`) moves the pointer boxes' seven per-type static tables into one
+non-generic holder, `GoBoxTables`, because a static table whose type names its class's own parameter is a new
+instantiation of the table's whole method set for every type argument, and Native AOT compiles each under its own
+symbol names. Its census (reflection over golib at `b2eaf5290a`: 336 generic type definitions, 51 static fields closed
+over their own parameter, 9 of them tables) found two more of the same shape outside the pointer box. The seat's guard,
+`PointerBoxStaticTableTests`, admits both by (type, field) with a reason, under a liveness arm that fails if either
+stops being a per-type table.
+
+- **`builtin.Itab<T>.s_entries`**, a `ConcurrentDictionary<Type, Entry>` (`Entry` is nested, so it carries `T`). One per
+  interface type a program asserts to: the type-assertion cache, behind a per-type monomorphic slot `s_last`. Moving it
+  keys one table by (interface type, dynamic type), a tuple hash on every miss of the slot, on the assertion hot path.
+  **Its own arm:** a JIT perf read of type assertions (hit and miss) before and after, as well as the AOT one.
+- **`map<K,V>.s_sampledStorage`**, a `ConditionalWeakTable<NilKeyDictionary, GoSampledStorage>`. One per map
+  instantiation, consulted only for a map the profiler sampled. Read since the census: `GoSampledStorage` holds two
+  `object?` fields and names neither `K` nor `V`, so moving it out of `map<K,V>` and keying one weak table by the store
+  is small. A TypeScript-shaped program reaches many map types, so it may carry more names than `Itab`.
+
+**The AOT arm that separates them.** On top of lever E (landed or seated): `parsedemo` (TypeScript `651c4ad147`, full
+trim, no native debug symbols, the B4 arm (a) command), one build per arm, one at a time: the lever E base, base +
+`map` only, base + `Itab` only. Read the symbol-name string table, the image and ILC peak for each, and check output
+against native Go on the demo and the corpus units. Each table is then priced alone. Score the two on their own numbers,
+not as a pair.
+
+**Guard.** Removing an entry from `PointerBoxStaticTableTests`' admitted list makes the guard red until the table moves.
+That is the cut's red-first arm.
+
+— i9 (2026-11-18)
+
+## 2026-11-18 — i9 (lever E seat, `claude/i9-lever-e`): the pointer boxes' seven per-type static tables move to one non-generic holder; converted TypeScript parsedemo AOT symbol names −29.2%, image −12.6%, ILC peak −24.6% — DONE (seated)
+
+**What moved.** `ж<T>`'s views table, `FieldRefWrappers<TElem>`'s wrappers, `ElemRefBox<T>`'s element boxes,
+`NilArrayBox<T>`'s typed nils, `FieldRefBox<T>`'s Go offsets and displacements, and `NativeSliceAnchors<T>`'s roots
+each declared a static table whose type named the class's own parameter, so every type argument a program reached
+instantiated the table's whole method set. All seven now live in `GoBoxTables` (`src/core/golib/GoBoxTables.cs`), keyed
+by reference (the nil-array table by (pointee type, dims)). Guard: `PointerBoxStaticTableTests`, red at the base naming
+exactly the seven, green at the cut; it admits `builtin.Itab<T>.s_entries` and `map<K,V>.s_sampledStorage` by name
+(the row above).
+
+**AOT, `parsedemo`** (one TypeScript conversion at `f36b6b0d48`, the B4 arm (a) command, win-x64; the cut builds golib
+from the seat via `-p:go2csPath`, its own artifacts root):
+
+| | base `f36b6b0d48` | seat `2b80848c0a` | change |
+|---|---|---|---|
+| symbol string table | 671,917,360 B (31.3% of 2 GiB) | 475,883,681 B (22.2%) | −29.18% |
+| image | 290,183,168 B | 253,496,320 B | −12.64% |
+| ILC peak private | 18.12 GB | 13.67 GB | −24.56% |
+| symbol records | 7,886,766 | 6,873,836 | −12.84% |
+| IL3054 | 0 | 0 | |
+| output vs native Go | demo + 17,422/17,422 units | demo + 17,422/17,422 units | identical |
+
+**The census undershot, and why.** Charging every string-table name whose first `ConditionalWeakTable`2` /
+`ConcurrentDictionary`2` / `KeyValuePair`2` instantiation carries a moved table's per-T arguments read 26.7% of the base
+table and 24 MB of its section bytes, nearly all metadata (39% of all method tables, 41% of writable data, 40% of
+generic dictionaries; 37 unwind records). The cut removed more: per-kind, the extra is GC and non-GC statics and frozen
+objects, i.e. each generic OWNER's static storage and the table instance preinitialized into the image per type
+argument, named after `ElemRefBox<T>` or `FieldRefBox<T>`, never after the table. **A census of a per-type static table
+charges the field's owner as well as the field's type.**
+
+**JIT and allocation.** `PerfFieldView`, 30 interleaved pairs: the seat's median inside the base arm's own A/A spread.
+Process allocation total (startup hook, 10 runs per arm, checksums equal): about 53 KB lower per run at the seat on
+831.5 MB, ranges disjoint, gen0 count equal — a fixed saving consistent with one shared table per kind instead of one
+per type argument (per-run constant inferred, not measured across iteration counts). GolibTests' alloc guards green.
+
+**Gates at `2b80848c0a`.** GolibTests Release 2984 (2929 / 1 / 54) and Debug 2984 (2905 / 0 / 79), skip sets equal by
+name to the base; `go test ./...` green; CNR byte-identical across 1106 behavioral packages. The one Release failure,
+`GoroutinePoolTests.GoroutineExitingLocked_TakesItsThreadWithIt`, fails identically at the base on the same host (its
+own seat).
+
+— i9 (2026-11-18)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

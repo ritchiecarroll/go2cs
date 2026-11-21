@@ -175,12 +175,11 @@ public abstract partial class ж<T> : INativeIdentity
 
 // The root an unsafe.Slice over a pointer that is not C memory alone keeps, with no word added to slice<T>: a
 // native-backed slice's array field is unused (it holds the shared empty array), so such a slice is given its OWN
-// zero-length array, and that array is tied to the root here. A re-slice passes the array along, so the root lives as
-// long as any slice cut from the first, and an element or SliceData of one is minted retaining the root.
+// zero-length array, and that array is tied to the root in GoBoxTables.SliceRoots. A re-slice passes the array along,
+// so the root lives as long as any slice cut from the first, and an element or SliceData of one is minted retaining
+// the root.
 internal static class NativeSliceAnchors<T>
 {
-    private static readonly ConditionalWeakTable<T[], object> s_roots = new();
-
     // The anchor array for a slice over `root`'s memory, or null when there is nothing to keep.
     internal static T[]? For(object? root)
     {
@@ -188,7 +187,7 @@ internal static class NativeSliceAnchors<T>
             return null;
 
         T[] anchor = new T[0];
-        s_roots.Add(anchor, root);
+        GoBoxTables.SliceRoots.Add(anchor, root);
 
         return anchor;
     }
@@ -200,16 +199,16 @@ internal static class NativeSliceAnchors<T>
     internal static void Keep(in slice<T> words, object? root)
     {
         if (root is not null && words.m_array is { Length: > 0 } array)
-            s_roots.AddOrUpdate(array, root);
+            GoBoxTables.SliceRoots.AddOrUpdate(array, root);
     }
 
     // The root tied to an anchor array, or null.
     internal static object? OfAnchor(T[]? anchor) =>
-        anchor is not null && s_roots.TryGetValue(anchor, out object? root) ? root : null;
+        anchor is not null && GoBoxTables.SliceRoots.TryGetValue(anchor, out object? root) ? root : null;
 
     // The root a native-backed slice keeps, or null: one reference compare for every slice that keeps none.
     internal static object? Of(in slice<T> view) =>
-        view.IsNativeBacked && !ReferenceEquals(view.m_array, Array.Empty<T>()) && s_roots.TryGetValue(view.m_array, out object? root)
+        view.IsNativeBacked && !ReferenceEquals(view.m_array, Array.Empty<T>()) && GoBoxTables.SliceRoots.TryGetValue(view.m_array, out object? root)
             ? root
             : null;
 }

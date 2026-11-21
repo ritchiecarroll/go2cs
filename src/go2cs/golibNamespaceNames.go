@@ -171,6 +171,7 @@ var golibFriendNamespaceTypes = nameSet(
 	"EqualityFallbacks",
 	"ErrorBinding",
 	"GoArrayDimsKey",
+	"GoBoxTables",
 	"GoCheapRand",
 	"GoDelegateSynthesis",
 	"GoEqualityComparer",
