@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
+using go.golib;
 using static go.builtin;
 using static go.runtime_package;
 
@@ -81,7 +82,7 @@ public class GlyphMethodFrameTests
     [TestMethod]
     public void CallersNamesAPointerReceiverBodyWithItsPointerReceiver()
     {
-        ж<glyphprobe_package.counter> box = heap(new glyphprobe_package.counter());
+        ж<glyphprobe_package.counter> box = Ꮡ(new glyphprobe_package.counter());
         List<string> functions = FunctionsOf(glyphprobe_package.bumpVia(box));
         string all = string.Join(" | ", functions);
 
@@ -143,7 +144,7 @@ public class GlyphMethodFrameTests
     public void AMethodValueThroughATwinKeepsItsName()
     {
         // Control: a method value's `-fm` name was already read through the holder, and stays.
-        ж<glyphprobe_package.counter> box = heap(new glyphprobe_package.counter());
+        ж<glyphprobe_package.counter> box = Ꮡ(new glyphprobe_package.counter());
         Func<slice<uintptr>> value = box.Bump;
         uintptr pc = reflect_package.ValueOf(value).Pointer();
 
