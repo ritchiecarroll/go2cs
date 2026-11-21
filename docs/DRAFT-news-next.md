@@ -69,6 +69,15 @@ breaks listed first below. A `nugetgo.*` package or other assembly built against
        (inbox/COORD/20261119T211252Z-P1.md; P3's read 20261119T212356Z-P3.md). The rule and the clash list:
        docs/ConversionStrategies.md, "Package main keeps its methods in the package class" (383eeb05c3, b9195efa78);
        the converter 4d22819305 and 3a5109de87; a type a test file adds a method to keeps its holder, a2035f6656. -->
+- **[QUEUED claude/p4-lift-dedup 29f9c49496]** **An anonymous struct or interface type is now one C# type per
+  package.** On every converted platform, a Go struct or interface type written without a name, used in more than
+  one place, converts to one C# type, where it could be one per use. A generated name such as `Box_T` that a
+  hand-written C# program referenced may be gone: use the declared Go type instead. These generated names can
+  change in any release ([Public surface](PublicSurface.md)).
+  <!-- Board (jj): COORD ruling 20261120T174811Z (a lift name that disappears is accepted; tier 3, not under the
+       floor), READY 20261120T174740Z at 8a468aa0db, P3 CLEAR 20261120T175038Z; ruling duties at 29f9c49496. The
+       behavioral move: InlineConstraintLift's Box_T and pair_T now reuse Show_T. Standard-library footprint 0 files on
+       windows/amd64, linux/amd64, darwin/amd64 and linux/arm64. -->
 
 **What changed.**
 
