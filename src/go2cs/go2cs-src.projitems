@@ -319,6 +319,7 @@
     <None Include="$(MSBuildThisFileDirectory)headerDataPointer_test.go" />
     <None Include="$(MSBuildThisFileDirectory)helpDefaultTags_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hostFatalClass_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)hostFatalModuleEvidence_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hostLaunchLoadTime_test.go" />
     <None Include="$(MSBuildThisFileDirectory)hoistedLiteralOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)hoistedLiteralsStamp_test.go" />
@@ -582,6 +583,8 @@
     <None Include="$(MSBuildThisFileDirectory)nugetMapRun_test.go" />
     <None Include="$(MSBuildThisFileDirectory)nugetMapSourceWording_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleBuildFailure_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)oracleLinknamePull_test.go" />
+    <None Include="$(MSBuildThisFileDirectory)oracleTagFileSets_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleArch_test.go" />
     <None Include="$(MSBuildThisFileDirectory)oracleTestArgs_test.go" />
     <None Include="$(MSBuildThisFileDirectory)orphanDisclosureCheck_test.go" />
