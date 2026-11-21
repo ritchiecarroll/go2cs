@@ -1480,6 +1480,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMnDeepUnwind() => CheckTarget("MnDeepUnwind");
 
     [TestMethod]
+    public void CheckMnForeignThread() => CheckTarget("MnForeignThread");
+
+    [TestMethod]
     public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
 
     [TestMethod]

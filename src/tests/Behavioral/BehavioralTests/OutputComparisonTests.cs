@@ -1433,6 +1433,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMnDeepUnwind() => CheckTarget("MnDeepUnwind");
 
     [TestMethod]
+    public void CheckMnForeignThread() => CheckTarget("MnForeignThread");
+
+    [TestMethod]
     public void CheckMnParkedCallers() => CheckTarget("MnParkedCallers");
 
     [TestMethod]
