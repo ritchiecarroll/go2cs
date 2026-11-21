@@ -208,6 +208,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckArrayValueCopySites() => CheckTarget("ArrayValueCopySites");
 
     [TestMethod]
+    public void CheckArrayViewWholeAssign() => CheckTarget("ArrayViewWholeAssign");
+
+    [TestMethod]
     public void CheckArrayWideIndexAddress() => CheckTarget("ArrayWideIndexAddress");
 
     [TestMethod]
