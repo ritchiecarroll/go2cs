@@ -343,8 +343,10 @@ const cgoP3WriteThrough = "which C must not write through"
 // cgoP3LayoutEntry and cgoP3LayoutEntryPointer are go2cs's refusal of a read of native memory as a Go type whose CLR
 // layout is not its Go layout (golib RuntimeErrorPanic.cs: "cannot read native memory as {0}: its CLR layout is not
 // its Go layout ({1})"), each pinned to the TYPE its rows read; the parenthesised reason is left unpinned. Their text
-// names no increment. Increment 3.2 retires both: each row asserting one becomes a row with no csFails when 3.2 reads
-// it. Hosted reading, os-matrix run 44883224786, the same on all five targets: s6nextnil exits 2 with
+// names no increment. Increment 3.2 retires cgoP3LayoutEntry: its three rows become rows with no csFails when 3.2's
+// field accessor reads them. cgoP3LayoutEntryPointer is s6next's designed end state, not a pin 3.2 retires: the
+// address of a C struct's pointer field (&l.next over C memory) stays refused in 3.2 by the reference floor
+// (DESIGN-cgo-phase3-marshaling 18.4 finding 1), until a later increment routes **C.T loads. Hosted reading, os-matrix run 44883224786, the same on all five targets: s6nextnil exits 2 with
 // "panic: runtime error: cannot read native memory as main._Ctype_struct_go2cs_probe_entry: its CLR layout is not its
 // Go layout (field next is a managed reference where Go stores the value inline)"; s6next exits 2 with "panic: runtime
 // error: cannot read native memory as *main._Ctype_struct_go2cs_probe_entry: its CLR layout is not its Go layout (a
@@ -408,7 +410,8 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "goviewnamedata", csFails: cgoP3WriteThrough},
 		// Increment 3.2's first reds (section 6). s6field, s6reinterp and s6slice print as Go does. The four with csFails
 		// are pinned to go2cs's refusal as the hosted legs read it, the same on all five targets (os-matrix run
-		// 44883224786; the readings are at cgoP3LayoutEntry); 3.2 retires each pin, and that change is 3.2's red.
+		// 44883224786; the readings are at cgoP3LayoutEntry). 3.2 retires the three cgoP3LayoutEntry pins, and that change
+		// is 3.2's red; s6next's pin is its refusal as 18.4 finding 1 rules it, and stays.
 		{name: "s6field"},
 		{name: "s6next", csFails: cgoP3LayoutEntryPointer},
 		{name: "s6nextnil", csFails: cgoP3LayoutEntry},
