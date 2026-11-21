@@ -2465,11 +2465,16 @@ increment", which retires s6next's pin. It is placed in .6 beside the resolver. 
   code, handing C a Go pointer to store is itself refused by 3.1's door ("increment 3.2") before any field read, so no
   e2e program reaches the read refusal until 1b.
 
-### 18.11 Amendment 2026-11-21: seat 1c, the `**C.T` load and store over C memory (posted for P3's review before code; .6)
+### 18.11 Amendment 2026-11-21: seat 1c, the `**C.T` load and store over C memory (P3: APPROVE WITH CHANGES, folded in before code; .6)
 
-18.10 places 1c in .6 beside the resolver. COORD's GO (2026-11-21) asks for this design first and P3's review before any
-code. 1c retires the last section-6 pin, s6next (`cgoP3LayoutEntryPointer`, src/go2cs/cgoPhase3_test.go:356). It
-stacks on 1a (`claude/h-cgo-sb2a` at `01ecb22bb9`), because it reuses 1a's word protocol, and it is cut after 1a lands.
+18.10 places 1c in .6 beside the resolver. COORD's GO (2026-11-21) asked for this design first and P3's review before
+any code. 1c retires the last section-6 pin, s6next (`cgoP3LayoutEntryPointer`, src/go2cs/cgoPhase3_test.go:356). It
+stacks on 1a (`claude/h-cgo-sb2a`), because it reuses 1a's word protocol, and it is cut on the FOLDED 1a (stop line
+[P3 N7]).
+
+P3 reviewed the first text, `dd80470936` (COORD inbox `20261121T211936Z-P3.md`): APPROVE WITH CHANGES, with one MUST (an
+arm), four SHOULDs and two NITs. COORD ruled all of them into this text before code. Each is marked where it lands:
+[P3 M1], [P3 S2] to [P3 S5], [P3 N6] and [P3 N7]. P3 agreed with Q1 to Q3 as proposed. Their answers are at the end.
 
 **The shape today, read at 1a's tip.**
 - `p := &l.next` emits `l.of(_Ctype_struct_go2cs_probe_entry.Ꮡnext)`. Over a native receiver, `nativeFieldView`
@@ -2489,9 +2494,13 @@ stacks on 1a (`claude/h-cgo-sb2a` at `01ecb22bb9`), because it reuses 1a's word 
   - This is the same name test 1a's marker reads (cgoDeclarations.go:313), so "a C type" has one meaning across both
     seats.
   - net's alias `_C_struct_addrinfo = C.struct_addrinfo` (cgo_unix_cgo.go:61) resolves to it.
+  - [Q3, P3] The `cgoType` kind puts `**C.char` on the door, so an argv walk is covered.
+  - [Q3, P3] A DEFINED pointer typedef as the pointee (`*_Ctype_xptr`, where P is a named type and not `*U`) is NOT on
+    the door. Its C# type is a pointer wrapper, which 1a also leaves out by name.
 - These keep their emission:
-  - a tuple assignment target (`*p, x = a, b`), as in W1;
-  - a ref-lowered parameter, as in W1: it is a C# `ref` to a managed slot and has no box;
+  - a tuple assignment target (`*p, x = a, b`), as in W1. Over a native slot it reaches the floor, which is asserted
+    ([P3 S3]; see "Not in 1c");
+  - a ref-lowered parameter, as in W1: it is a C# `ref` to a managed slot and has no box ([P3 S2]; see "Not in 1c");
   - every other pointee;
   - every package off the cgo route. So the stdlib and the behavioral corpus move 0 lines.
 - Unlike W1, there is NO provably-managed-slot exemption (W1's shapes (a) and (b)). The population is cgo packages
@@ -2513,8 +2522,19 @@ the load mints.
 
 **3. The load** (golib, `GoCgoArgs.LoadPointer<U>(ж<ж<U>> p)`).
 - p is nil: Go's nil dereference panic.
-- p is not a `NativeBox<ж<U>>` (a variable, a field view of a C struct Go allocated, an element): `p.Value`, exactly
-  today's read.
+- [P3 M1] p is a field view whose source is native (`INativeRooted.IsNativeRooted` on the FieldRefBox).
+  - This is `&l.next` where the field has no known Go offset: `of` keeps the view there (ж.cs:276, "a root whose
+    field offset cannot be known keeps its view").
+  - It is refused by name, before any read, with 1a's RequireGoFieldOffset text ("field ... has no known Go offset").
+  - P3 read that `.Value` would reach the layout floor anyway, through the view's source (ж.FieldRefBox.cs:147 into
+    NativeBox<T>.Value). The door does not rely on that read, for two reasons:
+    - 1a guards exactly this receiver on its own field path (RequireGoFieldOffset, ж.CgoFields.cs:77).
+    - The layout floor refuses only a T whose mismatch golib can prove (`s_layoutMismatch`). An unknown offset is the
+      case where golib may not know T's Go layout at all, and then `.Value` would return the CLR slot of a struct in
+      C memory.
+  - So the guard is unconditional, and E-2's row reads it red first.
+- p is any other non-`NativeBox<ж<U>>` (a variable, a field view of a C struct Go allocated, an element): `p.Value`,
+  exactly today's read.
 - p is a `NativeBox<ж<U>>`: `GoPointerWords.Classify`, as 1a's `CgoPointerFieldSlot` does (ж.CgoFields.cs:88).
   - Unheld: refused with S-B1's UnheldSlotText, word for word (18.10 delta U).
   - CMemory or GoMemory: read the word. 0 is nil. A word that Go memory names is refused with
@@ -2527,14 +2547,14 @@ the load mints.
 
 **4. The store** (`GoCgoArgs.StorePointer<U>(ж<ж<U>> p, ж<U> v)`).
 - p is nil: Go's nil dereference panic.
-- A managed p: `p.Value = v`, today's store.
+- [P3 M1] A native-rooted field view is refused, as in 3, with nothing written.
+- Any other managed p: `p.Value = v`, today's store.
 - A native p: Classify first, and Unheld is refused. Then:
   - nil writes 0;
   - a value that is C memory alone writes its address. `GoPointerWords.IsCMemoryAlone` decides: a `NativeBox<U>`, or
-    an element of a native-backed slice that has no anchor. This is 1a's store once P3's SHOULD 1 on 1a is folded in
-    (COORD, 2026-11-21). At `01ecb22bb9`, 1a admits a `NativeBox<U>` only;
+    an element of a native-backed slice that has no anchor. This is 1a's store as folded with P3's SHOULD 1 on 1a;
   - anything else is refused with `CgoFieldStoreIntoCText` or `CgoFieldStoreOverGoText`, by kind.
-- This is 1a's field store (ж.CgoFields.cs:119-132), on the same core.
+- This is 1a's field store, on the same core.
 
 **5. Not changed.**
 - `&x.f`'s emission and its box (ж.cs:276).
@@ -2550,24 +2570,44 @@ at the same site.
 - The row `ж.CgoFields.cs|CgoPointerFieldRead` (interiorPointerMintCensus_test.go:128) is RE-KEYED to the core, with
   count 1. It is re-keyed, never retired.
 
-**Not in 1c (named).**
+**Not in 1c (named).** Each stays loud, never silent.
 - darwin's resolver. cgo_unix_syscall.go:40 declares `_C_struct_addrinfo = unix.Addrinfo`, and :56 returns `&ai.Next`.
   That is a plain Go type in a package off the cgo route, so it is outside the predicate by construction. Its walk
   over libc's memory is the resolver increment's route, and 1c does not claim it.
 - The out-parameter `res **_C_struct_addrinfo` handed to C (cgo_unix_cgo.go:83). It is an argument, so it belongs to
   the argument door (3.1). 1c is the load and the store in Go code.
+- [P3 S2] The same idiom inside Go code: `func set(pp **C.struct_e, v *C.struct_e) { *pp = v }`, called as
+  `set(&l.next, v)` with l in C memory.
+  - If the converter ref-lowers `pp`, the call site builds a C# `ref` from the native box and reaches the floor.
+  - If it does not, `*pp = v` in `set` takes the door, and the call works.
+  - If it emits a `ref` to 1a's GET/SET property, that is 1a's stop line (a compile error), and it is posted before
+    any workaround.
+  - E-3's `s6nextset` reads which of the three happens, and the expected one is the floor.
+- [P3 S3] A tuple target over a native slot, `*pp, n = v, 1`. It keeps `.val`, and the floor refuses it by name
+  (E-2 and E-3's `s6nexttuple`).
+- [P3 N6] A slice of `*C.T` over C memory, `unsafe.Slice(argv, n)`. It stays refused at the slice door, because its
+  element holds a reference (slice.cs:329, unsafe.cs:1063).
 - A `**T` whose T is a Go type, reinterpreted over C memory. It stays the reference floor's refusal.
 - A Pinner-pinned Go pointer: 18.9's deviation 8b applies unchanged.
 
 **Arms.** Each is red before its code: red first, and every gate made to fail once.
 - E-1, converter (the offline cgo fixture):
   - `*p` and `*p = v`, for p a `**C.struct_x`, emit the two calls.
+  - [P3 S4] The load in positions other than a statement. Each takes the door or is a named exclusion, as listed:
+    - `&*pp` is not a load. It emits pp itself after its nil check (convUnaryExpr.go:516), with no `LoadPointer`.
+    - `(*pp).family = 3` takes the door. The base is a load and the field store is 1a's, so the emission is
+      `LoadPointer(pp).family = 3`. Only the outermost star of an assignment target is a store.
+    - `f(*pp)`, where f's `*C.T` parameter is ref-lowered, takes the door for `*pp`. What the callee's `ref` then does
+      with the C struct is the layout floor's, as for any C struct reached by ref (1a's scope), so it is a named
+      exclusion.
+    - `*pp` inside a closure takes the door.
+    - `**C.char` takes the door ([Q3]). A defined pointer typedef `*_Ctype_xptr` keeps `.val`.
   - Controls that keep `.val`:
     - (a) `**T`, T a Go struct in the same cgo package;
     - (b) a hand-written `_Ctype_struct_x` in a package that does not import "C" (1a's D-3b near-miss);
     - (c) a tuple target;
     - (d) a `*unsafe.Pointer`, which keeps W1;
-    - (e) a ref-lowered `**C.T` parameter.
+    - (e) a ref-lowered `**C.T` parameter. [P3 S2] It is run over a native receiver as E-3's `s6nextset`.
 - E-2, GolibTests:
   - the load and the store over Classify's four receivers (18.9 arm 5): a bare C root, a minted root, a pinned-Go root,
     and a managed receiver;
@@ -2575,7 +2615,12 @@ at the same site.
   - a word naming Go memory, refused on load with both texts;
   - a Go pointer, refused on store with both texts;
   - Unheld, through Reinterpret over a Go `slice<byte>`, refused on load and on store;
-  - the managed round trip through the door, which must be identical to `.Value` (18.9 arm 8's twin).
+  - the managed round trip through the door, which must be identical to `.Value` (18.9 arm 8's twin);
+  - [P3 M1] a native receiver, an accessor with no Go offset, then `of`, then LoadPointer and StorePointer: both refused
+    by name, with all of the struct's bytes unwritten;
+  - [P3 S3] the tuple target's emitted shape, `pp.Value = v` over a native `NativeBox<ж<U>>`: the floor's text, once;
+  - [P3 S5] the chained arm across the two seats. A C struct field of type `**C.T` is read through 1a's accessor,
+    which mints a `NativeBox<ж<U>>`. That box classifies as CMemory, and `*e.pp` loads and stores through the door.
 - E-3, e2e (testdata/cgo/p3; read only on the hosted legs, since H has no C compiler):
   - s6next's pin is removed, and it prints `s6next 10 b` (18.1's table).
   - `s6nextstore` stores through `pp := &l.next`: nil, then the C pointer back. C reads each through
@@ -2586,11 +2631,18 @@ at the same site.
     `func entryNext(e *C.struct_go2cs_probe_entry) **C.struct_go2cs_probe_entry { return &e.next }`, then
     `for r := l; r != nil; r = *entryNext(r)`, counting the nodes and summing the families. It prints
     `s6nextwalk 2 12`.
+  - [P3 S2] `s6nextset`: `set(&l.next, second)` through the out-parameter helper above. Go prints what C reads back.
+    go2cs is expected to refuse with the floor's text (csFails `cgoP3LayoutEntryPointer`, a named deviation). The
+    other two outcomes are scored as worded in "Not in 1c".
+  - [P3 S3] `s6nexttuple`: `*pp, n = second, 1`. Go stores it, and go2cs refuses with the floor's text (csFails
+    `cgoP3LayoutEntryPointer`, a named deviation).
 
 **Predictions** (scored as worded, at the cut):
 - D-1: corpus footprint 0 files on four targets, by the two-seeded reconvert.
-- D-2: E-3's four arms print what Go prints on 5 RIDs, and s6next's pin is removed in the seat. s6field, s6nextnil,
-  s6nextdirect, s6name, s6reinterp, s6slice, s6store and s6storego are unchanged.
+- D-2: on 5 RIDs, s6next, `s6nextstore` and `s6nextwalk` print what Go prints, and s6next's pin is removed in the seat.
+  - `s6nextstorego` is refused by name.
+  - `s6nextset` and `s6nexttuple` are refused with the floor's text.
+  - s6field, s6nextnil, s6nextdirect, s6name, s6reinterp, s6slice, s6store and s6storego are unchanged.
 - D-5: go2cs-gen's output is byte-identical (the D-5 generated-file diff, base against cut).
 - D-6: PublicSurface.golib.txt gains 0 lines. The mint census keeps its count, with one row re-keyed.
 - Counts (GolibTests, GenTests, converter suite, CNR) are posted before the battery, derived at the cut. CNR's population
@@ -2602,15 +2654,21 @@ at the same site.
 - The door's managed arm differs from `.Value` (E-2's round trip).
 - A new box kind, or any change to `&x.f`'s emission.
 - PublicSurface.golib.txt gains a line.
-- A `**C.T` dereference that the door does not reach reads anything but the floor's refusal.
+- A `**C.T` dereference that the door does not reach reads anything but the floor's refusal (E-2's M1 and S3 rows,
+  and E-3's `s6nextset` and `s6nexttuple`).
+- [P3 N7] 1c's core is cut on the FOLDED 1a: 1a carrying P3's SHOULD 1 (the store admits C memory alone by
+  `IsCMemoryAlone`). It is never cut on `01ecb22bb9`.
+- `s6nextset` compiles to a `ref` to 1a's GET/SET property. That is 1a's own stop line, and it is posted before any
+  workaround.
 
-**Questions for P3.**
-- Q1, placement: two members on `GoCgoArgs`, or a new `go.golib` type? Proposed: `GoCgoArgs`. It is the cgo seam's
-  hidden helper class, the converter already names it, and it adds no surface line.
-- Q2, no managed-slot exemption. Proposed: none. The cost is that, in a cgo package, `*pp` for a local
-  `pp := &x` (x a Go variable of type `*C.T`) emits the call, with identical behaviour on the managed arm. If P3 wants
-  W1's shape (b), it is a converter-only addition.
-- Q3, the predicate on U: only types cmd/cgo declares (as 1a), or any `**T` on the cgo route? Proposed: cmd/cgo's types
-  only. The wider predicate puts Go-typed dereferences on the door, and no arm needs that.
+**Questions for P3, and P3's answers.**
+- Q1, placement: two members on `GoCgoArgs`, or a new `go.golib` type? Proposed `GoCgoArgs`, because it is the cgo
+  seam's hidden helper class, the converter already names it, and it adds no surface line.
+  P3: agreed. The PublicSurface stop line guards it.
+- Q2, no managed-slot exemption. Proposed none. The cost is that, in a cgo package, `*pp` for a local `pp := &x` (x a
+  Go variable of type `*C.T`) emits the call, with identical behaviour on the managed arm.
+  P3: agreed. The managed arm is `.Value`, and a cgo package is a small population.
+- Q3, the predicate on U: only types cmd/cgo declares, or any `**T` on the cgo route? Proposed cmd/cgo's types only.
+  P3: agreed, with the two sentences folded into item 1 (`**C.char` is in; a defined pointer typedef is out).
 
 — H (2026-11-21)
