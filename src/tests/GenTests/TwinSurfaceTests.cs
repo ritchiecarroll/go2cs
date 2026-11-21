@@ -359,15 +359,19 @@ public class TwinSurfaceTests
 
         """;
 
-    // Each twin member's name, parameter and result types and names, and its attributes, less the compiler's own
-    // implementation marks (a state machine's, nullable context): the surface a caller binds.
+    // Each twin member's name, parameter and result types and names, and its attributes, less the implementation marks
+    // (a state machine's, nullable context): the surface a caller binds. M:N item 7d's [GoTwinOf] stamp and the
+    // [DynamicDependency] that keeps its origin through trimming are implementation marks too (train 3): the rewriter
+    // writes them on every STATE-MACHINE twin, for the runtime to name a parked frame's Go function and line, and no
+    // caller binds them. A forwarder never parks, so it carries neither. [GoParkForwarder] stays in: it is binding advice.
     private static string[] TwinMetadata(string shapes)
     {
         (_, Diagnostic[] errors) = RunWith(null, null, shapes);
         Assert.AreEqual(0, errors.Length, Errors(errors));
 
         System.Reflection.Assembly built = System.Reflection.Assembly.Load(LastImage!);
-        string[] internals = ["AsyncStateMachineAttribute", "NullableContextAttribute", "NullableAttribute", "DebuggerStepThroughAttribute", "ScopedRefAttribute"];
+        string[] internals = ["AsyncStateMachineAttribute", "NullableContextAttribute", "NullableAttribute", "DebuggerStepThroughAttribute", "ScopedRefAttribute",
+                              "GoTwinOfAttribute", "DynamicDependencyAttribute"];
 
         return built.GetType("go.box_package", throwOnError: true)!
             .GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)

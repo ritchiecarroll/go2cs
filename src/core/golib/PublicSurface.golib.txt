@@ -21,16 +21,6 @@
 #
 # A [go-tier2] addition, and any change to [tier1] or [tier1-members] outside the deprecation path, needs a COORD
 # ruling, cited in a comment line beside it.
-#
-# [mn-frozen] The M:N members generated code names in every converted assembly, which hold across a break floor:
-# "<type> :: ctor (<parameter types>)" for each public constructor and "<type> :: usage <targets>, AllowMultiple=<b>,
-# Inherited=<b>" for an attribute. A line that moves, or a constructor added, reads red by the line.
-
-[mn-frozen]
-# G's ruling on M:N item 7d (2026-11-20): the [GoTwinOf] stamp, docs/phase4/DATA-mn-origin-table.md
-# G 2026-11-21: a second int[], the call ordinals, before it shipped (one array, one meaning)
-go.golib.GoTwinOfAttribute :: ctor (System.Type, System.String, System.Type[], System.Int32[], System.Int32[])
-go.golib.GoTwinOfAttribute :: usage Method, AllowMultiple=False, Inherited=False
 
 [tier1]
 go.array`1
@@ -1236,11 +1226,13 @@ go.ж<T> :: property go.PointerStorage StorageKind { get; }
 go.ж<T> :: property static go.ж<T> NilBox { get; }
 
 # [mn-frozen] The M:N surface frozen for L-min (COORD ruling 2026-11-20, on G's 7b ask; the owner ruled L-min the same
-# day): every public or protected member of the six task types and of GoFuncPair, hidden or not, and the named twin
-# entry points (builtin RunMainꞏtwin, goǃtwin, selectꞏtwin, ᐸꟷꞏtwin; channel`1 ᐸꟷꞏtwin), each name's whole overload
-# family. A twin-built assembly binds them, so a line never disappears and changes only where its plain member does
-# (src/tools/mnspike2/TwinRefs/FREEZE-SHEET.md, block 7b). Same spelling as [tier1-members]; GolibTests writes the
-# lines with GO2CS_PUBLIC_SURFACE_MN_FROZEN=<path>. A change here needs a COORD ruling, cited beside it.
+# day): every public or protected member of the six task types, of GoFuncPair, and of the two attributes generated
+# code places or names ([GoParkForwarder], the [GoTwinOf] stamp), hidden or not, with one shape line per type, and
+# the named twin entry points (builtin RunMainꞏtwin, goǃtwin, selectꞏtwin, ᐸꟷꞏtwin; channel`1 ᐸꟷꞏtwin), each
+# name's whole overload family. A twin-built assembly binds them, so a line never disappears and changes only where
+# its plain member does (src/tools/mnspike2/TwinRefs/FREEZE-SHEET.md, block 7b). Same spelling as [tier1-members];
+# GolibTests writes the lines with GO2CS_PUBLIC_SURFACE_MN_FROZEN=<path>. A change here needs a COORD ruling, cited
+# beside it. ONE section: train 3 met two [mn-frozen] headers (7a's and 7d's), so a repeated header now throws.
 
 [mn-frozen]
 go.builtin :: method static System.Void RunMainꞏtwin(System.Action, System.Func<go.golib.GoTask>)
@@ -1301,3 +1293,14 @@ go.golib.GoTaskBuilder<T> :: method System.Void Start<TStateMachine>(ref TStateM
 go.golib.GoTaskBuilder<T> :: method static go.golib.GoTaskBuilder<T> Create()
 go.golib.GoTaskBuilder<T> :: property go.golib.GoTask<T> Task { get; }
 go.golib.GoTaskBuilder<T> :: shape struct
+# G's ruling on M:N item 7d (2026-11-20): the [GoTwinOf] stamp, docs/phase4/DATA-mn-origin-table.md
+# G 2026-11-21: a second int[], the call ordinals, before it shipped (one array, one meaning)
+# Generated code in every converted assembly names its ctor, so these lines hold across a break floor; train 3 folded
+# 7d's own [mn-frozen] block into this one section (G's ruling 2026-11-21), the lines taken from the writer.
+go.golib.GoTwinOfAttribute :: ctor public (System.Type, System.String, System.Type[], System.Int32[], System.Int32[])
+go.golib.GoTwinOfAttribute :: property System.Int32[] AwaitSites { get; }
+go.golib.GoTwinOfAttribute :: property System.Int32[] CallOrdinals { get; }
+go.golib.GoTwinOfAttribute :: property System.String Name { get; }
+go.golib.GoTwinOfAttribute :: property System.Type Host { get; }
+go.golib.GoTwinOfAttribute :: property System.Type[] Parameters { get; }
+go.golib.GoTwinOfAttribute :: shape sealed class; base System.Attribute; usage Method, multiple False, inherited False

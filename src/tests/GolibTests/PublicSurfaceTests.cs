@@ -31,14 +31,16 @@ public class PublicSurfaceTests
 
     private const string HiddenAttribute = "System.ComponentModel.EditorBrowsableAttribute";
 
-    // The file's sections: [tier1], [go-tier2], [builtin] and [tier1-members], each a set of lines.
-    private static Dictionary<string, HashSet<string>> ReadBaseline()
+    // The file's sections: [tier1], [go-tier2], [builtin], [tier1-members] and [mn-frozen], each a set of lines.
+    private static Dictionary<string, HashSet<string>> ReadBaseline() =>
+        ParseBaseline(File.ReadAllLines(Path.Combine(AppContext.BaseDirectory, BaselineFile)));
+
+    private static Dictionary<string, HashSet<string>> ParseBaseline(IEnumerable<string> lines)
     {
-        string path = Path.Combine(AppContext.BaseDirectory, BaselineFile);
         Dictionary<string, HashSet<string>> sections = new(StringComparer.Ordinal);
         HashSet<string>? current = null;
 
-        foreach (string raw in File.ReadAllLines(path))
+        foreach (string raw in lines)
         {
             string line = raw.Trim();
 
@@ -47,6 +49,11 @@ public class PublicSurfaceTests
 
             if (line.StartsWith('[') && line.EndsWith(']'))
             {
+                // A repeated header used to REPLACE the earlier section silently: train 3 met 7a's and 7d's [mn-frozen],
+                // and each side's test read the other's lines. One header, one section.
+                if (sections.ContainsKey(line[1..^1]))
+                    throw new InvalidDataException($"{BaselineFile}: the section {line} appears twice; keep one section of that name");
+
                 current = sections[line[1..^1]] = new HashSet<string>(StringComparer.Ordinal);
                 continue;
             }
@@ -272,15 +279,16 @@ public class PublicSurfaceTests
 
     // ---- [mn-frozen]: the M:N surface frozen for L-min (src/tools/mnspike2/TwinRefs/FREEZE-SHEET.md, block 7b) -------
     //
-    // Every public or protected member of the six task types and of GoFuncPair, hidden or not, and the named twin entry
-    // points (each name's whole overload family). They are tier 2 by their EditorBrowsable marks, so [tier1-members] does
-    // not see them; a twin-built assembly binds them, so they never disappear and change shape only where their plain
-    // member does. Same spelling as [tier1-members].
+    // Every public or protected member of the six task types, of GoFuncPair, and of the two attributes generated code
+    // places or names (GoParkForwarder; GoTwinOf, M:N item 7d's stamp, folded in at train 3), hidden or not, and the
+    // named twin entry points (each name's whole overload family). They are tier 2 by their EditorBrowsable marks, so
+    // [tier1-members] does not see them; a twin-built assembly binds them, so they never disappear and change shape only
+    // where their plain member does. Same spelling as [tier1-members].
     private static readonly string[] s_mnFrozenTypes =
     [
         "go.golib.GoTask", "go.golib.GoTask`1", "go.golib.GoTaskAwaiter", "go.golib.GoTaskAwaiter`1",
         "go.golib.GoTaskBuilder", "go.golib.GoTaskBuilder`1", "go.golib.GoFuncPair",
-        "go.golib.GoParkForwarderAttribute"
+        "go.golib.GoParkForwarderAttribute", "go.golib.GoTwinOfAttribute"
     ];
 
     private static readonly (string Type, string[] Names)[] s_mnFrozenMembers =
@@ -410,67 +418,31 @@ public class PublicSurfaceTests
         return violations;
     }
 
-    // [mn-frozen]: the lines golib has today for each type the section names.
-    private static HashSet<string> FrozenLines(IEnumerable<string> typeNames)
-    {
-        HashSet<string> lines = new(StringComparer.Ordinal);
-
-        foreach (string name in typeNames)
-        {
-            if (typeof(builtin).Assembly.GetType(name) is not { } type)
-                continue;
-
-            foreach (ConstructorInfo constructor in type.GetConstructors())
-                lines.Add($"{name} :: ctor ({string.Join(", ", constructor.GetParameters().Select(parameter => parameter.ParameterType.FullName))})");
-
-            if (type.GetCustomAttribute<AttributeUsageAttribute>(inherit: false) is { } usage)
-                lines.Add($"{name} :: usage {usage.ValidOn}, AllowMultiple={usage.AllowMultiple}, Inherited={usage.Inherited}");
-        }
-
-        return lines;
-    }
-
-    private static List<string> FrozenViolations(HashSet<string> baseline)
-    {
-        HashSet<string> types = [.. baseline.Select(line => line[..line.IndexOf(" :: ", StringComparison.Ordinal)])];
-        HashSet<string> actual = FrozenLines(types);
-        List<string> violations = [];
-
-        foreach (string line in baseline.Where(line => !actual.Contains(line)).Order(StringComparer.Ordinal))
-            violations.Add($"[mn-frozen] {line}: removed or changed; generated code in every converted assembly names it");
-
-        foreach (string line in actual.Where(line => !baseline.Contains(line)).Order(StringComparer.Ordinal))
-            violations.Add($"[mn-frozen] {line}: not in the frozen baseline");
-
-        return violations;
-    }
-
-    // M:N item 7d: the stamp generated code names holds its shape (G's condition 1).
+    // M:N item 7d: the [GoTwinOf] stamp holds its shape (G's condition 1). Generated code in every converted assembly
+    // names its ctor, so its lines hold across a break floor. Since train 3 they sit in the ONE [mn-frozen] section, on
+    // its predicate (ctor, properties and a shape line with the AttributeUsage), and GolibsPublicSurfaceMatchesItsBaseline
+    // checks them line for line; this row keeps the stamp named by a test of its own.
     [TestMethod]
-    public void TheFrozenMnSurfaceMatchesItsBaseline()
+    public void TheGoTwinOfStampIsInTheOneFrozenSection()
     {
-        HashSet<string> baseline = ReadBaseline()["mn-frozen"];
-        List<string> violations = FrozenViolations(baseline);
+        const string Stamp = "go.golib.GoTwinOfAttribute :: ";
+        string[] stamp = [.. MnFrozenSignatures().Where(line => line.StartsWith(Stamp, StringComparison.Ordinal))];
 
-        Assert.AreEqual(0, violations.Count, string.Join("\n", violations));
-        Assert.IsTrue(baseline.Count >= 2, "the [mn-frozen] section names the [GoTwinOf] ctor and usage");
+        Assert.IsTrue(stamp.Any(line => line.StartsWith(Stamp + "ctor ", StringComparison.Ordinal)), "no [GoTwinOf] ctor line");
+        Assert.IsTrue(stamp.Any(line => line.StartsWith(Stamp + "shape ", StringComparison.Ordinal) && line.Contains("; usage Method,", StringComparison.Ordinal)),
+            "no [GoTwinOf] shape line with its AttributeUsage");
+        CollectionAssert.IsSubsetOf(stamp, ReadBaseline()["mn-frozen"].ToArray(), "a [GoTwinOf] line is missing from [mn-frozen]");
     }
 
-    // Its negative control: a line that moves is named, both ways.
+    // A repeated section header is refused by name (train 3: two [mn-frozen] headers, the second silently replacing the
+    // first).
     [TestMethod]
-    public void AFrozenMnLineThatMovesIsNamed()
+    public void ARepeatedSectionHeaderIsRefusedByName()
     {
-        HashSet<string> baseline = ReadBaseline()["mn-frozen"];
-        const string Ctor = "go.golib.GoTwinOfAttribute :: ctor (System.Type, System.String, System.Type[], System.Int32[], System.Int32[])";
+        InvalidDataException refusal = Assert.ThrowsException<InvalidDataException>(() =>
+            ParseBaseline(["[tier1]", "go.string", "[mn-frozen]", "a :: ctor public ()", "", "[mn-frozen]", "b :: ctor public ()"]));
 
-        Assert.IsTrue(baseline.Remove(Ctor));
-        baseline.Add("go.golib.GoTwinOfAttribute :: ctor (System.Type, System.String)");
-
-        CollectionAssert.AreEquivalent(new[]
-        {
-            "[mn-frozen] go.golib.GoTwinOfAttribute :: ctor (System.Type, System.String): removed or changed; generated code in every converted assembly names it",
-            $"[mn-frozen] {Ctor}: not in the frozen baseline"
-        }, FrozenViolations(baseline));
+        StringAssert.Contains(refusal.Message, "the section [mn-frozen] appears twice");
     }
 
     [TestMethod]
