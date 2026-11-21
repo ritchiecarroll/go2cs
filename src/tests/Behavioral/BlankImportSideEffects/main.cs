@@ -1,8 +1,8 @@
 namespace go;
 
 using fmt = fmt_package;
-// blank import: BlankImportSideEffects.jpeglike_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
-// blank import: BlankImportSideEffects.pnglike_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "BlankImportSideEffects/jpeglike" (init forced in ImportInitializers)
+// import _ "BlankImportSideEffects/pnglike" (init forced in ImportInitializers)
 using registry = BlankImportSideEffects.registry_package;
 using BlankImportSideEffects;
 

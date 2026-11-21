@@ -810,7 +810,9 @@ The standard library follows the same rule. `unicode/utf8` is `utf8_package` in 
 **An import becomes a `using` alias named for the package.** Converted code keeps calling
 `registry.Count()`, exactly as in Go. The importer also opens the package's namespace
 (`using BlankImportSideEffects;`), because C# finds extension methods, and so Go methods, only through an
-open namespace. A blank import emits only a comment, since a `using _` alias would take over C#'s discard `_`:
+open namespace. A blank import emits no `using`. It becomes a comment that repeats the Go line and says what
+happens to the package's `init`; here both packages are forced to initialize
+([reference](ConversionStrategies-Reference/package-conversion.md#an-import-forces-the-imported-packages-init-to-run)):
 
 <!-- source: src/tests/Behavioral/BlankImportSideEffects/main.go:10-18 -->
 ```go
@@ -829,8 +831,8 @@ import (
 namespace go;
 
 using fmt = fmt_package;
-// blank import: BlankImportSideEffects.jpeglike_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
-// blank import: BlankImportSideEffects.pnglike_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "BlankImportSideEffects/jpeglike" (init forced in ImportInitializers)
+// import _ "BlankImportSideEffects/pnglike" (init forced in ImportInitializers)
 using registry = BlankImportSideEffects.registry_package;
 using BlankImportSideEffects;
 
