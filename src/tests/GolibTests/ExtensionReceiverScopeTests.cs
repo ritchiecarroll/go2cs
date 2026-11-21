@@ -22,6 +22,11 @@ namespace GolibTests;
 // The fixture is that shape in miniature, compiled here: a package (`l3fx`), its `-tests` host (`l3fx.tests`) declaring
 // methods on the package's types and on its own, an unrelated package (`l3fx.other`), and a receiver type the host was
 // built against in one assembly (`l3fx.facade`) that has since moved to another (`l3fx.moved`), leaving a type forwarder.
+//
+// The scan is also scoped by the receiver's KEY (docs/phase4/DESIGN-startup-method-sets.md, arm A1): a question reads
+// only the host classes whose receivers are its element, a type it derives from or an interface it implements, or carry
+// no key. `l3fx.keys` holds one host class per receiver shape whose reading the key must agree with the method-set rule
+// on: `Nullable<E>`, a generic base, a generic interface, and each public pointer-box subclass.
 [TestClass]
 public class ExtensionReceiverScopeTests
 {
@@ -33,6 +38,10 @@ public class ExtensionReceiverScopeTests
             public struct pair<K, V> { }
             public interface shape { }
             public struct circle : shape { }
+            public class basecls<T> { }
+            public class derived : basecls<int> { }
+            public interface gshape<T> { }
+            public struct gcircle : gshape<int> { }
         }
         """;
 
@@ -82,6 +91,23 @@ public class ExtensionReceiverScopeTests
         }
         """;
 
+    // One class per receiver shape, so that no class is read on another receiver's account. No listing: the walk reads
+    // these receivers' keys from the signatures.
+    private const string KeysSource =
+        """
+        namespace go.fx
+        {
+            public static class keys_nullable_package { public static int Maybe(this point? p) => 9; }
+            public static class keys_base_package { public static int Base(this basecls<int> b) => 10; }
+            public static class keys_interface_package { public static int GArea(this gshape<int> s) => 11; }
+            public static class keys_standard_package { public static int Standard(this StandardBox<point> p) => 12; }
+            public static class keys_slotted_package { public static int Slotted(this SlottedStandardBox<point> p) => 13; }
+            public static class keys_static_package { public static int Static(this StaticBox<point> p) => 14; }
+            public static class keys_native_package { public static int Native(this NativeBox<point> p) => 15; }
+            public static class keys_element_package { public static int Element(this ElemRefBox<point> p) => 16; }
+        }
+        """;
+
     private sealed class FixtureContext() : AssemblyLoadContext("l3-receiver-scope", isCollectible: false)
     {
         public readonly Dictionary<string, byte[]> Images = [];
@@ -91,9 +117,9 @@ public class ExtensionReceiverScopeTests
             name.Name is { } simple && Images.TryGetValue(simple, out byte[]? image) ? LoadFromStream(new MemoryStream(image)) : null;
     }
 
-    private sealed record Fixture(Assembly Package, Assembly Tests, Assembly Other, Assembly Moved)
+    private sealed record Fixture(Assembly Package, Assembly Tests, Assembly Other, Assembly Moved, Assembly Keys)
     {
-        public Assembly[] All => [Package, Tests, Other, Moved];
+        public Assembly[] All => [Package, Tests, Other, Moved, Keys];
 
         public Type Type(string name) => All.Select(assembly => assembly.GetType(name)).Single(type => type is not null)!;
     }
@@ -114,6 +140,7 @@ public class ExtensionReceiverScopeTests
         byte[] facadeNow = Compile("l3fx.facade", ForwarderSource, [.. framework, MetadataReference.CreateFromImage(moved)]);
         byte[] tests = Compile("l3fx.tests", TestsSource, [.. framework, MetadataReference.CreateFromImage(package), MetadataReference.CreateFromImage(facadeThen)]);
         byte[] other = Compile("l3fx.other", OtherSource, framework);
+        byte[] keys = Compile("l3fx.keys", KeysSource, [.. framework, MetadataReference.CreateFromImage(package)]);
 
         FixtureContext context = new();
         context.Images["l3fx"] = package;
@@ -121,10 +148,11 @@ public class ExtensionReceiverScopeTests
         context.Images["l3fx.facade"] = facadeNow;
         context.Images["l3fx.tests"] = tests;
         context.Images["l3fx.other"] = other;
+        context.Images["l3fx.keys"] = keys;
 
         Assembly load(string name) => context.LoadFromAssemblyName(new AssemblyName(name));
 
-        return new Fixture(load("l3fx"), load("l3fx.tests"), load("l3fx.other"), load("l3fx.moved"));
+        return new Fixture(load("l3fx"), load("l3fx.tests"), load("l3fx.other"), load("l3fx.moved"), load("l3fx.keys"));
     }
 
     private static byte[] Compile(string name, string source, IEnumerable<MetadataReference> references)
@@ -235,7 +263,7 @@ public class ExtensionReceiverScopeTests
             return TypeExtensions.CollectGoMethodSetCandidates(fixture.Type("go.fx.point"), true, null);
         });
 
-        CollectionAssert.AreEquivalent(new[] { "Generate", "Scale" }, candidates.Select(method => method.Name).Distinct().ToArray(), "the *point method set");
+        CollectionAssert.AreEquivalent(new[] { "Generate", "Scale" }, candidates.Where(method => method.DeclaringType!.Assembly == fixture.Tests).Select(method => method.Name).Distinct().ToArray(), "the *point method set's bridge methods");
         CollectionAssert.Contains(read, "go.fx.fx_internal_test_package", "control: the bridge host was read");
         CollectionAssert.DoesNotContain(read, "go.other.other_package", "a question about go.fx.point read an unrelated package's methods");
     }
@@ -246,7 +274,13 @@ public class ExtensionReceiverScopeTests
     public void EveryFixtureAnswerIsTheFullScans()
     {
         Fixture fixture = s_fixture.Value;
-        Type[] questions = [.. fixture.All.SelectMany(assembly => assembly.GetTypes())];
+        Type point = fixture.Type("go.fx.point");
+        Type[] questions =
+        [
+            .. fixture.All.SelectMany(assembly => assembly.GetTypes()),
+            typeof(Nullable<>).MakeGenericType(point),
+            .. ((Type[])[typeof(ж<>), typeof(StandardBox<>), typeof(StaticBox<>), typeof(NativeBox<>), typeof(ElemRefBox<>)]).Select(box => box.MakeGenericType(point))
+        ];
 
         string[] mismatches = WithScanOf(fixture.All, () => Mismatches(questions));
         Assert.AreEqual(0, mismatches.Length, string.Join("\n", mismatches));
@@ -258,6 +292,84 @@ public class ExtensionReceiverScopeTests
         Type closedPair = fixture.Type("go.fx.pair`2").MakeGenericType(typeof(int), typeof(string));
         Assert.AreEqual("First", string.Join(",", WithScanOf(fixture.All, () => TypeExtensions.CollectGoMethodSetCandidates(closedPair, false, null)).Select(method => method.Name)),
             "control: a generic receiver is reached by its definition");
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // Receiver keys
+    // ---------------------------------------------------------------------------------------------
+
+    // The walk keys each receiver by the type the method-set rule reads it as: a generic base or interface by its
+    // definition, a box subclass by what it holds. `Nullable<E>` has no key, so its class is read for every question.
+    [TestMethod]
+    public void TheWalkKeysEachReceiverAsTheMethodSetRuleReadsIt()
+    {
+        Fixture fixture = s_fixture.Value;
+        Dictionary<string, TypeExtensions.ExtensionHost> hosts = TypeExtensions.WalkedExtensionHosts(fixture.Keys)!.ToDictionary(host => host.Type.Name);
+
+        TypeExtensions.ReceiverKey key(string name)
+        {
+            Type type = fixture.Type(name);
+            return new TypeExtensions.ReceiverKey(type.Module, type.MetadataToken);
+        }
+
+        Assert.IsNull(hosts["keys_nullable_package"].Receivers, "Nullable<point> has no key");
+        CollectionAssert.AreEqual(new[] { key("go.fx.basecls`1") }, hosts["keys_base_package"].Receivers, "basecls<int>");
+        CollectionAssert.AreEqual(new[] { key("go.fx.gshape`1") }, hosts["keys_interface_package"].Receivers, "gshape<int>");
+
+        foreach (string box in (string[])["keys_standard_package", "keys_slotted_package", "keys_static_package", "keys_native_package", "keys_element_package"])
+        {
+            CollectionAssert.AreEqual(new[] { key("go.fx.point") }, hosts[box].Receivers, box);
+            CollectionAssert.AreEqual(new[] { fixture.Package }, hosts[box].Homes, $"{box}: homed with point");
+        }
+    }
+
+    // Each receiver shape is reached by the question the method-set rule matches it to, and a class whose receivers the
+    // question cannot match is not read.
+    [TestMethod]
+    public void AQuestionReadsOnlyTheHostsOfItsKeys()
+    {
+        Fixture fixture = s_fixture.Value;
+
+        Assert.AreEqual("Maybe", answer(fixture.Type("go.fx.point"), false), "Nullable<point> receiver, point question (assignability)");
+        Assert.AreEqual("Maybe", answer(typeof(Nullable<>).MakeGenericType(fixture.Type("go.fx.point")), false), "Nullable<point> question");
+        Assert.AreEqual("Base", answer(fixture.Type("go.fx.derived"), false), "generic base");
+        Assert.AreEqual("GArea", answer(fixture.Type("go.fx.gcircle"), false), "generic interface");
+        Assert.AreEqual("Element, Maybe, Native, Scale, Slotted, Standard, Static", answer(fixture.Type("go.fx.point"), true), "box subclasses, *point question");
+
+        List<string> read = [];
+
+        WithScanOf(fixture.All, () =>
+        {
+            TypeExtensions.HostReadProbeForTest = host => read.Add(host.Name);
+            return TypeExtensions.CollectGoMethodSetCandidates(fixture.Type("go.fx.point"), true, null);
+        });
+
+        CollectionAssert.Contains(read, "keys_native_package", "control: a box subclass's class was read");
+        CollectionAssert.DoesNotContain(read, "keys_base_package", "a question about point read a class homed with it whose receivers are not point's");
+
+        string answer(Type question, bool isPointer) =>
+            string.Join(", ", WithScanOf(fixture.All, () => TypeExtensions.CollectGoMethodSetCandidates(question, isPointer, null))
+                .Where(method => method.DeclaringType!.Assembly == fixture.Keys || method.Name == "Scale").Select(method => method.Name).Distinct().Order(StringComparer.Ordinal));
+    }
+
+    // error<T>'s own lookup (TypeAssertionError's Error, from error<T>'s static constructor) reads only the classes that
+    // extend its pointee's keys.
+    [TestMethod]
+    public void TheBoxLookupReadsOnlyTheHostsOfItsPointeesKeys()
+    {
+        Fixture fixture = s_fixture.Value;
+        Type point = fixture.Type("go.fx.point");
+        Type box = typeof(ж<>).MakeGenericType(point);
+        List<string> read = [];
+
+        MethodInfo? found = WithScanOf(fixture.All, () =>
+        {
+            TypeExtensions.HostReadProbeForTest = host => read.Add(host.Name);
+            return TypeExtensions.GetBoxExtensionMethod(point, box, "Scale");
+        });
+
+        Assert.AreEqual("fx_internal_test_package.Scale(ж`1)", found is null ? "none" : $"{found.DeclaringType!.Name}.{found.Name}({found.GetParameters()[0].ParameterType.Name})");
+        CollectionAssert.DoesNotContain(read, "keys_base_package", "the box lookup read a class whose receivers are not its pointee's");
     }
 
     // Every converted src/core assembly this project reaches, with the fixture: for every type each declares, both

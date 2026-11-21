@@ -78,13 +78,13 @@ internal static void main() {
 
     strs ss = slice<@string>(["a", "b"]);
     var ls = slice<nint>([4, 5, 6]);
-    var rows = new IntSlice[]{slice<nint>([1, 2]), slice<nint>([3])}.array();
+    var rows = array<IntSlice>([slice<nint>([1, 2]), slice<nint>([3])]);
     var list = slice<IntSlice>([slice<nint>([7]), slice<nint>([8, 9])]);
     fmt.Printf("alias: %v %T %v %T %v %T %v %T\n"u8, ss, ss, ls, ls, rows, rows[1], list, list[0]);
 
     var keyed = new slice<nint>(3){[2] = 5};
-    var arr = new nint[]{1, 2, 3}.array();
-    var pairs = GoReflect.WithElemDims(new array<nint>[]{new nint[]{1, 2}.array(), new nint[]{3, 4}.array()}.slice(), 2);
+    var arr = array<nint>([1, 2, 3]);
+    var pairs = GoReflect.WithElemDims(new array<nint>[]{array<nint>([1, 2]), array<nint>([3, 4])}.slice(), 2);
     fmt.Println("kept:", keyed, arr, pairs, len(pairs[1]));
 }
 

@@ -38,4 +38,4 @@ public static bool Below<T>(this Ord<T> o, T t)
     where T : Ord_T<T>
 { return o.V.Less(t); }
 
-} // end libᴛOrd
+}

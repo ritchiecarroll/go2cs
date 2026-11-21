@@ -5,7 +5,6 @@ using os = os_package;
 using reflect = reflect_package;
 using lib = AotReflectGaps.lib_package;
 using AotReflectGaps;
-using static main_package;
 
 partial class main_package {
 
@@ -18,13 +17,9 @@ partial struct Num {
     public nint N;
 }
 
-} partial class mainᴛNum {
-
 public static (nint, @string) Add(this Num n, nint d, @string label) { return (n.N + d, label); }
 
 public static float64 Scale(this Num n, float64 f) { return (float64)n.N * f; }
-
-} partial class main_package {
 
 partial interface Shaper {
     complex64 Area(int8 a, uint16 b);
@@ -34,11 +29,7 @@ partial struct Ghost {
     public nint X;
 }
 
-} partial class mainᴛGhost {
-
 public static uint32 Haunt(this Ghost g, bool b, rune r) { return (uint32)g.X + (uint32)r; }
-
-} partial class main_package {
 
 internal static void run(@string name, Action f) {
     GoFrame ᒐ = default;

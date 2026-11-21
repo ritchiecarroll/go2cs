@@ -558,4 +558,4 @@ internal static error wrapError(this ref Reader r, nint off, error err) {
     return new zstdErrorжerror(Ꮡ(new zstdError(r.blockOffset + (int64)off, err)));
 }
 
-} // end zstdᴛReader
+}

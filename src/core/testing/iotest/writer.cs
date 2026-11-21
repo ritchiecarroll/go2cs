@@ -41,4 +41,4 @@ internal static (nint n, error err) Write(this ref truncateWriter t, slice<byte>
     return (n, err);
 }
 
-} // end iotestᴛtruncateWriter
+}

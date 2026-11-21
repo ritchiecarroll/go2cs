@@ -1,15 +1,12 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
 partial struct inner {
     internal nint total;
 }
-
-} partial class mainᴛinner {
 
 internal static void Add(this ref inner g, slice<byte> p) {
     foreach (var (_, b) in range(p)) {
@@ -25,8 +22,6 @@ internal static void Store(this ref inner g, /*[4]*/ ж<array<byte>> Ꮡout) {
     @out[2] = (byte)(g.total >> 16);
     @out[3] = (byte)(g.total >> 24);
 }
-
-} partial class main_package {
 
 partial struct acc {
     /*embed*/ internal inner inner;
@@ -45,8 +40,6 @@ partial struct DeepHash {
     /*embed*/ internal deep deep;
 }
 
-} partial class mainᴛHash {
-
 public static void Write(this ref Hash h, slice<byte> p) {
     h.acc.inner.Add(p);
 }
@@ -57,8 +50,6 @@ public static slice<byte> Sum(this ref Hash h, slice<byte> b) {
     h.finalized = true;
     return appendꓸꓸꓸ(b, acc[..]);
 }
-
-} partial class mainᴛDeepHash {
 
 public static bool Verify(this ref DeepHash d, slice<byte> expected) {
     nint acc = 0;
@@ -73,8 +64,6 @@ public static bool Verify(this ref DeepHash d, slice<byte> expected) {
     }
     return acc == len(expected);
 }
-
-} partial class main_package {
 
 internal static array<byte> resetVia(ж<DeepHash> p) {
     ref var acc = ref heap(new array<byte>(4), out var Ꮡacc);

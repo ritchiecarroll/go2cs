@@ -165,11 +165,14 @@ public unsafe class NativeBoxDereferenceCensusControlTests
         }
     }
 
-    // The reference floor's one exemption: unsafe.Pointer over MANAGED Go storage (a box that retains its source). It is
-    // still a reference read out of a word, so the census keeps counting it as B2a, and that row is the population of the
-    // managed-word hazard on the BOARD. The memory read is C memory; the census reads only what the box retains.
+    // The reference floor's exemption is GONE (W4, DESIGN-cgo-phase3-marshaling.md 18.3 to 18.7, seat S-B1): unsafe.Pointer
+    // over MANAGED Go storage (a box that retains its source) is refused like every other reference read out of a word, and
+    // the word doors (unsafe.Pointer.LoadWord / StoreWord) are the only way to the word. So the population this test used to
+    // count, B2a kind=UnsafePointer source=retained, is EMPTY BY DESIGN, and the census reading 0 rows there is the claim.
+    // This is the control that makes that zero a reading: the read is refused BY NAME and the counter does NOT move, so a
+    // zero is a refusal and never a counter that cannot see. The counter's ability to move is driven by the B2a arms above.
     [TestMethod]
-    public void AnUnsafePointerOverManagedStorageIsExemptAndStillCountedAsB2a()
+    public void AnUnsafePointerOverManagedStorageIsRefusedByNameAndNotCountedAsB2a()
     {
         RequireTheCensus();
 
@@ -181,10 +184,11 @@ public unsafe class NativeBoxDereferenceCensusControlTests
             long counter = NativeBoxDereferenceCensus.Snapshot().b2a;
             long retained = NativeBoxDereferenceCensus.Rows("B2a", "kind=UnsafePointer", "T=go.unsafe_package+Pointer", "source=retained");
 
-            Assert.IsNull(new NativeBox<@unsafe.Pointer>(memory, retainedSource: source).Value);
+            PanicException refused = Assert.ThrowsException<PanicException>(() => _ = new NativeBox<@unsafe.Pointer>(memory, retainedSource: source).Value);
 
-            Assert.AreEqual(counter + 1, NativeBoxDereferenceCensus.Snapshot().b2a);
-            Assert.AreEqual(retained + 1, NativeBoxDereferenceCensus.Rows("B2a", "kind=UnsafePointer", "T=go.unsafe_package+Pointer", "source=retained"));
+            StringAssert.Contains(refused.Message, $"cannot read native memory as {GoReflect.GoTypeName(typeof(@unsafe.Pointer))}:");
+            Assert.AreEqual(counter, NativeBoxDereferenceCensus.Snapshot().b2a);
+            Assert.AreEqual(retained, NativeBoxDereferenceCensus.Rows("B2a", "kind=UnsafePointer", "T=go.unsafe_package+Pointer", "source=retained"));
         }
         finally
         {

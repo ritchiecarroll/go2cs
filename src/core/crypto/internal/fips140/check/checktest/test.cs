@@ -42,8 +42,8 @@ internal static array<byte> globl12 = new(12);
 internal static array<byte> globl8 = new(8);
 
 [GoInit] internal static void init() {
-    globl8.Assign(new byte[]{1, 2, 3, 4, 5, 6, 7, 8}.array());
-    globl12.Assign(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}.array());
+    globl8.Assign(array<byte>([1, 2, 3, 4, 5, 6, 7, 8]));
+    globl12.Assign(array<byte>([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]));
     runtime.Gosched();
 
     var sum = (byte)0;

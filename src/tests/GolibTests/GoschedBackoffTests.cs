@@ -28,36 +28,58 @@ public class GoschedBackoffTests
     // on both hosts with ≥7× margin around 2 µs, so the predicate is
     // `!switched || elapsed < 2 µs`.
 
-    // A quiet single thread spinning on Gosched is the deterministic inert case on both hosts:
-    // there is (almost) never another ready thread to switch to, so every yield is inert and the
-    // escalation tier must engage. Before the backoff existed this loop completed in a few
-    // milliseconds (6,400 × ~0.4 µs); with escalation at 64 consecutive inert yields it must pay
-    // roughly 6,400/64 ≈ 100 one-millisecond sleeps. The 50 ms bar sits far above the pre-fix
-    // ceiling and far below the post-fix expectation. Three attempts absorb the freak case where
-    // ambient machine load makes some yields effective (an effective yield legitimately resets
-    // the escalation counter).
+    // A thread spinning on Gosched escalates to the sleep tier once per 64 consecutive inert yields, and an
+    // effective yield (another thread really ran) resets the streak. That is the invariant asserted here, read on
+    // the host as it is, with no wall-time bar.
+    //
+    // THE BOUND, from GoschedBackoff.Yield. Each call is either effective (the streak becomes 0, nothing else) or
+    // inert (the streak gains 1; when it reaches 64 the call escalates and the streak becomes 0). Over N calls on
+    // this thread with E effective ones, the N - E inert calls fall into at most E + 1 maximal runs. A run of L inert
+    // calls entered with a streak of s >= 0 escalates floor((s + L) / 64) >= floor(L / 64) >= (L - 63) / 64 times,
+    // so the escalations number at least (N - E - 63 (E + 1)) / 64, rounded up. Quiet host, E = 0: 100. Each
+    // effective yield can cost one escalation at most, so a quiet-host reading of 99, 98 or 97 escalations (11-19)
+    // carries at least 1, 2 or 3 effective yields respectively, and passes for that reason. Busy neighbours make E
+    // large, the bound reaches 0 and the run proves nothing; the READING line says so. The streak a thread carries
+    // in from earlier calls (s) and escalations by other threads (the counter is process-wide; GolibTests runs
+    // serially) can only add.
+    //
+    // THE SLEEP IS REAL. Each escalation waits 1 ms (Sleep(1) on linux, golib's high-resolution timer on windows,
+    // the kqueue timer on macOS, all measured at >= 1 ms), and load lengthens a wait, never shortens it, so the run
+    // takes at least 0.9 ms per escalation.
+    //
+    // WHY NOT TIME (2026-11-19, P2). The bar used to be "6,400 calls take >= 50 ms". Yield-spinning neighbours make
+    // the yields effective AND cheap: with 16 os.sched_yield spinners on a 4-CPU box it read 20-46 ms with 0-1
+    // escalations, red 5 of 6 runs (P1 read 34 ms once in a full suite). With 32 spinners it passed at 45-73 ms with
+    // 0 escalations: the time measured the neighbours, and the backoff behaved as designed in every arm.
     [TestMethod]
     public void InertGoschedSpinEscalatesToSleep()
     {
-        double bestMilliseconds = 0;
+        const int Calls = 6_400;
 
-        for (int attempt = 0; attempt < 3; attempt++)
-        {
-            Stopwatch timer = Stopwatch.StartNew();
+        long effectiveBefore = GoschedBackoff.EffectiveYieldsOnThisThread;
+        long escalationsBefore = GoschedBackoff.Escalations;
+        Stopwatch timer = Stopwatch.StartNew();
 
-            for (int i = 0; i < 6_400; i++)
-                runtime.Gosched();
+        for (int i = 0; i < Calls; i++)
+            runtime.Gosched();
 
-            timer.Stop();
-            bestMilliseconds = Math.Max(bestMilliseconds, timer.Elapsed.TotalMilliseconds);
+        timer.Stop();
+        long effective = GoschedBackoff.EffectiveYieldsOnThisThread - effectiveBefore;
+        long escalations = GoschedBackoff.Escalations - escalationsBefore;
+        long bound = Math.Max(0, (Calls - effective - 63 * (effective + 1) + 63) / 64);
+        double milliseconds = timer.Elapsed.TotalMilliseconds;
 
-            if (bestMilliseconds >= 50.0)
-                return;
-        }
+        Console.WriteLine($"READING InertGoschedSpinEscalatesToSleep: {Calls} calls, {effective} effective, {escalations} " +
+            $"escalations, bound {bound}{(bound == 0 ? " (the host offered no inert run long enough to prove one)" : "")}, " +
+            $"{milliseconds:F1} ms");
 
-        Assert.Fail($"6,400 back-to-back Gosched calls on a quiet thread finished in {bestMilliseconds:F1} ms " +
-            "on every attempt — inert yields are not escalating to sleep, which is the exact starvation " +
-            "shape that made sync/atomic's CAS ring exceed 45 minutes on Linux.");
+        Assert.IsTrue(escalations >= bound,
+            $"{Calls} Gosched calls with {effective} effective yields escalated {escalations} times, under the {bound} " +
+            "the backoff guarantees (one per 64 consecutive inert yields): inert yields are not escalating to sleep, " +
+            "the starvation shape that made sync/atomic's CAS ring exceed 45 minutes on Linux.");
+
+        Assert.IsTrue(milliseconds >= 0.9 * escalations,
+            $"{escalations} escalations took {milliseconds:F1} ms, under 0.9 ms each: the sleep tier is not sleeping.");
     }
 
     // The fast path must stay free: when yields are EFFECTIVE (real context switches, ≥4 µs on

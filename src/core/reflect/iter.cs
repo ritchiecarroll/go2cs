@@ -191,4 +191,4 @@ public static iter.Seq2<Value, Value> Seq2(this Value v) {
     throw panic("reflect: " + v.Type().String() + " cannot produce iter.Seq2[Value, Value]");
 }
 
-} // end reflectᴛValue
+}

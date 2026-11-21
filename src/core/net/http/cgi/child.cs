@@ -261,4 +261,4 @@ internal static void writeCGIHeader(this ref response r, slice<byte> p) {
     r.bufw.Flush();
 }
 
-} // end cgiᴛresponse
+}

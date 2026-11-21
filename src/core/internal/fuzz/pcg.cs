@@ -160,4 +160,4 @@ partial struct noCopy {
 internal static void Lock(this ref noCopy _) { }
 internal static void Unlock(this ref noCopy _) { }
 
-} // end fuzzᴛnoCopy
+}

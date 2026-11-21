@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,13 +8,9 @@ partial struct Val /*[]byte*/;
 
 partial struct Ptr /*@string*/;
 
-} partial class mainᴛVal {
-
 public static Val Clone(this Val v) {
     return appendꓸꓸꓸ((Val)default, v);
 }
-
-} partial class main_package {
 
 internal static @string prefix<Bytes>(Bytes b, nint n)
     where Bytes : /* ~[]byte | ~string */ IByteSeq<Bytes, byte>, new()

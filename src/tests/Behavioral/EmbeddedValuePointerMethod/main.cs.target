@@ -9,13 +9,9 @@ partial struct inner {
     internal nint n;
 }
 
-} partial class mainᴛinner {
-
 internal static void bump(this ref inner i, nint d) { i.n += d; }
 internal static void reset0(this ref inner i) { i.n = 0; }
 internal static nint total(this ref inner i) { return i.n; }
-
-} partial class main_package {
 
 partial struct outer {
     internal nint tag;
@@ -38,8 +34,6 @@ partial struct chunk {
     /*embed*/ internal flags flags;
 }
 
-} partial class mainᴛchunk {
-
 internal static void alloc(this ref chunk c, uint16 n) {
     c.inUse += n;
     if (c.inUse >= 4) {
@@ -58,8 +52,6 @@ internal static void bump(this ref chunk c, ж<chunk> other) {
         cΔ1.of(chunk.Ꮡflags).set(2);
     }
 }
-
-} partial class main_package {
 
 internal static void main() {
     var o = Ꮡ(new outer(tag: 7));

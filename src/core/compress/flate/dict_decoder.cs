@@ -185,4 +185,4 @@ internal static slice<byte> readFlush(this ref dictDecoder dd) {
     return toRead;
 }
 
-} // end flateᴛdictDecoder
+}

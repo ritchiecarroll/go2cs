@@ -96,4 +96,4 @@ public static @string Path(this ref MountPointReparseBuffer rb) {
     return syscall.UTF16ToString(array<uint16>.AliasPointer(Ꮡ(rb.PathBuffer, 0), 65535).slice(n1, n2, n2));
 }
 
-} // end windowsᴛMountPointReparseBuffer
+}

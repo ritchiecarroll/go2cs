@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,12 +8,8 @@ partial struct counter {
     internal int64 n;
 }
 
-} partial class mainᴛcounter {
-
 internal static ж<counter> ptr(this ж<counter> Ꮡc) { return Ꮡc; }
 internal static void inc(this ж<counter> Ꮡc) { Ꮡc.ptr().n++; }
-
-} partial class main_package {
 
 partial struct holder {
     internal counter c;
@@ -29,16 +24,12 @@ partial struct wrapper {
     internal box b;
 }
 
-} partial class mainᴛwrapper {
-
 internal static ж<wrapper> self(this ж<wrapper> Ꮡw) { return Ꮡw; }
 
 internal static void bump(this ж<wrapper> Ꮡw) {
     _ = Ꮡw.self();
     Ꮡw.Ꮡb.Ꮡh.Ꮡc.inc();
 }
-
-} partial class main_package {
 
 partial struct mid {
     internal counter c;
@@ -47,11 +38,7 @@ partial struct deep {
     internal mid mid;
 }
 
-} partial class mainᴛdeep {
-
 internal static void bumpDeep(this ж<deep> Ꮡd) { Ꮡd.Ꮡmid.Ꮡc.inc(); }
-
-} partial class main_package {
 
 internal static void main() {
     var b = Ꮡ(new box());

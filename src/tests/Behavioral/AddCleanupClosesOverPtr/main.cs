@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using runtime = runtime_package;
-using static main_package;
 
 partial class main_package {
 
@@ -42,11 +41,7 @@ internal static void @try(@string name, Action register) {
 
 internal static void nothing(nint _) { }
 
-} partial class mainᴛT {
-
 internal static void release(this ref T t, nint _) { }
-
-} partial class main_package {
 
 internal static void main() {
     @try("captures ptr", () => {
@@ -156,7 +151,7 @@ internal static void main() {
 
     @try("array capture holds ptr", () => {
         var v = Ꮡ(new T(f: 17));
-        ref var a = ref heap<array<ж<T>>>(new ж<T>[]{default, v}.array(), out var Ꮡa);
+        ref var a = ref heap<array<ж<T>>>(array<ж<T>>([default, v]), out var Ꮡa);
         var aʗ1 = a;
         runtime.AddCleanup(v, (nint _Δp0) => {
             _ = aʗ1;

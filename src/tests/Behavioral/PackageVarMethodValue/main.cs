@@ -1,15 +1,12 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
 partial struct T {
     internal nint n;
 }
-
-} partial class mainᴛT {
 
 internal static void inc(this ref T p) { p.n++; }
 
@@ -19,8 +16,6 @@ internal static nint add(this ref T p, nint d) {
 }
 
 internal static nint peek(this T t) { return t.n; }
-
-} partial class main_package {
 
 partial struct H {
     internal T t;
@@ -39,11 +34,7 @@ partial struct Tab {
     internal array<nint> vals = new(8);
 }
 
-} partial class mainᴛTab {
-
 internal static void inc(this ref Tab p) { p.n++; }
-
-} partial class main_package {
 
 internal static T mk() { return new T(n: 10); }
 
@@ -72,7 +63,7 @@ internal static ж<T> gpp = Ꮡ(new T());
 internal static slice<T> gs = new slice<T>(1);
 internal static E ge = new E(Ꮡ(new T()));
 
-[GoLazy] partial class lazyᴛlz { internal static readonly ж<Tab> Ꮡlz = new StaticBox<Tab>(new Tab(vals: new nint[]{1, 2, 3, 4, 5, 6, 7, 8 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1}.array())); }
+[GoLazy] partial class lazyᴛlz { internal static readonly ж<Tab> Ꮡlz = new StaticBox<Tab>(new Tab(vals: array<nint>([1, 2, 3, 4, 5, 6, 7, 8 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1 * 1]))); }
 internal static ref Tab lz => ref ((StaticBox<Tab>)Ꮡlz).ValueSlot;
 
 internal static void main() {

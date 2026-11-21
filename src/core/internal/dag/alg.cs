@@ -70,4 +70,4 @@ public static void TransitiveReduction(this ref Graph g) {
     }
 }
 
-} // end dagᴛGraph
+}

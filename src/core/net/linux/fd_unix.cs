@@ -249,4 +249,4 @@ internal static (ж<os.File> f, error err) dup(this ж<netFD> Ꮡfd) {
     return (newUnixFile(ns, fd.name()), default);
 }
 
-} // end netᴛnetFD
+}

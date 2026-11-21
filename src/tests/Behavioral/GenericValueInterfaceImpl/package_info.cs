@@ -54,7 +54,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("GenericValueInterfaceImpl.go", "GenericValueInterfaceImpl.cs", "ABFC/rSEgoKCgpaClpaClA==")]
+[assembly: GoPositionMap("GenericValueInterfaceImpl.go", "GenericValueInterfaceImpl.cs", "AA5CvpSEgoKCgpaClpaClA==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -93,6 +93,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.G<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛG;
-[GoMethodHost(typeof(main_package.T)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛT;
 // </MethodHolders>

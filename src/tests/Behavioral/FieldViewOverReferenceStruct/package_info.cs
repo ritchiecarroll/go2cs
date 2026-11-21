@@ -55,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABxYqIKCgqaCgqqCpoKmgoKmgqqigoKCgqaCgoKCqoKCgqaCgoKmgoKqgoKCgqaigqaCgpSCpqqigoKCgoKCgqqCgqaCgqaCgoKmgoKCggAKGKKCgoLGgoKmgoKmgoKCgoKmgoKCqoKCgoKCgqqygqaC5oKUgpSCgoKClIKClIKCgpSCgoKClIKUgpSClIKClIKCgoKClA==", "231-233:1", "", "", "", "211:21,212:13")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABtYqIKCgqaCgqqCpoKmgoKmgqqigoKCgqaCgoKCqoKCgqaCgoKmgoKqgoKCgqaigqaCgpSCpqqigoKCgoKCgqqCgqaCgqaCgoKmgoKCggAIGKKCgoKmgoKmgoKmgoKCgoKmgoKCqoKCgoKCgqqygqaC5oKUgpSCgoKClIKClIKCgpSCgoKClIKUgpSClIKClIKCgoKClA==", "231-233:1", "", "", "", "206:21,207:13")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -96,5 +96,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.sockInet4)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛsockInet4;
 // </MethodHolders>

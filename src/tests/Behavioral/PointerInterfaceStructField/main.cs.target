@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -14,13 +13,9 @@ partial struct Setting {
     internal nint value;
 }
 
-} partial class mainᴛSetting {
-
 public static @string Describe(this ref Setting s) {
     return fmt.Sprintf("%s=%d"u8, s.name, s.value);
 }
-
-} partial class main_package {
 
 partial struct holder {
     internal Describer d;

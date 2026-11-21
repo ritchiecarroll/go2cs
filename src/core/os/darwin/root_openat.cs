@@ -553,4 +553,4 @@ partial struct errSymlink /*@string*/;
 
 internal static @string Error(this errSymlink _) { throw panic("errSymlink is not user-visible"); }
 
-} // end osᴛerrSymlink
+}

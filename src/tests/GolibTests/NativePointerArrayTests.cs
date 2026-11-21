@@ -70,7 +70,7 @@ public unsafe class NativePointerArrayTests
             *(nint*)(block + 8) = block + 192;
 
             ж<array<ж<uint16>>> declared = builtin.NativeArrayPointer<ж<uint16>>((nuint)block, 1);
-            slice<ж<uint16>> strings = array<ж<uint16>>.AliasPointer(declared.at<ж<uint16>>(0), 1 << 10).slice(0, 2, 2);
+            slice<ж<uint16>> strings = go.array<ж<uint16>>.AliasPointer(declared.at<ж<uint16>>(0), 1 << 10).slice(0, 2, 2);
 
             Assert.AreEqual((nint)2, strings.Length);
             Assert.AreEqual("first", readUtf16(strings[0]));

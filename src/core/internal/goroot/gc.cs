@@ -176,4 +176,4 @@ internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) {
     return false;
 }
 
-} // end gorootᴛgccgoDirs
+}

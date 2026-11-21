@@ -75,4 +75,4 @@ internal static void clear(this ref queue q) {
     q = new queue();
 }
 
-} // end fuzzᴛqueue
+}

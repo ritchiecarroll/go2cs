@@ -137,12 +137,12 @@ internal static uintptr f64hash(@unsafe.Pointer p, uintptr h) {
 }
 
 internal static uintptr c64hash(@unsafe.Pointer p, uintptr h) {
-    var x = @unsafe.Pointer.To<array<float32>>(p);
+    var x = @unsafe.Pointer.ToArray<float32>(p, 2);
     return f32hash(@unsafe.Pointer.FromPinnedBox(x.at<float32>(1)), f32hash(@unsafe.Pointer.FromPinnedBox(x.at<float32>(0)), h));
 }
 
 internal static uintptr c128hash(@unsafe.Pointer p, uintptr h) {
-    var x = @unsafe.Pointer.To<array<float64>>(p);
+    var x = @unsafe.Pointer.ToArray<float64>(p, 2);
     return f64hash(@unsafe.Pointer.FromPinnedBox(x.at<float64>(1)), f64hash(@unsafe.Pointer.FromPinnedBox(x.at<float64>(0)), h));
 }
 
@@ -442,15 +442,15 @@ internal static void alginit() {
 internal static void initAlgAES() {
     useAeshash = true;
     // Initialize with random data so hash collisions will be hard to engineer.
-    var key = @unsafe.Pointer.To<array<uint64>>(@unsafe.Pointer.FromPinnedBox(Ꮡaeskeysched));
+    var key = @unsafe.Pointer.ToArray<uint64>(@unsafe.Pointer.FromPinnedBox(Ꮡaeskeysched), 16);
     foreach (var i in range(key, 16)) {
-        key.Value[i] = bootstrapRand();
+        key.ElementRef(i) = bootstrapRand();
     }
 }
 
 // Note: These routines perform the read with a native endianness.
 internal static uint32 readUnaligned32(@unsafe.Pointer p) {
-    var q = @unsafe.Pointer.To<array<byte>>(p);
+    var q = @unsafe.Pointer.ToArray<byte>(p, 4);
     if (goarch.BigEndian) {
         return byteorder.BEUint32(q.slice());
     }
@@ -458,7 +458,7 @@ internal static uint32 readUnaligned32(@unsafe.Pointer p) {
 }
 
 internal static uint64 readUnaligned64(@unsafe.Pointer p) {
-    var q = @unsafe.Pointer.To<array<byte>>(p);
+    var q = @unsafe.Pointer.ToArray<byte>(p, 8);
     if (goarch.BigEndian) {
         return byteorder.BEUint64(q.slice());
     }

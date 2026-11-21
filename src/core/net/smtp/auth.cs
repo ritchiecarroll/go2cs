@@ -133,4 +133,4 @@ internal static (slice<byte>, error) Next(this ref cramMD5Auth a, slice<byte> fr
     return (default, default);
 }
 
-} // end smtpᴛcramMD5Auth
+}

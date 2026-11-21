@@ -56,7 +56,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA4emgAOHoKCqoKCpriU2pSYlNqUmoKigqKUmIKCkpSugoKilJqCspSWgoKUmIKilJaCooKUmIKCsoKUmIKCgoKUmoKCgoKUmIKylJqCgoKUnoKylJiCgqKUnIKigpQ=", "55-55:1;68-68:2;89-89:3;101-101:4;163-163:5", "54=main.frame.label;67=main.frame.label;79=main.frame.label;81=main.frame.label;90=main.frame.label;93=main.frame.label;102=main.frame.label;111=main.frame.label;133=main.frame.label;143=main.frame.label;173=main.frame.label;194=main.frame.label")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAsemgAMHoKCqoKCpriU2pSYlNqUmoKigqKUmIKCkpSugoKilJqCspSWgoKUmIKilJaCooKUmIKCsoKUmIKCgoKUmoKCgoKUmIKylJqCgoKUnoKylJiCgqKUnIKigpQ=", "55-55:1;68-68:2;89-89:3;101-101:4;163-163:5", "54=main.frame.label;67=main.frame.label;79=main.frame.label;81=main.frame.label;90=main.frame.label;93=main.frame.label;102=main.frame.label;111=main.frame.label;133=main.frame.label;143=main.frame.label;173=main.frame.label;194=main.frame.label")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -95,5 +95,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.frame)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛframe;
 // </MethodHolders>

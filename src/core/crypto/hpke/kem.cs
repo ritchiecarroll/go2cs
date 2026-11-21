@@ -451,4 +451,4 @@ internal static (slice<byte>, error) decap(this ref dhKEMPrivateKey k, slice<byt
     return k.kem.extractAndExpand(dhVal, kemContext);
 }
 
-} // end hpkeᴛdhKEMPrivateKey
+}

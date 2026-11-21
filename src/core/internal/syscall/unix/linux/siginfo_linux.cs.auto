@@ -77,4 +77,4 @@ public static syscall.WaitStatus /*ws*/ WaitStatus(this ref SiginfoChild s) {
     return ws;
 }
 
-} // end unixᴛSiginfoChild
+}

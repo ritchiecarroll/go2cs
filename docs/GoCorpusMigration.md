@@ -738,6 +738,7 @@ name the drift as a class (test-refresh-1262, shapes a, b and c) and refresh the
    CR-normalised:
    - a file the tests leg rewrote is restored from `E(final)`, and recorded as a finding;
    - it is never applied as part of the regen.
+   *(Step 3a, the per-row BUILD, follows the guard: Amendment 2026-11-19 below. Pointer added 2026-11-19.)*
 4. **Classify the test diff.** Each changed test hunk must belong to a mechanism the regen's rungs or a standing ruling
    name. An unclassified hunk is a finding.
 5. **Commit the tests as their own commit** in the regen series, after production and before the metadata
@@ -748,6 +749,63 @@ The 1.26.10.2 end regen runs this shape: [`PLAN-parity-train.md`](PLAN-parity-tr
 from [`DESIGN-ladder-identity.md`](phase4/DESIGN-ladder-identity.md) Step B. That control found the L3 `.csproj`
 rewrite, and seat #49 removed its cause. The guard stays, because any later `-tests`-only emission path can write
 production files again.
+
+#### Amendment 2026-11-19 (P2, from the 2026-11-18 lesson) — the tests leg BUILDS every row it converts, before its commit
+
+**The lesson.** A convert-only leg cannot see a compile failure. The .4 tests regen (`3cd829a83f`, 2026-11-18)
+converted every roster row with rc 0. Its guard read 0 production files rewritten, and its classifier explained every
+file it wrote. Seven of those rows did not compile, and nothing in the leg could show it. The re-bank, dispatched
+about 80 minutes later, was the first step that built them:
+- `text/tabwriter`, CS0579: the external test's two method holders were declared in both test info files. This was a
+  converter defect in the `-tests` path.
+- `runtime`, `net/http`, `encoding/json`, `encoding/gob`, CS0229, CS0104 and CS1501: in an external-test holder, an
+  own name tied with the same name in the internal test package. Also a converter defect.
+- `reflect`, `internal/reflectlite`, CS0305: their hand-owned `export_impl_test.cs` companions still named `ΔType`
+  after OQ2's regen of 2026-11-12 renamed it. A convert never writes a hand-owned companion, so only a build reads
+  one. These two had not compiled since 11-12.
+
+All seven came from OQ2's method holders meeting the `-tests` emission. Every one read FAIL in the re-bank's shards
+and hosted legs instead of at the regen. Two fix seats had to land during the re-bank, and the rows were dispatched
+again.
+<!-- 2026-11-18, the .4 hop (1.26.11.1). The regen: 3cd829a83f (i9, committed 14:44Z; 238 of 238 rows rc 0, 793 files,
+     the guard 0 production files, the classifier 793 of 793 explained). The re-bank at 6e870821d6 was dispatched by
+     COORD FLEET 160502Z. Reports, mailbox: P1 163516Z (text/tabwriter CS0579, P1-1 row 19); i9 163655Z (the same row,
+     i9-S seq 58: "My classifier attributed the shape correctly ... but cannot see a compile failure. The re-bank is
+     the gate that caught it."); i9 164408Z (internal/reflectlite CS0305, reflect predicted to fail the same way);
+     P5 164706Z (the hosted set: 7 rows FAIL, every one a build failure, classes A, B and C; "Nobody built runtime's
+     test project between 311 and this regen."). COORD's rulings: to P1 163716Z, to P5 164941Z. The fixes: P5's
+     4c5ed19247 (converter), 723264bca0 (the three hand-owns) and 8a86140f79 (the four rows' tests), on master at
+     17:25Z; P1's 947a66ed7b, landed in batch 313 as 81409fa08f with COORD's tabwriter tests regen a1b6c7bf52.
+     COORD assigned this amendment in FLEET 174056Z (2026-11-19). -->
+
+**So the tests leg gains step 3a, a per-row BUILD.** It runs after the guard (step 3) and before the classification
+and the commit (steps 4 and 5):
+
+**Step 3a: build every row the leg converted.** In the same seeded root, once step 3 has restored production to
+`E(final)`, run each roster row's convert argv again with `-test-action build`:
+
+`go2cs -tests -test-action build -go2cspath <tree>/src <GOROOT>/src/<pkg> <tree>/src/core/<pkg>`
+
+Use the same `-platforms` value as step 2 (or the same host default). Run the rows one at a time, after the
+convert leg has ended; no test runs. The build publishes the row's test project, which compiles the converted
+tests and the hand-owned test companions with the production package. It is the same publish that the
+re-bank's `-test-action all` runs.
+
+- Record each row's rc and, for a failure, its first error lines (file, line, code).
+- A failing row is a finding. Post it to COORD at once, with its error lines and its cause if known, before the
+  re-bank is dispatched. COORD rules each one: fix it in the hop, or hold the row at its last banked reading.
+- The tests commit (step 5) carries the build reading: the rows built, the rows that failed by name, and the
+  target.
+- Afterwards, purge the build output under the root (`bin`, `obj`, published hosts). Before staging, assert
+  that `git status --porcelain | grep '^ D'` is empty (safety floor item 8).
+
+A build on one target does not compile the other targets' flavours of an L3 package; the re-bank's legs still read
+those. The build adds wall time that the convert-only leg did not have. Measure it at the first run and record it
+in the commit; this runbook does not estimate it.
+
+**Why a build, and not a better classifier.** The classifier at `3cd829a83f` attributed the tabwriter hunk correctly
+("OQ2: MethodHolders block"). Attribution says which mechanism moved a line. Whether the moved lines compile is a
+separate question, and only a compiler answers it.
 
 #### Amendment 2026-09-13 — the pin assertion, both halves and the pairing, as copyable blocks
 
@@ -1620,8 +1678,8 @@ Its want: exactly the step-5 delete set (prefixed `core/`), plus whatever the ru
 is adopted from `<stage>/h5/src` verbatim, and only after that ruling: the generator lists every `.csproj` on disk,
 so while the residue stands it lists the residue.
 
-Exception: a flat file the emitter moved to per-GOOS folders is `git rm`'d by name once all three targets carry their
-copy (close lesson 3).
+Exception: a flat file the emitter moved to per-GOOS folders is `git rm`'d by name once every flavour the corpus carries
+has its copy (close lesson 3). <!-- 2026-11-20 (board tt): was "all three"; the corpus carries four flavours since linux/arm64 (corpus-reconvert §2). -->
 *(Edited in place 2026-10-01, §7 lesson 51: an exception to this step's STOP. The close met it first, and only by
 derivation.)*
 <!-- The overlay rule is this section's bullet above ("Overlay .cs, .csproj and README.md, excluding *.cs.auto"); a straight copy:
@@ -3252,6 +3310,7 @@ because a reader starting at H10 gets no pointer to them:
 | the `go` **on PATH** — the one the CONVERTER SPAWNS — itself resolves under the pinned GOROOT, which means **the pinned `bin` is FIRST on PATH**: `GOROOT` does NOT pin the child | i9's defect one: a shell asserting its own `go version` says nothing about what the converter's child process resolves, so the two can disagree silently and the row converts against the wrong toolchain reporting success. ⚠ **A GREEN TOOLCHAIN BANNER IS NOT EVIDENCE ABOUT THE CHILD** — R measured both halves on one box at the 1.24.13 hop: the converter logged `VERSION go1.24.13, read in-process` while the `go` it shelled out to came from PATH and refused with `requires go >= 1.24 (running go 1.23.x; GOTOOLCHAIN=local)`, and separately an ambient `GOROOT` overrode a binary invoked by ABSOLUTE PATH until `GOROOT` was exported. A row's toolchain is pinned in TWO places and the banner reports only the first; the recon wrapper's assertion of the PATH-resolved `go version` is the one that covers the second |
 | the output root is the worktree at the tip, whose `src/core` **is** the seed | H5's seeded-root rule; measured in `-tests` form at the 1.24 hop — a hand-own-carrying row converts rc 1 in a bare root and rc 0 seeded |
 | ≥ 25 GB free before a battery | H4a |
+| the escape probe's build cache counted with the build output: `GO2CS_PROBE_CACHE` exported beside `GOCACHE`, on the leg's drive, and purged with `bin`/`obj`/`Generated` when a battery needs the space (`rm -rf "$GO2CS_PROBE_CACHE"`; the next conversion rebuilds it) | every conversion runs `go build -gcflags=-m` for four targets into that cache, not into `GOCACHE` (KnownIssues, *A conversion keeps a Go build cache of its own*): about 60 MB per target for the standard library, then a share per package that grows with the package, so a disk preflight that reads only `GOCACHE` and the tree misses it |
 | one conversion per output root, never two concurrent; one dispatch per worktree | H5 |
 | `CGO_ENABLED` pinned to the corpus state, exported rather than assumed | the corpus emission state |
 | an entirely hand-owned package converts only under `-test-allow-handown` | the converter's own refusal, by name |
@@ -3736,7 +3795,7 @@ leads:** where a brief and this block disagree, the brief stops and quotes both.
    R-B16.)*
    - the converter suite;
    - CNR, with CHANGED empty, or classified by §4 with zero T5;
-   - the stdlib on all three flavours by H7 as amended;
+   - the stdlib on every flavour the corpus carries (today four), by H7 as amended; <!-- 2026-11-20 (board tt): was "all three"; the corpus carries four flavours since linux/arm64 (corpus-reconvert §2). -->
    - GolibTests and the full behavioral suite, each EQUAL by name to step 3's control;
    - `go2cs.slnx`, which is owed after the golib/runtime API changes this hop made, built with
      `-p:go2csPath=<repo>/src/` whenever the configuration is not Debug (R-B16, below);
@@ -3829,7 +3888,8 @@ term. The figures belong to the close STAMP that reads them, not to this block.
    (`Stale copies removed`, `platformEmit.go:259-295`). The overlay cannot carry a deletion (H5's
    overlay amendment, step 3). Without the removal, the committed flat copy survives beside the new
    per-GOOS copies and declares everything twice. So `git rm` it by name in the overlay commit, and
-   only when the overlay adds its per-GOOS copy for ALL THREE targets. Any other absent-in-stage file
+   only when the overlay adds its per-GOOS copy for EVERY flavour the corpus carries (today four:
+   windows/amd64, linux/amd64, darwin/amd64, linux/arm64). <!-- 2026-11-20 (board tt): was "all three"; the corpus carries four flavours since linux/arm64 (corpus-reconvert §2). --> Any other absent-in-stage file
    stops the seat. The instance predicted at this hop is `src/core/os/exec.cs`, from batch 3's
    measured footprint that was never committed (ledger 2026-09-22 02:36).
 
@@ -4114,14 +4174,16 @@ release published nothing: §2, AMENDED
    and the pinned Go first on PATH, then both read back from the repository root:
    ```powershell
    $env:PATH = '<.NET 10 SDK root>;<pinned Go root>\bin;' + $env:PATH
-   dotnet --version                       # an SDK global.json admits (10.0.400, rollForward latestFeature)
+   dotnet --version                       # an SDK global.json admits (10.0.400 floor, rollForward latestMajor)
    $env:GOTOOLCHAIN = 'local'; go version; Remove-Item Env:GOTOOLCHAIN   # the pin itself, not a re-exec
    ```
    Phase 0 refuses a dotnet whose `--version` fails from the repository root, before anything moves, and prints
    the SDK it resolved. It refuses a go whose `GOVERSION`, read with `GOTOOLCHAIN=local`, is not the release
    `src/go2cs/go.mod` names, and prints it *(added 2026-10-27, 1.26.10.2 seat #11: Phase 1b builds the go2cs dotnet
    tool with that Go, and a go2cs built with any other Go downloads none)*; the read-back above stays the
-   operator's own check. <!-- Before 2026-10-27 this read: "The script has no gate on the Go pin, so `go version`
+   operator's own check. A release box with an 11.x SDK beside 10.0.4xx builds with the 11.x one under the
+   `latestMajor` pin, so before a release the `dotnet --version` read from the repository root must print the
+   10.0.4xx SDK, not 11.x (11.0.100, say) *(added 2026-11-20 with the `latestMajor` pin)*. <!-- Before 2026-10-27 this read: "The script has no gate on the Go pin, so `go version`
    here is the only check of it (the repository root carries no `go.mod`, so `GOTOOLCHAIN=local` reads the bare
    toolchain)." -->
    **The go2cs dotnet tool** *(added 2026-10-27, 1.26.10.2 seat #11; [PLAN-dotnet-tool-installer.md](PLAN-dotnet-tool-installer.md) §11 OQ-3)*:
@@ -5130,8 +5192,10 @@ healthy run look hung — and, in the other direction, what lets a hung one look
 
 #### Close – H12
 
-75. **At the campaign-tip fold (§7 lesson 25's second fold), rehearse the close's two-seeded, three-target `-stdlib`
-    regen and its post-regen gates from per-run copies:**
+75. **At the campaign-tip fold (§7 lesson 25's second fold), rehearse the close's two-seeded `-stdlib` regen on every
+    flavour the corpus carries (today four: windows/amd64, linux/amd64, darwin/amd64, linux/arm64) and its post-regen
+    gates from per-run copies:** <!-- 2026-11-20 (board tt, COORD 152556Z): was "two-seeded, three-target"; a regen
+    measured on three flavours missed linux/arm64 (P2 152207Z; corpus-reconvert §2 holds the incident). -->
     - `go test ./... -count=1`, repoguard included;
     - `dotnet build src/go2cs.slnx -c Release -p:go2csPath=<repo>/src/` (the close's B9(f));
     - the README-badge check and the csproj diff.

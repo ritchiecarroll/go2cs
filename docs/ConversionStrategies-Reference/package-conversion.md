@@ -1440,9 +1440,22 @@ symbols the importer's own `init` references" — MISSES this exact case: slog's
 `log/internal.DefaultOutput`, but the package whose `init` WRITES it is `log`. The dependency that
 must be forced is not the one the init statement names.
 
-A blank import still emits **no `using`** — `using _ = <ns>;` would hijack C#'s `_` discard for the
-whole file (CS0118 + CS0029 on any deconstruction discard) — so it stays a comment in the importing
-file, and every import form, blank included, gets the same generated module-initializer hook, written
+A blank import still emits **no `using`**. `using _ = <ns>;` would take over C#'s `_` discard for the
+whole file (CS0118 + CS0029 on any deconstruction discard, for example `(w, _) = w.ensure(…)` in the
+runtime's `tracetime.go`). The import converts to a comment instead: the Go import line, then a tail in
+parentheses that says what happens to the package's `init`. The tail follows the same conditions that
+decide whether a hook is written, so it reads `init forced in ImportInitializers` exactly when one is:
+
+| Tail | When |
+|---|---|
+| `init forced in ImportInitializers` | the package, or something it imports, has initialization to run |
+| `nothing to initialize` | a pseudo-package (`unsafe`, `builtin`, `C`) or a package with no initialization anywhere in its imports; `import _ "unsafe"` for `//go:linkname` is the common case |
+| `compiled into this assembly; no hook` | a test file's blank import of the package under test, which is compiled into the test assembly |
+
+A Go trailing comment on the import (`_ "unsafe" // for linkname`) stays its own `//` comment on the same
+line, so the note is then written as a `/* … */` block comment.
+
+Every import form, blank included, gets the same generated module-initializer hook, written
 once per package into the `<ImportInitializers>` section of its `package_info.cs` class body:
 
 ```go
@@ -1454,8 +1467,8 @@ import (
 ```
 <!-- source: src/tests/Behavioral/BlankImportSideEffects/main.cs.target:4-6 -->
 ```csharp
-// blank import: BlankImportSideEffects.jpeglike_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
-// blank import: BlankImportSideEffects.pnglike_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "BlankImportSideEffects/jpeglike" (init forced in ImportInitializers)
+// import _ "BlankImportSideEffects/pnglike" (init forced in ImportInitializers)
 using registry = BlankImportSideEffects.registry_package;
 ```
 <!-- source: src/tests/Behavioral/BlankImportSideEffects/package_info.cs:76-81 -->

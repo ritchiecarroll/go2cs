@@ -90,24 +90,24 @@ partial class math_package {
 //   moshier@na-net.ornl.gov
 
 // sin coefficients
-internal static array<float64> _sin = new float64[]{
+internal static array<float64> _sin = array<float64>([
     1.58962301576546568060e-10D, // 0x3de5d8fd1fd19ccd
     -2.50507477628578072866e-8D, // 0xbe5ae5e5a9291f5d
     2.75573136213857245213e-6D,  // 0x3ec71de3567d48a1
     -1.98412698295895385996e-4D, // 0xbf2a01a019bfdf03
     8.33333333332211858878e-3D,  // 0x3f8111111110f7d0
     -1.66666666666666307295e-1D  // 0xbfc5555555555548
-}.array();
+]);
 
 // cos coefficients
-internal static array<float64> _cos = new float64[]{
+internal static array<float64> _cos = array<float64>([
     -1.13585365213876817300e-11D, // 0xbda8fa49a0861a9b
     2.08757008419747316778e-9D,   // 0x3e21ee9d7b4e3f05
     -2.75573141792967388112e-7D,  // 0xbe927e4f7eac4bc6
     2.48015872888517045348e-5D,   // 0x3efa01a019c844f5
     -1.38888888888730564116e-3D,  // 0xbf56c16c16c14f91
     4.16666666666665929218e-2D    // 0x3fa555555555554b
-}.array();
+]);
 
 // Cos returns the cosine of the radian argument x.
 //

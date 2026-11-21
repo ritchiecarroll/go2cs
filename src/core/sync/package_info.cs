@@ -64,6 +64,7 @@ using static go.sync_package;
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(Cond))]
 [assembly: GoFieldAccess(typeof(Map))]
+[assembly: GoFieldAccess(typeof(RWMutex))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -76,6 +77,7 @@ using static go.sync_package;
 [assembly: GoPositionMap("sync/cond.go", "cond.cs", "AC1gkgAEJAARAoKCgoIAAhTygq7CggAZOJI=")]
 [assembly: GoPositionMap("sync/map.go", "map.cs", "AC5esqiSqJKssqqiqqKqoqyyAAIQ0gACHAALAg==")]
 [assembly: GoPositionMap("sync/runtime.go", "runtime.cs", "AAkc5gACFAAIAgABEgAIBqampqaSgoKmgg==")]
+[assembly: GoPositionMap("sync/rwmutex.go", "rwmutex.cs", "ADSGAQASAoKClJSUgoIAAxLSgoKUgoKCgpSUgoKClAAEEsKCgoKUlJSC+IKCgqaUvtKCgqaUlIKUgoKCAAMS8oKClIKClJSCgoKUlIKCgpQABhIACAKCgoK4goKCpoKmgoIABRgACAKCyqIACAqC")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -93,8 +95,10 @@ public static partial class sync_package
     internal partial struct copyChecker {}
     internal partial struct noCopy {}
     internal partial struct notifyList {}
+    internal partial struct rlocker {}
     public partial struct Cond {}
     public partial struct Map {}
+    public partial struct RWMutex {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

@@ -514,4 +514,4 @@ internal static ж<affineCached> CondNeg(this ж<affineCached> Ꮡv, nint cond) 
     return Ꮡv;
 }
 
-} // end edwards25519ᴛaffineCached
+}

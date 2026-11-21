@@ -19,4 +19,4 @@ internal static (int64 n, bool handled, error err) readFrom(this ref File f, Δi
     return (0, false, default);
 }
 
-} // end osᴛFile
+}

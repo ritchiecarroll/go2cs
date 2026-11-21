@@ -3,7 +3,6 @@ global using PathAlias = go.main_package.Path;
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -85,8 +84,6 @@ partial interface Big {
 partial struct host {
 }
 
-} partial class mainᴛhost {
-
 internal static @string Ref(this host _, Path p) { return "ref:"u8 + ((@string)p); }
 internal static @string Dir(this host _) { return "/src"; }
 internal static bool Blocked(this host _, @string @file) { return @file == "x"u8; }
@@ -94,13 +91,9 @@ internal static @string Label(this host _) { return "L"; }
 internal static nint Extra(this host _) { return 7; }
 internal static @string Root(this host _) { return "/"; }
 
-} partial class main_package {
-
 partial struct phost {
     internal nint n;
 }
-
-} partial class mainᴛphost {
 
 internal static @string Ref(this ref phost h, Path p) {
     h.n++;
@@ -109,8 +102,6 @@ internal static @string Ref(this ref phost h, Path p) {
 
 internal static @string Dir(this ref phost h) { return "/ptr"; }
 internal static bool Blocked(this ref phost h, @string @file) { return true; }
-
-} partial class main_package {
 
 internal static @string emit(MayBeEmittedHost h, Path p) { return h.Ref(p); }
 

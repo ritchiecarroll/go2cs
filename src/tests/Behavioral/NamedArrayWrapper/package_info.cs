@@ -53,7 +53,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AA4+tIK2ooLYpIKCgoKWgoKCgpaCgpiCgoKWgoKCgoKCgoKYgoKChoKCgpaCAAEYgpKCgoKCgoKCgoKCmJKCgpyCgoKCgoKCmoKCmoKCAAEYgoKCloKSkoKCkpiSAAEQggAIEKAAChiCgriCggARIpQACQyAgAAIEoKCgoLI")]
+[assembly: GoPositionMap("main.go", "main.cs", "AA0+lIKWooK4pIKCgoKWgoKCgpaCgpiCgoKWgoKCgoKCgoKYgoKChoKCgpaCAAEYgpKCgoKCgoKCgoKCmJKCgpyCgoKCgoKCmoKCmoKCAAEYgoKCloKSkoKCkpiSAAEQggAGEKAACBiCgriCggAPIpTcgIAABBKCgoKCqA==")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -104,10 +104,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Grid)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛGrid;
-[GoMethodHost(typeof(main_package.counter2)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounter2;
-[GoMethodHost(typeof(main_package.counters)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounters;
-[GoMethodHost(typeof(main_package.pageBits)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛpageBits;
-[GoMethodHost(typeof(main_package.pallocBits)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛpallocBits;
-[GoMethodHost(typeof(main_package.slots)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛslots;
 // </MethodHolders>

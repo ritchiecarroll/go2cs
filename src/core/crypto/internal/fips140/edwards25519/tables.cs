@@ -149,4 +149,4 @@ internal static void SelectInto(this ref nafLookupTable8 v, ж<affineCached> Ꮡ
     dest = v.points[(int8)(x / 2)];
 }
 
-} // end edwards25519ᴛnafLookupTable8
+}

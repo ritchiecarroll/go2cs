@@ -98,4 +98,4 @@ internal static slice<byte> appendTo(this ref window w, slice<byte> buf, uint32 
     }
 }
 
-} // end zstdᴛwindow
+}

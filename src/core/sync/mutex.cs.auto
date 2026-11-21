@@ -78,4 +78,4 @@ public static void Unlock(this ж<Mutex> Ꮡm) {
     Ꮡm.of(Mutex.Ꮡmu).Unlock();
 }
 
-} // end syncᴛMutex
+}

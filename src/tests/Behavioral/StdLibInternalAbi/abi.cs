@@ -5,7 +5,6 @@
 namespace go;
 
 using @unsafe = unsafe_package;
-using static main_package;
 
 partial class main_package {
 
@@ -15,8 +14,6 @@ partial struct RegArgs {
     public array<@unsafe.Pointer> Ptrs = new(IntArgRegs);
     public IntArgRegBitmap ReturnIsPtr;
 }
-
-} partial class mainᴛRegArgs {
 
 public static void Dump(this ref RegArgs r) {
     print((@string)"Ints:");
@@ -47,12 +44,8 @@ public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintpt
     return @unsafe.Add(@unsafe.Pointer.FromBox(Ꮡ(r.Ints, reg)), offset);
 }
 
-} partial class main_package {
-
 /* [(IntArgRegs + 7) / 8]uint8 */
 partial struct IntArgRegBitmap /*[2]uint8*/;
-
-} partial class mainᴛIntArgRegBitmap {
 
 public static void Set(this ref IntArgRegBitmap b, nint i) {
     b.Value[i / 8] |= (uint8)(((uint8)1).Lsh((int64)(i % 8)));
@@ -62,4 +55,4 @@ public static bool Get(this ref IntArgRegBitmap b, nint i) {
     return (uint8)(b.Value[i / 8] & (((uint8)1).Lsh((int64)(i % 8)))) != 0;
 }
 
-} // end mainᴛIntArgRegBitmap
+} // end main_package
