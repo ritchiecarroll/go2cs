@@ -73,3 +73,65 @@ func TestAPromotedCallThroughOneViewReadsAsGo(t *testing.T) {
 		t.Fatalf("go2cs differs from go:\n   go: %s\ngo2cs: %s", want, got)
 	}
 }
+
+// A chain that crosses a FOREIGN embed above its last owner, the shape of TypeScript's checker structs over ast nodes.
+// go2cs-gen walks a metadata embed one level, but that level includes the embed's own generated promoted `ref`
+// properties (lib.X carries `Z`), so Outer declares `ᏑZ` and the call takes one view through it. Measured before this
+// test was kept: a seat decline written on the opposite premise (no `ᏑZ`, CS0117) was refuted by this e2e passing
+// WITHOUT it, and was withdrawn.
+const promotedOneHopForeignLib = `package lib
+
+type Z struct{ N int }
+
+func (z *Z) Bump() *Z { z.N++; return z }
+
+type Y struct{ Z }
+type X struct{ Y }
+`
+
+const promotedOneHopForeignMain = `package main
+
+import (
+	"fmt"
+
+	"example.com/app/lib"
+)
+
+type Outer struct{ lib.X }
+
+func main() {
+	o := &Outer{}
+	p := o.Bump()
+	q := o.Bump()
+	fmt.Println(p.N, p == q)
+}
+`
+
+func TestAPromotedCallThroughAForeignEmbedTakesOneView(t *testing.T) {
+	files := map[string]string{"lib/lib.go": promotedOneHopForeignLib, "main.go": promotedOneHopForeignMain}
+	out := convertInlineModule(t, "app", files)
+	main := readGenerated(t, filepath.Join(out, "main.cs"))
+
+	if !strings.Contains(main, ".of(Outer.ᏑZ).Bump()") {
+		t.Errorf("the promoted call through a foreign embed does not take one view through Outer.ᏑZ:\n%s", main)
+	}
+}
+
+// End to end: the one view across the foreign embed builds (Outer.ᏑZ exists) and reads as Go. GO2CS_INLINE_BUILD=1 runs it.
+func TestAPromotedCallThroughAForeignEmbedReadsAsGo(t *testing.T) {
+	dotnet := requireInlineBuild(t)
+	files := map[string]string{"lib/lib.go": promotedOneHopForeignLib, "main.go": promotedOneHopForeignMain}
+	want := goRunInlineModule(t, "app", files)
+	out := convertInlineModule(t, "app", files)
+
+	if built, err := buildConvertedInlineModule(t, dotnet, out); err != nil {
+		t.Fatalf("the converted module does not build: %v\n%s", err, built)
+	}
+
+	got := runConvertedInlineModule(t, dotnet, out)
+	t.Logf("READING go prints: %s; go2cs prints: %s", want, got)
+
+	if got != want || want == "" {
+		t.Fatalf("go2cs differs from go:\n   go: %s\ngo2cs: %s", want, got)
+	}
+}
