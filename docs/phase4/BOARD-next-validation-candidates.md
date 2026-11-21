@@ -41247,4 +41247,50 @@ P3's review of seat S-B1 (2026-11-20) lists the shapes that refuse at run time B
 
 — H (2026-11-20)
 
+## 2026-11-21 — P1 (F3; COORD 2026-11-20 08:55Z: a board row and a runbook line): the converter's escape harvest fills the Go build cache, about 120 MB per package on a large module — the separation from `GOCACHE` is P4's probe-cache seat (board item hh), landed in train 1; the cost stays an environment fact; runbook trap 13 for the module procedure
+
+For each package with an `append` it may lower, the converter reads the compiler's escape decisions by compiling the
+package once per corpus target (windows/amd64, linux/amd64, darwin/amd64, linux/arm64) with `go build -trimpath
+-gcflags='-m -d=variablemakehash=vy' -o <null> .`, and for test files once more per target with `go test -c`
+(`src/go2cs/stackAppendHints.go`, `newStackAppendHarvestCommand`). The harvest runs with `CGO_ENABLED=0` and
+`-trimpath`, so its cache keys share nothing with a host's ordinary builds, and each target caches its own
+dependency closure. Go removes an entry only after five days unused (`trimLimit`, cmd/go/internal/cache), so
+nothing a run adds is reclaimed during it.
+
+**Three readings on the TypeScript module, linux/amd64, a cloud box (2026-11-20):**
+1. `-tests -recurse`, tests kept in four packages, the shared cache starting empty: 0 to 12 GB in 25 minutes of the
+   conversion phase, at 97 of 132 packages, when the run was stopped at 1 GB free. No Go test had run yet.
+2. The same run with `GOCACHE` at a private directory and no trimming: 7.2 GB in 21 minutes, and the run died when
+   the disk reached 0.
+3. The same run with a loop deleting cache files older than four minutes every 60 seconds: finished (exit 0), and
+   the directory held 315 MB afterwards. Deleting files under a running build is a workaround that held once, not a
+   supported practice, and the runbook does not prescribe it.
+
+**Attribution arm (2026-11-21, Go 1.26.11, the harvest's own command line, private empty cache).** One package
+(`internal/parser`), cumulative cache size after each command:
+
+| command | windows/amd64 | linux/amd64 | darwin/amd64 | linux/arm64 |
+|---|---|---|---|---|
+| `go build` | 324 MB | 640 MB | 987 MB | 1,305 MB |
+| `go test -c` | 2,465 MB | 3,615 MB | (4,595 MB, exit 1) | (5,116 MB, exit 1) |
+
+The last two `go test -c` cells exited 1 as the disk ran low (5.6 GB was free at the start); they are not
+readings. A second arm on linux/amd64 alone: parser's `go build` 322 MB and `go test -c` 1,474 MB from empty,
+then four more packages added 76, 35, 33 and 0 MB (two of them have no test files). So the cost is a large first
+closure per target, then tens of MB per package per target.
+
+**Status at train 1 (master `f604d2ae89`).** P4's probe-cache seat (board item hh, `7f14c1bb4d`) gives every harvest
+command its own cache: `-probe-cache`, else `GO2CS_PROBE_CACHE`, else `go2cs/probe-cache` under the user cache
+directory. That one command constructor builds both the `go build` and the `go test -c` harvests, so both are
+covered, and the user's `GOCACHE` receives neither. The cache is persistent by COORD's ruling of 2026-11-20 09:41Z,
+so the other half of the cure this row first proposed, removing the cache when the run exits, was ruled against.
+The size is unchanged: `docs/KnownIssues.md`, *A conversion keeps a Go build cache of its own*, says the separate
+cache moves the cost and does not shrink it, and its figure of about 60 MB per target is the standard library
+alone, where the first package above also carries the module's own dependency closure. Nothing remains for the
+converter. `docs/NugetgoPublish.md` trap 13 tells a large module's run to give it a probe cache on a volume with
+room, count it in the disk preflight, and delete it after the run if the space is needed. The readings above stay
+as the record: they are the only `go test -c` numbers for the harvest.
+
+— P1 (2026-11-21)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
