@@ -449,21 +449,35 @@ func TestARecurseCgoConversionForAnotherTargetWithTheHostsCCIsRefused(t *testing
 	}
 }
 
-// X1, the cross-target conversion with a named C compiler. HOSTED: GO2CS_CGO_CROSS_TARGET names the target and
-// GO2CS_CGO_CROSS_CC its compiler (the converter-cgo stage's pinned zig, `zig cc -target <triple>`); without both the row
-// is NOT MEASURED.
+// X1, the cross-target conversion with a named C compiler. HOSTED. GO2CS_CGO_CROSS_TARGET and GO2CS_CGO_CROSS_CC name
+// the target and its compiler; without them, when the C compiler go would use is zig (the converter-cgo stage's
+// `;cc=zig`, .github/cgo-toolchain.ps1), the row converts for the other target with `<zig> cc -target <triple>`.
+// Otherwise it is NOT MEASURED: this box reaches no zig (ziglang.org is a proxy 403 here).
 func TestARecurseCgoConversionForAnotherTargetWithANamedCCBindsThatTarget(t *testing.T) {
 	target, cc := os.Getenv("GO2CS_CGO_CROSS_TARGET"), os.Getenv("GO2CS_CGO_CROSS_CC")
 
 	if target == "" || cc == "" {
-		t.Skip("GO2CS_CGO_CROSS_TARGET and GO2CS_CGO_CROSS_CC name no cross target and compiler here: NOT MEASURED")
+		target, cc = cgoRecurseZigCrossTarget(t)
 	}
 
-	combined, output, err := convertCgoRecurseEnv(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "main.go": cgoRecurseMain}, []string{"CC=" + cc},
+	if target == "" || cc == "" {
+		t.Skip("no cross target and compiler here (GO2CS_CGO_CROSS_TARGET/GO2CS_CGO_CROSS_CC, or zig as go's CC): NOT MEASURED")
+	}
+
+	// One size-dependent fact per target (P3's INC 2 shape read): C's long is 4 bytes on windows and 8 on the 64-bit
+	// unix targets, and the route folds unsafe.Sizeof of it to a constant from the compiler's own layout.
+	long := cgoRecurseCptr + "\n// LongBytes is the width of C's long on the target.\nfunc LongBytes() int { return int(unsafe.Sizeof(C.long(0))) }\n"
+	combined, output, err := convertCgoRecurseEnv(t, map[string]string{"cptr/cptr.go": long, "main.go": cgoRecurseMain}, []string{"CC=" + cc},
 		"-recurse=nuget", "-cgo=true", "-platforms", target)
 
 	if err != nil {
 		t.Fatalf("the cross-target conversion for %s failed: %v\n%s", target, err, combined)
+	}
+
+	width := "(uintptr)8"
+
+	if strings.HasPrefix(target, "windows/") {
+		width = "(uintptr)4"
 	}
 
 	sources := strings.Builder{}
@@ -474,7 +488,7 @@ func TestARecurseCgoConversionForAnotherTargetWithANamedCCBindsThatTarget(t *tes
 
 	cs := sources.String()
 
-	for _, want := range []string{`EntryPoint = "malloc")]`, `GoCgoLibraries.Register(`, `"` + target + `"`} {
+	for _, want := range []string{`EntryPoint = "malloc")]`, `GoCgoLibraries.Register(`, `"` + target + `"`, "unsafe.Sizeof(_Ctype_long(0)) */ " + width, "// C target triple: "} {
 		if !strings.Contains(cs, want) {
 			t.Errorf("cptr's %s emission lacks %q:\n%s", target, want, cs)
 		}
@@ -517,4 +531,27 @@ func TestARecurseCgoConversionWithCppSourcesIsRefused(t *testing.T) {
 			t.Errorf("the refusal does not name %q:\n%s", want, combined)
 		}
 	}
+}
+
+// cgoRecurseZigCrossTarget answers X1's target and compiler from a zig the C compiler go would use names: the other
+// target than the host's, with zig's -target triple for it. It answers nothing when go's CC is not zig.
+func cgoRecurseZigCrossTarget(t *testing.T) (string, string) {
+	t.Helper()
+
+	out, err := exec.Command("go", "env", "CC").Output()
+
+	if err != nil {
+		return "", ""
+	}
+
+	fields, err := splitCgoCommand(strings.TrimSpace(string(out)))
+
+	if err != nil || !strings.HasPrefix(strings.ToLower(filepath.Base(fields[0])), "zig") {
+		return "", ""
+	}
+
+	target := cgoRecurseOtherTarget()
+	triples := map[string]string{"windows/amd64": "x86_64-windows-gnu", "linux/amd64": "x86_64-linux-gnu"}
+
+	return target, fields[0] + " cc -target " + triples[target]
 }
