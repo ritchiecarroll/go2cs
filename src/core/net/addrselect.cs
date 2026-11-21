@@ -225,14 +225,14 @@ partial struct policyTable /*[]policyTableEntry*/;
 internal static policyTable rfc6724policyTable = new policyTable(new policyTableEntry[]{
     new(
         // "::1/128"
-        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01}.array()), 128),
+        Prefix: netip.PrefixFrom(netip.AddrFrom16(array<byte>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x01])), 128),
         Precedence: 50,
         Label: 0
     ),
     new(
         // "::ffff:0:0/96"
         // IPv4-compatible, etc.
-        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff}.array(16)), 96),
+        Prefix: netip.PrefixFrom(netip.AddrFrom16(array<byte>(16, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff])), 96),
         Precedence: 35,
         Label: 4
     ),
@@ -245,32 +245,32 @@ internal static policyTable rfc6724policyTable = new policyTable(new policyTable
     new(
         // "2001::/32"
         // Teredo
-        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0x20, 0x01}.array(16)), 32),
+        Prefix: netip.PrefixFrom(netip.AddrFrom16(array<byte>(16, [0x20, 0x01])), 32),
         Precedence: 5,
         Label: 5
     ),
     new(
         // "2002::/16"
         // 6to4
-        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0x20, 0x02}.array(16)), 16),
+        Prefix: netip.PrefixFrom(netip.AddrFrom16(array<byte>(16, [0x20, 0x02])), 16),
         Precedence: 30,
         Label: 2
     ),
     new(
         // "3ffe::/16"
-        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0x3f, 0xfe}.array(16)), 16),
+        Prefix: netip.PrefixFrom(netip.AddrFrom16(array<byte>(16, [0x3f, 0xfe])), 16),
         Precedence: 1,
         Label: 12
     ),
     new(
         // "fec0::/10"
-        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0xfe, 0xc0}.array(16)), 10),
+        Prefix: netip.PrefixFrom(netip.AddrFrom16(array<byte>(16, [0xfe, 0xc0])), 10),
         Precedence: 1,
         Label: 11
     ),
     new(
         // "fc00::/7"
-        Prefix: netip.PrefixFrom(netip.AddrFrom16(new byte[]{0xfc}.array(16)), 7),
+        Prefix: netip.PrefixFrom(netip.AddrFrom16(array<byte>(16, [0xfc])), 7),
         Precedence: 3,
         Label: 13
     ),

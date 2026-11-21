@@ -51,7 +51,9 @@ internal sealed class TestOptions
     public bool Verbose { get; private set; }
     public bool Short { get; private set; }
     public int Count { get; private set; } = 1;
-    public int Parallel { get; private set; } = Environment.ProcessorCount;
+    // Go's -test.parallel default, runtime.GOMAXPROCS(0) when the flag is registered: a GOMAXPROCS in the
+    // environment caps the parallel tests as it does under go test, and DOTNET_PROCESSOR_COUNT does not.
+    public int Parallel { get; private set; } = (int)go.runtime_package.GOMAXPROCS(0);
     public int? ShuffleSeed { get; private set; }
     public TimeSpan Timeout { get; private set; } = TimeSpan.FromMinutes(10.0D);
     public string? ResultFile { get; private set; }

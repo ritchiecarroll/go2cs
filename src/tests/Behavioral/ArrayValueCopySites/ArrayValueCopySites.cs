@@ -14,7 +14,7 @@ internal static ж<array<nint>> leaked;
 internal static ж<Row> leakedRow;
 
 internal static array<nint> leakLocal() {
-    ref var l = ref heap<array<nint>>(new nint[]{1, 2, 3}.array(), out var Ꮡl);
+    ref var l = ref heap<array<nint>>(array<nint>([1, 2, 3]), out var Ꮡl);
     leaked = Ꮡl;
     return l.Clone();
 }
@@ -56,7 +56,7 @@ internal static void mut(this Row r) {
 }
 
 internal static void rangeValues() {
-    var m = new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array();
+    var m = new array<nint>[]{array<nint>([1, 2, 3]), array<nint>([4, 5, 6])}.array();
 
     foreach (var (_, vᴛ1) in range(m.ΔRangeSnapshot())) {
         var row = vᴛ1.Clone();
@@ -66,7 +66,7 @@ internal static void rangeValues() {
 
     fmt.Println("rangeValues:", m);
 
-    var s = GoReflect.WithElemDims(new array<nint>[]{new nint[]{7, 8, 9}.array()}.slice(), 3);
+    var s = GoReflect.WithElemDims(new array<nint>[]{array<nint>([7, 8, 9])}.slice(), 3);
 
     foreach (var (_, vᴛ2) in range(s)) {
         var row = vᴛ2.Clone();
@@ -76,7 +76,7 @@ internal static void rangeValues() {
 
     fmt.Println("rangeSlice:", s);
 
-    var deep = new array<array<nint>>[]{new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array(), new array<nint>[]{new nint[]{7, 8, 9}.array(), new nint[]{10, 11, 12}.array()}.array()}.array();
+    var deep = new array<array<nint>>[]{new array<nint>[]{array<nint>([1, 2, 3]), array<nint>([4, 5, 6])}.array(), new array<nint>[]{array<nint>([7, 8, 9]), array<nint>([10, 11, 12])}.array()}.array();
 
     foreach (var (_, vᴛ3) in range(deep.ΔRangeSnapshot())) {
         var plane = vᴛ3.Clone();
@@ -100,7 +100,7 @@ internal static void rangeNamed() {
 }
 
 internal static void rangeHeapBoxed() {
-    var m = new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array();
+    var m = new array<nint>[]{array<nint>([1, 2, 3]), array<nint>([4, 5, 6])}.array();
 
     foreach (var (_, vᴛ1) in range(m.ΔRangeSnapshot())) {
         ref var row = ref heap(new array<nint>(3), out var Ꮡrow);
@@ -114,7 +114,7 @@ internal static void rangeHeapBoxed() {
 }
 
 internal static void rangeAssignExisting() {
-    var m = new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array();
+    var m = new array<nint>[]{array<nint>([1, 2, 3]), array<nint>([4, 5, 6])}.array();
     array<nint> row = new(3);
     nint i = default;
 
@@ -129,7 +129,7 @@ internal static void rangeAssignExisting() {
 }
 
 internal static void mapKeyRange() {
-    var mk = new map<array<nint>, @string>{[new nint[]{1, 2}.array()] = "v"};
+    var mk = new map<array<nint>, @string>{[array<nint>([1, 2])] = "v"};
 
     foreach (var (kᴛ1, _) in mk) {
         var k = kᴛ1.Clone();
@@ -137,12 +137,12 @@ internal static void mapKeyRange() {
         k[0] = 99;
     }
 
-    fmt.Println("mapKeyRange:", mk[new nint[]{1, 2}.array()]);
+    fmt.Println("mapKeyRange:", mk[array<nint>([1, 2])]);
 }
 
 internal static void compositeElements() {
-    var a = new nint[]{1, 2, 3}.array();
-    var b = new nint[]{4, 5, 6}.array();
+    var a = array<nint>([1, 2, 3]);
+    var b = array<nint>([4, 5, 6]);
 
     var m = new array<nint>[]{a.Clone(), b.Clone()}.array();
     m[0][0] = 99;
@@ -154,7 +154,7 @@ internal static void compositeElements() {
 }
 
 internal static void compositeStructFields() {
-    var a = new nint[]{1, 2, 3}.array();
+    var a = array<nint>([1, 2, 3]);
 
     var s1 = new holder(arr: a.Clone());
     s1.arr[0] = 99;
@@ -166,24 +166,24 @@ internal static void compositeStructFields() {
 }
 
 internal static void compositeMapValueAndKey() {
-    var a = new nint[]{1, 2, 3}.array();
+    var a = array<nint>([1, 2, 3]);
     var mv = new map<@string, array<nint>>{["x"] = a.Clone()};
     a[0] = 99;
     fmt.Println("mapValue:", mv["x", () => new array<nint>(3)]);
 
-    var k = new nint[]{1, 2}.array();
+    var k = array<nint>([1, 2]);
     var mk = new map<array<nint>, @string>{[k.Clone()] = "kv"};
     k[0] = 99;
-    fmt.Println("mapKeyLiteral:", mk[new nint[]{1, 2}.array()]);
+    fmt.Println("mapKeyLiteral:", mk[array<nint>([1, 2])]);
 }
 
 internal static void compositeSparseAndAny() {
-    var a = new nint[]{1, 2, 3}.array();
+    var a = array<nint>([1, 2, 3]);
     var sp = new array<array<nint>>(4, () => new(3)){[2] = a.Clone()};
     a[1] = 88;
     fmt.Println("sparse:", sp[2]);
 
-    var b = new nint[]{7, 8, 9}.array();
+    var b = array<nint>([7, 8, 9]);
     var lst = slice<any>([b.Clone()]);
     b[0] = 99;
     var got = lst[0]._<array<nint>>();
@@ -195,7 +195,7 @@ internal static void returnCopies() {
     (leaked.Value)[0] = 99;
     fmt.Println("returnLeak:", r, leaked.Value);
 
-    var h = new holder(arr: new nint[]{5, 6, 7}.array());
+    var h = new holder(arr: array<nint>([5, 6, 7]));
     var g = h.get();
     g[0] = 99;
     fmt.Println("returnField:", h.arr, g);
@@ -206,7 +206,7 @@ internal static void returnCopies() {
 }
 
 internal static void paramCopies() {
-    var a = new nint[]{1, 2, 3}.array();
+    var a = array<nint>([1, 2, 3]);
     modDirect(a);
     fmt.Println("paramDirect:", a);
 
@@ -214,7 +214,7 @@ internal static void paramCopies() {
     modNamed(nr);
     fmt.Println("paramNamed:", nr[0]);
 
-    var m = new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array();
+    var m = new array<nint>[]{array<nint>([1, 2, 3]), array<nint>([4, 5, 6])}.array();
     modDeep(m);
     fmt.Println("paramDeep:", m);
 
@@ -223,7 +223,7 @@ internal static void paramCopies() {
 }
 
 internal static void funcLitParam() {
-    var a = new nint[]{1, 2, 3}.array();
+    var a = array<nint>([1, 2, 3]);
     void fl([GoArrayDims(3)] array<nint> x) {
         x = x.Clone();
         x[0] = 99;
@@ -247,7 +247,7 @@ internal static void namedAssignCopies() {
     var got = x._<Row>();
     fmt.Println("namedAnyBoxed:", got[2], nr[2]);
 
-    var a = new nint[]{5, 6, 7}.array();
+    var a = array<nint>([5, 6, 7]);
     any y = a.Clone();
     a[0] = 99;
     var gotA = y._<array<nint>>();
@@ -255,7 +255,7 @@ internal static void namedAssignCopies() {
 }
 
 internal static void channelSend() {
-    var a = new nint[]{1, 2, 3}.array();
+    var a = array<nint>([1, 2, 3]);
     var ch = new channel<array<nint>>(1, ChanCargo.Of(null, new nint[] { 3 }));
     ch.ᐸꟷ(a.Clone());
     a[0] = 99;
@@ -266,7 +266,7 @@ internal static void channelSend() {
 internal static void appendElement() {
     var sᴷ = new stackAppend<array<nint>>();
 
-    var a = new nint[]{1, 2, 3}.array();
+    var a = array<nint>([1, 2, 3]);
     slice<array<nint>> s = default;
     s = append(sᴷ, s, a.Clone());
     a[0] = 99;

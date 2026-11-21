@@ -68,10 +68,10 @@ internal static Object universeComparable;
 }.slice()); }
 public static ref slice<ж<Basic>> Typ => ref ((StaticBox<slice<ж<Basic>>>)ᏑTyp).ValueSlot;
 
-internal static array<ж<Basic>> basicAliases = new ж<Basic>[]{
+internal static array<ж<Basic>> basicAliases = array<ж<Basic>>([
     Ꮡ(new Basic(Byte, (BasicInfo)(IsInteger | IsUnsigned), "byte")),
     Ꮡ(new Basic(Rune, IsInteger, "rune"))
-}.array();
+]);
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string anyˢ => ref anyˢᵇ;
@@ -160,11 +160,11 @@ partial struct predeclaredConstsᴛ1 /*dyn*/ {
     internal BasicKind kind;
     internal constant.Value val;
 }
-internal static array<predeclaredConstsᴛ1> predeclaredConsts = new predeclaredConstsᴛ1[]{
+internal static array<predeclaredConstsᴛ1> predeclaredConsts = array<predeclaredConstsᴛ1>([
     new("true", UntypedBool, constant.MakeBool(true)),
     new("false", UntypedBool, constant.MakeBool(false)),
     new("iota", ΔUntypedInt, constant.MakeInt64(0))
-}.array();
+]);
 
 internal static void defPredeclaredConsts() {
     foreach (var (_, c) in range(predeclaredConsts.ΔRangeSnapshot())) {

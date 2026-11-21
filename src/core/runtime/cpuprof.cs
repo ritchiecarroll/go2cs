@@ -83,7 +83,7 @@ public static void SetCPUProfileRate(nint hz) {
 
         cpuprof.on = true;
         cpuprof.log = newProfBuf(1, profBufWordCount, profBufTagCount);
-        var hdr = new uint64[]{(uint64)hz}.array();
+        var hdr = array<uint64>([(uint64)hz]);
         cpuprof.log.write(nil, nanotime(), hdr[..], default);
         setcpuprofilerate((int32)hz);
     } else if (cpuprof.on) {
@@ -115,7 +115,7 @@ public static void SetCPUProfileRate(nint hz) {
         if (p.numExtra > 0 || p.lostExtra > 0 || p.lostAtomic > 0) {
             p.addExtra();
         }
-        var hdr = new uint64[]{1}.array();
+        var hdr = array<uint64>([1]);
         // Note: write "knows" that the argument is &gp.labels,
         // because otherwise its write barrier behavior may not
         // be correct. See the long comment there before
@@ -167,7 +167,7 @@ public static void SetCPUProfileRate(nint hz) {
 // and has a g. The world may be stopped, though.
 [GoMethodBody("addExtra")] internal static void addExtraᴍ(ref cpuProfile p) {
     // Copy accumulated non-Go profile events.
-    var hdr = new uint64[]{1}.array();
+    var hdr = array<uint64>([1]);
     for (nint i = 0; i < p.numExtra; ) {
         p.log.write(nil, 0, hdr[..], p.extra.slice(i + 1, i + (nint)p.extra[i]));
         i += (nint)p.extra[i];
@@ -176,21 +176,21 @@ public static void SetCPUProfileRate(nint hz) {
 
     // Report any lost events.
     if (p.lostExtra > 0) {
-        var hdrΔ1 = new uint64[]{p.lostExtra}.array();
-        var lostStk = new uintptr[]{
+        var hdrΔ1 = array<uint64>([p.lostExtra]);
+        var lostStk = array<uintptr>([
             abi.FuncPCABIInternal(_LostExternalCode) + (uintptr)sys.PCQuantum,
             abi.FuncPCABIInternal(_ExternalCode) + (uintptr)sys.PCQuantum
-        }.array();
+        ]);
         p.log.write(nil, 0, hdrΔ1[..], lostStk[..]);
         p.lostExtra = 0;
     }
 
     if (p.lostAtomic > 0) {
-        var hdrΔ2 = new uint64[]{p.lostAtomic}.array();
-        var lostStk = new uintptr[]{
+        var hdrΔ2 = array<uint64>([p.lostAtomic]);
+        var lostStk = array<uintptr>([
             abi.FuncPCABIInternal(_LostSIGPROFDuringAtomic64) + (uintptr)sys.PCQuantum,
             abi.FuncPCABIInternal(_System) + (uintptr)sys.PCQuantum
-        }.array();
+        ]);
         p.log.write(nil, 0, hdrΔ2[..], lostStk[..]);
         p.lostAtomic = 0;
     }

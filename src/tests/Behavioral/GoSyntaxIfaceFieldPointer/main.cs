@@ -30,11 +30,11 @@ internal partial struct main_named /*dyn*/ {
 internal static void main() {
     var ta = Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix"));
 
-    array<main_type> connAddrs = new main_type[]{
+    array<main_type> connAddrs = array<main_type>([
         new(new UnixAddrжAddr(ta), new UnixAddrжAddr(ta)),
         new(new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix"))), new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix")))),
         new(new UnixAddrжAddr(ta), new UnixAddrжAddr(Ꮡ(new UnixAddr(Name: "/tmp/sock", Net: "unix"))))
-    }.array();
+    ]);
 
     foreach (var (i, ca) in range(connAddrs.ΔRangeSnapshot())) {
         fmt.Printf("%d got  T=%T v=%#v\n"u8, i, ca.got, ca.got);

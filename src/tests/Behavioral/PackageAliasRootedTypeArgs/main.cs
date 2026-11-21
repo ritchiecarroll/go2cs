@@ -67,7 +67,7 @@ internal static void main() {
     cplx e = slice<complex64>([complex(1F, 2F)]);
     cplx2 e2 = slice<complex128>([complex(3D, 4D)]);
     chans f = new chans(1);
-    arr g = new @string[]{"a", "b", "c"}.array();
+    arr g = array<@string>(["a", "b", "c"]);
     hdrs h = slice<Header>([new(Name: "n", Size: 1)]);
     rdrs i = slice<Δio.Reader>([default]);
     ptrs j = slice<ж<Header>>([default]);

@@ -1137,7 +1137,7 @@ private static readonly @string offsetOutOfRangeˢᵇᴍReader = "offset out of 
     }
 
     if (lowOK && highOK) {
-        ret = append(ret, new uint64[]{low, high}.array());
+        ret = append(ret, array<uint64>([low, high]));
     }
 
     ж<unit> u = default;
@@ -1256,7 +1256,7 @@ private static readonly @string rangesˢᵇᴍData = "ranges"u8;
         if (low == (~(uint64)0).Rsh((nuint)((8 - u.addrsize()) * 8))) {
             @base = high;
         } else {
-            ret = append(retᴷ, ret, new uint64[]{@base + low, @base + high}.array());
+            ret = append(retᴷ, ret, array<uint64>([@base + low, @base + high]));
         }
     }
 
@@ -1314,7 +1314,7 @@ private static readonly @string rnglistsˢᵇᴍData = "rnglists"u8;
             if (err != nil) {
                 return (default, err);
             }
-            ret = append(ret, new uint64[]{start, end}.array());
+            ret = append(ret, array<uint64>([start, end]));
             break;
         }
         case var ᴛ when ᴛ == rleStartxLength: {
@@ -1324,13 +1324,13 @@ private static readonly @string rnglistsˢᵇᴍData = "rnglists"u8;
             if (err != nil) {
                 return (default, err);
             }
-            ret = append(ret, new uint64[]{start, start + lenΔ2}.array());
+            ret = append(ret, array<uint64>([start, start + lenΔ2]));
             break;
         }
         case var ᴛ when ᴛ == rleOffsetPair: {
             var off1 = buf.@uint();
             var off2 = buf.@uint();
-            ret = append(ret, new uint64[]{@base + off1, @base + off2}.array());
+            ret = append(ret, array<uint64>([@base + off1, @base + off2]));
             break;
         }
         case var ᴛ when ᴛ == rleBaseAddress: {
@@ -1340,13 +1340,13 @@ private static readonly @string rnglistsˢᵇᴍData = "rnglists"u8;
         case var ᴛ when ᴛ == rleStartEnd: {
             var start = buf.addr();
             var end = buf.addr();
-            ret = append(ret, new uint64[]{start, end}.array());
+            ret = append(ret, array<uint64>([start, end]));
             break;
         }
         case var ᴛ when ᴛ == rleStartLength: {
             var start = buf.addr();
             var lenΔ3 = buf.@uint();
-            ret = append(ret, new uint64[]{start, start + lenΔ3}.array());
+            ret = append(ret, array<uint64>([start, start + lenΔ3]));
             break;
         }}
     }

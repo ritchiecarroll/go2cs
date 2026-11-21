@@ -64,12 +64,12 @@ partial struct State {
 [GoMethodBody("Init")] internal static void Initᴍ(ж<State> Ꮡs, /*[32]*/ array<byte> seed) {
     seed = seed.Clone();
 
-    Ꮡs.Init64(new uint64[]{
+    Ꮡs.Init64(array<uint64>([
         byteorder.LEUint64(seed[(int)(0 * 8)..]),
         byteorder.LEUint64(seed[(int)(1 * 8)..]),
         byteorder.LEUint64(seed[(int)(2 * 8)..]),
         byteorder.LEUint64(seed[(int)(3 * 8)..])
-    }.array());
+    ]));
 }
 
 // Init64 seeds the state with the given seed value.

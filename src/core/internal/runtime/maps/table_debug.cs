@@ -45,7 +45,7 @@ internal const bool debugLog = false;
 
                 @unsafe.Pointer key = g.key(Ꮡtyp, j);
                 if (typ.IndirectKey()) {
-                    key = (@unsafe.Pointer.To<@unsafe.Pointer>(key)).Value;
+                    key = @unsafe.Pointer.LoadWord((@unsafe.Pointer.To<@unsafe.Pointer>(key)));
                 }
 
                 // Can't lookup keys that don't compare equal

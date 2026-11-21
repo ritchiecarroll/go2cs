@@ -607,6 +607,14 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			}
 
 			for implementation := range implementations {
+				// The implementation side takes the same resolution: a conversion FROM an anonymous interface reached
+				// before its own lift (a function declared later in the file returns it) records the marker.
+				implementation, okImpl := resolveImplicitConvTypeName(implementation)
+
+				if !okImpl {
+					continue
+				}
+
 				// A closed-carrier pair (closedCarrier.go) is written with `Closed = true`, after `Pointer = true`
 				// for the pointer form. go2cs-gen reads the argument and writes a closed adapter class for the pair.
 				if closedCarrierImplementations.Contains(closedCarrierPairKey(recordedInterfaceName, implementation)) {
@@ -998,6 +1006,9 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	// was spliced into the class body of the file whose import spec produced it.
 	packageInfoLines = ensureImportInitSection(packageInfoLines)
 	packageInfoLines = applyImportInitSection(packageInfoLines, mergeExisting)
+
+	// The shape witness's per-pair witnesses, after the import hooks; absent for a package that has none (shapeWitness.go).
+	packageInfoLines = applyShapeWitnessSection(packageInfoLines, mergeExisting)
 
 	// Go source position maps. Same merge semantics as every other section: a whole-package
 	// conversion rebuilds the section from this run's records alone, while a merging write (the

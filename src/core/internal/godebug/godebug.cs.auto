@@ -189,7 +189,7 @@ public static @string Value(this ж<Setting> Ꮡs) {
         }
     });
     var v = Ꮡs.of(Setting.Ꮡvalue).Load().Value;
-    if (v.bisect != nil && !v.bisect.Stack(new «ADAPTER:72756e74696d655374646572727c40696e7465726e616c2e6269736563745f7061636b6167652e577269746572:ADAPTER»(Ꮡstderr))) {
+    if (v.bisect != nil && !v.bisect.Stack(new runtimeStderrжWriter(Ꮡstderr))) {
         return ""u8;
     }
     return v.text;

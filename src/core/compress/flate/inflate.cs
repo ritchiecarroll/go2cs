@@ -390,7 +390,7 @@ partial struct decompressor {
 
 // RFC 1951 section 3.2.7.
 // Compression with dynamic Huffman codes
-[GoLazy] partial class lazyᴛcodeOrder { internal static array<nint> codeOrder = new nint[]{16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15}.array(); }
+[GoLazy] partial class lazyᴛcodeOrder { internal static array<nint> codeOrder = array<nint>([16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]); }
 
 } partial class flate_package {
 

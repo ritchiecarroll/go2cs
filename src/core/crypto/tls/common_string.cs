@@ -43,7 +43,7 @@ private static readonly @string _SignatureScheme_name_7ᵇ = "ECDSAWithP521AndSH
 internal static ref readonly @string _SignatureScheme_name_8 => ref _SignatureScheme_name_8ᵇ;
 private static readonly @string _SignatureScheme_name_8ᵇ = "PSSWithSHA256PSSWithSHA384PSSWithSHA512Ed25519"u8;
 
-internal static array<uint8> _SignatureScheme_index_8 = new uint8[]{0, 13, 26, 39, 46}.array();
+internal static array<uint8> _SignatureScheme_index_8 = array<uint8>([0, 13, 26, 39, 46]);
 
 } partial class tls_package {
 
@@ -104,8 +104,8 @@ private static readonly @string _CurveID_name_1ᵇ = "X25519"u8;
 internal static ref readonly @string _CurveID_name_2 => ref _CurveID_name_2ᵇ;
 private static readonly @string _CurveID_name_2ᵇ = "SecP256r1MLKEM768X25519MLKEM768SecP384r1MLKEM1024"u8;
 
-internal static array<uint8> _CurveID_index_0 = new uint8[]{0, 9, 18, 27}.array();
-internal static array<uint8> _CurveID_index_2 = new uint8[]{0, 17, 31, 49}.array();
+internal static array<uint8> _CurveID_index_0 = array<uint8>([0, 9, 18, 27]);
+internal static array<uint8> _CurveID_index_2 = array<uint8>([0, 17, 31, 49]);
 
 } partial class tls_package {
 
@@ -143,7 +143,7 @@ internal static void _ᴛ3() {
 internal static ref readonly @string _ClientAuthType_name => ref _ClientAuthType_nameᵇ;
 private static readonly @string _ClientAuthType_nameᵇ = "NoClientCertRequestClientCertRequireAnyClientCertVerifyClientCertIfGivenRequireAndVerifyClientCert"u8;
 
-internal static array<uint8> _ClientAuthType_index = new uint8[]{0, 12, 29, 49, 72, 98}.array();
+internal static array<uint8> _ClientAuthType_index = array<uint8>([0, 12, 29, 49, 72, 98]);
 
 } partial class tls_package {
 

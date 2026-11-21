@@ -34,7 +34,7 @@ public class ArrayAssignInPlaceTests
     public void C1_AWindowShorterThanItsSourceCopiesItsOwnLength()
     {
         slice<nint> storage = new(new nint[] { 0, 0, 0, 0, 0, 0 });
-        array<nint> window = array<nint>.Alias(storage[1..3], 2);
+        array<nint> window = go.array<nint>.Alias(storage[1..3], 2);
 
         window.Assign(Of(7, 8, 9, 10));
 
@@ -79,16 +79,16 @@ public class ArrayAssignInPlaceTests
     public void C4_TwoWindowsOverOneBackingCopyInTheSafeDirection()
     {
         slice<array<nint>> up = new(new[] { Of(1, 1), Of(2, 2), Of(3, 3) });
-        array<array<nint>> above = array<array<nint>>.Alias(up[1..], 2);
-        array<array<nint>> below = array<array<nint>>.Alias(up, 2);
+        array<array<nint>> above = go.array<array<nint>>.Alias(up[1..], 2);
+        array<array<nint>> below = go.array<array<nint>>.Alias(up, 2);
 
         above.Assign(below);
 
         Assert.AreEqual("1 1 1 1 2 2", Flatten(up));
 
         slice<array<nint>> down = new(new[] { Of(1, 1), Of(2, 2), Of(3, 3) });
-        array<array<nint>> lower = array<array<nint>>.Alias(down, 2);
-        array<array<nint>> upper = array<array<nint>>.Alias(down[1..], 2);
+        array<array<nint>> lower = go.array<array<nint>>.Alias(down, 2);
+        array<array<nint>> upper = go.array<array<nint>>.Alias(down[1..], 2);
 
         lower.Assign(upper);
 

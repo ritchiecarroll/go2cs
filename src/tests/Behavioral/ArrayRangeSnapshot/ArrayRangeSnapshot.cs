@@ -13,7 +13,7 @@ partial struct holder {
 }
 
 internal static void arrayValue() {
-    var a = new nint[]{1, 2, 3, 4}.array();
+    var a = array<nint>([1, 2, 3, 4]);
 
     foreach (var (i, v) in range(a.ΔRangeSnapshot())) {
         if (i == 0) {
@@ -41,7 +41,7 @@ internal static void namedArrayValue() {
 }
 
 internal static void arrayField() {
-    var h = new holder(arr: new nint[]{1, 2, 3, 4}.array());
+    var h = new holder(arr: array<nint>([1, 2, 3, 4]));
 
     foreach (var (i, v) in range(h.arr.ΔRangeSnapshot())) {
         if (i == 0) {
@@ -55,7 +55,7 @@ internal static void arrayField() {
 }
 
 internal static void arrayOfArrays() {
-    var m = new array<nint>[]{new nint[]{1, 2}.array(), new nint[]{3, 4}.array(), new nint[]{5, 6}.array()}.array();
+    var m = new array<nint>[]{array<nint>([1, 2]), array<nint>([3, 4]), array<nint>([5, 6])}.array();
 
     foreach (var (i, vᴛ1) in range(m.ΔRangeSnapshot())) {
         var row = vᴛ1.Clone();
@@ -71,7 +71,7 @@ internal static void arrayOfArrays() {
 }
 
 internal static void pointerArray() {
-    ref var b = ref heap<array<nint>>(new nint[]{1, 2, 3, 4}.array(), out var Ꮡb);
+    ref var b = ref heap<array<nint>>(array<nint>([1, 2, 3, 4]), out var Ꮡb);
     var p = Ꮡb;
 
     foreach (var (i, v) in range(p.Value)) {
@@ -100,7 +100,7 @@ internal static void sliceValue() {
 }
 
 internal static void indexOnly() {
-    var a = new nint[]{1, 2, 3, 4}.array();
+    var a = array<nint>([1, 2, 3, 4]);
 
     foreach (var i in range(len(a))) {
         if (i == 0) {
@@ -112,7 +112,7 @@ internal static void indexOnly() {
 }
 
 internal static void assignVars() {
-    var a = new nint[]{1, 2, 3, 4}.array();
+    var a = array<nint>([1, 2, 3, 4]);
     nint i = default;
     nint v = default;
 
@@ -129,7 +129,7 @@ internal static void assignVars() {
 }
 
 internal static void mutableRangeVar() {
-    var a = new nint[]{1, 2, 3, 4}.array();
+    var a = array<nint>([1, 2, 3, 4]);
 
     foreach (var (i, vᴛ1) in range(a.ΔRangeSnapshot())) {
         var v = vᴛ1;
@@ -145,7 +145,7 @@ internal static void mutableRangeVar() {
 }
 
 internal static void aliasedElement() {
-    ref var a = ref heap<array<nint>>(new nint[]{1, 2, 3, 4}.array(), out var Ꮡa);
+    ref var a = ref heap<array<nint>>(array<nint>([1, 2, 3, 4]), out var Ꮡa);
     var q = Ꮡa.at<nint>(2);
 
     foreach (var (i, v) in range(a.ΔRangeSnapshot())) {
@@ -160,7 +160,7 @@ internal static void aliasedElement() {
 }
 
 internal static void arrayOfNamedSlices() {
-    var rows = new Digits[]{slice<nint>([1, 2]), slice<nint>([3, 4]), slice<nint>([5, 6])}.array();
+    var rows = array<Digits>([slice<nint>([1, 2]), slice<nint>([3, 4]), slice<nint>([5, 6])]);
 
     foreach (var (i, r) in range(rows.ΔRangeSnapshot())) {
         if (i == 0) {

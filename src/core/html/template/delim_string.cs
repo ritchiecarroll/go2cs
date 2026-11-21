@@ -19,7 +19,7 @@ internal static void _ᴛ2() {
 internal static ref readonly @string _delim_name => ref _delim_nameᵇ;
 private static readonly @string _delim_nameᵇ = "delimNonedelimDoubleQuotedelimSingleQuotedelimSpaceOrTagEnd"u8;
 
-internal static array<uint8> _delim_index = new uint8[]{0, 9, 25, 41, 59}.array();
+internal static array<uint8> _delim_index = array<uint8>([0, 9, 25, 41, 59]);
 
 } partial class template_package {
 

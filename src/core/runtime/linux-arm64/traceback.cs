@@ -694,7 +694,7 @@ internal static nint tracebackPCs(ж<unwinder> Ꮡu, nint skip, slice<uintptr> p
 
 // printArgs prints function arguments in traceback.
 internal static void printArgs(funcInfo f, @unsafe.Pointer argp, uintptr pc) {
-    var p = @unsafe.Pointer.To<array<uint8>>(funcdata(f, abi.FUNCDATA_ArgInfo));
+    var p = @unsafe.Pointer.ToArray<uint8>(funcdata(f, abi.FUNCDATA_ArgInfo), 171);
     if (p == nil) {
         return;
     }
@@ -745,7 +745,7 @@ internal static void printArgs(funcInfo f, @unsafe.Pointer argp, uintptr pc) {
     var slotIdx = (uint8)0; // register arg spill slot index
 printloop:
     for (;;) {
-        var o = p.Value[pi];
+        var o = p.ElementRef(pi);
         pi++;
         switch (o) {
         case var ᴛ when ᴛ == abi.TraceArgsEndSeq: {
@@ -775,7 +775,7 @@ printloop:
         }
         default: {
             printcomma();
-            var sz = p.Value[pi];
+            var sz = p.ElementRef(pi);
             pi++;
             print1(o, sz, slotIdx);
             if (o >= startOffset) {

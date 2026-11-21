@@ -183,6 +183,8 @@ if ($freeGB -lt 25) {
     Write-Host "*** DISK PREFLIGHT: $freeGB GB free on the repo drive -- below the 25 GB floor ***" -ForegroundColor Red
     Write-Host '    Below this, writes fail mid-run: builds and conversions report FALSE REDS, and a' -ForegroundColor Red
     Write-Host '    partial write leaves a TRACKED FILE TRUNCATED (three such incidents, 2026-08-13).' -ForegroundColor Red
+    Write-Host '    The escape probe build cache counts too: GO2CS_PROBE_CACHE (default go2cs/probe-cache under the' -ForegroundColor Red
+    Write-Host '    user cache directory) is safe to delete; the next conversion rebuilds it.' -ForegroundColor Red
     Write-Host '    Free space, or pass -IgnoreDiskPreflight to proceed with unmeasurable results.' -ForegroundColor Red
 
     if (-not $IgnoreDiskPreflight) { exit 1 }

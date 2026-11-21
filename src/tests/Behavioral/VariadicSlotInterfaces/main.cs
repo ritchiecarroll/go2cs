@@ -125,7 +125,7 @@ internal static void main() {
     fmt.Println(ᴛ21, ᴛ22);
     fmt.Println(nest((nint)1, anys));
 
-    var arr = new any[]{(nint)7, (nint)8}.array();
+    var arr = array<any>([(nint)7, (nint)8]);
     var (ᴛ23, ᴛ24) = countArgs((any)(arr));
     fmt.Println(ᴛ23, ᴛ24);
     fmt.Println(nest((any)(arr)));

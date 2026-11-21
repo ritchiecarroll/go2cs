@@ -24,7 +24,7 @@ internal static void bump(ж<holder> h, nint i) {
 }
 
 internal static void main() {
-    var h = Ꮡ(new holder(arr: new counter[]{new(), new(), new()}.array()));
+    var h = Ꮡ(new holder(arr: array<counter>([new(), new(), new()])));
     bump(h, 0);
     bump(h, 0);
     bump(h, 1);

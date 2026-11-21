@@ -68,12 +68,17 @@ func (v *Visitor) publishedConstraintProxyElements(pkg *types.Package, proxyName
 }
 
 // importPackageInfoLines reads an imported package's package_info.cs records from the source loadImportedTypeAliases
-// would read them from: a NuGet substitution's self-description, the converted file on disk, or the converter's
-// embedded record of a published standard-library package. Reading here applies nothing, so a package this file reaches
-// only through a third one is read without importing its aliases.
+// would read them from, in the same order: a NuGet substitution's self-description, the converter's embedded record of a
+// published standard-library package (never a file on disk, see publishedStdLibRecord), or the converted file on disk.
+// Reading here applies nothing, so a package this file reaches only through a third one is read without importing its
+// aliases.
 func importPackageInfoLines(info PackageInfo, options Options) ([]string, bool) {
 	if info.NuGetSubstitution != nil {
 		return info.NuGetSubstitution.metadataLines(info.ImportPath, options.targetPlatform)
+	}
+
+	if info.PublishedStdLib {
+		return publishedStdLibRecord(info, options)
 	}
 
 	packageInfoFile := platformPackageInfoPath(info.TargetDir, options.targetPlatform)
@@ -81,10 +86,6 @@ func importPackageInfoLines(info PackageInfo, options Options) ([]string, bool) 
 	if _, err := os.Stat(packageInfoFile); err == nil {
 		lines, err := readPackageInfoLines(packageInfoFile)
 		return lines, err == nil
-	}
-
-	if info.PublishedStdLib {
-		return stdLibExportedMetadata(info.PackageName, options.targetPlatform)
 	}
 
 	return nil, false

@@ -569,7 +569,7 @@ private static readonly @string unexpectedReadFromˢᵇᴍnobitsSectionReader = 
     // There are many other DWARF sections, but these
     // are the ones the debug/dwarf package uses.
     // Don't bother loading others.
-    array<uint32> subtypes = new uint32[]{SSUBTYP_DWABREV, SSUBTYP_DWINFO, SSUBTYP_DWLINE, SSUBTYP_DWRNGES, SSUBTYP_DWSTR}.array();
+    array<uint32> subtypes = array<uint32>([SSUBTYP_DWABREV, SSUBTYP_DWINFO, SSUBTYP_DWLINE, SSUBTYP_DWRNGES, SSUBTYP_DWSTR]);
     array<slice<byte>> dat = new(5); /* len(subtypes) */
     foreach (var (i, subtype) in range(subtypes.ΔRangeSnapshot())) {
         var s = f.SectionByType((uint32)STYP_DWARF | subtype);

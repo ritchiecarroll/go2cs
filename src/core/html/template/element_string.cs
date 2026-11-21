@@ -21,7 +21,7 @@ internal static void _ᴛ3() {
 internal static ref readonly @string _element_name => ref _element_nameᵇ;
 private static readonly @string _element_nameᵇ = "elementNoneelementScriptelementStyleelementTextareaelementTitleelementMeta"u8;
 
-internal static array<uint8> _element_index = new uint8[]{0, 11, 24, 36, 51, 63, 74}.array();
+internal static array<uint8> _element_index = array<uint8>([0, 11, 24, 36, 51, 63, 74]);
 
 } partial class template_package {
 

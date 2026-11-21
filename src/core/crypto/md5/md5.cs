@@ -212,7 +212,7 @@ private static readonly @string cryptoMd5UseOfMd5IsNotˢᵇᴍdigest = "crypto/m
     // 8 bytes representing the message length in bits.
     //
     // 1 byte end marker :: 0-63 padding bytes :: 8 byte length
-    var tmp = new byte[]{0x80}.array(72);
+    var tmp = array<byte>(72, [0x80]);
     var pad = (55 - d.len) % 64;                                   // calculate number of padding bytes
     byteorder.LEPutUint64(tmp.slice((nint)(1 + pad)), d.len << 3); // append length in bits
     Ꮡd.Write(tmp.slice(0, (nint)(1 + pad + 8)));

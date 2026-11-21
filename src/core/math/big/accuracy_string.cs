@@ -18,7 +18,7 @@ internal static void _ᴛ1() {
 internal static ref readonly @string _Accuracy_name => ref _Accuracy_nameᵇ;
 private static readonly @string _Accuracy_nameᵇ = "BelowExactAbove"u8;
 
-internal static array<uint8> _Accuracy_index = new uint8[]{0, 5, 10, 15}.array();
+internal static array<uint8> _Accuracy_index = array<uint8>([0, 5, 10, 15]);
 
 } partial class big_package {
 

@@ -101,6 +101,18 @@ partial class runtime_package
         // gogetenv. It runs in this initializer because C# does not order one module initializer
         // against another (managed_impl.cs, gcinitController).
         gcinitController();
+
+        // schedinit's GOMAXPROCS steps come after gcinit (managed_impl.cs, startGOMAXPROCS): they read the
+        // environment and debug.containermaxprocs, so parsedebugvars must precede them. A failure is a Go
+        // fatal, as above.
+        try
+        {
+            startGOMAXPROCS();
+        }
+        catch (Exception ex)
+        {
+            @throw($"GOMAXPROCS at startup: {ex.GetType().FullName}: {ex.Message}");
+        }
     }
 
     /// <summary>

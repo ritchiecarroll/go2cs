@@ -101,7 +101,7 @@ internal static (ж<Cipher>, error) newUnauthenticatedCipher(ж<Cipher> Ꮡc, sl
     }
 
     (key, nonce) = (key[..(int)(KeySize)], nonce[..(int)(NonceSize)]); // bounds check elimination hint
-    c.key.Assign(new uint32[]{
+    c.key.Assign(array<uint32>([
         binary.LittleEndian.Uint32(key[0..4]),
         binary.LittleEndian.Uint32(key[4..8]),
         binary.LittleEndian.Uint32(key[8..12]),
@@ -110,12 +110,12 @@ internal static (ж<Cipher>, error) newUnauthenticatedCipher(ж<Cipher> Ꮡc, sl
         binary.LittleEndian.Uint32(key[20..24]),
         binary.LittleEndian.Uint32(key[24..28]),
         binary.LittleEndian.Uint32(key[28..32])
-    }.array());
-    c.nonce.Assign(new uint32[]{
+    ]));
+    c.nonce.Assign(array<uint32>([
         binary.LittleEndian.Uint32(nonce[0..4]),
         binary.LittleEndian.Uint32(nonce[4..8]),
         binary.LittleEndian.Uint32(nonce[8..12])
-    }.array());
+    ]));
     return (Ꮡc, default);
 }
 

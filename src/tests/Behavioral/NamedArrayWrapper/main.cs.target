@@ -33,7 +33,7 @@ internal static void main() {
     (Ꮡe.Reinterpret<pallocBits, pageBits>()).set(1, 99);
     fmt.Println(e[1]);
 
-    var arr = new uint32[]{10, 20, 30, 40, 50, 60}.array();
+    var arr = array<uint32>([10, 20, 30, 40, 50, 60]);
     var p = (pm)(arr[2..5]);
     var d = new slice<uint32>(3);
     nint n = copy(d, p);
@@ -43,7 +43,7 @@ internal static void main() {
     nint n2 = copy(arr2[3..], new pm(new uint32[]{7, 8, 9}.slice()));
     fmt.Println(n2, arr2[3], arr2[4], arr2[5], arr2[0]);
 
-    var arr3 = new uint32[]{1, 2, 3, 4, 5, 6}.array();
+    var arr3 = array<uint32>([1, 2, 3, 4, 5, 6]);
     var ov = (pm)(arr3[0..4]);
     nint n3 = copy(arr3[2..6], ov);
     fmt.Println(n3, arr3[2], arr3[3], arr3[4], arr3[5]);

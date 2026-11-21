@@ -234,7 +234,7 @@ internal static (time.Time, error) parsePAXTime(@string s) {
 
     // Parse the nanoseconds.
     // Initialize an array with '0's to handle right padding automatically.
-    var nanoDigits = new byte[]{(byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0'}.array();
+    var nanoDigits = array<byte>([(byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0', (byte)'0']);
     foreach (var i in range(len(sn))) {
         var c = sn[i];
         switch (ᐧ) {

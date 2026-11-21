@@ -134,12 +134,12 @@ internal static (map<@string, slice<@string>>, error) readHeader(ж<textproto.Re
 internal static Func<slice<@string>> dateLayouts = sync.OnceValue(slice<@string> () => {
     // Generate layouts based on RFC 5322, section 3.3.
 
-    var dows = new @string[]{"", "Mon, "}.array();   // day-of-week
-    var days = new @string[]{"2", "02"}.array();     // day = 1*2DIGIT
-    var years = new @string[]{"2006", "06"}.array(); // year = 4*DIGIT / 2*DIGIT
-    var seconds = new @string[]{":05", ""}.array();  // second
+    var dows = array<@string>(["", "Mon, "]);   // day-of-week
+    var days = array<@string>(["2", "02"]);     // day = 1*2DIGIT
+    var years = array<@string>(["2006", "06"]); // year = 4*DIGIT / 2*DIGIT
+    var seconds = array<@string>([":05", ""]);  // second
     // "-0700 (MST)" is not in RFC 5322, but is common.
-    var zones = new @string[]{"-0700", "MST", "UT"}.array(); // zone = (("+" / "-") 4DIGIT) / "UT" / "GMT" / ...
+    var zones = array<@string>(["-0700", "MST", "UT"]); // zone = (("+" / "-") 4DIGIT) / "UT" / "GMT" / ...
 
     nint total = len(dows) * len(days) * len(years) * len(seconds) * len(zones);
     var layouts = new slice<@string>(0, total);

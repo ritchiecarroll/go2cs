@@ -1063,11 +1063,12 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 	// The package's OWN package_info.cs — written moments ago by the production half of this same
 	// run — supplies the fourth edge's gate: the VALUE-form `[assembly: GoImplement<T, I>]` records
 	// go2cs-gen realizes as base lists on the production types the test half binds members on.
-	referenceImports = append(referenceImports, declarationClosureImports(
+	referenceImports = append(referenceImports, declarationClosureImportsFrom(
 		[]*packages.Package{production, internal, external}, compileExcluded,
 		append([]string{production.PkgPath}, referenceImports...),
 		packageImplementBases(platformPackageInfoPath(outputPath, options.targetPlatform)),
-		foreignImplementBasesResolver(options))...)
+		foreignImplementBasesResolver(options),
+		testRecordInterfaces(testInfoPath, []*packages.Package{production, internal, external}))...)
 
 	testProjectName := projectFileBaseName(projectName) + ".tests.csproj"
 	if err := writeTestProject(filepath.Join(outputPath, testProjectName), projectName, projectNamespace, production.PkgPath, model, productionFiles, outputFiles, fixtures, referenceImports, options); err != nil {
@@ -3042,6 +3043,14 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// A test file's instantiation is refused as a production one is (constraintProxyForwarding.go), or under
 	// -warn GO2CS2002 downgraded as one is. The sites are recorded AFTER resetPackageState below, which would
 	// otherwise clear them.
+	//
+	// The test variant's shape-witness selection goes first, as production's does (conversionDriver.go), so the proxy
+	// refusals below decline its witnessed positions; resetPackageState clears it, and it is installed again after.
+	if refusal := prepareShapeWitness(pkg); refusal != nil {
+		refusal.report()
+		return nil, nil, refusal
+	}
+
 	downgraded := refuseUnforwardableConstraintProxies(pkg)
 
 	if downgraded != nil && !options.warnCodes[diagnosticProxyRefused] {
@@ -3065,6 +3074,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	}
 
 	resetPackageState(pkg)
+	installShapeWitnessSelection(pkg)
 
 	if downgraded != nil {
 		recordDowngradedRefusals(diagnosticProxyRefused, downgraded.sites)
@@ -5729,6 +5739,16 @@ func referenceScanTargets(line string) []string {
 // new and needs no separate visit: an interface implements its base's bases too, so those candidates
 // are found directly. Output is a sorted set, so the map-ordered walk stays deterministic.
 func declarationClosureImports(roots []*packages.Package, compileExcluded map[string]bool, referenced []string, recordedBases map[string][]string, foreignBases func(importPath string) map[string][]string) []string {
+	return declarationClosureImportsFrom(roots, compileExcluded, referenced, recordedBases, foreignBases, nil)
+}
+
+// declarationClosureImportsFrom is declarationClosureImports with one more seed set: recordInterfaces, the interfaces
+// the test project's own conversion records name (testRecordInterfaces). A record binds its interface although no
+// test file spells it -- logtarm's `check.Equal(t, …)` records `GoImplement<testing_package.T, check_package.TestingT>`
+// from the argument conversion alone -- so the interface-base walk has to start from it too. go2cs emits gotest.tools'
+// `assert.TestingT` as `TestingT : Δassert.LogT`, a structural base Go's interface does not declare, and binding the
+// record needed internal/assert (CS0012 `assert_package.LogT`, the TS session's tsgo scanner and ast suites).
+func declarationClosureImportsFrom(roots []*packages.Package, compileExcluded map[string]bool, referenced []string, recordedBases map[string][]string, foreignBases func(importPath string) map[string][]string, recordInterfaces []*types.Named) []string {
 	found := hashset.HashSet[string]{}
 	seen := hashset.NewHashSet(referenced)
 	visited := map[*types.Named]bool{}
@@ -5889,11 +5909,25 @@ func declarationClosureImports(roots []*packages.Package, compileExcluded map[st
 		}
 	}
 
+	for _, named := range recordInterfaces {
+		enqueue(named)
+	}
+
+	// The names the compiled test sources select as methods on a concrete receiver (a call or a method value), for the
+	// cross-package candidate edge below.
+	calledMethods := map[string][]*types.Signature{}
+
 	for _, root := range roots {
 		seeds := referencedTypeSeeds(root, compileExcluded)
 
 		for _, named := range seeds.named {
 			enqueue(named)
+		}
+
+		for _, method := range seeds.methodCalls {
+			if signature, ok := method.Type().(*types.Signature); ok {
+				calledMethods[method.Name()] = append(calledMethods[method.Name()], signature)
+			}
 		}
 
 		for _, named := range seeds.constructed {
@@ -6041,13 +6075,68 @@ func declarationClosureImports(roots []*packages.Package, compileExcluded map[st
 		}
 	}
 
-	for len(queue) > 0 {
-		named := queue[0]
-		queue = queue[1:]
+	// The CROSS-PACKAGE CANDIDATE edge. The overload edge above weighs the called method's own package only, and only
+	// parameter types; but every converted method is a C# extension, so `tx.Commit()` makes C# gather the visible
+	// extensions named Commit from every referenced assembly, and it binds the whole signature of each one it weighs,
+	// even one that cannot apply. t2b's `tx.Commit()` on a *sql.Tx failed `CS0012 … 'driver_package.Conn'` from its
+	// lib's `Commit(this ref Backup)` returning `(driver.Conn, error)`, and sqlite's root suite failed
+	// `… 'big_package.ΔInt'` from modernc.org/mathutil's `Next(this ref FCBig)`. The candidate's receiver form does not
+	// spare it: TestTestsProjectsBuildWithTheirCandidateReferences measured CS0012 from a `this ж<T>` candidate under
+	// a ж receiver and under a value receiver, and from a VALUE-receiver method (`this T`, which go2cs-gen also gives a
+	// `this ж<T>` twin) under a ж receiver.
+	//
+	// So the candidate set is every same-named method a visible package declares, at an arity the call accepts (COORD
+	// rulings 20261117T145209Z and 20261117T172451Z). C# weighs fewer: it searches namespace scopes innermost first and
+	// stops at the first that holds an applicable candidate, which is why registry's banked windows suite builds with
+	// no io/fs reference beside os's `Stat(this ж<File>)` (its own `Key.Stat` is in its namespace; os's is in the outer
+	// `go`). This set over-approximates that search, never under. A visible package is one this project references,
+	// or one an edge has added, to a fixpoint; a ROOT package is visible whole, unexported members included, since it
+	// compiles here or grants InternalsVisibleTo.
+	typesByPath := rootTypesByPath(roots)
 
-		for _, base := range interfaceBaseCandidates(named) {
-			reach(base)
-			enqueue(base)
+	//
+	// The candidate scan and the interface-base walk feed each other, so they run as ONE loop to a fixpoint: drain the
+	// base walk, scan every visible package not yet scanned, and repeat until neither adds anything. A package only the
+	// base walk reaches is visible like any other (TestDeclarationClosureImportsScansPackagesTheBaseWalkReaches), and a
+	// candidate's signature can name an interface whose bases need walking.
+	scanned := hashset.HashSet[string]{}
+
+	for {
+		for len(queue) > 0 {
+			named := queue[0]
+			queue = queue[1:]
+
+			for _, base := range interfaceBaseCandidates(named) {
+				reach(base)
+				enqueue(base)
+			}
+		}
+
+		var pending []string
+
+		if len(calledMethods) > 0 {
+			for _, path := range seen.Keys() {
+				if !scanned.Contains(path) && typesByPath[path] != nil {
+					pending = append(pending, path)
+				}
+			}
+		}
+
+		if len(pending) == 0 {
+			break
+		}
+
+		sort.Strings(pending)
+
+		for _, path := range pending {
+			scanned.Add(path)
+
+			for _, candidate := range sameNameCandidates(typesByPath[path], rootPaths.Contains(path), calledMethods) {
+				for _, mentioned := range namedTypesIn(candidate.Type()) {
+					reach(mentioned)
+					enqueue(mentioned)
+				}
+			}
 		}
 	}
 
@@ -6055,6 +6144,218 @@ func declarationClosureImports(roots []*packages.Package, compileExcluded map[st
 	sort.Strings(result)
 
 	return result
+}
+
+// rootTypesByPath indexes, by import path, the type-checked package of every package the roots reach through
+// go/packages' import graph. A root's types.Package does not list its imports for this load, so the graph is walked
+// instead.
+func rootTypesByPath(roots []*packages.Package) map[string]*types.Package {
+	typesByPath := map[string]*types.Package{}
+	visited := map[*packages.Package]bool{}
+
+	var walk func(pkg *packages.Package)
+
+	walk = func(pkg *packages.Package) {
+		if pkg == nil || visited[pkg] {
+			return
+		}
+
+		visited[pkg] = true
+
+		if pkg.Types != nil && typesByPath[pkg.Types.Path()] == nil {
+			typesByPath[pkg.Types.Path()] = pkg.Types
+		}
+
+		for _, imported := range pkg.Imports {
+			walk(imported)
+		}
+	}
+
+	for _, root := range roots {
+		walk(root)
+	}
+
+	return typesByPath
+}
+
+// testRecordInterfaces returns the interfaces the test project's conversion records name as their SECOND argument
+// (`[assembly: GoImplement<T, I>]`, `[assembly: GoImplicitConv<T, I>]`), resolved against the packages the roots
+// reach. These are the declarationClosureImportsFrom seeds no test file spells: a record exists because a value was
+// CONVERTED to the interface (logtarm's `check.Equal(t, …)` passes a *testing.T as check.TestingT), and binding the
+// record binds the interface's emitted declaration, base list included. A name the roots do not reach, or that is not
+// an interface, contributes nothing.
+func testRecordInterfaces(testInfoFile string, roots []*packages.Package) []*types.Named {
+	lines, err := readPackageInfoLines(testInfoFile)
+
+	if err != nil {
+		return nil
+	}
+
+	typesByPath := rootTypesByPath(roots)
+
+	paths := make([]string, 0, len(typesByPath))
+
+	for path := range typesByPath {
+		paths = append(paths, path)
+	}
+
+	sort.Strings(paths)
+
+	var result []*types.Named
+
+	seen := map[*types.Named]bool{}
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		isRecord := false
+
+		for _, prefix := range conversionRecordPrefixes {
+			if strings.HasPrefix(line, prefix) {
+				isRecord = true
+				break
+			}
+		}
+
+		open, end := strings.Index(line, "<"), strings.LastIndex(line, ">")
+
+		if !isRecord || open < 0 || end < open {
+			continue
+		}
+
+		// The second top-level argument of the generic list.
+		depth, start, argument := 0, -1, ""
+
+		for i, r := range line[open+1 : end] {
+			switch r {
+			case '<':
+				depth++
+			case '>':
+				depth--
+			case ',':
+				if depth == 0 && start < 0 {
+					start = i + 1
+				}
+			}
+		}
+
+		if start < 0 {
+			continue
+		}
+
+		argument = strings.TrimSpace(line[open+1+start : end])
+
+		match := packageQualifierPattern.FindStringSubmatchIndex(argument)
+
+		if match == nil || match[0] != 0 && !strings.HasPrefix(argument, "global::") {
+			continue
+		}
+
+		qualifier := argument[match[2]:match[3]]
+		name := strings.TrimPrefix(strings.TrimPrefix(argument[match[1]:], "."), "Δ")
+
+		// A generic instantiation (`Checker<nint>`) seeds its declaration: the converter emits a generic interface's
+		// bases from the declared type (getStructuralInterfaceBases), so the walk looks up the same one.
+		if open := strings.IndexByte(name, '<'); open >= 0 {
+			name = name[:open]
+		}
+
+		if name == "" || strings.Contains(name, ".") {
+			continue
+		}
+
+		for _, path := range paths {
+			if !qualifierTargetNamesPackage(qualifier, path) {
+				continue
+			}
+
+			typeName, isTypeName := typesByPath[path].Scope().Lookup(name).(*types.TypeName)
+
+			if !isTypeName {
+				continue
+			}
+
+			if named, isNamed := typeName.Type().(*types.Named); isNamed && types.IsInterface(named) && !seen[named] {
+				seen[named] = true
+				result = append(result, named)
+			}
+
+			break
+		}
+	}
+
+	return result
+}
+
+// sameNameCandidates returns the methods of pkg's non-interface named types, value and pointer receivers alike (the
+// method set of *T), whose names a test source calls at an arity they accept (arityAccepts): the extension-method
+// candidates declarationClosureImports' cross-package edge binds. Promoted methods count, since go2cs-gen writes a
+// forwarder for each; exported types and methods only, unless the package is a root (all), which compiles here or
+// grants InternalsVisibleTo. `testing` contributes none, for closureWalkable's reason.
+func sameNameCandidates(pkg *types.Package, root bool, called map[string][]*types.Signature) []*types.Func {
+	if pkg == nil || pkg.Path() == "testing" {
+		return nil
+	}
+
+	var result []*types.Func
+
+	scope := pkg.Scope()
+
+	for _, name := range scope.Names() {
+		typeName, isTypeName := scope.Lookup(name).(*types.TypeName)
+
+		if !isTypeName || typeName.IsAlias() || !typeName.Exported() && !root {
+			continue
+		}
+
+		named, isNamed := typeName.Type().(*types.Named)
+
+		if !isNamed || types.IsInterface(named) {
+			continue
+		}
+
+		methods := types.NewMethodSet(types.NewPointer(named))
+
+		for i := range methods.Len() {
+			method, isFunc := methods.At(i).Obj().(*types.Func)
+
+			if !isFunc || len(called[method.Name()]) == 0 || !method.Exported() && !root {
+				continue
+			}
+
+			signature, isSignature := method.Type().(*types.Signature)
+
+			if !isSignature || signature.Recv() == nil {
+				continue
+			}
+
+			for _, call := range called[method.Name()] {
+				if arityAccepts(call, signature) {
+					result = append(result, method)
+					break
+				}
+			}
+		}
+	}
+
+	return result
+}
+
+// arityAccepts reports whether a candidate of the given signature competes with a call of called's arity: the same
+// parameter count, or a variadic on either side that can span the difference. A same-named method of another arity
+// compiles clean beside the call (measured; TestDeclarationClosureImportsSurfacesOverloadCandidateEdges), so it binds
+// nothing.
+func arityAccepts(called, candidate *types.Signature) bool {
+	arity, count := called.Params().Len(), candidate.Params().Len()
+
+	if candidate.Variadic() && arity >= count-1 {
+		return true
+	}
+
+	if called.Variadic() && count >= arity-1 {
+		return true
+	}
+
+	return count == arity
 }
 
 // overloadCandidates returns the OTHER methods a call of method competes with in C#: every method of
@@ -6068,20 +6369,7 @@ func overloadCandidates(method *types.Func) []*types.Func {
 		return nil
 	}
 
-	arity := signature.Params().Len()
-	accepts := func(candidate *types.Signature) bool {
-		count := candidate.Params().Len()
-
-		if candidate.Variadic() && arity >= count-1 {
-			return true
-		}
-
-		if signature.Variadic() && count >= arity-1 {
-			return true
-		}
-
-		return count == arity
-	}
+	accepts := func(candidate *types.Signature) bool { return arityAccepts(signature, candidate) }
 
 	var result []*types.Func
 
@@ -6232,8 +6520,10 @@ type typeSeeds struct {
 	constructed      []*types.Named
 	constructedEmpty []*types.Named
 	memberBases      []*types.Named
-	// methodCalls carries the concrete methods a compiled test source CALLS through a selector; the
-	// overload-candidate edge reads their same-named siblings (see declarationClosureImports).
+	// methodCalls carries the concrete methods a compiled test source selects through a selector, a
+	// call or a method VALUE (`f := tx.Commit`, which converts a method group and weighs the same
+	// candidates); the overload-candidate and cross-package candidate edges read their same-named
+	// siblings (see declarationClosureImports).
 	methodCalls []*types.Func
 	// memberBound carries the types a compiled test source binds a member on through a form that
 	// spells no selector — a builtin call, a range, an index/slice. It feeds ONLY the
@@ -7554,7 +7844,7 @@ func executeTestAction(inputPath, outputPath string, options Options) error {
 		fmt.Print(output)
 		return err
 	case "compare", "all":
-		return compareGoAndConvertedTests(inputPath, outputPath, testProject, options)
+		return compareGoAndConvertedTests(inputPath, outputPath, testProject, manifest.PackageImportPath, options)
 	default:
 		return nil
 	}
@@ -7929,6 +8219,17 @@ type testEnvironmentRecord struct {
 	// OracleGOARCH is the GOARCH the oracle `go test` child ran at, recorded only when -test-oracle-goarch moved it off
 	// the target's (oracleOptions). Omitted otherwise, so every record whose oracle ran at the target is unchanged.
 	OracleGOARCH string `json:"oracleGoarch,omitempty"`
+
+	// OracleBuildTags is the oracle `go test` child's build tags, recorded only when they differ from the
+	// conversion's (oracleBuildTagsRecord): every row but math/big's own drops math_big_pure_go, so Go ran
+	// math/big's assembly where the conversion runs its pure-Go arithmetic. Omitted otherwise. A POINTER so an
+	// EMPTY set (math_big_pure_go was the conversion's only tag) survives the JSON round trip as `[]` and stays
+	// distinct from "the oracle ran the conversion's tags" (absent); a plain omitempty slice drops both alike.
+	OracleBuildTags *[]string `json:"oracleBuildTags,omitempty"`
+
+	// ModuleVersionClaimed is the module version a -tests run on a module COPY took from -module-version: CLAIMED,
+	// not resolved from a module-cache directory (moduleVersionClaimed). Omitted when the version was resolved.
+	ModuleVersionClaimed string `json:"moduleVersionClaimed,omitempty"`
 }
 
 // oracleOptions is the options the ORACLE child runs under: the conversion's own, with the target's GOARCH replaced
@@ -8691,7 +8992,17 @@ func hostFatalMintViolations(outputPath string, disclosures map[string]testDiscl
 		return nil, unchecked
 	}
 
-	page := filepath.Join(dir, validationProofDotID(importPath)+".md")
+	return hostFatalMintAgainstPage(filepath.Join(dir, validationProofDotID(importPath)+".md"), importPath, dir,
+		"the pages are the Windows record and a unix-only test is absent from them by construction", names, fatal, disclosures)
+}
+
+// hostFatalMintAgainstPage is the mint rule's judgement once the disclosing package's evidence page is known: page is
+// that package's committed proof page (which may not exist), importPath names the package in the messages, and dir is
+// where its pages are kept. hostFatalMintViolations reaches it for a standard-library package and
+// hostFatalMintViolationsFor for a module row; the rule itself is one.
+//
+// absentReason completes the line for a name the page does not carry: why that is not evidence either way.
+func hostFatalMintAgainstPage(page, importPath, dir, absentReason string, names []string, fatal map[string]bool, disclosures map[string]testDisclosure) (violations []string, unchecked []string) {
 	data, err := os.ReadFile(page)
 	if err != nil {
 		// No page for THIS package is not a violation -- an unbanked row, a fresh clone and a staging
@@ -8744,14 +9055,87 @@ func hostFatalMintViolations(outputPath string, disclosures map[string]testDiscl
 	for _, name := range names {
 		if !seen[name] {
 			unchecked = append(unchecked, fmt.Sprintf(
-				"%s: not named by %s's own proof page, so its exclusion was NOT cleared against any "+
-					"platform -- the pages are the Windows record and a unix-only test is absent from "+
-					"them by construction", name, importPath))
+				"%s: not named by %s's own proof page (%s), so its exclusion was NOT cleared against any "+
+					"platform -- %s", name, importPath, filepath.Base(page), absentReason))
 		}
 	}
 	sort.Strings(violations)
 	sort.Strings(unchecked)
 	return violations, unchecked
+}
+
+// hostFatalMintViolationsFor is the mint rule for the package a -tests run compares: hostFatalMintViolations for a
+// standard-library package, and for a MODULE row (options.mainModulePath set) the same rule against the module's
+// committed proof page (COORD 20261120T091624Z, GAP 2). A module row's banked record is the page copied into the go2cs
+// checkout the run converts against: docs/validation/modules/<module>@<version>/<package path in the module>.md, the
+// module's root package as index.md. Before this, a module output, never under <root>/core, reported every host-fatal
+// entry UNCHECKED and no module page was read.
+//
+// The checkout is the parent of -go2cspath, and the version is the one -module-disclosures resolves
+// (moduleDisclosureVersion: the module-cache directory's, or -module-version's for a copy). Under a CLAIMED version
+// the rule reads that claimed version's page; the claim itself is marked on the row (moduleVersionClaimed). Without
+// either, the rule can key no page, and every entry is reported unchecked with that reason.
+func hostFatalMintViolationsFor(outputPath, inputPath string, disclosures map[string]testDisclosure, options Options) ([]string, []string) {
+	if options.mainModulePath == "" {
+		return hostFatalMintViolations(outputPath, disclosures)
+	}
+
+	fatal := map[string]bool{}
+	var names []string
+
+	for name, d := range disclosures {
+		if d.Class == hostFatalClass {
+			fatal[name] = true
+			names = append(names, name)
+		}
+	}
+
+	if len(names) == 0 {
+		return nil, nil
+	}
+
+	sort.Strings(names)
+
+	uncheckedAll := func(reason string) ([]string, []string) {
+		var unchecked []string
+
+		for _, name := range names {
+			unchecked = append(unchecked, name+": "+reason)
+		}
+
+		return nil, unchecked
+	}
+
+	if options.go2csPath == "" {
+		return uncheckedAll("no go2cs checkout (-go2cspath) to read the module's committed proof page from")
+	}
+
+	_, version, err := moduleDisclosureVersion(options.testModuleDisclosures, options.mainModulePath, options.mainModuleDir, options.testModuleVersion)
+
+	if err != nil {
+		return uncheckedAll(fmt.Sprintf("no module version to key the committed proof page by (%v)", err))
+	}
+
+	rel, err := filepath.Rel(options.mainModuleDir, inputPath)
+
+	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return uncheckedAll(fmt.Sprintf("%s is not inside module %s at %s", inputPath, options.mainModulePath, options.mainModuleDir))
+	}
+
+	pageName := "index"
+	importPath := options.mainModulePath
+
+	if rel != "." {
+		pageName = filepath.ToSlash(rel)
+		importPath += "/" + pageName
+	}
+
+	dir := filepath.Join(filepath.Dir(filepath.Clean(options.go2csPath)), "docs", validationDocsDirName, "modules",
+		filepath.FromSlash(options.mainModulePath)+"@"+version)
+
+	return hostFatalMintAgainstPage(filepath.Join(dir, filepath.FromSlash(pageName)+".md"), importPath, dir,
+		"the page is the record of the one platform it names, and a test that platform does not build is absent from it",
+		names, fatal, disclosures)
 }
 
 // hostFatalNames lists the excluded tests for the DISCLOSED column, sorted. They appear in
@@ -10686,7 +11070,7 @@ func filterMatchedNothing(testFilter, status string, matched bool, goCount, csCo
 // body so the arguments can be asserted directly: what the oracle selects is a property of this
 // list alone, and a defect in it reads downstream as a divergence in the corpus rather than as a
 // mismatch between the two command lines.
-func oracleTestArgs(options Options, hostFatalSkip string) []string {
+func oracleTestArgs(options Options, packagePath, hostFatalSkip string) []string {
 	args := []string{"test", "-json", "-count=1", "-timeout", options.testTimeout.String()}
 	if options.testFilter != "" {
 		args = append(args, "-run", options.testFilter)
@@ -10712,7 +11096,11 @@ func oracleTestArgs(options Options, hostFatalSkip string) []string {
 	// loaderBuildFlags() and not a second rendering: one definition, so the oracle's flavour cannot
 	// drift from the conversion's. It returns nil for an untagged run, which leaves a tag-neutral
 	// conversion's command line byte-for-byte what it was.
-	args = append(args, options.loaderBuildFlags()...)
+	//
+	// One tag is the exception: math_big_pure_go is dropped on every row except math/big's own,
+	// because it selects no file outside math/big and it breaks the link of any package that pulls
+	// math/big's arithmetic by linkname. oracleBuildFlags holds the rule and its measurement.
+	args = append(args, oracleBuildFlags(options, packagePath)...)
 	// Handed VERBATIM to both sides, exactly as -test-filter is: the SAME string on the two command
 	// lines, verifiable by eye in the log, rather than two expressions someone would have to prove
 	// equivalent. Go's -skip and the host's --skip compile it identically (same `/` split, same
@@ -10723,6 +11111,70 @@ func oracleTestArgs(options Options, hostFatalSkip string) []string {
 	args = append(args, ".")
 
 	return args
+}
+
+// mathBigPureGoTag is the corpus tag that selects math/big's pure-Go arithmetic (arith_decl_pure.go)
+// over its assembly (arith_decl.go + arith_$GOARCH.s). See defaultStdLibBuildTags.
+const mathBigPureGoTag = "math_big_pure_go"
+
+// oracleBuildFlags is loaderBuildFlags for the `go test` oracle of the package at packagePath: the
+// conversion's own tags, less math_big_pure_go on every row except math/big's own.
+//
+// THE ORACLE BUILDS WHAT PLAIN GO BUILDS. math_big_pure_go selects files in math/big and nowhere
+// else in the standard library (census of Go 1.26.11's src: arith_decl.go, arith_decl_pure.go, the
+// arith_$GOARCH files and two of math/big's own test files). Both choices compute the same Words, and
+// math/big's tests check the assembly against the pure-Go `_g` bodies. So for any package other than
+// math/big the tag changes no file in the package under test or in its tests, and the conversion keeps
+// it because assembly cannot be converted. The oracle drops it because the tag also removes the five
+// `//go:linkname` pushes in arith_decl.go (addVV, subVV, shlVU, mulAddVWW, addMulVVW). A package that
+// pulls one of them, github.com/remyoudompheng/bigfft and so every module reaching it, then fails to
+// LINK under `go test`: "invalid reference to math/big.subVV". Its row compares nothing.
+//
+// math/big's own row keeps the tag on both sides: there it changes the test set
+// (arith_amd64_test.go is `//go:build !math_big_pure_go`). The external test variant's path
+// (`math/big_test`) is the same row. An UNKNOWN package path keeps the tag too, because nothing says the
+// row is not math/big's, and oracleBuildTags returns a note saying so, which the compare prints: that
+// row, if it reaches bigfft, fails to link again, and the note is how a reader finds out why.
+func oracleBuildFlags(options Options, packagePath string) []string {
+	options.buildTags, _ = oracleBuildTags(options, packagePath)
+
+	return options.loaderBuildFlags()
+}
+
+// oracleBuildTags is the oracle's tag list for the package at packagePath (see oracleBuildFlags), and a
+// note when the path is unknown and the tag is kept for that reason alone. The caller's slice is never
+// modified.
+func oracleBuildTags(options Options, packagePath string) ([]string, string) {
+	if !slices.Contains(options.buildTags, mathBigPureGoTag) {
+		return options.buildTags, ""
+	}
+
+	switch strings.TrimSuffix(packagePath, "_test") {
+	case "":
+		return options.buildTags, "oracle: the package under test is unknown (its test manifest has no packageImportPath), " +
+			"so the oracle keeps " + mathBigPureGoTag + "; a package that pulls math/big by linkname will not link"
+	case "math/big":
+		return options.buildTags, ""
+	}
+
+	return slices.DeleteFunc(slices.Clone(options.buildTags), func(tag string) bool {
+		return tag == mathBigPureGoTag
+	}), ""
+}
+
+// oracleBuildTagsRecord is the comparison record's oracleBuildTags: the oracle's tags when they differ
+// from the conversion's, nil otherwise, so a record whose oracle ran with the conversion's own tags is
+// unchanged (the same rule as oracleGoarch). An empty set is a non-nil empty slice, so it marshals as `[]`.
+func oracleBuildTagsRecord(options Options, packagePath string) *[]string {
+	tags, _ := oracleBuildTags(options, packagePath)
+
+	if slices.Equal(tags, options.buildTags) {
+		return nil
+	}
+
+	recorded := append([]string{}, tags...)
+
+	return &recorded
 }
 
 // oracleBuildFailure names why the Go side of a comparison did not BUILD: the first line the build
@@ -10745,7 +11197,7 @@ func oracleBuildFailure(goOutput string) string {
 	return ""
 }
 
-func compareGoAndConvertedTests(inputPath, outputPath, testProject string, options Options) error {
+func compareGoAndConvertedTests(inputPath, outputPath, testProject, packagePath string, options Options) error {
 	// -test-timeout is the PACKAGE deadline, handed to BOTH sides so they agree: `go test -timeout`
 	// and the converted host's own `--timeout`. Without it each side silently used its OWN 10-minute
 	// default — `go test`'s and TestHost's — so no value of the flag could let a slow suite finish:
@@ -10768,12 +11220,15 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	// manifest by the wrong platform without any message saying so.
 	// A third-party module row's manifest may live in the committed -module-disclosures tree instead of
 	// the output directory (moduleDisclosureRoot.go); the output directory's own manifest still wins.
-	manifestDir, manifestNote := resolveDisclosureManifestDir(outputPath, options.testModuleDisclosures, options.mainModulePath, options.mainModuleDir, inputPath)
+	manifestDir, manifestNote, manifestErr := resolveDisclosureManifestDir(outputPath, options.testModuleDisclosures, options.mainModulePath, options.mainModuleDir, options.testModuleVersion, inputPath)
+	if manifestErr != nil {
+		return manifestErr
+	}
 	if manifestNote != "" {
 		fmt.Println(manifestNote)
 	}
 	disclosures, outOfScopeDisclosures, disclosureNotes, disclosureErr := loadTestDisclosures(manifestDir, goosOfTarget(options.targetPlatform))
-	mintViolations, mintUnchecked := hostFatalMintViolations(outputPath, disclosures)
+	mintViolations, mintUnchecked := hostFatalMintViolationsFor(outputPath, inputPath, disclosures, options)
 	if len(mintViolations) > 0 {
 		// Refused BEFORE either child runs, so a bad entry cannot quietly withdraw a row that some
 		// platform passes. Fatal rather than a warning: the whole point of the class is that it
@@ -10794,7 +11249,11 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	archExcluded := targetArchExcludedTests(inputPath, options)
 	hostFatalSkip := withdrawnSkipExpression(disclosures, targetArchExcludedNames(archExcluded))
 
-	goArgs := oracleTestArgs(options, hostFatalSkip)
+	if _, note := oracleBuildTags(options, packagePath); note != "" {
+		fmt.Fprintln(os.Stderr, "WARNING: "+note)
+	}
+
+	goArgs := oracleTestArgs(options, packagePath, hostFatalSkip)
 	goOutput, goErr := runCommandWithTimeout(testChildTimeout(options), inputPath, oracleOptions(options), "go", goArgs...)
 
 	// Captured immediately after the real oracle run, same directory, same options — see
@@ -10878,7 +11337,9 @@ func compareGoAndConvertedTests(inputPath, outputPath, testProject string, optio
 	}
 	environment := testEnvironmentFromOptions(options)
 	environment.OracleGoVersion = oracleVersion
+	environment.ModuleVersionClaimed = moduleVersionClaimed(options)
 	environment.Terminal = terminal
+	environment.OracleBuildTags = oracleBuildTagsRecord(options, packagePath)
 	result := testComparison{
 		Package: comparisonRecordPackage(manifest, inputPath), Status: status, Go: goResults, CSharp: csResults,
 		Matched: true, Skipped: []string{}, Disclosed: []string{}, Excluded: excludedDeclarations(manifest), Errors: []string{},

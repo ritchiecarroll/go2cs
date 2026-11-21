@@ -81,25 +81,25 @@ internal static flag flagMethod => /* 1 << 9 */ 512;
 internal static UntypedInt flagMethodShift => 10;
 internal static flag flagRO => /* flagStickyRO | flagEmbedRO */ 96;
 
-} partial class reflect_package {
+} partial class reflectᴛflag {
 
-[GoMethodBody("kind")] internal static Kind kindᴍ(flag f) {
+internal static Kind kind(this flag f) {
     return (Kind)(nuint)((flag)(f & flagKindMask));
 }
 
-[GoMethodBody("ro")] internal static flag roᴍ(flag f) {
+internal static flag ro(this flag f) {
     if ((flag)(f & flagRO) != 0) {
         return flagStickyRO;
     }
     return 0;
 }
 
-} partial class reflect_package {
+} partial class reflectᴛValue {
 
 // typ returns the *abi.Type stored in the Value. This method is fast,
 // but it doesn't always return the correct type for the Value.
 // See abiType and Type, which do return the correct type.
-[GoMethodBody("typ")] internal static ж<abi.Type> typᴍ(Value v) {
+internal static ж<abi.Type> typ(this Value v) {
     // Types are either static (for compiler-created types) or
     // heap-allocated but always reachable (for reflection-created
     // types, held in the central map). So there is no need to
@@ -111,12 +111,12 @@ internal static flag flagRO => /* flagStickyRO | flagEmbedRO */ 96;
 // pointer returns the underlying pointer represented by v.
 // v.Kind() must be Pointer, Map, Chan, Func, or UnsafePointer
 // if v.Kind() == Pointer, the base type must not be not-in-heap.
-[GoMethodBody("pointer")] internal static @unsafe.Pointer pointerᴍ(Value v) {
+internal static @unsafe.Pointer pointer(this Value v) {
     if (v.typ().Size() != goarch.PtrSize || !v.typ().Pointers()) {
         throw panic("can't call pointer on a non-pointer Value");
     }
     if ((flag)(v.flag & flagIndir) != 0) {
-        return ~@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr);
+        return @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr));
     }
     return v.ptr;
 }
@@ -152,7 +152,7 @@ internal static @unsafe.Pointer packEfaceData(Value v) {
     case {} when (flag)(v.flag & flagIndir) != 0: {
         // Value is indirect, but interface is direct. We need
         // to load the data at v.ptr into the interface data word.
-        return ~@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr);
+        return @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr));
     }
     default: {
         // Value is direct, and so is the interface.
@@ -170,9 +170,9 @@ partial struct ValueError {
     public Kind Kind;
 }
 
-} partial class reflect_package {
+} partial class reflectᴛValueError {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref ValueError e) {
+public static @string Error(this ref ValueError e) {
     if (e.Kind == 0) {
         return "reflect: call of "u8 + e.Method + " on zero Value"u8;
     }
@@ -189,7 +189,7 @@ partial struct nonEmptyInterface {
     internal @unsafe.Pointer word;
 }
 
-} partial class reflect_package {
+} partial class reflectᴛflag {
 
 // go2cs generated this placeholder — func mustBe is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -201,13 +201,13 @@ partial struct nonEmptyInterface {
 
 // go2cs generated this placeholder — func mustBeAssignableSlow is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflect_package {
+} partial class reflectᴛValue {
 
 // go2cs generated this placeholder — func Addr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func Bool is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoMethodBody("panicNotBool")] internal static void panicNotBoolᴍ(Value v) {
+internal static void panicNotBool(this Value v) {
     v.mustBe(reflect.Bool);
 }
 
@@ -215,11 +215,11 @@ partial struct nonEmptyInterface {
 
 internal static ж<abi.Type> bytesType = rtypeOf((slice<byte>)(default));
 
-} partial class reflect_package {
+} partial class reflectᴛValue {
 
 // go2cs generated this placeholder — func Bytes is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoMethodBody("bytesSlow")] internal static slice<byte> bytesSlowᴍ(Value v) {
+internal static slice<byte> bytesSlow(this Value v) {
     switch (v.kind()) {
     case var ᴛ when ᴛ == reflect.Slice: {
         if (v.typ().Elem().Kind() != abi.Uint8) {
@@ -249,7 +249,7 @@ internal static ж<abi.Type> bytesType = rtypeOf((slice<byte>)(default));
 // an element of a slice, an element of an addressable array,
 // a field of an addressable struct, or the result of dereferencing a pointer.
 // If CanAddr returns false, calling [Value.Addr] will panic.
-[GoMethodBody("CanAddr")] internal static bool CanAddrᴍ(Value v) {
+public static bool CanAddr(this Value v) {
     return (flag)(v.flag & flagAddr) != 0;
 }
 
@@ -258,7 +258,7 @@ internal static ж<abi.Type> bytesType = rtypeOf((slice<byte>)(default));
 // obtained by the use of unexported struct fields.
 // If CanSet returns false, calling [Value.Set] or any type-specific
 // setter (e.g., [Value.SetBool], [Value.SetInt]) will panic.
-[GoMethodBody("CanSet")] internal static bool CanSetᴍ(Value v) {
+public static bool CanSet(this Value v) {
     return (flag)(v.flag & ((flag)(flagAddr | flagRO))) == flagAddr;
 }
 
@@ -273,19 +273,19 @@ internal static ref bool callGC => ref ((StaticBox<bool>)ᏑcallGC).ValueSlot; /
 
 internal const bool debugReflectCall = false;
 
-} partial class reflect_package {
+} partial class reflectᴛValue {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string reflectValueCallˢᴍValue => ref reflectValueCallˢᵇᴍValue;
-private static readonly @string reflectValueCallˢᵇᴍValue = "reflect.Value.Call"u8;
-internal static ref readonly @string precomputedStackArgˢᴍValue => ref precomputedStackArgˢᵇᴍValue;
-private static readonly @string precomputedStackArgˢᵇᴍValue = "precomputed stack arg offset"u8;
-internal static ref readonly @string precomputedValueOffsetˢᴍValue => ref precomputedValueOffsetˢᵇᴍValue;
-private static readonly @string precomputedValueOffsetˢᵇᴍValue = "precomputed value offset"u8;
-internal static ref readonly @string tvSize0ˢᴍValue => ref tvSize0ˢᵇᴍValue;
-private static readonly @string tvSize0ˢᵇᴍValue = "tv.Size() != 0"u8;
+internal static ref readonly @string reflectValueCallˢ => ref reflectValueCallˢᵇ;
+private static readonly @string reflectValueCallˢᵇ = "reflect.Value.Call"u8;
+internal static ref readonly @string precomputedStackArgˢ => ref precomputedStackArgˢᵇ;
+private static readonly @string precomputedStackArgˢᵇ = "precomputed stack arg offset"u8;
+internal static ref readonly @string precomputedValueOffsetˢ => ref precomputedValueOffsetˢᵇ;
+private static readonly @string precomputedValueOffsetˢᵇ = "precomputed value offset"u8;
+internal static ref readonly @string tvSize0ˢ => ref tvSize0ˢᵇ;
+private static readonly @string tvSize0ˢᵇ = "tv.Size() != 0"u8;
 
-[GoMethodBody("call")] internal static slice<Value> callᴍ(Value v, @string op, slice<Value> @in) {
+internal static slice<Value> call(this Value v, @string op, slice<Value> @in) {
     // Get function pointer, type.
     var t = v.typ().FuncType();
     @unsafe.Pointer fn = default;
@@ -295,7 +295,7 @@ private static readonly @string tvSize0ˢᵇᴍValue = "tv.Size() != 0"u8;
         rcvr = v;
         (rcvrtype, t, fn) = methodReceiver(op, v, (nint)v.flag >> (int)(flagMethodShift));
     } else if ((flag)(v.flag & flagIndir) != 0) {
-        fn = ~@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr);
+        fn = @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr));
     } else {
         fn = v.ptr;
     }
@@ -425,17 +425,17 @@ private static readonly @string tvSize0ˢᵇᴍValue = "tv.Size() != 0"u8;
         // TODO(mknyszek): Figure out if it's possible to get some
         // scratch space for this assignment check. Previously, it
         // was possible to use space in the argument frame.
-        vΔ1 = vΔ1.assignTo(reflectValueCallˢᴍValue, targ.Ꮡt, nil);
+        vΔ1 = vΔ1.assignTo(reflectValueCallˢ, targ.Ꮡt, nil);
 stepsLoop:
         foreach (var (_, st) in range(abid.call.stepsForValue(i + inStart))) {
             switch (st.kind) {
             case var ᴛ when ᴛ == abiStepStack: {
                 // Copy values to the "stack."
-                @unsafe.Pointer addr = add(stackArgs, st.stkOff, precomputedStackArgˢᴍValue);
+                @unsafe.Pointer addr = add(stackArgs, st.stkOff, precomputedStackArgˢ);
                 if ((flag)(vΔ1.flag & flagIndir) != 0) {
                     typedmemmove(targ.Ꮡt, addr, vΔ1.ptr);
                 } else {
-                    (@unsafe.Pointer.To<@unsafe.Pointer>(addr)).Value = vΔ1.ptr;
+                    @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(addr), vΔ1.ptr);
                 }
                 // There's only one step for a stack-allocated value.
                 goto break_stepsLoop;
@@ -444,12 +444,12 @@ stepsLoop:
             case var ᴛ when ᴛ == abiStepIntReg || ᴛ == abiStepPointer: {
                 // Copy values to "integer registers."
                 if ((flag)(vΔ1.flag & flagIndir) != 0) {
-                    @unsafe.Pointer offset = add(vΔ1.ptr, st.offset, precomputedValueOffsetˢᴍValue);
+                    @unsafe.Pointer offset = add(vΔ1.ptr, st.offset, precomputedValueOffsetˢ);
                     if (st.kind == abiStepPointer) {
                         // Duplicate this pointer in the pointer area of the
                         // register space. Otherwise, there's the potential for
                         // this to be the last reference to v.ptr.
-                        regArgs.Ptrs[st.ireg] = ~@unsafe.Pointer.To<@unsafe.Pointer>(offset);
+                        regArgs.Ptrs[st.ireg] = @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(offset));
                     }
                     intToReg(ᏑregArgs, st.ireg, st.size, offset);
                 } else {
@@ -466,7 +466,7 @@ stepsLoop:
                 if ((flag)(vΔ1.flag & flagIndir) == 0) {
                     throw panic("attempted to copy pointer to FP register");
                 }
-                @unsafe.Pointer offset = add(vΔ1.ptr, st.offset, precomputedValueOffsetˢᴍValue);
+                @unsafe.Pointer offset = add(vΔ1.ptr, st.offset, precomputedValueOffsetˢ);
                 floatToReg(ref regArgs, st.freg, st.size, offset);
                 break;
             }
@@ -534,7 +534,7 @@ break_stepsLoop:;
                     // allocated, the entire value is according to the ABI. So
                     // just make an indirection into the allocated frame.
                     var fl = (flag)(flagIndir | ((flag)(uintptr)tv.Kind()));
-                    ret[i] = new Value(tv, add(stackArgs, st.stkOff, tvSize0ˢᴍValue), fl);
+                    ret[i] = new Value(tv, add(stackArgs, st.stkOff, tvSize0ˢ), fl);
                     // Note: this does introduce false sharing between results -
                     // if any result is live, they are all live.
                     // (And the space for the args is live as well, but as we've
@@ -568,17 +568,17 @@ break_stepsLoop:;
             foreach (var (_, st) in range(steps)) {
                 switch (st.kind) {
                 case var ᴛ when ᴛ == abiStepIntReg: {
-                    @unsafe.Pointer offset = add(s, st.offset, precomputedValueOffsetˢᴍValue);
+                    @unsafe.Pointer offset = add(s, st.offset, precomputedValueOffsetˢ);
                     intFromReg(ᏑregArgs, st.ireg, st.size, offset);
                     break;
                 }
                 case var ᴛ when ᴛ == abiStepPointer: {
-                    @unsafe.Pointer sΔ2 = add(s, st.offset, precomputedValueOffsetˢᴍValue);
-                    (@unsafe.Pointer.To<@unsafe.Pointer>(sΔ2)).Value = regArgs.Ptrs[st.ireg];
+                    @unsafe.Pointer sΔ2 = add(s, st.offset, precomputedValueOffsetˢ);
+                    @unsafe.Pointer.StoreWord((@unsafe.Pointer.To<@unsafe.Pointer>(sΔ2)), regArgs.Ptrs[st.ireg]);
                     break;
                 }
                 case var ᴛ when ᴛ == abiStepFloatReg: {
-                    @unsafe.Pointer offset = add(s, st.offset, precomputedValueOffsetˢᴍValue);
+                    @unsafe.Pointer offset = add(s, st.offset, precomputedValueOffsetˢ);
                     floatFromReg(ᏑregArgs, st.freg, st.size, offset);
                     break;
                 }
@@ -671,7 +671,7 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
                 }
                 v.flag |= (flag)(flagIndir);
             } else {
-                v.ptr = ~@unsafe.Pointer.To<@unsafe.Pointer>(add(ptr, st.stkOff, ptrˢ));
+                v.ptr = @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(add(ptr, st.stkOff, ptrˢ)));
             }
         } else {
             if (!typ.IsDirectIface()) {
@@ -688,7 +688,7 @@ internal static void callReflect(ж<makeFuncImpl> Ꮡctxt, @unsafe.Pointer frame
                     }
                     case var ᴛ when ᴛ == abiStepPointer: {
                         @unsafe.Pointer s = add(v.ptr, stΔ1.offset, precomputedValueOffsetˢ);
-                        (@unsafe.Pointer.To<@unsafe.Pointer>(s)).Value = regs.Ptrs[stΔ1.ireg];
+                        @unsafe.Pointer.StoreWord((@unsafe.Pointer.To<@unsafe.Pointer>(s)), regs.Ptrs[stΔ1.ireg]);
                         break;
                     }
                     case var ᴛ when ᴛ == abiStepFloatReg: {
@@ -879,11 +879,11 @@ internal static void storeRcvr(Value v, @unsafe.Pointer p) {
     if (t.Kind() == abi.Interface) {
         // the interface data word becomes the receiver word
         var iface = @unsafe.Pointer.To<nonEmptyInterface>(v.ptr);
-        (@unsafe.Pointer.To<@unsafe.Pointer>(p)).Value = iface.word;
+        @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(p), iface.word);
     } else if ((flag)(v.flag & flagIndir) != 0 && t.IsDirectIface()) {
-        (@unsafe.Pointer.To<@unsafe.Pointer>(p)).Value = (@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr)).Value;
+        @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(p), @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr)));
     } else {
-        (@unsafe.Pointer.To<@unsafe.Pointer>(p)).Value = v.ptr;
+        @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(p), v.ptr);
     }
 }
 
@@ -1013,7 +1013,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
                     var matchᴛ2 = false;
                     if (exprᴛ2 == abiStepPointer) { matchᴛ2 = true;
                         // Do the pointer copy directly so we get a write barrier.
-                        methodRegs.Ptrs[mStepΔ1.ireg] = ~@unsafe.Pointer.To<@unsafe.Pointer>(from); // We need to make sure this ends up in Ints, too.
+                        methodRegs.Ptrs[mStepΔ1.ireg] = @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(from)); // We need to make sure this ends up in Ints, too.
                         fallthrough = true;
                     }
                     if (fallthrough || !matchᴛ2 && exprᴛ2 == abiStepIntReg) { matchᴛ2 = true;
@@ -1037,7 +1037,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
                     switch (vStep.kind) {
                     case var ᴛ when ᴛ == abiStepPointer: {
                         // Do the pointer copy directly so we get a write barrier.
-                        (@unsafe.Pointer.To<@unsafe.Pointer>(to)).Value = valueRegs.Ptrs[vStep.ireg];
+                        @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(to), valueRegs.Ptrs[vStep.ireg]);
                         break;
                     }
                     case var ᴛ when ᴛ == abiStepIntReg: {
@@ -1155,11 +1155,11 @@ internal static @string funcName(Func<slice<Value>, slice<Value>> fʗp) {
     return closureˢ;
 }
 
-} partial class reflect_package {
+} partial class reflectᴛValue {
 
 // go2cs generated this placeholder — func Cap is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoMethodBody("capNonSlice")] internal static nint capNonSliceᴍ(Value v) {
+internal static nint capNonSlice(this Value v) {
     Kind k = v.kind();
     switch (k) {
     case var ᴛ when ᴛ == Array: {
@@ -1181,7 +1181,7 @@ internal static @string funcName(Func<slice<Value>, slice<Value>> fʗp) {
 // go2cs generated this placeholder — func Close is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // CanComplex reports whether [Value.Complex] can be used without panicking.
-[GoMethodBody("CanComplex")] internal static bool CanComplexᴍ(Value v) {
+public static bool CanComplex(this Value v) {
     switch (v.kind()) {
     case var ᴛ when ᴛ == Complex64 || ᴛ == Complex128: {
         return true;
@@ -1200,7 +1200,7 @@ internal static @string funcName(Func<slice<Value>, slice<Value>> fʗp) {
 // FieldByIndex returns the nested field corresponding to index.
 // It panics if evaluation requires stepping through a nil
 // pointer or a field that is not a struct.
-[GoMethodBody("FieldByIndex")] internal static Value FieldByIndexᴍ(Value v, slice<nint> index) {
+public static Value FieldByIndex(this Value v, slice<nint> index) {
     if (len(index) == 1) {
         return v.Field(index[0]);
     }
@@ -1223,7 +1223,7 @@ internal static @string funcName(Func<slice<Value>, slice<Value>> fʗp) {
 // It returns an error if evaluation requires stepping through a nil
 // pointer, but panics if it must step through a field that
 // is not a struct.
-[GoMethodBody("FieldByIndexErr")] internal static (Value, error) FieldByIndexErrᴍ(Value v, slice<nint> index) {
+public static (Value, error) FieldByIndexErr(this Value v, slice<nint> index) {
     if (len(index) == 1) {
         return (v.Field(index[0]), default);
     }
@@ -1245,7 +1245,7 @@ internal static @string funcName(Func<slice<Value>, slice<Value>> fʗp) {
 // FieldByName returns the struct field with the given name.
 // It returns the zero Value if no field was found.
 // It panics if v's Kind is not [Struct].
-[GoMethodBody("FieldByName")] internal static Value FieldByNameᴍ(Value v, @string name) {
+public static Value FieldByName(this Value v, @string name) {
     v.mustBe(Struct);
     var (f, ok) = toRType(v.typ()).FieldByName(name); if (ok) {
         return v.FieldByIndex(f.Index);
@@ -1257,7 +1257,7 @@ internal static @string funcName(Func<slice<Value>, slice<Value>> fʗp) {
 // that satisfies the match function.
 // It panics if v's Kind is not [Struct].
 // It returns the zero Value if no field was found.
-[GoMethodBody("FieldByNameFunc")] internal static Value FieldByNameFuncᴍ(Value v, Func<@string, bool> match) {
+public static Value FieldByNameFunc(this Value v, Func<@string, bool> match) {
     var (f, ok) = toRType(v.typ()).FieldByNameFunc(match); if (ok) {
         return v.FieldByIndex(f.Index);
     }
@@ -1265,7 +1265,7 @@ internal static @string funcName(Func<slice<Value>, slice<Value>> fʗp) {
 }
 
 // CanFloat reports whether [Value.Float] can be used without panicking.
-[GoMethodBody("CanFloat")] internal static bool CanFloatᴍ(Value v) {
+public static bool CanFloat(this Value v) {
     switch (v.kind()) {
     case var ᴛ when ᴛ == Float32 || ᴛ == Float64: {
         return true;
@@ -1281,12 +1281,12 @@ internal static @string funcName(Func<slice<Value>, slice<Value>> fʗp) {
 
 internal static ж<abi.Type> uint8Type = rtypeOf((uint8)0);
 
-} partial class reflect_package {
+} partial class reflectᴛValue {
 
 // go2cs generated this placeholder — func Index is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // CanInt reports whether Int can be used without panicking.
-[GoMethodBody("CanInt")] internal static bool CanIntᴍ(Value v) {
+public static bool CanInt(this Value v) {
     switch (v.kind()) {
     case var ᴛ when ᴛ == reflect.Int || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64: {
         return true;
@@ -1299,7 +1299,7 @@ internal static ж<abi.Type> uint8Type = rtypeOf((uint8)0);
 // go2cs generated this placeholder — func Int is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // CanInterface reports whether [Value.Interface] can be used without panicking.
-[GoMethodBody("CanInterface")] internal static bool CanInterfaceᴍ(Value v) {
+public static bool CanInterface(this Value v) {
     if (v.flag == 0) {
         throw panic(Ꮡ(new ValueError("reflect.Value.CanInterface", Invalid)));
     }
@@ -1330,7 +1330,7 @@ internal static any packIfaceValueIntoEmptyIface(Value v) {
     return (@unsafe.Pointer.To<packIfaceValueIntoEmptyIface_type>(v.ptr)).ValueSlot;
 }
 
-} partial class reflect_package {
+} partial class reflectᴛValue {
 
 // go2cs generated this placeholder — func InterfaceData is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -1341,7 +1341,7 @@ internal static any packIfaceValueIntoEmptyIface(Value v) {
 // If [Value.IsValid] returns false, all other methods except String panic.
 // Most functions and methods never return an invalid Value.
 // If one does, its documentation states the conditions explicitly.
-[GoMethodBody("IsValid")] internal static bool IsValidᴍ(Value v) {
+public static bool IsValid(this Value v) {
     return v.flag != 0;
 }
 
@@ -1391,19 +1391,19 @@ internal static bool isZero(slice<byte> b) {
     return true;
 }
 
-} partial class reflect_package {
+} partial class reflectᴛValue {
 
 // go2cs generated this placeholder — func SetZero is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Kind returns v's Kind.
 // If v is the zero Value ([Value.IsValid] returns false), Kind returns Invalid.
-[GoMethodBody("Kind")] internal static Kind Kindᴍ(Value v) {
+public static Kind Kind(this Value v) {
     return v.kind();
 }
 
 // go2cs generated this placeholder — func Len is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoMethodBody("lenNonSlice")] internal static nint lenNonSliceᴍ(Value v) {
+internal static nint lenNonSlice(this Value v) {
     Kind k = v.kind();
     switch (k) {
     case var ᴛ when ᴛ == Array: {
@@ -1444,10 +1444,10 @@ internal static Value copyVal(ж<abi.Type> Ꮡtyp, flag fl, @unsafe.Pointer ptr)
         typedmemmove(Ꮡtyp, c, ptr);
         return new Value(Ꮡtyp, c.Value, (flag)(fl | flagIndir));
     }
-    return new Value(Ꮡtyp, ~@unsafe.Pointer.To<@unsafe.Pointer>(ptr), fl);
+    return new Value(Ꮡtyp, @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(ptr)), fl);
 }
 
-} partial class reflect_package {
+} partial class reflectᴛValue {
 
 // go2cs generated this placeholder — func Method is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -1456,7 +1456,7 @@ internal static Value copyVal(ж<abi.Type> Ꮡtyp, flag fl, @unsafe.Pointer ptr)
 // For a non-interface type, it returns the number of exported methods.
 //
 // For an interface type, it returns the number of exported and unexported methods.
-[GoMethodBody("NumMethod")] internal static nint NumMethodᴍ(Value v) {
+public static nint NumMethod(this Value v) {
     if (v.typ() == nil) {
         throw panic(Ꮡ(new ValueError("reflect.Value.NumMethod", Invalid)));
     }
@@ -1475,7 +1475,7 @@ internal static Value copyVal(ж<abi.Type> Ꮡtyp, flag fl, @unsafe.Pointer ptr)
 // Calling this method will cause the linker to retain all methods with this name in all packages.
 // If the linker can't determine the name, it will retain all exported methods.
 // This may make the executable binary larger but will not affect execution time.
-[GoMethodBody("MethodByName")] internal static Value MethodByNameᴍ(Value v, @string name) {
+public static Value MethodByName(this Value v, @string name) {
     if (v.typ() == nil) {
         throw panic(Ꮡ(new ValueError("reflect.Value.MethodByName", Invalid)));
     }
@@ -1493,7 +1493,7 @@ internal static Value copyVal(ж<abi.Type> Ꮡtyp, flag fl, @unsafe.Pointer ptr)
 
 // OverflowComplex reports whether the complex128 x cannot be represented by v's type.
 // It panics if v's Kind is not [Complex64] or [Complex128].
-[GoMethodBody("OverflowComplex")] internal static bool OverflowComplexᴍ(Value v, complex128 x) {
+public static bool OverflowComplex(this Value v, complex128 x) {
     Kind k = v.kind();
     switch (k) {
     case var ᴛ when ᴛ == Complex64: {
@@ -1507,7 +1507,7 @@ internal static Value copyVal(ж<abi.Type> Ꮡtyp, flag fl, @unsafe.Pointer ptr)
 
 // OverflowFloat reports whether the float64 x cannot be represented by v's type.
 // It panics if v's Kind is not [Float32] or [Float64].
-[GoMethodBody("OverflowFloat")] internal static bool OverflowFloatᴍ(Value v, float64 x) {
+public static bool OverflowFloat(this Value v, float64 x) {
     Kind k = v.kind();
     switch (k) {
     case var ᴛ when ᴛ == Float32: {
@@ -1528,11 +1528,11 @@ internal static bool overflowFloat32(float64 x) {
     return Δmath.MaxFloat32 < x && x <= Δmath.MaxFloat64;
 }
 
-} partial class reflect_package {
+} partial class reflectᴛValue {
 
 // OverflowInt reports whether the int64 x cannot be represented by v's type.
 // It panics if v's Kind is not [Int], [Int8], [Int16], [Int32], or [Int64].
-[GoMethodBody("OverflowInt")] internal static bool OverflowIntᴍ(Value v, int64 x) {
+public static bool OverflowInt(this Value v, int64 x) {
     Kind k = v.kind();
     switch (k) {
     case var ᴛ when ᴛ == reflect.Int || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64: {
@@ -1545,7 +1545,7 @@ internal static bool overflowFloat32(float64 x) {
 
 // OverflowUint reports whether the uint64 x cannot be represented by v's type.
 // It panics if v's Kind is not [Uint], [Uintptr], [Uint8], [Uint16], [Uint32], or [Uint64].
-[GoMethodBody("OverflowUint")] internal static bool OverflowUintᴍ(Value v, uint64 x) {
+public static bool OverflowUint(this Value v, uint64 x) {
     Kind k = v.kind();
     switch (k) {
     case var ᴛ when ᴛ == reflect.Uint || ᴛ == Uintptr || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64: {
@@ -1567,7 +1567,7 @@ internal static bool overflowFloat32(float64 x) {
 // The receive blocks until a value is ready.
 // The boolean value ok is true if the value x corresponds to a send
 // on the channel, false if it is a zero value received because the channel is closed.
-[GoMethodBody("Recv")] internal static (Value x, bool ok) Recvᴍ(Value v) {
+public static (Value x, bool ok) Recv(this Value v) {
     v.mustBe(Chan);
     v.mustBeExported();
     return v.recv(false);
@@ -1578,7 +1578,7 @@ internal static bool overflowFloat32(float64 x) {
 // Send sends x on the channel v.
 // It panics if v's kind is not [Chan] or if x's type is not the same type as v's element type.
 // As in Go, x's value must be assignable to the channel's element type.
-[GoMethodBody("Send")] internal static void Sendᴍ(Value v, Value x) {
+public static void Send(this Value v, Value x) {
     v.mustBe(Chan);
     v.mustBeExported();
     v.send(x, false);
@@ -1609,10 +1609,10 @@ internal static bool overflowFloat32(float64 x) {
 // SetPointer sets the [unsafe.Pointer] value v to x.
 // It panics if v's Kind is not [UnsafePointer]
 // or if [Value.CanSet] returns false.
-[GoMethodBody("SetPointer")] internal static void SetPointerᴍ(Value v, @unsafe.Pointer x) {
+public static void SetPointer(this Value v, @unsafe.Pointer x) {
     v.mustBeAssignable();
     v.mustBe(reflect.UnsafePointer);
-    (@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr)).Value = x;
+    @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr), x);
 }
 
 // go2cs generated this placeholder — func SetString is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1624,12 +1624,12 @@ internal static bool overflowFloat32(float64 x) {
 // go2cs generated this placeholder — func String is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidValueˢᴍValue => ref invalidValueˢᵇᴍValue;
-private static readonly @string invalidValueˢᵇᴍValue = "<invalid Value>"u8;
+internal static ref readonly @string invalidValueˢ => ref invalidValueˢᵇ;
+private static readonly @string invalidValueˢᵇ = "<invalid Value>"u8;
 
-[GoMethodBody("stringNonString")] internal static @string stringNonStringᴍ(Value v) {
+internal static @string stringNonString(this Value v) {
     if (v.kind() == Invalid) {
-        return invalidValueˢᴍValue;
+        return invalidValueˢ;
     }
     // If you call String on a reflect.Value of other type, it's better to
     // print something than to panic. Useful in debugging.
@@ -1641,7 +1641,7 @@ private static readonly @string invalidValueˢᵇᴍValue = "<invalid Value>"u8;
 // If the receive delivers a value, x is the transferred value and ok is true.
 // If the receive cannot finish without blocking, x is the zero Value and ok is false.
 // If the channel is closed, x is the zero value for the channel's element type and ok is false.
-[GoMethodBody("TryRecv")] internal static (Value x, bool ok) TryRecvᴍ(Value v) {
+public static (Value x, bool ok) TryRecv(this Value v) {
     v.mustBe(Chan);
     v.mustBeExported();
     return v.recv(true);
@@ -1651,7 +1651,7 @@ private static readonly @string invalidValueˢᵇᴍValue = "<invalid Value>"u8;
 // It panics if v's Kind is not [Chan].
 // It reports whether the value was sent.
 // As in Go, x's value must be assignable to the channel's element type.
-[GoMethodBody("TrySend")] internal static bool TrySendᴍ(Value v, Value x) {
+public static bool TrySend(this Value v, Value x) {
     v.mustBe(Chan);
     v.mustBeExported();
     return v.send(x, true);
@@ -1660,18 +1660,18 @@ private static readonly @string invalidValueˢᵇᴍValue = "<invalid Value>"u8;
 // go2cs generated this placeholder — func Type is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:noinline
-[GoMethodBody("typeSlow")] internal static partial Type typeSlowᴍ(Value v) {
+internal static partial Type typeSlow(this Value v) {
     return new rtypeжType(toRType(v.abiTypeSlow()));
 }
 
-[GoMethodBody("abiType")] internal static ж<abi.Type> abiTypeᴍ(Value v) {
+internal static ж<abi.Type> abiType(this Value v) {
     if (v.flag != 0 && (flag)(v.flag & flagMethod) == 0) {
         return v.typ();
     }
     return v.abiTypeSlow();
 }
 
-[GoMethodBody("abiTypeSlow")] internal static ж<abi.Type> abiTypeSlowᴍ(Value v) {
+internal static ж<abi.Type> abiTypeSlow(this Value v) {
     if (v.flag == 0) {
         throw panic(Ꮡ(new ValueError("reflect.Value.Type", Invalid)));
     }
@@ -1703,7 +1703,7 @@ private static readonly @string invalidValueˢᵇᴍValue = "<invalid Value>"u8;
 }
 
 // CanUint reports whether [Value.Uint] can be used without panicking.
-[GoMethodBody("CanUint")] internal static bool CanUintᴍ(Value v) {
+public static bool CanUint(this Value v) {
     switch (v.kind()) {
     case var ᴛ when ᴛ == reflect.Uint || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uintptr: {
         return true;
@@ -1729,7 +1729,7 @@ private static readonly @string invalidValueˢᵇᴍValue = "<invalid Value>"u8;
 // for each index i in the range [0, NumField()).
 //
 // It panics if v's Kind is not Struct.
-[GoMethodBody("Fields")] internal static iter.Seq2<StructField, Value> Fieldsᴍ(Value v) {
+public static iter.Seq2<StructField, Value> Fields(this Value v) {
     var t = v.Type();
     if (t.Kind() != Struct) {
         throw panic("reflect: Fields of non-struct type " + t.String());
@@ -1756,7 +1756,7 @@ private static readonly @string invalidValueˢᵇᴍValue = "<invalid Value>"u8;
 //
 // Calling this method will force the linker to retain all exported methods in all packages.
 // This may make the executable binary larger but will not affect execution time.
-[GoMethodBody("Methods")] internal static iter.Seq2<Method, Value> Methodsᴍ(Value v) {
+public static iter.Seq2<Method, Value> Methods(this Value v) {
     var vʗ1 = v;
     return (Func<Method, Value, bool> yield) => {
         var rtype = vʗ1.Type();
@@ -1818,12 +1818,12 @@ internal static @unsafe.Pointer arrayAt(@unsafe.Pointer p, nint i, uintptr eltSi
     return add(p, (uintptr)i * eltSize, iLenˢ);
 }
 
-} partial class reflect_package {
+} partial class reflectᴛValue {
 
 // go2cs generated this placeholder — func Grow is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // grow is identical to Grow but does not check for assignability.
-[GoMethodBody("grow")] internal static void growᴍ(Value v, nint n) {
+internal static void grow(this Value v, nint n) {
     var p = @unsafe.Pointer.To<unsafeheader.Slice>(v.ptr);
     switch (ᐧ) {
     case {} when n is < 0: {
@@ -1951,14 +1951,14 @@ internal static ref array<byte> zeroVal => ref ((StaticBox<array<byte>>)ᏑzeroV
 
 // go2cs generated this placeholder — func NewAt is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflect_package {
+} partial class reflectᴛValue {
 
 // assignTo returns a value v that can be assigned directly to dst.
 // It panics if v is not assignable to dst.
 // For a conversion to an interface type, target, if not nil,
 // is a suggested scratch space to use.
 // target must be initialized memory (or nil).
-[GoMethodBody("assignTo")] internal static Value assignToᴍ(Value v, @string context, ж<abi.Type> Ꮡdst, @unsafe.Pointer target) {
+internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst, @unsafe.Pointer target) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
     if ((flag)(v.flag & flagMethod) != 0) {
@@ -2000,7 +2000,7 @@ internal static ref array<byte> zeroVal => ref ((StaticBox<array<byte>>)ᏑzeroV
 
 // CanConvert reports whether the value v can be converted to type t.
 // If v.CanConvert(t) returns true then v.Convert(t) will not panic.
-[GoMethodBody("CanConvert")] internal static bool CanConvertᴍ(Value v, Type t) {
+public static bool CanConvert(this Value v, Type t) {
     var vt = v.Type();
     if (!vt.ConvertibleTo(t)) {
         return false;
@@ -2028,7 +2028,7 @@ internal static ref array<byte> zeroVal => ref ((StaticBox<array<byte>>)ᏑzeroV
 // If the type of v is an interface, this checks the dynamic type.
 // If this reports true then v.Interface() == x will not panic for any x,
 // nor will v.Equal(u) for any Value u.
-[GoMethodBody("Comparable")] internal static bool Comparableᴍ(Value v) {
+public static bool Comparable(this Value v) {
     Kind k = v.Kind();
     switch (k) {
     case var ᴛ when ᴛ == Invalid: {
@@ -2070,7 +2070,7 @@ internal static ref array<byte> zeroVal => ref ((StaticBox<array<byte>>)ᏑzeroV
 // and report false if it finds non-equal elements.
 // During all comparisons, if values of the same type are compared,
 // and the type is not comparable, Equal will panic.
-[GoMethodBody("Equal")] internal static bool Equalᴍ(Value v, Value u) {
+public static bool Equal(this Value v, Value u) {
     if (v.Kind() == reflect.Interface) {
         v = v.Elem();
     }
@@ -2683,57 +2683,3 @@ internal static void contentEscapes(@unsafe.Pointer x) {
 }
 
 } // end reflect_package
-
-// <GlyphForwarders> (scratch prototype: placed here, an alias of this file conflicts in package_info.cs)
-partial class reflectᴛflag {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Kind kind(this flag f) => reflect_package.kindᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static flag ro(this flag f) => reflect_package.roᴍ(f);
-}
-partial class reflectᴛValue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> typ(this Value v) => reflect_package.typᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer pointer(this Value v) => reflect_package.pointerᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void panicNotBool(this Value v) => reflect_package.panicNotBoolᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytesSlow(this Value v) => reflect_package.bytesSlowᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CanAddr(this Value v) => reflect_package.CanAddrᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CanSet(this Value v) => reflect_package.CanSetᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Value> call(this Value v, @string op, slice<Value> @in) => reflect_package.callᴍ(v, op, @in);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint capNonSlice(this Value v) => reflect_package.capNonSliceᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CanComplex(this Value v) => reflect_package.CanComplexᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Value FieldByIndex(this Value v, slice<nint> index) => reflect_package.FieldByIndexᴍ(v, index);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value, error) FieldByIndexErr(this Value v, slice<nint> index) => reflect_package.FieldByIndexErrᴍ(v, index);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Value FieldByName(this Value v, @string name) => reflect_package.FieldByNameᴍ(v, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Value FieldByNameFunc(this Value v, Func<@string, bool> match) => reflect_package.FieldByNameFuncᴍ(v, match);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CanFloat(this Value v) => reflect_package.CanFloatᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CanInt(this Value v) => reflect_package.CanIntᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CanInterface(this Value v) => reflect_package.CanInterfaceᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsValid(this Value v) => reflect_package.IsValidᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Kind Kind(this Value v) => reflect_package.Kindᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint lenNonSlice(this Value v) => reflect_package.lenNonSliceᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumMethod(this Value v) => reflect_package.NumMethodᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Value MethodByName(this Value v, @string name) => reflect_package.MethodByNameᴍ(v, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool OverflowComplex(this Value v, complex128 x) => reflect_package.OverflowComplexᴍ(v, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool OverflowFloat(this Value v, float64 x) => reflect_package.OverflowFloatᴍ(v, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool OverflowInt(this Value v, int64 x) => reflect_package.OverflowIntᴍ(v, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool OverflowUint(this Value v, uint64 x) => reflect_package.OverflowUintᴍ(v, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value x, bool ok) Recv(this Value v) => reflect_package.Recvᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Send(this Value v, Value x) => reflect_package.Sendᴍ(v, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetPointer(this Value v, @unsafe.Pointer x) => reflect_package.SetPointerᴍ(v, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string stringNonString(this Value v) => reflect_package.stringNonStringᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Value x, bool ok) TryRecv(this Value v) => reflect_package.TryRecvᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool TrySend(this Value v, Value x) => reflect_package.TrySendᴍ(v, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type typeSlow(this Value v) => reflect_package.typeSlowᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> abiType(this Value v) => reflect_package.abiTypeᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> abiTypeSlow(this Value v) => reflect_package.abiTypeSlowᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CanUint(this Value v) => reflect_package.CanUintᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static iter.Seq2<StructField, Value> Fields(this Value v) => reflect_package.Fieldsᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static iter.Seq2<Method, Value> Methods(this Value v) => reflect_package.Methodsᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void grow(this Value v, nint n) => reflect_package.growᴍ(v, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst, @unsafe.Pointer target) => reflect_package.assignToᴍ(v, context, Ꮡdst, target);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CanConvert(this Value v, Type t) => reflect_package.CanConvertᴍ(v, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Comparable(this Value v) => reflect_package.Comparableᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this Value v, Value u) => reflect_package.Equalᴍ(v, u);
-}
-partial class reflectᴛValueError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref ValueError e) => reflect_package.Errorᴍ(ref e);
-}
-// </GlyphForwarders>

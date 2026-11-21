@@ -259,7 +259,8 @@ func (v *Visitor) methodHolderClass(named *types.Named, method types.Object) (ho
 	typeofTarget = declaringClass + "." + escaped
 
 	if typeParams := named.Origin().TypeParams(); typeParams != nil && typeParams.Len() > 0 {
-		typeofTarget += "<" + strings.Repeat(",", typeParams.Len()-1) + ">"
+		// A shape-witness carrier's C# arity counts its witness parameters too (shapeWitness.go).
+		typeofTarget += "<" + strings.Repeat(",", typeParams.Len()-1+shapeWitnessArity(named.Origin().Obj())) + ">"
 	}
 
 	holder = strings.TrimSuffix(v.fileClassName, PackageSuffix) + TempVarMarker + bare

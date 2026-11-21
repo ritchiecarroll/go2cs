@@ -41,6 +41,7 @@ import (
 // direct-imports-only map could not resolve it. Entries are deduped by path; the same path
 // resolves to the same Dir/Name from any route, so the walk order is immaterial.
 func resetPackageState(pkg *packages.Package) {
+	resetShapeWitnessState()
 	packageName = ""
 	packageNamespace = ""
 	projectImports = hashset.NewHashSet([]string{})

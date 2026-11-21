@@ -119,7 +119,7 @@ internal static void main() {
     var b = bumpParamField(new Box(new Rect(1, 2), 3));
     fmt.Println("param field :", b.R.Min, b.R.Max, b.Tag);
 
-    var a = bumpParamElem(new nint[]{7, 8, 9}.array());
+    var a = bumpParamElem(array<nint>([7, 8, 9]));
     fmt.Println("param elem  :", a[0], a[1], a[2]);
 
     var (lo, hi) = readOnlyParam(new Rect(3, 4));

@@ -1103,12 +1103,12 @@ internal static nuint /*carry*/ addMulVVW(slice<nuint> z, slice<nuint> x, nuint 
     // Using bit sizes that don't divide 8 are more complex to implement, but
     // are likely to be more efficient if necessary.
 
-    var table = new ж<Nat>[]{ // table[i] = x ^ (i+1)
+    var table = array<ж<Nat>>([ // table[i] = x ^ (i+1)
         // newNat calls are unrolled so they are allocated on the stack.
         NewNat(), NewNat(), NewNat(), NewNat(), NewNat(),
         NewNat(), NewNat(), NewNat(), NewNat(), NewNat(),
         NewNat(), NewNat(), NewNat(), NewNat(), NewNat()
-    }.array();
+    ]);
     table[0].set(x).montgomeryRepresentation(Ꮡm);
     for (nint i = 1; i < len(table); i++) {
         table[i].montgomeryMul(table[i - 1], table[0], Ꮡm);

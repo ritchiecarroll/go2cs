@@ -38,7 +38,7 @@ private static readonly @string _KeyUsage_name_6ᵇ = "encipherOnly"u8;
 internal static ref readonly @string _KeyUsage_name_7 => ref _KeyUsage_name_7ᵇ;
 private static readonly @string _KeyUsage_name_7ᵇ = "decipherOnly"u8;
 
-internal static array<uint8> _KeyUsage_index_0 = new uint8[]{0, 16, 33}.array();
+internal static array<uint8> _KeyUsage_index_0 = array<uint8>([0, 16, 33]);
 
 } partial class x509_package {
 
@@ -99,7 +99,7 @@ internal static void _ᴛ3() {
 internal static ref readonly @string _ExtKeyUsage_name => ref _ExtKeyUsage_nameᵇ;
 private static readonly @string _ExtKeyUsage_nameᵇ = "anyExtendedKeyUsageserverAuthclientAuthcodeSigningemailProtectionipsecEndSystemipsecTunnelipsecUsertimeStampingOCSPSigningmsSGCnsSGCmsCodeCommsKernelCode"u8;
 
-internal static array<uint8> _ExtKeyUsage_index = new uint8[]{0, 19, 29, 39, 50, 65, 79, 90, 99, 111, 122, 127, 132, 141, 153}.array();
+internal static array<uint8> _ExtKeyUsage_index = array<uint8>([0, 19, 29, 39, 50, 65, 79, 90, 99, 111, 122, 127, 132, 141, 153]);
 
 } partial class x509_package {
 

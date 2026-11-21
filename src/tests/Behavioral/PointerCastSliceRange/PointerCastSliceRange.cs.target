@@ -6,7 +6,7 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 internal static void main() {
-    ref var arr = ref heap<array<nint>>(new nint[]{10, 20, 30, 40}.array(), out var Ꮡarr);
+    ref var arr = ref heap<array<nint>>(array<nint>([10, 20, 30, 40]), out var Ꮡarr);
     var s = Ꮡarr.slice(0, 4);
 
     nint sum = 0;

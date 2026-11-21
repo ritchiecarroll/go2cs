@@ -645,7 +645,7 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 
     // Match package net's IsGlobalUnicast logic. Notably private IPv4 addresses
     // and ULA IPv6 addresses are still considered "global unicast".
-    if (ip.Is4() && (ip == IPv4Unspecified() || ip == AddrFrom4(new byte[]{255, 255, 255, 255}.array()))) {
+    if (ip.Is4() && (ip == IPv4Unspecified() || ip == AddrFrom4(array<byte>([255, 255, 255, 255])))) {
         return false;
     }
 

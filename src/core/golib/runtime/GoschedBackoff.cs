@@ -86,6 +86,13 @@ internal static class GoschedBackoff
 
     internal static long Escalations => Interlocked.Read(ref s_escalations);
 
+    // Effective yields by the calling thread — a test-visible observation point, not a control input. It is
+    // counted only where the yield already paid a context switch, so the inert fast path reads no extra state.
+    [ThreadStatic]
+    private static long t_effectiveYields;
+
+    internal static long EffectiveYieldsOnThisThread => t_effectiveYields;
+
     /// <summary>
     /// Yields the processor, escalating to a 1 ms sleep after <see cref="EscalationThreshold"/>
     /// consecutive inert yields by the calling thread.
@@ -99,6 +106,7 @@ internal static class GoschedBackoff
         {
             // An effective yield: another thread really ran. The ring is rotating on its own.
             t_consecutiveInertYields = 0;
+            t_effectiveYields++;
             return;
         }
 

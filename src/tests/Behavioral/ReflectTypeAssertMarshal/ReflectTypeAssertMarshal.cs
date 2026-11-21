@@ -61,7 +61,7 @@ internal static void main() {
     (var z, ok) = reflect.TypeAssert<namer>(reflect.ValueOf(Ꮡnone).Elem());
     fmt.Println("nil interface value:", z == nil, ok);
 
-    (var a, ok) = reflect.TypeAssert<array<nint>>(reflect.ValueOf(new nint[]{3, 4}.array()));
+    (var a, ok) = reflect.TypeAssert<array<nint>>(reflect.ValueOf(array<nint>([3, 4])));
     fmt.Println("array:", a, ok);
 
     (var s, ok) = reflect.TypeAssert<@string>(reflect.ValueOf((nint)42));

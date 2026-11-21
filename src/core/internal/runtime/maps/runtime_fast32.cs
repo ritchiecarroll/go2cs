@@ -420,7 +420,7 @@ outer:
                 var iΔ1 = match.first();
 
                 @unsafe.Pointer slotKey = g.key(Ꮡtyp, iΔ1);
-                if (key == ~@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)) {
+                if (key == @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(slotKey))) {
                     slotElem = g.elem(Ꮡtyp, iΔ1);
 
                     t.checkInvariants(Ꮡtyp, Ꮡm);
@@ -459,7 +459,7 @@ outer:
             // If there is room left to grow, just insert the new entry.
             if (t.growthLeft > 0) {
                 @unsafe.Pointer slotKey = g.key(Ꮡtyp, i);
-                (@unsafe.Pointer.To<@unsafe.Pointer>(slotKey)).Value = key;
+                @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(slotKey), key);
 
                 slotElem = g.elem(Ꮡtyp, i);
 

@@ -21,7 +21,7 @@ internal static void _ᴛ7() {
 internal static ref readonly @string _RoundingMode_name => ref _RoundingMode_nameᵇ;
 private static readonly @string _RoundingMode_nameᵇ = "ToNearestEvenToNearestAwayToZeroAwayFromZeroToNegativeInfToPositiveInf"u8;
 
-internal static array<uint8> _RoundingMode_index = new uint8[]{0, 13, 26, 32, 44, 57, 70}.array();
+internal static array<uint8> _RoundingMode_index = array<uint8>([0, 13, 26, 32, 44, 57, 70]);
 
 } partial class big_package {
 

@@ -243,7 +243,7 @@ internal const bool timerDebug = false;
     if (!timerDebug) {
         return;
     }
-    var bits = new @string[]{"h", "m", "z", "c"}.array();
+    var bits = array<@string>(["h", "m", "z", "c"]);
     foreach (var i in range(3)) {
         if ((uint8)(t.state & (((uint8)1).Lsh((int64)(i)))) == 0) {
             bits[i] = "-";

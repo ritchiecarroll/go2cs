@@ -155,12 +155,12 @@ internal static void probe(@string name, any value, any pointer, map<@string, sl
 }
 
 [GoLazy] partial class lazyᴛgoSets { internal static map<@string, array<slice<@string>>> goSets = new map<@string, array<slice<@string>>>{
-    ["Plain"] = new slice<@string>[]{["Describe", "Get"], ["Describe", "Get", "Set"]}.array(),
-    ["Box[int]"] = new slice<@string>[]{["Describe", "Get"], ["Describe", "Get", "Set"]}.array(),
-    ["Box[string]"] = new slice<@string>[]{["Describe", "Get"], ["Describe", "Get", "Set"]}.array(),
-    ["Box[[]int]"] = new slice<@string>[]{["Describe", "Get"], ["Describe", "Get", "Set"]}.array(),
-    ["Pair[string,int]"] = new slice<@string>[]{["Key", "String"], ["Key", "String", "Swap"]}.array(),
-    ["Ord2[age]"] = new slice<@string>[]{["Less"], ["Less"]}.array()
+    ["Plain"] = array<slice<@string>>([["Describe", "Get"], ["Describe", "Get", "Set"]]),
+    ["Box[int]"] = array<slice<@string>>([["Describe", "Get"], ["Describe", "Get", "Set"]]),
+    ["Box[string]"] = array<slice<@string>>([["Describe", "Get"], ["Describe", "Get", "Set"]]),
+    ["Box[[]int]"] = array<slice<@string>>([["Describe", "Get"], ["Describe", "Get", "Set"]]),
+    ["Pair[string,int]"] = array<slice<@string>>([["Key", "String"], ["Key", "String", "Swap"]]),
+    ["Ord2[age]"] = array<slice<@string>>([["Less"], ["Less"]])
 }; }
 
 internal static void main() {

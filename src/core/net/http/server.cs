@@ -988,11 +988,11 @@ public static UntypedInt DefaultMaxHeaderBytes => /* 1 << 20 */ 1048576; // 1 MB
 // ReadTimeout, or WriteTimeout.
 [GoMethodBody("tlsHandshakeTimeout")] internal static time.Duration tlsHandshakeTimeoutᴍ(ref Server s) {
     time.Duration ret = default;
-    foreach (var (_, v) in range(new time.Duration[]{
+    foreach (var (_, v) in range(array<time.Duration>([
         s.ReadHeaderTimeout,
         s.ReadTimeout,
         s.WriteTimeout
-    }.array())) {
+    ]))) {
         if (v <= 0) {
             continue;
         }
