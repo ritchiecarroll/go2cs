@@ -48,7 +48,7 @@ func TestNugetgoCgoPackSuiteOnThisHost(t *testing.T) {
 
 	// Every arm by name, so the hosted summary reads which ran (its READING lines).
 	for _, line := range strings.Split(string(output), "\n") {
-		if trimmed := strings.TrimSpace(line); strings.HasPrefix(trimmed, "ok ") || strings.HasPrefix(trimmed, "FAIL ") || strings.HasPrefix(trimmed, "host ") || strings.HasPrefix(trimmed, "ran ") {
+		if trimmed := strings.TrimSpace(line); strings.HasPrefix(trimmed, "ok ") || strings.HasPrefix(trimmed, "FAIL ") || strings.HasPrefix(trimmed, "host ") || strings.HasPrefix(trimmed, "ran ") || strings.HasPrefix(trimmed, "DIAG ") {
 			t.Logf("READING %s", trimmed)
 		}
 	}

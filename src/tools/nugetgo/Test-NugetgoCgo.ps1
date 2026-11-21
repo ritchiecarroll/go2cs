@@ -176,11 +176,18 @@ try {
         Set-Content -LiteralPath (Join-Path $tdir 'Lib/Lib.cs') -Value 'namespace Lib; public static class L { public static string Where() => Probe.P.Where(); }'
         Set-Content -LiteralPath (Join-Path $tdir 'App/App.csproj') -Value "<Project Sdk=`"Microsoft.NET.Sdk`"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><RuntimeIdentifier>$hostRid</RuntimeIdentifier><UseAppHost>false</UseAppHost></PropertyGroup><ItemGroup><ProjectReference Include=`"../Lib/Lib.csproj`" /></ItemGroup></Project>"
         Set-Content -LiteralPath (Join-Path $tdir 'App/Program.cs') -Value 'System.Console.WriteLine(Lib.L.Where());'
-        $tout = @(& dotnet build (Join-Path $tdir 'App/App.csproj') -c Release --nologo 2>&1 | ForEach-Object { "$_" })
-        [pscustomobject]@{ Exit = $LASTEXITCODE; Text = $tout; App = @($tout | Where-Object { $_ -match 'NUGETGOCGO001' -and $_ -match '[\\/]App\.csproj\]' }).Count; Lib = @($tout | Where-Object { $_ -match 'NUGETGOCGO001' -and $_ -match '[\\/]Lib\.csproj\]' }).Count }
+        $tout = @(& dotnet build (Join-Path $tdir 'App/App.csproj') -c Release --nologo -v:n 2>&1 | ForEach-Object { "$_" })
+        $texit = $LASTEXITCODE
+        # DIAG (throwaway ref): what NuGet generated for App, and whether the guard target ran in App.
+        $gt = @(Get-ChildItem -Path (Join-Path $tdir 'App/obj') -Filter '*.nuget.g.targets' -ErrorAction SilentlyContinue | ForEach-Object { Get-Content -LiteralPath $_.FullName } | Where-Object { $_ -match 'Import ' } | ForEach-Object { ($_ -replace '^\s+', '') -replace '\s+', ' ' })
+        $assets = Join-Path $tdir 'App/obj/project.assets.json'
+        $build = if (Test-Path $assets) { $j = Get-Content -Raw $assets | ConvertFrom-Json; @($j.targets.PSObject.Properties | ForEach-Object { $t = $_.Name; $_.Value.PSObject.Properties | Where-Object { $_.Name -like 'nugetgo.cgo.probe/*' } | ForEach-Object { "$t => build:[$(@($_.Value.build.PSObject.Properties.Name) -join ',')]" } }) } else { @('no assets') }
+        $ran = @($tout | Where-Object { $_ -match '_NugetgoCgoRidGuard' }).Count
+        Write-Host "DIAG $name exit=$texit imports=[$($gt -join ' || ')] assets=[$($build -join ' ; ')] guardLines=$ran"
+        [pscustomobject]@{ Exit = $texit; Text = $tout; App = @($tout | Where-Object { $_ -match 'NUGETGOCGO001' -and $_ -match '[\\/]App\.csproj\]' }).Count; Lib = @($tout | Where-Object { $_ -match 'NUGETGOCGO001' -and $_ -match '[\\/]Lib\.csproj\]' }).Count }
     }
     $both = Invoke-Transitive 'both' '1.0.0'
-    Check "App -> Lib ($($others[0])) -> the pack, App for ${hostRid}: App's own build fails with NUGETGOCGO001 (buildTransitive/), Lib's passes" ($both.Exit -ne 0 -and $both.App -ge 1 -and $both.Lib -eq 0) "exit $($both.Exit), App errors $($both.App), Lib errors $($both.Lib): $(@($both.Text | Where-Object { $_ -match 'error' } | Select-Object -First 2) -join ' | ')"
+    Check "App -> Lib ($($others[0])) -> the pack, App for ${hostRid}: App's own build fails with NUGETGOCGO001 (buildTransitive/), Lib's passes" ($both.Exit -ne 0 -and $both.App -ge 1 -and $both.Lib -eq 0) "exit $($both.Exit), App errors $($both.App), Lib errors $($both.Lib): $(@($both.Text | Where-Object { $_ -match 'error|_NugetgoCgoRidGuard|NETCoreSdkRuntimeIdentifier' } | Select-Object -First 4) -join ' | ')"
     $buildOnly = Invoke-Transitive 'buildonly' '1.0.2'
     Check 'control: with the guard at build/ only, the same App builds (the gap buildTransitive/ closes)' ($buildOnly.Exit -eq 0 -and $buildOnly.App -eq 0) "exit $($buildOnly.Exit): $(@($buildOnly.Text | Where-Object { $_ -match 'error' } | Select-Object -First 2) -join ' | ')"
     $musl = Invoke-Consumer 'musl' '1.0.1' @('-r', 'linux-musl-x64')
