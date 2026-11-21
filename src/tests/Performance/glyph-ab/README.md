@@ -26,6 +26,7 @@ A/A first, then A/B. Use the same box, the same power plan, and no other load:
 ## Output
 - `run.txt` records the SHAs, the host, the SDK and the legs.
 - `transpile-compare.txt` should read `same` for every benchmark file. The programs are package main, which the default leaves unchanged.
+- **Rehearsed on G's box (2026-11-21)**, with three fixes folded in since: re-measure rounds run `--phase verify,measure`; the `docs/Performance.md` mirror is restored before the dirt check; each Debug and R2R build purges its project's `bin`/`obj` afterwards.
 - Each leg writes `<leg>.csv` (every run) and `<leg>-summary.csv/.txt` (medians and Δ%).
 - Read every A/B Δ against the A/A Δ of the same leg and benchmark.
 
@@ -38,4 +39,4 @@ Every refusal names what it found. The kit refuses when:
 - a tracked file outside `src/tests/Performance` is modified;
 - a program's output differs between runs or between arms.
 
-The kit was written on a Linux box without .NET or PowerShell. It has NOT been run. The first run on the box is its rehearsal.
+The kit was written on a Linux box without .NET or PowerShell. G's first run (A/A and A/B, JIT, Debug and R2R, 2026-11-21) was its rehearsal, and found the three faults fixed above.

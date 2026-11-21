@@ -177,14 +177,19 @@ if ($Legs -contains 'Headline') {
             $script = Join-Path $arms[$name] 'src/tests/Performance/run-performance.ps1'
             $runnerArgs = @('--runs', '5')
             if ($NoAot) { $runnerArgs += '--no-aot' }
-            if ($r -gt 1) { $runnerArgs += @('--phase', 'measure') }
+            # The runner times a variant only once Verify has set it verified, so a re-measure round runs verify too
+            # (G's rehearsal, 2026-11-21: `--phase measure` alone printed n/a for every row).
+            if ($r -gt 1) { $runnerArgs += @('--phase', 'verify,measure') }
             $log = Join-Path $Out "headline-r$r-$name.md"
 
             Write-Host "==> headline round $r, $name"
             & pwsh -NoProfile -File $script @runnerArgs *>&1 | Tee-Object -FilePath $log | Out-Null
             if ($LASTEXITCODE -ne 0) { throw "headline round $r ${name}: run-performance.ps1 exited $LASTEXITCODE (log $log)" }
 
-            # The run may rewrite the benchmarks' tracked .cs (a re-transpile); it must touch nothing else.
+            # run-performance.ps1 mirrors README.md over docs/Performance.md on success (the two differ on master), so that
+            # file is restored to the commit's bytes before the check (G's rehearsal, 2026-11-21). The run may also rewrite
+            # the benchmarks' tracked .cs (a re-transpile); it must touch nothing else.
+            git -C $arms[$name] checkout -- docs/Performance.md
             $dirty = @(git -C $arms[$name] status --porcelain --untracked-files=no | Where-Object { $_ -notmatch '^.. src/tests/Performance/' })
             if ($dirty.Count -gt 0) { throw "headline round $r ${name}: the run modified tracked files outside src/tests/Performance: $($dirty -join '; ')" }
         }
@@ -230,6 +235,14 @@ function Build-Arm([string] $leg, [string[]] $benchmarks, [scriptblock] $command
             $exe = Join-Path $outDir "$bench$exeSuffix"
             if (-not (Test-Path $exe)) { throw "[$leg] $bench ${name}: no executable at $exe" }
             $pair[$name] = $exe
+
+            # A Debug build or a RID-specific self-contained publish leaves the project's own obj/ (and bin/) restored for
+            # that shape, which the next JIT build of the same project then trips over (G's rehearsal, 2026-11-21: the
+            # runner refused, correctly). The timed executable is under -Out, so the project's own build output goes.
+            foreach ($dir in 'bin', 'obj') {
+                $stale = Join-Path (Split-Path $csproj) $dir
+                if (Test-Path $stale) { Remove-Item -LiteralPath $stale -Recurse -Force }
+            }
         }
 
         $exes[$bench] = $pair
