@@ -41185,4 +41185,66 @@ decides it. Unmeasured: whether the forwarder is public through a pointer hop fo
 
 — C1 (2026-11-20)
 
+## 2026-11-20 — H (found during seat S-B1; recorded, NOT fixed): a store of a pointer word INTO a func variable lands in a fresh box, so the func variable is never set — LOST WRITE, runtime, .5
+
+**The Go line.** Go builds a func value by hand: it stores a `*funcval` as the func variable's word.
+
+```go
+// runtime/debugcall.go (debugCallWrap2); runtime/cgocall.go (cgocallbackg1) is the same line over cb and cbFV
+dispatchFV := funcval{dispatch}
+*(*unsafe.Pointer)(unsafe.Pointer(&dispatchF)) = noescape(unsafe.Pointer(&dispatchFV))
+```
+
+**The emission at master `429b8fccb4`.** S-B1's word door does not change it: its narrowing returns exactly these
+lines to this text.
+
+<!-- illustration: the committed emission, src/core/runtime/debugcall.cs:266-268 and src/core/runtime/{windows,linux,darwin}/cgocall.cs:480-482 at 429b8fccb4 -->
+```csharp
+ref var dispatchF = ref heap<Action>(out var ᏑdispatchF);
+ref var dispatchFV = ref heap<funcval>(new funcval(dispatch), out var ᏑdispatchFV);
+(Ꮡ(@unsafe.Pointer.OfFunc(dispatchF))).Value = noescape(@unsafe.Pointer.FromPinnedBox(ᏑdispatchFV));
+```
+
+**Why the write is lost.**
+- The reinterpret carrying arm reads a func source's word as `OfFunc(f)`, the func's cookie, and wraps it in a fresh
+  `Ꮡ(…)` box (`reinterpretManagedEmission`, convCallExpr.go).
+- A READ through that form is right: it reads the word.
+- A STORE through it writes into the fresh box, which nothing else reads. So `dispatchF` / `cb` stays nil, and the
+  call through it on the next line is a nil func call.
+- The carrying arm's own comment names this: a store "owes a statement-level emission of its own, named as a
+  follow-up rather than approximated here".
+
+**The sites.** `runtime/debugcall.cs` (`debugCallWrap2`'s `dispatchF`) and the per-OS `runtime/cgocall.cs`
+(`cgocallbackg1`'s `cb`). Both are dormant in the managed model:
+- debugCallWrap2 is the debugger call-injection path;
+- cgocallbackg1 is the C-to-Go callback path, which is Phase 5.
+
+**Why nothing takes the shape today.**
+- The word door (W2) does not: over a fresh box it would store into that box just the same.
+- `funcWordOperations` (funcWordOperations.go) does not either. Its three stores are:
+  - w1 `*(*uintptr)(unsafe.Pointer(&f)) = x` → `f = GoFuncCookie.Func<F>(x)`, whose element test
+    (`isFuncWordType`) is `uintptr` only;
+  - w2, a func stored into a `uintptr` lvalue;
+  - w3 `*(*F)(e) = fn`, a FUNC stored through an `unsafe.Pointer`.
+  Here the element is `unsafe.Pointer` and the stored value is a pointer, so none of the three matches. The file's
+  header says the `*unsafe.Pointer` forms keep the reinterpret.
+
+**The likely fix direction (not applied).**
+- Widen w1 to the `*unsafe.Pointer` spelling.
+- The stored pointer names a `funcval` whose `fn` word names the code, so `f` takes the delegate that word names,
+  as w1 does for a `uintptr` word. That holds where the word is a GoFuncCookie. A word handed in from C is Phase 5's
+  question.
+- It owes a red arm that calls through `f` after the store.
+
+**The silent case beside the loud ones.** This store is the one `*unsafe.Pointer` shape whose failure is SILENT.
+P3's review of seat S-B1 (2026-11-20) lists the shapes that refuse at run time BY NAME, as designed:
+- a tuple target `*p, x = ..` over a native slot, which keeps `.Value` (the word door's header);
+- hand-written `.Value` on a native `*unsafe.Pointer` box (`mfinal.cs` takes the door by hand; hand-owned files were
+  not censused);
+- a Go pointer stored into or read out of C memory, `runtime.Pinner` included (design deviation 8(b)).
+
+**Owner.** Unassigned; for COORD to route.
+
+— H (2026-11-20)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
