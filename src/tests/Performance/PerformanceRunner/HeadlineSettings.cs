@@ -201,6 +201,11 @@ namespace PerformanceRunner
 
         // ---- the build files the in-tree projects import ----
 
+        /// <summary>The one go2csPath the performance tree's props may set: the repository's own src root.</summary>
+        internal const string Go2csPathName = "go2csPath";
+
+        internal const string RepositoryGo2csPath = "$([MSBuild]::EnsureTrailingSlash($([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../..'))))";
+
         /// <summary>
         /// The properties each build file above the in-tree projects may set, keyed by its path under src/, with the
         /// value pinned where the documented set names one (null: any value). The Native AOT set is the
@@ -216,6 +221,10 @@ namespace PerformanceRunner
                 ["tests/Performance/Directory.Build.props"] = new Dictionary<string, string?>(StringComparer.Ordinal)
                 {
                     ["SuppressTrimAnalysisWarnings"] = "true", ["BaseIntermediateOutputPath"] = null, ["BaseOutputPath"] = null,
+                    // bc0f7ecf11 pins go2csPath to the repository's own src root (under a Condition this static read
+                    // does not evaluate), so a Release build binds the in-tree corpus, not a deployed one. That is the
+                    // converter's default tree, not a tuning: allowed at exactly that expression, any other refused.
+                    [Go2csPathName] = RepositoryGo2csPath,
                 },
                 ["tests/Performance/Directory.Build.targets"] = new Dictionary<string, string?>(StringComparer.Ordinal)
                 {
