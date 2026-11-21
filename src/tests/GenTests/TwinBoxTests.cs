@@ -1478,7 +1478,7 @@ public class TwinBoxTests
         StringAssert.Contains(twins, "var ᴛcopyt = Ꮡt.DerefOrNull(); ref var t = ref ᴛcopyt;", "the control copies, on purpose");
     }
 
-    private static IEnumerable<MetadataReference> References()
+    internal static IEnumerable<MetadataReference> References()
     {
         string trusted = (string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!;
 
@@ -1487,7 +1487,7 @@ public class TwinBoxTests
             .Append(MetadataReference.CreateFromFile(typeof(golib::go.IGoEquatable).Assembly.Location));
     }
 
-    private sealed class BuildProperties(Dictionary<string, string> properties) : Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptionsProvider
+    internal sealed class BuildProperties(Dictionary<string, string> properties) : Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptionsProvider
     {
         private readonly Options m_global = new(properties);
 

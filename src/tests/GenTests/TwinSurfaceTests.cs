@@ -176,7 +176,8 @@ public class TwinSurfaceTests
         object awaiter = task.GetType().GetMethod("GetAwaiter")!.Invoke(task, null)!;
 
         Assert.AreEqual((nint)4, (nint)awaiter.GetType().GetMethod("GetResult")!.Invoke(awaiter, null)!, "every element is delivered");
-        StringAssert.Contains(twins, "Addꞏtwin(nint first, global::go.slice<object> restʗp);", "the slot takes the Go shape, a slice");
+        StringAssert.Contains(twins, "Addꞏtwin(nint first, global::go.slice<object> restʗp) => new", "the slot takes the Go shape, a slice");
+        StringAssert.Contains(twins, ".Add(first, restʗp.ꓸꓸꓸ));", "and its body spreads it to the plain member");
     }
 
     // F7: a Go type named Task, returned by a function that cannot park and by one that parks; a BCL Task beside them.
@@ -317,8 +318,9 @@ public class TwinSurfaceTests
 
         Assert.AreEqual(0, errors.Length, Errors(errors));
         Assert.AreEqual(0, Guard("GO2CS0018").Length);
-        StringAssert.Contains(twins, "interface IShapeꞏtwin", "the hidden twin interface");
-        StringAssert.Contains(twins, "Areaꞏtwin();", "a slot for every member, parking or not");
+        StringAssert.Contains(twins, "interface IShapeꞏtwin : global::go.box_package.IShape", "the hidden twin interface, over the plain one");
+        StringAssert.Contains(twins, "Areaꞏtwin() => new global::go.golib.GoTask<nint>(((global::go.box_package.IShape)this).Area());",
+            "a slot for every member, parking or not, whose body calls the plain member");
     }
 
     // P8 (11.4): the twin set does not depend on which lowering the plain member got. Three builds of one package: the
@@ -435,6 +437,60 @@ public class TwinSurfaceTests
         {
             LibraryTwins = false;
         }
+    }
+
+    // Arm S (the shipping default, F10's whole set) at closure scale, 2026-11-21: 20 CS0535. Under the hidden shape an
+    // implementer whose ONE parking member is forwarded to its twin declares `: Iꞏtwin`, and every other slot of Iꞏtwin
+    // (every member, R7) has no implementation (reflectlite's rtype : Typeꞏtwin; sync's MutexжLocker : Lockerꞏtwin).
+    // ImplementGenerator writes the explicit implementations the slot forwarders follow, as a converted project builds.
+    private const string ImplementerSource = """
+        using System;
+        using static go.builtin;
+
+        [assembly: go.GoImplement<global::go.work_package.Worker, global::go.work_package.IWork>]
+
+        namespace go;
+
+        public static partial class work_package
+        {
+            internal static channel<nint> ch;
+
+            public partial interface IWork { void Wait(); nint Size(); }
+
+            public partial struct Worker { public nint n; }
+
+            public static void Wait(this Worker w) { ᐸꟷ(ch); }
+
+            public static nint Size(this Worker w) => w.n;
+
+            public static nint useWork(IWork x)
+            {
+                x.Wait();
+                return x.Size();
+            }
+        }
+        """;
+
+    [TestMethod]
+    public void S_AnImplementerForwardingOneSlotStillImplementsEveryHiddenSlot()
+    {
+        Microsoft.CodeAnalysis.CSharp.CSharpParseOptions options = new(Microsoft.CodeAnalysis.CSharp.LanguageVersion.CSharp13);
+        Microsoft.CodeAnalysis.CSharp.CSharpCompilation compilation = Microsoft.CodeAnalysis.CSharp.CSharpCompilation.Create("twinwork",
+            [Microsoft.CodeAnalysis.CSharp.CSharpSyntaxTree.ParseText(ImplementerSource, options, path: @"C:\twinwork\main.cs")], References(),
+            new Microsoft.CodeAnalysis.CSharp.CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, allowUnsafe: true));
+
+        // No switch: the shipping default, the hidden shape with a slot for every member.
+        Microsoft.CodeAnalysis.CSharp.CSharpGeneratorDriver.Create(
+                [new go2cs.ImplementGenerator(), new go2cs.RecvGenerator(), new go2cs.FieldAccessGenerator(), new go2cs.TypeGenerator(), new go2cs.TwinGenerator()],
+                parseOptions: options, optionsProvider: new BuildProperties(new() { ["build_property.GoTwins"] = "true" }))
+            .RunGeneratorsAndUpdateCompilation(compilation, out Compilation output, out _);
+
+        string twins = string.Join("\n", output.SyntaxTrees.Skip(compilation.SyntaxTrees.Length).Select(tree => tree.ToString()));
+        Diagnostic[] errors = output.Emit(System.IO.Stream.Null).Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToArray();
+
+        StringAssert.Contains(twins, "interface IWorkꞏtwin", "the hidden twin interface");
+        StringAssert.Contains(twins, "IWorkꞏtwin.Waitꞏtwin()", "Worker forwards its parking slot to Wait's twin");
+        Assert.AreEqual(0, errors.Length, Errors(errors));
     }
 
     private static int Lines(string twins, string text) => twins.Split('\n').Count(line => line.Contains(text, StringComparison.Ordinal));

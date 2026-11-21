@@ -614,7 +614,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
             candidate.Twinned ? "twin" :
             candidate.Forwarded ? (candidate.Parks ? "forwarder-unmarked:" : "forwarder:") + (candidate.Refusal ?? "no-park") :
             IsE1(candidate.Symbol) ? "E1" :
-            "GUARD:" + (NotForwardable(candidate) ?? (GuardDrop.Contains(candidate.Symbol.Name) ? "forwarder-dropped" : null) ?? candidate.Refusal ?? "unknown");
+            "GUARD:" + (NotForwardable(candidate) ?? (GuardDrop.Contains(candidate.Symbol.Name) ? "forwarder-dropped" : null) ?? (Forwarders ? null : "forwarders-off") ?? candidate.Refusal ?? "unknown");
 
         // Async-shaped keys on the SYMBOLS (12.1, F7): a Go type that happens to be named Task is none.
         private static bool IsTaskShaped(ITypeSymbol type) =>

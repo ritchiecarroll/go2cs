@@ -80,8 +80,11 @@ public sealed partial class TwinGenerator
                 string name = type.ToDisplayString(s_full);
                 string indent = Open(source, type.ContainingType, type.ContainingNamespace, out int depth);
 
+                // 7a, arm S (2026-11-21): the hidden interface derives from the plain one, and each slot has a body that calls
+                // the plain member. An implementer forwards only the slots whose target can park; with a slot for every
+                // member (R7) the rest fall to that body (CS0535 otherwise: reflectlite's rtype, sync's MutexжLocker).
                 if (IfaceHidden)
-                    source.Append(indent).Append(Hidden).Append("\r\n").Append(indent).Append(Access(type)).Append(" interface ").Append(type.Name).Append(Suffix);
+                    source.Append(indent).Append(Hidden).Append("\r\n").Append(indent).Append(Access(type)).Append(" interface ").Append(type.Name).Append(Suffix).Append(" : ").Append(name);
                 else
                     source.Append(indent).Append("partial interface ").Append(Escaped(type.Name));
 
@@ -95,7 +98,9 @@ public sealed partial class TwinGenerator
 
                     if (IfaceHidden)
                     {
-                        source.Append(inner).Append(result).Append(' ').Append(method.Name).Append(Suffix).Append('(').Append(parameters).Append(");\r\n");
+                        string self = "((" + name + ")this)." + call;
+                        source.Append(inner).Append(result).Append(' ').Append(method.Name).Append(Suffix).Append('(').Append(parameters).Append(')')
+                            .Append(method.ReturnsVoid ? " { " + self + "; return default; }\r\n" : " => new " + result + "(" + self + ");\r\n");
                         source.Append(inner).Append("static ").Append(result).Append(' ').Append(method.Name).Append("ꞏcall(").Append(name).Append(" ᴛrecv")
                             .Append(parameters.Length > 0 ? ", " : "").Append(parameters).Append(')');
 
