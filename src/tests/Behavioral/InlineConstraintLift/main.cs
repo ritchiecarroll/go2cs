@@ -41,22 +41,18 @@ public static @string Label<T>(T t)
     return fmt.Sprintf("%s#%d"u8, t.Name(), t.Tag());
 }
 
-public partial interface Box_T /*dyn*/ {
-    @string Name();
-}
-
 partial struct Box<T>
-    where T : Box_T
+    where T : Show_T
 {
     internal slice<T> items;
 }
 
 public static void Add<T>(this ref Box<T> b, T t)
-    where T : Box_T
+    where T : Show_T
 { b.items = append(b.items, t); }
 
 public static @string Names<T>(this ref Box<T> b)
-    where T : Box_T
+    where T : Show_T
 {
     @string @out = "";
     foreach (var (_, it) in range(b.items)) {
@@ -65,18 +61,14 @@ public static @string Names<T>(this ref Box<T> b)
     return @out;
 }
 
-partial interface pair_T /*dyn*/ {
-    @string Name();
-}
-
 partial struct pair<T>
-    where T : pair_T
+    where T : Show_T
 {
     internal T a, b;
 }
 
 internal static @string joined<T>(this pair<T> p)
-    where T : pair_T
+    where T : Show_T
 { return p.a.Name() + "+"u8 + p.b.Name(); }
 
 partial interface nameI {
@@ -98,8 +90,8 @@ public partial interface Both_C /*dyn*/ {
 }
 
 public static @string Both<A, B, C>(A a, B b, C c)
-    where A : Box_T
-    where B : Box_T
+    where A : Show_T
+    where B : Show_T
     where C : Both_C
 {
     return a.Name() + "/"u8 + b.Name() + "/"u8 + fmt.Sprint(c.Tag());

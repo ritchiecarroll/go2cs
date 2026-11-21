@@ -45,6 +45,7 @@ using static go.main_package;
 // go2cs-gen emits a field property on the pointer for each of their fields.
 [assembly: GoFieldAccess(typeof(DeepHash))]
 [assembly: GoFieldAccess(typeof(Hash))]
+[assembly: GoFieldAccess(typeof(TwinHash))]
 
 // Go source positions are recorded here, one `GoPositionMap` attribute per converted
 // source file in this compilation, so that `runtime.Caller` and the tracebacks built on it
@@ -54,7 +55,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("LocalShadowsEmbedHopType.go", "LocalShadowsEmbedHopType.cs", "AAougoK4ooKCggATJoKogoKCgqqCgoKCgoKCuAACFIKCgqaCgoKClIKCgoKCgoI=")]
+[assembly: GoPositionMap("LocalShadowsEmbedHopType.go", "LocalShadowsEmbedHopType.cs", "AAougoK4ooKCggAcPIKogoKCgqqCgoKCgoKCuAACFIKCgqqCgoKmgoKCgpSCgoKCgoKClIKC")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -73,8 +74,10 @@ public static partial class main_package
     internal partial struct acc {}
     internal partial struct deep {}
     internal partial struct inner {}
+    internal partial struct side {}
     public partial struct DeepHash {}
     public partial struct Hash {}
+    public partial struct TwinHash {}
     // </TypeAccessibility>
 
     // Go initializes an imported package before the importing package, for every import

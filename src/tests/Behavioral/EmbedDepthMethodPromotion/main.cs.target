@@ -361,19 +361,19 @@ internal static void main() {
     selfer sx = new aStmtжselfer(@as);
     selfer sy = new aIfжselfer(ai);
     var (_, aok) = ((any)ai.OrTypedNil())._<selfer>(ᐧ);
-    fmt.Println("A", @as.of(aStmt.ᏑaBase).of(aBase.ᏑaDefault).Self().k, ai.of(aIf.ᏑaStmt).of(aStmt.ᏑaBase).of(aBase.ᏑaDefault).Self().k, sx.Self().k, sy.Self() == ai.of(aIf.ᏑaNode), ai.of(aIf.ᏑaStmt).of(aStmt.ᏑaSide).Flag(), aok);
-    fmt.Println("A", @as.of(aStmt.ᏑaBase).of(aBase.ᏑaDefault).of(aDefault.ᏑaNode).Root().k, ai.of(aIf.ᏑaStmt).of(aStmt.ᏑaBase).of(aBase.ᏑaDefault).of(aDefault.ᏑaNode).Root().k, sx.Root().k, sy.Root() == ai.of(aIf.ᏑaNode), @as.hits, ai.hits);
+    fmt.Println("A", @as.of(aStmt.ᏑaDefault).Self().k, ai.of(aIf.ᏑaDefault).Self().k, sx.Self().k, sy.Self() == ai.of(aIf.ᏑaNode), ai.of(aIf.ᏑaSide).Flag(), aok);
+    fmt.Println("A", @as.of(aStmt.ᏑaNode).Root().k, ai.of(aIf.ᏑaNode).Root().k, sx.Root().k, sy.Root() == ai.of(aIf.ᏑaNode), @as.hits, ai.hits);
 
     var bb = Ꮡ(new bBoth());
     var bo = Ꮡ(new bOuter());
     namer nx = new bBothжnamer(bb);
     namer ny = new bOuterжnamer(bo);
-    fmt.Println("B", bb.of(bBoth.ᏑbFlat).Name(), bo.of(bOuter.ᏑbBoth).of(bBoth.ᏑbFlat).Name(), nx.Name(), ny.Name());
+    fmt.Println("B", bb.of(bBoth.ᏑbFlat).Name(), bo.of(bOuter.ᏑbFlat).Name(), nx.Name(), ny.Name());
 
     var bf = Ꮡ(new bFirst());
     var bfo = Ꮡ(new bFirstOuter());
     (nx, ny) = (new bFirstжnamer(bf), new bFirstOuterжnamer(bfo));
-    fmt.Println("B", bf.of(bFirst.ᏑbFlat).Name(), bfo.of(bFirstOuter.ᏑbFirst).of(bFirst.ᏑbFlat).Name(), nx.Name(), ny.Name());
+    fmt.Println("B", bf.of(bFirst.ᏑbFlat).Name(), bfo.of(bFirstOuter.ᏑbFlat).Name(), nx.Name(), ny.Name());
 
     var bs = Ꮡ(new bStmt());
     bs.n = 4;
@@ -381,7 +381,7 @@ internal static void main() {
     bi.n = 5;
     flowData fx = new bStmtжflowData(bs);
     flowData fy = new bIfжflowData(bi);
-    fmt.Println("B", bs.of(bStmt.ᏑbFlow).Data().n, bi.of(bIf.ᏑbStmt).of(bStmt.ᏑbFlow).Data().n, fx.Data().n, fy.Data() == bi.of(bIf.ᏑbFlow));
+    fmt.Println("B", bs.of(bStmt.ᏑbFlow).Data().n, bi.of(bIf.ᏑbFlow).Data().n, fx.Data().n, fy.Data() == bi.of(bIf.ᏑbFlow));
 
     var cb = Ꮡ(new cBase());
     cb.k = 1;
@@ -389,20 +389,20 @@ internal static void main() {
     cs.k = 2;
     visitor vx = new cBaseжvisitor(cb);
     visitor vy = new cStmtжvisitor(cs);
-    fmt.Println("C", cb.of(cBase.ᏑcDefault).Visit(), cs.of(cStmt.ᏑcBase).of(cBase.ᏑcDefault).Visit(), vx.Visit(), vy.Visit());
+    fmt.Println("C", cb.of(cBase.ᏑcDefault).Visit(), cs.of(cStmt.ᏑcDefault).Visit(), vx.Visit(), vy.Visit());
 
     var da = Ꮡ(new dAll());
     var @do = Ꮡ(new dOuter());
     tagger tx = new dAllжtagger(da);
     tagger ty = new dOuterжtagger(@do);
     var (_, pairOk) = ((any)(Ꮡ(new dPair())))._<tagger>(ᐧ);
-    fmt.Println("D", da.of(dAll.ᏑdTop).Tag(), @do.of(dOuter.ᏑdAll).of(dAll.ᏑdTop).Tag(), tx.Tag(), ty.Tag(), pairOk);
+    fmt.Println("D", da.of(dAll.ᏑdTop).Tag(), @do.of(dOuter.ᏑdTop).Tag(), tx.Tag(), ty.Tag(), pairOk);
 
     var ef = Ꮡ(new eFork());
     var eo = Ꮡ(new eOuter());
     picker px = new eForkжpicker(ef);
     picker py = new eOuterжpicker(eo);
-    fmt.Println("E", ef.of(eFork.ᏑeNear).Pick(), eo.of(eOuter.ᏑeFork).of(eFork.ᏑeNear).Pick(), px.Pick(), py.Pick(), eo.of(eOuter.ᏑeVia).of(eVia.ᏑeFar).Pick(6));
+    fmt.Println("E", ef.of(eFork.ᏑeNear).Pick(), eo.of(eOuter.ᏑeNear).Pick(), px.Pick(), py.Pick(), eo.of(eOuter.ᏑeVia).of(eVia.ᏑeFar).Pick(6));
 
     var (_, tieOk) = ((any)(Ꮡ(new fAll())))._<tier>(ᐧ);
     var (_, bothOk) = ((any)(Ꮡ(new fBoth())))._<tier>(ᐧ);

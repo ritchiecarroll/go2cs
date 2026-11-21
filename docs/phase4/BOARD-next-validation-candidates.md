@@ -41246,5 +41246,220 @@ P3's review of seat S-B1 (2026-11-20) lists the shapes that refuse at run time B
 **Owner.** Unassigned; for COORD to route.
 
 — H (2026-11-20)
+## 2026-11-21 — P2 (TS items 4 and 6): generic pointer ==, the type-assert body and its entry points
+
+From P3's TypeScript type-check profile (items 4 and 6 of its .5 list). Measured with a converted Go probe
+(`PerfEqAssert`, kept in P2's kit, not in the tree): `slices.Contains` over 64 pointers for generic `==`, and
+comma-ok asserts on an `any`. P2's linux-x64 box, Release, net10, floor over rounds 2-8 of each process, shown as
+floor/ceiling over five processes, ns per compare or assert. Native Go on the same box: 0.5 per compare, 0.2-0.5
+per pointer assert, 2.1-2.4 per interface assert.
+
+**Item 4, generic `==` over a pointer type argument.** `AreEqual<T>` for a pointer `T`, after its nil leg, entered
+the interface-value overload `AreEqual(object, object)`: six adapter probes, two `GetType` calls, the
+comparable-type dictionary, the `IGoEquatable` cast and call. Two non-nil pointers now answer through the pointer
+type's own identity rule (`EqualityComparer<T>.Default`: `ж<T>`'s per-kind `Equals`, or a named pointer's `Equals`
+over its box). Box compare 93.66 to 25.20 with tiering off, 14.23 to 3.08 by default; a field view 97.66 to 27.35
+and 73.94 to 4.91. A measure-only arm returning `ReferenceEquals` reads 6.7 off and 1.9 by default, the loop and
+the call; the rest of the tiering-off figure is the existing `PointerNilIdentity` nil leg and the comparer's
+dispatch in shared generic code, which PGO removes.
+**A behavior fix rode with it.** The object overload matched the operands by box CLASS, so two kinds naming one
+address (an element box and a heap box over the zerobase, a native element box and a `NativeBox`) were unequal
+through generic `==` and equal through `ж`'s `==`. `GenericEqualityAgreesWithPointerEqualityAcrossBoxKinds` pins
+the agreement; it fails with item 4's line removed.
+
+**Item 6, `TryTypeAssert<T>`'s per-T facts.** The shared body read `typeof(T)` before its first arm; the string arm
+now reads `AssertFacts<T>.IsGoString` and the cold arms `AssertFacts<T>.Type`. A pointer miss 27.92 to 23.60 off,
+no measurable move by default. A pointer HIT never reaches this body: every emitted assert calls `AssertHit<T>`
+first. My prediction for the hit was derived from the body without reading its callers, and missed.
+
+**The entry points (commit 3).** `AssertHit<T>` is AggressiveInlining and assumed it was specialized for the call
+site's `T`, but the four `_<T>` entry points that call it are themselves shared generic bodies for every reference
+`T` and carried no inlining hint, so its `is T` was the runtime lookup it was written to avoid. With
+AggressiveInlining on the four: pointer hit 11.84 to 3.91 off and 8.61 to 2.81 by default; an interface assert on a
+value 49.04 to 27.32 and 39.66 to 24.88; on a pointer 32.05 to 26.90 and 28.51 to 23.16. Code: IL unchanged at
+every call site; jitted native code (tiering off, same program) fmt +4.3%, the probe's main +24.5%, the whole
+process +0.06% (the two shared bodies are no longer jitted); about 300-430 bytes of x64 per hot assert site.
+ReadyToRun images do not change (crossgen2 does not inline across version bubbles, and golib is outside every
+converted package's bubble), so only tier-1 code grows.
+
+**Not measured here:** the type-check share. P3's rows predicted -1.5% to -2.5% (item 4) and -0.5% to -1% (item 6)
+from a biased sampler; the checkdemo re-time and the checker's jitted growth are R's.
+
+— P2 (2026-11-21)
+
+## 2026-11-21 — P1 (F3; COORD 2026-11-20 08:55Z: a board row and a runbook line): the converter's escape harvest fills the Go build cache, about 120 MB per package on a large module — the separation from `GOCACHE` is P4's probe-cache seat (board item hh), landed in train 1; the cost stays an environment fact; runbook trap 13 for the module procedure
+
+For each package with an `append` it may lower, the converter reads the compiler's escape decisions by compiling the
+package once per corpus target (windows/amd64, linux/amd64, darwin/amd64, linux/arm64) with `go build -trimpath
+-gcflags='-m -d=variablemakehash=vy' -o <null> .`, and for test files once more per target with `go test -c`
+(`src/go2cs/stackAppendHints.go`, `newStackAppendHarvestCommand`). The harvest runs with `CGO_ENABLED=0` and
+`-trimpath`, so its cache keys share nothing with a host's ordinary builds, and each target caches its own
+dependency closure. Go removes an entry only after five days unused (`trimLimit`, cmd/go/internal/cache), so
+nothing a run adds is reclaimed during it.
+
+**Three readings on the TypeScript module, linux/amd64, a cloud box (2026-11-20):**
+1. `-tests -recurse`, tests kept in four packages, the shared cache starting empty: 0 to 12 GB in 25 minutes of the
+   conversion phase, at 97 of 132 packages, when the run was stopped at 1 GB free. No Go test had run yet.
+2. The same run with `GOCACHE` at a private directory and no trimming: 7.2 GB in 21 minutes, and the run died when
+   the disk reached 0.
+3. The same run with a loop deleting cache files older than four minutes every 60 seconds: finished (exit 0), and
+   the directory held 315 MB afterwards. Deleting files under a running build is a workaround that held once, not a
+   supported practice, and the runbook does not prescribe it.
+
+**Attribution arm (2026-11-21, Go 1.26.11, the harvest's own command line, private empty cache).** One package
+(`internal/parser`), cumulative cache size after each command:
+
+| command | windows/amd64 | linux/amd64 | darwin/amd64 | linux/arm64 |
+|---|---|---|---|---|
+| `go build` | 324 MB | 640 MB | 987 MB | 1,305 MB |
+| `go test -c` | 2,465 MB | 3,615 MB | (4,595 MB, exit 1) | (5,116 MB, exit 1) |
+
+The last two `go test -c` cells exited 1 as the disk ran low (5.6 GB was free at the start); they are not
+readings. A second arm on linux/amd64 alone: parser's `go build` 322 MB and `go test -c` 1,474 MB from empty,
+then four more packages added 76, 35, 33 and 0 MB (two of them have no test files). So the cost is a large first
+closure per target, then tens of MB per package per target.
+
+**Status at train 1 (master `f604d2ae89`).** P4's probe-cache seat (board item hh, `7f14c1bb4d`) gives every harvest
+command its own cache: `-probe-cache`, else `GO2CS_PROBE_CACHE`, else `go2cs/probe-cache` under the user cache
+directory. That one command constructor builds both the `go build` and the `go test -c` harvests, so both are
+covered, and the user's `GOCACHE` receives neither. The cache is persistent by COORD's ruling of 2026-11-20 09:41Z,
+so the other half of the cure this row first proposed, removing the cache when the run exits, was ruled against.
+The size is unchanged: `docs/KnownIssues.md`, *A conversion keeps a Go build cache of its own*, says the separate
+cache moves the cost and does not shrink it, and its figure of about 60 MB per target is the standard library
+alone, where the first package above also carries the module's own dependency closure. Nothing remains for the
+converter. `docs/NugetgoPublish.md` trap 13 tells a large module's run to give it a probe cache on a volume with
+room, count it in the disk preflight, and delete it after the run if the space is needed. The readings above stay
+as the record: they are the only `go test -c` numbers for the harvest.
+
+— P1 (2026-11-21)
+
+## 2026-11-17 — C2 (ruling C item 3, scope b): the `-recurse` importer seed, measured — windows recovers its one crossing; linux trades 5 reuses for 5; a second-order loss is OPEN
+
+**The rule, as built.** In a `-recurse` run with no flag, the converter seeds an import with an alias when two things
+hold: an importer admits an anonymous struct identical to that alias, and the import does not admit it. The import
+is the first in import-path order that declares the alias. This is path order, NOT import-statement order: it is the
+order `importedStructLift` reuses in. When the import has several identical aliases, the first by name is seeded.
+The derivation is a fixed point over the closure in dependency order, against in-memory stamps. Its seeds form a union
+with the `-inline-arrays` flag's. `-<pattern>` beats both. A seeded struct is admitted even when it holds no array; an
+unseeded array-free struct is still never admitted (negative control
+`TestAnArrayFreeStructIsAdmittedOnlyWhenSeeded`).
+
+**Census.** sqlite closure, converter e190d6da30, no flag. Base: 0881fa6371 with the flag. The prediction is mailbox
+029483ad9, scored at 47c03e896.
+
+| target | seeds (passes) | reuses recovered | reuses lost | reuse=true decisions | wall |
+|---|---|---|---|---|---|
+| windows/amd64 | 1 (1): libc#largeInteger | the flag's, line for line | 0 | 26 → 26 | 133 s vs 130 |
+| linux/amd64 | 3 (1): uuid#Timespec, Timeval, Fsid_t | 5: libc ← uuid | 5: sqlite/lib ← libc | 73 → 58 | 137 s vs 132 |
+| linux/arm64 | the same 3 | the same 5 | the same 5 | 73 → 57 | 143 s vs 131 |
+| darwin/amd64 | 7 (2) | 8: libc ← netdb, pthread, wctype | 0 | 43 → 53 | 103 s vs 96 |
+
+**What the prediction missed.**
+- linux, the lost reuses: I predicted 2 lost (`Titimerval`, `Titimerspec`); 5 were lost. The other 3 are `Ttimespec`,
+  `Ttimeval` and `Tstat`. Once seeded, libc REUSES uuid's lifts, so it no longer publishes its own. sqlite/lib reuses
+  only a lift its DIRECT import declares (`importedStructLiftSource`), so it finds none and keeps its own.
+- linux, the third seed's name: I predicted `X__fsid_t`; it was `Fsid_t`. Both alias one struct, so it is one lift.
+- darwin, the seed count: I predicted 5; it was 7. The extra seed in pass 1 is sqlite/lib → libc#timespec. The extra
+  seed in pass 2 is libc → libc/fcntl#Timespec. Pass 2 hands libc's new lift on to fcntl, so sqlite/lib gains nothing
+  from its own demand. It is the same second-order shape as linux.
+
+**Gate (COORD 19:18Z): no lost reuse crosses by value.**
+- The linux emission grep of sqlite/lib for `Titimerval|Titimerspec|Itimerval|Itimerspec` finds 12 lines per
+  architecture, and all are sqlite/lib's own declarations: lift records, alias records, stubs, global usings and the
+  2 struct bodies. No code uses either type.
+- The Go-level crossing census lists every use in a convert-set package of another convert-set package's func, var,
+  field or type name whose type holds an anonymous struct by value. It finds 0 uses from sqlite/lib into libc on
+  linux, so none of the 5 lost types crosses; sqlite/lib passes libc only `uintptr`.
+- libc ← uuid, the pair the seed repairs on linux, also has 0 crossings.
+- windows has 1 crossing: sqlite/lib → `libc.XSetFilePointerEx(LARGE_INTEGER)`. That is the one ruling C exists for,
+  and the seed now repairs it with no flag.
+- Expected: the linux closure build reads CS1503 = 0. That build is COORD's leg after 311.
+
+**Side measurement: std stamps.** The pre-pass reads only in-memory stamps, while the real conversion also reads std
+stamps from disk. Giving the pre-pass in-memory std stamps changes 0 of 13 / 13 / 23 / 38 convert-set admissions
+(linux amd64, linux arm64, windows, darwin). The gap is latent; it would be closed by a fallback to the real lookup.
+
+**OPEN, for a ruling (mailbox 47c03e896).** Should an importer follow its direct import's own resolution? Example: P
+imports Q, and Q's identical alias names a lift that Q reuses from R. P would then reuse R's lift too, under the same
+admission and nested checks. That turns linux's 5-for-5 trade into 10 agreements, and darwin's timespec demand into a
+reuse. Estimated cost: about 3 h, red first, plus an e2e arm over P ← Q ← R.
+
+— C2 (2026-11-17)
+
+## 2026-11-17 — C2 (ruling C item 3, scope a): foreign NAMED structs converted whole while their declaring package does not admit them — census; reading OWED on darwin
+
+**The shape.** An importer writes `(*pkg.T)(unsafe.Pointer(p))`, where `T` is a named struct of another package and
+`T` holds an array by value. Admission treats that as the declaring package's decision and skips it
+(`computeInlineArrayAdmission`, "a seed declared in another package"). If the declaring package never converts `T`
+whole itself, `T` keeps `array<T>` storage and the importer reads native memory through it.
+
+**Census.** A Go-level probe over the sqlite closure, per target, run against e190d6da30. It lists every whole
+conversion whose target is a foreign named struct, and judges each by the declaring package's admission.
+
+| target | foreign named targets | array-holding, NOT admitted by their package |
+|---|---|---|
+| linux/amd64, linux/arm64 | 2 each (`reflect.StringHeader`, `sync.Mutex`), both array-free | **0** |
+| windows/amd64 | 6 | **1 type, 2 sites**: x/sys/windows → `syscall.RawSockaddrAny`. This is std's own pair-rule state (both sides `array<T>`). |
+| darwin/amd64 | 14 | **2 types, 4 sites**: libc → x/sys/unix `FdSet` (3) and `Utsname` (1) |
+
+The other darwin targets are admitted by x/sys/unix itself (`Dirent`, `Rusage`, `Stat_t`, `Statfs_t`, `Termios`,
+`Timeval`) or hold no array (`Flock_t`, `Kevent_t`, `Timespec`, `Winsize`, `StringHeader`, `Mutex`).
+
+**Not measured: whether the 4 darwin sites read correctly today.** That needs a darwin run of libc's select and
+uname paths, and this box cannot run darwin. The shape predicts wrong bytes, or a refusal from golib's reinterpret,
+not a compile error. Each is a darwin-only site.
+
+**Determinism caveat (the flag and item 3 too).** A package converted on its own carries no importer seeds. For
+example, a stand-alone x/sys/unix or libc sub-package nugetgo package lays its types out without the importer's
+demand. A fix that seeds the declaring package from its importers inherits that caveat: the stand-alone build needs
+the hand seed. Each stamp records its seeds, so every consumer reads the truth. The trap is a mismatch between two
+builds, not a wrong record.
+
+— C2 (2026-11-17)
+
+
+## 2026-11-17 — C2 (ruling C item 3, shape A, COORD 19:34Z): an importer follows its import's resolution — the second-order loss CLOSED, measured on 4 targets
+
+**The rule.** For an anonymous struct, an import offers the lift its code USES. That is either a public lift the
+import declares, or the lift an EXPORTED alias of the identical struct names in the import's `GoTypeAlias` record.
+In the second case, the lift must be checked in the declaring package's own lift records, which load on demand for a
+transitive import. The admission check is read at the declaring package. `nestedLiftsMatch` compares each nested
+struct as a lift, package and name, against the lift the outer lift holds. Termination: the record names the
+declaring package's lift, so one record read reaches a declaration, and the import graph is acyclic.
+
+**The same seat:** the seed pre-pass now reads a std stamp where the conversion reads it. Only the convert-set's
+stamps are in memory.
+
+**Arms.**
+- The P ← Q ← R end-to-end arm went red with CS1503 at 500ae6f765. At a76c8bf2eb it is green, and go prints the
+  same as go2cs: `10 14 12884901888`.
+- The negative nested arm: a nested struct resolves to a fourth package, so the importer keeps its own lift. It is
+  green, turns red with the nested check neutered, and was restored byte-identical.
+- `TestImporterSeedPrePassReadsAStdStamp` is red without the fallback and green with it.
+
+**Census.** sqlite closure, converter a76c8bf2eb, no flag. Scored against census-r3 and the prediction in mailbox
+116aae9cd; no falsifier fired.
+
+| target | seeds | chained reuses (sqlite/lib through libc) | reuse=true r3 → A (census-c) | nested:own | wall |
+|---|---|---|---|---|---|
+| windows/amd64 | as r3 | 1: `time.Timevalᴛ1`. It predates the seed: libc already reused it | 26 → 29 (26) | 0 | 140 s |
+| linux/amd64 | as r3 | 5: uuid `Timespecᴛ1`, `Timevalᴛ1`, `Itimervalᴛ1`, `Itimerspecᴛ1`, plus `Timezoneᴛ1` (also predates the seed) | 58 → 82 (73) | 0 | 146 s |
+| linux/arm64 | as r3 | the same 5 | 57 → 82 (73) | 0 | 139 s |
+| darwin/amd64 | as r3 | 0 | 53 → 53 (43) | 0 | 99 s |
+
+On linux, sqlite/lib now spells `Ttimespec`, `Ttimeval`, `Titimerval`, `Titimerspec` and `Ttimezone` as uuid's
+lifts, and `Tstat` as `libc.Tstatᴛ1`. libc uses exactly those types. The 5 reuses the seed cost (row above) are back,
+and so is 1 that was lost before this seat.
+
+**Residual: darwin.** libc declares no exported alias for any of the 25 lifts it reuses from fcntl, netdb, pthread,
+stdlib and wctype; its `timespec` is unexported. So there is no record to follow, and the timespec seed demand
+(sqlite/lib → libc, then libc → fcntl) still produces no reuse. sqlite/lib has 0 by-value crossings into libc on
+darwin. Following an unexported alias would mean re-deriving the import's resolution rather than reading its record.
+That is not done here.
+
+**Owed (COORD, after 311):** the closure builds on windows, linux and darwin (linux: CS1503 = 0), the slnx build, and
+the `-stdlib` footprint. My prediction for the `-stdlib` footprint is 0 files.
+
+— C2 (2026-11-17)
 
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

@@ -104,11 +104,13 @@ func resetPackageState(pkg *packages.Package) {
 	cgoPseudoPackageTypeAccess = hashset.HashSet[string]{}
 	globalTempVarCount = make(map[string]int)
 	packageDynamicTypeNames = make(map[string]string)
+	packagePublicLiftNames = make(map[string]bool)
 	importedDynamicTypeNames = make(map[string]map[string]string)
 	importedPublicLiftNames = make(map[string]map[string]bool)
 	importedValueCloneLiftNames = make(map[string]map[string]bool)
 	importedStructLiftTargets = make(map[string]string)
 	importedLiftAdmissionStamps = make(map[string]*inlineArrayStamp)
+	liftRecordsRead = make(map[string]bool)
 	packageConstraintLiftNames = make(map[string]string)
 	resetInlineConstraintState()
 	packageLiftedTypeNames = hashset.HashSet[string]{}

@@ -22,7 +22,8 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   [Requirements](README.md#requirements), which the go2cs dotnet tool downloads for you.
 * **cgo converts only through `-cgo`, and only calls of C functions a shared library defines** ([cgo](#cgo)).
 * **Assembly, `//go:linkname` and deep `unsafe` tricks compile clean, then fail at run time.** Many
-  libraries ship a pure-Go fallback behind a build tag, and you have to pass that tag yourself.
+  libraries ship a pure-Go fallback behind a build tag. A plain `-recurse` applies the common ones (`safe`, `purego`,
+  `noasm`) for you; an explicit `-tags` replaces them, so restate them beside your own.
 * **By default, each live goroutine holds an operating-system thread.** Thousands alive at once are fine; Go's
   million are out of reach.
 * **It's usually slower than Go**, starts slower and uses more memory.
@@ -48,6 +49,7 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   older versions until `go build ./...` passes, as the
   [module walkthrough](ConvertingAModule.md#step-by-step) does.
 * **Hand-written assembly.** A function whose body lives in a `.s` file usually becomes a stub. The
+  conversion names each one (`warning GO2CS2012`, [diagnostic codes](DiagnosticCodes.md)), the
   project builds clean, and the first call throws a `NotImplementedException` saying
   `no implementation reached this compilation`. Convert with the library's pure-Go build tag
   ([below](#third-party-modules-where-they-trip-today)), or write the body in C#. `//go:linkname` into
@@ -198,7 +200,7 @@ standard library, and runs on Windows, Linux or macOS. **A longer evening:** lot
   until the function returns, so "drop the reference, call `runtime.GC()`, expect the finalizer" can
   wait forever. `GOGC` and `GOMEMLIMIT` are read and reported, by `debug.SetGCPercent` for example, but
   .NET's collector does not follow them.
-  <!-- src/core/runtime/managed_impl.cs:1510 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
+  <!-- src/core/runtime/managed_impl.cs:1654 `internal static void gcinitController() => ᏑgcController.init(readGOGC(), readGOMEMLIMIT());`;
        nothing in src/core/runtime or src/core/golib sets a GCSettings value or a GC heap limit from them. -->
 * **Runtime introspection is thinner than Go's.** A dump of all goroutines lists each one and what it waits on,
   with frames for the calling goroutine only. `pprof.StartCPUProfile` gives a profile with no samples (profile with
@@ -388,12 +390,18 @@ The [validated modules](ValidatedModules.md) page lists the modules validated so
   A plain `-recurse` (your module plus its dependencies) applies `safe`, `purego` and `noasm` for
   you, so a fast path behind `!purego` or `!noasm` is replaced by the library's pure-Go fallback
   ([Build tags for a module](ConvertingAModule.md#build-tags-for-a-module)). A file gated on the
-  architecture alone has no such fallback: zeebo/xxh3's `accum_stubs_amd64.go` declares its vector
-  routines with no body, so they convert to stubs. xxh3 calls them only when the CPU reports AVX2,
-  AVX-512 or SSE2, which the converted klauspost/cpuid never does under `noasm`, so hashing works and
-  only code that forces a vector path on (xxh3's own tests do) throws. An explicit `-tags` replaces
-  every default, so include `safe,purego,noasm` with yours, and under `-tests` include
-  `math_big_pure_go` too.
+  architecture alone has no such fallback, and the conversion names each stub it leaves
+  (`warning GO2CS2012`). Where the same package already holds the answer in Go under another name, go2cs
+  forwards the stub to it: zeebo/xxh3's `accumNEON` and `accumBlockNEON`, which its arm64 build calls for
+  every input over 240 bytes, run its own `accumScalar` and `accumBlockScalar`. Plain xxh3 still stops
+  earlier, on every architecture, at its `unsafe` string views ([below](#unsafe-header-views)); use the
+  repository's copy of it named there. An explicit `-tags` replaces every default, so include
+  `safe,purego,noasm` with yours, and under `-tests` include `math_big_pure_go` too.
+  <!-- The sibling rows: src/go2cs/asmForwardBodies.go, guarded by TestAsmSiblingForwardEmission and
+       TestAsmSiblingForwardIsRefusedBySite. The earlier text here said hashing works because the converted
+       klauspost/cpuid never reports AVX2/SSE2 under noasm; that held for the amd64 vector stubs and missed both
+       the header views (every architecture) and arm64, where accum_stubs_arm64.go sets hasNEON = true as a
+       constant. -->
 * **A test suite that imports testify depends on the `safe` tag.** Its bundled go-spew does pointer
   arithmetic into `reflect.Value` at load, which the runtime library refuses by design, and go-spew's
   `safe` tag selects its fallback. Drop the tag, with `-module-safe-tag=false` or an explicit `-tags` that
@@ -410,7 +418,7 @@ The [validated modules](ValidatedModules.md) page lists the modules validated so
   own code, reshape the Go. In a dependency, point a `replace` at a patched copy, or fix the generated
   `.cs` and mark the file `[module: go.GoManualConversion]` so the next conversion leaves it alone. New
   ones still turn up: [tell me](#when-you-hit-a-seam).
-* **`unsafe` views of a string's or a slice's bytes are not supported yet.** Go code can read a string or a
+* <a id="unsafe-header-views"></a>**`unsafe` views of a string's or a slice's bytes are not supported yet.** Go code can read a string or a
   `[]byte` through its header, `*(*struct{ p unsafe.Pointer; n uint })(unsafe.Pointer(&s))`, and then read bytes at
   `unsafe.Pointer(uintptr(p) + i)` or through `(*[8]byte)(p)`. Converted, these stop with a named runtime panic,
   because the string or slice lives in .NET-managed memory with no fixed address to offset. github.com/zeebo/xxh3

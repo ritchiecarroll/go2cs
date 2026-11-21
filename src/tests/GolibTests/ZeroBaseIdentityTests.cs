@@ -5,6 +5,7 @@
 // that can be found in the LICENSE file.
 
 using System;
+using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using go;
 using static go.builtin;
@@ -85,6 +86,110 @@ public class ZeroBaseIdentityTests
         Assert.IsTrue(@unsafe.SliceData(new slice<Void>(3)) == @unsafe.SliceData(s), "two []struct{} share one data pointer");
         Assert.IsTrue(@unsafe.Pointer.FromPinnedBox(@unsafe.SliceData(new slice<EmptyStruct>(3))) == @unsafe.Pointer.FromPinnedBox(Ꮡ(s, 0)),
             "and so do slices of two different zero-size types");
+    }
+
+    // Generic `==` over a pointer type argument (slices.Contains, a comparable type parameter) is AreEqual<T>. It took
+    // the interface-value path, whose type match reads the box CLASS, so an element box and a heap box naming the
+    // zerobase were unequal there while equal under ж's `==`. Go has one `==`.
+    [TestMethod]
+    public void GenericEqualityAgreesWithPointerEqualityAcrossBoxKinds()
+    {
+        slice<Void> s = new(10);
+        ж<Void> element = Ꮡ(s, 5), heap = Zero<Void>();
+
+        Assert.IsTrue(element == heap, "&s[5] == new(struct{})");
+        Assert.IsTrue(AreEqual(element, heap), "and through generic ==");
+        Assert.IsTrue(AreEqual(heap, element), "in either order");
+
+        ж<nint> one = Ꮡ((nint)1), other = Ꮡ((nint)1);
+
+        Assert.IsTrue(AreEqual(one, one), "a pointer equals itself through generic ==");
+        Assert.IsFalse(AreEqual(one, other), "two allocations stay two pointers through generic ==");
+    }
+
+    [TestMethod]
+    public void GenericEqualityAgreesWithPointerEqualityForANativeElementAndANativeBox()
+    {
+        const int Length = 8;
+        nuint addr = (nuint)(nint)Marshal.AllocHGlobal(Length * sizeof(ulong));
+
+        try
+        {
+            ж<array<ulong>> view = NativeArrayBox<ulong>.Over(addr, Length);
+            ж<ulong> element = view.at<ulong>(4);                                // a native element box
+            ж<ulong> rebuilt = (ж<ulong>)(uintptr)(addr + 4 * sizeof(ulong));    // a NativeBox, one address
+
+            Assert.AreNotEqual(element.GetType(), rebuilt.GetType(), "two box kinds, or the pair proves nothing");
+            Assert.IsTrue(element == rebuilt, "one native address is one pointer");
+            Assert.IsTrue(rebuilt == element, "in either order");
+            Assert.IsTrue(AreEqual(element, rebuilt), "and through generic ==");
+            Assert.IsTrue(AreEqual(rebuilt, element), "in either order");
+
+            ж<ulong> next = view.at<ulong>(5);
+
+            Assert.IsFalse(rebuilt == next, "the next element is another pointer");
+            Assert.IsFalse(next == rebuilt);
+            Assert.IsFalse(AreEqual(rebuilt, next), "and through generic ==");
+            Assert.IsFalse(AreEqual(next, rebuilt));
+        }
+        finally
+        {
+            Marshal.FreeHGlobal((nint)addr);
+        }
+    }
+
+    [TestMethod]
+    public void GenericEqualityAgreesWithPointerEqualityForANamedPointerType()
+    {
+        slice<Void> s = new(10);
+        voidPtr element = new(Ꮡ(s, 5)), heap = new(Zero<Void>()), nilPtr = new(nil);
+
+        Assert.IsTrue(element == heap, "type P *struct{}: P(&s[5]) == P(new(struct{}))");
+        Assert.IsTrue(heap == element, "in either order");
+        Assert.IsTrue(AreEqual(element, heap), "and through generic ==");
+        Assert.IsTrue(AreEqual(heap, element), "in either order");
+
+        Assert.IsFalse(element == nilPtr, "a non-nil P is not the nil P");
+        Assert.IsFalse(nilPtr == element);
+        Assert.IsFalse(AreEqual(element, nilPtr), "and through generic ==");
+        Assert.IsFalse(AreEqual(nilPtr, element));
+
+        Assert.IsTrue(AreEqual(nilPtr, (voidPtr)null!), "the nil P and a null reference are one nil");
+        Assert.IsTrue(AreEqual((voidPtr)null!, nilPtr), "in either order");
+    }
+
+    // A stand-in for go2cs-gen's named-pointer wrapper (`type P *struct{}`), with the members its templates emit that
+    // the comparison reads: Equals over the box and the reference-identity == (Templates/InheritedType/
+    // PointerTypeTemplate and InheritedTypeTemplate's "Pointer" EqualityExpression).
+    [GoType("ж<Void>")]
+    private sealed class voidPtr : IPointer<Void>, INilPointer
+    {
+        private readonly ж<Void> m_value;
+
+        public voidPtr(ж<Void> value) => m_value = value;
+
+        public voidPtr(NilType _) => m_value = default!;
+
+        public ref Void Value => ref m_value.Value;
+
+        public bool IsNull => m_value is null || m_value.IsNull;
+
+        public bool IsNilPointer => m_value is null || m_value.IsNilPointer;
+
+        public override bool Equals(object? obj) => obj switch
+        {
+            voidPtr other => m_value == other.m_value,
+            null => IsNilPointer,
+            _ => false
+        };
+
+        public override int GetHashCode() => m_value?.GetHashCode() ?? 0;
+
+        public static bool operator ==(voidPtr left, voidPtr right) => Equals(left, right);
+
+        public static bool operator !=(voidPtr left, voidPtr right) => !(left == right);
+
+        static Void IPointer<Void>.operator ~(IPointer<Void> value) => value.Value;
     }
 
     [TestMethod]
