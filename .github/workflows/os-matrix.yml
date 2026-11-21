@@ -655,6 +655,11 @@ jobs:
 
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@v5
+        env:
+          # The job's own install directory, first on PATH with DOTNET_ROOT on it, so the job's dotnet sees only the
+          # SDK installed here: the runner image carries newer majors beside its own install, and global.json's
+          # latestMajor would take them. The checkout is not touched. The step after this one proves the pin.
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
         with:
           dotnet-version: ${{ needs.plan.outputs.dotnet }}
 
@@ -772,6 +777,11 @@ jobs:
 
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@v5
+        env:
+          # The job's own install directory, first on PATH with DOTNET_ROOT on it, so the job's dotnet sees only the
+          # SDK installed here: the runner image carries newer majors beside its own install, and global.json's
+          # latestMajor would take them. The checkout is not touched. The step after this one proves the pin.
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
         with:
           dotnet-version: ${{ needs.plan.outputs.dotnet }}
 
@@ -854,6 +864,11 @@ jobs:
 
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@v5
+        env:
+          # The job's own install directory, first on PATH with DOTNET_ROOT on it, so the job's dotnet sees only the
+          # SDK installed here: the runner image carries newer majors beside its own install, and global.json's
+          # latestMajor would take them. The checkout is not touched. The step after this one proves the pin.
+          DOTNET_INSTALL_DIR: ${{ runner.temp }}/dotnet
         with:
           # Channel comes from the `dotnet` input: 10.0.x, the corpus TFM's own runtime since the
           # Stage-2 hop. An SDK cannot target a framework newer than itself, so an older channel
