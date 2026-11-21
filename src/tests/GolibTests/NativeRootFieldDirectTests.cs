@@ -192,6 +192,56 @@ public class NativeRootFieldDirectTests
         }
     }
 
+    // An element box over a NATIVE window is not a native root: its field keeps today's cached view, read and written
+    // through the element at the window's address. Change A's arm is for a NativeBox root alone; converted code's
+    // `&s[i]` over a native-backed slice already mints a NativeBox (builtin.Ꮡ) and takes the arm, so an ElemRefBox over
+    // one is reached only through reflect's element alias (IGoReflectSlice.ReflectElementZero) and the slice
+    // constructor's defensive branch. Both are pinned here, and both must keep the view, the same one on each request.
+    private struct NativePair
+    {
+        public nint a;
+        public nint b;
+    }
+
+    private static ref nint Ꮡb(ref NativePair value) => ref value.b;
+
+    [TestMethod]
+    public unsafe void AnElementBoxOverANativeWindowKeepsTodaysCachedFieldView()
+    {
+        const int Count = 3;
+        nint block = Marshal.AllocHGlobal(sizeof(NativePair) * Count);
+
+        try
+        {
+            for (int i = 0; i < Count; i++)
+                ((NativePair*)block)[i] = new NativePair { a = 100 + i, b = 200 + i };
+
+            slice<NativePair> window = slice<NativePair>.OverNativeMemory((nuint)block, Count);
+            ж<NativePair> viaReflect = (ж<NativePair>)((IGoReflectSlice)window).ReflectElementZero();
+            ж<NativePair> viaConstructor = new ElemRefBox<NativePair>(window, 1);
+
+            foreach ((ж<NativePair> element, int index) in new[] { (viaReflect, 0), (viaConstructor, 1) })
+            {
+                Assert.IsInstanceOfType(element, typeof(ElemRefBox<NativePair>), "the fixture must be an element box, or this arm measures nothing");
+                Assert.AreNotEqual((nuint)0, element.NativeIdentity, "over a native window: the element has a native address");
+
+                ж<nint> first = element.of(Ꮡb);
+                ж<nint> second = element.of(Ꮡb);
+
+                Assert.IsInstanceOfType(first, typeof(FieldRefBox<nint>), $"element {index}: an element box is not a native root, so its field keeps the view");
+                Assert.AreSame(first, second, $"element {index}: and the view is the cached one");
+                Assert.AreEqual((nint)(200 + index), first.Value, $"element {index}: read through the element at the window");
+
+                first.Value = 900 + index;
+                Assert.AreEqual((nint)(900 + index), ((NativePair*)block)[index].b, $"element {index}: and written through it");
+            }
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(block);
+        }
+    }
+
     // ---- retention: a non-bare root's field keeps the root's storage (NativeDerivation.Kept) ----
 
     [TestMethod]
