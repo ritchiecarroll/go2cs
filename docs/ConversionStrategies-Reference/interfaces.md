@@ -1705,7 +1705,7 @@ Go, in the importer:
 The importer's C#, where `lib.With(3)` passes straight into a `lib.Option` parameter and a local `mine` value
 reaches `Take`'s `With_R0` parameter through the importer's usual value adapter:
 
-<!-- source: src/tests/Behavioral/AnonIfaceEmbedCrossPackage/main.cs.target:36-41 -->
+<!-- source: src/tests/Behavioral/AnonIfaceEmbedCrossPackage/main.cs.target:27-32 -->
 ```csharp
     fmt.Println(useOption(lib.With(3)));
     fmt.Println(useOther(lib.With(3)));
