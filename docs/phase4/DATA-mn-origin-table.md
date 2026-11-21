@@ -135,3 +135,48 @@ All on H, Windows x64, go1.26.11.
 
 - The Native AOT reading of A4's program (MnAotGeneric) after a park, routed by COORD to the AOT box. Predicted:
   frames are named, with no file:line (A2's AOT limit), and the read never throws.
+
+## 8. Readings: the seat's battery, the twins sweep, and the merge (dated block, 2026-11-21, H)
+
+Predictions were posted before each run and are scored here as worded. All runs on H, Windows x64, go1.26.11.
+
+**The battery at 2105e850e5** (all gates unfiltered). Two misses, each posted on its own before the fix:
+- go test read ok=10 against a predicted 11. TestOutputComparisonListMatchesConsoleOutputAttribute named the
+  two new fixtures, which lacked [GoTestMatchingConsoleOutput] in their package_info.cs.
+- go2cs.slnx added two CS8603 warnings at TwinStampTests.cs:298, from the test code, not from a fixture.
+- Fixed at 05ec4c70fd. The re-gate met every prediction:
+  - go test ok=11;
+  - GenTests 724/724;
+  - CNR NO REGRESSION over 1133 packages (+12 platform-exclusive);
+  - go2cs.slnx: a warning-code list identical to the base's;
+  - full repoguard rc 0.
+- The rest of the battery met as predicted:
+  - GolibTests Release 2966/52 skipped of 3018, and Debug 2941/77 of 3018, failed [] in both;
+  - go2cs-stdlib.slnx: 365 dlls, 0 GO2CS0016;
+  - the twins lane on 8 Mn fixtures: 0 diff at the base and at the tip.
+
+**G's twins sweep** covers 28 programs plus MnBoxAlias, MnFuncPair and MnParkedSameName, at the base 1f6f316d6c
+and at 05ec4c70fd.
+- MnParkedSameName is ABSENT at the base and PASS at the tip.
+- The other 30 programs are identical at both on runner rc, verdict, the twins-report candidates and direct rc.
+  The three rows that do not PASS read the same at both: GoroutineWaitState and MnMixedStorm (direct runs time
+  out at 300 s under GO2CS_MN_READING) and SelectStatement (NOT COMPARED).
+- Prediction (3) MISSED as worded. The scheduler READING counts differed in 8 programs, not in the 3 named.
+  - A 3-run alternating arm read 7 of the 8 as timing: their base and tip ranges overlap.
+  - MnFuncPair separated on 3 runs (steps 4024-4027 at the base, 4158-4215 at the tip).
+  - A four-build arm then removed the separation: the tip, the tip with the base runtime, the tip with the
+    base generator, and the base, 3 runs each, alternating. The base read 4025, 4109 and 4176, and the tip read
+    4185, 4133 and 4019. Neither half of 7d separates from the base.
+  - The interim "not timing as measured" is superseded by that arm.
+
+**For G's item 5 (N5 policy), an input, not a 7d finding.** MnFuncPair's step count is BIMODAL at both arms:
+about 4020-4027 or about 4100-4240, with steps minus parks 2001 at every run. Pooled over 7 readings per arm,
+the base sat high 3 times and the tip 6 times.
+
+**The merge of the landed master f604d2ae89** (train 1), at 0ee197701a:
+- 2 conflicts, both doc citations into managed_impl.cs, re-derived from the merged file. The provenance guard
+  passed: 958 note tokens.
+- Train 1's main-holders rule moves methods back into main_package, so 5 of this branch's 11 extra fixtures were
+  re-baselined at 05cb5b3446: MnParkedSameName, MnAotGeneric, MnBoxAlias, MnIfaceTwin and MnMixedStorm.
+- MnParkedSameName now carries T.b and U.b in one class, which is the red's shape in converted code.
+- The gates at the merged tip are appended below.
