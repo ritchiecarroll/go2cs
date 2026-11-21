@@ -232,6 +232,29 @@ func namedArray() {
 	fmt.Println("named   :", a[0], f[2])
 }
 
+func selectRecv() {
+	var a [8]uint64
+	f := (*[16]uint32)(unsafe.Pointer(&a))
+	ch := make(chan [8]uint64, 1)
+	ch <- [8]uint64{211, 212}
+	select {
+	case a = <-ch:
+	}
+	f[0] = 0xAAAA
+	fmt.Println("select  :", a[0], f[2])
+}
+
+func recvOk() {
+	var a [8]uint64
+	var ok bool
+	f := (*[16]uint32)(unsafe.Pointer(&a))
+	ch := make(chan [8]uint64, 1)
+	ch <- [8]uint64{221, 222}
+	a, ok = <-ch
+	f[0] = 0xAAAA
+	fmt.Println("recv ok :", a[0], f[2], ok)
+}
+
 func namedResultIndex() (a [8]uint64) {
 	p := &a
 	defer func() { a[0] = 0xBBBB }()
@@ -262,6 +285,8 @@ func main() {
 	nested()
 	pointerStruct()
 	namedArray()
+	selectRecv()
+	recvOk()
 	r := namedResultIndex()
 	fmt.Println("res idx :", r[0], r[1], len(r))
 }

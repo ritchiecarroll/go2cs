@@ -238,6 +238,33 @@ internal static void namedArray() {
     fmt.Println("named   :", a[0], f.ElementRef(2));
 }
 
+internal static void selectRecv() {
+    ref var a = ref heap(new array<uint64>(8), out var Ꮡa);
+    var f = @unsafe.Pointer.ToArray<uint32>(@unsafe.Pointer.FromPinnedBox(Ꮡa), 16);
+    var ch = new channel<array<uint64>>(1, ChanCargo.Of(null, new nint[] { 8 }));
+    ch.ᐸꟷ(array<uint64>(8, [211, 212]));
+    var chᴛ1 = ch;
+    switch (select(ᐸꟷ(chᴛ1, ꓸꓸꓸ))) {
+    case 0 when chᴛ1.ꟷᐳ(out var aᴛ1): {
+        a.Assign(aᴛ1);
+        break;
+    }}
+    f.ElementRef(0) = 0xAAAA;
+    fmt.Println("select  :", a[0], f.ElementRef(2));
+}
+
+internal static void recvOk() {
+    ref var a = ref heap(new array<uint64>(8), out var Ꮡa);
+    bool ok = default;
+    var f = @unsafe.Pointer.ToArray<uint32>(@unsafe.Pointer.FromPinnedBox(Ꮡa), 16);
+    var ch = new channel<array<uint64>>(1, ChanCargo.Of(null, new nint[] { 8 }));
+    ch.ᐸꟷ(array<uint64>(8, [221, 222]));
+    (var aᴛ1, ok) = ᐸꟷ(ch, ꟷ);
+    a.Assign(aᴛ1);
+    f.ElementRef(0) = 0xAAAA;
+    fmt.Println("recv ok :", a[0], f.ElementRef(2), ok);
+}
+
 internal static array<uint64> /*a*/ namedResultIndex() {
     heap(new array<uint64>(8), out var Ꮡa);
     GoFrame ᒐ = default;
@@ -278,6 +305,8 @@ internal static void main() {
     nested();
     pointerStruct();
     namedArray();
+    selectRecv();
+    recvOk();
     var r = namedResultIndex();
     fmt.Println("res idx :", r[0], r[1], len(r));
 }
