@@ -375,6 +375,7 @@ Each topic is its own page. The summary, [Conversion Strategies](../ConversionSt
   - [Adapter accessibility: symbol-OR-name on both sides](interfaces.md#adapter-accessibility-symbol-or-name-on-both-sides)
   - [GoImplement records de-duplicate at attribute emission](interfaces.md#goimplement-records-de-duplicate-at-attribute-emission)
   - [Anonymous interfaces used as an adapter target are lifted package-wide](interfaces.md#anonymous-interfaces-used-as-an-adapter-target-are-lifted-package-wide)
+  - [Another package's anonymous interface that embeds named interfaces takes that package's lift, and inherits what it embeds](interfaces.md#another-packages-anonymous-interface-that-embeds-named-interfaces-takes-that-packages-lift-and-inherits-what-it-embeds)
   - [An anonymous interface lifted out of a GENERIC declaration binds its type parameters, and each instantiation's concrete lift derives it](interfaces.md#an-anonymous-interface-lifted-out-of-a-generic-declaration-binds-its-type-parameters-and-each-instantiations-concrete-lift-derives-it)
   - [An INITIALIZED var lifts its explicit anonymous declared type too — and a blank name lifts from the GO identifier](interfaces.md#an-initialized-var-lifts-its-explicit-anonymous-declared-type-too--and-a-blank-name-lifts-from-the-go-identifier)
   - [A collision-renamed type's pointer adapter composes on the package qualifier, never the whole-type alias](interfaces.md#a-collision-renamed-types-pointer-adapter-composes-on-the-package-qualifier-never-the-whole-type-alias)

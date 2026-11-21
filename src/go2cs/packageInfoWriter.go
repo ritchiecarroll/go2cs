@@ -607,6 +607,14 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 			}
 
 			for implementation := range implementations {
+				// The implementation side takes the same resolution: a conversion FROM an anonymous interface reached
+				// before its own lift (a function declared later in the file returns it) records the marker.
+				implementation, okImpl := resolveImplicitConvTypeName(implementation)
+
+				if !okImpl {
+					continue
+				}
+
 				// A closed-carrier pair (closedCarrier.go) is written with `Closed = true`, after `Pointer = true`
 				// for the pointer form. go2cs-gen reads the argument and writes a closed adapter class for the pair.
 				if closedCarrierImplementations.Contains(closedCarrierPairKey(recordedInterfaceName, implementation)) {

@@ -1653,6 +1653,87 @@ Guarded by
 Namer })`, file B casts a concrete `*box` to it — the lifted name must flow into the attribute,
 the adapter, and the signature).
 
+## Another package's anonymous interface that embeds named interfaces takes that package's lift, and inherits what it embeds
+<!-- board (ii), 2026-11-20: goldmark's html.WithWriter returns interface{ renderer.Option; Option }, and a call
+     passing that result on as a renderer.Option refused the conversion with "Unresolved dynamic struct type". -->
+
+A package that returns, accepts or stores an anonymous interface lifts it and publishes the lift (a
+`GoDynamicTypeLift` record plus a `public partial interface` line in its `package_info.cs`). An importer that
+holds a value of that type names the producer's lift. An interface made only of embedded interfaces names no
+package of its own, so the importer searches its direct imports' published lifts for one with the same type text;
+the lexically smallest import path wins, as for a reused anonymous struct. An interface with explicit methods asks
+the package that declares those methods first.
+
+The lift declares every embedded interface as a C# base, so a value of the lift IS each interface it embeds.
+Passing it where one of those is expected needs no adapter and records no `GoImplement`.
+
+Go, in the producer:
+
+<!-- source: src/tests/Behavioral/AnonIfaceEmbedCrossPackage/embedlib/lib.go:19-24 -->
+```go
+func With(n int) interface {
+	Option
+	Other
+} {
+	return &both{n}
+}
+```
+
+The producer's lift:
+
+<!-- source: src/tests/Behavioral/AnonIfaceEmbedCrossPackage/embedlib/lib.cs:27-31 -->
+```csharp
+public partial interface With_R0 /*dyn*/ :
+    Option,
+    Other
+{
+}
+```
+
+Go, in the importer:
+
+<!-- source: src/tests/Behavioral/AnonIfaceEmbedCrossPackage/main.go:28-33 -->
+```go
+	fmt.Println(useOption(lib.With(3)))
+	fmt.Println(useOther(lib.With(3)))
+	fmt.Println(useOption(lib.WithMixed(4)))
+	fmt.Println(lib.WithMixed(4).Extra())
+	fmt.Println(lib.Take(mine{}))
+	fmt.Println(lib.Take(lib.With(6)))
+```
+
+The importer's C#, where `lib.With(3)` passes straight into a `lib.Option` parameter and a local `mine` value
+reaches `Take`'s `With_R0` parameter through the importer's usual value adapter:
+
+<!-- source: src/tests/Behavioral/AnonIfaceEmbedCrossPackage/main.cs.target:36-41 -->
+```csharp
+    fmt.Println(useOption(lib.With(3)));
+    fmt.Println(useOther(lib.With(3)));
+    fmt.Println(useOption(lib.WithMixed(4)));
+    fmt.Println(lib.WithMixed(4).Extra());
+    fmt.Println(lib.Take(new mine()));
+    fmt.Println(lib.Take(lib.With(6)));
+```
+
+The match is by printed signature, so it is made only where the signature names one Go type: every method,
+embedded ones included, exported, and no type parameter anywhere in a method signature. `interface{ run() int }`
+written in this package, with its own unexported `run`, is a different type from an import's interface of the
+same spelling, and keeps this package's lift. A conversion that reaches such an interface before this package lifts
+it (main converts `mkRun(9)` to a named interface, and `mkRun` is declared later in the file) records the
+`GoImplement` pair under a marker, and the package-info writer resolves the marker on the implementation side as it
+does on the interface side: `[assembly: GoImplement<useRun_r, runs>]`.
+
+Limits: the search covers DIRECT imports only, so a value whose anonymous type comes from a package reached only
+through another one still refuses by name. When two imports each lift the identical interface, the lexically
+smallest import path wins, so a value from the other import's API does not convert; that two-lift class stays open
+for interfaces. And a producer lifts one Go type once per site that spells it (a result and a struct field each get
+their own lift), so two such lifts in one package do not convert to each other; that is board (jj).
+
+Guarded by: `AnonIfaceEmbedCrossPackage` (nested library `embedlib`): an embedded-only result passed as each
+interface it embeds, a mixed result and its explicit method, a local value into an embedded-only parameter, a
+library result into it, an assignment to a named interface, and the importer's own `interface{ run() int }` beside a
+library lift of the same spelling. The output equals `go run`.
+
 ## An anonymous interface lifted out of a GENERIC declaration binds its type parameters, and each instantiation's concrete lift derives it
 
 Go 1.26's crypto/x509 declares `type constraints[T, V any] struct { permitted, excluded interface{

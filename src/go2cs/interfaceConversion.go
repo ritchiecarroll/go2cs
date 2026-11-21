@@ -302,6 +302,14 @@ func (v *Visitor) convertToInterfaceTypeSlot(interfaceType types.Type, checkType
 
 			packageLock.Unlock()
 
+			// An ANONYMOUS source interface inherits, in C#, every interface it embeds (its lift declares them as
+			// bases, as a named interface's declaration does), so a value of goldmark's `interface{ renderer.Option;
+			// Option }` IS a renderer.Option and takes no adapter. interfaceInheritances is keyed by named
+			// interfaces only, so the embeds are read from the type (board ii).
+			if !targetCoveredByInheritance && anonymousInterfaceEmbeds(targetType, interfaceType) {
+				targetCoveredByInheritance = true
+			}
+
 			recordableInterface = !targetCoveredByInheritance
 		}
 	}
@@ -1371,4 +1379,36 @@ func openGenericImplementRecordName(targetType types.Type, targetTypeName string
 	}
 
 	return openGenericImplementRecordPrefix + base + "<" + strings.Repeat(",", typeParams-1) + ">)", true
+}
+
+// anonymousInterfaceEmbeds reports whether source is an ANONYMOUS interface that embeds target, directly or through
+// an interface it embeds; the lift of such an interface lists every embedded interface as a C# base.
+func anonymousInterfaceEmbeds(source, target types.Type) bool {
+	iface, ok := types.Unalias(source).(*types.Interface)
+
+	if !ok {
+		return false
+	}
+
+	return interfaceEmbedsType(iface, types.Unalias(target), 0)
+}
+
+func interfaceEmbedsType(iface *types.Interface, target types.Type, depth int) bool {
+	if depth > 16 {
+		return false
+	}
+
+	for i := range iface.NumEmbeddeds() {
+		embedded := types.Unalias(iface.EmbeddedType(i))
+
+		if types.Identical(embedded, target) {
+			return true
+		}
+
+		if inner, ok := embedded.Underlying().(*types.Interface); ok && interfaceEmbedsType(inner, target, depth+1) {
+			return true
+		}
+	}
+
+	return false
 }
