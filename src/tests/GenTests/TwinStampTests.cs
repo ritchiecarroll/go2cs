@@ -295,7 +295,7 @@ public class TwinStampTests
 
         Built? built = Load(output, out string errors);
         Assert.IsNotNull(built, errors);
-        return built;
+        return built!;
     }
 
     // Emits a compilation with its portable PDB and loads it; null (with the errors) where it does not emit.
