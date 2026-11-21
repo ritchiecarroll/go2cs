@@ -221,7 +221,7 @@ public class NativeRootFieldDirectTests
             for (int i = 0; i < Count; i++)
                 ((NativePair*)block)[i] = new NativePair { a = 100 + i, b = 200 + i };
 
-            slice<NativePair> window = slice<NativePair>.OverNativeMemory((nuint)block, Count);
+            slice<NativePair> window = global::go.slice<NativePair>.OverNativeMemory((nuint)block, Count);
             ж<NativePair> viaReflect = (ж<NativePair>)((IGoReflectSlice)window).ReflectElementZero();
             ж<NativePair> viaConstructor = new ElemRefBox<NativePair>(window, 1);
 
