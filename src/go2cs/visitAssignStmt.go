@@ -1248,9 +1248,17 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	if tupleResult || lhsLen == reassignedCount || parallelHazard || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt && !anyTypeIsUnsafePointer && !anyRhsIsFunctionValue {
 		leftExprs := hashset.HashSet[string]{}
 
-		// The tuple in-place copy (P5's C5) appends its Assign statements after this one and takes its left locations in
-		// the statement's hoist buffer, so it needs statement position: a for-loop clause has neither.
-		tupleInPlaceOK := format.useNewLine && format.includeSemiColon && v.hoistedDecls != nil
+		// The tuple in-place copy (P5's C5) appends its Assign calls after this statement and takes its left locations in
+		// the statement's hoist buffer. In statement position the calls follow as statements. A for-loop clause holds no
+		// `;`, so there they follow the way a clause's pointer re-alias does: in the INIT clause as a C# expression list,
+		// `(var aᴛ1, n) = (b.Clone(), 0), a.Assign(aᴛ1)`; in the POST clause, where C# allows no declaration, the
+		// temporary is declared in the hoist buffer, which lowers the post to the end of the body (visitForStmt), and the
+		// calls are handed to visitForStmt with the re-aliases. Without this a clause tuple replaced the array's storage,
+		// and a window cut over the old storage (door C, a field view) lost every later write
+		// (docs/phase4/DESIGN-array-pointer-doors.md 21).
+		tupleStatementPos := format.useNewLine && format.includeSemiColon
+		tupleInForPost := !tupleStatementPos && !format.forInit && v.inForPost
+		tupleInPlaceOK := v.hoistedDecls != nil && (tupleStatementPos || format.forInit || v.inForPost)
 		var tupleInPlaceAssigns []string
 
 		// Go's partial redeclaration `a, b := f()` reuses any already-declared LHS variable and
@@ -1495,7 +1503,15 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 
 				tupleTemp = v.getTempVarName(root)
-				tupleInPlaceAssigns = append(tupleInPlaceAssigns, fmt.Sprintf("%s.%s(%s);", target, valueAssignMethod(lhsType), tupleTemp))
+				tupleInPlaceAssigns = append(tupleInPlaceAssigns, fmt.Sprintf("%s.%s(%s)", target, valueAssignMethod(lhsType), tupleTemp))
+
+				if tupleInForPost {
+					if v.hoistedDecls.Len() == 0 {
+						v.hoistedDecls.WriteString(v.newline)
+					}
+
+					v.hoistedDecls.WriteString(fmt.Sprintf("%s%s %s;%s", v.indent(v.indentLevel), v.getCSharpTypeName(lhsType), tupleTemp, v.newline))
+				}
 			}
 
 			// Per-element `var` for the newly-declared members of a mixed redeclaration tuple. An
@@ -1517,7 +1533,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
-			if tupleTemp != "" {
+			if tupleTemp != "" && tupleInForPost {
+				result.WriteString(tupleTemp)
+			} else if tupleTemp != "" {
 				result.WriteString("var " + tupleTemp)
 			} else {
 				result.WriteString(lhsExpr)
@@ -1891,9 +1909,16 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		}
 
 		for _, tupleAssign := range tupleInPlaceAssigns {
-			result.WriteString(v.newline)
-			result.WriteString(v.indent(v.indentLevel))
-			result.WriteString(tupleAssign)
+			switch {
+			case tupleStatementPos:
+				result.WriteString(v.newline)
+				result.WriteString(v.indent(v.indentLevel))
+				result.WriteString(tupleAssign + ";")
+			case tupleInForPost:
+				v.forPostReAlias = append(v.forPostReAlias, tupleAssign)
+			default:
+				result.WriteString(", " + tupleAssign)
+			}
 		}
 
 		if len(leftExprs) > 0 && operator == " = " {

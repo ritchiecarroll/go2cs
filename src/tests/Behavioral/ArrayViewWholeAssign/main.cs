@@ -10,10 +10,19 @@ partial struct holder {
     internal array<uint64> x = new(8);
 }
 
+partial struct outerHolder {
+    internal int32 k;
+    internal holder h;
+}
+
+partial struct named /*[8]uint64*/;
+
 internal static readonly ж<array<uint64>> Ꮡglobal = new StaticBox<array<uint64>>(new array<uint64>(8));
 internal static ref array<uint64> global => ref ((StaticBox<array<uint64>>)Ꮡglobal).ValueSlot;
 
 internal static array<uint64> mk() { return array<uint64>(8, [11, 12]); }
+
+internal static (array<uint64>, error) pair() { return (array<uint64>(8, [17, 18]), default); }
 
 internal static void variable() {
     ref var a = ref heap(new array<uint64>(8), out var Ꮡa);
@@ -116,6 +125,119 @@ internal static void sliceElement() {
     fmt.Println("slice el:", hs[1].x[0], f.ElementRef(2));
 }
 
+internal static void forClause() {
+    ref var a = ref heap(new array<uint64>(8), out var Ꮡa);
+    var b = array<uint64>(8, [101, 102]);
+    var f = @unsafe.Pointer.ToArray<uint32>(@unsafe.Pointer.FromPinnedBox(Ꮡa), 16);
+    nint n = default;
+    for ((var aᴛ1, n) = (b.Clone(), 0), a.Assign(aᴛ1); n < 1; n++) {
+        f.ElementRef(0) = 0xAAAA;
+    }
+    fmt.Println("for cl  :", a[0], f.ElementRef(2), n);
+}
+
+internal static void forPost() {
+    ref var a = ref heap(new array<uint64>(8), out var Ꮡa);
+    var b = array<uint64>(8, [171, 172]);
+    var f = @unsafe.Pointer.ToArray<uint32>(@unsafe.Pointer.FromPinnedBox(Ꮡa), 16);
+    nint n = 0;
+    for (; n < 2; ) {
+        if (n == 0) {
+            goto continueᴛ1;
+        }
+continueᴛ1:;
+        array<uint64> aᴛ1;
+        (aᴛ1, n) = (b.Clone(), n + 1); a.Assign(aᴛ1);
+    }
+    f.ElementRef(0) = 0xAAAA;
+    fmt.Println("for post:", a[0], f.ElementRef(2), n);
+}
+
+internal static void forField() {
+    ref var h = ref heap(new holder(), out var Ꮡh);
+    var f = @unsafe.ArrayPointer<uint32>.Of(Ꮡh.Ꮡx, 16);
+    nint n = default;
+    ref var hᴛ1 = ref h.x;
+    for ((var hᴛ2, n) = (array<uint64>(8, [181, 182]), 0), hᴛ1.Assign(hᴛ2); n < 1; n++) {
+        f.ElementRef(0) = 0xAAAA;
+    }
+    fmt.Println("for fld :", h.x[0], f.ElementRef(2), n);
+}
+
+internal static void ifInit() {
+    ref var a = ref heap(new array<uint64>(8), out var Ꮡa);
+    var b = array<uint64>(8, [111, 112]);
+    var f = @unsafe.Pointer.ToArray<uint32>(@unsafe.Pointer.FromPinnedBox(Ꮡa), 16);
+    nint n = default;
+    (var aᴛ1, n) = (b.Clone(), 1);
+    a.Assign(aᴛ1); if (n > 0) {
+        f.ElementRef(0) = 0xAAAA;
+    }
+    fmt.Println("if init :", a[0], f.ElementRef(2), n);
+}
+
+internal static void switchInit() {
+    ref var a = ref heap(new array<uint64>(8), out var Ꮡa);
+    var b = array<uint64>(8, [121, 122]);
+    var f = @unsafe.Pointer.ToArray<uint32>(@unsafe.Pointer.FromPinnedBox(Ꮡa), 16);
+    nint n = default;
+    (var aᴛ1, n) = (b.Clone(), 1);
+    a.Assign(aᴛ1);
+    switch (n) {
+    case 1: {
+        f.ElementRef(0) = 0xAAAA;
+        break;
+    }}
+
+    fmt.Println("sw init :", a[0], f.ElementRef(2), n);
+}
+
+internal static void multiValue() {
+    ref var a = ref heap(new array<uint64>(8), out var Ꮡa);
+    error err = default;
+    var f = @unsafe.Pointer.ToArray<uint32>(@unsafe.Pointer.FromPinnedBox(Ꮡa), 16);
+    (var aᴛ1, err) = pair();
+    a.Assign(aᴛ1);
+    f.ElementRef(0) = 0xAAAA;
+    fmt.Println("multi   :", a[0], f.ElementRef(2), err == nil);
+}
+
+internal static void rangeAssign() {
+    ref var a = ref heap(new array<uint64>(8), out var Ꮡa);
+    var arrs = GoReflect.WithElemDims(new array<uint64>[]{array<uint64>(8, [131, 132])}.slice(), 8);
+    var f = @unsafe.Pointer.ToArray<uint32>(@unsafe.Pointer.FromPinnedBox(Ꮡa), 16);
+    foreach (var (_, vᴛ1) in range(arrs)) {
+        a.Assign(vᴛ1);
+
+        f.ElementRef(0) = 0xAAAA;
+    }
+    fmt.Println("range   :", a[0], f.ElementRef(2));
+}
+
+internal static void nested() {
+    ref var o = ref heap(new outerHolder(), out var Ꮡo);
+    var f = @unsafe.ArrayPointer<uint32>.Of(Ꮡo.Ꮡh.Ꮡx, 16);
+    o.AssignFrom(new outerHolder(k: 1, h: new holder(n: 2, x: array<uint64>(8, [141, 142]))));
+    f.ElementRef(0) = 0xAAAA;
+    fmt.Println("nested  :", o.h.x[0], f.ElementRef(2), o.k, o.h.n);
+}
+
+internal static void pointerStruct() {
+    var ph = @new<holder>();
+    var f = @unsafe.ArrayPointer<uint32>.Of(ph.Ꮡx, 16);
+    ph.Value.AssignFrom(new holder(n: 3, x: array<uint64>(8, [151, 152])));
+    f.ElementRef(0) = 0xAAAA;
+    fmt.Println("ptr str :", ph.x[0], f.ElementRef(2), ph.n);
+}
+
+internal static void namedArray() {
+    ref var a = ref heap(new named(), out var Ꮡa);
+    var f = @unsafe.Pointer.ToArray<uint32>(@unsafe.Pointer.FromPinnedBox(Ꮡa), 16);
+    a.Assign(new named(new uint64[]{161, 162}.array(8)));
+    f.ElementRef(0) = 0xAAAA;
+    fmt.Println("named   :", a[0], f.ElementRef(2));
+}
+
 internal static void main() {
     variable();
     literal();
@@ -129,6 +251,16 @@ internal static void main() {
     throughPointer();
     glob();
     sliceElement();
+    forClause();
+    forPost();
+    forField();
+    ifInit();
+    switchInit();
+    multiValue();
+    rangeAssign();
+    nested();
+    pointerStruct();
+    namedArray();
 }
 
 } // end main_package

@@ -20,9 +20,18 @@ type holder struct {
 	x [8]uint64
 }
 
+type outerHolder struct {
+	k int32
+	h holder
+}
+
+type named [8]uint64
+
 var global [8]uint64
 
 func mk() [8]uint64 { return [8]uint64{11, 12} }
+
+func pair() ([8]uint64, error) { return [8]uint64{17, 18}, nil }
 
 func variable() {
 	var a [8]uint64
@@ -122,6 +131,107 @@ func sliceElement() {
 	fmt.Println("slice el:", hs[1].x[0], f[2])
 }
 
+func forClause() {
+	var a [8]uint64
+	b := [8]uint64{101, 102}
+	f := (*[16]uint32)(unsafe.Pointer(&a))
+	var n int
+	for a, n = b, 0; n < 1; n++ {
+		f[0] = 0xAAAA
+	}
+	fmt.Println("for cl  :", a[0], f[2], n)
+}
+
+func forPost() {
+	var a [8]uint64
+	b := [8]uint64{171, 172}
+	f := (*[16]uint32)(unsafe.Pointer(&a))
+	n := 0
+	for ; n < 2; a, n = b, n+1 {
+		if n == 0 {
+			continue
+		}
+	}
+	f[0] = 0xAAAA
+	fmt.Println("for post:", a[0], f[2], n)
+}
+
+func forField() {
+	var h holder
+	f := (*[16]uint32)(unsafe.Pointer(&h.x))
+	var n int
+	for h.x, n = [8]uint64{181, 182}, 0; n < 1; n++ {
+		f[0] = 0xAAAA
+	}
+	fmt.Println("for fld :", h.x[0], f[2], n)
+}
+
+func ifInit() {
+	var a [8]uint64
+	b := [8]uint64{111, 112}
+	f := (*[16]uint32)(unsafe.Pointer(&a))
+	var n int
+	if a, n = b, 1; n > 0 {
+		f[0] = 0xAAAA
+	}
+	fmt.Println("if init :", a[0], f[2], n)
+}
+
+func switchInit() {
+	var a [8]uint64
+	b := [8]uint64{121, 122}
+	f := (*[16]uint32)(unsafe.Pointer(&a))
+	var n int
+	switch a, n = b, 1; n {
+	case 1:
+		f[0] = 0xAAAA
+	}
+	fmt.Println("sw init :", a[0], f[2], n)
+}
+
+func multiValue() {
+	var a [8]uint64
+	var err error
+	f := (*[16]uint32)(unsafe.Pointer(&a))
+	a, err = pair()
+	f[0] = 0xAAAA
+	fmt.Println("multi   :", a[0], f[2], err == nil)
+}
+
+func rangeAssign() {
+	var a [8]uint64
+	arrs := [][8]uint64{{131, 132}}
+	f := (*[16]uint32)(unsafe.Pointer(&a))
+	for _, a = range arrs {
+		f[0] = 0xAAAA
+	}
+	fmt.Println("range   :", a[0], f[2])
+}
+
+func nested() {
+	var o outerHolder
+	f := (*[16]uint32)(unsafe.Pointer(&o.h.x))
+	o = outerHolder{k: 1, h: holder{n: 2, x: [8]uint64{141, 142}}}
+	f[0] = 0xAAAA
+	fmt.Println("nested  :", o.h.x[0], f[2], o.k, o.h.n)
+}
+
+func pointerStruct() {
+	ph := new(holder)
+	f := (*[16]uint32)(unsafe.Pointer(&ph.x))
+	*ph = holder{n: 3, x: [8]uint64{151, 152}}
+	f[0] = 0xAAAA
+	fmt.Println("ptr str :", ph.x[0], f[2], ph.n)
+}
+
+func namedArray() {
+	var a named
+	f := (*[16]uint32)(unsafe.Pointer(&a))
+	a = named{161, 162}
+	f[0] = 0xAAAA
+	fmt.Println("named   :", a[0], f[2])
+}
+
 func main() {
 	variable()
 	literal()
@@ -135,4 +245,14 @@ func main() {
 	throughPointer()
 	glob()
 	sliceElement()
+	forClause()
+	forPost()
+	forField()
+	ifInit()
+	switchInit()
+	multiValue()
+	rangeAssign()
+	nested()
+	pointerStruct()
+	namedArray()
 }
