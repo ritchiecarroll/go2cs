@@ -33,11 +33,11 @@ internal static void main() {
     var r = Ꮡ(answer());
     var pt = new point(1, 2);
     var pp = Ꮡ(pt);
-    var arr = new nint[]{1, 2, 3}.array();
+    var arr = array<nint>([1, 2, 3]);
     var pa = Ꮡ(arr.Clone());
     var rw = new row(new byte[]{9, 8, 7}.array());
     var pr = Ꮡ(rw.Clone());
-    var raw = new byte[]{4, 5, 6}.array();
+    var raw = array<byte>([4, 5, 6]);
     var pc = Ꮡ(new row(raw.Clone()));
     (p.Value, pp.x, pa.Value[0], pr.Value[0], pc.Value[0]) = (43, 10, 100, 1, 40);
     fmt.Println(p.Value, f.Value, s.Value, q.Value, r.Value);

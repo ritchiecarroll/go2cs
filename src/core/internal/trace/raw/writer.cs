@@ -77,4 +77,4 @@ public static error WriteEvent(this ref Writer w, Event e) {
     return default;
 }
 
-} // end rawᴛWriter
+}

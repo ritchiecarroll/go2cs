@@ -696,4 +696,4 @@ public static ж<Rat> Quo(this ж<Rat> Ꮡz, ж<Rat> Ꮡx, ж<Rat> Ꮡy) {
     finally { ᒐ.Run(); }
 }
 
-} // end bigᴛRat
+}

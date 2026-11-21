@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,13 +8,9 @@ partial struct counter {
     internal nint n;
 }
 
-} partial class mainᴛcounter {
-
 internal static void bump(this ref counter c) {
     c.n++;
 }
-
-} partial class main_package {
 
 internal static nint apply(Func<nint> f) {
     return f();

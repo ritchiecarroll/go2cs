@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -10,14 +9,10 @@ partial struct Tally {
     internal @string log;
 }
 
-} partial class mainᴛTally {
-
 public static void Add(this ref Tally t, nint n) {
     t.total += n;
     t.log += "+"u8;
 }
-
-} partial class main_package {
 
 internal static void probeA1() {
     ref var t = ref heap<Tally>(new Tally(5, "s"), out var Ꮡt);

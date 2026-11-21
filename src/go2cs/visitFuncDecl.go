@@ -601,7 +601,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.currentFuncName = csFunctionName
 	v.currentFuncPrefix = &strings.Builder{}
 	v.currentFuncHoists = nil
-	v.currentHolderNamed = receiverNamed(v.info, funcDecl)
+	v.currentHolderNamed = holderNamed(receiverNamed(v.info, funcDecl))
 
 	// The holder ends with its method: a declaration that follows in file order (a package-level
 	// variable holding a function literal, a type) stands in the package class again.
@@ -1102,7 +1102,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					bodyCode = csharpCodeWithoutCommentsOrLiterals(bodyText)
 				}
 
-				if !bodyReferencesIdentAsValue(bodyCode, getSanitizedIdentifier(analyzedName)) {
+				// A *unsafe.Pointer parameter is read and written only through the word door, which takes the BOX
+				// (unsafePointerWordDoor.go), so its value alias is dead by construction. The alias would dereference a
+				// native box over a word at entry, which the reference floor refuses by name (seat S-B1, W4); the scan
+				// alone kept it wherever a field selector spelled the name (runtime atomicwb's `.ptr()`).
+				if isUnsafePointerPointerType(param.Type()) || !bodyReferencesIdentAsValue(bodyCode, getSanitizedIdentifier(analyzedName)) {
 					// The param still needs the box rename (`Ꮡ<name>`) the body's uses reference —
 					// force the signature rebuild even if this leaves implicitPointers empty.
 					skippedDeadPointerAlias = true

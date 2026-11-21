@@ -198,4 +198,4 @@ public static ObjKind Lbl => 6;            // label
 
 public static @string String(this ObjKind kind) { return objKindStrings[kind]; }
 
-} // end astᴛObjKind
+}

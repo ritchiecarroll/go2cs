@@ -20,10 +20,12 @@
 # is that artwork, so a package that carries it says so, as the go.* packages do).
 $script:Go2csRepository = 'https://github.com/ritchiecarroll/go2cs'
 $script:ArtworkLine = 'Artwork licensed under Creative Commons Attribution 3.0; see [artwork attribution](https://github.com/ritchiecarroll/go2cs/blob/master/docs/images/README).'
-# The converted-by badge (owner, 2026-11-12): go2cs's own mark, hosted on go2cs.net and linking there, the first badge
-# of a package README's first badge line. The go2cs badge on the second line names the release the package was built
-# on; this one says only that go2cs converted it.
-$script:ConvertedByBadge = '[![converted by go2cs](https://go2cs.net/images/go2cs-badge.svg)](https://go2cs.net)'
+# The converted-by badge (owner, 2026-11-12): go2cs's own mark, linking to go2cs.net, the first badge of a package
+# README's first badge line. The go2cs badge on the second line names the release the package was built on; this one
+# says only that go2cs converted it. The image is the repository's docs/images/go2cs-badge.svg served by
+# cdn.jsdelivr.net from master: nuget.org renders README images only from the hosts it allows, and go2cs.net is not
+# one, so the image hosted there showed as broken on the go.* package pages (COORD, 2026-11-19).
+$script:ConvertedByBadge = '[![converted by go2cs](https://cdn.jsdelivr.net/gh/ritchiecarroll/go2cs@master/docs/images/go2cs-badge.svg)](https://go2cs.net)'
 $script:ShieldsHost = 'https://img.shields.io'
 $script:GoBlue = '00ADD8'
 $script:DotnetPurple = '512BD4'

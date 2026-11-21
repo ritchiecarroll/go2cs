@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -17,11 +16,7 @@ internal static readonly relationship opDelete = "opDelete"u8;
 
 internal static readonly @string prefix = "op"u8;
 
-} partial class mainᴛrelationship {
-
 internal static @string tag(this relationship r) { return "rel:"u8 + ((@string)r); }
-
-} partial class main_package {
 
 internal static @string describe(relationship r) {
     if (r == equivalent) {

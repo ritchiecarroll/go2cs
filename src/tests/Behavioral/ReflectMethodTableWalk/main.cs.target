@@ -4,15 +4,12 @@ using fmt = fmt_package;
 using reflect = reflect_package;
 using sort = sort_package;
 using strings = strings_package;
-using static main_package;
 
 partial class main_package {
 
 partial struct counter {
     internal nint n;
 }
-
-} partial class mainᴛcounter {
 
 internal static nint Add(this ref counter c, nint d) {
     c.n += d;
@@ -27,27 +24,17 @@ internal static @string Label(this counter c, @string p) {
 
 internal static nint hidden(this counter c) { return -1; }
 
-} partial class main_package {
-
 partial struct embedded {
 }
 
-} partial class mainᴛembedded {
-
 internal static @string Zeta(this embedded _) { return "zeta"; }
-
-} partial class main_package {
 
 partial struct outer {
     /*embed*/ internal embedded embedded;
 }
 
-} partial class mainᴛouter {
-
 internal static @string Beta(this outer _) { return "beta"; }
 internal static @string Alpha(this outer _) { return "alpha"; }
-
-} partial class main_package {
 
 internal static slice<@string> names(reflect.Type t) {
     var @out = new slice<@string>(0, t.NumMethod());
@@ -114,8 +101,6 @@ internal static void main() {
 
 partial struct stringish /*@string*/;
 
-} partial class mainᴛstringish {
-
 internal static @string String(this stringish s) { return "<"u8 + ((@string)s) + ">"u8; }
 
-} // end mainᴛstringish
+} // end main_package

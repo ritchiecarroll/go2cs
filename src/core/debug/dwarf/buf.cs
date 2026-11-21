@@ -236,4 +236,4 @@ public static @string Error(this DecodeError e) {
     return "decoding dwarf section "u8 + e.Name + " at offset 0x"u8 + strconv.FormatInt((int64)e.Offset, 16) + ": "u8 + e.Err;
 }
 
-} // end dwarfᴛDecodeError
+}

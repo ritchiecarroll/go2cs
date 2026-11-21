@@ -71,6 +71,14 @@ public class GoroutinePoolTests
     [TestMethod]
     public void GoroutineExitingLocked_TakesItsThreadWithIt()
     {
+        // The control's precondition: room in the idle set, and no other worker on its way back to it. A worker that
+        // finishes with the set at MaxIdle exits by design, so a test run just after a burst (a full set, the burst's
+        // last workers still returning) saw the control's thread exit at once and read red -- 3 of 6 unfiltered Release
+        // runs on one host, and 4 of 5 runs of the burst-then-test sequence (i9, 2026-11-18). Idle workers retire after
+        // IdleTimeout, so the set settles below the cap in bounded time; if it does not, the control cannot be asked.
+        if (!IdleSetSettlesBelowTheCap(GoroutineThreadPool.IdleTimeout + TimeSpan.FromSeconds(5), out int idle))
+            Assert.Inconclusive($"the goroutine pool's idle set did not settle below its cap ({idle} idle, cap {GoroutineThreadPool.MaxIdle}) within {(GoroutineThreadPool.IdleTimeout + TimeSpan.FromSeconds(5)).TotalSeconds} s; the control cannot be asked");
+
         // Control: an unlocked goroutine's thread stays alive, idle, for the next one.
         Thread unlocked = ThreadOfGoroutine(lockThread: false);
         Assert.IsFalse(WaitForExit(unlocked, TimeSpan.FromSeconds(2)), "control: an unlocked goroutine's thread must stay alive for reuse");
@@ -78,6 +86,15 @@ public class GoroutinePoolTests
         // Go: "If the calling goroutine exits without unlocking the thread, the thread will be terminated."
         Thread locked = ThreadOfGoroutine(lockThread: true);
         Assert.IsTrue(WaitForExit(locked, TimeSpan.FromSeconds(5)), "a goroutine that exited locked to its thread left the thread alive for reuse");
+    }
+
+    // The locked-exit arm's precondition, held on demand: a burst leaves the idle set at its cap with workers still on
+    // their way back, and the arm runs at once. Without the precondition this read red 4 runs of 5.
+    [TestMethod]
+    public void GoroutineExitingLocked_HoldsRightAfterABurst()
+    {
+        RunBurst(GoroutineThreadPool.MaxIdle + 16, whileRunning: null);
+        GoroutineExitingLocked_TakesItsThreadWithIt();
     }
 
     private static Thread ThreadOfGoroutine(bool lockThread)
@@ -325,6 +342,26 @@ public class GoroutinePoolTests
         }
 
         return last;
+    }
+
+    // True once the idle set is settled (no worker still returning to it) with room for one more, by both the count the
+    // cap reads and the workers actually idle; false at the deadline. `idle` is the last settled reading.
+    private static bool IdleSetSettlesBelowTheCap(TimeSpan timeout, out int idle)
+    {
+        DateTime deadline = DateTime.UtcNow + timeout;
+
+        while (true)
+        {
+            idle = SettledIdleWorkers();
+
+            if (idle < GoroutineThreadPool.MaxIdle && GoroutineThreadPool.IdleCount < GoroutineThreadPool.MaxIdle)
+                return true;
+
+            if (DateTime.UtcNow >= deadline)
+                return false;
+
+            Thread.Sleep(100);
+        }
     }
 
     // The workers actually waiting for a body: the idle stacks' entries whose state is Idle, across both reserves'

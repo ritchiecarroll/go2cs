@@ -144,4 +144,4 @@ internal static uint64 mergeRound(this ref xxhash64 xh, uint64 v, uint64 n) {
     return v;
 }
 
-} // end zstdᴛxxhash64
+}

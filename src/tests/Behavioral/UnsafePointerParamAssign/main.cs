@@ -42,7 +42,7 @@ internal static void main() {
     @unsafe.Pointer r = rebind(pa, pb);
     fmt.Println("rebind:", ~@unsafe.Pointer.To<nint>(r), "caller's pa still reads", ~@unsafe.Pointer.To<nint>(pa));
 
-    ref var arr = ref heap<array<int32>>(new int32[]{10, 20, 30, 40}.array(), out var Ꮡarr);
+    ref var arr = ref heap<array<int32>>(array<int32>([10, 20, 30, 40]), out var Ꮡarr);
     @unsafe.Pointer p0 = @unsafe.Pointer.FromPinnedBox(Ꮡarr.at<int32>(0));
     @unsafe.Pointer s = advance(p0, /* unsafe.Sizeof(arr[0]) */ (uintptr)4);
     fmt.Println("advance:", ~@unsafe.Pointer.To<int32>(s), "caller's p0 still reads", ~@unsafe.Pointer.To<int32>(p0));

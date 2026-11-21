@@ -530,4 +530,4 @@ public static (nint n, bool exact) FloatPrec(this ж<Rat> Ꮡx) {
     return (n, exact);
 }
 
-} // end bigᴛRat
+}

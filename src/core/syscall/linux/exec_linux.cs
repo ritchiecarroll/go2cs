@@ -108,9 +108,9 @@ partial struct SysProcAttr {
     public ж<nint> PidFD;
 }
 
-internal static readonly ж<array<byte>> Ꮡnone = new StaticBox<array<byte>>(new byte[]{(byte)'n', (byte)'o', (byte)'n', (byte)'e', 0}.array());
+internal static readonly ж<array<byte>> Ꮡnone = new StaticBox<array<byte>>(array<byte>([(byte)'n', (byte)'o', (byte)'n', (byte)'e', 0]));
 internal static ref array<byte> none => ref ((StaticBox<array<byte>>)Ꮡnone).ValueSlot;
-internal static readonly ж<array<byte>> Ꮡslash = new StaticBox<array<byte>>(new byte[]{(byte)'/', 0}.array());
+internal static readonly ж<array<byte>> Ꮡslash = new StaticBox<array<byte>>(array<byte>([(byte)'/', 0]));
 internal static ref array<byte> slash => ref ((StaticBox<array<byte>>)Ꮡslash).ValueSlot;
 
 internal static readonly ж<bool> ᏑforceClone3 = new StaticBox<bool>(false);

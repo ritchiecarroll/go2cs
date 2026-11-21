@@ -297,10 +297,13 @@ func TestDirectoryBuildPropsCarriesTheLanguageVersionPin(t *testing.T) {
 }
 
 // global.json pins the SDK band, and NOTHING else: a `test` key would change `dotnet test`'s runner
-// (docs/DotNetMigration.md step 4). The floor 10.0.400 with `latestFeature` admits every band-400-or-later 10.0.x SDK
-// and refuses a 10.0.1xx one, an 11.x and a 9.x. Band 400 (Roslyn 5.9) is the release compiler; a 1xx build is blind
-// to the CS0012 class batch 134 fixed, so it must fail at SDK resolution rather than read green. The `latestMajor` family is
-// the trap: it is the only roll-forward that crosses a major, so it would admit 11.x.
+// (docs/DotNetMigration.md step 4). The floor 10.0.400 with `latestMajor` takes the highest installed SDK at or above
+// it: every band-400-or-later 10.0.x and every later major, and it refuses a 10.0.1xx one and a 9.x. SDK 11.0.100
+// builds the net10.0 tree: measured 2026-11-20 at 1fa80494ee against 10.0.404 (both solutions, GolibTests, go test;
+// mailbox docs/phase4/inbox/COORD/20261120T183523Z-i9.md). Band 400 (Roslyn 5.9) is the release compiler; a 1xx build
+// is blind to the CS0012 class batch 134 fixed, so it must fail at SDK resolution rather than read green. A newer SDK
+// does not move the language: src/Directory.Build.props pins LangVersion. A release and a hosted lane hold to the
+// framework's major and to their channel (release-nuget.ps1 Phase 0; the step after each setup-dotnet).
 func TestGlobalJsonPinsTheSdkBand(t *testing.T) {
 	raw, err := os.ReadFile(filepath.Join(repoRootFromPackageDir(t), "global.json"))
 
@@ -324,7 +327,7 @@ func TestGlobalJsonPinsTheSdkBand(t *testing.T) {
 		t.Fatalf("global.json has no \"sdk\" object")
 	}
 
-	if sdk["version"] != "10.0.400" || sdk["rollForward"] != "latestFeature" || sdk["allowPrerelease"] != false || len(sdk) != 3 {
-		t.Errorf("global.json sdk = %v, want version 10.0.400, rollForward latestFeature, allowPrerelease false and nothing else", sdk)
+	if sdk["version"] != "10.0.400" || sdk["rollForward"] != "latestMajor" || sdk["allowPrerelease"] != false || len(sdk) != 3 {
+		t.Errorf("global.json sdk = %v, want version 10.0.400, rollForward latestMajor, allowPrerelease false and nothing else", sdk)
 	}
 }

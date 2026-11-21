@@ -50,7 +50,7 @@ using static go.main_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("dotimport.go", "dotimport.cs", "/IKC")]
-[assembly: GoPositionMap("main.go", "main.cs", "ABcqgoKotoKCgoKCAAgKlLSCgoKCloKCloKWgpaCloKCgoI=")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABUqgoKoloKCgoKCAAgKlLSCgoKCloKCloKWgpaCloKCgoI=")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -91,5 +91,4 @@ public static partial class main_package
 
 // <MethodHolders>
 [GoMethodHost(typeof(main_package.TLS)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛTLS;
-[GoMethodHost(typeof(main_package.counter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounter;
 // </MethodHolders>

@@ -60,18 +60,18 @@ partial class math_package {
 //   moshier@na-net.ornl.gov
 
 // tan coefficients
-internal static array<float64> _tanP = new float64[]{
+internal static array<float64> _tanP = array<float64>([
     -1.30936939181383777646e4D, // 0xc0c992d8d24f3f38
     1.15351664838587416140e6D,  // 0x413199eca5fc9ddd
     -1.79565251976484877988e7D  // 0xc1711fead3299176
-}.array();
-internal static array<float64> _tanQ = new float64[]{
+]);
+internal static array<float64> _tanQ = array<float64>([
     1.00000000000000000000e0D,
     1.36812963470692954678e4D,  // 0x40cab8a5eeb36572
     -1.32089234440210967447e6D, // 0xc13427bc582abc96
     2.50083801823357915839e7D,  // 0x4177d98fc2ead8ef
     -5.38695755929454629881e7D  // 0xc189afe03cbe5a31
-}.array();
+]);
 
 // Tan returns the tangent of the radian argument x.
 //

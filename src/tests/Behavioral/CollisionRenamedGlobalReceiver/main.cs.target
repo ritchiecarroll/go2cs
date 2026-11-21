@@ -19,16 +19,12 @@ partial struct counter {
     internal nint n;
 }
 
-} partial class mainᴛcounter {
-
 internal static nint bump(this ref counter c) {
     c.n++;
     return c.n;
 }
 
 internal static ж<counter> self(this ж<counter> Ꮡc) { return Ꮡc; }
-
-} partial class main_package {
 
 internal static int32 shadow() {
     ref var tid = ref heap(new atomic.Int32(), out var Ꮡtid);

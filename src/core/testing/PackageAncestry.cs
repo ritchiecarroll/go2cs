@@ -145,6 +145,37 @@ internal static class PackageAncestry
     public const string ModuleRootEnvironmentVariable = "GO2CS_MODULE_ROOT";
 
     /// <summary>
+    /// The <see cref="ModuleRootEnvironmentVariable"/> value that runs a MODULE host without its module copy, on
+    /// purpose, matched ignoring case (<see cref="IsModuleRootNone"/>). A module host with the variable unset refuses
+    /// instead (TestHost.ModuleRootForStaging). It is for a deliberate by-hand run only: the pipeline never passes it,
+    /// since the host's "not staged" line goes to stderr, which the comparison reads.
+    /// </summary>
+    public const string ModuleRootNone = "none";
+
+    /// <summary>Whether a module-root value is the <see cref="ModuleRootNone"/> opt-out, in any letter case.</summary>
+    public static bool IsModuleRootNone(string? moduleRoot) =>
+        string.Equals(moduleRoot?.Trim(), ModuleRootNone, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Why a module host with a module root SET cannot stage its module, naming the precondition that failed, or
+    /// null when it can: the package must be a package of the module, and the root must be a module (its own
+    /// go.mod, or the one go reads for a module that ships none). These are <see cref="TryStageModule"/>'s
+    /// "nothing to stage" answers, which for a module host are a sandbox that is silently not the module, so the
+    /// host refuses with this text instead (P3 110324Z, MUST 1.1).
+    /// </summary>
+    public static string? ModuleStagingRefusal(string moduleRoot, string modulePath, string importPath, string? goMod = null)
+    {
+        if (importPath != modulePath && !importPath.StartsWith(modulePath + "/", StringComparison.Ordinal))
+            return $"{importPath} is not a package of module {modulePath}, so the module at {moduleRoot} cannot be staged for it";
+
+        if (!File.Exists(Path.Combine(moduleRoot, "go.mod")) && (string.IsNullOrWhiteSpace(goMod) || !File.Exists(goMod)))
+            return $"{moduleRoot} holds no go.mod and none was handed over ({ModuleGoModEnvironmentVariable}), so it is not a " +
+                $"module go can read; {modulePath} cannot be staged from it";
+
+        return null;
+    }
+
+    /// <summary>
     /// The environment variable through which the converter's run hands over the go.mod of a module
     /// that ships NONE (a module-cache release that predates modules): the file <c>go</c> itself reads
     /// for it, cache/download/&lt;path&gt;/@v/&lt;version&gt;.mod. <see cref="TryStageModule"/> stages it
@@ -177,21 +208,22 @@ internal static class PackageAncestry
     /// </remarks>
     /// <param name="goMod">The module's go.mod when it ships none (<see cref="ModuleGoModEnvironmentVariable"/>);
     /// ignored when the module root holds its own.</param>
-    /// <returns>true when the module was staged; false when it was skipped and the sandbox is unchanged.</returns>
+    /// <returns>true when the module was staged; false when there is nothing to stage (no root, no module path, a
+    /// package outside the module, no go.mod) and the sandbox is unchanged.</returns>
+    /// <exception cref="IOException">The copy failed part-way. The tests would run in a partial sandbox, which is
+    /// neither the module nor the plain sandbox, so the host reports it and exits rather than continue.</exception>
     public static bool TryStageModule(string? moduleRoot, string modulePath, string importPath, string runRoot, string workingDirectory, string? goMod = null)
     {
         if (string.IsNullOrWhiteSpace(moduleRoot) || string.IsNullOrEmpty(modulePath))
             return false;
 
         // The package must belong to the module the root claims, and the root must BE a module: its own
-        // go.mod, or the one go reads for a module that ships none.
-        if (importPath != modulePath && !importPath.StartsWith(modulePath + "/", StringComparison.Ordinal))
+        // go.mod, or the one go reads for a module that ships none. ONE predicate, the one a module host
+        // refuses on (ModuleStagingRefusal), so a precondition added there cannot reopen a silent false here.
+        if (ModuleStagingRefusal(moduleRoot, modulePath, importPath, goMod) is not null)
             return false;
 
         bool ownGoMod = File.Exists(Path.Combine(moduleRoot, "go.mod"));
-
-        if (!ownGoMod && (string.IsNullOrWhiteSpace(goMod) || !File.Exists(goMod)))
-            return false;
 
         string mirrorRoot = ModuleMirrorRoot(runRoot, modulePath);
 
@@ -210,8 +242,11 @@ internal static class PackageAncestry
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
         {
-            // A partially copied module is still a superset of the empty sandbox, so the run continues.
-            return false;
+            // Not "a superset of the empty sandbox, so the run continues", as this was until 2026-11-20: a test that
+            // reads the part that did not copy fails here and passes under Go, and nothing said why
+            // (ModuleStagingRefusalTests).
+            throw new IOException($"staging module {modulePath} failed: copying {moduleRoot} to {mirrorRoot} did not complete " +
+                $"({ex.Message}); the tests would run in a partial copy of the module", ex);
         }
     }
 

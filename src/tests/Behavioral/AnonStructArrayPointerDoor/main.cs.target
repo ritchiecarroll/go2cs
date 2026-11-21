@@ -74,7 +74,7 @@ internal partial struct bound_v /*dyn*/ {
 internal static void bound() {
     ref var buf = ref heap(new array<uintptr>(4), out var Ꮡbuf);
     @unsafe.Pointer bp = @unsafe.Pointer.FromPinnedBox(Ꮡbuf);
-    var v = new bound_v[]{new(1, 2), new(3, 4)}.array();
+    var v = array<bound_v>([new(1, 2), new(3, 4)]);
 
     @unsafe.Pointer.StoreArray<bound_v>(bp, 2, v);
     v[0].lo = 9;

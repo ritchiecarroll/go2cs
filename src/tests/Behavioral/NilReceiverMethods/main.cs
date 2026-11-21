@@ -2,7 +2,6 @@ namespace go;
 
 using errors = errors_package;
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -12,8 +11,6 @@ partial struct File {
     internal @string name;
     internal nint fd;
 }
-
-} partial class mainᴛFile {
 
 internal static error checkValid(this ж<File> Ꮡf, @string op) {
     if (Ꮡf == nil) {
@@ -58,8 +55,6 @@ public static @string ValAnnounce(this ref File f) {
     fmt.Println("  side effect ran (ref shape)");
     return f.name;
 }
-
-} partial class main_package {
 
 internal static void @try(@string label, Action fn) {
     GoFrame ᒐ = default;

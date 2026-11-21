@@ -97,6 +97,9 @@ internal static nint noted(/*[4]*/ array<byte> a, nint b) {
     return len(a) + b;
 }
 
+// put, a package-level name, keeps holder's method put in its method holder in package main.
+internal static UntypedInt put => 3;
+
 } partial class mainᴛholder {
 
 internal static void put(this ref holder h, /*[3]*/ array<nint> v) { v = v.Clone(); }

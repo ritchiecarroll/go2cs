@@ -38,4 +38,4 @@ public static nint First(this Buf b) {
     return b[0];
 }
 
-} // end fslikeᴛBuf
+}

@@ -235,4 +235,4 @@ public static (ж<File>, error) GetFile(this ref Archive arch, @string name) {
     return (default, fmt.Errorf("unknown member %s in archive"u8, name));
 }
 
-} // end xcoffᴛArchive
+}

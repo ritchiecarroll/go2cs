@@ -125,4 +125,4 @@ internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offse
     return (r.offset, default);
 }
 
-} // end elfᴛreadSeekerFromReader
+}

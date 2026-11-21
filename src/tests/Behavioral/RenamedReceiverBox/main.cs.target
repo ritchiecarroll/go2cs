@@ -22,26 +22,18 @@ partial struct counter {
     internal nint n;
 }
 
-} partial class mainᴛcounter {
-
 internal static void add(this ж<counter> Ꮡc, nint d) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     addInt(ref nonnil(ref c).n, d);
 }
 
-} partial class main_package {
-
 internal static void addInt(ref nint x, nint d) { x += d; }
-
-} partial class mainᴛcounter {
 
 internal static void bumpTwice(this ж<counter> Ꮡp) {
     Ꮡp.add(1);
     Ꮡp.add(1);
 }
-
-} partial class main_package {
 
 internal static nint addInClosure(ж<counter> Ꮡp, nint d) {
     ref var p = ref Ꮡp.DerefOrNull();

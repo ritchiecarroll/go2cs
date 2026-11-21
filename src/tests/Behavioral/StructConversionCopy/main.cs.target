@@ -28,7 +28,7 @@ partial struct holder {
 }
 
 internal static lib.Chord fresh() {
-    return new lib.Chord(Name: "f", Notes: new nint[]{1, 2}.array(), In: new lib.Inner(V: new nint[]{3, 4}.array()));
+    return new lib.Chord(Name: "f", Notes: array<nint>([1, 2]), In: new lib.Inner(V: array<nint>([3, 4])));
 }
 
 internal partial struct main_x /*dyn*/ {
@@ -80,7 +80,7 @@ internal static void main() {
     pc.Notes[1] = 13;
     fmt.Println("pointer:", p.Notes, pc.Notes);
 
-    var raw = new nint[]{1, 2}.array();
+    var raw = array<nint>([1, 2]);
     var n = ((notes)raw).Clone();
     n[0] = 14;
     fmt.Println("array:", raw, n);

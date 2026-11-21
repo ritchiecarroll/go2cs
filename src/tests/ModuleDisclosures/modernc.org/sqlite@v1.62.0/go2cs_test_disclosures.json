@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "disclosures": [
+    {
+      "name": "TestSEHTruncatedShm",
+      "class": "host-fatal",
+      "platforms": [
+        "linux"
+      ],
+      "signature": "",
+      "reason": "TestSEHTruncatedShm truncates the database's -shm file to zero bytes while SQLite holds it mapped, so the next read of the wal-index faults. Native Go turns that fault into a recoverable panic (lib/seh.go calls debug.SetPanicOnFault), and the library's SEH emulation reports it as SQLITE_IOERR_IN_PAGE, which the test expects. The .NET runtime cannot catch the memory fault the converted code raises at that read (in the memory copy under walIndexTryHdr, reached through the converted libc package's memcpy), so the converted test host aborts, and every test after it in the run loses its verdict: 43 verdicts in one measured run on linux/amd64. The test is withdrawn from both sides by name on linux and counted as disclosed. Windows skips the test itself (a mapped file cannot be truncated there), and darwin has not been measured. The signature is empty: a host-fatal test produces no verdict on either side. The entry would be removed when the converted runtime can recover a hardware memory fault as a Go panic."
+    }
+  ]
+}

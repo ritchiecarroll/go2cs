@@ -344,4 +344,4 @@ internal static void resolveBrackets(this ref bracketPairer p, Class dirEmbed, s
     }
 }
 
-} // end bidiᴛbracketPairer
+}

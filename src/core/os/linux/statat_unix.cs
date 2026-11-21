@@ -29,4 +29,4 @@ internal static (FileInfo, error) lstatatNolog(this ж<File> Ꮡf, @string name)
     return (new fileStatжFileInfo(Ꮡfs), default);
 }
 
-} // end osᴛFile
+}

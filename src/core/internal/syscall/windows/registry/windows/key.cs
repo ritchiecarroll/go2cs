@@ -190,4 +190,4 @@ public static (ж<KeyInfo>, error) Stat(this Key k) {
     return (Ꮡki, default);
 }
 
-} // end registryᴛKey
+}

@@ -193,7 +193,7 @@ internal static UntypedInt stdSeparatorShift => 28;                   // extra a
 internal static UntypedInt stdMask => /* 1<<stdArgShift - 1 */ 65535; // mask out argument
 
 // std0x records the std values for "01", "02", ..., "06".
-internal static array<nint> std0x = new nint[]{stdZeroMonth, stdZeroDay, stdZeroHour12, stdZeroMinute, stdZeroSecond, stdYear}.array();
+internal static array<nint> std0x = array<nint>([stdZeroMonth, stdZeroDay, stdZeroHour12, stdZeroMinute, stdZeroSecond, stdYear]);
 
 // startsWithLowerCase reports whether the string has a lower-case letter at the beginning.
 // Its purpose is to prevent matching strings like "Month" when looking for "Mon".

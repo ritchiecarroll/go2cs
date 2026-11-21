@@ -477,4 +477,4 @@ internal static error Errors(this ref errAccumulator e) {
     return errors.Join(e.errs.ꓸꓸꓸ);
 }
 
-} // end testtraceᴛerrAccumulator
+}

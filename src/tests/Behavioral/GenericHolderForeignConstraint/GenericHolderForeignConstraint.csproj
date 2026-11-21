@@ -187,7 +187,7 @@
     <ProjectReference Include="$(go2csPath)core/golib/golib.csproj" />
 
     <ProjectReference Include="$(go2csPath)core/fmt/fmt.csproj" />
-    <ProjectReference Include="text/GenericHolderForeignConstraint.text.csproj" />
+    <ProjectReference Include="iterators/GenericHolderForeignConstraint.iterators.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
-using static main_package;
 
 partial class main_package {
 
@@ -10,11 +9,7 @@ partial struct stringer {
     internal nint n;
 }
 
-} partial class mainᴛstringer {
-
 internal static @string String(this stringer s) { return fmt.Sprint(s.n); }
-
-} partial class main_package {
 
 internal static @string /*msg*/ recovered(Action fn) {
     @string msg = default;

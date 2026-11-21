@@ -154,7 +154,7 @@ v, ok := m[nil]
 delete(m, nil)
 lit := map[any]int{nil: 1, "b": 2}
 ```
-<!-- source: src/tests/Behavioral/NilMapKey/main.cs:19-21, 28, 47, 60 -->
+<!-- source: src/tests/Behavioral/NilMapKey/main.cs:14-16, 23, 42, 55 -->
 ```csharp
 var m = new map<any, @string>();
 
@@ -383,11 +383,9 @@ func (cw closeWaiter) Close() { close(cw) }
 func (cw closeWaiter) Wait()  { <-cw }
 ```
 
-<!-- source: src/tests/Behavioral/NamedChannelType/main.cs.target:8-22 -->
+<!-- source: src/tests/Behavioral/NamedChannelType/main.cs.target:7-19 -->
 ```csharp
 partial struct closeWaiter /*chan EmptyStruct*/;
-
-} partial class mainᴛcloseWaiter {
 
 internal static void Init(this ref closeWaiter cw) {
     cw = new closeWaiter(0);
@@ -423,7 +421,7 @@ A generic defined map or channel type declares its type parameters, and their co
 forward declaration AND on the accessibility line, exactly as a generic defined array or slice
 already did. `type Set[T comparable] map[T]void` (the hashset module's exported shape) emits:
 
-<!-- source: src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:12, 50-52 -->
+<!-- source: src/tests/Behavioral/GenericDefinedMapChan/GenericDefinedMapChan.cs.target:11, 47-49 -->
 ```csharp
 partial struct Set<T> /*map[T, @void]*/;
 …

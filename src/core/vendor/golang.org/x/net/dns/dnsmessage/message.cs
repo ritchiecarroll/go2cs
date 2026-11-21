@@ -1855,7 +1855,7 @@ internal static UntypedInt edns0DNSSECOKMask => 0x00ff8000;
 //
 // The provided extRCode must be an extended RCode.
 public static error SetEDNS0(this ref ResourceHeader h, nint udpPayloadLen, RCode extRCode, bool dnssecOK) {
-    h.Name.AssignFrom(new Name(Data: new byte[]{(byte)'.'}.array(255), Length: 1)); // RFC 6891 section 6.1.2
+    h.Name.AssignFrom(new Name(Data: array<byte>(255, [(byte)'.']), Length: 1)); // RFC 6891 section 6.1.2
     h.Type = TypeOPT;
     h.Class = (Class)(uint16)udpPayloadLen;
     h.TTL = ((uint32)extRCode >> 4) << 24;

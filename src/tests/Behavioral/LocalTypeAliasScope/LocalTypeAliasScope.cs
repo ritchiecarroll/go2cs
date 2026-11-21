@@ -7,7 +7,6 @@ global using aliasedIfaceConv_S = go.fmt_package.Stringer;
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -16,11 +15,7 @@ partial struct Header {
     public int64 Size;
 }
 
-} partial class mainᴛHeader {
-
 public static @string String(this Header h) { return fmt.Sprint(h.Name, "/", h.Size); }
-
-} partial class main_package {
 
 internal partial struct writeOps_opWrite /*dyn*/ {
     internal @string str;
