@@ -228,7 +228,7 @@ public class TwinSurfaceTests
     public void F9_TheGuardNamesAPopulationMemberWithNoTwinAndNoForwarder()
     {
         // The seam drops add's forwarder: the guard must name add, and nothing else.
-        (_, Diagnostic[] errors) = RunWith(null, new() { ["build_property.GoTwinsGuardDrop"] = "add" }, CannotPark, CallsAdd, Generic);
+        (_, Diagnostic[] errors) = RunWith(null, new() { ["build_property.GoTwinsGuardDrop"] = "add", ["build_property.GoTwinsArm"] = "true" }, CannotPark, CallsAdd, Generic);
 
         Assert.AreEqual(0, errors.Length, Errors(errors));
         Diagnostic[] guard = Guard("GO2CS0017");
@@ -276,6 +276,30 @@ public class TwinSurfaceTests
 
         RunWith(null, new() { ["build_property.GoTwinsGo"] = "false" }, AnInterface);
         StringAssert.Contains(Guard("GO2CS0018").Single().GetMessage(), "GoTwinsGo", "each switch of the list");
+    }
+
+    [TestMethod]
+    public void F10_TheArmSwitchesAreRefusedOutsideAnArm()
+    {
+        RunWith(null, new() { ["build_property.GoTwinsForwarders"] = "false", ["build_property.GoTwinsGuardWarn"] = "true", ["build_property.GoTwinsGuardDrop"] = "add" }, CannotPark);
+        string[] named = Guard("GO2CS0018").Select(diagnostic => diagnostic.GetMessage()).ToArray();
+
+        Assert.AreEqual(3, named.Length, string.Join("\n", named));
+        Assert.IsTrue(named.Any(message => message.Contains("GoTwinsForwarders")) && named.Any(message => message.Contains("GoTwinsGuardWarn")) &&
+                      named.Any(message => message.Contains("GoTwinsGuardDrop")), string.Join("\n", named));
+    }
+
+    [TestMethod]
+    public void F10_TheClosureArmSwitchesDoWhatTheySay()
+    {
+        // GoTwinsForwarders=false: no forwarder, the bytes-and-wall control. The guard names what lost one.
+        (string twins, _) = RunWith(null, new() { ["build_property.GoTwinsForwarders"] = "false", ["build_property.GoTwinsArm"] = "true" }, CannotPark);
+        Assert.AreEqual(0, Lines(twins, Forwarder), "no forwarder");
+        Assert.AreEqual(2, Guard("GO2CS0017").Length, "add and note, each named");
+
+        // GoTwinsGuardWarn=true: the guard reports as a warning, so a census build runs to the end.
+        RunWith(null, new() { ["build_property.GoTwinsGuardDrop"] = "add", ["build_property.GoTwinsGuardWarn"] = "true", ["build_property.GoTwinsArm"] = "true" }, CannotPark);
+        Assert.AreEqual(DiagnosticSeverity.Warning, Guard("GO2CS0017").Single().Severity);
     }
 
     [TestMethod]

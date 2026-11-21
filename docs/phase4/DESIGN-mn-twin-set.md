@@ -404,3 +404,8 @@ F2, F6; F3, F5; F4, F11; F7, F8; the guard (F9) and O2 (F10); P8; then the closu
     stale and pcb.
   - The report counts `forwarders=N marked=M unmarked=U`, and a row reads `forwarder-unmarked:<reason>`.
   - GenTests 712 of 712.
+- **Closure-arm switches (arm-only, refused by O2 outside `GoTwinsArm=true`, as the `GoTwinsGuardDrop` seam now is):**
+  `GoTwinsForwarders=false` writes no forwarder. It is the same-tree control for Q4's bytes and Q5's wall.
+  `GoTwinsGuardWarn=true` reports GO2CS0017 as a warning, so a census build runs to the end. Their rows (refused
+  outside an arm; each does what it says) were written after the code: they are arm tooling, not a gate.
+  GenTests 714 of 714.

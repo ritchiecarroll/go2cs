@@ -130,7 +130,8 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         if (!arm)
         {
-            foreach (string name in new[] { "GoTwinsIface", "GoTwinsIfaceAll", "GoTwinsGo" })
+            // The 7a arm switches and the guard's seam are refused the same way: none may reach a package that ships.
+            foreach (string name in new[] { "GoTwinsIface", "GoTwinsIfaceAll", "GoTwinsGo", "GoTwinsForwarders", "GoTwinsGuardWarn", "GoTwinsGuardDrop" })
             {
                 if (Set(name))
                     context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.PartialTwinSet, Location.None, name));
@@ -168,6 +169,12 @@ public sealed partial class TwinGenerator : ISourceGenerator
                 unmark.Add(entry.Trim());
         }
 
+        // 7a's closure arms (section 12.3): GoTwinsForwarders=false writes no forwarder, the same-tree control for their
+        // bytes and build wall (Q4, Q5); GoTwinsGuardWarn=true reports GO2CS0017 as a warning, so a census build runs to
+        // the end and counts every GUARD row (Q2). Both are arm-only (O2).
+        bool forwarders = !(options.TryGetValue("build_property.GoTwinsForwarders", out string? forwarding) && string.Equals(forwarding, "false", StringComparison.OrdinalIgnoreCase));
+        bool guardWarn = options.TryGetValue("build_property.GoTwinsGuardWarn", out string? warn) && string.Equals(warn, "true", StringComparison.OrdinalIgnoreCase);
+
         // 7a's test seam for the guard (F9): GoTwinsGuardDrop names functions, ',' or ';' between, whose forwarders are
         // dropped, so GO2CS0017 must name each one. Never a build anyone ships.
         HashSet<string> guardDrop = new(StringComparer.Ordinal);
@@ -194,7 +201,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         new Run(context, goSites, ifaceShape, ifaceAll)
         {
-            Self = self, Pairs = pairs, CallerRule = callerRule, IfaceUnmark = unmark, GuardDrop = guardDrop, BoxRecv = boxRecv, BoxForwarders = boxForwarders, BoxCopy = boxCopy,
+            Self = self, Pairs = pairs, CallerRule = callerRule, IfaceUnmark = unmark, GuardDrop = guardDrop, Forwarders = forwarders, GuardWarn = guardWarn, BoxRecv = boxRecv, BoxForwarders = boxForwarders, BoxCopy = boxCopy,
             BoxParam = boxParam, BoxArgCopy = boxArgCopy
         }.Execute();
     }
@@ -215,6 +222,10 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         // 7a's guard seam (F9): the functions whose forwarders are dropped.
         internal HashSet<string> GuardDrop { get; init; } = [];
+
+        // 7a's closure-arm switches (Execute): forwarders off, and the guard as a warning.
+        internal bool Forwarders { get; init; } = true;
+        internal bool GuardWarn { get; init; }
 
         internal SemanticModel Model(SyntaxTree tree)
         {
@@ -283,7 +294,7 @@ public sealed partial class TwinGenerator : ISourceGenerator
             m_populationAssembly = !Common.IsHandOwnedAssembly(Context.Compilation);
 
             foreach (Candidate candidate in m_ordered)
-                candidate.Forwarded = m_populationAssembly && !candidate.Twinned && InPopulation(candidate) && !IsE1(candidate.Symbol) && NotForwardable(candidate) is null &&
+                candidate.Forwarded = m_populationAssembly && Forwarders && !candidate.Twinned && InPopulation(candidate) && !IsE1(candidate.Symbol) && NotForwardable(candidate) is null &&
                     !GuardDrop.Contains(candidate.Symbol.Name);
 
             // The guard (GO2CS0017, section 8): a member of the population that is neither twinned, forwarded nor E1.
@@ -294,7 +305,8 @@ public sealed partial class TwinGenerator : ISourceGenerator
                     string verdict = Classify(candidate);
 
                     if (verdict.StartsWith("GUARD:", StringComparison.Ordinal))
-                        Context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.TwinSetGap, candidate.Syntax.Identifier.GetLocation(), candidate.Symbol.ToDisplayString(), verdict.Substring("GUARD:".Length)));
+                        Context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.TwinSetGap, candidate.Syntax.Identifier.GetLocation(),
+                            GuardWarn ? DiagnosticSeverity.Warning : DiagnosticSeverity.Error, null, null, candidate.Symbol.ToDisplayString(), verdict.Substring("GUARD:".Length)));
                 }
             }
 

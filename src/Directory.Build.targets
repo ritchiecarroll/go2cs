@@ -84,6 +84,8 @@
     <CompilerVisibleProperty Include="GoTwinsTiming" />
     <CompilerVisibleProperty Include="GoTwinsArm" />
     <CompilerVisibleProperty Include="GoTwinsGuardDrop" />
+    <CompilerVisibleProperty Include="GoTwinsForwarders" />
+    <CompilerVisibleProperty Include="GoTwinsGuardWarn" />
   </ItemGroup>
   <ItemGroup Condition="'$(GoTwinsRefuse)' != ''">
     <AdditionalFiles Include="$(GoTwinsRefuse)" />
