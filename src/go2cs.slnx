@@ -356,6 +356,8 @@
     <Project Path="tests/Behavioral/OpenSliceUnnamedArray/OpenSliceUnnamedArray.csproj" />
     <Project Path="tests/Behavioral/PackageNameNotDirName/PackageNameNotDirName.csproj" />
     <Project Path="tests/Behavioral/PackageNameNotDirName/lib/PackageNameNotDirName.lib.csproj" />
+    <Project Path="tests/Behavioral/PromotedUnexportedEmbedChain/PromotedUnexportedEmbedChain.csproj" />
+    <Project Path="tests/Behavioral/PromotedUnexportedEmbedChain/ppembedlib/go.ppembedlib.csproj" />
     <Project Path="tests/Behavioral/ReceiverShadowsImport/ReceiverShadowsImport.csproj" />
     <Project Path="tests/Behavioral/BigUntypedConstComparison/BigUntypedConstComparison.csproj" />
     <Project Path="tests/Behavioral/BitwiseUntypedConst/BitwiseUntypedConst.csproj" />

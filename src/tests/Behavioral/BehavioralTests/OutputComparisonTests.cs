@@ -2093,6 +2093,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPromotedTargetParam() => CheckTarget("PromotedTargetParam");
 
     [TestMethod]
+    public void CheckPromotedUnexportedEmbedChain() => CheckTarget("PromotedUnexportedEmbedChain");
+
+    [TestMethod]
     public void CheckPromotedValueEmbedExprRecv() => CheckTarget("PromotedValueEmbedExprRecv");
 
     [TestMethod]
