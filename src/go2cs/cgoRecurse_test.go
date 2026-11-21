@@ -516,15 +516,40 @@ func TestARecurseCgoConversionWithASysrootIsRefused(t *testing.T) {
 	}
 }
 
-func TestARecurseCgoConversionWithCppSourcesIsRefused(t *testing.T) {
+// RE-CITED (P3's 2a CLEAR, SHOULD 4; COORD's ruling): before 2a a host-target conversion of a package with C++ sources
+// converted (measured at 6bdf33a157, single-package -cgo: rc=0), so INC 2 must change nothing there. The refusal holds
+// for another target only, where C++ needs a compiler for it (CXX) INC 2 does not take; that row is hosted, with the
+// pinned zig, beside X1.
+func TestARecurseCgoConversionWithCppSourcesAtTheHostsTargetConvertsAsBefore(t *testing.T) {
 	requireHostCC(t)
 
-	combined, _, err := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "cptr/helper.cc": "int go2cs_helper() { return 1; }\n",
+	combined, output, err := convertCgoRecurse(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "cptr/helper.cc": "int go2cs_helper() { return 1; }\n",
 		"main.go": cgoRecurseMain}, "-recurse=nuget", "-cgo=true")
 
-	if err == nil {
-		t.Fatalf("a -cgo conversion of a package with C++ sources converted:\n%s", combined)
+	if err != nil || strings.Contains(combined, "R3") {
+		t.Fatalf("a host-target conversion of a package with C++ sources did not convert as it did before 2a (%v):\n%s", err, combined)
 	}
+
+	if !cgoRecurseConverted(t, output, "cptr") {
+		t.Errorf("cptr was not converted:\n%s", combined)
+	}
+}
+
+func TestARecurseCgoConversionWithCppSourcesForAnotherTargetIsRefused(t *testing.T) {
+	target, cc := os.Getenv("GO2CS_CGO_CROSS_TARGET"), os.Getenv("GO2CS_CGO_CROSS_CC")
+
+	if target == "" || cc == "" {
+		target, cc = cgoRecurseZigCrossTarget(t)
+	}
+
+	if target == "" || cc == "" {
+		t.Skip("no cross target and compiler here (GO2CS_CGO_CROSS_TARGET/GO2CS_CGO_CROSS_CC, or zig as go's CC): NOT MEASURED")
+	}
+
+	combined, _, err := convertCgoRecurseEnv(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "cptr/helper.cc": "int go2cs_helper() { return 1; }\n",
+		"main.go": cgoRecurseMain}, []string{"CC=" + cc}, "-recurse=nuget", "-cgo=true", "-platforms", target)
+
+	_ = err
 
 	for _, want := range []string{"R3", "C++", "CXX", "helper.cc"} {
 		if !strings.Contains(combined, want) {
@@ -554,4 +579,129 @@ func cgoRecurseZigCrossTarget(t *testing.T) (string, string) {
 	triples := map[string]string{"windows/amd64": "x86_64-windows-gnu", "linux/amd64": "x86_64-linux-gnu"}
 
 	return target, fields[0] + " cc -target " + triples[target]
+}
+
+// P3's 2a CLEAR, SHOULDs 1 and 2 (COORD's ruling). The triple's ABI is read: gnu for linux, gnu or mingw for windows;
+// musl, android and msvc are R3 by name. A target-changing flag (-target, --target=) in CGO_CFLAGS or CGO_CPPFLAGS is
+// R3 like a sysroot: cmd/cgo would compile with it while the -dumpmachine probe, which runs CC alone, cannot see it. A
+// -target in CC itself is what the probe answers for (the pinned zig is `zig cc -target <triple>`). LOCAL: a CC wrapper
+// that answers -dumpmachine with a musl triple and is gcc otherwise.
+func cgoRecurseMuslCC(t *testing.T) string {
+	t.Helper()
+
+	if runtime.GOOS == "windows" {
+		t.Skip("the musl wrapper is a shell script: NOT MEASURED on windows")
+	}
+
+	out, err := exec.Command("go", "env", "CC").Output()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	wrapper := filepath.Join(t.TempDir(), "cc-musl")
+	script := "#!/bin/sh\nif [ \"$1\" = \"-dumpmachine\" ]; then echo " + runtime.GOARCH + "-linux-musl; exit 0; fi\nexec " + strings.TrimSpace(string(out)) + " \"$@\"\n"
+	script = strings.Replace(script, "amd64-linux-musl", "x86_64-linux-musl", 1)
+
+	if err := os.WriteFile(wrapper, []byte(script), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	return wrapper
+}
+
+func TestARecurseCgoConversionWithAMuslCompilerIsRefused(t *testing.T) {
+	requireHostCC(t)
+
+	if runtime.GOOS != "linux" {
+		t.Skip("the musl row is linux's: NOT MEASURED")
+	}
+
+	combined, _, err := convertCgoRecurseEnv(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "main.go": cgoRecurseMain},
+		[]string{"CC=" + cgoRecurseMuslCC(t)}, "-recurse=nuget", "-cgo=true")
+
+	if err == nil {
+		t.Fatalf("a -cgo conversion with a musl C compiler converted:\n%s", combined)
+	}
+
+	for _, want := range []string{"R3", "musl"} {
+		if !strings.Contains(combined, want) {
+			t.Errorf("the refusal does not name %q:\n%s", want, combined)
+		}
+	}
+}
+
+func TestARecurseCgoConversionWithATargetFlagInCgoCflagsIsRefused(t *testing.T) {
+	requireHostCC(t)
+
+	for _, name := range []string{"CGO_CFLAGS", "CGO_CPPFLAGS"} {
+		t.Run(name, func(t *testing.T) {
+			combined, _, err := convertCgoRecurseEnv(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "main.go": cgoRecurseMain},
+				[]string{name + "=--target=x86_64-windows-gnu"}, "-recurse=nuget", "-cgo=true")
+
+			if err == nil {
+				t.Fatalf("a -cgo conversion with a target flag in %s converted:\n%s", name, combined)
+			}
+
+			for _, want := range []string{"R3", name, "--target"} {
+				if !strings.Contains(combined, want) {
+					t.Errorf("the refusal does not name %q:\n%s", want, combined)
+				}
+			}
+		})
+	}
+}
+
+// The triple reader, one row per shape the R3 check meets (P3's 2a CLEAR, SHOULD 1).
+func TestTheCgoTripleReaderReadsOSArchitectureAndABI(t *testing.T) {
+	for _, c := range []struct{ triple, goos, goarch, abi string }{
+		{"x86_64-linux-gnu", "linux", "amd64", "gnu"},
+		{"aarch64-linux-gnu", "linux", "arm64", "gnu"},
+		{"x86_64-linux-musl", "linux", "amd64", "musl"},
+		{"aarch64-linux-android", "android", "arm64", "android"},
+		{"x86_64-w64-mingw32", "windows", "amd64", "mingw"},
+		{"x86_64-unknown-windows-gnu", "windows", "amd64", "gnu"},
+		{"x86_64-pc-windows-msvc", "windows", "amd64", "msvc"},
+		{"aarch64-apple-darwin24.0.0", "darwin", "arm64", ""},
+		{"x86_64-macos-none", "darwin", "amd64", ""},
+	} {
+		goos, goarch, abi := cgoTripleTarget(c.triple)
+
+		if goos != c.goos || goarch != c.goarch || abi != c.abi {
+			t.Errorf("%s reads %s/%s %q, want %s/%s %q", c.triple, goos, goarch, abi, c.goos, c.goarch, c.abi)
+		}
+	}
+}
+
+// The probe runs once per CC value and target in a run, not once per package (P3's 2a CLEAR, SHOULD 3).
+func TestTheCgoCompilerProbeRunsOncePerCompilerAndTarget(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("the counting wrapper is a shell script: NOT MEASURED on windows")
+	}
+
+	dir := t.TempDir()
+	count := filepath.Join(dir, "count")
+	wrapper := filepath.Join(dir, "cc-count")
+
+	if err := os.WriteFile(wrapper, []byte("#!/bin/sh\necho x >> "+count+"\necho x86_64-linux-gnu\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	load := cgoLoad{env: append(os.Environ(), "CC="+wrapper), dir: dir}
+
+	for range 3 {
+		if triple, err := cgoCompilerTriple(load, "linux/amd64"); err != nil || triple != "x86_64-linux-gnu" {
+			t.Fatalf("the probe answered %q, %v", triple, err)
+		}
+	}
+
+	calls, err := os.ReadFile(count)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if n := strings.Count(string(calls), "x"); n != 1 {
+		t.Errorf("three lookups ran the probe %d times, want 1", n)
+	}
 }
