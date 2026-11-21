@@ -122,13 +122,35 @@ public sealed partial class TwinGenerator : ISourceGenerator
 
         bool goSites = !(options.TryGetValue("build_property.GoTwinsGo", out string? go) && string.Equals(go, "false", StringComparison.OrdinalIgnoreCase));
 
-        // GoTwinsIface picks the interface twin shape (hidden or default; none without it); GoTwinsIfaceAll twins
-        // every interface member, not only the ones an implementer of this assembly can park in.
-        IfaceShape ifaceShape = !options.TryGetValue("build_property.GoTwinsIface", out string? shape) ? IfaceShape.None :
+        // O2 (7a, DESIGN-mn-twin-set.md 12.1 and section 10): a package built with twins carries the WHOLE set, so a
+        // switch that selects part of it is refused (GO2CS0018), naming it. A prototype arm sets GoTwinsArm=true, which
+        // admits the switches and keeps their old defaults. A property MSBuild makes visible arrives empty when unset.
+        bool arm = options.TryGetValue("build_property.GoTwinsArm", out string? armed) && string.Equals(armed, "true", StringComparison.OrdinalIgnoreCase);
+        bool Set(string name) => options.TryGetValue("build_property." + name, out string? value) && !string.IsNullOrWhiteSpace(value);
+
+        if (!arm)
+        {
+            foreach (string name in new[] { "GoTwinsIface", "GoTwinsIfaceAll", "GoTwinsGo" })
+            {
+                if (Set(name))
+                    context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.PartialTwinSet, Location.None, name));
+            }
+
+            if (context.AdditionalFiles.Any(text => string.Equals(Path.GetFileName(text.Path), "twin-refuse.txt", StringComparison.OrdinalIgnoreCase)))
+                context.ReportDiagnostic(Diagnostic.Create(GeneratorDiagnostics.PartialTwinSet, Location.None, "GoTwinsRefuse"));
+        }
+
+        // GoTwinsIface picks the interface twin shape (hidden or default); GoTwinsIfaceAll twins every interface member,
+        // not only the ones an implementer of this assembly can park in. Unset, a package built with twins gets the
+        // whole set, the hidden shape for every member (R7); an arm gets none, as the prototype always did.
+        options.TryGetValue("build_property.GoTwinsIface", out string? shape);
+
+        IfaceShape ifaceShape = !Set("GoTwinsIface") ? (arm ? IfaceShape.None : IfaceShape.Hidden) :
             string.Equals(shape, "hidden", StringComparison.OrdinalIgnoreCase) ? IfaceShape.Hidden :
             string.Equals(shape, "default", StringComparison.OrdinalIgnoreCase) ? IfaceShape.Default : IfaceShape.None;
 
-        bool ifaceAll = options.TryGetValue("build_property.GoTwinsIfaceAll", out string? all) && string.Equals(all, "true", StringComparison.OrdinalIgnoreCase);
+        bool ifaceAll = !Set("GoTwinsIfaceAll") ? !arm :
+            options.TryGetValue("build_property.GoTwinsIfaceAll", out string? all) && string.Equals(all, "true", StringComparison.OrdinalIgnoreCase);
 
         // GoTwinsPairs=false: N3's D3 core off (no pairs, no pair test), the A/B control.
         bool pairs = !(options.TryGetValue("build_property.GoTwinsPairs", out string? pairing) && string.Equals(pairing, "false", StringComparison.OrdinalIgnoreCase));

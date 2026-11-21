@@ -371,3 +371,11 @@ F2, F6; F3, F5; F4, F11; F7, F8; the guard (F9) and O2 (F10); P8; then the closu
     drops a forwarder, and the guard names that one member. Made to fail as section 8 asks: keyed on the name again,
     `async-shaped` makes the guard name the two functions returning the Go type `Task`. Restored byte-identical.
   - GenTests 707 of 707, with no earlier row changed. GO2CS0017 is registered in `docs/DiagnosticCodes.md`.
+- **Step 5, F10 (O2):**
+  - With twins on, `GoTwinsIface`, `GoTwinsIfaceAll`, `GoTwinsGo` and a `twin-refuse.txt` file (`GoTwinsRefuse`)
+    each get GO2CS0018, naming the property, unless `GoTwinsArm=true`.
+  - Unset, the set is whole: the hidden interface shape with a slot for every member (R7). An arm keeps the old
+    defaults (no interface shape).
+  - GenTests 710 of 710 under the new default, with no earlier row changed.
+  - Owed at the closure arms (Q1): the 7b kit's twin builds that pass the interface switches now need
+    `GoTwinsArm=true`, or they can drop the switches, since their default is now the whole set.

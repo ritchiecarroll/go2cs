@@ -253,6 +253,45 @@ public class TwinSurfaceTests
         StringAssert.Contains(guard[0].GetMessage(), "real(", "the BCL Task, and not the Go type named Task");
     }
 
+    // F10: O2, no partial sets. A switch that selects part of the twin set is refused with twins on, unless the build is
+    // a prototype arm (GoTwinsArm=true). With no switch the set is whole: interfaces get the hidden shape, every member.
+    private const string AnInterface = """
+            public partial interface IShape { nint Area(); }
+
+        """;
+
+    [TestMethod]
+    public void F10_APartialSetSwitchIsRefusedByName()
+    {
+        RunWith(null, new() { ["build_property.GoTwinsIface"] = "hidden" }, AnInterface);
+        Diagnostic[] refused = Guard("GO2CS0018");
+        Assert.AreEqual(1, refused.Length, string.Join("\n", refused.Select(diagnostic => diagnostic.ToString())));
+        Assert.AreEqual(DiagnosticSeverity.Error, refused[0].Severity);
+        StringAssert.Contains(refused[0].GetMessage(), "GoTwinsIface", "it names the property");
+
+        RunWith(null, new() { ["build_property.GoTwinsGo"] = "false" }, AnInterface);
+        StringAssert.Contains(Guard("GO2CS0018").Single().GetMessage(), "GoTwinsGo", "each switch of the list");
+    }
+
+    [TestMethod]
+    public void F10_AnArmMaySetTheSwitches()
+    {
+        RunWith(null, new() { ["build_property.GoTwinsIface"] = "hidden", ["build_property.GoTwinsGo"] = "false", ["build_property.GoTwinsArm"] = "true" }, AnInterface);
+
+        Assert.AreEqual(0, Guard("GO2CS0018").Length, "GoTwinsArm=true admits the prototype's switches");
+    }
+
+    [TestMethod]
+    public void F10_WithNoSwitchTheSetIsWhole()
+    {
+        (string twins, Diagnostic[] errors) = RunWith(null, null, AnInterface);
+
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+        Assert.AreEqual(0, Guard("GO2CS0018").Length);
+        StringAssert.Contains(twins, "interface IShapeꞏtwin", "the hidden twin interface");
+        StringAssert.Contains(twins, "Areaꞏtwin();", "a slot for every member, parking or not");
+    }
+
     private static int Lines(string twins, string text) => twins.Split('\n').Count(line => line.Contains(text, StringComparison.Ordinal));
 
     [TestMethod]
