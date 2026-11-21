@@ -484,7 +484,7 @@ foreach ($flavor in Get-NugetgoFlavors) {
         $cgoArgs = @('-cgo=true'); $env:CC = Get-NugetgoCgoCompiler -Zig $Zig -Flavor $flavor; $env:CGO_ENABLED = '1'
         Write-Host "  cgo: $flavor converts at $target with CC=$env:CC"
     }
-    try { & $converter -recurse=nuget @provenanceArgs @cgoArgs -platforms $target -go2cspath (Split-Path $flavorConverterDir) $moduleCacheDir $root *> $log; $convertCode = $LASTEXITCODE }
+    try { & $converter -recurse=nuget @provenanceArgs -platforms $target @cgoArgs -go2cspath (Split-Path $flavorConverterDir) $moduleCacheDir $root *> $log; $convertCode = $LASTEXITCODE }
     finally { foreach ($k in $savedCc.Keys) { if ($null -eq $savedCc[$k]) { Remove-Item "env:$k" -ErrorAction SilentlyContinue } else { Set-Item "env:$k" $savedCc[$k] } } }
     if ($convertCode -ne 0) { Refuse "the $flavor flavor of $ModulePath did not convert at $target ($convertCode): $log" }
     $flavorSrc = Join-Path (Join-Path $root 'src') $ModulePath

@@ -136,8 +136,8 @@ RID's flavor, with every flavor's `go.*` dependencies. The pack prints which it 
 the pack builds a converter from its own tree. That matches `G` only when `G` was built from the same directory with
 the same toolchain.
 
-**Cgo** (COORD's ruling (a), 2026-11-21; *not yet publishable*). A module with a cgo package packs with `-Cgo -Zig
-<zig>`, where `<zig>` is the pinned zig of `.github/cgo-toolchain.ps1` (0.17.0), and `PR` converted with
+**Cgo** (COORD's ruling (a), 2026-11-21; *not yet publishable*). A module with a cgo package packs with
+`-Cgo -Zig <zig>`, where `<zig>` is the pinned zig of `.github/cgo-toolchain.ps1` (0.17.0), and `PR` converted with
 `-recurse=nuget -cgo`. Each flavor converts with `-cgo`, and its `CC` is that zig with the flavor's target
 (`x86_64-windows-gnu`, `x86_64-linux-gnu`, `x86_64-macos`, `aarch64-linux-gnu`). A cgo package's C binding is per
 target, so the package is always RID-specific, and differs from the layout above in three ways:
