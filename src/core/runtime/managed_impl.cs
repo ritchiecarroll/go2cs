@@ -2173,7 +2173,20 @@ partial class runtime_package
         method.Name == "Main" && method.IsStatic && method.GetParameters().Length == 0 &&
         !method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false)
             ? "main"
-            : method.Name;
+            : glyphMethodGoName(method) ?? method.Name;
+
+    // SCRATCH PROTOTYPE (the global ᴍ cost test): a Go method's BODY is a plain static `<name>ᴍ` in the package class,
+    // stamped [GoMethodBody("<name>")], its receiver the first parameter; the Go-named extension forwarder is
+    // [StackTraceHidden]. The body's frame is the method's: its name is the stamp's and its receiver is read from
+    // parameter 0. The STAMP is the discriminator, never the spelling (the owner's rule), so a Go identifier that ends
+    // in the glyph is never read as a body.
+    private static string? glyphMethodGoName(System.Reflection.MethodBase method) =>
+        method.IsStatic && method.GetCustomAttributes(typeof(GoMethodBodyAttribute), inherit: false) is [GoMethodBodyAttribute stamp]
+            ? stamp.GoName
+            : null;
+
+    private static bool isGlyphMethodBody(System.Reflection.MethodBase method) =>
+        glyphMethodGoName(method) is not null && method.GetParameters().Length > 0;
 
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, (string? Suffix, string? MethodValue)?> s_statementSiblingNames = new();
 
@@ -2799,7 +2812,7 @@ partial class runtime_package
     // static method and keeps its bare `<pkg>.<name>`, exactly as Go renders one.
     private static string? goReceiverName(System.Reflection.MethodBase method)
     {
-        if (!method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false))
+        if (!method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false) && !isGlyphMethodBody(method))
             return null;
 
         System.Reflection.ParameterInfo[] parameters = method.GetParameters();
@@ -5765,10 +5778,76 @@ partial class runtime_package
                 (receiver.IsGenericType && referent.IsGenericType && receiver.GetGenericTypeDefinition() == referent.GetGenericTypeDefinition());
 
             if (sameReceiver)
+                return glyphBodyOf(candidate) ?? candidate;
+        }
+
+        return null;
+    }
+
+    // SCRATCH PROTOTYPE (the global ᴍ cost test): the Go-named `this ref T` method a twin forwards to is itself a
+    // [StackTraceHidden] forwarder to the body `<name>ᴍ(ref T, …)` in the package class; the body is the Go method.
+    private static System.Reflection.MethodBase? glyphBodyOf(System.Reflection.MethodInfo forwarder)
+    {
+        if (!forwarder.IsDefined(typeof(System.Diagnostics.StackTraceHiddenAttribute), inherit: false) || forwarder.DeclaringType is not { } holder)
+            return null;
+
+        Type? package = GoMethodHostAttribute.PackageClassOf(holder);
+
+        if (package is null || package == holder)
+            return null;
+
+        Type[] parameterTypes = Array.ConvertAll(forwarder.GetParameters(), parameter => parameter.ParameterType);
+        const System.Reflection.BindingFlags anyStatic = System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.DeclaredOnly;
+
+        foreach (System.Reflection.MethodInfo candidate in package.GetMethods(anyStatic))
+        {
+            if (glyphMethodGoName(candidate) != forwarder.Name)
+                continue;
+
+            System.Reflection.ParameterInfo[] parameters = candidate.GetParameters();
+
+            if (parameters.Length != parameterTypes.Length)
+                continue;
+
+            bool same = true;
+
+            for (int i = 0; i < parameters.Length && same; i++)
+                same = glyphSameShape(parameters[i].ParameterType, parameterTypes[i]);
+
+            if (same)
                 return candidate;
         }
 
         return null;
+    }
+
+    // Two parameter types of two methods that declare their own type parameters: the same type, or the same shape with
+    // a method type parameter in the same position (`ref nistCurve<Point>` against `ref nistCurve<Point>`, each Point the
+    // declaring method's own).
+    private static bool glyphSameShape(Type a, Type b)
+    {
+        if (a == b)
+            return true;
+
+        if (a.IsGenericParameter || b.IsGenericParameter)
+            return a.IsGenericParameter && b.IsGenericParameter && a.GenericParameterPosition == b.GenericParameterPosition;
+
+        if (a.HasElementType || b.HasElementType)
+            return a.HasElementType && b.HasElementType && a.IsByRef == b.IsByRef && a.IsArray == b.IsArray && a.IsPointer == b.IsPointer &&
+                   glyphSameShape(a.GetElementType()!, b.GetElementType()!);
+
+        if (!a.IsGenericType || !b.IsGenericType || a.GetGenericTypeDefinition() != b.GetGenericTypeDefinition())
+            return false;
+
+        Type[] left = a.GetGenericArguments(), right = b.GetGenericArguments();
+
+        for (int i = 0; i < left.Length; i++)
+        {
+            if (!glyphSameShape(left[i], right[i]))
+                return false;
+        }
+
+        return true;
     }
 
     // `<pkg>.<Interface>.<Method>` when the method implements an interface method on its declaring Go

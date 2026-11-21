@@ -169,6 +169,10 @@ namespace go;
 
         string name = method.Name;
 
+        // SCRATCH PROTOTYPE (the global ᴍ cost test): a method body is named by its stamp (GoMethodBodyAttribute).
+        if (method.GetCustomAttribute<GoMethodBodyAttribute>(inherit: false) is { GoName: { } goName })
+            name = goName;
+
         // An sstring twin's canonical value delegate (`Sprintfᶠ`) is a lambda. Its method is a
         // compiler-generated `<.cctor>b__X_Y` on the nested `<>c` class, so the function's Go name is
         // RECORDED on it, and its package is the enclosing package class, not the closure class
