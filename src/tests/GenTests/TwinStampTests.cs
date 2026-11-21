@@ -174,6 +174,47 @@ public class TwinStampTests
             "the oracle did not name the missing await:\n" + (problems.Length == 0 ? "(no problem reported)" : string.Join("\n", problems)));
     }
 
+    // A call that parks on the SECOND line of its statement, beside a same-name call on the first: Go reports the call's
+    // own line, so the stamp names the call by its place among the statement's calls of its name (G's second array).
+    private const string MultiLine = """
+        using System;
+        using static go.builtin;
+
+        namespace go;
+
+        public static partial class multi_package
+        {
+            internal static channel<nint> ch;
+
+            internal static nint leaf() { return ᐸꟷ(ch); }
+
+            internal static nint add(nint a, nint b) => a + b;
+
+            internal static nint mid()
+            {
+                nint v = add(leaf(),
+                    leaf());
+                return v;
+            }
+        }
+        """;
+
+    [TestMethod]
+    public void AStampNamesALaterLineCallByItsPlaceInTheStatement()
+    {
+        using Built built = Build(MultiLine);
+        (Type machine, System.Reflection.MethodInfo kickoff) = built.Twins().Single(twin => twin.Machine.Name.StartsWith("<midꞏtwin>", StringComparison.Ordinal));
+        CustomAttributeData stamp = Stamp(kickoff) ?? throw new AssertFailedException($"{machine.Name} carries no stamp");
+
+        int[] sites = [.. ((IEnumerable<CustomAttributeTypedArgument>)stamp.ConstructorArguments[3].Value!).Select(argument => (int)argument.Value!)];
+        int[] calls = [.. ((IEnumerable<CustomAttributeTypedArgument>)stamp.ConstructorArguments[4].Value!).Select(argument => (int)argument.Value!)];
+        int statement = Array.FindIndex(MultiLine.Replace("\r\n", "\n").Split('\n'), line => line.Contains("add(leaf(),", StringComparison.Ordinal)) + 1;
+
+        // Both leaf calls park: the first, then the second, each at the statement's line, named 1 of 2 and 2 of 2.
+        CollectionAssert.AreEqual(new[] { statement, statement }, sites, "the await lines");
+        CollectionAssert.AreEqual(new[] { (1 << 16) | 2, (2 << 16) | 2 }, calls, "each leaf call's place among the statement's two");
+    }
+
     // ---- the oracle ----
 
     // Every state machine of a twin or of an async literal in one: its stamp's await list against the compiler's.
