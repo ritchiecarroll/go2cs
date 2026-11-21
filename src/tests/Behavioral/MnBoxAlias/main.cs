@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -45,13 +44,9 @@ partial struct bag {
     internal slice<cell> s;
 }
 
-} partial class mainᴛbag {
-
 internal static nint waitAt(this ref bag b, nint i) {
     return b.s[i].waitAndRead();
 }
-
-} partial class main_package {
 
 internal static readonly ж<cell> ᏑpkgCell = new StaticBox<cell>(new cell(v: 1));
 internal static ref cell pkgCell => ref ((StaticBox<cell>)ᏑpkgCell).ValueSlot;
@@ -59,15 +54,11 @@ internal static ref cell pkgCell => ref ((StaticBox<cell>)ᏑpkgCell).ValueSlot;
 internal static channel<EmptyStruct> ready = new channel<EmptyStruct>(0);
 internal static channel<EmptyStruct> resume = new channel<EmptyStruct>(0);
 
-} partial class mainᴛacct {
-
 internal static nint waitAndRead(this ref acct a) {
     ready.ᐸꟷ(new EmptyStruct());
     ᐸꟷ(resume);
     return a.bal;
 }
-
-} partial class mainᴛinner {
 
 internal static nint waitAndRead(this ref inner s) {
     ready.ᐸꟷ(new EmptyStruct());
@@ -75,15 +66,11 @@ internal static nint waitAndRead(this ref inner s) {
     return s.n;
 }
 
-} partial class mainᴛcell {
-
 internal static nint waitAndRead(this ref cell c) {
     ready.ᐸꟷ(new EmptyStruct());
     ᐸꟷ(resume);
     return c.v;
 }
-
-} partial class mainᴛacct {
 
 internal static nint valueRead(this acct a) {
     ready.ᐸꟷ(new EmptyStruct());
@@ -92,8 +79,6 @@ internal static nint valueRead(this acct a) {
     a.bal = 777;
     return got;
 }
-
-} partial class main_package {
 
 internal static nint readCell(ref cell c) {
     ready.ᐸꟷ(new EmptyStruct());
