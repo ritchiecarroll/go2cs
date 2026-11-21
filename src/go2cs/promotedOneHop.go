@@ -73,6 +73,10 @@ func (v *Visitor) promotedOneHopView(selectorExpr *ast.SelectorExpr, fieldAddr s
 	// more than once across the outer type's embeds, its count can then disagree with Go's, and it declares no accessor
 	// Go's selector would name (P3's 1b review, finding 2: Outer{ lib.X; W } reaches lib.Z at Go depth 2 through lib.X
 	// and 1 through W; the generator reads both at depth 1, ambiguous, and Outer.ᏑZ is CS1929). The chain is kept there.
+	// The decline is deliberately COARSER than needed: a foreign embed ANYWHERE among the outer type's embeds counts, not
+	// only one on the selected path, and every path's occurrence of the name counts. It costs a one-view call only where
+	// a foreign embed and a repeated name meet; a foreign embed with the name once (Outer{ lib.X }, `o.of(Outer.ᏑZ)`)
+	// keeps the one view, which TestAPromotedCallThroughAForeignEmbedReadsAsGo measures under GO2CS_INLINE_BUILD=1.
 	if foreign, occurrences := v.embedFieldCensus(outer, last.Name()); foreign && occurrences > 1 {
 		return "", false
 	}
