@@ -833,7 +833,11 @@ func (v *Visitor) writeOutputFile(outputFileName string) error {
 	registerAlignedRuns(outputFileName, v.alignedRuns, 0)
 
 	// SCRATCH PROTOTYPE (glyphMethods.go): method bodies into the package class as `<name>ᴍ`, Go-named forwarders.
-	content := []byte(applyGlyphMethods(v.outputBuilder.String(), v.fileClassName, outputFileName))
+	content := []byte(v.outputBuilder.String())
+
+	if v.pkg != nil && glyphMethodsAppliesTo(v.pkg.Name()) {
+		content = []byte(applyGlyphMethods(string(content), v.fileClassName, outputFileName))
+	}
 
 	// A file still holding DEFERRED MARKERS is rewritten by the marker passes once the package is visited, so its text
 	// here never equals the previous run's resolved file; remember that file so restoreUnchangedMarkedSources can give

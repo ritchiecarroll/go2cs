@@ -35,9 +35,24 @@ import (
 // GlyphMethodSuffix ends a method body's name in the package class.
 const GlyphMethodSuffix = "ᴍ"
 
-// glyphMethodsEnabled is on unless GO2CS_GLYPH_METHODS=0 (a scratch prototype: on by default so every harness that
-// runs the converter exercises it).
-var glyphMethodsEnabled = os.Getenv("GO2CS_GLYPH_METHODS") != "0"
+// GO2CS_GLYPH_METHODS selects the prototype's scope (on by default so every harness that runs the converter exercises
+// it):
+//   - "0": off, today's form everywhere;
+//   - "all": every package, package main included (the first measured scope);
+//   - anything else, blank included ("libs"): every LIBRARY package, while package main keeps today's standard form, its
+//     methods plain-named extension methods in main_package (the owner's steer of 11-21 for the final form, COORD).
+var glyphMethodsMode = os.Getenv("GO2CS_GLYPH_METHODS")
+
+var glyphMethodsEnabled = glyphMethodsMode != "0"
+
+// glyphMethodsAppliesTo answers whether the transform rewrites a file of the package named goPackageName.
+func glyphMethodsAppliesTo(goPackageName string) bool {
+	if !glyphMethodsEnabled {
+		return false
+	}
+
+	return glyphMethodsMode == "all" || goPackageName != "main"
+}
 
 const glyphForwarderAttributes = "global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough"
 
