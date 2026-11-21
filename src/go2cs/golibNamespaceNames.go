@@ -324,6 +324,7 @@ var golibBuiltinMembers = nameSet(
 	"ZeroElements",
 	"append",
 	"appendꓸꓸꓸ",
+	"array",
 	"bitcast",
 	"cap",
 	"clear",
