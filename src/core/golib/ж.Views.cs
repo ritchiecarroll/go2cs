@@ -44,6 +44,7 @@
 // lifetime (the parent → view → parent cycle collects together).
 
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -287,6 +288,9 @@ public abstract partial class ж<T>
 
     private ж<TElem> publishView<TElem>(Delegate token, FieldRefBox<TElem> view)
     {
+        // A view alone in the slot is found by its OWN token, so it must be the token it is published under.
+        Debug.Assert(ReferenceEquals(view.ViewToken, token), "a view is published under its own accessor token");
+
         ref object? head = ref viewsHead();
 
         while (true)
@@ -304,7 +308,8 @@ public abstract partial class ж<T>
 
             // The first view goes into the slot itself, with no list node. A second field turns the slot into a list
             // that carries the first view as its tail entry: its token is read by exact type when the two fields share
-            // an element type (a point's x, y and z), and through IFirstFieldView only when they do not.
+            // an element type (a point's x, y and z), and through IFirstFieldView only when they do not. So a box's
+            // SECOND field costs two list nodes where the list-only form paid one; the third and later cost one each.
             object candidate = seen switch
             {
                 null => view,
