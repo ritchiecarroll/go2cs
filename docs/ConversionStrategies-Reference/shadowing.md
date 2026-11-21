@@ -445,10 +445,25 @@ generic type that identifier carries no type parameters and no constraints. In a
 `Iterator[T text.Text]` and `Window[K comparable, T text.Text]`, both constrained by a type of a package whose
 import path has a slash, take the holders `iteratorsᴛIterator` and `iteratorsᴛWindow`, each declared once with
 its open generic type (`[GoMethodHost(typeof(iterators_package.Iterator<>))]`,
-`typeof(iterators_package.Window<,>)`). Package `main` writes a holder only when a method name clashes (see
+`typeof(iterators_package.Window<,>)`):
+
+<!-- source: src/tests/Behavioral/GenericHolderForeignConstraint/iterators/iterators.cs:16-19, 56-59 -->
+```csharp
+} partial class iteratorsᴛIterator {
+
+public static void SetText<T>(this ref Iterator<T> it, T data)
+    where T : /* text.Text */ IByteSeq<T, byte>, new()
+…
+} partial class iteratorsᴛWindow {
+
+public static nint Len<K, T>(this Window<K, T> w)
+    where T : /* text.Text */ IByteSeq<T, byte>, new()
+```
+Package `main` writes a holder only when a method name clashes (see
 [Functions and Methods](../ConversionStrategies.md#functions-and-methods)); otherwise its generic types' methods
 stay in `main_package` and no holder is named at all.
-(Guarded by the converter test `TestGenericHolderIsNamedByTheTypeWhateverItsConstraint`, a library fixture.)
+(Guarded by the `GenericHolderForeignConstraint` behavioral test, whose `iterators` sub-package holds these types,
+output-compared against `go run`, and by the converter test `TestGenericHolderIsNamedByTheTypeWhateverItsConstraint`.)
 <!-- Until 2026-11-19 the holder's name was cut from the type's generic ORIGIN as rendered through
      getCSharpTypeName, whose string form carries each type parameter with its constraint. For a constraint
      from a slash-path package the string path's last-slash strip ate the type's own name, so

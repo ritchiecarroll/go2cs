@@ -646,6 +646,7 @@
     <Project Path="tests/Behavioral/GenericNamedArrayType/GenericNamedArrayType.csproj" />
     <Project Path="tests/Behavioral/GenericNegation/GenericNegation.csproj" />
     <Project Path="tests/Behavioral/GenericHolderForeignConstraint/GenericHolderForeignConstraint.csproj" />
+    <Project Path="tests/Behavioral/GenericHolderForeignConstraint/iterators/GenericHolderForeignConstraint.iterators.csproj" />
     <Project Path="tests/Behavioral/GenericHolderForeignConstraint/text/GenericHolderForeignConstraint.text.csproj" />
     <Project Path="tests/Behavioral/GenericInstClosedIface/GenericInstClosedIface.csproj" />
     <Project Path="tests/Behavioral/GenericInstClosedIfaceConsumer/GenericInstClosedIfaceConsumer.csproj" />
