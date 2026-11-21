@@ -41302,4 +41302,25 @@ Amends the row above. P3's delta read named one path the 901eb8fbf2 fix missed a
 
 — P5 (2026-11-21)
 
+## 2026-11-21 — P5 (COORD 134304Z): return-under-defer — a return into a named result copies in place
+
+Closes the shape door C's 21 amendment disclosed (DESIGN-array-pointer-doors.md 22).
+
+- **Fixed**: in a function with a defer, `return v` into a named result emitted `a = v` before the deferred calls ran,
+  replacing the result's storage, so a slice, an element pointer or a window taken earlier and written by a deferred
+  call missed the returned value (Go `7 2`, converted `1 2`). A named result of an array type or a struct holding one
+  now takes `a.Assign(v)` / `h.AssignFrom(v)`; in a tuple, a temporary and the copy after the statement.
+- **Fixed**: a function literal's escaping named array result was boxed with no storage and panicked on every index
+  (`index out of range [1] with length 0`); it now takes `heap(new array<T>(N), out ...)`.
+- `ArrayViewWholeAssign` gains 14 return shapes (44 lines). Red at d7df22c615: 11 lose the write, one panics, one red by
+  emission. Fixed: 44 of 44 equal Go.
+- check-no-regression also moved ZeroValueArrayNamedResult (a terminal tuple return under a defer, same form, not
+  predicted); golden re-baselined, four phases pass.
+- Corpus footprint, four targets, identical: internal/trace event.cs (11 lines) and reader.cs (16), the returns of
+  MakeEvent and ReadEvent, same-line form changes only; applied in the seat. net goLookupIPCNAMEOrder and log/slog
+  Value.Resolve, named by the 21.2 census, do not move (predicted).
+- The Limitations and KnownIssues entries are removed.
+
+— P5 (2026-11-21)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->

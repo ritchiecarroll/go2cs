@@ -2492,3 +2492,65 @@ with a defer, a named result of such a type and an explicit return, 4 (net goLoo
 MakeEvent and ReadEvent, log/slog Value.Resolve), none taking the address, a slice or an element address of the result
 (positive control: the probes read 3 of 3). The predicate does not see an alias taken through a field of a struct
 result or through a pointer-receiver method call; the four were read and take neither.
+
+## 22. Amendment 2026-11-21 (P5): the return into a named result copies in place; the remaining shape is fixed
+
+21's last bullet left one shape: `return v` into a named result, in a function with a defer, was emitted `a = v` before
+the deferred calls ran, so it replaced the result's storage, and a slice, an element pointer or a window taken from the
+result earlier and written by a deferred call missed the returned value (Go `7 2`, conversion `1 2`). COORD scheduled
+the fix as its own seat (134304Z). It is fixed, and the Limitations and KnownIssues entries are removed.
+
+### 22.1 The change
+
+- **The defer-mode return** (visitReturnStmt.go) asks `valueAssignMethod` of each named result's type, the predicate
+  the in-place reassign uses for `=`. A single result that owns array storage is emitted `a.Assign(v)` (an array) or
+  `h.AssignFrom(v)` (a struct holding one), without the clone: the call copies the elements into the result's own
+  storage. In a tuple, each such operand becomes a temporary in the deconstruction and its copy follows the statement,
+  left to right, as in the tuple path of visitAssignStmt: `(var aᴛ1, err) = (mk(), default); a.Assign(aᴛ1);`. A result
+  forwarded from a call (`return pair()`) takes the same form, `(var aᴛ1, err) = pair(); a.Assign(aᴛ1);`. A result
+  reached through its box inside a function literal is `Ꮡa.Value.Assign(...)`. Results with no value-assign method, and
+  every return outside defer mode, are emitted as before. In a tuple the clone of a variable operand is kept; it is
+  redundant before the copy, and correct.
+- **A function literal's escaping named array result** was declared `heap<array<T>>(out var Ꮡa)` outside the wrapper
+  (iifeOperations.go, namedReturnDeclLines), which is `default(array<T>)`: no storage, so every index through the result
+  panicked with length 0. It now takes `heap(new array<T>(N), out var Ꮡa)`, the literal twin of the 901eb8fbf2
+  declaration in visitFuncDecl, with the alias unwrapped as in the 21 fold. A literal whose result is not boxed takes the
+  frame form's plain local and was never affected by this half.
+
+### 22.2 The guard, red first
+
+`ArrayViewWholeAssign` gains 14 lines (44 in all), each a named result written by a deferred call through something
+taken from it before an explicit return: a slice, an element pointer, a window, a struct result's array field, a named
+array type, a tuple `return mk(), nil`, the second of two results with an early return, a recovered panic, a return of
+a variable, a function literal's result (plain and captured), a literal whose result's address is taken (an index
+through it, and `return [8]uint64{1, 2}` written through the pointer), and a forwarded call `return pair()`. Go output
+checked first.
+
+- The converter at d7df22c615 (door C with its fold): 11 lines lose the deferred write (`ret slice: 1 2` against Go's
+  `7 2`, and the same loss on each of the other ten), and the address-taken literal panics `index out of range [1] with
+  length 0`, which stops the program there, so the last two lines are not reached. The forwarded call is red by its
+  emission (`(a, err) = pair();`), read and not run. Predictions P-RD-3, P-RD-5 and P-RD-6 were
+  written before each run; P-RD-3 missed the plain literal in kind (it lost the write, it did not die, because a literal
+  whose result is not boxed takes the frame form's local), which is why the address-taken pair was added.
+- The fixed converter: 44 of 44 lines equal Go; the golden re-baselined from that emission and byte-equal to it.
+- check-no-regression moved one more behavioral file, not predicted: ZeroValueArrayNamedResult, whose `withDefer`
+  ends `return a4, nil` under a defer and now emits `(var a4ᴛ1, err) = (a4.Clone(), default); a4.Assign(a4ᴛ1);`. Its
+  golden is re-baselined and all four phases pass, output equal to Go. No other behavioral file moves.
+
+### 22.3 The corpus footprint
+
+Seeded `-stdlib -comments` reconverts, base converter d7df22c615 against the fix, one target per run (windows/amd64,
+linux/amd64, darwin/amd64, linux/arm64), both arms at one root path, seeded from this branch's `src/core` with
+`version.props`. On every target the same two files differ, by the same 27 lines: internal/trace event.cs (the 11
+returns of MakeEvent) and reader.cs (the 16 of Reader.ReadEvent), each line `(e, err) = (...)` becoming
+`(var eᴛN, err) = (...); e.AssignFrom(eᴛN);` on the same line. No line is added or removed, no position-map line moves,
+and no project file or README differs; the bare `heap<array<..>>(out var` count is 5 in both arms (all `:=` locals, none
+a literal's result). The hunks are applied verbatim in this seat and internal/trace builds clean.
+
+Of the four functions 21.2 named, net goLookupIPCNAMEOrder and log/slog Value.Resolve do not move: the first has no
+defer of its own (the census predicate saw one inside a function literal), and the second's result type, Value, holds
+only a zero-length array and has no value-assign method (its return is emitted `rv = v;` with no clone). Both were
+predicted 0 before the run (P-RD-7). The prediction missed the trace counts by one per file: it counted the
+`goto ᒐdone` returns and not each function's terminal return. Event's arrays are copied into the result's storage now;
+nothing in either function takes an alias of the result, so the banked internal/trace row should read as before. It
+was not re-run in this seat; the union sweep reads it.

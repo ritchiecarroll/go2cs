@@ -1224,6 +1224,15 @@ internal static (ж<Regexp>, error err) parse(@string s, Flags flags) {
 
 A result list that is entirely **unnamed** (`func f() (int, error)`) or entirely blank keeps the plain form: there is nothing deferred code could mutate, and Go likewise returns the zero results after a recover. Go forbids mixing named and unnamed results, so seeing one truly unnamed result settles the whole signature. (Guarded by the `NamedReturnDefer` extension — a `(_ *box, err error)` function whose recover sets `err`; the pre-fix converter compiles it and returns `(nil, nil)`.)
 
+A named result that **owns array storage** — an array, or a struct holding one (`valueAssignMethod`) — is assigned **in place** by an explicit `return`, as an `=` to it is: in Go the result IS its storage, so a slice, an element pointer or a window taken from it before the `return` still names it when a deferred call writes through it afterwards. The swap `a = v` left every one of those on the old storage and the deferred write missed the result (Go `7 2`, converted `1 2`). A single result emits `a.Assign(v)` / `h.AssignFrom(v)` with no clone; in a tuple each such operand becomes a temporary in the deconstruction and its copy follows the statement, as in `internal/trace`'s `Reader.ReadEvent` (Go `return Event{}, io.EOF`):
+
+<!-- source: src/core/internal/trace/reader.cs:102 -->
+```csharp
+            (var eᴛ1, err) = (new Event(), io.EOF); e.AssignFrom(eᴛ1); goto ᒐdone;
+```
+
+A function literal's escaping named array result takes `heap(new array<T>(N), out var Ꮡa)`, never `heap<array<T>>(out …)`, which boxes `default(array<T>)` with no storage. (Guarded by `ArrayViewWholeAssign`'s 14 `ret` lines, output-compared vs Go; DESIGN-array-pointer-doors.md §22.)
+
 ## Function-literal named results
 
 A func **literal** with named results declares them at the top of its emitted block, zero-initialized — Go's semantics for `next = func() (v1 V, ok1 bool) { …; return }` (the `iter.Pull` shape): a bare `return` yields the named results as currently assigned, so the lambda emits `() => { V v1 = default!; bool ok1 = default!; …; return (v1, ok1); }`. Without the declarations the emitted tuple would reference undeclared names (CS0103, met in the `iter` package). Two interactions: a named-results literal whose *first* statement is a bare `return` must NOT collapse to an expression-bodied lambda (the names exist only as block declarations), and the `namedReturnDefer` path (named results that deferred code mutates) keeps its own arrangement — declarations *before* the `try`, returned after the `finally`. Declarations reuse the shadow-aware naming, so a literal result shadowing an outer local renames consistently in both the declaration and the return (`nΔ1`). (Guarded by the `FuncLitArgCapture` extension — bare returns with assigned and zero named results, plus the first-statement-bare-return shape, values vs Go.)
