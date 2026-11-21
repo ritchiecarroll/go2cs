@@ -130,4 +130,4 @@ internal static (slice<@string>, error) lookupAddr(this ж<Resolver> Ꮡr, conte
     return Ꮡr.goLookupPTR(ctx, addr, order, conf);
 }
 
-} // end netᴛResolver
+}

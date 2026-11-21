@@ -40,4 +40,4 @@ public static error WriteEvent(this ref TextWriter w, Event e) {
     return err;
 }
 
-} // end rawᴛTextWriter
+}

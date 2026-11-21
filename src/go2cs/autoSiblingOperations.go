@@ -50,9 +50,9 @@ import (
 // gets no sibling because its files are never visited at all.
 func emitAutoConversionSiblings(markedFiles []FileEntry, fset *token.FileSet, packageTypes *types.Package,
 	info *types.Info, globalIdentNames map[*ast.Ident]string, globalScope map[string]*types.Var,
-	packageOutputPath string, options Options) {
+	packageOutputPath string, options Options) []string {
 	if len(markedFiles) == 0 {
-		return
+		return nil
 	}
 
 	// Mirror the per-file analysis pipeline the normal conversion runs over its convert set.
@@ -133,9 +133,11 @@ func emitAutoConversionSiblings(markedFiles []FileEntry, fset *token.FileSet, pa
 	resolveDynamicTypeMarkers(autoFileNames)
 	resolveDynamicInterfaceBases(autoFileNames)
 
-	// Give an unchanged sibling its previous time back, and clear what writeAutoConversionSibling remembered: the record
-	// is process-wide and first-wins, so an entry left here would shadow the next conversion's.
-	restoreUnchangedMarkedSources(autoFileNames)
+	// The siblings are returned for the caller's adapter-name pass. A deferred pointer-adapter marker can only resolve
+	// once the package's GoImplement records are final, which is after writePackageInfoFile, and that runs in the caller
+	// after this pass; so the caller also runs restoreUnchangedMarkedSources over these names, after both marker passes.
+	// Until 2026-11-19 neither ran here, and internal/godebug's sibling kept an unresolved adapter-name marker.
+	return autoFileNames
 }
 
 // writeAutoConversionSibling writes the `.cs.auto` content prefixed with a stable banner that
@@ -156,7 +158,7 @@ func writeAutoConversionSibling(autoFileName string, baseName string, content st
 	// A sibling still holding a deferred marker is rewritten by the package's marker passes after this write, so its text
 	// here never equals the previous run's resolved sibling; remember the file so restoreUnchangedMarkedSources can give
 	// its time back when the resolved text turns out identical (incrementalWrites.go). Both callers restore: the partly
-	// hand-owned path over its output files, emitAutoConversionSiblings over its own.
+	// hand-owned path over its output files, the fully hand-owned path over the names emitAutoConversionSiblings returns.
 	rememberIfMarked(autoFileName, sibling)
 
 	if _, err := writeSourceIfChanged(autoFileName, sibling); err != nil {

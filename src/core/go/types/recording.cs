@@ -203,4 +203,4 @@ internal static void recordScope(this ref Checker check, ast.Node node, ж<Scope
     }
 }
 
-} // end typesᴛChecker
+}

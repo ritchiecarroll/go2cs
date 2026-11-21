@@ -62,12 +62,12 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("abi.go", "abi.cs", "ABRcgoKClIKCgpSCgoKUAAIYgoKUgoKUAAkQggACEoI=")]
+[assembly: GoPositionMap("abi.go", "abi.cs", "ABFcgoKClIKCgpSCgoKUAAIYgoKUgoKUAAUQggACEoI=")]
 [assembly: GoPositionMap("compiletype.go", "compiletype.cs", "AAgelpiWlg==")]
 [assembly: GoPositionMap("escape.go", "escape.cs", "AAomgoLegoKU")]
 [assembly: GoPositionMap("main.go", "main.cs", "7oKCgpSUgoI=")]
 [assembly: GoPositionMap("switch.go", "switch.cs", "ABtAgoKYlKQ=")]
-[assembly: GoPositionMap("type.go", "type.cs", "AEuIAoKClMYAHT6ijKiCgoKUxpSCqJaCqIKmggAVLqKClKaigpQABBSCABAkooKUpoIAGDKigoKUAC4IooKUlKSsrKysrKysAAQSopSCpIKkgqSCpIKkqKKClKiigpSoooKUqKKClKiigpSolpQACxCCgoKUpqKCgpTIABEigpSClIKUgpSCxqKClAARMoKmgqaCpoKmooKClIKUlKKCgpSCgpSmggARHIIAEFKCqoKogqiCqIKqgoKCgoKCzIKClILMgoKCgoKClNqCgpSCqIKClIKCxoKClIKUgoKClIKCgpSCgpSCpoKCgoKCgoKm")]
+[assembly: GoPositionMap("type.go", "type.cs", "AEuIAoKClMYAHT6ijKiCgoKUxpSCqJaCqIKmggATLqKClKaigpQAAhSCABAkooKUpoIAGDKigoKUAC4IooKUlKSsrKysrKysAAQSopSCpIKkgqSCpIKkqKKClKiigpSoooKUqKKClKiigpSolpQACxCCgoKUpqKCgpTIAA0igpSClIKUgpSCxqKClAAPMoKmgqaCpoKmooKClIKUlKKCgpSCgpSmggANHIIADlKCqoKogqiCqIKqgoKCgoKCzIKClILMgoKCgoKClNqCgpSCqIKClIKCxoKClIKUgoKClIKCgpSCgpSCpoKCgoKCgoKm")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -147,14 +147,7 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.FuncType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛFuncType;
-[GoMethodHost(typeof(main_package.IntArgRegBitmap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛIntArgRegBitmap;
-[GoMethodHost(typeof(main_package.InterfaceType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛInterfaceType;
 [GoMethodHost(typeof(main_package.Kind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛKind;
-[GoMethodHost(typeof(main_package.MapType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛMapType;
 [GoMethodHost(typeof(main_package.Name)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛName;
-[GoMethodHost(typeof(main_package.RegArgs)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛRegArgs;
-[GoMethodHost(typeof(main_package.StructField)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛStructField;
 [GoMethodHost(typeof(main_package.Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛType;
-[GoMethodHost(typeof(main_package.UncommonType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛUncommonType;
 // </MethodHolders>

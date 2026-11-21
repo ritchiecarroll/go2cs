@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,16 +8,12 @@ partial struct counter {
     internal nint n;
 }
 
-} partial class mainᴛcounter {
-
 internal static void inc(this ж<counter> Ꮡc, nint by) {
     var p = Ꮡc.Ꮡn;
     p.Value += by;
 }
 
 internal static nint get(this counter c) { return c.n; }
-
-} partial class main_package {
 
 partial struct entry {
     internal @string name;

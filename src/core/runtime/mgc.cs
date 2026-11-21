@@ -296,12 +296,12 @@ internal static gcMarkWorkerMode gcMarkWorkerIdleMode => 3;
 
 // gcMarkWorkerModeStrings are the strings labels of gcMarkWorkerModes
 // to use in execution traces.
-internal static array<@string> gcMarkWorkerModeStrings = new @string[]{
+internal static array<@string> gcMarkWorkerModeStrings = array<@string>([
     "Not worker",
     "GC (dedicated)",
     "GC (fractional)",
     "GC (idle)"
-}.array();
+]);
 
 // pollFractionalWorkerExit reports whether a fractional mark worker
 // should self-preempt. It assumes it is called from the fractional
@@ -740,7 +740,7 @@ internal static void gcStart(gcTrigger trigger) {
             }
             // Initialize ptrBuf if necessary.
             if (goexperiment.GreenTeaGC && (~p).gcw.ptrBuf == nil) {
-                p.Value.gcw.ptrBuf = @unsafe.Pointer.To<array<uintptr>>(persistentalloc(gc.PageSize, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
+                p.Value.gcw.ptrBuf = @unsafe.Pointer.ToArray<uintptr>(persistentalloc(gc.PageSize, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys), 1024);
             }
         }
 

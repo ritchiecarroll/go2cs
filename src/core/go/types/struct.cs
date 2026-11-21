@@ -260,4 +260,4 @@ internal static @string tag(this ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡt) {
     return ""u8;
 }
 
-} // end typesᴛChecker
+}

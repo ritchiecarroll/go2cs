@@ -540,6 +540,64 @@ function Test-GoApiCompatBaselineCoverage {
 }
 
 <#
+    A MODULE'S BASELINE AND THE BREAK FLOOR (W-ng-apicompat, COORD 20261119T230653Z). go.lib's <GoBreakFloor> fails a
+    consumer's build for any package built below it (GO2CS3002), so a module revision built below the CURRENT floor
+    cannot be consumed with the go.lib this pack ships, and its surface is no binary contract to hold the next revision
+    to. The 1.26.11.1 wave met it first: every module's previous revision was built on 1.26.10.3, and the .4 method
+    holders moved every method out of its <pkg>_package class (hashset rev 6: 56 CP0002 against rev 5).
+    The baseline's go.lib dependency range says what it was built on: its lower bound, less everything from its first
+    '-', as go.lib.targets reads a version, compared with the floor. Below it, the baseline is skipped and the caller
+    reports Line, as it reports a first revision. At or above it, the baseline is compared as before. A baseline whose
+    go.lib range cannot be read (no nuspec, no go.lib dependency, an exclusive or unparsable lower bound), or a floor
+    that is not major.minor.patch.revision, is a Failure: the guard refuses, and never skips what it cannot judge.
+    Returns Skip, Line (when skipped) and Failure.
+#>
+function Test-GoApiCompatBaselineFloor {
+    param(
+        [Parameter(Mandatory)][string]$Baseline,
+        [Parameter(Mandatory)][string]$BaselineVersion,
+        [AllowEmptyString()][string]$Floor
+    )
+
+    function Result([bool]$Skip, [string]$Line, [string]$Failure) { [pscustomobject]@{ Skip = $Skip; Line = $Line; Failure = $Failure } }
+
+    $floorParsed = $null
+    if (-not $Floor -or -not [version]::TryParse($Floor, [ref]$floorParsed) -or $floorParsed.Revision -lt 0) {
+        return Result $false $null "the break floor '$Floor' is not a major.minor.patch.revision, so the baseline $BaselineVersion cannot be judged against it"
+    }
+
+    $zip = [System.IO.Compression.ZipFile]::OpenRead($Baseline)
+    try {
+        $entries = @($zip.Entries | Where-Object { $_.FullName -notmatch '/' -and $_.FullName -like '*.nuspec' })
+        if ($entries.Count -ne 1) { return Result $false $null "the baseline $BaselineVersion carries $($entries.Count) root .nuspec file(s), not 1, so its go.lib range cannot be read" }
+        $reader = New-Object System.IO.StreamReader($entries[0].Open())
+        try { $text = $reader.ReadToEnd() } finally { $reader.Dispose() }
+    }
+    finally { $zip.Dispose() }
+
+    $xml = New-Object System.Xml.XmlDocument
+    try { $xml.LoadXml($text) } catch { return Result $false $null "the baseline $BaselineVersion's nuspec does not parse: $($_.Exception.Message)" }
+    $ranges = @($xml.SelectNodes("//*[local-name()='dependency']") | Where-Object { $_.GetAttribute('id') -ieq 'go.lib' } | ForEach-Object { $_.GetAttribute('version') })
+    if ($ranges.Count -eq 0) { return Result $false $null "the baseline $BaselineVersion's nuspec names no go.lib dependency, so the break floor cannot judge what it was built on" }
+
+    $lowest = $null; $lowestRange = $null
+    foreach ($range in $ranges) {
+        # An inclusive lower bound, '[a, b)', '[a,b]' or '[a]', or a bare minimum version 'a', as NuGet reads it.
+        $bound = if ($range -match '^\s*\[\s*([^,\]\s]+)\s*[,\]]') { $Matches[1] } elseif ($range -match '^\s*([0-9][^\s,\[\]\(\)]*)\s*$') { $Matches[1] } else { $null }
+        $parsed = $null
+        if (-not $bound -or -not [version]::TryParse(($bound -split '-', 2)[0], [ref]$parsed)) {
+            return Result $false $null "the baseline $BaselineVersion's go.lib range '$range' has no inclusive lower bound that parses, so the break floor cannot judge what it was built on"
+        }
+        if ($null -eq $lowest -or $parsed -lt $lowest) { $lowest = $parsed; $lowestRange = $range }
+    }
+
+    if ($lowest -lt $floorParsed) {
+        return Result $true "baseline $BaselineVersion built below the break floor $Floor (go.lib $lowestRange): not compared (reported, not gated)" $null
+    }
+    Result $false $null $null
+}
+
+<#
     The guard over a set of packed packages. For each package it finds the baseline on the feed's flat container, and
     compares the two with the package's suppression file ($SuppressionFor maps an id to a path or $null). Returns:
       Packages    the packages compared with a baseline
@@ -547,6 +605,8 @@ function Test-GoApiCompatBaselineCoverage {
       NoBaseline  the ids whose line has no published version: new packages, or the first release of a Go minor.
                   They are reported, not gated (DESIGN-binary-compat-guard.md section 6).
       NoSurface   the ids whose baseline has no lib/ or runtimes/ asset (go.gen, an analyzer): nothing to compare.
+      BelowFloor  with -BreakFloor, one line per baseline built below that floor, which was not compared and is
+                  reported, not gated (Test-GoApiCompatBaselineFloor)
       Baselines   id -> { Version, Path } of each baseline downloaded, under $WorkDir (read it before $WorkDir goes)
       Failures    every reason the guard is red
     A guard that was asked about at least one package with a baseline and compared no asset is itself a failure.
@@ -571,7 +631,11 @@ function Invoke-GoApiCompatGuard {
         [string]$ReleaseVersion,
         # The baseline line rule (Get-GoApiCompatBaselineVersion): Minor for the standard library (push-nuget.ps1),
         # Base, the default, for a module revision (nugetgo-pack.ps1).
-        [ValidateSet('Base', 'Minor')][string]$BaselineLine = 'Base'
+        [ValidateSet('Base', 'Minor')][string]$BaselineLine = 'Base',
+        # The current go.lib's <GoBreakFloor>, from a module pack (nugetgo-pack.ps1): a baseline built below it is reported
+        # in BelowFloor and not compared (Test-GoApiCompatBaselineFloor). The standard library passes none: a go.* break is
+        # held by its suppressions and the floor rule (Test-GoBreakFloor).
+        [string]$BreakFloor
     )
 
     Add-Type -AssemblyName System.Net.Http
@@ -583,6 +647,7 @@ function Invoke-GoApiCompatGuard {
     $noBaseline = New-Object System.Collections.Generic.List[string]
     $noSurface = New-Object System.Collections.Generic.List[string]
     $minorReleased = New-Object System.Collections.Generic.List[string]
+    $belowFloor = New-Object System.Collections.Generic.List[string]
     $baselines = @{}
     $packagesCompared = 0
     $compared = 0
@@ -603,6 +668,11 @@ function Invoke-GoApiCompatGuard {
 
             $baseline = Save-GoApiCompatBaseline $client $flat $id.Id $baselineVersion (Join-Path $WorkDir '_baselines')
             $baselines[$id.Id] = [pscustomobject]@{ Version = $baselineVersion; Path = $baseline }
+            if ($PSBoundParameters.ContainsKey('BreakFloor')) {
+                $floor = Test-GoApiCompatBaselineFloor -Baseline $baseline -BaselineVersion $baselineVersion -Floor $BreakFloor
+                if ($floor.Failure) { $failures.Add("$($id.Id): $($floor.Failure)"); continue }
+                if ($floor.Skip) { $belowFloor.Add("$($id.Id): $($floor.Line)"); continue }
+            }
             $suppression = & $SuppressionFor $id.Id
             $result = Test-GoApiCompatPackage -Id $id.Id -Baseline $baseline -Current $package.FullName -SuppressionFile $suppression -RepoRoot $RepoRoot -WorkDir $WorkDir -ReleaseVersion $(if ($ReleaseVersion) { $ReleaseVersion } else { $id.Version })
 
@@ -624,6 +694,7 @@ function Invoke-GoApiCompatGuard {
         Expected   = $expected
         NoBaseline = @($noBaseline)
         NoSurface  = @($noSurface)
+        BelowFloor = @($belowFloor)
         Failures   = @($failures)
         Baselines  = $baselines
     }
@@ -780,5 +851,5 @@ function Get-GoBreakFloor([AllowEmptyString()][string]$TargetsText) {
 
 Export-ModuleMember -Function Initialize-GoApiCompatTool, Get-GoApiCompatAssets, Get-GoApiCompatSuppressionMap,
     Read-GoApiCompatSuppressions, Test-GoApiCompatPackage, Get-GoApiCompatRenameSuccessors, Get-GoApiCompatBaselineVersion, Get-GoApiCompatPublishedVersions,
-    Save-GoApiCompatBaseline, Invoke-GoApiCompatGuard, Test-GoApiCompatBaselineCoverage,
+    Save-GoApiCompatBaseline, Invoke-GoApiCompatGuard, Test-GoApiCompatBaselineCoverage, Test-GoApiCompatBaselineFloor,
     Test-GoBreakFloor, Test-GoBreakFloorShape, Test-GoBreakFloorReachable, Get-GoBreakFloor, Get-GoBreakFloorFromPackage

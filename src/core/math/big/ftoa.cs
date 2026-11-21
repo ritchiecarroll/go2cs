@@ -590,4 +590,4 @@ public static void Format(this ж<Float> Ꮡx, fmt.State s, rune format) {
     }}
 }
 
-} // end bigᴛFloat
+}

@@ -72,7 +72,7 @@ public class ElementAddressCompareTests
 
         // Go's (*[3]T)(s[1:4]): an array WINDOW over a slice's backing (array<T>.Alias)
         slice<long> s = new(new long[] { 5, 6, 7, 8, 9 });
-        array<long> window = array<long>.Alias(s[1..4], 3);
+        array<long> window = go.array<long>.Alias(s[1..4], 3);
         AssertAgrees(Ꮡelem(window, 0), Ꮡelem(s, 1), Ꮡ(window, 0), Ꮡ(s, 1), true, "an alias window's first element");
         AssertAgrees(Ꮡelem(window, 2), Ꮡelem(s, 2), Ꮡ(window, 2), Ꮡ(s, 2), false, "an alias window's index is relative");
     }
@@ -206,7 +206,7 @@ public class ElementAddressCompareTests
     {
         slice<int> s = new(new[] { 1, 2, 3, 4, 5, 6, 7, 8 });
         array<int> a = new(new[] { 1, 2, 3, 4 });
-        array<int> window = array<int>.Alias(s[2..6], 4);
+        array<int> window = go.array<int>.Alias(s[2..6], 4);
         slice<EmptyStruct> empty = new(4);
         ж<array<int>> p = new StandardBox<array<int>>(a);
         nuint addr = (nuint)(nint)Marshal.AllocHGlobal(8 * sizeof(long));

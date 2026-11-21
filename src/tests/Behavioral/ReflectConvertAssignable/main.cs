@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using reflect = reflect_package;
-using static main_package;
 
 partial class main_package {
 
@@ -46,11 +45,7 @@ partial struct fieldsTagged {
 partial struct speaker {
 }
 
-} partial class mainᴛspeaker {
-
 internal static @string String(this speaker _) { return "speaker"; }
-
-} partial class main_package {
 
 partial struct mute {
 }

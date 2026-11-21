@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,8 +8,6 @@ partial struct node {
     internal nint val;
     internal ж<node> next;
 }
-
-} partial class mainᴛnode {
 
 internal static nint sum(this ж<node> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
@@ -49,8 +46,6 @@ internal static void scale(this ж<node> Ꮡn, nint factor) {
         Ꮡn = n.next; n = ref Ꮡn.DerefOrNull();
     }
 }
-
-} partial class main_package {
 
 internal static void main() {
     var c = Ꮡ(new node(val: 3));

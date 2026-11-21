@@ -396,6 +396,12 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		// path. runtime/windows/usleep_windows_impl.cs sleeps the same microseconds without the OS call.
 		// Windows alone: linux already hand-owns its usleep (mem_linux_impl.cs) and darwin's converts.
 		"usleep": goosWindows,
+		// getCPUCount on WINDOWS: Go counts the process affinity mask through stdcall over
+		// _GetProcessAffinityMask, a pointer the not-run osinit never fills, and stdcall reaches
+		// asmcgocall. NumCPU and the start-up GOMAXPROCS read it from the runtime's module initializer, so
+		// the converted body killed every Windows host at start-up. runtime/windows/os_windows_impl.cs
+		// makes the same two kernel calls directly. Linux (sched_getaffinity) and darwin (sysctl) convert.
+		"getCPUCount": goosWindows,
 		// windows_QueryPerformanceCounter / windows_QueryPerformanceFrequency on WINDOWS: the bodies Go
 		// pushes into internal/syscall/windows (linknamePushTargets). Each is one
 		// `stdcall(_QueryPerformance*, &x)`, which reaches asmstdcall (a throwing stub) over a function
@@ -782,6 +788,9 @@ var manualConversionFuncs = map[string]map[string]goosScope{
 		"GC":         goosAny,
 		"GOMAXPROCS": goosAny,
 		"Gosched":    goosAny,
+		// SetDefaultGOMAXPROCS resets the setting GOMAXPROCS keeps; the converted body set newprocs for a
+		// startTheWorldWithSema that never runs, so the setting did not move.
+		"SetDefaultGOMAXPROCS": goosAny,
 		// Goexit belongs to the same surface for the same reason: its converted body drives Go's
 		// own _panic record and stack unwinder (p.start(getcallerpc(), getcallersp()) → nextDefer →
 		// goexit1), all of it assembly. The managed shape unwinds the calling goroutine with a

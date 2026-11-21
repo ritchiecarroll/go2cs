@@ -115,4 +115,4 @@ internal static rune /*r*/ hangul(this ref input @in, nint p) {
     return r;
 }
 
-} // end normᴛinput
+}

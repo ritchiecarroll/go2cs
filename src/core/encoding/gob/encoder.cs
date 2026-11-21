@@ -306,4 +306,4 @@ public static error EncodeValue(this ж<Encoder> Ꮡenc, reflect.Value value) {
     finally { if (ᒐd1) Ꮡenc.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
 
-} // end gobᴛEncoder
+}

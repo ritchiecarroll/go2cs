@@ -77,7 +77,7 @@ internal static @string osCPUInfoName() {
     // so the cpuMHz field information is not needed.
     // modelName filed example:
     //	Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz
-    var f = new @string[]{"GHz", "MHz"}.array();
+    var f = array<@string>(["GHz", "MHz"]);
     foreach (var (_, v) in range(f.ΔRangeSnapshot())) {
         if (strings.Contains(modelName, v)) {
             return modelName;

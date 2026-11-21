@@ -1,0 +1,94 @@
+# PRE 780cb9b34f: 208 Delta-renames in 91 sections
+# POST HEAD: 0 Delta-renames in 0 sections
+# dropped by OQ2: 208 (157 types, 51 consts/vars) in 91 sections
+crypto.des	BlockSize(const)
+crypto.ecdh	Curve PublicKey
+crypto.hpke	KEM PublicKey
+crypto.internal.fips140.aes	BlockSize(const)
+crypto.internal.fips140.bigmod	Nat
+crypto.internal.fips140.ecdh	PublicKey
+crypto.internal.fips140.ecdsa	PublicKey
+crypto.internal.fips140.ed25519	PublicKey
+crypto.internal.fips140.mldsa	PublicKey
+crypto.internal.fips140.rsa	PublicKey
+crypto.internal.fips140.tls13	ExporterMasterSecret HandshakeSecret MasterSecret
+crypto.md5	BlockSize(const) Size(const)
+crypto.sha1	BlockSize(const) Size(const)
+crypto.tls	ConnectionState
+crypto.x509	OID
+crypto.x509@darwin	OID
+crypto.x509@linux	OID
+database.sql	Conn Stmt
+database.sql.driver	RowsAffected String(const)
+debug.dwarf	LineReader Reader Type
+debug.elf	Data Section
+debug.macho	Section Segment
+debug.pe	Section
+debug.plan9obj	Section
+encoding.json	Token
+encoding.xml	Token
+expvar	String
+flag	ErrorHandling
+go.constant	Kind String(const)
+go.doc.comment	Text
+go.scanner	Error
+go.token	File Pos Position
+go.types	Error Info Scope Signature String(const) Term Type
+hash.adler32	Size(const)
+hash.crc32	Size(const)
+hash.crc32@linux-arm64	Size(const)
+hash.crc64	Size(const)
+hash.maphash	Seed
+html.template	Error
+image	Opaque(const) RGBA
+image.color	RGBA
+internal.abi	ArrayType ChanDir FuncType InterfaceType Kind MapType Name String(const) StructType
+internal.pkgbits	Code Version
+internal.reflectlite	String(const) Type
+internal.runtime.maps	Map
+internal.strconv	Error
+internal.trace	Event Label Log Metric Range Region Stack StateTransition Sync Task Time
+internal.trace.internal.testgen	Batch Generation
+internal.trace.internal.tracev1	STWReason
+internal.xcoff	Section
+log.slog	Handler Kind Level LogValuer Source
+math.big	Int Rat
+math.big.internal.asmgen	AltCarry(const) Carry Func Pipe Reg RegsUsed
+net	Addr Error
+net.http	Cookie Handler Header
+net.internal.socktest	Sockets
+net.internal.socktest@darwin	Sockets
+net.internal.socktest@linux	Sockets
+net.netip	Addr Prefix
+net.rpc	Call
+net.smtp	Auth
+net.textproto	Error
+net.url	Error
+net@darwin	Addr Error
+net@linux	Addr Error
+os	Kill(const) Signal
+os.exec	Error
+os.exec@darwin	Error
+os.exec@linux	Error
+os@darwin	Kill(const) Signal
+os@linux	Kill(const) Signal
+reflect	Bool(const) ChanDir Int(const) Interface(const) Kind Method Pointer(const) Slice(const) String(const) Type Uint(const) UnsafePointer(const) Value
+regexp.syntax	Error
+runtime	Error
+runtime.metrics	Float64Histogram
+runtime@darwin	Error
+runtime@linux-amd64	Error
+runtime@linux-arm64	Error
+syscall	Handle Signal Sockaddr
+syscall@darwin	Signal
+syscall@linux-amd64	Signal
+syscall@linux-arm64	Signal
+testing.internal.testdeps	ImportPath(const) ModulePath(const)
+text.scanner	String(const)
+time	Hour(const) Local(const) Location Minute(const) Month Nanosecond(const) Second(const) UTC(const) Weekday
+time@darwin	Hour(const) Local(const) Location Minute(const) Month Nanosecond(const) Second(const) UTC(const) Weekday
+time@linux	Hour(const) Local(const) Location Minute(const) Month Nanosecond(const) Second(const) UTC(const) Weekday
+vendor.golang.org.x.crypto.chacha20poly1305	NonceSize(const) Overhead(const)
+vendor.golang.org.x.net.dns.dnsmessage	AAAAResource AResource CNAMEResource HTTPSResource MXResource NSResource OPTResource PTRResource Question SOAResource SRVResource SVCBResource TXTResource UnknownResource
+vendor.golang.org.x.text.unicode.bidi	Class Direction Run
+vendor.golang.org.x.text.unicode.norm	Properties

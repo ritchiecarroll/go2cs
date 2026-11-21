@@ -1082,4 +1082,4 @@ internal static ж<mspan> allocUserArenaChunk(this ж<mheap> Ꮡh) {
     return s;
 }
 
-} // end runtimeᴛmheap
+}

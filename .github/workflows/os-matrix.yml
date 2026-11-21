@@ -658,6 +658,19 @@ jobs:
         with:
           dotnet-version: ${{ needs.plan.outputs.dotnet }}
 
+      # global.json's latestMajor takes the highest SDK installed, and an image carrying a newer major beside the one
+      # setup-dotnet installed would build this job with it, silently. The job holds to the channel it asked for.
+      - name: The .NET SDK is the requested channel
+        shell: pwsh
+        env:
+          DOTNET_CHANNEL: ${{ needs.plan.outputs.dotnet }}
+        run: |
+          $got = "$(dotnet --version)".Trim()
+          $want = $env:DOTNET_CHANNEL
+          $ok = if ($want.EndsWith('.x')) { $got.StartsWith($want.Substring(0, $want.Length - 1)) } else { $got -ceq $want }
+          if (-not $ok) { Write-Host "::error::dotnet --version is $got, not the requested channel ${want}: global.json's latestMajor takes the highest SDK installed"; exit 1 }
+          Write-Host "dotnet --version $got is channel $want"
+
       # push-nuget builds one flavour per GOOS/GOARCH pair of its $ridFlavors map (seat S6), passing -p:GoTargetOS and
       # -p:GoTargetArch, so the job's environment no longer decides any flavour's architecture. A pair at the wrong
       # architecture would pack a wrong package that compiles; the guard reads the map and probes each pair.
@@ -762,6 +775,19 @@ jobs:
         with:
           dotnet-version: ${{ needs.plan.outputs.dotnet }}
 
+      # global.json's latestMajor takes the highest SDK installed, and an image carrying a newer major beside the one
+      # setup-dotnet installed would build this job with it, silently. The job holds to the channel it asked for.
+      - name: The .NET SDK is the requested channel
+        shell: pwsh
+        env:
+          DOTNET_CHANNEL: ${{ needs.plan.outputs.dotnet }}
+        run: |
+          $got = "$(dotnet --version)".Trim()
+          $want = $env:DOTNET_CHANNEL
+          $ok = if ($want.EndsWith('.x')) { $got.StartsWith($want.Substring(0, $want.Length - 1)) } else { $got -ceq $want }
+          if (-not $ok) { Write-Host "::error::dotnet --version is $got, not the requested channel ${want}: global.json's latestMajor takes the highest SDK installed"; exit 1 }
+          Write-Host "dotnet --version $got is channel $want"
+
       - name: Release smoke cgo — build the cgo probe library
         shell: pwsh
         run: |
@@ -833,6 +859,19 @@ jobs:
           # Stage-2 hop. An SDK cannot target a framework newer than itself, so an older channel
           # could only fail here with NETSDK1045; the 1.23.1.x anchors build from their own tag.
           dotnet-version: ${{ needs.plan.outputs.dotnet }}
+
+      # global.json's latestMajor takes the highest SDK installed, and an image carrying a newer major beside the one
+      # setup-dotnet installed would build this job with it, silently. The job holds to the channel it asked for.
+      - name: The .NET SDK is the requested channel
+        shell: pwsh
+        env:
+          DOTNET_CHANNEL: ${{ needs.plan.outputs.dotnet }}
+        run: |
+          $got = "$(dotnet --version)".Trim()
+          $want = $env:DOTNET_CHANNEL
+          $ok = if ($want.EndsWith('.x')) { $got.StartsWith($want.Substring(0, $want.Length - 1)) } else { $got -ceq $want }
+          if (-not $ok) { Write-Host "::error::dotnet --version is $got, not the requested channel ${want}: global.json's latestMajor takes the highest SDK installed"; exit 1 }
+          Write-Host "dotnet --version $got is channel $want"
 
       - name: Environment report
         shell: pwsh

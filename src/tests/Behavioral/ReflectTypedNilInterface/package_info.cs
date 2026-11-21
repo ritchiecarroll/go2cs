@@ -51,7 +51,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "ABM+ooKUAAoOooKUAA8gooKUyqKClL6CgoKCgoKCAA8IhIKCgoKogoKCgqiCgoKqgoKCqIKYgpiegoKCqIKCnoKCgpiCnoKCgoKClA==", "166-166:1", "", "76=ValueOf/1/1/1,IsValid/1/1/1,TypeOf/1/1/1,Sprint/1/1/1;141=Kind/1/2/1,IsNil/1/2/1,IsZero/1/1/1,Elem/1/2/1,Kind/2/2/1,Elem/2/2/1,IsNil/2/2/1")]
+[assembly: GoPositionMap("main.go", "main.cs", "ABA+ooKU7qKClAALIKKClKqigpS+goKCgoKCggAPCISCgoKCqIKCgoKogoKCqoKCgqiCmIKYnoKCgqiCgp6CgoKYgp6CgoKCgpQ=", "166-166:1", "", "63=ValueOf/1/1/1,IsValid/1/1/1,TypeOf/1/1/1,Sprint/1/1/1;128=Kind/1/2/1,IsNil/1/2/1,IsZero/1/1/1,Elem/1/2/1,Kind/2/2/1,Elem/2/2/1,IsNil/2/2/1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -96,7 +96,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.Blob)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛBlob;
-[GoMethodHost(typeof(main_package.Stamp)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛStamp;
-[GoMethodHost(typeof(main_package.Tag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛTag;
 // </MethodHolders>

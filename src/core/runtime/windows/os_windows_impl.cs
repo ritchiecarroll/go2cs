@@ -13,7 +13,8 @@
 // (1) THE SYSTEM DIRECTORY - initSysDirectory, below.
 // (2) LONG-PATH AWARENESS  - initLongPathSupport, after it.
 // (3) THE PHYSICAL PAGE SIZE - physPageSize, after them.
-// (4) THE PERFORMANCE COUNTER - windows_QueryPerformanceCounter/Frequency, at the end of this file.
+// (4) THE PERFORMANCE COUNTER - windows_QueryPerformanceCounter/Frequency, after them.
+// (5) THE CPU COUNT - getCPUCount, at the end of this file.
 //
 // Go fills `runtime.sysDirectory` in initSysDirectory(), which osinit() calls before any user code:
 // `stdcall2(_GetSystemDirectoryA, &sysDirectory[0], len(sysDirectory)-1)`, then it appends a
@@ -55,6 +56,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 [module: go.GoManualConversion]
@@ -184,5 +186,57 @@ partial class runtime_package
         {
             throw new PanicException((@string)$"go2cs: {call}: Stopwatch is not high-resolution here, so it does not read the kernel's performance counter, and its value would not be Go's");
         }
+    }
+    // (5) THE CPU COUNT. Go's getCPUCount (runtime/os_windows.go) counts the set bits of the process affinity mask
+    // from GetProcessAffinityMask(CurrentProcess, &mask, &sysmask), and falls back to GetSystemInfo's
+    // NumberOfProcessors when that call fails or the mask is empty. Both calls go through stdcall over function
+    // pointers the not-run osinit never fills, and stdcall reaches asmcgocall, so the converted body could not run.
+    // It matters at start-up: osinit's numCPUStartup and the first GOMAXPROCS are read from it, here in the runtime's
+    // module initializer (managed_impl.cs startGOMAXPROCS), so the failure killed the whole host rather than one row.
+    // The body is displaced (manualConversionFuncs, windows only) and makes the same two kernel calls, in Go's order,
+    // with Go's handle (windows.CurrentProcess is the pseudo-handle -1). Like Go it reads one processor group: the
+    // mask is one uintptr wide. It does not read Environment.ProcessorCount, which also applies
+    // DOTNET_PROCESSOR_COUNT, a setting Go has no counterpart for.
+    internal static int32 getCPUCount()
+    {
+        if (GetProcessAffinityMask(currentProcessPseudoHandle, out nuint mask, out _) != 0)
+        {
+            int n = System.Numerics.BitOperations.PopCount(mask);
+
+            if (n != 0)
+            {
+                return (int32)n;
+            }
+        }
+
+        // use GetSystemInfo if GetProcessAffinityMask fails
+        GetSystemInfo(out SYSTEM_INFO info);
+
+        return (int32)info.dwNumberOfProcessors;
+    }
+
+    private const nint currentProcessPseudoHandle = -1;
+
+    [DllImport("kernel32.dll", ExactSpelling = true)]
+    private static extern int GetProcessAffinityMask(nint hProcess, out nuint lpProcessAffinityMask, out nuint lpSystemAffinityMask);
+
+    [DllImport("kernel32.dll", ExactSpelling = true)]
+    private static extern void GetSystemInfo(out SYSTEM_INFO lpSystemInfo);
+
+    // SYSTEM_INFO as winbase.h lays it out; only dwNumberOfProcessors is read.
+    [StructLayout(LayoutKind.Sequential)]
+    private struct SYSTEM_INFO
+    {
+        public ushort wProcessorArchitecture;
+        public ushort wReserved;
+        public uint dwPageSize;
+        public nint lpMinimumApplicationAddress;
+        public nint lpMaximumApplicationAddress;
+        public nuint dwActiveProcessorMask;
+        public uint dwNumberOfProcessors;
+        public uint dwProcessorType;
+        public uint dwAllocationGranularity;
+        public ushort wProcessorLevel;
+        public ushort wProcessorRevision;
     }
 }

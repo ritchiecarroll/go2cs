@@ -37,13 +37,9 @@ partial struct @base {
     internal int64 id;
 }
 
-} partial class mainᴛbase {
-
 internal static int64 twice(this @base b) {
     return b.id * 2;
 }
-
-} partial class main_package {
 
 partial struct derived {
     /*embed*/ internal @base @base;

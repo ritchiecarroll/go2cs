@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using runtime = runtime_package;
-using static main_package;
 
 partial class main_package {
 
@@ -201,17 +200,11 @@ partial struct genRecv<X> {
     internal X v;
 }
 
-} partial class mainᴛrecvT {
-
 internal static partial @string ptrFrame(this ref recvT t) { return stackText(); }
 
 internal static partial @string valueFrame(this recvT t) { return t.ptrFrame(); }
 
-} partial class mainᴛgenRecv {
-
 internal static partial @string genFrame<X>(this genRecv<X> g) { return stackText(); }
-
-} partial class main_package {
 
 internal static partial @string plainFrame() { return stackText(); }
 

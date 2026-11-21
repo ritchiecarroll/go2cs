@@ -69,7 +69,7 @@ internal static (ж<PrivateKey>, error) NewPrivateKey(this ж<x25519Curve> Ꮡc,
         return (default, errors.New(cryptoEcdhInvalidPrivateˢ2));
     }
     var publicKey = new slice<byte>(x25519PublicKeySize);
-    var x25519Basepoint = new byte[]{9}.array(32);
+    var x25519Basepoint = array<byte>(32, [9]);
     x25519ScalarMult(publicKey, key, x25519Basepoint[..]);
     // We don't check for the all-zero public key here because the scalar is
     // never zero because of clamping, and the basepoint is not the identity in

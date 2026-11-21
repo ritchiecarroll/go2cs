@@ -74,7 +74,7 @@ internal static void main() {
     var g = new Grid(Cells: new array2<array3<int16>>(new array3<int16>(1, 2, 3), new array3<int16>(4, 5, 6)), Off: new array4<uint8>(default, 7, 9));
     var b = box(g.Off.ΔCopy());
     g.Off[1] = 0;
-    fmt.Println(b, g.Off.ΔCopy(), AreEqual(box(g.Cells.ΔSelect(static Δe1 => Δe1.ΔCopy())), box(new array<int16>[]{new int16[]{1, 2, 3}.array(), new int16[]{4, 5, 6}.array()}.array())));
+    fmt.Println(b, g.Off.ΔCopy(), AreEqual(box(g.Cells.ΔSelect(static Δe1 => Δe1.ΔCopy())), box(new array<int16>[]{array<int16>([1, 2, 3]), array<int16>([4, 5, 6])}.array())));
     var switchᴛ1 = box(g.Cells[1].ΔCopy());
     switch (switchᴛ1.type()) {
     case array<int16> v: {
@@ -87,7 +87,7 @@ internal static void main() {
         break;
     }}
     var m = new map<any, nint>{[box(g.Cells[0].ΔCopy())] = 1};
-    fmt.Println(m[new int16[]{1, 2, 3}.array()], reflect.ValueOf(g.Off.ΔCopy()).Cap(), reflect.ValueOf(g.Cells.ΔSelect(static Δe1 => Δe1.ΔCopy())).Index(1).Len());
+    fmt.Println(m[array<int16>([1, 2, 3])], reflect.ValueOf(g.Off.ΔCopy()).Cap(), reflect.ValueOf(g.Cells.ΔSelect(static Δe1 => Δe1.ΔCopy())).Index(1).Len());
     fmt.Printf("%T %v\n"u8, g.Cells.ΔSelect(static Δe1 => Δe1.ΔCopy()), g.Cells[1].ΔCopy());
     _ = (Func<@unsafe.Pointer, ж<Grid>>)(grid);
 }

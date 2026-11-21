@@ -376,7 +376,7 @@ func TestArrayPointerElementDoorReplacesTheWholeArrayBox(t *testing.T) {
 		{"measured", "return 4 + 4;", "a measured dereference is the type's constant length"},
 		{"measuredPointer", "return 4 + 64;", "a measured conversion is the type's constant length"},
 		{"rangedIndex", "in range(4))", "a dereference ranged for its index alone ranges the type's constant length"},
-		{"rangedPointerIndex", "in range((@unsafe.Pointer.To<array<byte>>(p)), 4))", "a conversion ranged for its index alone ranges the pointer and the type's length"},
+		{"rangedPointerIndex", "in range((@unsafe.Pointer.ToArray<byte>(p, 4)), 4))", "a conversion ranged for its index alone ranges the pointer (door C, section 20) and the type's length"},
 		{"identityWhole", "", "the identity conversion's whole-array store and load keep the box"},
 	} {
 		body := emittedFunctionBody(t, mainCs, arm.function)

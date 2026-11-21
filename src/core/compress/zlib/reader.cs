@@ -182,4 +182,4 @@ internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) {
     return default;
 }
 
-} // end zlibᴛreader
+}

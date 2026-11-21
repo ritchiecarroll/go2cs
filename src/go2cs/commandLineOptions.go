@@ -84,6 +84,7 @@ type Options struct {
 	testTiered             bool          // -test-tiered: explicit opt-back-IN to the CLR's default tiered JIT when testConfig is Release (Release's own default is DOTNET_TieredCompilation=0, for deterministic timing-bounded verdicts -- see the tiering census); meaningless when testConfig is Debug
 	testBuildMaxCPU        int           // -test-build-maxcpu N: the test host's dotnet publish runs with -m:N (at most N MSBuild nodes); 0, the default, passes no -m, so MSBuild picks its own count as before
 	testPublishBinlog      bool          // -test-publish-binlog: the test host's dotnet publish writes bin/tests/publish.binlog from the first attempt and keeps it only when the publish fails (see preparePublishBinlog); off by default, since it costs ~35% of a warm publish
+	testModuleVersion      string        // -module-version: with -module-disclosures, the version of a module source that is not a module-cache directory (a copy); see moduleDisclosureVersion
 	testModuleDisclosures  string        // -module-disclosures: the committed tree of third-party module rows' disclosure manifests, <root>/<module>@<version>/<pkg>/go2cs_test_disclosures.json; consulted only when the output directory holds none, and only for the resolved version (moduleDisclosureRoot.go)
 	testAllowHandOwn       bool          // -test-allow-handown: deliberately convert a package the -stdlib queue skips (testing, unsafe, ...) into a SCRATCH root; refused by default because the default output path IS the hand-owned tree -- see requireConvertibleTestTarget
 	testHandOwnHost        bool          // DERIVED, never a flag: the package under test is a hand-owned host already present at the output path, so this run converts its TESTS ONLY -- no production emission, external variant only. Set from testTargetKind; see handOwnHostTestTarget
@@ -457,6 +458,21 @@ func isSingleFileInput(path string, options Options) bool {
 // run itself populates (core\<pkg> is written into it), so having no golib under it is the normal
 // state of a first conversion, not a fault.
 func resolveGo2CSPath(options *Options, outputAnchor string, selfLocate bool) {
+	// -recurse=nuget describes the standard library from its embedded record and reads no package_info.cs under the
+	// runtime root (publishedStdLibRecord). Say so once when the root holds a core\ tree, the thing that used to be read:
+	// such a root is often an old deploy-core staging (i9's had no core\golib\golib.csproj, so it was not even a go2cs
+	// root by isGo2CSRoot), and until 2026-11-20 its stale metadata silently won over the record.
+	if options.nugetRefs && !go2csRootWarned {
+		if stat, err := os.Stat(filepath.Join(options.go2csPath, "core")); err == nil && stat.IsDir() {
+			go2csRootWarned = true
+
+			showWarning("-recurse=nuget found go2cs standard-library sources under \"%s\" and does not read\n"+
+				"         their metadata: the published go.* packages are described by the record this converter\n"+
+				"         carries.",
+				filepath.Join(options.go2csPath, "core"))
+		}
+	}
+
 	if isGo2CSRoot(options.go2csPath) {
 		return
 	}

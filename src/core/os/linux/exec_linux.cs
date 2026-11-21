@@ -14,4 +14,4 @@ internal static void closeHandle(this ref processHandle ph) {
     syscall.Close((nint)ph.handle);
 }
 
-} // end osᴛprocessHandle
+}

@@ -371,4 +371,4 @@ internal static ж<stackObject> findObject(this ref stackScanState s, uintptr a)
     }
 }
 
-} // end runtimeᴛstackScanState
+}

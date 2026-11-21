@@ -68,4 +68,4 @@ public static ж<Float64Histogram> Float64Histogram(this Value v) {
     return @unsafe.Pointer.To<Float64Histogram>(v.pointer);
 }
 
-} // end metricsᴛValue
+}

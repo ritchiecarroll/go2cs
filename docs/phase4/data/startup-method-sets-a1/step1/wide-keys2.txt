@@ -1,0 +1,340 @@
+B3PROBE marks:
+B3PROBE   main-enter at 430 ms after process start; assemblies loaded 82; methods jitted 3377; jit time 2420 ms
+B3PROBE   exit at 716 ms after process start; assemblies loaded 87; methods jitted 5860; jit time 2817 ms
+B3PROBE site	calls	inclusive ms	items
+B3PROBE HomedIn.by	16	72.2	221
+B3PROBE GetExtensionMethodsHomedIn	16	69.5	2003
+B3PROBE StructurallyImplements	28	56.5	8
+B3PROBE CollectGoMethodSetCandidates	14	54.0	197
+B3PROBE AdapterBinder.BuildFactory	8	42.4	8
+B3PROBE Collect Duration	1	41.7	11
+B3PROBE GoDeferredRegistrations.Run(Adapters)	1	39.4	22
+B3PROBE HomedIn.gc	16	39.4	0
+B3PROBE HomedIn.pass	16	39.1	2003
+B3PROBE HomedIn.call#1 (read)	1	37.5	22
+B3PROBE ExtensionHost.Methods(read)	211	34.2	1948
+B3PROBE HomedIn.call#7+	10	30.7	1902
+B3PROBE HomedIn.pass call#7+	10	29.4	1902
+B3PROBE HomedIn.walk	16	27.8	9648
+B3PROBE LoadAssemblyExtensionHosts	87	24.2	603
+B3PROBE HomedIn.pass call#1	1	7.7	22
+B3PROBE ExtensionMethodsOf	1	3.1	0
+B3PROBE Collect *Duration	1	1.8	11
+B3PROBE Collect *rtype	1	1.7	51
+B3PROBE ExtensionHost.Type(resolve)	211	1.7	0
+B3PROBE Collect *URL	1	1.6	35
+B3PROBE Collect *Token	1	1.5	5
+B3PROBE HomedIn.call#6 (read)	1	1.4	10
+B3PROBE HomedIn.call#3 (read)	1	1.3	35
+B3PROBE HomedIn.pass call#3	1	1.2	35
+B3PROBE Collect *TypeAssertionError	1	1.2	4
+B3PROBE Collect errorString	1	0.8	2
+B3PROBE Collect *Buffer	1	0.7	55
+B3PROBE Collect *Ident	1	0.7	9
+B3PROBE Collect Kind	1	0.6	1
+B3PROBE Collect Pos	1	0.6	1
+B3PROBE Collect Token	1	0.5	5
+B3PROBE Collect *PathError	1	0.5	6
+B3PROBE HomedIn.call#2 (read)	1	0.5	22
+B3PROBE HomedIn.call#4 (read)	1	0.5	2
+B3PROBE HomedIn.call#5 (read)	1	0.5	10
+B3PROBE HomedIn.pass call#5	1	0.4	10
+B3PROBE Collect *Kind	1	0.3	1
+B3PROBE HomedIn.pass call#2	1	0.3	22
+B3PROBE HomedIn.pass call#4	1	0.3	2
+B3PROBE HomedIn.pass call#6	1	0.0	10
+B3PROBE keys StructurallyImplements: 28 distinct
+B3PROBE   go.FieldRefBox`1[go.reflect_package+rtype] -> go.error = False x1
+B3PROBE   go.FieldRefBox`1[go.reflect_package+rtype] -> go.fmt_package+Formatter = False x1
+B3PROBE   go.FieldRefBox`1[go.reflect_package+rtype] -> go.fmt_package+Stringer = True x1
+B3PROBE   go.go.token_package+Pos -> go.error = False x1
+B3PROBE   go.go.token_package+Pos -> go.fmt_package+Formatter = False x1
+B3PROBE   go.go.token_package+Pos -> go.fmt_package+Stringer = False x1
+B3PROBE   go.go.token_package+Token -> go.error = False x1
+B3PROBE   go.go.token_package+Token -> go.fmt_package+Formatter = False x1
+B3PROBE   go.go.token_package+Token -> go.fmt_package+Stringer = True x1
+B3PROBE   go.reflect_package+Kind -> go.error = False x1
+B3PROBE   go.reflect_package+Kind -> go.fmt_package+Formatter = False x1
+B3PROBE   go.reflect_package+Kind -> go.fmt_package+Stringer = True x1
+B3PROBE   go.runtime_package+errorString -> go.fmt_package+Formatter = False x1
+B3PROBE   go.StandardBox`1[go.bytes_package+Buffer] -> go.error = False x1
+B3PROBE   go.StandardBox`1[go.bytes_package+Buffer] -> go.fmt_package+Formatter = False x1
+B3PROBE   go.StandardBox`1[go.bytes_package+Buffer] -> go.fmt_package+Stringer = True x1
+B3PROBE   go.StandardBox`1[go.go.ast_package+Ident] -> go.error = False x1
+B3PROBE   go.StandardBox`1[go.go.ast_package+Ident] -> go.fmt_package+Formatter = False x1
+B3PROBE   go.StandardBox`1[go.go.ast_package+Ident] -> go.fmt_package+Stringer = True x1
+B3PROBE   go.StandardBox`1[go.io.fs_package+PathError] -> go.fmt_package+Formatter = False x1
+B3PROBE   go.StandardBox`1[go.net.url_package+URL] -> go.error = False x1
+B3PROBE   go.StandardBox`1[go.net.url_package+URL] -> go.fmt_package+Formatter = False x1
+B3PROBE   go.StandardBox`1[go.net.url_package+URL] -> go.fmt_package+Stringer = True x1
+B3PROBE   go.StandardBox`1[go.runtime_package+TypeAssertionError] -> go.error = True x1
+B3PROBE   go.StandardBox`1[go.runtime_package+TypeAssertionError] -> go.fmt_package+Formatter = False x1
+B3PROBE   go.time_package+Duration -> go.error = False x1
+B3PROBE   go.time_package+Duration -> go.fmt_package+Formatter = False x1
+B3PROBE   go.time_package+Duration -> go.fmt_package+Stringer = True x1
+B3PROBE keys AdapterBinder.BuildFactory: 8 distinct
+B3PROBE   go.FieldRefBox`1[go.reflect_package+rtype] -> go.fmt_package+Stringer x1
+B3PROBE   go.go.token_package+Token -> go.fmt_package+Stringer x1
+B3PROBE   go.reflect_package+Kind -> go.fmt_package+Stringer x1
+B3PROBE   go.StandardBox`1[go.bytes_package+Buffer] -> go.fmt_package+Stringer x1
+B3PROBE   go.StandardBox`1[go.go.ast_package+Ident] -> go.fmt_package+Stringer x1
+B3PROBE   go.StandardBox`1[go.net.url_package+URL] -> go.fmt_package+Stringer x1
+B3PROBE   go.StandardBox`1[go.runtime_package+TypeAssertionError] -> go.error x1
+B3PROBE   go.time_package+Duration -> go.fmt_package+Stringer x1
+B3PROBE keys ExtensionHost.Methods(read): 211 distinct
+B3PROBE   go.bytesᴛBuffer x1
+B3PROBE   go.go.astᴛIdent x1
+B3PROBE   go.go.astᴛinspector x1
+B3PROBE   go.go.tokenᴛPos x1
+B3PROBE   go.go.tokenᴛToken x1
+B3PROBE   go.io.fsᴛPathError x1
+B3PROBE   go.net.urlᴛURL x1
+B3PROBE   go.reflectᴛKind x1
+B3PROBE   go.reflectᴛrtype x1
+B3PROBE   go.runtime_package_asserts x1
+B3PROBE   go.runtimeᴛ_func x1
+B3PROBE   go.runtimeᴛ_panic x1
+B3PROBE   go.runtimeᴛactiveSweep x1
+B3PROBE   go.runtimeᴛaddrRange x1
+B3PROBE   go.runtimeᴛaddrRanges x1
+B3PROBE   go.runtimeᴛalloc_pollDescPaddedᴛpkg x1
+B3PROBE   go.runtimeᴛarenaIdx x1
+B3PROBE   go.runtimeᴛatomicHeadTailIndex x1
+B3PROBE   go.runtimeᴛatomicMSpanPointer x1
+B3PROBE   go.runtimeᴛatomicOffAddr x1
+B3PROBE   go.runtimeᴛatomicScavChunkData x1
+B3PROBE   go.runtimeᴛatomicSpanSetSpinePointer x1
+B3PROBE   go.runtimeᴛbitCursor x1
+B3PROBE   go.runtimeᴛbitvector x1
+B3PROBE   go.runtimeᴛBlockProfileRecordᴛpkg x1
+B3PROBE   go.runtimeᴛboundsError x1
+B3PROBE   go.runtimeᴛbucket x1
+B3PROBE   go.runtimeᴛchunkIdx x1
+B3PROBE   go.runtimeᴛCleanup x1
+B3PROBE   go.runtimeᴛcleanupQueue x1
+B3PROBE   go.runtimeᴛconsistentHeapStats x1
+B3PROBE   go.runtimeᴛcpuProfile x1
+B3PROBE   go.runtimeᴛcpuStats x1
+B3PROBE   go.runtimeᴛcpuStatsAggregate x1
+B3PROBE   go.runtimeᴛcpuStatsAggregateᴛpkg x1
+B3PROBE   go.runtimeᴛdebugLogReader x1
+B3PROBE   go.runtimeᴛdebugLogWriter x1
+B3PROBE   go.runtimeᴛdloggerFake x1
+B3PROBE   go.runtimeᴛdloggerImpl x1
+B3PROBE   go.runtimeᴛerrorAddressString x1
+B3PROBE   go.runtimeᴛerrorString x1
+B3PROBE   go.runtimeᴛfinalStatsAggregate x1
+B3PROBE   go.runtimeᴛfixalloc x1
+B3PROBE   go.runtimeᴛFrames x1
+B3PROBE   go.runtimeᴛFunc x1
+B3PROBE   go.runtimeᴛfuncInfo x1
+B3PROBE   go.runtimeᴛfuncInfoᴛpkg x1
+B3PROBE   go.runtimeᴛg x1
+B3PROBE   go.runtimeᴛgcBits x1
+B3PROBE   go.runtimeᴛgcBitsArena x1
+B3PROBE   go.runtimeᴛgcControllerState x1
+B3PROBE   go.runtimeᴛgcCPULimiterState x1
+B3PROBE   go.runtimeᴛgclinkptr x1
+B3PROBE   go.runtimeᴛgcStatsAggregate x1
+B3PROBE   go.runtimeᴛgcTrigger x1
+B3PROBE   go.runtimeᴛgcWork x1
+B3PROBE   go.runtimeᴛgList x1
+B3PROBE   go.runtimeᴛgodebugInc x1
+B3PROBE   go.runtimeᴛgoroutineProfileStateHolder x1
+B3PROBE   go.runtimeᴛgQueue x1
+B3PROBE   go.runtimeᴛgTraceState x1
+B3PROBE   go.runtimeᴛgTraceStateᴛpkg x1
+B3PROBE   go.runtimeᴛguintptr x1
+B3PROBE   go.runtimeᴛhchan x1
+B3PROBE   go.runtimeᴛheadTailIndex x1
+B3PROBE   go.runtimeᴛheapStatsAggregate x1
+B3PROBE   go.runtimeᴛheapStatsAggregateᴛpkg x1
+B3PROBE   go.runtimeᴛheapStatsDelta x1
+B3PROBE   go.runtimeᴛhexdumper x1
+B3PROBE   go.runtimeᴛhexdumpMarker x1
+B3PROBE   go.runtimeᴛimmortalWeakHandle x1
+B3PROBE   go.runtimeᴛimmortalWeakHandleMap x1
+B3PROBE   go.runtimeᴛinlineFrame x1
+B3PROBE   go.runtimeᴛinlineUnwinder x1
+B3PROBE   go.runtimeᴛitabTableType x1
+B3PROBE   go.runtimeᴛkernelVersion x1
+B3PROBE   go.runtimeᴛlfstack x1
+B3PROBE   go.runtimeᴛlimiterEvent x1
+B3PROBE   go.runtimeᴛlimiterEventStamp x1
+B3PROBE   go.runtimeᴛlinearAlloc x1
+B3PROBE   go.runtimeᴛlistHead x1
+B3PROBE   go.runtimeᴛlistHeadManual x1
+B3PROBE   go.runtimeᴛliveUserArenaChunkᴛpkg x1
+B3PROBE   go.runtimeᴛlockRank x1
+B3PROBE   go.runtimeᴛm x1
+B3PROBE   go.runtimeᴛmarkBits x1
+B3PROBE   go.runtimeᴛmaybeTraceableChan x1
+B3PROBE   go.runtimeᴛmaybeTraceableChanᴛpkg x1
+B3PROBE   go.runtimeᴛmaybeTraceablePtr x1
+B3PROBE   go.runtimeᴛmcache x1
+B3PROBE   go.runtimeᴛmcentral x1
+B3PROBE   go.runtimeᴛMemProfileRecord x1
+B3PROBE   go.runtimeᴛmemRecordCycle x1
+B3PROBE   go.runtimeᴛmetricReader x1
+B3PROBE   go.runtimeᴛmetricValue x1
+B3PROBE   go.runtimeᴛmheap x1
+B3PROBE   go.runtimeᴛmLockProfile x1
+B3PROBE   go.runtimeᴛmoduledata x1
+B3PROBE   go.runtimeᴛmPaddedᴛpkg x1
+B3PROBE   go.runtimeᴛmProfCycleHolder x1
+B3PROBE   go.runtimeᴛmspan x1
+B3PROBE   go.runtimeᴛmSpanList x1
+B3PROBE   go.runtimeᴛmSpanStateBox x1
+B3PROBE   go.runtimeᴛmuintptr x1
+B3PROBE   go.runtimeᴛmWeakPointer x1
+B3PROBE   go.runtimeᴛnotInHeap x1
+B3PROBE   go.runtimeᴛobjptr x1
+B3PROBE   go.runtimeᴛoffAddr x1
+B3PROBE   go.runtimeᴛp x1
+B3PROBE   go.runtimeᴛpageAlloc x1
+B3PROBE   go.runtimeᴛpageBits x1
+B3PROBE   go.runtimeᴛpageCache x1
+B3PROBE   go.runtimeᴛpallocBits x1
+B3PROBE   go.runtimeᴛpallocData x1
+B3PROBE   go.runtimeᴛpallocDataᴛpkg x1
+B3PROBE   go.runtimeᴛpallocSum x1
+B3PROBE   go.runtimeᴛPanicNilError x1
+B3PROBE   go.runtimeᴛpiController x1
+B3PROBE   go.runtimeᴛpinner x1
+B3PROBE   go.runtimeᴛPinner x1
+B3PROBE   go.runtimeᴛpinnerBits x1
+B3PROBE   go.runtimeᴛPinnerᴛpkg x1
+B3PROBE   go.runtimeᴛpinState x1
+B3PROBE   go.runtimeᴛplainError x1
+B3PROBE   go.runtimeᴛpMask x1
+B3PROBE   go.runtimeᴛpollCache x1
+B3PROBE   go.runtimeᴛpollDesc x1
+B3PROBE   go.runtimeᴛpollInfo x1
+B3PROBE   go.runtimeᴛprintDebugLogImpl_readStateᴛpkg x1
+B3PROBE   go.runtimeᴛprofAtomic x1
+B3PROBE   go.runtimeᴛprofBuf x1
+B3PROBE   go.runtimeᴛprofIndex x1
+B3PROBE   go.runtimeᴛpTraceStateᴛpkg x1
+B3PROBE   go.runtimeᴛpuintptr x1
+B3PROBE   go.runtimeᴛrandomEnum x1
+B3PROBE   go.runtimeᴛrandomOrder x1
+B3PROBE   go.runtimeᴛrtype x1
+B3PROBE   go.runtimeᴛrtypeᴛxpkg x1
+B3PROBE   go.runtimeᴛrwmutex x1
+B3PROBE   go.runtimeᴛscavChunkData x1
+B3PROBE   go.runtimeᴛscavChunkDataᴛpkg x1
+B3PROBE   go.runtimeᴛscavChunkFlags x1
+B3PROBE   go.runtimeᴛscavengeIndex x1
+B3PROBE   go.runtimeᴛscavengerState x1
+B3PROBE   go.runtimeᴛschedStatsAggregate x1
+B3PROBE   go.runtimeᴛsemaRoot x1
+B3PROBE   go.runtimeᴛsemTable x1
+B3PROBE   go.runtimeᴛsigctxt x1
+B3PROBE   go.runtimeᴛspanAllocType x1
+B3PROBE   go.runtimeᴛspanClass x1
+B3PROBE   go.runtimeᴛspanInlineMarkBits x1
+B3PROBE   go.runtimeᴛspanQueue x1
+B3PROBE   go.runtimeᴛspanScanOwnership x1
+B3PROBE   go.runtimeᴛspanSet x1
+B3PROBE   go.runtimeᴛspanSetBlockAlloc x1
+B3PROBE   go.runtimeᴛspanSetSpinePointer x1
+B3PROBE   go.runtimeᴛspanSPMC x1
+B3PROBE   go.runtimeᴛspecialsIter x1
+B3PROBE   go.runtimeᴛsrcFunc x1
+B3PROBE   go.runtimeᴛstackObject x1
+B3PROBE   go.runtimeᴛstackObjectRecord x1
+B3PROBE   go.runtimeᴛStackRecord x1
+B3PROBE   go.runtimeᴛstackScanState x1
+B3PROBE   go.runtimeᴛstatAggregate x1
+B3PROBE   go.runtimeᴛstatDepSet x1
+B3PROBE   go.runtimeᴛstkframe x1
+B3PROBE   go.runtimeᴛstwReason x1
+B3PROBE   go.runtimeᴛsweepClass x1
+B3PROBE   go.runtimeᴛsweepLocked x1
+B3PROBE   go.runtimeᴛsweepLockedᴛpkg x1
+B3PROBE   go.runtimeᴛsweepLocker x1
+B3PROBE   go.runtimeᴛsynctestBubble x1
+B3PROBE   go.runtimeᴛsynctestDeadlockError x1
+B3PROBE   go.runtimeᴛsyscallingThread x1
+B3PROBE   go.runtimeᴛsysMemStat x1
+B3PROBE   go.runtimeᴛsysStatsAggregate x1
+B3PROBE   go.runtimeᴛtaggedPointer x1
+B3PROBE   go.runtimeᴛticksType x1
+B3PROBE   go.runtimeᴛtimeHistogram x1
+B3PROBE   go.runtimeᴛtimer x1
+B3PROBE   go.runtimeᴛtimers x1
+B3PROBE   go.runtimeᴛtimerWhen x1
+B3PROBE   go.runtimeᴛtimespec x1
+B3PROBE   go.runtimeᴛtimeTimerᴛpkg x1
+B3PROBE   go.runtimeᴛtimeval x1
+B3PROBE   go.runtimeᴛtraceAdvancerState x1
+B3PROBE   go.runtimeᴛtraceBuf x1
+B3PROBE   go.runtimeᴛtraceBufQueue x1
+B3PROBE   go.runtimeᴛtraceEventWriter x1
+B3PROBE   go.runtimeᴛtraceLocker x1
+B3PROBE   go.runtimeᴛtraceMap x1
+B3PROBE   go.runtimeᴛtraceRegionAlloc x1
+B3PROBE   go.runtimeᴛtraceSchedResourceState x1
+B3PROBE   go.runtimeᴛtraceStackTable x1
+B3PROBE   go.runtimeᴛtraceStringTable x1
+B3PROBE   go.runtimeᴛtraceTypeTable x1
+B3PROBE   go.runtimeᴛtraceWriter x1
+B3PROBE   go.runtimeᴛtraceWriterᴛpkg x1
+B3PROBE   go.runtimeᴛTypeAssertionError x1
+B3PROBE   go.runtimeᴛtypePointers x1
+B3PROBE   go.runtimeᴛunwinder x1
+B3PROBE   go.runtimeᴛuserArena x1
+B3PROBE   go.runtimeᴛwaitq x1
+B3PROBE   go.runtimeᴛwaitReason x1
+B3PROBE   go.runtimeᴛwakeableSleep x1
+B3PROBE   go.runtimeᴛwbBuf x1
+B3PROBE   go.runtimeᴛworkbuf x1
+B3PROBE   go.runtimeᴛworkTypeᴛpkg x1
+B3PROBE   go.runtimeᴛwriteUserArenaHeapBits x1
+B3PROBE   go.runtimeᴛxRegPerP x1
+B3PROBE   go.timeᴛDuration x1
+B3PROBE keys CollectGoMethodSetCandidates: 14 distinct
+B3PROBE   *go.bytes_package+Buffer x1
+B3PROBE   *go.go.ast_package+Ident x1
+B3PROBE   *go.go.token_package+Token x1
+B3PROBE   *go.io.fs_package+PathError x1
+B3PROBE   *go.net.url_package+URL x1
+B3PROBE   *go.reflect_package+Kind x1
+B3PROBE   *go.reflect_package+rtype x1
+B3PROBE   *go.runtime_package+TypeAssertionError x1
+B3PROBE   *go.time_package+Duration x1
+B3PROBE   go.go.token_package+Pos x1
+B3PROBE   go.go.token_package+Token x1
+B3PROBE   go.reflect_package+Kind x1
+B3PROBE   go.runtime_package+errorString x1
+B3PROBE   go.time_package+Duration x1
+B3PROBE keys HomedIn.gc: 16 distinct
+B3PROBE   call 1: gen0 0, gen1 0, gen2 0, allocated 48 KB, heap 2163 KB x1
+B3PROBE   call 10: gen0 0, gen1 0, gen2 0, allocated 8 KB, heap 2499 KB x1
+B3PROBE   call 11: gen0 0, gen1 0, gen2 0, allocated 7 KB, heap 2555 KB x1
+B3PROBE   call 12: gen0 0, gen1 0, gen2 0, allocated 16 KB, heap 2595 KB x1
+B3PROBE   call 13: gen0 0, gen1 0, gen2 0, allocated 1475 KB, heap 4091 KB x1
+B3PROBE   call 14: gen0 0, gen1 0, gen2 0, allocated 0 KB, heap 4099 KB x1
+B3PROBE   call 15: gen0 0, gen1 0, gen2 0, allocated 0 KB, heap 4147 KB x1
+B3PROBE   call 16: gen0 0, gen1 0, gen2 0, allocated 32 KB, heap 4195 KB x1
+B3PROBE   call 2: gen0 0, gen1 0, gen2 0, allocated 8 KB, heap 2195 KB x1
+B3PROBE   call 3: gen0 0, gen1 0, gen2 0, allocated 23 KB, heap 2251 KB x1
+B3PROBE   call 4: gen0 0, gen1 0, gen2 0, allocated 8 KB, heap 2291 KB x1
+B3PROBE   call 5: gen0 0, gen1 0, gen2 0, allocated 8 KB, heap 2323 KB x1
+B3PROBE   call 6: gen0 0, gen1 0, gen2 0, allocated 0 KB, heap 2339 KB x1
+B3PROBE   call 7: gen0 0, gen1 0, gen2 0, allocated 24 KB, heap 2403 KB x1
+B3PROBE   call 8: gen0 0, gen1 0, gen2 0, allocated 0 KB, heap 2451 KB x1
+B3PROBE   call 9: gen0 0, gen1 0, gen2 0, allocated 0 KB, heap 2467 KB x1
+B3PROBE keys ExtensionMethodsOf: 1 distinct
+B3PROBE   go.runtime_package+TypeAssertionError x1
+B3PROBE keys HomedIn.by: 5 distinct
+B3PROBE   keyed hosts=1 homes=3 via GetExtensionMethodsFor < CollectGoMethodSetCandidatesB3 < CollectGoMethodSetCandidates < <GetGoMethodSetCandidates>b__91_0 x11
+B3PROBE   keyed hosts=2 homes=3 via GetExtensionMethodsFor < CollectGoMethodSetCandidatesB3 < CollectGoMethodSetCandidates < <GetGoMethodSetCandidates>b__91_0 x2
+B3PROBE   keyed hosts=2 homes=3 via GetExtensionMethodsFor < ExtensionMethodsOfB3 < ExtensionMethodsOf < <GetExtensionMethods>b__54_0 x1
+B3PROBE   keyed hosts=3 homes=3 via GetExtensionMethodsFor < CollectGoMethodSetCandidatesB3 < CollectGoMethodSetCandidates < <GetGoMethodSetCandidates>b__91_0 x1
+B3PROBE   UNKEYED hosts=201 homes=3 via GetExtensionMethodsHomedIn < GetBoxExtensionMethod < PointerMethod < .cctor x1
+B3PROBE keys HomedIn.pass: 4 distinct
+B3PROBE   attempt 1, hosts 1 x11
+B3PROBE   attempt 1, hosts 2 x3
+B3PROBE   attempt 1, hosts 201 x1
+B3PROBE   attempt 1, hosts 3 x1

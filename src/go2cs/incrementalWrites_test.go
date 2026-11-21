@@ -221,6 +221,88 @@ func Describe() string {
 	}
 }
 
+// A FULLY hand-owned package (every Go file's .cs marked go.GoManualConversion) emits only .cs.auto review siblings,
+// through emitAutoConversionSiblings, and re-mints its metadata after them. A pointer-adapter cast in a sibling is
+// emitted as a deferred marker that can only resolve once writePackageInfoFile has made the GoImplement records final.
+// Until 2026-11-19 that path never ran the adapter-name pass, so the marker stayed in the sibling under an exit code of
+// 0: internal/godebug's godebug.cs.auto:192, `v.bisect.Stack(&stderr)` (FLEET 2026-11-19, P5). The sibling must carry
+// the cast exactly as the compiled conversion spells it, and an unchanged re-conversion must keep the sibling's time.
+func TestFullyHandOwnedSiblingResolvesItsAdapterMarkers(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	if testing.Short() {
+		t.Skip("integration test: loads the fixture package via go/packages")
+	}
+
+	pkgDir, outDir, options := incrementalFixture(t)
+
+	writeModuleFile(t, filepath.Join(pkgDir, "c.go"), `package incr
+
+import "fmt"
+
+type Named struct{ name string }
+
+func (n *Named) String() string { return n.name }
+
+func Describe() string {
+	var s fmt.Stringer = &Named{"n"}
+	return s.String()
+}
+`)
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("first conversion: %v", err)
+	}
+
+	compiled, err := os.ReadFile(filepath.Join(outDir, "c.cs"))
+
+	if err != nil {
+		t.Fatalf("reading the normal conversion of c.go: %v", err)
+	}
+
+	// The adapter class the cast constructs, as the compiled conversion resolves its marker. Only the class name is
+	// compared: the sibling's literal spelling differs from the compiled file's on its own (a u8 string literal).
+	const adapterCast = "new NamedжStringer("
+
+	if !strings.Contains(string(compiled), adapterCast) {
+		t.Fatalf("the normal conversion of c.go no longer constructs %q, the adapter this test reads:\n%s", adapterCast, compiled)
+	}
+
+	for _, name := range []string{"a", "b", "c"} {
+		writeModuleFile(t, filepath.Join(outDir, name+".cs"), "// "+name+".cs - hand-owned\n[module: go.GoManualConversion]\n\nnamespace go;\n")
+	}
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("fully hand-owned conversion: %v", err)
+	}
+
+	siblingPath := filepath.Join(outDir, "c.cs.auto")
+	sibling, err := os.ReadFile(siblingPath)
+
+	if err != nil {
+		t.Fatalf("the fully hand-owned conversion writes c.go's review sibling: %v", err)
+	}
+
+	if strings.Contains(string(sibling), adapterNameMarkerPrefix) {
+		t.Errorf("c.cs.auto still holds an unresolved adapter-name marker:\n%s", sibling)
+	}
+
+	if !strings.Contains(string(sibling), adapterCast) {
+		t.Errorf("c.cs.auto does not construct %q as the compiled conversion does:\n%s", adapterCast, sibling)
+	}
+
+	if err := os.Chtimes(siblingPath, incrementalFixtureStamp, incrementalFixtureStamp); err != nil {
+		t.Fatalf("stamping the sibling: %v", err)
+	}
+
+	if err := processConversion(pkgDir, true, outDir, options); err != nil {
+		t.Fatalf("unchanged fully hand-owned conversion: %v", err)
+	}
+
+	if info, err := os.Stat(siblingPath); err != nil || !info.ModTime().Equal(incrementalFixtureStamp) {
+		t.Errorf("an unchanged re-conversion rewrote c.cs.auto (stat: %v, %v)", info, err)
+	}
+}
+
 // A `-tests` conversion RE-SEEDS its metadata anchors on every run (package_test_info.cs is written from a seed, and
 // package_info_internal_test.cs is removed and re-seeded) before merging the variants' records into them, so the
 // merge's byte compare reads the seed, never the previous run's file. Measured on sweep row io: every re-run rewrote

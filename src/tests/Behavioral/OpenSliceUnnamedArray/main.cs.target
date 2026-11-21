@@ -51,7 +51,7 @@ internal static void main() {
 
     arm("C", () => {
         ref var nameOff = ref heap(new int32(), out var ᏑnameOff);
-        ref var src = ref heap<array<byte>>(new byte[]{0, 1, 2, 3, 4, 5, 6, 7}.array(), out var Ꮡsrc);
+        ref var src = ref heap<array<byte>>(array<byte>([0, 1, 2, 3, 4, 5, 6, 7]), out var Ꮡsrc);
         @unsafe.Pointer off = @unsafe.Pointer.FromPinnedBox(Ꮡsrc.at<byte>(2));
         nint n = @unsafe.Pointer.CopyInto<byte>(@unsafe.Pointer.FromPinnedBox(ᏑnameOff), 0, 4, @unsafe.Pointer.View<byte>(off, 0, 4));
         fmt.Println("C", n, nameOff);

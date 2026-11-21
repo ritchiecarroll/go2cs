@@ -130,4 +130,4 @@ public static (Symbol, error) Lookup(this ж<Plugin> Ꮡp, @string symName) {
     return lookup(ref (Ꮡp).DerefOrNull(), symName);
 }
 
-} // end pluginᴛPlugin
+}

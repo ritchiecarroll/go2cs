@@ -60,4 +60,4 @@ public static void Del(this MIMEHeader h, @string key) {
     delete(h, CanonicalMIMEHeaderKey(key));
 }
 
-} // end textprotoᴛMIMEHeader
+}

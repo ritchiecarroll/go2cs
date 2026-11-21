@@ -78,7 +78,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAsgnIIAByKiggAGGgAKHgAHEgAQKoIAEyyCAAkWABEegoKCAA4itJSAvgABEJyCsoKCuJTSlIKCgpaCgpaCloKCnoKCgoKegpaCgoKcgp6CgoKCgp6CgoKCgpqCgoKIioKalLS0upSCgoKCgpyCgpiCgoIAARSCgoKChoKCgoKCgoKUgpSCgpSCnIKCgpqClIKUgoKCgpqCgpSCnIKcgpyCggABEIIAARCCmoKCgoKalgABFIKYgoIAARCCgoKCAAEUgoKCAAEQgoKCgoKCgqIACiaCgpQAAhSCABJEABIq", "196-200:1;435-435:1", "", "", "172:21")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAsgnIIAByKiggAGGgAKHgAFEgAMKoIADyyCAAUWAA0egoKCAAoilJSAvgABEJyCsoKCuJTSlIKCgpaCgpaCloKCnoKCgoKegpaCgoKcgp6CgoKCgp6CgoKCgpqCgoKIioKalLS0upSCgoKCgpyCgpiCgoIAARSCgoKChoKCgoKCgoKUgpSCgpSCnIKCgpqClIKUgoKCgpqCgpSCnIKcgpyCggABEIIAARCCmoKCgoKalgABFIKYgoIAARCCgoKCAAEUgoKCAAEQgoKCgoKCgqIACiaCgpQAAhSCABJEABAq", "196-200:1;435-435:1", "", "", "148:21")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -139,12 +139,5 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.badge)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛbadge;
-[GoMethodHost(typeof(main_package.cert)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcert;
-[GoMethodHost(typeof(main_package.dial)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛdial;
-[GoMethodHost(typeof(main_package.emblem)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛemblem;
-[GoMethodHost(typeof(main_package.relay)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛrelay;
-[GoMethodHost(typeof(main_package.seal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛseal;
 [GoMethodHost(typeof(main_package.tagged)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛtagged;
-[GoMethodHost(typeof(main_package.tallies)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛtallies;
 // </MethodHolders>

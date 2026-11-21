@@ -326,4 +326,4 @@ internal static error Close(this ref streamWriter w) {
     return w.c.writeRecord(w.recType, w.reqId, default);
 }
 
-} // end fcgiᴛstreamWriter
+}

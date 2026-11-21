@@ -343,4 +343,4 @@ public static (ProcState from, ProcState to) Proc(this StateTransition d) {
     return ((ProcState)d.oldState, (ProcState)d.newState);
 }
 
-} // end traceᴛStateTransition
+}

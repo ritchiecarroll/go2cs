@@ -338,7 +338,9 @@ name — scoped to a root that *looks* like a corpus (`isGo2CSRoot`, i.e. `core/
   side was WRITTEN** — a single-target conversion re-emits only its own per-GOOS files, so per-PATH
   diffs report fresh-vs-seeded pairs, and a host-default reconvert reports ZERO diff on `linux/` files
   another lane measured as carrying missing forced-init hooks. Classify by write-evidence PER TARGET;
-  measure an L3 package with the three-target emission.
+  measure an L3 package with the emission of every flavour the corpus carries (today four: windows/amd64,
+  linux/amd64, darwin/amd64, linux/arm64). <!-- 2026-11-20 (board tt, COORD 152556Z): was "the three-target emission";
+  a regen measured on three flavours missed linux/arm64 (P2 152207Z; corpus-reconvert §2 holds the incident). -->
 - **A single-target number is not "the" population** — report union AND intersection; the GAP between
   them is the finding.
 

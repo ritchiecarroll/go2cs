@@ -134,11 +134,11 @@ var mallocScanTable = [513]func(size uintptr, typ *_type, needzero bool) unsafe.
 ```
 <!-- source: src/core/runtime/malloc_tables_generated.cs:9-523 -->
 ```csharp
-[GoLazy] partial class lazyᴛmallocScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable = new Func<uintptr, ж<_type>, bool, @unsafe.Pointer>[]{
+[GoLazy] partial class lazyᴛmallocScanTable { internal static array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>> mallocScanTable = array<Func<uintptr, ж<_type>, bool, @unsafe.Pointer>>([
     mallocPanic,
     mallocgcSmallScanNoHeaderSC1,
 …
-}.array(); }
+]); }
 ```
 
 go2cs-gen's `LazyHolderGenerator` completes each holder. It gives the package class a `ref` accessor under the var's

@@ -179,4 +179,4 @@ internal static bool typeset(this ref TypeParam t, Func<Type, Type, bool> f) {
     return t.iface().typeSet().all(f);
 }
 
-} // end typesᴛTypeParam
+}

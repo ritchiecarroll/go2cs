@@ -54,16 +54,16 @@ partial class math_package {
 //   Stephen L. Moshier
 //   moshier@na-net.ornl.gov
 //
-internal static array<float64> tanhP = new float64[]{
+internal static array<float64> tanhP = array<float64>([
     -9.64399179425052238628e-1D,
     -9.92877231001918586564e1D,
     -1.61468768441708447952e3D
-}.array();
-internal static array<float64> tanhQ = new float64[]{
+]);
+internal static array<float64> tanhQ = array<float64>([
     1.12811678491632931402e2D,
     2.23548839060100448583e3D,
     4.84406305325125486048e3D
-}.array();
+]);
 
 // Tanh returns the hyperbolic tangent of x.
 //

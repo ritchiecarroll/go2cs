@@ -1192,4 +1192,4 @@ internal static nat subMod2N(this nat z, nat x, nat y, nuint n) {
     return z.add(z, natOne);
 }
 
-} // end bigᴛnat
+}

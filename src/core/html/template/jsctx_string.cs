@@ -18,7 +18,7 @@ internal static void _ᴛ4() {
 internal static ref readonly @string _jsCtx_name => ref _jsCtx_nameᵇ;
 private static readonly @string _jsCtx_nameᵇ = "jsCtxRegexpjsCtxDivOpjsCtxUnknown"u8;
 
-internal static array<uint8> _jsCtx_index = new uint8[]{0, 11, 21, 33}.array();
+internal static array<uint8> _jsCtx_index = array<uint8>([0, 11, 21, 33]);
 
 } partial class templateᴛjsCtx {
 
@@ -29,4 +29,4 @@ internal static @string String(this jsCtx i) {
     return _jsCtx_name.slice(_jsCtx_index[i], _jsCtx_index[i + 1]);
 }
 
-} // end templateᴛjsCtx
+}

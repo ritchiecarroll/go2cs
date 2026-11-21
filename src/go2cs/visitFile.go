@@ -274,7 +274,13 @@ func (v *Visitor) visitFile(file *ast.File) {
 		}
 	}
 
-	v.writeOutputLn("} // end %s", v.openClassName)
+	// The file's own class is named where it closes the file; a method holder the file's last method left open
+	// closes bare, as a holder does wherever the next declaration switches class.
+	if v.openClassName == v.fileClassName {
+		v.writeOutputLn("} // end %s", v.openClassName)
+	} else {
+		v.writeOutputLn("}")
+	}
 
 	if cgoPart.Len() > 0 {
 		v.outputBuilder.WriteString(v.newline)

@@ -457,6 +457,10 @@ func (v *Visitor) getAliasQualifiedTypeName(t types.Type, isUnderlying bool) str
 				}
 			}
 
+			// A shape-witness CARRIER names its canonical witness for each selected position after the declared
+			// arguments, so the C# identity is the same wherever the Go type is written (shapeWitness.go).
+			args = append(args, v.shapeWitnessInstanceArgs(named.Origin().Obj(), typeArgs, true)...)
+
 			if pkg := obj.Pkg(); pkg != nil && pkg != v.pkg {
 				// Prefer THIS FILE's actual import alias for the type's package over the canonical
 				// package NAME — the SAME rule the non-generic arm below already takes, against the
@@ -856,6 +860,9 @@ func (v *Visitor) getFullyQualifiedTypeName(t types.Type, isUnderlying bool) str
 					args[i] = v.getFullyQualifiedTypeName(typeArgs.At(i), isUnderlying)
 				}
 			}
+
+			// A same-package shape-witness CARRIER names its witnesses here too (shapeWitness.go); a foreign one is stage 2.
+			args = append(args, v.shapeWitnessInstanceArgs(named.Origin().Obj(), typeArgs, true)...)
 
 			return qualifier + getSanitizedIdentifier(obj.Name()) + "[" + strings.Join(args, ", ") + "]"
 		}

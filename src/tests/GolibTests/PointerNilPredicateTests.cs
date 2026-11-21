@@ -270,8 +270,9 @@ public class PointerNilPredicateTests
     // (crypto/tls's TestCloneNonFuncFields is the measured case). The behavioral half is guarded by
     // the DeepEqual test's `guarded` struct; the classification itself is guarded here.
 
-    // A stand-in for a hand-owned shim's backing object — sync.Mutex's SemaphoreSlim gate,
-    // sync.RWMutex's RWState. A plain managed class: no ж<T>, no IPointer<T>, nothing to read.
+    // A stand-in for a hand-owned shim's backing object — sync.WaitGroup's WaitGroupState today, and
+    // sync.Mutex's SemaphoreSlim gate and sync.RWMutex's RWState until each took Go's layout. A plain
+    // managed class: no ж<T>, no IPointer<T>, nothing to read.
     private sealed class opaqueHandle
     {
         internal readonly object Gate = new();

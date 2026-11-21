@@ -411,4 +411,4 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
     return result;
 }
 
-} // end suffixarrayᴛIndex
+}

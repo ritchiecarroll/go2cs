@@ -707,4 +707,4 @@ internal static void shortVarDecl(this ж<Checker> Ꮡcheck, positioner pos, sli
     }
 }
 
-} // end typesᴛChecker
+}

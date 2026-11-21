@@ -3,7 +3,6 @@ namespace go;
 using fmt = fmt_package;
 using typelib = FormatTypeAdapters.typelib_package;
 using FormatTypeAdapters;
-using static main_package;
 
 partial class main_package {
 
@@ -15,21 +14,13 @@ partial struct loud {
     internal nint n;
 }
 
-} partial class mainᴛloud {
-
 internal static @string greet(this ref loud l) { return "LOUD"; }
-
-} partial class main_package {
 
 partial struct soft {
     internal nint n;
 }
 
-} partial class mainᴛsoft {
-
 internal static @string greet(this soft s) { return "soft"; }
-
-} partial class main_package {
 
 partial interface stamper {
     @string Stamp();

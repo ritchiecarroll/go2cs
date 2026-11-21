@@ -1586,4 +1586,4 @@ internal static void singleValue(this ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
     }
 }
 
-} // end typesᴛChecker
+}

@@ -212,7 +212,7 @@ internal static UntypedInt _HW_PAGESIZE => 7;
 
 internal static int32 getCPUCount() {
     // Use sysctl to fetch hw.ncpu.
-    ref var mib = ref heap<array<uint32>>(new uint32[]{_CTL_HW, _HW_NCPU}.array(), out var Ꮡmib);
+    ref var mib = ref heap<array<uint32>>(array<uint32>([_CTL_HW, _HW_NCPU]), out var Ꮡmib);
     ref var @out = ref heap<uint32>((uint32)0, out var Ꮡout);
     ref var nout = ref heap<uintptr>(/* unsafe.Sizeof(out) */ (uintptr)4, out var Ꮡnout);
     var ret = sysctl(Ꮡmib.at<uint32>(0), 2, Ꮡout.Reinterpret<uint32, byte>(), Ꮡnout, nil, 0);
@@ -224,7 +224,7 @@ internal static int32 getCPUCount() {
 
 internal static uintptr getPageSize() {
     // Use sysctl to fetch hw.pagesize.
-    ref var mib = ref heap<array<uint32>>(new uint32[]{_CTL_HW, _HW_PAGESIZE}.array(), out var Ꮡmib);
+    ref var mib = ref heap<array<uint32>>(array<uint32>([_CTL_HW, _HW_PAGESIZE]), out var Ꮡmib);
     ref var @out = ref heap<uint32>((uint32)0, out var Ꮡout);
     ref var nout = ref heap<uintptr>(/* unsafe.Sizeof(out) */ (uintptr)4, out var Ꮡnout);
     var ret = sysctl(Ꮡmib.at<uint32>(0), 2, Ꮡout.Reinterpret<uint32, byte>(), Ꮡnout, nil, 0);
