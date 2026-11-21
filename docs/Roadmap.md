@@ -172,7 +172,16 @@ before Go 1.28 ships in about February 2027.
   ([Performance](#performance));
 - readability: a `package main` program keeps its methods in its package class;
 - tooling: support for the .NET 11 SDK, newer runtimes, and safer release checks;
-- the next cgo step, reading C memory that holds pointers ([cgo](#cgo)).
+- the next cgo step, reading C memory that holds pointers ([cgo](#cgo));
+- a runtime-library change that cuts the memory and image size of a Native AOT publish of a large program
+  ([Native AOT and trimming](#native-aot-and-trimming));
+- a pointer to an unnamed array of another type, kept in a local variable, views the memory in place, over C memory
+  and over Go storage that a box holds still.
+  <!-- COORD rulings 20261121T081449Z: the Native AOT change is i9's lever E (golib's seven per-type box tables become
+       one GoBoxTables), merged in train 1 (43982146a0). The array view is door C, merged in train 1; its scope, from
+       P5 20261121T081646Z and docs/phase4/DESIGN-array-pointer-doors.md section 20.1: `(*[N]E)(unsafe.Pointer(x))`
+       bound to a local never re-pointed and whose address is never taken, E unnamed with no references; over Go
+       memory only when a box holds the storage still and all N elements lie inside it, refused otherwise. -->
 
 It does not wait for goroutine scheduling. With its fixes, the converted `modernc.org/sqlite` passes its own
 root test package on linux/amd64, measured on the development tree.
@@ -197,10 +206,9 @@ rest of cgo Phase 3 ([cgo](#cgo)).
 February 2027, when the 1.26 series leaves support ([Go releases](#go-releases)). It includes the conversion
 design for generic methods.
 
-**Planned for a later release:**
-- viewing a Go array through a pointer to an array of another type, when that pointer is kept;
-- as an option, a runtime-library change that cuts the memory and image size of a Native AOT publish of a large
-  program ([Native AOT and trimming](#native-aot-and-trimming)).
+**Planned for a later release:** the same array view when the pointer is passed to a function, stored in a field or
+re-pointed, when the array type is named, and when its element type holds references. Each is refused by name until
+then.
 
 ## Phase 4: validation against Go's own tests
 
@@ -306,8 +314,8 @@ AOT. Done so far:
   <!-- About 0.47 s against about 3.5 s for a small converted program, win-x64, one development machine
        (DATA-hop126-perf.md §11.8, batch 214). -->
 
-**Later stages** cover method sets and stack frames, and, as an option for a later release, a
-runtime-library change that cuts the memory and image size of the publish of a large program.
+**Later stages** cover method sets and stack frames. 1.26.11.2 carries a runtime-library change that cuts the memory
+and image size of the publish of a large program.
 
 Converted packages are built for the default x64 instruction set: `x86-64-v3` gives no gain across the
 benchmark suite on `win-x64`, and an image built that way does not start without AVX2.
