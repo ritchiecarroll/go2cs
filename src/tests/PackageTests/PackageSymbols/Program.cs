@@ -29,8 +29,31 @@ public static class Program
         });
 
         System.Console.WriteLine("PACKAGE-SYMBOLS: " + found);
+        System.Console.WriteLine("STRUCTURAL-ASSERT: " + StructuralAssert());
         System.Console.WriteLine("GOSCHED-ESCALATION: " + MeasureGoschedEscalation());
         return 0;
+    }
+
+    // Two type assertions the runtime settles from the value's method set, as a Go program's v.(I) does whenever the
+    // value's managed type does not declare I (P2, 2026-11-21, COORD ruling for train 2). In Go:
+    //     var v any = sort.IntSlice{3, 1, 2}
+    //     _, ok := v.(runtime.Error)    // false: IntSlice has no Error or RuntimeError method
+    //     var p any = new(runtime.PanicNilError)
+    //     _, ok = p.(error)             // true: *PanicNilError has Error
+    // Both reach builtin.Implements, then StructurallyImplements and the extension-method scan, keyed by a type of a
+    // go.* package; the second is TRUE only if the scan finds PanicNilError's Error, since the pointer box declares
+    // no error. Under Native AOT that scan read a metadata token the runtime does not have and threw (train 1, B3
+    // A1), so every AOT program that took such an assertion died. Judged: false, then true.
+    private static string StructuralAssert()
+    {
+        object v = new sort_package.IntSlice(new nint[] { 3, 1, 2 }.slice());
+        (runtime_package.Error _, bool miss) = v._<runtime_package.Error>(ᐧ);
+
+        object p = @new<runtime_package.PanicNilError>();
+        (error _, bool hit) = p._<error>(ᐧ);
+
+        return $"sort.IntSlice is runtime.Error: {(miss ? "true" : "false")}; " +
+            $"*runtime.PanicNilError is error: {(hit ? "true" : "false")}";
     }
 
     // The Gosched escalation's clock as THIS deployment binds it (C1, 2026-11-08, COORD ruling for the .3 release
