@@ -292,6 +292,80 @@ public class TwinSurfaceTests
         StringAssert.Contains(twins, "Areaꞏtwin();", "a slot for every member, parking or not");
     }
 
+    // P8 (11.4): the twin set does not depend on which lowering the plain member got. Three builds of one package: the
+    // base, (a) the sstring pilot list emptied (the converter writes @string), and (b) one pointer receiver flipped from
+    // `this ref T` to `this ж<T>` by a body edit (an added nil check). Members that park and members that cannot.
+    private const string P8Base = """
+            public static nint slen(sstring s) => 0;
+
+            public static void sput(sstring s, nint n) { ᐸꟷ(ch); }
+
+            public static void pset(this ref T t, nint v) { t.x = v; }
+
+            public static void pbk(this ref T t) { ᐸꟷ(ch); t.x = 1; }
+
+        """;
+
+    private const string P8NoPilot = """
+            public static nint slen(@string s) => 0;
+
+            public static void sput(@string s, nint n) { ᐸꟷ(ch); }
+
+            public static void pset(this ref T t, nint v) { t.x = v; }
+
+            public static void pbk(this ref T t) { ᐸꟷ(ch); t.x = 1; }
+
+        """;
+
+    private const string P8Flipped = """
+            public static nint slen(sstring s) => 0;
+
+            public static void sput(sstring s, nint n) { ᐸꟷ(ch); }
+
+            public static void pset(this ж<T> Ꮡt, nint v) { if (Ꮡt is null) return; ref var t = ref Ꮡt.DerefOrNull(); t.x = v; }
+
+            public static void pbk(this ref T t) { ᐸꟷ(ch); t.x = 1; }
+
+        """;
+
+    // Each twin member's name, parameter and result types and names, and its attributes, less the compiler's own
+    // implementation marks (a state machine's, nullable context): the surface a caller binds.
+    private static string[] TwinMetadata(string shapes)
+    {
+        (_, Diagnostic[] errors) = RunWith(null, null, shapes);
+        Assert.AreEqual(0, errors.Length, Errors(errors));
+
+        System.Reflection.Assembly built = System.Reflection.Assembly.Load(LastImage!);
+        string[] internals = ["AsyncStateMachineAttribute", "NullableContextAttribute", "NullableAttribute", "DebuggerStepThroughAttribute", "ScopedRefAttribute"];
+
+        return built.GetType("go.box_package", throwOnError: true)!
+            .GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
+            .Where(method => method.Name.EndsWith("ꞏtwin", StringComparison.Ordinal))
+            .Select(method => method.Name + "(" + string.Join(", ", method.GetParameters().Select(parameter => parameter.ParameterType + " " + parameter.Name)) + ") -> " +
+                              method.ReturnType + " [" + string.Join(", ", method.CustomAttributes.Select(attribute => attribute.AttributeType.Name)
+                                  .Where(name => !internals.Contains(name)).OrderBy(name => name, StringComparer.Ordinal)) + "]")
+            .OrderBy(line => line, StringComparer.Ordinal).ToArray();
+    }
+
+    [TestMethod]
+    public void P8_TheTwinSetDoesNotDependOnThePlainLowering()
+    {
+        string[] baseline = TwinMetadata(P8Base), noPilot = TwinMetadata(P8NoPilot), flipped = TwinMetadata(P8Flipped);
+        string Show(string[] lines) => string.Join("\n", lines);
+
+        Assert.AreEqual(4, baseline.Length, Show(baseline));
+        Assert.AreEqual(Show(baseline), Show(flipped), "(b) one receiver flipped from ref to ж: identical, attributes included");
+
+        // (a), as found (DESIGN-mn-twin-set.md 12.4, P8): the call surface is identical; the ONE difference is the
+        // forwarder mark of a pilot member that parks (sput). Under the pilot its body keeps the sstring parameter, so it
+        // is refused a state machine and forwarded; with @string it is twinned. Pinned exactly, so any other difference
+        // still fails, until COORD rules on the mark.
+        string Unmarked(string line) => line.Replace(", GoParkForwarderAttribute", "");
+        Assert.AreEqual(Show(baseline.Select(Unmarked).ToArray()), Show(noPilot.Select(Unmarked).ToArray()), "(a) the call surface");
+        CollectionAssert.AreEqual(new[] { "sputꞏtwin(go.string s, System.IntPtr n) -> go.golib.GoTask [EditorBrowsableAttribute]" },
+            noPilot.Except(baseline).ToArray(), "(a) the only difference: sput's twin is a state machine, not a forwarder");
+    }
+
     private static int Lines(string twins, string text) => twins.Split('\n').Count(line => line.Contains(text, StringComparison.Ordinal));
 
     [TestMethod]

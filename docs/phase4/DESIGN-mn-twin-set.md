@@ -379,3 +379,17 @@ F2, F6; F3, F5; F4, F11; F7, F8; the guard (F9) and O2 (F10); P8; then the closu
   - GenTests 710 of 710 under the new default, with no earlier row changed.
   - Owed at the closure arms (Q1): the 7b kit's twin builds that pass the interface switches now need
     `GoTwinsArm=true`, or they can drop the switches, since their default is now the whole set.
+- **Step 6, P8 (11.4): MISSED as worded, on one attribute.** The row compiles three builds of one package and
+  compares each twin member's name, parameter and result types, and attributes. It leaves out the compiler's
+  implementation marks (state machine, nullable).
+  - (b), one receiver flipped from `this ref T` to `this ж<T>`: identical, attributes included.
+  - (a), the sstring pilot list emptied: the call surface is identical. The ONE difference is the `[GoParkForwarder]`
+    mark of a pilot member that PARKS (`sput`). Under the pilot its body keeps the `sstring` parameter, so it is
+    refused a state machine and forwarded. With `@string` it is twinned, without the mark. A pilot member that
+    cannot park is identical in both.
+  - Not a break: a caller built against either build binds and runs correctly against the other. A caller bound
+    plain to the forwarder keeps calling plain, holding a carrier, until it is rebuilt.
+  - The row pins the difference exactly, so any other difference fails. RULING ASKED: (i) the mark is binding
+    advice, not surface, so accept it; or (iii) mark only members that cannot park (the generator's park analysis),
+    so a refused member that parks gets an unmarked forwarder that callers await. The surface then stays fixed when
+    a refusal is lifted, at the cost of more caller state machines now.
