@@ -5925,7 +5925,8 @@ func TestExternalVariantHoldersAreDeclaredOnlyInTheExternalUnit(t *testing.T) {
 	if strings.Contains(testInfo, "value_testᴛbuffer") {
 		t.Fatalf("package_test_info.cs declares the external holder value_testᴛbuffer a second time (CS0579):\n%s", testInfo)
 	}
-	if !strings.Contains(testInfo, productionHolder) {
+	// The merging write respells the seeded holder's System attribute short (applyPackageInfoSystemUsings).
+	if !strings.Contains(testInfo, respellSystemAttributes(productionHolder, true)) {
 		t.Fatalf("package_test_info.cs must keep the production holder valueᴛWriter:\n%s", testInfo)
 	}
 
@@ -5961,7 +5962,7 @@ func TestExternalVariantHoldersAreDeclaredOnlyInTheExternalUnit(t *testing.T) {
 	if n := strings.Count(string(controlData), "public static partial class value_testᴛbuffer;"); n != 1 {
 		t.Fatalf("control: package_test_info.cs declares value_testᴛbuffer %d times, want 1:\n%s", n, controlData)
 	}
-	if !strings.Contains(string(controlData), productionHolder) {
+	if !strings.Contains(string(controlData), respellSystemAttributes(productionHolder, true)) {
 		t.Fatalf("control: package_test_info.cs must keep the production holder valueᴛWriter:\n%s", controlData)
 	}
 

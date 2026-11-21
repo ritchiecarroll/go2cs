@@ -194,12 +194,12 @@ func TestMethodsTakeTheSuffixFormWithAForwarderInTheirHolder(t *testing.T) {
 
 	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
 		"// <MethodHolders>\n",
-		"[GoMethodHost(typeof(main_package.Box)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛBox;\n",
+		"[GoMethodHost(typeof(main_package.Box)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛBox;\n",
 		"// </MethodHolders>\n",
 		"// <MethodForwarders>\npartial class mainᴛBox {\n",
-		"    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Limit(this Box b) => main_package.Limit⁔(b);\n",
-		"    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Count(this ref Box b) => main_package.Count⁔(ref b);\n",
-		"    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Kind Kind(this Box b) => main_package.Kind⁔(b);\n",
+		"    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Limit(this Box b) => main_package.Limit⁔(b);\n",
+		"    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Count(this ref Box b) => main_package.Count⁔(ref b);\n",
+		"    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Kind Kind(this Box b) => main_package.Kind⁔(b);\n",
 		"}\n// </MethodForwarders>\n",
 	}, nil)
 }
@@ -863,7 +863,7 @@ func TestPromotedForwarderTakesTheSuffixFormInItsStructsHolder(t *testing.T) {
 	})
 
 	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
-		"[GoMethodHost(typeof(main_package.counting)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounting;\n",
+		"[GoMethodHost(typeof(main_package.counting)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mainᴛcounting;\n",
 		"internal static Driver Driver(this counting recvᴛ) => main_package.Driver⁔(recvᴛ);\n",
 		"internal static @string Name(this ref counting c) => main_package.Name⁔(ref c);\n",
 	}, nil)
@@ -1287,8 +1287,8 @@ func TestGenericHolderIsNamedByTheTypeWhateverItsConstraint(t *testing.T) {
 	})
 
 	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
-		"[GoMethodHost(typeof(iterators_package.Iterator<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iteratorsᴛIterator;\n",
-		"[GoMethodHost(typeof(iterators_package.Window<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iteratorsᴛWindow;\n",
+		"[GoMethodHost(typeof(iterators_package.Iterator<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iteratorsᴛIterator;\n",
+		"[GoMethodHost(typeof(iterators_package.Window<,>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iteratorsᴛWindow;\n",
 		"partial class iteratorsᴛIterator {\n",
 		"partial class iteratorsᴛWindow {\n",
 		"public static void SetText<T>(this ref Iterator<T> it, T data) where T : /* lib.Text */ IByteSeq<T, byte>, new() => iterators_package.SetText⁔<T>(ref it, data);\n",

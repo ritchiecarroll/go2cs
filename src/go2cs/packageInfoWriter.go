@@ -1023,6 +1023,7 @@ func writePackageInfoFile(packageInfoFileName string, mergeExisting bool) {
 	packageInfoLines = applyCgoPseudoPackageStamp(packageInfoLines, mergeExisting)
 	packageInfoLines = applyMethodHolderSection(packageInfoLines, mergeExisting)
 	packageInfoLines = applyMethodForwarderSection(packageInfoLines, mergeExisting)
+	packageInfoLines = applyPackageInfoSystemUsings(packageInfoLines)
 
 	// Remove trailing empty lines
 	for i := len(packageInfoLines) - 1; i >= 0; i-- {

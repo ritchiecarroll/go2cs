@@ -45,7 +45,8 @@ const MethodHolderSection = "MethodHolders"
 
 // methodHolderAttributes is what every method-holder declaration carries after its receiver attribute:
 // the class is plumbing a consumer never names, so completion lists leave it out. Its methods are the
-// type's Go methods and carry no such mark.
+// type's Go methods and carry no such mark. This is the global:: spelling; applyPackageInfoSystemUsings
+// writes the short one wherever the package declares no name its using would make ambiguous.
 const methodHolderAttributes = "global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)"
 
 // packageMethodHolders maps each method-holder class this emission unit wrote a block of to the C#
@@ -70,7 +71,7 @@ const MethodForwarderSection = "MethodForwarders"
 
 // methodForwarderAttributes leads every forwarder: inlined into its callers, and hidden from every stack walk
 // (Exception.StackTrace drops [StackTraceHidden]; runtime.Callers skips it through isGoSourceFrame) and from the
-// debugger's step-into, so the body's frame is the Go method's one frame.
+// debugger's step-into, so the body's frame is the Go method's one frame. Spelled as methodHolderAttributes is.
 const methodForwarderAttributes = "global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough"
 
 // methodForwarder is one recorded forwarder: its holder, its line, and a key ordering it as Go declares the
@@ -1383,6 +1384,10 @@ func applyMethodForwarderSection(packageInfoLines []string, mergeExisting bool) 
 			case line == "}":
 				holder = ""
 			case holder != "" && line != "":
+				// An earlier write may have spelled the attributes short; this pass compares, and
+				// applyPackageInfoSystemUsings respells, in the global:: spelling.
+				line = respellSystemAttributes(line, false)
+
 				if !seen[holder+"\x00"+line] {
 					seen[holder+"\x00"+line] = true
 					byHolder[holder] = append(byHolder[holder], line)

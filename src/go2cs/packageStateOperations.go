@@ -54,6 +54,7 @@ func resetPackageState(pkg *packages.Package) {
 	cgoRouteFunctions = nil
 	cgoCheckClosures = nil
 	currentPackagePath = pkg.PkgPath
+	packageInfoSystemClashes = systemUsingClashes(pkg.Types)
 	currentPackageGorootVendored = false
 	currentPackageOutsideGoroot = pkg.Dir != "" && !isPathUnder(pkg.Dir, filepath.Join(build.Default.GOROOT, "src"))
 	packageHoistsLiterals = false

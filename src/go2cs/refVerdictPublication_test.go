@@ -403,7 +403,7 @@ func maskPositionMapRecords(lines []string) []string {
 // maskMethodForwarders masks each forwarder declaration of the <MethodForwarders> section (recordMethodForwarder).
 func maskMethodForwarders(lines []string) []string {
 	for i, line := range lines {
-		if strings.HasPrefix(strings.TrimSpace(line), "["+methodForwarderAttributes+"]") {
+		if _, forwarder := systemAttributeLineKind(strings.TrimSpace(line)); forwarder {
 			lines[i] = "    <masked forwarder>"
 		}
 	}
