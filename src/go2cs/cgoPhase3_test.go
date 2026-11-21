@@ -340,10 +340,18 @@ const cgoP3GoMemory = "increment 3.2"
 // for every typed pointer parameter): a native box minted over managed storage. Its text names no increment.
 const cgoP3WriteThrough = "which C must not write through"
 
-// cgoP3Layout is in the refusal of a read of native memory as a Go struct whose CLR layout is not its Go layout
-// (golib RuntimeErrorPanic.cs: "cannot read native memory as {0}: its CLR layout is not its Go layout ({1})"). Its text
-// names no increment. Increment 3.2 retires it: each row asserting it becomes a row with no csFails when 3.2 reads it.
-const cgoP3Layout = "its CLR layout is not its Go layout"
+// cgoP3LayoutEntry and cgoP3LayoutEntryPointer are go2cs's refusal of a read of native memory as a Go type whose CLR
+// layout is not its Go layout (golib RuntimeErrorPanic.cs: "cannot read native memory as {0}: its CLR layout is not
+// its Go layout ({1})"), each pinned to the TYPE its rows read; the parenthesised reason is left unpinned. Their text
+// names no increment. Increment 3.2 retires both: each row asserting one becomes a row with no csFails when 3.2 reads
+// it. Hosted reading, os-matrix run 44883224786, the same on all five targets: s6nextnil exits 2 with
+// "panic: runtime error: cannot read native memory as main._Ctype_struct_go2cs_probe_entry: its CLR layout is not its
+// Go layout (field next is a managed reference where Go stores the value inline)"; s6next exits 2 with "panic: runtime
+// error: cannot read native memory as *main._Ctype_struct_go2cs_probe_entry: its CLR layout is not its Go layout (a
+// managed reference where Go stores words)".
+const cgoP3LayoutEntry = "cannot read native memory as main._Ctype_struct_go2cs_probe_entry: its CLR layout is not its Go layout"
+
+const cgoP3LayoutEntryPointer = "cannot read native memory as *main._Ctype_struct_go2cs_probe_entry: its CLR layout is not its Go layout"
 
 // cgoP3Arms are the end-to-end program's arms. An arm with neither goFails nor csFails prints the same lines and exits
 // 0 both ways. The arms with csFails hand C or a helper a pointer into Go memory: Go runs each to its end, and go2cs
@@ -400,12 +408,12 @@ func cgoP3Arms() []cgoG1Arm {
 		{name: "goviewnamedata", csFails: cgoP3WriteThrough},
 		// Increment 3.2's first reds (section 6). s6field, s6reinterp and s6slice print as Go does. The four with csFails
 		// are pinned to go2cs's refusal as the hosted legs read it, the same on all five targets (os-matrix run
-		// 44883224786); 3.2 retires each pin, and that change is 3.2's red.
+		// 44883224786; the readings are at cgoP3LayoutEntry); 3.2 retires each pin, and that change is 3.2's red.
 		{name: "s6field"},
-		{name: "s6next", csFails: cgoP3Layout},
-		{name: "s6nextnil", csFails: cgoP3Layout},
-		{name: "s6nextdirect", csFails: cgoP3Layout},
-		{name: "s6name", csFails: cgoP3Layout},
+		{name: "s6next", csFails: cgoP3LayoutEntryPointer},
+		{name: "s6nextnil", csFails: cgoP3LayoutEntry},
+		{name: "s6nextdirect", csFails: cgoP3LayoutEntry},
+		{name: "s6name", csFails: cgoP3LayoutEntry},
 		{name: "s6reinterp"},
 		{name: "s6slice"},
 		// Their twins over C memory, which run to their end both ways.
