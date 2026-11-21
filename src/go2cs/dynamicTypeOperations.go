@@ -197,10 +197,10 @@ func unresolvedDynamicTypeError() error {
 func registerDynamicTypeName(signature, csTypeName string) {
 	packageLock.Lock()
 
-	// Deterministic winner when one signature registers from multiple files/functions
-	// (file visits are concurrent, so last-wins would vary run to run — the converter is
-	// byte-deterministic): keep the lexically smallest name. Every registrant is a lifted
-	// file-level type of the same package, so any winner resolves.
+	// Deterministic winner when one signature registers from multiple files/functions: keep
+	// the lexically smallest name. File visits are sequential, in sorted file order
+	// (conversionDriver), so the winner does not depend on the visit order either way. Every
+	// registrant is a lifted file-level type of the same package, so any winner resolves.
 	if existing, ok := packageDynamicTypeNames[signature]; !ok || csTypeName < existing {
 		packageDynamicTypeNames[signature] = csTypeName
 	}
@@ -907,4 +907,30 @@ func interfaceSignatureIdentifiesIt(iface *types.Interface) bool {
 	}
 
 	return true
+}
+
+// recordLiftDeclaredPublic notes that a lift this package declares is public, so a later site whose
+// own lift would need public may reuse it (board (jj)): one Go type, one lift. access is the modifier
+// the declaration carries: "public " (publicized), "internal " (function-local, localTypeAccess), or
+// "" (go2cs-gen scopes the type by its name, as generatedTypeScope does). The record is keyed by the
+// lift name alone, which is sound because a lift name is unique within a package
+// (getUniqueLiftedTypeName claims each name package-wide).
+func recordLiftDeclaredPublic(csTypeName, access string) {
+	if csTypeName == "" || !(access == "public " || access == "" && generatedTypeScope(csTypeName) == "public") {
+		return
+	}
+
+	packageLock.Lock()
+	packagePublicLiftNames[csTypeName] = true
+	packageLock.Unlock()
+}
+
+// liftDeclaredPublic reports whether a lift registered for reuse was declared public by
+// recordLiftDeclaredPublic. This is the declaration's real accessibility, not a guess from its
+// name, which is what the removed name-based disjunct got wrong for function-local lifts.
+func liftDeclaredPublic(csTypeName string) bool {
+	packageLock.Lock()
+	public := packagePublicLiftNames[csTypeName]
+	packageLock.Unlock()
+	return public
 }
