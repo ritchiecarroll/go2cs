@@ -1222,8 +1222,9 @@ func forwarderTypeParameterNames(typeParams string) map[string]bool {
 // first. A forwarder stands at namespace scope, where a bare name is looked up in the enclosing namespaces before any
 // using (a type named like one of the root namespace's binds to that one) and then among the usings, where System's
 // `Buffer` or `Type` makes the package's own ambiguous (CS0104). So the forwarder names each of its package's types
-// through the class that declares it, as the holder's typeof does. A name already qualified, a type parameter, an
-// alias (declared at namespace scope already) and a parameter's or a tuple element's own name are left as written.
+// through the class that declares it, as the holder's typeof does, and unsafe.Pointer through unsafe_package. A name
+// already qualified, a type parameter, an alias (declared at namespace scope already) and a parameter's or a tuple
+// element's own name are left as written.
 func (v *Visitor) qualifyForwarderLocalTypes(text string, typeParamNames map[string]bool, isResult bool) string {
 	if v.pkg == nil || strings.TrimSpace(text) == "" {
 		return text
@@ -1231,6 +1232,12 @@ func (v *Visitor) qualifyForwarderLocalTypes(text string, typeParamNames map[str
 
 	qualify := func(typeText string) string {
 		return packageQualifiedNameRegex.ReplaceAllStringFunc(typeText, func(match string) string {
+			// unsafe.Pointer is spelled through each file's `using @unsafe = unsafe_package;`, which package_info.cs
+			// does not declare; the package class is the spelling an assembly attribute takes for the same reason.
+			if member, ok := strings.CutPrefix(match, "@unsafe."); ok {
+				return "unsafe_package." + member
+			}
+
 			if strings.Contains(match, ".") || typeParamNames[match] {
 				return match
 			}

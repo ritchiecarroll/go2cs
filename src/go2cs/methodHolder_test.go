@@ -1300,6 +1300,8 @@ func TestGenericHolderIsNamedByTheTypeWhateverItsConstraint(t *testing.T) {
 
 const forwarderNamespaceScopeSource = `package buf
 
+import "unsafe"
+
 type Buffer struct{ n int }
 
 type Type int
@@ -1312,6 +1314,8 @@ func (b *Buffer) Add(xs ...any) int {
 }
 
 func (b Buffer) Many(ts ...Type) int { return len(ts) + b.n }
+
+func (b *Buffer) At(p unsafe.Pointer) unsafe.Pointer { return unsafe.Add(p, b.n) }
 `
 
 // A forwarder stands at namespace scope in package_info.cs, where a bare name is looked up in the enclosing
@@ -1319,7 +1323,8 @@ func (b Buffer) Many(ts ...Type) int { return len(ts) + b.n }
 // named like one of the root namespace's would bind to it without a word. So a forwarder names each of its package's
 // types through the package class, as the holder's typeof does, while the body keeps the bare names its package class
 // resolves. A variadic parameter's `ꓸꓸꓸT` alias is a using of the body's file, so package_info.cs declares the ones
-// its forwarders name.
+// its forwarders name, and so is the `@unsafe` alias unsafe.Pointer is spelled through, so a forwarder names the
+// package class as an assembly attribute does (`unsafe_package.Pointer`).
 func TestAForwarderNamesItsPackagesTypesAndVariadicAliasesForNamespaceScope(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"buf.go": forwarderNamespaceScopeSource})
 
@@ -1334,8 +1339,10 @@ func TestAForwarderNamesItsPackagesTypesAndVariadicAliasesForNamespaceScope(t *t
 		"public static nint Many(this buf_package.Buffer b, params ꓸꓸꓸType tsʗp) => buf_package.Many⁔(b, tsʗp);\n",
 		"\nusing ꓸꓸꓸany = Span<any>;\n",
 		"\nusing ꓸꓸꓸType = Span<buf_package.Type>;\n",
+		"public static unsafe_package.Pointer At(this ref buf_package.Buffer b, unsafe_package.Pointer p) => buf_package.At⁔(ref b, p);\n",
 	}, []string{
 		"(this Buffer b",
 		"(this ref Buffer b",
+		"@unsafe.",
 	})
 }
