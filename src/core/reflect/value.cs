@@ -14,8 +14,6 @@ using runtime = runtime_package;
 using @unsafe = unsafe_package;
 using @internal;
 using Δsync = sync_package;
-using reflect = reflect_package;
-using static reflect_package;
 
 partial class reflect_package {
 
@@ -81,25 +79,21 @@ internal static flag flagMethod => /* 1 << 9 */ 512;
 internal static UntypedInt flagMethodShift => 10;
 internal static flag flagRO => /* flagStickyRO | flagEmbedRO */ 96;
 
-} partial class reflectᴛflag {
-
-internal static Kind kind(this flag f) {
+internal static Kind kind⁔(/*this*/ flag f) {
     return (Kind)(nuint)((flag)(f & flagKindMask));
 }
 
-internal static flag ro(this flag f) {
+internal static flag ro⁔(/*this*/ flag f) {
     if ((flag)(f & flagRO) != 0) {
         return flagStickyRO;
     }
     return 0;
 }
 
-} partial class reflectᴛValue {
-
 // typ returns the *abi.Type stored in the Value. This method is fast,
 // but it doesn't always return the correct type for the Value.
 // See abiType and Type, which do return the correct type.
-internal static ж<abi.Type> typ(this Value v) {
+internal static ж<abi.Type> typ⁔(/*this*/ Value v) {
     // Types are either static (for compiler-created types) or
     // heap-allocated but always reachable (for reflection-created
     // types, held in the central map). So there is no need to
@@ -111,7 +105,7 @@ internal static ж<abi.Type> typ(this Value v) {
 // pointer returns the underlying pointer represented by v.
 // v.Kind() must be Pointer, Map, Chan, Func, or UnsafePointer
 // if v.Kind() == Pointer, the base type must not be not-in-heap.
-internal static @unsafe.Pointer pointer(this Value v) {
+internal static @unsafe.Pointer pointer⁔(/*this*/ Value v) {
     if (v.typ().Size() != goarch.PtrSize || !v.typ().Pointers()) {
         throw panic("can't call pointer on a non-pointer Value");
     }
@@ -120,8 +114,6 @@ internal static @unsafe.Pointer pointer(this Value v) {
     }
     return v.ptr;
 }
-
-} partial class reflect_package {
 
 // packEface converts v to the empty interface.
 internal static any packEface(Value v) {
@@ -170,16 +162,12 @@ partial struct ValueError {
     public Kind Kind;
 }
 
-} partial class reflectᴛValueError {
-
-public static @string Error(this ref ValueError e) {
+internal static @string Error⁔(/*this*/ ref ValueError e) {
     if (e.Kind == 0) {
         return "reflect: call of "u8 + e.Method + " on zero Value"u8;
     }
     return "reflect: call of "u8 + e.Method + " on "u8 + e.Kind.String() + " Value"u8;
 }
-
-} partial class reflect_package {
 
 // go2cs generated this placeholder — func valueMethodName is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -188,8 +176,6 @@ partial struct nonEmptyInterface {
     internal ж<abi.ITab> itab;
     internal @unsafe.Pointer word;
 }
-
-} partial class reflectᴛflag {
 
 // go2cs generated this placeholder — func mustBe is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -201,27 +187,21 @@ partial struct nonEmptyInterface {
 
 // go2cs generated this placeholder — func mustBeAssignableSlow is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflectᴛValue {
-
 // go2cs generated this placeholder — func Addr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func Bool is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static void panicNotBool(this Value v) {
-    v.mustBe(reflect.Bool);
+internal static void panicNotBool⁔(/*this*/ Value v) {
+    v.mustBe(Bool);
 }
-
-} partial class reflect_package {
 
 internal static ж<abi.Type> bytesType = rtypeOf((slice<byte>)(default));
 
-} partial class reflectᴛValue {
-
 // go2cs generated this placeholder — func Bytes is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static slice<byte> bytesSlow(this Value v) {
+internal static slice<byte> bytesSlow⁔(/*this*/ Value v) {
     switch (v.kind()) {
-    case var ᴛ when ᴛ == reflect.Slice: {
+    case var ᴛ when ᴛ == Slice: {
         if (v.typ().Elem().Kind() != abi.Uint8) {
             throw panic("reflect.Value.Bytes of non-byte slice");
         }
@@ -249,7 +229,7 @@ internal static slice<byte> bytesSlow(this Value v) {
 // an element of a slice, an element of an addressable array,
 // a field of an addressable struct, or the result of dereferencing a pointer.
 // If CanAddr returns false, calling [Value.Addr] will panic.
-public static bool CanAddr(this Value v) {
+internal static bool CanAddr⁔(/*this*/ Value v) {
     return (flag)(v.flag & flagAddr) != 0;
 }
 
@@ -258,7 +238,7 @@ public static bool CanAddr(this Value v) {
 // obtained by the use of unexported struct fields.
 // If CanSet returns false, calling [Value.Set] or any type-specific
 // setter (e.g., [Value.SetBool], [Value.SetInt]) will panic.
-public static bool CanSet(this Value v) {
+internal static bool CanSet⁔(/*this*/ Value v) {
     return (flag)(v.flag & ((flag)(flagAddr | flagRO))) == flagAddr;
 }
 
@@ -266,14 +246,10 @@ public static bool CanSet(this Value v) {
 
 // go2cs generated this placeholder — func CallSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflect_package {
-
 internal static readonly ж<bool> ᏑcallGC = new StaticBox<bool>(default(bool));
 internal static ref bool callGC => ref ((StaticBox<bool>)ᏑcallGC).ValueSlot; // for testing; see TestCallMethodJump and TestCallArgLive
 
 internal const bool debugReflectCall = false;
-
-} partial class reflectᴛValue {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string reflectValueCallˢ => ref reflectValueCallˢᵇ;
@@ -285,7 +261,7 @@ private static readonly @string precomputedValueOffsetˢᵇ = "precomputed value
 internal static ref readonly @string tvSize0ˢ => ref tvSize0ˢᵇ;
 private static readonly @string tvSize0ˢᵇ = "tv.Size() != 0"u8;
 
-internal static slice<Value> call(this Value v, @string op, slice<Value> @in) {
+internal static slice<Value> call⁔(/*this*/ Value v, @string op, slice<Value> @in) {
     // Get function pointer, type.
     var t = v.typ().FuncType();
     @unsafe.Pointer fn = default;
@@ -496,7 +472,7 @@ break_stepsLoop:;
     }
 
     // Call.
-    reflect.call(frametype, fn, stackArgs, (uint32)frametype.Size(), (uint32)abid.retOffset, (uint32)frameSize, ᏑregArgs);
+    call(frametype, fn, stackArgs, (uint32)frametype.Size(), (uint32)abid.retOffset, (uint32)frameSize, ᏑregArgs);
 
     // For testing; see TestCallMethodJump.
     if (callGC) {
@@ -598,19 +574,13 @@ break_stepsLoop:;
     return ret;
 }
 
-} partial class reflect_package {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string typSize0ˢ => ref typSize0ˢᵇ;
 private static readonly @string typSize0ˢᵇ = "typ.size > 0"u8;
 internal static ref readonly @string ptrˢ => ref ptrˢᵇ;
 private static readonly @string ptrˢᵇ = "1-ptr"u8;
-internal static ref readonly @string precomputedValueOffsetˢ => ref precomputedValueOffsetˢᵇ;
-private static readonly @string precomputedValueOffsetˢᵇ = "precomputed value offset"u8;
 internal static ref readonly @string reflectMakeFuncˢ => ref reflectMakeFuncˢᵇ;
 private static readonly @string reflectMakeFuncˢᵇ = "reflect.MakeFunc"u8;
-internal static ref readonly @string precomputedStackArgˢ => ref precomputedStackArgˢᵇ;
-private static readonly @string precomputedStackArgˢᵇ = "precomputed stack arg offset"u8;
 
 // callReflect is the call implementation used by a function
 // returned by MakeFunc. In many ways it is the opposite of the
@@ -1155,11 +1125,9 @@ internal static @string funcName(Func<slice<Value>, slice<Value>> fʗp) {
     return closureˢ;
 }
 
-} partial class reflectᴛValue {
-
 // go2cs generated this placeholder — func Cap is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static nint capNonSlice(this Value v) {
+internal static nint capNonSlice⁔(/*this*/ Value v) {
     Kind k = v.kind();
     switch (k) {
     case var ᴛ when ᴛ == Array: {
@@ -1181,7 +1149,7 @@ internal static nint capNonSlice(this Value v) {
 // go2cs generated this placeholder — func Close is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // CanComplex reports whether [Value.Complex] can be used without panicking.
-public static bool CanComplex(this Value v) {
+internal static bool CanComplex⁔(/*this*/ Value v) {
     switch (v.kind()) {
     case var ᴛ when ᴛ == Complex64 || ᴛ == Complex128: {
         return true;
@@ -1200,14 +1168,14 @@ public static bool CanComplex(this Value v) {
 // FieldByIndex returns the nested field corresponding to index.
 // It panics if evaluation requires stepping through a nil
 // pointer or a field that is not a struct.
-public static Value FieldByIndex(this Value v, slice<nint> index) {
+internal static Value FieldByIndex⁔(/*this*/ Value v, slice<nint> index) {
     if (len(index) == 1) {
         return v.Field(index[0]);
     }
     v.mustBe(Struct);
     foreach (var (i, x) in range(index)) {
         if (i > 0) {
-            if (v.Kind() == reflect.Pointer && v.typ().Elem().Kind() == abi.Struct) {
+            if (v.Kind() == Pointer && v.typ().Elem().Kind() == abi.Struct) {
                 if (v.IsNil()) {
                     throw panic("reflect: indirection through nil pointer to embedded struct");
                 }
@@ -1223,7 +1191,7 @@ public static Value FieldByIndex(this Value v, slice<nint> index) {
 // It returns an error if evaluation requires stepping through a nil
 // pointer, but panics if it must step through a field that
 // is not a struct.
-public static (Value, error) FieldByIndexErr(this Value v, slice<nint> index) {
+internal static (Value, error) FieldByIndexErr⁔(/*this*/ Value v, slice<nint> index) {
     if (len(index) == 1) {
         return (v.Field(index[0]), default);
     }
@@ -1245,7 +1213,7 @@ public static (Value, error) FieldByIndexErr(this Value v, slice<nint> index) {
 // FieldByName returns the struct field with the given name.
 // It returns the zero Value if no field was found.
 // It panics if v's Kind is not [Struct].
-public static Value FieldByName(this Value v, @string name) {
+internal static Value FieldByName⁔(/*this*/ Value v, @string name) {
     v.mustBe(Struct);
     var (f, ok) = toRType(v.typ()).FieldByName(name); if (ok) {
         return v.FieldByIndex(f.Index);
@@ -1257,7 +1225,7 @@ public static Value FieldByName(this Value v, @string name) {
 // that satisfies the match function.
 // It panics if v's Kind is not [Struct].
 // It returns the zero Value if no field was found.
-public static Value FieldByNameFunc(this Value v, Func<@string, bool> match) {
+internal static Value FieldByNameFunc⁔(/*this*/ Value v, Func<@string, bool> match) {
     var (f, ok) = toRType(v.typ()).FieldByNameFunc(match); if (ok) {
         return v.FieldByIndex(f.Index);
     }
@@ -1265,7 +1233,7 @@ public static Value FieldByNameFunc(this Value v, Func<@string, bool> match) {
 }
 
 // CanFloat reports whether [Value.Float] can be used without panicking.
-public static bool CanFloat(this Value v) {
+internal static bool CanFloat⁔(/*this*/ Value v) {
     switch (v.kind()) {
     case var ᴛ when ᴛ == Float32 || ᴛ == Float64: {
         return true;
@@ -1277,18 +1245,14 @@ public static bool CanFloat(this Value v) {
 
 // go2cs generated this placeholder — func Float is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflect_package {
-
 internal static ж<abi.Type> uint8Type = rtypeOf((uint8)0);
-
-} partial class reflectᴛValue {
 
 // go2cs generated this placeholder — func Index is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // CanInt reports whether Int can be used without panicking.
-public static bool CanInt(this Value v) {
+internal static bool CanInt⁔(/*this*/ Value v) {
     switch (v.kind()) {
-    case var ᴛ when ᴛ == reflect.Int || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64: {
+    case var ᴛ when ᴛ == Int || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64: {
         return true;
     }
     default: {
@@ -1299,7 +1263,7 @@ public static bool CanInt(this Value v) {
 // go2cs generated this placeholder — func Int is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // CanInterface reports whether [Value.Interface] can be used without panicking.
-public static bool CanInterface(this Value v) {
+internal static bool CanInterface⁔(/*this*/ Value v) {
     if (v.flag == 0) {
         throw panic(Ꮡ(new ValueError("reflect.Value.CanInterface", Invalid)));
     }
@@ -1307,8 +1271,6 @@ public static bool CanInterface(this Value v) {
 }
 
 // go2cs generated this placeholder — func Interface is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-} partial class reflect_package {
 
 // go2cs generated this placeholder — func valueInterface is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -1330,8 +1292,6 @@ internal static any packIfaceValueIntoEmptyIface(Value v) {
     return (@unsafe.Pointer.To<packIfaceValueIntoEmptyIface_type>(v.ptr)).ValueSlot;
 }
 
-} partial class reflectᴛValue {
-
 // go2cs generated this placeholder — func InterfaceData is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func IsNil is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
@@ -1341,13 +1301,11 @@ internal static any packIfaceValueIntoEmptyIface(Value v) {
 // If [Value.IsValid] returns false, all other methods except String panic.
 // Most functions and methods never return an invalid Value.
 // If one does, its documentation states the conditions explicitly.
-public static bool IsValid(this Value v) {
+internal static bool IsValid⁔(/*this*/ Value v) {
     return v.flag != 0;
 }
 
 // go2cs generated this placeholder — func IsZero is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-} partial class reflect_package {
 
 // isZero For all zeros, performance is not as good as
 // return bytealg.Count(b, byte(0)) == len(b)
@@ -1391,19 +1349,17 @@ internal static bool isZero(slice<byte> b) {
     return true;
 }
 
-} partial class reflectᴛValue {
-
 // go2cs generated this placeholder — func SetZero is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Kind returns v's Kind.
 // If v is the zero Value ([Value.IsValid] returns false), Kind returns Invalid.
-public static Kind Kind(this Value v) {
+internal static Kind Kind⁔(/*this*/ Value v) {
     return v.kind();
 }
 
 // go2cs generated this placeholder — func Len is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-internal static nint lenNonSlice(this Value v) {
+internal static nint lenNonSlice⁔(/*this*/ Value v) {
     Kind k = v.kind();
     switch (k) {
     case var ᴛ when ᴛ == Array: {
@@ -1416,7 +1372,7 @@ internal static nint lenNonSlice(this Value v) {
     case var ᴛ when ᴛ == Map: {
         return maplen(v.pointer());
     }
-    case var ᴛ when ᴛ == reflect.String: {
+    case var ᴛ when ᴛ == String: {
         // String is bigger than a word; assume flagIndir.
         return (@unsafe.Pointer.To<unsafeheader.String>(v.ptr)).Value.Len;
     }
@@ -1429,8 +1385,6 @@ internal static nint lenNonSlice(this Value v) {
     }}
     throw panic(Ꮡ(new ValueError("reflect.Value.Len", v.kind())));
 }
-
-} partial class reflect_package {
 
 // copyVal returns a Value containing the map key or value at ptr,
 // allocating a new variable as needed.
@@ -1447,8 +1401,6 @@ internal static Value copyVal(ж<abi.Type> Ꮡtyp, flag fl, @unsafe.Pointer ptr)
     return new Value(Ꮡtyp, @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(ptr)), fl);
 }
 
-} partial class reflectᴛValue {
-
 // go2cs generated this placeholder — func Method is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // NumMethod returns the number of methods in the value's method set.
@@ -1456,7 +1408,7 @@ internal static Value copyVal(ж<abi.Type> Ꮡtyp, flag fl, @unsafe.Pointer ptr)
 // For a non-interface type, it returns the number of exported methods.
 //
 // For an interface type, it returns the number of exported and unexported methods.
-public static nint NumMethod(this Value v) {
+internal static nint NumMethod⁔(/*this*/ Value v) {
     if (v.typ() == nil) {
         throw panic(Ꮡ(new ValueError("reflect.Value.NumMethod", Invalid)));
     }
@@ -1475,7 +1427,7 @@ public static nint NumMethod(this Value v) {
 // Calling this method will cause the linker to retain all methods with this name in all packages.
 // If the linker can't determine the name, it will retain all exported methods.
 // This may make the executable binary larger but will not affect execution time.
-public static Value MethodByName(this Value v, @string name) {
+internal static Value MethodByName⁔(/*this*/ Value v, @string name) {
     if (v.typ() == nil) {
         throw panic(Ꮡ(new ValueError("reflect.Value.MethodByName", Invalid)));
     }
@@ -1493,7 +1445,7 @@ public static Value MethodByName(this Value v, @string name) {
 
 // OverflowComplex reports whether the complex128 x cannot be represented by v's type.
 // It panics if v's Kind is not [Complex64] or [Complex128].
-public static bool OverflowComplex(this Value v, complex128 x) {
+internal static bool OverflowComplex⁔(/*this*/ Value v, complex128 x) {
     Kind k = v.kind();
     switch (k) {
     case var ᴛ when ᴛ == Complex64: {
@@ -1507,7 +1459,7 @@ public static bool OverflowComplex(this Value v, complex128 x) {
 
 // OverflowFloat reports whether the float64 x cannot be represented by v's type.
 // It panics if v's Kind is not [Float32] or [Float64].
-public static bool OverflowFloat(this Value v, float64 x) {
+internal static bool OverflowFloat⁔(/*this*/ Value v, float64 x) {
     Kind k = v.kind();
     switch (k) {
     case var ᴛ when ᴛ == Float32: {
@@ -1519,8 +1471,6 @@ public static bool OverflowFloat(this Value v, float64 x) {
     throw panic(Ꮡ(new ValueError("reflect.Value.OverflowFloat", v.kind())));
 }
 
-} partial class reflect_package {
-
 internal static bool overflowFloat32(float64 x) {
     if (x < 0D) {
         x = -x;
@@ -1528,14 +1478,12 @@ internal static bool overflowFloat32(float64 x) {
     return Δmath.MaxFloat32 < x && x <= Δmath.MaxFloat64;
 }
 
-} partial class reflectᴛValue {
-
 // OverflowInt reports whether the int64 x cannot be represented by v's type.
 // It panics if v's Kind is not [Int], [Int8], [Int16], [Int32], or [Int64].
-public static bool OverflowInt(this Value v, int64 x) {
+internal static bool OverflowInt⁔(/*this*/ Value v, int64 x) {
     Kind k = v.kind();
     switch (k) {
-    case var ᴛ when ᴛ == reflect.Int || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64: {
+    case var ᴛ when ᴛ == Int || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64: {
         var bitSize = v.typ().Size() * 8;
         var trunc = (x.Lsh((uint64)(64 - bitSize))).Rsh((uint64)(64 - bitSize));
         return x != trunc;
@@ -1545,10 +1493,10 @@ public static bool OverflowInt(this Value v, int64 x) {
 
 // OverflowUint reports whether the uint64 x cannot be represented by v's type.
 // It panics if v's Kind is not [Uint], [Uintptr], [Uint8], [Uint16], [Uint32], or [Uint64].
-public static bool OverflowUint(this Value v, uint64 x) {
+internal static bool OverflowUint⁔(/*this*/ Value v, uint64 x) {
     Kind k = v.kind();
     switch (k) {
-    case var ᴛ when ᴛ == reflect.Uint || ᴛ == Uintptr || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64: {
+    case var ᴛ when ᴛ == Uint || ᴛ == Uintptr || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64: {
         var bitSize = v.typ_.Size() * 8; // ok to use v.typ_ directly as Size doesn't escape
         var trunc = (x.Lsh((uint64)(64 - bitSize))).Rsh((uint64)(64 - bitSize));
         return x != trunc;
@@ -1567,7 +1515,7 @@ public static bool OverflowUint(this Value v, uint64 x) {
 // The receive blocks until a value is ready.
 // The boolean value ok is true if the value x corresponds to a send
 // on the channel, false if it is a zero value received because the channel is closed.
-public static (Value x, bool ok) Recv(this Value v) {
+internal static (Value x, bool ok) Recv⁔(/*this*/ Value v) {
     v.mustBe(Chan);
     v.mustBeExported();
     return v.recv(false);
@@ -1578,7 +1526,7 @@ public static (Value x, bool ok) Recv(this Value v) {
 // Send sends x on the channel v.
 // It panics if v's kind is not [Chan] or if x's type is not the same type as v's element type.
 // As in Go, x's value must be assignable to the channel's element type.
-public static void Send(this Value v, Value x) {
+internal static void Send⁔(/*this*/ Value v, Value x) {
     v.mustBe(Chan);
     v.mustBeExported();
     v.send(x, false);
@@ -1609,9 +1557,9 @@ public static void Send(this Value v, Value x) {
 // SetPointer sets the [unsafe.Pointer] value v to x.
 // It panics if v's Kind is not [UnsafePointer]
 // or if [Value.CanSet] returns false.
-public static void SetPointer(this Value v, @unsafe.Pointer x) {
+internal static void SetPointer⁔(/*this*/ Value v, @unsafe.Pointer x) {
     v.mustBeAssignable();
-    v.mustBe(reflect.UnsafePointer);
+    v.mustBe(UnsafePointer);
     @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(v.ptr), x);
 }
 
@@ -1627,7 +1575,7 @@ public static void SetPointer(this Value v, @unsafe.Pointer x) {
 internal static ref readonly @string invalidValueˢ => ref invalidValueˢᵇ;
 private static readonly @string invalidValueˢᵇ = "<invalid Value>"u8;
 
-internal static @string stringNonString(this Value v) {
+internal static @string stringNonString⁔(/*this*/ Value v) {
     if (v.kind() == Invalid) {
         return invalidValueˢ;
     }
@@ -1641,7 +1589,7 @@ internal static @string stringNonString(this Value v) {
 // If the receive delivers a value, x is the transferred value and ok is true.
 // If the receive cannot finish without blocking, x is the zero Value and ok is false.
 // If the channel is closed, x is the zero value for the channel's element type and ok is false.
-public static (Value x, bool ok) TryRecv(this Value v) {
+internal static (Value x, bool ok) TryRecv⁔(/*this*/ Value v) {
     v.mustBe(Chan);
     v.mustBeExported();
     return v.recv(true);
@@ -1651,7 +1599,7 @@ public static (Value x, bool ok) TryRecv(this Value v) {
 // It panics if v's Kind is not [Chan].
 // It reports whether the value was sent.
 // As in Go, x's value must be assignable to the channel's element type.
-public static bool TrySend(this Value v, Value x) {
+internal static bool TrySend⁔(/*this*/ Value v, Value x) {
     v.mustBe(Chan);
     v.mustBeExported();
     return v.send(x, true);
@@ -1660,18 +1608,18 @@ public static bool TrySend(this Value v, Value x) {
 // go2cs generated this placeholder — func Type is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 //go:noinline
-internal static partial Type typeSlow(this Value v) {
+internal static partial Type typeSlow⁔(/*this*/ Value v) {
     return new rtypeжType(toRType(v.abiTypeSlow()));
 }
 
-internal static ж<abi.Type> abiType(this Value v) {
+internal static ж<abi.Type> abiType⁔(/*this*/ Value v) {
     if (v.flag != 0 && (flag)(v.flag & flagMethod) == 0) {
         return v.typ();
     }
     return v.abiTypeSlow();
 }
 
-internal static ж<abi.Type> abiTypeSlow(this Value v) {
+internal static ж<abi.Type> abiTypeSlow⁔(/*this*/ Value v) {
     if (v.flag == 0) {
         throw panic(Ꮡ(new ValueError("reflect.Value.Type", Invalid)));
     }
@@ -1703,9 +1651,9 @@ internal static ж<abi.Type> abiTypeSlow(this Value v) {
 }
 
 // CanUint reports whether [Value.Uint] can be used without panicking.
-public static bool CanUint(this Value v) {
+internal static bool CanUint⁔(/*this*/ Value v) {
     switch (v.kind()) {
-    case var ᴛ when ᴛ == reflect.Uint || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uintptr: {
+    case var ᴛ when ᴛ == Uint || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uintptr: {
         return true;
     }
     default: {
@@ -1729,7 +1677,7 @@ public static bool CanUint(this Value v) {
 // for each index i in the range [0, NumField()).
 //
 // It panics if v's Kind is not Struct.
-public static iter.Seq2<StructField, Value> Fields(this Value v) {
+internal static iter.Seq2<StructField, Value> Fields⁔(/*this*/ Value v) {
     var t = v.Type();
     if (t.Kind() != Struct) {
         throw panic("reflect: Fields of non-struct type " + t.String());
@@ -1756,7 +1704,7 @@ public static iter.Seq2<StructField, Value> Fields(this Value v) {
 //
 // Calling this method will force the linker to retain all exported methods in all packages.
 // This may make the executable binary larger but will not affect execution time.
-public static iter.Seq2<Method, Value> Methods(this Value v) {
+internal static iter.Seq2<Method, Value> Methods⁔(/*this*/ Value v) {
     var vʗ1 = v;
     return (Func<Method, Value, bool> yield) => {
         var rtype = vʗ1.Type();
@@ -1767,8 +1715,6 @@ public static iter.Seq2<Method, Value> Methods(this Value v) {
         }
     };
 }
-
-} partial class reflect_package {
 
 // StringHeader is the runtime representation of a string.
 // It cannot be used safely or portably and its representation may
@@ -1818,12 +1764,10 @@ internal static @unsafe.Pointer arrayAt(@unsafe.Pointer p, nint i, uintptr eltSi
     return add(p, (uintptr)i * eltSize, iLenˢ);
 }
 
-} partial class reflectᴛValue {
-
 // go2cs generated this placeholder — func Grow is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // grow is identical to Grow but does not check for assignability.
-internal static void grow(this Value v, nint n) {
+internal static void grow⁔(/*this*/ Value v, nint n) {
     var p = @unsafe.Pointer.To<unsafeheader.Slice>(v.ptr);
     switch (ᐧ) {
     case {} when n is < 0: {
@@ -1844,8 +1788,6 @@ internal static void grow(this Value v, nint n) {
 // go2cs generated this placeholder — func extendSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // go2cs generated this placeholder — func Clear is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-} partial class reflect_package {
 
 // go2cs generated this placeholder — func Append is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -1951,14 +1893,12 @@ internal static ref array<byte> zeroVal => ref ((StaticBox<array<byte>>)ᏑzeroV
 
 // go2cs generated this placeholder — func NewAt is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class reflectᴛValue {
-
 // assignTo returns a value v that can be assigned directly to dst.
 // It panics if v is not assignable to dst.
 // For a conversion to an interface type, target, if not nil,
 // is a suggested scratch space to use.
 // target must be initialized memory (or nil).
-internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst, @unsafe.Pointer target) {
+internal static Value assignTo⁔(/*this*/ Value v, @string context, ж<abi.Type> Ꮡdst, @unsafe.Pointer target) {
     ref var dst = ref Ꮡdst.DerefOrNull();
 
     if ((flag)(v.flag & flagMethod) != 0) {
@@ -1974,11 +1914,11 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
         return new Value(Ꮡdst, v.ptr, fl);
     }
     case {} when implements(Ꮡdst, v.typ()): {
-        if (v.Kind() == reflect.Interface && v.IsNil()) {
+        if (v.Kind() == Interface && v.IsNil()) {
             // A nil ReadWriter passed to nil Reader is OK,
             // but using ifaceE2I below will panic.
             // Avoid the panic by returning a nil dst (e.g., Reader) explicitly.
-            return new Value(Ꮡdst, nil, (flag)(uintptr)reflect.Interface);
+            return new Value(Ꮡdst, nil, (flag)(uintptr)Interface);
         }
         var x = valueInterface(v, false);
         if (target == nil) {
@@ -1989,7 +1929,7 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
         } else {
             ifaceE2I(Ꮡdst, x, target);
         }
-        return new Value(Ꮡdst, target.Value, (flag)(flagIndir | ((flag)(uintptr)reflect.Interface)));
+        return new Value(Ꮡdst, target.Value, (flag)(flagIndir | ((flag)(uintptr)Interface)));
     }}
 
     // Failed.
@@ -2000,7 +1940,7 @@ internal static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡds
 
 // CanConvert reports whether the value v can be converted to type t.
 // If v.CanConvert(t) returns true then v.Convert(t) will not panic.
-public static bool CanConvert(this Value v, Type t) {
+internal static bool CanConvert⁔(/*this*/ Value v, Type t) {
     var vt = v.Type();
     if (!vt.ConvertibleTo(t)) {
         return false;
@@ -2008,13 +1948,13 @@ public static bool CanConvert(this Value v, Type t) {
     // Converting from slice to array or to pointer-to-array can panic
     // depending on the value.
     switch (ᐧ) {
-    case {} when vt.Kind() == reflect.Slice && t.Kind() == Array: {
+    case {} when vt.Kind() == Slice && t.Kind() == Array: {
         if (t.Len() > v.Len()) {
             return false;
         }
         break;
     }
-    case {} when vt.Kind() == reflect.Slice && t.Kind() == reflect.Pointer && t.Elem().Kind() == Array: {
+    case {} when vt.Kind() == Slice && t.Kind() == Pointer && t.Elem().Kind() == Array: {
         nint n = t.Elem().Len();
         if (n > v.Len()) {
             return false;
@@ -2028,7 +1968,7 @@ public static bool CanConvert(this Value v, Type t) {
 // If the type of v is an interface, this checks the dynamic type.
 // If this reports true then v.Interface() == x will not panic for any x,
 // nor will v.Equal(u) for any Value u.
-public static bool Comparable(this Value v) {
+internal static bool Comparable⁔(/*this*/ Value v) {
     Kind k = v.Kind();
     switch (k) {
     case var ᴛ when ᴛ == Invalid: {
@@ -2036,7 +1976,7 @@ public static bool Comparable(this Value v) {
     }
     case var ᴛ when ᴛ == Array: {
         switch (v.Type().Elem().Kind()) {
-        case var ᴛ2 when ᴛ2 == reflect.Interface || ᴛ2 == Array || ᴛ2 == Struct: {
+        case var ᴛ2 when ᴛ2 == Interface || ᴛ2 == Array || ᴛ2 == Struct: {
             for (nint i = 0; i < v.Type().Len(); i++) {
                 if (!v.Index(i).Comparable()) {
                     return false;
@@ -2046,7 +1986,7 @@ public static bool Comparable(this Value v) {
         }}
         return v.Type().Comparable();
     }
-    case var ᴛ when ᴛ == reflect.Interface: {
+    case var ᴛ when ᴛ == Interface: {
         return v.IsNil() || v.Elem().Comparable();
     }
     case var ᴛ when ᴛ == Struct: {
@@ -2070,11 +2010,11 @@ public static bool Comparable(this Value v) {
 // and report false if it finds non-equal elements.
 // During all comparisons, if values of the same type are compared,
 // and the type is not comparable, Equal will panic.
-public static bool Equal(this Value v, Value u) {
-    if (v.Kind() == reflect.Interface) {
+internal static bool Equal⁔(/*this*/ Value v, Value u) {
+    if (v.Kind() == Interface) {
         v = v.Elem();
     }
-    if (u.Kind() == reflect.Interface) {
+    if (u.Kind() == Interface) {
         u = u.Elem();
     }
 
@@ -2093,13 +2033,13 @@ public static bool Equal(this Value v, Value u) {
         throw panic("reflect.Value.Equal: invalid Kind");
         break;
     }
-    case var ᴛ when ᴛ == reflect.Bool: {
+    case var ᴛ when ᴛ == Bool: {
         return v.Bool() == u.Bool();
     }
-    case var ᴛ when ᴛ == reflect.Int || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64: {
+    case var ᴛ when ᴛ == Int || ᴛ == Int8 || ᴛ == Int16 || ᴛ == Int32 || ᴛ == Int64: {
         return v.Int() == u.Int();
     }
-    case var ᴛ when ᴛ == reflect.Uint || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uintptr: {
+    case var ᴛ when ᴛ == Uint || ᴛ == Uint8 || ᴛ == Uint16 || ᴛ == Uint32 || ᴛ == Uint64 || ᴛ == Uintptr: {
         return v.Uint() == u.Uint();
     }
     case var ᴛ when ᴛ == Float32 || ᴛ == Float64: {
@@ -2108,10 +2048,10 @@ public static bool Equal(this Value v, Value u) {
     case var ᴛ when ᴛ == Complex64 || ᴛ == Complex128: {
         return v.Complex() == u.Complex();
     }
-    case var ᴛ when ᴛ == reflect.String: {
+    case var ᴛ when ᴛ == String: {
         return v.String() == u.String();
     }
-    case var ᴛ when ᴛ == Chan || ᴛ == reflect.Pointer || ᴛ == reflect.UnsafePointer: {
+    case var ᴛ when ᴛ == Chan || ᴛ == Pointer || ᴛ == UnsafePointer: {
         return v.Pointer() == u.Pointer();
     }
     case var ᴛ when ᴛ == Array: {
@@ -2141,14 +2081,12 @@ public static bool Equal(this Value v, Value u) {
         }
         return true;
     }
-    case var ᴛ when ᴛ == Func || ᴛ == Map || ᴛ == reflect.Slice: {
+    case var ᴛ when ᴛ == Func || ᴛ == Map || ᴛ == Slice: {
         break;
         break;
     }}
     throw panic("reflect.Value.Equal: values of type " + v.Type().String() + " are not comparable");
 }
-
-} partial class reflect_package {
 
 // convertOp returns the function to convert a value of type src
 // to a value of type dst. If the conversion is illegal, convertOp returns nil.

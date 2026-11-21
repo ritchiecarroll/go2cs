@@ -7,7 +7,6 @@ using poll = @internal.poll_package;
 using runtime = runtime_package;
 using syscall = syscall_package;
 using @internal;
-using static net_package;
 
 partial class net_package {
 
@@ -22,15 +21,13 @@ partial struct rawConn {
     internal ж<netFD> fd;
 }
 
-} partial class netᴛrawConn {
-
-internal static bool ok(this ж<rawConn> Ꮡc) {
+internal static bool ok⁔(/*this*/ ж<rawConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     return Ꮡc != nil && c.fd != nil;
 }
 
-internal static error Control(this ж<rawConn> Ꮡc, Action<uintptr> f) {
+internal static error Control⁔(/*this*/ ж<rawConn> Ꮡc, Action<uintptr> f) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -44,7 +41,7 @@ internal static error Control(this ж<rawConn> Ꮡc, Action<uintptr> f) {
     return err;
 }
 
-internal static error Read(this ж<rawConn> Ꮡc, Func<uintptr, bool> f) {
+internal static error Read⁔(/*this*/ ж<rawConn> Ꮡc, Func<uintptr, bool> f) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -58,7 +55,7 @@ internal static error Read(this ж<rawConn> Ꮡc, Func<uintptr, bool> f) {
     return err;
 }
 
-internal static error Write(this ж<rawConn> Ꮡc, Func<uintptr, bool> f) {
+internal static error Write⁔(/*this*/ ж<rawConn> Ꮡc, Func<uintptr, bool> f) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -79,7 +76,7 @@ internal static error Write(this ж<rawConn> Ꮡc, Func<uintptr, bool> f) {
 // they can pass the *poll.FD to functions like poll.Splice.
 //
 // PollFD is not intended for use outside the standard library.
-internal static ж<poll.FD> PollFD(this ж<rawConn> Ꮡc) {
+internal static ж<poll.FD> PollFD⁔(/*this*/ ж<rawConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -88,13 +85,9 @@ internal static ж<poll.FD> PollFD(this ж<rawConn> Ꮡc) {
     return c.fd.Ꮡpfd;
 }
 
-} partial class net_package {
-
 internal static ж<rawConn> newRawConn(ж<netFD> fd) {
     return Ꮡ(new rawConn(fd: fd));
 }
-
-} partial class netᴛrawConn {
 
 // Network returns the network type of the underlying connection.
 //
@@ -103,27 +96,21 @@ internal static ж<rawConn> newRawConn(ж<netFD> fd) {
 // extension method so that they can distinguish different socket types.
 //
 // Network is not intended for use outside the standard library.
-internal static poll.String Network(this ref rawConn c) {
+internal static poll.String Network⁔(/*this*/ ref rawConn c) {
     return (poll.String)c.fd.net;
 }
-
-} partial class net_package {
 
 partial struct rawListener {
     /*embed*/ internal rawConn rawConn;
 }
 
-} partial class netᴛrawListener {
-
-internal static error Read(this ref rawListener l, Func<uintptr, bool> _) {
+internal static error Read⁔(/*this*/ ref rawListener l, Func<uintptr, bool> _) {
     return syscall.EINVAL;
 }
 
-internal static error Write(this ref rawListener l, Func<uintptr, bool> _) {
+internal static error Write⁔(/*this*/ ref rawListener l, Func<uintptr, bool> _) {
     return syscall.EINVAL;
 }
-
-} partial class net_package {
 
 internal static ж<rawListener> newRawListener(ж<netFD> fd) {
     return Ꮡ(new rawListener(new rawConn(fd: fd)));

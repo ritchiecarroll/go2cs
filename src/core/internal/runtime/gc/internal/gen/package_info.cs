@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.@internal.runtime.gc.@internal.gen_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -74,11 +78,11 @@ using static go.@internal.runtime.gc.@internal.gen_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/runtime/gc/internal/gen/gen.go", "gen.cs", "ABkqogAIEoLGggALELgACxSCgsrkgoKCgoK4goKCxtKCgoKCgqaigoKUggATKILGgsaigpSCgqamgoKClIKUgpSClMaCgoIAEQjG6oKmgoKUgqaClIKCgpSCgpSUgqaClJTapIKCgpSClIKClIKUpoKigoKCpoK4goKCgoKCuKiSgoKSgpSCgriCpMiClIKCgqaC6gALFvqCgoKC3JSUgoKCgpTugoKCgqYACgaigpS0tOzqgoKCgpSUlJSUkpSmgqaCgoKCggAKCP6CgoKCgpSUgqaUgoKClIKCgoKCgriCgoKCgoKCpuaipoKCgrimgrakpLamlIK4lIKClJSClKa4lJSCxoKUgoKCgpSmgriCgoKCgoKClKY=", "173-179:1;230-239:1;259-267:1;366-376:1")]
-[assembly: GoPositionMap("internal/runtime/gc/internal/gen/gp.go", "gp.cs", "AA0WlKKCxoKmgoKC")]
-[assembly: GoPositionMap("internal/runtime/gc/internal/gen/regalloc.go", "regalloc.cs", "ACJEgpSkpKSUpoKmggAMEoKClIKUgpSmgqaCgpQAChIADCCC/KKClIKClIKUgpSmgoKUgoKUgpSClMa0poKCAAgSgoKUgpTKgoKUgoKU7oKCgsqCgriClKaUgtKCgpSUgqa4goKkgpS0gpSCgoKCgpS0gpSUkoKUtIK0gujagoKmlKaCgoLKgqaUgriCuIKCgriClLSCxoLGgraCpg==", "215-227:1")]
-[assembly: GoPositionMap("internal/runtime/gc/internal/gen/simd.go", "simd.cs", "AA0WlLKCxoKmgoKCpqKCpqLclILKgoKmooKCpqKCgq7kgoKmtIKCprSCggAIDpTEgqaigsaigqaCpoKCgqaigqa0gqaigqa0gqaigqa0ggAIDpSigoKCxoKmgoKCpqKCpqKCpqKClJQACA6UooKCgsaCpoKCgqaigqaigqaigpSUpqKClJQ=")]
-[assembly: GoPositionMap("internal/runtime/gc/internal/gen/val.go", "val.cs", "ACtMtAAKDpTEooKCgoKClKaigoKmwoKCgpSCxrKCgoKCpoIACA7mgsakkgAKDgAJDKKClIKUpoKCgsqC")]
+[assembly: GoPositionMap("internal/runtime/gc/internal/gen/gen.go", "gen.cs", "ABgqogAIEoKmggAHELgACRSCgqrkgoKCgoK4goKCptKCgoKCgqaigoKUggARKIKmgqaigpSCgqamgoKClIKUgpSClKaCgoIADwjG6oKmgoKUgqaClIKCgpSCgpSUgqaClJS6pIKCgpSClIKClIKUpoKigoKCpoK4goKCgoKCuKiSgoKSgpSCgriCpMiClIKCgqaCygAJFvqCgoKC3JSUgoKCgpTugoKCgqYACAaigpS0tOzKgoKCgpSUlJSUkpSmgqaCgoKCggAICP6CgoKCgpSUgqaUgoKClIKCgoKCgriCgoKCgoKCpuaipoKCgrimgrakpLamlIK4lIKClJSClKa4lJSCpoKUgoKCgpSmgriCgoKCgoKClKY=", "173-179:1;230-239:1;259-267:1;366-376:1")]
+[assembly: GoPositionMap("internal/runtime/gc/internal/gen/gp.go", "gp.cs", "AAsWlKKCpoKmgoKC")]
+[assembly: GoPositionMap("internal/runtime/gc/internal/gen/regalloc.go", "regalloc.cs", "AB9EgpSkpKSUpoKmggAIEoKClIKUgpSmgqaCgpQACBIADCCC3KKClIKClIKUgpSmgoKUgoKUgpSClKa0poKCAAgSgoKUgpTKgoKUgoKU7oKCgsqCgriClKaUgtKCgpSUgqa4goKkgpS0gpSCgoKCgpS0gpSUkoKUtIK0gujagoKmlKaCgoLKgqaUgriCuIKCgriClLSCxoLGgraCpg==", "215-227:1")]
+[assembly: GoPositionMap("internal/runtime/gc/internal/gen/simd.go", "simd.cs", "AAsWlLKCpoKmgoKCpqKCpqLclILKgoKmooKCpqKCgq7kgoKmtIKCprSCgu6UxIKmooKmooKmgqaCgoKmooKmtIKmooKmtIKmooKmtILulKKCgoKmgqaCgoKmooKmooKmooKUlO6UooKCgqaCpoKCgqaigqaigqaigpSUpqKClJQ=")]
+[assembly: GoPositionMap("internal/runtime/gc/internal/gen/val.go", "val.cs", "ACpMlAAIDpSkooKCgoKClKaigoKmwoKCgpSCprKCgoKCpoIACA7mgqakku7cooKUgpSmgoKCyoI=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.runtime.gc.@internal;
@@ -147,21 +151,130 @@ public static partial class gen_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(gen_package.Array<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛArray;
-[GoMethodHost(typeof(gen_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛFile;
-[GoMethodHost(typeof(gen_package.Func)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛFunc;
-[GoMethodHost(typeof(gen_package.Mask64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛMask64;
-[GoMethodHost(typeof(gen_package.Mask8)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛMask8;
-[GoMethodHost(typeof(gen_package.Ptr<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛPtr;
-[GoMethodHost(typeof(gen_package.Uint64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛUint64;
-[GoMethodHost(typeof(gen_package.Uint64x8)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛUint64x8;
-[GoMethodHost(typeof(gen_package.Uint8x64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛUint8x64;
-[GoMethodHost(typeof(gen_package.locMem)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛlocMem;
-[GoMethodHost(typeof(gen_package.locReg)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛlocReg;
-[GoMethodHost(typeof(gen_package.op)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛop;
-[GoMethodHost(typeof(gen_package.opHeap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛopHeap;
-[GoMethodHost(typeof(gen_package.regSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛregSet;
-[GoMethodHost(typeof(gen_package.valAny)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛvalAny;
-[GoMethodHost(typeof(gen_package.valGP)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛvalGP;
-[GoMethodHost(typeof(gen_package.@void)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class genᴛvoid;
+[GoMethodHost(typeof(gen_package.Array<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛArray;
+[GoMethodHost(typeof(gen_package.File)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛFile;
+[GoMethodHost(typeof(gen_package.Func)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛFunc;
+[GoMethodHost(typeof(gen_package.Mask64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛMask64;
+[GoMethodHost(typeof(gen_package.Mask8)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛMask8;
+[GoMethodHost(typeof(gen_package.Ptr<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛPtr;
+[GoMethodHost(typeof(gen_package.Uint64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛUint64;
+[GoMethodHost(typeof(gen_package.Uint64x8)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛUint64x8;
+[GoMethodHost(typeof(gen_package.Uint8x64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛUint8x64;
+[GoMethodHost(typeof(gen_package.locMem)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛlocMem;
+[GoMethodHost(typeof(gen_package.locReg)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛlocReg;
+[GoMethodHost(typeof(gen_package.op)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛop;
+[GoMethodHost(typeof(gen_package.opHeap)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛopHeap;
+[GoMethodHost(typeof(gen_package.regSet)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛregSet;
+[GoMethodHost(typeof(gen_package.valAny)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛvalAny;
+[GoMethodHost(typeof(gen_package.valGP)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛvalGP;
+[GoMethodHost(typeof(gen_package.@void)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class genᴛvoid;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class genᴛArray {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<gen_package.kind> kind<T>(this gen_package.Array<T> _) where T : gen_package.Value => gen_package.kind⁔<T>(_);
+}
+partial class genᴛFile {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.void AddFunc(this ref gen_package.File f, ж<gen_package.Func> Ꮡfn) => gen_package.AddFunc⁔(ref f, Ꮡfn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.void AddConst(this ref gen_package.File f, @string name, any data) => gen_package.AddConst⁔(ref f, name, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.void Compile(this ж<gen_package.File> Ꮡf) => gen_package.Compile⁔(Ꮡf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.void emitConst(this ref gen_package.File f, @string name, any data) => gen_package.emitConst⁔(ref f, name, data);
+}
+partial class genᴛFunc {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.void attach(this ж<gen_package.Func> Ꮡfn, ж<gen_package.op> Ꮡx) => gen_package.attach⁔(Ꮡfn, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.void write(this ref gen_package.Func fn, io.Writer w) => gen_package.write⁔(ref fn, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool cse(this ref gen_package.Func fn) => gen_package.cse⁔(ref fn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool deadcode(this ref gen_package.Func fn) => gen_package.deadcode⁔(ref fn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.void addLoads(this ж<gen_package.Func> Ꮡfn) => gen_package.addLoads⁔(Ꮡfn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static map<ж<gen_package.op>, nint> opRefs(this ref gen_package.Func fn) => gen_package.opRefs⁔(ref fn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.void schedule(this ref gen_package.Func fn) => gen_package.schedule⁔(ref fn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.void emit(this ref gen_package.Func fn, ж<gen_package.File> Ꮡf, map<ж<gen_package.op>, gen_package.loc> locs) => gen_package.emit⁔(ref fn, Ꮡf, locs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static map<ж<gen_package.op>, gen_package.loc> assignLocs(this ж<gen_package.Func> Ꮡfn) => gen_package.assignLocs⁔(Ꮡfn);
+}
+partial class genᴛMask64 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<gen_package.kind> kind(this gen_package.Mask64 _) => gen_package.kind⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.Mask64 wrap(this gen_package.Mask64 _, ж<gen_package.op> Ꮡx) => gen_package.wrap⁔(_, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Uint64 /*z*/ ToUint64(this gen_package.Mask64 x) => gen_package.ToUint64⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Mask64 /*z*/ Or(this gen_package.Mask64 x, gen_package.Mask64 y) => gen_package.Or⁔(x, y);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Mask64 /*z*/ ShiftLeft(this gen_package.Mask64 x, uint8 c) => gen_package.ShiftLeft⁔(x, c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Mask64 /*z*/ ShiftRight(this gen_package.Mask64 x, uint8 c) => gen_package.ShiftRight⁔(x, c);
+}
+partial class genᴛMask8 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<gen_package.kind> kind(this gen_package.Mask8 _) => gen_package.kind⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.Mask8 wrap(this gen_package.Mask8 _, ж<gen_package.op> Ꮡx) => gen_package.wrap⁔(_, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Uint64 /*z*/ ToUint8(this gen_package.Mask8 x) => gen_package.ToUint8⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Mask8 /*z*/ Or(this gen_package.Mask8 x, gen_package.Mask8 y) => gen_package.Or⁔(x, y);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Mask8 /*z*/ ShiftLeft(this gen_package.Mask8 x, uint8 c) => gen_package.ShiftLeft⁔(x, c);
+}
+partial class genᴛPtr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<gen_package.kind> kind<T>(this gen_package.Ptr<T> _Δp0) where T : gen_package.Value => gen_package.kind⁔<T>(_Δp0);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.Ptr<T> wrap<T>(this gen_package.Ptr<T> _, ж<gen_package.op> Ꮡx) where T : gen_package.Value => gen_package.wrap⁔<T>(_, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Ptr<T> /*y*/ AddConst<T>(this gen_package.Ptr<T> x, nint off) where T : gen_package.Value => gen_package.AddConst⁔<T>(x, off);
+}
+partial class genᴛUint64 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<gen_package.kind> kind(this gen_package.Uint64 _) => gen_package.kind⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.Uint64 wrap(this gen_package.Uint64 _, ж<gen_package.op> Ꮡx) => gen_package.wrap⁔(_, Ꮡx);
+}
+partial class genᴛUint64x8 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Uint64x8 /*z*/ BroadcastMasked(this gen_package.Uint64x8 x, gen_package.Uint64 src, gen_package.Mask8 mask) => gen_package.BroadcastMasked⁔(x, src, mask);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<gen_package.kind> kind(this gen_package.Uint64x8 _) => gen_package.kind⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.Uint64x8 wrap(this gen_package.Uint64x8 _, ж<gen_package.op> Ꮡx) => gen_package.wrap⁔(_, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Uint64x8 /*z*/ Or(this gen_package.Uint64x8 x, gen_package.Uint64x8 y) => gen_package.Or⁔(x, y);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Uint64x8 /*z*/ Sub(this gen_package.Uint64x8 x, gen_package.Uint64x8 y) => gen_package.Sub⁔(x, y);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Uint8x64 /*z*/ ToUint8x64(this gen_package.Uint64x8 x) => gen_package.ToUint8x64⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Uint8x64 /*z*/ GF2P8Affine(this gen_package.Uint64x8 x, gen_package.Uint8x64 y) => gen_package.GF2P8Affine⁔(x, y);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Mask64 /*z*/ ShuffleBits(this gen_package.Uint64x8 x, gen_package.Uint8x64 y) => gen_package.ShuffleBits⁔(x, y);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Mask64 /*z*/ ShuffleBitsMasked(this gen_package.Uint64x8 x, gen_package.Uint8x64 y, gen_package.Mask64 mask) => gen_package.ShuffleBitsMasked⁔(x, y, mask);
+}
+partial class genᴛUint8x64 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<gen_package.kind> kind(this gen_package.Uint8x64 _) => gen_package.kind⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.Uint8x64 wrap(this gen_package.Uint8x64 _, ж<gen_package.op> Ꮡx) => gen_package.wrap⁔(_, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Uint64x8 /*z*/ ToUint64x8(this gen_package.Uint8x64 x) => gen_package.ToUint64x8⁔(x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Uint8x64 /*y*/ Shuffle(this gen_package.Uint8x64 x, gen_package.Uint8x64 shuf) => gen_package.Shuffle⁔(x, shuf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Uint8x64 /*y*/ ShuffleZeroed(this gen_package.Uint8x64 x, gen_package.Uint8x64 shuf, gen_package.Mask64 mask) => gen_package.ShuffleZeroed⁔(x, shuf, mask);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Uint8x64 /*y*/ ShuffleMasked(this gen_package.Uint8x64 x, gen_package.Uint8x64 shuf, gen_package.Mask64 mask) => gen_package.ShuffleMasked⁔(x, shuf, mask);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Uint8x64 /*z*/ Shuffle2(this gen_package.Uint8x64 x, gen_package.Uint8x64 y, gen_package.Uint8x64 shuf) => gen_package.Shuffle2⁔(x, y, shuf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Uint8x64 /*z*/ Shuffle2Zeroed(this gen_package.Uint8x64 x, gen_package.Uint8x64 y, gen_package.Uint8x64 shuf, gen_package.Mask64 mask) => gen_package.Shuffle2Zeroed⁔(x, y, shuf, mask);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static gen_package.Uint8x64 /*z*/ Shuffle2Masked(this gen_package.Uint8x64 x, gen_package.Uint8x64 y, gen_package.Uint8x64 shuf, gen_package.Mask64 mask) => gen_package.Shuffle2Masked⁔(x, y, shuf, mask);
+}
+partial class genᴛlocMem {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string LocString(this gen_package.locMem l) => gen_package.LocString⁔(l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (gen_package.loc, error) Deref(this gen_package.locMem l, nint off) => gen_package.Deref⁔(l, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (gen_package.locReg, bool) Reg(this gen_package.locMem l) => gen_package.Reg⁔(l);
+}
+partial class genᴛlocReg {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string LocString(this gen_package.locReg l) => gen_package.LocString⁔(l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (gen_package.loc, error) Deref(this gen_package.locReg l, nint off) => gen_package.Deref⁔(l, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (gen_package.locReg, bool) Reg(this gen_package.locReg l) => gen_package.Reg⁔(l);
+}
+partial class genᴛop {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref gen_package.op o) => gen_package.String⁔(ref o);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool equalNoName(this ref gen_package.op o, ж<gen_package.op> Ꮡo2) => gen_package.equalNoName⁔(ref o, Ꮡo2);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.void write(this ref gen_package.op o, io.Writer w) => gen_package.write⁔(ref o, w);
+}
+partial class genᴛopHeap {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this gen_package.opHeap h) => gen_package.Len⁔(h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.void Swap(this gen_package.opHeap h, nint i, nint j) => gen_package.Swap⁔(h, i, j);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Less(this gen_package.opHeap h, nint i, nint j) => gen_package.Less⁔(h, i, j);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.void Push(this ref gen_package.opHeap h, any x) => gen_package.Push⁔(ref h, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Pop(this ref gen_package.opHeap h) => gen_package.Pop⁔(ref h);
+}
+partial class genᴛregSet {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.void used(this ref gen_package.regSet s, ж<gen_package.op> Ꮡo, gen_package.loc l) => gen_package.used⁔(ref s, Ꮡo, l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.void free(this ref gen_package.regSet s, gen_package.loc l) => gen_package.free⁔(ref s, l);
+}
+partial class genᴛvalAny {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.void initOp(this ref gen_package.valAny v, ж<gen_package.op> Ꮡx) => gen_package.initOp⁔(ref v, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<gen_package.op> getOp(this gen_package.valAny v) => gen_package.getOp⁔(v);
+}
+partial class genᴛvalGP {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static gen_package.void isWord(this gen_package.valGP _) => gen_package.isWord⁔(_);
+}
+partial class genᴛvoid {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<gen_package.kind> kind(this gen_package.@void _) => gen_package.kind⁔(_);
+}
+// </MethodForwarders>

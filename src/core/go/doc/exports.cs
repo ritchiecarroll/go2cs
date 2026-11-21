@@ -7,7 +7,6 @@ namespace go.go;
 using ast = global::go.go.ast_package;
 using token = global::go.go.token_package;
 using global::go.go;
-using static doc_package;
 
 partial class doc_package {
 
@@ -105,13 +104,11 @@ internal static void removeAnonymousField(@string name, ref ast.InterfaceType it
     ityp.Methods.List = list.slice(0, j);
 }
 
-} partial class docᴛreader {
-
 // filterFieldList removes unexported fields (field names) from the field list
 // in place and reports whether fields were removed. Anonymous fields are
 // recorded with the parent type. filterType is called with the types of
 // all remaining fields.
-internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<namedType> parent, ж<ast.FieldList> Ꮡfields, ж<ast.InterfaceType> ityp) {
+internal static bool /*removedFields*/ filterFieldList⁔(/*this*/ ref reader r, ж<namedType> parent, ж<ast.FieldList> Ꮡfields, ж<ast.InterfaceType> ityp) {
     bool removedFields = default;
     ref var fields = ref Ꮡfields.DerefOrNull();
 
@@ -166,7 +163,7 @@ internal static bool /*removedFields*/ filterFieldList(this ref reader r, ж<nam
 }
 
 // filterParamList applies filterType to each parameter type in fields.
-internal static void filterParamList(this ref reader r, ж<ast.FieldList> Ꮡfields) {
+internal static void filterParamList⁔(/*this*/ ref reader r, ж<ast.FieldList> Ꮡfields) {
     ref var fields = ref Ꮡfields.DerefOrNull();
 
     if (Ꮡfields != nil) {
@@ -179,7 +176,7 @@ internal static void filterParamList(this ref reader r, ж<ast.FieldList> Ꮡfie
 // filterType strips any unexported struct fields or method types from typ
 // in place. If fields (or methods) have been removed, the corresponding
 // struct or interface type has the Incomplete field set to true.
-internal static void filterType(this ref reader r, ж<namedType> parent, ast.Expr typ) {
+internal static void filterType⁔(/*this*/ ref reader r, ж<namedType> parent, ast.Expr typ) {
     switch (typ.type()) {
     case ж<ast.Ident> t: {
         // nothing to do
@@ -239,7 +236,7 @@ internal static void filterType(this ref reader r, ж<namedType> parent, ast.Exp
     }}
 }
 
-internal static bool filterSpec(this ref reader r, ast.Spec spec) {
+internal static bool filterSpec⁔(/*this*/ ref reader r, ast.Spec spec) {
     switch (spec.type()) {
     case ж<ast.ImportSpec> s: {
         // always keep imports so we can collect them
@@ -284,8 +281,6 @@ internal static bool filterSpec(this ref reader r, ast.Spec spec) {
     return false;
 }
 
-} partial class doc_package {
-
 // copyConstType returns a copy of typ with position pos.
 // typ must be a valid constant type.
 // In practice, only (possibly qualified) identifiers are possible.
@@ -307,9 +302,7 @@ internal static ast.Expr copyConstType(ast.Expr typ, token.Pos pos) {
     return default; // shouldn't happen, but be conservative and don't panic
 }
 
-} partial class docᴛreader {
-
-internal static slice<ast.Spec> filterSpecList(this ref reader r, slice<ast.Spec> list, token.Token tok) {
+internal static slice<ast.Spec> filterSpecList⁔(/*this*/ ref reader r, slice<ast.Spec> list, token.Token tok) {
     if (tok == token.CONST) {
         // Propagate any type information that would get lost otherwise
         // when unexported constants are filtered.
@@ -339,7 +332,7 @@ internal static slice<ast.Spec> filterSpecList(this ref reader r, slice<ast.Spec
     return list.slice(0, j);
 }
 
-internal static bool filterDecl(this ref reader r, ast.Decl decl) {
+internal static bool filterDecl⁔(/*this*/ ref reader r, ast.Decl decl) {
     switch (decl.type()) {
     case ж<ast.GenDecl> d: {
         d.Specs = r.filterSpecList(d.Specs, d.Tok);
@@ -356,7 +349,7 @@ internal static bool filterDecl(this ref reader r, ast.Decl decl) {
 }
 
 // fileExports removes unexported declarations from src in place.
-internal static void fileExports(this ref reader r, ж<ast.File> Ꮡsrc) {
+internal static void fileExports⁔(/*this*/ ref reader r, ж<ast.File> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     nint j = 0;
@@ -369,4 +362,4 @@ internal static void fileExports(this ref reader r, ж<ast.File> Ꮡsrc) {
     src.Decls = src.Decls.slice(0, j);
 }
 
-}
+} // end doc_package

@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.vendor.golang.org.x.text.unicode.norm_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -65,18 +69,20 @@ using static go.vendor.golang.org.x.text.unicode.norm_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/composition.go", "composition.cs", "ACRMoqqigpSCgoIACBKCgpSuwoKUgoKUgoKUpoIAHTaCgoKCpoKCgoKmgoKokoKmooKUgoLIsoKCgpTIkoKCgpSCqqKCgoKUgqyygoKClIKClKaCgoKCAA4i4oKClIKUgq7igpSUlL7SuIKCgpSClKqigqiSqJKCgoKCqJKCgqiSgoKqooIAH0CCgpSCgpSClKSkpJSmgoKUgoKUgpSkpKSUqKSmgoKCqqKCgoKCgoKCgpTMsoKCgoKCgryigoKCgoKClJSClIKCqMy0gsis1u6CgpSCgoKmgpTKgoKCgoKUlIKCgoK4gpQ=")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/forminfo.go", "forminfo.cs", "ADt6ABhEAAgCgsqqtAARHIKUgoKUgqaCpoKmgqq0gpSCgoKokqiSgpSqoqqixoKCgoKCgoIAAx4ACwKCgpSmgoKmgoLIkoKkuJKCpNyygoKC3IKUpoKCgoKCgoKCgoKUgoKUpg==")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/input.go", "input.cs", "ABAcgqaCxoKCpoKCpoKClKaCgqampoKCpqamgoKUgpSmgoKUpoKClKaCgpSmooKCgpSUgpSUgpQ=")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/iter.go", "iter.cs", "ACBAkoKCgoKUgoKCgoKokoKCgoKUgoKCgoKssoKUtLS0lIKUgoKUgoKCgoKuwoKUqJKmgoKokgACEPLGooKCgoKUgoKClIKCpqKCgoKClIKCgpSCgqaigoKCgoKCgoKUgqaCqsKClJSCgoKClKaCqsKCgoKCgoKCgoKUgpSCgqiygpKCgoKCgoKCgoKClILKgoKmgpSmgoKCpoKClIKCgpSUpIKkgoKUlIKCgoKUgoKCgoKCgoKCgqaCgpSClIKClIKCgoKCgpSCpoKCgpSChqKCpqKCgoKClIKClIKCuKaigoKCgoKospKCgoKUgoKClIKClIKCgoKCgoKClIKCgoKClIKmgoSSgoKCgoKCgoKUgoKmtIKCgpSCgoKCgpSUgoKmooKCuIKC")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/normalize.go", "normalize.cs", "AC9akoKCgoKUgoKCqJKCgoKClIKCgqiSgoKCgpSCgoKCgpSUxqKCgoKClIKCgoKUpsiSgoKCgpSCgoKCgpSCgoKClKaUgoKUlMzSgoKUgoKmgoKCgoKClIKCgoKCgoKCgpSCpqKClIKCysKmgoKUlIKCgoKUgpSCxqKCkoKUgoKUgoKCgoKCgpSmgpSUgqaCpqKCgpTKoqqigqrSgoKClKaq0oKCgpSmzuKCgoKCgoKCgoKUgoKUlLiUtKSCtoKCpoKmgpSCgpSUyqKCqqKmgoKClIK4goKClIKUgoKClM6irLKssqaCgoKUlIKCgoKUlIKUgoKCgpS4gqaClKqixoKCgoKUgoKUgoKCpoKUgpSCgoKCgpSCgpSmrOSCgpSAlIKUgoKkgIKkgoKCgpSUgoKClJSCgoKClIKmgoKUqqKClIKUqsKCgpSUgpSCgoKCgoKCppSCgoKUgoKmhJKCgoKCgg==", "120-136:1")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/readwriter.go", "readwriter.cs", "ABIk9KSUgoKUgoKCgriCgpSCgpSCpqiSgoKCps7CgoIAEByygoKCgoKUlIKUgoKUgoKCgpSClIKCAAcQooKCgoI=")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/tables15.0.0.go", "tables15.0.0.cs", "ABMoABMsALEV5iqygpSkpIKUgoKClKSClIKCgpSCgoKClKSClIKCgpSCgoKClIKCgoKUpqqigoKUgoKUgoKUgoKUrLKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpQACAyCyJKUpIL8AIYEjggAatYBpgCBB4YOsoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKaqooKClIKClIKClIKClKyygpSkpIKUgoKClKSClIKCgpSCgoKClKSClIKCgpSCgoKClIKCgoKUpqqigoKUgoKUgoKUgoKUAAgMgsiSlKSC/ACkCMoQAHLmAaY=")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/transform.go", "transform.cs", "AA8crAAJBIKCgoKClIKCgoKmgpTGtIKUgqa49IKClIKCgpSCpoKCgoKClIKCgoKCgpQ=")]
-[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/trie.go", "trie.cs", "ABMi2tyCvsKCgoKCgoKCgpSClKY=")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/composition.go", "composition.cs", "ACFMoqqigpSCgoIACBKCgpSuwoKUgoKUgoKUpoIAGTaCgoKCpoKCgoKmgoKokoKmooKUgoKosoKCgpSokoKCgpSCqqKCgoKUgqyygoKClIKClKaCgoKCAAoi4oKClIKUgq7igpSUlL7SuIKCgpSClKqigqiSqJKCgoKCqJKCgqiSgoKqooIAHUCCgpSCgpSClKSkpJSmgoKUgoKUgpSkpKSUqKSmgoKCqqKCgoKCgoKCgpSssoKCgoKCgryigoKCgoKClJSClIKCqMy0gsis1u6CgpSCgoKmgpTKgoKCgoKUlIKCgoK4gpQ=")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/forminfo.go", "forminfo.cs", "ADp6ABZEAAgCgsqqtAANHIKUgoKUgqaCpoKmgqq0gpSCgoKokqiSgpSqoqqipoKCgoKCgoIAAx4ACwKCgpSmgoKmgoKokoKkuJKCpLyygoKC3IKUpoKCgoKCgoKCgoKUgoKUpg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/input.go", "input.cs", "AA8cgqaCpoKCpoKCpoKClKaCgqampoKCpqamgoKUgpSmgoKUpoKClKaCgpSmooKCgpSUgpSUgpQ=")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/iter.go", "iter.cs", "AB1AkoKCgoKUgoKCgoKokoKCgoKUgoKCgoKssoKUtLS0lIKUgoKUgoKCgoKuwoKUqJKmgoKokgACEPKmooKCgoKUgoKClIKCpqKCgoKClIKCgpSCgqaigoKCgoKCgoKUgqaCqsKClJSCgoKClKaCqsKCgoKCgoKCgoKUgpSCgqiygpKCgoKCgoKCgoKClILKgoKmgpSmgoKCpoKClIKCgpSUpIKkgoKUlIKCgoKUgoKCgoKCgoKCgqaCgpSClIKClIKCgoKCgpSCpoKCgpSChqKCpqKCgoKClIKClIKCuKaigoKCgoKospKCgoKUgoKClIKClIKCgoKCgoKClIKCgoKClIKmgoSSgoKCgoKCgoKUgoKmtIKCgpSCgoKCgpSUgoKmooKCuIKC")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/normalize.go", "normalize.cs", "ACtakoKCgoKUgoKCqJKCgoKClIKCgqiSgoKCgpSCgoKCgpSUpqKCgoKClIKCgoKUpqiSgoKCgpSCgoKCgpSCgoKClKaUgoKUlKzSgoKUgoKmgoKCgoKClIKCgoKCgoKCgpSCpqKClIKCqsKmgoKUlIKCgoKUgpSCpqKCkoKUgoKUgoKCgoKCgpSmgpSUgqaCpqKCgpSqoqqigqrSgoKClKaq0oKCgpSmruKCgoKCgoKCgoKUgoKUlLiUtKSCtoKCpoKmgpSCgpSUqqKCqqKmgoKClIK4goKClIKUgoKClM6irLKssqaCgoKUlIKCgoKUlIKUgoKCgpS4gqaClKqipoKCgoKUgoKUgoKCpoKUgpSCgoKCgpSCgpSmrOSCgpSAlIKUgoKkgIKkgoKCgpSUgoKClJSCgoKClIKmgoKUqqKClIKUqsKCgpSUgpSCgoKCgoKCppSCgoKUgoKmhJKCgoKCgg==", "120-136:1")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/readwriter.go", "readwriter.cs", "AA8k9KSUgoKUgoKCgriCgpSCgpSCpqiSgoKCpq7CgoIADByygoKCgoKUlIKUgoKUgoKCgpSClIKCAAUQooKCgoI=")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/tables15.0.0.go", "tables15.0.0.cs", "ABIoABMsAK8V5iqygpSkpIKUgoKClKSClIKCgpSCgoKClKSClIKCgpSCgoKClIKCgoKUpqqigoKUgoKUgoKUgoKUrLKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpTsgqiSlKSC3ACGBI4IAGrWAaYA/waGDrKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpSssoKUpKSClIKCgpSkgpSCgoKUgoKCgpSkgpSCgoKUgoKCgpSCgoKClKaqooKClIKClIKClIKClOyCqJKUpILcAKQIyhAAcuYBpg==")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/transform.go", "transform.cs", "AAwcrAAJBIKCgoKClIKCgoKmgpSmtIKUgqaY9IKClIKCgpSCpoKCgoKClIKCgoKCgpQ=")]
+[assembly: GoPositionMap("vendor/golang.org/x/text/unicode/norm/trie.go", "trie.cs", "ABEi2tyCnsKCgoKCgoKCgpSClKY=")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.text.unicode;
+
+using ꓸꓸꓸbyte = Span<byte>;
 
 [GoPackage("norm", ImportPath = "vendor/golang.org/x/text/unicode/norm")]
 public static partial class norm_package
@@ -129,16 +135,145 @@ public static partial class norm_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(norm_package.Form)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class normᴛForm;
-[GoMethodHost(typeof(norm_package.Iter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class normᴛIter;
-[GoMethodHost(typeof(norm_package.Properties)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class normᴛProperties;
-[GoMethodHost(typeof(norm_package.formInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class normᴛformInfo;
-[GoMethodHost(typeof(norm_package.input)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class normᴛinput;
-[GoMethodHost(typeof(norm_package.nfcTrie)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class normᴛnfcTrie;
-[GoMethodHost(typeof(norm_package.nfkcTrie)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class normᴛnfkcTrie;
-[GoMethodHost(typeof(norm_package.normReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class normᴛnormReader;
-[GoMethodHost(typeof(norm_package.normWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class normᴛnormWriter;
-[GoMethodHost(typeof(norm_package.reorderBuffer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class normᴛreorderBuffer;
-[GoMethodHost(typeof(norm_package.sparseBlocks)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class normᴛsparseBlocks;
-[GoMethodHost(typeof(norm_package.streamSafe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class normᴛstreamSafe;
+[GoMethodHost(typeof(norm_package.Form)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class normᴛForm;
+[GoMethodHost(typeof(norm_package.Iter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class normᴛIter;
+[GoMethodHost(typeof(norm_package.Properties)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class normᴛProperties;
+[GoMethodHost(typeof(norm_package.formInfo)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class normᴛformInfo;
+[GoMethodHost(typeof(norm_package.input)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class normᴛinput;
+[GoMethodHost(typeof(norm_package.nfcTrie)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class normᴛnfcTrie;
+[GoMethodHost(typeof(norm_package.nfkcTrie)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class normᴛnfkcTrie;
+[GoMethodHost(typeof(norm_package.normReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class normᴛnormReader;
+[GoMethodHost(typeof(norm_package.normWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class normᴛnormWriter;
+[GoMethodHost(typeof(norm_package.reorderBuffer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class normᴛreorderBuffer;
+[GoMethodHost(typeof(norm_package.sparseBlocks)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class normᴛsparseBlocks;
+[GoMethodHost(typeof(norm_package.streamSafe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class normᴛstreamSafe;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class normᴛForm {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static norm_package.Properties Properties(this norm_package.Form f, slice<byte> s) => norm_package.Properties⁔(f, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static norm_package.Properties PropertiesString(this norm_package.Form f, @string s) => norm_package.PropertiesString⁔(f, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this norm_package.Form f, slice<byte> b) => norm_package.Bytes⁔(f, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this norm_package.Form f, @string s) => norm_package.String⁔(f, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsNormal(this norm_package.Form f, slice<byte> b) => norm_package.IsNormal⁔(f, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsNormalString(this norm_package.Form f, @string s) => norm_package.IsNormalString⁔(f, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Append(this norm_package.Form f, slice<byte> @out, params ꓸꓸꓸbyte srcʗp) => norm_package.Append⁔(f, @out, srcʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> doAppend(this norm_package.Form f, slice<byte> @out, norm_package.input src, nint n) => norm_package.doAppend⁔(f, @out, src, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> AppendString(this norm_package.Form f, slice<byte> @out, @string src) => norm_package.AppendString⁔(f, @out, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint QuickSpan(this norm_package.Form f, slice<byte> b) => norm_package.QuickSpan⁔(f, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Span(this norm_package.Form f, slice<byte> b, bool atEOF) => norm_package.Span⁔(f, b, atEOF);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) SpanString(this norm_package.Form f, @string s, bool atEOF) => norm_package.SpanString⁔(f, s, atEOF);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint QuickSpanString(this norm_package.Form f, @string s) => norm_package.QuickSpanString⁔(f, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint FirstBoundary(this norm_package.Form f, slice<byte> b) => norm_package.FirstBoundary⁔(f, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint firstBoundary(this norm_package.Form f, norm_package.input src, nint nsrc) => norm_package.firstBoundary⁔(f, src, nsrc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint FirstBoundaryInString(this norm_package.Form f, @string s) => norm_package.FirstBoundaryInString⁔(f, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NextBoundary(this norm_package.Form f, slice<byte> b, bool atEOF) => norm_package.NextBoundary⁔(f, b, atEOF);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NextBoundaryInString(this norm_package.Form f, @string s, bool atEOF) => norm_package.NextBoundaryInString⁔(f, s, atEOF);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint nextBoundary(this norm_package.Form f, norm_package.input src, nint nsrc, bool atEOF) => norm_package.nextBoundary⁔(f, src, nsrc, atEOF);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint LastBoundary(this norm_package.Form f, slice<byte> b) => norm_package.LastBoundary⁔(f, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static io.WriteCloser Writer(this norm_package.Form f, io.Writer w) => norm_package.Writer⁔(f, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static io.Reader Reader(this norm_package.Form f, io.Reader r) => norm_package.Reader⁔(f, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this norm_package.Form _) => norm_package.Reset⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint nDst, nint nSrc, error err) Transform(this norm_package.Form f, slice<byte> dst, slice<byte> src, bool atEOF) => norm_package.Transform⁔(f, dst, src, atEOF);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) transform(this norm_package.Form f, slice<byte> dst, slice<byte> src, bool atEOF) => norm_package.transform⁔(f, dst, src, atEOF);
+}
+partial class normᴛIter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Init(this ref norm_package.Iter i, norm_package.Form f, slice<byte> src) => norm_package.Init⁔(ref i, f, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void InitString(this ref norm_package.Iter i, norm_package.Form f, @string src) => norm_package.InitString⁔(ref i, f, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64, error) Seek(this ref norm_package.Iter i, int64 offset, nint whence) => norm_package.Seek⁔(ref i, offset, whence);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> returnSlice(this ref norm_package.Iter i, nint a, nint b) => norm_package.returnSlice⁔(ref i, a, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Pos(this ref norm_package.Iter i) => norm_package.Pos⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setDone(this ref norm_package.Iter i) => norm_package.setDone⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Done(this ref norm_package.Iter i) => norm_package.Done⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Next(this ж<norm_package.Iter> Ꮡi) => norm_package.Next⁔(Ꮡi);
+}
+partial class normᴛProperties {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool BoundaryBefore(this norm_package.Properties p) => norm_package.BoundaryBefore⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool BoundaryAfter(this norm_package.Properties p) => norm_package.BoundaryAfter⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isYesC(this norm_package.Properties p) => norm_package.isYesC⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isYesD(this norm_package.Properties p) => norm_package.isYesD⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool combinesForward(this norm_package.Properties p) => norm_package.combinesForward⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool combinesBackward(this norm_package.Properties p) => norm_package.combinesBackward⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasDecomposition(this norm_package.Properties p) => norm_package.hasDecomposition⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isInert(this norm_package.Properties p) => norm_package.isInert⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool multiSegment(this norm_package.Properties p) => norm_package.multiSegment⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint8 nLeadingNonStarters(this norm_package.Properties p) => norm_package.nLeadingNonStarters⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint8 nTrailingNonStarters(this norm_package.Properties p) => norm_package.nTrailingNonStarters⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Decomposition(this norm_package.Properties p) => norm_package.Decomposition⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this norm_package.Properties p) => norm_package.Size⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint8 CCC(this norm_package.Properties p) => norm_package.CCC⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint8 LeadCCC(this norm_package.Properties p) => norm_package.LeadCCC⁔(p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint8 TrailCCC(this norm_package.Properties p) => norm_package.TrailCCC⁔(p);
+}
+partial class normᴛformInfo {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, bool ok) quickSpan(this ref norm_package.formInfo f, norm_package.input src, nint i, nint end, bool atEOF) => norm_package.quickSpan⁔(ref f, src, i, end, atEOF);
+}
+partial class normᴛinput {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setBytes(this ref norm_package.input @in, slice<byte> str) => norm_package.setBytes⁔(ref @in, str);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setString(this ref norm_package.input @in, @string str) => norm_package.setString⁔(ref @in, str);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static byte _byte(this ref norm_package.input @in, nint p) => norm_package._byte⁔(ref @in, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint skipASCII(this ref norm_package.input @in, nint p, nint max) => norm_package.skipASCII⁔(ref @in, p, max);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint skipContinuationBytes(this ref norm_package.input @in, nint p) => norm_package.skipContinuationBytes⁔(ref @in, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendSlice(this ref norm_package.input @in, slice<byte> buf, nint b, nint e) => norm_package.appendSlice⁔(ref @in, buf, b, e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint copySlice(this ref norm_package.input @in, slice<byte> buf, nint b, nint e) => norm_package.copySlice⁔(ref @in, buf, b, e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16, nint) charinfoNFC(this ref norm_package.input @in, nint p) => norm_package.charinfoNFC⁔(ref @in, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16, nint) charinfoNFKC(this ref norm_package.input @in, nint p) => norm_package.charinfoNFKC⁔(ref @in, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static rune /*r*/ hangul(this ref norm_package.input @in, nint p) => norm_package.hangul⁔(ref @in, p);
+}
+partial class normᴛnfcTrie {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16 v, nint sz) lookup(this ref norm_package.nfcTrie t, slice<byte> s) => norm_package.lookup⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookupUnsafe(this ref norm_package.nfcTrie t, slice<byte> s) => norm_package.lookupUnsafe⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16 v, nint sz) lookupString(this ref norm_package.nfcTrie t, @string s) => norm_package.lookupString⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookupStringUnsafe(this ref norm_package.nfcTrie t, @string s) => norm_package.lookupStringUnsafe⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookupValue(this ref norm_package.nfcTrie t, uint32 n, byte b) => norm_package.lookupValue⁔(ref t, n, b);
+}
+partial class normᴛnfkcTrie {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16 v, nint sz) lookup(this ref norm_package.nfkcTrie t, slice<byte> s) => norm_package.lookup⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookupUnsafe(this ref norm_package.nfkcTrie t, slice<byte> s) => norm_package.lookupUnsafe⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16 v, nint sz) lookupString(this ref norm_package.nfkcTrie t, @string s) => norm_package.lookupString⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookupStringUnsafe(this ref norm_package.nfkcTrie t, @string s) => norm_package.lookupStringUnsafe⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookupValue(this ref norm_package.nfkcTrie t, uint32 n, byte b) => norm_package.lookupValue⁔(ref t, n, b);
+}
+partial class normᴛnormReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ж<norm_package.normReader> Ꮡr, slice<byte> p) => norm_package.Read⁔(Ꮡr, p);
+}
+partial class normᴛnormWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ж<norm_package.normWriter> Ꮡw, slice<byte> data) => norm_package.Write⁔(Ꮡw, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref norm_package.normWriter w) => norm_package.Close⁔(ref w);
+}
+partial class normᴛreorderBuffer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ref norm_package.reorderBuffer rb, norm_package.Form f, slice<byte> src) => norm_package.init⁔(ref rb, f, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void initString(this ref norm_package.reorderBuffer rb, norm_package.Form f, @string src) => norm_package.initString⁔(ref rb, f, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setFlusher(this ref norm_package.reorderBuffer rb, slice<byte> @out, Func<ж<norm_package.reorderBuffer>, bool> f) => norm_package.setFlusher⁔(ref rb, @out, f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void reset(this ref norm_package.reorderBuffer rb) => norm_package.reset⁔(ref rb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool doFlush(this ж<norm_package.reorderBuffer> Ꮡrb) => norm_package.doFlush⁔(Ꮡrb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> flush(this ref norm_package.reorderBuffer rb, slice<byte> @out) => norm_package.flush⁔(ref rb, @out);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint flushCopy(this ref norm_package.reorderBuffer rb, slice<byte> buf) => norm_package.flushCopy⁔(ref rb, buf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void insertOrdered(this ref norm_package.reorderBuffer rb, norm_package.Properties info) => norm_package.insertOrdered⁔(ref rb, info);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static norm_package.insertErr insertFlush(this ж<norm_package.reorderBuffer> Ꮡrb, norm_package.input src, nint i, norm_package.Properties info) => norm_package.insertFlush⁔(Ꮡrb, src, i, info);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void insertUnsafe(this ж<norm_package.reorderBuffer> Ꮡrb, norm_package.input src, nint i, norm_package.Properties info) => norm_package.insertUnsafe⁔(Ꮡrb, src, i, info);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static norm_package.insertErr insertDecomposed(this ж<norm_package.reorderBuffer> Ꮡrb, slice<byte> dcomp) => norm_package.insertDecomposed⁔(Ꮡrb, dcomp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void insertSingle(this ref norm_package.reorderBuffer rb, norm_package.input src, nint i, norm_package.Properties info) => norm_package.insertSingle⁔(ref rb, src, i, info);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void insertCGJ(this ref norm_package.reorderBuffer rb) => norm_package.insertCGJ⁔(ref rb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void appendRune(this ref norm_package.reorderBuffer rb, rune r) => norm_package.appendRune⁔(ref rb, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void assignRune(this ref norm_package.reorderBuffer rb, nint pos, rune r) => norm_package.assignRune⁔(ref rb, pos, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static rune runeAt(this ref norm_package.reorderBuffer rb, nint n) => norm_package.runeAt⁔(ref rb, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> bytesAt(this ref norm_package.reorderBuffer rb, nint n) => norm_package.bytesAt⁔(ref rb, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void decomposeHangul(this ref norm_package.reorderBuffer rb, rune r) => norm_package.decomposeHangul⁔(ref rb, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void combineHangul(this ref norm_package.reorderBuffer rb, nint s, nint i, nint k) => norm_package.combineHangul⁔(ref rb, s, i, k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void compose(this ref norm_package.reorderBuffer rb) => norm_package.compose⁔(ref rb);
+}
+partial class normᴛsparseBlocks {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookup(this ref norm_package.sparseBlocks t, uint32 n, byte b) => norm_package.lookup⁔(ref t, n, b);
+}
+partial class normᴛstreamSafe {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void first(this ref norm_package.streamSafe ss, norm_package.Properties p) => norm_package.first⁔(ref ss, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static norm_package.ssState next(this ref norm_package.streamSafe ss, norm_package.Properties p) => norm_package.next⁔(ref ss, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static norm_package.ssState backwards(this ref norm_package.streamSafe ss, norm_package.Properties p) => norm_package.backwards⁔(ref ss, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isMax(this norm_package.streamSafe ss) => norm_package.isMax⁔(ss);
+}
+// </MethodForwarders>

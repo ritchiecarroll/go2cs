@@ -6,7 +6,6 @@ namespace go.vendor.golang.org.x.text.unicode;
 using fmt = fmt_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
-using static norm_package;
 
 partial class norm_package {
 
@@ -28,10 +27,8 @@ partial struct Iter {
 
 // type iterFunc is a methodless func type — rendered inline as its base delegate
 
-} partial class normᴛIter {
-
 // Init initializes i to iterate over src after normalizing it to Form f.
-public static void Init(this ref Iter i, Form f, slice<byte> src) {
+internal static void Init⁔(/*this*/ ref Iter i, Form f, slice<byte> src) {
     i.p = 0;
     if (len(src) == 0) {
         i.setDone();
@@ -47,7 +44,7 @@ public static void Init(this ref Iter i, Form f, slice<byte> src) {
 }
 
 // InitString initializes i to iterate over src after normalizing it to Form f.
-public static void InitString(this ref Iter i, Form f, @string src) {
+internal static void InitString⁔(/*this*/ ref Iter i, Form f, @string src) {
     i.p = 0;
     if (len(src) == 0) {
         i.setDone();
@@ -65,7 +62,7 @@ public static void InitString(this ref Iter i, Form f, @string src) {
 // Seek sets the segment to be returned by the next call to Next to start
 // at position p.  It is the responsibility of the caller to set p to the
 // start of a segment.
-public static (int64, error) Seek(this ref Iter i, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ref Iter i, int64 offset, nint whence) {
     int64 abs = default;
     switch (whence) {
     case 0: {
@@ -102,7 +99,7 @@ public static (int64, error) Seek(this ref Iter i, int64 offset, nint whence) {
 // If the underlying is of type []byte, it will simply return a slice.
 // If the underlying is of type string, it will copy the slice to the buffer
 // and return that.
-internal static slice<byte> returnSlice(this ref Iter i, nint a, nint b) {
+internal static slice<byte> returnSlice⁔(/*this*/ ref Iter i, nint a, nint b) {
     if (i.rb.src.bytes == nil) {
         return i.buf.slice(0, copy(i.buf[..], i.rb.src.str.slice(a, b)));
     }
@@ -110,17 +107,17 @@ internal static slice<byte> returnSlice(this ref Iter i, nint a, nint b) {
 }
 
 // Pos returns the byte position at which the next call to Next will commence processing.
-public static nint Pos(this ref Iter i) {
+internal static nint Pos⁔(/*this*/ ref Iter i) {
     return i.p;
 }
 
-internal static void setDone(this ref Iter i) {
+internal static void setDone⁔(/*this*/ ref Iter i) {
     i.next = nextDone;
     i.p = i.rb.nsrc;
 }
 
 // Done returns true if there is no more input to process.
-public static bool Done(this ref Iter i) {
+internal static bool Done⁔(/*this*/ ref Iter i) {
     return i.p >= i.rb.nsrc;
 }
 
@@ -129,13 +126,11 @@ public static bool Done(this ref Iter i) {
 // to Next will return the same segments.
 // Modifying runes are grouped together with the preceding starter, if such a starter exists.
 // Although not guaranteed, n will typically be the smallest possible n.
-public static slice<byte> Next(this ж<Iter> Ꮡi) {
+internal static slice<byte> Next⁔(/*this*/ ж<Iter> Ꮡi) {
     ref var i = ref Ꮡi.DerefOrNull();
 
     return i.next(Ꮡi);
 }
-
-} partial class norm_package {
 
 internal static slice<byte> nextASCIIBytes(ж<Iter> Ꮡi) {
     ref var i = ref Ꮡi.DerefOrNull();

@@ -14,6 +14,9 @@
 
 using go;
 using static go.vendor.golang.org.x.net.idna_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -63,12 +66,12 @@ using static go.vendor.golang.org.x.net.idna_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("vendor/golang.org/x/net/idna/idna10.0.0.go", "idna10.0.0.cs", "AB9cABACqJIABRbSgL7CgLqigAADENKmgpSCgoKClAAEFNKAvsKCggADHAAKAoAAAxTygLqigoKCgoIAAxgACAKCgoIAGj6CggADGAAKAoKCzsKuwoKCAAgKooKClJSClIKUgpSClPzKuLiUggAKFAAJEgAUJIKCAAgKgoLKwoKCgqaC3IKUgoKCpoKUlIKCgoKCppSClIKCgpS4lIKmgoKCgriCgoKCgoKUgpSCgriClIKClIKmxoKCgqam6IKCpsSClIKCgpSU6oKUlMaCgriClJTGwgABEMKCgoKCgoKClJSCgoKUlLSCgpS0grTGgqSUlIKmgoKmlAANGIKCgqaCpoKClKaCgpSCgoKUqJKCgoKmgoLKgoKUAAoMgpSClMaClMaC2KTGooK4goKClIKUlAAQJgAqYKKCgpSUgoKUgqaClJSCgoKmgpSCgoKCgoKUgoKUgpSClIKUxoKCgqY=", "64-64:1;72-72:1;78-78:1;87-101:1;110-110:1;118-121:1;135-135:1;146-146:1;152-158:1;170-174:1")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/idna/idna10.0.0.go", "idna10.0.0.cs", "AB5cABACqJIABRbSgL7CgLqigAADENKmgpSCgoKClAAEFNKAvsKCggADHAAKAoAAAxTygLqigoKCgoIAAxgACAKCgoIAGj6CggADGAAKAoKCrsKuwoKCAAgKooKClJSClIKUgpSClNzKuLiUggAKFAAJEgASJIKCyoKCqsKCgoKmgtyClIKCgqaClJSCgoKCgqaUgpSCgoKUuJSCpoKCgoK4goKCgoKClIKUgoK4gpSCgpSCpqaCgoKmpuiCgqbEgpSCgoKUlOqClJSmgoK4gpSUpsIAARDCgoKCgoKCgpSUgoKClJS0goKUtIK0xoKklJSCpoKCppQACxiCgoKmgqaCgpSmgoKUgoKClKiSgoKCpoKCyoKClOyClIKUxoKUxoLYpKaigriCgoKUgpSUABAmAChgooKClJSCgpSCpoKUlIKCgqaClIKCgoKCgpSCgpSClIKUgpSmgoKCpg==", "64-64:1;72-72:1;78-78:1;87-101:1;110-110:1;118-121:1;135-135:1;146-146:1;152-158:1;170-174:1")]
 [assembly: GoPositionMap("vendor/golang.org/x/net/idna/punycode.go", "punycode.cs", "ABo+lrKClIKClIKUgoKCpoKCgoKCgpSCgpSCgoKUgoKCgpSClIKCpoKUgoKCgoKUgoKClAACEPKCgoKCgoKClKaCgpSCgoKCgqaCgpSCgoKCgpSUgpSCgoKCgoKUgpSClIKCgoKUgpSokoKClKaClKSklKaClKSUqJKClJSCgoKClA==")]
-[assembly: GoPositionMap("vendor/golang.org/x/net/idna/tables15.0.0.go", "tables15.0.0.cs", "AA9yAPwBxgeygpSkpIKUgoKClKSClIKCgpSCgoKClKSClIKCgpSCgoKClIKCgoKUpqqigoKUgoKUgoKUgoKUrLKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpQACAyCyJKUpIL8AM0MnBkAuQL0BKY=")]
-[assembly: GoPositionMap("vendor/golang.org/x/net/idna/trie.go", "trie.cs", "ABUq7LzCgoKCgoKCgoKUgpSm")]
-[assembly: GoPositionMap("vendor/golang.org/x/net/idna/trie13.0.0.go", "trie13.0.0.cs", "AA0aooKCgpSClJSCgqY=")]
-[assembly: GoPositionMap("vendor/golang.org/x/net/idna/trieval.go", "trieval.cs", "AFq8AYKmgoKClKaCgpSmgqaC")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/idna/tables15.0.0.go", "tables15.0.0.cs", "AA1yAPoBxgeygpSkpIKUgoKClKSClIKCgpSCgoKClKSClIKCgpSCgoKClIKCgoKUpqqigoKUgoKUgoKUgoKUrLKClKSkgpSCgoKUpIKUgoKClIKCgoKUpIKUgoKClIKCgoKUgoKCgpSmqqKCgpSCgpSCgpSCgpTsgqiSlKSC3ADNDJwZALkC9ASm")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/idna/trie.go", "trie.cs", "ABMq7JzCgoKCgoKCgoKUgpSm")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/idna/trie13.0.0.go", "trie13.0.0.cs", "AAkaooKCgpSClJSCgqY=")]
+[assembly: GoPositionMap("vendor/golang.org/x/net/idna/trieval.go", "trieval.cs", "AFa8AYKmgoKClKaCgpSmgqaC")]
 // </GoSourcePositionMaps>
 
 namespace go.vendor.golang.org.x.net;
@@ -120,11 +123,61 @@ public static partial class idna_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(idna_package.Profile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛProfile;
-[GoMethodHost(typeof(idna_package.idnaTrie)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛidnaTrie;
-[GoMethodHost(typeof(idna_package.info)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛinfo;
-[GoMethodHost(typeof(idna_package.labelError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛlabelError;
-[GoMethodHost(typeof(idna_package.labelIter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛlabelIter;
-[GoMethodHost(typeof(idna_package.runeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛruneError;
-[GoMethodHost(typeof(idna_package.sparseBlocks)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛsparseBlocks;
+[GoMethodHost(typeof(idna_package.Profile)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class idnaᴛProfile;
+[GoMethodHost(typeof(idna_package.idnaTrie)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class idnaᴛidnaTrie;
+[GoMethodHost(typeof(idna_package.info)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class idnaᴛinfo;
+[GoMethodHost(typeof(idna_package.labelError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class idnaᴛlabelError;
+[GoMethodHost(typeof(idna_package.labelIter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class idnaᴛlabelIter;
+[GoMethodHost(typeof(idna_package.runeError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class idnaᴛruneError;
+[GoMethodHost(typeof(idna_package.sparseBlocks)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class idnaᴛsparseBlocks;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class idnaᴛProfile {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) ToASCII(this ж<idna_package.Profile> Ꮡp, @string s) => idna_package.ToASCII⁔(Ꮡp, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) ToUnicode(this ref idna_package.Profile p, @string s) => idna_package.ToUnicode⁔(ref p, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref idna_package.Profile p) => idna_package.String⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, error) process(this ж<idna_package.Profile> Ꮡp, @string s, bool toASCII) => idna_package.process⁔(Ꮡp, s, toASCII);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static idna_package.category simplify(this ref idna_package.Profile p, idna_package.category cat) => idna_package.simplify⁔(ref p, cat);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ validateLabel(this ref idna_package.Profile p, @string s) => idna_package.validateLabel⁔(ref p, s);
+}
+partial class idnaᴛidnaTrie {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16 v, nint sz) lookup(this ref idna_package.idnaTrie t, slice<byte> s) => idna_package.lookup⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookupUnsafe(this ref idna_package.idnaTrie t, slice<byte> s) => idna_package.lookupUnsafe⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16 v, nint sz) lookupString(this ref idna_package.idnaTrie t, @string s) => idna_package.lookupString⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookupStringUnsafe(this ref idna_package.idnaTrie t, @string s) => idna_package.lookupStringUnsafe⁔(ref t, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookupValue(this ref idna_package.idnaTrie t, uint32 n, byte b) => idna_package.lookupValue⁔(ref t, n, b);
+}
+partial class idnaᴛinfo {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isBidi(this idna_package.info c, @string s) => idna_package.isBidi⁔(c, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendMapping(this idna_package.info c, slice<byte> b, @string s) => idna_package.appendMapping⁔(c, b, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isMapped(this idna_package.info c) => idna_package.isMapped⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static idna_package.category category(this idna_package.info c) => idna_package.category⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static idna_package.info joinType(this idna_package.info c) => idna_package.joinType⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isModifier(this idna_package.info c) => idna_package.isModifier⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isViramaModifier(this idna_package.info c) => idna_package.isViramaModifier⁔(c);
+}
+partial class idnaᴛlabelError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string code(this idna_package.labelError e) => idna_package.code⁔(e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this idna_package.labelError e) => idna_package.Error⁔(e);
+}
+partial class idnaᴛlabelIter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void reset(this ref idna_package.labelIter l) => idna_package.reset⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool done(this ref idna_package.labelIter l) => idna_package.done⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string result(this ref idna_package.labelIter l) => idna_package.result⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string label(this ref idna_package.labelIter l) => idna_package.label⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void next(this ref idna_package.labelIter l) => idna_package.next⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void set(this ref idna_package.labelIter l, @string s) => idna_package.set⁔(ref l, s);
+}
+partial class idnaᴛruneError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string code(this idna_package.runeError e) => idna_package.code⁔(e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this idna_package.runeError e) => idna_package.Error⁔(e);
+}
+partial class idnaᴛsparseBlocks {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookup(this ref idna_package.sparseBlocks t, uint32 n, byte b) => idna_package.lookup⁔(ref t, n, b);
+}
+// </MethodForwarders>

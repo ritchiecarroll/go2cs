@@ -3,11 +3,7 @@
 // license that can be found in the LICENSE file.
 namespace go.regexp;
 
-using static syntax_package;
-
 partial class syntax_package {
-
-} partial class syntaxᴛRegexp {
 
 // Simplify returns a regexp equivalent to re but without counted repetitions
 // and with various other simplifications, such as rewriting /(?:a+)+/ to /a+/.
@@ -16,7 +12,7 @@ partial class syntax_package {
 // may have been duplicated or removed. For example, the simplified form
 // for /(x){1,2}/ is /(x)(x)?/ but both parentheses capture as $1.
 // The returned regexp may share structure with or be the original.
-public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
+internal static ж<Regexp> Simplify⁔(/*this*/ ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (Ꮡre == nil) {
@@ -122,8 +118,6 @@ public static ж<Regexp> Simplify(this ж<Regexp> Ꮡre) {
 
     return Ꮡre;
 }
-
-} partial class syntax_package {
 
 // simplify1 implements Simplify for the unary OpStar,
 // OpPlus, and OpQuest operators. It returns the simple regexp

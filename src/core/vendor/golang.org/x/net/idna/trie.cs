@@ -4,8 +4,6 @@
 // license that can be found in the LICENSE file.
 namespace go.vendor.golang.org.x.net;
 
-using static idna_package;
-
 partial class idna_package {
 
 // Sparse block handling code.
@@ -28,13 +26,11 @@ internal static ref sparseBlocks idnaSparse => ref ((StaticBox<sparseBlocks>)Ꮡ
 // Don't use newIdnaTrie to avoid unconditional linking in of the table.
 internal static ж<idnaTrie> trie = Ꮡ(new idnaTrie());
 
-} partial class idnaᴛsparseBlocks {
-
 // lookup determines the type of block n and looks up the value for b.
 // For n < t.cutoff, the block is a simple lookup table. Otherwise, the block
 // is a list of ranges with an accompanying value. Given a matching range r,
 // the value for b is by r.value + (b - r.lo) * stride.
-internal static uint16 lookup(this ref sparseBlocks t, uint32 n, byte b) {
+internal static uint16 lookup⁔(/*this*/ ref sparseBlocks t, uint32 n, byte b) {
     var offset = t.offset[n];
     var header = t.values[offset];
     var lo = (uint16)(offset + 1);
@@ -54,4 +50,4 @@ internal static uint16 lookup(this ref sparseBlocks t, uint32 n, byte b) {
     return 0;
 }
 
-}
+} // end idna_package

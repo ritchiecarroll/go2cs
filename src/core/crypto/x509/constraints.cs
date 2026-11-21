@@ -11,7 +11,6 @@ using url = go.net.url_package;
 using slices = slices_package;
 using strings = strings_package;
 using go.net;
-using static x509_package;
 
 partial class x509_package {
 
@@ -70,12 +69,10 @@ partial struct nameConstraintsSet<T, V>
     internal slice<T> set;
 }
 
-} partial class x509ᴛnameConstraintsSet {
-
 // sortAndPrune sorts the constraints using the provided comparison function, and then
 // prunes any constraints that are subsets of preceding constraints using the
 // provided subset function.
-internal static void sortAndPrune<T, V>(this ref nameConstraintsSet<T, V> nc, Func<T, T, nint> cmp, Func<T, T, bool> subset)
+internal static void sortAndPrune⁔<T, V>(/*this*/ ref nameConstraintsSet<T, V> nc, Func<T, T, nint> cmp, Func<T, T, bool> subset)
     where V : /* net.IP | string */ new()
 {
     if (len(nc.set) < 2) {
@@ -102,7 +99,7 @@ internal static void sortAndPrune<T, V>(this ref nameConstraintsSet<T, V> nc, Fu
 // the match function to determine if the found constraint is a prefix of s. If
 // a matching constraint is found, it is returned along with true. If no
 // matching constraint is found, the zero value of T and false are returned.
-internal static (T lowerBound, bool exactMatch) search<T, V>(this ref nameConstraintsSet<T, V> nc, V s, Func<T, V, nint> cmp, Func<T, V, bool> match)
+internal static (T lowerBound, bool exactMatch) search⁔<T, V>(/*this*/ ref nameConstraintsSet<T, V> nc, V s, Func<T, V, nint> cmp, Func<T, V, bool> match)
     where V : /* net.IP | string */ new()
 {
     T lowerBound = GoZero<T>();
@@ -132,8 +129,6 @@ internal static (T lowerBound, bool exactMatch) search<T, V>(this ref nameConstr
     }
     return (lowerBound, false);
 }
-
-} partial class x509_package {
 
 internal static bool ipNetworkSubset(ж<net.IPNet> a, ж<net.IPNet> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
@@ -213,9 +208,7 @@ internal static newIPNetConstraints_R0 newIPNetConstraints(slice<ж<net.IPNet>> 
     return new ipConstraintsжnewIPNetConstraints_R0(Ꮡ(new ipConstraints(ipv4: v4c, ipv6: v6c)));
 }
 
-} partial class x509ᴛipConstraints {
-
-internal static (ж<net.IPNet>, bool) query(this ref ipConstraints ipc, net.IP ip) {
+internal static (ж<net.IPNet>, bool) query⁔(/*this*/ ref ipConstraints ipc, net.IP ip) {
     ж<nameConstraintsSet<ж<net.IPNet>, net.IP>> c = default;
     if (len(ip) == net.IPv4len) {
         c = ipc.ipv4;
@@ -227,8 +220,6 @@ internal static (ж<net.IPNet>, bool) query(this ref ipConstraints ipc, net.IP i
     }
     return c.search(ip, ipBinarySearch, ipMatch);
 }
-
-} partial class x509_package {
 
 // dnsHasSuffix case-insensitively checks if DNS name b is a label suffix of DNS
 // name a, meaning that example.com is not considered a suffix of
@@ -395,9 +386,7 @@ internal static newDNSConstraints_R0 newDNSConstraints(slice<@string> l, bool pe
     return new dnsConstraintsжnewDNSConstraints_R0(nc);
 }
 
-} partial class x509ᴛdnsConstraints {
-
-internal static (@string, bool) query(this ref dnsConstraints dnc, @string s) {
+internal static (@string, bool) query⁔(/*this*/ ref dnsConstraints dnc, @string s) {
     if (dnc.all) {
         return ("", true);
     }
@@ -416,8 +405,6 @@ internal static (@string, bool) query(this ref dnsConstraints dnc, @string s) {
     }
     return ("", false);
 }
-
-} partial class x509_package {
 
 
 partial struct emailConstraints {
@@ -468,9 +455,7 @@ internal static newEmailConstraints_R0 newEmailConstraints(slice<@string> l, boo
     return new emailConstraintsжnewEmailConstraints_R0(ec);
 }
 
-} partial class x509ᴛemailConstraints {
-
-internal static (@string, bool) query(this ref emailConstraints ec, rfc2821Mailbox s) {
+internal static (@string, bool) query⁔(/*this*/ ref emailConstraints ec, rfc2821Mailbox s) {
     if (len(ec.fullEmails) > 0) {
         var (_, ok) = ec.fullEmails[s, ꟷ]; if (ok) {
             return (fmt.Sprintf("%s@%s"u8, s.local, s.domain), true);
@@ -482,8 +467,6 @@ internal static (@string, bool) query(this ref emailConstraints ec, rfc2821Mailb
     var (constraint, found) = ec.dnsConstraints.query(s.domain);
     return (constraint, found);
 }
-
-} partial class x509_package {
 
 partial interface constraints_permitted<T, V> /*dyn*/ {
     (T, bool) query(V _Δp0);
@@ -524,9 +507,7 @@ partial struct chainConstraints {
     internal ж<chainConstraints> next;
 }
 
-} partial class x509ᴛchainConstraints {
-
-internal static error check(this ref chainConstraints cc, slice<@string> dns, slice<parsedURI> uris, slice<rfc2821Mailbox> emails, slice<net.IP> ips) {
+internal static error check⁔(/*this*/ ref chainConstraints cc, slice<@string> dns, slice<parsedURI> uris, slice<rfc2821Mailbox> emails, slice<net.IP> ips) {
     foreach (var (_, ip) in range(ips)) {
         var err = checkConstraints(cc.ip, ip, ip); if (err != nil) {
             return err;
@@ -558,8 +539,6 @@ internal static error check(this ref chainConstraints cc, slice<@string> dns, sl
     }
     return default;
 }
-
-} partial class x509_package {
 
 internal static error checkChainConstraints(slice<ж<Certificate>> chain) {
     ж<chainConstraints> currentConstraints = default;
@@ -627,13 +606,9 @@ partial struct parsedURI {
     internal @string domain;
 }
 
-} partial class x509ᴛparsedURI {
-
-internal static @string String(this parsedURI u) {
+internal static @string String⁔(/*this*/ parsedURI u) {
     return u.uri.String();
 }
-
-} partial class x509_package {
 
 internal static (slice<parsedURI>, error) parseURIs(slice<ж<url.URL>> uris) {
     var parsed = new slice<parsedURI>(0, len(uris));

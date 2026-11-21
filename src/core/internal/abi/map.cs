@@ -4,7 +4,6 @@
 namespace go.@internal;
 
 using @unsafe = unsafe_package;
-using static abi_package;
 
 partial class abi_package {
 
@@ -46,23 +45,21 @@ public static UntypedInt MapHashMightPanic => 2;
 public static UntypedInt MapIndirectKey => 4;
 public static UntypedInt MapIndirectElem => 8;
 
-} partial class abiᴛMapType {
-
-public static bool NeedKeyUpdate(this ref MapType mt) {
+internal static bool NeedKeyUpdate⁔(/*this*/ ref MapType mt) {
     // true if we need to update key on an overwrite
     return (mt.Flags & (uint32)MapNeedKeyUpdate) != 0;
 }
-public static bool HashMightPanic(this ref MapType mt) {
+internal static bool HashMightPanic⁔(/*this*/ ref MapType mt) {
     // true if hash function might panic
     return (mt.Flags & (uint32)MapHashMightPanic) != 0;
 }
-public static bool IndirectKey(this ref MapType mt) {
+internal static bool IndirectKey⁔(/*this*/ ref MapType mt) {
     // store ptr to key instead of key itself
     return (mt.Flags & (uint32)MapIndirectKey) != 0;
 }
-public static bool IndirectElem(this ref MapType mt) {
+internal static bool IndirectElem⁔(/*this*/ ref MapType mt) {
     // store ptr to elem instead of elem itself
     return (mt.Flags & (uint32)MapIndirectElem) != 0;
 }
 
-}
+} // end abi_package

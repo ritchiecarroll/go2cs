@@ -8,7 +8,6 @@ using atomic = @internal.runtime.atomic_package;
 using sys = @internal.runtime.sys_package;
 using @unsafe = unsafe_package;
 using @internal.runtime;
-using static runtime_package;
 
 partial class runtime_package {
 
@@ -122,17 +121,13 @@ internal static UntypedInt pollFDSeq => 16; // 20 bit field, low 20 bits of fdse
 internal static UntypedInt pollFDSeqBits => 20;                                 // number of bits in pollFDSeq
 internal static UntypedInt pollFDSeqMask => /* 1<<pollFDSeqBits - 1 */ 1048575; // mask for pollFDSeq
 
-} partial class runtimeᴛpollInfo {
-
-internal static bool closing(this pollInfo i) { return (pollInfo)(i & (uint32)pollClosing) != 0; }
-internal static bool eventErr(this pollInfo i) { return (pollInfo)(i & (uint32)pollEventErr) != 0; }
-internal static bool expiredReadDeadline(this pollInfo i) { return (pollInfo)(i & (uint32)pollExpiredReadDeadline) != 0; }
-internal static bool expiredWriteDeadline(this pollInfo i) { return (pollInfo)(i & (uint32)pollExpiredWriteDeadline) != 0; }
-
-} partial class runtimeᴛpollDesc {
+internal static bool closing⁔(/*this*/ pollInfo i) { return (pollInfo)(i & (uint32)pollClosing) != 0; }
+internal static bool eventErr⁔(/*this*/ pollInfo i) { return (pollInfo)(i & (uint32)pollEventErr) != 0; }
+internal static bool expiredReadDeadline⁔(/*this*/ pollInfo i) { return (pollInfo)(i & (uint32)pollExpiredReadDeadline) != 0; }
+internal static bool expiredWriteDeadline⁔(/*this*/ pollInfo i) { return (pollInfo)(i & (uint32)pollExpiredWriteDeadline) != 0; }
 
 // info returns the pollInfo corresponding to pd.
-internal static pollInfo info(this ж<pollDesc> Ꮡpd) {
+internal static pollInfo info⁔(/*this*/ ж<pollDesc> Ꮡpd) {
     return (pollInfo)Ꮡpd.ᏑatomicInfo.Load();
 }
 
@@ -143,7 +138,7 @@ internal static pollInfo info(this ж<pollDesc> Ꮡpd) {
 // that might affect the info bits.
 // In practice this means after changing closing
 // or changing rd or wd from < 0 to >= 0.
-internal static void publishInfo(this ж<pollDesc> Ꮡpd) {
+internal static void publishInfo⁔(/*this*/ ж<pollDesc> Ꮡpd) {
     ref var pd = ref Ꮡpd.DerefOrNull();
 
     uint32 info = default;
@@ -168,7 +163,7 @@ internal static void publishInfo(this ж<pollDesc> Ꮡpd) {
 // setEventErr sets the result of pd.info().eventErr() to b.
 // We only change the error bit if seq == 0 or if seq matches pollFDSeq
 // (issue #59545).
-internal static void setEventErr(this ж<pollDesc> Ꮡpd, bool b, uintptr seq) {
+internal static void setEventErr⁔(/*this*/ ж<pollDesc> Ꮡpd, bool b, uintptr seq) {
     var mSeq = (uint32)((uintptr)(seq & (uintptr)pollFDSeqMask));
     var x = Ꮡpd.ᏑatomicInfo.Load();
     var xSeq = (x >> (int)(pollFDSeq)) & (uint32)pollFDSeqMask;
@@ -183,8 +178,6 @@ internal static void setEventErr(this ж<pollDesc> Ꮡpd, bool b, uintptr seq) {
         }
     }
 }
-
-} partial class runtime_package {
 
 partial struct pollCache {
     internal mutex @lock;
@@ -298,9 +291,7 @@ internal static void poll_runtime_pollClose(ж<pollDesc> Ꮡpd) {
     Ꮡpollcache.free(Ꮡpd);
 }
 
-} partial class runtimeᴛpollCache {
-
-internal static void free(this ж<pollCache> Ꮡc, ж<pollDesc> Ꮡpd) {
+internal static void free⁔(/*this*/ ж<pollCache> Ꮡc, ж<pollDesc> Ꮡpd) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var pd = ref Ꮡpd.DerefOrNull();
 
@@ -323,8 +314,6 @@ internal static void free(this ж<pollCache> Ꮡc, ж<pollDesc> Ꮡpd) {
     c.first = Ꮡpd;
     unlock(Ꮡc.Ꮡlock);
 }
-
-} partial class runtime_package {
 
 // poll_runtime_pollReset, which is internal/poll.runtime_pollReset,
 // prepares a descriptor for polling in mode, which is 'r' or 'w'.
@@ -728,9 +717,7 @@ internal partial struct alloc_pollDescPadded /*dyn*/ {
     internal array<byte> pad = new(216);
 }
 
-} partial class runtimeᴛpollCache {
-
-internal static ж<pollDesc> alloc(this ж<pollCache> Ꮡc) {
+internal static ж<pollDesc> alloc⁔(/*this*/ ж<pollCache> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     @lock(Ꮡc.Ꮡlock);
@@ -758,14 +745,12 @@ internal static ж<pollDesc> alloc(this ж<pollCache> Ꮡc) {
     return pd;
 }
 
-} partial class runtimeᴛpollDesc {
-
 // makeArg converts pd to an interface{}.
 // makeArg does not do any allocation. Normally, such
 // a conversion requires an allocation because pointers to
 // types which embed internal/runtime/sys.NotInHeap (which pollDesc is)
 // must be stored in interfaces indirectly. See issue 42076.
-internal static any /*i*/ makeArg(this ж<pollDesc> Ꮡpd) {
+internal static any /*i*/ makeArg⁔(/*this*/ ж<pollDesc> Ꮡpd) {
     ref var i = ref heap<any>(out var Ꮡi);
 
     var x = Ꮡi.Reinterpret<any, eface>();
@@ -773,8 +758,6 @@ internal static any /*i*/ makeArg(this ж<pollDesc> Ꮡpd) {
     x.of(eface.Ꮡdata).Value = @unsafe.Pointer.FromBox(Ꮡpd.Ꮡself);
     return i;
 }
-
-} partial class runtime_package {
 
 internal static readonly ж<any> ᏑpdEface = new StaticBox<any>(((ж<pollDesc>)nil));
 internal static ref any pdEface => ref ((StaticBox<any>)ᏑpdEface).ValueSlot;

@@ -4,14 +4,11 @@
 namespace go.image;
 
 using image = image_package;
-using static jpeg_package;
 
 partial class jpeg_package {
 
-} partial class jpegᴛdecoder {
-
 // makeImg allocates and initializes the destination image.
-internal static void makeImg(this ref decoder d, nint mxx, nint myy) {
+internal static void makeImg⁔(/*this*/ ref decoder d, nint mxx, nint myy) {
     if (d.nComp == 1) {
         var mΔ1 = image.NewGray(image.Rect(0, 0, 8 * mxx, 8 * myy));
         d.img1 = mΔ1.SubImage(image.Rect(0, 0, d.width, d.height))._<ж<image.Gray>>();
@@ -63,19 +60,7 @@ internal static void makeImg(this ref decoder d, nint mxx, nint myy) {
     }
 }
 
-} partial class jpeg_package {
-
-internal partial struct processSOS_scan /*dyn*/ {
-    internal uint8 compIndex;
-    internal uint8 td; // DC table selector.
-    internal uint8 ta; // AC table selector.
-}
-
-} partial class jpegᴛdecoder {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingSofMarkerˢ => ref missingSofMarkerˢᵇ;
-private static readonly @string missingSofMarkerˢᵇ = "missing SOF marker"u8;
 internal static ref readonly @string sosHasWrongLengthˢ => ref sosHasWrongLengthˢᵇ;
 private static readonly @string sosHasWrongLengthˢᵇ = "SOS has wrong length"u8;
 internal static ref readonly @string sosLengthInconsistentˢ => ref sosLengthInconsistentˢᵇ;
@@ -99,8 +84,14 @@ private static readonly @string badSuccessiveˢᵇ = "bad successive approximati
 internal static ref readonly @string excessiveDcComponentˢ => ref excessiveDcComponentˢᵇ;
 private static readonly @string excessiveDcComponentˢᵇ = "excessive DC component"u8;
 
+internal partial struct processSOS_scan /*dyn*/ {
+    internal uint8 compIndex;
+    internal uint8 td; // DC table selector.
+    internal uint8 ta; // AC table selector.
+}
+
 // Specified in section B.2.3.
-internal static error processSOS(this ref decoder d, nint n) {
+internal static error processSOS⁔(/*this*/ ref decoder d, nint n) {
     if (d.nComp == 0) {
         return ((FormatError)(@string)missingSofMarkerˢ);
     }
@@ -397,7 +388,7 @@ private static readonly @string tooManyCoefficientsˢᵇ = "too many coefficient
 
 // refine decodes a successive approximation refinement block, as specified in
 // section G.1.2.
-internal static error refine(this ref decoder d, ж<block> Ꮡb, ж<huffman> h, int32 zigStart, int32 zigEnd, int32 delta) {
+internal static error refine⁔(/*this*/ ref decoder d, ж<block> Ꮡb, ж<huffman> h, int32 zigStart, int32 zigEnd, int32 delta) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Refining a DC component is trivial.
@@ -483,7 +474,7 @@ break_loop:;
 
 // refineNonZeroes refines non-zero entries of b in zig-zag order. If nz >= 0,
 // the first nz zero entries are skipped over.
-internal static (int32, error) refineNonZeroes(this ref decoder d, ж<block> Ꮡb, int32 zig, int32 zigEnd, int32 nz, int32 delta) {
+internal static (int32, error) refineNonZeroes⁔(/*this*/ ref decoder d, ж<block> Ꮡb, int32 zig, int32 zigEnd, int32 nz, int32 delta) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (; zig <= zigEnd; zig++) {
@@ -511,7 +502,7 @@ internal static (int32, error) refineNonZeroes(this ref decoder d, ж<block> Ꮡ
     return (zig, default);
 }
 
-internal static error reconstructProgressiveImage(this ref decoder d) {
+internal static error reconstructProgressiveImage⁔(/*this*/ ref decoder d) {
     // The h0, mxx, by and bx variables have the same meaning as in the
     // processSOS method.
     nint h0 = d.comp[0].h;
@@ -540,7 +531,7 @@ private static readonly @string tooManyComponentsˢᵇ = "too many components"u8
 
 // reconstructBlock dequantizes, performs the inverse DCT and stores the block
 // to the image.
-internal static error reconstructBlock(this ref decoder d, ж<block> Ꮡb, nint bx, nint by, nint compIndex) {
+internal static error reconstructBlock⁔(/*this*/ ref decoder d, ж<block> Ꮡb, nint bx, nint by, nint compIndex) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var qt = Ꮡ(d.quant, d.comp[compIndex].tq);
@@ -606,7 +597,7 @@ private static readonly @string badRstMarkerˢᵇ = "bad RST marker"u8;
 //
 // Precondition: d.tmp[:2] holds the next two bytes of JPEG-encoded input
 // (input in the d.readFull sense).
-internal static error findRST(this ref decoder d, uint8 expectedRST) {
+internal static error findRST⁔(/*this*/ ref decoder d, uint8 expectedRST) {
     for (;;) {
         // i is the index such that, at the bottom of the loop, we read 2-i
         // bytes into d.tmp[i:2], maintaining the invariant that d.tmp[:2]
@@ -640,4 +631,4 @@ internal static error findRST(this ref decoder d, uint8 expectedRST) {
     }
 }
 
-}
+} // end jpeg_package

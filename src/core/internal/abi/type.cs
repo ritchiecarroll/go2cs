@@ -4,7 +4,6 @@
 namespace go.@internal;
 
 using @unsafe = unsafe_package;
-using static abi_package;
 
 partial class abi_package {
 
@@ -135,17 +134,13 @@ partial struct TypeOff /*num:int32*/;
 // TextOff is an offset from the top of a text section.  See (rtype).textOff in runtime.
 partial struct TextOff /*num:int32*/;
 
-} partial class abiᴛKind {
-
 // String returns the name of k.
-public static @string String(this Kind k) {
+internal static @string String⁔(/*this*/ Kind k) {
     if ((nint)k < len(kindNames)) {
         return kindNames[k];
     }
     return kindNames[0];
 }
-
-} partial class abi_package {
 
 [GoLazy] partial class lazyᴛkindNames { internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [Invalid] = "invalid",
@@ -181,30 +176,26 @@ public static @string String(this Kind k) {
 
 // go2cs generated this placeholder — func TypeFor is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class abiᴛType {
+internal static Kind Kind⁔(/*this*/ ref Type t) { return t.Kind_; }
 
-public static Kind Kind(this ref Type t) { return t.Kind_; }
-
-public static bool HasName(this ref Type t) {
+internal static bool HasName⁔(/*this*/ ref Type t) {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;
 }
 
 // Pointers reports whether t contains pointers.
-public static bool Pointers(this ref Type t) { return t.PtrBytes != 0; }
+internal static bool Pointers⁔(/*this*/ ref Type t) { return t.PtrBytes != 0; }
 
 // IsDirectIface reports whether t is stored directly in an interface value.
-public static bool IsDirectIface(this ref Type t) {
+internal static bool IsDirectIface⁔(/*this*/ ref Type t) {
     return (TFlag)(t.TFlag & TFlagDirectIface) != 0;
 }
 
-public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) {
+internal static slice<byte> GcSlice⁔(/*this*/ ref Type t, uintptr begin, uintptr end) {
     if ((TFlag)(t.TFlag & TFlagGCMaskOnDemand) != 0) {
         throw panic("GcSlice can't handle on-demand gcdata types");
     }
     return @unsafe.Slice(t.GCData, (nint)end).slice((nint)(begin));
 }
-
-} partial class abi_package {
 
 // Method on non-interface type
 partial struct Method {
@@ -226,13 +217,11 @@ partial struct UncommonType {
     internal uint32 _;      // unused
 }
 
-} partial class abiᴛUncommonType {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string tMcount0ˢ => ref tMcount0ˢᵇ;
 private static readonly @string tMcount0ˢᵇ = "t.mcount > 0"u8;
 
-public static unsafe slice<Method> Methods(this ж<UncommonType> Ꮡt) {
+internal static unsafe slice<Method> Methods⁔(/*this*/ ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Mcount == 0) {
@@ -245,7 +234,7 @@ public static unsafe slice<Method> Methods(this ж<UncommonType> Ꮡt) {
 internal static ref readonly @string tXcount0ˢ => ref tXcount0ˢᵇ;
 private static readonly @string tXcount0ˢᵇ = "t.xcount > 0"u8;
 
-public static unsafe slice<Method> ExportedMethods(this ж<UncommonType> Ꮡt) {
+internal static unsafe slice<Method> ExportedMethods⁔(/*this*/ ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Xcount == 0) {
@@ -253,8 +242,6 @@ public static unsafe slice<Method> ExportedMethods(this ж<UncommonType> Ꮡt) {
     }
     return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, tXcount0ˢ)), (int)(t.Xcount)));
 }
-
-} partial class abi_package {
 
 // addChecked returns p+x.
 //
@@ -281,15 +268,11 @@ partial struct ArrayType {
     public uintptr Len;
 }
 
-} partial class abiᴛType {
-
 // go2cs generated this placeholder — func Len is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-public static ж<Type> Common(this ж<Type> Ꮡt) {
+internal static ж<Type> Common⁔(/*this*/ ж<Type> Ꮡt) {
     return Ꮡt;
 }
-
-} partial class abi_package {
 
 partial struct ChanDir /*num:nint*/;
 
@@ -310,11 +293,7 @@ partial struct structTypeUncommon {
     internal UncommonType u;
 }
 
-} partial class abiᴛType {
-
 // go2cs generated this placeholder — func ChanDir is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-} partial class abi_package {
 
 internal partial struct Uncommon_u /*dyn*/ {
     /*embed*/ public PtrType PtrType;
@@ -356,10 +335,8 @@ internal partial struct Uncommon_uᴛ7 /*dyn*/ {
     internal UncommonType u;
 }
 
-} partial class abiᴛType {
-
 // Uncommon returns a pointer to T's "uncommon" data if there is any, otherwise nil
-public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
+internal static ж<UncommonType> Uncommon⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if ((TFlag)(t.TFlag & TFlagUncommon) == 0) {
@@ -410,11 +387,9 @@ public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) {
 // go2cs generated this placeholder — func Size is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Align returns the alignment of data with type t.
-public static nint Align(this ref Type t) { return (nint)t.Align_; }
+internal static nint Align⁔(/*this*/ ref Type t) { return (nint)t.Align_; }
 
-public static nint FieldAlign(this ref Type t) { return (nint)t.FieldAlign_; }
-
-} partial class abi_package {
+internal static nint FieldAlign⁔(/*this*/ ref Type t) { return (nint)t.FieldAlign_; }
 
 partial struct InterfaceType {
     /*embed*/ public Type Type;
@@ -422,9 +397,7 @@ partial struct InterfaceType {
     public slice<Imethod> Methods; // sorted by hash
 }
 
-} partial class abiᴛType {
-
-public static slice<Method> ExportedMethods(this ж<Type> Ꮡt) {
+internal static slice<Method> ExportedMethods⁔(/*this*/ ж<Type> Ꮡt) {
     var ut = Ꮡt.Uncommon();
     if (ut == nil) {
         return default;
@@ -432,7 +405,7 @@ public static slice<Method> ExportedMethods(this ж<Type> Ꮡt) {
     return ut.ExportedMethods();
 }
 
-public static nint NumMethod(this ж<Type> Ꮡt) {
+internal static nint NumMethod⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() == Interface) {
@@ -442,16 +415,10 @@ public static nint NumMethod(this ж<Type> Ꮡt) {
     return len(Ꮡt.ExportedMethods());
 }
 
-} partial class abiᴛInterfaceType {
-
 // NumMethod returns the number of interface methods in the type's method set.
-public static nint NumMethod(this ref InterfaceType t) { return len(t.Methods); }
-
-} partial class abiᴛType {
+internal static nint NumMethod⁔(/*this*/ ref InterfaceType t) { return len(t.Methods); }
 
 // go2cs generated this placeholder — func Key is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
-
-} partial class abi_package {
 
 partial struct SliceType {
     /*embed*/ public Type Type;
@@ -475,32 +442,28 @@ partial struct FuncType {
     public uint16 OutCount; // top bit is set if last input parameter is ...
 }
 
-} partial class abiᴛFuncType {
-
-public static ж<Type> In(this ж<FuncType> Ꮡt, nint i) {
+internal static ж<Type> In⁔(/*this*/ ж<FuncType> Ꮡt, nint i) {
     return Ꮡt.InSlice()[i];
 }
 
-public static nint NumIn(this ref FuncType t) {
+internal static nint NumIn⁔(/*this*/ ref FuncType t) {
     return (nint)t.InCount;
 }
 
-public static nint NumOut(this ref FuncType t) {
+internal static nint NumOut⁔(/*this*/ ref FuncType t) {
     return (nint)((uint16)(t.OutCount & ((1 << 15) - 1)));
 }
 
-public static ж<Type> Out(this ж<FuncType> Ꮡt, nint i) {
+internal static ж<Type> Out⁔(/*this*/ ж<FuncType> Ꮡt, nint i) {
     return (Ꮡt.OutSlice()[i]);
 }
 
 // go2cs generated this placeholder — func InSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 // go2cs generated this placeholder — func OutSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-public static bool IsVariadic(this ref FuncType t) {
+internal static bool IsVariadic⁔(/*this*/ ref FuncType t) {
     return (uint16)(t.OutCount & ((uint16)(1 << 15))) != 0;
 }
-
-} partial class abi_package {
 
 partial struct PtrType {
     /*embed*/ public Type Type;
@@ -513,13 +476,9 @@ partial struct StructField {
     public uintptr Offset; // byte offset of field
 }
 
-} partial class abiᴛStructField {
-
-public static bool Embedded(this ref StructField f) {
+internal static bool Embedded⁔(/*this*/ ref StructField f) {
     return f.Name.IsEmbedded();
 }
-
-} partial class abi_package {
 
 partial struct StructType {
     /*embed*/ public Type Type;
@@ -556,11 +515,9 @@ partial struct Name {
     public ж<byte> Bytes;
 }
 
-} partial class abiᴛName {
-
 // DataChecked does pointer arithmetic on n's Bytes, and that arithmetic is asserted to
 // be safe for the reason in whySafe (which can appear in a backtrace, etc.)
-public static ж<byte> DataChecked(this Name n, nint off, @string whySafe) {
+internal static ж<byte> DataChecked⁔(/*this*/ Name n, nint off, @string whySafe) {
     return @unsafe.Pointer.To<byte>(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, whySafe));
 }
 
@@ -570,22 +527,22 @@ private static readonly @string theRuntimeDoesnTNeedToˢᵇ = "the runtime doesn
 
 // Data does pointer arithmetic on n's Bytes, and that arithmetic is asserted to
 // be safe because the runtime made the call (other packages use DataChecked)
-public static ж<byte> Data(this Name n, nint off) {
+internal static ж<byte> Data⁔(/*this*/ Name n, nint off) {
     return @unsafe.Pointer.To<byte>(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, theRuntimeDoesnTNeedToˢ));
 }
 
 // IsExported returns "is n exported?"
-public static bool IsExported(this Name n) {
+internal static bool IsExported⁔(/*this*/ Name n) {
     return (byte)((n.Bytes.Value) & ((byte)(1 << 0))) != 0;
 }
 
 // HasTag returns true iff there is tag data following this name
-public static bool HasTag(this Name n) {
+internal static bool HasTag⁔(/*this*/ Name n) {
     return (byte)((n.Bytes.Value) & ((byte)(1 << 1))) != 0;
 }
 
 // IsEmbedded returns true iff n is embedded (an anonymous field).
-public static bool IsEmbedded(this Name n) {
+internal static bool IsEmbedded⁔(/*this*/ Name n) {
     return (byte)((n.Bytes.Value) & ((byte)(1 << 3))) != 0;
 }
 
@@ -595,7 +552,7 @@ private static readonly @string readVarintˢᵇ = "read varint"u8;
 
 // ReadVarint parses a varint as encoded by encoding/binary.
 // It returns the number of encoded bytes and the encoded value.
-public static (nint, nint) ReadVarint(this Name n, nint off) {
+internal static (nint, nint) ReadVarint⁔(/*this*/ Name n, nint off) {
     nint v = 0;
     for (nint i = 0; ; i++) {
         var x = n.DataChecked(off + i, readVarintˢ).Value;
@@ -607,15 +564,13 @@ public static (nint, nint) ReadVarint(this Name n, nint off) {
 }
 
 // IsBlank indicates whether n is "_".
-public static bool IsBlank(this Name n) {
+internal static bool IsBlank⁔(/*this*/ Name n) {
     if (n.Bytes == nil) {
         return false;
     }
     var (_, l) = n.ReadVarint(1);
     return l == 1 && n.Data(2).Value == '_';
 }
-
-} partial class abi_package {
 
 // writeVarint writes n to buf in varint form. Returns the
 // number of bytes written. n must be nonnegative.
@@ -632,14 +587,12 @@ internal static nint writeVarint(slice<byte> buf, nint n) {
     }
 }
 
-} partial class abiᴛName {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string nonEmptyStringˢ => ref nonEmptyStringˢᵇ;
 private static readonly @string nonEmptyStringˢᵇ = "non-empty string"u8;
 
 // Name returns the name of n, or empty if it does not actually have a name.
-public static @string Name(this Name n) {
+internal static @string Name⁔(/*this*/ Name n) {
     if (n.Bytes == nil) {
         return ""u8;
     }
@@ -648,7 +601,7 @@ public static @string Name(this Name n) {
 }
 
 // Tag returns the tag string for n, or empty if there is none.
-public static @string Tag(this Name n) {
+internal static @string Tag⁔(/*this*/ Name n) {
     if (!n.HasTag()) {
         return ""u8;
     }
@@ -656,8 +609,6 @@ public static @string Tag(this Name n) {
     var (i2, l2) = n.ReadVarint(1 + i + l);
     return @unsafe.String(n.DataChecked(1 + i + l + i2, nonEmptyStringˢ), l2);
 }
-
-} partial class abi_package {
 
 public static Name NewName(@string n, @string tag, bool exported, bool embedded) {
     if (len(n) >= 1 << 29) {

@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 namespace go.compress;
 
-using static flate_package;
-
 partial class flate_package {
 
 // dictDecoder implements the LZ77 sliding dictionary as used in decompression.
@@ -35,12 +33,10 @@ partial struct dictDecoder {
     internal bool full;  // Has a full window length been written yet?
 }
 
-} partial class flateᴛdictDecoder {
-
 // init initializes dictDecoder to have a sliding window dictionary of the given
 // size. If a preset dict is provided, it will initialize the dictionary with
 // the contents of dict.
-internal static void init(this ref dictDecoder dd, nint size, slice<byte> dict) {
+internal static void init⁔(/*this*/ ref dictDecoder dd, nint size, slice<byte> dict) {
     dd = new dictDecoder(hist: dd.hist);
 
     if (cap(dd.hist) < size) {
@@ -60,7 +56,7 @@ internal static void init(this ref dictDecoder dd, nint size, slice<byte> dict) 
 }
 
 // histSize reports the total amount of historical data in the dictionary.
-internal static nint histSize(this ref dictDecoder dd) {
+internal static nint histSize⁔(/*this*/ ref dictDecoder dd) {
     if (dd.full) {
         return len(dd.hist);
     }
@@ -68,33 +64,33 @@ internal static nint histSize(this ref dictDecoder dd) {
 }
 
 // availRead reports the number of bytes that can be flushed by readFlush.
-internal static nint availRead(this ref dictDecoder dd) {
+internal static nint availRead⁔(/*this*/ ref dictDecoder dd) {
     return dd.wrPos - dd.rdPos;
 }
 
 // availWrite reports the available amount of output buffer space.
-internal static nint availWrite(this ref dictDecoder dd) {
+internal static nint availWrite⁔(/*this*/ ref dictDecoder dd) {
     return len(dd.hist) - dd.wrPos;
 }
 
 // writeSlice returns a slice of the available buffer to write data to.
 //
 // This invariant will be kept: len(s) <= availWrite()
-internal static slice<byte> writeSlice(this ref dictDecoder dd) {
+internal static slice<byte> writeSlice⁔(/*this*/ ref dictDecoder dd) {
     return dd.hist.slice(dd.wrPos);
 }
 
 // writeMark advances the writer pointer by cnt.
 //
 // This invariant must be kept: 0 <= cnt <= availWrite()
-internal static void writeMark(this ref dictDecoder dd, nint cnt) {
+internal static void writeMark⁔(/*this*/ ref dictDecoder dd, nint cnt) {
     dd.wrPos += cnt;
 }
 
 // writeByte writes a single byte to the dictionary.
 //
 // This invariant must be kept: 0 < availWrite()
-internal static void writeByte(this ref dictDecoder dd, byte c) {
+internal static void writeByte⁔(/*this*/ ref dictDecoder dd, byte c) {
     dd.hist[dd.wrPos] = c;
     dd.wrPos++;
 }
@@ -104,7 +100,7 @@ internal static void writeByte(this ref dictDecoder dd, byte c) {
 // length if the available space in the output buffer is too small.
 //
 // This invariant must be kept: 0 < dist <= histSize()
-internal static nint writeCopy(this ref dictDecoder dd, nint dist, nint length) {
+internal static nint writeCopy⁔(/*this*/ ref dictDecoder dd, nint dist, nint length) {
     nint dstBase = dd.wrPos;
     nint dstPos = dstBase;
     nint srcPos = dstPos - dist;
@@ -154,7 +150,7 @@ internal static nint writeCopy(this ref dictDecoder dd, nint dist, nint length) 
 // This method is designed to be inlined for performance reasons.
 //
 // This invariant must be kept: 0 < dist <= histSize()
-internal static nint tryWriteCopy(this ref dictDecoder dd, nint dist, nint length) {
+internal static nint tryWriteCopy⁔(/*this*/ ref dictDecoder dd, nint dist, nint length) {
     nint dstPos = dd.wrPos;
     nint endPos = dstPos + length;
     if (dstPos < dist || endPos > len(dd.hist)) {
@@ -175,7 +171,7 @@ internal static nint tryWriteCopy(this ref dictDecoder dd, nint dist, nint lengt
 // readFlush returns a slice of the historical buffer that is ready to be
 // emitted to the user. The data returned by readFlush must be fully consumed
 // before calling any other dictDecoder methods.
-internal static slice<byte> readFlush(this ref dictDecoder dd) {
+internal static slice<byte> readFlush⁔(/*this*/ ref dictDecoder dd) {
     var toRead = dd.hist.slice(dd.rdPos, dd.wrPos);
     dd.rdPos = dd.wrPos;
     if (dd.wrPos == len(dd.hist)) {
@@ -185,4 +181,4 @@ internal static slice<byte> readFlush(this ref dictDecoder dd) {
     return toRead;
 }
 
-}
+} // end flate_package

@@ -14,6 +14,9 @@
 
 using go;
 using static go.crypto.@internal.fips140.edwards25519_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -65,11 +68,11 @@ using static go.crypto.@internal.fips140.edwards25519_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/edwards25519.go", "edwards25519.cs", "AChSooKCAA4ekoKCgvi6kureksaCgoKCgsaCgoKCzOKCrsaipoKUooKClIKCxgAJEgAPEoKCAAcQgqaCpoKCuIKUgoKClMaygsqSgoKCpoKCgoLGgoKCgoKmgoKCgoLY2rSCgoKCgsaCgoKUgoKCgoLMsoKCgqiSgoKCxoLkgpSCgoKUlIKCgoKmguSClIKCgpSUgoKCgqaC5IKUgoKUlIKCgoKmguSClIKClJSCgoKCqpLEgoKCgoKUgpSCgsyygoKCgoKokpSygoKClMyygoKCgsiSgoKCyLKCgsiygoI=")]
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/scalar.go", "scalar.cs", "AB50AB0CyrSCqOSCqOSCqNSCqOSCqMKCAAYS4oIADRyCgoKClPyk2sKClIKCkpIACAzSgpSCppKk2JiigqaCgoKUgoKCuIKCgoIACBwADwqCqqKCgoKCqJaiprKCgpKowoKCgpKCgoKCgoKs6IKClIKCgqaClIKmgpSCgoKCgoKUpriU7oKmgoKUgqaUpoKCgqamgoK4goKCpg==")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/edwards25519.go", "edwards25519.cs", "ACdSooKCAAwekoKCgti6kurekqaCgoKCgqaCgoKCrOKCrsaipoKUooKClIKCpgAHEgAPEoKCAAcQgqaCpoKCuIKUgoKClKaygqqSgoKCpoKCgoKmgoKCgoKmgoKCgoK42pSCgoKCgqaCgoKUgoKCgoKssoKCgqiSgoKCpoLkgpSCgoKUlIKCgoKmguSClIKCgpSUgoKCgqaC5IKUgoKUlIKCgoKmguSClIKClJSCgoKCqpLEgoKCgoKUgpSCgqyygoKCgoKokpSygoKClKyygoKCgqiSgoKCqLKCgqiygoI=")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/scalar.go", "scalar.cs", "AB10AB0CqrSCqOSCqOSCqNSCqOSCqMKCAAYS4oIADRyCgoKClNykusKClIKCkpIACAzSgpSCppKkuJiigqaCgoKUgoKCuIKCgoIABhwADwqCqqKCgoKCqJaiprKCgpKowoKCgpKCgoKCgoKs6IKClIKCgqaClIKmgpSCgoKCgoKUpriU7oKmgoKUgqaUpoKCgqamgoK4goKCpg==")]
 [assembly: GoPositionMap("crypto/internal/fips140/edwards25519/scalar_fiat.go", "scalar_fiat.cs", "ADmOAQAPAoKCAAIcAAsCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIAAhwACwKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAIcAAsCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggACGgAKAoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIAAigAEQKCAAIaAAoCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCggACGgAKAoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoIAAigAEQKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCAAIqABQCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKC")]
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/scalarmult.go", "scalarmult.cs", "AAoWooKCgoKCuAALGMIADBqUgoKmgoKCgriCgoKCgoKCgqaCgoKmrLKUggAIEqaCgoKUgoKCgoKCgoKCgoKCgpSCyqKClAALGMIADyCCgqaCpoKCgriCgoKCyoKmgoKCgoKCgqaCgoKCgoKCpqaC", "12-20:1;128-130:1")]
-[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/tables.go", "tables.cs", "ACFA1oKCgrjatoKCgpTatoKCgoKCgtqSgoKCgoKC3sSClIKUgqbIpIKUgpSCpsiyyLI=")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/scalarmult.go", "scalarmult.cs", "AAkWooKCgoKCuAAJGMIADBqUgoKmgoKCgriCgoKCgoKCgqaCgoKmrLKUggAIEqaCgoKUgoKCgoKCgoKCgoKCgpSCqqKClAAJGMIADyCCgqaCpoKCgriCgoKCyoKmgoKCgoKCgqaCgoKCgoKCpqaC", "12-20:1;128-130:1")]
+[assembly: GoPositionMap("crypto/internal/fips140/edwards25519/tables.go", "tables.cs", "AB5A1oKCgri6toKCgpS6toKCgoKCgrqSgoKCgoKCvsSClIKUgqaopIKUgpSCpqiyqLI=")]
 // </GoSourcePositionMaps>
 
 namespace go.crypto.@internal.fips140;
@@ -125,14 +128,93 @@ public static partial class edwards25519_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(edwards25519_package.Point)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛPoint;
-[GoMethodHost(typeof(edwards25519_package.Scalar)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛScalar;
-[GoMethodHost(typeof(edwards25519_package.affineCached)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛaffineCached;
-[GoMethodHost(typeof(edwards25519_package.affineLookupTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛaffineLookupTable;
-[GoMethodHost(typeof(edwards25519_package.nafLookupTable5)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛnafLookupTable5;
-[GoMethodHost(typeof(edwards25519_package.nafLookupTable8)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛnafLookupTable8;
-[GoMethodHost(typeof(edwards25519_package.projCached)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛprojCached;
-[GoMethodHost(typeof(edwards25519_package.projLookupTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛprojLookupTable;
-[GoMethodHost(typeof(edwards25519_package.projP1xP1)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛprojP1xP1;
-[GoMethodHost(typeof(edwards25519_package.projP2)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class edwards25519ᴛprojP2;
+[GoMethodHost(typeof(edwards25519_package.Point)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class edwards25519ᴛPoint;
+[GoMethodHost(typeof(edwards25519_package.Scalar)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class edwards25519ᴛScalar;
+[GoMethodHost(typeof(edwards25519_package.affineCached)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class edwards25519ᴛaffineCached;
+[GoMethodHost(typeof(edwards25519_package.affineLookupTable)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class edwards25519ᴛaffineLookupTable;
+[GoMethodHost(typeof(edwards25519_package.nafLookupTable5)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class edwards25519ᴛnafLookupTable5;
+[GoMethodHost(typeof(edwards25519_package.nafLookupTable8)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class edwards25519ᴛnafLookupTable8;
+[GoMethodHost(typeof(edwards25519_package.projCached)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class edwards25519ᴛprojCached;
+[GoMethodHost(typeof(edwards25519_package.projLookupTable)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class edwards25519ᴛprojLookupTable;
+[GoMethodHost(typeof(edwards25519_package.projP1xP1)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class edwards25519ᴛprojP1xP1;
+[GoMethodHost(typeof(edwards25519_package.projP2)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class edwards25519ᴛprojP2;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class edwards25519ᴛPoint {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<edwards25519_package.Point> Set(this ж<edwards25519_package.Point> Ꮡv, ж<edwards25519_package.Point> Ꮡu) => edwards25519_package.Set⁔(Ꮡv, Ꮡu);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ж<edwards25519_package.Point> Ꮡv) => edwards25519_package.Bytes⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> bytes(this ж<edwards25519_package.Point> Ꮡv, /*[32]*/ ж<array<byte>> Ꮡbuf) => edwards25519_package.bytes⁔(Ꮡv, Ꮡbuf);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<edwards25519_package.Point>, error) SetBytes(this ж<edwards25519_package.Point> Ꮡv, slice<byte> x) => edwards25519_package.SetBytes⁔(Ꮡv, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.Point> fromP1xP1(this ж<edwards25519_package.Point> Ꮡv, ж<edwards25519_package.projP1xP1> Ꮡp) => edwards25519_package.fromP1xP1⁔(Ꮡv, Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.Point> fromP2(this ж<edwards25519_package.Point> Ꮡv, ж<edwards25519_package.projP2> Ꮡp) => edwards25519_package.fromP2⁔(Ꮡv, Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<edwards25519_package.Point> Add(this ж<edwards25519_package.Point> Ꮡv, ж<edwards25519_package.Point> Ꮡp, ж<edwards25519_package.Point> Ꮡq) => edwards25519_package.Add⁔(Ꮡv, Ꮡp, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<edwards25519_package.Point> Subtract(this ж<edwards25519_package.Point> Ꮡv, ж<edwards25519_package.Point> Ꮡp, ж<edwards25519_package.Point> Ꮡq) => edwards25519_package.Subtract⁔(Ꮡv, Ꮡp, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<edwards25519_package.Point> Negate(this ж<edwards25519_package.Point> Ꮡv, ж<edwards25519_package.Point> Ꮡp) => edwards25519_package.Negate⁔(Ꮡv, Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Equal(this ж<edwards25519_package.Point> Ꮡv, ж<edwards25519_package.Point> Ꮡu) => edwards25519_package.Equal⁔(Ꮡv, Ꮡu);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<edwards25519_package.Point> ScalarBaseMult(this ж<edwards25519_package.Point> Ꮡv, ж<edwards25519_package.Scalar> Ꮡx) => edwards25519_package.ScalarBaseMult⁔(Ꮡv, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<edwards25519_package.Point> ScalarMult(this ж<edwards25519_package.Point> Ꮡv, ж<edwards25519_package.Scalar> Ꮡx, ж<edwards25519_package.Point> Ꮡq) => edwards25519_package.ScalarMult⁔(Ꮡv, Ꮡx, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<edwards25519_package.Point> VarTimeDoubleScalarBaseMult(this ж<edwards25519_package.Point> Ꮡv, ж<edwards25519_package.Scalar> Ꮡa, ж<edwards25519_package.Point> ᏑA, ж<edwards25519_package.Scalar> Ꮡb) => edwards25519_package.VarTimeDoubleScalarBaseMult⁔(Ꮡv, Ꮡa, ᏑA, Ꮡb);
+}
+partial class edwards25519ᴛScalar {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<edwards25519_package.Scalar> MultiplyAdd(this ж<edwards25519_package.Scalar> Ꮡs, ж<edwards25519_package.Scalar> Ꮡx, ж<edwards25519_package.Scalar> Ꮡy, ж<edwards25519_package.Scalar> Ꮡz) => edwards25519_package.MultiplyAdd⁔(Ꮡs, Ꮡx, Ꮡy, Ꮡz);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<edwards25519_package.Scalar> Add(this ж<edwards25519_package.Scalar> Ꮡs, ж<edwards25519_package.Scalar> Ꮡx, ж<edwards25519_package.Scalar> Ꮡy) => edwards25519_package.Add⁔(Ꮡs, Ꮡx, Ꮡy);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<edwards25519_package.Scalar> Subtract(this ж<edwards25519_package.Scalar> Ꮡs, ж<edwards25519_package.Scalar> Ꮡx, ж<edwards25519_package.Scalar> Ꮡy) => edwards25519_package.Subtract⁔(Ꮡs, Ꮡx, Ꮡy);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<edwards25519_package.Scalar> Negate(this ж<edwards25519_package.Scalar> Ꮡs, ж<edwards25519_package.Scalar> Ꮡx) => edwards25519_package.Negate⁔(Ꮡs, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<edwards25519_package.Scalar> Multiply(this ж<edwards25519_package.Scalar> Ꮡs, ж<edwards25519_package.Scalar> Ꮡx, ж<edwards25519_package.Scalar> Ꮡy) => edwards25519_package.Multiply⁔(Ꮡs, Ꮡx, Ꮡy);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<edwards25519_package.Scalar> Set(this ж<edwards25519_package.Scalar> Ꮡs, ж<edwards25519_package.Scalar> Ꮡx) => edwards25519_package.Set⁔(Ꮡs, Ꮡx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<edwards25519_package.Scalar>, error) SetUniformBytes(this ж<edwards25519_package.Scalar> Ꮡs, slice<byte> x) => edwards25519_package.SetUniformBytes⁔(Ꮡs, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.Scalar> setShortBytes(this ж<edwards25519_package.Scalar> Ꮡs, slice<byte> x) => edwards25519_package.setShortBytes⁔(Ꮡs, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<edwards25519_package.Scalar>, error) SetCanonicalBytes(this ж<edwards25519_package.Scalar> Ꮡs, slice<byte> x) => edwards25519_package.SetCanonicalBytes⁔(Ꮡs, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<edwards25519_package.Scalar>, error) SetBytesWithClamping(this ж<edwards25519_package.Scalar> Ꮡs, slice<byte> x) => edwards25519_package.SetBytesWithClamping⁔(Ꮡs, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ж<edwards25519_package.Scalar> Ꮡs) => edwards25519_package.Bytes⁔(Ꮡs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> bytes(this ж<edwards25519_package.Scalar> Ꮡs, /*[32]*/ ж<array<byte>> Ꮡout) => edwards25519_package.bytes⁔(Ꮡs, Ꮡout);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Equal(this ж<edwards25519_package.Scalar> Ꮡs, ж<edwards25519_package.Scalar> Ꮡt) => edwards25519_package.Equal⁔(Ꮡs, Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static array<int8> nonAdjacentForm(this ж<edwards25519_package.Scalar> Ꮡs, nuint w) => edwards25519_package.nonAdjacentForm⁔(Ꮡs, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static array<int8> signedRadix16(this ж<edwards25519_package.Scalar> Ꮡs) => edwards25519_package.signedRadix16⁔(Ꮡs);
+}
+partial class edwards25519ᴛaffineCached {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.affineCached> Zero(this ж<edwards25519_package.affineCached> Ꮡv) => edwards25519_package.Zero⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.affineCached> FromP3(this ж<edwards25519_package.affineCached> Ꮡv, ж<edwards25519_package.Point> Ꮡp) => edwards25519_package.FromP3⁔(Ꮡv, Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.affineCached> Select(this ж<edwards25519_package.affineCached> Ꮡv, ж<edwards25519_package.affineCached> Ꮡa, ж<edwards25519_package.affineCached> Ꮡb, nint cond) => edwards25519_package.Select⁔(Ꮡv, Ꮡa, Ꮡb, cond);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.affineCached> CondNeg(this ж<edwards25519_package.affineCached> Ꮡv, nint cond) => edwards25519_package.CondNeg⁔(Ꮡv, cond);
+}
+partial class edwards25519ᴛaffineLookupTable {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void FromP3(this ref edwards25519_package.affineLookupTable v, ж<edwards25519_package.Point> Ꮡq) => edwards25519_package.FromP3⁔(ref v, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void SelectInto(this ref edwards25519_package.affineLookupTable v, ж<edwards25519_package.affineCached> Ꮡdest, int8 x) => edwards25519_package.SelectInto⁔(ref v, Ꮡdest, x);
+}
+partial class edwards25519ᴛnafLookupTable5 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void FromP3(this ref edwards25519_package.nafLookupTable5 v, ж<edwards25519_package.Point> Ꮡq) => edwards25519_package.FromP3⁔(ref v, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void SelectInto(this ref edwards25519_package.nafLookupTable5 v, ж<edwards25519_package.projCached> Ꮡdest, int8 x) => edwards25519_package.SelectInto⁔(ref v, Ꮡdest, x);
+}
+partial class edwards25519ᴛnafLookupTable8 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void FromP3(this ref edwards25519_package.nafLookupTable8 v, ж<edwards25519_package.Point> Ꮡq) => edwards25519_package.FromP3⁔(ref v, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void SelectInto(this ref edwards25519_package.nafLookupTable8 v, ж<edwards25519_package.affineCached> Ꮡdest, int8 x) => edwards25519_package.SelectInto⁔(ref v, Ꮡdest, x);
+}
+partial class edwards25519ᴛprojCached {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.projCached> Zero(this ж<edwards25519_package.projCached> Ꮡv) => edwards25519_package.Zero⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.projCached> FromP3(this ж<edwards25519_package.projCached> Ꮡv, ж<edwards25519_package.Point> Ꮡp) => edwards25519_package.FromP3⁔(Ꮡv, Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.projCached> Select(this ж<edwards25519_package.projCached> Ꮡv, ж<edwards25519_package.projCached> Ꮡa, ж<edwards25519_package.projCached> Ꮡb, nint cond) => edwards25519_package.Select⁔(Ꮡv, Ꮡa, Ꮡb, cond);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.projCached> CondNeg(this ж<edwards25519_package.projCached> Ꮡv, nint cond) => edwards25519_package.CondNeg⁔(Ꮡv, cond);
+}
+partial class edwards25519ᴛprojLookupTable {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void FromP3(this ref edwards25519_package.projLookupTable v, ж<edwards25519_package.Point> Ꮡq) => edwards25519_package.FromP3⁔(ref v, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void SelectInto(this ref edwards25519_package.projLookupTable v, ж<edwards25519_package.projCached> Ꮡdest, int8 x) => edwards25519_package.SelectInto⁔(ref v, Ꮡdest, x);
+}
+partial class edwards25519ᴛprojP1xP1 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.projP1xP1> Add(this ж<edwards25519_package.projP1xP1> Ꮡv, ж<edwards25519_package.Point> Ꮡp, ж<edwards25519_package.projCached> Ꮡq) => edwards25519_package.Add⁔(Ꮡv, Ꮡp, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.projP1xP1> Sub(this ж<edwards25519_package.projP1xP1> Ꮡv, ж<edwards25519_package.Point> Ꮡp, ж<edwards25519_package.projCached> Ꮡq) => edwards25519_package.Sub⁔(Ꮡv, Ꮡp, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.projP1xP1> AddAffine(this ж<edwards25519_package.projP1xP1> Ꮡv, ж<edwards25519_package.Point> Ꮡp, ж<edwards25519_package.affineCached> Ꮡq) => edwards25519_package.AddAffine⁔(Ꮡv, Ꮡp, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.projP1xP1> SubAffine(this ж<edwards25519_package.projP1xP1> Ꮡv, ж<edwards25519_package.Point> Ꮡp, ж<edwards25519_package.affineCached> Ꮡq) => edwards25519_package.SubAffine⁔(Ꮡv, Ꮡp, Ꮡq);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.projP1xP1> Double(this ж<edwards25519_package.projP1xP1> Ꮡv, ж<edwards25519_package.projP2> Ꮡp) => edwards25519_package.Double⁔(Ꮡv, Ꮡp);
+}
+partial class edwards25519ᴛprojP2 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.projP2> Zero(this ж<edwards25519_package.projP2> Ꮡv) => edwards25519_package.Zero⁔(Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.projP2> FromP1xP1(this ж<edwards25519_package.projP2> Ꮡv, ж<edwards25519_package.projP1xP1> Ꮡp) => edwards25519_package.FromP1xP1⁔(Ꮡv, Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<edwards25519_package.projP2> FromP3(this ж<edwards25519_package.projP2> Ꮡv, ж<edwards25519_package.Point> Ꮡp) => edwards25519_package.FromP3⁔(Ꮡv, Ꮡp);
+}
+// </MethodForwarders>

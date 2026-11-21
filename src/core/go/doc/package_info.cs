@@ -10,10 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using ast = go.go.ast_package;
+using comment = go.go.doc.comment_package;
+using token = go.go.token_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.go.doc_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -95,12 +101,12 @@ using static go.go.doc_package;
 
 // <GoSourcePositionMaps>
 [assembly: GoPositionMap("go/doc/comment.go", "comment.cs", "AAtAABQCgoKCggACNAAXAoLK")]
-[assembly: GoPositionMap("go/doc/doc.go", "doc.cs", "AHHyAeKCgoKCABAigoKClMaCgoLKgoKUlIKCgoKCgriCgoKCgpSUAAQcAAsCgoKClIKClIKC3KKCgoKUgoKUgoIACzgAGgSClILogoKUtLi6goKClKS0grQACRSCgoIABBTygpQAAhTygoKUlIKUrsIABRTmAAIQ8gACEPIAAhQACQI=", "", "", "125=sortedKeys/1/1/4,noteBodies/1/1/7,sortedValues/1/2/8,sortedTypes/1/1/9,sortedValues/2/2/10,sortedFuncs/1/1/11")]
+[assembly: GoPositionMap("go/doc/doc.go", "doc.cs", "AHDyAeKCgoKCABAigoKClKaCgoLKgoKUlIKCgoKCgriCgoKCgpSUAAQcAAsCgoKClIKClIKC3KKCgoKUgoKUgoIACTgAGgSClILogoKUtLi6goKClKS0grQACRSCgoIAAhTygpQAAhTygoKUlIKUrsIABRTmAAIQ8gACEPIAAhQACQI=", "", "", "124=sortedKeys/1/1/4,noteBodies/1/1/7,sortedValues/1/2/8,sortedTypes/1/1/9,sortedValues/2/2/10,sortedFuncs/1/1/11")]
 [assembly: GoPositionMap("go/doc/example.go", "example.cs", "AC9kABICgoKCgoKCgoKUgoKUgoKCgpSClIKUgpSClIKClKIACxi4gpSmhqaWspSCgoKUlIKClKassoKUgpSCAAgKwpSmuIKUgpSClIKCgtiClLSCAAkQmrLKgpKCgqamgoKClKaUgoKClILGppSCgoKCgsqCgtyCqJKCgsqCgtymgpSCxoLsyqbcgoKClIaqAAYcAAwMgoKClILClIKChIKCgqbagtqClKaCgoLcpoKmlIKmgsaClIKCtIKUggAIHgAIAoKUtISSgpSCxoLugoKUgoKCgoKCgriCyJSCpoKClJTapoKmgqaqooKCgpSoxIKUiqKCgoKUlIKm+tSCgqiSopSCgoKUuIKCkoKq1IKCuMqCgoKo0oKUkoKClIKUlAACHAANAoKmgoKCgpSUgoKUgoKClJSCgpTK7oKCgpSCgpSCgsqCAAMW0oKClIKUlAACEgAJAoKUgpSCpoKCrNKCgoI=", "110-112:1;207-214:1;315-317:2;318-320:3;349-377:1;379-385:2;523-525:1;680-682:1", "", "106=playExample/1/1/4;342=NewIdent/1/1/1;357=NewIdent/1/1/1;646=Pos/1/1/3")]
-[assembly: GoPositionMap("go/doc/exports.go", "exports.cs", "AA0gooKCgoKmppSCgoKCuIKCgpS0gpSCtoKUqsKCgpSmqJKCgqaokoKCgoKUgqaCgqaClM7ygpSCgoKClIKCgoK4ggAHEKaCgpSCpoKCgqaClIKosoKCAAQQsti0tILGgoLGtILGgoK0gsaCtMiCpqSC7oKCpoKCgvyCgoKCgpS2zLKUpJTsxoKGooKClJSUlMqCgoKCpqaClILslKiygoKCgqY=", "", "", "300=NewIdent/1/1/1")]
-[assembly: GoPositionMap("go/doc/filter.go", "filter.cs", "AA0WooKCgoLKpoKClIKC2IK4lILGguqmgoKCgoKmpoKCgoKCpqaCgoKCgqaCgoKClIKCpsqigoKCgg==")]
-[assembly: GoPositionMap("go/doc/reader.go", "reader.cs", "ACRAopSktraCgoKCgoKClIK25oKClM7igtymgoKUgpSU7oK+0oKCgpSUAAgY0pSkpKSmxqSUADRygq7CgpSCptyCrvKCgpSCgoKUpqaCgoKUpoKClMaCgpSCpsgACAqCgoKCgoKClIKmguqklKaClIKUgriCuIKClIK43ILcyMKClIK0pIKUyMKCgsqmgpSUgoKUmrKCgoLMkqjEgriUppSCppSC7sqCgoKCgoCmpIKmlIKCgoLugoLKysKClIKCgri6gprCgoKCgoKUgoK4gpTIkoLKgoKCAAke0oKCgoKCgpSmgszUgoKCyoKUpoKCgoKCgoKCpoKClIKCgoIACRDG3IKUlILKAAoWAAkQgoK4xIKCgoKCgriCgoKUpoKCgpSmgoLKgoKCAAcSwoK4goKCgoKCgpSmgqaCpoKClJTIsoLcgpSCpoKmqJKUlAAIEoKCAAQSwoKClO6UpqaClILcggAGEKKCgoKClIKokoKCpqaCgoKCgoKmlIKCgpSmpoKCgoIACBKmmKaCgpSmgoKClPyCtoKGqqKCgpSuwqYAGDIAFCoABhSynoKCgoKCuIKClA==", "852-858:1;879-881:1;909-911:1;990-995:1", "", "109=Text/1/1/1;368=Text/1/1/1,specNames/1/1/2;589=Pos/1/1/1,End/1/1/2;693=Pos/1/1/7;948=sortedValues/1/2/4,sortedValues/2/2/5,sortedFuncs/1/2/6,sortedFuncs/2/2/7")]
-[assembly: GoPositionMap("go/doc/synopsis.go", "synopsis.cs", "AA0gsqKigpSClIKUlK7CggAHEAAIGAAIAoKCgoKmgoKCgpSClII=")]
+[assembly: GoPositionMap("go/doc/exports.go", "exports.cs", "AAwgooKCgoKmppSCgoKCuIKCgpS0gpSCtoKUqsKCgpSmqJKCgqaokoKCgoKUgqaCgqaClK7ygpSCgoKClIKCgoK4ggAHEKaCgpSCpoKCgqaClIKosoKCAAQQsti0tILGgoLGtILGgoK0gsaCtMiCpqSC7oKCpoKCgvyCgoKCgpS2rLKUpJTspoKGooKClJSUlMqCgoKCpqaClILslKiygoKCgqY=", "", "", "295=NewIdent/1/1/1")]
+[assembly: GoPositionMap("go/doc/filter.go", "filter.cs", "AAwWooKCgoLKpoKClIKC2IK4lILGguqmgoKCgoKmpoKCgoKCpqaCgoKCgqaCgoKClIKCpqqigoKCgg==")]
+[assembly: GoPositionMap("go/doc/reader.go", "reader.cs", "ACNAopSktraCgoKCgoKClIK25oKClK7igtymgoKUgpSU7oK+0oKCgpSUAAYY0pSkpKSmxqSUADJygq7CgpSCptyCrvKCgpSCgoKUpqaCgoKUpoKClKaCgpSCpqgACAqCgoKCgoKClIKmguqklKaClIKUgriCuIKClIK43ILcqMKClIK0pIKUqMKCgsqmgpSUgoKUmrKCgoLMkqjEgriUppSCppSC7sqCgoKCgoCmpIKmlIKCgoLugoLKqsKClIKCgri6gprCgoKCgoKUgoK4gpSokoLKgoKCAAke0oKCgoKCgpSmgszUgoKCyoKUpoKCgoKCgoKCpoKClIKCgoIACRDG3IKUlILKAAoWAAkQgoK4xIKCgoKCgriCgoKUpoKCgpSmgoLKgoKCAAUSwoK4goKCgoKCgpSmgqaCpoKClJSosoLcgpSCpoKmqJKUlAAIEoKCAAQSwoKClO6UpqaClILcggAEEKKCgoKClIKokoKCpqaCgoKCgoKmlIKCgpSmpoKCgoIACBKmmKaCgpSmgoKClPyCtoKGqqKCgpSuwqYAGDIAFCoABhSynoKCgoKCuIKClA==", "852-858:1;879-881:1;909-911:1;990-995:1", "", "106=Text/1/1/1;357=Text/1/1/1,specNames/1/1/2;570=Pos/1/1/1,End/1/1/2;674=Pos/1/1/7;923=sortedValues/1/2/4,sortedValues/2/2/5,sortedFuncs/1/2/6,sortedFuncs/2/2/7")]
+[assembly: GoPositionMap("go/doc/synopsis.go", "synopsis.cs", "AAwgsqKigpSClIKUlK7CggAHEAAGGAAIAoKCgoKmgoKCgpSClII=")]
 // </GoSourcePositionMaps>
 
 namespace go.go;
@@ -157,7 +163,59 @@ public static partial class doc_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(doc_package.Package)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class docᴛPackage;
-[GoMethodHost(typeof(doc_package.methodSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class docᴛmethodSet;
-[GoMethodHost(typeof(doc_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class docᴛreader;
+[GoMethodHost(typeof(doc_package.Package)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class docᴛPackage;
+[GoMethodHost(typeof(doc_package.methodSet)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class docᴛmethodSet;
+[GoMethodHost(typeof(doc_package.reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class docᴛreader;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class docᴛPackage {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void collectValues(this ref doc_package.Package p, slice<ж<doc_package.Value>> values) => doc_package.collectValues⁔(ref p, values);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void collectTypes(this ref doc_package.Package p, slice<ж<doc_package.Type>> types) => doc_package.collectTypes⁔(ref p, types);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void collectFuncs(this ref doc_package.Package p, slice<ж<doc_package.Func>> funcs) => doc_package.collectFuncs⁔(ref p, funcs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void collectInterfaceMethods(this ref doc_package.Package p, ж<doc_package.Type> Ꮡt) => doc_package.collectInterfaceMethods⁔(ref p, Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void collectStructFields(this ref doc_package.Package p, ж<doc_package.Type> Ꮡt) => doc_package.collectStructFields⁔(ref p, Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool lookupSym(this ref doc_package.Package p, @string recv, @string name) => doc_package.lookupSym⁔(ref p, recv, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string importPath, bool ok) lookupPackage(this ref doc_package.Package p, @string name) => doc_package.lookupPackage⁔(ref p, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<comment.Parser> Parser(this ж<doc_package.Package> Ꮡp) => doc_package.Parser⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<comment.Printer> Printer(this ref doc_package.Package p) => doc_package.Printer⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> HTML(this ж<doc_package.Package> Ꮡp, @string text) => doc_package.HTML⁔(Ꮡp, text);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Markdown(this ж<doc_package.Package> Ꮡp, @string text) => doc_package.Markdown⁔(Ꮡp, text);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Text(this ж<doc_package.Package> Ꮡp, @string text) => doc_package.Text⁔(Ꮡp, text);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Filter(this ref doc_package.Package p, Func<@string, bool> f) => doc_package.Filter⁔(ref p, f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Synopsis(this ж<doc_package.Package> Ꮡp, @string text) => doc_package.Synopsis⁔(Ꮡp, text);
+}
+partial class docᴛmethodSet {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void set(this doc_package.methodSet mset, ж<ast.FuncDecl> Ꮡf, bool preserveAST) => doc_package.set⁔(mset, Ꮡf, preserveAST);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void add(this doc_package.methodSet mset, ж<doc_package.Func> Ꮡm) => doc_package.add⁔(mset, Ꮡm);
+}
+partial class docᴛreader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool /*removedFields*/ filterFieldList(this ref doc_package.reader r, ж<doc_package.namedType> Ꮡparent, ж<ast.FieldList> Ꮡfields, ж<ast.InterfaceType> Ꮡityp) => doc_package.filterFieldList⁔(ref r, Ꮡparent, Ꮡfields, Ꮡityp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void filterParamList(this ref doc_package.reader r, ж<ast.FieldList> Ꮡfields) => doc_package.filterParamList⁔(ref r, Ꮡfields);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void filterType(this ref doc_package.reader r, ж<doc_package.namedType> Ꮡparent, ast.Expr typ) => doc_package.filterType⁔(ref r, Ꮡparent, typ);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool filterSpec(this ref doc_package.reader r, ast.Spec spec) => doc_package.filterSpec⁔(ref r, spec);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<ast.Spec> filterSpecList(this ref doc_package.reader r, slice<ast.Spec> list, token.Token tok) => doc_package.filterSpecList⁔(ref r, list, tok);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool filterDecl(this ref doc_package.reader r, ast.Decl decl) => doc_package.filterDecl⁔(ref r, decl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fileExports(this ref doc_package.reader r, ж<ast.File> Ꮡsrc) => doc_package.fileExports⁔(ref r, Ꮡsrc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isVisible(this ref doc_package.reader r, @string name) => doc_package.isVisible⁔(ref r, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<doc_package.namedType> lookupType(this ref doc_package.reader r, @string name) => doc_package.lookupType⁔(ref r, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string /*fname*/ recordAnonymousField(this ref doc_package.reader r, ж<doc_package.namedType> Ꮡparent, ast.Expr fieldType) => doc_package.recordAnonymousField⁔(ref r, Ꮡparent, fieldType);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void readDoc(this ref doc_package.reader r, ж<ast.CommentGroup> Ꮡcomment) => doc_package.readDoc⁔(ref r, Ꮡcomment);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void remember(this ref doc_package.reader r, @string predecl, ж<ast.InterfaceType> Ꮡtyp) => doc_package.remember⁔(ref r, predecl, Ꮡtyp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void readValue(this ж<doc_package.reader> Ꮡr, ж<ast.GenDecl> Ꮡdecl) => doc_package.readValue⁔(Ꮡr, Ꮡdecl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void readType(this ref doc_package.reader r, ж<ast.GenDecl> Ꮡdecl, ж<ast.TypeSpec> Ꮡspec) => doc_package.readType⁔(ref r, Ꮡdecl, Ꮡspec);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isPredeclared(this ref doc_package.reader r, @string n) => doc_package.isPredeclared⁔(ref r, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void readFunc(this ref doc_package.reader r, ж<ast.FuncDecl> Ꮡfun) => doc_package.readFunc⁔(ref r, Ꮡfun);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void readNote(this ref doc_package.reader r, slice<ж<ast.Comment>> list) => doc_package.readNote⁔(ref r, list);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void readNotes(this ref doc_package.reader r, slice<ж<ast.CommentGroup>> comments) => doc_package.readNotes⁔(ref r, comments);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void readFile(this ж<doc_package.reader> Ꮡr, ж<ast.File> Ꮡsrc) => doc_package.readFile⁔(Ꮡr, Ꮡsrc);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void readPackage(this ж<doc_package.reader> Ꮡr, ж<ast.Package> Ꮡpkg, doc_package.Mode mode) => doc_package.readPackage⁔(Ꮡr, Ꮡpkg, mode);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void collectEmbeddedMethods(this ref doc_package.reader r, doc_package.methodSet mset, ж<doc_package.namedType> Ꮡtyp, @string recvTypeName, bool embeddedIsPtr, nint level, doc_package.embeddedSet visited) => doc_package.collectEmbeddedMethods⁔(ref r, mset, Ꮡtyp, recvTypeName, embeddedIsPtr, level, visited);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void computeMethodSets(this ref doc_package.reader r) => doc_package.computeMethodSets⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void cleanupTypes(this ref doc_package.reader r) => doc_package.cleanupTypes⁔(ref r);
+}
+// </MethodForwarders>

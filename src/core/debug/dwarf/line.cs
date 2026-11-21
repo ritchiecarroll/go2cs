@@ -8,7 +8,6 @@ using fmt = fmt_package;
 using io = io_package;
 using path = path_package;
 using strings = strings_package;
-using static dwarf_package;
 
 partial class dwarf_package {
 
@@ -119,8 +118,6 @@ partial struct LineFile {
     public nint Length;  // File length, or 0 if unknown
 }
 
-} partial class dwarfᴛData {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string attrStmtListValueOutOfˢ => ref attrStmtListValueOutOfˢᵇ;
 private static readonly @string attrStmtListValueOutOfˢᵇ = "AttrStmtList value out of range"u8;
@@ -131,7 +128,7 @@ private static readonly @string lineˢᵇ = "line"u8;
 // unit cu, which must be an [Entry] with tag [TagCompileUnit].
 //
 // If this compilation unit has no line table, it returns nil, nil.
-public static (ж<LineReader>, error) LineReader(this ж<Data> Ꮡd, ж<Entry> Ꮡcu) {
+internal static (ж<LineReader>, error) LineReader⁔(/*this*/ ж<Data> Ꮡd, ж<Entry> Ꮡcu) {
     ref var d = ref Ꮡd.DerefOrNull();
     ref var cu = ref Ꮡcu.DerefOrNull();
 
@@ -175,11 +172,9 @@ public static (ж<LineReader>, error) LineReader(this ж<Data> Ꮡd, ж<Entry> �
     return (Ꮡr, default);
 }
 
-} partial class dwarfᴛLineReader {
-
 // readHeader reads the line number program header from r.buf and sets
 // all of the header fields in r.
-internal static error readHeader(this ж<LineReader> Ꮡr, @string compDir) {
+internal static error readHeader⁔(/*this*/ ж<LineReader> Ꮡr, @string compDir) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var buf = Ꮡr.Ꮡbuf;
@@ -316,8 +311,6 @@ internal static error readHeader(this ж<LineReader> Ꮡr, @string compDir) {
     return buf.err;
 }
 
-} partial class dwarf_package {
-
 // lnctForm is a pair of an LNCT code and a form. This represents an
 // entry in the directory name or file name description in the DWARF 5
 // line number program header.
@@ -326,10 +319,8 @@ partial struct lnctForm {
     internal format form;
 }
 
-} partial class dwarfᴛLineReader {
-
 // readLNCTFormat reads an LNCT format description.
-internal static slice<lnctForm> readLNCTFormat(this ref LineReader r) {
+internal static slice<lnctForm> readLNCTFormat⁔(/*this*/ ref LineReader r) {
     var c = r.buf.uint8();
     var ret = new slice<lnctForm>(c);
     foreach (var i in range(len(ret))) {
@@ -339,14 +330,8 @@ internal static slice<lnctForm> readLNCTFormat(this ref LineReader r) {
     return ret;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string strˢ => ref strˢᵇ;
-private static readonly @string strˢᵇ = "str"u8;
-internal static ref readonly @string lineStrˢ => ref lineStrˢᵇ;
-private static readonly @string lineStrˢᵇ = "line_str"u8;
-
 // readLNCT reads a sequence of LNCT entries and returns path information.
-internal static (@string path, uint64 mtime, uint64 size, error err) readLNCT(this ref LineReader r, slice<lnctForm> s, bool dwarf64) {
+internal static (@string path, uint64 mtime, uint64 size, error err) readLNCT⁔(/*this*/ ref LineReader r, slice<lnctForm> s, bool dwarf64) {
     @string path = default;
     uint64 mtime = default;
     uint64 size = default;
@@ -478,7 +463,7 @@ internal static (@string path, uint64 mtime, uint64 size, error err) readLNCT(th
 // readFileEntry reads a file entry from either the header or a
 // DW_LNE_define_file extended opcode and adds it to r.fileEntries. A
 // true return value indicates that there are no more entries to read.
-internal static (bool, error) readFileEntry(this ref LineReader r) {
+internal static (bool, error) readFileEntry⁔(/*this*/ ref LineReader r) {
     ref var name = ref heap<@string>(r.buf.@string(), out var Ꮡname);
     if (r.buf.err != nil) {
         return (false, r.buf.err);
@@ -516,7 +501,7 @@ internal static (bool, error) readFileEntry(this ref LineReader r) {
 
 // updateFile updates r.state.File after r.fileIndex has
 // changed or r.fileEntries has changed.
-internal static void updateFile(this ref LineReader r) {
+internal static void updateFile⁔(/*this*/ ref LineReader r) {
     if (r.fileIndex < len(r.fileEntries)) {
         r.state.File = r.fileEntries[r.fileIndex];
     } else {
@@ -530,7 +515,7 @@ internal static void updateFile(this ref LineReader r) {
 //
 // Rows are always in order of increasing entry.Address, but
 // entry.Line may go forward or backward.
-public static error Next(this ref LineReader r, ж<LineEntry> entry) {
+internal static error Next⁔(/*this*/ ref LineReader r, ж<LineEntry> entry) {
     if (r.buf.err != nil) {
         return r.buf.err;
     }
@@ -551,8 +536,6 @@ public static error Next(this ref LineReader r, ж<LineEntry> entry) {
     }
 }
 
-} partial class dwarf_package {
-
 // knownOpcodeLengths gives the opcode lengths (in varint arguments)
 // of known standard opcodes.
 [GoLazy] partial class lazyᴛknownOpcodeLengths { internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
@@ -571,16 +554,10 @@ public static error Next(this ref LineReader r, ж<LineEntry> entry) {
     // ignore it.
 }; }
 
-} partial class dwarfᴛLineReader {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownAddressSizeˢ => ref unknownAddressSizeˢᵇ;
-private static readonly @string unknownAddressSizeˢᵇ = "unknown address size"u8;
-
 // step processes the next opcode and updates r.state. If the opcode
 // emits a row in the line table, this updates *entry and returns
 // true.
-internal static bool step(this ref LineReader r, ж<LineEntry> Ꮡentry) {
+internal static bool step⁔(/*this*/ ref LineReader r, ж<LineEntry> Ꮡentry) {
     ref var entry = ref Ꮡentry.DerefOrNull();
 
     nint opcode = (nint)r.buf.uint8();
@@ -728,13 +705,11 @@ emit:
 
 // advancePC advances "operation pointer" (the combination of Address
 // and OpIndex) in r.state by opAdvance steps.
-internal static void advancePC(this ref LineReader r, nint opAdvance) {
+internal static void advancePC⁔(/*this*/ ref LineReader r, nint opAdvance) {
     nint opIndex = r.state.OpIndex + opAdvance;
     r.state.Address += (uint64)(r.minInstructionLength * (quo(opIndex, r.maxOpsPerInstruction)));
     r.state.OpIndex = rem(opIndex, r.maxOpsPerInstruction);
 }
-
-} partial class dwarf_package {
 
 // A LineReaderPos represents a position in a line table.
 partial struct LineReaderPos {
@@ -748,10 +723,8 @@ partial struct LineReaderPos {
     internal nint fileIndex;
 }
 
-} partial class dwarfᴛLineReader {
-
 // Tell returns the current position in the line table.
-public static LineReaderPos Tell(this ref LineReader r) {
+internal static LineReaderPos Tell⁔(/*this*/ ref LineReader r) {
     return new LineReaderPos(r.buf.off, len(r.fileEntries), r.state, r.fileIndex);
 }
 
@@ -759,7 +732,7 @@ public static LineReaderPos Tell(this ref LineReader r) {
 //
 // The argument pos must have been returned by a call to [LineReader.Tell] on this
 // line table.
-public static void Seek(this ref LineReader r, LineReaderPos pos) {
+internal static void Seek⁔(/*this*/ ref LineReader r, LineReaderPos pos) {
     r.buf.off = pos.off;
     r.buf.data = r.section.slice((nint)(r.buf.off), (nint)(r.endOffset));
     r.fileEntries = r.fileEntries.slice(0, pos.numFileEntries);
@@ -769,7 +742,7 @@ public static void Seek(this ref LineReader r, LineReaderPos pos) {
 
 // Reset repositions the line table reader at the beginning of the
 // line table.
-public static void Reset(this ref LineReader r) {
+internal static void Reset⁔(/*this*/ ref LineReader r) {
     // Reset buffer to the line number program offset.
     r.buf.off = r.programOffset;
     r.buf.data = r.section.slice((nint)(r.buf.off), (nint)(r.endOffset));
@@ -782,7 +755,7 @@ public static void Reset(this ref LineReader r) {
 }
 
 // resetState resets r.state to its default values
-internal static void resetState(this ref LineReader r) {
+internal static void resetState⁔(/*this*/ ref LineReader r) {
     // Reset the state machine registers to the defaults given in
     // [DWARF4 6.2.2].
     r.state = new LineEntry(
@@ -814,17 +787,13 @@ internal static void resetState(this ref LineReader r) {
 // table. This may contain more entries than the file table at an
 // earlier position in the line table, though existing entries never
 // change.
-public static slice<ж<LineFile>> Files(this ref LineReader r) {
+internal static slice<ж<LineFile>> Files⁔(/*this*/ ref LineReader r) {
     return r.fileEntries;
 }
-
-} partial class dwarf_package {
 
 // ErrUnknownPC is the error returned by LineReader.ScanPC when the
 // seek PC is not covered by any entry in the line table.
 public static error ErrUnknownPC = errors.New("ErrUnknownPC");
-
-} partial class dwarfᴛLineReader {
 
 // SeekPC sets *entry to the [LineEntry] that includes pc and positions
 // the reader on the next entry in the line table. If necessary, this
@@ -838,7 +807,7 @@ public static error ErrUnknownPC = errors.New("ErrUnknownPC");
 // Hence, in the worst case, this takes time linear in the size of the
 // line table. If the caller wishes to do repeated fast PC lookups, it
 // should build an appropriate index of the line table.
-public static error SeekPC(this ref LineReader r, uint64 pc, ж<LineEntry> Ꮡentry) {
+internal static error SeekPC⁔(/*this*/ ref LineReader r, uint64 pc, ж<LineEntry> Ꮡentry) {
     ref var entry = ref Ꮡentry.DerefOrNull();
 
     {
@@ -882,8 +851,6 @@ public static error SeekPC(this ref LineReader r, uint64 pc, ж<LineEntry> Ꮡen
         entry = next;
     }
 }
-
-} partial class dwarf_package {
 
 // pathIsAbs reports whether path is an absolute path (or "full path
 // name" in DWARF parlance). This is in "whatever form makes sense for

@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 namespace go;
 
-using static syscall_package;
-
 partial class syscall_package {
 
 internal static UntypedInt _SYS_setgroups => /* SYS_SETGROUPS */ 116;
@@ -106,28 +104,20 @@ internal static Timeval setTimeval(int64 sec, int64 usec) {
     return new Timeval(Sec: sec, Usec: usec);
 }
 
-} partial class syscallᴛPtraceRegs {
+internal static uint64 PC⁔(/*this*/ ref PtraceRegs r) { return r.Rip; }
 
-public static uint64 PC(this ref PtraceRegs r) { return r.Rip; }
+internal static void SetPC⁔(/*this*/ ref PtraceRegs r, uint64 pc) { r.Rip = pc; }
 
-public static void SetPC(this ref PtraceRegs r, uint64 pc) { r.Rip = pc; }
-
-} partial class syscallᴛIovec {
-
-public static void SetLen(this ref Iovec iov, nint length) {
+internal static void SetLen⁔(/*this*/ ref Iovec iov, nint length) {
     iov.Len = (uint64)length;
 }
 
-} partial class syscallᴛMsghdr {
-
-public static void SetControllen(this ref Msghdr msghdr, nint length) {
+internal static void SetControllen⁔(/*this*/ ref Msghdr msghdr, nint length) {
     msghdr.Controllen = (uint64)length;
 }
 
-} partial class syscallᴛCmsghdr {
-
-public static void SetLen(this ref Cmsghdr cmsg, nint length) {
+internal static void SetLen⁔(/*this*/ ref Cmsghdr cmsg, nint length) {
     cmsg.Len = (uint64)length;
 }
 
-}
+} // end syscall_package

@@ -9,7 +9,6 @@ using binary = encoding.binary_package;
 using bits = math.bits_package;
 using encoding;
 using math;
-using static poly1305_package;
 
 partial class poly1305_package {
 
@@ -58,11 +57,9 @@ partial struct macGeneric {
     internal nint offset;
 }
 
-} partial class poly1305ᴛmacGeneric {
-
 // Write splits the incoming message into TagSize chunks, and passes them to
 // update. It buffers incomplete chunks.
-internal static (nint, error) Write(this ж<macGeneric> Ꮡh, slice<byte> p) {
+internal static (nint, error) Write⁔(/*this*/ ж<macGeneric> Ꮡh, slice<byte> p) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     nint nn = len(p);
@@ -91,15 +88,13 @@ internal static (nint, error) Write(this ж<macGeneric> Ꮡh, slice<byte> p) {
 // Sum flushes the last incomplete chunk from the buffer, if any, and generates
 // the MAC output. It does not modify its state, in order to allow for multiple
 // calls to Sum, even if no Write is allowed after Sum.
-internal static void Sum(this ref macGeneric h, /*[16]*/ ж<array<byte>> @out) {
+internal static void Sum⁔(/*this*/ ref macGeneric h, /*[16]*/ ж<array<byte>> @out) {
     var state = h.macState.ΔClone();
     if (h.offset > 0) {
         updateGeneric(ref state, h.buffer.slice(0, h.offset));
     }
     finalize(@out, ref state.h, ref state.s);
 }
-
-} partial class poly1305_package {
 
 // [rMask0, rMask1] is the specified Poly1305 clamping mask in little-endian. It
 // clears some bits of the secret coefficient to make it possible to implement

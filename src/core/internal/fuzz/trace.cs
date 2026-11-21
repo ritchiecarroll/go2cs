@@ -4,7 +4,7 @@
 //go:build !libfuzzer
 namespace go.@internal;
 
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for go:linkname
+/* import _ "unsafe" (nothing to initialize) */ // for go:linkname
 
 partial class fuzz_package {
 

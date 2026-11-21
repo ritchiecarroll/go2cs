@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using time = go.time_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.net.mail_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -62,10 +66,12 @@ using static go.net.mail_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("net/mail/message.go", "message.cs", "ACxOooIACxrSlIKCpgAFGgAJAqaAgoKClLaCgoK4goKUpoK4lJSC7qaCgoKUlIKUgoKCgoKC7gAKCKSCgqaCuIKClILKgoK4poKmgpSCgoKmAAcY4sb2koKClKiSgoKUAAwYkqiSAAoWoqqiAAgMxIKSppS4goKClLiCpoKUgqiUgriCpoKCpoLcgpQAERCigoKmgqaCgpSUgpSClIK4gpSCpgAIBqKCgpSClIKUgpSClAAMCLKCgoIACRSCgoKCgoKCuMqClpKCgoKmlIKCgriCgoKCgqamypSCgpSClJTcopSCgoKUpoKUgoKUlIKUgoKUlIKmAAwI8pSCkoK6koKClJSCgoK4gpSCgqaCqJKCgqaUgoK4goK46NKEqJSCgqiSgoKUgpTKgoK4gpSClLSCgrTIgriCgpSC6MSClJSCgpSUpsqCpoLatra2qLSCAAwO4pSCgoKUprbqgpSCgoKUgpSCpgAICKSCuIKCgoKUgqaCgpSCpoKUpoK4gqbmgoKUgoK4goKCgpSCuKaCgpSCqJKmgqaCpoKokpSCgqaCpqamlJSCgoKmgoKCgoKUgpSmprKCggAIEoKCkoKClIKClJSCggAHEIK4xgAIEILKopS4lKikgpSokoKCgoKCgoKmgqikqqKqoqikgpQ=", "517-521:1;784-784:1;882-892:1", "", "", "", "612:21,613:13")]
+[assembly: GoPositionMap("net/mail/message.go", "message.cs", "AClOooIACRrSlIKCpgAFGgAJAqaAgoKClLaCgoK4goKUpoK4lJSC7qaCgoKUlIKUgoKCgoKC7gAKCKSCgqaCuIKClILKgoK4poKmgpSCgoKmAAUY4qbWkoKClKiSgoKUAAoYkqiSAAgWoqqi7MSCkqaUuIKCgpS4gqaClIKolIK4gqaCgqaC3IKUAAsQooKCpoKmgoKUlIKUgpSCuIKUgqYACAaigoKUgpSClIKUgpQADAiygoKCAAkUgoKCgoKCgrjKgpaSgoKCppSCgoK4goKCgoKmpsqUgoKUgpSU3KKUgoKClKaClIKClJSClIKClJSCpgAMCPKUgpKCupKCgpSUgoKCuIKUgoKmgqiSgoKmlIKCuIKCuOjShKiUgoKokoKClIKUyoKCuIKUgpS0goK0yIK4goKUgujEgpSUgoKUlKbKgqaC2ra2tqi0ggAMDuKUgoKClKa26oKUgoKClIKUgqYACAikgriCgoKClIKmgoKUgqaClKaCuIKm5oKClIKCuIKCgoKUgrimgoKUgqiSpoKmgqaCqJKUgoKmgqamppSUgoKCpoKCgoKClIKUpqaygoIACBKCgpKCgpSCgpSUgoIABxCCuKYABhCCqqKUuJSopIKUqJKCgoKCgoKCpoKopKqiqqKopIKU", "517-521:1;784-784:1;882-892:1", "", "", "", "589:21,590:13")]
 // </GoSourcePositionMaps>
 
 namespace go.net;
+
+using ꓸꓸꓸany = Span<any>;
 
 [GoPackage("mail")]
 public static partial class mail_package
@@ -115,10 +121,55 @@ public static partial class mail_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(mail_package.Address)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mailᴛAddress;
-[GoMethodHost(typeof(mail_package.AddressParser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mailᴛAddressParser;
-[GoMethodHost(typeof(mail_package.Header)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mailᴛHeader;
-[GoMethodHost(typeof(mail_package.addrParser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mailᴛaddrParser;
-[GoMethodHost(typeof(mail_package.charsetError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mailᴛcharsetError;
-[GoMethodHost(typeof(mail_package.debugT)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mailᴛdebugT;
+[GoMethodHost(typeof(mail_package.Address)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mailᴛAddress;
+[GoMethodHost(typeof(mail_package.AddressParser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mailᴛAddressParser;
+[GoMethodHost(typeof(mail_package.Header)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mailᴛHeader;
+[GoMethodHost(typeof(mail_package.addrParser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mailᴛaddrParser;
+[GoMethodHost(typeof(mail_package.charsetError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mailᴛcharsetError;
+[GoMethodHost(typeof(mail_package.debugT)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mailᴛdebugT;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class mailᴛAddress {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref mail_package.Address a) => mail_package.String⁔(ref a);
+}
+partial class mailᴛAddressParser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<mail_package.Address>, error) Parse(this ref mail_package.AddressParser p, @string address) => mail_package.Parse⁔(ref p, address);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<ж<mail_package.Address>>, error) ParseList(this ref mail_package.AddressParser p, @string list) => mail_package.ParseList⁔(ref p, list);
+}
+partial class mailᴛHeader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Get(this mail_package.Header h, @string key) => mail_package.Get⁔(h, key);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (time.Time, error) Date(this mail_package.Header h) => mail_package.Date⁔(h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<ж<mail_package.Address>>, error) AddressList(this mail_package.Header h, @string key) => mail_package.AddressList⁔(h, key);
+}
+partial class mailᴛaddrParser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<ж<mail_package.Address>>, error) parseAddressList(this ж<mail_package.addrParser> Ꮡp) => mail_package.parseAddressList⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<mail_package.Address>, error) parseSingleAddress(this ж<mail_package.addrParser> Ꮡp) => mail_package.parseSingleAddress⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<ж<mail_package.Address>>, error) parseAddress(this ж<mail_package.addrParser> Ꮡp, bool handleGroup) => mail_package.parseAddress⁔(Ꮡp, handleGroup);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<ж<mail_package.Address>>, error) consumeGroupList(this ж<mail_package.addrParser> Ꮡp) => mail_package.consumeGroupList⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string spec, error err) consumeAddrSpec(this ж<mail_package.addrParser> Ꮡp) => mail_package.consumeAddrSpec⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string phrase, error err) consumePhrase(this ref mail_package.addrParser p) => mail_package.consumePhrase⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string qs, error err) consumeQuotedString(this ref mail_package.addrParser p) => mail_package.consumeQuotedString⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string atom, error err) consumeAtom(this ref mail_package.addrParser p, bool dot, bool permissive) => mail_package.consumeAtom⁔(ref p, dot, permissive);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, error) consumeDomainLiteral(this ref mail_package.addrParser p) => mail_package.consumeDomainLiteral⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, error) consumeDisplayNameComment(this ref mail_package.addrParser p) => mail_package.consumeDisplayNameComment⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool consume(this ref mail_package.addrParser p, byte c) => mail_package.consume⁔(ref p, c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void skipSpace(this ref mail_package.addrParser p) => mail_package.skipSpace⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static byte peek(this ref mail_package.addrParser p) => mail_package.peek⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool empty(this ref mail_package.addrParser p) => mail_package.empty⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint len(this ref mail_package.addrParser p) => mail_package.len⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool skipCFWS(this ref mail_package.addrParser p) => mail_package.skipCFWS⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, bool) consumeComment(this ref mail_package.addrParser p) => mail_package.consumeComment⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string word, bool isEncoded, error err) decodeRFC2047Word(this ref mail_package.addrParser p, @string s) => mail_package.decodeRFC2047Word⁔(ref p, s);
+}
+partial class mailᴛcharsetError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this mail_package.charsetError e) => mail_package.Error⁔(e);
+}
+partial class mailᴛdebugT {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Printf(this mail_package.debugT d, @string format, params ꓸꓸꓸany argsʗp) => mail_package.Printf⁔(d, format, argsʗp);
+}
+// </MethodForwarders>

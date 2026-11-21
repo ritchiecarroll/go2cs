@@ -14,6 +14,9 @@
 
 using go;
 using static go.@internal.singleflight_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -59,7 +62,7 @@ using static go.@internal.singleflight_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/singleflight/singleflight.go", "singleflight.cs", "AC1e8oKClIKCgoKUgoKClIKqwoKCgpSCgoKClIKCgpSUqMKUgoKClIKUAAIQAAoCgoKCgpSCgpQ=")]
+[assembly: GoPositionMap("internal/singleflight/singleflight.go", "singleflight.cs", "ACpe8oKClIKCgoKUgoKClIKqwoKCgpSCgoKClIKCgpSUqMKUgoKClIKUAAIQAAoCgoKCgpSCgpQ=")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -97,5 +100,18 @@ public static partial class singleflight_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(singleflight_package.Group)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class singleflightᴛGroup;
+[GoMethodHost(typeof(singleflight_package.Group)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class singleflightᴛGroup;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class singleflightᴛGroup {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (any v, error err, bool shared) Do(this ж<singleflight_package.Group> Ꮡg, @string key, Func<(any, error)> fn) => singleflight_package.Do⁔(Ꮡg, key, fn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static /*<-*/channel<singleflight_package.Result> DoChan(this ж<singleflight_package.Group> Ꮡg, @string key, Func<(any, error)> fn) => singleflight_package.DoChan⁔(Ꮡg, key, fn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void doCall(this ж<singleflight_package.Group> Ꮡg, ж<singleflight_package.call> Ꮡc, @string key, Func<(any, error)> fn) => singleflight_package.doCall⁔(Ꮡg, Ꮡc, key, fn);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool ForgetUnshared(this ж<singleflight_package.Group> Ꮡg, @string key) => singleflight_package.ForgetUnshared⁔(Ꮡg, key);
+}
+// </MethodForwarders>

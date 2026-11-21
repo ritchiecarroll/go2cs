@@ -10,10 +10,14 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using strings = go.strings_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.text.template.parse_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -89,12 +93,14 @@ using static go.text.template.parse_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("text/template/parse/lex.go", "lex.cs", "AB0sgpSkpKSUACxaADp2koKClIKCgpSokoKCqJKCgpSCzqKCgoKokqiSgqyygoKokoKUgqiSlKrCgoKCgqrCgoKClIKCguySgpSClAAIEgAMGrKCgpSCgoKUgoKCgoKCppSUgoKUqJLIkoKUgpTIkqrCgoKCgpSCgoKUgoKCgoKosoKCgpSCgoKUgoKClIKClIKClKiygoKClIKCgoKUgqjogoKClJSkpIKkpIKUpKSkpKS2goKClrSCpIKkgqSCgpSkpM7SgoKCgoKUgriCgoKmqLKC6IKCgpSUgoKUpKSkAAYQoqrCgpSqwoKClJSCgoKCgqaClM7CgoKUlJTKwoKCtIKUtKTGruKClJSClJTGlJSClIKCgoKCpoKClIKClIKCppSCgpTIsoKCtIKUtKTGqLKCgpSk1qiSqJKmgqaC")]
-[assembly: GoPositionMap("text/template/parse/node.go", "node.cs", "ACtUgsqiAChOgsaCpoKmgoKCpoKCuKKClIKClKaCAA4WgsaCpoKmgqaCAA4WgsaCgoKmgoKCpoKmggARHILGgqaCgoKmgoKCgpSUgpSmgoKUuIKmooKUgoKUgoKClKaCABEcgsaCgoKmgoKCpoKmggAOFoLGgqaCgoKmgoKClIKCgoKUuIKmooKUgoKUAAwYkszSgqzSgqaCpoKmgqaCAA8YgsaCgoKmgoKClLiCpoIADRSCxrimgqaCpoKmggANFILGuOaCpoKmgqaCABAagsaCgoKmgoKCuIKmggARHILIkoKUgoKUpoKCgqaCgoKClJSCgriCpoIADhaCAAoGgoKUpoKmgqaCABwqgoKUgoKUgpSCgoKCgoK2gpSCgqaCgoKCgoK4goKClIKCgoKCgriCgoKCgpSCpoKUgpSCgpSCgriClMqigoKCgoKUgoLKgqaCpoKmgoKCAA8YgsaCpoKmgqaCAA4WggAIBoKmgqaCpoIADhaCxoLmgqaCpoKmggARHIKCggAMBoKClLS0tKSCgoKCgoKCgpSmgqaClKSkpAANEoLGggAOFoLGwoKCAA0UgsbCgoIACg6CxoIACxCCxoIAEBqCxoKCguaCgoKCgpSmgqaC")]
-[assembly: GoPositionMap("text/template/parse/parse.go", "parse.cs", "ADFmkoLasoKUAAkY4oKCgoLIkoKUlKiSqqKCqrKCgqiSgpSCgqiygoKCpqiSgoLM0gAHEtKCgoKUgoKClIKUgoKosoKCqJKokoKClKiSgoKU6JKCgoKCgqaUqPKCgoKUgpS0AAgGsoKCgoKCggAGEJKCgoKuAAwCgoKCgoKCgoLosoKCgpSC2pKU1taCgqYACAjmpAAIDNKCgoKCgoKCgoKCgpSUpLQACRDSgoKCgoKUgoKCgpSCAAIQAAkCgoKClJSUguwACAKApKSCgqSktNaCAAYUAAkCpKSkpKSkpKSklIKUAAYQ8oKUgpQABhDygpSClKzigpSCgsqCgpSCgoK0goKCgqa0trS0toK2gqaCtNq0gqaCptoACQKCgoKUgoKClAAOGoKCgoKCgoKUgoLIAAYS4gAHEuKSAAYS4gAHEPIABhDyuIKUggAGFAAJApSCgpSCgoKCgoKCgpSClAAGEgAIAoKCgoKClJSmopSCgpS0pAAGEgAIAoKCgoKClKS0+KSUgpQAAhQACQKCgpSCgoLulLS0tLYABhwADwKApIKClKSkpKSkpIKClKSClIKAkqSCgpSkgtiSgoKUgqaokqrCgoKCpoI=", "807-807:1", "", "66=CopyList/1/1/3;283=hasFunction/1/2/2,hasFunction/2/2/3", "", "1067:29,1068:21")]
+[assembly: GoPositionMap("text/template/parse/lex.go", "lex.cs", "ABosgpSkpKSUACpaADh2koKClIKCgpSokoKCqJKCgpSCzqKCgoKokqiSgqyygoKokoKUgqiSlKrCgoKCgqrCgoKClIKCgsySgpSClAAIEgAMGrKCgpSCgoKUgoKCgoKCppSUgoKUqJKokoKUgpSokqrCgoKCgpSCgoKUgoKCgoKosoKCgpSCgoKUgoKClIKClIKClKiygoKClIKCgoKUgqjogoKClJSkpIKkpIKUpKSkpKS2goKClrSCpIKkgqSCgpSkpM7SgoKCgoKUgriCgoKmqLKC6IKCgpSUgoKUpKSkAAYQoqrCgpSqwoKClJSCgoKCgqaClK7CgoKUlJSqwoKCtIKUtKTGruKClJSClJSmlJSClIKCgoKCpoKClIKClIKCppSCgpSosoKCtIKUtKTGqLKCgpSk1qiSqJKmgqaC")]
+[assembly: GoPositionMap("text/template/parse/node.go", "node.cs", "AChUgqqiACROgqaCpoKmgoKCpoKCuKKClIKClKaCAAoWgqaCpoKmgqaCAAoWgqaCgoKmgoKCpoKmggANHIKmgqaCgoKmgoKCgpSUgpSmgoKUuIKmooKUgoKUgoKClKaCAA0cgqaCgoKmgoKCpoKmggAKFoKmgqaCgoKmgoKClIKCgoKUuIKmooKUgoKUAAoYkqzSgqzSgqaCpoKmgqaCAAsYgqaCgoKmgoKClLiCpoIACRSCprimgqaCpoKmggAJFIKmuOaCpoKmgqaCAAwagqaCgoKmgoKCuIKmggANHIKokoKUgoKUpoKCgqaCgoKClJSCgriCpoIAChaCAAgGgoKUpoKmgqaCABgqgoKUgoKUgpSCgoKCgoK2gpSCgqaCgoKCgoK4goKClIKCgoKCgriCgoKCgpSCpoKUgpSCgpSCgriClKqigoKCgoKUgoLKgqaCpoKmgoKCAAsYgqaCpoKmgqaCAAoWguaCpoKmgqaCAAoWgqaC5oKmgqaCpoIADRyCgoIACAaCgpS0tLSkgoKCgoKCgoKUpoKmgpSkpKQACRKCpoIAChaCpsKCggAJFIKmwoKC7oKmggAHEIKmggAMGoKmgoKC5oKCgoKClKaCpoI=")]
+[assembly: GoPositionMap("text/template/parse/parse.go", "parse.cs", "ADBmkoK6soKUAAcY4oKCgoKokoKUlKiSqqKCqrKCgqiSgpSCgqiygoKCpqiSgoKs0gAFEtKCgoKUgoKClIKUgoKosoKCqJKokoKClKiSgoKU6JKCgoKCgqaUqPKCgoKUgpS0AAgGsoKCgoKCggAGEJKCgoKuAAwCgoKCgoKCgoLosoKCgpSCupKU1taCgqYACAjmpOzSgoKCgoKCgoKCgoKUlKS0AAkQ0oKCgoKClIKCgoKUggACEAAJAoKCgpSUlILsAAgCgKSkgoKkpLTWggAGFAAJAqSkpKSkpKSkpJSClAACEPKClIKUAAIQ8oKUgpSs4oKUgoLKgoKUgoKCtIKCgoKmtLa0tLaCtoKmgrTatIKmgqbaAAkCgoKClIKCgpQADhqCgoKCgoKClIKCyAAGEuIAAxLikgACEuIABxDyAAYQ8riClIIABhQACQKUgoKUgoKCgoKCgoKUgpQABhIACAKCgoKCgpSUpqKUgoKUtKQABhIACAKCgoKCgpSktPiklIKUAAIUAAkCgoKUgoKC7pS0tLS2AAYcAA8CgKSCgpSkpKSkpKSCgpSkgpSCgJKkgoKUpILYkoKClIKmqJKqwoKCgqaC", "807-807:1", "", "63=CopyList/1/1/3;272=hasFunction/1/2/2,hasFunction/2/2/3", "", "1036:29,1037:21")]
 // </GoSourcePositionMaps>
 
 namespace go.text.template;
+
+using ꓸꓸꓸany = Span<any>;
 
 [GoPackage("parse")]
 public static partial class parse_package
@@ -165,33 +171,280 @@ public static partial class parse_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(parse_package.ActionNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛActionNode;
-[GoMethodHost(typeof(parse_package.BoolNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛBoolNode;
-[GoMethodHost(typeof(parse_package.BranchNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛBranchNode;
-[GoMethodHost(typeof(parse_package.BreakNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛBreakNode;
-[GoMethodHost(typeof(parse_package.ChainNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛChainNode;
-[GoMethodHost(typeof(parse_package.CommandNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛCommandNode;
-[GoMethodHost(typeof(parse_package.CommentNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛCommentNode;
-[GoMethodHost(typeof(parse_package.ContinueNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛContinueNode;
-[GoMethodHost(typeof(parse_package.DotNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛDotNode;
-[GoMethodHost(typeof(parse_package.FieldNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛFieldNode;
-[GoMethodHost(typeof(parse_package.IdentifierNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛIdentifierNode;
-[GoMethodHost(typeof(parse_package.IfNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛIfNode;
-[GoMethodHost(typeof(parse_package.ListNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛListNode;
-[GoMethodHost(typeof(parse_package.NilNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛNilNode;
-[GoMethodHost(typeof(parse_package.NodeType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛNodeType;
-[GoMethodHost(typeof(parse_package.NumberNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛNumberNode;
-[GoMethodHost(typeof(parse_package.PipeNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛPipeNode;
-[GoMethodHost(typeof(parse_package.Pos)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛPos;
-[GoMethodHost(typeof(parse_package.RangeNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛRangeNode;
-[GoMethodHost(typeof(parse_package.StringNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛStringNode;
-[GoMethodHost(typeof(parse_package.TemplateNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛTemplateNode;
-[GoMethodHost(typeof(parse_package.TextNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛTextNode;
-[GoMethodHost(typeof(parse_package.Tree)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛTree;
-[GoMethodHost(typeof(parse_package.VariableNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛVariableNode;
-[GoMethodHost(typeof(parse_package.WithNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛWithNode;
-[GoMethodHost(typeof(parse_package.elseNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛelseNode;
-[GoMethodHost(typeof(parse_package.endNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛendNode;
-[GoMethodHost(typeof(parse_package.item)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛitem;
-[GoMethodHost(typeof(parse_package.lexer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class parseᴛlexer;
+[GoMethodHost(typeof(parse_package.ActionNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛActionNode;
+[GoMethodHost(typeof(parse_package.BoolNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛBoolNode;
+[GoMethodHost(typeof(parse_package.BranchNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛBranchNode;
+[GoMethodHost(typeof(parse_package.BreakNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛBreakNode;
+[GoMethodHost(typeof(parse_package.ChainNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛChainNode;
+[GoMethodHost(typeof(parse_package.CommandNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛCommandNode;
+[GoMethodHost(typeof(parse_package.CommentNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛCommentNode;
+[GoMethodHost(typeof(parse_package.ContinueNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛContinueNode;
+[GoMethodHost(typeof(parse_package.DotNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛDotNode;
+[GoMethodHost(typeof(parse_package.FieldNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛFieldNode;
+[GoMethodHost(typeof(parse_package.IdentifierNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛIdentifierNode;
+[GoMethodHost(typeof(parse_package.IfNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛIfNode;
+[GoMethodHost(typeof(parse_package.ListNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛListNode;
+[GoMethodHost(typeof(parse_package.NilNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛNilNode;
+[GoMethodHost(typeof(parse_package.NodeType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛNodeType;
+[GoMethodHost(typeof(parse_package.NumberNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛNumberNode;
+[GoMethodHost(typeof(parse_package.PipeNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛPipeNode;
+[GoMethodHost(typeof(parse_package.Pos)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛPos;
+[GoMethodHost(typeof(parse_package.RangeNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛRangeNode;
+[GoMethodHost(typeof(parse_package.StringNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛStringNode;
+[GoMethodHost(typeof(parse_package.TemplateNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛTemplateNode;
+[GoMethodHost(typeof(parse_package.TextNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛTextNode;
+[GoMethodHost(typeof(parse_package.Tree)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛTree;
+[GoMethodHost(typeof(parse_package.VariableNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛVariableNode;
+[GoMethodHost(typeof(parse_package.WithNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛWithNode;
+[GoMethodHost(typeof(parse_package.elseNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛelseNode;
+[GoMethodHost(typeof(parse_package.endNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛendNode;
+[GoMethodHost(typeof(parse_package.item)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛitem;
+[GoMethodHost(typeof(parse_package.lexer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class parseᴛlexer;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class parseᴛActionNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.ActionNode a) => parse_package.String⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.ActionNode a, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref a, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.ActionNode a) => parse_package.tree⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.ActionNode a) => parse_package.Copy⁔(ref a);
+}
+partial class parseᴛBoolNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.BoolNode b) => parse_package.String⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.BoolNode b, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref b, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.BoolNode b) => parse_package.tree⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.BoolNode b) => parse_package.Copy⁔(ref b);
+}
+partial class parseᴛBranchNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.BranchNode b) => parse_package.String⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.BranchNode b, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref b, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.BranchNode b) => parse_package.tree⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.BranchNode b) => parse_package.Copy⁔(ref b);
+}
+partial class parseᴛBreakNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.BreakNode b) => parse_package.Copy⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.BreakNode b) => parse_package.String⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.BreakNode b) => parse_package.tree⁔(ref b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.BreakNode b, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref b, Ꮡsb);
+}
+partial class parseᴛChainNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Add(this ref parse_package.ChainNode c, @string field) => parse_package.Add⁔(ref c, field);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.ChainNode c) => parse_package.String⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.ChainNode c, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref c, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.ChainNode c) => parse_package.tree⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.ChainNode c) => parse_package.Copy⁔(ref c);
+}
+partial class parseᴛCommandNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void append(this ref parse_package.CommandNode c, parse_package.Node arg) => parse_package.append⁔(ref c, arg);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.CommandNode c) => parse_package.String⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.CommandNode c, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref c, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.CommandNode c) => parse_package.tree⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ж<parse_package.CommandNode> Ꮡc) => parse_package.Copy⁔(Ꮡc);
+}
+partial class parseᴛCommentNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.CommentNode c) => parse_package.String⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.CommentNode c, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref c, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.CommentNode c) => parse_package.tree⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.CommentNode c) => parse_package.Copy⁔(ref c);
+}
+partial class parseᴛContinueNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.ContinueNode c) => parse_package.Copy⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.ContinueNode c) => parse_package.String⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.ContinueNode c) => parse_package.tree⁔(ref c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.ContinueNode c, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref c, Ꮡsb);
+}
+partial class parseᴛDotNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.NodeType Type(this ref parse_package.DotNode d) => parse_package.Type⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.DotNode d) => parse_package.String⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.DotNode d, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref d, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.DotNode d) => parse_package.tree⁔(ref d);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.DotNode d) => parse_package.Copy⁔(ref d);
+}
+partial class parseᴛFieldNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.FieldNode f) => parse_package.String⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.FieldNode f, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref f, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.FieldNode f) => parse_package.tree⁔(ref f);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.FieldNode f) => parse_package.Copy⁔(ref f);
+}
+partial class parseᴛIdentifierNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<parse_package.IdentifierNode> SetPos(this ж<parse_package.IdentifierNode> Ꮡi, parse_package.Pos pos) => parse_package.SetPos⁔(Ꮡi, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<parse_package.IdentifierNode> SetTree(this ж<parse_package.IdentifierNode> Ꮡi, ж<parse_package.Tree> Ꮡt) => parse_package.SetTree⁔(Ꮡi, Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.IdentifierNode i) => parse_package.String⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.IdentifierNode i, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref i, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.IdentifierNode i) => parse_package.tree⁔(ref i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.IdentifierNode i) => parse_package.Copy⁔(ref i);
+}
+partial class parseᴛIfNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.IfNode i) => parse_package.Copy⁔(ref i);
+}
+partial class parseᴛListNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void append(this ref parse_package.ListNode l, parse_package.Node n) => parse_package.append⁔(ref l, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.ListNode l) => parse_package.tree⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.ListNode l) => parse_package.String⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.ListNode l, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref l, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<parse_package.ListNode> CopyList(this ж<parse_package.ListNode> Ꮡl) => parse_package.CopyList⁔(Ꮡl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ж<parse_package.ListNode> Ꮡl) => parse_package.Copy⁔(Ꮡl);
+}
+partial class parseᴛNilNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.NodeType Type(this ref parse_package.NilNode n) => parse_package.Type⁔(ref n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.NilNode n) => parse_package.String⁔(ref n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.NilNode n, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref n, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.NilNode n) => parse_package.tree⁔(ref n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.NilNode n) => parse_package.Copy⁔(ref n);
+}
+partial class parseᴛNodeType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.NodeType Type(this parse_package.NodeType t) => parse_package.Type⁔(t);
+}
+partial class parseᴛNumberNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void simplifyComplex(this ref parse_package.NumberNode n) => parse_package.simplifyComplex⁔(ref n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.NumberNode n) => parse_package.String⁔(ref n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.NumberNode n, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref n, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.NumberNode n) => parse_package.tree⁔(ref n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.NumberNode n) => parse_package.Copy⁔(ref n);
+}
+partial class parseᴛPipeNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void append(this ref parse_package.PipeNode p, ж<parse_package.CommandNode> Ꮡcommand) => parse_package.append⁔(ref p, Ꮡcommand);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.PipeNode p) => parse_package.String⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.PipeNode p, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref p, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.PipeNode p) => parse_package.tree⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<parse_package.PipeNode> CopyPipe(this ж<parse_package.PipeNode> Ꮡp) => parse_package.CopyPipe⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ж<parse_package.PipeNode> Ꮡp) => parse_package.Copy⁔(Ꮡp);
+}
+partial class parseᴛPos {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Pos Position(this parse_package.Pos p) => parse_package.Position⁔(p);
+}
+partial class parseᴛRangeNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.RangeNode r) => parse_package.Copy⁔(ref r);
+}
+partial class parseᴛStringNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.StringNode s) => parse_package.String⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.StringNode s, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref s, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.StringNode s) => parse_package.tree⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.StringNode s) => parse_package.Copy⁔(ref s);
+}
+partial class parseᴛTemplateNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.TemplateNode t) => parse_package.String⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.TemplateNode t, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref t, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.TemplateNode t) => parse_package.tree⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.TemplateNode t) => parse_package.Copy⁔(ref t);
+}
+partial class parseᴛTextNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.TextNode t) => parse_package.String⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.TextNode t, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref t, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.TextNode t) => parse_package.tree⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.TextNode t) => parse_package.Copy⁔(ref t);
+}
+partial class parseᴛTree {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.ListNode> newList(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos) => parse_package.newList⁔(Ꮡt, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.TextNode> newText(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, @string text) => parse_package.newText⁔(Ꮡt, pos, text);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.CommentNode> newComment(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, @string text) => parse_package.newComment⁔(Ꮡt, pos, text);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.PipeNode> newPipeline(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, nint line, slice<ж<parse_package.VariableNode>> vars) => parse_package.newPipeline⁔(Ꮡt, pos, line, vars);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.ActionNode> newAction(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, nint line, ж<parse_package.PipeNode> Ꮡpipe) => parse_package.newAction⁔(Ꮡt, pos, line, Ꮡpipe);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.CommandNode> newCommand(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos) => parse_package.newCommand⁔(Ꮡt, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.VariableNode> newVariable(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, @string ident) => parse_package.newVariable⁔(Ꮡt, pos, ident);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.DotNode> newDot(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos) => parse_package.newDot⁔(Ꮡt, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.NilNode> newNil(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos) => parse_package.newNil⁔(Ꮡt, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.FieldNode> newField(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, @string ident) => parse_package.newField⁔(Ꮡt, pos, ident);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.ChainNode> newChain(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, parse_package.Node node) => parse_package.newChain⁔(Ꮡt, pos, node);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.BoolNode> newBool(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, bool @true) => parse_package.newBool⁔(Ꮡt, pos, @true);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<parse_package.NumberNode>, error) newNumber(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, @string text, parse_package.itemType typ) => parse_package.newNumber⁔(Ꮡt, pos, text, typ);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.StringNode> newString(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, @string orig, @string text) => parse_package.newString⁔(Ꮡt, pos, orig, text);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.endNode> newEnd(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos) => parse_package.newEnd⁔(Ꮡt, pos);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.elseNode> newElse(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, nint line) => parse_package.newElse⁔(Ꮡt, pos, line);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.IfNode> newIf(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, nint line, ж<parse_package.PipeNode> Ꮡpipe, ж<parse_package.ListNode> Ꮡlist, ж<parse_package.ListNode> ᏑelseList) => parse_package.newIf⁔(Ꮡt, pos, line, Ꮡpipe, Ꮡlist, ᏑelseList);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.BreakNode> newBreak(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, nint line) => parse_package.newBreak⁔(Ꮡt, pos, line);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.ContinueNode> newContinue(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, nint line) => parse_package.newContinue⁔(Ꮡt, pos, line);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.RangeNode> newRange(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, nint line, ж<parse_package.PipeNode> Ꮡpipe, ж<parse_package.ListNode> Ꮡlist, ж<parse_package.ListNode> ᏑelseList) => parse_package.newRange⁔(Ꮡt, pos, line, Ꮡpipe, Ꮡlist, ᏑelseList);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.WithNode> newWith(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, nint line, ж<parse_package.PipeNode> Ꮡpipe, ж<parse_package.ListNode> Ꮡlist, ж<parse_package.ListNode> ᏑelseList) => parse_package.newWith⁔(Ꮡt, pos, line, Ꮡpipe, Ꮡlist, ᏑelseList);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.TemplateNode> newTemplate(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, nint line, @string name, ж<parse_package.PipeNode> Ꮡpipe) => parse_package.newTemplate⁔(Ꮡt, pos, line, name, Ꮡpipe);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<parse_package.Tree> Copy(this ж<parse_package.Tree> Ꮡt) => parse_package.Copy⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.item next(this ref parse_package.Tree t) => parse_package.next⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void backup(this ref parse_package.Tree t) => parse_package.backup⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void backup2(this ref parse_package.Tree t, parse_package.item t1) => parse_package.backup2⁔(ref t, t1);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void backup3(this ref parse_package.Tree t, parse_package.item t2, parse_package.item t1) => parse_package.backup3⁔(ref t, t2, t1);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.item peek(this ref parse_package.Tree t) => parse_package.peek⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.item /*token*/ nextNonSpace(this ref parse_package.Tree t) => parse_package.nextNonSpace⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.item peekNonSpace(this ref parse_package.Tree t) => parse_package.peekNonSpace⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string location, @string context) ErrorContext(this ж<parse_package.Tree> Ꮡt, parse_package.Node n) => parse_package.ErrorContext⁔(Ꮡt, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void errorf(this ref parse_package.Tree t, @string format, params ꓸꓸꓸany argsʗp) => parse_package.errorf⁔(ref t, format, argsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void error(this ref parse_package.Tree t, error err) => parse_package.error⁔(ref t, err);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.item expect(this ref parse_package.Tree t, parse_package.itemType expected, @string context) => parse_package.expect⁔(ref t, expected, context);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.item expectOneOf(this ref parse_package.Tree t, parse_package.itemType expected1, parse_package.itemType expected2, @string context) => parse_package.expectOneOf⁔(ref t, expected1, expected2, context);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void unexpected(this ref parse_package.Tree t, parse_package.item token, @string context) => parse_package.unexpected⁔(ref t, token, context);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void recover(this ж<parse_package.Tree> Ꮡt, ж<error> Ꮡerrp) => parse_package.recover⁔(Ꮡt, Ꮡerrp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void startParse(this ref parse_package.Tree t, slice<map<@string, any>> funcs, ж<parse_package.lexer> Ꮡlex, map<@string, ж<parse_package.Tree>> treeSet) => parse_package.startParse⁔(ref t, funcs, Ꮡlex, treeSet);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void stopParse(this ref parse_package.Tree t) => parse_package.stopParse⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<parse_package.Tree> tree, error err) Parse(this ж<parse_package.Tree> Ꮡt, @string text, @string leftDelim, @string rightDelim, map<@string, ж<parse_package.Tree>> treeSet, params Span<map<@string, any>> funcsʗp) => parse_package.Parse⁔(Ꮡt, text, leftDelim, rightDelim, treeSet, funcsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void add(this ж<parse_package.Tree> Ꮡt) => parse_package.add⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void parse(this ж<parse_package.Tree> Ꮡt) => parse_package.parse⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void parseDefinition(this ж<parse_package.Tree> Ꮡt) => parse_package.parseDefinition⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<parse_package.ListNode> list, parse_package.Node next) itemList(this ж<parse_package.Tree> Ꮡt) => parse_package.itemList⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node textOrAction(this ж<parse_package.Tree> Ꮡt) => parse_package.textOrAction⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void clearActionLine(this ref parse_package.Tree t) => parse_package.clearActionLine⁔(ref t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node /*n*/ action(this ж<parse_package.Tree> Ꮡt) => parse_package.action⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node breakControl(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, nint line) => parse_package.breakControl⁔(Ꮡt, pos, line);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node continueControl(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, nint line) => parse_package.continueControl⁔(Ꮡt, pos, line);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.PipeNode> /*pipe*/ pipeline(this ж<parse_package.Tree> Ꮡt, @string context, parse_package.itemType end) => parse_package.pipeline⁔(Ꮡt, context, end);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void checkPipeline(this ref parse_package.Tree t, ж<parse_package.PipeNode> Ꮡpipe, @string context) => parse_package.checkPipeline⁔(ref t, Ꮡpipe, context);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (parse_package.Pos pos, nint line, ж<parse_package.PipeNode> pipe, ж<parse_package.ListNode> list, ж<parse_package.ListNode> elseList) parseControl(this ж<parse_package.Tree> Ꮡt, @string context) => parse_package.parseControl⁔(Ꮡt, context);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node ifControl(this ж<parse_package.Tree> Ꮡt) => parse_package.ifControl⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node rangeControl(this ж<parse_package.Tree> Ꮡt) => parse_package.rangeControl⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node withControl(this ж<parse_package.Tree> Ꮡt) => parse_package.withControl⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node endControl(this ж<parse_package.Tree> Ꮡt) => parse_package.endControl⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node elseControl(this ж<parse_package.Tree> Ꮡt) => parse_package.elseControl⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node blockControl(this ж<parse_package.Tree> Ꮡt) => parse_package.blockControl⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node templateControl(this ж<parse_package.Tree> Ꮡt) => parse_package.templateControl⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string /*name*/ parseTemplateName(this ref parse_package.Tree t, parse_package.item token, @string context) => parse_package.parseTemplateName⁔(ref t, token, context);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.CommandNode> command(this ж<parse_package.Tree> Ꮡt) => parse_package.command⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node operand(this ж<parse_package.Tree> Ꮡt) => parse_package.operand⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node term(this ж<parse_package.Tree> Ꮡt) => parse_package.term⁔(Ꮡt);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasFunction(this ref parse_package.Tree t, @string name) => parse_package.hasFunction⁔(ref t, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void popVars(this ref parse_package.Tree t, nint n) => parse_package.popVars⁔(ref t, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node useVar(this ж<parse_package.Tree> Ꮡt, parse_package.Pos pos, @string name) => parse_package.useVar⁔(Ꮡt, pos, name);
+}
+partial class parseᴛVariableNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref parse_package.VariableNode v) => parse_package.String⁔(ref v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.VariableNode v, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref v, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.VariableNode v) => parse_package.tree⁔(ref v);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.VariableNode v) => parse_package.Copy⁔(ref v);
+}
+partial class parseᴛWithNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static parse_package.Node Copy(this ref parse_package.WithNode w) => parse_package.Copy⁔(ref w);
+}
+partial class parseᴛelseNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.NodeType Type(this ref parse_package.elseNode e) => parse_package.Type⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref parse_package.elseNode e) => parse_package.String⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.elseNode e, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref e, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.elseNode e) => parse_package.tree⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node Copy(this ref parse_package.elseNode e) => parse_package.Copy⁔(ref e);
+}
+partial class parseᴛendNode {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref parse_package.endNode e) => parse_package.String⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeTo(this ref parse_package.endNode e, ж<strings.Builder> Ꮡsb) => parse_package.writeTo⁔(ref e, Ꮡsb);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<parse_package.Tree> tree(this ref parse_package.endNode e) => parse_package.tree⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.Node Copy(this ref parse_package.endNode e) => parse_package.Copy⁔(ref e);
+}
+partial class parseᴛitem {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this parse_package.item i) => parse_package.String⁔(i);
+}
+partial class parseᴛlexer {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static rune next(this ref parse_package.lexer l) => parse_package.next⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static rune peek(this ref parse_package.lexer l) => parse_package.peek⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void backup(this ref parse_package.lexer l) => parse_package.backup⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.item thisItem(this ref parse_package.lexer l, parse_package.itemType t) => parse_package.thisItem⁔(ref l, t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.stateFn emit(this ref parse_package.lexer l, parse_package.itemType t) => parse_package.emit⁔(ref l, t);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.stateFn emitItem(this ref parse_package.lexer l, parse_package.item i) => parse_package.emitItem⁔(ref l, i);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void ignore(this ref parse_package.lexer l) => parse_package.ignore⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool accept(this ref parse_package.lexer l, @string valid) => parse_package.accept⁔(ref l, valid);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void acceptRun(this ref parse_package.lexer l, @string valid) => parse_package.acceptRun⁔(ref l, valid);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.stateFn errorf(this ref parse_package.lexer l, @string format, params ꓸꓸꓸany argsʗp) => parse_package.errorf⁔(ref l, format, argsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static parse_package.item nextItem(this ж<parse_package.lexer> Ꮡl) => parse_package.nextItem⁔(Ꮡl);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (bool delim, bool trimSpaces) atRightDelim(this ref parse_package.lexer l) => parse_package.atRightDelim⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool atTerminator(this ref parse_package.lexer l) => parse_package.atTerminator⁔(ref l);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool scanNumber(this ref parse_package.lexer l) => parse_package.scanNumber⁔(ref l);
+}
+// </MethodForwarders>

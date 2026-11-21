@@ -16,8 +16,6 @@ using hash = hash_package;
 using byteorder = go.@internal.byteorder_package;
 using go.@internal;
 using go.crypto.@internal;
-using md5 = md5_package;
-using static md5_package;
 
 partial class md5_package {
 
@@ -49,9 +47,7 @@ partial struct digest {
     internal uint64 len;
 }
 
-} partial class md5ᴛdigest {
-
-internal static void Reset(this ref digest d) {
+internal static void Reset⁔(/*this*/ ref digest d) {
     d.s[0] = init0;
     d.s[1] = init1;
     d.s[2] = init2;
@@ -60,19 +56,15 @@ internal static void Reset(this ref digest d) {
     d.len = 0;
 }
 
-} partial class md5_package {
-
 internal static ref readonly @string magic => ref magicᵇ;
 private static readonly @string magicᵇ = "md5\x01"u8;
 internal const nint marshaledSize = /* len(magic) + 4*4 + BlockSize + 8 */ 92;
 
-} partial class md5ᴛdigest {
-
-internal static (slice<byte>, error) MarshalBinary(this ref digest d) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
-internal static (slice<byte>, error) AppendBinary(this ref digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, d.s[0]);
     b = byteorder.BEAppendUint32(b, d.s[1]);
@@ -90,7 +82,7 @@ private static readonly @string cryptoMd5InvalidHashˢᵇ = "crypto/md5: invalid
 internal static ref readonly @string cryptoMd5InvalidHashˢ2 => ref cryptoMd5InvalidHashˢ2ᵇ;
 private static readonly @string cryptoMd5InvalidHashˢ2ᵇ = "crypto/md5: invalid hash state size"u8;
 
-internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
+internal static error UnmarshalBinary⁔(/*this*/ ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
         return errors.New(cryptoMd5InvalidHashˢ);
     }
@@ -104,11 +96,9 @@ internal static error UnmarshalBinary(this ref digest d, slice<byte> b) {
     (b, d.s[3]) = consumeUint32(b);
     b = b.slice(copy(d.x[..], b));
     (b, d.len) = consumeUint64(b);
-    d.nx = (nint)(d.len % (uint64)md5.BlockSize);
+    d.nx = (nint)(d.len % (uint64)BlockSize);
     return default;
 }
-
-} partial class md5_package {
 
 internal static (slice<byte>, uint64) consumeUint64(slice<byte> b) {
     return (b[8..], byteorder.BEUint64(b[0..8]));
@@ -118,14 +108,10 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
     return (b[4..], byteorder.BEUint32(b[0..4]));
 }
 
-} partial class md5ᴛdigest {
-
-internal static (hash.Cloner, error) Clone(this ref digest d) {
+internal static (hash.Cloner, error) Clone⁔(/*this*/ ref digest d) {
     ref var r = ref heap<digest>(d.ΔClone(), out var Ꮡr);
     return (new digestжCloner(Ꮡr), default);
 }
-
-} partial class md5_package {
 
 // New returns a new [hash.Hash] computing the MD5 checksum. The Hash
 // also implements [encoding.BinaryMarshaler], [encoding.BinaryAppender] and
@@ -137,17 +123,15 @@ public static hash.Hash New() {
     return new digestжHash(d);
 }
 
-} partial class md5ᴛdigest {
+internal static nint Size⁔(/*this*/ ref digest d) { return Size; }
 
-internal static nint Size(this ref digest d) { return md5.Size; }
-
-internal static nint BlockSize(this ref digest d) { return md5.BlockSize; }
+internal static nint BlockSize⁔(/*this*/ ref digest d) { return BlockSize; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string cryptoMd5UseOfMd5IsNotˢ => ref cryptoMd5UseOfMd5IsNotˢᵇ;
 private static readonly @string cryptoMd5UseOfMd5IsNotˢᵇ = "crypto/md5: use of MD5 is not allowed in FIPS 140-only mode"u8;
 
-internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) {
+internal static (nint nn, error err) Write⁔(/*this*/ ж<digest> Ꮡd, slice<byte> p) {
     nint nn = default;
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
@@ -163,7 +147,7 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
     if (d.nx > 0) {
         nint n = copy(d.x.slice(d.nx), p);
         d.nx += n;
-        if (d.nx == md5.BlockSize) {
+        if (d.nx == BlockSize) {
             if (haveAsm) {
                 block(ref (Ꮡd).DerefOrNull(), d.x[..]);
             } else {
@@ -173,8 +157,8 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
         }
         p = p.slice(n);
     }
-    if (len(p) >= md5.BlockSize) {
-        nint n = len(p) & ~(nint)(md5.BlockSize - 1);
+    if (len(p) >= BlockSize) {
+        nint n = len(p) & ~(nint)(BlockSize - 1);
         if (haveAsm) {
             while (n > maxAsmSize) {
                 block(ref (Ꮡd).DerefOrNull(), p[..(int)(maxAsmSize)]);
@@ -193,14 +177,14 @@ internal static (nint nn, error err) Write(this ж<digest> Ꮡd, slice<byte> p) 
     return (nn, err);
 }
 
-internal static slice<byte> Sum(this ref digest d, slice<byte> @in) {
+internal static slice<byte> Sum⁔(/*this*/ ref digest d, slice<byte> @in) {
     // Make a copy of d so that caller can keep writing and summing.
     ref var d0 = ref heap<digest>(d.ΔClone(), out var Ꮡd0);
     var hash = Ꮡd0.checkSum();
     return appendꓸꓸꓸ(@in, hash[..]);
 }
 
-internal static array<byte> checkSum(this ж<digest> Ꮡd) {
+internal static array<byte> checkSum⁔(/*this*/ ж<digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (fips140only.Enforced()) {
@@ -223,15 +207,13 @@ internal static array<byte> checkSum(this ж<digest> Ꮡd) {
         throw panic("d.nx != 0");
     }
 
-    array<byte> digest = new(16); /* md5.Size */
+    array<byte> digest = new(16); /* Size */
     byteorder.LEPutUint32(digest[0..], d.s[0]);
     byteorder.LEPutUint32(digest[4..], d.s[1]);
     byteorder.LEPutUint32(digest[8..], d.s[2]);
     byteorder.LEPutUint32(digest[12..], d.s[3]);
     return digest.Clone();
 }
-
-} partial class md5_package {
 
 // Sum returns the MD5 checksum of the data.
 public static array<byte> Sum(slice<byte> data) {
