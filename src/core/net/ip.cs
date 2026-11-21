@@ -16,7 +16,6 @@ using stringslite = @internal.stringslite_package;
 using netip = net.netip_package;
 using @internal;
 using net;
-using static net_package;
 
 partial class net_package {
 
@@ -121,16 +120,14 @@ public static ref IP IPv6linklocalallnodes => ref ((StaticBox<IP>)ᏑIPv6linkloc
 public static readonly ж<IP> ᏑIPv6linklocalallrouters = new StaticBox<IP>(new IP(new byte[]{0xff, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x02}.slice()));
 public static ref IP IPv6linklocalallrouters => ref ((StaticBox<IP>)ᏑIPv6linklocalallrouters).ValueSlot;
 
-} partial class netᴛIP {
-
 // IsUnspecified reports whether ip is an unspecified address, either
 // the IPv4 address "0.0.0.0" or the IPv6 address "::".
-public static bool IsUnspecified(this IP ip) {
+internal static bool IsUnspecified⁔(/*this*/ IP ip) {
     return ip.Equal(IPv4zero) || ip.Equal(IPv6unspecified);
 }
 
 // IsLoopback reports whether ip is a loopback address.
-public static bool IsLoopback(this IP ip) {
+internal static bool IsLoopback⁔(/*this*/ IP ip) {
     var ip4 = ip.To4(); if (ip4 != nil) {
         return ip4[0] == 127;
     }
@@ -139,7 +136,7 @@ public static bool IsLoopback(this IP ip) {
 
 // IsPrivate reports whether ip is a private address, according to
 // RFC 1918 (IPv4 addresses) and RFC 4193 (IPv6 addresses).
-public static bool IsPrivate(this IP ip) {
+internal static bool IsPrivate⁔(/*this*/ IP ip) {
     var ip4 = ip.To4(); if (ip4 != nil) {
         // Following RFC 1918, Section 3. Private Address Space which says:
         //   The Internet Assigned Numbers Authority (IANA) has reserved the
@@ -155,7 +152,7 @@ public static bool IsPrivate(this IP ip) {
 }
 
 // IsMulticast reports whether ip is a multicast address.
-public static bool IsMulticast(this IP ip) {
+internal static bool IsMulticast⁔(/*this*/ IP ip) {
     var ip4 = ip.To4(); if (ip4 != nil) {
         return (byte)(ip4[0] & 0xf0) == 0xe0;
     }
@@ -164,13 +161,13 @@ public static bool IsMulticast(this IP ip) {
 
 // IsInterfaceLocalMulticast reports whether ip is
 // an interface-local multicast address.
-public static bool IsInterfaceLocalMulticast(this IP ip) {
+internal static bool IsInterfaceLocalMulticast⁔(/*this*/ IP ip) {
     return len(ip) == IPv6len && ip[0] == 0xff && (byte)(ip[1] & 0x0f) == 0x01;
 }
 
 // IsLinkLocalMulticast reports whether ip is a link-local
 // multicast address.
-public static bool IsLinkLocalMulticast(this IP ip) {
+internal static bool IsLinkLocalMulticast⁔(/*this*/ IP ip) {
     var ip4 = ip.To4(); if (ip4 != nil) {
         return ip4[0] == 224 && ip4[1] == 0 && ip4[2] == 0;
     }
@@ -179,7 +176,7 @@ public static bool IsLinkLocalMulticast(this IP ip) {
 
 // IsLinkLocalUnicast reports whether ip is a link-local
 // unicast address.
-public static bool IsLinkLocalUnicast(this IP ip) {
+internal static bool IsLinkLocalUnicast⁔(/*this*/ IP ip) {
     var ip4 = ip.To4(); if (ip4 != nil) {
         return ip4[0] == 169 && ip4[1] == 254;
     }
@@ -194,11 +191,9 @@ public static bool IsLinkLocalUnicast(this IP ip) {
 // the exception of IPv4 directed broadcast addresses.
 // It returns true even if ip is in IPv4 private address space or
 // local IPv6 unicast address space.
-public static bool IsGlobalUnicast(this IP ip) {
+internal static bool IsGlobalUnicast⁔(/*this*/ IP ip) {
     return (len(ip) == IPv4len || len(ip) == IPv6len) && !ip.Equal(IPv4bcast) && !ip.IsUnspecified() && !ip.IsLoopback() && !ip.IsMulticast() && !ip.IsLinkLocalUnicast();
 }
-
-} partial class net_package {
 
 // Is p all zeros?
 internal static bool isZeros(IP p) {
@@ -210,11 +205,9 @@ internal static bool isZeros(IP p) {
     return true;
 }
 
-} partial class netᴛIP {
-
 // To4 converts the IPv4 address ip to a 4-byte representation.
 // If ip is not an IPv4 address, To4 returns nil.
-public static IP To4(this IP ip) {
+internal static IP To4⁔(/*this*/ IP ip) {
     if (len(ip) == IPv4len) {
         return ip;
     }
@@ -226,7 +219,7 @@ public static IP To4(this IP ip) {
 
 // To16 converts the IP address ip to a 16-byte representation.
 // If ip is not an IP address (it is the wrong length), To16 returns nil.
-public static IP To16(this IP ip) {
+internal static IP To16⁔(/*this*/ IP ip) {
     if (len(ip) == IPv4len) {
         return IPv4(ip[0], ip[1], ip[2], ip[3]);
     }
@@ -236,19 +229,15 @@ public static IP To16(this IP ip) {
     return default;
 }
 
-} partial class net_package {
-
 // Default route masks for IPv4.
 internal static IPMask classAMask = IPv4Mask(0xff, 0, 0, 0);
 internal static IPMask classBMask = IPv4Mask(0xff, 0xff, 0, 0);
 internal static IPMask classCMask = IPv4Mask(0xff, 0xff, 0xff, 0);
 
-} partial class netᴛIP {
-
 // DefaultMask returns the default IP mask for the IP address ip.
 // Only IPv4 addresses have default masks; DefaultMask returns
 // nil if ip is not a valid IPv4 address.
-public static IPMask DefaultMask(this IP ip) {
+internal static IPMask DefaultMask⁔(/*this*/ IP ip) {
     ip = ip.To4(); if (ip == nil) {
         return default;
     }
@@ -264,8 +253,6 @@ public static IPMask DefaultMask(this IP ip) {
     }}
 }
 
-} partial class net_package {
-
 internal static bool allFF(slice<byte> b) {
     foreach (var (_, c) in range(b)) {
         if (c != 0xff) {
@@ -275,10 +262,8 @@ internal static bool allFF(slice<byte> b) {
     return true;
 }
 
-} partial class netᴛIP {
-
 // Mask returns the result of masking the IP address ip with mask.
-public static IP Mask(this IP ip, IPMask mask) {
+internal static IP Mask⁔(/*this*/ IP ip, IPMask mask) {
     if (len(mask) == IPv6len && len(ip) == IPv4len && allFF(mask[..12])) {
         mask = mask[12..];
     }
@@ -306,7 +291,7 @@ private static readonly @string nilˢᵇ = "<nil>"u8;
 //   - dotted decimal ("192.0.2.1"), if ip is an IPv4 or IP4-mapped IPv6 address
 //   - IPv6 conforming to RFC 5952 ("2001:db8::1"), if ip is a valid IPv6 address
 //   - the hexadecimal form of ip, without punctuation, if no other cases apply
-public static @string String(this IP ip) {
+internal static @string String⁔(/*this*/ IP ip) {
     if (len(ip) == 0) {
         return nilˢ;
     }
@@ -331,8 +316,6 @@ public static @string String(this IP ip) {
     return (@string)buf;
 }
 
-} partial class net_package {
-
 internal static @string hexString(slice<byte> b) {
     var s = new slice<byte>(len(b) * 2);
     foreach (var (i, tn) in range(b)) {
@@ -350,11 +333,9 @@ internal static @string ipEmptyString(IP ip) {
     return ip.String();
 }
 
-} partial class netᴛIP {
-
 // appendTo appends the string representation of ip to b and returns the expanded b
 // If len(ip) != IPv4len or IPv6len, it appends nothing.
-internal static slice<byte> appendTo(this IP ip, slice<byte> b) {
+internal static slice<byte> appendTo⁔(/*this*/ IP ip, slice<byte> b) {
     // If IPv4, use dotted notation.
     var p4 = ip.To4(); if (len(p4) == IPv4len) {
         ip = p4;
@@ -366,7 +347,7 @@ internal static slice<byte> appendTo(this IP ip, slice<byte> b) {
 // AppendText implements the [encoding.TextAppender] interface.
 // The encoding is the same as returned by [IP.String], with one exception:
 // When len(ip) is zero, it appends nothing.
-public static (slice<byte>, error) AppendText(this IP ip, slice<byte> b) {
+internal static (slice<byte>, error) AppendText⁔(/*this*/ IP ip, slice<byte> b) {
     if (len(ip) == 0) {
         return (b, default);
     }
@@ -380,7 +361,7 @@ public static (slice<byte>, error) AppendText(this IP ip, slice<byte> b) {
 // MarshalText implements the [encoding.TextMarshaler] interface.
 // The encoding is the same as returned by [IP.String], with one exception:
 // When len(ip) is zero, it returns an empty slice.
-public static (slice<byte>, error) MarshalText(this IP ip) {
+internal static (slice<byte>, error) MarshalText⁔(/*this*/ IP ip) {
     // 24 is satisfied with all IPv4 addresses and short IPv6 addresses
     var (b, err) = ip.AppendText(new slice<byte>(0, 24));
     if (err != nil) {
@@ -391,7 +372,7 @@ public static (slice<byte>, error) MarshalText(this IP ip) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 // The IP address is expected in a form accepted by [ParseIP].
-public static error UnmarshalText(this ref IP ip, slice<byte> text) {
+internal static error UnmarshalText⁔(/*this*/ ref IP ip, slice<byte> text) {
     if (len(text) == 0) {
         ip = default;
         return default;
@@ -408,7 +389,7 @@ public static error UnmarshalText(this ref IP ip, slice<byte> text) {
 // Equal reports whether ip and x are the same IP address.
 // An IPv4 address and that same address in IPv6 form are
 // considered to be equal.
-public static bool Equal(this IP ip, IP x) {
+internal static bool Equal⁔(/*this*/ IP ip, IP x) {
     if (len(ip) == len(x)) {
         return bytealg.Equal(ip, x);
     }
@@ -421,11 +402,9 @@ public static bool Equal(this IP ip, IP x) {
     return false;
 }
 
-internal static bool matchAddrFamily(this IP ip, IP x) {
+internal static bool matchAddrFamily⁔(/*this*/ IP ip, IP x) {
     return ip.To4() != nil && x.To4() != nil || ip.To16() != nil && ip.To4() == nil && x.To16() != nil && x.To4() == nil;
 }
-
-} partial class net_package {
 
 // If mask is a sequence of 1 bits followed by 0 bits,
 // return the number of 1 bits.
@@ -459,12 +438,10 @@ internal static nint simpleMaskLength(IPMask mask) {
     return n;
 }
 
-} partial class netᴛIPMask {
-
 // Size returns the number of leading ones and total bits in the mask.
 // If the mask is not in the canonical form--ones followed by zeros--then
 // Size returns 0, 0.
-public static (nint ones, nint bits) Size(this IPMask m) {
+internal static (nint ones, nint bits) Size⁔(/*this*/ IPMask m) {
     nint ones = default;
     nint bits = default;
 
@@ -475,19 +452,13 @@ public static (nint ones, nint bits) Size(this IPMask m) {
     return (ones, bits);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
-
 // String returns the hexadecimal form of m, with no punctuation.
-public static @string String(this IPMask m) {
+internal static @string String⁔(/*this*/ IPMask m) {
     if (len(m) == 0) {
         return nilˢ;
     }
     return hexString(m);
 }
-
-} partial class net_package {
 
 internal static (IP ip, IPMask m) networkNumberAndMask(ref IPNet n) {
     IP ip = default;
@@ -519,10 +490,8 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ref IPNet n) {
     return (ip, m);
 }
 
-} partial class netᴛIPNet {
-
 // Contains reports whether the network includes ip.
-public static bool Contains(this ж<IPNet> Ꮡn, IP ip) {
+internal static bool Contains⁔(/*this*/ ж<IPNet> Ꮡn, IP ip) {
     var (nn, m) = networkNumberAndMask(ref (Ꮡn).DerefOrNull());
     var x = ip.To4(); if (x != nil) {
         ip = x;
@@ -544,11 +513,7 @@ internal static ref readonly @string ipNetˢ => ref ipNetˢᵇ;
 private static readonly @string ipNetˢᵇ = "ip+net"u8;
 
 // Network returns the address's network name, "ip+net".
-public static @string Network(this ref IPNet n) { return ipNetˢ; }
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static @string Network⁔(/*this*/ ref IPNet n) { return ipNetˢ; }
 
 // String returns the CIDR notation of n like "192.0.2.0/24"
 // or "2001:db8::/48" as defined in RFC 4632 and RFC 4291.
@@ -556,7 +521,7 @@ private static readonly @string nilˢᵇ = "<nil>"u8;
 // string which consists of an IP address, followed by a slash
 // character and a mask expressed as hexadecimal form with no
 // punctuation like "198.51.100.0/c000ff00".
-public static @string String(this ж<IPNet> Ꮡn) {
+internal static @string String⁔(/*this*/ ж<IPNet> Ꮡn) {
     if (Ꮡn == nil) {
         return nilˢ;
     }
@@ -570,8 +535,6 @@ public static @string String(this ж<IPNet> Ꮡn) {
     }
     return nn.String() + "/"u8 + strconv.Itoa(l);
 }
-
-} partial class net_package {
 
 // ParseIP parses s as an IP address, returning the result.
 // The string s can be in IPv4 dotted decimal ("192.0.2.1"), IPv6

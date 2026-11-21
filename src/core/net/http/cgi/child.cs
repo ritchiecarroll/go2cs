@@ -18,7 +18,6 @@ using strconv = strconv_package;
 using strings = strings_package;
 using crypto;
 using go.net;
-using static cgi_package;
 
 partial class cgi_package {
 
@@ -209,17 +208,15 @@ partial struct response {
     internal ж<bufio.Writer> bufw;
 }
 
-} partial class cgiᴛresponse {
-
-internal static void Flush(this ref response r) {
+internal static void Flush⁔(/*this*/ ref response r) {
     r.bufw.Flush();
 }
 
-internal static http.Header Header(this ref response r) {
+internal static http.Header Header⁔(/*this*/ ref response r) {
     return r.header;
 }
 
-internal static (nint n, error err) Write(this ref response r, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref response r, slice<byte> p) {
     if (!r.wroteHeader) {
         r.WriteHeader(http.StatusOK);
     }
@@ -229,7 +226,7 @@ internal static (nint n, error err) Write(this ref response r, slice<byte> p) {
     return r.bufw.Write(p);
 }
 
-internal static void WriteHeader(this ref response r, nint code) {
+internal static void WriteHeader⁔(/*this*/ ref response r, nint code) {
     if (r.wroteHeader) {
         // Note: explicitly using Stderr, as Stdout is our HTTP output.
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "CGI attempted to write header twice on request for %s"u8, r.req.URL.OrTypedNil());
@@ -239,15 +236,11 @@ internal static void WriteHeader(this ref response r, nint code) {
     r.code = code;
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentTypeˢ2 => ref contentTypeˢ2ᵇ;
-private static readonly @string contentTypeˢ2ᵇ = "Content-Type"u8;
-
 // writeCGIHeader finalizes the header sent to the client and writes it to the output.
 // p is not written by writeHeader, but is the first chunk of the body
 // that will be written. It is sniffed for a Content-Type if none is
 // set explicitly.
-internal static void writeCGIHeader(this ref response r, slice<byte> p) {
+internal static void writeCGIHeader⁔(/*this*/ ref response r, slice<byte> p) {
     if (r.wroteCGIHeader) {
         return;
     }
@@ -261,4 +254,4 @@ internal static void writeCGIHeader(this ref response r, slice<byte> p) {
     r.bufw.Flush();
 }
 
-}
+} // end cgi_package

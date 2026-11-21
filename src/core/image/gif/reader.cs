@@ -16,7 +16,6 @@ using Δcolor = go.image.color_package;
 using io = io_package;
 using compress;
 using go.image;
-using static gif_package;
 
 partial class gif_package {
 
@@ -112,9 +111,7 @@ partial struct blockReader {
     internal error err;
 }
 
-} partial class gifᴛblockReader {
-
-internal static void fill(this ref blockReader b) {
+internal static void fill⁔(/*this*/ ref blockReader b) {
     if (b.err != nil) {
         return;
     }
@@ -133,7 +130,7 @@ internal static void fill(this ref blockReader b) {
     }
 }
 
-internal static (byte, error) ReadByte(this ref blockReader b) {
+internal static (byte, error) ReadByte⁔(/*this*/ ref blockReader b) {
     if (b.i == b.j) {
         b.fill();
         if (b.err != nil) {
@@ -148,7 +145,7 @@ internal static (byte, error) ReadByte(this ref blockReader b) {
 
 // blockReader must implement io.Reader, but its Read shouldn't ever actually
 // be called in practice. The compress/lzw package will only call [blockReader.ReadByte].
-internal static (nint, error) Read(this ref blockReader b, slice<byte> p) {
+internal static (nint, error) Read⁔(/*this*/ ref blockReader b, slice<byte> p) {
     if (len(p) == 0 || b.err != nil) {
         return (0, b.err);
     }
@@ -172,7 +169,7 @@ internal static (nint, error) Read(this ref blockReader b, slice<byte> p) {
 // most one more sub-block of length 1 may exist before the block-terminator.
 // These accommodations allow us to support GIFs created by less strict encoders.
 // See https://golang.org/issue/16146.
-internal static error close(this ref blockReader b) {
+internal static error close⁔(/*this*/ ref blockReader b) {
     if (AreEqual(b.err, io.EOF)) {
         // A clean block-sequence terminator was encountered while reading.
         return default;
@@ -206,10 +203,8 @@ internal static error close(this ref blockReader b) {
     return errTooMuch;
 }
 
-} partial class gifᴛdecoder {
-
 // decode reads a GIF image from r and stores the result in d.
-internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly, bool keepAllFrames) {
+internal static error decode⁔(/*this*/ ж<decoder> Ꮡd, io.Reader r, bool configOnly, bool keepAllFrames) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Add buffering if r does not provide ReadByte.
@@ -263,7 +258,7 @@ internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly
     }
 }
 
-internal static error readHeaderAndScreenDescriptor(this ref decoder d) {
+internal static error readHeaderAndScreenDescriptor⁔(/*this*/ ref decoder d) {
     var err = readFull(d.r, d.tmp[..13]);
     if (err != nil) {
         return fmt.Errorf("gif: reading header: %v"u8, err);
@@ -285,7 +280,7 @@ internal static error readHeaderAndScreenDescriptor(this ref decoder d) {
     return default;
 }
 
-internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte fields) {
+internal static (Δcolor.Palette, error) readColorTable⁔(/*this*/ ref decoder d, byte fields) {
     nint n = ((nint)1).Lsh((1 + (nuint)((byte)(fields & (byte)fColorTableBitsMask))));
     var err = readFull(d.r, d.tmp.slice(0, 3 * n));
     if (err != nil) {
@@ -300,7 +295,7 @@ internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte
     return (p, default);
 }
 
-internal static error readExtension(this ref decoder d) {
+internal static error readExtension⁔(/*this*/ ref decoder d) {
     var (extension, err) = readByte(d.r);
     if (err != nil) {
         return fmt.Errorf("gif: reading extension: %v"u8, err);
@@ -361,7 +356,7 @@ internal static error readExtension(this ref decoder d) {
     }
 }
 
-internal static error readGraphicControl(this ref decoder d) {
+internal static error readGraphicControl⁔(/*this*/ ref decoder d) {
     var err = readFull(d.r, d.tmp[..6]); if (err != nil) {
         return fmt.Errorf("gif: can't read graphic control: %s"u8, err);
     }
@@ -385,7 +380,7 @@ internal static error readGraphicControl(this ref decoder d) {
 internal static ref readonly @string gifNoColorTableˢ => ref gifNoColorTableˢᵇ;
 private static readonly @string gifNoColorTableˢᵇ = "gif: no color table"u8;
 
-internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFrames) {
+internal static error readImageDescriptor⁔(/*this*/ ж<decoder> Ꮡd, bool keepAllFrames) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -504,7 +499,7 @@ internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFra
 internal static ref readonly @string gifFrameBoundsLargerThanˢ => ref gifFrameBoundsLargerThanˢᵇ;
 private static readonly @string gifFrameBoundsLargerThanˢᵇ = "gif: frame bounds larger than image bounds"u8;
 
-internal static (ж<image.Paletted>, error) newImageFromDescriptor(this ref decoder d) {
+internal static (ж<image.Paletted>, error) newImageFromDescriptor⁔(/*this*/ ref decoder d) {
     var err = readFull(d.r, d.tmp[..9]); if (err != nil) {
         return (default, fmt.Errorf("gif: can't read image descriptor: %s"u8, err));
     }
@@ -539,7 +534,7 @@ internal static (ж<image.Paletted>, error) newImageFromDescriptor(this ref deco
     ), default), default);
 }
 
-internal static (nint, error) readBlock(this ref decoder d) {
+internal static (nint, error) readBlock⁔(/*this*/ ref decoder d) {
     var (n, err) = readByte(d.r);
     if (n == 0 || err != nil) {
         return (0, err);
@@ -549,8 +544,6 @@ internal static (nint, error) readBlock(this ref decoder d) {
     }
     return ((nint)n, default);
 }
-
-} partial class gif_package {
 
 // interlaceScan defines the ordering for a pass of the interlace algorithm.
 partial struct interlaceScan {

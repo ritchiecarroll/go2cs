@@ -34,7 +34,6 @@ using utf8 = unicode.utf8_package;
 using @internal;
 using go.math;
 using unicode;
-using static asn1_package;
 
 partial class asn1_package {
 
@@ -44,22 +43,14 @@ partial struct StructuralError {
     public @string Msg;
 }
 
-} partial class asn1ᴛStructuralError {
-
-public static @string Error(this StructuralError e) { return "asn1: structure error: "u8 + e.Msg; }
-
-} partial class asn1_package {
+internal static @string Error⁔(/*this*/ StructuralError e) { return "asn1: structure error: "u8 + e.Msg; }
 
 // A SyntaxError suggests that the ASN.1 data is invalid.
 partial struct SyntaxError {
     public @string Msg;
 }
 
-} partial class asn1ᴛSyntaxError {
-
-public static @string Error(this SyntaxError e) { return "asn1: syntax error: "u8 + e.Msg; }
-
-} partial class asn1_package {
+internal static @string Error⁔(/*this*/ SyntaxError e) { return "asn1: syntax error: "u8 + e.Msg; }
 
 // We start by dealing with each of the primitive types in turn.
 // BOOLEAN
@@ -185,11 +176,9 @@ partial struct BitString {
     public nint BitLength;    // length in bits.
 }
 
-} partial class asn1ᴛBitString {
-
 // At returns the bit at the given index. If the index is out of range it
 // returns 0.
-public static nint At(this BitString b, nint i) {
+internal static nint At⁔(/*this*/ BitString b, nint i) {
     if (i < 0 || i >= b.BitLength) {
         return 0;
     }
@@ -200,7 +189,7 @@ public static nint At(this BitString b, nint i) {
 
 // RightAlign returns a slice where the padding bits are at the beginning. The
 // slice may share memory with the BitString.
-public static slice<byte> RightAlign(this BitString b) {
+internal static slice<byte> RightAlign⁔(/*this*/ BitString b) {
     nuint shift = (nuint)(8 - (b.BitLength % 8));
     if (shift == 8 || len(b.Bytes) == 0) {
         return b.Bytes;
@@ -215,8 +204,6 @@ public static slice<byte> RightAlign(this BitString b) {
 
     return a;
 }
-
-} partial class asn1_package {
 
 // parseBitString parses an ASN.1 bit string from the given byte slice and returns it.
 internal static (BitString ret, error err) parseBitString(slice<byte> bytes) {
@@ -252,14 +239,12 @@ public static ref slice<byte> NullBytes => ref ((StaticBox<slice<byte>>)ᏑNullB
 // An ObjectIdentifier represents an ASN.1 OBJECT IDENTIFIER.
 partial struct ObjectIdentifier /*[]nint*/;
 
-} partial class asn1ᴛObjectIdentifier {
-
 // Equal reports whether oi and other represent the same identifier.
-public static bool Equal(this ObjectIdentifier oi, ObjectIdentifier other) {
+internal static bool Equal⁔(/*this*/ ObjectIdentifier oi, ObjectIdentifier other) {
     return slices.Equal<ObjectIdentifier, nint>(oi, other);
 }
 
-public static @string String(this ObjectIdentifier oi) {
+internal static @string String⁔(/*this*/ ObjectIdentifier oi) {
     ref var s = ref heap(new strings.Builder(), out var Ꮡs);
     Ꮡs.Grow(32);
 
@@ -273,8 +258,6 @@ public static @string String(this ObjectIdentifier oi) {
 
     return s.String();
 }
-
-} partial class asn1_package {
 
 // parseObjectIdentifier parses an OBJECT IDENTIFIER from the given bytes and
 // returns it. An object identifier is a sequence of variable length integers
@@ -1276,13 +1259,11 @@ partial struct invalidUnmarshalError {
     public reflect.Type Type;
 }
 
-} partial class asn1ᴛinvalidUnmarshalError {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string asn1UnmarshalRecipientˢ => ref asn1UnmarshalRecipientˢᵇ;
 private static readonly @string asn1UnmarshalRecipientˢᵇ = "asn1: Unmarshal recipient value is nil"u8;
 
-internal static @string Error(this ref invalidUnmarshalError e) {
+internal static @string Error⁔(/*this*/ ref invalidUnmarshalError e) {
     if (e.Type == nil) {
         return asn1UnmarshalRecipientˢ;
     }
@@ -1292,8 +1273,6 @@ internal static @string Error(this ref invalidUnmarshalError e) {
     }
     return "asn1: Unmarshal recipient value is nil "u8 + e.Type.String();
 }
-
-} partial class asn1_package {
 
 // UnmarshalWithParams allows field parameters to be specified for the
 // top-level element. The form of the params is the same as the field tags.

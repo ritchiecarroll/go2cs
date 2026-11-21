@@ -27,7 +27,6 @@ using go.mime;
 using go.net;
 using go.path;
 using iter = iter_package;
-using static http_package;
 
 partial class http_package {
 
@@ -78,11 +77,9 @@ internal static error mapOpenError(error originalErr, @string name, rune sep, Fu
 // cannot be represented by the operating system.
 internal static error errInvalidUnsafePath = errors.New("http: invalid or unsafe file path");
 
-} partial class httpᴛDir {
-
 // Open implements [FileSystem] using [os.Open], opening files for reading rooted
 // and relative to the directory d.
-public static (File, error) Open(this Dir d, @string name) {
+internal static (File, error) Open⁔(/*this*/ Dir d, @string name) {
     @string pathΔ1 = path.Clean("/"u8 + name)[1..];
     if (pathΔ1 == ""u8) {
         pathΔ1 = ".";
@@ -102,8 +99,6 @@ public static (File, error) Open(this Dir d, @string name) {
     }
     return (new os_FileжFile(f), default);
 }
-
-} partial class http_package {
 
 // A FileSystem implements access to a collection of named files.
 // The elements in a file path are separated by slash ('/', U+002F)
@@ -138,29 +133,19 @@ partial interface anyDirs {
 
 partial struct fileInfoDirs /*[]global::go.io.fs_package.FileInfo*/;
 
-} partial class httpᴛfileInfoDirs {
-
-internal static nint len(this fileInfoDirs d) { return builtin.len(d); }
-internal static bool isDir(this fileInfoDirs d, nint i) { return d[i].IsDir(); }
-internal static @string name(this fileInfoDirs d, nint i) { return d[i].Name(); }
-
-} partial class http_package {
+internal static nint len⁔(/*this*/ fileInfoDirs d) { return len(d); }
+internal static bool isDir⁔(/*this*/ fileInfoDirs d, nint i) { return d[i].IsDir(); }
+internal static @string name⁔(/*this*/ fileInfoDirs d, nint i) { return d[i].Name(); }
 
 partial struct dirEntryDirs /*[]global::go.io.fs_package.DirEntry*/;
 
-} partial class httpᴛdirEntryDirs {
-
-internal static nint len(this dirEntryDirs d) { return builtin.len(d); }
-internal static bool isDir(this dirEntryDirs d, nint i) { return d[i].IsDir(); }
-internal static @string name(this dirEntryDirs d, nint i) { return d[i].Name(); }
-
-} partial class http_package {
+internal static nint len⁔(/*this*/ dirEntryDirs d) { return len(d); }
+internal static bool isDir⁔(/*this*/ dirEntryDirs d, nint i) { return d[i].IsDir(); }
+internal static @string name⁔(/*this*/ dirEntryDirs d, nint i) { return d[i].Name(); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string errorReadingDirectoryˢ => ref errorReadingDirectoryˢᵇ;
 private static readonly @string errorReadingDirectoryˢᵇ = "Error reading directory"u8;
-internal static ref readonly @string contentTypeˢ => ref contentTypeˢᵇ;
-private static readonly @string contentTypeˢᵇ = "Content-Type"u8;
 internal static ref readonly @string textHtmlCharsetUtf8ˢ => ref textHtmlCharsetUtf8ˢᵇ;
 private static readonly @string textHtmlCharsetUtf8ˢᵇ = "text/html; charset=utf-8"u8;
 
@@ -906,10 +891,6 @@ internal static (@string msg, nint httpStatus) toHTTPError(error err) {
     return (internalServerErrorˢ, StatusInternalServerError);
 }
 
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string locationˢ => ref locationˢᵇ;
-private static readonly @string locationˢᵇ = "Location"u8;
-
 // localRedirect gives a Moved Permanently response.
 // It does not convert relative paths to absolute paths like Redirect does.
 internal static void localRedirect(ResponseWriter w, ref Request r, @string newPath) {
@@ -1022,9 +1003,7 @@ partial struct ioFile {
     internal fs.File @file;
 }
 
-} partial class httpᴛioFS {
-
-internal static (File, error) Open(this ioFS f, @string name) {
+internal static (File, error) Open⁔(/*this*/ ioFS f, @string name) {
     if (name == "/"u8) {
         name = ".";
     } else {
@@ -1038,20 +1017,14 @@ internal static (File, error) Open(this ioFS f, @string name) {
     return (new ioFile(@file), default);
 }
 
-} partial class httpᴛioFile {
-
-internal static error Close(this ioFile f) { return f.@file.Close(); }
-internal static (nint, error) Read(this ioFile f, slice<byte> b) { return f.@file.Read(b); }
-internal static (fs.FileInfo, error) Stat(this ioFile f) { return f.@file.Stat(); }
-
-} partial class http_package {
+internal static error Close⁔(/*this*/ ioFile f) { return f.@file.Close(); }
+internal static (nint, error) Read⁔(/*this*/ ioFile f, slice<byte> b) { return f.@file.Read(b); }
+internal static (fs.FileInfo, error) Stat⁔(/*this*/ ioFile f) { return f.@file.Stat(); }
 
 internal static error errMissingSeek = errors.New("io.File missing Seek method");
 internal static error errMissingReadDir = errors.New("io.File directory missing ReadDir method");
 
-} partial class httpᴛioFile {
-
-internal static (int64, error) Seek(this ioFile f, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ioFile f, int64 offset, nint whence) {
     var (s, ok) = f.@file._<io.Seeker>(ᐧ);
     if (!ok) {
         return (0, errMissingSeek);
@@ -1059,7 +1032,7 @@ internal static (int64, error) Seek(this ioFile f, int64 offset, nint whence) {
     return s.Seek(offset, whence);
 }
 
-internal static (slice<fs.DirEntry>, error) ReadDir(this ioFile f, nint count) {
+internal static (slice<fs.DirEntry>, error) ReadDir⁔(/*this*/ ioFile f, nint count) {
     var (d, ok) = f.@file._<fs.ReadDirFile>(ᐧ);
     if (!ok) {
         return (default, errMissingReadDir);
@@ -1067,7 +1040,7 @@ internal static (slice<fs.DirEntry>, error) ReadDir(this ioFile f, nint count) {
     return d.ReadDir(count);
 }
 
-internal static (slice<fs.FileInfo>, error) Readdir(this ioFile f, nint count) {
+internal static (slice<fs.FileInfo>, error) Readdir⁔(/*this*/ ioFile f, nint count) {
     var (d, ok) = f.@file._<fs.ReadDirFile>(ᐧ);
     if (!ok) {
         return (default, errMissingReadDir);
@@ -1092,8 +1065,6 @@ internal static (slice<fs.FileInfo>, error) Readdir(this ioFile f, nint count) {
     }
     return (list, default);
 }
-
-} partial class http_package {
 
 // FS converts fsys to a [FileSystem] implementation,
 // for use with [FileServer] and [NewFileTransport].
@@ -1132,9 +1103,7 @@ public static Handler FileServerFS(fs.FS root) {
     return FileServer(FS(root));
 }
 
-} partial class httpᴛfileHandler {
-
-internal static void ServeHTTP(this ref fileHandler f, ResponseWriter w, ж<Request> Ꮡr) {
+internal static void ServeHTTP⁔(/*this*/ ref fileHandler f, ResponseWriter w, ж<Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     @string upath = r.URL.Path;
@@ -1145,27 +1114,21 @@ internal static void ServeHTTP(this ref fileHandler f, ResponseWriter w, ж<Requ
     serveFile(w, Ꮡr, f.root, path.Clean(upath), true);
 }
 
-} partial class http_package {
-
 // httpRange specifies the byte range to be sent to the client.
 partial struct httpRange {
     internal int64 start, length;
 }
 
-} partial class httpᴛhttpRange {
-
-internal static @string contentRange(this httpRange r, int64 size) {
+internal static @string contentRange⁔(/*this*/ httpRange r, int64 size) {
     return fmt.Sprintf("bytes %d-%d/%d"u8, r.start, r.start + r.length - 1, size);
 }
 
-internal static textproto.MIMEHeader mimeHeader(this httpRange r, @string contentType, int64 size) {
+internal static textproto.MIMEHeader mimeHeader⁔(/*this*/ httpRange r, @string contentType, int64 size) {
     return new textproto.MIMEHeader(new map<@string, slice<@string>>{
         ["Content-Range"] = slice<@string>([r.contentRange(size)]),
         ["Content-Type"] = [contentType]
     });
 }
-
-} partial class http_package {
 
 // GODEBUG=httpservecontentmaxranges=<limit> controls the maximum number of ranges that will
 // be processed in a Range header. Setting httpservecontentmaxranges=0 disables the limit.
@@ -1282,14 +1245,10 @@ internal static (slice<httpRange>, error) parseRange(@string s, int64 size) {
 // countingWriter counts how many bytes have been written to it.
 partial struct countingWriter /*num:int64*/;
 
-} partial class httpᴛcountingWriter {
-
-internal static (nint n, error err) Write(this ref countingWriter w, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref countingWriter w, slice<byte> p) {
     w += ((countingWriter)(int64)len(p));
     return (len(p), default);
 }
-
-} partial class http_package {
 
 // rangesMIMESize returns the number of bytes it takes to encode the
 // provided ranges as a multipart response.

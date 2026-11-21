@@ -3,19 +3,15 @@
 // license that can be found in the LICENSE file.
 namespace go.net;
 
-using static textproto_package;
-
 partial class textproto_package {
 
 // A MIMEHeader represents a MIME-style header mapping
 // keys to sets of values.
 partial struct MIMEHeader /*map[@string, slice<@string>]*/;
 
-} partial class textprotoᴛMIMEHeader {
-
 // Add adds the key, value pair to the header.
 // It appends to any existing values associated with key.
-public static void Add(this MIMEHeader h, @string key, @string value) {
+internal static void Add⁔(/*this*/ MIMEHeader h, @string key, @string value) {
     key = CanonicalMIMEHeaderKey(key);
     h[key] = append(h[key], value);
 }
@@ -23,7 +19,7 @@ public static void Add(this MIMEHeader h, @string key, @string value) {
 // Set sets the header entries associated with key to
 // the single element value. It replaces any existing
 // values associated with key.
-public static void Set(this MIMEHeader h, @string key, @string value) {
+internal static void Set⁔(/*this*/ MIMEHeader h, @string key, @string value) {
     h[CanonicalMIMEHeaderKey(key)] = [value];
 }
 
@@ -32,7 +28,7 @@ public static void Set(this MIMEHeader h, @string key, @string value) {
 // to canonicalize the provided key.
 // If there are no values associated with the key, Get returns "".
 // To use non-canonical keys, access the map directly.
-public static @string Get(this MIMEHeader h, @string key) {
+internal static @string Get⁔(/*this*/ MIMEHeader h, @string key) {
     if (h == nil) {
         return ""u8;
     }
@@ -48,7 +44,7 @@ public static @string Get(this MIMEHeader h, @string key) {
 // used to canonicalize the provided key. To use non-canonical
 // keys, access the map directly.
 // The returned slice is not a copy.
-public static slice<@string> Values(this MIMEHeader h, @string key) {
+internal static slice<@string> Values⁔(/*this*/ MIMEHeader h, @string key) {
     if (h == nil) {
         return default;
     }
@@ -56,8 +52,8 @@ public static slice<@string> Values(this MIMEHeader h, @string key) {
 }
 
 // Del deletes the values associated with key.
-public static void Del(this MIMEHeader h, @string key) {
+internal static void Del⁔(/*this*/ MIMEHeader h, @string key) {
     delete(h, CanonicalMIMEHeaderKey(key));
 }
 
-}
+} // end textproto_package

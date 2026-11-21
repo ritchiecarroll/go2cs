@@ -9,7 +9,6 @@ using sync = sync_package;
 using unicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using go.unicode;
-using static syntax_package;
 
 partial class syntax_package {
 
@@ -20,13 +19,9 @@ partial struct Error {
     public @string Expr;
 }
 
-} partial class syntaxᴛError {
-
-public static @string Error(this ref Error e) {
+internal static @string Error⁔(/*this*/ ref Error e) {
     return "error parsing regexp: "u8 + e.Code.String() + ": `"u8 + e.Expr + "`"u8;
 }
-
-} partial class syntax_package {
 
 // An ErrorCode describes a failure to parse a regular expression.
 partial struct ErrorCode /*@string*/;
@@ -67,13 +62,9 @@ private static readonly ErrorCode ErrNestingDepthᵇ = "expression nests too dee
 public static ref readonly ErrorCode ErrLarge => ref ErrLargeᵇ;
 private static readonly ErrorCode ErrLargeᵇ = "expression too large"u8;
 
-} partial class syntaxᴛErrorCode {
-
-public static @string String(this ErrorCode e) {
+internal static @string String⁔(/*this*/ ErrorCode e) {
     return (@string)e;
 }
-
-} partial class syntax_package {
 
 // Flags control the behavior of the parser and record information about regexp context.
 partial struct Flags /*num:uint16*/;
@@ -153,9 +144,7 @@ partial struct parser {
     internal map<ж<Regexp>, int64> size;  // regexp compiled size, for size limit check
 }
 
-} partial class syntaxᴛparser {
-
-internal static ж<Regexp> newRegexp(this ref parser p, Op op) {
+internal static ж<Regexp> newRegexp⁔(/*this*/ ref parser p, Op op) {
     var re = p.free;
     if (re != nil) {
         p.free = re.Sub0[0];
@@ -168,7 +157,7 @@ internal static ж<Regexp> newRegexp(this ref parser p, Op op) {
     return re;
 }
 
-internal static void reuse(this ref parser p, ж<Regexp> Ꮡre) {
+internal static void reuse⁔(/*this*/ ref parser p, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (p.height != nil) {
@@ -178,7 +167,7 @@ internal static void reuse(this ref parser p, ж<Regexp> Ꮡre) {
     p.free = Ꮡre;
 }
 
-internal static void checkLimits(this ref parser p, ж<Regexp> re) {
+internal static void checkLimits⁔(/*this*/ ref parser p, ж<Regexp> re) {
     if (p.numRunes > maxRunes) {
         throw panic(ErrLarge);
     }
@@ -186,7 +175,7 @@ internal static void checkLimits(this ref parser p, ж<Regexp> re) {
     p.checkHeight(re);
 }
 
-internal static void checkSize(this ref parser p, ж<Regexp> Ꮡre) {
+internal static void checkSize⁔(/*this*/ ref parser p, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (p.size == nil) {
@@ -230,7 +219,7 @@ internal static void checkSize(this ref parser p, ж<Regexp> Ꮡre) {
     }
 }
 
-internal static int64 calcSize(this ref parser p, ж<Regexp> Ꮡre, bool force) {
+internal static int64 calcSize⁔(/*this*/ ref parser p, ж<Regexp> Ꮡre, bool force) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (!force) {
@@ -289,7 +278,7 @@ internal static int64 calcSize(this ref parser p, ж<Regexp> Ꮡre, bool force) 
     return size;
 }
 
-internal static void checkHeight(this ref parser p, ж<Regexp> re) {
+internal static void checkHeight⁔(/*this*/ ref parser p, ж<Regexp> re) {
     if (p.numRegexp < maxHeight) {
         return;
     }
@@ -304,7 +293,7 @@ internal static void checkHeight(this ref parser p, ж<Regexp> re) {
     }
 }
 
-internal static nint calcHeight(this ref parser p, ж<Regexp> Ꮡre, bool force) {
+internal static nint calcHeight⁔(/*this*/ ref parser p, ж<Regexp> Ꮡre, bool force) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (!force) {
@@ -326,7 +315,7 @@ internal static nint calcHeight(this ref parser p, ж<Regexp> Ꮡre, bool force)
 // Parse stack manipulation.
 
 // push pushes the regexp re onto the parse stack and returns the regexp.
-internal static ж<Regexp> push(this ref parser p, ж<Regexp> Ꮡre) {
+internal static ж<Regexp> push⁔(/*this*/ ref parser p, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     p.numRunes += len(re.Rune);
@@ -367,7 +356,7 @@ internal static ж<Regexp> push(this ref parser p, ж<Regexp> Ꮡre) {
 // If r >= 0 and there's a node left over, maybeConcat uses it
 // to push r with the given flags.
 // maybeConcat reports whether r was pushed.
-internal static bool maybeConcat(this ref parser p, rune r, Flags flags) {
+internal static bool maybeConcat⁔(/*this*/ ref parser p, rune r, Flags flags) {
     nint n = len(p.stack);
     if (n < 2) {
         return false;
@@ -396,7 +385,7 @@ internal static bool maybeConcat(this ref parser p, rune r, Flags flags) {
 }
 
 // literal pushes a literal regexp for the rune r on the stack.
-internal static void literal(this ref parser p, rune r) {
+internal static void literal⁔(/*this*/ ref parser p, rune r) {
     var re = p.newRegexp(OpLiteral);
     re.Flags = p.flags;
     if ((Flags)(p.flags & FoldCase) != 0) {
@@ -406,8 +395,6 @@ internal static void literal(this ref parser p, rune r) {
     re.Rune = re.Rune0[..1];
     p.push(re);
 }
-
-} partial class syntax_package {
 
 // minFoldRune returns the minimum rune fold-equivalent to r.
 internal static rune minFoldRune(rune r) {
@@ -422,11 +409,9 @@ internal static rune minFoldRune(rune r) {
     return m;
 }
 
-} partial class syntaxᴛparser {
-
 // op pushes a regexp with the given op onto the stack
 // and returns that regexp.
-internal static ж<Regexp> op(this ref parser p, Op op) {
+internal static ж<Regexp> op⁔(/*this*/ ref parser p, Op op) {
     var re = p.newRegexp(op);
     re.Flags = p.flags;
     return p.push(re);
@@ -436,7 +421,7 @@ internal static ж<Regexp> op(this ref parser p, Op op) {
 // before is the regexp suffix starting at the repetition operator.
 // after is the regexp suffix following after the repetition operator.
 // repeat returns an updated 'after' and an error, if any.
-internal static (@string, error) repeat(this ref parser p, Op op, nint min, nint max, @string before, @string after, @string lastRepeat) {
+internal static (@string, error) repeat⁔(/*this*/ ref parser p, Op op, nint min, nint max, @string before, @string after, @string lastRepeat) {
     var flags = p.flags;
     if ((Flags)(p.flags & PerlX) != 0) {
         if (len(after) > 0 && after[0] == '?') {
@@ -475,8 +460,6 @@ internal static (@string, error) repeat(this ref parser p, Op op, nint min, nint
     return (after, default);
 }
 
-} partial class syntax_package {
-
 // repeatIsValid reports whether the repetition re is valid.
 // Valid means that the combination of the top-level repetition
 // and any inner repetitions does not exceed n copies of the
@@ -510,10 +493,8 @@ internal static bool repeatIsValid(ref Regexp re, nint n) {
     return true;
 }
 
-} partial class syntaxᴛparser {
-
 // concat replaces the top of the stack (above the topmost '|' or '(') with its concatenation.
-internal static ж<Regexp> concat(this ref parser p) {
+internal static ж<Regexp> concat⁔(/*this*/ ref parser p) {
     p.maybeConcat(-1, 0);
 
     // Scan down to find pseudo-operator | or (.
@@ -533,7 +514,7 @@ internal static ж<Regexp> concat(this ref parser p) {
 }
 
 // alternate replaces the top of the stack (above the topmost '(') with its alternation.
-internal static ж<Regexp> alternate(this ref parser p) {
+internal static ж<Regexp> alternate⁔(/*this*/ ref parser p) {
     // Scan down to find pseudo-operator (.
     // There are no | above (.
     nint i = len(p.stack);
@@ -557,8 +538,6 @@ internal static ж<Regexp> alternate(this ref parser p) {
 
     return p.push(p.collapse(subs, OpAlternate));
 }
-
-} partial class syntax_package {
 
 // cleanAlt cleans re for eventual inclusion in an alternation.
 internal static void cleanAlt(ж<Regexp> Ꮡre) {
@@ -586,13 +565,11 @@ internal static void cleanAlt(ж<Regexp> Ꮡre) {
     }}
 }
 
-} partial class syntaxᴛparser {
-
 // collapse returns the result of applying op to sub.
 // If sub contains op nodes, they all get hoisted up
 // so that there is never a concat of a concat or an
 // alternate of an alternate.
-internal static ж<Regexp> collapse(this ref parser p, slice<ж<Regexp>> subs, Op op) {
+internal static ж<Regexp> collapse⁔(/*this*/ ref parser p, slice<ж<Regexp>> subs, Op op) {
     if (len(subs) == 1) {
         return subs[0];
     }
@@ -632,7 +609,7 @@ internal static ж<Regexp> collapse(this ref parser p, slice<ж<Regexp>> subs, O
 // which simplifies by character class introduction to
 //
 //	A(B[CD]|EF)|BC[XY]
-internal static slice<ж<Regexp>> factor(this ref parser p, slice<ж<Regexp>> sub) {
+internal static slice<ж<Regexp>> factor⁔(/*this*/ ref parser p, slice<ж<Regexp>> sub) {
     if (len(sub) < 2) {
         return sub;
     }
@@ -821,7 +798,7 @@ internal static slice<ж<Regexp>> factor(this ref parser p, slice<ж<Regexp>> su
 
 // leadingString returns the leading literal string that re begins with.
 // The string refers to storage in re or its children.
-internal static (slice<rune>, Flags) leadingString(this ref parser p, ж<Regexp> Ꮡre) {
+internal static (slice<rune>, Flags) leadingString⁔(/*this*/ ref parser p, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (re.Op == OpConcat && len(re.Sub) > 0) {
@@ -835,7 +812,7 @@ internal static (slice<rune>, Flags) leadingString(this ref parser p, ж<Regexp>
 
 // removeLeadingString removes the first n leading runes
 // from the beginning of re. It returns the replacement for re.
-internal static ж<Regexp> removeLeadingString(this ref parser p, ж<Regexp> Ꮡre, nint n) {
+internal static ж<Regexp> removeLeadingString⁔(/*this*/ ref parser p, ж<Regexp> Ꮡre, nint n) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (re.Op == OpConcat && len(re.Sub) > 0) {
@@ -879,7 +856,7 @@ internal static ж<Regexp> removeLeadingString(this ref parser p, ж<Regexp> Ꮡ
 
 // leadingRegexp returns the leading regexp that re begins with.
 // The regexp refers to storage in re or its children.
-internal static ж<Regexp> leadingRegexp(this ref parser p, ж<Regexp> Ꮡre) {
+internal static ж<Regexp> leadingRegexp⁔(/*this*/ ref parser p, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (re.Op == OpEmptyMatch) {
@@ -898,7 +875,7 @@ internal static ж<Regexp> leadingRegexp(this ref parser p, ж<Regexp> Ꮡre) {
 // removeLeadingRegexp removes the leading regexp in re.
 // It returns the replacement for re.
 // If reuse is true, it passes the removed regexp (if no longer needed) to p.reuse.
-internal static ж<Regexp> removeLeadingRegexp(this ref parser p, ж<Regexp> Ꮡre, bool reuse) {
+internal static ж<Regexp> removeLeadingRegexp⁔(/*this*/ ref parser p, ж<Regexp> Ꮡre, bool reuse) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (re.Op == OpConcat && len(re.Sub) > 0) {
@@ -925,8 +902,6 @@ internal static ж<Regexp> removeLeadingRegexp(this ref parser p, ж<Regexp> Ꮡ
     }
     return p.newRegexp(OpEmptyMatch);
 }
-
-} partial class syntax_package {
 
 internal static ж<Regexp> literalRegexp(@string s, Flags flags) {
     var re = Ꮡ(new Regexp(Op: OpLiteral));
@@ -1212,12 +1187,10 @@ BigSwitch:
     ᒐdone: return (_ᴛ1, err);
 }
 
-} partial class syntaxᴛparser {
-
 // parseRepeat parses {min} (max=min) or {min,} (max=-1) or {min,max}.
 // If s is not of that form, it returns ok == false.
 // If s has the right form but the values are too big, it returns min == -1, ok == true.
-internal static (nint min, nint max, @string rest, bool ok) parseRepeat(this ref parser p, @string s) {
+internal static (nint min, nint max, @string rest, bool ok) parseRepeat⁔(/*this*/ ref parser p, @string s) {
     nint min = default;
     nint max = default;
     @string rest = default;
@@ -1263,7 +1236,7 @@ internal static (nint min, nint max, @string rest, bool ok) parseRepeat(this ref
 // parsePerlFlags parses a Perl flag setting or non-capturing group or both,
 // like (?i) or (?: or (?i:.  It removes the prefix from s and updates the parse state.
 // The caller must have ensured that s begins with "(?".
-internal static (@string rest, error err) parsePerlFlags(this ref parser p, @string s) {
+internal static (@string rest, error err) parsePerlFlags⁔(/*this*/ ref parser p, @string s) {
     error err = default;
 
     @string t = s;
@@ -1390,8 +1363,6 @@ break_Loop:;
     return ("", new Errorжerror(Ꮡ(new Error(ErrInvalidPerlOp, s.slice(0, len(s) - len(t))))));
 }
 
-} partial class syntax_package {
-
 // isValidCaptureName reports whether name
 // is a valid capture name: [A-Za-z0-9_]+.
 // PCRE limits names to 32 bytes.
@@ -1409,10 +1380,8 @@ internal static bool isValidCaptureName(@string name) {
     return true;
 }
 
-} partial class syntaxᴛparser {
-
 // parseInt parses a decimal integer.
-internal static (nint n, @string rest, bool ok) parseInt(this ref parser p, @string s) {
+internal static (nint n, @string rest, bool ok) parseInt⁔(/*this*/ ref parser p, @string s) {
     nint n = default;
     @string rest = default;
     bool ok = default;
@@ -1443,8 +1412,6 @@ internal static (nint n, @string rest, bool ok) parseInt(this ref parser p, @str
     return (n, rest, ok);
 }
 
-} partial class syntax_package {
-
 // can this be represented as a character class?
 // single-rune literal string, char class, ., and .|\n.
 internal static bool isCharClass(ref Regexp re) {
@@ -1474,10 +1441,8 @@ internal static bool matchRune(ref Regexp re, rune r) {
     return false;
 }
 
-} partial class syntaxᴛparser {
-
 // parseVerticalBar handles a | in the input.
-internal static void parseVerticalBar(this ref parser p) {
+internal static void parseVerticalBar⁔(/*this*/ ref parser p) {
     p.concat();
 
     // The concatenation we just parsed is on top of the stack.
@@ -1488,8 +1453,6 @@ internal static void parseVerticalBar(this ref parser p) {
         p.op(opVerticalBar);
     }
 }
-
-} partial class syntax_package {
 
 // mergeCharClass makes dst = dst|src.
 // The caller must ensure that dst.Op >= src.Op,
@@ -1528,12 +1491,10 @@ internal static void mergeCharClass(ref Regexp dst, ref Regexp src) {
     }}
 }
 
-} partial class syntaxᴛparser {
-
 // If the top of the stack is an element followed by an opVerticalBar
 // swapVerticalBar swaps the two and returns true.
 // Otherwise it returns false.
-internal static bool swapVerticalBar(this ref parser p) {
+internal static bool swapVerticalBar⁔(/*this*/ ref parser p) {
     // If above and below vertical bar are literal or char class,
     // can merge into a single char class.
     nint n = len(p.stack);
@@ -1569,7 +1530,7 @@ internal static bool swapVerticalBar(this ref parser p) {
 }
 
 // parseRightParen handles a ) in the input.
-internal static error parseRightParen(this ref parser p) {
+internal static error parseRightParen⁔(/*this*/ ref parser p) {
     p.concat();
     if (p.swapVerticalBar()) {
         // pop vertical bar
@@ -1603,7 +1564,7 @@ internal static error parseRightParen(this ref parser p) {
 
 // parseEscape parses an escape sequence at the beginning of s
 // and returns the rune.
-internal static (rune r, @string rest, error err) parseEscape(this ref parser p, @string s) {
+internal static (rune r, @string rest, error err) parseEscape⁔(/*this*/ ref parser p, @string s) {
     rune r = default;
     error err = default;
 
@@ -1735,7 +1696,7 @@ Switch:
 
 // parseClassChar parses a character class character at the beginning of s
 // and returns it.
-internal static (rune r, @string rest, error err) parseClassChar(this ref parser p, @string s, @string wholeClass) {
+internal static (rune r, @string rest, error err) parseClassChar⁔(/*this*/ ref parser p, @string s, @string wholeClass) {
     if (s == ""u8) {
         return (0, "", new Errorжerror(Ꮡ(new Error(Code: ErrMissingBracket, Expr: wholeClass))));
     }
@@ -1749,21 +1710,17 @@ internal static (rune r, @string rest, error err) parseClassChar(this ref parser
     return nextRune(s);
 }
 
-} partial class syntax_package {
-
 partial struct charGroup {
     internal nint sign;
     internal slice<rune> @class;
 }
-
-} partial class syntaxᴛparser {
 
 //go:generate perl make_perl_groups.pl perl_groups.go
 
 // parsePerlClassEscape parses a leading Perl character class escape like \d
 // from the beginning of s. If one is present, it appends the characters to r
 // and returns the new slice r and the remainder of the string.
-internal static (slice<rune> @out, @string rest) parsePerlClassEscape(this ж<parser> Ꮡp, @string s, slice<rune> r) {
+internal static (slice<rune> @out, @string rest) parsePerlClassEscape⁔(/*this*/ ж<parser> Ꮡp, @string s, slice<rune> r) {
     slice<rune> @out = default;
     @string rest = default;
     ref var p = ref Ꮡp.DerefOrNull();
@@ -1781,7 +1738,7 @@ internal static (slice<rune> @out, @string rest) parsePerlClassEscape(this ж<pa
 // parseNamedClass parses a leading POSIX named character class like [:alnum:]
 // from the beginning of s. If one is present, it appends the characters to r
 // and returns the new slice r and the remainder of the string.
-internal static (slice<rune> @out, @string rest, error err) parseNamedClass(this ж<parser> Ꮡp, @string s, slice<rune> r) {
+internal static (slice<rune> @out, @string rest, error err) parseNamedClass⁔(/*this*/ ж<parser> Ꮡp, @string s, slice<rune> r) {
     slice<rune> @out = default;
     @string rest = default;
     error err = default;
@@ -1805,7 +1762,7 @@ internal static (slice<rune> @out, @string rest, error err) parseNamedClass(this
     return (Ꮡp.appendGroup(r, g), s, default);
 }
 
-internal static slice<rune> appendGroup(this ж<parser> Ꮡp, slice<rune> r, charGroup g) {
+internal static slice<rune> appendGroup⁔(/*this*/ ж<parser> Ꮡp, slice<rune> r, charGroup g) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if ((Flags)(p.flags & FoldCase) == 0) {
@@ -1827,8 +1784,6 @@ internal static slice<rune> appendGroup(this ж<parser> Ꮡp, slice<rune> r, cha
     }
     return r;
 }
-
-} partial class syntax_package {
 
 [GoLazy] partial class lazyᴛanyTable { internal static ж<unicode.RangeTable> anyTable = Ꮡ(new unicode.RangeTable(
     R16: [new(Lo: 0, Hi: (uint16)((1 << 16) - 1), Stride: 1)],
@@ -1956,12 +1911,10 @@ internal static (ж<unicode.RangeTable> tab, ж<unicode.RangeTable> fold, nint s
     return (default, default, 0);
 }
 
-} partial class syntaxᴛparser {
-
 // parseUnicodeClass parses a leading Unicode character class like \p{Han}
 // from the beginning of s. If one is present, it appends the characters to r
 // and returns the new slice r and the remainder of the string.
-internal static (slice<rune> @out, @string rest, error err) parseUnicodeClass(this ж<parser> Ꮡp, @string s, slice<rune> r) {
+internal static (slice<rune> @out, @string rest, error err) parseUnicodeClass⁔(/*this*/ ж<parser> Ꮡp, @string s, slice<rune> r) {
     slice<rune> @out = default;
     @string rest = default;
     error err = default;
@@ -2043,7 +1996,7 @@ internal static (slice<rune> @out, @string rest, error err) parseUnicodeClass(th
 
 // parseClass parses a character class at the beginning of s
 // and pushes it onto the parse stack.
-internal static (@string rest, error err) parseClass(this ж<parser> Ꮡp, @string s) {
+internal static (@string rest, error err) parseClass⁔(/*this*/ ж<parser> Ꮡp, @string s) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     @string t = s[1..]; // chop [
@@ -2141,8 +2094,6 @@ internal static (@string rest, error err) parseClass(this ж<parser> Ꮡp, @stri
     p.push(re);
     return (t, default);
 }
-
-} partial class syntax_package {
 
 // cleanClass sorts the ranges (pairs of elements of r),
 // merges them, and eliminates duplicates.
@@ -2398,27 +2349,23 @@ partial struct ranges {
     internal ж<slice<rune>> p;
 }
 
-} partial class syntaxᴛranges {
-
-internal static bool Less(this ranges ra, nint i, nint j) {
+internal static bool Less⁔(/*this*/ ranges ra, nint i, nint j) {
     var p = ra.p.ValueSlot;
     i *= 2;
     j *= 2;
     return p[i] < p[j] || p[i] == p[j] && p[i + 1] > p[j + 1];
 }
 
-internal static nint Len(this ranges ra) {
+internal static nint Len⁔(/*this*/ ranges ra) {
     return len(ra.p.ValueSlot) / 2;
 }
 
-internal static void Swap(this ranges ra, nint i, nint j) {
+internal static void Swap⁔(/*this*/ ranges ra, nint i, nint j) {
     var p = ra.p.ValueSlot;
     i *= 2;
     j *= 2;
     (p[i], p[i + 1], p[j], p[j + 1]) = (p[j], p[j + 1], p[i], p[i + 1]);
 }
-
-} partial class syntax_package {
 
 internal static error checkUTF8(@string s) {
     while (s != ""u8) {

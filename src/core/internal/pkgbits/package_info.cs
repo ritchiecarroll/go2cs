@@ -10,10 +10,16 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using big = go.math.big_package;
+using constant = go.go.constant_package;
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.@internal.pkgbits_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -74,13 +80,13 @@ using static go.@internal.pkgbits_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/pkgbits/codes.go", "codes.cs", "ABksggARIoIAFy6C")]
-[assembly: GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADp+oJaAurLulIKClIKmgoKCppSClIKUlIKUyJKCgpSokqiSgoKqooKClIKUqqKUgoKUlKiSqqKCgq7CgoKmooKs0tyCgoKCgqamotyCgoKCgpSUgoKmABAegoK4ooKCzNKCgoKCgoKUlIKClJSClKa0gqaCgpSmgoKCruKCpoKCgoKmggASJpSCgpSCpoKCgoLcqLKCgoKCqJKCqJKCqJCAgICmkICAgKaQgICAAAIS8oKqwoKqwoKqooKClKqigoKCgpSmgqS2pKSkpIKCpLiCgoKUpoKCggAEFAAIAoKCgoKUgpSqwoKCgoKCgoKCgoKmgpSUyIA=")]
-[assembly: GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "AChMgAADEvIACBLSgpSSppSCgoKUqqKCgtyCgoKCyoKCgsqCgpSqooKCpoKCgqyygoKu4oKUABYuspaSyoKUgoKCgoKCpoKClKaCgriCgoKCppSCgqamgoKCgqamgoKCpoKCrsKCgoLKgoKCAAMiAA0CgoKClIKCqJKCqJKCqJCApoCWgAABEOKCqJKCAAIS4qqigqqigoK8ooKCgpS4grS0grSCtIK0grSCgrSCyKKCgqaCgqiA", "61-63:1")]
+[assembly: GoPositionMap("internal/pkgbits/codes.go", "codes.cs", "ABUsggANIoIAEy6C")]
+[assembly: GoPositionMap("internal/pkgbits/decoder.go", "decoder.cs", "ADd+oJaAmrLulIKClIKmgoKCppSClIKUlIKUqJKCgpSokqiSgoKqooKClIKUqqKUgoKUlKiSqqKCgq7CgoKmooKs0tyCgoKCgqamotyCgoKCgpSUgoKmAAwegoK4ooKCrNKCgoKCgoKUlIKClJSClKaUgqaCgpSmgoKCruKCpoKCgoKmggASJpSCgpSCpoKCgoLcqLKCgoKCqJKCqJKCqJCAgICmkICAgKaQgICAAAIS8oKqwoKqwoKqooKClKqigoKCgpSmgqS2pKSkpIKCpLiCgoKUpoKCggACFAAIAoKCgoKUgpSqwoKCgoKCgoKCgoKmgpSUqIA=")]
+[assembly: GoPositionMap("internal/pkgbits/encoder.go", "encoder.cs", "ACVMgAABEvIABhLSgpSSppSCgoKUqqKCgtyCgoKCyoKCgsqCgpSqooKCpoKCgqyygoKu4oKUABIuspaSyoKUgoKCgoKCpoKClKaCgriCgoKCppSCgqamgoKCgqamgoKCpoKCrsKCgoLKgoKCAAMiAA0CgoKClIKCqJKCqJKCqJCApoCWgAABEOKCqJKCAAIS4qqigqqigoK8ooKCgpS4grS0grSCtIK0grSCgrSCyKKCgqaCgqiA", "61-63:1")]
 [assembly: GoPositionMap("internal/pkgbits/support.go", "support.cs", "AAoSgoK4og==")]
 [assembly: GoPositionMap("internal/pkgbits/sync.go", "sync.cs", "ABAcsoKUlJQABBCygqaCgoKCgg==", "16-21:1")]
-[assembly: GoPositionMap("internal/pkgbits/syncmarker_string.go", "syncmarker_string.cs", "AAkOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgtq0goKClA==")]
-[assembly: GoPositionMap("internal/pkgbits/version.go", "version.cs", "AEKIAQAHEP6S")]
+[assembly: GoPositionMap("internal/pkgbits/syncmarker_string.go", "syncmarker_string.cs", "AAgOhqKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgtqUgoKClA==")]
+[assembly: GoPositionMap("internal/pkgbits/version.go", "version.cs", "AECIAQAHEN6S")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal;
@@ -141,13 +147,108 @@ public static partial class pkgbits_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(pkgbits_package.CodeObj)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛCodeObj;
-[GoMethodHost(typeof(pkgbits_package.CodeType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛCodeType;
-[GoMethodHost(typeof(pkgbits_package.CodeVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛCodeVal;
-[GoMethodHost(typeof(pkgbits_package.Decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛDecoder;
-[GoMethodHost(typeof(pkgbits_package.Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛEncoder;
-[GoMethodHost(typeof(pkgbits_package.PkgDecoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛPkgDecoder;
-[GoMethodHost(typeof(pkgbits_package.PkgEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛPkgEncoder;
-[GoMethodHost(typeof(pkgbits_package.SyncMarker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛSyncMarker;
-[GoMethodHost(typeof(pkgbits_package.Version)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pkgbitsᴛVersion;
+[GoMethodHost(typeof(pkgbits_package.CodeObj)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pkgbitsᴛCodeObj;
+[GoMethodHost(typeof(pkgbits_package.CodeType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pkgbitsᴛCodeType;
+[GoMethodHost(typeof(pkgbits_package.CodeVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pkgbitsᴛCodeVal;
+[GoMethodHost(typeof(pkgbits_package.Decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pkgbitsᴛDecoder;
+[GoMethodHost(typeof(pkgbits_package.Encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pkgbitsᴛEncoder;
+[GoMethodHost(typeof(pkgbits_package.PkgDecoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pkgbitsᴛPkgDecoder;
+[GoMethodHost(typeof(pkgbits_package.PkgEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pkgbitsᴛPkgEncoder;
+[GoMethodHost(typeof(pkgbits_package.SyncMarker)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pkgbitsᴛSyncMarker;
+[GoMethodHost(typeof(pkgbits_package.Version)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pkgbitsᴛVersion;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class pkgbitsᴛCodeObj {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static pkgbits_package.SyncMarker Marker(this pkgbits_package.CodeObj c) => pkgbits_package.Marker⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Value(this pkgbits_package.CodeObj c) => pkgbits_package.Value⁔(c);
+}
+partial class pkgbitsᴛCodeType {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static pkgbits_package.SyncMarker Marker(this pkgbits_package.CodeType c) => pkgbits_package.Marker⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Value(this pkgbits_package.CodeType c) => pkgbits_package.Value⁔(c);
+}
+partial class pkgbitsᴛCodeVal {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static pkgbits_package.SyncMarker Marker(this pkgbits_package.CodeVal c) => pkgbits_package.Marker⁔(c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Value(this pkgbits_package.CodeVal c) => pkgbits_package.Value⁔(c);
+}
+partial class pkgbitsᴛDecoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void checkErr(this ref pkgbits_package.Decoder r, error err) => pkgbits_package.checkErr⁔(ref r, err);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 rawUvarint(this ж<pkgbits_package.Decoder> Ꮡr) => pkgbits_package.rawUvarint⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 rawVarint(this ж<pkgbits_package.Decoder> Ꮡr) => pkgbits_package.rawVarint⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static RelElemIdx rawReloc(this ref pkgbits_package.Decoder r, pkgbits_package.SectionKind k, nint idx) => pkgbits_package.rawReloc⁔(ref r, k, idx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Sync(this ж<pkgbits_package.Decoder> Ꮡr, pkgbits_package.SyncMarker mWant) => pkgbits_package.Sync⁔(Ꮡr, mWant);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Bool(this ж<pkgbits_package.Decoder> Ꮡr) => pkgbits_package.Bool⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Int64(this ж<pkgbits_package.Decoder> Ꮡr) => pkgbits_package.Int64⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 Uint64(this ж<pkgbits_package.Decoder> Ꮡr) => pkgbits_package.Uint64⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this ж<pkgbits_package.Decoder> Ꮡr) => pkgbits_package.Len⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Int(this ж<pkgbits_package.Decoder> Ꮡr) => pkgbits_package.Int⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nuint Uint(this ж<pkgbits_package.Decoder> Ꮡr) => pkgbits_package.Uint⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Code(this ж<pkgbits_package.Decoder> Ꮡr, pkgbits_package.SyncMarker mark) => pkgbits_package.Code⁔(Ꮡr, mark);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static RelElemIdx Reloc(this ж<pkgbits_package.Decoder> Ꮡr, pkgbits_package.SectionKind k) => pkgbits_package.Reloc⁔(Ꮡr, k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ж<pkgbits_package.Decoder> Ꮡr) => pkgbits_package.String⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> Strings(this ж<pkgbits_package.Decoder> Ꮡr) => pkgbits_package.Strings⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static constant.Value Value(this ж<pkgbits_package.Decoder> Ꮡr) => pkgbits_package.Value⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static constant.Value scalar(this ж<pkgbits_package.Decoder> Ꮡr) => pkgbits_package.scalar⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<big.Int> bigInt(this ж<pkgbits_package.Decoder> Ꮡr) => pkgbits_package.bigInt⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<big.Float> bigFloat(this ж<pkgbits_package.Decoder> Ꮡr) => pkgbits_package.bigFloat⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static pkgbits_package.Version Version(this ref pkgbits_package.Decoder w) => pkgbits_package.Version⁔(ref w);
+}
+partial class pkgbitsᴛEncoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static RelElemIdx Flush(this ж<pkgbits_package.Encoder> Ꮡw) => pkgbits_package.Flush⁔(Ꮡw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void checkErr(this ref pkgbits_package.Encoder w, error err) => pkgbits_package.checkErr⁔(ref w, err);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void rawUvarint(this ref pkgbits_package.Encoder w, uint64 x) => pkgbits_package.rawUvarint⁔(ref w, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void rawVarint(this ref pkgbits_package.Encoder w, int64 x) => pkgbits_package.rawVarint⁔(ref w, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint rawReloc(this ref pkgbits_package.Encoder w, pkgbits_package.SectionKind k, RelElemIdx idx) => pkgbits_package.rawReloc⁔(ref w, k, idx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Sync(this ref pkgbits_package.Encoder w, pkgbits_package.SyncMarker m) => pkgbits_package.Sync⁔(ref w, m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Bool(this ref pkgbits_package.Encoder w, bool b) => pkgbits_package.Bool⁔(ref w, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Int64(this ref pkgbits_package.Encoder w, int64 x) => pkgbits_package.Int64⁔(ref w, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Uint64(this ref pkgbits_package.Encoder w, uint64 x) => pkgbits_package.Uint64⁔(ref w, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Len(this ref pkgbits_package.Encoder w, nint x) => pkgbits_package.Len⁔(ref w, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Int(this ref pkgbits_package.Encoder w, nint x) => pkgbits_package.Int⁔(ref w, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Uint(this ref pkgbits_package.Encoder w, nuint x) => pkgbits_package.Uint⁔(ref w, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reloc(this ref pkgbits_package.Encoder w, pkgbits_package.SectionKind k, RelElemIdx idx) => pkgbits_package.Reloc⁔(ref w, k, idx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Code(this ref pkgbits_package.Encoder w, pkgbits_package.Code c) => pkgbits_package.Code⁔(ref w, c);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void String(this ref pkgbits_package.Encoder w, @string s) => pkgbits_package.String⁔(ref w, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StringRef(this ref pkgbits_package.Encoder w, RelElemIdx idx) => pkgbits_package.StringRef⁔(ref w, idx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Strings(this ref pkgbits_package.Encoder w, slice<@string> ss) => pkgbits_package.Strings⁔(ref w, ss);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Value(this ref pkgbits_package.Encoder w, constant.Value val) => pkgbits_package.Value⁔(ref w, val);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void scalar(this ref pkgbits_package.Encoder w, constant.Value val) => pkgbits_package.scalar⁔(ref w, val);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void bigInt(this ref pkgbits_package.Encoder w, ж<big.Int> Ꮡv) => pkgbits_package.bigInt⁔(ref w, Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void bigFloat(this ref pkgbits_package.Encoder w, ж<big.Float> Ꮡv) => pkgbits_package.bigFloat⁔(ref w, Ꮡv);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static pkgbits_package.Version Version(this ref pkgbits_package.Encoder w) => pkgbits_package.Version⁔(ref w);
+}
+partial class pkgbitsᴛPkgDecoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string PkgPath(this ref pkgbits_package.PkgDecoder pr) => pkgbits_package.PkgPath⁔(ref pr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool SyncMarkers(this ref pkgbits_package.PkgDecoder pr) => pkgbits_package.SyncMarkers⁔(ref pr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NumElems(this ref pkgbits_package.PkgDecoder pr, pkgbits_package.SectionKind k) => pkgbits_package.NumElems⁔(ref pr, k);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint TotalElems(this ref pkgbits_package.PkgDecoder pr) => pkgbits_package.TotalElems⁔(ref pr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static array<byte> Fingerprint(this ref pkgbits_package.PkgDecoder pr) => pkgbits_package.Fingerprint⁔(ref pr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint AbsIdx(this ref pkgbits_package.PkgDecoder pr, pkgbits_package.SectionKind k, RelElemIdx idx) => pkgbits_package.AbsIdx⁔(ref pr, k, idx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string DataIdx(this ref pkgbits_package.PkgDecoder pr, pkgbits_package.SectionKind k, RelElemIdx idx) => pkgbits_package.DataIdx⁔(ref pr, k, idx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string StringIdx(this ref pkgbits_package.PkgDecoder pr, RelElemIdx idx) => pkgbits_package.StringIdx⁔(ref pr, idx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static pkgbits_package.Decoder NewDecoder(this ж<pkgbits_package.PkgDecoder> Ꮡpr, pkgbits_package.SectionKind k, RelElemIdx idx, pkgbits_package.SyncMarker marker) => pkgbits_package.NewDecoder⁔(Ꮡpr, k, idx, marker);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static pkgbits_package.Decoder TempDecoder(this ж<pkgbits_package.PkgDecoder> Ꮡpr, pkgbits_package.SectionKind k, RelElemIdx idx, pkgbits_package.SyncMarker marker) => pkgbits_package.TempDecoder⁔(Ꮡpr, k, idx, marker);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void RetireDecoder(this ref pkgbits_package.PkgDecoder pr, ж<pkgbits_package.Decoder> Ꮡd) => pkgbits_package.RetireDecoder⁔(ref pr, Ꮡd);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static pkgbits_package.Decoder NewDecoderRaw(this ж<pkgbits_package.PkgDecoder> Ꮡpr, pkgbits_package.SectionKind k, RelElemIdx idx) => pkgbits_package.NewDecoderRaw⁔(Ꮡpr, k, idx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static pkgbits_package.Decoder TempDecoderRaw(this ж<pkgbits_package.PkgDecoder> Ꮡpr, pkgbits_package.SectionKind k, RelElemIdx idx) => pkgbits_package.TempDecoderRaw⁔(Ꮡpr, k, idx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string PeekPkgPath(this ж<pkgbits_package.PkgDecoder> Ꮡpr, RelElemIdx idx) => pkgbits_package.PeekPkgPath⁔(Ꮡpr, idx);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, @string, pkgbits_package.CodeObj) PeekObj(this ж<pkgbits_package.PkgDecoder> Ꮡpr, RelElemIdx idx) => pkgbits_package.PeekObj⁔(Ꮡpr, idx);
+}
+partial class pkgbitsᴛPkgEncoder {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool SyncMarkers(this ref pkgbits_package.PkgEncoder pw) => pkgbits_package.SyncMarkers⁔(ref pw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static array<byte> /*fingerprint*/ DumpTo(this ж<pkgbits_package.PkgEncoder> Ꮡpw, io.Writer out0) => pkgbits_package.DumpTo⁔(Ꮡpw, out0);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static RelElemIdx StringIdx(this ref pkgbits_package.PkgEncoder pw, @string s) => pkgbits_package.StringIdx⁔(ref pw, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<pkgbits_package.Encoder> NewEncoder(this ж<pkgbits_package.PkgEncoder> Ꮡpw, pkgbits_package.SectionKind k, pkgbits_package.SyncMarker marker) => pkgbits_package.NewEncoder⁔(Ꮡpw, k, marker);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<pkgbits_package.Encoder> NewEncoderRaw(this ж<pkgbits_package.PkgEncoder> Ꮡpw, pkgbits_package.SectionKind k) => pkgbits_package.NewEncoderRaw⁔(Ꮡpw, k);
+}
+partial class pkgbitsᴛSyncMarker {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this pkgbits_package.SyncMarker i) => pkgbits_package.String⁔(i);
+}
+partial class pkgbitsᴛVersion {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Has(this pkgbits_package.Version v, pkgbits_package.Field f) => pkgbits_package.Has⁔(v, f);
+}
+// </MethodForwarders>

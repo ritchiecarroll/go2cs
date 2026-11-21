@@ -15,7 +15,6 @@ using reflect = reflect_package;
 using strings = strings_package;
 using time = time_package;
 using go.math;
-using static quick_package;
 
 partial class quick_package {
 
@@ -251,10 +250,8 @@ partial struct Config {
 internal static readonly ж<Config> ᏑdefaultConfig = new StaticBox<Config>(default(Config));
 internal static ref Config defaultConfig => ref ((StaticBox<Config>)ᏑdefaultConfig).ValueSlot;
 
-} partial class quickᴛConfig {
-
 // getRand returns the *rand.Rand to use for a given Config.
-internal static ж<rand.Rand> getRand(this ref Config c) {
+internal static ж<rand.Rand> getRand⁔(/*this*/ ref Config c) {
     if (c.Rand == nil) {
         return rand.New(rand.NewSource(time.Now().UnixNano()));
     }
@@ -263,7 +260,7 @@ internal static ж<rand.Rand> getRand(this ref Config c) {
 
 // getMaxCount returns the maximum number of iterations to run for a given
 // Config.
-internal static nint /*maxCount*/ getMaxCount(this ref Config c) {
+internal static nint /*maxCount*/ getMaxCount⁔(/*this*/ ref Config c) {
     nint maxCount = default;
 
     maxCount = c.MaxCount;
@@ -278,17 +275,11 @@ internal static nint /*maxCount*/ getMaxCount(this ref Config c) {
     return maxCount;
 }
 
-} partial class quick_package {
-
 // A SetupError is the result of an error in the way that check is being
 // used, independent of the functions being tested.
 partial struct SetupError /*@string*/;
 
-} partial class quickᴛSetupError {
-
-public static @string Error(this SetupError s) { return (@string)s; }
-
-} partial class quick_package {
+internal static @string Error⁔(/*this*/ SetupError s) { return (@string)s; }
 
 // A CheckError is the result of Check finding an error.
 partial struct CheckError {
@@ -296,13 +287,9 @@ partial struct CheckError {
     public slice<any> In;
 }
 
-} partial class quickᴛCheckError {
-
-public static @string Error(this ref CheckError s) {
+internal static @string Error⁔(/*this*/ ref CheckError s) {
     return fmt.Sprintf("#%d: failed on input %s"u8, s.Count, toString(s.In));
 }
-
-} partial class quick_package {
 
 // A CheckEqualError is the result [CheckEqual] finding an error.
 partial struct CheckEqualError {
@@ -311,13 +298,9 @@ partial struct CheckEqualError {
     public slice<any> Out2;
 }
 
-} partial class quickᴛCheckEqualError {
-
-public static @string Error(this ref CheckEqualError s) {
+internal static @string Error⁔(/*this*/ ref CheckEqualError s) {
     return fmt.Sprintf("#%d: failed on input %s. Output 1: %s. Output 2: %s"u8, s.Count, toString(s.In), toString(s.Out1), toString(s.Out2));
 }
-
-} partial class quick_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string argumentIsNotAFunctionˢ => ref argumentIsNotAFunctionˢᵇ;

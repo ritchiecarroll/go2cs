@@ -7,14 +7,11 @@ namespace go.@internal;
 using io = io_package;
 using Δruntime = runtime_package;
 using Δsyscall = syscall_package;
-using static poll_package;
 
 partial class poll_package {
 
-} partial class pollᴛFD {
-
 // Writev wraps the writev system call.
-public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> Ꮡv) {
+internal static (int64, error) Writev⁔(/*this*/ ж<FD> Ꮡfd, ж<slice<slice<byte>>> Ꮡv) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -99,4 +96,4 @@ public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> �
     finally { if (ᒐd1) Ꮡfd.writeUnlock(); ᒐ.Run(); }
 }
 
-}
+} // end poll_package

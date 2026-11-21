@@ -13,7 +13,6 @@ using Δunicode = unicode_package;
 using utf8 = go.unicode.utf8_package;
 using encoding;
 using go.unicode;
-using static mime_package;
 
 partial class mime_package {
 
@@ -27,19 +26,15 @@ public static WordEncoder QEncoding => /* WordEncoder('q') */ 113;
 
 internal static error errInvalidWord = errors.New("mime: invalid RFC 2047 encoded-word");
 
-} partial class mimeᴛWordEncoder {
-
 // Encode returns the encoded-word form of s. If s is ASCII without special
 // characters, it is returned unchanged. The provided charset is the IANA
 // charset name of s. It is case insensitive.
-public static @string Encode(this WordEncoder e, @string charset, @string s) {
+internal static @string Encode⁔(/*this*/ WordEncoder e, @string charset, @string s) {
     if (!needsEncoding(s)) {
         return s;
     }
     return e.encodeWord(charset, s);
 }
-
-} partial class mime_package {
 
 internal static bool needsEncoding(@string s) {
     foreach (var (_, b) in s) {
@@ -50,10 +45,8 @@ internal static bool needsEncoding(@string s) {
     return false;
 }
 
-} partial class mimeᴛWordEncoder {
-
 // encodeWord encodes a string into an encoded-word.
-internal static @string encodeWord(this WordEncoder e, @string charset, @string s) {
+internal static @string encodeWord⁔(/*this*/ WordEncoder e, @string charset, @string s) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     // Could use a hint like len(s)*3, but that's not enough for cases
     // with word splits and too much for simpler inputs.
@@ -71,8 +64,6 @@ internal static @string encodeWord(this WordEncoder e, @string charset, @string 
     return buf.String();
 }
 
-} partial class mime_package {
-
 // The maximum length of an encoded-word is 75 characters.
 // See RFC 2047, section 2.
 internal static UntypedInt maxEncodedWordLen => 75;
@@ -82,10 +73,8 @@ internal const nint maxContentLen = /* maxEncodedWordLen - len("=?UTF-8?q?") - l
 
 internal static nint maxBase64Len = base64.StdEncoding.DecodedLen(maxContentLen);
 
-} partial class mimeᴛWordEncoder {
-
 // bEncode encodes s using base64 encoding and writes it to buf.
-internal static void bEncode(this WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) {
+internal static void bEncode⁔(/*this*/ WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) {
     var w = base64.NewEncoder(base64.StdEncoding, new strings_BuilderжWriter(buf));
     // If the charset is not UTF-8 or if the content is short, do not bother
     // splitting the encoded-word.
@@ -119,7 +108,7 @@ internal static void bEncode(this WordEncoder e, ж<strings.Builder> buf, @strin
 
 // qEncode encodes s using Q encoding and writes it to buf. It splits the
 // encoded-words when necessary.
-internal static void qEncode(this WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) {
+internal static void qEncode⁔(/*this*/ WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) {
     // We only split encoded-words when the charset is UTF-8.
     if (!isUTF8(charset)) {
         writeQString(buf, s);
@@ -149,8 +138,6 @@ internal static void qEncode(this WordEncoder e, ж<strings.Builder> buf, @strin
     }
 }
 
-} partial class mime_package {
-
 // writeQString encodes s using Q encoding and writes it to buf.
 internal static void writeQString(ж<strings.Builder> buf, @string s) {
     for (nint i = 0; i < len(s); i++) {
@@ -173,10 +160,8 @@ internal static void writeQString(ж<strings.Builder> buf, @string s) {
     }
 }
 
-} partial class mimeᴛWordEncoder {
-
 // openWord writes the beginning of an encoded-word into buf.
-internal static void openWord(this WordEncoder e, ж<strings.Builder> buf, @string charset) {
+internal static void openWord⁔(/*this*/ WordEncoder e, ж<strings.Builder> buf, @string charset) {
     buf.WriteString("=?");
     buf.WriteString(charset);
     buf.WriteByte((byte)'?');
@@ -184,23 +169,17 @@ internal static void openWord(this WordEncoder e, ж<strings.Builder> buf, @stri
     buf.WriteByte((byte)'?');
 }
 
-} partial class mime_package {
-
 // closeWord writes the end of an encoded-word into buf.
 internal static void closeWord(ж<strings.Builder> buf) {
     buf.WriteString("?=");
 }
 
-} partial class mimeᴛWordEncoder {
-
 // splitWord closes the current encoded-word and opens a new one.
-internal static void splitWord(this WordEncoder e, ж<strings.Builder> buf, @string charset) {
+internal static void splitWord⁔(/*this*/ WordEncoder e, ж<strings.Builder> buf, @string charset) {
     closeWord(buf);
     buf.WriteByte((byte)' ');
     e.openWord(buf, charset);
 }
-
-} partial class mime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string utf8ˢ => ref utf8ˢᵇ;
@@ -224,10 +203,8 @@ partial struct WordDecoder {
     public Func<@string, Δio.Reader, (Δio.Reader, error)> CharsetReader;
 }
 
-} partial class mimeᴛWordDecoder {
-
 // Decode decodes an RFC 2047 encoded-word.
-public static (@string, error) Decode(this ref WordDecoder d, @string word) {
+internal static (@string, error) Decode⁔(/*this*/ ref WordDecoder d, @string word) {
     // See https://tools.ietf.org/html/rfc2047#section-2 for details.
     // Our decoder is permissive, we accept empty encoded-text.
     if (len(word) < 8 || !strings.HasPrefix(word, "=?") || !strings.HasSuffix(word, "?=") || strings.Count(word, "?") != 4) {
@@ -259,7 +236,7 @@ public static (@string, error) Decode(this ref WordDecoder d, @string word) {
 
 // DecodeHeader decodes all encoded-words of the given string. It returns an
 // error if and only if [WordDecoder.CharsetReader] of d returns an error.
-public static (@string, error) DecodeHeader(this ref WordDecoder d, @string header) {
+internal static (@string, error) DecodeHeader⁔(/*this*/ ref WordDecoder d, @string header) {
     // If there is no encoded-word, returns before creating a buffer.
     nint i = strings.Index(header, "=?");
     if (i == -1) {
@@ -333,8 +310,6 @@ public static (@string, error) DecodeHeader(this ref WordDecoder d, @string head
     return (buf.String(), default);
 }
 
-} partial class mime_package {
-
 internal static (slice<byte>, error) decode(byte encoding, @string text) {
     switch (encoding) {
     case (byte)'B' or (byte)'b': {
@@ -348,8 +323,6 @@ internal static (slice<byte>, error) decode(byte encoding, @string text) {
     }}
 }
 
-} partial class mimeᴛWordDecoder {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string utf8ˢ2 => ref utf8ˢ2ᵇ;
 private static readonly @string utf8ˢ2ᵇ = "utf-8"u8;
@@ -358,7 +331,7 @@ private static readonly @string iso88591ˢᵇ = "iso-8859-1"u8;
 internal static ref readonly @string usAsciiˢ => ref usAsciiˢᵇ;
 private static readonly @string usAsciiˢᵇ = "us-ascii"u8;
 
-internal static error convert(this ref WordDecoder d, ж<strings.Builder> buf, @string charset, slice<byte> content) {
+internal static error convert⁔(/*this*/ ref WordDecoder d, ж<strings.Builder> buf, @string charset, slice<byte> content) {
     switch (ᐧ) {
     case {} when strings.EqualFold(utf8ˢ2, charset): {
         buf.Write(content);
@@ -395,8 +368,6 @@ internal static error convert(this ref WordDecoder d, ж<strings.Builder> buf, @
     }}
     return default;
 }
-
-} partial class mime_package {
 
 // hasNonWhitespace reports whether s (assumed to be ASCII) contains at least
 // one byte of non-whitespace.

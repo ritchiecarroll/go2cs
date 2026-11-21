@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using coverage = go.@internal.coverage_package;
+using io = go.io_package;
 // </ImportedTypeAliases>
 
 using go;
 using static go.@internal.coverage.cformat_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -60,7 +65,7 @@ using static go.@internal.coverage.cformat_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("internal/coverage/cformat/format.go", "format.cs", "AFWoAYIABxTCgpSCgoKCgoKUrLKClIKCgoKClIKCgoKCuJTOwoKCgoCCyICCpICCpICCpICCpAAFFAAJAoKUgoKCpoCCpIKCgoKUgoKUgoKCgqa4rNKCgoK4goKUlIKCpqaCkoKCgpSClIKCgoKmgoCCpICCyIKCuAAGFAAMAoKUgoKUlIKSgqaCgoKUgoLugoKCgoKSkoKCgpTWgpSmgoKCgoKUgoKUlIK4goKCpoCCtoCUpA==", "143-164:1;221-233:1;281-286:1;313-318:2;319-334:3", "", "368=Invoke/1/1/1;404=Invoke/1/1/1", "328:21")]
+[assembly: GoPositionMap("internal/coverage/cformat/format.go", "format.cs", "AFSoAYIABRTCgpSCgoKCgoKUrLKClIKCgoKClIKCgoKCuJSuwoKCgoCCyICCpICCpICCpICCpAADFAAJAoKUgoKCpoCCpIKCgoKUgoKUgoKCgqa4rNKCgoK4goKUlIKCpqaCkoKCgpSClIKCgoKmgoCCpICCyIKCuAAGFAAMAoKUgoKUlIKSgqaCgoKUgoLugoKCgoKSkoKCgpTWgpSmgoKCgoKUgoKUlIK4goKCpoCCtoCUpA==", "143-164:1;221-233:1;281-286:1;313-318:2;319-334:3", "", "361=Invoke/1/1/1;397=Invoke/1/1/1", "321:21")]
 // </GoSourcePositionMaps>
 
 namespace go.@internal.coverage;
@@ -107,6 +112,23 @@ public static partial class cformat_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(cformat_package.Formatter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cformatᴛFormatter;
-[GoMethodHost(typeof(cformat_package.pstate)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cformatᴛpstate;
+[GoMethodHost(typeof(cformat_package.Formatter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cformatᴛFormatter;
+[GoMethodHost(typeof(cformat_package.pstate)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cformatᴛpstate;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class cformatᴛFormatter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetPackage(this ref cformat_package.Formatter fm, @string importpath) => cformat_package.SetPackage⁔(ref fm, importpath);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AddUnit(this ref cformat_package.Formatter fm, @string @file, @string fname, bool isfnlit, coverage.CoverableUnit unit, uint32 count) => cformat_package.AddUnit⁔(ref fm, @file, fname, isfnlit, unit, count);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error EmitTextual(this ref cformat_package.Formatter fm, slice<@string> pkgs, io.Writer w) => cformat_package.EmitTextual⁔(ref fm, pkgs, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error EmitPercent(this ref cformat_package.Formatter fm, io.Writer w, slice<@string> pkgs, @string inpkgs, bool noteEmpty, bool aggregate) => cformat_package.EmitPercent⁔(ref fm, w, pkgs, inpkgs, noteEmpty, aggregate);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error EmitFuncs(this ж<cformat_package.Formatter> Ꮡfm, io.Writer w) => cformat_package.EmitFuncs⁔(Ꮡfm, w);
+}
+partial class cformatᴛpstate {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void sortUnits(this ж<cformat_package.pstate> Ꮡp, slice<cformat_package.extcu> units) => cformat_package.sortUnits⁔(Ꮡp, units);
+}
+// </MethodForwarders>

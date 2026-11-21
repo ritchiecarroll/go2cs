@@ -13,7 +13,6 @@ using strconv = strconv_package;
 using sync = sync_package;
 using time = time_package;
 using go.log.slog.@internal;
-using static slog_package;
 
 partial class slog_package {
 
@@ -102,16 +101,14 @@ internal static ж<defaultHandler> newDefaultHandler(Func<uintptr, slice<byte>, 
     ));
 }
 
-} partial class slogᴛdefaultHandler {
-
-internal static bool Enabled(this ref defaultHandler _Δp0, context.Context _Δp1, Level l) {
+internal static bool Enabled⁔(/*this*/ ref defaultHandler _Δp0, context.Context _Δp1, Level l) {
     return l >= ᏑlogLoggerLevel.Level();
 }
 
 // Collect the level, attributes and message in a string and
 // write it with the default log.Logger.
 // Let the log.Logger handle time and file/line.
-internal static error Handle(this ж<defaultHandler> Ꮡh, context.Context ctx, Record r) {
+internal static error Handle⁔(/*this*/ ж<defaultHandler> Ꮡh, context.Context ctx, Record r) {
     GoFrame ᒐ = default;
     try {
         r = r.ΔClone();
@@ -130,15 +127,13 @@ internal static error Handle(this ж<defaultHandler> Ꮡh, context.Context ctx, 
     finally { ᒐ.Run(); }
 }
 
-internal static Handler WithAttrs(this ref defaultHandler h, slice<Attr> @as) {
+internal static Handler WithAttrs⁔(/*this*/ ref defaultHandler h, slice<Attr> @as) {
     return new defaultHandlerжHandler(Ꮡ(new defaultHandler(h.ch.withAttrs(@as), h.output)));
 }
 
-internal static Handler WithGroup(this ref defaultHandler h, @string name) {
+internal static Handler WithGroup⁔(/*this*/ ref defaultHandler h, @string name) {
     return new defaultHandlerжHandler(Ꮡ(new defaultHandler(h.ch.withGroup(name), h.output)));
 }
-
-} partial class slog_package {
 
 // HandlerOptions are options for a [TextHandler] or [JSONHandler].
 // A zero HandlerOptions consists entirely of default values.
@@ -213,9 +208,7 @@ partial struct commonHandler {
     internal io.Writer w;
 }
 
-} partial class slogᴛcommonHandler {
-
-internal static ж<commonHandler> clone(this ref commonHandler h) {
+internal static ж<commonHandler> clone⁔(/*this*/ ref commonHandler h) {
     // We can't use assignment because we can't copy the mutex.
     return Ꮡ(new commonHandler(
         json: h.json,
@@ -231,7 +224,7 @@ internal static ж<commonHandler> clone(this ref commonHandler h) {
 
 // enabled reports whether l is greater than or equal to the
 // minimum level.
-internal static bool enabled(this ref commonHandler h, Level l) {
+internal static bool enabled⁔(/*this*/ ref commonHandler h, Level l) {
     Level minLevel = LevelInfo;
     if (h.opts.Level != nil) {
         minLevel = h.opts.Level.Level();
@@ -239,7 +232,7 @@ internal static bool enabled(this ref commonHandler h, Level l) {
     return l >= minLevel;
 }
 
-internal static ж<commonHandler> withAttrs(this ж<commonHandler> Ꮡh, slice<Attr> @as) {
+internal static ж<commonHandler> withAttrs⁔(/*this*/ ж<commonHandler> Ꮡh, slice<Attr> @as) {
     GoFrame ᒐ = default;
     try {
         ref var h = ref Ꮡh.DerefOrNull();
@@ -278,7 +271,7 @@ internal static ж<commonHandler> withAttrs(this ж<commonHandler> Ꮡh, slice<A
     finally { ᒐ.Run(); }
 }
 
-internal static ж<commonHandler> withGroup(this ref commonHandler h, @string name) {
+internal static ж<commonHandler> withGroup⁔(/*this*/ ref commonHandler h, @string name) {
     var h2 = h.clone();
     h2.groups = append(h2.groups, name);
     return h2;
@@ -286,7 +279,7 @@ internal static ж<commonHandler> withGroup(this ref commonHandler h, @string na
 
 // handle is the internal implementation of Handler.Handle
 // used by TextHandler and JSONHandler.
-internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
+internal static error handle⁔(/*this*/ ж<commonHandler> Ꮡh, Record r) {
     GoFrame ᒐ = default;
     try {
         r = r.ΔClone();
@@ -350,9 +343,7 @@ internal static error handle(this ж<commonHandler> Ꮡh, Record r) {
     finally { ᒐ.Run(); }
 }
 
-} partial class slogᴛhandleState {
-
-internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
+internal static void appendNonBuiltIns⁔(/*this*/ ж<handleState> Ꮡs, Record r) {
     r = r.ΔClone();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -400,17 +391,13 @@ internal static void appendNonBuiltIns(this ж<handleState> Ꮡs, Record r) {
     }
 }
 
-} partial class slogᴛcommonHandler {
-
 // attrSep returns the separator between attributes.
-internal static @string attrSep(this ref commonHandler h) {
+internal static @string attrSep⁔(/*this*/ ref commonHandler h) {
     if (h.json) {
         return ",";
     }
     return " ";
 }
-
-} partial class slog_package {
 
 // handleState holds state for a single call to commonHandler.handle.
 // The initial value of sep determines whether to emit a separator
@@ -431,9 +418,7 @@ partial struct handleState {
 )); }
 internal static ref sync.Pool groupPool => ref ((StaticBox<sync.Pool>)ᏑgroupPool).ValueSlot;
 
-} partial class slogᴛcommonHandler {
-
-internal static handleState newHandleState(this ж<commonHandler> Ꮡh, ж<buffer.Buffer> buf, bool freeBuf, @string sep) {
+internal static handleState newHandleState⁔(/*this*/ ж<commonHandler> Ꮡh, ж<buffer.Buffer> buf, bool freeBuf, @string sep) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var s = new handleState(
@@ -450,9 +435,7 @@ internal static handleState newHandleState(this ж<commonHandler> Ꮡh, ж<buffe
     return s;
 }
 
-} partial class slogᴛhandleState {
-
-internal static void free(this ref handleState s) {
+internal static void free⁔(/*this*/ ref handleState s) {
     if (s.freeBuf) {
         s.buf.Free();
     }
@@ -463,22 +446,18 @@ internal static void free(this ref handleState s) {
     s.prefix.Free();
 }
 
-internal static void openGroups(this ref handleState s) {
+internal static void openGroups⁔(/*this*/ ref handleState s) {
     foreach (var (_, n) in range(s.h.groups.slice(s.h.nOpenGroups))) {
         s.openGroup(n);
     }
 }
 
-} partial class slog_package {
-
 // Separator for group names and keys.
 internal static UntypedInt keyComponentSep => /* '.' */ 46;
 
-} partial class slogᴛhandleState {
-
 // openGroup starts a new group of attributes
 // with the given name.
-internal static void openGroup(this ref handleState s, @string name) {
+internal static void openGroup⁔(/*this*/ ref handleState s, @string name) {
     if (s.h.json) {
         s.appendKey(name);
         s.buf.WriteByte((byte)'{');
@@ -494,7 +473,7 @@ internal static void openGroup(this ref handleState s, @string name) {
 }
 
 // closeGroup ends the group with the given name.
-internal static void closeGroup(this ref handleState s, @string name) {
+internal static void closeGroup⁔(/*this*/ ref handleState s, @string name) {
     if (s.h.json) {
         s.buf.WriteByte((byte)'}');
     } else {
@@ -509,7 +488,7 @@ internal static void closeGroup(this ref handleState s, @string name) {
 
 // appendAttrs appends the slice of Attrs.
 // It reports whether something was appended.
-internal static bool appendAttrs(this ж<handleState> Ꮡs, slice<Attr> @as) {
+internal static bool appendAttrs⁔(/*this*/ ж<handleState> Ꮡs, slice<Attr> @as) {
     var nonEmpty = false;
     foreach (var (_, a) in range(@as)) {
         if (Ꮡs.appendAttr(a)) {
@@ -522,7 +501,7 @@ internal static bool appendAttrs(this ж<handleState> Ꮡs, slice<Attr> @as) {
 // appendAttr appends the Attr's key and value.
 // It handles replacement and checking for an empty key.
 // It reports whether something was appended.
-internal static bool appendAttr(this ж<handleState> Ꮡs, Attr a) {
+internal static bool appendAttr⁔(/*this*/ ж<handleState> Ꮡs, Attr a) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     a.Value = a.Value.Resolve();
@@ -581,11 +560,11 @@ internal static bool appendAttr(this ж<handleState> Ꮡs, Attr a) {
     return true;
 }
 
-internal static void appendError(this ref handleState s, error err) {
+internal static void appendError⁔(/*this*/ ref handleState s, error err) {
     s.appendString(fmt.Sprintf("!ERROR:%v"u8, err));
 }
 
-internal static void appendKey(this ref handleState s, @string key) {
+internal static void appendKey⁔(/*this*/ ref handleState s, @string key) {
     s.buf.WriteString(s.sep);
     if (s.prefix != nil && len(s.prefix.ValueSlot) > 0) {
         s.appendTwoStrings((@string)(slice<byte>)s.prefix.ValueSlot, key);
@@ -601,7 +580,7 @@ internal static void appendKey(this ref handleState s, @string key) {
 }
 
 // appendTwoStrings implements appendString(prefix + key), but faster.
-internal static void appendTwoStrings(this ref handleState s, @string x, @string y) {
+internal static void appendTwoStrings⁔(/*this*/ ref handleState s, @string x, @string y) {
     var buf = s.buf.ValueSlot;
     switch (ᐧ) {
     case {} when s.h.json: {
@@ -623,7 +602,7 @@ internal static void appendTwoStrings(this ref handleState s, @string x, @string
     s.buf.ValueSlot = buf;
 }
 
-internal static void appendString(this ref handleState s, @string str) {
+internal static void appendString⁔(/*this*/ ref handleState s, @string str) {
     if (s.h.json) {
         s.buf.WriteByte((byte)'"');
         s.buf.ValueSlot = appendEscapedJSONString(s.buf.ValueSlot, str);
@@ -642,7 +621,7 @@ internal static void appendString(this ref handleState s, @string str) {
 internal static ref readonly @string nilˢ => ref nilˢᵇ;
 private static readonly @string nilˢᵇ = "<nil>"u8;
 
-internal static void appendValue(this ж<handleState> Ꮡs, Value v) {
+internal static void appendValue⁔(/*this*/ ж<handleState> Ꮡs, Value v) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -679,7 +658,7 @@ internal static void appendValue(this ж<handleState> Ꮡs, Value v) {
     finally { ᒐ.Run(); }
 }
 
-internal static void appendTime(this ж<handleState> Ꮡs, time.Time t) {
+internal static void appendTime⁔(/*this*/ ж<handleState> Ꮡs, time.Time t) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.h.json) {
@@ -688,8 +667,6 @@ internal static void appendTime(this ж<handleState> Ꮡs, time.Time t) {
         s.buf.ValueSlot = appendRFC3339Millis(s.buf.ValueSlot, t);
     }
 }
-
-} partial class slog_package {
 
 internal static slice<byte> appendRFC3339Millis(slice<byte> b, time.Time t) {
     // Format according to time.RFC3339Nano since it is highly optimized,
@@ -711,11 +688,9 @@ public static Handler DiscardHandler = new discardHandler();
 partial struct discardHandler {
 }
 
-} partial class slogᴛdiscardHandler {
+internal static bool Enabled⁔(/*this*/ discardHandler dh, context.Context _Δp1, Level _Δp2) { return false; }
+internal static error Handle⁔(/*this*/ discardHandler dh, context.Context _Δp1, Record _Δp2) { return default; }
+internal static Handler WithAttrs⁔(/*this*/ discardHandler dh, slice<Attr> attrs) { return dh; }
+internal static Handler WithGroup⁔(/*this*/ discardHandler dh, @string name) { return dh; }
 
-internal static bool Enabled(this discardHandler dh, context.Context _Δp1, Level _Δp2) { return false; }
-internal static error Handle(this discardHandler dh, context.Context _Δp1, Record _Δp2) { return default; }
-internal static Handler WithAttrs(this discardHandler dh, slice<Attr> attrs) { return dh; }
-internal static Handler WithGroup(this discardHandler dh, @string name) { return dh; }
-
-}
+} // end slog_package

@@ -10,10 +10,15 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸnint = Span<nint>;
 // </ImportedTypeAliases>
 
 using go;
 using static go.math.big.@internal.asmgen_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -68,17 +73,17 @@ using static go.math.big.@internal.asmgen_package;
 [assembly: GoPositionMap("math/big/internal/asmgen/386.go", "386.cs", "AAkSAC5eog==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/add.go", "add.cs", "AA0U0pSCgoKCpoKCgoKCpoKCgoCAkoCAyJSigoKUlKaClIKUgoI=", "31-31:1;32-32:2;38-44:3")]
 [assembly: GoPositionMap("math/big/internal/asmgen/amd64.go", "amd64.cs", "/gAvYIIACAai3IKClJSUlIKUgqaqtqailKSClKSClJSmlIKUpqKUgoKUlIKmgoKUlIKUgpQ=")]
-[assembly: GoPositionMap("math/big/internal/asmgen/arch.go", "arch.cs", "AIoBvAKiABkugJaAloCWgAAMEICWgJaA")]
+[assembly: GoPositionMap("math/big/internal/asmgen/arch.go", "arch.cs", "AIcBvAKiABUugJaAloCWgAAIEICWgJaA")]
 [assembly: GoPositionMap("math/big/internal/asmgen/arm.go", "arm.cs", "/gAqVoKmooK4ooK4ooK4ooI=")]
 [assembly: GoPositionMap("math/big/internal/asmgen/arm64.go", "arm64.cs", "/gAtXKKCgpSCgoKUgriigoKUgoKClIK4ooKClIKCgpSCuKKCgpSCgoKUgg==")]
-[assembly: GoPositionMap("math/big/internal/asmgen/asm.go", "asm.cs", "AB88woKCgpSCABou4oKCgqiygpSClIKUqqIAAhgACQKokqiSqJKClKiSqLKCgpSCqLKCgoKUgpSClKrCgoKUgpQAAhDygoKUgpQACxSirLKokqjCgoKUqLKowoKClKrCgoKUgqqiqqKs0oKUlIKUgpSCprqygrzCpoKCgoKUqsKqwqrCqsKCgoKUgoKUlIKUupKqwoKUqsKClIKClKrCgpSClKrCgpSqwoKUgoKUqsKClIKUqLKUtLQAFAqylPi0tLS0gpSUgpQADRqCgoKClJSCgpSUxpSCgpSCgoK2lIKUgpS02IKCgoKUgoKCtqaCgoKCmrKUtKSCgoKCuIKCgqaCgoKUggASDLKU+LS0tOqClJQADBiCgpSCgpSUxpSCgpSCgoK2lIKmgoKCtpTugoKCgoKClIKCyoKCgoKCgoKCggAKENKClLS0pOwACAiCgpSUlOrCgoKUgoLclAAICsKClJSClJS0ggAIDMKUtIKCgvqCrNKUtLS0tIK0gsqkqsKqwqiSqJI=")]
-[assembly: GoPositionMap("math/big/internal/asmgen/func.go", "func.cs", "ACA2soKClJKClMq4goKmgpKCgoKUlJS4goKClLSCtIKUlIKCgsiCgoKClMqiqJKCgpSCgpSCgqiSqJKCgpSCgoKCgoKClA==")]
+[assembly: GoPositionMap("math/big/internal/asmgen/asm.go", "asm.cs", "AB08woKCgpSCABgu4oKCgqiygpSClIKUqqIAAhgACQKokqiSqJKClKiSqLKCgpSCqLKCgoKUgpSClKrCgoKUgpQAAhDygoKUgpQABxSirLKokqjCgoKUqLKowoKClKrCgoKUgqqiqqKs0oKUlIKUgpSCprqygrzCpoKCgoKUqsKqwqrCqsKCgoKUgoKUlIKUupKqwoKUqsKClIKClKrCgpSClKrCgpSqwoKUgoKUqsKClIKUqLKUtLQAFAqylPi0tLS0gpSUgpQADRqCgoKClJSCgpSUxpSCgpSCgoK2lIKUgpS02IKCgoKUgoKCtqaCgoKCmrKUtKSCgoKCuIKCgqaCgoKUggASDLKU+LS0tOqClJQADBiCgpSCgpSUxpSCgpSCgoK2lIKmgoKCtpTugoKCgoKClIKCyoKCgoKCgoKCggAKENKClLS0pOwACAiCgpSUlOrCgoKUgoLclAAICsKClJSClJS0ggAIDMKUtIKCgvqCrNKUtLS0tIK0gsqkqsKqwqiSqJI=")]
+[assembly: GoPositionMap("math/big/internal/asmgen/func.go", "func.cs", "AB02soKClJKClMq4goKmgpKCgoKUlJS4goKClLSCtIKUlIKCgsiCgoKClKqiqJKCgpSCgpSCgqiSqJKCgpSCgoKCgoKClA==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/loong64.go", "loong64.cs", "/g==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/main.go", "main.cs", "ABIiABYcwoKCgoKCgoKC")]
 [assembly: GoPositionMap("math/big/internal/asmgen/mips.go", "mips.cs", "/gAmToI=")]
 [assembly: GoPositionMap("math/big/internal/asmgen/mips64.go", "mips64.cs", "/gAmToI=")]
 [assembly: GoPositionMap("math/big/internal/asmgen/mul.go", "mul.cs", "AAsQspSCgpQACArCpoKCuIKCgoKCgoKCuAAIjAIAhQECgoKClIKClIKClIKClLS02oLCgoKCgoKCgoKClIKUgoKCgoKClJSmggAIBqKCgoKmgoKCpoKCgoKCqqKCgpKCgoKUsoKClLKCgoKClIKCgoKUpoLmooKCgriCgsKCgoKCgoKUgoKUlII=", "204-230:1;262-267:1;268-272:2;273-287:3;303-317:1")]
-[assembly: GoPositionMap("math/big/internal/asmgen/pipe.go", "pipe.cs", "ADFesoLKgpTKooKUrsKClKqiqqIAAhLigpSCgpSClIKUAAoWAAgCgoK4goKUgrjcgoIAChSCgoKClIKUABAggoKUggAJFrKCgrKCpoKUgpTsgoKClIKClJSCgpSClIKC2oKokoKCgpSCsqaClOyCgoKUgoKUlMissoLsgpSUgpSClIIABhKygoKUgoKCgoIAAzAAFgKCgpSClIKCgpTugpSUlKaCuOrCgoKUgoKC3IKUlMiCooKUgpSCgoKCgpTIgoKUgpSCgoKUypKClIKClIIAAi4AFAKClIKCgoKmqqKqogAICJKCpoKClJSmgpSUgpSCgoKCgpSCgoKClIKUgpSmlLaCtrak")]
+[assembly: GoPositionMap("math/big/internal/asmgen/pipe.go", "pipe.cs", "AC5esoLKgpSqooKUrsKClKqiqqIAAhLigpSCgpSClIKUAAoWAAgCgoK4goKUgrjcgoIAChSCgoKClIKUABAggoKUggAJFrKCgrKCpoKUgpTsgoKClIKClJSCgpSClIKC2oKokoKCgpSCsqaClOyCgoKUgoKUlMissoLsgpSUgpSClIIABhKygoKUgoKCgoIAAzAAFgKCgpSClIKCgpTugpSUlKaCuOrCgoKUgoKC3IKUlMiCooKUgpSCgoKCgpTIgoKUgpSCgoKUypKClIKClIIAAi4AFAKClIKCgoKmqqKqogAICJKCpoKClJSmgpSUgpSCgoKCgpSCgoKClIKUgpSmlLaCtrak")]
 [assembly: GoPositionMap("math/big/internal/asmgen/ppc64.go", "ppc64.cs", "/g==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/riscv64.go", "riscv64.cs", "/g==")]
 [assembly: GoPositionMap("math/big/internal/asmgen/s390x.go", "s390x.cs", "/gAtXKKCyoKCgpSmgoKUAAgGgpSklKaCgpSClIKUgoKU")]
@@ -131,10 +136,109 @@ public static partial class asmgen_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(asmgen_package.Arch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asmgenᴛArch;
-[GoMethodHost(typeof(asmgen_package.Asm)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asmgenᴛAsm;
-[GoMethodHost(typeof(asmgen_package.Func)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asmgenᴛFunc;
-[GoMethodHost(typeof(asmgen_package.Pipe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asmgenᴛPipe;
-[GoMethodHost(typeof(asmgen_package.Reg)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asmgenᴛReg;
-[GoMethodHost(typeof(asmgen_package.RegPtr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asmgenᴛRegPtr;
+[GoMethodHost(typeof(asmgen_package.Arch)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asmgenᴛArch;
+[GoMethodHost(typeof(asmgen_package.Asm)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asmgenᴛAsm;
+[GoMethodHost(typeof(asmgen_package.Func)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asmgenᴛFunc;
+[GoMethodHost(typeof(asmgen_package.Pipe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asmgenᴛPipe;
+[GoMethodHost(typeof(asmgen_package.Reg)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asmgenᴛReg;
+[GoMethodHost(typeof(asmgen_package.RegPtr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asmgenᴛRegPtr;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class asmgenᴛArch {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HasShiftWide(this ref asmgen_package.Arch a) => asmgen_package.HasShiftWide⁔(ref a);
+}
+partial class asmgenᴛAsm {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Fatalf(this ж<asmgen_package.Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) => asmgen_package.Fatalf⁔(Ꮡa, format, argsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string hint(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Hint h) => asmgen_package.hint⁔(Ꮡa, h);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static asmgen_package.Reg ZR(this ref asmgen_package.Asm a) => asmgen_package.ZR⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static asmgen_package.Reg tmp(this ref asmgen_package.Asm a) => asmgen_package.tmp⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static asmgen_package.Reg Carry(this ref asmgen_package.Asm a) => asmgen_package.Carry⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static asmgen_package.Reg AltCarry(this ref asmgen_package.Asm a) => asmgen_package.AltCarry⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static asmgen_package.Reg Imm(this ref asmgen_package.Asm a, nint x) => asmgen_package.Imm⁔(ref a, x);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsZero(this ref asmgen_package.Asm a, asmgen_package.Reg r) => asmgen_package.IsZero⁔(ref a, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static asmgen_package.Reg Reg(this ж<asmgen_package.Asm> Ꮡa) => asmgen_package.Reg⁔(Ꮡa);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static asmgen_package.Reg RegHint(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Hint hint) => asmgen_package.RegHint⁔(Ꮡa, hint);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Free(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg r) => asmgen_package.Free⁔(Ꮡa, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Unfree(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg r) => asmgen_package.Unfree⁔(Ꮡa, r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static asmgen_package.RegsUsed RegsUsed(this ref asmgen_package.Asm a) => asmgen_package.RegsUsed⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetRegsUsed(this ref asmgen_package.Asm a, asmgen_package.RegsUsed used) => asmgen_package.SetRegsUsed⁔(ref a, used);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void FreeAll(this ref asmgen_package.Asm a) => asmgen_package.FreeAll⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Printf(this ж<asmgen_package.Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) => asmgen_package.Printf⁔(Ꮡa, format, argsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Comment(this ж<asmgen_package.Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) => asmgen_package.Comment⁔(Ꮡa, format, argsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void EOL(this ж<asmgen_package.Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) => asmgen_package.EOL⁔(Ꮡa, format, argsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool JmpEnable(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Option option, @string label) => asmgen_package.JmpEnable⁔(Ꮡa, option, label);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Enabled(this ref asmgen_package.Asm a, asmgen_package.Option option) => asmgen_package.Enabled⁔(ref a, option);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetOption(this ref asmgen_package.Asm a, asmgen_package.Option option, bool on) => asmgen_package.SetOption⁔(ref a, option, on);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void op3(this ж<asmgen_package.Asm> Ꮡa, @string op, asmgen_package.Reg src1, asmgen_package.Reg src2, asmgen_package.Reg dst) => asmgen_package.op3⁔(Ꮡa, op, src1, src2, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Mov(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg src, asmgen_package.Reg dst) => asmgen_package.Mov⁔(Ꮡa, src, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AddWords(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg src1, asmgen_package.RegPtr src2, asmgen_package.RegPtr dst) => asmgen_package.AddWords⁔(Ꮡa, src1, src2, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void And(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg src1, asmgen_package.Reg src2, asmgen_package.Reg dst) => asmgen_package.And⁔(Ꮡa, src1, src2, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Or(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg src1, asmgen_package.Reg src2, asmgen_package.Reg dst) => asmgen_package.Or⁔(Ꮡa, src1, src2, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Xor(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg src1, asmgen_package.Reg src2, asmgen_package.Reg dst) => asmgen_package.Xor⁔(Ꮡa, src1, src2, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Neg(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg src, asmgen_package.Reg dst) => asmgen_package.Neg⁔(Ꮡa, src, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HasRegShift(this ref asmgen_package.Asm a) => asmgen_package.HasRegShift⁔(ref a);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static asmgen_package.Reg LshReg(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg shift, asmgen_package.Reg src) => asmgen_package.LshReg⁔(Ꮡa, shift, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Lsh(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg shift, asmgen_package.Reg src, asmgen_package.Reg dst) => asmgen_package.Lsh⁔(Ꮡa, shift, src, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void LshWide(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg shift, asmgen_package.Reg adj, asmgen_package.Reg src, asmgen_package.Reg dst) => asmgen_package.LshWide⁔(Ꮡa, shift, adj, src, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static asmgen_package.Reg RshReg(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg shift, asmgen_package.Reg src) => asmgen_package.RshReg⁔(Ꮡa, shift, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Rsh(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg shift, asmgen_package.Reg src, asmgen_package.Reg dst) => asmgen_package.Rsh⁔(Ꮡa, shift, src, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void RshWide(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg shift, asmgen_package.Reg adj, asmgen_package.Reg src, asmgen_package.Reg dst) => asmgen_package.RshWide⁔(Ꮡa, shift, adj, src, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SLTU(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg src1, asmgen_package.Reg src2, asmgen_package.Reg dst) => asmgen_package.SLTU⁔(Ꮡa, src1, src2, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Add(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg src1, asmgen_package.Reg src2, asmgen_package.Reg dst, asmgen_package.Carry carry) => asmgen_package.Add⁔(Ꮡa, src1, src2, dst, carry);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Sub(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg src1, asmgen_package.Reg src2, asmgen_package.Reg dst, asmgen_package.Carry carry) => asmgen_package.Sub⁔(Ꮡa, src1, src2, dst, carry);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void ClearCarry(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Carry which) => asmgen_package.ClearCarry⁔(Ꮡa, which);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SaveCarry(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg dst) => asmgen_package.SaveCarry⁔(Ꮡa, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void RestoreCarry(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg src) => asmgen_package.RestoreCarry⁔(Ꮡa, src);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void ConvertCarry(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Carry which, asmgen_package.Reg dst) => asmgen_package.ConvertCarry⁔(Ꮡa, which, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SaveConvertCarry(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Carry which, asmgen_package.Reg dst) => asmgen_package.SaveConvertCarry⁔(Ꮡa, which, dst);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void MulWide(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg src1, asmgen_package.Reg src2, asmgen_package.Reg dstlo, asmgen_package.Reg dsthi) => asmgen_package.MulWide⁔(Ꮡa, src1, src2, dstlo, dsthi);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Jmp(this ж<asmgen_package.Asm> Ꮡa, @string label) => asmgen_package.Jmp⁔(Ꮡa, label);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void JmpZero(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg src, @string label) => asmgen_package.JmpZero⁔(Ꮡa, src, label);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void JmpNonZero(this ж<asmgen_package.Asm> Ꮡa, asmgen_package.Reg src, @string label) => asmgen_package.JmpNonZero⁔(Ꮡa, src, label);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Label(this ж<asmgen_package.Asm> Ꮡa, @string name) => asmgen_package.Label⁔(Ꮡa, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Ret(this ж<asmgen_package.Asm> Ꮡa) => asmgen_package.Ret⁔(Ꮡa);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<asmgen_package.Func> Func(this ж<asmgen_package.Asm> Ꮡa, @string decl) => asmgen_package.Func⁔(Ꮡa, decl);
+}
+partial class asmgenᴛFunc {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static asmgen_package.Reg Arg(this ref asmgen_package.Func f, @string name) => asmgen_package.Arg⁔(ref f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static asmgen_package.Reg ArgHint(this ref asmgen_package.Func f, @string name, asmgen_package.Hint hint) => asmgen_package.ArgHint⁔(ref f, name, hint);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static asmgen_package.RegPtr ArgPtr(this ref asmgen_package.Func f, @string name) => asmgen_package.ArgPtr⁔(ref f, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StoreArg(this ref asmgen_package.Func f, asmgen_package.Reg src, @string name) => asmgen_package.StoreArg⁔(ref f, src, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<asmgen_package.Pipe> Pipe(this ж<asmgen_package.Func> Ꮡf) => asmgen_package.Pipe⁔(Ꮡf);
+}
+partial class asmgenᴛPipe {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetBackward(this ref asmgen_package.Pipe p) => asmgen_package.SetBackward⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetUseIndexCounter(this ref asmgen_package.Pipe p) => asmgen_package.SetUseIndexCounter⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetLabel(this ref asmgen_package.Pipe p, @string label) => asmgen_package.SetLabel⁔(ref p, label);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetMaxColumns(this ref asmgen_package.Pipe p, nint m) => asmgen_package.SetMaxColumns⁔(ref p, m);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetHint(this ref asmgen_package.Pipe p, @string name, asmgen_package.Hint hint) => asmgen_package.SetHint⁔(ref p, name, hint);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void LoadPtrs(this ref asmgen_package.Pipe p, asmgen_package.Reg n) => asmgen_package.LoadPtrs⁔(ref p, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<slice<asmgen_package.Reg>> LoadN(this ref asmgen_package.Pipe p, nint n) => asmgen_package.LoadN⁔(ref p, n);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StoreN(this ref asmgen_package.Pipe p, slice<slice<asmgen_package.Reg>> regs) => asmgen_package.StoreN⁔(ref p, regs);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void advancePtrs(this ref asmgen_package.Pipe p, nint step) => asmgen_package.advancePtrs⁔(ref p, step);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void DropInput(this ref asmgen_package.Pipe p, @string name) => asmgen_package.DropInput⁔(ref p, name);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Start(this ref asmgen_package.Pipe p, asmgen_package.Reg n, params ꓸꓸꓸnint factorsʗp) => asmgen_package.Start⁔(ref p, n, factorsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Restart(this ref asmgen_package.Pipe p, asmgen_package.Reg n, params ꓸꓸꓸnint factorsʗp) => asmgen_package.Restart⁔(ref p, n, factorsʗp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Done(this ref asmgen_package.Pipe p) => asmgen_package.Done⁔(ref p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Loop(this ref asmgen_package.Pipe p, Action<slice<slice<asmgen_package.Reg>>, slice<slice<asmgen_package.Reg>>> block) => asmgen_package.Loop⁔(ref p, block);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AtUnrollStart(this ref asmgen_package.Pipe p, Action start) => asmgen_package.AtUnrollStart⁔(ref p, start);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AtUnrollEnd(this ref asmgen_package.Pipe p, Action end) => asmgen_package.AtUnrollEnd⁔(ref p, end);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void unroll(this ref asmgen_package.Pipe p, asmgen_package.Reg n, nint factor, Action<slice<slice<asmgen_package.Reg>>, slice<slice<asmgen_package.Reg>>> block) => asmgen_package.unroll⁔(ref p, n, factor, block);
+}
+partial class asmgenᴛReg {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsImm(this asmgen_package.Reg r) => asmgen_package.IsImm⁔(r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsMem(this asmgen_package.Reg r) => asmgen_package.IsMem⁔(r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this asmgen_package.Reg r) => asmgen_package.String⁔(r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Valid(this asmgen_package.Reg r) => asmgen_package.Valid⁔(r);
+}
+partial class asmgenᴛRegPtr {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this asmgen_package.RegPtr r) => asmgen_package.String⁔(r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Valid(this asmgen_package.RegPtr r) => asmgen_package.Valid⁔(r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static asmgen_package.Reg mem(this ж<asmgen_package.RegPtr> Ꮡr, nint off) => asmgen_package.mem⁔(Ꮡr, off);
+}
+// </MethodForwarders>

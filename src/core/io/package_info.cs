@@ -14,6 +14,9 @@
 
 using go;
 using static go.io_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -93,9 +96,9 @@ using static go.io_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("io/io.go", "io.cs", "ABs6pqYACBK4ygCLAooEsoKUAAIWAAsCgpSCgoKUgoKClAACFPIAAhIACQKCgpSUlAACHgAMAgACFPKClKr2gqaClIKCgoKUppSCgoKCgoKCpoKCgpSCgqaCgpSmrKAADBaygpSClIKCyqKCgoK4lAAOGrKClIKUgoLGgrSClKS0tKSClIKmsoKUgoKCgoKUlKiAnMIACxiixrKCgqaCgqaCpoKUpLSkgpSCAAQQ0gAJELKCgoKm6uy0gqaCxpSC6LKCgoKCgoKCgpQABhLCgpQACA4ACQyUgs4ACAbKgoSSgoKCgoKUgriCgoKUgqaUgoKC")]
-[assembly: GoPositionMap("io/multi.go", "multi.cs", "ABASggAKDrKUgoKCpoKmgpSClJSmpoKmsoKCgpSUgoKClJSCxpzigoIACA6ygoKClIKCpsa0soKCgpSClJSClIKCpgAEEgAIAoKCgpSm")]
-[assembly: GoPositionMap("io/pipe.go", "pipe.cs", "ABUq0oKCgpSiktKCggAICAAOHKKk2LSCgqTIgoKUgoCSpuKkpIK2grSCgrSm5oKClIKAkqiSgoKUqJKCgpQACxbSqqIAAhDSAAsW0qqiAAIS4gAEJAAPAuo=", "72-72:1;103-103:1")]
+[assembly: GoPositionMap("io/io.go", "io.cs", "ABo6pqYACBK4ygCLAooEsoKUAAIWAAsCgpSCgoKUgoKClAACFPIAAhIACQKCgpSUlAACHgAMAgACFPKClKr2gqaClIKCgoKUppSCgoKCgoKCpoKCgpSCgqaCgpSmrKAAChaygpSClIKCqqKCgoK4lAAMGrKClIKUgoKmgpSClKS0tKSClIKmsoKUgoKCgoKUlKiAnMIACRiiprKCgqaCgqaCpoKUpLSkgpSCAAIQ0gAHELKCgoKmyuyUgqaCppSCyLKCgoKCgoKCgpQABBLCgpTu3JSCrgAIBsqChJKCgoKCgpSCuIKCgpSCppSCgoI=")]
+[assembly: GoPositionMap("io/multi.go", "multi.cs", "AA0Sgu6ylIKCgqaCpoKUgpSUpqaCprKCgoKUlIKCgpSUgqac4oKC7rKCgoKUgoKmppSygoKClIKUlIKUgoKmAAISAAgCgoKClKY=")]
+[assembly: GoPositionMap("io/pipe.go", "pipe.cs", "ABIq0oKCgpSiktKCgugADByipNi0goKkyIKClIKAkqbipKSCtoK0goK0puaCgpSCgJKokoKClKiSgoKUAAcW0qqiAAIQ0gAHFtKqogACEuIAAiQADwLq", "72-72:1;103-103:1")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -167,18 +170,89 @@ public static partial class io_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(io_package.LimitedReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛLimitedReader;
-[GoMethodHost(typeof(io_package.OffsetWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛOffsetWriter;
-[GoMethodHost(typeof(io_package.PipeReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛPipeReader;
-[GoMethodHost(typeof(io_package.PipeWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛPipeWriter;
-[GoMethodHost(typeof(io_package.SectionReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛSectionReader;
-[GoMethodHost(typeof(io_package.discard)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛdiscard;
-[GoMethodHost(typeof(io_package.eofReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛeofReader;
-[GoMethodHost(typeof(io_package.multiReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛmultiReader;
-[GoMethodHost(typeof(io_package.multiWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛmultiWriter;
-[GoMethodHost(typeof(io_package.nopCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛnopCloser;
-[GoMethodHost(typeof(io_package.nopCloserWriterTo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛnopCloserWriterTo;
-[GoMethodHost(typeof(io_package.onceError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛonceError;
-[GoMethodHost(typeof(io_package.pipe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛpipe;
-[GoMethodHost(typeof(io_package.teeReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛteeReader;
+[GoMethodHost(typeof(io_package.LimitedReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛLimitedReader;
+[GoMethodHost(typeof(io_package.OffsetWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛOffsetWriter;
+[GoMethodHost(typeof(io_package.PipeReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛPipeReader;
+[GoMethodHost(typeof(io_package.PipeWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛPipeWriter;
+[GoMethodHost(typeof(io_package.SectionReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛSectionReader;
+[GoMethodHost(typeof(io_package.discard)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛdiscard;
+[GoMethodHost(typeof(io_package.eofReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛeofReader;
+[GoMethodHost(typeof(io_package.multiReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛmultiReader;
+[GoMethodHost(typeof(io_package.multiWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛmultiWriter;
+[GoMethodHost(typeof(io_package.nopCloser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛnopCloser;
+[GoMethodHost(typeof(io_package.nopCloserWriterTo)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛnopCloserWriterTo;
+[GoMethodHost(typeof(io_package.onceError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛonceError;
+[GoMethodHost(typeof(io_package.pipe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛpipe;
+[GoMethodHost(typeof(io_package.teeReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛteeReader;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class ioᴛLimitedReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ref io_package.LimitedReader l, slice<byte> p) => io_package.Read⁔(ref l, p);
+}
+partial class ioᴛOffsetWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ref io_package.OffsetWriter o, slice<byte> p) => io_package.Write⁔(ref o, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) WriteAt(this ref io_package.OffsetWriter o, slice<byte> p, int64 off) => io_package.WriteAt⁔(ref o, p, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64, error) Seek(this ref io_package.OffsetWriter o, int64 offset, nint whence) => io_package.Seek⁔(ref o, offset, whence);
+}
+partial class ioᴛPipeReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ж<io_package.PipeReader> Ꮡr, slice<byte> data) => io_package.Read⁔(Ꮡr, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ж<io_package.PipeReader> Ꮡr) => io_package.Close⁔(Ꮡr);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error CloseWithError(this ж<io_package.PipeReader> Ꮡr, error err) => io_package.CloseWithError⁔(Ꮡr, err);
+}
+partial class ioᴛPipeWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ж<io_package.PipeWriter> Ꮡw, slice<byte> data) => io_package.Write⁔(Ꮡw, data);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ж<io_package.PipeWriter> Ꮡw) => io_package.Close⁔(Ꮡw);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error CloseWithError(this ж<io_package.PipeWriter> Ꮡw, error err) => io_package.CloseWithError⁔(Ꮡw, err);
+}
+partial class ioᴛSectionReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ref io_package.SectionReader s, slice<byte> p) => io_package.Read⁔(ref s, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64, error) Seek(this ref io_package.SectionReader s, int64 offset, nint whence) => io_package.Seek⁔(ref s, offset, whence);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) ReadAt(this ref io_package.SectionReader s, slice<byte> p, int64 off) => io_package.ReadAt⁔(ref s, p, off);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Size(this ref io_package.SectionReader s) => io_package.Size⁔(ref s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (io_package.ReaderAt r, int64 off, int64 n) Outer(this ref io_package.SectionReader s) => io_package.Outer⁔(ref s);
+}
+partial class ioᴛdiscard {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this io_package.discard _, slice<byte> p) => io_package.Write⁔(_, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) WriteString(this io_package.discard _, @string s) => io_package.WriteString⁔(_, s);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64 n, error err) ReadFrom(this io_package.discard _, io_package.Reader r) => io_package.ReadFrom⁔(_, r);
+}
+partial class ioᴛeofReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this io_package.eofReader _Δp0, slice<byte> _Δp1) => io_package.Read⁔(_Δp0, _Δp1);
+}
+partial class ioᴛmultiReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref io_package.multiReader mr, slice<byte> p) => io_package.Read⁔(ref mr, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64 sum, error err) WriteTo(this ref io_package.multiReader mr, io_package.Writer w) => io_package.WriteTo⁔(ref mr, w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64 sum, error err) writeToWithBuffer(this ref io_package.multiReader mr, io_package.Writer w, slice<byte> buf) => io_package.writeToWithBuffer⁔(ref mr, w, buf);
+}
+partial class ioᴛmultiWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref io_package.multiWriter t, slice<byte> p) => io_package.Write⁔(ref t, p);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref io_package.multiWriter t, @string s) => io_package.WriteString⁔(ref t, s);
+}
+partial class ioᴛnopCloser {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this io_package.nopCloser _) => io_package.Close⁔(_);
+}
+partial class ioᴛnopCloserWriterTo {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this io_package.nopCloserWriterTo _) => io_package.Close⁔(_);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64 n, error err) WriteTo(this io_package.nopCloserWriterTo c, io_package.Writer w) => io_package.WriteTo⁔(c, w);
+}
+partial class ioᴛonceError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Store(this ж<io_package.onceError> Ꮡa, error err) => io_package.Store⁔(Ꮡa, err);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Load(this ж<io_package.onceError> Ꮡa) => io_package.Load⁔(Ꮡa);
+}
+partial class ioᴛpipe {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) read(this ж<io_package.pipe> Ꮡp, slice<byte> b) => io_package.read⁔(Ꮡp, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error closeRead(this ж<io_package.pipe> Ꮡp, error err) => io_package.closeRead⁔(Ꮡp, err);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) write(this ж<io_package.pipe> Ꮡp, slice<byte> b) => io_package.write⁔(Ꮡp, b);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error closeWrite(this ж<io_package.pipe> Ꮡp, error err) => io_package.closeWrite⁔(Ꮡp, err);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readCloseError(this ж<io_package.pipe> Ꮡp) => io_package.readCloseError⁔(Ꮡp);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeCloseError(this ж<io_package.pipe> Ꮡp) => io_package.writeCloseError⁔(Ꮡp);
+}
+partial class ioᴛteeReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref io_package.teeReader t, slice<byte> p) => io_package.Read⁔(ref t, p);
+}
+// </MethodForwarders>

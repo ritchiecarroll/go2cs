@@ -6,7 +6,6 @@ namespace go;
 
 using context = context_package;
 using syscall = syscall_package;
-using static net_package;
 
 partial class net_package {
 
@@ -21,9 +20,7 @@ internal static Addr sockaddrToIP(syscall.Sockaddr sa) {
     return default;
 }
 
-} partial class netᴛIPAddr {
-
-internal static nint family(this ж<IPAddr> Ꮡa) {
+internal static nint family⁔(/*this*/ ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil || len(a.IP) <= IPv4len) {
@@ -35,7 +32,7 @@ internal static nint family(this ж<IPAddr> Ꮡa) {
     return syscall.AF_INET6;
 }
 
-internal static (syscall.Sockaddr, error) sockaddr(this ж<IPAddr> Ꮡa, nint family) {
+internal static (syscall.Sockaddr, error) sockaddr⁔(/*this*/ ж<IPAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -44,13 +41,11 @@ internal static (syscall.Sockaddr, error) sockaddr(this ж<IPAddr> Ꮡa, nint fa
     return ipToSockaddr(family, a.IP, 0, a.Zone);
 }
 
-internal static sockaddr toLocal(this ref IPAddr a, @string net) {
+internal static sockaddr toLocal⁔(/*this*/ ref IPAddr a, @string net) {
     return new IPAddrжsockaddr(Ꮡ(new IPAddr(loopbackIP(net), a.Zone)));
 }
 
-} partial class netᴛIPConn {
-
-internal static (nint, ж<IPAddr>, error) readFrom(this ref IPConn c, slice<byte> b) {
+internal static (nint, ж<IPAddr>, error) readFrom⁔(/*this*/ ref IPConn c, slice<byte> b) {
     // TODO(cw,rsc): consider using readv if we know the family
     // type to avoid the header trim/copy
     ж<IPAddr> addr = default;
@@ -68,8 +63,6 @@ internal static (nint, ж<IPAddr>, error) readFrom(this ref IPConn c, slice<byte
     return (n, addr, err);
 }
 
-} partial class net_package {
-
 internal static nint stripIPv4Header(nint n, slice<byte> b) {
     if (len(b) < 20) {
         return n;
@@ -85,9 +78,7 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
     return n - l;
 }
 
-} partial class netᴛIPConn {
-
-internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) readMsg(this ref IPConn c, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) readMsg⁔(/*this*/ ref IPConn c, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -108,7 +99,7 @@ internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) read
     return (n, oobn, flags, addr, err);
 }
 
-internal static (nint, error) writeTo(this ref IPConn c, slice<byte> b, ж<IPAddr> addr) {
+internal static (nint, error) writeTo⁔(/*this*/ ref IPConn c, slice<byte> b, ж<IPAddr> addr) {
     if (c.fd.isConnected) {
         return (0, ErrWriteToConnected);
     }
@@ -122,7 +113,7 @@ internal static (nint, error) writeTo(this ref IPConn c, slice<byte> b, ж<IPAdd
     return c.fd.writeTo(b, sa);
 }
 
-internal static (nint n, nint oobn, error err) writeMsg(this ref IPConn c, slice<byte> b, slice<byte> oob, ж<IPAddr> addr) {
+internal static (nint n, nint oobn, error err) writeMsg⁔(/*this*/ ref IPConn c, slice<byte> b, slice<byte> oob, ж<IPAddr> addr) {
     error err = default;
 
     if (c.fd.isConnected) {
@@ -138,13 +129,7 @@ internal static (nint n, nint oobn, error err) writeMsg(this ref IPConn c, slice
     return c.fd.writeMsg(b, oob, sa);
 }
 
-} partial class netᴛsysDialer {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string dialˢ => ref dialˢᵇ;
-private static readonly @string dialˢᵇ = "dial"u8;
-
-internal static (ж<IPConn>, error) dialIP(this ж<sysDialer> Ꮡsd, context.Context ctx, ж<IPAddr> laddr, ж<IPAddr> raddr) {
+internal static (ж<IPConn>, error) dialIP⁔(/*this*/ ж<sysDialer> Ꮡsd, context.Context ctx, ж<IPAddr> laddr, ж<IPAddr> raddr) {
     ref var sd = ref Ꮡsd.DerefOrNull();
 
     var (network, proto, err) = parseNetwork(ctx, sd.network, true);
@@ -169,13 +154,7 @@ internal static (ж<IPConn>, error) dialIP(this ж<sysDialer> Ꮡsd, context.Con
     return (newIPConn(fd), default);
 }
 
-} partial class netᴛsysListener {
-
-// Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string listenˢ => ref listenˢᵇ;
-private static readonly @string listenˢᵇ = "listen"u8;
-
-internal static (ж<IPConn>, error) listenIP(this ж<sysListener> Ꮡsl, context.Context ctx, ж<IPAddr> laddr) {
+internal static (ж<IPConn>, error) listenIP⁔(/*this*/ ж<sysListener> Ꮡsl, context.Context ctx, ж<IPAddr> laddr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
 
     var (network, proto, err) = parseNetwork(ctx, sl.network, true);
@@ -200,4 +179,4 @@ internal static (ж<IPConn>, error) listenIP(this ж<sysListener> Ꮡsl, context
     return (newIPConn(fd), default);
 }
 
-}
+} // end net_package

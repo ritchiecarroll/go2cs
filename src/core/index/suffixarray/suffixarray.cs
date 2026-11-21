@@ -24,7 +24,6 @@ using regexp = regexp_package;
 using slices = slices_package;
 using sort = sort_package;
 using encoding;
-using static suffixarray_package;
 
 partial class suffixarray_package {
 
@@ -47,20 +46,18 @@ partial struct ints {
     internal slice<int64> int64;
 }
 
-} partial class suffixarrayᴛints {
-
-internal static nint len(this ref ints a) {
-    return builtin.len(a.int32) + builtin.len(a.int64);
+internal static nint len⁔(/*this*/ ref ints a) {
+    return len(a.int32) + len(a.int64);
 }
 
-internal static int64 get(this ref ints a, nint i) {
+internal static int64 get⁔(/*this*/ ref ints a, nint i) {
     if (a.int32 != nil) {
         return (int64)a.int32[i];
     }
     return a.int64[i];
 }
 
-internal static void set(this ref ints a, nint i, int64 v) {
+internal static void set⁔(/*this*/ ref ints a, nint i, int64 v) {
     if (a.int32 != nil) {
         a.int32[i] = (int32)v;
     } else {
@@ -68,14 +65,12 @@ internal static void set(this ref ints a, nint i, int64 v) {
     }
 }
 
-internal static ints Δslice(this ref ints a, nint i, nint j) {
+internal static ints Δslice⁔(/*this*/ ref ints a, nint i, nint j) {
     if (a.int32 != nil) {
         return new ints(a.int32.slice(i, j), default);
     }
     return new ints(default, a.int64.slice(i, j));
 }
-
-} partial class suffixarray_package {
 
 // New creates a new [Index] for data.
 // [Index] creation time is O(N) for N = len(data).
@@ -163,10 +158,8 @@ internal static (nint n, error err) readSlice(io.Reader r, slice<byte> buf, ints
 
 internal static UntypedInt bufSize => /* 16 << 10 */ 16384; // reasonable for BenchmarkSaveRestore
 
-} partial class suffixarrayᴛIndex {
-
 // Read reads the index from r into x; x must not be nil.
-public static error Read(this ref Index x, io.Reader r) {
+internal static error Read⁔(/*this*/ ref Index x, io.Reader r) {
     // buffer for all reads
     var buf = new slice<byte>(bufSize);
 
@@ -216,7 +209,7 @@ public static error Read(this ref Index x, io.Reader r) {
 }
 
 // Write writes the index x to w.
-public static error Write(this ref Index x, io.Writer w) {
+internal static error Write⁔(/*this*/ ref Index x, io.Writer w) {
     // buffer for all writes
     var buf = new slice<byte>(bufSize);
 
@@ -248,17 +241,17 @@ public static error Write(this ref Index x, io.Writer w) {
 
 // Bytes returns the data over which the index was created.
 // It must not be modified.
-public static slice<byte> Bytes(this ref Index x) {
+internal static slice<byte> Bytes⁔(/*this*/ ref Index x) {
     return x.data;
 }
 
-internal static slice<byte> at(this ref Index x, nint i) {
+internal static slice<byte> at⁔(/*this*/ ref Index x, nint i) {
     return x.data.slice((nint)(x.sa.get(i)));
 }
 
 // lookupAll returns a slice into the matching region of the index.
 // The runtime is O(log(N)*len(s)).
-internal static ints lookupAll(this ж<Index> Ꮡx, slice<byte> s) {
+internal static ints lookupAll⁔(/*this*/ ж<Index> Ꮡx, slice<byte> s) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // find matching suffix index range [i:j]
@@ -276,7 +269,7 @@ internal static ints lookupAll(this ж<Index> Ꮡx, slice<byte> s) {
 // The result is nil if s is empty, s is not found, or n == 0.
 // Lookup time is O(log(N)*len(s) + len(result)) where N is the
 // size of the indexed data.
-public static slice<nint> /*result*/ Lookup(this ж<Index> Ꮡx, slice<byte> s, nint n) {
+internal static slice<nint> /*result*/ Lookup⁔(/*this*/ ж<Index> Ꮡx, slice<byte> s, nint n) {
     slice<nint> result = default;
 
     if (len(s) > 0 && n != 0) {
@@ -308,7 +301,7 @@ public static slice<nint> /*result*/ Lookup(this ж<Index> Ꮡx, slice<byte> s, 
 // in successive order. Otherwise, at most n matches are returned and
 // they may not be successive. The result is nil if there are no matches,
 // or if n == 0.
-public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж<regexp.Regexp> Ꮡr, nint n) {
+internal static slice<slice<nint>> /*result*/ FindAllIndex⁔(/*this*/ ж<Index> Ꮡx, ж<regexp.Regexp> Ꮡr, nint n) {
     slice<slice<nint>> result = default;
     ref var x = ref Ꮡx.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
@@ -411,4 +404,4 @@ public static slice<slice<nint>> /*result*/ FindAllIndex(this ж<Index> Ꮡx, ж
     return result;
 }
 
-}
+} // end suffixarray_package

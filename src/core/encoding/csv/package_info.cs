@@ -14,6 +14,9 @@
 
 using go;
 using static go.encoding.csv_package;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -60,8 +63,8 @@ using static go.encoding.csv_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("encoding/csv/reader.go", "reader.cs", "AE2UAYKClIKUpsiCgqaWlIIAQqQBkgAHHgAMAoKClJQAAhLigpSCrLIACxrygoKClIKUAAMQwoKCgoKClJSCgpSCpoKUgoKUyJKClKiSgsaCgqiSgoKCgoKUgoKUlIKokoKCgoKCgoKCgoKGgoKUgpSUgoKClKaCgoKCpoKCgoKCgpSmgoKCgoKUgoKCtoKCxoKCgoLGgoLGxoKklIKClIKCgoKUgriCgpSCguqCyoKCgpSCgoKCuIKC7oKU", "333-335:1", "", "172=NewReader/1/1/2")]
-[assembly: GoPositionMap("encoding/csv/writer.go", "writer.cs", "ACZOkgAHFMKCpqKCgtyCgpSmgpSUgoK4gpSmgoKUtILGgpS2goK4gqaCgpSUqqKqooKqooKCgqYAAh4ADAKCpoKmgoKCgriCuII=", "", "", "41=NewWriter/1/1/2")]
+[assembly: GoPositionMap("encoding/csv/reader.go", "reader.cs", "AEqUAYKClIKUpqiCgqaWlIIAQqQBkgAFHgAMAoKClJQAAhLigpSCrLIABxrygoKClIKUAAMQwoKCgoKClJSCgpSCpoKUgoKUqJKClKiSgqaCgqiSgoKCgoKUgoKUlIKokoKCgoKCgoKCgoKGgoKUgpSUgoKClKaCgoKCpoKCgoKCgpSmgoKCgoKUgoKCtoKCxoKCgoLGgoLGxoKklIKClIKCgoKUgriCgpSCguqCyoKCgpSCgoKCuIKC7oKU", "333-335:1", "", "167=NewReader/1/1/2")]
+[assembly: GoPositionMap("encoding/csv/writer.go", "writer.cs", "ACVOkgAFFMKCpqKCgtyCgpSmgpSUgoK4gpSmgoKUtILGgpS2goK4gqaCgpSUqqKqooKqooKCgqYAAh4ADAKCpoKmgoKCgriCuII=", "", "", "40=NewWriter/1/1/2")]
 // </GoSourcePositionMaps>
 
 namespace go.encoding;
@@ -107,7 +110,33 @@ public static partial class csv_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(csv_package.ParseError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class csvᴛParseError;
-[GoMethodHost(typeof(csv_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class csvᴛReader;
-[GoMethodHost(typeof(csv_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class csvᴛWriter;
+[GoMethodHost(typeof(csv_package.ParseError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class csvᴛParseError;
+[GoMethodHost(typeof(csv_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class csvᴛReader;
+[GoMethodHost(typeof(csv_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class csvᴛWriter;
 // </MethodHolders>
+
+// A Go method's body sits in its package class beside its type, named with a trailing U+2054 (`String⁔`),
+// which no Go identifier can spell. The Go-named extension method its holder declares is a one-line
+// forwarder to that body: every call, interface and method set reads the forwarder, and the runtime names
+// the body's frame as the Go method.
+// <MethodForwarders>
+partial class csvᴛParseError {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref csv_package.ParseError e) => csv_package.Error⁔(ref e);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Unwrap(this ref csv_package.ParseError e) => csv_package.Unwrap⁔(ref e);
+}
+partial class csvᴛReader {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string> record, error err) Read(this ref csv_package.Reader r) => csv_package.Read⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint line, nint column) FieldPos(this ref csv_package.Reader r, nint field) => csv_package.FieldPos⁔(ref r, field);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 InputOffset(this ref csv_package.Reader r) => csv_package.InputOffset⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<slice<@string>> records, error err) ReadAll(this ref csv_package.Reader r) => csv_package.ReadAll⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) readLine(this ref csv_package.Reader r) => csv_package.readLine⁔(ref r);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<@string>, error) readRecord(this ref csv_package.Reader r, slice<@string> dst) => csv_package.readRecord⁔(ref r, dst);
+}
+partial class csvᴛWriter {
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Write(this ref csv_package.Writer w, slice<@string> record) => csv_package.Write⁔(ref w, record);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Flush(this ref csv_package.Writer w) => csv_package.Flush⁔(ref w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Error(this ref csv_package.Writer w) => csv_package.Error⁔(ref w);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error WriteAll(this ref csv_package.Writer w, slice<slice<@string>> records) => csv_package.WriteAll⁔(ref w, records);
+    [MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool fieldNeedsQuotes(this ref csv_package.Writer w, @string field) => csv_package.fieldNeedsQuotes⁔(ref w, field);
+}
+// </MethodForwarders>

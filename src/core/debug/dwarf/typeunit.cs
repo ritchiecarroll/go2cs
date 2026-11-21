@@ -5,7 +5,6 @@ namespace go.debug;
 
 using fmt = fmt_package;
 using strconv = strconv_package;
-using static dwarf_package;
 
 partial class dwarf_package {
 
@@ -22,8 +21,6 @@ partial struct typeUnit {
     internal Type cache;   // Cache the type, nil to start.
 }
 
-} partial class dwarfᴛData {
-
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
 internal static ref readonly @string typeUnitLengthOverflowˢ => ref typeUnitLengthOverflowˢᵇ;
 private static readonly @string typeUnitLengthOverflowˢᵇ = "type unit length overflow"u8;
@@ -31,7 +28,7 @@ internal static ref readonly @string typeUnitTypeOffsetˢ => ref typeUnitTypeOff
 private static readonly @string typeUnitTypeOffsetˢᵇ = "type unit type offset overflow"u8;
 
 // Parse a .debug_types section.
-internal static error parseTypes(this ж<Data> Ꮡd, @string name, slice<byte> types) {
+internal static error parseTypes⁔(/*this*/ ж<Data> Ꮡd, @string name, slice<byte> types) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var b = makeBuf(Ꮡd, new unknownFormat(), name, 0, types);
@@ -95,7 +92,7 @@ internal static error parseTypes(this ж<Data> Ꮡd, @string name, slice<byte> t
 }
 
 // Return the type for a type signature.
-internal static (Type, error) sigToType(this ж<Data> Ꮡd, uint64 sig) {
+internal static (Type, error) sigToType⁔(/*this*/ ж<Data> Ꮡd, uint64 sig) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var tu = d.typeSigs[sig];
@@ -117,8 +114,6 @@ internal static (Type, error) sigToType(this ж<Data> Ꮡd, uint64 sig) {
     return (t, default);
 }
 
-} partial class dwarf_package {
-
 // typeUnitReader is a typeReader for a tagTypeUnit.
 partial struct typeUnitReader {
     internal ж<Data> d;
@@ -127,10 +122,8 @@ partial struct typeUnitReader {
     internal error err;
 }
 
-} partial class dwarfᴛtypeUnitReader {
-
 // Seek to a new position in the type unit.
-internal static void Seek(this ref typeUnitReader tur, Offset off) {
+internal static void Seek⁔(/*this*/ ref typeUnitReader tur, Offset off) {
     tur.err = default;
     var doff = off - tur.tu.off;
     if (doff < 0 || doff >= ((Offset)(uint32)len(tur.tu.data))) {
@@ -141,12 +134,12 @@ internal static void Seek(this ref typeUnitReader tur, Offset off) {
 }
 
 // AddressSize returns the size in bytes of addresses in the current type unit.
-internal static nint AddressSize(this ref typeUnitReader tur) {
+internal static nint AddressSize⁔(/*this*/ ref typeUnitReader tur) {
     return tur.tu.unit.asize;
 }
 
 // Next reads the next [Entry] from the type unit.
-internal static (ж<Entry>, error) Next(this ж<typeUnitReader> Ꮡtur) {
+internal static (ж<Entry>, error) Next⁔(/*this*/ ж<typeUnitReader> Ꮡtur) {
     ref var tur = ref Ꮡtur.DerefOrNull();
 
     if (tur.err != nil) {
@@ -164,7 +157,7 @@ internal static (ж<Entry>, error) Next(this ж<typeUnitReader> Ꮡtur) {
 }
 
 // clone returns a new reader for the type unit.
-internal static typeReader clone(this ref typeUnitReader tur) {
+internal static typeReader clone⁔(/*this*/ ref typeUnitReader tur) {
     return new typeUnitReaderжtypeReader(Ꮡ(new typeUnitReader(
         d: tur.d,
         tu: tur.tu,
@@ -173,8 +166,8 @@ internal static typeReader clone(this ref typeUnitReader tur) {
 }
 
 // offset returns the current offset.
-internal static Offset offset(this ref typeUnitReader tur) {
+internal static Offset offset⁔(/*this*/ ref typeUnitReader tur) {
     return tur.b.off;
 }
 
-}
+} // end dwarf_package
