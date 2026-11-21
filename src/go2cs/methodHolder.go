@@ -28,6 +28,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"os"
 	"path/filepath"
@@ -323,20 +324,11 @@ func (v *Visitor) testHolderSuffix(method types.Object, typeObj types.Object) st
 	return ""
 }
 
-// funcDeclClass names the class funcDecl is emitted into: its receiver type's method holder, or the
-// file's own class for a function.
+// funcDeclClass names the class funcDecl is emitted into: the file's own class, for a function and a method alike.
 func (v *Visitor) funcDeclClass(funcDecl *ast.FuncDecl) string {
 	// A Go method's body is a member of the file's own class: a method with a holder takes the suffix form,
 	// whose body sits in the package class beside its type (GlyphMethodSuffix), and a method of package main
 	// with no holder is a plain extension method there (methodsStayInPackageClass).
-	if funcDecl.Recv != nil {
-		return v.fileClassName
-	}
-
-	if holder := v.useMethodHolder(receiverNamed(v.info, funcDecl), v.info.Defs[funcDecl.Name]); holder != "" {
-		return holder
-	}
-
 	return v.fileClassName
 }
 
@@ -349,8 +341,17 @@ func (v *Visitor) suffixMethodHolder(funcDecl *ast.FuncDecl) string {
 		return ""
 	}
 
-	named := receiverNamed(v.info, funcDecl)
-	holder, typeofTarget := v.methodHolderClass(named, v.info.Defs[funcDecl.Name])
+	return v.suffixHolderOfMethod(receiverNamed(v.info, funcDecl), v.info.Defs[funcDecl.Name])
+}
+
+// suffixHolderOf is suffixMethodHolder for a method the converter writes rather than Go declares (a promoted
+// forwarder of named's), which has no declaration of its own.
+func (v *Visitor) suffixHolderOf(named *types.Named) string {
+	return v.suffixHolderOfMethod(named, nil)
+}
+
+func (v *Visitor) suffixHolderOfMethod(named *types.Named, method types.Object) string {
+	holder, typeofTarget := v.methodHolderClass(named, method)
 
 	if holder == "" {
 		return ""
@@ -1155,6 +1156,19 @@ func suffixBodyName(csMethodName string) string {
 // (with its `this` receiver, as the method was declared before the suffix form) and constraint clauses. The
 // forwarder calls the body in the file's class with the same type arguments and arguments.
 func (v *Visitor) recordMethodForwarder(funcDecl *ast.FuncDecl, holder string, access string, isUnsafe bool, result string, name string, typeParams string, params string, constraints string) {
+	var signature *types.Signature
+
+	if fn, ok := v.info.Defs[funcDecl.Name].(*types.Func); ok {
+		signature, _ = fn.Type().(*types.Signature)
+	}
+
+	v.recordForwarder(funcDecl.Pos(), holder, access, isUnsafe, result, name, typeParams, params, constraints, signature)
+}
+
+// recordForwarder records a forwarder for the holder from the pieces of its body's declaration; pos orders it among
+// the package's forwarders (its declaration's position), and signature, when known, is walked for the imported types
+// it spells (recordForwarderTypeQualifiers).
+func (v *Visitor) recordForwarder(pos token.Pos, holder string, access string, isUnsafe bool, result string, name string, typeParams string, params string, constraints string, signature *types.Signature) {
 	modifiers := access + " static"
 
 	if isUnsafe {
@@ -1169,10 +1183,10 @@ func (v *Visitor) recordMethodForwarder(funcDecl *ast.FuncDecl, holder string, a
 
 	line := fmt.Sprintf("[%s] %s %s %s%s(%s)%s => %s;", methodForwarderAttributes, modifiers, result, name, typeParams, params, flattenConstraints(constraints), call)
 
-	position := v.fset.Position(funcDecl.Pos())
-	key := fmt.Sprintf("%s\x00%010d", filepath.Base(position.Filename), position.Offset)
+	position := v.fset.Position(pos)
+	key := fmt.Sprintf("%s\x00%010d\x00%s", filepath.Base(position.Filename), position.Offset, name)
 
-	v.recordForwarderTypeQualifiers(funcDecl)
+	v.recordForwarderTypeQualifiers(signature)
 
 	packageLock.Lock()
 	packageMethodForwarders = append(packageMethodForwarders, methodForwarder{holder: holder, key: key, line: line})
@@ -1183,16 +1197,8 @@ func (v *Visitor) recordMethodForwarder(funcDecl *ast.FuncDecl, holder string, a
 // named type the forwarder's signature spells (its receiver, parameters and results, through every wrapper and
 // type argument), so package_info.cs resolves it through a file-local `using` exactly as the converted file does
 // (conversionPackageUsings). No file's own usings are copied.
-func (v *Visitor) recordForwarderTypeQualifiers(funcDecl *ast.FuncDecl) {
-	fn, ok := v.info.Defs[funcDecl.Name].(*types.Func)
-
-	if !ok {
-		return
-	}
-
-	signature, ok := fn.Type().(*types.Signature)
-
-	if !ok {
+func (v *Visitor) recordForwarderTypeQualifiers(signature *types.Signature) {
+	if signature == nil {
 		return
 	}
 

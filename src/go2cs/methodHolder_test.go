@@ -846,23 +846,25 @@ func main() {
 `
 
 // A promoted forwarder the converter writes for a struct (a method its pointer gets only through an
-// embedded interface) is one of the struct's methods, so it is a member of the struct's holder, beside the
-// forwarders of the methods Go declares on it. In the package class it shared a class with the type of its
-// name: CS0102, `Driver` beside `Driver`. The next type of a grouped declaration is back in the package class,
-// as is the body of the struct's own method.
-func TestPromotedForwarderIsEmittedInItsStructsHolder(t *testing.T) {
+// embedded interface) is one of the struct's methods, so it takes the suffix form as the methods Go declares
+// on it do: its body `Driver⁔` in the package class right after the struct, and its Go-named forwarder in the
+// struct's holder. The Go name in the package class would share a class with the type of its name: CS0102,
+// `Driver` beside `Driver`. No file switches into the holder.
+func TestPromotedForwarderTakesTheSuffixFormInItsStructsHolder(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"main.go": promotedForwarderHolderSource})
 
 	requireEmitted(t, "main.cs", emitted["main.cs"], []string{
-		"\n} partial class mainᴛcounting {\n\n// Go method set entry for the promoted 'Connector.Driver()'",
-		"internal static Driver Driver(this counting recvᴛ) => recvᴛ.Connector.Driver();\n\n} partial class main_package {\n\npartial struct after {",
+		"\n// Go method set entry for the promoted 'Connector.Driver()'",
+		"internal static Driver Driver⁔(/*this*/ counting recvᴛ) => recvᴛ.Connector.Driver();\n\npartial struct after {",
 		"\ninternal static @string Name⁔(/*this*/ ref counting c)",
 	}, []string{
 		"Δ",
+		"partial class mainᴛ",
 	})
 
 	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
 		"[GoMethodHost(typeof(main_package.counting)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛcounting;\n",
+		"internal static Driver Driver(this counting recvᴛ) => main_package.Driver⁔(recvᴛ);\n",
 		"internal static @string Name(this ref counting c) => main_package.Name⁔(ref c);\n",
 	}, nil)
 }
@@ -1016,7 +1018,7 @@ func main() {
 // like something a file of the package reads bare, which the method would hide there from the whole package: a
 // package-level name, a name of the universe, an import's name, a name a dot-imported package declares (an
 // unexported one included), or a member of golib's builtin class. Such a type keeps its holder, as does a struct
-// whose forwarder for an embedded interface's method is named so (TestPromotedForwarderIsEmittedInItsStructsHolder):
+// whose forwarder for an embedded interface's method is named so (TestPromotedForwarderTakesTheSuffixFormInItsStructsHolder):
 // its methods take the suffix form, a body in the package class and a forwarder in the holder.
 // A method expression of a type without a holder names the method through the package class, under the delegate
 // cast that picks the receiver's overload: bare, it would bind a local, parameter or result of its name first
