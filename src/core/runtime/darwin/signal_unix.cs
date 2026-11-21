@@ -607,7 +607,7 @@ internal static void sighandler(uint32 sig, ж<siginfo> info, @unsafe.Pointer ct
     // signal delivery. We use that as an indicator of delayed signals.
     // For delayed signals, the handler is called on the g0 stack (see
     // adjustSignalStack).
-    var delayedSignal = cgo_yield.Value != nil && mp != nil && (~gsignal).stack == (~(~mp).g0).stack;
+    var delayedSignal = @unsafe.Pointer.LoadWord(cgo_yield) != nil && mp != nil && (~gsignal).stack == (~(~mp).g0).stack;
 
     if (sig == _SIGPROF) {
         // Some platforms (Linux) have per-thread timers, which we use in

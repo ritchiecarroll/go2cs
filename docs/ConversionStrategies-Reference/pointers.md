@@ -844,7 +844,7 @@ So the run-time form answers through **`GoReflect.TryGoSizeOf`** — the same Go
 reflection bridge already stamps into a descriptor's `Size_`, and the same one `reflect.Type.Size()`
 reads:
 
-<!-- source: src/core/unsafe/unsafe.cs:1441-1449 -->
+<!-- source: src/core/unsafe/unsafe.cs:1677-1685 -->
 ```csharp
 public static uintptr Sizeof<T>(T x) {
     // TryGoSizeOf answers derivability separately from the size, which matters here: the old
@@ -1360,6 +1360,58 @@ through the derived pointer
 stores into a detached box rather than corrupting punned memory; real write-through semantics for it are
 not implemented.
 
+## The pointer WORD through a `*unsafe.Pointer` — the word doors, and the managed slots they skip
+
+`*p` and `*p = v`, where `p`'s static type is exactly `*unsafe.Pointer`, are emitted as calls: the word doors
+`unsafe.Pointer.LoadWord(p)` and `unsafe.Pointer.StoreWord(p, v)`. <!-- W1 and W2 of
+docs/phase4/DESIGN-cgo-phase3-marshaling.md, 18.3 to 18.7 (seat S-B1). --> A
+`*unsafe.Pointer` can name a WORD of memory (Go memory reinterpreted from a number, or C memory), and turning a
+word into a CLR `Pointer` object and back cannot happen behind a `ref`: a write through `p.Value` gives the box no
+way to know what to publish. So the doors decide by the box. A box over a CLR `Pointer` slot is read and written
+through the slot itself (`ValueSlot`, never `Value`), so a slot that holds nil, Go's nil `unsafe.Pointer`, loads nil
+and takes a store (`tests/Behavioral/UnsafePointerWordNilSlot`). A native box publishes the BaseOf projection, a
+pinned address or an order token, and keeps the referent in a per-slot bag.
+
+```go
+func load(k unsafe.Pointer) unsafe.Pointer { return *(*unsafe.Pointer)(k) }
+func store(dst *unsafe.Pointer, val unsafe.Pointer) { *dst = val }
+```
+
+<!-- illustration: not converter output -->
+```csharp
+return @unsafe.Pointer.LoadWord(@unsafe.Pointer.To<@unsafe.Pointer>(k));
+@unsafe.Pointer.StoreWord(dst, val);
+```
+
+**A provably MANAGED slot keeps its plain emission** (`unsafePointerWordSlotIsManaged`, unsafePointerWordDoor.go).
+That is a slot the converter itself allocated in managed memory, which no native box can be. Over it the doors would
+take their managed arm, the slot itself, so the call buys no behavior and costs the Go-like shape. Exactly two shapes:
+
+1. **The reinterpret CARRYING arm** of the section above: `(*unsafe.Pointer)(unsafe.Pointer(p))` of a Go pointer
+   `p` whose pointee is not `unsafe.Pointer`, and its deref at more than one level (`**(**unsafe.Pointer)(…)`).
+   It is rendered as a fresh `Ꮡ(<rvalue>)` box (`new Pointer(..)`, `OfFunc(f)`, `FromPinnedBox(..)`).
+2. **`&x`**, through the identity round trip `(*unsafe.Pointer)(unsafe.Pointer(&x))`, where `x` is a LOCAL
+   variable or a PARAMETER. Its box is the converter's own `heap(..)`. Only as the operand itself: under a star
+   (`**&x`, `x` a local `*unsafe.Pointer`) the slot is read OUT of `x`, which may hold a native box. A store through
+   it writes the box through its slot, `(Ꮡx).ValueSlot = v`, as every held reference is stored, and a load reads
+   `~Ꮡx`, the slot too: `.Value` would read the held value first and panic on a nil `unsafe.Pointer`, where Go
+   stores.
+
+The following stay on the doors:
+- a package variable, or a package variable's address;
+- a field or an element;
+- a call result;
+- a `*unsafe.Pointer` variable or parameter, and a slot read out of one (`**&x`);
+- every pointer derived from a number.
+
+A mistake in the predicate fails LOUD. With the native box's unsafe.Pointer exemption gone, a `.Value` over a native
+box is refused by name, so a slot wrongly called managed is a refusal and never a wrong read. The one silent case is
+master's, not the predicate's: a STORE through shape 1 writes into the fresh box, which nothing else reads, so the
+write is lost (runtime's `debugcall.cs` and the per-OS `cgocall.cs`, a pointer word stored into a func variable).
+Guarded both ways by `unsafePointerWordDoor_test.go` (six managed arms unrewritten, six native-reachable arms
+rewritten, each half made red by forcing the predicate). `tests/Behavioral/UnsafePointerWordRead` and
+`unsafePointerWordRead_test.go` keep the carrying arm's emission unchanged.
+
 ## A func value carried as a number — one word per static function, through `GoFuncCookie`
 
 C translated to Go by ccgo (modernc.org/libc, modernc.org/sqlite) keeps a C function pointer as a `uintptr`.
@@ -1484,7 +1536,7 @@ internal static ж<bool> boolFieldAddr(ж<types.Config> conf, @string name) {
 }
 ```
 
-The conversion back, `@unsafe.Pointer.To<T>`, is the number conversion: it and `ж<T>`'s `explicit operator ж<T>(uintptr)` share one body, `ж<T>.FromNumber`. <!-- src/core/unsafe/unsafe.cs:652 `return ж<T>.FromNumber(BaseOf(p), p.m_retainedSource);` (To<T>(Pointer? p)); src/core/golib/ж.cs:1136 `return FromNumber(value, carried: null);` (the uintptr operator). The sample spelled the cast (ж<bool>)(uintptr)(…) until the interior-pointer cut (837a413fdc); the .4 -tests regen moved the cited test file to the new spelling. --> That body builds a **native-address** box over whatever number it is handed (`m_nativeAddr`), so the `.Value` store writes a `bool` at the numeric value of an order token — an access violation when that page is not mapped, and silent heap corruption when it is. Without the table below it kills `go/types`' converted test host outright at the first test that reaches the idiom, `TestCheck/blank.go`; the fault arrives as a bare `System.AccessViolationException` in `testFilesImpl` with no frame below it, because the faulting store is inlined at the call site. <!-- with 542 verdicts behind it, when measured -->
+The conversion back, `@unsafe.Pointer.To<T>`, is the number conversion: it and `ж<T>`'s `explicit operator ж<T>(uintptr)` share one body, `ж<T>.FromNumber`. <!-- src/core/unsafe/unsafe.cs:652 `return ж<T>.FromNumber(BaseOf(p), p.m_retainedSource);` (To<T>(Pointer? p)); src/core/golib/ж.cs:1147 `return FromNumber(value, carried: null);` (the uintptr operator). The sample spelled the cast (ж<bool>)(uintptr)(…) until the interior-pointer cut (837a413fdc); the .4 -tests regen moved the cited test file to the new spelling. --> That body builds a **native-address** box over whatever number it is handed (`m_nativeAddr`), so the `.Value` store writes a `bool` at the numeric value of an order token — an access violation when that page is not mapped, and silent heap corruption when it is. Without the table below it kills `go/types`' converted test host outright at the first test that reaches the idiom, `TestCheck/blank.go`; the fault arrives as a bare `System.AccessViolationException` in `testFilesImpl` with no frame below it, because the faulting store is inlined at the call site. <!-- with 542 verdicts behind it, when measured -->
 
 The information needed to do better is never actually lost. `reflect.Value.Addr` surfaces the **real aliasing box** — an addressable Value already carries `addrBox`, minted by `GoReflect.FieldAliasBox` — and only the projection to a scalar discards it. So golib's `ManagedPointerTokens` (`golib/ж.PointerTokens.cs`) remembers the association the projection drops: the token that was handed out, and the box it named. `reflectPointerToken` registers on the way out, and the `uintptr → ж<T>` operator consults the table **first**, so a token that came from there recovers its own box and aliases the original storage exactly as Go's pointer would. Everything else keeps the native-address route.
 

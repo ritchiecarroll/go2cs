@@ -2920,6 +2920,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckUnsafePointerTypeAlias() => CheckTarget("UnsafePointerTypeAlias");
 
     [TestMethod]
+    public void CheckUnsafePointerWordNilSlot() => CheckTarget("UnsafePointerWordNilSlot");
+
+    [TestMethod]
     public void CheckUnsafePointerWordRead() => CheckTarget("UnsafePointerWordRead");
 
     [TestMethod]

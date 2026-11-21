@@ -815,6 +815,17 @@ public abstract partial class ж<T> : IPointer<T>, IEquatable<ж<T>>, INilPointe
 
     bool IHeldStorage.TryHeldExtent(out nuint start, out nuint end) => heldExtent(out start, out end);
 
+    bool IHeldStorage.TryHeldTarget(out object target, out nuint start, out nuint end)
+    {
+        target = null!;
+
+        if (!heldExtent(out start, out end) || m_pin?.PinnedTarget is not { } pinned)
+            return false;
+
+        target = pinned;
+        return true;
+    }
+
     // The storage this box holds still. Three facts, each of which must hold: this box owns a pin (m_pin, set at the
     // address-take and never cleared, released by its finalizer once the box is unreachable); the pinned object is
     // a managed array (the value slot, an element array, or the root's slot for a field or element view), whose

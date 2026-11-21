@@ -41078,4 +41078,92 @@ deadline in its own row.
 
 — P5 (2026-11-19)
 
+## 2026-11-15 — H (cgo 3.2's flip list, COORD's ruling): a one-expression uintptr round trip is emitted as a NUMBER, so Go-valid code is refused at the void door — OPEN, fidelity gap, .5
+
+**What.** `C.f(unsafe.Pointer(uintptr(unsafe.Pointer(&x))))`, a pointer converted to `uintptr` and back in ONE
+expression with no arithmetic, is Go-valid. go2cs emits it as `new @unsafe.Pointer((uintptr)@unsafe.Pointer.FromPinnedBox(Ꮡx))`,
+a bare number that carries no box. Under cgo 3.2's ruling (numbers stay refused) the void door refuses it, where Go
+runs it. The arm is `govoidexpr` (`src/go2cs/testdata/cgo/p3`), read refused on linux, windows and darwin (cgo-e2e
+43765795991, 43765805154, 43765814200), while its twin `govoid` (`unsafe.Pointer(&x)`) crosses in 3.2
+(DESIGN-cgo-phase3-marshaling section 18.1).
+
+**Not the ruling's target.** The ruling refuses numbers because Go-INVALID code holds them, across statements. This
+number exists only because the conversion is spelled out. The form with arithmetic already converts to `unsafe.Add`
+(`src/go2cs/pointerArithmetic.go`), which keeps the box.
+
+**The direction, NOT proposed now** (COORD, 2026-11-15): a converter fold of the identity round trip
+`unsafe.Pointer(uintptr(p))` to `p`, which keeps the box. It is an emission change that every package can reach, so its
+corpus cost (the two-seeded comparison on four targets) is UNMEASURED. Measure it when a consumer's census shows the
+shape. Until then it stays refused by name, as a number.
+
+**State.** OPEN, owner H, .5.
+
+— H (2026-11-15)
+
+## 2026-11-17 — H (COORD rulings on DESIGN-cgo-phase3-marshaling 18.6, before code): a self or mutual value-type cycle through W2-stored `unsafe.Pointer` words is retained until a word in the cycle is overwritten or cleared — NAMED LEAK, bounded, .5
+
+**The shapes.** All are managed WORD storage written through W2 (`StoreWord`, design 18.3), with value-type
+referents.
+- SELF: a slot in backing `K` stores `K`'s own address.
+- MUTUAL: a slot in `A` stores `B`'s address, and a slot in `B` stores `A`'s.
+- Each word's entry holds its referent's box, and that box keeps its pin-only hold (18.6 finding 1). So the entry's
+  pin, a strong `GCHandle`, roots a backing that is itself an entry table's `ConditionalWeakTable` key. In the self
+  case that is the entry's own key; in the mutual case, the other backing's key. No backing in the cycle is collected
+  while its words are published.
+
+**Why it is accepted.** The alternative is an unpinned word, whose number goes stale when the referent moves. That
+opens three holes P3 found:
+- C reads a stale address;
+- 3.2's number rule takes a stale word for C memory and dereferences it raw;
+- a reused address makes one number name two objects (CAS, memequal, memhash).
+COORD ruled a bounded leak the lesser harm than silent corruption, before any code, first for the mutual cycle (c4),
+then for the self case (ruling (B)), so that "one number names one live object" holds with no exception.
+
+**The bound.** The leak lasts until a word in the cycle is overwritten through W2 or cleared by a clear door (18.5
+finding 5). That drops the entry, releases its pin, and the cycle is collected.
+
+**The shape is rare.** It is reached only through W2 into managed word storage, which means the runtime's own word
+slots. `container/list`'s `root.next = &root` is a CLR reference field, outside the table, and never leaks this way.
+
+**Measured by** B-4's known-limit arms at the cut, c3 (self) and c4 (mutual):
+- every backing reads ALIVE after the drop and the forced collections;
+- after one word is overwritten through W2, every backing reads DEAD.
+A first-step reading of dead is news and is posted, not a pass.
+
+**Procedure (design 18.7 finding 3, 2026-11-17).**
+- c2, c3 and c4 run in ONE test. c2, with no cycle, is the control that the loop collects, and it must read dead.
+- A round is a forced, blocking, compacting full collection followed by `WaitForPendingFinalizers`. The cap is 10
+  rounds for both steps.
+- Step two reaches the slot through the `WeakReference`'s target, which is alive because of the leak. It does this in
+  a `NoInlining` helper, so no frame roots a backing.
+- c4 frees in stages, so the round in which each backing dies is posted.
+
+— H (2026-11-17)
+
+## 2026-11-20 — H (amends the 2026-11-17 NAMED LEAK row; COORD ruled c1 inside it): the leak's general form, and its third instance, c1 — NAMED LEAK, bounded, .5
+
+**The general form.** A published word whose referent reaches the box that pins the destination's storage.
+- The destination slot's storage is held still by a pin, a strong `GCHandle` owned by the box that pins it. W2 takes
+  that pin when it projects the slot, and the box's finalizer frees it.
+- The word's entry holds its referent strongly, so the referent reaches that box.
+- The box therefore never finalizes. Its pin roots the storage, which is the entry table's `ConditionalWeakTable` key,
+  and the key keeps the table and the entry. Nothing in the loop is collected while the word is published.
+- The 2026-11-17 row's two shapes are instances in which the referent IS such a box: SELF (c3), a word naming its own
+  backing, and MUTUAL (c4), two backings naming each other. Both have value-type referents.
+
+**The third instance, c1.** A REFERENCE-BEARING referent, published as its order token rather than a pinned address,
+that holds the destination's own box. Measured in the same B-4 test as c3 and c4: ALIVE after the drop and the cap,
+DEAD after its word is overwritten through W2. COORD ruled it inside the named leak rather than a fourth hole
+(2026-11-20).
+
+**Unchanged.**
+- The bound: a word of the loop overwritten through W2, or cleared by a clear door, drops the entry. The box then
+  finalizes, the pin is freed, and the loop is collected.
+- The reason it is accepted.
+- The procedure: one test, the c2 control dead within the 10-round cap.
+
+**Where it is stated.** `golib/GoPointerWords.cs` (THE NAMED LEAK remark) and design 18.8.
+
+— H (2026-11-20)
+
 <!-- {% endraw %} — keep this the FINAL line: the board is append-only and every append must land INSIDE the raw guard, or Jekyll's Liquid chokes on quoted Go composite-literal syntax (this exact failure took the Pages build down at f37ba28ef). -->
