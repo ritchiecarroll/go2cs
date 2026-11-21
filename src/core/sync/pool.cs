@@ -24,13 +24,13 @@
 //     closes that gap where it matters: the private slot is taken and filled with a single interlocked
 //     step, and the shard's shared-chain HEAD — single-producer by poolqueue.go's contract — is
 //     serialized by a per-shard producer gate. Stealing (popTail) stays lock-free, as designed.
-//   - poolCleanup is registered with the runtime exactly as Go registers it, and runs when a garbage
-//     collection is REQUESTED (runtime.GC() → the pool hook; see runtime's managed_impl.cs) rather
-//     than at the start of every cycle including automatic ones. Two honest consequences: a program
-//     that never calls runtime.GC() holds its cached items longer than Go's would (a retention
-//     divergence, not a correctness one — Pool only promises that items MAY vanish), and the cleanup
-//     runs on the caller's thread instead of with the world stopped, so a Put racing it can land in a
-//     shard that just became a victim and age one cycle early. Pool's contract permits exactly that.
+//   - poolCleanup is registered with the runtime exactly as Go registers it, and runs once per
+//     collection as Go's clearpools does, automatic collections included: runtime.GC() and the
+//     periodic tick run it at the head of their cycle, and every other CLR collection runs it from
+//     the finalizer thread (PoolCleanupCadence in runtime's managed_impl.cs, which also honors
+//     GOGC=off and never ages twice for one runtime.GC()). The one honest consequence: the cleanup
+//     runs without the world stopped, so a Put racing it can land in a shard that just became a
+//     victim and age one cycle early. Pool's contract permits exactly that.
 using System.Collections.Generic;
 using System.Threading;
 
@@ -273,8 +273,8 @@ internal static (poolLocal, nint) pinSlow(poolState state) {
 
 // poolCleanup drops every pool's victim cache and moves its primary cache into the victim slot. This
 // is the aging step that lets a Pool release what it cached; Go's runtime runs it at the start of each
-// GC cycle with the world stopped, and here it runs when a collection is requested (see the file
-// header for both divergences).
+// GC cycle with the world stopped, and here it runs once per collection without stopping the world
+// (see the file header), so allPoolsMu serializes it against pinSlow.
 internal static void poolCleanup() {
     lock (allPoolsMu) {
         // Drop victim caches from all pools.

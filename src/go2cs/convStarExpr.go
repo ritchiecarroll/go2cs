@@ -92,6 +92,13 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 			// Ꮡp.Value` local. That ref-local cannot be captured by a lambda/closure (CS8175 —
 			// "cannot use ref local inside an anonymous method"), so inside a lambda dereference
 			// the heap box parameter directly (`Ꮡp.Value`), which is a capturable reference type.
+			// A parameter a func literal repoints has no alias anywhere (see
+			// closureRepointedPointerParams): it takes the box form in the body too, with the
+			// nil-deferring accessor its alias was declared with (as convIdent reads it).
+			if v.paramReadsThroughBox(v.info.ObjectOf(ident)) {
+				return AddressPrefix + strings.TrimPrefix(v.getIdentName(ident), "@") + "." + NilDeferringDerefAccessor
+			}
+
 			if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda {
 				return AddressPrefix + strings.TrimPrefix(v.getIdentName(ident), "@") + derefAccessor
 			}

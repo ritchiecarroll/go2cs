@@ -392,7 +392,7 @@ internal static ж<abi.Type> common(this ж<interfaceType> Ꮡt) {
 }
 
 internal static ж<abi.UncommonType> uncommon(this ж<interfaceType> Ꮡt) {
-    return Ꮡt.of(interfaceType.ᏑInterfaceType).of(abi.InterfaceType.ᏑType).Uncommon();
+    return Ꮡt.of(interfaceType.ᏑType).Uncommon();
 }
 
 } partial class reflect_package {

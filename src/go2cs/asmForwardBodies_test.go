@@ -129,6 +129,152 @@ func TestAsmForwardBodiesEmission(t *testing.T) {
 	}
 }
 
+// The sibling rows (zeebo/xxh3): a fixture module named github.com/zeebo/xxh3 whose two NEON functions are assembly
+// with no body, and whose scalar siblings are Go with identical signatures (`ptr` an alias of unsafe.Pointer, as in
+// xxh3 v1.1.0's utils.go).
+const asmSiblingXxh3Go = `package xxh3
+
+import "unsafe"
+
+type (
+	u64 = uint64
+	ptr = unsafe.Pointer
+)
+
+func accumNEON(acc *[8]u64, data, key unsafe.Pointer, len u64)
+
+func accumBlockNEON(acc *[8]u64, data, key unsafe.Pointer)
+
+func accumScalar(accs *[8]u64, p, secret ptr, l u64) { accs[0] += l }
+
+func accumBlockScalar(accs *[8]u64, p, secret ptr) { accs[1]++ }
+
+func Sum(n u64) u64 {
+	var acc [8]u64
+	var block [64]byte
+	accumNEON(&acc, unsafe.Pointer(&block), unsafe.Pointer(&block), n)
+	accumBlockNEON(&acc, unsafe.Pointer(&block), unsafe.Pointer(&block))
+	return acc[0] + acc[1]
+}
+`
+
+const asmSiblingXxh3Asm = `#include "textflag.h"
+
+TEXT ·accumNEON(SB), NOSPLIT, $0-40
+	RET
+
+TEXT ·accumBlockNEON(SB), NOSPLIT, $0-24
+	RET
+`
+
+func TestAsmSiblingForwardEmission(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	if testing.Short() {
+		t.Skip("integration test: runs the real converter over a module fixture")
+	}
+
+	root := t.TempDir()
+	appDir := filepath.Join(root, "app")
+
+	writeModuleFile(t, filepath.Join(appDir, "go.mod"), "module github.com/zeebo/xxh3\n\ngo 1.23\n")
+	writeModuleFile(t, filepath.Join(appDir, "xxh3.go"), asmSiblingXxh3Go)
+	writeModuleFile(t, filepath.Join(appDir, "accum_amd64.s"), asmSiblingXxh3Asm)
+
+	goRoot := build.Default.GOROOT
+
+	if goRoot == "" {
+		goRoot = runtime.GOROOT()
+	}
+
+	options := Options{
+		goRoot:              goRoot,
+		goPath:              build.Default.GOPATH,
+		go2csPath:           filepath.Join(root, "out"),
+		recurse:             true,
+		targetPlatform:      "windows/amd64",
+		indentSpaces:        4,
+		preferVarDecl:       true,
+		useChannelOperators: true,
+	}
+
+	build.Default.GOROOT = options.goRoot
+	build.Default.GOPATH = options.goPath
+
+	var convertErr error
+
+	stderr := captureStderr(t, func() {
+		convertErr = NewModuleConverter(options).ConvertModule(appDir)
+	})
+
+	if convertErr != nil {
+		t.Fatalf("ConvertModule: %v", convertErr)
+	}
+
+	xxh3Cs := strings.ReplaceAll(readGenerated(t, filepath.Join(options.go2csPath, "src", "github.com", "zeebo", "xxh3", "xxh3.cs")), "\r\n", "\n")
+
+	// A forwarder is the partial's implementing declaration, with a body: `{ accumScalar(acc, data, key, len); }`.
+	for name, call := range map[string]string{"accumNEON": "accumScalar(acc, data, key, len);", "accumBlockNEON": "accumBlockScalar(acc, data, key);"} {
+		forwarder := emittedFunction(t, xxh3Cs, name)
+
+		if !strings.Contains(forwarder, call) {
+			t.Errorf("%s must forward to its same-package sibling, `%s`, not stay a bodyless stub:\n%s", name, call, forwarder)
+		}
+
+		if strings.Contains(stderr, "github.com/zeebo/xxh3."+name+" has no Go body") {
+			t.Errorf("%s is forwarded, so it must not be named as a stub (GO2CS2012):\n%s", name, stderr)
+		}
+	}
+}
+
+func TestAsmSiblingForwardIsRefusedBySite(t *testing.T) {
+	isolateConverterPathGlobals(t)
+	if testing.Short() {
+		t.Skip("integration test: loads the fixture package via go/packages")
+	}
+
+	write := func(xxh3Go string) string {
+		dir := t.TempDir()
+
+		writeModuleFiles(t, dir, map[string]string{
+			"go.mod":        "module github.com/zeebo/xxh3\n\ngo 1.23\n",
+			"xxh3.go":       xxh3Go,
+			"accum_amd64.s": asmSiblingXxh3Asm,
+		})
+
+		return dir
+	}
+
+	if refusal := refuseAsmForwardSignatures(loadProductionForDir(t, write(asmSiblingXxh3Go))); refusal != nil {
+		t.Fatalf("identical siblings were refused: %v", refusal)
+	}
+
+	// accumScalar drops a parameter, and accumBlockScalar is gone: both rows must be refused, each by name.
+	wrong := strings.Replace(asmSiblingXxh3Go, "func accumScalar(accs *[8]u64, p, secret ptr, l u64) { accs[0] += l }", "func accumScalar(accs *[8]u64, p ptr, l u64) { accs[0] += l }", 1)
+	wrong = strings.Replace(wrong, "func accumBlockScalar(accs *[8]u64, p, secret ptr) { accs[1]++ }\n", "", 1)
+
+	refusal := refuseAsmForwardSignatures(loadProductionForDir(t, write(wrong)))
+
+	if refusal == nil {
+		t.Fatal("a sibling with another signature, and a missing sibling, were not refused")
+	}
+
+	if len(refusal.sites) != 2 {
+		t.Fatalf("want exactly two refused sites (accumNEON, accumBlockNEON), got %d: %v", len(refusal.sites), refusal.sites)
+	}
+
+	texts := refusal.sites[0].text + "\n" + refusal.sites[1].text
+
+	// Signatures are spelled as go/types prints them, aliases by name (github.com/zeebo/xxh3.u64).
+	for _, want := range []string{
+		"github.com/zeebo/xxh3.accumNEON is assembly that go2cs forwards to its same-package sibling accumScalar, which is func(*[8]github.com/zeebo/xxh3.u64, github.com/zeebo/xxh3.ptr, github.com/zeebo/xxh3.u64); this declaration is func(",
+		"github.com/zeebo/xxh3.accumBlockNEON is assembly that go2cs forwards to its same-package sibling accumBlockScalar, which this package does not declare",
+	} {
+		if !strings.Contains(texts, want) {
+			t.Errorf("the refusal must say %q:\n%s", want, texts)
+		}
+	}
+}
+
 func TestAsmForwardSignatureIsRefusedBySite(t *testing.T) {
 	isolateConverterPathGlobals(t)
 	if testing.Short() {

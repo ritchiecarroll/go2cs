@@ -468,8 +468,14 @@ var packageLock = sync.Mutex{}
 // their own `liftedTypeMap`, but cross-file references (e.g. taking the address
 // of a field of a package-global anonymous-struct var declared in another file)
 // can't see that per-file map. This package-level registry, resolved after the
-// concurrent file-visit barrier, bridges that gap. Guarded by packageLock.
+// file-visit barrier (files are visited sequentially), bridges that gap. Guarded by packageLock.
 var packageDynamicTypeNames map[string]string
+
+// packagePublicLiftNames holds the package-level lifts this package has DECLARED public: publicized
+// (isPublicizedLiftedType) or public by the name rule, and never a function-local lift, which
+// localTypeAccess pins internal whatever its name reads. A reuse that needs a public type may take
+// a lift named here (liftDeclaredPublic). Guarded by packageLock.
+var packagePublicLiftNames map[string]bool
 
 // importedDynamicTypeNames is packageDynamicTypeNames' cross-PACKAGE sibling: each IMPORTED package's
 // published GoDynamicTypeLift records (signature -> lifted C# name), keyed by that package's cleaned
@@ -500,6 +506,10 @@ var importedStructLiftTargets map[string]string
 // reused lift's admission (foreignLiftAdmitted); nil marks a record that could not be read. Guarded by packageLock;
 // reset per package by resetPackageState.
 var importedLiftAdmissionStamps map[string]*inlineArrayStamp
+
+// liftRecordsRead records, per cleaned source directory, the transitive imports whose lift records
+// loadImportLiftRecords has read (or tried to read) from their package_info.cs, so each is read once per package.
+var liftRecordsRead map[string]bool
 
 // packageConstraintLiftNames maps a generic type's inline-constraint DECLARATION (constraintLiftKey)
 // to its lift, for the methods whose receiver copy of the constraint no signature key may name.

@@ -4,21 +4,19 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static nint accumulate(ж<nint> Ꮡcounter, slice<nint> vals) {
-    ref var counter = ref Ꮡcounter.DerefOrNull();
-
+internal static nint accumulate(ж<nint> counter, slice<nint> vals) {
     void add(nint v) {
-        if (Ꮡcounter == nil) {
-            Ꮡcounter = @new<nint>();
+        if (counter == nil) {
+            counter = @new<nint>();
         }
-        Ꮡcounter.Value += v;
+        counter.DerefOrNull() += v;
     }
 
     foreach (var (_, v) in range(vals)) {
         add(v);
     }
 
-    return counter;
+    return counter.DerefOrNull();
 }
 
 internal static void main() {

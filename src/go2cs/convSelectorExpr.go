@@ -2655,6 +2655,13 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 									strings.Join(hopPath, "."), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 							}
 
+							// One view, not one per level (TS perf item 1b): the outer type's accessor for the promoted embed that
+							// declares the method reaches its storage in one step, so the call binds on `x.of(A.ᏑD).M()`, not on
+							// `x.of(A.ᏑB).of(B.ᏑC).of(C.ᏑD).M()`. See promotedOneHopView.
+							if oneHop, ok := v.promotedOneHopView(selectorExpr, fieldAddr, hopFields); ok {
+								return v.aliasResolvedSelector(selectorExpr, fmt.Sprintf("%s.%s", oneHop, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+							}
+
 							for k := 1; k < len(hopFields); k++ {
 								ownerTypeName := convertToCSTypeName(v.getAliasQualifiedTypeName(hopFields[k-1].Type(), false))
 								fieldAddr = fmt.Sprintf("%s.of(%s.%s%s)", fieldAddr, v.boxAccessorType(ownerTypeName, "", hopFields[k-1].Type()),
