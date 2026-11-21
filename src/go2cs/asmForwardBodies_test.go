@@ -10,7 +10,10 @@ package main
 
 import (
 	"go/build"
+	"os"
+	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -273,6 +276,147 @@ func TestAsmSiblingForwardIsRefusedBySite(t *testing.T) {
 			t.Errorf("the refusal must say %q:\n%s", want, texts)
 		}
 	}
+}
+
+// The real module, built and run both ways: a program hashing inputs on both sides of xxh3's 240-byte line with every
+// entry point (Hash, Hash128, HashSeed, HashString and a streaming Hasher), printed by go and by the converted program.
+// On linux/arm64 and darwin/arm64 every input over 240 bytes reaches accumNEON, and the Hasher reaches accumBlockNEON,
+// so before the sibling rows the converted program died at the first long input; elsewhere the arm is the control,
+// since those architectures' accum functions have Go bodies. Opt-in like the other build-and-run arms: the hosted
+// cgo-e2e stage sets GO2CS_TESTS_E2E and is dispatched per leg with a filter naming this test.
+const xxh3ProbeMain = `package main
+
+import (
+	"fmt"
+
+	"github.com/zeebo/xxh3"
+)
+
+func main() {
+	data := make([]byte, 4096)
+
+	for i := range data {
+		data[i] = byte(i*7 + i>>8)
+	}
+
+	for _, n := range []int{16, 240, 241, 1024, 4096} {
+		h128 := xxh3.Hash128(data[:n])
+		fmt.Printf("%d %016x %016x%016x %016x %016x\n", n, xxh3.Hash(data[:n]), h128.Hi, h128.Lo, xxh3.HashSeed(data[:n], 42), xxh3.HashString(string(data[:n])))
+	}
+
+	h := xxh3.New()
+	h.Write(data)
+	h.Write(data[:1000])
+	sum := h.Sum128()
+	fmt.Printf("hasher %016x %016x%016x\n", h.Sum64(), sum.Hi, sum.Lo)
+}
+`
+
+func TestXxh3LongInputsHashAsGoDoes(t *testing.T) {
+	if os.Getenv(testsE2EEnv) != "1" {
+		t.Skipf("opt-in (%s=1): converts github.com/zeebo/xxh3 with -recurse, builds and runs it", testsE2EEnv)
+	}
+
+	framework := regexp.MustCompile(`<TargetFramework Condition="[^"]*">([^<]+)</TargetFramework>`).FindStringSubmatch(renderCsprojTemplate("Exe", "", ""))
+
+	if framework == nil {
+		t.Fatal("the rendered template names no TargetFramework")
+	}
+
+	dotnet := requireDotnetSdk(t, framework[1])
+	target := runtime.GOOS + "/" + runtime.GOARCH
+	root := t.TempDir()
+	module := filepath.Join(root, "xxh3probe")
+	out := filepath.Join(root, "out")
+
+	writeModuleFile(t, filepath.Join(module, "go.mod"), "module example.com/xxh3probe\n\ngo 1.22\n\nrequire github.com/zeebo/xxh3 v1.1.0\n")
+	writeModuleFile(t, filepath.Join(module, "main.go"), xxh3ProbeMain)
+
+	goEnv := append(os.Environ(), "GOWORK=off", "GOFLAGS=-mod=mod")
+	run := func(name string, args ...string) string {
+		t.Helper()
+		cmd := exec.Command(name, args...)
+		cmd.Dir = module
+		cmd.Env = goEnv
+		output, err := cmd.CombinedOutput()
+
+		if err != nil {
+			t.Fatalf("%s %s: %v\n%s", name, strings.Join(args, " "), err, lastLines(string(output), 30))
+		}
+
+		return string(output)
+	}
+
+	run("go", "mod", "tidy")
+	want := strings.ReplaceAll(run("go", "run", "."), "\r\n", "\n")
+
+	treeSrc, err := filepath.Abs("..")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	converted := run(driverBinary(t), "-recurse", "-go2cspath", treeSrc, module, out)
+
+	if strings.Contains(converted, "github.com/zeebo/xxh3.accumNEON has no Go body") || strings.Contains(converted, "github.com/zeebo/xxh3.accumBlockNEON has no Go body") {
+		t.Errorf("the conversion left a NEON stub (GO2CS2012):\n%s", lastLines(converted, 30))
+	}
+
+	projects, err := filepath.Glob(filepath.Join(out, "src", "example.com", "xxh3probe", "*.csproj"))
+
+	if err != nil || len(projects) != 1 {
+		t.Fatalf("the conversion wrote %d main project files, want 1 (%v)\n%s", len(projects), err, lastLines(converted, 30))
+	}
+
+	dotnetBuild := exec.Command(dotnet, cgoBuildArgs(t, projects[0], runtime.GOOS, "")...)
+	dotnetBuild.Env = cgoBuildEnvironment()
+
+	if built, err := dotnetBuild.CombinedOutput(); err != nil {
+		t.Fatalf("the converted program does not build on %s: %v\n%s", target, err, lastLines(strings.ReplaceAll(string(built), "\r\n", "\n"), 40))
+	}
+
+	csRun := exec.Command(dotnet, recurseBuiltAssembly(t, out, projects[0]))
+	var stdout, stderr strings.Builder
+	csRun.Stdout, csRun.Stderr = &stdout, &stderr
+	runErr := csRun.Run()
+	got := strings.ReplaceAll(stdout.String(), "\r\n", "\n")
+
+	t.Logf("READING %s: go printed %d lines; the converted program printed %d lines (%v)", target, strings.Count(want, "\n"), strings.Count(got, "\n"), runErr)
+
+	if runErr != nil || got != want {
+		t.Errorf("the converted program differs from go on %s (%v):\n   go:\n%s\ngo2cs:\n%s\n%s", target, runErr, want, got, lastLines(stderr.String(), 12))
+	}
+}
+
+// recurseBuiltAssembly is the assembly a build of a -recurse conversion's project left under the conversion's output
+// root. A -recurse root collects every project's build output in its own artifacts tree (moduleConverter.go's
+// generated Directory.Build.props), not beside the project, so the assembly is found by name under a bin directory.
+func recurseBuiltAssembly(t *testing.T, outRoot, project string) string {
+	t.Helper()
+
+	contents, err := os.ReadFile(project)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assemblyName := declaredAssemblyName(string(contents)) + ".dll"
+	binSegment := string(filepath.Separator) + "bin" + string(filepath.Separator)
+	var assemblies []string
+
+	_ = filepath.WalkDir(outRoot, func(path string, entry os.DirEntry, err error) error {
+		if err == nil && !entry.IsDir() && entry.Name() == assemblyName && strings.Contains(path, binSegment) {
+			assemblies = append(assemblies, path)
+		}
+
+		return nil
+	})
+
+	if len(assemblies) != 1 {
+		t.Fatalf("the build left %d assemblies named %s under %s, want 1: %v", len(assemblies), assemblyName, outRoot, assemblies)
+	}
+
+	return assemblies[0]
 }
 
 func TestAsmForwardSignatureIsRefusedBySite(t *testing.T) {
