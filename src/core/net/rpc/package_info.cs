@@ -88,6 +88,8 @@ using encoding;
 using global::go.net;
 using static rpc_package;
 using html;
+using reflect = reflect_package;
+using global::go.go;
 // </GlyphForwarderUsings>
 
 [GoPackage("rpc")]

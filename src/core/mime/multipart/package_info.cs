@@ -92,6 +92,8 @@ using textproto = net.textproto_package;
 using @internal;
 using net;
 using static multipart_package;
+using go.mime;
+using path;
 using crypto;
 // </GlyphForwarderUsings>
 

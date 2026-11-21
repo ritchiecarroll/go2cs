@@ -224,12 +224,19 @@ var glyphUsingAlias = regexp.MustCompile(`^using\s+([\p{L}_@][\p{L}\p{N}_]*)\s*=
 // false when one of its aliases already names something else there.
 func glyphRegisterForwarders(text string, blocks string) bool {
 	var usings []string
+	seenNamespace := false
 
 	for _, line := range strings.Split(text, "\n") {
 		trimmed := strings.TrimRight(line, "\r")
 
-		if strings.HasPrefix(trimmed, "partial class ") || strings.HasPrefix(trimmed, "[") && !strings.HasPrefix(trimmed, "[assembly") {
+		// Before the namespace line a `[` opens a Go doc link in the package comment (`[NewClient] on the
+		// connection`, net/rpc), not an attribute.
+		if strings.HasPrefix(trimmed, "partial class ") || seenNamespace && strings.HasPrefix(trimmed, "[") && !strings.HasPrefix(trimmed, "[assembly") {
 			break
+		}
+
+		if strings.HasPrefix(trimmed, "namespace ") {
+			seenNamespace = true
 		}
 
 		if strings.HasPrefix(trimmed, "using ") && strings.HasSuffix(trimmed, ";") {
