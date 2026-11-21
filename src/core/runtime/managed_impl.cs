@@ -2173,7 +2173,19 @@ partial class runtime_package
         method.Name == "Main" && method.IsStatic && method.GetParameters().Length == 0 &&
         !method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false)
             ? "main"
-            : method.Name;
+            : isGlyphMethodBody(method) ? method.Name[..^GlyphMethodSuffix.Length] : method.Name;
+
+    // SCRATCH PROTOTYPE (the global ᴍ cost test): a Go method's BODY is a plain static `<name>ᴍ` in the package class,
+    // its receiver the first parameter, and the Go-named extension forwarder is [StackTraceHidden]. The body's frame is
+    // the method's: its name drops the suffix and its receiver is read from parameter 0. No Go identifier in std, the
+    // behavioral corpus or the converted modules ends in ᴍ (census 2026-11-20), so the suffix is the prototype's
+    // discriminator; the design's form reads a stamp on the body instead.
+    private const string GlyphMethodSuffix = "ᴍ";
+
+    private static bool isGlyphMethodBody(System.Reflection.MethodBase method) =>
+        method.IsStatic && method.Name.Length > GlyphMethodSuffix.Length && method.Name.EndsWith(GlyphMethodSuffix, StringComparison.Ordinal) &&
+        method.GetParameters().Length > 0 &&
+        !method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false);
 
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Reflection.MethodBase, (string? Suffix, string? MethodValue)?> s_statementSiblingNames = new();
 
@@ -2799,7 +2811,7 @@ partial class runtime_package
     // static method and keeps its bare `<pkg>.<name>`, exactly as Go renders one.
     private static string? goReceiverName(System.Reflection.MethodBase method)
     {
-        if (!method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false))
+        if (!method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), inherit: false) && !isGlyphMethodBody(method))
             return null;
 
         System.Reflection.ParameterInfo[] parameters = method.GetParameters();
