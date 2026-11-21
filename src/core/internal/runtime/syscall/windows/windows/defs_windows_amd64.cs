@@ -68,18 +68,18 @@ partial struct Context {
 
 } partial class windows_package {
 
-[GoMethodBody("PC")] internal static uintptr PCᴍ(ref Context c) { return (uintptr)c.Rip; }
-[GoMethodBody("SP")] internal static uintptr SPᴍ(ref Context c) { return (uintptr)c.Rsp; }
+internal static uintptr PC⁔(/*this*/ ref Context c) { return (uintptr)c.Rip; }
+internal static uintptr SP⁔(/*this*/ ref Context c) { return (uintptr)c.Rsp; }
 
 // AMD64 does not have link register, so this returns 0.
-[GoMethodBody("LR")] internal static uintptr LRᴍ(ref Context c) { return 0; }
-[GoMethodBody("SetLR")] internal static void SetLRᴍ(ref Context c, uintptr x) { }
+internal static uintptr LR⁔(/*this*/ ref Context c) { return 0; }
+internal static void SetLR⁔(/*this*/ ref Context c, uintptr x) { }
 
-[GoMethodBody("SetPC")] internal static void SetPCᴍ(ref Context c, uintptr x) { c.Rip = (uint64)x; }
-[GoMethodBody("SetSP")] internal static void SetSPᴍ(ref Context c, uintptr x) { c.Rsp = (uint64)x; }
-[GoMethodBody("SetFP")] internal static void SetFPᴍ(ref Context c, uintptr x) { c.Rbp = (uint64)x; }
+internal static void SetPC⁔(/*this*/ ref Context c, uintptr x) { c.Rip = (uint64)x; }
+internal static void SetSP⁔(/*this*/ ref Context c, uintptr x) { c.Rsp = (uint64)x; }
+internal static void SetFP⁔(/*this*/ ref Context c, uintptr x) { c.Rbp = (uint64)x; }
 
-[GoMethodBody("PushCall")] internal static void PushCallᴍ(ref Context c, uintptr targetPC, uintptr resumePC) {
+internal static void PushCall⁔(/*this*/ ref Context c, uintptr targetPC, uintptr resumePC) {
     var sp = c.SP() - (uintptr)goarch.StackAlign;
     (@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)sp)).Value = resumePC;
     c.SetSP(sp);
@@ -101,7 +101,7 @@ partial struct DISPATCHER_CONTEXT {
 
 } partial class windows_package {
 
-[GoMethodBody("Ctx")] internal static ж<Context> Ctxᴍ(ref DISPATCHER_CONTEXT c) {
+internal static ж<Context> Ctx⁔(/*this*/ ref DISPATCHER_CONTEXT c) {
     return c.Context;
 }
 

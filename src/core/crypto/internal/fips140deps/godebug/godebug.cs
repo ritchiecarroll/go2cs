@@ -17,7 +17,7 @@ public static ж<Setting> New(@string name) {
 
 } partial class godebug_package {
 
-[GoMethodBody("Value")] internal static @string Valueᴍ(ж<Setting> Ꮡs) {
+internal static @string Value⁔(/*this*/ ж<Setting> Ꮡs) {
     return (Ꮡs.Reinterpret<Setting, godebug.Setting>()).Value();
 }
 

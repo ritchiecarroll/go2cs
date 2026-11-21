@@ -63,7 +63,7 @@ partial struct Writer {
 } partial class lzw_package {
 
 // writeLSB writes the code c for "Least Significant Bits first" data.
-[GoMethodBody("writeLSB")] internal static error writeLSBᴍ(ref Writer w, uint32 c) {
+internal static error writeLSB⁔(/*this*/ ref Writer w, uint32 c) {
     w.bits |= (uint32)(c.Lsh(w.nBits));
     w.nBits += w.width;
     while (w.nBits >= 8) {
@@ -77,7 +77,7 @@ partial struct Writer {
 }
 
 // writeMSB writes the code c for "Most Significant Bits first" data.
-[GoMethodBody("writeMSB")] internal static error writeMSBᴍ(ref Writer w, uint32 c) {
+internal static error writeMSB⁔(/*this*/ ref Writer w, uint32 c) {
     w.bits |= (uint32)(c.Lsh((32 - w.width - w.nBits)));
     w.nBits += w.width;
     while (w.nBits >= 8) {
@@ -101,7 +101,7 @@ internal static error errOutOfCodes = errors.New("lzw: out of codes");
 // incHi increments e.hi and checks for both overflow and running out of
 // unused codes. In the latter case, incHi sends a clear code, resets the
 // writer state and returns errOutOfCodes.
-[GoMethodBody("incHi")] internal static error incHiᴍ(ж<Writer> Ꮡw) {
+internal static error incHi⁔(/*this*/ ж<Writer> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.hi++;
@@ -126,11 +126,11 @@ internal static error errOutOfCodes = errors.New("lzw: out of codes");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string lzwInputByteTooLargeForˢᴍWriter => ref lzwInputByteTooLargeForˢᵇᴍWriter;
-private static readonly @string lzwInputByteTooLargeForˢᵇᴍWriter = "lzw: input byte too large for the litWidth"u8;
+internal static ref readonly @string lzwInputByteTooLargeForˢ⁔Writer => ref lzwInputByteTooLargeForˢᵇ⁔Writer;
+private static readonly @string lzwInputByteTooLargeForˢᵇ⁔Writer = "lzw: input byte too large for the litWidth"u8;
 
 // Write writes a compressed representation of p to w's underlying writer.
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<Writer> Ꮡw, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<Writer> Ꮡw, slice<byte> p) {
     nint n = default;
     ref var w = ref Ꮡw.DerefOrNull();
 
@@ -143,7 +143,7 @@ private static readonly @string lzwInputByteTooLargeForˢᵇᴍWriter = "lzw: in
     var maxLit = (uint8)(((uint8)1).Lsh(w.litWidth) - 1); if (maxLit != 0xff) {
         foreach (var (_, x) in range(p)) {
             if (x > maxLit) {
-                w.err = errors.New(lzwInputByteTooLargeForˢᴍWriter);
+                w.err = errors.New(lzwInputByteTooLargeForˢ⁔Writer);
                 return (0, w.err);
             }
         }
@@ -213,7 +213,7 @@ break_loop:;
 
 // Close closes the [Writer], flushing any pending output. It does not close
 // w's underlying writer.
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<Writer> Ꮡw) {
+internal static error Close⁔(/*this*/ ж<Writer> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.err != nil) {
@@ -264,7 +264,7 @@ break_loop:;
 
 // Reset clears the [Writer]'s state and allows it to be reused again
 // as a new [Writer].
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref Writer w, io.Writer dst, Order order, nint litWidth) {
+internal static void Reset⁔(/*this*/ ref Writer w, io.Writer dst, Order order, nint litWidth) {
     w.AssignFrom(new Writer());
     w.init(dst, order, litWidth);
 }
@@ -293,10 +293,10 @@ internal static ж<Writer> newWriter(io.Writer dst, Order order, nint litWidth) 
 } partial class lzw_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string lzwUnknownOrderˢᴍWriter => ref lzwUnknownOrderˢᵇᴍWriter;
-private static readonly @string lzwUnknownOrderˢᵇᴍWriter = "lzw: unknown order"u8;
+internal static ref readonly @string lzwUnknownOrderˢ⁔Writer => ref lzwUnknownOrderˢᵇ⁔Writer;
+private static readonly @string lzwUnknownOrderˢᵇ⁔Writer = "lzw: unknown order"u8;
 
-[GoMethodBody("init")] internal static void initᴍ(ref Writer w, io.Writer dst, Order order, nint litWidth) {
+internal static void init⁔(/*this*/ ref Writer w, io.Writer dst, Order order, nint litWidth) {
     switch (order) {
     case var ᴛ when ᴛ == LSB: {
         w.write = ((Func<ж<Writer>, uint32, error>)(lzwᴛWriter.writeLSB));
@@ -307,7 +307,7 @@ private static readonly @string lzwUnknownOrderˢᵇᴍWriter = "lzw: unknown or
         break;
     }
     default: {
-        w.err = errors.New(lzwUnknownOrderˢᴍWriter);
+        w.err = errors.New(lzwUnknownOrderˢ⁔Writer);
         return;
     }}
     if (litWidth < 2 || 8 < litWidth) {

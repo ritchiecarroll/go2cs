@@ -136,7 +136,7 @@ partial struct gcWork {
 // write barrier while the gcWork was in an inconsistent state, and
 // the write barrier in turn invoked a gcWork method, it could
 // permanently corrupt the gcWork.
-[GoMethodBody("init")] internal static void initᴍ(ref gcWork w) {
+internal static void init⁔(/*this*/ ref gcWork w) {
     w.wbuf1 = getempty();
     var wbuf2 = trygetfull();
     if (wbuf2 == nil) {
@@ -149,7 +149,7 @@ partial struct gcWork {
 // obj must point to the beginning of a heap object or an oblet.
 //
 //go:nowritebarrierrec
-[GoMethodBody("putObj")] internal static void putObjᴍ(ref gcWork w, uintptr obj) {
+internal static void putObj⁔(/*this*/ ref gcWork w, uintptr obj) {
     var flushed = false;
     var wbuf = w.wbuf1;
     // Record that this may acquire the wbufSpans or heap lock to
@@ -192,7 +192,7 @@ partial struct gcWork {
 // otherwise it returns false and the caller needs to call put.
 //
 //go:nowritebarrierrec
-[GoMethodBody("putObjFast")] internal static bool putObjFastᴍ(ref gcWork w, uintptr obj) {
+internal static bool putObjFast⁔(/*this*/ ref gcWork w, uintptr obj) {
     var wbuf = w.wbuf1;
     if (wbuf == nil || wbuf.nobj == len(wbuf.obj)) {
         return false;
@@ -207,7 +207,7 @@ partial struct gcWork {
 // constraints on these pointers.
 //
 //go:nowritebarrierrec
-[GoMethodBody("putObjBatch")] internal static void putObjBatchᴍ(ref gcWork w, slice<uintptr> obj) {
+internal static void putObjBatch⁔(/*this*/ ref gcWork w, slice<uintptr> obj) {
     if (len(obj) == 0) {
         return;
     }
@@ -248,7 +248,7 @@ partial struct gcWork {
 // other gcWork instances or other caches.
 //
 //go:nowritebarrierrec
-[GoMethodBody("tryGetObj")] internal static uintptr tryGetObjᴍ(ref gcWork w) {
+internal static uintptr tryGetObj⁔(/*this*/ ref gcWork w) {
     var wbuf = w.wbuf1;
     if (wbuf == nil) {
         w.init();
@@ -278,7 +278,7 @@ partial struct gcWork {
 // the caller is expected to call tryGet().
 //
 //go:nowritebarrierrec
-[GoMethodBody("tryGetObjFast")] internal static uintptr tryGetObjFastᴍ(ref gcWork w) {
+internal static uintptr tryGetObjFast⁔(/*this*/ ref gcWork w) {
     var wbuf = w.wbuf1;
     if (wbuf == nil || wbuf.nobj == 0) {
         return 0;
@@ -295,7 +295,7 @@ partial struct gcWork {
 // ability to hide pointers during the concurrent mark phase.
 //
 //go:nowritebarrierrec
-[GoMethodBody("dispose")] internal static void disposeᴍ(ж<gcWork> Ꮡw) {
+internal static void dispose⁔(/*this*/ ж<gcWork> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     var wbuf = w.wbuf1; if (wbuf != nil) {
@@ -348,7 +348,7 @@ partial struct gcWork {
 // global queue.
 //
 //go:nowritebarrierrec
-[GoMethodBody("balance")] internal static void balanceᴍ(ref gcWork w) {
+internal static void balance⁔(/*this*/ ref gcWork w) {
     if (w.wbuf1 == nil) {
         return;
     }
@@ -375,7 +375,7 @@ partial struct gcWork {
 // empty reports whether w has no mark work available.
 //
 //go:nowritebarrierrec
-[GoMethodBody("empty")] internal static bool emptyᴍ(ж<gcWork> Ꮡw) {
+internal static bool empty⁔(/*this*/ ж<gcWork> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     return (w.wbuf1 == nil || (w.wbuf1.nobj == 0 && w.wbuf2.nobj == 0)) && Ꮡw.Ꮡspanq.empty();
@@ -401,26 +401,26 @@ partial struct workbuf {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string workbufIsEmptyˢᴍworkbuf => ref workbufIsEmptyˢᵇᴍworkbuf;
-private static readonly @string workbufIsEmptyˢᵇᴍworkbuf = "workbuf is empty"u8;
+internal static ref readonly @string workbufIsEmptyˢ⁔workbuf => ref workbufIsEmptyˢᵇ⁔workbuf;
+private static readonly @string workbufIsEmptyˢᵇ⁔workbuf = "workbuf is empty"u8;
 
 // workbuf factory routines. These funcs are used to manage the
 // workbufs.
 // If the GC asks for some work these are the only routines that
 // make wbufs available to the GC.
-[GoMethodBody("checknonempty")] internal static void checknonemptyᴍ(ref workbuf b) {
+internal static void checknonempty⁔(/*this*/ ref workbuf b) {
     if (b.nobj == 0) {
-        @throw(workbufIsEmptyˢᴍworkbuf);
+        @throw(workbufIsEmptyˢ⁔workbuf);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string workbufIsNotEmptyˢᴍworkbuf => ref workbufIsNotEmptyˢᵇᴍworkbuf;
-private static readonly @string workbufIsNotEmptyˢᵇᴍworkbuf = "workbuf is not empty"u8;
+internal static ref readonly @string workbufIsNotEmptyˢ⁔workbuf => ref workbufIsNotEmptyˢᵇ⁔workbuf;
+private static readonly @string workbufIsNotEmptyˢᵇ⁔workbuf = "workbuf is not empty"u8;
 
-[GoMethodBody("checkempty")] internal static void checkemptyᴍ(ref workbuf b) {
+internal static void checkempty⁔(/*this*/ ref workbuf b) {
     if (b.nobj != 0) {
-        @throw(workbufIsNotEmptyˢᴍworkbuf);
+        @throw(workbufIsNotEmptyˢ⁔workbuf);
     }
 }
 

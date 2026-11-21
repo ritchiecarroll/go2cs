@@ -47,7 +47,7 @@ partial struct mcentral {
 } partial class runtime_package {
 
 // Initialize a single central free list.
-[GoMethodBody("init")] internal static void initᴍ(ref mcentral c, spanClass spc) {
+internal static void init⁔(/*this*/ ref mcentral c, spanClass spc) {
     c.spanclass = spc;
     lockInit(ref nonnil(ref c).partial[0].spineLock, lockRankSpanSetSpine);
     lockInit(ref nonnil(ref c).partial[1].spineLock, lockRankSpanSetSpine);
@@ -57,34 +57,34 @@ partial struct mcentral {
 
 // partialUnswept returns the spanSet which holds partially-filled
 // unswept spans for this sweepgen.
-[GoMethodBody("partialUnswept")] internal static ж<spanSet> partialUnsweptᴍ(ref mcentral c, uint32 sweepgen) {
+internal static ж<spanSet> partialUnswept⁔(/*this*/ ref mcentral c, uint32 sweepgen) {
     return Ꮡ(c.partial, 1 - sweepgen / 2 % 2);
 }
 
 // partialSwept returns the spanSet which holds partially-filled
 // swept spans for this sweepgen.
-[GoMethodBody("partialSwept")] internal static ж<spanSet> partialSweptᴍ(ref mcentral c, uint32 sweepgen) {
+internal static ж<spanSet> partialSwept⁔(/*this*/ ref mcentral c, uint32 sweepgen) {
     return Ꮡ(c.partial, sweepgen / 2 % 2);
 }
 
 // fullUnswept returns the spanSet which holds unswept spans without any
 // free slots for this sweepgen.
-[GoMethodBody("fullUnswept")] internal static ж<spanSet> fullUnsweptᴍ(ref mcentral c, uint32 sweepgen) {
+internal static ж<spanSet> fullUnswept⁔(/*this*/ ref mcentral c, uint32 sweepgen) {
     return Ꮡ(c.full, 1 - sweepgen / 2 % 2);
 }
 
 // fullSwept returns the spanSet which holds swept spans without any
 // free slots for this sweepgen.
-[GoMethodBody("fullSwept")] internal static ж<spanSet> fullSweptᴍ(ref mcentral c, uint32 sweepgen) {
+internal static ж<spanSet> fullSwept⁔(/*this*/ ref mcentral c, uint32 sweepgen) {
     return Ꮡ(c.full, sweepgen / 2 % 2);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string spanHasNoFreeObjectsˢᴍmcentral => ref spanHasNoFreeObjectsˢᵇᴍmcentral;
-private static readonly @string spanHasNoFreeObjectsˢᵇᴍmcentral = "span has no free objects"u8;
+internal static ref readonly @string spanHasNoFreeObjectsˢ⁔mcentral => ref spanHasNoFreeObjectsˢᵇ⁔mcentral;
+private static readonly @string spanHasNoFreeObjectsˢᵇ⁔mcentral = "span has no free objects"u8;
 
 // Allocate a span to use in an mcache.
-[GoMethodBody("cacheSpan")] internal static ж<mspan> cacheSpanᴍ(ref mcentral c) {
+internal static ж<mspan> cacheSpan⁔(/*this*/ ref mcentral c) {
     // Deduct credit for this span allocation and sweep if necessary.
     var spanBytes = (uintptr)gc.SizeClassToNPages[c.spanclass.sizeclass()] * (uintptr)pageSize;
     deductSweepCredit(spanBytes, 0);
@@ -189,7 +189,7 @@ havespan:
     }
     nint n = (nint)s.nelems - (nint)s.allocCount;
     if (n == 0 || s.freeindex == s.nelems || s.allocCount == s.nelems) {
-        @throw(spanHasNoFreeObjectsˢᴍmcentral);
+        @throw(spanHasNoFreeObjectsˢ⁔mcentral);
     }
     var freeByteBase = (uint16)(s.freeindex & ~(64 - 1));
     var whichByte = (uint16)(freeByteBase / 8);
@@ -204,18 +204,18 @@ havespan:
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string uncachingSpanButSˢᴍmcentral => ref uncachingSpanButSˢᵇᴍmcentral;
-private static readonly @string uncachingSpanButSˢᵇᴍmcentral = "uncaching span but s.allocCount == 0"u8;
+internal static ref readonly @string uncachingSpanButSˢ⁔mcentral => ref uncachingSpanButSˢᵇ⁔mcentral;
+private static readonly @string uncachingSpanButSˢᵇ⁔mcentral = "uncaching span but s.allocCount == 0"u8;
 
 // Return span from an mcache.
 //
 // s must have a span class corresponding to this
 // mcentral and it must not be empty.
-[GoMethodBody("uncacheSpan")] internal static void uncacheSpanᴍ(ref mcentral c, ж<mspan> Ꮡs) {
+internal static void uncacheSpan⁔(/*this*/ ref mcentral c, ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.allocCount == 0) {
-        @throw(uncachingSpanButSˢᴍmcentral);
+        @throw(uncachingSpanButSˢ⁔mcentral);
     }
 
     var sg = mheap_.sweepgen;
@@ -259,7 +259,7 @@ private static readonly @string uncachingSpanButSˢᵇᴍmcentral = "uncaching s
 }
 
 // grow allocates a new empty span from the heap and initializes it for c's size class.
-[GoMethodBody("grow")] internal static ж<mspan> growᴍ(ref mcentral c) {
+internal static ж<mspan> grow⁔(/*this*/ ref mcentral c) {
     var npages = (uintptr)gc.SizeClassToNPages[c.spanclass.sizeclass()];
     var s = Ꮡmheap_.alloc(npages, c.spanclass);
     if (s == nil) {

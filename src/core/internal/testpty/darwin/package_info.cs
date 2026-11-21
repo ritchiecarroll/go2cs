@@ -62,9 +62,12 @@ using static go.@internal.testpty_package;
 
 namespace go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static testpty_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("testpty")]
 public static partial class testpty_package
@@ -101,12 +104,12 @@ public static partial class testpty_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(testpty_package.PtyError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testptyᴛPtyError;
+[GoMethodHost(typeof(testpty_package.PtyError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class testptyᴛPtyError;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class testptyᴛPtyError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref PtyError e) => testpty_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref PtyError e) => testpty_package.Unwrapᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref PtyError e) => testpty_package.Error⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Unwrap(this ref PtyError e) => testpty_package.Unwrap⁔(ref e);
 }
 // </GlyphForwarders>

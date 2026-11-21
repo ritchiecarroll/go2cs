@@ -489,7 +489,7 @@ partial struct LimitedReader {
 
 } partial class io_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref LimitedReader l, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref LimitedReader l, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -533,7 +533,7 @@ partial struct SectionReader {
 
 } partial class io_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref SectionReader s, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref SectionReader s, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -555,7 +555,7 @@ internal static error errOffset = errors.New("Seek: invalid offset");
 
 } partial class io_package {
 
-[GoMethodBody("Seek")] internal static (int64, error) Seekᴍ(ref SectionReader s, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ref SectionReader s, int64 offset, nint whence) {
     switch (whence) {
     default: {
         return (0, errWhence);
@@ -579,7 +579,7 @@ internal static error errOffset = errors.New("Seek: invalid offset");
     return (offset - s.@base, default);
 }
 
-[GoMethodBody("ReadAt")] internal static (nint n, error err) ReadAtᴍ(ref SectionReader s, slice<byte> p, int64 off) {
+internal static (nint n, error err) ReadAt⁔(/*this*/ ref SectionReader s, slice<byte> p, int64 off) {
     nint n = default;
     error err = default;
 
@@ -599,13 +599,13 @@ internal static error errOffset = errors.New("Seek: invalid offset");
 }
 
 // Size returns the size of the section in bytes.
-[GoMethodBody("Size")] internal static int64 Sizeᴍ(ref SectionReader s) { return s.limit - s.@base; }
+internal static int64 Size⁔(/*this*/ ref SectionReader s) { return s.limit - s.@base; }
 
 // Outer returns the underlying [ReaderAt] and offsets for the section.
 //
 // The returned values are the same that were passed to [NewSectionReader]
 // when the [SectionReader] was created.
-[GoMethodBody("Outer")] internal static (ReaderAt r, int64 off, int64 n) Outerᴍ(ref SectionReader s) {
+internal static (ReaderAt r, int64 off, int64 n) Outer⁔(/*this*/ ref SectionReader s) {
     return (s.r, s.@base, s.n);
 }
 
@@ -626,7 +626,7 @@ public static ж<OffsetWriter> NewOffsetWriter(WriterAt w, int64 off) {
 
 } partial class io_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref OffsetWriter o, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref OffsetWriter o, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -635,7 +635,7 @@ public static ж<OffsetWriter> NewOffsetWriter(WriterAt w, int64 off) {
     return (n, err);
 }
 
-[GoMethodBody("WriteAt")] internal static (nint n, error err) WriteAtᴍ(ref OffsetWriter o, slice<byte> p, int64 off) {
+internal static (nint n, error err) WriteAt⁔(/*this*/ ref OffsetWriter o, slice<byte> p, int64 off) {
     if (off < 0) {
         return (0, errOffset);
     }
@@ -644,7 +644,7 @@ public static ж<OffsetWriter> NewOffsetWriter(WriterAt w, int64 off) {
     return o.w.WriteAt(p, off);
 }
 
-[GoMethodBody("Seek")] internal static (int64, error) Seekᴍ(ref OffsetWriter o, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ref OffsetWriter o, int64 offset, nint whence) {
     switch (whence) {
     default: {
         return (0, errWhence);
@@ -682,7 +682,7 @@ partial struct teeReader {
 
 } partial class io_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref teeReader t, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref teeReader t, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -710,11 +710,11 @@ internal static ReaderFrom _ᴛ1ʗ = new discard();
 
 } partial class io_package {
 
-[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(discard _, slice<byte> p) {
+internal static (nint, error) Write⁔(/*this*/ discard _, slice<byte> p) {
     return (len(p), default);
 }
 
-[GoMethodBody("WriteString")] internal static (nint, error) WriteStringᴍ(discard _, @string s) {
+internal static (nint, error) WriteString⁔(/*this*/ discard _, @string s) {
     return (len(s), default);
 }
 
@@ -730,7 +730,7 @@ internal static ref Δsync.Pool blackHolePool => ref ((StaticBox<Δsync.Pool>)�
 
 } partial class io_package {
 
-[GoMethodBody("ReadFrom")] internal static (int64 n, error err) ReadFromᴍ(discard _, Reader r) {
+internal static (int64 n, error err) ReadFrom⁔(/*this*/ discard _, Reader r) {
     int64 n = default;
     error err = default;
 
@@ -768,7 +768,7 @@ partial struct nopCloser {
 
 } partial class io_package {
 
-[GoMethodBody("Close")] internal static error Closeᴍ(nopCloser _) { return default; }
+internal static error Close⁔(/*this*/ nopCloser _) { return default; }
 
 } partial class io_package {
 
@@ -778,9 +778,9 @@ partial struct nopCloserWriterTo {
 
 } partial class io_package {
 
-[GoMethodBody("Close")] internal static error Closeᴍ(nopCloserWriterTo _) { return default; }
+internal static error Close⁔(/*this*/ nopCloserWriterTo _) { return default; }
 
-[GoMethodBody("WriteTo")] internal static (int64 n, error err) WriteToᴍ(nopCloserWriterTo c, Writer w) {
+internal static (int64 n, error err) WriteTo⁔(/*this*/ nopCloserWriterTo c, Writer w) {
     return c.Reader._<WriterTo>().WriteTo(w);
 }
 

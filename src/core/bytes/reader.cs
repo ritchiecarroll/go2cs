@@ -26,7 +26,7 @@ partial struct Reader {
 
 // Len returns the number of bytes of the unread portion of the
 // slice.
-[GoMethodBody("Len")] internal static nint Lenᴍ(ref Reader r) {
+internal static nint Len⁔(/*this*/ ref Reader r) {
     if (r.i >= (int64)len(r.s)) {
         return 0;
     }
@@ -36,10 +36,10 @@ partial struct Reader {
 // Size returns the original length of the underlying byte slice.
 // Size is the number of bytes available for reading via [Reader.ReadAt].
 // The result is unaffected by any method calls except [Reader.Reset].
-[GoMethodBody("Size")] internal static int64 Sizeᴍ(ref Reader r) { return (int64)len(r.s); }
+internal static int64 Size⁔(/*this*/ ref Reader r) { return (int64)len(r.s); }
 
 // Read implements the [io.Reader] interface.
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref Reader r, slice<byte> b) {
+internal static (nint n, error err) Read⁔(/*this*/ ref Reader r, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -53,17 +53,17 @@ partial struct Reader {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bytesReaderReadAtˢᴍReader => ref bytesReaderReadAtˢᵇᴍReader;
-private static readonly @string bytesReaderReadAtˢᵇᴍReader = "bytes.Reader.ReadAt: negative offset"u8;
+internal static ref readonly @string bytesReaderReadAtˢ⁔Reader => ref bytesReaderReadAtˢᵇ⁔Reader;
+private static readonly @string bytesReaderReadAtˢᵇ⁔Reader = "bytes.Reader.ReadAt: negative offset"u8;
 
 // ReadAt implements the [io.ReaderAt] interface.
-[GoMethodBody("ReadAt")] internal static (nint n, error err) ReadAtᴍ(ref Reader r, slice<byte> b, int64 off) {
+internal static (nint n, error err) ReadAt⁔(/*this*/ ref Reader r, slice<byte> b, int64 off) {
     nint n = default;
     error err = default;
 
     // cannot modify state - see io.ReaderAt
     if (off < 0) {
-        return (0, errors.New(bytesReaderReadAtˢᴍReader));
+        return (0, errors.New(bytesReaderReadAtˢ⁔Reader));
     }
     if (off >= (int64)len(r.s)) {
         return (0, io.EOF);
@@ -76,7 +76,7 @@ private static readonly @string bytesReaderReadAtˢᵇᴍReader = "bytes.Reader.
 }
 
 // ReadByte implements the [io.ByteReader] interface.
-[GoMethodBody("ReadByte")] internal static (byte, error) ReadByteᴍ(ref Reader r) {
+internal static (byte, error) ReadByte⁔(/*this*/ ref Reader r) {
     r.prevRune = -1;
     if (r.i >= (int64)len(r.s)) {
         return (0, io.EOF);
@@ -87,13 +87,13 @@ private static readonly @string bytesReaderReadAtˢᵇᴍReader = "bytes.Reader.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bytesReaderUnreadByteAtˢᴍReader => ref bytesReaderUnreadByteAtˢᵇᴍReader;
-private static readonly @string bytesReaderUnreadByteAtˢᵇᴍReader = "bytes.Reader.UnreadByte: at beginning of slice"u8;
+internal static ref readonly @string bytesReaderUnreadByteAtˢ⁔Reader => ref bytesReaderUnreadByteAtˢᵇ⁔Reader;
+private static readonly @string bytesReaderUnreadByteAtˢᵇ⁔Reader = "bytes.Reader.UnreadByte: at beginning of slice"u8;
 
 // UnreadByte complements [Reader.ReadByte] in implementing the [io.ByteScanner] interface.
-[GoMethodBody("UnreadByte")] internal static error UnreadByteᴍ(ref Reader r) {
+internal static error UnreadByte⁔(/*this*/ ref Reader r) {
     if (r.i <= 0) {
-        return errors.New(bytesReaderUnreadByteAtˢᴍReader);
+        return errors.New(bytesReaderUnreadByteAtˢ⁔Reader);
     }
     r.prevRune = -1;
     r.i--;
@@ -101,7 +101,7 @@ private static readonly @string bytesReaderUnreadByteAtˢᵇᴍReader = "bytes.R
 }
 
 // ReadRune implements the [io.RuneReader] interface.
-[GoMethodBody("ReadRune")] internal static (rune ch, nint size, error err) ReadRuneᴍ(ref Reader r) {
+internal static (rune ch, nint size, error err) ReadRune⁔(/*this*/ ref Reader r) {
     rune ch = default;
     nint size = default;
     error err = default;
@@ -121,18 +121,18 @@ private static readonly @string bytesReaderUnreadByteAtˢᵇᴍReader = "bytes.R
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bytesReaderUnreadRuneAtˢᴍReader => ref bytesReaderUnreadRuneAtˢᵇᴍReader;
-private static readonly @string bytesReaderUnreadRuneAtˢᵇᴍReader = "bytes.Reader.UnreadRune: at beginning of slice"u8;
-internal static ref readonly @string bytesReaderUnreadRuneˢᴍReader => ref bytesReaderUnreadRuneˢᵇᴍReader;
-private static readonly @string bytesReaderUnreadRuneˢᵇᴍReader = "bytes.Reader.UnreadRune: previous operation was not ReadRune"u8;
+internal static ref readonly @string bytesReaderUnreadRuneAtˢ⁔Reader => ref bytesReaderUnreadRuneAtˢᵇ⁔Reader;
+private static readonly @string bytesReaderUnreadRuneAtˢᵇ⁔Reader = "bytes.Reader.UnreadRune: at beginning of slice"u8;
+internal static ref readonly @string bytesReaderUnreadRuneˢ⁔Reader => ref bytesReaderUnreadRuneˢᵇ⁔Reader;
+private static readonly @string bytesReaderUnreadRuneˢᵇ⁔Reader = "bytes.Reader.UnreadRune: previous operation was not ReadRune"u8;
 
 // UnreadRune complements [Reader.ReadRune] in implementing the [io.RuneScanner] interface.
-[GoMethodBody("UnreadRune")] internal static error UnreadRuneᴍ(ref Reader r) {
+internal static error UnreadRune⁔(/*this*/ ref Reader r) {
     if (r.i <= 0) {
-        return errors.New(bytesReaderUnreadRuneAtˢᴍReader);
+        return errors.New(bytesReaderUnreadRuneAtˢ⁔Reader);
     }
     if (r.prevRune < 0) {
-        return errors.New(bytesReaderUnreadRuneˢᴍReader);
+        return errors.New(bytesReaderUnreadRuneˢ⁔Reader);
     }
     r.i = (int64)r.prevRune;
     r.prevRune = -1;
@@ -140,13 +140,13 @@ private static readonly @string bytesReaderUnreadRuneˢᵇᴍReader = "bytes.Rea
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bytesReaderSeekInvalidˢᴍReader => ref bytesReaderSeekInvalidˢᵇᴍReader;
-private static readonly @string bytesReaderSeekInvalidˢᵇᴍReader = "bytes.Reader.Seek: invalid whence"u8;
-internal static ref readonly @string bytesReaderSeekNegativeˢᴍReader => ref bytesReaderSeekNegativeˢᵇᴍReader;
-private static readonly @string bytesReaderSeekNegativeˢᵇᴍReader = "bytes.Reader.Seek: negative position"u8;
+internal static ref readonly @string bytesReaderSeekInvalidˢ⁔Reader => ref bytesReaderSeekInvalidˢᵇ⁔Reader;
+private static readonly @string bytesReaderSeekInvalidˢᵇ⁔Reader = "bytes.Reader.Seek: invalid whence"u8;
+internal static ref readonly @string bytesReaderSeekNegativeˢ⁔Reader => ref bytesReaderSeekNegativeˢᵇ⁔Reader;
+private static readonly @string bytesReaderSeekNegativeˢᵇ⁔Reader = "bytes.Reader.Seek: negative position"u8;
 
 // Seek implements the [io.Seeker] interface.
-[GoMethodBody("Seek")] internal static (int64, error) Seekᴍ(ref Reader r, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ref Reader r, int64 offset, nint whence) {
     r.prevRune = -1;
     int64 abs = default;
     switch (whence) {
@@ -163,17 +163,17 @@ private static readonly @string bytesReaderSeekNegativeˢᵇᴍReader = "bytes.R
         break;
     }
     default: {
-        return (0, errors.New(bytesReaderSeekInvalidˢᴍReader));
+        return (0, errors.New(bytesReaderSeekInvalidˢ⁔Reader));
     }}
     if (abs < 0) {
-        return (0, errors.New(bytesReaderSeekNegativeˢᴍReader));
+        return (0, errors.New(bytesReaderSeekNegativeˢ⁔Reader));
     }
     r.i = abs;
     return (abs, default);
 }
 
 // WriteTo implements the [io.WriterTo] interface.
-[GoMethodBody("WriteTo")] internal static (int64 n, error err) WriteToᴍ(ref Reader r, io.Writer w) {
+internal static (int64 n, error err) WriteTo⁔(/*this*/ ref Reader r, io.Writer w) {
     int64 n = default;
     error err = default;
 
@@ -195,7 +195,7 @@ private static readonly @string bytesReaderSeekNegativeˢᵇᴍReader = "bytes.R
 }
 
 // Reset resets the [Reader] to be reading from b.
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref Reader r, slice<byte> b) { r = new Reader(b, 0, -1); }
+internal static void Reset⁔(/*this*/ ref Reader r, slice<byte> b) { r = new Reader(b, 0, -1); }
 
 } partial class bytes_package {
 

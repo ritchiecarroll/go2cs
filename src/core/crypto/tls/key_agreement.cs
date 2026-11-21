@@ -48,15 +48,15 @@ partial struct rsaKeyAgreement {
 
 } partial class tls_package {
 
-[GoMethodBody("generateServerKeyExchange")] internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchangeᴍ(rsaKeyAgreement ka, ж<Config> config, ж<Certificate> cert, ж<clientHelloMsg> clientHello, ж<serverHelloMsg> hello) {
+internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange⁔(/*this*/ rsaKeyAgreement ka, ж<Config> config, ж<Certificate> cert, ж<clientHelloMsg> clientHello, ж<serverHelloMsg> hello) {
     return (default, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsCertificatePrivateKeyˢᴍrsaKeyAgreement => ref tlsCertificatePrivateKeyˢᵇᴍrsaKeyAgreement;
-private static readonly @string tlsCertificatePrivateKeyˢᵇᴍrsaKeyAgreement = "tls: certificate private key does not implement crypto.Decrypter"u8;
+internal static ref readonly @string tlsCertificatePrivateKeyˢ⁔rsaKeyAgreement => ref tlsCertificatePrivateKeyˢᵇ⁔rsaKeyAgreement;
+private static readonly @string tlsCertificatePrivateKeyˢᵇ⁔rsaKeyAgreement = "tls: certificate private key does not implement crypto.Decrypter"u8;
 
-[GoMethodBody("processClientKeyExchange")] internal static (slice<byte>, error) processClientKeyExchangeᴍ(rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) {
+internal static (slice<byte>, error) processClientKeyExchange⁔(/*this*/ rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) {
     ref var config = ref Ꮡconfig.DerefOrNull();
     ref var cert = ref Ꮡcert.DerefOrNull();
     ref var ckx = ref Ꮡckx.DerefOrNull();
@@ -72,7 +72,7 @@ private static readonly @string tlsCertificatePrivateKeyˢᵇᴍrsaKeyAgreement 
 
     var (priv, ok) = cert.PrivateKey._<crypto.Decrypter>(ᐧ);
     if (!ok) {
-        return (default, errors.New(tlsCertificatePrivateKeyˢᴍrsaKeyAgreement));
+        return (default, errors.New(tlsCertificatePrivateKeyˢ⁔rsaKeyAgreement));
     }
     // Perform constant time RSA PKCS #1 v1.5 decryption
     var (preMasterSecret, err) = priv.Decrypt(config.rand(), ciphertext, Ꮡ(new rsa.PKCS1v15DecryptOptions(SessionKeyLen: 48)));
@@ -89,18 +89,18 @@ private static readonly @string tlsCertificatePrivateKeyˢᵇᴍrsaKeyAgreement 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsUnexpectedˢᴍrsaKeyAgreement => ref tlsUnexpectedˢᵇᴍrsaKeyAgreement;
-private static readonly @string tlsUnexpectedˢᵇᴍrsaKeyAgreement = "tls: unexpected ServerKeyExchange"u8;
+internal static ref readonly @string tlsUnexpectedˢ⁔rsaKeyAgreement => ref tlsUnexpectedˢᵇ⁔rsaKeyAgreement;
+private static readonly @string tlsUnexpectedˢᵇ⁔rsaKeyAgreement = "tls: unexpected ServerKeyExchange"u8;
 
-[GoMethodBody("processServerKeyExchange")] internal static error processServerKeyExchangeᴍ(rsaKeyAgreement ka, ж<Config> config, ж<clientHelloMsg> clientHello, ж<serverHelloMsg> serverHello, ж<Δx509.Certificate> cert, ж<serverKeyExchangeMsg> skx) {
-    return errors.New(tlsUnexpectedˢᴍrsaKeyAgreement);
+internal static error processServerKeyExchange⁔(/*this*/ rsaKeyAgreement ka, ж<Config> config, ж<clientHelloMsg> clientHello, ж<serverHelloMsg> serverHello, ж<Δx509.Certificate> cert, ж<serverKeyExchangeMsg> skx) {
+    return errors.New(tlsUnexpectedˢ⁔rsaKeyAgreement);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsServerCertificateˢᴍrsaKeyAgreement => ref tlsServerCertificateˢᵇᴍrsaKeyAgreement;
-private static readonly @string tlsServerCertificateˢᵇᴍrsaKeyAgreement = "tls: server certificate contains incorrect key type for selected ciphersuite"u8;
+internal static ref readonly @string tlsServerCertificateˢ⁔rsaKeyAgreement => ref tlsServerCertificateˢᵇ⁔rsaKeyAgreement;
+private static readonly @string tlsServerCertificateˢᵇ⁔rsaKeyAgreement = "tls: server certificate contains incorrect key type for selected ciphersuite"u8;
 
-[GoMethodBody("generateClientKeyExchange")] internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchangeᴍ(rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<Δx509.Certificate> Ꮡcert) {
+internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchange⁔(/*this*/ rsaKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<Δx509.Certificate> Ꮡcert) {
     ref var config = ref Ꮡconfig.DerefOrNull();
     ref var clientHello = ref ᏑclientHello.DerefOrNull();
     ref var cert = ref Ꮡcert.DerefOrNull();
@@ -115,7 +115,7 @@ private static readonly @string tlsServerCertificateˢᵇᴍrsaKeyAgreement = "t
 
     var (rsaKey, ok) = cert.PublicKey._<ж<rsa.PublicKey>>(ᐧ);
     if (!ok) {
-        return (default, default, errors.New(tlsServerCertificateˢᴍrsaKeyAgreement));
+        return (default, default, errors.New(tlsServerCertificateˢ⁔rsaKeyAgreement));
     }
     (var encrypted, err) = rsa.EncryptPKCS1v15(config.rand(), rsaKey, preMasterSecret);
     if (err != nil) {
@@ -185,14 +185,14 @@ partial struct ecdheKeyAgreement {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsNoSupportedEllipticˢ2ᴍecdheKeyAgreement => ref tlsNoSupportedEllipticˢ2ᵇᴍecdheKeyAgreement;
-private static readonly @string tlsNoSupportedEllipticˢ2ᵇᴍecdheKeyAgreement = "tls: no supported elliptic curves offered"u8;
-internal static ref readonly @string tlsCurvePreferencesˢᴍecdheKeyAgreement => ref tlsCurvePreferencesˢᵇᴍecdheKeyAgreement;
-private static readonly @string tlsCurvePreferencesˢᵇᴍecdheKeyAgreement = "tls: CurvePreferences includes unsupported curve"u8;
-internal static ref readonly @string tlsCertificateCannotBeˢᴍecdheKeyAgreement => ref tlsCertificateCannotBeˢᵇᴍecdheKeyAgreement;
-private static readonly @string tlsCertificateCannotBeˢᵇᴍecdheKeyAgreement = "tls: certificate cannot be used with the selected cipher suite"u8;
+internal static ref readonly @string tlsNoSupportedEllipticˢ2⁔ecdheKeyAgreement => ref tlsNoSupportedEllipticˢ2ᵇ⁔ecdheKeyAgreement;
+private static readonly @string tlsNoSupportedEllipticˢ2ᵇ⁔ecdheKeyAgreement = "tls: no supported elliptic curves offered"u8;
+internal static ref readonly @string tlsCurvePreferencesˢ⁔ecdheKeyAgreement => ref tlsCurvePreferencesˢᵇ⁔ecdheKeyAgreement;
+private static readonly @string tlsCurvePreferencesˢᵇ⁔ecdheKeyAgreement = "tls: CurvePreferences includes unsupported curve"u8;
+internal static ref readonly @string tlsCertificateCannotBeˢ⁔ecdheKeyAgreement => ref tlsCertificateCannotBeˢᵇ⁔ecdheKeyAgreement;
+private static readonly @string tlsCertificateCannotBeˢᵇ⁔ecdheKeyAgreement = "tls: certificate cannot be used with the selected cipher suite"u8;
 
-[GoMethodBody("generateServerKeyExchange")] internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchangeᴍ(ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> Ꮡhello) {
+internal static (ж<serverKeyExchangeMsg>, error) generateServerKeyExchange⁔(/*this*/ ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<Certificate> Ꮡcert, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> Ꮡhello) {
     ref var config = ref Ꮡconfig.DerefOrNull();
     ref var cert = ref Ꮡcert.DerefOrNull();
     ref var clientHello = ref ᏑclientHello.DerefOrNull();
@@ -206,10 +206,10 @@ private static readonly @string tlsCertificateCannotBeˢᵇᴍecdheKeyAgreement 
     }
 
     if (ka.curveID == 0) {
-        return (default, errors.New(tlsNoSupportedEllipticˢ2ᴍecdheKeyAgreement));
+        return (default, errors.New(tlsNoSupportedEllipticˢ2⁔ecdheKeyAgreement));
     }
     var (_, okΔ1) = curveForCurveID(ka.curveID); if (!okΔ1) {
-        return (default, errors.New(tlsCurvePreferencesˢᴍecdheKeyAgreement));
+        return (default, errors.New(tlsCurvePreferencesˢ⁔ecdheKeyAgreement));
     }
 
     var (key, err) = generateECDHEKey(config.rand(), ka.curveID);
@@ -249,7 +249,7 @@ private static readonly @string tlsCertificateCannotBeˢᵇᴍecdheKeyAgreement 
         }
         var signed = slices.Concat<slice<byte>, byte>(clientHello.random, hello.random, serverECDHEParams);
         if ((sigType == signaturePKCS1v15 || sigType == signatureRSAPSS) != ka.isRSA) {
-            return (default, errors.New(tlsCertificateCannotBeˢᴍecdheKeyAgreement));
+            return (default, errors.New(tlsCertificateCannotBeˢ⁔ecdheKeyAgreement));
         }
         var signOpts = ((crypto.SignerOpts)sigHash);
         if (sigType == signatureRSAPSS) {
@@ -266,7 +266,7 @@ private static readonly @string tlsCertificateCannotBeˢᵇᴍecdheKeyAgreement 
         }
         var signed = hashForServerKeyExchange(sigType, clientHello.random, hello.random, serverECDHEParams);
         if ((sigType == signaturePKCS1v15) != ka.isRSA) {
-            return (default, errors.New(tlsCertificateCannotBeˢᴍecdheKeyAgreement));
+            return (default, errors.New(tlsCertificateCannotBeˢ⁔ecdheKeyAgreement));
         }
         (sig, errΔ2) = priv.Sign(config.rand(), signed, sigHash);
         if (errΔ2 != nil) {
@@ -294,7 +294,7 @@ private static readonly @string tlsCertificateCannotBeˢᵇᴍecdheKeyAgreement 
     return (skx, default);
 }
 
-[GoMethodBody("processClientKeyExchange")] internal static (slice<byte>, error) processClientKeyExchangeᴍ(ref ecdheKeyAgreement ka, ж<Config> config, ж<Certificate> cert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) {
+internal static (slice<byte>, error) processClientKeyExchange⁔(/*this*/ ref ecdheKeyAgreement ka, ж<Config> config, ж<Certificate> cert, ж<clientKeyExchangeMsg> Ꮡckx, uint16 version) {
     ref var ckx = ref Ꮡckx.DerefOrNull();
 
     if (len(ckx.ciphertext) == 0 || (nint)ckx.ciphertext[0] != len(ckx.ciphertext) - 1) {
@@ -314,14 +314,14 @@ private static readonly @string tlsCertificateCannotBeˢᵇᴍecdheKeyAgreement 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsServerSelectedˢ4ᴍecdheKeyAgreement => ref tlsServerSelectedˢ4ᵇᴍecdheKeyAgreement;
-private static readonly @string tlsServerSelectedˢ4ᵇᴍecdheKeyAgreement = "tls: server selected unsupported curve"u8;
-internal static ref readonly @string tlsServerSelectedˢ5ᴍecdheKeyAgreement => ref tlsServerSelectedˢ5ᵇᴍecdheKeyAgreement;
-private static readonly @string tlsServerSelectedˢ5ᵇᴍecdheKeyAgreement = "tls: server selected unoffered curve"u8;
-internal static ref readonly @string tlsCertificateUsedWithˢᴍecdheKeyAgreement => ref tlsCertificateUsedWithˢᵇᴍecdheKeyAgreement;
-private static readonly @string tlsCertificateUsedWithˢᵇᴍecdheKeyAgreement = "tls: certificate used with invalid signature algorithm"u8;
+internal static ref readonly @string tlsServerSelectedˢ4⁔ecdheKeyAgreement => ref tlsServerSelectedˢ4ᵇ⁔ecdheKeyAgreement;
+private static readonly @string tlsServerSelectedˢ4ᵇ⁔ecdheKeyAgreement = "tls: server selected unsupported curve"u8;
+internal static ref readonly @string tlsServerSelectedˢ5⁔ecdheKeyAgreement => ref tlsServerSelectedˢ5ᵇ⁔ecdheKeyAgreement;
+private static readonly @string tlsServerSelectedˢ5ᵇ⁔ecdheKeyAgreement = "tls: server selected unoffered curve"u8;
+internal static ref readonly @string tlsCertificateUsedWithˢ⁔ecdheKeyAgreement => ref tlsCertificateUsedWithˢᵇ⁔ecdheKeyAgreement;
+private static readonly @string tlsCertificateUsedWithˢᵇ⁔ecdheKeyAgreement = "tls: certificate used with invalid signature algorithm"u8;
 
-[GoMethodBody("processServerKeyExchange")] internal static error processServerKeyExchangeᴍ(ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> ᏑserverHello, ж<Δx509.Certificate> Ꮡcert, ж<serverKeyExchangeMsg> Ꮡskx) {
+internal static error processServerKeyExchange⁔(/*this*/ ref ecdheKeyAgreement ka, ж<Config> Ꮡconfig, ж<clientHelloMsg> ᏑclientHello, ж<serverHelloMsg> ᏑserverHello, ж<Δx509.Certificate> Ꮡcert, ж<serverKeyExchangeMsg> Ꮡskx) {
     ref var config = ref Ꮡconfig.DerefOrNull();
     ref var clientHello = ref ᏑclientHello.DerefOrNull();
     ref var serverHello = ref ᏑserverHello.DerefOrNull();
@@ -332,7 +332,7 @@ private static readonly @string tlsCertificateUsedWithˢᵇᴍecdheKeyAgreement 
         return errServerKeyExchange;
     }
     if (skx.key[0] != 3) { // named curve
-        return errors.New(tlsServerSelectedˢ4ᴍecdheKeyAgreement);
+        return errors.New(tlsServerSelectedˢ4⁔ecdheKeyAgreement);
     }
     ka.curveID = (CurveID)((CurveID)(uint16)(((CurveID)(uint16)skx.key[1]) << 8) | ((CurveID)(uint16)skx.key[2]));
 
@@ -361,11 +361,11 @@ private static readonly @string tlsCertificateUsedWithˢᵇᴍecdheKeyAgreement 
     sig = sig[2..];
 
     if (!slices.Contains(clientHello.supportedCurves, ka.curveID)) {
-        return errors.New(tlsServerSelectedˢ5ᴍecdheKeyAgreement);
+        return errors.New(tlsServerSelectedˢ5⁔ecdheKeyAgreement);
     }
 
     var (_, ok) = curveForCurveID(ka.curveID); if (!ok) {
-        return errors.New(tlsServerSelectedˢ4ᴍecdheKeyAgreement);
+        return errors.New(tlsServerSelectedˢ4⁔ecdheKeyAgreement);
     }
 
     var (key, err) = generateECDHEKey(config.rand(), ka.curveID);
@@ -393,7 +393,7 @@ private static readonly @string tlsCertificateUsedWithˢᵇᴍecdheKeyAgreement 
     crypto.Hash sigHash = default;
     if (ka.version >= VersionTLS12) {
         if (!isSupportedSignatureAlgorithm(ka.signatureAlgorithm, clientHello.supportedSignatureAlgorithms)) {
-            return errors.New(tlsCertificateUsedWithˢᴍecdheKeyAgreement);
+            return errors.New(tlsCertificateUsedWithˢ⁔ecdheKeyAgreement);
         }
         (sigType, sigHash, err) = typeAndHashFromSignatureScheme(ka.signatureAlgorithm);
         if (err != nil) {
@@ -428,12 +428,12 @@ private static readonly @string tlsCertificateUsedWithˢᵇᴍecdheKeyAgreement 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsMissingˢᴍecdheKeyAgreement => ref tlsMissingˢᵇᴍecdheKeyAgreement;
-private static readonly @string tlsMissingˢᵇᴍecdheKeyAgreement = "tls: missing ServerKeyExchange message"u8;
+internal static ref readonly @string tlsMissingˢ⁔ecdheKeyAgreement => ref tlsMissingˢᵇ⁔ecdheKeyAgreement;
+private static readonly @string tlsMissingˢᵇ⁔ecdheKeyAgreement = "tls: missing ServerKeyExchange message"u8;
 
-[GoMethodBody("generateClientKeyExchange")] internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchangeᴍ(ref ecdheKeyAgreement ka, ж<Config> config, ж<clientHelloMsg> clientHello, ж<Δx509.Certificate> cert) {
+internal static (slice<byte>, ж<clientKeyExchangeMsg>, error) generateClientKeyExchange⁔(/*this*/ ref ecdheKeyAgreement ka, ж<Config> config, ж<clientHelloMsg> clientHello, ж<Δx509.Certificate> cert) {
     if (ka.ckx == nil) {
-        return (default, default, errors.New(tlsMissingˢᴍecdheKeyAgreement));
+        return (default, default, errors.New(tlsMissingˢ⁔ecdheKeyAgreement));
     }
 
     return (ka.preMasterSecret, ka.ckx, default);

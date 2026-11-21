@@ -69,11 +69,14 @@ using static go.crypto.@internal.fips140.rsa_package;
 
 namespace go.crypto.@internal.fips140;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using static rsa_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("rsa")]
 public static partial class rsa_package
@@ -120,16 +123,16 @@ public static partial class rsa_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(rsa_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPrivateKey;
-[GoMethodHost(typeof(rsa_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPublicKey;
+[GoMethodHost(typeof(rsa_package.PrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rsaᴛPrivateKey;
+[GoMethodHost(typeof(rsa_package.PublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rsaᴛPublicKey;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class rsaᴛPublicKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Size(this ref PublicKey pub) => rsa_package.Sizeᴍ(ref pub);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this ref PublicKey pub) => rsa_package.Size⁔(ref pub);
 }
 partial class rsaᴛPrivateKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => rsa_package.PublicKeyᴍ(Ꮡpriv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) Export(this ref PrivateKey priv) => rsa_package.Exportᴍ(ref priv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => rsa_package.PublicKey⁔(Ꮡpriv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) Export(this ref PrivateKey priv) => rsa_package.Export⁔(ref priv);
 }
 // </GlyphForwarders>

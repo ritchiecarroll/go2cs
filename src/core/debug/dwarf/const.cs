@@ -140,7 +140,7 @@ public static Attr AttrLoclistsBase => 0x8C;
 
 } partial class dwarf_package {
 
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(Attr a) {
+internal static @string GoString⁔(/*this*/ Attr a) {
     var (str, ok) = _Attr_map[a, ꟷ]; if (ok) {
         return "dwarf.Attr"u8 + str;
     }
@@ -283,7 +283,7 @@ public static Tag TagImmutableType => 0x4B;
 
 } partial class dwarf_package {
 
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(Tag t) {
+internal static @string GoString⁔(/*this*/ Tag t) {
     if (t <= TagTemplateAlias) {
         return "dwarf.Tag"u8 + t.String();
     }

@@ -20,7 +20,7 @@ partial struct StreamReader {
 
 } partial class cipher_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(StreamReader r, slice<byte> dst) {
+internal static (nint n, error err) Read⁔(/*this*/ StreamReader r, slice<byte> dst) {
     nint n = default;
     error err = default;
 
@@ -44,7 +44,7 @@ partial struct StreamWriter {
 
 } partial class cipher_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(StreamWriter w, slice<byte> src) {
+internal static (nint n, error err) Write⁔(/*this*/ StreamWriter w, slice<byte> src) {
     nint n = default;
     error err = default;
 
@@ -59,7 +59,7 @@ partial struct StreamWriter {
 
 // Close closes the underlying Writer and returns its Close return value, if the Writer
 // is also an io.Closer. Otherwise it returns nil.
-[GoMethodBody("Close")] internal static error Closeᴍ(StreamWriter w) {
+internal static error Close⁔(/*this*/ StreamWriter w) {
     var (c, ok) = w.W._<io.Closer>(ᐧ); if (ok) {
         return c.Close();
     }

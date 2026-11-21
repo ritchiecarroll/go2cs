@@ -52,14 +52,14 @@ partial struct Printer {
 
 } partial class comment_package {
 
-[GoMethodBody("headingLevel")] internal static nint headingLevelᴍ(ref Printer p) {
+internal static nint headingLevel⁔(/*this*/ ref Printer p) {
     if (p.HeadingLevel <= 0) {
         return 3;
     }
     return p.HeadingLevel;
 }
 
-[GoMethodBody("headingID")] internal static @string headingIDᴍ(ref Printer p, ж<Heading> Ꮡh) {
+internal static @string headingID⁔(/*this*/ ref Printer p, ж<Heading> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (p.HeadingID == nil) {
@@ -68,7 +68,7 @@ partial struct Printer {
     return p.HeadingID(Ꮡh);
 }
 
-[GoMethodBody("docLinkURL")] internal static @string docLinkURLᴍ(ref Printer p, ж<DocLink> Ꮡlink) {
+internal static @string docLinkURL⁔(/*this*/ ref Printer p, ж<DocLink> Ꮡlink) {
     ref var link = ref Ꮡlink.DerefOrNull();
 
     if (p.DocLinkURL != nil) {
@@ -97,7 +97,7 @@ partial struct Printer {
 //	"/pkg"  → "/pkg/math#Sqrt"
 //	"/"     → "/math/#Sqrt"
 //	""      → "/math#Sqrt"
-[GoMethodBody("DefaultURL")] internal static @string DefaultURLᴍ(ref DocLink l, @string baseURL) {
+internal static @string DefaultURL⁔(/*this*/ ref DocLink l, @string baseURL) {
     if (l.ImportPath != ""u8) {
         @string slash = ""u8;
         if (strings.HasSuffix(baseURL, "/")) {
@@ -125,8 +125,8 @@ partial struct Printer {
 } partial class comment_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hdrˢᴍHeading => ref hdrˢᵇᴍHeading;
-private static readonly @string hdrˢᵇᴍHeading = "hdr-"u8;
+internal static ref readonly @string hdrˢ⁔Heading => ref hdrˢᵇ⁔Heading;
+private static readonly @string hdrˢᵇ⁔Heading = "hdr-"u8;
 
 // DefaultID returns the default anchor ID for the heading h.
 //
@@ -135,7 +135,7 @@ private static readonly @string hdrˢᵇᴍHeading = "hdr-"u8;
 // and then adding the prefix “hdr-”.
 // For example, if the heading text is “Go Doc Comments”,
 // the default ID is “hdr-Go_Doc_Comments”.
-[GoMethodBody("DefaultID")] internal static @string DefaultIDᴍ(ref Heading h) {
+internal static @string DefaultID⁔(/*this*/ ref Heading h) {
     // Note: The “hdr-” prefix is important to avoid DOM clobbering attacks.
     // See https://pkg.go.dev/github.com/google/safehtml#Identifier.
     ref var @out = ref heap(new strings.Builder(), out var Ꮡout);
@@ -146,7 +146,7 @@ private static readonly @string hdrˢᵇᴍHeading = "hdr-"u8;
         return ""u8;
     }
     @out.Reset();
-    Ꮡout.WriteString(hdrˢᴍHeading);
+    Ꮡout.WriteString(hdrˢ⁔Heading);
     foreach (var (_, r) in s) {
         if (r < 0x80 && isIdentASCII((byte)r)) {
             Ꮡout.WriteByte((byte)r);
@@ -167,7 +167,7 @@ partial struct commentPrinter {
 
 // Comment returns the standard Go formatting of the [Doc],
 // without any comment markers.
-[GoMethodBody("Comment")] internal static slice<byte> Commentᴍ(ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+internal static slice<byte> Comment⁔(/*this*/ ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var cp = Ꮡ(new commentPrinter(Printer: Ꮡp));
@@ -219,11 +219,11 @@ internal static bool blankBefore(Block x) {
 } partial class comment_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string fourSpaceᶜ1ᴍcommentPrinter => ref fourSpaceᶜ1ᵇᴍcommentPrinter;
-private static readonly @string fourSpaceᶜ1ᵇᴍcommentPrinter = "    "u8;
+internal static ref readonly @string fourSpaceᶜ1⁔commentPrinter => ref fourSpaceᶜ1ᵇ⁔commentPrinter;
+private static readonly @string fourSpaceᶜ1ᵇ⁔commentPrinter = "    "u8;
 
 // block prints the block x to out.
-[GoMethodBody("block")] internal static void blockᴍ(ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
+internal static void block⁔(/*this*/ ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     switch (x.type()) {
@@ -270,7 +270,7 @@ private static readonly @string fourSpaceᶜ1ᵇᴍcommentPrinter = "    "u8;
                 @out.WriteString(". ");
             }
             foreach (var (iΔ1, blk) in range(item.Content)) {
-                @string fourSpace = fourSpaceᶜ1ᴍcommentPrinter;
+                @string fourSpace = fourSpaceᶜ1⁔commentPrinter;
                 if (iΔ1 > 0) {
                     @out.WriteString("\n" + fourSpace);
                 }
@@ -283,7 +283,7 @@ private static readonly @string fourSpaceᶜ1ᵇᴍcommentPrinter = "    "u8;
 }
 
 // text prints the text sequence x to out.
-[GoMethodBody("text")] internal static void textᴍ(ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) {
+internal static void text⁔(/*this*/ ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     foreach (var (_, t) in range(x)) {
@@ -317,7 +317,7 @@ private static readonly @string fourSpaceᶜ1ᵇᴍcommentPrinter = "    "u8;
 
 // indent prints s to out, indenting with the indent string
 // after each newline in s.
-[GoMethodBody("indent")] internal static void indentᴍ(ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, @string s) {
+internal static void indent⁔(/*this*/ ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, @string s) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     while (s != ""u8) {

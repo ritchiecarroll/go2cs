@@ -127,7 +127,7 @@ internal static nuint chunkPageIndex(uintptr p) {
 } partial class runtime_package {
 
 // l1 returns the index into the first level of (*pageAlloc).chunks.
-[GoMethodBody("l1")] internal static nuint l1ᴍ(chunkIdx i) {
+internal static nuint l1⁔(/*this*/ chunkIdx i) {
     if (pallocChunksL1Bits == 0) {
         // Let the compiler optimize this away if there's no
         // L1 map.
@@ -138,7 +138,7 @@ internal static nuint chunkPageIndex(uintptr p) {
 }
 
 // l2 returns the index into the second level of (*pageAlloc).chunks.
-[GoMethodBody("l2")] internal static nuint l2ᴍ(chunkIdx i) {
+internal static nuint l2⁔(/*this*/ chunkIdx i) {
     if (pallocChunksL1Bits == 0) {
         return (nuint)i;
     } else {
@@ -309,10 +309,10 @@ partial struct pageAlloc {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string rootLevelMaxPagesDoesnTˢᴍpageAlloc => ref rootLevelMaxPagesDoesnTˢᵇᴍpageAlloc;
-private static readonly @string rootLevelMaxPagesDoesnTˢᵇᴍpageAlloc = "root level max pages doesn't fit in summary"u8;
+internal static ref readonly @string rootLevelMaxPagesDoesnTˢ⁔pageAlloc => ref rootLevelMaxPagesDoesnTˢᵇ⁔pageAlloc;
+private static readonly @string rootLevelMaxPagesDoesnTˢᵇ⁔pageAlloc = "root level max pages doesn't fit in summary"u8;
 
-[GoMethodBody("init")] internal static void initᴍ(ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sysMemStat> ᏑsysStat, bool test) {
+internal static void init⁔(/*this*/ ж<pageAlloc> Ꮡp, ж<mutex> ᏑmheapLock, ж<sysMemStat> ᏑsysStat, bool test) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var mheapLock = ref ᏑmheapLock.DerefOrNull();
     ref var sysStat = ref ᏑsysStat.DerefOrNull();
@@ -323,7 +323,7 @@ private static readonly @string rootLevelMaxPagesDoesnTˢᵇᴍpageAlloc = "root
         // is a big problem. Throw.
         print((@string)"runtime: root level max pages = ", ((nint)1).Lsh(levelLogPages[0]), (@string)"\n");
         print((@string)"runtime: summary max pages = ", (nint)(maxPackedValue), (@string)"\n");
-        @throw(rootLevelMaxPagesDoesnTˢᴍpageAlloc);
+        @throw(rootLevelMaxPagesDoesnTˢ⁔pageAlloc);
     }
     p.sysStat = ᏑsysStat;
 
@@ -349,7 +349,7 @@ private static readonly @string rootLevelMaxPagesDoesnTˢᵇᴍpageAlloc = "root
 // tryChunkOf returns the bitmap data for the given chunk.
 //
 // Returns nil if the chunk data has not been mapped.
-[GoMethodBody("tryChunkOf")] internal static ж<pallocData> tryChunkOfᴍ(ref pageAlloc p, chunkIdx ci) {
+internal static ж<pallocData> tryChunkOf⁔(/*this*/ ref pageAlloc p, chunkIdx ci) {
     var l2 = p.chunks[ci.l1()];
     if (l2 == nil) {
         return default;
@@ -360,19 +360,19 @@ private static readonly @string rootLevelMaxPagesDoesnTˢᵇᴍpageAlloc = "root
 // chunkOf returns the chunk at the given chunk index.
 //
 // The chunk index must be valid or this method may throw.
-[GoMethodBody("chunkOf")] internal static ж<pallocData> chunkOfᴍ(ref pageAlloc p, chunkIdx ci) {
+internal static ж<pallocData> chunkOf⁔(/*this*/ ref pageAlloc p, chunkIdx ci) {
     return p.chunks[ci.l1()].at<pallocData>((ulong)(ci.l2()));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string pageAllocOutOfMemoryˢᴍpageAlloc => ref pageAllocOutOfMemoryˢᵇᴍpageAlloc;
-private static readonly @string pageAllocOutOfMemoryˢᵇᴍpageAlloc = "pageAlloc: out of memory"u8;
+internal static ref readonly @string pageAllocOutOfMemoryˢ⁔pageAlloc => ref pageAllocOutOfMemoryˢᵇ⁔pageAlloc;
+private static readonly @string pageAllocOutOfMemoryˢᵇ⁔pageAlloc = "pageAlloc: out of memory"u8;
 
 // grow sets up the metadata for the address range [base, base+size).
 // It may allocate metadata, in which case *p.sysStat will be updated.
 //
 // p.mheapLock must be held.
-[GoMethodBody("grow")] internal static void growᴍ(ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) {
+internal static void grow⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr @base, uintptr size) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     assertLockHeld(p.mheapLock);
@@ -424,7 +424,7 @@ private static readonly @string pageAllocOutOfMemoryˢᵇᴍpageAlloc = "pageAll
             uintptr l2Size = /* unsafe.Sizeof(*p.chunks[0]) */ 1048576;
             @unsafe.Pointer r = sysAlloc(l2Size, p.sysStat, vmaNamePageAllocIndex);
             if (r == nil) {
-                @throw(pageAllocOutOfMemoryˢᴍpageAlloc);
+                @throw(pageAllocOutOfMemoryˢ⁔pageAlloc);
             }
             if (!p.test) {
                 // Make the chunk mapping eligible or ineligible
@@ -462,7 +462,7 @@ private static readonly @string pageAllocOutOfMemoryˢᵇᴍpageAlloc = "pageAll
 // Must be called on the system stack because it acquires the heap lock.
 //
 //go:systemstack
-[GoMethodBody("enableChunkHugePages")] internal static void enableChunkHugePagesᴍ(ref pageAlloc p) {
+internal static void enableChunkHugePages⁔(/*this*/ ref pageAlloc p) {
     // Grab the heap lock to turn on huge pages for new chunks and clone the current
     // heap address space ranges.
     //
@@ -503,7 +503,7 @@ private static readonly @string pageAllocOutOfMemoryˢᵇᴍpageAlloc = "pageAll
 // whether the operation performed was an allocation or a free.
 //
 // p.mheapLock must be held.
-[GoMethodBody("update")] internal static void updateᴍ(ref pageAlloc p, uintptr @base, uintptr npages, bool contig, bool alloc) {
+internal static void update⁔(/*this*/ ref pageAlloc p, uintptr @base, uintptr npages, bool contig, bool alloc) {
     assertLockHeld(p.mheapLock);
 
     // base, limit, start, and end are inclusive.
@@ -589,7 +589,7 @@ private static readonly @string pageAllocOutOfMemoryˢᵇᴍpageAlloc = "pageAll
 // allocated range.
 //
 // p.mheapLock must be held.
-[GoMethodBody("allocRange")] internal static uintptr allocRangeᴍ(ref pageAlloc p, uintptr @base, uintptr npages) {
+internal static uintptr allocRange⁔(/*this*/ ref pageAlloc p, uintptr @base, uintptr npages) {
     assertLockHeld(p.mheapLock);
 
     var limit = @base + npages * (uintptr)pageSize - 1;
@@ -632,7 +632,7 @@ private static readonly @string pageAllocOutOfMemoryˢᵇᴍpageAlloc = "pageAll
 // it returns maxOffAddr.
 //
 // p.mheapLock must be held.
-[GoMethodBody("findMappedAddr")] internal static offAddr findMappedAddrᴍ(ref pageAlloc p, offAddr addr) {
+internal static offAddr findMappedAddr⁔(/*this*/ ref pageAlloc p, offAddr addr) {
     assertLockHeld(p.mheapLock);
 
     // If we're not in a test, validate first by checking mheap_.arenas.
@@ -661,10 +661,10 @@ internal partial struct find_firstFree /*dyn*/ {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string rangePartiallyOverlapsˢᴍpageAlloc => ref rangePartiallyOverlapsˢᵇᴍpageAlloc;
-private static readonly @string rangePartiallyOverlapsˢᵇᴍpageAlloc = "range partially overlaps"u8;
-internal static ref readonly @string badSummaryDataˢᴍpageAlloc => ref badSummaryDataˢᵇᴍpageAlloc;
-private static readonly @string badSummaryDataˢᵇᴍpageAlloc = "bad summary data"u8;
+internal static ref readonly @string rangePartiallyOverlapsˢ⁔pageAlloc => ref rangePartiallyOverlapsˢᵇ⁔pageAlloc;
+private static readonly @string rangePartiallyOverlapsˢᵇ⁔pageAlloc = "range partially overlaps"u8;
+internal static ref readonly @string badSummaryDataˢ⁔pageAlloc => ref badSummaryDataˢᵇ⁔pageAlloc;
+private static readonly @string badSummaryDataˢᵇ⁔pageAlloc = "bad summary data"u8;
 
 // find searches for the first (address-ordered) contiguous free region of
 // npages in size and returns a base address for that region.
@@ -682,7 +682,7 @@ private static readonly @string badSummaryDataˢᵇᴍpageAlloc = "bad summary d
 // searchAddr returned is invalid and must be ignored.
 //
 // p.mheapLock must be held.
-[GoMethodBody("find")] internal static (uintptr, offAddr) findᴍ(ref pageAlloc p, uintptr npages) {
+internal static (uintptr, offAddr) find⁔(/*this*/ ref pageAlloc p, uintptr npages) {
     assertLockHeld(p.mheapLock);
 
     // Search algorithm.
@@ -750,7 +750,7 @@ private static readonly @string badSummaryDataˢᵇᴍpageAlloc = "bad summary d
             // so throw.
             print((@string)"runtime: addr = ", (hex)(uint64)addrΔ1.addr(), (@string)", size = ", size, (@string)"\n");
             print((@string)"runtime: base = ", (hex)(uint64)ᏑfirstFree.Value.@base.addr(), (@string)", bound = ", (hex)(uint64)ᏑfirstFree.Value.bound.addr(), (@string)"\n");
-            @throw(rangePartiallyOverlapsˢᴍpageAlloc);
+            @throw(rangePartiallyOverlapsˢ⁔pageAlloc);
         }
     }
 
@@ -863,7 +863,7 @@ nextLevel:
             var sum = entries[jΔ2];
             print((@string)"runtime: summary[", l, (@string)"][", i + jΔ2, (@string)"] = (", sum.start(), (@string)", ", sum.max(), (@string)", ", sum.end(), (@string)")\n");
         }
-        @throw(badSummaryDataˢᴍpageAlloc);
+        @throw(badSummaryDataˢ⁔pageAlloc);
 continue_nextLevel:;
     }
 break_nextLevel:;
@@ -883,7 +883,7 @@ break_nextLevel:;
         var sum = p.summary[len(p.summary) - 1][i];
         print((@string)"runtime: summary[", (nint)(len(p.summary) - 1), (@string)"][", i, (@string)"] = (", sum.start(), (@string)", ", sum.max(), (@string)", ", sum.end(), (@string)")\n");
         print((@string)"runtime: npages = ", npages, (@string)"\n");
-        @throw(badSummaryDataˢᴍpageAlloc);
+        @throw(badSummaryDataˢ⁔pageAlloc);
     }
 
     // Compute the address at which the free space starts.
@@ -908,7 +908,7 @@ break_nextLevel:;
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-[GoMethodBody("alloc")] internal static (uintptr addr, uintptr scav) allocᴍ(ref pageAlloc p, uintptr npages) {
+internal static (uintptr addr, uintptr scav) alloc⁔(/*this*/ ref pageAlloc p, uintptr npages) {
     uintptr addr = default;
     uintptr scav = default;
 
@@ -931,7 +931,7 @@ break_nextLevel:;
             if (j == ~(nuint)0) {
                 print((@string)"runtime: max = ", max, (@string)", npages = ", npages, (@string)"\n");
                 print((@string)"runtime: searchIdx = ", chunkPageIndex(p.searchAddr.addr()), (@string)", p.searchAddr = ", (hex)(uint64)p.searchAddr.addr(), (@string)"\n");
-                @throw(badSummaryDataˢᴍpageAlloc);
+                @throw(badSummaryDataˢ⁔pageAlloc);
             }
             addr = chunkBase(i) + (uintptr)j * (uintptr)pageSize;
             searchAddr = new offAddr(chunkBase(i) + (uintptr)searchIdx * (uintptr)pageSize);
@@ -972,7 +972,7 @@ Found:
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-[GoMethodBody("free")] internal static void freeᴍ(ж<pageAlloc> Ꮡp, uintptr @base, uintptr npages) {
+internal static void free⁔(/*this*/ ж<pageAlloc> Ꮡp, uintptr @base, uintptr npages) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     assertLockHeld(p.mheapLock);
@@ -1024,7 +1024,7 @@ Found:
 // newly-updated bitmap.
 //
 // p.mheapLock must be held.
-[GoMethodBody("markRandomPaddingPages")] internal static void markRandomPaddingPagesᴍ(ref pageAlloc p, uintptr @base, uintptr npages) {
+internal static void markRandomPaddingPages⁔(/*this*/ ref pageAlloc p, uintptr @base, uintptr npages) {
     assertLockHeld(p.mheapLock);
 
     var limit = @base + npages * (uintptr)pageSize - 1;
@@ -1087,7 +1087,7 @@ internal static pallocSum packPallocSum(nuint start, nuint max, nuint end) {
 } partial class runtime_package {
 
 // start extracts the start value from a packed sum.
-[GoMethodBody("start")] internal static nuint startᴍ(pallocSum p) {
+internal static nuint start⁔(/*this*/ pallocSum p) {
     if (((uint64)p & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
@@ -1095,7 +1095,7 @@ internal static pallocSum packPallocSum(nuint start, nuint max, nuint end) {
 }
 
 // max extracts the max value from a packed sum.
-[GoMethodBody("max")] internal static nuint maxᴍ(pallocSum p) {
+internal static nuint max⁔(/*this*/ pallocSum p) {
     if (((uint64)p & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
@@ -1103,7 +1103,7 @@ internal static pallocSum packPallocSum(nuint start, nuint max, nuint end) {
 }
 
 // end extracts the end value from a packed sum.
-[GoMethodBody("end")] internal static nuint endᴍ(pallocSum p) {
+internal static nuint end⁔(/*this*/ pallocSum p) {
     if (((uint64)p & (uint64)((uint64)1 << 63)) != 0) {
         return maxPackedValue;
     }
@@ -1111,7 +1111,7 @@ internal static pallocSum packPallocSum(nuint start, nuint max, nuint end) {
 }
 
 // unpack unpacks all three values from the summary.
-[GoMethodBody("unpack")] internal static (nuint, nuint, nuint) unpackᴍ(pallocSum p) {
+internal static (nuint, nuint, nuint) unpack⁔(/*this*/ pallocSum p) {
     if (((uint64)p & (uint64)((uint64)1 << 63)) != 0) {
         return (maxPackedValue, maxPackedValue, maxPackedValue);
     }

@@ -60,10 +60,13 @@ using static go.@internal.synctest_package;
 
 namespace go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.@internal;
 using static synctest_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("synctest")]
 public static partial class synctest_package
@@ -97,12 +100,12 @@ public static partial class synctest_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(synctest_package.Bubble)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class synctestᴛBubble;
+[GoMethodHost(typeof(synctest_package.Bubble)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class synctestᴛBubble;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class synctestᴛBubble {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Release(this ж<Bubble> Ꮡb) => synctest_package.Releaseᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Run(this ж<Bubble> Ꮡb, Action f) => synctest_package.Runᴍ(Ꮡb, f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Release(this ж<Bubble> Ꮡb) => synctest_package.Release⁔(Ꮡb);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Run(this ж<Bubble> Ꮡb, Action f) => synctest_package.Run⁔(Ꮡb, f);
 }
 // </GlyphForwarders>

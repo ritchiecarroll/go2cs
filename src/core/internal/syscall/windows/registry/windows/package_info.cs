@@ -65,9 +65,12 @@ using static go.@internal.syscall.windows.registry_package;
 
 namespace go.@internal.syscall.windows;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static registry_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("registry")]
 public static partial class registry_package
@@ -104,13 +107,13 @@ public static partial class registry_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(registry_package.Key)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class registryᴛKey;
+[GoMethodHost(typeof(registry_package.Key)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class registryᴛKey;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class registryᴛKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this Key k) => registry_package.Closeᴍ(k);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) ReadSubKeyNames(this Key k) => registry_package.ReadSubKeyNamesᴍ(k);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<KeyInfo>, error) Stat(this Key k) => registry_package.Statᴍ(k);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this Key k) => registry_package.Close⁔(k);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string>, error) ReadSubKeyNames(this Key k) => registry_package.ReadSubKeyNames⁔(k);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<KeyInfo>, error) Stat(this Key k) => registry_package.Stat⁔(k);
 }
 // </GlyphForwarders>

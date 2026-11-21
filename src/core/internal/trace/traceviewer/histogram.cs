@@ -27,7 +27,7 @@ internal static float64 logDiv = math.Log(math.Pow(10D, 1.0D / 5D));
 } partial class traceviewer_package {
 
 // Add adds a single sample to the histogram.
-[GoMethodBody("Add")] internal static void Addᴍ(ref TimeHistogram h, time.Duration d) {
+internal static void Add⁔(/*this*/ ref TimeHistogram h, time.Duration d) {
     nint bucket = default;
     if (d > 0) {
         bucket = (nint)(math.Log((float64)d) / logDiv);
@@ -47,12 +47,12 @@ internal static float64 logDiv = math.Log(math.Pow(10D, 1.0D / 5D));
 }
 
 // BucketMin returns the minimum duration value for a provided bucket.
-[GoMethodBody("BucketMin")] internal static time.Duration BucketMinᴍ(ref TimeHistogram h, nint bucket) {
+internal static time.Duration BucketMin⁔(/*this*/ ref TimeHistogram h, nint bucket) {
     return (time.Duration)(int64)math.Exp((float64)bucket * logDiv);
 }
 
 // ToHTML renders the histogram as HTML.
-[GoMethodBody("ToHTML")] internal static template.HTML ToHTMLᴍ(ж<TimeHistogram> Ꮡh, Func<time.Duration, time.Duration, @string> urlmaker) {
+internal static template.HTML ToHTML⁔(/*this*/ ж<TimeHistogram> Ꮡh, Func<time.Duration, time.Duration, @string> urlmaker) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (Ꮡh == nil || h.Count == 0) {

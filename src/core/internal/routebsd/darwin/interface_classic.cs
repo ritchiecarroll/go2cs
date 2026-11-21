@@ -12,7 +12,7 @@ partial class routebsd_package {
 
 } partial class routebsd_package {
 
-[GoMethodBody("parseInterfaceMessage")] internal static (Message, error) parseInterfaceMessageᴍ(ref wireFormat w, slice<byte> b) {
+internal static (Message, error) parseInterfaceMessage⁔(/*this*/ ref wireFormat w, slice<byte> b) {
     if (len(b) < w.bodyOff) {
         return (default, errMessageTooShort);
     }
@@ -53,7 +53,7 @@ partial class routebsd_package {
     return (new InterfaceMessageжMessage(m), default);
 }
 
-[GoMethodBody("parseInterfaceAddrMessage")] internal static (Message, error) parseInterfaceAddrMessageᴍ(ref wireFormat w, slice<byte> b) {
+internal static (Message, error) parseInterfaceAddrMessage⁔(/*this*/ ref wireFormat w, slice<byte> b) {
     if (len(b) < w.bodyOff) {
         return (default, errMessageTooShort);
     }

@@ -73,12 +73,15 @@ using static go.vendor.golang.org.x.net.idna_package;
 
 namespace go.vendor.golang.org.x.net;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.vendor.golang.org.x.text.secure;
 using go.vendor.golang.org.x.text.unicode;
 using unicode;
 using static idna_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("idna", ImportPath = "vendor/golang.org/x/net/idna")]
 public static partial class idna_package
@@ -127,61 +130,61 @@ public static partial class idna_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(idna_package.Profile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛProfile;
-[GoMethodHost(typeof(idna_package.idnaTrie)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛidnaTrie;
-[GoMethodHost(typeof(idna_package.info)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛinfo;
-[GoMethodHost(typeof(idna_package.labelError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛlabelError;
-[GoMethodHost(typeof(idna_package.labelIter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛlabelIter;
-[GoMethodHost(typeof(idna_package.runeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛruneError;
-[GoMethodHost(typeof(idna_package.sparseBlocks)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class idnaᴛsparseBlocks;
+[GoMethodHost(typeof(idna_package.Profile)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class idnaᴛProfile;
+[GoMethodHost(typeof(idna_package.idnaTrie)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class idnaᴛidnaTrie;
+[GoMethodHost(typeof(idna_package.info)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class idnaᴛinfo;
+[GoMethodHost(typeof(idna_package.labelError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class idnaᴛlabelError;
+[GoMethodHost(typeof(idna_package.labelIter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class idnaᴛlabelIter;
+[GoMethodHost(typeof(idna_package.runeError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class idnaᴛruneError;
+[GoMethodHost(typeof(idna_package.sparseBlocks)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class idnaᴛsparseBlocks;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class idnaᴛProfile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) ToASCII(this ж<Profile> Ꮡp, @string s) => idna_package.ToASCIIᴍ(Ꮡp, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) ToUnicode(this ref Profile p, @string s) => idna_package.ToUnicodeᴍ(ref p, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Profile p) => idna_package.Stringᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) process(this ж<Profile> Ꮡp, @string s, bool toASCII) => idna_package.processᴍ(Ꮡp, s, toASCII);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static category simplify(this ref Profile p, category cat) => idna_package.simplifyᴍ(ref p, cat);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ validateLabel(this ref Profile p, @string s) => idna_package.validateLabelᴍ(ref p, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) ToASCII(this ж<Profile> Ꮡp, @string s) => idna_package.ToASCII⁔(Ꮡp, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) ToUnicode(this ref Profile p, @string s) => idna_package.ToUnicode⁔(ref p, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref Profile p) => idna_package.String⁔(ref p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, error) process(this ж<Profile> Ꮡp, @string s, bool toASCII) => idna_package.process⁔(Ꮡp, s, toASCII);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static category simplify(this ref Profile p, category cat) => idna_package.simplify⁔(ref p, cat);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ validateLabel(this ref Profile p, @string s) => idna_package.validateLabel⁔(ref p, s);
 }
 partial class idnaᴛlabelError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string code(this labelError e) => idna_package.codeᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this labelError e) => idna_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string code(this labelError e) => idna_package.code⁔(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this labelError e) => idna_package.Error⁔(e);
 }
 partial class idnaᴛruneError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string code(this runeError e) => idna_package.codeᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this runeError e) => idna_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string code(this runeError e) => idna_package.code⁔(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this runeError e) => idna_package.Error⁔(e);
 }
 partial class idnaᴛinfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isBidi(this info c, @string s) => idna_package.isBidiᴍ(c, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isBidi(this info c, @string s) => idna_package.isBidi⁔(c, s);
 }
 partial class idnaᴛlabelIter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref labelIter l) => idna_package.resetᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool done(this ref labelIter l) => idna_package.doneᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string result(this ref labelIter l) => idna_package.resultᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string label(this ref labelIter l) => idna_package.labelᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void next(this ref labelIter l) => idna_package.nextᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void set(this ref labelIter l, @string s) => idna_package.setᴍ(ref l, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void reset(this ref labelIter l) => idna_package.reset⁔(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool done(this ref labelIter l) => idna_package.done⁔(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string result(this ref labelIter l) => idna_package.result⁔(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string label(this ref labelIter l) => idna_package.label⁔(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void next(this ref labelIter l) => idna_package.next⁔(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void set(this ref labelIter l, @string s) => idna_package.set⁔(ref l, s);
 }
 partial class idnaᴛidnaTrie {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint16 v, nint sz) lookup(this ref idnaTrie t, slice<byte> s) => idna_package.lookupᴍ(ref t, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 lookupUnsafe(this ref idnaTrie t, slice<byte> s) => idna_package.lookupUnsafeᴍ(ref t, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint16 v, nint sz) lookupString(this ref idnaTrie t, @string s) => idna_package.lookupStringᴍ(ref t, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 lookupStringUnsafe(this ref idnaTrie t, @string s) => idna_package.lookupStringUnsafeᴍ(ref t, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 lookupValue(this ref idnaTrie t, uint32 n, byte b) => idna_package.lookupValueᴍ(ref t, n, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16 v, nint sz) lookup(this ref idnaTrie t, slice<byte> s) => idna_package.lookup⁔(ref t, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookupUnsafe(this ref idnaTrie t, slice<byte> s) => idna_package.lookupUnsafe⁔(ref t, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16 v, nint sz) lookupString(this ref idnaTrie t, @string s) => idna_package.lookupString⁔(ref t, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookupStringUnsafe(this ref idnaTrie t, @string s) => idna_package.lookupStringUnsafe⁔(ref t, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookupValue(this ref idnaTrie t, uint32 n, byte b) => idna_package.lookupValue⁔(ref t, n, b);
 }
 partial class idnaᴛsparseBlocks {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 lookup(this ref sparseBlocks t, uint32 n, byte b) => idna_package.lookupᴍ(ref t, n, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint16 lookup(this ref sparseBlocks t, uint32 n, byte b) => idna_package.lookup⁔(ref t, n, b);
 }
 partial class idnaᴛinfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendMapping(this info c, slice<byte> b, @string s) => idna_package.appendMappingᴍ(c, b, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendMapping(this info c, slice<byte> b, @string s) => idna_package.appendMapping⁔(c, b, s);
 }
 partial class idnaᴛinfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isMapped(this info c) => idna_package.isMappedᴍ(c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static category category(this info c) => idna_package.categoryᴍ(c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static info joinType(this info c) => idna_package.joinTypeᴍ(c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isModifier(this info c) => idna_package.isModifierᴍ(c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isViramaModifier(this info c) => idna_package.isViramaModifierᴍ(c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isMapped(this info c) => idna_package.isMapped⁔(c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static category category(this info c) => idna_package.category⁔(c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static info joinType(this info c) => idna_package.joinType⁔(c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isModifier(this info c) => idna_package.isModifier⁔(c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isViramaModifier(this info c) => idna_package.isViramaModifier⁔(c);
 }
 // </GlyphForwarders>

@@ -23,7 +23,7 @@ partial struct listHead {
 
 // init initializes the list head. off is the offset (via unsafe.Offsetof) of
 // the listNode field in the objects in the list.
-[GoMethodBody("init")] internal static void initᴍ(ref listHead head, uintptr off) {
+internal static void init⁔(/*this*/ ref listHead head, uintptr off) {
     head.initialized = true;
     head.nodeOffset = off;
 }
@@ -53,12 +53,12 @@ partial struct listNode {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeUninitializedˢᴍlistHead => ref runtimeUninitializedˢᵇᴍlistHead;
-private static readonly @string runtimeUninitializedˢᵇᴍlistHead = "runtime: uninitialized listHead"u8;
+internal static ref readonly @string runtimeUninitializedˢ⁔listHead => ref runtimeUninitializedˢᵇ⁔listHead;
+private static readonly @string runtimeUninitializedˢᵇ⁔listHead = "runtime: uninitialized listHead"u8;
 
-[GoMethodBody("getNode")] internal static ж<listNode> getNodeᴍ(ref listHead head, @unsafe.Pointer p) {
+internal static ж<listNode> getNode⁔(/*this*/ ref listHead head, @unsafe.Pointer p) {
     if (!head.initialized) {
-        @throw(runtimeUninitializedˢᴍlistHead);
+        @throw(runtimeUninitializedˢ⁔listHead);
     }
 
     if (p == nil) {
@@ -68,17 +68,17 @@ private static readonly @string runtimeUninitializedˢᵇᴍlistHead = "runtime:
 }
 
 // Returns true if the list is empty.
-[GoMethodBody("empty")] internal static bool emptyᴍ(ref listHead head) {
+internal static bool empty⁔(/*this*/ ref listHead head) {
     return head.obj == nil;
 }
 
 // Returns the head of the list without removing it.
-[GoMethodBody("head")] internal static @unsafe.Pointer headᴍ(ref listHead head) {
+internal static @unsafe.Pointer head⁔(/*this*/ ref listHead head) {
     return head.obj;
 }
 
 // Push p onto the front of the list.
-[GoMethodBody("push")] internal static void pushᴍ(ref listHead head, @unsafe.Pointer p) {
+internal static void push⁔(/*this*/ ref listHead head, @unsafe.Pointer p) {
     // p becomes the head of the list.
 
     // ... so p's next is the current head.
@@ -95,7 +95,7 @@ private static readonly @string runtimeUninitializedˢᵇᴍlistHead = "runtime:
 }
 
 // Pop removes the head of the list.
-[GoMethodBody("pop")] internal static @unsafe.Pointer popᴍ(ref listHead head) {
+internal static @unsafe.Pointer pop⁔(/*this*/ ref listHead head) {
     if (head.obj == nil) {
         return default;
     }
@@ -120,7 +120,7 @@ private static readonly @string runtimeUninitializedˢᵇᴍlistHead = "runtime:
 }
 
 // Remove p from the middle of the list.
-[GoMethodBody("remove")] internal static void removeᴍ(ref listHead head, @unsafe.Pointer p) {
+internal static void remove⁔(/*this*/ ref listHead head, @unsafe.Pointer p) {
     if (head.obj == p) {
         // Use pop to ensure head is updated when removing the head.
         head.pop();

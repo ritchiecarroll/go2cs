@@ -21,24 +21,24 @@ partial struct bigEndian {
 
 } partial class cpu_package {
 
-[GoMethodBody("Uint32")] internal static uint32 Uint32ᴍ(littleEndian _Δp0, slice<byte> b) {
+internal static uint32 Uint32⁔(/*this*/ littleEndian _Δp0, slice<byte> b) {
     _ = b[3]; // bounds check hint to compiler; see golang.org/issue/14808
     return (uint32)b[0] | (uint32)b[1] << 8 | (uint32)b[2] << 16 | (uint32)b[3] << 24;
 }
 
-[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(littleEndian _Δp0, slice<byte> b) {
+internal static uint64 Uint64⁔(/*this*/ littleEndian _Δp0, slice<byte> b) {
     _ = b[7]; // bounds check hint to compiler; see golang.org/issue/14808
     return (uint64)b[0] | (uint64)b[1] << 8 | (uint64)b[2] << 16 | (uint64)b[3] << 24 | (uint64)b[4] << 32 | (uint64)b[5] << 40 | (uint64)b[6] << 48 | (uint64)b[7] << 56;
 }
 
 } partial class cpu_package {
 
-[GoMethodBody("Uint32")] internal static uint32 Uint32ᴍ(bigEndian _Δp0, slice<byte> b) {
+internal static uint32 Uint32⁔(/*this*/ bigEndian _Δp0, slice<byte> b) {
     _ = b[3]; // bounds check hint to compiler; see golang.org/issue/14808
     return (uint32)b[3] | (uint32)b[2] << 8 | (uint32)b[1] << 16 | (uint32)b[0] << 24;
 }
 
-[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(bigEndian _Δp0, slice<byte> b) {
+internal static uint64 Uint64⁔(/*this*/ bigEndian _Δp0, slice<byte> b) {
     _ = b[7]; // bounds check hint to compiler; see golang.org/issue/14808
     return (uint64)b[7] | (uint64)b[6] << 8 | (uint64)b[5] << 16 | (uint64)b[4] << 24 | (uint64)b[3] << 32 | (uint64)b[2] << 40 | (uint64)b[1] << 48 | (uint64)b[0] << 56;
 }

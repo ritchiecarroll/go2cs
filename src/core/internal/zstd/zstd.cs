@@ -80,7 +80,7 @@ public static ж<Reader> NewReader(io.Reader input) {
 
 // Reset discards the current state and starts reading a new stream from r.
 // This permits reusing a Reader rather than allocating a new one.
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref Reader r, io.Reader input) {
+internal static void Reset⁔(/*this*/ ref Reader r, io.Reader input) {
     r.r = input;
 
     // Several fields are preserved to avoid allocation.
@@ -109,7 +109,7 @@ public static ж<Reader> NewReader(io.Reader input) {
 }
 
 // Read implements [io.Reader].
-[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ж<Reader> Ꮡr, slice<byte> p) {
+internal static (nint, error) Read⁔(/*this*/ ж<Reader> Ꮡr, slice<byte> p) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var err = Ꮡr.refillIfNeeded(); if (err != nil) {
@@ -121,7 +121,7 @@ public static ж<Reader> NewReader(io.Reader input) {
 }
 
 // ReadByte implements [io.ByteReader].
-[GoMethodBody("ReadByte")] internal static (byte, error) ReadByteᴍ(ж<Reader> Ꮡr) {
+internal static (byte, error) ReadByte⁔(/*this*/ ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var err = Ꮡr.refillIfNeeded(); if (err != nil) {
@@ -133,7 +133,7 @@ public static ж<Reader> NewReader(io.Reader input) {
 }
 
 // refillIfNeeded reads the next block if necessary.
-[GoMethodBody("refillIfNeeded")] internal static error refillIfNeededᴍ(ж<Reader> Ꮡr) {
+internal static error refillIfNeeded⁔(/*this*/ ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     while (r.off >= len(r.buffer)) {
@@ -146,7 +146,7 @@ public static ж<Reader> NewReader(io.Reader input) {
 }
 
 // refill reads and decompresses the next block.
-[GoMethodBody("refill")] internal static error refillᴍ(ж<Reader> Ꮡr) {
+internal static error refill⁔(/*this*/ ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (!r.sawFrameHeader) {
@@ -158,17 +158,17 @@ public static ж<Reader> NewReader(io.Reader input) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidMagicNumberˢᴍReader => ref invalidMagicNumberˢᵇᴍReader;
-private static readonly @string invalidMagicNumberˢᵇᴍReader = "invalid magic number"u8;
-internal static ref readonly @string reservedBitSetInFrameˢᴍReader => ref reservedBitSetInFrameˢᵇᴍReader;
-private static readonly @string reservedBitSetInFrameˢᵇᴍReader = "reserved bit set in frame header descriptor"u8;
-internal static ref readonly @string windowSizeTooLargeˢᴍReader => ref windowSizeTooLargeˢᵇᴍReader;
-private static readonly @string windowSizeTooLargeˢᵇᴍReader = "windowSize too large"u8;
-internal static ref readonly @string dictionariesAreNotˢᴍReader => ref dictionariesAreNotˢᵇᴍReader;
-private static readonly @string dictionariesAreNotˢᵇᴍReader = "dictionaries are not supported"u8;
+internal static ref readonly @string invalidMagicNumberˢ⁔Reader => ref invalidMagicNumberˢᵇ⁔Reader;
+private static readonly @string invalidMagicNumberˢᵇ⁔Reader = "invalid magic number"u8;
+internal static ref readonly @string reservedBitSetInFrameˢ⁔Reader => ref reservedBitSetInFrameˢᵇ⁔Reader;
+private static readonly @string reservedBitSetInFrameˢᵇ⁔Reader = "reserved bit set in frame header descriptor"u8;
+internal static ref readonly @string windowSizeTooLargeˢ⁔Reader => ref windowSizeTooLargeˢᵇ⁔Reader;
+private static readonly @string windowSizeTooLargeˢᵇ⁔Reader = "windowSize too large"u8;
+internal static ref readonly @string dictionariesAreNotˢ⁔Reader => ref dictionariesAreNotˢᵇ⁔Reader;
+private static readonly @string dictionariesAreNotˢᵇ⁔Reader = "dictionaries are not supported"u8;
 
 // readFrameHeader reads the frame header and prepares to read a block.
-[GoMethodBody("readFrameHeader")] internal static error readFrameHeaderᴍ(ref Reader r) {
+internal static error readFrameHeader⁔(/*this*/ ref Reader r) {
 retry:
     nint relativeOffset = 0;
 
@@ -194,7 +194,7 @@ retry:
             goto retry;
         }
 
-        return r.makeError(relativeOffset, invalidMagicNumberˢᴍReader);
+        return r.makeError(relativeOffset, invalidMagicNumberˢ⁔Reader);
     }
 
     relativeOffset += 4;
@@ -222,7 +222,7 @@ retry:
     }
 
     if ((byte)(descriptor & ((byte)(1 << 3))) != 0) {
-        return r.makeError(relativeOffset, reservedBitSetInFrameˢᴍReader);
+        return r.makeError(relativeOffset, reservedBitSetInFrameˢ⁔Reader);
     }
 
     r.hasChecksum = (byte)(descriptor & ((byte)(1 << 2))) != 0;
@@ -261,7 +261,7 @@ retry:
 
         // Default zstd sets limits on the window size.
         if (fuzzing && (windowLog > 31 || windowSize > (uint64)1 << 27)) {
-            return r.makeError(relativeOffset, windowSizeTooLargeˢᴍReader);
+            return r.makeError(relativeOffset, windowSizeTooLargeˢ⁔Reader);
         }
     }
 
@@ -271,7 +271,7 @@ retry:
         // Allow only zero Dictionary ID.
         foreach (var (_, b) in range(dictionaryId)) {
             if (b != 0) {
-                return r.makeError(relativeOffset, dictionariesAreNotˢᴍReader);
+                return r.makeError(relativeOffset, dictionariesAreNotˢ⁔Reader);
             }
         }
     }
@@ -339,7 +339,7 @@ retry:
 }
 
 // skipFrame skips a skippable frame. RFC 3.1.2.
-[GoMethodBody("skipFrame")] internal static error skipFrameᴍ(ref Reader r) {
+internal static error skipFrame⁔(/*this*/ ref Reader r) {
     nint relativeOffset = 0;
 
     var (_, errΔ1) = io.ReadFull(r.r, r.scratch[..4]); if (errΔ1 != nil) {
@@ -390,17 +390,17 @@ retry:
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string blockSizeTooLargeˢᴍReader => ref blockSizeTooLargeˢᵇᴍReader;
-private static readonly @string blockSizeTooLargeˢᵇᴍReader = "block size too large"u8;
-internal static ref readonly @string invalidBlockTypeˢᴍReader => ref invalidBlockTypeˢᵇᴍReader;
-private static readonly @string invalidBlockTypeˢᵇᴍReader = "invalid block type"u8;
-internal static ref readonly @string tooManyUncompressedBytesˢᴍReader => ref tooManyUncompressedBytesˢᵇᴍReader;
-private static readonly @string tooManyUncompressedBytesˢᵇᴍReader = "too many uncompressed bytes in frame"u8;
-internal static ref readonly @string notEnoughUncompressedˢᴍReader => ref notEnoughUncompressedˢᵇᴍReader;
-private static readonly @string notEnoughUncompressedˢᵇᴍReader = "not enough uncompressed bytes for frame"u8;
+internal static ref readonly @string blockSizeTooLargeˢ⁔Reader => ref blockSizeTooLargeˢᵇ⁔Reader;
+private static readonly @string blockSizeTooLargeˢᵇ⁔Reader = "block size too large"u8;
+internal static ref readonly @string invalidBlockTypeˢ⁔Reader => ref invalidBlockTypeˢᵇ⁔Reader;
+private static readonly @string invalidBlockTypeˢᵇ⁔Reader = "invalid block type"u8;
+internal static ref readonly @string tooManyUncompressedBytesˢ⁔Reader => ref tooManyUncompressedBytesˢᵇ⁔Reader;
+private static readonly @string tooManyUncompressedBytesˢᵇ⁔Reader = "too many uncompressed bytes in frame"u8;
+internal static ref readonly @string notEnoughUncompressedˢ⁔Reader => ref notEnoughUncompressedˢᵇ⁔Reader;
+private static readonly @string notEnoughUncompressedˢᵇ⁔Reader = "not enough uncompressed bytes for frame"u8;
 
 // readBlock reads the next block from a frame.
-[GoMethodBody("readBlock")] internal static error readBlockᴍ(ж<Reader> Ꮡr) {
+internal static error readBlock⁔(/*this*/ ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     nint relativeOffset = 0;
@@ -424,7 +424,7 @@ private static readonly @string notEnoughUncompressedˢᵇᴍReader = "not enoug
     // We don't record the window size for a single segment frame,
     // so just use 128K. RFC 3.1.1.2.3, 3.1.1.2.4.
     if (blockSize > 128 << 10 || (r.window.size > 0 && blockSize > r.window.size)) {
-        return r.makeError(relativeOffset, blockSizeTooLargeˢᴍReader);
+        return r.makeError(relativeOffset, blockSizeTooLargeˢ⁔Reader);
     }
 
     // Handle different block types. RFC 3.1.1.2.2.
@@ -466,12 +466,12 @@ private static readonly @string notEnoughUncompressedˢᵇᴍReader = "not enoug
         break;
     }
     case 3: {
-        return r.makeError(relativeOffset, invalidBlockTypeˢᴍReader);
+        return r.makeError(relativeOffset, invalidBlockTypeˢ⁔Reader);
     }}
 
     if (!r.frameSizeUnknown) {
         if ((uint64)len(r.buffer) > r.remainingFrameSize) {
-            return r.makeError(relativeOffset, tooManyUncompressedBytesˢᴍReader);
+            return r.makeError(relativeOffset, tooManyUncompressedBytesˢ⁔Reader);
         }
         r.remainingFrameSize -= (uint64)len(r.buffer);
     }
@@ -484,7 +484,7 @@ private static readonly @string notEnoughUncompressedˢᵇᴍReader = "not enoug
         r.window.save(r.buffer);
     } else {
         if (!r.frameSizeUnknown && r.remainingFrameSize != 0) {
-            return r.makeError(relativeOffset, notEnoughUncompressedˢᴍReader);
+            return r.makeError(relativeOffset, notEnoughUncompressedˢ⁔Reader);
         }
         // Check for checksum at end of frame. RFC 3.1.1.
         if (r.hasChecksum) {
@@ -508,7 +508,7 @@ private static readonly @string notEnoughUncompressedˢᵇᴍReader = "not enoug
 
 // setBufferSize sets the decompressed buffer size.
 // When this is called the buffer is empty.
-[GoMethodBody("setBufferSize")] internal static void setBufferSizeᴍ(ref Reader r, nint size) {
+internal static void setBufferSize⁔(/*this*/ ref Reader r, nint size) {
     if (cap(r.buffer) < size) {
         nint need = size - cap(r.buffer);
         r.buffer = appendꓸꓸꓸ(r.buffer.slice(0, cap(r.buffer)), makeꓸꓸꓸ<byte>(need));
@@ -526,32 +526,32 @@ partial struct zstdError {
 
 } partial class zstd_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref zstdError ze) {
+internal static @string Error⁔(/*this*/ ref zstdError ze) {
     return fmt.Sprintf("zstd decompression error at %d: %v"u8, ze.offset, ze.err);
 }
 
-[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref zstdError ze) {
+internal static error Unwrap⁔(/*this*/ ref zstdError ze) {
     return ze.err;
 }
 
 } partial class zstd_package {
 
-[GoMethodBody("makeEOFError")] internal static error makeEOFErrorᴍ(ref Reader r, nint off) {
+internal static error makeEOFError⁔(/*this*/ ref Reader r, nint off) {
     return r.wrapError(off, io.ErrUnexpectedEOF);
 }
 
-[GoMethodBody("wrapNonEOFError")] internal static error wrapNonEOFErrorᴍ(ref Reader r, nint off, error err) {
+internal static error wrapNonEOFError⁔(/*this*/ ref Reader r, nint off, error err) {
     if (AreEqual(err, io.EOF)) {
         err = io.ErrUnexpectedEOF;
     }
     return r.wrapError(off, err);
 }
 
-[GoMethodBody("makeError")] internal static error makeErrorᴍ(ref Reader r, nint off, @string msg) {
+internal static error makeError⁔(/*this*/ ref Reader r, nint off, @string msg) {
     return r.wrapError(off, errors.New(msg));
 }
 
-[GoMethodBody("wrapError")] internal static error wrapErrorᴍ(ref Reader r, nint off, error err) {
+internal static error wrapError⁔(/*this*/ ref Reader r, nint off, error err) {
     if (AreEqual(err, io.EOF)) {
         return err;
     }

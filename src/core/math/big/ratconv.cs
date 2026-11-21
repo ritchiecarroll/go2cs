@@ -24,25 +24,25 @@ internal static fmt.Scanner _ᴛ6ʗ = new RatжScanner(ᏑratZero); // *Rat must
 } partial class big_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string efgEFGvˢᴍRat => ref efgEFGvˢᵇᴍRat;
-private static readonly @string efgEFGvˢᵇᴍRat = "efgEFGv"u8;
-internal static ref readonly @string ratScanInvalidVerbˢᴍRat => ref ratScanInvalidVerbˢᵇᴍRat;
-private static readonly @string ratScanInvalidVerbˢᵇᴍRat = "Rat.Scan: invalid verb"u8;
-internal static ref readonly @string ratScanInvalidSyntaxˢᴍRat => ref ratScanInvalidSyntaxˢᵇᴍRat;
-private static readonly @string ratScanInvalidSyntaxˢᵇᴍRat = "Rat.Scan: invalid syntax"u8;
+internal static ref readonly @string efgEFGvˢ⁔Rat => ref efgEFGvˢᵇ⁔Rat;
+private static readonly @string efgEFGvˢᵇ⁔Rat = "efgEFGv"u8;
+internal static ref readonly @string ratScanInvalidVerbˢ⁔Rat => ref ratScanInvalidVerbˢᵇ⁔Rat;
+private static readonly @string ratScanInvalidVerbˢᵇ⁔Rat = "Rat.Scan: invalid verb"u8;
+internal static ref readonly @string ratScanInvalidSyntaxˢ⁔Rat => ref ratScanInvalidSyntaxˢᵇ⁔Rat;
+private static readonly @string ratScanInvalidSyntaxˢᵇ⁔Rat = "Rat.Scan: invalid syntax"u8;
 
 // Scan is a support routine for fmt.Scanner. It accepts the formats
 // 'e', 'E', 'f', 'F', 'g', 'G', and 'v'. All formats are equivalent.
-[GoMethodBody("Scan")] internal static error Scanᴍ(ж<Rat> Ꮡz, fmt.ScanState s, rune ch) {
+internal static error Scan⁔(/*this*/ ж<Rat> Ꮡz, fmt.ScanState s, rune ch) {
     var (tok, err) = s.Token(true, ratTok);
     if (err != nil) {
         return err;
     }
-    if (!strings.ContainsRune(efgEFGvˢᴍRat, ch)) {
-        return errors.New(ratScanInvalidVerbˢᴍRat);
+    if (!strings.ContainsRune(efgEFGvˢ⁔Rat, ch)) {
+        return errors.New(ratScanInvalidVerbˢ⁔Rat);
     }
     var (_, ok) = Ꮡz.SetString((@string)tok); if (!ok) {
-        return errors.New(ratScanInvalidSyntaxˢᴍRat);
+        return errors.New(ratScanInvalidSyntaxˢ⁔Rat);
     }
     return default;
 }
@@ -65,7 +65,7 @@ private static readonly @string ratScanInvalidSyntaxˢᵇᴍRat = "Rat.Scan: inv
 // is too large, the operation may fail.
 // The entire string, not just a prefix, must be valid for success. If the
 // operation failed, the value of z is undefined but the returned value is nil.
-[GoMethodBody("SetString")] internal static (ж<Rat>, bool) SetStringᴍ(ж<Rat> Ꮡz, @string s) {
+internal static (ж<Rat>, bool) SetString⁔(/*this*/ ж<Rat> Ꮡz, @string s) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -339,14 +339,14 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
 } partial class big_package {
 
 // String returns a string representation of x in the form "a/b" (even if b == 1).
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Rat> Ꮡx) {
+internal static @string String⁔(/*this*/ ж<Rat> Ꮡx) {
     return (@string)Ꮡx.marshal(default);
 }
 
 // marshal implements [Rat.String] returning a slice of bytes.
 // It appends the string representation of x in the form "a/b" (even if b == 1) to buf,
 // and returns the extended buffer.
-[GoMethodBody("marshal")] internal static slice<byte> marshalᴍ(ж<Rat> Ꮡx, slice<byte> buf) {
+internal static slice<byte> marshal⁔(/*this*/ ж<Rat> Ꮡx, slice<byte> buf) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     buf = Ꮡx.Ꮡa.Append(buf, 10);
@@ -361,7 +361,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
 
 // RatString returns a string representation of x in the form "a/b" if b != 1,
 // and in the form "a" if b == 1.
-[GoMethodBody("RatString")] internal static @string RatStringᴍ(ж<Rat> Ꮡx) {
+internal static @string RatString⁔(/*this*/ ж<Rat> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.IsInt()) {
@@ -373,7 +373,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
 // FloatString returns a string representation of x in decimal form with prec
 // digits of precision after the radix point. The last digit is rounded to
 // nearest, with halves rounded away from zero.
-[GoMethodBody("FloatString")] internal static @string FloatStringᴍ(ж<Rat> Ꮡx, nint prec) {
+internal static @string FloatString⁔(/*this*/ ж<Rat> Ꮡx, nint prec) {
     GoFrame ᒐ = default;
     try {
         ref var x = ref Ꮡx.DerefOrNull();
@@ -453,7 +453,7 @@ internal static (int64 exp, nint @base, error err) scanExponent(io.ByteScanner r
 //	1/3    0    false    0       (0.333... rounded)
 //	1/4    2    true     0.25
 //	1/6    1    false    0.2     (0.166... rounded)
-[GoMethodBody("FloatPrec")] internal static (nint n, bool exact) FloatPrecᴍ(ж<Rat> Ꮡx) {
+internal static (nint n, bool exact) FloatPrec⁔(/*this*/ ж<Rat> Ꮡx) {
     nint n = default;
     bool exact = default;
     GoFrame ᒐ = default;

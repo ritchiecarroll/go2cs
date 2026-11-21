@@ -23,7 +23,7 @@ public partial struct @decimal {
 
 } partial class strconv_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref @decimal a) {
+internal static @string String⁔(/*this*/ ref @decimal a) {
     nint n = 10 + a.nd;
     if (a.dp > 0) {
         n += a.dp;
@@ -89,7 +89,7 @@ internal static void trim(ref @decimal a) {
 } partial class strconv_package {
 
 // Assign v to a.
-[GoMethodBody("Assign")] internal static void Assignᴍ(ж<@decimal> Ꮡa, uint64 v) {
+internal static void Assign⁔(/*this*/ ж<@decimal> Ꮡa, uint64 v) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     array<byte> buf = new(24);
@@ -328,7 +328,7 @@ internal static void leftShift(ref @decimal a, nuint k) {
 } partial class strconv_package {
 
 // Binary shift left (k > 0) or right (k < 0).
-[GoMethodBody("Shift")] internal static void Shiftᴍ(ж<@decimal> Ꮡa, nint k) {
+internal static void Shift⁔(/*this*/ ж<@decimal> Ꮡa, nint k) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -378,7 +378,7 @@ internal static bool shouldRoundUp(ref @decimal a, nint nd) {
 // If nd is zero, it means we're rounding
 // just to the left of the digits, as in
 // 0.09 -> 0.1.
-[GoMethodBody("Round")] internal static void Roundᴍ(ж<@decimal> Ꮡa, nint nd) {
+internal static void Round⁔(/*this*/ ж<@decimal> Ꮡa, nint nd) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (nd < 0 || nd >= a.nd) {
@@ -392,7 +392,7 @@ internal static bool shouldRoundUp(ref @decimal a, nint nd) {
 }
 
 // Round a down to nd digits (or fewer).
-[GoMethodBody("RoundDown")] internal static void RoundDownᴍ(ж<@decimal> Ꮡa, nint nd) {
+internal static void RoundDown⁔(/*this*/ ж<@decimal> Ꮡa, nint nd) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (nd < 0 || nd >= a.nd) {
@@ -403,7 +403,7 @@ internal static bool shouldRoundUp(ref @decimal a, nint nd) {
 }
 
 // Round a up to nd digits (or fewer).
-[GoMethodBody("RoundUp")] internal static void RoundUpᴍ(ref @decimal a, nint nd) {
+internal static void RoundUp⁔(/*this*/ ref @decimal a, nint nd) {
     if (nd < 0 || nd >= a.nd) {
         return;
     }
@@ -427,7 +427,7 @@ internal static bool shouldRoundUp(ref @decimal a, nint nd) {
 
 // Extract integer part, rounded appropriately.
 // No guarantees about overflow.
-[GoMethodBody("RoundedInteger")] internal static uint64 RoundedIntegerᴍ(ж<@decimal> Ꮡa) {
+internal static uint64 RoundedInteger⁔(/*this*/ ж<@decimal> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.dp > 20) {

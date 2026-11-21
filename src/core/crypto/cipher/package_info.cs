@@ -81,14 +81,17 @@ using static go.crypto.cipher_package;
 
 namespace go.crypto;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using static cipher_package;
 using go.@internal;
 using go.crypto.@internal.fips140.aes;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("cipher")]
 public static partial class cipher_package
@@ -145,60 +148,60 @@ public static partial class cipher_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(cipher_package.StreamReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛStreamReader;
-[GoMethodHost(typeof(cipher_package.StreamWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛStreamWriter;
-[GoMethodHost(typeof(cipher_package.aesCtrWrapper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛaesCtrWrapper;
-[GoMethodHost(typeof(cipher_package.cbcDecrypter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛcbcDecrypter;
-[GoMethodHost(typeof(cipher_package.cbcEncrypter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛcbcEncrypter;
-[GoMethodHost(typeof(cipher_package.cfb)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛcfb;
-[GoMethodHost(typeof(cipher_package.ctr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛctr;
-[GoMethodHost(typeof(cipher_package.gcmFallback)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛgcmFallback;
-[GoMethodHost(typeof(cipher_package.gcmWithRandomNonce)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛgcmWithRandomNonce;
-[GoMethodHost(typeof(cipher_package.ofb)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cipherᴛofb;
+[GoMethodHost(typeof(cipher_package.StreamReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛStreamReader;
+[GoMethodHost(typeof(cipher_package.StreamWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛStreamWriter;
+[GoMethodHost(typeof(cipher_package.aesCtrWrapper)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛaesCtrWrapper;
+[GoMethodHost(typeof(cipher_package.cbcDecrypter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛcbcDecrypter;
+[GoMethodHost(typeof(cipher_package.cbcEncrypter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛcbcEncrypter;
+[GoMethodHost(typeof(cipher_package.cfb)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛcfb;
+[GoMethodHost(typeof(cipher_package.ctr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛctr;
+[GoMethodHost(typeof(cipher_package.gcmFallback)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛgcmFallback;
+[GoMethodHost(typeof(cipher_package.gcmWithRandomNonce)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛgcmWithRandomNonce;
+[GoMethodHost(typeof(cipher_package.ofb)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cipherᴛofb;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class cipherᴛcbcEncrypter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref cbcEncrypter x) => cipher_package.BlockSizeᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void CryptBlocks(this ref cbcEncrypter x, slice<byte> dst, slice<byte> src) => cipher_package.CryptBlocksᴍ(ref x, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SetIV(this ref cbcEncrypter x, slice<byte> iv) => cipher_package.SetIVᴍ(ref x, iv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref cbcEncrypter x) => cipher_package.BlockSize⁔(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void CryptBlocks(this ref cbcEncrypter x, slice<byte> dst, slice<byte> src) => cipher_package.CryptBlocks⁔(ref x, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void SetIV(this ref cbcEncrypter x, slice<byte> iv) => cipher_package.SetIV⁔(ref x, iv);
 }
 partial class cipherᴛcbcDecrypter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref cbcDecrypter x) => cipher_package.BlockSizeᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void CryptBlocks(this ref cbcDecrypter x, slice<byte> dst, slice<byte> src) => cipher_package.CryptBlocksᴍ(ref x, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void SetIV(this ref cbcDecrypter x, slice<byte> iv) => cipher_package.SetIVᴍ(ref x, iv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref cbcDecrypter x) => cipher_package.BlockSize⁔(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void CryptBlocks(this ref cbcDecrypter x, slice<byte> dst, slice<byte> src) => cipher_package.CryptBlocks⁔(ref x, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void SetIV(this ref cbcDecrypter x, slice<byte> iv) => cipher_package.SetIV⁔(ref x, iv);
 }
 partial class cipherᴛcfb {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void XORKeyStream(this ref cfb x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStreamᴍ(ref x, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void XORKeyStream(this ref cfb x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStream⁔(ref x, dst, src);
 }
 partial class cipherᴛaesCtrWrapper {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void XORKeyStream(this aesCtrWrapper x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStreamᴍ(x, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void XORKeyStream(this aesCtrWrapper x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStream⁔(x, dst, src);
 }
 partial class cipherᴛctr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void refill(this ref ctr x) => cipher_package.refillᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void XORKeyStream(this ref ctr x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStreamᴍ(ref x, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void refill(this ref ctr x) => cipher_package.refill⁔(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void XORKeyStream(this ref ctr x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStream⁔(ref x, dst, src);
 }
 partial class cipherᴛgcmWithRandomNonce {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NonceSize(this gcmWithRandomNonce g) => cipher_package.NonceSizeᴍ(g);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Overhead(this gcmWithRandomNonce g) => cipher_package.Overheadᴍ(g);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Seal(this gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => cipher_package.Sealᴍ(g, dst, nonce, plaintext, additionalData);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) Open(this gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => cipher_package.Openᴍ(g, dst, nonce, ciphertext, additionalData);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint NonceSize(this gcmWithRandomNonce g) => cipher_package.NonceSize⁔(g);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Overhead(this gcmWithRandomNonce g) => cipher_package.Overhead⁔(g);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Seal(this gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => cipher_package.Seal⁔(g, dst, nonce, plaintext, additionalData);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) Open(this gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => cipher_package.Open⁔(g, dst, nonce, ciphertext, additionalData);
 }
 partial class cipherᴛgcmFallback {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NonceSize(this ref gcmFallback g) => cipher_package.NonceSizeᴍ(ref g);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Overhead(this ref gcmFallback g) => cipher_package.Overheadᴍ(ref g);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> Seal(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => cipher_package.Sealᴍ(ref g, dst, nonce, plaintext, additionalData);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) Open(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => cipher_package.Openᴍ(ref g, dst, nonce, ciphertext, additionalData);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint NonceSize(this ref gcmFallback g) => cipher_package.NonceSize⁔(ref g);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Overhead(this ref gcmFallback g) => cipher_package.Overhead⁔(ref g);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> Seal(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) => cipher_package.Seal⁔(ref g, dst, nonce, plaintext, additionalData);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) Open(this ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) => cipher_package.Open⁔(ref g, dst, nonce, ciphertext, additionalData);
 }
 partial class cipherᴛStreamReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this StreamReader r, slice<byte> dst) => cipher_package.Readᴍ(r, dst);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this StreamReader r, slice<byte> dst) => cipher_package.Read⁔(r, dst);
 }
 partial class cipherᴛStreamWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this StreamWriter w, slice<byte> src) => cipher_package.Writeᴍ(w, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this StreamWriter w) => cipher_package.Closeᴍ(w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this StreamWriter w, slice<byte> src) => cipher_package.Write⁔(w, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this StreamWriter w) => cipher_package.Close⁔(w);
 }
 partial class cipherᴛofb {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void refill(this ref ofb x) => cipher_package.refillᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void XORKeyStream(this ref ofb x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStreamᴍ(ref x, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void refill(this ref ofb x) => cipher_package.refill⁔(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void XORKeyStream(this ref ofb x, slice<byte> dst, slice<byte> src) => cipher_package.XORKeyStream⁔(ref x, dst, src);
 }
 // </GlyphForwarders>

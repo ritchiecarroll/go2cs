@@ -265,7 +265,7 @@ partial struct ifacePair {
 
 } partial class types_package {
 
-[GoMethodBody("identical")] internal static bool identicalᴍ(ref ifacePair p, ж<ifacePair> Ꮡq) {
+internal static bool identical⁔(/*this*/ ref ifacePair p, ж<ifacePair> Ꮡq) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     return p.x == q.x && p.y == q.y || p.x == q.y && p.y == q.x;
@@ -282,7 +282,7 @@ partial struct comparer {
 } partial class types_package {
 
 // For changes to this code the corresponding changes should be made to unifier.nify.
-[GoMethodBody("identical")] internal static bool identicalᴍ(ref comparer c, Type x, Type y, ж<ifacePair> Ꮡp) {
+internal static bool identical⁔(/*this*/ ref comparer c, Type x, Type y, ж<ifacePair> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
     var targsᴷ = new stackAppend<Type>();
 

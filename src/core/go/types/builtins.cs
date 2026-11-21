@@ -21,32 +21,32 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string argumentToDeleteˢᴍChecker => ref argumentToDeleteˢᵇᴍChecker;
-private static readonly @string argumentToDeleteˢᵇᴍChecker = "argument to delete"u8;
-internal static ref readonly @string argumentToNewˢᴍChecker => ref argumentToNewˢᵇᴍChecker;
-private static readonly @string argumentToNewˢᵇᴍChecker = "argument to new"u8;
-internal static ref readonly @string argumentToPanicˢᴍChecker => ref argumentToPanicˢᵇᴍChecker;
-private static readonly @string argumentToPanicˢᵇᴍChecker = "argument to panic"u8;
-internal static ref readonly @string argumentToUnsafeAddˢᴍChecker => ref argumentToUnsafeAddˢᵇᴍChecker;
-private static readonly @string argumentToUnsafeAddˢᵇᴍChecker = "argument to unsafe.Add"u8;
-internal static ref readonly @string lengthˢᴍChecker => ref lengthˢᵇᴍChecker;
-private static readonly @string lengthˢᵇᴍChecker = "length"u8;
-internal static ref readonly @string argumentToUnsafeAlignofˢᴍChecker => ref argumentToUnsafeAlignofˢᵇᴍChecker;
-private static readonly @string argumentToUnsafeAlignofˢᵇᴍChecker = "argument to unsafe.Alignof"u8;
-internal static ref readonly @string argumentToUnsafeSizeofˢᴍChecker => ref argumentToUnsafeSizeofˢᵇᴍChecker;
-private static readonly @string argumentToUnsafeSizeofˢᵇᴍChecker = "argument to unsafe.Sizeof"u8;
-internal static ref readonly @string argumentToUnsafeStringˢᴍChecker => ref argumentToUnsafeStringˢᵇᴍChecker;
-private static readonly @string argumentToUnsafeStringˢᵇᴍChecker = "argument to unsafe.String"u8;
-internal static ref readonly @string argumentToUnsafeˢᴍChecker => ref argumentToUnsafeˢᵇᴍChecker;
-private static readonly @string argumentToUnsafeˢᵇᴍChecker = "argument to unsafe.StringData"u8;
-internal static ref readonly @string vTraceWithoutArgumentsˢᴍChecker => ref vTraceWithoutArgumentsˢᵇᴍChecker;
-private static readonly @string vTraceWithoutArgumentsˢᵇᴍChecker = "%v: trace() without arguments"u8;
+internal static ref readonly @string argumentToDeleteˢ⁔Checker => ref argumentToDeleteˢᵇ⁔Checker;
+private static readonly @string argumentToDeleteˢᵇ⁔Checker = "argument to delete"u8;
+internal static ref readonly @string argumentToNewˢ⁔Checker => ref argumentToNewˢᵇ⁔Checker;
+private static readonly @string argumentToNewˢᵇ⁔Checker = "argument to new"u8;
+internal static ref readonly @string argumentToPanicˢ⁔Checker => ref argumentToPanicˢᵇ⁔Checker;
+private static readonly @string argumentToPanicˢᵇ⁔Checker = "argument to panic"u8;
+internal static ref readonly @string argumentToUnsafeAddˢ⁔Checker => ref argumentToUnsafeAddˢᵇ⁔Checker;
+private static readonly @string argumentToUnsafeAddˢᵇ⁔Checker = "argument to unsafe.Add"u8;
+internal static ref readonly @string lengthˢ⁔Checker => ref lengthˢᵇ⁔Checker;
+private static readonly @string lengthˢᵇ⁔Checker = "length"u8;
+internal static ref readonly @string argumentToUnsafeAlignofˢ⁔Checker => ref argumentToUnsafeAlignofˢᵇ⁔Checker;
+private static readonly @string argumentToUnsafeAlignofˢᵇ⁔Checker = "argument to unsafe.Alignof"u8;
+internal static ref readonly @string argumentToUnsafeSizeofˢ⁔Checker => ref argumentToUnsafeSizeofˢᵇ⁔Checker;
+private static readonly @string argumentToUnsafeSizeofˢᵇ⁔Checker = "argument to unsafe.Sizeof"u8;
+internal static ref readonly @string argumentToUnsafeStringˢ⁔Checker => ref argumentToUnsafeStringˢᵇ⁔Checker;
+private static readonly @string argumentToUnsafeStringˢᵇ⁔Checker = "argument to unsafe.String"u8;
+internal static ref readonly @string argumentToUnsafeˢ⁔Checker => ref argumentToUnsafeˢᵇ⁔Checker;
+private static readonly @string argumentToUnsafeˢᵇ⁔Checker = "argument to unsafe.StringData"u8;
+internal static ref readonly @string vTraceWithoutArgumentsˢ⁔Checker => ref vTraceWithoutArgumentsˢᵇ⁔Checker;
+private static readonly @string vTraceWithoutArgumentsˢᵇ⁔Checker = "%v: trace() without arguments"u8;
 
 // builtin type-checks a call to the built-in specified by id and
 // reports whether the call is valid, with *x holding the result;
 // but x.expr is not set. If the call is invalid, the result is
 // false, and *x is undefined.
-[GoMethodBody("Δbuiltin")] internal static bool /*_*/ Δbuiltinᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall, builtinId id) {
+internal static bool /*_*/ Δbuiltin⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall, builtinId id) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -110,9 +110,9 @@ private static readonly @string vTraceWithoutArgumentsˢᵇᴍChecker = "%v: tra
         {
             @string msg = ""u8;
             if (nargs < bin.nargs) {
-                msg = notEnoughˢᴍChecker;
+                msg = notEnoughˢ⁔Checker;
             } else if (!bin.variadic && nargs > bin.nargs) {
-                msg = tooManyˢᴍChecker;
+                msg = tooManyˢ⁔Checker;
             }
             if (msg != ""u8) {
                 Ꮡcheck.errorf(argErrPos(Ꮡcall), WrongArgCount, invalidOp + "%s arguments for %v (expected %d, found %d)", msg, Ꮡcall.OrTypedNil(), bin.nargs, nargs);
@@ -513,7 +513,7 @@ private static readonly @string vTraceWithoutArgumentsˢᵇᴍChecker = "%v: tra
             }
 
             x = args[1].Value; // key
-            Ꮡcheck.assignment(Ꮡx, key, argumentToDeleteˢᴍChecker);
+            Ꮡcheck.assignment(Ꮡx, key, argumentToDeleteˢ⁔Checker);
             if (x.mode == invalid) {
                 return default;
             }
@@ -750,7 +750,7 @@ private static readonly @string vTraceWithoutArgumentsˢᵇᴍChecker = "%v: tra
                 // new(expr)
                 if (isUntyped(x.typ)) {
                     // check for overflow and untyped nil
-                    Ꮡcheck.assignment(Ꮡx, default, argumentToNewˢᴍChecker);
+                    Ꮡcheck.assignment(Ꮡx, default, argumentToNewˢ⁔Checker);
                     if (x.mode == invalid) {
                         return default;
                     }
@@ -784,7 +784,7 @@ private static readonly @string vTraceWithoutArgumentsˢᵇᴍChecker = "%v: tra
                 p[Ꮡcall] = true;
             }
 
-            Ꮡcheck.assignment(Ꮡx, new InterfaceжType(ᏑemptyInterface), argumentToPanicˢᴍChecker);
+            Ꮡcheck.assignment(Ꮡx, new InterfaceжType(ᏑemptyInterface), argumentToPanicˢ⁔Checker);
             if (x.mode == invalid) {
                 return default;
             }
@@ -829,13 +829,13 @@ private static readonly @string vTraceWithoutArgumentsˢᵇᴍChecker = "%v: tra
             // unsafe.Add(ptr unsafe.Pointer, len IntegerType) unsafe.Pointer
             Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), go1_17, "unsafe.Add");
 
-            Ꮡcheck.assignment(Ꮡx, new BasicжType(Typ[UnsafePointer]), argumentToUnsafeAddˢᴍChecker);
+            Ꮡcheck.assignment(Ꮡx, new BasicжType(Typ[UnsafePointer]), argumentToUnsafeAddˢ⁔Checker);
             if (x.mode == invalid) {
                 return default;
             }
 
             var y = args[1];
-            if (!Ꮡcheck.isValidIndex(y, InvalidUnsafeAdd, lengthˢᴍChecker, true)) {
+            if (!Ꮡcheck.isValidIndex(y, InvalidUnsafeAdd, lengthˢ⁔Checker, true)) {
                 return default;
             }
 
@@ -848,7 +848,7 @@ private static readonly @string vTraceWithoutArgumentsˢᵇᴍChecker = "%v: tra
         }
         case var ᴛ when ᴛ == _Alignof: {
             // unsafe.Alignof(x T) uintptr
-            Ꮡcheck.assignment(Ꮡx, default, argumentToUnsafeAlignofˢᴍChecker);
+            Ꮡcheck.assignment(Ꮡx, default, argumentToUnsafeAlignofˢ⁔Checker);
             if (x.mode == invalid) {
                 return default;
             }
@@ -939,7 +939,7 @@ private static readonly @string vTraceWithoutArgumentsˢᵇᴍChecker = "%v: tra
         }
         case var ᴛ when ᴛ == _Sizeof: {
             // unsafe.Sizeof(x T) uintptr
-            Ꮡcheck.assignment(Ꮡx, default, argumentToUnsafeSizeofˢᴍChecker);
+            Ꮡcheck.assignment(Ꮡx, default, argumentToUnsafeSizeofˢ⁔Checker);
             if (x.mode == invalid) {
                 return default;
             }
@@ -974,7 +974,7 @@ private static readonly @string vTraceWithoutArgumentsˢᵇᴍChecker = "%v: tra
             }
 
             var y = args[1];
-            if (!Ꮡcheck.isValidIndex(y, InvalidUnsafeSlice, lengthˢᴍChecker, false)) {
+            if (!Ꮡcheck.isValidIndex(y, InvalidUnsafeSlice, lengthˢ⁔Checker, false)) {
                 return default;
             }
 
@@ -1007,13 +1007,13 @@ private static readonly @string vTraceWithoutArgumentsˢᵇᴍChecker = "%v: tra
             // unsafe.String(ptr *byte, len IntegerType) string
             Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), go1_20, "unsafe.String");
 
-            Ꮡcheck.assignment(Ꮡx, new PointerжType(NewPointer(universeByte)), argumentToUnsafeStringˢᴍChecker);
+            Ꮡcheck.assignment(Ꮡx, new PointerжType(NewPointer(universeByte)), argumentToUnsafeStringˢ⁔Checker);
             if (x.mode == invalid) {
                 return default;
             }
 
             var y = args[1];
-            if (!Ꮡcheck.isValidIndex(y, InvalidUnsafeString, lengthˢᴍChecker, false)) {
+            if (!Ꮡcheck.isValidIndex(y, InvalidUnsafeString, lengthˢ⁔Checker, false)) {
                 return default;
             }
 
@@ -1028,7 +1028,7 @@ private static readonly @string vTraceWithoutArgumentsˢᵇᴍChecker = "%v: tra
             // unsafe.StringData(str string) *byte
             Ꮡcheck.verifyVersionf(new ast_Exprᴠpositioner(call.Fun), go1_20, "unsafe.StringData");
 
-            Ꮡcheck.assignment(Ꮡx, new BasicжType(Typ[String]), argumentToUnsafeˢᴍChecker);
+            Ꮡcheck.assignment(Ꮡx, new BasicжType(Typ[String]), argumentToUnsafeˢ⁔Checker);
             if (x.mode == invalid) {
                 return default;
             }
@@ -1066,7 +1066,7 @@ private static readonly @string vTraceWithoutArgumentsˢᵇᴍChecker = "%v: tra
             // Note: trace is only available in self-test mode.
             // (no argument evaluated yet)
             if (nargs == 0) {
-                Ꮡcheck.dump(vTraceWithoutArgumentsˢᴍChecker, call.Pos());
+                Ꮡcheck.dump(vTraceWithoutArgumentsˢ⁔Checker, call.Pos());
                 x.mode = novalue;
                 break;
             }
@@ -1188,7 +1188,7 @@ internal static bool /*varSized*/ hasVarSize(Type t, map<ж<Named>, bool> seen) 
 // of x. If any of these applications of f return nil,
 // applyTypeFunc returns nil.
 // If x is not a type parameter, the result is f(x).
-[GoMethodBody("applyTypeFunc")] internal static Type applyTypeFuncᴍ(ж<Checker> Ꮡcheck, Func<Type, Type> f, ж<operand> Ꮡx, builtinId id) {
+internal static Type applyTypeFunc⁔(/*this*/ ж<Checker> Ꮡcheck, Func<Type, Type> f, ж<operand> Ꮡx, builtinId id) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 

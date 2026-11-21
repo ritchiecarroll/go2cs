@@ -24,7 +24,7 @@ partial struct cfb {
 
 } partial class cipher_package {
 
-[GoMethodBody("XORKeyStream")] internal static void XORKeyStreamᴍ(ref cfb x, slice<byte> dst, slice<byte> src) {
+internal static void XORKeyStream⁔(/*this*/ ref cfb x, slice<byte> dst, slice<byte> src) {
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }

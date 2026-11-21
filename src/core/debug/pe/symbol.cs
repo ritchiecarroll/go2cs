@@ -49,7 +49,7 @@ internal static (bool, uint32) isSymNameOffset(/*[8]*/ array<byte> name) {
 // FullName finds real name of symbol sym. Normally name is stored
 // in sym.Name, but if it is longer then 8 characters, it is stored
 // in COFF string table st instead.
-[GoMethodBody("FullName")] internal static (@string, error) FullNameᴍ(ref COFFSymbol sym, StringTable st) {
+internal static (@string, error) FullName⁔(/*this*/ ref COFFSymbol sym, StringTable st) {
     var (ok, offset) = isSymNameOffset(sym.Name); if (ok) {
         return st.String(offset);
     }

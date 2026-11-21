@@ -99,7 +99,7 @@ partial struct neverEnding /*num:byte*/;
 
 } partial class cgi_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(neverEnding b, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ neverEnding b, slice<byte> p) {
     foreach (var i in range(len(p))) {
         p[i] = (byte)b;
     }

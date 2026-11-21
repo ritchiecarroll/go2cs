@@ -166,7 +166,7 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 // Indent sets the encoder to generate XML in which each element
 // begins on a new indented line that starts with prefix and is followed by
 // one or more copies of indent according to the nesting depth.
-[GoMethodBody("Indent")] internal static void Indentᴍ(ref Encoder enc, @string prefix, @string indent) {
+internal static void Indent⁔(/*this*/ ref Encoder enc, @string prefix, @string indent) {
     enc.p.prefix = prefix;
     enc.p.indent = indent;
 }
@@ -177,7 +177,7 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 // of Go values to XML.
 //
 // Encode calls [Encoder.Flush] before returning.
-[GoMethodBody("Encode")] internal static error Encodeᴍ(ж<Encoder> Ꮡenc, any v) {
+internal static error Encode⁔(/*this*/ ж<Encoder> Ꮡenc, any v) {
     ref var enc = ref Ꮡenc.DerefOrNull();
 
     var err = Ꮡenc.Ꮡp.marshalValue(reflect.ValueOf(v), nil, nil);
@@ -194,7 +194,7 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 // of Go values to XML.
 //
 // EncodeElement calls [Encoder.Flush] before returning.
-[GoMethodBody("EncodeElement")] internal static error EncodeElementᴍ(ж<Encoder> Ꮡenc, any v, StartElement startʗp) {
+internal static error EncodeElement⁔(/*this*/ ж<Encoder> Ꮡenc, any v, StartElement startʗp) {
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var start = ref heap(startʗp, out var Ꮡstart);
 
@@ -225,7 +225,7 @@ internal static slice<byte> endProcInst = slice<byte>("?>"u8);
 //
 // EncodeToken allows writing a [ProcInst] with Target set to "xml" only as the first token
 // in the stream.
-[GoMethodBody("EncodeToken")] internal static error EncodeTokenᴍ(ж<Encoder> Ꮡenc, Token t) {
+internal static error EncodeToken⁔(/*this*/ ж<Encoder> Ꮡenc, Token t) {
     var p = Ꮡenc.Ꮡp;
     switch (t.type()) {
     case StartElement tΔ1ᴛ1: {
@@ -348,14 +348,14 @@ internal static bool isValidDirective(Directive dir) {
 
 // Flush flushes any buffered XML to the underlying writer.
 // See the [Encoder.EncodeToken] documentation for details about when it is necessary.
-[GoMethodBody("Flush")] internal static error Flushᴍ(ref Encoder enc) {
+internal static error Flush⁔(/*this*/ ref Encoder enc) {
     return enc.p.w.Flush();
 }
 
 // Close the Encoder, indicating that no more data will be written. It flushes
 // any buffered XML to the underlying writer and returns an error if the
 // written XML is invalid (e.g. by containing unclosed elements).
-[GoMethodBody("Close")] internal static error Closeᴍ(ref Encoder enc) {
+internal static error Close⁔(/*this*/ ref Encoder enc) {
     return enc.p.Close();
 }
 
@@ -381,14 +381,14 @@ partial struct printer {
 } partial class xml_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string xmlˢᴍprinter => ref xmlˢᵇᴍprinter;
-private static readonly @string xmlˢᵇᴍprinter = "xml"u8;
-internal static ref readonly @string xmlnsˢᴍprinter => ref xmlnsˢᵇᴍprinter;
-private static readonly @string xmlnsˢᵇᴍprinter = @"xmlns:"u8;
+internal static ref readonly @string xmlˢ⁔printer => ref xmlˢᵇ⁔printer;
+private static readonly @string xmlˢᵇ⁔printer = "xml"u8;
+internal static ref readonly @string xmlnsˢ⁔printer => ref xmlnsˢᵇ⁔printer;
+private static readonly @string xmlnsˢᵇ⁔printer = @"xmlns:"u8;
 
 // createAttrPrefix finds the name space prefix attribute to use for the given name space,
 // defining a new prefix if necessary. It returns the prefix.
-[GoMethodBody("createAttrPrefix")] internal static @string createAttrPrefixᴍ(ж<printer> Ꮡp, @string url) {
+internal static @string createAttrPrefix⁔(/*this*/ ж<printer> Ꮡp, @string url) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     @string prefixΔ1 = p.attrPrefix[url]; if (prefixΔ1 != ""u8) {
@@ -422,7 +422,7 @@ private static readonly @string xmlnsˢᵇᴍprinter = @"xmlns:"u8;
     // case should be matched, so:
     //    (('X'|'x') ('M'|'m') ('L'|'l'))
     // See Section 2.3 of https://www.w3.org/TR/REC-xml/
-    if (len(prefix) >= 3 && strings.EqualFold(prefix[..3], xmlˢᴍprinter)) {
+    if (len(prefix) >= 3 && strings.EqualFold(prefix[..3], xmlˢ⁔printer)) {
         prefix = "_"u8 + prefix;
     }
     if (p.attrNS[prefix] != "") {
@@ -438,7 +438,7 @@ private static readonly @string xmlnsˢᵇᴍprinter = @"xmlns:"u8;
     p.attrPrefix[url] = prefix;
     p.attrNS[prefix] = url;
 
-    p.WriteString(xmlnsˢᴍprinter);
+    p.WriteString(xmlnsˢ⁔printer);
     p.WriteString(prefix);
     p.WriteString(@"=""");
     EscapeText(new printerжWriter(Ꮡp), slice<byte>(url));
@@ -450,16 +450,16 @@ private static readonly @string xmlnsˢᵇᴍprinter = @"xmlns:"u8;
 }
 
 // deleteAttrPrefix removes an attribute name space prefix.
-[GoMethodBody("deleteAttrPrefix")] internal static void deleteAttrPrefixᴍ(ref printer p, @string prefix) {
+internal static void deleteAttrPrefix⁔(/*this*/ ref printer p, @string prefix) {
     delete(p.attrPrefix, p.attrNS[prefix]);
     delete(p.attrNS, prefix);
 }
 
-[GoMethodBody("markPrefix")] internal static void markPrefixᴍ(ref printer p) {
+internal static void markPrefix⁔(/*this*/ ref printer p) {
     p.prefixes = append(p.prefixes, ""u8);
 }
 
-[GoMethodBody("popPrefix")] internal static void popPrefixᴍ(ref printer p) {
+internal static void popPrefix⁔(/*this*/ ref printer p) {
     while (len(p.prefixes) > 0) {
         @string prefix = p.prefixes[len(p.prefixes) - 1];
         p.prefixes = p.prefixes.slice(0, len(p.prefixes) - 1);
@@ -472,7 +472,7 @@ private static readonly @string xmlnsˢᵇᴍprinter = @"xmlns:"u8;
 
 // marshalValue writes one or more XML elements representing val.
 // If val was obtained from a struct field, finfo must have its details.
-[GoMethodBody("marshalValue")] internal static error marshalValueᴍ(ж<printer> Ꮡp, reflect.Value val, ж<fieldInfo> Ꮡfinfo, ж<StartElement> ᏑstartTemplate) {
+internal static error marshalValue⁔(/*this*/ ж<printer> Ꮡp, reflect.Value val, ж<fieldInfo> Ꮡfinfo, ж<StartElement> ᏑstartTemplate) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var finfo = ref Ꮡfinfo.DerefOrNull();
     ref var startTemplate = ref ᏑstartTemplate.DerefOrNull();
@@ -637,7 +637,7 @@ private static readonly @string xmlnsˢᵇᴍprinter = @"xmlns:"u8;
 }
 
 // marshalAttr marshals an attribute with the given name and value, adding to start.Attr.
-[GoMethodBody("marshalAttr")] internal static error marshalAttrᴍ(ref printer p, ж<StartElement> Ꮡstart, Name name, reflect.Value val) {
+internal static error marshalAttr⁔(/*this*/ ref printer p, ж<StartElement> Ꮡstart, Name name, reflect.Value val) {
     ref var start = ref Ꮡstart.DerefOrNull();
 
     if (val.CanInterface()) {
@@ -762,7 +762,7 @@ internal static StartElement defaultStart(reflect.Type typ, ж<fieldInfo> Ꮡfin
 } partial class xml_package {
 
 // marshalInterface marshals a Marshaler interface value.
-[GoMethodBody("marshalInterface")] internal static error marshalInterfaceᴍ(ref printer p, Marshaler val, StartElement start) {
+internal static error marshalInterface⁔(/*this*/ ref printer p, Marshaler val, StartElement start) {
     // Push a marker onto the tag stack so that MarshalXML
     // cannot close the XML tags that it did not open.
     p.tags = append(p.tags, new Name());
@@ -782,7 +782,7 @@ internal static StartElement defaultStart(reflect.Type typ, ж<fieldInfo> Ꮡfin
 }
 
 // marshalTextInterface marshals a TextMarshaler interface value.
-[GoMethodBody("marshalTextInterface")] internal static error marshalTextInterfaceᴍ(ж<printer> Ꮡp, encoding.TextMarshaler val, StartElement startʗp) {
+internal static error marshalTextInterface⁔(/*this*/ ж<printer> Ꮡp, encoding.TextMarshaler val, StartElement startʗp) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var start = ref heap(startʗp, out var Ꮡstart);
 
@@ -798,11 +798,11 @@ internal static StartElement defaultStart(reflect.Type typ, ж<fieldInfo> Ꮡfin
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string xmlnsˢ2ᴍprinter => ref xmlnsˢ2ᵇᴍprinter;
-private static readonly @string xmlnsˢ2ᵇᴍprinter = @" xmlns="""u8;
+internal static ref readonly @string xmlnsˢ2⁔printer => ref xmlnsˢ2ᵇ⁔printer;
+private static readonly @string xmlnsˢ2ᵇ⁔printer = @" xmlns="""u8;
 
 // writeStart writes the given start element.
-[GoMethodBody("writeStart")] internal static error writeStartᴍ(ж<printer> Ꮡp, ж<StartElement> Ꮡstart) {
+internal static error writeStart⁔(/*this*/ ж<printer> Ꮡp, ж<StartElement> Ꮡstart) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var start = ref Ꮡstart.DerefOrNull();
 
@@ -818,7 +818,7 @@ private static readonly @string xmlnsˢ2ᵇᴍprinter = @" xmlns="""u8;
     p.WriteString(start.Name.Local);
 
     if (start.Name.Space != ""u8) {
-        p.WriteString(xmlnsˢ2ᴍprinter);
+        p.WriteString(xmlnsˢ2⁔printer);
         p.EscapeString(start.Name.Space);
         p.WriteByte((byte)'"');
     }
@@ -843,7 +843,7 @@ private static readonly @string xmlnsˢ2ᵇᴍprinter = @" xmlns="""u8;
     return default;
 }
 
-[GoMethodBody("writeEnd")] internal static error writeEndᴍ(ref printer p, Name name) {
+internal static error writeEnd⁔(/*this*/ ref printer p, Name name) {
     if (name.Local == ""u8) {
         return fmt.Errorf("xml: end tag with no name"u8);
     }
@@ -867,7 +867,7 @@ private static readonly @string xmlnsˢ2ᵇᴍprinter = @" xmlns="""u8;
     return default;
 }
 
-[GoMethodBody("marshalSimple")] internal static (@string, slice<byte>, error) marshalSimpleᴍ(ref printer p, reflect.Type typ, reflect.Value val) {
+internal static (@string, slice<byte>, error) marshalSimple⁔(/*this*/ ref printer p, reflect.Type typ, reflect.Value val) {
     switch (val.Kind()) {
     case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
         return (strconv.FormatInt(val.Int(), 10), default, default);
@@ -928,7 +928,7 @@ internal static reflect.Value indirect(reflect.Value vf) {
 
 } partial class xml_package {
 
-[GoMethodBody("marshalStruct")] internal static error marshalStructᴍ(ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo, reflect.Value val) {
+internal static error marshalStruct⁔(/*this*/ ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo, reflect.Value val) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var tinfo = ref Ꮡtinfo.DerefOrNull();
 
@@ -1132,15 +1132,15 @@ internal static reflect.Value indirect(reflect.Value vf) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string useOfClosedEncoderˢᴍprinter => ref useOfClosedEncoderˢᵇᴍprinter;
-private static readonly @string useOfClosedEncoderˢᵇᴍprinter = "use of closed Encoder"u8;
+internal static ref readonly @string useOfClosedEncoderˢ⁔printer => ref useOfClosedEncoderˢᵇ⁔printer;
+private static readonly @string useOfClosedEncoderˢᵇ⁔printer = "use of closed Encoder"u8;
 
 // Write implements io.Writer
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref printer p, slice<byte> b) {
+internal static (nint n, error err) Write⁔(/*this*/ ref printer p, slice<byte> b) {
     nint n = default;
 
     if (p.closed && p.err == nil) {
-        p.err = errors.New(useOfClosedEncoderˢᴍprinter);
+        p.err = errors.New(useOfClosedEncoderˢ⁔printer);
     }
     if (p.err == nil) {
         (n, p.err) = p.w.Write(b);
@@ -1149,11 +1149,11 @@ private static readonly @string useOfClosedEncoderˢᵇᴍprinter = "use of clos
 }
 
 // WriteString implements io.StringWriter
-[GoMethodBody("WriteString")] internal static (nint n, error err) WriteStringᴍ(ref printer p, @string s) {
+internal static (nint n, error err) WriteString⁔(/*this*/ ref printer p, @string s) {
     nint n = default;
 
     if (p.closed && p.err == nil) {
-        p.err = errors.New(useOfClosedEncoderˢᴍprinter);
+        p.err = errors.New(useOfClosedEncoderˢ⁔printer);
     }
     if (p.err == nil) {
         (n, p.err) = p.w.WriteString(s);
@@ -1162,9 +1162,9 @@ private static readonly @string useOfClosedEncoderˢᵇᴍprinter = "use of clos
 }
 
 // WriteByte implements io.ByteWriter
-[GoMethodBody("WriteByte")] internal static error WriteByteᴍ(ref printer p, byte c) {
+internal static error WriteByte⁔(/*this*/ ref printer p, byte c) {
     if (p.closed && p.err == nil) {
-        p.err = errors.New(useOfClosedEncoderˢᴍprinter);
+        p.err = errors.New(useOfClosedEncoderˢ⁔printer);
     }
     if (p.err == nil) {
         p.err = p.w.WriteByte(c);
@@ -1175,7 +1175,7 @@ private static readonly @string useOfClosedEncoderˢᵇᴍprinter = "use of clos
 // Close the Encoder, indicating that no more data will be written. It flushes
 // any buffered XML to the underlying writer and returns an error if the
 // written XML is invalid (e.g. by containing unclosed elements).
-[GoMethodBody("Close")] internal static error Closeᴍ(ref printer p) {
+internal static error Close⁔(/*this*/ ref printer p) {
     if (p.closed) {
         return default;
     }
@@ -1190,12 +1190,12 @@ private static readonly @string useOfClosedEncoderˢᵇᴍprinter = "use of clos
 }
 
 // return the bufio Writer's cached write error
-[GoMethodBody("cachedWriteError")] internal static error cachedWriteErrorᴍ(ref printer p) {
+internal static error cachedWriteError⁔(/*this*/ ref printer p) {
     var (_, err) = p.Write(default);
     return err;
 }
 
-[GoMethodBody("writeIndent")] internal static void writeIndentᴍ(ref printer p, nint depthDelta) {
+internal static void writeIndent⁔(/*this*/ ref printer p, nint depthDelta) {
     if (len(p.prefix) == 0 && len(p.indent) == 0) {
         return;
     }
@@ -1238,7 +1238,7 @@ partial struct parentStack {
 // trim updates the XML context to match the longest common prefix of the stack
 // and the given parents. A closing tag will be written for every parent
 // popped. Passing a zero slice or nil will close all the elements.
-[GoMethodBody("trim")] internal static error trimᴍ(ref parentStack s, slice<@string> parents) {
+internal static error trim⁔(/*this*/ ref parentStack s, slice<@string> parents) {
     nint split = 0;
     for (; split < len(parents) && split < len(s.stack); split++) {
         if (parents[split] != s.stack[split]) {
@@ -1255,7 +1255,7 @@ partial struct parentStack {
 }
 
 // push adds parent elements to the stack and writes open tags.
-[GoMethodBody("push")] internal static error pushᴍ(ref parentStack s, slice<@string> parents) {
+internal static error push⁔(/*this*/ ref parentStack s, slice<@string> parents) {
     for (nint i = 0; i < len(parents); i++) {
         var err = s.p.writeStart(Ꮡ(new StartElement(Name: new Name(Local: parents[i])))); if (err != nil) {
             return err;
@@ -1275,7 +1275,7 @@ partial struct UnsupportedTypeError {
 
 } partial class xml_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref UnsupportedTypeError e) {
+internal static @string Error⁔(/*this*/ ref UnsupportedTypeError e) {
     return "xml: unsupported type: "u8 + e.Type.String();
 }
 

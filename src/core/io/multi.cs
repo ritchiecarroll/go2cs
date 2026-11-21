@@ -14,7 +14,7 @@ partial struct eofReader {
 
 } partial class io_package {
 
-[GoMethodBody("Read")] internal static (nint, error) Readᴍ(eofReader _Δp0, slice<byte> _Δp1) {
+internal static (nint, error) Read⁔(/*this*/ eofReader _Δp0, slice<byte> _Δp1) {
     return (0, EOF);
 }
 
@@ -26,7 +26,7 @@ partial struct multiReader {
 
 } partial class io_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref multiReader mr, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref multiReader mr, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -56,11 +56,11 @@ partial struct multiReader {
     return (0, EOF);
 }
 
-[GoMethodBody("WriteTo")] internal static (int64 sum, error err) WriteToᴍ(ref multiReader mr, Writer w) {
+internal static (int64 sum, error err) WriteTo⁔(/*this*/ ref multiReader mr, Writer w) {
     return mr.writeToWithBuffer(w, new slice<byte>(1024 * 32));
 }
 
-[GoMethodBody("writeToWithBuffer")] internal static (int64 sum, error err) writeToWithBufferᴍ(ref multiReader mr, Writer w, slice<byte> buf) {
+internal static (int64 sum, error err) writeToWithBuffer⁔(/*this*/ ref multiReader mr, Writer w, slice<byte> buf) {
     int64 sum = default;
     error err = default;
 
@@ -104,7 +104,7 @@ partial struct multiWriter {
 
 } partial class io_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref multiWriter t, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref multiWriter t, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -127,7 +127,7 @@ internal static StringWriter _ᴛ3ʗ = new multiWriterжStringWriter(((ж<multiW
 
 } partial class io_package {
 
-[GoMethodBody("WriteString")] internal static (nint n, error err) WriteStringᴍ(ref multiWriter t, @string s) {
+internal static (nint n, error err) WriteString⁔(/*this*/ ref multiWriter t, @string s) {
     nint n = default;
     error err = default;
 

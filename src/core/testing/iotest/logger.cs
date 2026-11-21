@@ -16,7 +16,7 @@ partial struct writeLogger {
 
 } partial class iotest_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref writeLogger l, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref writeLogger l, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -45,7 +45,7 @@ partial struct readLogger {
 
 } partial class iotest_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref readLogger l, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref readLogger l, slice<byte> p) {
     nint n = default;
     error err = default;
 

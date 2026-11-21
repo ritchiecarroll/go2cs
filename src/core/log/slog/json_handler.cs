@@ -50,17 +50,17 @@ public static ж<JSONHandler> NewJSONHandler(io.Writer w, ж<HandlerOptions> Ꮡ
 
 // Enabled reports whether the handler handles records at the given level.
 // The handler ignores records whose level is lower.
-[GoMethodBody("Enabled")] internal static bool Enabledᴍ(ref JSONHandler h, context.Context _, Level level) {
+internal static bool Enabled⁔(/*this*/ ref JSONHandler h, context.Context _, Level level) {
     return h.commonHandler.enabled(level);
 }
 
 // WithAttrs returns a new [JSONHandler] whose attributes consists
 // of h's attributes followed by attrs.
-[GoMethodBody("WithAttrs")] internal static Handler WithAttrsᴍ(ref JSONHandler h, slice<Attr> attrs) {
+internal static Handler WithAttrs⁔(/*this*/ ref JSONHandler h, slice<Attr> attrs) {
     return new JSONHandlerжHandler(Ꮡ(new JSONHandler(commonHandler: h.commonHandler.withAttrs(attrs))));
 }
 
-[GoMethodBody("WithGroup")] internal static Handler WithGroupᴍ(ref JSONHandler h, @string name) {
+internal static Handler WithGroup⁔(/*this*/ ref JSONHandler h, @string name) {
     return new JSONHandlerжHandler(Ꮡ(new JSONHandler(commonHandler: h.commonHandler.withGroup(name))));
 }
 
@@ -92,7 +92,7 @@ public static ж<JSONHandler> NewJSONHandler(io.Writer w, ж<HandlerOptions> Ꮡ
 // Instead, the error message is formatted as a string.
 //
 // Each call to Handle results in a single serialized call to io.Writer.Write.
-[GoMethodBody("Handle")] internal static error Handleᴍ(ref JSONHandler h, context.Context _, Record r) {
+internal static error Handle⁔(/*this*/ ref JSONHandler h, context.Context _, Record r) {
     r = r.ΔClone();
 
     return h.commonHandler.handle(r);

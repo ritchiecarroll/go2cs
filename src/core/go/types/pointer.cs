@@ -20,9 +20,9 @@ public static ж<Pointer> NewPointer(Type elem) { return Ꮡ(new Pointer(@base: 
 } partial class types_package {
 
 // Elem returns the element type for the given pointer p.
-[GoMethodBody("Elem")] internal static Type Elemᴍ(ref Pointer p) { return p.@base; }
+internal static Type Elem⁔(/*this*/ ref Pointer p) { return p.@base; }
 
-[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Pointer> Ꮡp) { return new PointerжType(Ꮡp); }
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Pointer> Ꮡp) { return TypeString(new PointerжType(Ꮡp), default); }
+internal static Type Underlying⁔(/*this*/ ж<Pointer> Ꮡp) { return new PointerжType(Ꮡp); }
+internal static @string String⁔(/*this*/ ж<Pointer> Ꮡp) { return TypeString(new PointerжType(Ꮡp), default); }
 
 }

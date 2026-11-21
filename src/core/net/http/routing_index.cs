@@ -32,7 +32,7 @@ partial struct routingIndexKey {
 
 } partial class http_package {
 
-[GoMethodBody("addPattern")] internal static void addPatternᴍ(ref routingIndex idx, ж<pattern> Ꮡpat) {
+internal static void addPattern⁔(/*this*/ ref routingIndex idx, ж<pattern> Ꮡpat) {
     ref var pat = ref Ꮡpat.DerefOrNull();
 
     if (pat.lastSegment().multi) {
@@ -60,7 +60,7 @@ partial struct routingIndexKey {
 // For instance, an implementation that returns all registered patterns is correct.
 // We use this fact throughout, simplifying the implementation by returning more
 // patterns that we might need to.
-[GoMethodBody("possiblyConflictingPatterns")] internal static error /*err*/ possiblyConflictingPatternsᴍ(ref routingIndex idx, ж<pattern> Ꮡpat, Func<ж<pattern>, error> f) {
+internal static error /*err*/ possiblyConflictingPatterns⁔(/*this*/ ref routingIndex idx, ж<pattern> Ꮡpat, Func<ж<pattern>, error> f) {
     error err = default;
     ref var pat = ref Ꮡpat.DerefOrNull();
 

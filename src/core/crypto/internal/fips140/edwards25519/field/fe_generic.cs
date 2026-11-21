@@ -263,7 +263,7 @@ internal static void feSquareGeneric(ref Element v, ref Element a) {
 
 // carryPropagate brings the limbs below 52 bits by applying the reduction
 // identity (a * 2²⁵⁵ + b = a * 19 + b) to the l4 carry.
-[GoMethodBody("carryPropagate")] internal static ж<Element> carryPropagateᴍ(ж<Element> Ꮡv) {
+internal static ж<Element> carryPropagate⁔(/*this*/ ж<Element> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     // (l4>>51) is at most 64 - 51 = 13 bits, so (l4>>51)*19 is at most 18 bits, and

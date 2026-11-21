@@ -24,13 +24,13 @@ partial struct rawConn {
 
 } partial class net_package {
 
-[GoMethodBody("ok")] internal static bool okᴍ(ж<rawConn> Ꮡc) {
+internal static bool ok⁔(/*this*/ ж<rawConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     return Ꮡc != nil && c.fd != nil;
 }
 
-[GoMethodBody("Control")] internal static error Controlᴍ(ж<rawConn> Ꮡc, Action<uintptr> f) {
+internal static error Control⁔(/*this*/ ж<rawConn> Ꮡc, Action<uintptr> f) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -44,7 +44,7 @@ partial struct rawConn {
     return err;
 }
 
-[GoMethodBody("Read")] internal static error Readᴍ(ж<rawConn> Ꮡc, Func<uintptr, bool> f) {
+internal static error Read⁔(/*this*/ ж<rawConn> Ꮡc, Func<uintptr, bool> f) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -58,7 +58,7 @@ partial struct rawConn {
     return err;
 }
 
-[GoMethodBody("Write")] internal static error Writeᴍ(ж<rawConn> Ꮡc, Func<uintptr, bool> f) {
+internal static error Write⁔(/*this*/ ж<rawConn> Ꮡc, Func<uintptr, bool> f) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -79,7 +79,7 @@ partial struct rawConn {
 // they can pass the *poll.FD to functions like poll.Splice.
 //
 // PollFD is not intended for use outside the standard library.
-[GoMethodBody("PollFD")] internal static ж<poll.FD> PollFDᴍ(ж<rawConn> Ꮡc) {
+internal static ж<poll.FD> PollFD⁔(/*this*/ ж<rawConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -103,7 +103,7 @@ internal static ж<rawConn> newRawConn(ж<netFD> fd) {
 // extension method so that they can distinguish different socket types.
 //
 // Network is not intended for use outside the standard library.
-[GoMethodBody("Network")] internal static poll.String Networkᴍ(ref rawConn c) {
+internal static poll.String Network⁔(/*this*/ ref rawConn c) {
     return (poll.String)c.fd.net;
 }
 
@@ -115,11 +115,11 @@ partial struct rawListener {
 
 } partial class net_package {
 
-[GoMethodBody("Read")] internal static error Readᴍ(ref rawListener l, Func<uintptr, bool> _) {
+internal static error Read⁔(/*this*/ ref rawListener l, Func<uintptr, bool> _) {
     return syscall.EINVAL;
 }
 
-[GoMethodBody("Write")] internal static error Writeᴍ(ref rawListener l, Func<uintptr, bool> _) {
+internal static error Write⁔(/*this*/ ref rawListener l, Func<uintptr, bool> _) {
     return syscall.EINVAL;
 }
 

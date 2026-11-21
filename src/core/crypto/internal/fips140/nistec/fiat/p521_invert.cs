@@ -13,7 +13,7 @@ partial class fiat_package {
 // Invert sets e = 1/x, and returns e.
 //
 // If x == 0, Invert returns e = 0.
-[GoMethodBody("Invert")] internal static ж<P521Element> Invertᴍ(ж<P521Element> Ꮡe, ж<P521Element> x) {
+internal static ж<P521Element> Invert⁔(/*this*/ ж<P521Element> Ꮡe, ж<P521Element> x) {
     // Inversion is implemented as exponentiation with exponent p − 2.
     // The sequence of 13 multiplications and 520 squarings is derived from the
     // following addition chain generated with github.com/mmcloughlin/addchain v0.4.0.

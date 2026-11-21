@@ -2370,14 +2370,16 @@ partial class runtime_package
             ? "main"
             : glyphMethodGoName(method) ?? method.Name;
 
-    // SCRATCH PROTOTYPE (the global ᴍ cost test): a Go method's BODY is a plain static `<name>ᴍ` in the package class,
-    // stamped [GoMethodBody("<name>")], its receiver the first parameter; the Go-named extension forwarder is
-    // [StackTraceHidden]. The body's frame is the method's: its name is the stamp's and its receiver is read from
-    // parameter 0. The STAMP is the discriminator, never the spelling (the owner's rule), so a Go identifier that ends
-    // in the glyph is never read as a body.
+    // SCRATCH PROTOTYPE (the global-glyph cost test, the owner's ⁔ steer of 11-21): a Go method's BODY is a plain static
+    // `<name>⁔` in the package class, its receiver the first parameter; the Go-named extension forwarder is
+    // [StackTraceHidden]. The body's frame is the method's: its name is the spelling without the trailing ⁔ and its
+    // receiver is read from parameter 0. U+2054 is connector punctuation, which a Go identifier cannot spell (Go's
+    // letter is a Unicode L* code point or `_`), so the suffix alone is the discriminator: no stamp, no escape.
+    private const string GlyphMethodSuffix = "\u2054";
+
     private static string? glyphMethodGoName(System.Reflection.MethodBase method) =>
-        method.IsStatic && method.GetCustomAttributes(typeof(GoMethodBodyAttribute), inherit: false) is [GoMethodBodyAttribute stamp]
-            ? stamp.GoName
+        method.IsStatic && method.Name.Length > GlyphMethodSuffix.Length && method.Name.EndsWith(GlyphMethodSuffix, StringComparison.Ordinal)
+            ? method.Name[..^GlyphMethodSuffix.Length]
             : null;
 
     private static bool isGlyphMethodBody(System.Reflection.MethodBase method) =>
@@ -5980,7 +5982,7 @@ partial class runtime_package
     }
 
     // SCRATCH PROTOTYPE (the global ᴍ cost test): the Go-named `this ref T` method a twin forwards to is itself a
-    // [StackTraceHidden] forwarder to the body `<name>ᴍ(ref T, …)` in the package class; the body is the Go method.
+    // [StackTraceHidden] forwarder to the body `<name>⁔(ref T, …)` in the package class; the body is the Go method.
     private static System.Reflection.MethodBase? glyphBodyOf(System.Reflection.MethodInfo forwarder)
     {
         if (!forwarder.IsDefined(typeof(System.Diagnostics.StackTraceHiddenAttribute), inherit: false) || forwarder.DeclaringType is not { } holder)

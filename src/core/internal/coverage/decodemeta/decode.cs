@@ -50,7 +50,7 @@ public static (ж<CoverageMetaDataDecoder>, error) NewCoverageMetaDataDecoder(sl
 
 } partial class decodemeta_package {
 
-[GoMethodBody("readHeader")] internal static error readHeaderᴍ(ж<CoverageMetaDataDecoder> Ꮡd) {
+internal static error readHeader⁔(/*this*/ ж<CoverageMetaDataDecoder> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var err = binary.Read(new slicereader_ReaderжReader(d.r), binary.LittleEndian, Ꮡd.Ꮡhdr); if (err != nil) {
@@ -62,7 +62,7 @@ public static (ж<CoverageMetaDataDecoder>, error) NewCoverageMetaDataDecoder(sl
     return default;
 }
 
-[GoMethodBody("readStringTable")] internal static error readStringTableᴍ(ref CoverageMetaDataDecoder d) {
+internal static error readStringTable⁔(/*this*/ ref CoverageMetaDataDecoder d) {
     // Seek to the correct location to read the string table.
     var stringTableLocation = (int64)((uint32)coverage.CovMetaHeaderSize + 4 * d.hdr.NumFuncs);
     var (_, err) = d.r.Seek(stringTableLocation, io.SeekStart); if (err != nil) {
@@ -75,25 +75,25 @@ public static (ж<CoverageMetaDataDecoder>, error) NewCoverageMetaDataDecoder(sl
     return default;
 }
 
-[GoMethodBody("PackagePath")] internal static @string PackagePathᴍ(ref CoverageMetaDataDecoder d) {
+internal static @string PackagePath⁔(/*this*/ ref CoverageMetaDataDecoder d) {
     return d.strtab.Get(d.hdr.PkgPath);
 }
 
-[GoMethodBody("PackageName")] internal static @string PackageNameᴍ(ref CoverageMetaDataDecoder d) {
+internal static @string PackageName⁔(/*this*/ ref CoverageMetaDataDecoder d) {
     return d.strtab.Get(d.hdr.PkgName);
 }
 
-[GoMethodBody("ModulePath")] internal static @string ModulePathᴍ(ref CoverageMetaDataDecoder d) {
+internal static @string ModulePath⁔(/*this*/ ref CoverageMetaDataDecoder d) {
     return d.strtab.Get(d.hdr.ModulePath);
 }
 
-[GoMethodBody("NumFuncs")] internal static uint32 NumFuncsᴍ(ref CoverageMetaDataDecoder d) {
+internal static uint32 NumFuncs⁔(/*this*/ ref CoverageMetaDataDecoder d) {
     return d.hdr.NumFuncs;
 }
 
 // ReadFunc reads the coverage meta-data for the function with index
 // 'findex', filling it into the FuncDesc pointed to by 'f'.
-[GoMethodBody("ReadFunc")] internal static error ReadFuncᴍ(ref CoverageMetaDataDecoder d, uint32 fidx, ж<coverage.FuncDesc> Ꮡf) {
+internal static error ReadFunc⁔(/*this*/ ref CoverageMetaDataDecoder d, uint32 fidx, ж<coverage.FuncDesc> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (fidx >= d.hdr.NumFuncs) {

@@ -302,7 +302,7 @@ public static rune ToTitle(rune r) {
 } partial class unicode_package {
 
 // ToUpper maps the rune to upper case giving priority to the special mapping.
-[GoMethodBody("ToUpper")] internal static rune ToUpperᴍ(SpecialCase special, rune r) {
+internal static rune ToUpper⁔(/*this*/ SpecialCase special, rune r) {
     var (r1, hadMapping) = to(UpperCase, r, (slice<CaseRange>)special);
     if (r1 == r && !hadMapping) {
         r1 = unicode.ToUpper(r);
@@ -311,7 +311,7 @@ public static rune ToTitle(rune r) {
 }
 
 // ToTitle maps the rune to title case giving priority to the special mapping.
-[GoMethodBody("ToTitle")] internal static rune ToTitleᴍ(SpecialCase special, rune r) {
+internal static rune ToTitle⁔(/*this*/ SpecialCase special, rune r) {
     var (r1, hadMapping) = to(TitleCase, r, (slice<CaseRange>)special);
     if (r1 == r && !hadMapping) {
         r1 = unicode.ToTitle(r);
@@ -320,7 +320,7 @@ public static rune ToTitle(rune r) {
 }
 
 // ToLower maps the rune to lower case giving priority to the special mapping.
-[GoMethodBody("ToLower")] internal static rune ToLowerᴍ(SpecialCase special, rune r) {
+internal static rune ToLower⁔(/*this*/ SpecialCase special, rune r) {
     var (r1, hadMapping) = to(LowerCase, r, (slice<CaseRange>)special);
     if (r1 == r && !hadMapping) {
         r1 = unicode.ToLower(r);

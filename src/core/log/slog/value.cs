@@ -73,14 +73,14 @@ internal static slice<@string> kindStrings = [
 } partial class slog_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownSlogKindˢᴍKind => ref unknownSlogKindˢᵇᴍKind;
-private static readonly @string unknownSlogKindˢᵇᴍKind = "<unknown slog.Kind>"u8;
+internal static ref readonly @string unknownSlogKindˢ⁔Kind => ref unknownSlogKindˢᵇ⁔Kind;
+private static readonly @string unknownSlogKindˢᵇ⁔Kind = "<unknown slog.Kind>"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Kind k) {
+internal static @string String⁔(/*this*/ Kind k) {
     if (k >= 0 && (nint)k < len(kindStrings)) {
         return kindStrings[k];
     }
-    return unknownSlogKindˢᴍKind;
+    return unknownSlogKindˢ⁔Kind;
 }
 
 } partial class slog_package {
@@ -92,7 +92,7 @@ partial struct kind /*num:nint*/;
 } partial class slog_package {
 
 // Kind returns v's Kind.
-[GoMethodBody("Kind")] internal static Kind Kindᴍ(Value v) {
+internal static Kind Kind⁔(/*this*/ Value v) {
     switch (v.any.type()) {
     case Kind x: {
         return x;
@@ -310,7 +310,7 @@ public static Value AnyValue(any v) {
 //////////////// Accessors
 
 // Any returns v's value as an any.
-[GoMethodBody("Any")] internal static any Anyᴍ(Value v) {
+internal static any Any⁔(/*this*/ Value v) {
     switch (v.Kind()) {
     case var ᴛ when ᴛ == KindAny: {
         var (k, ok) = v.any._<kind>(ᐧ); if (ok) {
@@ -354,7 +354,7 @@ public static Value AnyValue(any v) {
 // String returns Value's value as a string, formatted like [fmt.Sprint]. Unlike
 // the methods Int64, Float64, and so on, which panic if v is of the
 // wrong kind, String never panics.
-[GoMethodBody("String")] internal static @string Stringᴍ(Value v) {
+internal static @string String⁔(/*this*/ Value v) {
     var (sp, ok) = v.any._<stringptr>(ᐧ); if (ok) {
         return @unsafe.String(sp, v.num);
     }
@@ -362,13 +362,13 @@ public static Value AnyValue(any v) {
     return (@string)v.append(buf);
 }
 
-[GoMethodBody("str")] internal static @string strᴍ(Value v) {
+internal static @string str⁔(/*this*/ Value v) {
     return @unsafe.String(v.any._<stringptr>(), v.num);
 }
 
 // Int64 returns v's value as an int64. It panics
 // if v is not a signed integer.
-[GoMethodBody("Int64")] internal static int64 Int64ᴍ(Value v) {
+internal static int64 Int64⁔(/*this*/ Value v) {
     Kind g = v.Kind();
     Kind w = KindInt64; if (g != w) {
         throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
@@ -378,7 +378,7 @@ public static Value AnyValue(any v) {
 
 // Uint64 returns v's value as a uint64. It panics
 // if v is not an unsigned integer.
-[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(Value v) {
+internal static uint64 Uint64⁔(/*this*/ Value v) {
     Kind g = v.Kind();
     Kind w = KindUint64; if (g != w) {
         throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
@@ -388,7 +388,7 @@ public static Value AnyValue(any v) {
 
 // Bool returns v's value as a bool. It panics
 // if v is not a bool.
-[GoMethodBody("Bool")] internal static bool Boolᴍ(Value v) {
+internal static bool Bool⁔(/*this*/ Value v) {
     Kind g = v.Kind();
     Kind w = KindBool; if (g != w) {
         throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
@@ -396,13 +396,13 @@ public static Value AnyValue(any v) {
     return v.@bool();
 }
 
-[GoMethodBody("bool")] internal static bool @boolᴍ(Value v) {
+internal static bool @bool⁔(/*this*/ Value v) {
     return v.num == 1;
 }
 
 // Duration returns v's value as a [time.Duration]. It panics
 // if v is not a time.Duration.
-[GoMethodBody("Duration")] internal static time.Duration Durationᴍ(Value v) {
+internal static time.Duration Duration⁔(/*this*/ Value v) {
     Kind g = v.Kind();
     Kind w = KindDuration; if (g != w) {
         throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
@@ -411,13 +411,13 @@ public static Value AnyValue(any v) {
     return v.duration();
 }
 
-[GoMethodBody("duration")] internal static time.Duration durationᴍ(Value v) {
+internal static time.Duration duration⁔(/*this*/ Value v) {
     return (time.Duration)(int64)v.num;
 }
 
 // Float64 returns v's value as a float64. It panics
 // if v is not a float64.
-[GoMethodBody("Float64")] internal static float64 Float64ᴍ(Value v) {
+internal static float64 Float64⁔(/*this*/ Value v) {
     Kind g = v.Kind();
     Kind w = KindFloat64; if (g != w) {
         throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
@@ -426,13 +426,13 @@ public static Value AnyValue(any v) {
     return v.@float();
 }
 
-[GoMethodBody("float")] internal static float64 @floatᴍ(Value v) {
+internal static float64 @float⁔(/*this*/ Value v) {
     return math.Float64frombits(v.num);
 }
 
 // Time returns v's value as a [time.Time]. It panics
 // if v is not a time.Time.
-[GoMethodBody("Time")] internal static time.Time Timeᴍ(Value v) {
+internal static time.Time Time⁔(/*this*/ Value v) {
     Kind g = v.Kind();
     Kind w = KindTime; if (g != w) {
         throw panic(fmt.Sprintf("Value kind is %s, not %s"u8, g, w));
@@ -441,7 +441,7 @@ public static Value AnyValue(any v) {
 }
 
 // See TimeValue to understand how times are represented.
-[GoMethodBody("time")] internal static time.Time timeᴍ(Value v) {
+internal static time.Time time⁔(/*this*/ Value v) {
     switch (v.any.type()) {
     case timeLocation a: {
         if (a == nil) {
@@ -461,27 +461,27 @@ public static Value AnyValue(any v) {
 
 // LogValuer returns v's value as a LogValuer. It panics
 // if v is not a LogValuer.
-[GoMethodBody("LogValuer")] internal static LogValuer LogValuerᴍ(Value v) {
+internal static LogValuer LogValuer⁔(/*this*/ Value v) {
     return v.any._<LogValuer>();
 }
 
 // Group returns v's value as a []Attr.
 // It panics if v's [Kind] is not [KindGroup].
-[GoMethodBody("Group")] internal static slice<Attr> Groupᴍ(Value v) {
+internal static slice<Attr> Group⁔(/*this*/ Value v) {
     var (sp, ok) = v.any._<groupptr>(ᐧ); if (ok) {
         return @unsafe.Slice((ж<Attr>)(sp), v.num);
     }
     throw panic("Group: bad kind");
 }
 
-[GoMethodBody("group")] internal static slice<Attr> groupᴍ(Value v) {
+internal static slice<Attr> group⁔(/*this*/ Value v) {
     return @unsafe.Slice((ж<Attr>)(v.any._<groupptr>()), v.num);
 }
 
 //////////////// Other
 
 // Equal reports whether v and w represent the same Go value.
-[GoMethodBody("Equal")] internal static bool Equalᴍ(Value v, Value w) {
+internal static bool Equal⁔(/*this*/ Value v, Value w) {
     Kind k1 = v.Kind();
     Kind k2 = w.Kind();
     if (k1 != k2) {
@@ -513,7 +513,7 @@ public static Value AnyValue(any v) {
 }
 
 // isEmptyGroup reports whether v is a group that has no attributes.
-[GoMethodBody("isEmptyGroup")] internal static bool isEmptyGroupᴍ(Value v) {
+internal static bool isEmptyGroup⁔(/*this*/ Value v) {
     if (v.Kind() != KindGroup) {
         return false;
     }
@@ -525,7 +525,7 @@ public static Value AnyValue(any v) {
 
 // append appends a text representation of v to dst.
 // v is formatted as with fmt.Sprint.
-[GoMethodBody("append")] internal static slice<byte> appendᴍ(Value v, slice<byte> dst) {
+internal static slice<byte> append⁔(/*this*/ Value v, slice<byte> dst) {
     switch (v.Kind()) {
     case var ᴛ when ᴛ == KindString: {
         return builtin.append(dst, v.str().ꓸꓸꓸ);
@@ -581,7 +581,7 @@ internal static UntypedInt maxLogValues => 100;
 // If the number of LogValue calls exceeds a threshold, a Value containing an
 // error is returned.
 // Resolve's return value is guaranteed not to be of Kind [KindLogValuer].
-[GoMethodBody("Resolve")] internal static Value /*rv*/ Resolveᴍ(Value v) {
+internal static Value /*rv*/ Resolve⁔(/*this*/ Value v) {
     Value rv = default;
     GoFrame ᒐ = default;
     try {

@@ -16,7 +16,7 @@ partial struct AlertError /*num:uint8*/;
 
 } partial class tls_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(AlertError e) {
+internal static @string Error⁔(/*this*/ AlertError e) {
     return ((alert)(uint8)e).String();
 }
 
@@ -102,7 +102,7 @@ internal static alert alertECHRequired => 121;
 
 } partial class tls_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(alert e) {
+internal static @string String⁔(/*this*/ alert e) {
     var (s, ok) = alertText[e, ꟷ];
     if (ok) {
         return "tls: "u8 + s;
@@ -110,7 +110,7 @@ internal static alert alertECHRequired => 121;
     return "tls: alert("u8 + strconv.Itoa((nint)e) + ")"u8;
 }
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(alert e) {
+internal static @string Error⁔(/*this*/ alert e) {
     return e.String();
 }
 

@@ -30,7 +30,7 @@ partial struct listHeadManual {
 
 // init initializes the list head. off is the offset (via unsafe.Offsetof) of
 // the listNodeManual field in the objects in the list.
-[GoMethodBody("init")] internal static void initᴍ(ref listHeadManual head, uintptr off) {
+internal static void init⁔(/*this*/ ref listHeadManual head, uintptr off) {
     head.initialized = true;
     head.nodeOffset = off;
 }
@@ -60,12 +60,12 @@ partial struct listNodeManual {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeUninitializedˢᴍlistHeadManual => ref runtimeUninitializedˢᵇᴍlistHeadManual;
-private static readonly @string runtimeUninitializedˢᵇᴍlistHeadManual = "runtime: uninitialized listHead"u8;
+internal static ref readonly @string runtimeUninitializedˢ⁔listHeadManual => ref runtimeUninitializedˢᵇ⁔listHeadManual;
+private static readonly @string runtimeUninitializedˢᵇ⁔listHeadManual = "runtime: uninitialized listHead"u8;
 
-[GoMethodBody("getNode")] internal static ж<listNodeManual> getNodeᴍ(ref listHeadManual head, @unsafe.Pointer p) {
+internal static ж<listNodeManual> getNode⁔(/*this*/ ref listHeadManual head, @unsafe.Pointer p) {
     if (!head.initialized) {
-        @throw(runtimeUninitializedˢᴍlistHeadManual);
+        @throw(runtimeUninitializedˢ⁔listHeadManual);
     }
 
     if (p == nil) {
@@ -75,17 +75,17 @@ private static readonly @string runtimeUninitializedˢᵇᴍlistHeadManual = "ru
 }
 
 // Returns true if the list is empty.
-[GoMethodBody("empty")] internal static bool emptyᴍ(ref listHeadManual head) {
+internal static bool empty⁔(/*this*/ ref listHeadManual head) {
     return head.obj == 0;
 }
 
 // Returns the head of the list without removing it.
-[GoMethodBody("head")] internal static @unsafe.Pointer headᴍ(ref listHeadManual head) {
+internal static @unsafe.Pointer head⁔(/*this*/ ref listHeadManual head) {
     return (@unsafe.Pointer)head.obj;
 }
 
 // Push p onto the front of the list.
-[GoMethodBody("push")] internal static void pushᴍ(ref listHeadManual head, @unsafe.Pointer p) {
+internal static void push⁔(/*this*/ ref listHeadManual head, @unsafe.Pointer p) {
     // p becomes the head of the list.
 
     // ... so p's next is the current head.
@@ -102,7 +102,7 @@ private static readonly @string runtimeUninitializedˢᵇᴍlistHeadManual = "ru
 }
 
 // Pop removes the head of the list.
-[GoMethodBody("pop")] internal static @unsafe.Pointer popᴍ(ref listHeadManual head) {
+internal static @unsafe.Pointer pop⁔(/*this*/ ref listHeadManual head) {
     if (head.obj == 0) {
         return default;
     }
@@ -127,7 +127,7 @@ private static readonly @string runtimeUninitializedˢᵇᴍlistHeadManual = "ru
 }
 
 // Remove p from the middle of the list.
-[GoMethodBody("remove")] internal static void removeᴍ(ref listHeadManual head, @unsafe.Pointer p) {
+internal static void remove⁔(/*this*/ ref listHeadManual head, @unsafe.Pointer p) {
     if ((@unsafe.Pointer)head.obj == p) {
         // Use pop to ensure head is updated when removing the head.
         head.pop();

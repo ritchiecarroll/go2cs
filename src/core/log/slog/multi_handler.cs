@@ -28,7 +28,7 @@ partial struct MultiHandler {
 
 } partial class slog_package {
 
-[GoMethodBody("Enabled")] internal static bool Enabledᴍ(ref MultiHandler h, context.Context ctx, Level l) {
+internal static bool Enabled⁔(/*this*/ ref MultiHandler h, context.Context ctx, Level l) {
     foreach (var i in range(len(h.multi))) {
         if (h.multi[i].Enabled(ctx, l)) {
             return true;
@@ -37,7 +37,7 @@ partial struct MultiHandler {
     return false;
 }
 
-[GoMethodBody("Handle")] internal static error Handleᴍ(ref MultiHandler h, context.Context ctx, Record r) {
+internal static error Handle⁔(/*this*/ ref MultiHandler h, context.Context ctx, Record r) {
     r = r.ΔClone();
     var errsᴷ = new stackAppend<error>();
 
@@ -52,7 +52,7 @@ partial struct MultiHandler {
     return errors.Join(errs.ꓸꓸꓸ);
 }
 
-[GoMethodBody("WithAttrs")] internal static Handler WithAttrsᴍ(ref MultiHandler h, slice<Attr> attrs) {
+internal static Handler WithAttrs⁔(/*this*/ ref MultiHandler h, slice<Attr> attrs) {
     var handlers = new slice<Handler>(0, len(h.multi));
     foreach (var i in range(len(h.multi))) {
         handlers = append(handlers, h.multi[i].WithAttrs(attrs));
@@ -60,7 +60,7 @@ partial struct MultiHandler {
     return new MultiHandlerжHandler(Ꮡ(new MultiHandler(multi: handlers)));
 }
 
-[GoMethodBody("WithGroup")] internal static Handler WithGroupᴍ(ref MultiHandler h, @string name) {
+internal static Handler WithGroup⁔(/*this*/ ref MultiHandler h, @string name) {
     var handlers = new slice<Handler>(0, len(h.multi));
     foreach (var i in range(len(h.multi))) {
         handlers = append(handlers, h.multi[i].WithGroup(name));

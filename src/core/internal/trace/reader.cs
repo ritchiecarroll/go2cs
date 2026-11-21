@@ -90,7 +90,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 // ReadEvent reads a single event from the stream.
 //
 // If the stream has been exhausted, it returns an invalid event and io.EOF.
-[GoMethodBody("ReadEvent")] internal static (Event e, error err) ReadEventᴍ(ж<Reader> Ꮡr) {
+internal static (Event e, error err) ReadEvent⁔(/*this*/ ж<Reader> Ꮡr) {
     Event e = new();
     error err = default;
     GoFrame ᒐ = default;
@@ -251,14 +251,14 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string internalErrorˢ4ᴍReader => ref internalErrorˢ4ᵇᴍReader;
-private static readonly @string internalErrorˢ4ᵇᴍReader = "internal error: nextGenWithSpill called for Go 1.26+ trace"u8;
+internal static ref readonly @string internalErrorˢ4⁔Reader => ref internalErrorˢ4ᵇ⁔Reader;
+private static readonly @string internalErrorˢ4ᵇ⁔Reader = "internal error: nextGenWithSpill called for Go 1.26+ trace"u8;
 
 // nextGenWithSpill reads the generation and calls nextGen while
 // also handling any spilled batches.
-[GoMethodBody("nextGenWithSpill")] internal static (Event, error) nextGenWithSpillᴍ(ref Reader r) {
+internal static (Event, error) nextGenWithSpill⁔(/*this*/ ref Reader r) {
     if (r.version >= version.Go126) {
-        return (new Event(), errors.New(internalErrorˢ4ᴍReader));
+        return (new Event(), errors.New(internalErrorˢ4⁔Reader));
     }
     if (r.spillErr != nil) {
         if (r.spillErrSync) {
@@ -293,7 +293,7 @@ private static readonly @string internalErrorˢ4ᵇᴍReader = "internal error: 
 
 // installGen installs the new generation into the Reader and returns
 // a Sync event for the new generation.
-[GoMethodBody("installGen")] internal static (Event, error) installGenᴍ(ref Reader r, ж<generation> Ꮡgen) {
+internal static (Event, error) installGen⁔(/*this*/ ref Reader r, ж<generation> Ꮡgen) {
     ref var gen = ref Ꮡgen.DerefOrNull();
 
     if (Ꮡgen == nil) {

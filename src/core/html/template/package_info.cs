@@ -100,7 +100,7 @@ using static go.html.template_package;
 
 namespace go.html;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static template_package;
 using parse = text.template.parse_package;
 using text.template;
@@ -112,7 +112,10 @@ using fs = go.io.fs_package;
 using go.io;
 using go.path;
 using ꓸꓸꓸstring = Span<@string>;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("template")]
 public static partial class template_package
@@ -185,84 +188,84 @@ public static partial class template_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(template_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛError;
-[GoMethodHost(typeof(template_package.Template)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛTemplate;
-[GoMethodHost(typeof(template_package.attr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛattr;
-[GoMethodHost(typeof(template_package.context)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛcontext;
-[GoMethodHost(typeof(template_package.delim)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛdelim;
-[GoMethodHost(typeof(template_package.element)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛelement;
-[GoMethodHost(typeof(template_package.escaper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛescaper;
-[GoMethodHost(typeof(template_package.jsCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛjsCtx;
-[GoMethodHost(typeof(template_package.state)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛstate;
-[GoMethodHost(typeof(template_package.urlPart)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class templateᴛurlPart;
+[GoMethodHost(typeof(template_package.Error)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛError;
+[GoMethodHost(typeof(template_package.Template)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛTemplate;
+[GoMethodHost(typeof(template_package.attr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛattr;
+[GoMethodHost(typeof(template_package.context)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛcontext;
+[GoMethodHost(typeof(template_package.delim)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛdelim;
+[GoMethodHost(typeof(template_package.element)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛelement;
+[GoMethodHost(typeof(template_package.escaper)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛescaper;
+[GoMethodHost(typeof(template_package.jsCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛjsCtx;
+[GoMethodHost(typeof(template_package.state)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛstate;
+[GoMethodHost(typeof(template_package.urlPart)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class templateᴛurlPart;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class templateᴛattr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this attr i) => template_package.Stringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this attr i) => template_package.String⁔(i);
 }
 partial class templateᴛcontext {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this context c) => template_package.Stringᴍ(c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool eq(this context c, context d) => template_package.eqᴍ(c, d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string mangle(this context c, @string templateName) => template_package.mangleᴍ(c, templateName);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context clone(this context c) => template_package.cloneᴍ(c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this context c) => template_package.String⁔(c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool eq(this context c, context d) => template_package.eq⁔(c, d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string mangle(this context c, @string templateName) => template_package.mangle⁔(c, templateName);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context clone(this context c) => template_package.clone⁔(c);
 }
 partial class templateᴛdelim {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this delim i) => template_package.Stringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this delim i) => template_package.String⁔(i);
 }
 partial class templateᴛelement {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this element i) => template_package.Stringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this element i) => template_package.String⁔(i);
 }
 partial class templateᴛError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref Error e) => template_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref Error e) => template_package.Error⁔(ref e);
 }
 partial class templateᴛescaper {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context escape(this ref escaper e, context c, parse.Node n) => template_package.escapeᴍ(ref e, c, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context escapeAction(this ref escaper e, context c, ж<parse.ActionNode> Ꮡn) => template_package.escapeActionᴍ(ref e, c, Ꮡn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context escapeBranch(this ref escaper e, context c, ж<parse.BranchNode> Ꮡn, @string nodeName) => template_package.escapeBranchᴍ(ref e, c, Ꮡn, nodeName);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context escapeList(this ref escaper e, context c, ж<parse.ListNode> Ꮡn) => template_package.escapeListᴍ(ref e, c, Ꮡn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (context, bool) escapeListConditionally(this ref escaper e, context c, ж<parse.ListNode> n, Func<ж<escaper>, context, bool> filter) => template_package.escapeListConditionallyᴍ(ref e, c, n, filter);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context escapeTemplate(this ref escaper e, context c, ж<parse.TemplateNode> Ꮡn) => template_package.escapeTemplateᴍ(ref e, c, Ꮡn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (context, @string) escapeTree(this ref escaper e, context c, parse.Node node, @string name, nint line) => template_package.escapeTreeᴍ(ref e, c, node, name, line);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context computeOutCtx(this ref escaper e, context c, ж<template.Template> Ꮡt) => template_package.computeOutCtxᴍ(ref e, c, Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (context, bool) escapeTemplateBody(this ref escaper e, context c, ж<template.Template> Ꮡt) => template_package.escapeTemplateBodyᴍ(ref e, c, Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static context escapeText(this ref escaper e, context c, ж<parse.TextNode> Ꮡn) => template_package.escapeTextᴍ(ref e, c, Ꮡn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void editActionNode(this ref escaper e, ж<parse.ActionNode> n, slice<@string> cmds) => template_package.editActionNodeᴍ(ref e, n, cmds);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void editTemplateNode(this ref escaper e, ж<parse.TemplateNode> n, @string callee) => template_package.editTemplateNodeᴍ(ref e, n, callee);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void editTextNode(this ref escaper e, ж<parse.TextNode> n, slice<byte> text) => template_package.editTextNodeᴍ(ref e, n, text);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void commit(this ref escaper e) => template_package.commitᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<template.Template> template(this ref escaper e, @string name) => template_package.templateᴍ(ref e, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Template> arbitraryTemplate(this ref escaper e) => template_package.arbitraryTemplateᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context escape(this ref escaper e, context c, parse.Node n) => template_package.escape⁔(ref e, c, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context escapeAction(this ref escaper e, context c, ж<parse.ActionNode> Ꮡn) => template_package.escapeAction⁔(ref e, c, Ꮡn);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context escapeBranch(this ref escaper e, context c, ж<parse.BranchNode> Ꮡn, @string nodeName) => template_package.escapeBranch⁔(ref e, c, Ꮡn, nodeName);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context escapeList(this ref escaper e, context c, ж<parse.ListNode> Ꮡn) => template_package.escapeList⁔(ref e, c, Ꮡn);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (context, bool) escapeListConditionally(this ref escaper e, context c, ж<parse.ListNode> n, Func<ж<escaper>, context, bool> filter) => template_package.escapeListConditionally⁔(ref e, c, n, filter);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context escapeTemplate(this ref escaper e, context c, ж<parse.TemplateNode> Ꮡn) => template_package.escapeTemplate⁔(ref e, c, Ꮡn);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (context, @string) escapeTree(this ref escaper e, context c, parse.Node node, @string name, nint line) => template_package.escapeTree⁔(ref e, c, node, name, line);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context computeOutCtx(this ref escaper e, context c, ж<template.Template> Ꮡt) => template_package.computeOutCtx⁔(ref e, c, Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (context, bool) escapeTemplateBody(this ref escaper e, context c, ж<template.Template> Ꮡt) => template_package.escapeTemplateBody⁔(ref e, c, Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static context escapeText(this ref escaper e, context c, ж<parse.TextNode> Ꮡn) => template_package.escapeText⁔(ref e, c, Ꮡn);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void editActionNode(this ref escaper e, ж<parse.ActionNode> n, slice<@string> cmds) => template_package.editActionNode⁔(ref e, n, cmds);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void editTemplateNode(this ref escaper e, ж<parse.TemplateNode> n, @string callee) => template_package.editTemplateNode⁔(ref e, n, callee);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void editTextNode(this ref escaper e, ж<parse.TextNode> n, slice<byte> text) => template_package.editTextNode⁔(ref e, n, text);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void commit(this ref escaper e) => template_package.commit⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<template.Template> template(this ref escaper e, @string name) => template_package.template⁔(ref e, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Template> arbitraryTemplate(this ref escaper e) => template_package.arbitraryTemplate⁔(ref e);
 }
 partial class templateᴛjsCtx {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this jsCtx i) => template_package.Stringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this jsCtx i) => template_package.String⁔(i);
 }
 partial class templateᴛstate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this state i) => template_package.Stringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this state i) => template_package.String⁔(i);
 }
 partial class templateᴛTemplate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<ж<Template>> Templates(this ж<Template> Ꮡt) => template_package.Templatesᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) => template_package.Optionᴍ(Ꮡt, optʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error checkCanParse(this ж<Template> Ꮡt) => template_package.checkCanParseᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error escape(this ж<Template> Ꮡt) => template_package.escapeᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Execute(this ж<Template> Ꮡt, io.Writer wr, any data) => template_package.Executeᴍ(Ꮡt, wr, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error ExecuteTemplate(this ж<Template> Ꮡt, io.Writer wr, @string name, any data) => template_package.ExecuteTemplateᴍ(Ꮡt, wr, name, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Template> tmpl, error err) lookupAndEscapeTemplate(this ж<Template> Ꮡt, @string name) => template_package.lookupAndEscapeTemplateᴍ(Ꮡt, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string DefinedTemplates(this ref Template t) => template_package.DefinedTemplatesᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) Parse(this ж<Template> Ꮡt, @string text) => template_package.Parseᴍ(Ꮡt, text);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) AddParseTree(this ж<Template> Ꮡt, @string name, ж<parse.Tree> tree) => template_package.AddParseTreeᴍ(Ꮡt, name, tree);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) => template_package.Cloneᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Template> New(this ж<Template> Ꮡt, @string name) => template_package.Newᴍ(Ꮡt, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Template> @new(this ref Template t, @string name) => template_package.@newᴍ(ref t, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Name(this ref Template t) => template_package.Nameᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Template> Funcs(this ж<Template> Ꮡt, FuncMap funcMap) => template_package.Funcsᴍ(Ꮡt, funcMap);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Template> Delims(this ж<Template> Ꮡt, @string left, @string right) => template_package.Delimsᴍ(Ꮡt, left, right);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Template> Lookup(this ж<Template> Ꮡt, @string name) => template_package.Lookupᴍ(Ꮡt, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) ParseFiles(this ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) => template_package.ParseFilesᴍ(Ꮡt, filenamesʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) ParseGlob(this ж<Template> Ꮡt, @string pattern) => template_package.ParseGlobᴍ(Ꮡt, pattern);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsΔ1, params ꓸꓸꓸstring patternsʗp) => template_package.ParseFSᴍ(Ꮡt, fsΔ1, patternsʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<ж<Template>> Templates(this ж<Template> Ꮡt) => template_package.Templates⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Template> Option(this ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) => template_package.Option⁔(Ꮡt, optʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error checkCanParse(this ж<Template> Ꮡt) => template_package.checkCanParse⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error escape(this ж<Template> Ꮡt) => template_package.escape⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Execute(this ж<Template> Ꮡt, io.Writer wr, any data) => template_package.Execute⁔(Ꮡt, wr, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error ExecuteTemplate(this ж<Template> Ꮡt, io.Writer wr, @string name, any data) => template_package.ExecuteTemplate⁔(Ꮡt, wr, name, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<Template> tmpl, error err) lookupAndEscapeTemplate(this ж<Template> Ꮡt, @string name) => template_package.lookupAndEscapeTemplate⁔(Ꮡt, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string DefinedTemplates(this ref Template t) => template_package.DefinedTemplates⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Template>, error) Parse(this ж<Template> Ꮡt, @string text) => template_package.Parse⁔(Ꮡt, text);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Template>, error) AddParseTree(this ж<Template> Ꮡt, @string name, ж<parse.Tree> tree) => template_package.AddParseTree⁔(Ꮡt, name, tree);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Template>, error) Clone(this ж<Template> Ꮡt) => template_package.Clone⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Template> New(this ж<Template> Ꮡt, @string name) => template_package.New⁔(Ꮡt, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Template> @new(this ref Template t, @string name) => template_package.@new⁔(ref t, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this ref Template t) => template_package.Name⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Template> Funcs(this ж<Template> Ꮡt, FuncMap funcMap) => template_package.Funcs⁔(Ꮡt, funcMap);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Template> Delims(this ж<Template> Ꮡt, @string left, @string right) => template_package.Delims⁔(Ꮡt, left, right);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Template> Lookup(this ж<Template> Ꮡt, @string name) => template_package.Lookup⁔(Ꮡt, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Template>, error) ParseFiles(this ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) => template_package.ParseFiles⁔(Ꮡt, filenamesʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Template>, error) ParseGlob(this ж<Template> Ꮡt, @string pattern) => template_package.ParseGlob⁔(Ꮡt, pattern);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Template>, error) ParseFS(this ж<Template> Ꮡt, fs.FS fsΔ1, params ꓸꓸꓸstring patternsʗp) => template_package.ParseFS⁔(Ꮡt, fsΔ1, patternsʗp);
 }
 partial class templateᴛurlPart {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this urlPart i) => template_package.Stringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this urlPart i) => template_package.String⁔(i);
 }
 // </GlyphForwarders>

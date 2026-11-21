@@ -36,7 +36,7 @@ partial struct CorruptInputError /*num:int64*/;
 
 } partial class flate_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(CorruptInputError e) {
+internal static @string Error⁔(/*this*/ CorruptInputError e) {
     return "flate: corrupt input before offset "u8 + strconv.FormatInt((int64)e, 10);
 }
 
@@ -47,7 +47,7 @@ partial struct InternalError /*@string*/;
 
 } partial class flate_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(InternalError e) { return "flate: internal error: "u8 + ((@string)e); }
+internal static @string Error⁔(/*this*/ InternalError e) { return "flate: internal error: "u8 + ((@string)e); }
 
 } partial class flate_package {
 
@@ -61,7 +61,7 @@ partial struct ReadError {
 
 } partial class flate_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref ReadError e) {
+internal static @string Error⁔(/*this*/ ref ReadError e) {
     return "flate: read error at offset "u8 + strconv.FormatInt(e.Offset, 10) + ": "u8 + e.Err.Error();
 }
 
@@ -77,7 +77,7 @@ partial struct WriteError {
 
 } partial class flate_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref WriteError e) {
+internal static @string Error⁔(/*this*/ ref WriteError e) {
     return "flate: write error at offset "u8 + strconv.FormatInt(e.Offset, 10) + ": "u8 + e.Err.Error();
 }
 
@@ -129,7 +129,7 @@ partial struct huffmanDecoder {
 // tree (i.e., neither over-subscribed nor under-subscribed). The exception is a
 // degenerate case where the tree has only a single symbol with length 1. Empty
 // trees are permitted.
-[GoMethodBody("init")] internal static bool initᴍ(ref huffmanDecoder h, slice<nint> lengths) {
+internal static bool init⁔(/*this*/ ref huffmanDecoder h, slice<nint> lengths) {
     // Sanity enables additional runtime tests during Huffman
     // table construction. It's intended to be used during
     // development to supplement the currently ad-hoc unit tests.
@@ -315,7 +315,7 @@ partial struct decompressor {
 
 } partial class flate_package {
 
-[GoMethodBody("nextBlock")] internal static void nextBlockᴍ(ж<decompressor> Ꮡf) {
+internal static void nextBlock⁔(/*this*/ ж<decompressor> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     while (f.nb < 1 + 2) {
@@ -357,7 +357,7 @@ partial struct decompressor {
     }}
 }
 
-[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ж<decompressor> Ꮡf, slice<byte> b) {
+internal static (nint, error) Read⁔(/*this*/ ж<decompressor> Ꮡf, slice<byte> b) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     for (;;) {
@@ -379,7 +379,7 @@ partial struct decompressor {
     }
 }
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ref decompressor f) {
+internal static error Close⁔(/*this*/ ref decompressor f) {
     if (AreEqual(f.err, io.EOF)) {
         return default;
     }
@@ -395,10 +395,10 @@ partial struct decompressor {
 } partial class flate_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedLengthCodeˢᴍdecompressor => ref unexpectedLengthCodeˢᵇᴍdecompressor;
-private static readonly @string unexpectedLengthCodeˢᵇᴍdecompressor = "unexpected length code"u8;
+internal static ref readonly @string unexpectedLengthCodeˢ⁔decompressor => ref unexpectedLengthCodeˢᵇ⁔decompressor;
+private static readonly @string unexpectedLengthCodeˢᵇ⁔decompressor = "unexpected length code"u8;
 
-[GoMethodBody("readHuffman")] internal static error readHuffmanᴍ(ж<decompressor> Ꮡf) {
+internal static error readHuffman⁔(/*this*/ ж<decompressor> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     // HLIT[5], HDIST[5], HCLEN[4].
@@ -459,7 +459,7 @@ private static readonly @string unexpectedLengthCodeˢᵇᴍdecompressor = "unex
         nint b = default;
         switch (x) {
         default: {
-            return ((InternalError)(@string)unexpectedLengthCodeˢᴍdecompressor);
+            return ((InternalError)(@string)unexpectedLengthCodeˢ⁔decompressor);
         }
         case 16: {
             rep = 3;
@@ -518,7 +518,7 @@ private static readonly @string unexpectedLengthCodeˢᵇᴍdecompressor = "unex
 // hl and hd are the Huffman states for the lit/length values
 // and the distance values, respectively. If hd == nil, using the
 // fixed distance encoding associated with fixed Huffman blocks.
-[GoMethodBody("huffmanBlock")] internal static void huffmanBlockᴍ(ref decompressor f) {
+internal static void huffmanBlock⁔(/*this*/ ref decompressor f) {
     const nint stateInit = iota; // Zero value must be stateInit
     const nint stateDict = 1;
 
@@ -684,7 +684,7 @@ copyHistory:
 }
 
 // Copy a single uncompressed data block from input to output.
-[GoMethodBody("dataBlock")] internal static void dataBlockᴍ(ref decompressor f) {
+internal static void dataBlock⁔(/*this*/ ref decompressor f) {
     // Uncompressed.
     // Discard current half-byte.
     f.nb = 0;
@@ -716,7 +716,7 @@ copyHistory:
 
 // copyData copies f.copyLen bytes from the underlying reader into f.hist.
 // It pauses for reads when f.hist is full.
-[GoMethodBody("copyData")] internal static void copyDataᴍ(ref decompressor f) {
+internal static void copyData⁔(/*this*/ ref decompressor f) {
     var buf = f.dict.writeSlice();
     if (len(buf) > f.copyLen) {
         buf = buf.slice(0, f.copyLen);
@@ -739,7 +739,7 @@ copyHistory:
     f.finishBlock();
 }
 
-[GoMethodBody("finishBlock")] internal static void finishBlockᴍ(ref decompressor f) {
+internal static void finishBlock⁔(/*this*/ ref decompressor f) {
     if (f.final) {
         if (f.dict.availRead() > 0) {
             f.toRead = f.dict.readFlush();
@@ -761,7 +761,7 @@ internal static error noEOF(error e) {
 
 } partial class flate_package {
 
-[GoMethodBody("moreBits")] internal static error moreBitsᴍ(ref decompressor f) {
+internal static error moreBits⁔(/*this*/ ref decompressor f) {
     var (c, err) = f.r.ReadByte();
     if (err != nil) {
         return noEOF(err);
@@ -773,7 +773,7 @@ internal static error noEOF(error e) {
 }
 
 // Read the next Huffman-encoded symbol from f according to h.
-[GoMethodBody("huffSym")] internal static (nint, error) huffSymᴍ(ref decompressor f, ж<huffmanDecoder> Ꮡh) {
+internal static (nint, error) huffSym⁔(/*this*/ ref decompressor f, ж<huffmanDecoder> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     // Since a huffmanDecoder can be empty or be composed of a degenerate tree
@@ -818,7 +818,7 @@ internal static error noEOF(error e) {
     }
 }
 
-[GoMethodBody("makeReader")] internal static void makeReaderᴍ(ref decompressor f, io.Reader r) {
+internal static void makeReader⁔(/*this*/ ref decompressor f, io.Reader r) {
     var (rr, ok) = r._<Reader>(ᐧ); if (ok) {
         f.rBuf = default;
         f.r = rr;
@@ -858,7 +858,7 @@ internal static void fixedHuffmanDecoderInit() {
 
 } partial class flate_package {
 
-[GoMethodBody("Reset")] internal static error Resetᴍ(ref decompressor f, io.Reader r, slice<byte> dict) {
+internal static error Reset⁔(/*this*/ ref decompressor f, io.Reader r, slice<byte> dict) {
     f.AssignFrom(new decompressor(
         rBuf: f.rBuf,
         bits: f.bits,

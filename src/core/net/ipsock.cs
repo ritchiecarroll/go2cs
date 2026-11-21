@@ -85,7 +85,7 @@ internal static bool isNotIPv4(Addr addr) { return !isIPv4(addr); }
 // forResolve returns the most appropriate address in address for
 // a call to ResolveTCPAddr, ResolveUDPAddr, or ResolveIPAddr.
 // IPv4 is preferred, unless addr contains an IPv6 literal.
-[GoMethodBody("forResolve")] internal static Addr forResolveᴍ(addrList addrs, @string network, @string addr) {
+internal static Addr forResolve⁔(/*this*/ addrList addrs, @string network, @string addr) {
     bool want6 = default;
     switch (ᐧ) {
     case {} when network == "ip"u8: {
@@ -106,7 +106,7 @@ internal static bool isNotIPv4(Addr addr) { return !isIPv4(addr); }
 
 // first returns the first address which satisfies strategy, or if
 // none do, then the first address of any kind.
-[GoMethodBody("first")] internal static Addr firstᴍ(addrList addrs, Func<Addr, bool> strategy) {
+internal static Addr first⁔(/*this*/ addrList addrs, Func<Addr, bool> strategy) {
     foreach (var (_, addr) in range<Addr>(addrs)) {
         if (strategy(addr)) {
             return addr;
@@ -121,7 +121,7 @@ internal static bool isNotIPv4(Addr addr) { return !isIPv4(addr); }
 // primaries, while addresses with the opposite label are returned
 // as fallbacks. For non-empty inputs, primaries is guaranteed to be
 // non-empty.
-[GoMethodBody("partition")] internal static (addrList primaries, addrList fallbacks) partitionᴍ(addrList addrs, Func<Addr, bool> strategy) {
+internal static (addrList primaries, addrList fallbacks) partition⁔(/*this*/ addrList addrs, Func<Addr, bool> strategy) {
     addrList primaries = default;
     addrList fallbacks = default;
 
@@ -289,7 +289,7 @@ public static @string JoinHostPort(@string host, @string port) {
 // address or a DNS name, and returns a list of internet protocol
 // family addresses. The result contains at least one address when
 // error is nil.
-[GoMethodBody("internetAddrList")] internal static (addrList, error) internetAddrListᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string net, @string addr) {
+internal static (addrList, error) internetAddrList⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string net, @string addr) {
     error err = default;
     @string host = default;
     @string port = default;

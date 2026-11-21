@@ -74,9 +74,12 @@ using static go.vendor.golang.org.x.net.http2.hpack_package;
 
 namespace go.vendor.golang.org.x.net.http2;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static hpack_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("hpack", ImportPath = "vendor/golang.org/x/net/http2/hpack")]
 public static partial class hpack_package
@@ -124,71 +127,71 @@ public static partial class hpack_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(hpack_package.Decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛDecoder;
-[GoMethodHost(typeof(hpack_package.DecodingError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛDecodingError;
-[GoMethodHost(typeof(hpack_package.Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛEncoder;
-[GoMethodHost(typeof(hpack_package.HeaderField)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛHeaderField;
-[GoMethodHost(typeof(hpack_package.InvalidIndexError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛInvalidIndexError;
-[GoMethodHost(typeof(hpack_package.dynamicTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛdynamicTable;
-[GoMethodHost(typeof(hpack_package.headerFieldTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛheaderFieldTable;
-[GoMethodHost(typeof(hpack_package.indexType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hpackᴛindexType;
+[GoMethodHost(typeof(hpack_package.Decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpackᴛDecoder;
+[GoMethodHost(typeof(hpack_package.DecodingError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpackᴛDecodingError;
+[GoMethodHost(typeof(hpack_package.Encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpackᴛEncoder;
+[GoMethodHost(typeof(hpack_package.HeaderField)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpackᴛHeaderField;
+[GoMethodHost(typeof(hpack_package.InvalidIndexError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpackᴛInvalidIndexError;
+[GoMethodHost(typeof(hpack_package.dynamicTable)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpackᴛdynamicTable;
+[GoMethodHost(typeof(hpack_package.headerFieldTable)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpackᴛheaderFieldTable;
+[GoMethodHost(typeof(hpack_package.indexType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hpackᴛindexType;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class hpackᴛEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteField(this ж<Encoder> Ꮡe, HeaderField f) => hpack_package.WriteFieldᴍ(Ꮡe, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64 i, bool nameValueMatch) searchTable(this ж<Encoder> Ꮡe, HeaderField f) => hpack_package.searchTableᴍ(Ꮡe, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetMaxDynamicTableSize(this ref Encoder e, uint32 v) => hpack_package.SetMaxDynamicTableSizeᴍ(ref e, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 /*v*/ MaxDynamicTableSize(this ref Encoder e) => hpack_package.MaxDynamicTableSizeᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetMaxDynamicTableSizeLimit(this ref Encoder e, uint32 v) => hpack_package.SetMaxDynamicTableSizeLimitᴍ(ref e, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool shouldIndex(this ref Encoder e, HeaderField f) => hpack_package.shouldIndexᴍ(ref e, f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error WriteField(this ж<Encoder> Ꮡe, HeaderField f) => hpack_package.WriteField⁔(Ꮡe, f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64 i, bool nameValueMatch) searchTable(this ж<Encoder> Ꮡe, HeaderField f) => hpack_package.searchTable⁔(Ꮡe, f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetMaxDynamicTableSize(this ref Encoder e, uint32 v) => hpack_package.SetMaxDynamicTableSize⁔(ref e, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 /*v*/ MaxDynamicTableSize(this ref Encoder e) => hpack_package.MaxDynamicTableSize⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetMaxDynamicTableSizeLimit(this ref Encoder e, uint32 v) => hpack_package.SetMaxDynamicTableSizeLimit⁔(ref e, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool shouldIndex(this ref Encoder e, HeaderField f) => hpack_package.shouldIndex⁔(ref e, f);
 }
 partial class hpackᴛDecodingError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this DecodingError de) => hpack_package.Errorᴍ(de);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this DecodingError de) => hpack_package.Error⁔(de);
 }
 partial class hpackᴛInvalidIndexError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this InvalidIndexError e) => hpack_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this InvalidIndexError e) => hpack_package.Error⁔(e);
 }
 partial class hpackᴛHeaderField {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsPseudo(this HeaderField hf) => hpack_package.IsPseudoᴍ(hf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this HeaderField hf) => hpack_package.Stringᴍ(hf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Size(this HeaderField hf) => hpack_package.Sizeᴍ(hf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsPseudo(this HeaderField hf) => hpack_package.IsPseudo⁔(hf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this HeaderField hf) => hpack_package.String⁔(hf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 Size(this HeaderField hf) => hpack_package.Size⁔(hf);
 }
 partial class hpackᴛDecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetMaxStringLength(this ref Decoder d, nint n) => hpack_package.SetMaxStringLengthᴍ(ref d, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetEmitFunc(this ref Decoder d, Action<HeaderField> emitFunc) => hpack_package.SetEmitFuncᴍ(ref d, emitFunc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetEmitEnabled(this ref Decoder d, bool v) => hpack_package.SetEmitEnabledᴍ(ref d, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool EmitEnabled(this ref Decoder d) => hpack_package.EmitEnabledᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetMaxDynamicTableSize(this ref Decoder d, uint32 v) => hpack_package.SetMaxDynamicTableSizeᴍ(ref d, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetAllowedMaxDynamicTableSize(this ref Decoder d, uint32 v) => hpack_package.SetAllowedMaxDynamicTableSizeᴍ(ref d, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint maxTableIndex(this ref Decoder d) => hpack_package.maxTableIndexᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (HeaderField hf, bool ok) at(this ref Decoder d, uint64 i) => hpack_package.atᴍ(ref d, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<HeaderField>, error) DecodeFull(this ж<Decoder> Ꮡd, slice<byte> p) => hpack_package.DecodeFullᴍ(Ꮡd, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Decoder d) => hpack_package.Closeᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ref Decoder d, slice<byte> p) => hpack_package.Writeᴍ(ref d, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseHeaderFieldRepr(this ref Decoder d) => hpack_package.parseHeaderFieldReprᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseFieldIndexed(this ref Decoder d) => hpack_package.parseFieldIndexedᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseFieldLiteral(this ref Decoder d, uint8 n, indexType it) => hpack_package.parseFieldLiteralᴍ(ref d, n, it);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error callEmit(this ref Decoder d, HeaderField hf) => hpack_package.callEmitᴍ(ref d, hf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error parseDynamicTableSizeUpdate(this ref Decoder d) => hpack_package.parseDynamicTableSizeUpdateᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (undecodedString u, slice<byte> remain, error err) readString(this ref Decoder d, slice<byte> p) => hpack_package.readStringᴍ(ref d, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) decodeString(this ref Decoder d, undecodedString u) => hpack_package.decodeStringᴍ(ref d, u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetMaxStringLength(this ref Decoder d, nint n) => hpack_package.SetMaxStringLength⁔(ref d, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetEmitFunc(this ref Decoder d, Action<HeaderField> emitFunc) => hpack_package.SetEmitFunc⁔(ref d, emitFunc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetEmitEnabled(this ref Decoder d, bool v) => hpack_package.SetEmitEnabled⁔(ref d, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool EmitEnabled(this ref Decoder d) => hpack_package.EmitEnabled⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetMaxDynamicTableSize(this ref Decoder d, uint32 v) => hpack_package.SetMaxDynamicTableSize⁔(ref d, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetAllowedMaxDynamicTableSize(this ref Decoder d, uint32 v) => hpack_package.SetAllowedMaxDynamicTableSize⁔(ref d, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint maxTableIndex(this ref Decoder d) => hpack_package.maxTableIndex⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (HeaderField hf, bool ok) at(this ref Decoder d, uint64 i) => hpack_package.at⁔(ref d, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<HeaderField>, error) DecodeFull(this ж<Decoder> Ꮡd, slice<byte> p) => hpack_package.DecodeFull⁔(Ꮡd, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Decoder d) => hpack_package.Close⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ref Decoder d, slice<byte> p) => hpack_package.Write⁔(ref d, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error parseHeaderFieldRepr(this ref Decoder d) => hpack_package.parseHeaderFieldRepr⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error parseFieldIndexed(this ref Decoder d) => hpack_package.parseFieldIndexed⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error parseFieldLiteral(this ref Decoder d, uint8 n, indexType it) => hpack_package.parseFieldLiteral⁔(ref d, n, it);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error callEmit(this ref Decoder d, HeaderField hf) => hpack_package.callEmit⁔(ref d, hf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error parseDynamicTableSizeUpdate(this ref Decoder d) => hpack_package.parseDynamicTableSizeUpdate⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (undecodedString u, slice<byte> remain, error err) readString(this ref Decoder d, slice<byte> p) => hpack_package.readString⁔(ref d, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, error) decodeString(this ref Decoder d, undecodedString u) => hpack_package.decodeString⁔(ref d, u);
 }
 partial class hpackᴛdynamicTable {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setMaxSize(this ref dynamicTable dt, uint32 v) => hpack_package.setMaxSizeᴍ(ref dt, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ref dynamicTable dt, HeaderField f) => hpack_package.addᴍ(ref dt, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void evict(this ref dynamicTable dt) => hpack_package.evictᴍ(ref dt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setMaxSize(this ref dynamicTable dt, uint32 v) => hpack_package.setMaxSize⁔(ref dt, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void add(this ref dynamicTable dt, HeaderField f) => hpack_package.add⁔(ref dt, f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void evict(this ref dynamicTable dt) => hpack_package.evict⁔(ref dt);
 }
 partial class hpackᴛindexType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool indexed(this indexType v) => hpack_package.indexedᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool sensitive(this indexType v) => hpack_package.sensitiveᴍ(v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool indexed(this indexType v) => hpack_package.indexed⁔(v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool sensitive(this indexType v) => hpack_package.sensitive⁔(v);
 }
 partial class hpackᴛheaderFieldTable {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref headerFieldTable t) => hpack_package.initᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint len(this ref headerFieldTable t) => hpack_package.lenᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addEntry(this ref headerFieldTable t, HeaderField f) => hpack_package.addEntryᴍ(ref t, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void evictOldest(this ref headerFieldTable t, nint n) => hpack_package.evictOldestᴍ(ref t, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64 i, bool nameValueMatch) search(this ж<headerFieldTable> Ꮡt, HeaderField f) => hpack_package.searchᴍ(Ꮡt, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 idToIndex(this ж<headerFieldTable> Ꮡt, uint64 id) => hpack_package.idToIndexᴍ(Ꮡt, id);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ref headerFieldTable t) => hpack_package.init⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint len(this ref headerFieldTable t) => hpack_package.len⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void addEntry(this ref headerFieldTable t, HeaderField f) => hpack_package.addEntry⁔(ref t, f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void evictOldest(this ref headerFieldTable t, nint n) => hpack_package.evictOldest⁔(ref t, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64 i, bool nameValueMatch) search(this ж<headerFieldTable> Ꮡt, HeaderField f) => hpack_package.search⁔(Ꮡt, f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 idToIndex(this ж<headerFieldTable> Ꮡt, uint64 id) => hpack_package.idToIndex⁔(Ꮡt, id);
 }
 // </GlyphForwarders>

@@ -33,19 +33,19 @@ partial struct PrivateKey {
 
 } partial class ed25519_package {
 
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref PrivateKey priv) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PrivateKey priv) {
     var k = new slice<byte>(0, privateKeySize);
     k = appendꓸꓸꓸ(k, priv.seed[..]);
     k = appendꓸꓸꓸ(k, priv.pub[..]);
     return k;
 }
 
-[GoMethodBody("Seed")] internal static slice<byte> Seedᴍ(ref PrivateKey priv) {
+internal static slice<byte> Seed⁔(/*this*/ ref PrivateKey priv) {
     var seed = priv.seed.Clone();
     return seed[..];
 }
 
-[GoMethodBody("PublicKey")] internal static slice<byte> PublicKeyᴍ(ref PrivateKey priv) {
+internal static slice<byte> PublicKey⁔(/*this*/ ref PrivateKey priv) {
     var pub = priv.pub.Clone();
     return pub[..];
 }
@@ -59,7 +59,7 @@ partial struct PublicKey {
 
 } partial class ed25519_package {
 
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref PublicKey pub) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PublicKey pub) {
     var a = pub.aBytes.Clone();
     return a[..];
 }

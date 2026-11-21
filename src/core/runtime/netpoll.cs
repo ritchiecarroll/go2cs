@@ -124,15 +124,15 @@ internal static UntypedInt pollFDSeqMask => /* 1<<pollFDSeqBits - 1 */ 1048575; 
 
 } partial class runtime_package {
 
-[GoMethodBody("closing")] internal static bool closingᴍ(pollInfo i) { return (pollInfo)(i & (uint32)pollClosing) != 0; }
-[GoMethodBody("eventErr")] internal static bool eventErrᴍ(pollInfo i) { return (pollInfo)(i & (uint32)pollEventErr) != 0; }
-[GoMethodBody("expiredReadDeadline")] internal static bool expiredReadDeadlineᴍ(pollInfo i) { return (pollInfo)(i & (uint32)pollExpiredReadDeadline) != 0; }
-[GoMethodBody("expiredWriteDeadline")] internal static bool expiredWriteDeadlineᴍ(pollInfo i) { return (pollInfo)(i & (uint32)pollExpiredWriteDeadline) != 0; }
+internal static bool closing⁔(/*this*/ pollInfo i) { return (pollInfo)(i & (uint32)pollClosing) != 0; }
+internal static bool eventErr⁔(/*this*/ pollInfo i) { return (pollInfo)(i & (uint32)pollEventErr) != 0; }
+internal static bool expiredReadDeadline⁔(/*this*/ pollInfo i) { return (pollInfo)(i & (uint32)pollExpiredReadDeadline) != 0; }
+internal static bool expiredWriteDeadline⁔(/*this*/ pollInfo i) { return (pollInfo)(i & (uint32)pollExpiredWriteDeadline) != 0; }
 
 } partial class runtime_package {
 
 // info returns the pollInfo corresponding to pd.
-[GoMethodBody("info")] internal static pollInfo infoᴍ(ж<pollDesc> Ꮡpd) {
+internal static pollInfo info⁔(/*this*/ ж<pollDesc> Ꮡpd) {
     return (pollInfo)Ꮡpd.ᏑatomicInfo.Load();
 }
 
@@ -143,7 +143,7 @@ internal static UntypedInt pollFDSeqMask => /* 1<<pollFDSeqBits - 1 */ 1048575; 
 // that might affect the info bits.
 // In practice this means after changing closing
 // or changing rd or wd from < 0 to >= 0.
-[GoMethodBody("publishInfo")] internal static void publishInfoᴍ(ж<pollDesc> Ꮡpd) {
+internal static void publishInfo⁔(/*this*/ ж<pollDesc> Ꮡpd) {
     ref var pd = ref Ꮡpd.DerefOrNull();
 
     uint32 info = default;
@@ -168,7 +168,7 @@ internal static UntypedInt pollFDSeqMask => /* 1<<pollFDSeqBits - 1 */ 1048575; 
 // setEventErr sets the result of pd.info().eventErr() to b.
 // We only change the error bit if seq == 0 or if seq matches pollFDSeq
 // (issue #59545).
-[GoMethodBody("setEventErr")] internal static void setEventErrᴍ(ж<pollDesc> Ꮡpd, bool b, uintptr seq) {
+internal static void setEventErr⁔(/*this*/ ж<pollDesc> Ꮡpd, bool b, uintptr seq) {
     var mSeq = (uint32)((uintptr)(seq & (uintptr)pollFDSeqMask));
     var x = Ꮡpd.ᏑatomicInfo.Load();
     var xSeq = (x >> (int)(pollFDSeq)) & (uint32)pollFDSeqMask;
@@ -300,7 +300,7 @@ internal static void poll_runtime_pollClose(ж<pollDesc> Ꮡpd) {
 
 } partial class runtime_package {
 
-[GoMethodBody("free")] internal static void freeᴍ(ж<pollCache> Ꮡc, ж<pollDesc> Ꮡpd) {
+internal static void free⁔(/*this*/ ж<pollCache> Ꮡc, ж<pollDesc> Ꮡpd) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var pd = ref Ꮡpd.DerefOrNull();
 
@@ -730,7 +730,7 @@ internal partial struct alloc_pollDescPadded /*dyn*/ {
 
 } partial class runtime_package {
 
-[GoMethodBody("alloc")] internal static ж<pollDesc> allocᴍ(ж<pollCache> Ꮡc) {
+internal static ж<pollDesc> alloc⁔(/*this*/ ж<pollCache> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     @lock(Ꮡc.Ꮡlock);
@@ -765,7 +765,7 @@ internal partial struct alloc_pollDescPadded /*dyn*/ {
 // a conversion requires an allocation because pointers to
 // types which embed internal/runtime/sys.NotInHeap (which pollDesc is)
 // must be stored in interfaces indirectly. See issue 42076.
-[GoMethodBody("makeArg")] internal static any /*i*/ makeArgᴍ(ж<pollDesc> Ꮡpd) {
+internal static any /*i*/ makeArg⁔(/*this*/ ж<pollDesc> Ꮡpd) {
     ref var i = ref heap<any>(out var Ꮡi);
 
     var x = Ꮡi.Reinterpret<any, eface>();

@@ -74,13 +74,16 @@ using static go.crypto.@internal.fips140.aes_package;
 
 namespace go.crypto.@internal.fips140;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using static aes_package;
 using go.crypto.@internal.fips140deps;
 using math;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("aes")]
 public static partial class aes_package
@@ -125,38 +128,38 @@ public static partial class aes_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(aes_package.Block)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class aesᴛBlock;
-[GoMethodHost(typeof(aes_package.CBCDecrypter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class aesᴛCBCDecrypter;
-[GoMethodHost(typeof(aes_package.CBCEncrypter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class aesᴛCBCEncrypter;
-[GoMethodHost(typeof(aes_package.CTR)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class aesᴛCTR;
-[GoMethodHost(typeof(aes_package.KeySizeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class aesᴛKeySizeError;
-[GoMethodHost(typeof(aes_package.blockExpanded)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class aesᴛblockExpanded;
+[GoMethodHost(typeof(aes_package.Block)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class aesᴛBlock;
+[GoMethodHost(typeof(aes_package.CBCDecrypter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class aesᴛCBCDecrypter;
+[GoMethodHost(typeof(aes_package.CBCEncrypter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class aesᴛCBCEncrypter;
+[GoMethodHost(typeof(aes_package.CTR)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class aesᴛCTR;
+[GoMethodHost(typeof(aes_package.KeySizeError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class aesᴛKeySizeError;
+[GoMethodHost(typeof(aes_package.blockExpanded)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class aesᴛblockExpanded;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class aesᴛblockExpanded {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint roundKeysSize(this ref blockExpanded b) => aes_package.roundKeysSizeᴍ(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint roundKeysSize(this ref blockExpanded b) => aes_package.roundKeysSize⁔(ref b);
 }
 partial class aesᴛKeySizeError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this KeySizeError k) => aes_package.Errorᴍ(k);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this KeySizeError k) => aes_package.Error⁔(k);
 }
 partial class aesᴛBlock {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint BlockSize(this ref Block c) => aes_package.BlockSizeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Encrypt(this ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.Encryptᴍ(Ꮡc, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Decrypt(this ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.Decryptᴍ(Ꮡc, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint BlockSize(this ref Block c) => aes_package.BlockSize⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Encrypt(this ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.Encrypt⁔(Ꮡc, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Decrypt(this ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.Decrypt⁔(Ꮡc, dst, src);
 }
 partial class aesᴛCBCEncrypter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint BlockSize(this ref CBCEncrypter c) => aes_package.BlockSizeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void CryptBlocks(this ж<CBCEncrypter> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.CryptBlocksᴍ(Ꮡc, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetIV(this ref CBCEncrypter x, slice<byte> iv) => aes_package.SetIVᴍ(ref x, iv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint BlockSize(this ref CBCEncrypter c) => aes_package.BlockSize⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void CryptBlocks(this ж<CBCEncrypter> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.CryptBlocks⁔(Ꮡc, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetIV(this ref CBCEncrypter x, slice<byte> iv) => aes_package.SetIV⁔(ref x, iv);
 }
 partial class aesᴛCBCDecrypter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint BlockSize(this ref CBCDecrypter c) => aes_package.BlockSizeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void CryptBlocks(this ж<CBCDecrypter> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.CryptBlocksᴍ(Ꮡc, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetIV(this ref CBCDecrypter x, slice<byte> iv) => aes_package.SetIVᴍ(ref x, iv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint BlockSize(this ref CBCDecrypter c) => aes_package.BlockSize⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void CryptBlocks(this ж<CBCDecrypter> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.CryptBlocks⁔(Ꮡc, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetIV(this ref CBCDecrypter x, slice<byte> iv) => aes_package.SetIV⁔(ref x, iv);
 }
 partial class aesᴛCTR {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void XORKeyStream(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.XORKeyStreamᴍ(Ꮡc, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void XORKeyStreamAt(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte> src, uint64 offset) => aes_package.XORKeyStreamAtᴍ(Ꮡc, dst, src, offset);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void XORKeyStream(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte> src) => aes_package.XORKeyStream⁔(Ꮡc, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void XORKeyStreamAt(this ж<CTR> Ꮡc, slice<byte> dst, slice<byte> src, uint64 offset) => aes_package.XORKeyStreamAt⁔(Ꮡc, dst, src, offset);
 }
 // </GlyphForwarders>

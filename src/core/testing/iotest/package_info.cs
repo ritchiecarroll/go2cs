@@ -71,9 +71,12 @@ using static go.testing.iotest_package;
 
 namespace go.testing;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static iotest_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("iotest")]
 public static partial class iotest_package
@@ -118,43 +121,43 @@ public static partial class iotest_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(iotest_package.dataErrReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛdataErrReader;
-[GoMethodHost(typeof(iotest_package.errReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛerrReader;
-[GoMethodHost(typeof(iotest_package.halfReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛhalfReader;
-[GoMethodHost(typeof(iotest_package.oneByteReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛoneByteReader;
-[GoMethodHost(typeof(iotest_package.readLogger)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛreadLogger;
-[GoMethodHost(typeof(iotest_package.smallByteReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛsmallByteReader;
-[GoMethodHost(typeof(iotest_package.timeoutReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛtimeoutReader;
-[GoMethodHost(typeof(iotest_package.truncateWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛtruncateWriter;
-[GoMethodHost(typeof(iotest_package.writeLogger)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class iotestᴛwriteLogger;
+[GoMethodHost(typeof(iotest_package.dataErrReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iotestᴛdataErrReader;
+[GoMethodHost(typeof(iotest_package.errReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iotestᴛerrReader;
+[GoMethodHost(typeof(iotest_package.halfReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iotestᴛhalfReader;
+[GoMethodHost(typeof(iotest_package.oneByteReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iotestᴛoneByteReader;
+[GoMethodHost(typeof(iotest_package.readLogger)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iotestᴛreadLogger;
+[GoMethodHost(typeof(iotest_package.smallByteReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iotestᴛsmallByteReader;
+[GoMethodHost(typeof(iotest_package.timeoutReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iotestᴛtimeoutReader;
+[GoMethodHost(typeof(iotest_package.truncateWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iotestᴛtruncateWriter;
+[GoMethodHost(typeof(iotest_package.writeLogger)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class iotestᴛwriteLogger;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class iotestᴛwriteLogger {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref writeLogger l, slice<byte> p) => iotest_package.Writeᴍ(ref l, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref writeLogger l, slice<byte> p) => iotest_package.Write⁔(ref l, p);
 }
 partial class iotestᴛreadLogger {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref readLogger l, slice<byte> p) => iotest_package.Readᴍ(ref l, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref readLogger l, slice<byte> p) => iotest_package.Read⁔(ref l, p);
 }
 partial class iotestᴛoneByteReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref oneByteReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref oneByteReader r, slice<byte> p) => iotest_package.Read⁔(ref r, p);
 }
 partial class iotestᴛhalfReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref halfReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref halfReader r, slice<byte> p) => iotest_package.Read⁔(ref r, p);
 }
 partial class iotestᴛdataErrReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref dataErrReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref dataErrReader r, slice<byte> p) => iotest_package.Read⁔(ref r, p);
 }
 partial class iotestᴛtimeoutReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref timeoutReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref timeoutReader r, slice<byte> p) => iotest_package.Read⁔(ref r, p);
 }
 partial class iotestᴛerrReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref errReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref errReader r, slice<byte> p) => iotest_package.Read⁔(ref r, p);
 }
 partial class iotestᴛsmallByteReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref smallByteReader r, slice<byte> p) => iotest_package.Readᴍ(ref r, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref smallByteReader r, slice<byte> p) => iotest_package.Read⁔(ref r, p);
 }
 partial class iotestᴛtruncateWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref truncateWriter t, slice<byte> p) => iotest_package.Writeᴍ(ref t, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref truncateWriter t, slice<byte> p) => iotest_package.Write⁔(ref t, p);
 }
 // </GlyphForwarders>

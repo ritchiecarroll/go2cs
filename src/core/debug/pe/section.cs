@@ -33,7 +33,7 @@ partial struct SectionHeader32 {
 // fullName finds real name of section sh. Normally name is stored
 // in sh.Name, but if it is longer then 8 characters, it is stored
 // in COFF string table st instead.
-[GoMethodBody("fullName")] internal static (@string, error) fullNameᴍ(ref SectionHeader32 sh, StringTable st) {
+internal static (@string, error) fullName⁔(/*this*/ ref SectionHeader32 sh, StringTable st) {
     if (sh.Name[0] != '/') {
         return (cstring(sh.Name[..]), default);
     }
@@ -109,7 +109,7 @@ partial struct Section {
 //
 // If s.Offset is 0, the section has no contents,
 // and Data will always return a non-nil error.
-[GoMethodBody("Data")] internal static (slice<byte>, error) Dataᴍ(ref Section s) {
+internal static (slice<byte>, error) Data⁔(/*this*/ ref Section s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), (uint64)s.Size, 0);
 }
 
@@ -117,7 +117,7 @@ partial struct Section {
 //
 // If s.Offset is 0, the section has no contents, and all calls
 // to the returned reader will return a non-nil error.
-[GoMethodBody("Open")] internal static io.ReadSeeker Openᴍ(ref Section s) {
+internal static io.ReadSeeker Open⁔(/*this*/ ref Section s) {
     return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L));
 }
 

@@ -33,7 +33,7 @@ internal partial struct probe_type /*dyn*/ {
 // the IPv6 interface. That simplifies our code and is most
 // general. Unfortunately, we need to run on kernels built without
 // IPv6 support too. So probe the kernel to figure it out.
-[GoMethodBody("probe")] internal static void probeᴍ(ж<ipStackCapabilities> Ꮡp) {
+internal static void probe⁔(/*this*/ ж<ipStackCapabilities> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();

@@ -48,7 +48,7 @@ internal static UntypedInt aes256Rounds => 14;
 } partial class aes_package {
 
 // roundKeysSize returns the number of uint32 of c.end or c.dec that are used.
-[GoMethodBody("roundKeysSize")] internal static nint roundKeysSizeᴍ(ref blockExpanded b) {
+internal static nint roundKeysSize⁔(/*this*/ ref blockExpanded b) {
     return (b.rounds + 1) * (128 / 32);
 }
 
@@ -58,7 +58,7 @@ partial struct KeySizeError /*num:nint*/;
 
 } partial class aes_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(KeySizeError k) {
+internal static @string Error⁔(/*this*/ KeySizeError k) {
     return "crypto/aes: invalid key size "u8 + strconv.Itoa((nint)k);
 }
 
@@ -108,9 +108,9 @@ internal static void newBlockExpanded(ж<blockExpanded> Ꮡc, slice<byte> key) {
 
 } partial class aes_package {
 
-[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref Block c) { return aes.BlockSize; }
+internal static nint BlockSize⁔(/*this*/ ref Block c) { return aes.BlockSize; }
 
-[GoMethodBody("Encrypt")] internal static void Encryptᴍ(ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) {
+internal static void Encrypt⁔(/*this*/ ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) {
     // AES-ECB is not approved in FIPS 140-3 mode.
     fips140.RecordNonApproved();
     if (len(src) < aes.BlockSize) {
@@ -125,7 +125,7 @@ internal static void newBlockExpanded(ж<blockExpanded> Ꮡc, slice<byte> key) {
     encryptBlock(ref (Ꮡc).DerefOrNull(), dst, src);
 }
 
-[GoMethodBody("Decrypt")] internal static void Decryptᴍ(ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) {
+internal static void Decrypt⁔(/*this*/ ж<Block> Ꮡc, slice<byte> dst, slice<byte> src) {
     // AES-ECB is not approved in FIPS 140-3 mode.
     fips140.RecordNonApproved();
     if (len(src) < aes.BlockSize) {

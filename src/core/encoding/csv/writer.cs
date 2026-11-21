@@ -50,7 +50,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 // A record is a slice of strings with each string being one field.
 // Writes are buffered, so [Writer.Flush] must eventually be called to ensure
 // that the record is written to the underlying [io.Writer].
-[GoMethodBody("Write")] internal static error Writeᴍ(ref Writer w, slice<@string> record) {
+internal static error Write⁔(/*this*/ ref Writer w, slice<@string> record) {
     if (!validDelim(w.Comma)) {
         return errInvalidDelim;
     }
@@ -132,20 +132,20 @@ public static ж<Writer> NewWriter(io.Writer w) {
 
 // Flush writes any buffered data to the underlying [io.Writer].
 // To check if an error occurred during Flush, call [Writer.Error].
-[GoMethodBody("Flush")] internal static void Flushᴍ(ref Writer w) {
+internal static void Flush⁔(/*this*/ ref Writer w) {
     w.w.Flush();
 }
 
 // Error reports any error that has occurred during
 // a previous [Writer.Write] or [Writer.Flush].
-[GoMethodBody("Error")] internal static error Errorᴍ(ref Writer w) {
+internal static error Error⁔(/*this*/ ref Writer w) {
     var (_, err) = w.w.Write(default);
     return err;
 }
 
 // WriteAll writes multiple CSV records to w using [Writer.Write] and
 // then calls [Writer.Flush], returning any error from the Flush.
-[GoMethodBody("WriteAll")] internal static error WriteAllᴍ(ref Writer w, slice<slice<@string>> records) {
+internal static error WriteAll⁔(/*this*/ ref Writer w, slice<slice<@string>> records) {
     foreach (var (_, record) in range(records)) {
         var err = w.Write(record);
         if (err != nil) {
@@ -167,7 +167,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 // Not quoting the empty string also makes this package match the behavior
 // of Microsoft Excel and Google Drive.
 // For Postgres, quote the data terminating string `\.`.
-[GoMethodBody("fieldNeedsQuotes")] internal static bool fieldNeedsQuotesᴍ(ref Writer w, @string field) {
+internal static bool fieldNeedsQuotes⁔(/*this*/ ref Writer w, @string field) {
     if (field == ""u8) {
         return false;
     }

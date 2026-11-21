@@ -63,9 +63,12 @@ using static go.encoding.ascii85_package;
 
 namespace go.encoding;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static ascii85_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("ascii85")]
 public static partial class ascii85_package
@@ -101,20 +104,20 @@ public static partial class ascii85_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ascii85_package.CorruptInputError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ascii85ᴛCorruptInputError;
-[GoMethodHost(typeof(ascii85_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ascii85ᴛdecoder;
-[GoMethodHost(typeof(ascii85_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ascii85ᴛencoder;
+[GoMethodHost(typeof(ascii85_package.CorruptInputError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ascii85ᴛCorruptInputError;
+[GoMethodHost(typeof(ascii85_package.decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ascii85ᴛdecoder;
+[GoMethodHost(typeof(ascii85_package.encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ascii85ᴛencoder;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class ascii85ᴛencoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) => ascii85_package.Writeᴍ(ref e, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref encoder e) => ascii85_package.Closeᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) => ascii85_package.Write⁔(ref e, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref encoder e) => ascii85_package.Close⁔(ref e);
 }
 partial class ascii85ᴛCorruptInputError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this CorruptInputError e) => ascii85_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this CorruptInputError e) => ascii85_package.Error⁔(e);
 }
 partial class ascii85ᴛdecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) => ascii85_package.Readᴍ(ref d, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) => ascii85_package.Read⁔(ref d, p);
 }
 // </GlyphForwarders>

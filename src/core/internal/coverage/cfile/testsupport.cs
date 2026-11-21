@@ -143,7 +143,7 @@ partial struct tstate {
 } partial class cfile_package {
 
 // processPod reads coverage counter data for a specific pod.
-[GoMethodBody("processPod")] internal static error processPodᴍ(ж<tstate> Ꮡts, pods.Pod p, map<@string, EmptyStruct> importpaths) {
+internal static error processPod⁔(/*this*/ ж<tstate> Ꮡts, pods.Pod p, map<@string, EmptyStruct> importpaths) {
     GoFrame ᒐ = default;
     try {
         ref var ts = ref Ꮡts.DerefOrNull();
@@ -274,7 +274,7 @@ partial struct pkfunc {
 
 } partial class cfile_package {
 
-[GoMethodBody("readAuxMetaFiles")] internal static error readAuxMetaFilesᴍ(ж<tstate> Ꮡts, @string metafiles, map<@string, EmptyStruct> importpaths) {
+internal static error readAuxMetaFiles⁔(/*this*/ ж<tstate> Ꮡts, @string metafiles, map<@string, EmptyStruct> importpaths) {
     // Unmarshal the information on available aux metafiles into
     // a MetaFileCollection struct.
     ref var mfc = ref heap(new coverage.MetaFileCollection(), out var Ꮡmfc);
@@ -356,7 +356,7 @@ public static float64 Snapshot() {
 
 // <GlyphForwarders> (scratch prototype: placed here, an alias of this file conflicts in package_info.cs)
 partial class cfileᴛtstate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string, EmptyStruct> importpaths) => cfile_package.processPodᴍ(Ꮡts, p, importpaths);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles, map<@string, EmptyStruct> importpaths) => cfile_package.readAuxMetaFilesᴍ(Ꮡts, metafiles, importpaths);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error processPod(this ж<tstate> Ꮡts, pods.Pod p, map<@string, EmptyStruct> importpaths) => cfile_package.processPod⁔(Ꮡts, p, importpaths);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readAuxMetaFiles(this ж<tstate> Ꮡts, @string metafiles, map<@string, EmptyStruct> importpaths) => cfile_package.readAuxMetaFiles⁔(Ꮡts, metafiles, importpaths);
 }
 // </GlyphForwarders>

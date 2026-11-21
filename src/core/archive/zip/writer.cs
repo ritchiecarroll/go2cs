@@ -55,7 +55,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 // underlying writer. It should be used when the zip data is appended to an
 // existing file, such as a binary executable.
 // It must be called before any data is written.
-[GoMethodBody("SetOffset")] internal static void SetOffsetᴍ(ref Writer w, int64 n) {
+internal static void SetOffset⁔(/*this*/ ref Writer w, int64 n) {
     if (w.cw.count != 0) {
         throw panic("zip: SetOffset called after data was written");
     }
@@ -64,31 +64,31 @@ public static ж<Writer> NewWriter(io.Writer w) {
 
 // Flush flushes any buffered data to the underlying writer.
 // Calling Flush is not normally necessary; calling Close is sufficient.
-[GoMethodBody("Flush")] internal static error Flushᴍ(ref Writer w) {
+internal static error Flush⁔(/*this*/ ref Writer w) {
     return w.cw.w._<ж<bufio.Writer>>().Flush();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string zipWriterCommentTooLongˢᴍWriter => ref zipWriterCommentTooLongˢᵇᴍWriter;
-private static readonly @string zipWriterCommentTooLongˢᵇᴍWriter = "zip: Writer.Comment too long"u8;
+internal static ref readonly @string zipWriterCommentTooLongˢ⁔Writer => ref zipWriterCommentTooLongˢᵇ⁔Writer;
+private static readonly @string zipWriterCommentTooLongˢᵇ⁔Writer = "zip: Writer.Comment too long"u8;
 
 // SetComment sets the end-of-central-directory comment field.
 // It can only be called before [Writer.Close].
-[GoMethodBody("SetComment")] internal static error SetCommentᴍ(ref Writer w, @string comment) {
+internal static error SetComment⁔(/*this*/ ref Writer w, @string comment) {
     if (len(comment) > uint16max) {
-        return errors.New(zipWriterCommentTooLongˢᴍWriter);
+        return errors.New(zipWriterCommentTooLongˢ⁔Writer);
     }
     w.comment = comment;
     return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string zipWriterClosedTwiceˢᴍWriter => ref zipWriterClosedTwiceˢᵇᴍWriter;
-private static readonly @string zipWriterClosedTwiceˢᵇᴍWriter = "zip: writer closed twice"u8;
+internal static ref readonly @string zipWriterClosedTwiceˢ⁔Writer => ref zipWriterClosedTwiceˢᵇ⁔Writer;
+private static readonly @string zipWriterClosedTwiceˢᵇ⁔Writer = "zip: writer closed twice"u8;
 
 // Close finishes writing the zip file by writing the central directory.
 // It does not close the underlying writer.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref Writer w) {
+internal static error Close⁔(/*this*/ ref Writer w) {
     if (w.last != nil && !w.last.closed) {
         var err = w.last.close(); if (err != nil) {
             return err;
@@ -96,7 +96,7 @@ private static readonly @string zipWriterClosedTwiceˢᵇᴍWriter = "zip: write
         w.last = default;
     }
     if (w.closed) {
-        return errors.New(zipWriterClosedTwiceˢᴍWriter);
+        return errors.New(zipWriterClosedTwiceˢ⁔Writer);
     }
     w.closed = true;
 
@@ -242,7 +242,7 @@ private static readonly @string zipWriterClosedTwiceˢᵇᴍWriter = "zip: write
 // and are appended to the zip file.
 // The file's contents must be written to the [io.Writer] before the next
 // call to [Writer.Create], [Writer.CreateHeader], or [Writer.Close].
-[GoMethodBody("Create")] internal static (io.Writer, error) Createᴍ(ref Writer w, @string name) {
+internal static (io.Writer, error) Create⁔(/*this*/ ref Writer w, @string name) {
     var header = Ꮡ(new FileHeader(
         Name: name,
         Method: Deflate
@@ -280,12 +280,12 @@ internal static (bool valid, bool require) detectUTF8(@string s) {
 } partial class zip_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string archiveZipInvalidˢᴍWriter => ref archiveZipInvalidˢᵇᴍWriter;
-private static readonly @string archiveZipInvalidˢᵇᴍWriter = "archive/zip: invalid duplicate FileHeader"u8;
+internal static ref readonly @string archiveZipInvalidˢ⁔Writer => ref archiveZipInvalidˢᵇ⁔Writer;
+private static readonly @string archiveZipInvalidˢᵇ⁔Writer = "archive/zip: invalid duplicate FileHeader"u8;
 
 // prepare performs the bookkeeping operations required at the start of
 // CreateHeader and CreateRaw.
-[GoMethodBody("prepare")] internal static error prepareᴍ(ref Writer w, ж<FileHeader> fh) {
+internal static error prepare⁔(/*this*/ ref Writer w, ж<FileHeader> fh) {
     if (w.last != nil && !w.last.closed) {
         var err = w.last.close(); if (err != nil) {
             return err;
@@ -293,7 +293,7 @@ private static readonly @string archiveZipInvalidˢᵇᴍWriter = "archive/zip: 
     }
     if (len(w.dir) > 0 && w.dir[len(w.dir) - 1].FileHeader == fh) {
         // See https://golang.org/issue/11144 confusion.
-        return errors.New(archiveZipInvalidˢᴍWriter);
+        return errors.New(archiveZipInvalidˢ⁔Writer);
     }
     return default;
 }
@@ -305,7 +305,7 @@ private static readonly @string archiveZipInvalidˢᵇᴍWriter = "archive/zip: 
 // This returns a [Writer] to which the file contents should be written.
 // The file's contents must be written to the io.Writer before the next
 // call to [Writer.Create], [Writer.CreateHeader], [Writer.CreateRaw], or [Writer.Close].
-[GoMethodBody("CreateHeader")] internal static (io.Writer, error) CreateHeaderᴍ(ref Writer w, ж<FileHeader> Ꮡfh) {
+internal static (io.Writer, error) CreateHeader⁔(/*this*/ ref Writer w, ж<FileHeader> Ꮡfh) {
     ref var fh = ref Ꮡfh.DerefOrNull();
 
     {
@@ -486,7 +486,7 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
 // CreateRaw's argument is stored in w. If the argument is a pointer to the embedded
 // [FileHeader] in a [File] obtained from a [Reader] created from in-memory data,
 // then w will refer to all of that memory.
-[GoMethodBody("CreateRaw")] internal static (io.Writer, error) CreateRawᴍ(ref Writer w, ж<FileHeader> Ꮡfh) {
+internal static (io.Writer, error) CreateRaw⁔(/*this*/ ref Writer w, ж<FileHeader> Ꮡfh) {
     ref var fh = ref Ꮡfh.DerefOrNull();
 
     {
@@ -525,7 +525,7 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
 
 // Copy copies the file f (obtained from a [Reader]) into w. It copies the raw
 // form directly bypassing decompression, compression, and validation.
-[GoMethodBody("Copy")] internal static error Copyᴍ(ref Writer w, ж<File> Ꮡf) {
+internal static error Copy⁔(/*this*/ ref Writer w, ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var (r, err) = f.OpenRaw();
@@ -546,7 +546,7 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
 // RegisterCompressor registers or overrides a custom compressor for a specific
 // method ID. If a compressor for a given method is not found, [Writer] will
 // default to looking up the compressor at the package level.
-[GoMethodBody("RegisterCompressor")] internal static void RegisterCompressorᴍ(ref Writer w, uint16 method, Func<io.Writer, (io.WriteCloser, error)> comp) {
+internal static void RegisterCompressor⁔(/*this*/ ref Writer w, uint16 method, Func<io.Writer, (io.WriteCloser, error)> comp) {
     if (w.compressors == nil) {
         w.compressors = new map<uint16, Func<io.Writer, (io.WriteCloser, error)>>();
     }
@@ -554,13 +554,13 @@ internal static error writeHeader(io.Writer w, ж<header> Ꮡh) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string zipCannotAddNonRegularˢᴍWriter => ref zipCannotAddNonRegularˢᵇᴍWriter;
-private static readonly @string zipCannotAddNonRegularˢᵇᴍWriter = "zip: cannot add non-regular file"u8;
+internal static ref readonly @string zipCannotAddNonRegularˢ⁔Writer => ref zipCannotAddNonRegularˢᵇ⁔Writer;
+private static readonly @string zipCannotAddNonRegularˢᵇ⁔Writer = "zip: cannot add non-regular file"u8;
 
 // AddFS adds the files from fs.FS to the archive.
 // It walks the directory tree starting at the root of the filesystem
 // adding each file to the zip using deflate while maintaining the directory structure.
-[GoMethodBody("AddFS")] internal static error AddFSᴍ(ж<Writer> Ꮡw, fs.FS fsys) {
+internal static error AddFS⁔(/*this*/ ж<Writer> Ꮡw, fs.FS fsys) {
     return fs.WalkDir(fsys, ".", error (@string name, fs.DirEntry d, error err) => {
         GoFrame ᒐ = default;
         try {
@@ -575,7 +575,7 @@ private static readonly @string zipCannotAddNonRegularˢᵇᴍWriter = "zip: can
                 return err;
             }
             if (!d.IsDir() && !info.Mode().IsRegular()) {
-                return errors.New(zipCannotAddNonRegularˢᴍWriter);
+                return errors.New(zipCannotAddNonRegularˢ⁔Writer);
             }
             (var h, err) = FileInfoHeader(info);
             if (err != nil) {
@@ -607,7 +607,7 @@ private static readonly @string zipCannotAddNonRegularˢᵇᴍWriter = "zip: can
     });
 }
 
-[GoMethodBody("compressor")] internal static Func<io.Writer, (io.WriteCloser, error)> compressorᴍ(ref Writer w, uint16 method) {
+internal static Func<io.Writer, (io.WriteCloser, error)> compressor⁔(/*this*/ ref Writer w, uint16 method) {
     var comp = w.compressors[method];
     if (comp == nil) {
         comp = zip.compressor(method);
@@ -623,14 +623,14 @@ partial struct dirWriter {
 } partial class zip_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string zipWriteToDirectoryˢᴍdirWriter => ref zipWriteToDirectoryˢᵇᴍdirWriter;
-private static readonly @string zipWriteToDirectoryˢᵇᴍdirWriter = "zip: write to directory"u8;
+internal static ref readonly @string zipWriteToDirectoryˢ⁔dirWriter => ref zipWriteToDirectoryˢᵇ⁔dirWriter;
+private static readonly @string zipWriteToDirectoryˢᵇ⁔dirWriter = "zip: write to directory"u8;
 
-[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(dirWriter _, slice<byte> b) {
+internal static (nint, error) Write⁔(/*this*/ dirWriter _, slice<byte> b) {
     if (len(b) == 0) {
         return (0, default);
     }
-    return (0, errors.New(zipWriteToDirectoryˢᴍdirWriter));
+    return (0, errors.New(zipWriteToDirectoryˢ⁔dirWriter));
 }
 
 } partial class zip_package {
@@ -648,12 +648,12 @@ partial struct fileWriter {
 } partial class zip_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string zipWriteToClosedFileˢᴍfileWriter => ref zipWriteToClosedFileˢᵇᴍfileWriter;
-private static readonly @string zipWriteToClosedFileˢᵇᴍfileWriter = "zip: write to closed file"u8;
+internal static ref readonly @string zipWriteToClosedFileˢ⁔fileWriter => ref zipWriteToClosedFileˢᵇ⁔fileWriter;
+private static readonly @string zipWriteToClosedFileˢᵇ⁔fileWriter = "zip: write to closed file"u8;
 
-[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ref fileWriter w, slice<byte> p) {
+internal static (nint, error) Write⁔(/*this*/ ref fileWriter w, slice<byte> p) {
     if (w.closed) {
-        return (0, errors.New(zipWriteToClosedFileˢᴍfileWriter));
+        return (0, errors.New(zipWriteToClosedFileˢ⁔fileWriter));
     }
     if (w.raw) {
         return w.zipw.Write(p);
@@ -663,12 +663,12 @@ private static readonly @string zipWriteToClosedFileˢᵇᴍfileWriter = "zip: w
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string zipFileClosedTwiceˢᴍfileWriter => ref zipFileClosedTwiceˢᵇᴍfileWriter;
-private static readonly @string zipFileClosedTwiceˢᵇᴍfileWriter = "zip: file closed twice"u8;
+internal static ref readonly @string zipFileClosedTwiceˢ⁔fileWriter => ref zipFileClosedTwiceˢᵇ⁔fileWriter;
+private static readonly @string zipFileClosedTwiceˢᵇ⁔fileWriter = "zip: file closed twice"u8;
 
-[GoMethodBody("close")] internal static error closeᴍ(ref fileWriter w) {
+internal static error close⁔(/*this*/ ref fileWriter w) {
     if (w.closed) {
-        return errors.New(zipFileClosedTwiceˢᴍfileWriter);
+        return errors.New(zipFileClosedTwiceˢ⁔fileWriter);
     }
     w.closed = true;
     if (w.raw) {
@@ -696,7 +696,7 @@ private static readonly @string zipFileClosedTwiceˢᵇᴍfileWriter = "zip: fil
     return w.writeDataDescriptor();
 }
 
-[GoMethodBody("writeDataDescriptor")] internal static error writeDataDescriptorᴍ(ref fileWriter w) {
+internal static error writeDataDescriptor⁔(/*this*/ ref fileWriter w) {
     if (!w.hasDataDescriptor()) {
         return default;
     }
@@ -734,7 +734,7 @@ partial struct countWriter {
 
 } partial class zip_package {
 
-[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ref countWriter w, slice<byte> p) {
+internal static (nint, error) Write⁔(/*this*/ ref countWriter w, slice<byte> p) {
     var (n, err) = w.w.Write(p);
     w.count += (int64)n;
     return (n, err);
@@ -748,7 +748,7 @@ partial struct nopCloser {
 
 } partial class zip_package {
 
-[GoMethodBody("Close")] internal static error Closeᴍ(nopCloser w) {
+internal static error Close⁔(/*this*/ nopCloser w) {
     return default;
 }
 
@@ -758,22 +758,22 @@ partial struct writeBuf /*[]byte*/;
 
 } partial class zip_package {
 
-[GoMethodBody("uint8")] internal static void uint8ᴍ(ref writeBuf b, uint8 v) {
+internal static void uint8⁔(/*this*/ ref writeBuf b, uint8 v) {
     (b)[0] = v;
     b = (b)[1..];
 }
 
-[GoMethodBody("uint16")] internal static void uint16ᴍ(ref writeBuf b, uint16 v) {
+internal static void uint16⁔(/*this*/ ref writeBuf b, uint16 v) {
     binary.LittleEndian.PutUint16(b, v);
     b = (b)[2..];
 }
 
-[GoMethodBody("uint32")] internal static void uint32ᴍ(ref writeBuf b, uint32 v) {
+internal static void uint32⁔(/*this*/ ref writeBuf b, uint32 v) {
     binary.LittleEndian.PutUint32(b, v);
     b = (b)[4..];
 }
 
-[GoMethodBody("uint64")] internal static void uint64ᴍ(ref writeBuf b, uint64 v) {
+internal static void uint64⁔(/*this*/ ref writeBuf b, uint64 v) {
     binary.LittleEndian.PutUint64(b, v);
     b = (b)[8..];
 }

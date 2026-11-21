@@ -32,7 +32,7 @@ partial struct locReg {
 
 } partial class gen_package {
 
-[GoMethodBody("LocString")] internal static @string LocStringᴍ(locReg l) {
+internal static @string LocString⁔(/*this*/ locReg l) {
     switch (l.cls) {
     case var ᴛ when ᴛ == regClassFixed: {
         return fixedRegs[l.reg];
@@ -49,11 +49,11 @@ partial struct locReg {
     throw panic("bad register class");
 }
 
-[GoMethodBody("Deref")] internal static (loc, error) Derefᴍ(locReg l, nint off) {
+internal static (loc, error) Deref⁔(/*this*/ locReg l, nint off) {
     return (new locMem(l, off, ""), default);
 }
 
-[GoMethodBody("Reg")] internal static (locReg, bool) Regᴍ(locReg l) {
+internal static (locReg, bool) Reg⁔(/*this*/ locReg l) {
     return (l, true);
 }
 
@@ -67,7 +67,7 @@ partial struct locMem {
 
 } partial class gen_package {
 
-[GoMethodBody("LocString")] internal static @string LocStringᴍ(locMem l) {
+internal static @string LocString⁔(/*this*/ locMem l) {
     if (l.@base.cls == regClassFixed && l.@base.reg == regSB && l.off == 0) {
         return l.name + "(SB)"u8;
     }
@@ -80,11 +80,11 @@ partial struct locMem {
     return "("u8 + l.@base.LocString() + ")"u8;
 }
 
-[GoMethodBody("Deref")] internal static (loc, error) Derefᴍ(locMem l, nint off) {
+internal static (loc, error) Deref⁔(/*this*/ locMem l, nint off) {
     return (default, fmt.Errorf("cannot dereference already memory address %s"u8, l.LocString()));
 }
 
-[GoMethodBody("Reg")] internal static (locReg, bool) Regᴍ(locMem l) {
+internal static (locReg, bool) Reg⁔(/*this*/ locMem l) {
     if (l.@base.cls == regClassFixed) {
         return (new locReg(), false);
     }
@@ -121,7 +121,7 @@ partial struct regSet {
 
 } partial class gen_package {
 
-[GoMethodBody("used")] internal static void usedᴍ(ref regSet s, ж<op> Ꮡo, loc l) {
+internal static void used⁔(/*this*/ ref regSet s, ж<op> Ꮡo, loc l) {
     ref var o = ref Ꮡo.DerefOrNull();
 
     if (l == nil) {
@@ -140,7 +140,7 @@ partial struct regSet {
     s.inUse[reg.cls] |= (uint32)(((uint32)1).Lsh((int64)(reg.reg)));
 }
 
-[GoMethodBody("free")] internal static void freeᴍ(ref regSet s, loc l) {
+internal static void free⁔(/*this*/ ref regSet s, loc l) {
     if (l == nil) {
         return;
     }
@@ -159,7 +159,7 @@ partial struct regSet {
 
 } partial class gen_package {
 
-[GoMethodBody("assignLocs")] internal static map<ж<op>, loc> assignLocsᴍ(ж<Func> Ꮡfn) {
+internal static map<ж<op>, loc> assignLocs⁔(/*this*/ ж<Func> Ꮡfn) {
     ref var fn = ref Ꮡfn.DerefOrNull();
 
     // Remove static indicator on name, if any. We'll add it back.

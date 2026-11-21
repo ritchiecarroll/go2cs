@@ -56,7 +56,7 @@ partial struct formatter {
 
 // parseString parses bytes as a NUL-terminated C-style string.
 // If a NUL byte is not found then the whole slice is returned as a string.
-[GoMethodBody("parseString")] internal static @string parseStringᴍ(ref parser _, slice<byte> b) {
+internal static @string parseString⁔(/*this*/ ref parser _, slice<byte> b) {
     nint i = bytes.IndexByte(b, 0); if (i >= 0) {
         return (@string)(b.slice(0, i));
     }
@@ -66,7 +66,7 @@ partial struct formatter {
 } partial class tar_package {
 
 // formatString copies s into b, NUL-terminating if possible.
-[GoMethodBody("formatString")] internal static void formatStringᴍ(ref formatter f, slice<byte> b, @string s) {
+internal static void formatString⁔(/*this*/ ref formatter f, slice<byte> b, @string s) {
     if (len(s) > len(b)) {
         f.err = ErrFieldTooLong;
     }
@@ -103,7 +103,7 @@ internal static bool fitsInBase256(nint n, int64 x) {
 // parseNumeric parses the input as being encoded in either base-256 or octal.
 // This function may return negative numbers.
 // If parsing fails or an integer overflow occurs, err will be set.
-[GoMethodBody("parseNumeric")] internal static int64 parseNumericᴍ(ref parser p, slice<byte> b) {
+internal static int64 parseNumeric⁔(/*this*/ ref parser p, slice<byte> b) {
     // Check for base-256 (binary) format first.
     // If the first bit is set, then all following bits constitute a two's
     // complement encoded number in big-endian byte order.
@@ -150,7 +150,7 @@ internal static bool fitsInBase256(nint n, int64 x) {
 
 // formatNumeric encodes x into b using base-8 (octal) encoding if possible.
 // Otherwise it will attempt to use base-256 (binary) encoding.
-[GoMethodBody("formatNumeric")] internal static void formatNumericᴍ(ref formatter f, slice<byte> b, int64 x) {
+internal static void formatNumeric⁔(/*this*/ ref formatter f, slice<byte> b, int64 x) {
     if (fitsInOctal(len(b), x)) {
         f.formatOctal(b, x);
         return;
@@ -171,7 +171,7 @@ internal static bool fitsInBase256(nint n, int64 x) {
 
 } partial class tar_package {
 
-[GoMethodBody("parseOctal")] internal static int64 parseOctalᴍ(ref parser p, slice<byte> b) {
+internal static int64 parseOctal⁔(/*this*/ ref parser p, slice<byte> b) {
     // Because unused fields are filled with NULs, we need
     // to skip leading NULs. Fields may also be padded with
     // spaces or NULs.
@@ -191,7 +191,7 @@ internal static bool fitsInBase256(nint n, int64 x) {
 
 } partial class tar_package {
 
-[GoMethodBody("formatOctal")] internal static void formatOctalᴍ(ref formatter f, slice<byte> b, int64 x) {
+internal static void formatOctal⁔(/*this*/ ref formatter f, slice<byte> b, int64 x) {
     if (!fitsInOctal(len(b), x)) {
         x = 0; // Last resort, just write zero
         f.err = ErrFieldTooLong;

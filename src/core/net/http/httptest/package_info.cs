@@ -76,7 +76,7 @@ using static go.net.http.httptest_package;
 
 namespace go.net.http;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using http = go.net.http_package;
 using go.net;
 using vendor.golang.org.x.net.http;
@@ -85,7 +85,10 @@ using x509 = crypto.x509_package;
 using net = net_package;
 using crypto;
 using go.net.http.@internal;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("httptest")]
 public static partial class httptest_package
@@ -138,31 +141,31 @@ public static partial class httptest_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(httptest_package.ResponseRecorder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httptestᴛResponseRecorder;
-[GoMethodHost(typeof(httptest_package.Server)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httptestᴛServer;
+[GoMethodHost(typeof(httptest_package.ResponseRecorder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httptestᴛResponseRecorder;
+[GoMethodHost(typeof(httptest_package.Server)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httptestᴛServer;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class httptestᴛResponseRecorder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static http.Header Header(this ref ResponseRecorder rw) => httptest_package.Headerᴍ(ref rw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeHeader(this ref ResponseRecorder rw, slice<byte> b, @string str) => httptest_package.writeHeaderᴍ(ref rw, b, str);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Write(this ref ResponseRecorder rw, slice<byte> buf) => httptest_package.Writeᴍ(ref rw, buf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteString(this ref ResponseRecorder rw, @string str) => httptest_package.WriteStringᴍ(ref rw, str);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void WriteHeader(this ref ResponseRecorder rw, nint code) => httptest_package.WriteHeaderᴍ(ref rw, code);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Flush(this ref ResponseRecorder rw) => httptest_package.Flushᴍ(ref rw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<http.Response> Result(this ref ResponseRecorder rw) => httptest_package.Resultᴍ(ref rw);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static http.Header Header(this ref ResponseRecorder rw) => httptest_package.Header⁔(ref rw);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeHeader(this ref ResponseRecorder rw, slice<byte> b, @string str) => httptest_package.writeHeader⁔(ref rw, b, str);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Write(this ref ResponseRecorder rw, slice<byte> buf) => httptest_package.Write⁔(ref rw, buf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) WriteString(this ref ResponseRecorder rw, @string str) => httptest_package.WriteString⁔(ref rw, str);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void WriteHeader(this ref ResponseRecorder rw, nint code) => httptest_package.WriteHeader⁔(ref rw, code);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Flush(this ref ResponseRecorder rw) => httptest_package.Flush⁔(ref rw);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<http.Response> Result(this ref ResponseRecorder rw) => httptest_package.Result⁔(ref rw);
 }
 partial class httptestᴛServer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Start(this ж<Server> Ꮡs) => httptest_package.Startᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StartTLS(this ж<Server> Ꮡs) => httptest_package.StartTLSᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Close(this ж<Server> Ꮡs) => httptest_package.Closeᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void logCloseHangDebugInfo(this ж<Server> Ꮡs) => httptest_package.logCloseHangDebugInfoᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void CloseClientConnections(this ж<Server> Ꮡs) => httptest_package.CloseClientConnectionsᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<x509.Certificate> Certificate(this ref Server s) => httptest_package.Certificateᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<http.Client> Client(this ref Server s) => httptest_package.Clientᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void goServe(this ж<Server> Ꮡs) => httptest_package.goServeᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void wrap(this ж<Server> Ꮡs) => httptest_package.wrapᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeConn(this ref Server s, net.Conn c) => httptest_package.closeConnᴍ(ref s, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeConnChan(this ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) => httptest_package.closeConnChanᴍ(ref s, c, done);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Start(this ж<Server> Ꮡs) => httptest_package.Start⁔(Ꮡs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StartTLS(this ж<Server> Ꮡs) => httptest_package.StartTLS⁔(Ꮡs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Close(this ж<Server> Ꮡs) => httptest_package.Close⁔(Ꮡs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void logCloseHangDebugInfo(this ж<Server> Ꮡs) => httptest_package.logCloseHangDebugInfo⁔(Ꮡs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void CloseClientConnections(this ж<Server> Ꮡs) => httptest_package.CloseClientConnections⁔(Ꮡs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<x509.Certificate> Certificate(this ref Server s) => httptest_package.Certificate⁔(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<http.Client> Client(this ref Server s) => httptest_package.Client⁔(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void goServe(this ж<Server> Ꮡs) => httptest_package.goServe⁔(Ꮡs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void wrap(this ж<Server> Ꮡs) => httptest_package.wrap⁔(Ꮡs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void closeConn(this ref Server s, net.Conn c) => httptest_package.closeConn⁔(ref s, c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void closeConnChan(this ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) => httptest_package.closeConnChan⁔(ref s, c, done);
 }
 // </GlyphForwarders>

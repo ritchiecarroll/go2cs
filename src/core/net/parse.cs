@@ -24,9 +24,9 @@ partial struct @file {
 
 } partial class net_package {
 
-[GoMethodBody("close")] internal static void closeᴍ(ref @file f) { f.ΔΔfile.Close(); }
+internal static void close⁔(/*this*/ ref @file f) { f.ΔΔfile.Close(); }
 
-[GoMethodBody("getLineFromData")] internal static (@string s, bool ok) getLineFromDataᴍ(ref @file f) {
+internal static (@string s, bool ok) getLineFromData⁔(/*this*/ ref @file f) {
     @string s = default;
     bool ok = default;
 
@@ -53,7 +53,7 @@ partial struct @file {
     return (s, ok);
 }
 
-[GoMethodBody("readLine")] internal static (@string s, bool ok) readLineᴍ(ref @file f) {
+internal static (@string s, bool ok) readLine⁔(/*this*/ ref @file f) {
     @string s = default;
     bool ok = default;
 
@@ -74,7 +74,7 @@ partial struct @file {
     return (s, ok);
 }
 
-[GoMethodBody("stat")] internal static (time.Time mtime, int64 size, error err) statᴍ(ref @file f) {
+internal static (time.Time mtime, int64 size, error err) stat⁔(/*this*/ ref @file f) {
     error err = default;
 
     (var st, err) = f.ΔΔfile.Stat();

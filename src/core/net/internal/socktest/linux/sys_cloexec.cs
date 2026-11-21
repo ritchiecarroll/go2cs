@@ -12,7 +12,7 @@ partial class socktest_package {
 } partial class socktest_package {
 
 // Accept4 wraps syscall.Accept4.
-[GoMethodBody("Accept4")] internal static (nint ns, syscall.Sockaddr sa, error err) Accept4ᴍ(ж<Switch> Ꮡsw, nint s, nint flags) {
+internal static (nint ns, syscall.Sockaddr sa, error err) Accept4⁔(/*this*/ ж<Switch> Ꮡsw, nint s, nint flags) {
     nint ns = default;
     syscall.Sockaddr sa = default;
     error err = default;

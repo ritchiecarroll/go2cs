@@ -23,7 +23,7 @@ internal static Addr sockaddrToIP(syscall.Sockaddr sa) {
 
 } partial class net_package {
 
-[GoMethodBody("family")] internal static nint familyᴍ(ж<IPAddr> Ꮡa) {
+internal static nint family⁔(/*this*/ ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil || len(a.IP) <= IPv4len) {
@@ -35,7 +35,7 @@ internal static Addr sockaddrToIP(syscall.Sockaddr sa) {
     return syscall.AF_INET6;
 }
 
-[GoMethodBody("sockaddr")] internal static (syscall.Sockaddr, error) sockaddrᴍ(ж<IPAddr> Ꮡa, nint family) {
+internal static (syscall.Sockaddr, error) sockaddr⁔(/*this*/ ж<IPAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -44,13 +44,13 @@ internal static Addr sockaddrToIP(syscall.Sockaddr sa) {
     return ipToSockaddr(family, a.IP, 0, a.Zone);
 }
 
-[GoMethodBody("toLocal")] internal static sockaddr toLocalᴍ(ref IPAddr a, @string net) {
+internal static sockaddr toLocal⁔(/*this*/ ref IPAddr a, @string net) {
     return new IPAddrжsockaddr(Ꮡ(new IPAddr(loopbackIP(net), a.Zone)));
 }
 
 } partial class net_package {
 
-[GoMethodBody("readFrom")] internal static (nint, ж<IPAddr>, error) readFromᴍ(ref IPConn c, slice<byte> b) {
+internal static (nint, ж<IPAddr>, error) readFrom⁔(/*this*/ ref IPConn c, slice<byte> b) {
     // TODO(cw,rsc): consider using readv if we know the family
     // type to avoid the header trim/copy
     ж<IPAddr> addr = default;
@@ -87,7 +87,7 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
 
 } partial class net_package {
 
-[GoMethodBody("readMsg")] internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) readMsgᴍ(ref IPConn c, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) readMsg⁔(/*this*/ ref IPConn c, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -108,7 +108,7 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
     return (n, oobn, flags, addr, err);
 }
 
-[GoMethodBody("writeTo")] internal static (nint, error) writeToᴍ(ref IPConn c, slice<byte> b, ж<IPAddr> addr) {
+internal static (nint, error) writeTo⁔(/*this*/ ref IPConn c, slice<byte> b, ж<IPAddr> addr) {
     if (c.fd.isConnected) {
         return (0, ErrWriteToConnected);
     }
@@ -122,7 +122,7 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
     return c.fd.writeTo(b, sa);
 }
 
-[GoMethodBody("writeMsg")] internal static (nint n, nint oobn, error err) writeMsgᴍ(ref IPConn c, slice<byte> b, slice<byte> oob, ж<IPAddr> addr) {
+internal static (nint n, nint oobn, error err) writeMsg⁔(/*this*/ ref IPConn c, slice<byte> b, slice<byte> oob, ж<IPAddr> addr) {
     error err = default;
 
     if (c.fd.isConnected) {
@@ -141,10 +141,10 @@ internal static nint stripIPv4Header(nint n, slice<byte> b) {
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string dialˢᴍsysDialer => ref dialˢᵇᴍsysDialer;
-private static readonly @string dialˢᵇᴍsysDialer = "dial"u8;
+internal static ref readonly @string dialˢ⁔sysDialer => ref dialˢᵇ⁔sysDialer;
+private static readonly @string dialˢᵇ⁔sysDialer = "dial"u8;
 
-[GoMethodBody("dialIP")] internal static (ж<IPConn>, error) dialIPᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<IPAddr> laddr, ж<IPAddr> raddr) {
+internal static (ж<IPConn>, error) dialIP⁔(/*this*/ ж<sysDialer> Ꮡsd, context.Context ctx, ж<IPAddr> laddr, ж<IPAddr> raddr) {
     ref var sd = ref Ꮡsd.DerefOrNull();
 
     var (network, proto, err) = parseNetwork(ctx, sd.network, true);
@@ -162,7 +162,7 @@ private static readonly @string dialˢᵇᴍsysDialer = "dial"u8;
     if (ctrlCtxFn == nil && sd.Dialer.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string networkΔ1, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(networkΔ1, address, c);
     }
-    (var fd, err) = internetSocket(ctx, network, new IPAddrжsockaddr(laddr), new IPAddrжsockaddr(raddr), syscall.SOCK_RAW, proto, dialˢᴍsysDialer, ctrlCtxFn);
+    (var fd, err) = internetSocket(ctx, network, new IPAddrжsockaddr(laddr), new IPAddrжsockaddr(raddr), syscall.SOCK_RAW, proto, dialˢ⁔sysDialer, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }
@@ -172,10 +172,10 @@ private static readonly @string dialˢᵇᴍsysDialer = "dial"u8;
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string listenˢᴍsysListener => ref listenˢᵇᴍsysListener;
-private static readonly @string listenˢᵇᴍsysListener = "listen"u8;
+internal static ref readonly @string listenˢ⁔sysListener => ref listenˢᵇ⁔sysListener;
+private static readonly @string listenˢᵇ⁔sysListener = "listen"u8;
 
-[GoMethodBody("listenIP")] internal static (ж<IPConn>, error) listenIPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<IPAddr> laddr) {
+internal static (ж<IPConn>, error) listenIP⁔(/*this*/ ж<sysListener> Ꮡsl, context.Context ctx, ж<IPAddr> laddr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
 
     var (network, proto, err) = parseNetwork(ctx, sl.network, true);
@@ -193,7 +193,7 @@ private static readonly @string listenˢᵇᴍsysListener = "listen"u8;
     if (sl.ListenConfig.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string networkΔ1, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(networkΔ1, address, c);
     }
-    (var fd, err) = internetSocket(ctx, network, new IPAddrжsockaddr(laddr), default, syscall.SOCK_RAW, proto, listenˢᴍsysListener, ctrlCtxFn);
+    (var fd, err) = internetSocket(ctx, network, new IPAddrжsockaddr(laddr), default, syscall.SOCK_RAW, proto, listenˢ⁔sysListener, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }

@@ -61,9 +61,12 @@ using static go.mime.quotedprintable_package;
 
 namespace go.mime;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static quotedprintable_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("quotedprintable")]
 public static partial class quotedprintable_package
@@ -100,22 +103,22 @@ public static partial class quotedprintable_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(quotedprintable_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quotedprintableᴛReader;
-[GoMethodHost(typeof(quotedprintable_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class quotedprintableᴛWriter;
+[GoMethodHost(typeof(quotedprintable_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class quotedprintableᴛReader;
+[GoMethodHost(typeof(quotedprintable_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class quotedprintableᴛWriter;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class quotedprintableᴛReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ref Reader r, slice<byte> p) => quotedprintable_package.Readᴍ(ref r, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ref Reader r, slice<byte> p) => quotedprintable_package.Read⁔(ref r, p);
 }
 partial class quotedprintableᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ref Writer w, slice<byte> p) => quotedprintable_package.Writeᴍ(ref w, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Writer w) => quotedprintable_package.Closeᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error write(this ref Writer w, slice<byte> p) => quotedprintable_package.writeᴍ(ref w, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error encode(this ref Writer w, byte b) => quotedprintable_package.encodeᴍ(ref w, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error checkLastByte(this ref Writer w) => quotedprintable_package.checkLastByteᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error insertSoftLineBreak(this ref Writer w) => quotedprintable_package.insertSoftLineBreakᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error insertCRLF(this ref Writer w) => quotedprintable_package.insertCRLFᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error flush(this ref Writer w) => quotedprintable_package.flushᴍ(ref w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ref Writer w, slice<byte> p) => quotedprintable_package.Write⁔(ref w, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Writer w) => quotedprintable_package.Close⁔(ref w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error write(this ref Writer w, slice<byte> p) => quotedprintable_package.write⁔(ref w, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error encode(this ref Writer w, byte b) => quotedprintable_package.encode⁔(ref w, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error checkLastByte(this ref Writer w) => quotedprintable_package.checkLastByte⁔(ref w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error insertSoftLineBreak(this ref Writer w) => quotedprintable_package.insertSoftLineBreak⁔(ref w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error insertCRLF(this ref Writer w) => quotedprintable_package.insertCRLF⁔(ref w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error flush(this ref Writer w) => quotedprintable_package.flush⁔(ref w);
 }
 // </GlyphForwarders>

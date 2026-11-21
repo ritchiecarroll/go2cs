@@ -46,13 +46,13 @@ partial struct TagExpr {
 
 } partial class constraint_package {
 
-[GoMethodBody("isExpr")] internal static void isExprᴍ(ref TagExpr x) { }
+internal static void isExpr⁔(/*this*/ ref TagExpr x) { }
 
-[GoMethodBody("Eval")] internal static bool Evalᴍ(ref TagExpr x, Func<@string, bool> ok) {
+internal static bool Eval⁔(/*this*/ ref TagExpr x, Func<@string, bool> ok) {
     return ok(x.Tag);
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref TagExpr x) {
+internal static @string String⁔(/*this*/ ref TagExpr x) {
     return x.Tag;
 }
 
@@ -67,13 +67,13 @@ partial struct NotExpr {
 
 } partial class constraint_package {
 
-[GoMethodBody("isExpr")] internal static void isExprᴍ(ref NotExpr x) { }
+internal static void isExpr⁔(/*this*/ ref NotExpr x) { }
 
-[GoMethodBody("Eval")] internal static bool Evalᴍ(ref NotExpr x, Func<@string, bool> ok) {
+internal static bool Eval⁔(/*this*/ ref NotExpr x, Func<@string, bool> ok) {
     return !x.X.Eval(ok);
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref NotExpr x) {
+internal static @string String⁔(/*this*/ ref NotExpr x) {
     @string s = x.X.String();
     switch (x.X.type()) {
     case ж<AndExpr> _:
@@ -95,16 +95,16 @@ partial struct AndExpr {
 
 } partial class constraint_package {
 
-[GoMethodBody("isExpr")] internal static void isExprᴍ(ref AndExpr x) { }
+internal static void isExpr⁔(/*this*/ ref AndExpr x) { }
 
-[GoMethodBody("Eval")] internal static bool Evalᴍ(ref AndExpr x, Func<@string, bool> ok) {
+internal static bool Eval⁔(/*this*/ ref AndExpr x, Func<@string, bool> ok) {
     // Note: Eval both, to make sure ok func observes all tags.
     var xok = x.X.Eval(ok);
     var yok = x.Y.Eval(ok);
     return xok && yok;
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref AndExpr x) {
+internal static @string String⁔(/*this*/ ref AndExpr x) {
     return andArg(x.X) + " && "u8 + andArg(x.Y);
 }
 
@@ -129,16 +129,16 @@ partial struct OrExpr {
 
 } partial class constraint_package {
 
-[GoMethodBody("isExpr")] internal static void isExprᴍ(ref OrExpr x) { }
+internal static void isExpr⁔(/*this*/ ref OrExpr x) { }
 
-[GoMethodBody("Eval")] internal static bool Evalᴍ(ref OrExpr x, Func<@string, bool> ok) {
+internal static bool Eval⁔(/*this*/ ref OrExpr x, Func<@string, bool> ok) {
     // Note: Eval both, to make sure ok func observes all tags.
     var xok = x.X.Eval(ok);
     var yok = x.Y.Eval(ok);
     return xok || yok;
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref OrExpr x) {
+internal static @string String⁔(/*this*/ ref OrExpr x) {
     return orArg(x.X) + " || "u8 + orArg(x.Y);
 }
 
@@ -164,7 +164,7 @@ partial struct SyntaxError {
 
 } partial class constraint_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref SyntaxError e) {
+internal static @string Error⁔(/*this*/ ref SyntaxError e) {
     return e.Err;
 }
 
@@ -272,7 +272,7 @@ internal static (Expr x, error err) parseExpr(@string text) {
 // or parses a sequence of || expressions.
 // On entry, the next input token has not yet been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-[GoMethodBody("or")] internal static Expr orᴍ(ж<exprParser> Ꮡp) {
+internal static Expr or⁔(/*this*/ ж<exprParser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var x = Ꮡp.and();
@@ -285,7 +285,7 @@ internal static (Expr x, error err) parseExpr(@string text) {
 // and parses a sequence of && expressions.
 // On entry, the next input token has not yet been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-[GoMethodBody("and")] internal static Expr andᴍ(ж<exprParser> Ꮡp) {
+internal static Expr and⁔(/*this*/ ж<exprParser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var x = Ꮡp.not();
@@ -298,7 +298,7 @@ internal static (Expr x, error err) parseExpr(@string text) {
 // not parses a ! expression.
 // On entry, the next input token has not yet been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-[GoMethodBody("not")] internal static Expr notᴍ(ж<exprParser> Ꮡp) {
+internal static Expr not⁔(/*this*/ ж<exprParser> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.size++;
@@ -317,13 +317,13 @@ internal static (Expr x, error err) parseExpr(@string text) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingCloseParenˢᴍexprParser => ref missingCloseParenˢᵇᴍexprParser;
-private static readonly @string missingCloseParenˢᵇᴍexprParser = "missing close paren"u8;
+internal static ref readonly @string missingCloseParenˢ⁔exprParser => ref missingCloseParenˢᵇ⁔exprParser;
+private static readonly @string missingCloseParenˢᵇ⁔exprParser = "missing close paren"u8;
 
 // atom parses a tag or a parenthesized expression.
 // On entry, the next input token HAS been lexed.
 // On exit, the next input token has been lexed and is in p.tok.
-[GoMethodBody("atom")] internal static Expr atomᴍ(ж<exprParser> Ꮡp) {
+internal static Expr atom⁔(/*this*/ ж<exprParser> Ꮡp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -334,7 +334,7 @@ private static readonly @string missingCloseParenˢᵇᴍexprParser = "missing c
             defer(() => {
                 var e = recover(); if (e != nil) {
                     var (eΔ1, ok) = e._<ж<SyntaxError>>(ᐧ); if (ok && eΔ1.Err == "unexpected end of expression"u8) {
-                        eΔ1.Err = missingCloseParenˢᴍexprParser;
+                        eΔ1.Err = missingCloseParenˢ⁔exprParser;
                     }
                     throw panic(e);
                 }
@@ -367,7 +367,7 @@ private static readonly @string missingCloseParenˢᵇᴍexprParser = "missing c
 // and p.pos records the byte offset of the start of the token in the input stream.
 // If lex reaches the end of the input, p.tok is set to the empty string.
 // For any other syntax error, lex panics with a SyntaxError.
-[GoMethodBody("lex")] internal static void lexᴍ(ref exprParser p) {
+internal static void lex⁔(/*this*/ ref exprParser p) {
     p.isTag = false;
     while (p.i < len(p.s) && (p.s[p.i] == ' ' || p.s[p.i] == '\t')) {
         p.i++;

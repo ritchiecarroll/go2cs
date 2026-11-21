@@ -32,7 +32,7 @@ partial struct Header /*map[@string, slice<@string>]*/;
 // It appends to any existing values associated with key.
 // The key is case insensitive; it is canonicalized by
 // [CanonicalHeaderKey].
-[GoMethodBody("Add")] internal static void Addᴍ(Header h, @string key, @string value) {
+internal static void Add⁔(/*this*/ Header h, @string key, @string value) {
     ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Add(key, value);
 }
 
@@ -41,7 +41,7 @@ partial struct Header /*map[@string, slice<@string>]*/;
 // associated with key. The key is case insensitive; it is
 // canonicalized by [textproto.CanonicalMIMEHeaderKey].
 // To use non-canonical keys, assign to the map directly.
-[GoMethodBody("Set")] internal static void Setᴍ(Header h, @string key, @string value) {
+internal static void Set⁔(/*this*/ Header h, @string key, @string value) {
     ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Set(key, value);
 }
 
@@ -51,7 +51,7 @@ partial struct Header /*map[@string, slice<@string>]*/;
 // used to canonicalize the provided key. Get assumes that all
 // keys are stored in canonical form. To use non-canonical keys,
 // access the map directly.
-[GoMethodBody("Get")] internal static @string Getᴍ(Header h, @string key) {
+internal static @string Get⁔(/*this*/ Header h, @string key) {
     return ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Get(key);
 }
 
@@ -60,12 +60,12 @@ partial struct Header /*map[@string, slice<@string>]*/;
 // used to canonicalize the provided key. To use non-canonical
 // keys, access the map directly.
 // The returned slice is not a copy.
-[GoMethodBody("Values")] internal static slice<@string> Valuesᴍ(Header h, @string key) {
+internal static slice<@string> Values⁔(/*this*/ Header h, @string key) {
     return ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Values(key);
 }
 
 // get is like Get, but key must already be in CanonicalHeaderKey form.
-[GoMethodBody("get")] internal static @string getᴍ(Header h, @string key) {
+internal static @string get⁔(/*this*/ Header h, @string key) {
     var v = h[key]; if (len(v) > 0) {
         return v[0];
     }
@@ -74,7 +74,7 @@ partial struct Header /*map[@string, slice<@string>]*/;
 
 // has reports whether h has the provided key defined, even if it's
 // set to 0-length slice.
-[GoMethodBody("has")] internal static bool hasᴍ(Header h, @string key) {
+internal static bool has⁔(/*this*/ Header h, @string key) {
     var (_, ok) = h[key, ꟷ];
     return ok;
 }
@@ -82,21 +82,21 @@ partial struct Header /*map[@string, slice<@string>]*/;
 // Del deletes the values associated with key.
 // The key is case insensitive; it is canonicalized by
 // [CanonicalHeaderKey].
-[GoMethodBody("Del")] internal static void Delᴍ(Header h, @string key) {
+internal static void Del⁔(/*this*/ Header h, @string key) {
     ((textproto.MIMEHeader)(map<@string, slice<@string>>)h).Del(key);
 }
 
 // Write writes a header in wire format.
-[GoMethodBody("Write")] internal static error Writeᴍ(Header h, io.Writer w) {
+internal static error Write⁔(/*this*/ Header h, io.Writer w) {
     return h.write(w, nil);
 }
 
-[GoMethodBody("write")] internal static error writeᴍ(Header h, io.Writer w, ж<httptrace.ClientTrace> trace) {
+internal static error write⁔(/*this*/ Header h, io.Writer w, ж<httptrace.ClientTrace> trace) {
     return h.writeSubset(w, default, trace);
 }
 
 // Clone returns a copy of h or nil if h is nil.
-[GoMethodBody("Clone")] internal static Header Cloneᴍ(Header h) {
+internal static Header Clone⁔(/*this*/ Header h) {
     if (h == nil) {
         return default;
     }
@@ -156,7 +156,7 @@ partial struct stringWriter {
 
 } partial class http_package {
 
-[GoMethodBody("WriteString")] internal static (nint n, error err) WriteStringᴍ(stringWriter w, @string s) {
+internal static (nint n, error err) WriteString⁔(/*this*/ stringWriter w, @string s) {
     return w.w.Write(slice<byte>(s));
 }
 
@@ -182,7 +182,7 @@ internal static ref sync.Pool headerSorterPool => ref ((StaticBox<sync.Pool>)Ꮡ
 // sortedKeyValues returns h's keys sorted in the returned kvs
 // slice. The headerSorter used to sort is also returned, for possible
 // return to headerSorterCache.
-[GoMethodBody("sortedKeyValues")] internal static (slice<keyValues> kvs, ж<headerSorter> hs) sortedKeyValuesᴍ(Header h, map<@string, bool> exclude) {
+internal static (slice<keyValues> kvs, ж<headerSorter> hs) sortedKeyValues⁔(/*this*/ Header h, map<@string, bool> exclude) {
     slice<keyValues> kvs = default;
     ж<headerSorter> hs = default;
 
@@ -204,11 +204,11 @@ internal static ref sync.Pool headerSorterPool => ref ((StaticBox<sync.Pool>)Ꮡ
 // WriteSubset writes a header in wire format.
 // If exclude is not nil, keys where exclude[key] == true are not written.
 // Keys are not canonicalized before checking the exclude map.
-[GoMethodBody("WriteSubset")] internal static error WriteSubsetᴍ(Header h, io.Writer w, map<@string, bool> exclude) {
+internal static error WriteSubset⁔(/*this*/ Header h, io.Writer w, map<@string, bool> exclude) {
     return h.writeSubset(w, exclude, nil);
 }
 
-[GoMethodBody("writeSubset")] internal static error writeSubsetᴍ(Header h, io.Writer w, map<@string, bool> exclude, ж<httptrace.ClientTrace> Ꮡtrace) {
+internal static error writeSubset⁔(/*this*/ Header h, io.Writer w, map<@string, bool> exclude, ж<httptrace.ClientTrace> Ꮡtrace) {
     ref var trace = ref Ꮡtrace.DerefOrNull();
 
     var (ws, ok) = w._<io.StringWriter>(ᐧ);

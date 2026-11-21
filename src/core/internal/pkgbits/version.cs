@@ -81,7 +81,7 @@ internal static array<Version> removed = new golib.SparseArray<Version>{
 } partial class pkgbits_package {
 
 // Has reports whether field f is present in a bitstream at version v.
-[GoMethodBody("Has")] internal static bool Hasᴍ(Version v, Field f) {
+internal static bool Has⁔(/*this*/ Version v, Field f) {
     return introduced[f] <= v && (v < removed[f] || removed[f] == V0);
 }
 

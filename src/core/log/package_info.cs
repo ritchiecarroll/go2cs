@@ -64,13 +64,16 @@ using static go.log_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using Δio = io_package;
 using go.sync;
 using log;
 using ꓸꓸꓸany = Span<any>;
 using static log_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("log")]
 public static partial class log_package
@@ -109,27 +112,27 @@ public static partial class log_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(log_package.Logger)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class logᴛLogger;
+[GoMethodHost(typeof(log_package.Logger)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class logᴛLogger;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class logᴛLogger {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetOutput(this ж<Logger> Ꮡl, Δio.Writer w) => log_package.SetOutputᴍ(Ꮡl, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Output(this ж<Logger> Ꮡl, nint calldepth, @string s) => log_package.Outputᴍ(Ꮡl, calldepth, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error output(this ж<Logger> Ꮡl, uintptr pc, nint calldepth, Func<slice<byte>, slice<byte>> appendOutput) => log_package.outputᴍ(Ꮡl, pc, calldepth, appendOutput);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Print(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Printᴍ(Ꮡl, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Printf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) => log_package.Printfᴍ(Ꮡl, format, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Println(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Printlnᴍ(Ꮡl, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Fatal(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Fatalᴍ(Ꮡl, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Fatalf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) => log_package.Fatalfᴍ(Ꮡl, format, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Fatalln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Fatallnᴍ(Ꮡl, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Panicᴍ(Ꮡl, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Panicf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) => log_package.Panicfᴍ(Ꮡl, format, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Panicln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Paniclnᴍ(Ꮡl, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Flags(this ж<Logger> Ꮡl) => log_package.Flagsᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetFlags(this ж<Logger> Ꮡl, nint flag) => log_package.SetFlagsᴍ(Ꮡl, flag);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Prefix(this ж<Logger> Ꮡl) => log_package.Prefixᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetPrefix(this ж<Logger> Ꮡl, @string prefixʗp) => log_package.SetPrefixᴍ(Ꮡl, prefixʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Δio.Writer Writer(this ж<Logger> Ꮡl) => log_package.Writerᴍ(Ꮡl);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetOutput(this ж<Logger> Ꮡl, Δio.Writer w) => log_package.SetOutput⁔(Ꮡl, w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Output(this ж<Logger> Ꮡl, nint calldepth, @string s) => log_package.Output⁔(Ꮡl, calldepth, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error output(this ж<Logger> Ꮡl, uintptr pc, nint calldepth, Func<slice<byte>, slice<byte>> appendOutput) => log_package.output⁔(Ꮡl, pc, calldepth, appendOutput);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Print(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Print⁔(Ꮡl, vʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Printf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) => log_package.Printf⁔(Ꮡl, format, vʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Println(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Println⁔(Ꮡl, vʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Fatal(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Fatal⁔(Ꮡl, vʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Fatalf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) => log_package.Fatalf⁔(Ꮡl, format, vʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Fatalln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Fatalln⁔(Ꮡl, vʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Panic(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Panic⁔(Ꮡl, vʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Panicf(this ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) => log_package.Panicf⁔(Ꮡl, format, vʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Panicln(this ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) => log_package.Panicln⁔(Ꮡl, vʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Flags(this ж<Logger> Ꮡl) => log_package.Flags⁔(Ꮡl);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetFlags(this ж<Logger> Ꮡl, nint flag) => log_package.SetFlags⁔(Ꮡl, flag);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Prefix(this ж<Logger> Ꮡl) => log_package.Prefix⁔(Ꮡl);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetPrefix(this ж<Logger> Ꮡl, @string prefixʗp) => log_package.SetPrefix⁔(Ꮡl, prefixʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Δio.Writer Writer(this ж<Logger> Ꮡl) => log_package.Writer⁔(Ꮡl);
 }
 // </GlyphForwarders>

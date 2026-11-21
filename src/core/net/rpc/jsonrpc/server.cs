@@ -51,7 +51,7 @@ partial struct serverRequest {
 
 } partial class jsonrpc_package {
 
-[GoMethodBody("reset")] internal static void resetᴍ(ref serverRequest r) {
+internal static void reset⁔(/*this*/ ref serverRequest r) {
     r.Method = ""u8;
     r.Params = default;
     r.Id = default;
@@ -67,7 +67,7 @@ partial struct serverResponse {
 
 } partial class jsonrpc_package {
 
-[GoMethodBody("ReadRequestHeader")] internal static error ReadRequestHeaderᴍ(ж<serverCodec> Ꮡc, ж<rpc.Request> Ꮡr) {
+internal static error ReadRequestHeader⁔(/*this*/ ж<serverCodec> Ꮡc, ж<rpc.Request> Ꮡr) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -90,7 +90,7 @@ partial struct serverResponse {
     return default;
 }
 
-[GoMethodBody("ReadRequestBody")] internal static error ReadRequestBodyᴍ(ref serverCodec c, any x) {
+internal static error ReadRequestBody⁔(/*this*/ ref serverCodec c, any x) {
     if (x == nil) {
         return default;
     }
@@ -114,10 +114,10 @@ internal static ref json.RawMessage @null => ref ((StaticBox<json.RawMessage>)�
 } partial class jsonrpc_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidSequenceNumberInˢᴍserverCodec => ref invalidSequenceNumberInˢᵇᴍserverCodec;
-private static readonly @string invalidSequenceNumberInˢᵇᴍserverCodec = "invalid sequence number in response"u8;
+internal static ref readonly @string invalidSequenceNumberInˢ⁔serverCodec => ref invalidSequenceNumberInˢᵇ⁔serverCodec;
+private static readonly @string invalidSequenceNumberInˢᵇ⁔serverCodec = "invalid sequence number in response"u8;
 
-[GoMethodBody("WriteResponse")] internal static error WriteResponseᴍ(ж<serverCodec> Ꮡc, ж<rpc.Response> Ꮡr, any x) {
+internal static error WriteResponse⁔(/*this*/ ж<serverCodec> Ꮡc, ж<rpc.Response> Ꮡr, any x) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -125,7 +125,7 @@ private static readonly @string invalidSequenceNumberInˢᵇᴍserverCodec = "in
     var (b, ok) = c.pending[r.Seq, ꟷ];
     if (!ok) {
         c.mutex.Unlock();
-        return errors.New(invalidSequenceNumberInˢᴍserverCodec);
+        return errors.New(invalidSequenceNumberInˢ⁔serverCodec);
     }
     delete(c.pending, r.Seq);
     c.mutex.Unlock();
@@ -143,7 +143,7 @@ private static readonly @string invalidSequenceNumberInˢᵇᴍserverCodec = "in
     return c.enc.Encode(resp);
 }
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ref serverCodec c) {
+internal static error Close⁔(/*this*/ ref serverCodec c) {
     return c.c.Close();
 }
 

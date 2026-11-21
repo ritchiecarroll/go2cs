@@ -95,7 +95,7 @@ using static go.net.http.httputil_package;
 
 namespace go.net.http;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using bufio = bufio_package;
 using io = io_package;
 using net = net_package;
@@ -110,7 +110,10 @@ using go.net.http.@internal;
 using go.sync;
 using vendor.golang.org.x.net.http;
 using ꓸꓸꓸany = Span<any>;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("httputil")]
 public static partial class httputil_package
@@ -175,79 +178,79 @@ public static partial class httputil_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(httputil_package.ClientConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛClientConn;
-[GoMethodHost(typeof(httputil_package.ProxyRequest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛProxyRequest;
-[GoMethodHost(typeof(httputil_package.ReverseProxy)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛReverseProxy;
-[GoMethodHost(typeof(httputil_package.ServerConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛServerConn;
-[GoMethodHost(typeof(httputil_package.delegateReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛdelegateReader;
-[GoMethodHost(typeof(httputil_package.dumpConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛdumpConn;
-[GoMethodHost(typeof(httputil_package.failureToReadBody)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛfailureToReadBody;
-[GoMethodHost(typeof(httputil_package.maxLatencyWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛmaxLatencyWriter;
-[GoMethodHost(typeof(httputil_package.neverEnding)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛneverEnding;
-[GoMethodHost(typeof(httputil_package.noopCloseReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛnoopCloseReader;
-[GoMethodHost(typeof(httputil_package.switchProtocolCopier)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class httputilᴛswitchProtocolCopier;
+[GoMethodHost(typeof(httputil_package.ClientConn)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛClientConn;
+[GoMethodHost(typeof(httputil_package.ProxyRequest)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛProxyRequest;
+[GoMethodHost(typeof(httputil_package.ReverseProxy)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛReverseProxy;
+[GoMethodHost(typeof(httputil_package.ServerConn)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛServerConn;
+[GoMethodHost(typeof(httputil_package.delegateReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛdelegateReader;
+[GoMethodHost(typeof(httputil_package.dumpConn)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛdumpConn;
+[GoMethodHost(typeof(httputil_package.failureToReadBody)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛfailureToReadBody;
+[GoMethodHost(typeof(httputil_package.maxLatencyWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛmaxLatencyWriter;
+[GoMethodHost(typeof(httputil_package.neverEnding)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛneverEnding;
+[GoMethodHost(typeof(httputil_package.noopCloseReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛnoopCloseReader;
+[GoMethodHost(typeof(httputil_package.switchProtocolCopier)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class httputilᴛswitchProtocolCopier;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class httputilᴛdumpConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref dumpConn c) => httputil_package.Closeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static net.Addr LocalAddr(this ref dumpConn c) => httputil_package.LocalAddrᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static net.Addr RemoteAddr(this ref dumpConn c) => httputil_package.RemoteAddrᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetDeadline(this ref dumpConn c, time.Time t) => httputil_package.SetDeadlineᴍ(ref c, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetReadDeadline(this ref dumpConn c, time.Time t) => httputil_package.SetReadDeadlineᴍ(ref c, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) => httputil_package.SetWriteDeadlineᴍ(ref c, t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref dumpConn c) => httputil_package.Close⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static net.Addr LocalAddr(this ref dumpConn c) => httputil_package.LocalAddr⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static net.Addr RemoteAddr(this ref dumpConn c) => httputil_package.RemoteAddr⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error SetDeadline(this ref dumpConn c, time.Time t) => httputil_package.SetDeadline⁔(ref c, t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error SetReadDeadline(this ref dumpConn c, time.Time t) => httputil_package.SetReadDeadline⁔(ref c, t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error SetWriteDeadline(this ref dumpConn c, time.Time t) => httputil_package.SetWriteDeadline⁔(ref c, t);
 }
 partial class httputilᴛneverEnding {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) => httputil_package.Readᴍ(b, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) => httputil_package.Read⁔(b, p);
 }
 partial class httputilᴛdelegateReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) => httputil_package.Readᴍ(ref r, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref delegateReader r, slice<byte> p) => httputil_package.Read⁔(ref r, p);
 }
 partial class httputilᴛfailureToReadBody {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this failureToReadBody _Δp0, slice<byte> _Δp1) => httputil_package.Readᴍ(_Δp0, _Δp1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this failureToReadBody _) => httputil_package.Closeᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this failureToReadBody _Δp0, slice<byte> _Δp1) => httputil_package.Read⁔(_Δp0, _Δp1);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this failureToReadBody _) => httputil_package.Close⁔(_);
 }
 partial class httputilᴛServerConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (net.Conn, ж<bufio.Reader>) Hijack(this ж<ServerConn> Ꮡsc) => httputil_package.Hijackᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<ServerConn> Ꮡsc) => httputil_package.Closeᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<http.Request>, error) Read(this ж<ServerConn> Ꮡsc) => httputil_package.Readᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Pending(this ж<ServerConn> Ꮡsc) => httputil_package.Pendingᴍ(Ꮡsc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ж<ServerConn> Ꮡsc, ж<http.Request> req, ж<http.Response> Ꮡresp) => httputil_package.Writeᴍ(Ꮡsc, req, Ꮡresp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (net.Conn, ж<bufio.Reader>) Hijack(this ж<ServerConn> Ꮡsc) => httputil_package.Hijack⁔(Ꮡsc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ж<ServerConn> Ꮡsc) => httputil_package.Close⁔(Ꮡsc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<http.Request>, error) Read(this ж<ServerConn> Ꮡsc) => httputil_package.Read⁔(Ꮡsc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Pending(this ж<ServerConn> Ꮡsc) => httputil_package.Pending⁔(Ꮡsc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Write(this ж<ServerConn> Ꮡsc, ж<http.Request> req, ж<http.Response> Ꮡresp) => httputil_package.Write⁔(Ꮡsc, req, Ꮡresp);
 }
 partial class httputilᴛClientConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (net.Conn c, ж<bufio.Reader> r) Hijack(this ж<ClientConn> Ꮡcc) => httputil_package.Hijackᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<ClientConn> Ꮡcc) => httputil_package.Closeᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) => httputil_package.Writeᴍ(Ꮡcc, Ꮡreq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Pending(this ж<ClientConn> Ꮡcc) => httputil_package.Pendingᴍ(Ꮡcc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<http.Response> resp, error err) Read(this ж<ClientConn> Ꮡcc, ж<http.Request> req) => httputil_package.Readᴍ(Ꮡcc, req);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<http.Response>, error) Do(this ж<ClientConn> Ꮡcc, ж<http.Request> req) => httputil_package.Doᴍ(Ꮡcc, req);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (net.Conn c, ж<bufio.Reader> r) Hijack(this ж<ClientConn> Ꮡcc) => httputil_package.Hijack⁔(Ꮡcc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ж<ClientConn> Ꮡcc) => httputil_package.Close⁔(Ꮡcc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Write(this ж<ClientConn> Ꮡcc, ж<http.Request> Ꮡreq) => httputil_package.Write⁔(Ꮡcc, Ꮡreq);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Pending(this ж<ClientConn> Ꮡcc) => httputil_package.Pending⁔(Ꮡcc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<http.Response> resp, error err) Read(this ж<ClientConn> Ꮡcc, ж<http.Request> req) => httputil_package.Read⁔(Ꮡcc, req);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<http.Response>, error) Do(this ж<ClientConn> Ꮡcc, ж<http.Request> req) => httputil_package.Do⁔(Ꮡcc, req);
 }
 partial class httputilᴛProxyRequest {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetURL(this ref ProxyRequest r, ж<url.URL> target) => httputil_package.SetURLᴍ(ref r, target);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetXForwarded(this ref ProxyRequest r) => httputil_package.SetXForwardedᴍ(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetURL(this ref ProxyRequest r, ж<url.URL> target) => httputil_package.SetURL⁔(ref r, target);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetXForwarded(this ref ProxyRequest r) => httputil_package.SetXForwarded⁔(ref r);
 }
 partial class httputilᴛReverseProxy {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void defaultErrorHandler(this ref ReverseProxy p, http.ResponseWriter rw, ж<http.Request> req, error err) => httputil_package.defaultErrorHandlerᴍ(ref p, rw, req, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Action<http.ResponseWriter, ж<http.Request>, error> getErrorHandler(this ж<ReverseProxy> Ꮡp) => httputil_package.getErrorHandlerᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool modifyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Response> Ꮡres, ж<http.Request> req) => httputil_package.modifyResponseᴍ(Ꮡp, rw, Ꮡres, req);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq) => httputil_package.ServeHTTPᴍ(Ꮡp, rw, Ꮡreq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Duration flushInterval(this ref ReverseProxy p, ж<http.Response> Ꮡres) => httputil_package.flushIntervalᴍ(ref p, Ꮡres);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error copyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter dst, io.Reader src, time.Duration flushInterval) => httputil_package.copyResponseᴍ(Ꮡp, dst, src, flushInterval);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) copyBuffer(this ref ReverseProxy p, io.Writer dst, io.Reader src, slice<byte> buf) => httputil_package.copyBufferᴍ(ref p, dst, src, buf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void logf(this ref ReverseProxy p, @string format, params ꓸꓸꓸany argsʗp) => httputil_package.logfᴍ(ref p, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡres) => httputil_package.handleUpgradeResponseᴍ(Ꮡp, rw, Ꮡreq, Ꮡres);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void defaultErrorHandler(this ref ReverseProxy p, http.ResponseWriter rw, ж<http.Request> req, error err) => httputil_package.defaultErrorHandler⁔(ref p, rw, req, err);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Action<http.ResponseWriter, ж<http.Request>, error> getErrorHandler(this ж<ReverseProxy> Ꮡp) => httputil_package.getErrorHandler⁔(Ꮡp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool modifyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Response> Ꮡres, ж<http.Request> req) => httputil_package.modifyResponse⁔(Ꮡp, rw, Ꮡres, req);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void ServeHTTP(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq) => httputil_package.ServeHTTP⁔(Ꮡp, rw, Ꮡreq);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static time.Duration flushInterval(this ref ReverseProxy p, ж<http.Response> Ꮡres) => httputil_package.flushInterval⁔(ref p, Ꮡres);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error copyResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter dst, io.Reader src, time.Duration flushInterval) => httputil_package.copyResponse⁔(Ꮡp, dst, src, flushInterval);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64, error) copyBuffer(this ref ReverseProxy p, io.Writer dst, io.Reader src, slice<byte> buf) => httputil_package.copyBuffer⁔(ref p, dst, src, buf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void logf(this ref ReverseProxy p, @string format, params ꓸꓸꓸany argsʗp) => httputil_package.logf⁔(ref p, format, argsʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void handleUpgradeResponse(this ж<ReverseProxy> Ꮡp, http.ResponseWriter rw, ж<http.Request> Ꮡreq, ж<http.Response> Ꮡres) => httputil_package.handleUpgradeResponse⁔(Ꮡp, rw, Ꮡreq, Ꮡres);
 }
 partial class httputilᴛmaxLatencyWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ж<maxLatencyWriter> Ꮡm, slice<byte> p) => httputil_package.Writeᴍ(Ꮡm, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void delayedFlush(this ж<maxLatencyWriter> Ꮡm) => httputil_package.delayedFlushᴍ(Ꮡm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stop(this ж<maxLatencyWriter> Ꮡm) => httputil_package.stopᴍ(Ꮡm);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ж<maxLatencyWriter> Ꮡm, slice<byte> p) => httputil_package.Write⁔(Ꮡm, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void delayedFlush(this ж<maxLatencyWriter> Ꮡm) => httputil_package.delayedFlush⁔(Ꮡm);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void stop(this ж<maxLatencyWriter> Ꮡm) => httputil_package.stop⁔(Ꮡm);
 }
 partial class httputilᴛswitchProtocolCopier {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void copyFromBackend(this switchProtocolCopier c, channel/*<-*/<error> errc) => httputil_package.copyFromBackendᴍ(c, errc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void copyToBackend(this switchProtocolCopier c, channel/*<-*/<error> errc) => httputil_package.copyToBackendᴍ(c, errc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void copyFromBackend(this switchProtocolCopier c, channel/*<-*/<error> errc) => httputil_package.copyFromBackend⁔(c, errc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void copyToBackend(this switchProtocolCopier c, channel/*<-*/<error> errc) => httputil_package.copyToBackend⁔(c, errc);
 }
 partial class httputilᴛnoopCloseReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<noopCloseReader> Ꮡncr) => httputil_package.Closeᴍ(Ꮡncr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ж<noopCloseReader> Ꮡncr, slice<byte> p) => httputil_package.Readᴍ(Ꮡncr, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ж<noopCloseReader> Ꮡncr) => httputil_package.Close⁔(Ꮡncr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ж<noopCloseReader> Ꮡncr, slice<byte> p) => httputil_package.Read⁔(Ꮡncr, p);
 }
 // </GlyphForwarders>

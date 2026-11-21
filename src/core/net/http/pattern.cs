@@ -36,9 +36,9 @@ partial struct pattern {
 
 } partial class http_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref pattern p) { return p.str; }
+internal static @string String⁔(/*this*/ ref pattern p) { return p.str; }
 
-[GoMethodBody("lastSegment")] internal static segment lastSegmentᴍ(ref pattern p) {
+internal static segment lastSegment⁔(/*this*/ ref pattern p) {
     return p.segments[len(p.segments) - 1];
 }
 
@@ -269,7 +269,7 @@ private static readonly relationship overlapsᵇ = "overlaps"u8;         // ther
 // If rule 1 doesn't apply, then two patterns conflict if their relationship
 // is either equivalence (they match the same set of requests) or overlap
 // (they both match some requests, but neither is more specific than the other).
-[GoMethodBody("conflictsWith")] internal static bool conflictsWithᴍ(ref pattern p1, ж<pattern> Ꮡp2) {
+internal static bool conflictsWith⁔(/*this*/ ref pattern p1, ж<pattern> Ꮡp2) {
     ref var p2 = ref Ꮡp2.DerefOrNull();
 
     if (p1.host != p2.host) {
@@ -282,7 +282,7 @@ private static readonly relationship overlapsᵇ = "overlaps"u8;         // ther
     return rel == equivalent || rel == overlaps;
 }
 
-[GoMethodBody("comparePathsAndMethods")] internal static relationship comparePathsAndMethodsᴍ(ref pattern p1, ж<pattern> p2) {
+internal static relationship comparePathsAndMethods⁔(/*this*/ ref pattern p1, ж<pattern> p2) {
     relationship mrel = p1.compareMethods(p2);
     // Optimization: avoid a call to comparePaths.
     if (mrel == disjoint) {
@@ -299,7 +299,7 @@ private static readonly relationship overlapsᵇ = "overlaps"u8;         // ther
 // The empty string matches any method, so it is the most general.
 // "GET" matches both GET and HEAD.
 // Anything else matches only itself.
-[GoMethodBody("compareMethods")] internal static relationship compareMethodsᴍ(ref pattern p1, ж<pattern> Ꮡp2) {
+internal static relationship compareMethods⁔(/*this*/ ref pattern p1, ж<pattern> Ꮡp2) {
     ref var p2 = ref Ꮡp2.DerefOrNull();
 
     if (p1.method == p2.method) {
@@ -324,7 +324,7 @@ private static readonly relationship overlapsᵇ = "overlaps"u8;         // ther
 
 // comparePaths determines the relationship between the path
 // part of two patterns.
-[GoMethodBody("comparePaths")] internal static relationship comparePathsᴍ(ref pattern p1, ж<pattern> Ꮡp2) {
+internal static relationship comparePaths⁔(/*this*/ ref pattern p1, ж<pattern> Ꮡp2) {
     ref var p2 = ref Ꮡp2.DerefOrNull();
 
     // Optimization: if a path pattern doesn't end in a multi ("...") wildcard, then it

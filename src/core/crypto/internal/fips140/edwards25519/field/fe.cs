@@ -44,7 +44,7 @@ internal static ж<Element> feZero = Ꮡ(new Element(0, 0, 0, 0, 0));
 } partial class field_package {
 
 // Zero sets v = 0, and returns v.
-[GoMethodBody("Zero")] internal static ж<Element> Zeroᴍ(ж<Element> Ꮡv) {
+internal static ж<Element> Zero⁔(/*this*/ ж<Element> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     v = feZero.Value;
@@ -58,7 +58,7 @@ internal static ж<Element> feOne = Ꮡ(new Element(1, 0, 0, 0, 0));
 } partial class field_package {
 
 // One sets v = 1, and returns v.
-[GoMethodBody("One")] internal static ж<Element> Oneᴍ(ж<Element> Ꮡv) {
+internal static ж<Element> One⁔(/*this*/ ж<Element> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     v = feOne.Value;
@@ -66,7 +66,7 @@ internal static ж<Element> feOne = Ꮡ(new Element(1, 0, 0, 0, 0));
 }
 
 // reduce reduces v modulo 2^255 - 19 and returns it.
-[GoMethodBody("reduce")] internal static ж<Element> reduceᴍ(ж<Element> Ꮡv) {
+internal static ж<Element> reduce⁔(/*this*/ ж<Element> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     Ꮡv.carryPropagate();
@@ -101,7 +101,7 @@ internal static ж<Element> feOne = Ꮡ(new Element(1, 0, 0, 0, 0));
 }
 
 // Add sets v = a + b, and returns v.
-[GoMethodBody("Add")] internal static ж<Element> Addᴍ(ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) {
+internal static ж<Element> Add⁔(/*this*/ ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -115,7 +115,7 @@ internal static ж<Element> feOne = Ꮡ(new Element(1, 0, 0, 0, 0));
 }
 
 // Subtract sets v = a - b, and returns v.
-[GoMethodBody("Subtract")] internal static ж<Element> Subtractᴍ(ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) {
+internal static ж<Element> Subtract⁔(/*this*/ ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -131,14 +131,14 @@ internal static ж<Element> feOne = Ꮡ(new Element(1, 0, 0, 0, 0));
 }
 
 // Negate sets v = -a, and returns v.
-[GoMethodBody("Negate")] internal static ж<Element> Negateᴍ(ж<Element> Ꮡv, ж<Element> a) {
+internal static ж<Element> Negate⁔(/*this*/ ж<Element> Ꮡv, ж<Element> a) {
     return Ꮡv.Subtract(feZero, a);
 }
 
 // Invert sets v = 1/z mod p, and returns v.
 //
 // If z == 0, Invert returns v = 0.
-[GoMethodBody("Invert")] internal static ж<Element> Invertᴍ(ж<Element> Ꮡv, ж<Element> z) {
+internal static ж<Element> Invert⁔(/*this*/ ж<Element> Ꮡv, ж<Element> z) {
     // Inversion is implemented as exponentiation with exponent p − 2. It uses the
     // same sequence of 255 squarings and 11 multiplications as [Curve25519].
     ref var z2 = ref heap(new Element(), out var Ꮡz2);
@@ -211,7 +211,7 @@ internal static ж<Element> feOne = Ꮡ(new Element(1, 0, 0, 0, 0));
 }
 
 // Set sets v = a, and returns v.
-[GoMethodBody("Set")] internal static ж<Element> Setᴍ(ж<Element> Ꮡv, ж<Element> Ꮡa) {
+internal static ж<Element> Set⁔(/*this*/ ж<Element> Ꮡv, ж<Element> Ꮡa) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
 
@@ -220,8 +220,8 @@ internal static ж<Element> feOne = Ꮡ(new Element(1, 0, 0, 0, 0));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string edwards25519InvalidFieldˢᴍElement => ref edwards25519InvalidFieldˢᵇᴍElement;
-private static readonly @string edwards25519InvalidFieldˢᵇᴍElement = "edwards25519: invalid field element input size"u8;
+internal static ref readonly @string edwards25519InvalidFieldˢ⁔Element => ref edwards25519InvalidFieldˢᵇ⁔Element;
+private static readonly @string edwards25519InvalidFieldˢᵇ⁔Element = "edwards25519: invalid field element input size"u8;
 
 // SetBytes sets v to x, where x is a 32-byte little-endian encoding. If x is
 // not of the right length, SetBytes returns nil and an error, and the
@@ -231,11 +231,11 @@ private static readonly @string edwards25519InvalidFieldˢᵇᴍElement = "edwar
 // last byte) is ignored, and non-canonical values (2^255-19 through 2^255-1)
 // are accepted. Note that this is laxer than specified by RFC 8032, but
 // consistent with most Ed25519 implementations.
-[GoMethodBody("SetBytes")] internal static (ж<Element>, error) SetBytesᴍ(ж<Element> Ꮡv, slice<byte> x) {
+internal static (ж<Element>, error) SetBytes⁔(/*this*/ ж<Element> Ꮡv, slice<byte> x) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     if (len(x) != 32) {
-        return (default, errors.New(edwards25519InvalidFieldˢᴍElement));
+        return (default, errors.New(edwards25519InvalidFieldˢ⁔Element));
     }
 
     // Bits 0:51 (bytes 0:8, bits 0:64, shift 0, mask 51).
@@ -259,14 +259,14 @@ private static readonly @string edwards25519InvalidFieldˢᵇᴍElement = "edwar
 }
 
 // Bytes returns the canonical 32-byte little-endian encoding of v.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref Element v) {
+internal static slice<byte> Bytes⁔(/*this*/ ref Element v) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(32), out var Ꮡout);
     return v.bytes(Ꮡout);
 }
 
-[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ref Element v, /*[32]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes⁔(/*this*/ ref Element v, /*[32]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     ref var t = ref heap<Element>(v, out var Ꮡt);
@@ -293,7 +293,7 @@ private static readonly @string edwards25519InvalidFieldˢᵇᴍElement = "edwar
 }
 
 // Equal returns 1 if v and u are equal, and 0 otherwise.
-[GoMethodBody("Equal")] internal static nint Equalᴍ(ref Element v, ж<Element> Ꮡu) {
+internal static nint Equal⁔(/*this*/ ref Element v, ж<Element> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var (sa, sv) = (u.Bytes(), v.Bytes());
@@ -308,7 +308,7 @@ internal static uint64 mask64Bits(nint cond) { return ~((uint64)cond - 1); }
 } partial class field_package {
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
-[GoMethodBody("Select")] internal static ж<Element> Selectᴍ(ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb, nint cond) {
+internal static ж<Element> Select⁔(/*this*/ ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb, nint cond) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -323,7 +323,7 @@ internal static uint64 mask64Bits(nint cond) { return ~((uint64)cond - 1); }
 }
 
 // Swap swaps v and u if cond == 1 or leaves them unchanged if cond == 0, and returns v.
-[GoMethodBody("Swap")] internal static void Swapᴍ(ref Element v, ж<Element> Ꮡu, nint cond) {
+internal static void Swap⁔(/*this*/ ref Element v, ж<Element> Ꮡu, nint cond) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var m = mask64Bits(cond);
@@ -345,31 +345,31 @@ internal static uint64 mask64Bits(nint cond) { return ~((uint64)cond - 1); }
 }
 
 // IsNegative returns 1 if v is negative, and 0 otherwise.
-[GoMethodBody("IsNegative")] internal static nint IsNegativeᴍ(ref Element v) {
+internal static nint IsNegative⁔(/*this*/ ref Element v) {
     return (nint)((byte)(v.Bytes()[0] & 1));
 }
 
 // Absolute sets v to |u|, and returns v.
-[GoMethodBody("Absolute")] internal static ж<Element> Absoluteᴍ(ж<Element> Ꮡv, ж<Element> Ꮡu) {
+internal static ж<Element> Absolute⁔(/*this*/ ж<Element> Ꮡv, ж<Element> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     return Ꮡv.Select(@new<Element>().Negate(Ꮡu), Ꮡu, u.IsNegative());
 }
 
 // Multiply sets v = x * y, and returns v.
-[GoMethodBody("Multiply")] internal static ж<Element> Multiplyᴍ(ж<Element> Ꮡv, ж<Element> x, ж<Element> y) {
+internal static ж<Element> Multiply⁔(/*this*/ ж<Element> Ꮡv, ж<Element> x, ж<Element> y) {
     feMul(ref (Ꮡv).DerefOrNull(), ref (x).DerefOrNull(), ref (y).DerefOrNull());
     return Ꮡv;
 }
 
 // Square sets v = x * x, and returns v.
-[GoMethodBody("Square")] internal static ж<Element> Squareᴍ(ж<Element> Ꮡv, ж<Element> x) {
+internal static ж<Element> Square⁔(/*this*/ ж<Element> Ꮡv, ж<Element> x) {
     feSquare(ref (Ꮡv).DerefOrNull(), ref (x).DerefOrNull());
     return Ꮡv;
 }
 
 // Mult32 sets v = x * y, and returns v.
-[GoMethodBody("Mult32")] internal static ж<Element> Mult32ᴍ(ж<Element> Ꮡv, ж<Element> Ꮡx, uint32 y) {
+internal static ж<Element> Mult32⁔(/*this*/ ж<Element> Ꮡv, ж<Element> Ꮡx, uint32 y) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -404,7 +404,7 @@ internal static (uint64 lo, uint64 hi) mul51(uint64 a, uint32 b) {
 } partial class field_package {
 
 // Pow22523 set v = x^((p-5)/8), and returns v. (p-5)/8 is 2^252-3.
-[GoMethodBody("Pow22523")] internal static ж<Element> Pow22523ᴍ(ж<Element> Ꮡv, ж<Element> x) {
+internal static ж<Element> Pow22523⁔(/*this*/ ж<Element> Ꮡv, ж<Element> x) {
     ref var t0 = ref heap(new Element(), out var Ꮡt0);
     ref var t1 = ref heap(new Element(), out var Ꮡt1);
     ref var t2 = ref heap(new Element(), out var Ꮡt2);
@@ -469,7 +469,7 @@ internal static ж<Element> sqrtM1 = Ꮡ(new Element(1718705420411056UL, 2349088
 // If u/v is square, SqrtRatio returns r and 1. If u/v is not square, SqrtRatio
 // sets r according to Section 4.3 of draft-irtf-cfrg-ristretto255-decaf448-00,
 // and returns r and 0.
-[GoMethodBody("SqrtRatio")] internal static (ж<Element> R, nint wasSquare) SqrtRatioᴍ(ж<Element> Ꮡr, ж<Element> u, ж<Element> v) {
+internal static (ж<Element> R, nint wasSquare) SqrtRatio⁔(/*this*/ ж<Element> Ꮡr, ж<Element> u, ж<Element> v) {
     var t0 = @new<Element>();
 
     // r = (u * v3) * (u * v7)^((p-5)/8)

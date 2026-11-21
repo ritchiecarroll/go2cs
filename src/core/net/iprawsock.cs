@@ -45,17 +45,17 @@ partial struct IPAddr {
 } partial class net_package {
 
 // Network returns the address's network name, "ip".
-[GoMethodBody("Network")] internal static @string Networkᴍ(ref IPAddr a) { return "ip"; }
+internal static @string Network⁔(/*this*/ ref IPAddr a) { return "ip"; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢᴍIPAddr => ref nilˢᵇᴍIPAddr;
-private static readonly @string nilˢᵇᴍIPAddr = "<nil>"u8;
+internal static ref readonly @string nilˢ⁔IPAddr => ref nilˢᵇ⁔IPAddr;
+private static readonly @string nilˢᵇ⁔IPAddr = "<nil>"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<IPAddr> Ꮡa) {
+internal static @string String⁔(/*this*/ ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
-        return nilˢᴍIPAddr;
+        return nilˢ⁔IPAddr;
     }
     @string ip = ipEmptyString(a.IP);
     if (a.Zone != ""u8) {
@@ -64,7 +64,7 @@ private static readonly @string nilˢᵇᴍIPAddr = "<nil>"u8;
     return ip;
 }
 
-[GoMethodBody("isWildcard")] internal static bool isWildcardᴍ(ж<IPAddr> Ꮡa) {
+internal static bool isWildcard⁔(/*this*/ ж<IPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil || a.IP == nil) {
@@ -73,7 +73,7 @@ private static readonly @string nilˢᵇᴍIPAddr = "<nil>"u8;
     return a.IP.IsUnspecified();
 }
 
-[GoMethodBody("opAddr")] internal static Addr opAddrᴍ(ж<IPAddr> Ꮡa) {
+internal static Addr opAddr⁔(/*this*/ ж<IPAddr> Ꮡa) {
     if (Ꮡa == nil) {
         return default;
     }
@@ -127,7 +127,7 @@ partial struct IPConn {
 
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
-[GoMethodBody("SyscallConn")] internal static (syscall.RawConn, error) SyscallConnᴍ(ж<IPConn> Ꮡc) {
+internal static (syscall.RawConn, error) SyscallConn⁔(/*this*/ ж<IPConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -137,7 +137,7 @@ partial struct IPConn {
 }
 
 // ReadFromIP acts like ReadFrom but returns an IPAddr.
-[GoMethodBody("ReadFromIP")] internal static (nint, ж<IPAddr>, error) ReadFromIPᴍ(ж<IPConn> Ꮡc, slice<byte> b) {
+internal static (nint, ж<IPAddr>, error) ReadFromIP⁔(/*this*/ ж<IPConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -151,7 +151,7 @@ partial struct IPConn {
 }
 
 // ReadFrom implements the [PacketConn] ReadFrom method.
-[GoMethodBody("ReadFrom")] internal static (nint, Addr, error) ReadFromᴍ(ж<IPConn> Ꮡc, slice<byte> b) {
+internal static (nint, Addr, error) ReadFrom⁔(/*this*/ ж<IPConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -174,7 +174,7 @@ partial struct IPConn {
 //
 // The packages golang.org/x/net/ipv4 and golang.org/x/net/ipv6 can be
 // used to manipulate IP-level socket options in oob.
-[GoMethodBody("ReadMsgIP")] internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) ReadMsgIPᴍ(ж<IPConn> Ꮡc, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, ж<IPAddr> addr, error err) ReadMsgIP⁔(/*this*/ ж<IPConn> Ꮡc, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -193,7 +193,7 @@ partial struct IPConn {
 }
 
 // WriteToIP acts like [IPConn.WriteTo] but takes an [IPAddr].
-[GoMethodBody("WriteToIP")] internal static (nint, error) WriteToIPᴍ(ж<IPConn> Ꮡc, slice<byte> b, ж<IPAddr> addr) {
+internal static (nint, error) WriteToIP⁔(/*this*/ ж<IPConn> Ꮡc, slice<byte> b, ж<IPAddr> addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -207,7 +207,7 @@ partial struct IPConn {
 }
 
 // WriteTo implements the [PacketConn] WriteTo method.
-[GoMethodBody("WriteTo")] internal static (nint, error) WriteToᴍ(ж<IPConn> Ꮡc, slice<byte> b, Addr addr) {
+internal static (nint, error) WriteTo⁔(/*this*/ ж<IPConn> Ꮡc, slice<byte> b, Addr addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(IPConn.Ꮡconn).ok()) {
@@ -230,7 +230,7 @@ partial struct IPConn {
 //
 // The packages golang.org/x/net/ipv4 and golang.org/x/net/ipv6 can be
 // used to manipulate IP-level socket options in oob.
-[GoMethodBody("WriteMsgIP")] internal static (nint n, nint oobn, error err) WriteMsgIPᴍ(ж<IPConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<IPAddr> addr) {
+internal static (nint n, nint oobn, error err) WriteMsgIP⁔(/*this*/ ж<IPConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<IPAddr> addr) {
     nint n = default;
     nint oobn = default;
     error err = default;

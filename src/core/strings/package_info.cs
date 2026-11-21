@@ -80,13 +80,16 @@ using static go.strings_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using @internal;
 using go.unicode;
 using static strings_package;
 using io = io_package;
 using math;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("strings")]
 public static partial class strings_package
@@ -141,84 +144,84 @@ public static partial class strings_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(strings_package.Builder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛBuilder;
-[GoMethodHost(typeof(strings_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛReader;
-[GoMethodHost(typeof(strings_package.Replacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛReplacer;
-[GoMethodHost(typeof(strings_package.appendSliceWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛappendSliceWriter;
-[GoMethodHost(typeof(strings_package.asciiSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛasciiSet;
-[GoMethodHost(typeof(strings_package.byteReplacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛbyteReplacer;
-[GoMethodHost(typeof(strings_package.byteStringReplacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛbyteStringReplacer;
-[GoMethodHost(typeof(strings_package.genericReplacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛgenericReplacer;
-[GoMethodHost(typeof(strings_package.singleStringReplacer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛsingleStringReplacer;
-[GoMethodHost(typeof(strings_package.stringFinder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛstringFinder;
-[GoMethodHost(typeof(strings_package.stringWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛstringWriter;
-[GoMethodHost(typeof(strings_package.trieNode)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class stringsᴛtrieNode;
+[GoMethodHost(typeof(strings_package.Builder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛBuilder;
+[GoMethodHost(typeof(strings_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛReader;
+[GoMethodHost(typeof(strings_package.Replacer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛReplacer;
+[GoMethodHost(typeof(strings_package.appendSliceWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛappendSliceWriter;
+[GoMethodHost(typeof(strings_package.asciiSet)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛasciiSet;
+[GoMethodHost(typeof(strings_package.byteReplacer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛbyteReplacer;
+[GoMethodHost(typeof(strings_package.byteStringReplacer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛbyteStringReplacer;
+[GoMethodHost(typeof(strings_package.genericReplacer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛgenericReplacer;
+[GoMethodHost(typeof(strings_package.singleStringReplacer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛsingleStringReplacer;
+[GoMethodHost(typeof(strings_package.stringFinder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛstringFinder;
+[GoMethodHost(typeof(strings_package.stringWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛstringWriter;
+[GoMethodHost(typeof(strings_package.trieNode)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class stringsᴛtrieNode;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class stringsᴛBuilder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void copyCheck(this ж<Builder> Ꮡb) => strings_package.copyCheckᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Builder b) => strings_package.Stringᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ref Builder b) => strings_package.Lenᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Cap(this ref Builder b) => strings_package.Capᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Builder b) => strings_package.Resetᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void grow(this ref Builder b, nint n) => strings_package.growᴍ(ref b, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Grow(this ж<Builder> Ꮡb, nint n) => strings_package.Growᴍ(Ꮡb, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Write(this ж<Builder> Ꮡb, slice<byte> p) => strings_package.Writeᴍ(Ꮡb, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteByte(this ж<Builder> Ꮡb, byte c) => strings_package.WriteByteᴍ(Ꮡb, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteRune(this ж<Builder> Ꮡb, rune r) => strings_package.WriteRuneᴍ(Ꮡb, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteString(this ж<Builder> Ꮡb, @string s) => strings_package.WriteStringᴍ(Ꮡb, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void copyCheck(this ж<Builder> Ꮡb) => strings_package.copyCheck⁔(Ꮡb);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref Builder b) => strings_package.String⁔(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this ref Builder b) => strings_package.Len⁔(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Cap(this ref Builder b) => strings_package.Cap⁔(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Builder b) => strings_package.Reset⁔(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void grow(this ref Builder b, nint n) => strings_package.grow⁔(ref b, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Grow(this ж<Builder> Ꮡb, nint n) => strings_package.Grow⁔(Ꮡb, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Write(this ж<Builder> Ꮡb, slice<byte> p) => strings_package.Write⁔(Ꮡb, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error WriteByte(this ж<Builder> Ꮡb, byte c) => strings_package.WriteByte⁔(Ꮡb, c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) WriteRune(this ж<Builder> Ꮡb, rune r) => strings_package.WriteRune⁔(Ꮡb, r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) WriteString(this ж<Builder> Ꮡb, @string s) => strings_package.WriteString⁔(Ꮡb, s);
 }
 partial class stringsᴛReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ref Reader r) => strings_package.Lenᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Size(this ref Reader r) => strings_package.Sizeᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ref Reader r, slice<byte> b) => strings_package.Readᴍ(ref r, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) ReadAt(this ref Reader r, slice<byte> b, int64 off) => strings_package.ReadAtᴍ(ref r, b, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (byte, error) ReadByte(this ref Reader r) => strings_package.ReadByteᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnreadByte(this ref Reader r) => strings_package.UnreadByteᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (rune ch, nint size, error err) ReadRune(this ref Reader r) => strings_package.ReadRuneᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnreadRune(this ref Reader r) => strings_package.UnreadRuneᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) Seek(this ref Reader r, int64 offset, nint whence) => strings_package.Seekᴍ(ref r, offset, whence);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) => strings_package.WriteToᴍ(ref r, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Reader r, @string s) => strings_package.Resetᴍ(ref r, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this ref Reader r) => strings_package.Len⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Size(this ref Reader r) => strings_package.Size⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ref Reader r, slice<byte> b) => strings_package.Read⁔(ref r, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) ReadAt(this ref Reader r, slice<byte> b, int64 off) => strings_package.ReadAt⁔(ref r, b, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (byte, error) ReadByte(this ref Reader r) => strings_package.ReadByte⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnreadByte(this ref Reader r) => strings_package.UnreadByte⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (rune ch, nint size, error err) ReadRune(this ref Reader r) => strings_package.ReadRune⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnreadRune(this ref Reader r) => strings_package.UnreadRune⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64, error) Seek(this ref Reader r, int64 offset, nint whence) => strings_package.Seek⁔(ref r, offset, whence);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 n, error err) WriteTo(this ref Reader r, io.Writer w) => strings_package.WriteTo⁔(ref r, w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Reader r, @string s) => strings_package.Reset⁔(ref r, s);
 }
 partial class stringsᴛReplacer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void buildOnce(this ref Replacer r) => strings_package.buildOnceᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static replacer build(this ref Replacer b) => strings_package.buildᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Replace(this ж<Replacer> Ꮡr, @string s) => strings_package.Replaceᴍ(Ꮡr, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) WriteString(this ж<Replacer> Ꮡr, io.Writer w, @string s) => strings_package.WriteStringᴍ(Ꮡr, w, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void buildOnce(this ref Replacer r) => strings_package.buildOnce⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static replacer build(this ref Replacer b) => strings_package.build⁔(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Replace(this ж<Replacer> Ꮡr, @string s) => strings_package.Replace⁔(Ꮡr, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) WriteString(this ж<Replacer> Ꮡr, io.Writer w, @string s) => strings_package.WriteString⁔(Ꮡr, w, s);
 }
 partial class stringsᴛtrieNode {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void add(this ref trieNode t, @string key, @string val, nint priority, ж<genericReplacer> Ꮡr) => strings_package.addᴍ(ref t, key, val, priority, Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void add(this ref trieNode t, @string key, @string val, nint priority, ж<genericReplacer> Ꮡr) => strings_package.add⁔(ref t, key, val, priority, Ꮡr);
 }
 partial class stringsᴛgenericReplacer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string val, nint keylen, bool found) lookup(this ж<genericReplacer> Ꮡr, @string s, bool ignoreRoot) => strings_package.lookupᴍ(Ꮡr, s, ignoreRoot);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Replace(this ж<genericReplacer> Ꮡr, @string s) => strings_package.Replaceᴍ(Ꮡr, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this ж<genericReplacer> Ꮡr, io.Writer w, @string s) => strings_package.WriteStringᴍ(Ꮡr, w, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string val, nint keylen, bool found) lookup(this ж<genericReplacer> Ꮡr, @string s, bool ignoreRoot) => strings_package.lookup⁔(Ꮡr, s, ignoreRoot);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Replace(this ж<genericReplacer> Ꮡr, @string s) => strings_package.Replace⁔(Ꮡr, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) WriteString(this ж<genericReplacer> Ꮡr, io.Writer w, @string s) => strings_package.WriteString⁔(Ꮡr, w, s);
 }
 partial class stringsᴛappendSliceWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this ref appendSliceWriter w, slice<byte> p) => strings_package.Writeᴍ(ref w, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) WriteString(this ref appendSliceWriter w, @string s) => strings_package.WriteStringᴍ(ref w, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this ref appendSliceWriter w, slice<byte> p) => strings_package.Write⁔(ref w, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) WriteString(this ref appendSliceWriter w, @string s) => strings_package.WriteString⁔(ref w, s);
 }
 partial class stringsᴛstringWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) WriteString(this stringWriter w, @string s) => strings_package.WriteStringᴍ(w, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) WriteString(this stringWriter w, @string s) => strings_package.WriteString⁔(w, s);
 }
 partial class stringsᴛsingleStringReplacer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Replace(this ref singleStringReplacer r, @string s) => strings_package.Replaceᴍ(ref r, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref singleStringReplacer r, io.Writer w, @string s) => strings_package.WriteStringᴍ(ref r, w, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Replace(this ref singleStringReplacer r, @string s) => strings_package.Replace⁔(ref r, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref singleStringReplacer r, io.Writer w, @string s) => strings_package.WriteString⁔(ref r, w, s);
 }
 partial class stringsᴛbyteReplacer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Replace(this ref byteReplacer r, @string s) => strings_package.Replaceᴍ(ref r, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref byteReplacer r, io.Writer w, @string s) => strings_package.WriteStringᴍ(ref r, w, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Replace(this ref byteReplacer r, @string s) => strings_package.Replace⁔(ref r, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref byteReplacer r, io.Writer w, @string s) => strings_package.WriteString⁔(ref r, w, s);
 }
 partial class stringsᴛbyteStringReplacer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Replace(this ref byteStringReplacer r, @string s) => strings_package.Replaceᴍ(ref r, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref byteStringReplacer r, io.Writer w, @string s) => strings_package.WriteStringᴍ(ref r, w, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Replace(this ref byteStringReplacer r, @string s) => strings_package.Replace⁔(ref r, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref byteStringReplacer r, io.Writer w, @string s) => strings_package.WriteString⁔(ref r, w, s);
 }
 partial class stringsᴛstringFinder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint next(this ref stringFinder f, @string text) => strings_package.nextᴍ(ref f, text);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint next(this ref stringFinder f, @string text) => strings_package.next⁔(ref f, text);
 }
 partial class stringsᴛasciiSet {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool contains(this ref asciiSet @as, byte c) => strings_package.containsᴍ(ref @as, c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool contains(this ref asciiSet @as, byte c) => strings_package.contains⁔(ref @as, c);
 }
 // </GlyphForwarders>

@@ -56,7 +56,7 @@ public static Stream NewOFB(Block b, slice<byte> iv) {
 
 } partial class cipher_package {
 
-[GoMethodBody("refill")] internal static void refillᴍ(ref ofb x) {
+internal static void refill⁔(/*this*/ ref ofb x) {
     nint bs = x.b.BlockSize();
     nint remain = len(x.@out) - x.outUsed;
     if (remain > x.outUsed) {
@@ -73,7 +73,7 @@ public static Stream NewOFB(Block b, slice<byte> iv) {
     x.outUsed = 0;
 }
 
-[GoMethodBody("XORKeyStream")] internal static void XORKeyStreamᴍ(ref ofb x, slice<byte> dst, slice<byte> src) {
+internal static void XORKeyStream⁔(/*this*/ ref ofb x, slice<byte> dst, slice<byte> src) {
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }

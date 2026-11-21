@@ -100,9 +100,12 @@ using static go.io_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static io_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("io")]
 public static partial class io_package
@@ -171,85 +174,85 @@ public static partial class io_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(io_package.LimitedReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛLimitedReader;
-[GoMethodHost(typeof(io_package.OffsetWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛOffsetWriter;
-[GoMethodHost(typeof(io_package.PipeReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛPipeReader;
-[GoMethodHost(typeof(io_package.PipeWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛPipeWriter;
-[GoMethodHost(typeof(io_package.SectionReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛSectionReader;
-[GoMethodHost(typeof(io_package.discard)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛdiscard;
-[GoMethodHost(typeof(io_package.eofReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛeofReader;
-[GoMethodHost(typeof(io_package.multiReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛmultiReader;
-[GoMethodHost(typeof(io_package.multiWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛmultiWriter;
-[GoMethodHost(typeof(io_package.nopCloser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛnopCloser;
-[GoMethodHost(typeof(io_package.nopCloserWriterTo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛnopCloserWriterTo;
-[GoMethodHost(typeof(io_package.onceError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛonceError;
-[GoMethodHost(typeof(io_package.pipe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛpipe;
-[GoMethodHost(typeof(io_package.teeReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ioᴛteeReader;
+[GoMethodHost(typeof(io_package.LimitedReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛLimitedReader;
+[GoMethodHost(typeof(io_package.OffsetWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛOffsetWriter;
+[GoMethodHost(typeof(io_package.PipeReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛPipeReader;
+[GoMethodHost(typeof(io_package.PipeWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛPipeWriter;
+[GoMethodHost(typeof(io_package.SectionReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛSectionReader;
+[GoMethodHost(typeof(io_package.discard)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛdiscard;
+[GoMethodHost(typeof(io_package.eofReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛeofReader;
+[GoMethodHost(typeof(io_package.multiReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛmultiReader;
+[GoMethodHost(typeof(io_package.multiWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛmultiWriter;
+[GoMethodHost(typeof(io_package.nopCloser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛnopCloser;
+[GoMethodHost(typeof(io_package.nopCloserWriterTo)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛnopCloserWriterTo;
+[GoMethodHost(typeof(io_package.onceError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛonceError;
+[GoMethodHost(typeof(io_package.pipe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛpipe;
+[GoMethodHost(typeof(io_package.teeReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ioᴛteeReader;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class ioᴛLimitedReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ref LimitedReader l, slice<byte> p) => io_package.Readᴍ(ref l, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ref LimitedReader l, slice<byte> p) => io_package.Read⁔(ref l, p);
 }
 partial class ioᴛSectionReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ref SectionReader s, slice<byte> p) => io_package.Readᴍ(ref s, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) Seek(this ref SectionReader s, int64 offset, nint whence) => io_package.Seekᴍ(ref s, offset, whence);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) ReadAt(this ref SectionReader s, slice<byte> p, int64 off) => io_package.ReadAtᴍ(ref s, p, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Size(this ref SectionReader s) => io_package.Sizeᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ReaderAt r, int64 off, int64 n) Outer(this ref SectionReader s) => io_package.Outerᴍ(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ref SectionReader s, slice<byte> p) => io_package.Read⁔(ref s, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64, error) Seek(this ref SectionReader s, int64 offset, nint whence) => io_package.Seek⁔(ref s, offset, whence);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) ReadAt(this ref SectionReader s, slice<byte> p, int64 off) => io_package.ReadAt⁔(ref s, p, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Size(this ref SectionReader s) => io_package.Size⁔(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ReaderAt r, int64 off, int64 n) Outer(this ref SectionReader s) => io_package.Outer⁔(ref s);
 }
 partial class ioᴛOffsetWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ref OffsetWriter o, slice<byte> p) => io_package.Writeᴍ(ref o, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) WriteAt(this ref OffsetWriter o, slice<byte> p, int64 off) => io_package.WriteAtᴍ(ref o, p, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) Seek(this ref OffsetWriter o, int64 offset, nint whence) => io_package.Seekᴍ(ref o, offset, whence);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ref OffsetWriter o, slice<byte> p) => io_package.Write⁔(ref o, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) WriteAt(this ref OffsetWriter o, slice<byte> p, int64 off) => io_package.WriteAt⁔(ref o, p, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64, error) Seek(this ref OffsetWriter o, int64 offset, nint whence) => io_package.Seek⁔(ref o, offset, whence);
 }
 partial class ioᴛteeReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref teeReader t, slice<byte> p) => io_package.Readᴍ(ref t, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref teeReader t, slice<byte> p) => io_package.Read⁔(ref t, p);
 }
 partial class ioᴛdiscard {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this discard _, slice<byte> p) => io_package.Writeᴍ(_, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) WriteString(this discard _, @string s) => io_package.WriteStringᴍ(_, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 n, error err) ReadFrom(this discard _, Reader r) => io_package.ReadFromᴍ(_, r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this discard _, slice<byte> p) => io_package.Write⁔(_, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) WriteString(this discard _, @string s) => io_package.WriteString⁔(_, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64 n, error err) ReadFrom(this discard _, Reader r) => io_package.ReadFrom⁔(_, r);
 }
 partial class ioᴛnopCloser {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this nopCloser _) => io_package.Closeᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this nopCloser _) => io_package.Close⁔(_);
 }
 partial class ioᴛnopCloserWriterTo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this nopCloserWriterTo _) => io_package.Closeᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 n, error err) WriteTo(this nopCloserWriterTo c, Writer w) => io_package.WriteToᴍ(c, w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this nopCloserWriterTo _) => io_package.Close⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64 n, error err) WriteTo(this nopCloserWriterTo c, Writer w) => io_package.WriteTo⁔(c, w);
 }
 partial class ioᴛeofReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this eofReader _Δp0, slice<byte> _Δp1) => io_package.Readᴍ(_Δp0, _Δp1);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this eofReader _Δp0, slice<byte> _Δp1) => io_package.Read⁔(_Δp0, _Δp1);
 }
 partial class ioᴛmultiReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref multiReader mr, slice<byte> p) => io_package.Readᴍ(ref mr, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 sum, error err) WriteTo(this ref multiReader mr, Writer w) => io_package.WriteToᴍ(ref mr, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64 sum, error err) writeToWithBuffer(this ref multiReader mr, Writer w, slice<byte> buf) => io_package.writeToWithBufferᴍ(ref mr, w, buf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref multiReader mr, slice<byte> p) => io_package.Read⁔(ref mr, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64 sum, error err) WriteTo(this ref multiReader mr, Writer w) => io_package.WriteTo⁔(ref mr, w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64 sum, error err) writeToWithBuffer(this ref multiReader mr, Writer w, slice<byte> buf) => io_package.writeToWithBuffer⁔(ref mr, w, buf);
 }
 partial class ioᴛmultiWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref multiWriter t, slice<byte> p) => io_package.Writeᴍ(ref t, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref multiWriter t, @string s) => io_package.WriteStringᴍ(ref t, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref multiWriter t, slice<byte> p) => io_package.Write⁔(ref t, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref multiWriter t, @string s) => io_package.WriteString⁔(ref t, s);
 }
 partial class ioᴛonceError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Store(this ж<onceError> Ꮡa, error err) => io_package.Storeᴍ(Ꮡa, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Load(this ж<onceError> Ꮡa) => io_package.Loadᴍ(Ꮡa);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Store(this ж<onceError> Ꮡa, error err) => io_package.Store⁔(Ꮡa, err);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Load(this ж<onceError> Ꮡa) => io_package.Load⁔(Ꮡa);
 }
 partial class ioᴛpipe {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) => io_package.readᴍ(Ꮡp, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error closeRead(this ж<pipe> Ꮡp, error err) => io_package.closeReadᴍ(Ꮡp, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) => io_package.writeᴍ(Ꮡp, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error closeWrite(this ж<pipe> Ꮡp, error err) => io_package.closeWriteᴍ(Ꮡp, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readCloseError(this ж<pipe> Ꮡp) => io_package.readCloseErrorᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeCloseError(this ж<pipe> Ꮡp) => io_package.writeCloseErrorᴍ(Ꮡp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) => io_package.read⁔(Ꮡp, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error closeRead(this ж<pipe> Ꮡp, error err) => io_package.closeRead⁔(Ꮡp, err);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) => io_package.write⁔(Ꮡp, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error closeWrite(this ж<pipe> Ꮡp, error err) => io_package.closeWrite⁔(Ꮡp, err);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readCloseError(this ж<pipe> Ꮡp) => io_package.readCloseError⁔(Ꮡp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeCloseError(this ж<pipe> Ꮡp) => io_package.writeCloseError⁔(Ꮡp);
 }
 partial class ioᴛPipeReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ж<PipeReader> Ꮡr, slice<byte> data) => io_package.Readᴍ(Ꮡr, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<PipeReader> Ꮡr) => io_package.Closeᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CloseWithError(this ж<PipeReader> Ꮡr, error err) => io_package.CloseWithErrorᴍ(Ꮡr, err);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ж<PipeReader> Ꮡr, slice<byte> data) => io_package.Read⁔(Ꮡr, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ж<PipeReader> Ꮡr) => io_package.Close⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error CloseWithError(this ж<PipeReader> Ꮡr, error err) => io_package.CloseWithError⁔(Ꮡr, err);
 }
 partial class ioᴛPipeWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ж<PipeWriter> Ꮡw, slice<byte> data) => io_package.Writeᴍ(Ꮡw, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<PipeWriter> Ꮡw) => io_package.Closeᴍ(Ꮡw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CloseWithError(this ж<PipeWriter> Ꮡw, error err) => io_package.CloseWithErrorᴍ(Ꮡw, err);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ж<PipeWriter> Ꮡw, slice<byte> data) => io_package.Write⁔(Ꮡw, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ж<PipeWriter> Ꮡw) => io_package.Close⁔(Ꮡw);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error CloseWithError(this ж<PipeWriter> Ꮡw, error err) => io_package.CloseWithError⁔(Ꮡw, err);
 }
 // </GlyphForwarders>

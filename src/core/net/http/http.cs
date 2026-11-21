@@ -38,24 +38,24 @@ internal static UntypedInt protoUnencryptedHTTP2 => 4;
 } partial class http_package {
 
 // HTTP1 reports whether p includes HTTP/1.
-[GoMethodBody("HTTP1")] internal static bool HTTP1ᴍ(Protocols p) { return (uint8)(p.bits & (uint8)protoHTTP1) != 0; }
+internal static bool HTTP1⁔(/*this*/ Protocols p) { return (uint8)(p.bits & (uint8)protoHTTP1) != 0; }
 
 // SetHTTP1 adds or removes HTTP/1 from p.
-[GoMethodBody("SetHTTP1")] internal static void SetHTTP1ᴍ(ref Protocols p, bool ok) { p.setBit(protoHTTP1, ok); }
+internal static void SetHTTP1⁔(/*this*/ ref Protocols p, bool ok) { p.setBit(protoHTTP1, ok); }
 
 // HTTP2 reports whether p includes HTTP/2.
-[GoMethodBody("HTTP2")] internal static bool HTTP2ᴍ(Protocols p) { return (uint8)(p.bits & (uint8)protoHTTP2) != 0; }
+internal static bool HTTP2⁔(/*this*/ Protocols p) { return (uint8)(p.bits & (uint8)protoHTTP2) != 0; }
 
 // SetHTTP2 adds or removes HTTP/2 from p.
-[GoMethodBody("SetHTTP2")] internal static void SetHTTP2ᴍ(ref Protocols p, bool ok) { p.setBit(protoHTTP2, ok); }
+internal static void SetHTTP2⁔(/*this*/ ref Protocols p, bool ok) { p.setBit(protoHTTP2, ok); }
 
 // UnencryptedHTTP2 reports whether p includes unencrypted HTTP/2.
-[GoMethodBody("UnencryptedHTTP2")] internal static bool UnencryptedHTTP2ᴍ(Protocols p) { return (uint8)(p.bits & (uint8)protoUnencryptedHTTP2) != 0; }
+internal static bool UnencryptedHTTP2⁔(/*this*/ Protocols p) { return (uint8)(p.bits & (uint8)protoUnencryptedHTTP2) != 0; }
 
 // SetUnencryptedHTTP2 adds or removes unencrypted HTTP/2 from p.
-[GoMethodBody("SetUnencryptedHTTP2")] internal static void SetUnencryptedHTTP2ᴍ(ref Protocols p, bool ok) { p.setBit(protoUnencryptedHTTP2, ok); }
+internal static void SetUnencryptedHTTP2⁔(/*this*/ ref Protocols p, bool ok) { p.setBit(protoUnencryptedHTTP2, ok); }
 
-[GoMethodBody("setBit")] internal static void setBitᴍ(ref Protocols p, uint8 bit, bool ok) {
+internal static void setBit⁔(/*this*/ ref Protocols p, uint8 bit, bool ok) {
     if (ok) {
         p.bits |= (uint8)(bit);
     } else {
@@ -63,7 +63,7 @@ internal static UntypedInt protoUnencryptedHTTP2 => 4;
     }
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Protocols p) {
+internal static @string String⁔(/*this*/ Protocols p) {
     var sᴷ = new stackAppend<@string>();
 
     slice<@string> s = default;
@@ -110,7 +110,7 @@ public partial struct contextKey {
 
 } partial class http_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref contextKey k) { return "net/http context value "u8 + k.name; }
+internal static @string String⁔(/*this*/ ref contextKey k) { return "net/http context value "u8 + k.name; }
 
 } partial class http_package {
 
@@ -188,9 +188,9 @@ public partial struct noBody {
 
 } partial class http_package {
 
-[GoMethodBody("Read")] internal static (nint, error) Readᴍ(noBody _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
-[GoMethodBody("Close")] internal static error Closeᴍ(noBody _) { return default; }
-[GoMethodBody("WriteTo")] internal static (int64, error) WriteToᴍ(noBody _Δp0, io.Writer _Δp1) { return (0, default); }
+internal static (nint, error) Read⁔(/*this*/ noBody _Δp0, slice<byte> _Δp1) { return (0, io.EOF); }
+internal static error Close⁔(/*this*/ noBody _) { return default; }
+internal static (int64, error) WriteTo⁔(/*this*/ noBody _Δp0, io.Writer _Δp1) { return (0, default); }
 
 } partial class http_package {
 

@@ -26,7 +26,7 @@ partial struct bitReader {
 } partial class zstd_package {
 
 // makeBitReader makes a bit reader starting at off.
-[GoMethodBody("makeBitReader")] internal static bitReader makeBitReaderᴍ(ж<Reader> Ꮡr, block data, nint off) {
+internal static bitReader makeBitReader⁔(/*this*/ ж<Reader> Ꮡr, block data, nint off) {
     return new bitReader(
         r: Ꮡr,
         data: data,
@@ -38,7 +38,7 @@ partial struct bitReader {
 
 // moreBits is called to read more bits.
 // This ensures that at least 16 bits are available.
-[GoMethodBody("moreBits")] internal static error moreBitsᴍ(ref bitReader br) {
+internal static error moreBits⁔(/*this*/ ref bitReader br) {
     while (br.cnt < 16) {
         if (br.off >= (uint32)len(br.data)) {
             return br.r.makeEOFError((nint)br.off);
@@ -52,7 +52,7 @@ partial struct bitReader {
 }
 
 // val is called to fetch a value of b bits.
-[GoMethodBody("val")] internal static uint32 valᴍ(ref bitReader br, uint8 b) {
+internal static uint32 val⁔(/*this*/ ref bitReader br, uint8 b) {
     var r = br.bits & ((((uint32)1).Lsh((uint64)(b))) - 1);
     br.bits.RshAssign((uint64)(b));
     br.cnt -= (uint32)b;
@@ -60,7 +60,7 @@ partial struct bitReader {
 }
 
 // backup steps back to the last byte we used.
-[GoMethodBody("backup")] internal static void backupᴍ(ref bitReader br) {
+internal static void backup⁔(/*this*/ ref bitReader br) {
     while (br.cnt >= 8) {
         br.off--;
         br.cnt -= 8;
@@ -68,7 +68,7 @@ partial struct bitReader {
 }
 
 // makeError returns an error at the current offset wrapping a string.
-[GoMethodBody("makeError")] internal static error makeErrorᴍ(ref bitReader br, @string msg) {
+internal static error makeError⁔(/*this*/ ref bitReader br, @string msg) {
     return br.r.makeError((nint)br.off, msg);
 }
 
@@ -87,18 +87,18 @@ partial struct reverseBitReader {
 } partial class zstd_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string zeroByteAtReverseBitˢᴍReader => ref zeroByteAtReverseBitˢᵇᴍReader;
-private static readonly @string zeroByteAtReverseBitˢᵇᴍReader = "zero byte at reverse bit stream start"u8;
+internal static ref readonly @string zeroByteAtReverseBitˢ⁔Reader => ref zeroByteAtReverseBitˢᵇ⁔Reader;
+private static readonly @string zeroByteAtReverseBitˢᵇ⁔Reader = "zero byte at reverse bit stream start"u8;
 
 // makeReverseBitReader makes a reverseBitReader reading backward
 // from off to start. The bitstream starts with a 1 bit in the last
 // byte, at off.
-[GoMethodBody("makeReverseBitReader")] internal static (reverseBitReader, error) makeReverseBitReaderᴍ(ж<Reader> Ꮡr, block data, nint off, nint start) {
+internal static (reverseBitReader, error) makeReverseBitReader⁔(/*this*/ ж<Reader> Ꮡr, block data, nint off, nint start) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var streamStart = data[off];
     if (streamStart == 0) {
-        return (new reverseBitReader(), r.makeError(off, zeroByteAtReverseBitˢᴍReader));
+        return (new reverseBitReader(), r.makeError(off, zeroByteAtReverseBitˢ⁔Reader));
     }
     var rbr = new reverseBitReader(
         r: Ꮡr,
@@ -114,7 +114,7 @@ private static readonly @string zeroByteAtReverseBitˢᵇᴍReader = "zero byte 
 } partial class zstd_package {
 
 // val is called to fetch a value of b bits.
-[GoMethodBody("val")] internal static (uint32, error) valᴍ(ref reverseBitReader rbr, uint8 b) {
+internal static (uint32, error) val⁔(/*this*/ ref reverseBitReader rbr, uint8 b) {
     if (!rbr.fetch(b)) {
         return (0, rbr.r.makeEOFError((nint)rbr.off));
     }
@@ -127,7 +127,7 @@ private static readonly @string zeroByteAtReverseBitˢᵇᴍReader = "zero byte 
 // fetch is called to ensure that at least b bits are available.
 // It reports false if this can't be done,
 // in which case only rbr.cnt bits are available.
-[GoMethodBody("fetch")] internal static bool fetchᴍ(ref reverseBitReader rbr, uint8 b) {
+internal static bool fetch⁔(/*this*/ ref reverseBitReader rbr, uint8 b) {
     while (rbr.cnt < (uint32)b) {
         if (rbr.off <= rbr.start) {
             return false;
@@ -142,7 +142,7 @@ private static readonly @string zeroByteAtReverseBitˢᵇᴍReader = "zero byte 
 }
 
 // makeError returns an error at the current offset wrapping a string.
-[GoMethodBody("makeError")] internal static error makeErrorᴍ(ref reverseBitReader rbr, @string msg) {
+internal static error makeError⁔(/*this*/ ref reverseBitReader rbr, @string msg) {
     return rbr.r.makeError((nint)rbr.off, msg);
 }
 

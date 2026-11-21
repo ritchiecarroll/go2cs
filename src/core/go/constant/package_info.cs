@@ -73,12 +73,15 @@ using static go.go.constant_package;
 
 namespace go.go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static constant_package;
 using global::go.go;
 using global::go.math;
 using unicode;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("constant")]
 public static partial class constant_package
@@ -128,69 +131,69 @@ public static partial class constant_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(constant_package.Kind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛKind;
-[GoMethodHost(typeof(constant_package.boolVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛboolVal;
-[GoMethodHost(typeof(constant_package.complexVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛcomplexVal;
-[GoMethodHost(typeof(constant_package.floatVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛfloatVal;
-[GoMethodHost(typeof(constant_package.int64Val)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛint64Val;
-[GoMethodHost(typeof(constant_package.intVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛintVal;
-[GoMethodHost(typeof(constant_package.ratVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛratVal;
-[GoMethodHost(typeof(constant_package.stringVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛstringVal;
-[GoMethodHost(typeof(constant_package.unknownVal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constantᴛunknownVal;
+[GoMethodHost(typeof(constant_package.Kind)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛKind;
+[GoMethodHost(typeof(constant_package.boolVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛboolVal;
+[GoMethodHost(typeof(constant_package.complexVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛcomplexVal;
+[GoMethodHost(typeof(constant_package.floatVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛfloatVal;
+[GoMethodHost(typeof(constant_package.int64Val)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛint64Val;
+[GoMethodHost(typeof(constant_package.intVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛintVal;
+[GoMethodHost(typeof(constant_package.ratVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛratVal;
+[GoMethodHost(typeof(constant_package.stringVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛstringVal;
+[GoMethodHost(typeof(constant_package.unknownVal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constantᴛunknownVal;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class constantᴛKind {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Kind i) => constant_package.Stringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Kind i) => constant_package.String⁔(i);
 }
 partial class constantᴛunknownVal {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Kind Kind(this unknownVal _) => constant_package.Kindᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this unknownVal _) => constant_package.Stringᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string ExactString(this unknownVal x) => constant_package.ExactStringᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void implementsValue(this unknownVal _) => constant_package.implementsValueᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this unknownVal _) => constant_package.Kind⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this unknownVal _) => constant_package.String⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this unknownVal x) => constant_package.ExactString⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this unknownVal _) => constant_package.implementsValue⁔(_);
 }
 partial class constantᴛboolVal {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Kind Kind(this boolVal _) => constant_package.Kindᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this boolVal x) => constant_package.Stringᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string ExactString(this boolVal x) => constant_package.ExactStringᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void implementsValue(this boolVal _) => constant_package.implementsValueᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this boolVal _) => constant_package.Kind⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this boolVal x) => constant_package.String⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this boolVal x) => constant_package.ExactString⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this boolVal _) => constant_package.implementsValue⁔(_);
 }
 partial class constantᴛstringVal {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Kind Kind(this ref stringVal _) => constant_package.Kindᴍ(ref _);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ж<stringVal> Ꮡx) => constant_package.Stringᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ж<stringVal> Ꮡx) => constant_package.@stringᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<@string> appendReverse(this ж<stringVal> Ꮡx, slice<@string> list) => constant_package.appendReverseᴍ(Ꮡx, list);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string ExactString(this ж<stringVal> Ꮡx) => constant_package.ExactStringᴍ(Ꮡx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void implementsValue(this ref stringVal _) => constant_package.implementsValueᴍ(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this ref stringVal _) => constant_package.Kind⁔(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ж<stringVal> Ꮡx) => constant_package.String⁔(Ꮡx);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string @string(this ж<stringVal> Ꮡx) => constant_package.@string⁔(Ꮡx);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<@string> appendReverse(this ж<stringVal> Ꮡx, slice<@string> list) => constant_package.appendReverse⁔(Ꮡx, list);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this ж<stringVal> Ꮡx) => constant_package.ExactString⁔(Ꮡx);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this ref stringVal _) => constant_package.implementsValue⁔(ref _);
 }
 partial class constantᴛint64Val {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Kind Kind(this int64Val _) => constant_package.Kindᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this int64Val x) => constant_package.Stringᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string ExactString(this int64Val x) => constant_package.ExactStringᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void implementsValue(this int64Val _) => constant_package.implementsValueᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this int64Val _) => constant_package.Kind⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this int64Val x) => constant_package.String⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this int64Val x) => constant_package.ExactString⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this int64Val _) => constant_package.implementsValue⁔(_);
 }
 partial class constantᴛintVal {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Kind Kind(this intVal _) => constant_package.Kindᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this intVal x) => constant_package.Stringᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string ExactString(this intVal x) => constant_package.ExactStringᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void implementsValue(this intVal _) => constant_package.implementsValueᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this intVal _) => constant_package.Kind⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this intVal x) => constant_package.String⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this intVal x) => constant_package.ExactString⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this intVal _) => constant_package.implementsValue⁔(_);
 }
 partial class constantᴛratVal {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Kind Kind(this ratVal _) => constant_package.Kindᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ratVal x) => constant_package.Stringᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string ExactString(this ratVal x) => constant_package.ExactStringᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void implementsValue(this ratVal _) => constant_package.implementsValueᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this ratVal _) => constant_package.Kind⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ratVal x) => constant_package.String⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this ratVal x) => constant_package.ExactString⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this ratVal _) => constant_package.implementsValue⁔(_);
 }
 partial class constantᴛfloatVal {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Kind Kind(this floatVal _) => constant_package.Kindᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this floatVal x) => constant_package.Stringᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string ExactString(this floatVal x) => constant_package.ExactStringᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void implementsValue(this floatVal _) => constant_package.implementsValueᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this floatVal _) => constant_package.Kind⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this floatVal x) => constant_package.String⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this floatVal x) => constant_package.ExactString⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this floatVal _) => constant_package.implementsValue⁔(_);
 }
 partial class constantᴛcomplexVal {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Kind Kind(this complexVal _) => constant_package.Kindᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this complexVal x) => constant_package.Stringᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string ExactString(this complexVal x) => constant_package.ExactStringᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void implementsValue(this complexVal _) => constant_package.implementsValueᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this complexVal _) => constant_package.Kind⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this complexVal x) => constant_package.String⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string ExactString(this complexVal x) => constant_package.ExactString⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void implementsValue(this complexVal _) => constant_package.implementsValue⁔(_);
 }
 // </GlyphForwarders>

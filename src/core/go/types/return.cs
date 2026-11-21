@@ -16,7 +16,7 @@ partial class types_package {
 // isTerminating reports if s is a terminating statement.
 // If s is labeled, label is the label name; otherwise s
 // is "".
-[GoMethodBody("isTerminating")] internal static bool isTerminatingᴍ(ref Checker check, ast.Stmt s, @string label) {
+internal static bool isTerminating⁔(/*this*/ ref Checker check, ast.Stmt s, @string label) {
     switch (s.type()) {
     default: {
         var sΔ1 = s;
@@ -89,7 +89,7 @@ partial class types_package {
     return false;
 }
 
-[GoMethodBody("isTerminatingList")] internal static bool isTerminatingListᴍ(ref Checker check, slice<ast.Stmt> list, @string label) {
+internal static bool isTerminatingList⁔(/*this*/ ref Checker check, slice<ast.Stmt> list, @string label) {
     // trailing empty statements are permitted - skip them
     for (nint i = len(list) - 1; i >= 0; i--) {
         var (_, ok) = list[i]._<ж<ast.EmptyStmt>>(ᐧ); if (!ok) {
@@ -99,7 +99,7 @@ partial class types_package {
     return false; // all statements are empty
 }
 
-[GoMethodBody("isTerminatingSwitch")] internal static bool isTerminatingSwitchᴍ(ref Checker check, ж<ast.BlockStmt> Ꮡbody, @string label) {
+internal static bool isTerminatingSwitch⁔(/*this*/ ref Checker check, ж<ast.BlockStmt> Ꮡbody, @string label) {
     ref var body = ref Ꮡbody.DerefOrNull();
 
     var hasDefault = false;

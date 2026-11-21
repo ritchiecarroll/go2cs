@@ -66,12 +66,15 @@ using static go.mime_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using strings = strings_package;
 using encoding;
 using go.unicode;
 using static mime_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("mime")]
 public static partial class mime_package
@@ -116,22 +119,22 @@ public static partial class mime_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(mime_package.WordDecoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mimeᴛWordDecoder;
-[GoMethodHost(typeof(mime_package.WordEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mimeᴛWordEncoder;
+[GoMethodHost(typeof(mime_package.WordDecoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mimeᴛWordDecoder;
+[GoMethodHost(typeof(mime_package.WordEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mimeᴛWordEncoder;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class mimeᴛWordEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Encode(this WordEncoder e, @string charset, @string s) => mime_package.Encodeᴍ(e, charset, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string encodeWord(this WordEncoder e, @string charset, @string s) => mime_package.encodeWordᴍ(e, charset, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void bEncode(this WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) => mime_package.bEncodeᴍ(e, buf, charset, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void qEncode(this WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) => mime_package.qEncodeᴍ(e, buf, charset, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void openWord(this WordEncoder e, ж<strings.Builder> buf, @string charset) => mime_package.openWordᴍ(e, buf, charset);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void splitWord(this WordEncoder e, ж<strings.Builder> buf, @string charset) => mime_package.splitWordᴍ(e, buf, charset);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Encode(this WordEncoder e, @string charset, @string s) => mime_package.Encode⁔(e, charset, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string encodeWord(this WordEncoder e, @string charset, @string s) => mime_package.encodeWord⁔(e, charset, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void bEncode(this WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) => mime_package.bEncode⁔(e, buf, charset, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void qEncode(this WordEncoder e, ж<strings.Builder> buf, @string charset, @string s) => mime_package.qEncode⁔(e, buf, charset, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void openWord(this WordEncoder e, ж<strings.Builder> buf, @string charset) => mime_package.openWord⁔(e, buf, charset);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void splitWord(this WordEncoder e, ж<strings.Builder> buf, @string charset) => mime_package.splitWord⁔(e, buf, charset);
 }
 partial class mimeᴛWordDecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) Decode(this ref WordDecoder d, @string word) => mime_package.Decodeᴍ(ref d, word);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) DecodeHeader(this ref WordDecoder d, @string header) => mime_package.DecodeHeaderᴍ(ref d, header);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error convert(this ref WordDecoder d, ж<strings.Builder> buf, @string charset, slice<byte> content) => mime_package.convertᴍ(ref d, buf, charset, content);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) Decode(this ref WordDecoder d, @string word) => mime_package.Decode⁔(ref d, word);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) DecodeHeader(this ref WordDecoder d, @string header) => mime_package.DecodeHeader⁔(ref d, header);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error convert(this ref WordDecoder d, ж<strings.Builder> buf, @string charset, slice<byte> content) => mime_package.convert⁔(ref d, buf, charset, content);
 }
 // </GlyphForwarders>

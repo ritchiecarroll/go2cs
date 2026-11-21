@@ -70,13 +70,16 @@ using static go.@internal.trace.raw_package;
 
 namespace go.@internal.trace;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using version = go.@internal.trace.version_package;
 using encoding;
 using go;
 using go.@internal.trace;
 using static raw_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("raw")]
 public static partial class raw_package
@@ -121,33 +124,33 @@ public static partial class raw_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(raw_package.Event)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛEvent;
-[GoMethodHost(typeof(raw_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛReader;
-[GoMethodHost(typeof(raw_package.TextReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛTextReader;
-[GoMethodHost(typeof(raw_package.TextWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛTextWriter;
-[GoMethodHost(typeof(raw_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rawᴛWriter;
+[GoMethodHost(typeof(raw_package.Event)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rawᴛEvent;
+[GoMethodHost(typeof(raw_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rawᴛReader;
+[GoMethodHost(typeof(raw_package.TextReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rawᴛTextReader;
+[GoMethodHost(typeof(raw_package.TextWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rawᴛTextWriter;
+[GoMethodHost(typeof(raw_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rawᴛWriter;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class rawᴛEvent {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref Event e) => raw_package.Stringᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint EncodedSize(this ref Event e) => raw_package.EncodedSizeᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref Event e) => raw_package.String⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint EncodedSize(this ref Event e) => raw_package.EncodedSize⁔(ref e);
 }
 partial class rawᴛReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static version.Version Version(this ref Reader r) => raw_package.Versionᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Event, error) ReadEvent(this ref Reader r) => raw_package.ReadEventᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<uint64>, error) readArgs(this ref Reader r, nint n) => raw_package.readArgsᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) readData(this ref Reader r) => raw_package.readDataᴍ(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static version.Version Version(this ref Reader r) => raw_package.Version⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Event, error) ReadEvent(this ref Reader r) => raw_package.ReadEvent⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<uint64>, error) readArgs(this ref Reader r, nint n) => raw_package.readArgs⁔(ref r, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) readData(this ref Reader r) => raw_package.readData⁔(ref r);
 }
 partial class rawᴛTextReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static version.Version Version(this ref TextReader r) => raw_package.Versionᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Event, error) ReadEvent(this ref TextReader r) => raw_package.ReadEventᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) nextLine(this ref TextReader r) => raw_package.nextLineᴍ(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static version.Version Version(this ref TextReader r) => raw_package.Version⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Event, error) ReadEvent(this ref TextReader r) => raw_package.ReadEvent⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, error) nextLine(this ref TextReader r) => raw_package.nextLine⁔(ref r);
 }
 partial class rawᴛTextWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteEvent(this ref TextWriter w, Event e) => raw_package.WriteEventᴍ(ref w, e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error WriteEvent(this ref TextWriter w, Event e) => raw_package.WriteEvent⁔(ref w, e);
 }
 partial class rawᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteEvent(this ref Writer w, Event e) => raw_package.WriteEventᴍ(ref w, e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error WriteEvent(this ref Writer w, Event e) => raw_package.WriteEvent⁔(ref w, e);
 }
 // </GlyphForwarders>

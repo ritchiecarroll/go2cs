@@ -45,7 +45,7 @@ public static ж<CoverageMetaFileWriter> NewCoverageMetaFileWriter(@string mfnam
 
 } partial class encodemeta_package {
 
-[GoMethodBody("Write")] internal static error Writeᴍ(ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<byte> finalHash, slice<slice<byte>> blobs, coverage.CounterMode mode, coverage.CounterGranularity granularity) {
+internal static error Write⁔(/*this*/ ж<CoverageMetaFileWriter> Ꮡm, /*[16]*/ array<byte> finalHash, slice<slice<byte>> blobs, coverage.CounterMode mode, coverage.CounterGranularity granularity) {
     finalHash = finalHash.Clone();
     ref var m = ref Ꮡm.DerefOrNull();
 

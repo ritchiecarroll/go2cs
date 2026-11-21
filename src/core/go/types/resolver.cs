@@ -37,12 +37,12 @@ partial struct declInfo {
 
 // hasInitializer reports whether the declared object has an initialization
 // expression or function body.
-[GoMethodBody("hasInitializer")] internal static bool hasInitializerᴍ(ref declInfo d) {
+internal static bool hasInitializer⁔(/*this*/ ref declInfo d) {
     return d.init != nil || d.fdecl != nil && d.fdecl.Body != nil;
 }
 
 // addDep adds obj to the set of objects d's init expression depends on.
-[GoMethodBody("addDep")] internal static void addDepᴍ(ref declInfo d, Object obj) {
+internal static void addDep⁔(/*this*/ ref declInfo d, Object obj) {
     var m = d.deps;
     if (m == nil) {
         m = new map<Object, bool>();
@@ -54,14 +54,14 @@ partial struct declInfo {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingTypeOrInitExprˢᴍChecker => ref missingTypeOrInitExprˢᵇᴍChecker;
-private static readonly @string missingTypeOrInitExprˢᵇᴍChecker = "missing type or init expr"u8;
+internal static ref readonly @string missingTypeOrInitExprˢ⁔Checker => ref missingTypeOrInitExprˢᵇ⁔Checker;
+private static readonly @string missingTypeOrInitExprˢᵇ⁔Checker = "missing type or init expr"u8;
 
 // arityMatch checks that the lhs and rhs of a const or var decl
 // have the appropriate number of names and init exprs. For const
 // decls, init is the value spec providing the init exprs; for
 // var decls, init is nil (the init exprs are in s in this case).
-[GoMethodBody("arityMatch")] internal static void arityMatchᴍ(ж<Checker> Ꮡcheck, ж<ast.ValueSpec> Ꮡs, ж<ast.ValueSpec> Ꮡinit) {
+internal static void arityMatch⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ast.ValueSpec> Ꮡs, ж<ast.ValueSpec> Ꮡinit) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
     ref var init = ref Ꮡinit.DerefOrNull();
@@ -77,7 +77,7 @@ private static readonly @string missingTypeOrInitExprˢᵇᴍChecker = "missing 
     case {} when Ꮡinit == nil && r == 0: {
         // var decl w/o init expr
         if (s.Type == nil) {
-            Ꮡcheck.error(new ast_ValueSpecжpositioner(Ꮡs), code, missingTypeOrInitExprˢᴍChecker);
+            Ꮡcheck.error(new ast_ValueSpecжpositioner(Ꮡs), code, missingTypeOrInitExprˢ⁔Checker);
         }
         break;
     }
@@ -127,14 +127,14 @@ internal static (@string, error) validatedImportPath(@string path) {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cannotDeclareInitMustBeˢᴍChecker => ref cannotDeclareInitMustBeˢᵇᴍChecker;
-private static readonly @string cannotDeclareInitMustBeˢᵇᴍChecker = "cannot declare init - must be func"u8;
-internal static ref readonly @string cannotDeclareMainMustBeˢᴍChecker => ref cannotDeclareMainMustBeˢᵇᴍChecker;
-private static readonly @string cannotDeclareMainMustBeˢᵇᴍChecker = "cannot declare main - must be func"u8;
+internal static ref readonly @string cannotDeclareInitMustBeˢ⁔Checker => ref cannotDeclareInitMustBeˢᵇ⁔Checker;
+private static readonly @string cannotDeclareInitMustBeˢᵇ⁔Checker = "cannot declare init - must be func"u8;
+internal static ref readonly @string cannotDeclareMainMustBeˢ⁔Checker => ref cannotDeclareMainMustBeˢᵇ⁔Checker;
+private static readonly @string cannotDeclareMainMustBeˢᵇ⁔Checker = "cannot declare main - must be func"u8;
 
 // declarePkgObj declares obj in the package scope, records its ident -> obj mapping,
 // and updates check.objMap. The object must not be a function or method.
-[GoMethodBody("declarePkgObj")] internal static void declarePkgObjᴍ(ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡident, Object obj, ж<declInfo> d) {
+internal static void declarePkgObj⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡident, Object obj, ж<declInfo> d) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var ident = ref Ꮡident.DerefOrNull();
 
@@ -143,14 +143,14 @@ private static readonly @string cannotDeclareMainMustBeˢᵇᴍChecker = "cannot
     // spec: "A package-scope or file-scope identifier with name init
     // may only be declared to be a function with this (func()) signature."
     if (ident.Name == "init"u8) {
-        Ꮡcheck.error(new ast_Identжpositioner(Ꮡident), InvalidInitDecl, cannotDeclareInitMustBeˢᴍChecker);
+        Ꮡcheck.error(new ast_Identжpositioner(Ꮡident), InvalidInitDecl, cannotDeclareInitMustBeˢ⁔Checker);
         return;
     }
 
     // spec: "The main package must have package name main and declare
     // a function main that takes no arguments and returns no value."
     if (ident.Name == "main"u8 && check.pkg.name == "main"u8) {
-        Ꮡcheck.error(new ast_Identжpositioner(Ꮡident), InvalidMainDecl, cannotDeclareMainMustBeˢᴍChecker);
+        Ꮡcheck.error(new ast_Identжpositioner(Ꮡident), InvalidMainDecl, cannotDeclareMainMustBeˢ⁔Checker);
         return;
     }
 
@@ -160,7 +160,7 @@ private static readonly @string cannotDeclareMainMustBeˢᵇᴍChecker = "cannot
 }
 
 // filename returns a filename suitable for debugging output.
-[GoMethodBody("filename")] internal static @string filenameᴍ(ref Checker check, nint fileNo) {
+internal static @string filename⁔(/*this*/ ref Checker check, nint fileNo) {
     var @file = check.files[fileNo];
     token.Pos pos = @file.Pos(); if (pos.IsValid()) {
         return check.fset.File(pos).Name();
@@ -169,10 +169,10 @@ private static readonly @string cannotDeclareMainMustBeˢᵇᴍChecker = "cannot
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cannotUseFakeImportCAndˢᴍChecker => ref cannotUseFakeImportCAndˢᵇᴍChecker;
-private static readonly @string cannotUseFakeImportCAndˢᵇᴍChecker = "cannot use FakeImportC and go115UsesCgo together"u8;
+internal static ref readonly @string cannotUseFakeImportCAndˢ⁔Checker => ref cannotUseFakeImportCAndˢᵇ⁔Checker;
+private static readonly @string cannotUseFakeImportCAndˢᵇ⁔Checker = "cannot use FakeImportC and go115UsesCgo together"u8;
 
-[GoMethodBody("importPackage")] internal static ж<Package> importPackageᴍ(ж<Checker> Ꮡcheck, positioner at, @string path, @string dir) {
+internal static ж<Package> importPackage⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, @string path, @string dir) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // If we already have a package for the given (path, dir)
@@ -189,7 +189,7 @@ private static readonly @string cannotUseFakeImportCAndˢᵇᴍChecker = "cannot
     // no package yet => import it
     if (path == "C"u8 && (check.conf.FakeImportC || check.conf.go115UsesCgo)) {
         if (check.conf.FakeImportC && check.conf.go115UsesCgo) {
-            Ꮡcheck.error(at, BadImportPath, cannotUseFakeImportCAndˢᴍChecker);
+            Ꮡcheck.error(at, BadImportPath, cannotUseFakeImportCAndˢ⁔Checker);
         }
         imp = NewPackage("C", "C");
         imp.fake = true; // package scope is not populated
@@ -266,17 +266,17 @@ internal partial struct collectObjects_methodInfo /*dyn*/ {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cannotRenameImportCˢᴍChecker => ref cannotRenameImportCˢᵇᴍChecker;
-private static readonly @string cannotRenameImportCˢᵇᴍChecker = @"cannot rename import ""C"""u8;
-internal static ref readonly @string cannotImportPackageAsˢᴍChecker => ref cannotImportPackageAsˢᵇᴍChecker;
-private static readonly @string cannotImportPackageAsˢᵇᴍChecker = "cannot import package as init - init must be a func"u8;
-internal static ref readonly @string methodHasNoReceiverˢᴍChecker => ref methodHasNoReceiverˢᵇᴍChecker;
-private static readonly @string methodHasNoReceiverˢᵇᴍChecker = "method has no receiver"u8;
+internal static ref readonly @string cannotRenameImportCˢ⁔Checker => ref cannotRenameImportCˢᵇ⁔Checker;
+private static readonly @string cannotRenameImportCˢᵇ⁔Checker = @"cannot rename import ""C"""u8;
+internal static ref readonly @string cannotImportPackageAsˢ⁔Checker => ref cannotImportPackageAsˢᵇ⁔Checker;
+private static readonly @string cannotImportPackageAsˢᵇ⁔Checker = "cannot import package as init - init must be a func"u8;
+internal static ref readonly @string methodHasNoReceiverˢ⁔Checker => ref methodHasNoReceiverˢᵇ⁔Checker;
+private static readonly @string methodHasNoReceiverˢᵇ⁔Checker = "method has no receiver"u8;
 
 // collectObjects collects all file and package objects and inserts them
 // into their respective scopes. It also performs imports and associates
 // methods with receiver base type names.
-[GoMethodBody("collectObjects")] internal static void collectObjectsᴍ(ж<Checker> Ꮡcheck) {
+internal static void collectObjects⁔(/*this*/ ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var pkg = check.pkg;
@@ -345,13 +345,13 @@ private static readonly @string methodHasNoReceiverˢᵇᴍChecker = "method has
                     name = dΔ1.spec.Name.Name;
                     if (path == "C"u8) {
                         // match 1.17 cmd/compile (not prescribed by spec)
-                        Ꮡcheck.error(new ast_Identжpositioner(dΔ1.spec.Name), ImportCRenamed, cannotRenameImportCˢᴍChecker);
+                        Ꮡcheck.error(new ast_Identжpositioner(dΔ1.spec.Name), ImportCRenamed, cannotRenameImportCˢ⁔Checker);
                         return;
                     }
                 }
 
                 if (name == "init"u8) {
-                    Ꮡcheck.error(new ast_ImportSpecжpositioner(dΔ1.spec), InvalidInitDecl, cannotImportPackageAsˢᴍChecker);
+                    Ꮡcheck.error(new ast_ImportSpecжpositioner(dΔ1.spec), InvalidInitDecl, cannotImportPackageAsˢ⁔Checker);
                     return;
                 }
 
@@ -474,7 +474,7 @@ private static readonly @string methodHasNoReceiverˢᵇᴍChecker = "method has
                 if (dΔ1.decl.Recv.NumFields() == 0) {
                     // regular function
                     if (dΔ1.decl.Recv != nil) {
-                        Ꮡcheck.error(new ast_FieldListжpositioner(dΔ1.decl.Recv), BadRecv, methodHasNoReceiverˢᴍChecker);
+                        Ꮡcheck.error(new ast_FieldListжpositioner(dΔ1.decl.Recv), BadRecv, methodHasNoReceiverˢ⁔Checker);
                         // treat as function
                     }
                     if (name == "init"u8 || (name == "main"u8 && Ꮡcheck.Value.pkg.name == "main"u8)) {
@@ -573,7 +573,7 @@ private static readonly @string methodHasNoReceiverˢᵇᴍChecker = "method has
 }
 
 // sortObjects sorts package-level objects by source-order for reproducible processing
-[GoMethodBody("sortObjects")] internal static void sortObjectsᴍ(ref Checker check) {
+internal static void sortObjects⁔(/*this*/ ref Checker check) {
     check.objList = new slice<Object>(len(check.objMap));
     nint i = 0;
     foreach (var (obj, _) in check.objMap) {
@@ -584,8 +584,8 @@ private static readonly @string methodHasNoReceiverˢᵇᴍChecker = "method has
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string parameterizedReceiverˢᴍChecker => ref parameterizedReceiverˢᵇᴍChecker;
-private static readonly @string parameterizedReceiverˢᵇᴍChecker = "parameterized receiver contains nil parameters"u8;
+internal static ref readonly @string parameterizedReceiverˢ⁔Checker => ref parameterizedReceiverˢᵇ⁔Checker;
+private static readonly @string parameterizedReceiverˢᵇ⁔Checker = "parameterized receiver contains nil parameters"u8;
 
 // unpackRecv unpacks a receiver type expression and returns its components: ptr indicates
 // whether rtyp is a pointer receiver, base is the receiver base type expression stripped
@@ -596,7 +596,7 @@ private static readonly @string parameterizedReceiverˢᵇᴍChecker = "paramete
 //
 // ptr is true, base is T, and tparams is [A, _] (assuming unpackParams is set).
 // Note that base may not be a *ast.Ident for erroneous programs.
-[GoMethodBody("unpackRecv")] internal static (bool ptr, ast.Expr @base, slice<ж<ast.Ident>> tparams) unpackRecvᴍ(ж<Checker> Ꮡcheck, ast.Expr rtyp, bool unpackParams) {
+internal static (bool ptr, ast.Expr @base, slice<ж<ast.Ident>> tparams) unpackRecv⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr rtyp, bool unpackParams) {
     bool ptr = default;
     ast.Expr @base = default;
     slice<ж<ast.Ident>> tparams = default;
@@ -628,7 +628,7 @@ private static readonly @string parameterizedReceiverˢᵇᴍChecker = "paramete
                     break;
                 }
                 case null: {
-                    Ꮡcheck.error(new ast_Exprᴠpositioner(ix.orig), InvalidSyntaxTree, parameterizedReceiverˢᴍChecker);
+                    Ꮡcheck.error(new ast_Exprᴠpositioner(ix.orig), InvalidSyntaxTree, parameterizedReceiverˢ⁔Checker);
                     break;
                 }
                 default: {
@@ -654,7 +654,7 @@ private static readonly @string parameterizedReceiverˢᵇᴍChecker = "paramete
 // in package scope, and there can be at most one pointer indirection. Traversals
 // through generic alias types are not permitted. If no such type name exists, the
 // returned base is nil.
-[GoMethodBody("resolveBaseTypeName")] internal static (bool ptr_, ж<TypeName> @base) resolveBaseTypeNameᴍ(ref Checker check, bool ptr, ж<ast.Ident> Ꮡname) {
+internal static (bool ptr_, ж<TypeName> @base) resolveBaseTypeName⁔(/*this*/ ref Checker check, bool ptr, ж<ast.Ident> Ꮡname) {
     ref var name = ref Ꮡname.DerefOrNull();
 
     // Algorithm: Starting from name, which is expected to denote a type,
@@ -726,7 +726,7 @@ private static readonly @string parameterizedReceiverˢᵇᴍChecker = "paramete
 }
 
 // packageObjects typechecks all package objects, but not function bodies.
-[GoMethodBody("packageObjects")] internal static void packageObjectsᴍ(ж<Checker> Ꮡcheck) {
+internal static void packageObjects⁔(/*this*/ ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     var aliasListᴷ = new stackAppend<ж<TypeName>>(moves: true);
     var othersListᴷ = new stackAppend<Object>(moves: true);
@@ -798,7 +798,7 @@ private static readonly @string parameterizedReceiverˢᵇᴍChecker = "paramete
 }
 
 // unusedImports checks for unused imports.
-[GoMethodBody("unusedImports")] internal static void unusedImportsᴍ(ж<Checker> Ꮡcheck) {
+internal static void unusedImports⁔(/*this*/ ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // If function bodies are not checked, packages' uses are likely missing - don't check.
@@ -817,7 +817,7 @@ private static readonly @string parameterizedReceiverˢᵇᴍChecker = "paramete
     }
 }
 
-[GoMethodBody("errorUnusedPkg")] internal static void errorUnusedPkgᴍ(ж<Checker> Ꮡcheck, ж<PkgName> Ꮡobj) {
+internal static void errorUnusedPkg⁔(/*this*/ ж<Checker> Ꮡcheck, ж<PkgName> Ꮡobj) {
     ref var obj = ref Ꮡobj.DerefOrNull();
 
     // If the package was imported with a name other than the final

@@ -73,15 +73,15 @@ partial struct Basic {
 } partial class types_package {
 
 // Kind returns the kind of basic type b.
-[GoMethodBody("Kind")] internal static BasicKind Kindᴍ(ref Basic b) { return b.kind; }
+internal static BasicKind Kind⁔(/*this*/ ref Basic b) { return b.kind; }
 
 // Info returns information about properties of basic type b.
-[GoMethodBody("Info")] internal static BasicInfo Infoᴍ(ref Basic b) { return b.info; }
+internal static BasicInfo Info⁔(/*this*/ ref Basic b) { return b.info; }
 
 // Name returns the name of basic type b.
-[GoMethodBody("Name")] internal static @string Nameᴍ(ref Basic b) { return b.name; }
+internal static @string Name⁔(/*this*/ ref Basic b) { return b.name; }
 
-[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Basic> Ꮡb) { return new BasicжType(Ꮡb); }
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Basic> Ꮡb) { return TypeString(new BasicжType(Ꮡb), default); }
+internal static Type Underlying⁔(/*this*/ ж<Basic> Ꮡb) { return new BasicжType(Ꮡb); }
+internal static @string String⁔(/*this*/ ж<Basic> Ꮡb) { return TypeString(new BasicжType(Ꮡb), default); }
 
 }

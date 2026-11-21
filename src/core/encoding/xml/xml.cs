@@ -36,7 +36,7 @@ partial struct SyntaxError {
 
 } partial class xml_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref SyntaxError e) {
+internal static @string Error⁔(/*this*/ ref SyntaxError e) {
     return "XML syntax error on line "u8 + strconv.Itoa(e.Line) + ": "u8 + e.Msg;
 }
 
@@ -66,7 +66,7 @@ partial struct StartElement {
 } partial class xml_package {
 
 // Copy creates a new copy of StartElement.
-[GoMethodBody("Copy")] internal static StartElement Copyᴍ(StartElement e) {
+internal static StartElement Copy⁔(/*this*/ StartElement e) {
     var attrs = new slice<Attr>(len(e.Attr));
     copy(attrs, e.Attr);
     e.Attr = attrs;
@@ -74,7 +74,7 @@ partial struct StartElement {
 }
 
 // End returns the corresponding XML end element.
-[GoMethodBody("End")] internal static EndElement Endᴍ(StartElement e) {
+internal static EndElement End⁔(/*this*/ StartElement e) {
     return new EndElement(e.Name);
 }
 
@@ -93,7 +93,7 @@ partial struct CharData /*[]byte*/;
 } partial class xml_package {
 
 // Copy creates a new copy of CharData.
-[GoMethodBody("Copy")] internal static CharData Copyᴍ(CharData c) { return (CharData)bytes.Clone(c); }
+internal static CharData Copy⁔(/*this*/ CharData c) { return (CharData)bytes.Clone(c); }
 
 } partial class xml_package {
 
@@ -104,7 +104,7 @@ partial struct Comment /*[]byte*/;
 } partial class xml_package {
 
 // Copy creates a new copy of Comment.
-[GoMethodBody("Copy")] internal static Comment Copyᴍ(Comment c) { return (Comment)bytes.Clone(c); }
+internal static Comment Copy⁔(/*this*/ Comment c) { return (Comment)bytes.Clone(c); }
 
 } partial class xml_package {
 
@@ -117,7 +117,7 @@ partial struct ProcInst {
 } partial class xml_package {
 
 // Copy creates a new copy of ProcInst.
-[GoMethodBody("Copy")] internal static ProcInst Copyᴍ(ProcInst p) {
+internal static ProcInst Copy⁔(/*this*/ ProcInst p) {
     p.Inst = bytes.Clone(p.Inst);
     return p;
 }
@@ -131,7 +131,7 @@ partial struct Directive /*[]byte*/;
 } partial class xml_package {
 
 // Copy creates a new copy of Directive.
-[GoMethodBody("Copy")] internal static Directive Copyᴍ(Directive d) { return (Directive)bytes.Clone(d); }
+internal static Directive Copy⁔(/*this*/ Directive d) { return (Directive)bytes.Clone(d); }
 
 } partial class xml_package {
 
@@ -274,8 +274,8 @@ public static ж<Decoder> NewTokenDecoder(TokenReader t) {
 } partial class xml_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedEofˢᴍDecoder => ref unexpectedEofˢᵇᴍDecoder;
-private static readonly @string unexpectedEofˢᵇᴍDecoder = "unexpected EOF"u8;
+internal static ref readonly @string unexpectedEofˢ⁔Decoder => ref unexpectedEofˢᵇ⁔Decoder;
+private static readonly @string unexpectedEofˢᵇ⁔Decoder = "unexpected EOF"u8;
 
 // Token returns the next XML token in the input stream.
 // At the end of the input stream, Token returns nil, [io.EOF].
@@ -303,7 +303,7 @@ private static readonly @string unexpectedEofˢᵇᴍDecoder = "unexpected EOF"u
 // set to the URL identifying its name space when known.
 // If Token encounters an unrecognized name space prefix,
 // it uses the prefix as the Space rather than report an error.
-[GoMethodBody("Token")] internal static (Token, error) Tokenᴍ(ref Decoder d) {
+internal static (Token, error) Token⁔(/*this*/ ref Decoder d) {
     Token t = default;
     error err = default;
     if (d.stk != nil && d.stk.kind == stkEOF) {
@@ -315,7 +315,7 @@ private static readonly @string unexpectedEofˢᵇᴍDecoder = "unexpected EOF"u
     } else {
         (t, err) = d.rawToken(); if (t == nil && err != nil) {
             if (AreEqual(err, io.EOF) && d.stk != nil && d.stk.kind != stkEOF) {
-                err = d.syntaxError(unexpectedEofˢᴍDecoder);
+                err = d.syntaxError(unexpectedEofˢ⁔Decoder);
             }
             return (default, err);
         }
@@ -383,7 +383,7 @@ private static readonly @string xmlPrefixᵇ = "xml"u8;
 // Apply name space translation to name n.
 // The default name space (for Space=="")
 // applies only to element names, not to attribute names.
-[GoMethodBody("translate")] internal static void translateᴍ(ref Decoder d, ж<Name> Ꮡn, bool isElementName) {
+internal static void translate⁔(/*this*/ ref Decoder d, ж<Name> Ꮡn, bool isElementName) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     switch (ᐧ) {
@@ -407,7 +407,7 @@ private static readonly @string xmlPrefixᵇ = "xml"u8;
     }
 }
 
-[GoMethodBody("switchToReader")] internal static void switchToReaderᴍ(ref Decoder d, io.Reader r) {
+internal static void switchToReader⁔(/*this*/ ref Decoder d, io.Reader r) {
     // Get efficient byte at a time reader.
     // Assume that if reader has its own
     // ReadByte, it's efficient enough.
@@ -438,7 +438,7 @@ internal static UntypedInt stkEOF => 2;
 
 } partial class xml_package {
 
-[GoMethodBody("push")] internal static ж<stack> pushᴍ(ref Decoder d, nint kind) {
+internal static ж<stack> push⁔(/*this*/ ref Decoder d, nint kind) {
     var s = d.free;
     if (s != nil) {
         d.free = s.next;
@@ -454,7 +454,7 @@ internal static UntypedInt stkEOF => 2;
     return s;
 }
 
-[GoMethodBody("pop")] internal static ж<stack> popᴍ(ref Decoder d) {
+internal static ж<stack> pop⁔(/*this*/ ref Decoder d) {
     var s = d.stk;
     if (s != nil) {
         if (s.kind == stkStart) {
@@ -470,7 +470,7 @@ internal static UntypedInt stkEOF => 2;
 // Record that after the current element is finished
 // (that element is already pushed on the stack)
 // Token should return EOF until popEOF is called.
-[GoMethodBody("pushEOF")] internal static void pushEOFᴍ(ref Decoder d) {
+internal static void pushEOF⁔(/*this*/ ref Decoder d) {
     // Walk down stack to find Start.
     // It might not be the top, because there might be stkNs
     // entries above it.
@@ -496,7 +496,7 @@ internal static UntypedInt stkEOF => 2;
 
 // Undo a pushEOF.
 // The element must have been finished, so the EOF should be at the top of the stack.
-[GoMethodBody("popEOF")] internal static bool popEOFᴍ(ref Decoder d) {
+internal static bool popEOF⁔(/*this*/ ref Decoder d) {
     if (d.stk == nil || d.stk.kind != stkEOF) {
         return false;
     }
@@ -505,14 +505,14 @@ internal static UntypedInt stkEOF => 2;
 }
 
 // Record that we are starting an element with the given name.
-[GoMethodBody("pushElement")] internal static void pushElementᴍ(ref Decoder d, Name name) {
+internal static void pushElement⁔(/*this*/ ref Decoder d, Name name) {
     var s = d.push(stkStart);
     s.name = name;
 }
 
 // Record that we are changing the value of ns[local].
 // The old value is url, ok.
-[GoMethodBody("pushNs")] internal static void pushNsᴍ(ref Decoder d, @string local, @string url, bool ok) {
+internal static void pushNs⁔(/*this*/ ref Decoder d, @string local, @string url, bool ok) {
     var s = d.push(stkNs);
     s.name.Local = local;
     s.name.Space = url;
@@ -520,7 +520,7 @@ internal static UntypedInt stkEOF => 2;
 }
 
 // Creates a SyntaxError with the current line number.
-[GoMethodBody("syntaxError")] internal static error syntaxErrorᴍ(ref Decoder d, @string msg) {
+internal static error syntaxError⁔(/*this*/ ref Decoder d, @string msg) {
     return new SyntaxErrorжerror(Ꮡ(new SyntaxError(Msg: msg, Line: d.line)));
 }
 
@@ -530,7 +530,7 @@ internal static UntypedInt stkEOF => 2;
 // After popping the element, apply any undo records from
 // the stack to restore the name translations that existed
 // before we saw this element.
-[GoMethodBody("popElement")] internal static bool popElementᴍ(ref Decoder d, ж<EndElement> Ꮡt) {
+internal static bool popElement⁔(/*this*/ ref Decoder d, ж<EndElement> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var s = d.pop();
@@ -577,7 +577,7 @@ internal static UntypedInt stkEOF => 2;
 
 // If the top element on the stack is autoclosing and
 // t is not the end tag, invent the end tag.
-[GoMethodBody("autoClose")] internal static (Token, bool) autoCloseᴍ(ref Decoder d, Token t) {
+internal static (Token, bool) autoClose⁔(/*this*/ ref Decoder d, Token t) {
     if (d.stk == nil || d.stk.kind != stkStart) {
         return (default, false);
     }
@@ -603,7 +603,7 @@ internal static error errRawToken = errors.New("xml: cannot use RawToken from Un
 // RawToken is like [Decoder.Token] but does not verify that
 // start and end elements match and does not translate
 // name space prefixes to their corresponding URLs.
-[GoMethodBody("RawToken")] internal static (Token, error) RawTokenᴍ(ref Decoder d) {
+internal static (Token, error) RawToken⁔(/*this*/ ref Decoder d) {
     if (d.inUnmarshalXML) {
         return (default, errRawToken);
     }
@@ -611,32 +611,32 @@ internal static error errRawToken = errors.New("xml: cannot use RawToken from Un
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string expectedElementNameAfterˢᴍDecoder => ref expectedElementNameAfterˢᵇᴍDecoder;
-private static readonly @string expectedElementNameAfterˢᵇᴍDecoder = "expected element name after </"u8;
-internal static ref readonly @string expectedTargetNameAfterˢᴍDecoder => ref expectedTargetNameAfterˢᵇᴍDecoder;
-private static readonly @string expectedTargetNameAfterˢᵇᴍDecoder = "expected target name after <?"u8;
-internal static ref readonly @string versionˢᴍDecoder => ref versionˢᵇᴍDecoder;
-private static readonly @string versionˢᵇᴍDecoder = "version"u8;
-internal static ref readonly @string encodingˢᴍDecoder => ref encodingˢᵇᴍDecoder;
-private static readonly @string encodingˢᵇᴍDecoder = "encoding"u8;
-internal static ref readonly @string utf8ˢᴍDecoder => ref utf8ˢᵇᴍDecoder;
-private static readonly @string utf8ˢᵇᴍDecoder = "utf-8"u8;
-internal static ref readonly @string invalidSequenceNotPartOfˢᴍDecoder => ref invalidSequenceNotPartOfˢᵇᴍDecoder;
-private static readonly @string invalidSequenceNotPartOfˢᵇᴍDecoder = "invalid sequence <!- not part of <!--"u8;
-internal static ref readonly @string invalidSequenceNotˢᴍDecoder => ref invalidSequenceNotˢᵇᴍDecoder;
-private static readonly @string invalidSequenceNotˢᵇᴍDecoder = @"invalid sequence ""--"" not allowed in comments"u8;
-internal static ref readonly @string invalidSequenceˢᴍDecoder => ref invalidSequenceˢᵇᴍDecoder;
-private static readonly @string invalidSequenceˢᵇᴍDecoder = "invalid <![ sequence"u8;
-internal static ref readonly @string expectedElementNameAfterˢ2ᴍDecoder => ref expectedElementNameAfterˢ2ᵇᴍDecoder;
-private static readonly @string expectedElementNameAfterˢ2ᵇᴍDecoder = "expected element name after <"u8;
-internal static ref readonly @string expectedInElementˢᴍDecoder => ref expectedInElementˢᵇᴍDecoder;
-private static readonly @string expectedInElementˢᵇᴍDecoder = "expected /> in element"u8;
-internal static ref readonly @string expectedAttributeNameInˢᴍDecoder => ref expectedAttributeNameInˢᵇᴍDecoder;
-private static readonly @string expectedAttributeNameInˢᵇᴍDecoder = "expected attribute name in element"u8;
-internal static ref readonly @string attributeNameWithoutInˢᴍDecoder => ref attributeNameWithoutInˢᵇᴍDecoder;
-private static readonly @string attributeNameWithoutInˢᵇᴍDecoder = "attribute name without = in element"u8;
+internal static ref readonly @string expectedElementNameAfterˢ⁔Decoder => ref expectedElementNameAfterˢᵇ⁔Decoder;
+private static readonly @string expectedElementNameAfterˢᵇ⁔Decoder = "expected element name after </"u8;
+internal static ref readonly @string expectedTargetNameAfterˢ⁔Decoder => ref expectedTargetNameAfterˢᵇ⁔Decoder;
+private static readonly @string expectedTargetNameAfterˢᵇ⁔Decoder = "expected target name after <?"u8;
+internal static ref readonly @string versionˢ⁔Decoder => ref versionˢᵇ⁔Decoder;
+private static readonly @string versionˢᵇ⁔Decoder = "version"u8;
+internal static ref readonly @string encodingˢ⁔Decoder => ref encodingˢᵇ⁔Decoder;
+private static readonly @string encodingˢᵇ⁔Decoder = "encoding"u8;
+internal static ref readonly @string utf8ˢ⁔Decoder => ref utf8ˢᵇ⁔Decoder;
+private static readonly @string utf8ˢᵇ⁔Decoder = "utf-8"u8;
+internal static ref readonly @string invalidSequenceNotPartOfˢ⁔Decoder => ref invalidSequenceNotPartOfˢᵇ⁔Decoder;
+private static readonly @string invalidSequenceNotPartOfˢᵇ⁔Decoder = "invalid sequence <!- not part of <!--"u8;
+internal static ref readonly @string invalidSequenceNotˢ⁔Decoder => ref invalidSequenceNotˢᵇ⁔Decoder;
+private static readonly @string invalidSequenceNotˢᵇ⁔Decoder = @"invalid sequence ""--"" not allowed in comments"u8;
+internal static ref readonly @string invalidSequenceˢ⁔Decoder => ref invalidSequenceˢᵇ⁔Decoder;
+private static readonly @string invalidSequenceˢᵇ⁔Decoder = "invalid <![ sequence"u8;
+internal static ref readonly @string expectedElementNameAfterˢ2⁔Decoder => ref expectedElementNameAfterˢ2ᵇ⁔Decoder;
+private static readonly @string expectedElementNameAfterˢ2ᵇ⁔Decoder = "expected element name after <"u8;
+internal static ref readonly @string expectedInElementˢ⁔Decoder => ref expectedInElementˢᵇ⁔Decoder;
+private static readonly @string expectedInElementˢᵇ⁔Decoder = "expected /> in element"u8;
+internal static ref readonly @string expectedAttributeNameInˢ⁔Decoder => ref expectedAttributeNameInˢᵇ⁔Decoder;
+private static readonly @string expectedAttributeNameInˢᵇ⁔Decoder = "expected attribute name in element"u8;
+internal static ref readonly @string attributeNameWithoutInˢ⁔Decoder => ref attributeNameWithoutInˢᵇ⁔Decoder;
+private static readonly @string attributeNameWithoutInˢᵇ⁔Decoder = "attribute name without = in element"u8;
 
-[GoMethodBody("rawToken")] internal static (Token, error) rawTokenᴍ(ref Decoder d) {
+internal static (Token, error) rawToken⁔(/*this*/ ref Decoder d) {
     if (d.t != nil) {
         return d.t.Token();
     }
@@ -675,7 +675,7 @@ private static readonly @string attributeNameWithoutInˢᵇᴍDecoder = "attribu
         Name nameΔ2 = default;
         (nameΔ2, ok) = d.nsname(); if (!ok) {
             if (d.err == nil) {
-                d.err = d.syntaxError(expectedElementNameAfterˢᴍDecoder);
+                d.err = d.syntaxError(expectedElementNameAfterˢ⁔Decoder);
             }
             return (default, d.err);
         }
@@ -694,7 +694,7 @@ private static readonly @string attributeNameWithoutInˢᵇᴍDecoder = "attribu
         @string targetΔ1 = default;
         (targetΔ1, ok) = d.name(); if (!ok) {
             if (d.err == nil) {
-                d.err = d.syntaxError(expectedTargetNameAfterˢᴍDecoder);
+                d.err = d.syntaxError(expectedTargetNameAfterˢ⁔Decoder);
             }
             return (default, d.err);
         }
@@ -716,13 +716,13 @@ private static readonly @string attributeNameWithoutInˢᵇᴍDecoder = "attribu
 
         if (targetΔ1 == "xml"u8) {
             @string content = (@string)data;
-            @string ver = procInst(versionˢᴍDecoder, content);
+            @string ver = procInst(versionˢ⁔Decoder, content);
             if (ver != ""u8 && ver != "1.0"u8) {
                 d.err = fmt.Errorf("xml: unsupported version %q; only version 1.0 is supported"u8, ver);
                 return (default, d.err);
             }
-            @string enc = procInst(encodingˢᴍDecoder, content);
-            if (enc != ""u8 && enc != "utf-8"u8 && enc != "UTF-8"u8 && !strings.EqualFold(enc, utf8ˢᴍDecoder)) {
+            @string enc = procInst(encodingˢ⁔Decoder, content);
+            if (enc != ""u8 && enc != "utf-8"u8 && enc != "UTF-8"u8 && !strings.EqualFold(enc, utf8ˢ⁔Decoder)) {
                 if (d.CharsetReader == nil) {
                     d.err = fmt.Errorf("xml: encoding %q declared but Decoder.CharsetReader is nil"u8, enc);
                     return (default, d.err);
@@ -752,7 +752,7 @@ private static readonly @string attributeNameWithoutInˢᵇᴍDecoder = "attribu
                 return (default, d.err);
             }
             if (b != '-') {
-                d.err = d.syntaxError(invalidSequenceNotPartOfˢᴍDecoder);
+                d.err = d.syntaxError(invalidSequenceNotPartOfˢ⁔Decoder);
                 return (default, d.err);
             }
             // Look for terminator.
@@ -767,7 +767,7 @@ private static readonly @string attributeNameWithoutInˢᵇᴍDecoder = "attribu
                 if (b0 == '-' && b1 == '-') {
                     if (b != '>') {
                         d.err = d.syntaxError(
-                            invalidSequenceNotˢᴍDecoder);
+                            invalidSequenceNotˢ⁔Decoder);
                         return (default, d.err);
                     }
                     break;
@@ -785,7 +785,7 @@ private static readonly @string attributeNameWithoutInˢᵇᴍDecoder = "attribu
                     return (default, d.err);
                 }
                 if (b != LiteralByteAt("CDATA["u8, i)) {
-                    d.err = d.syntaxError(invalidSequenceˢᴍDecoder);
+                    d.err = d.syntaxError(invalidSequenceˢ⁔Decoder);
                     return (default, d.err);
                 }
             }
@@ -881,7 +881,7 @@ HandleB:
     slice<Attr> attr = default;
     (name, ok) = d.nsname(); if (!ok) {
         if (d.err == nil) {
-            d.err = d.syntaxError(expectedElementNameAfterˢ2ᴍDecoder);
+            d.err = d.syntaxError(expectedElementNameAfterˢ2⁔Decoder);
         }
         return (default, d.err);
     }
@@ -898,7 +898,7 @@ HandleB:
                 return (default, d.err);
             }
             if (b != '>') {
-                d.err = d.syntaxError(expectedInElementˢᴍDecoder);
+                d.err = d.syntaxError(expectedInElementˢ⁔Decoder);
                 return (default, d.err);
             }
             break;
@@ -911,7 +911,7 @@ HandleB:
         var a = new Attr();
         (a.Name, ok) = d.nsname(); if (!ok) {
             if (d.err == nil) {
-                d.err = d.syntaxError(expectedAttributeNameInˢᴍDecoder);
+                d.err = d.syntaxError(expectedAttributeNameInˢ⁔Decoder);
             }
             return (default, d.err);
         }
@@ -921,7 +921,7 @@ HandleB:
         }
         if (b != '=') {
             if (d.Strict) {
-                d.err = d.syntaxError(attributeNameWithoutInˢᴍDecoder);
+                d.err = d.syntaxError(attributeNameWithoutInˢ⁔Decoder);
                 return (default, d.err);
             }
             d.ungetc(b);
@@ -944,10 +944,10 @@ HandleB:
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unquotedOrMissingˢᴍDecoder => ref unquotedOrMissingˢᵇᴍDecoder;
-private static readonly @string unquotedOrMissingˢᵇᴍDecoder = "unquoted or missing attribute value in element"u8;
+internal static ref readonly @string unquotedOrMissingˢ⁔Decoder => ref unquotedOrMissingˢᵇ⁔Decoder;
+private static readonly @string unquotedOrMissingˢᵇ⁔Decoder = "unquoted or missing attribute value in element"u8;
 
-[GoMethodBody("attrval")] internal static slice<byte> attrvalᴍ(ref Decoder d) {
+internal static slice<byte> attrval⁔(/*this*/ ref Decoder d) {
     var (b, ok) = d.mustgetc();
     if (!ok) {
         return default;
@@ -958,7 +958,7 @@ private static readonly @string unquotedOrMissingˢᵇᴍDecoder = "unquoted or 
     }
     // Handle unquoted attribute values for strict parsers
     if (d.Strict) {
-        d.err = d.syntaxError(unquotedOrMissingˢᴍDecoder);
+        d.err = d.syntaxError(unquotedOrMissingˢ⁔Decoder);
         return default;
     }
     // Handle unquoted attribute values for unstrict parsers
@@ -981,7 +981,7 @@ private static readonly @string unquotedOrMissingˢᵇᴍDecoder = "unquoted or 
 }
 
 // Skip spaces if any
-[GoMethodBody("space")] internal static void spaceᴍ(ref Decoder d) {
+internal static void space⁔(/*this*/ ref Decoder d) {
     for (;;) {
         var (b, ok) = d.getc();
         if (!ok) {
@@ -1002,7 +1002,7 @@ private static readonly @string unquotedOrMissingˢᵇᴍDecoder = "unquoted or 
 // If there is no byte to read, return ok==false
 // and leave the error in d.err.
 // Maintain line number.
-[GoMethodBody("getc")] internal static (byte b, bool ok) getcᴍ(ref Decoder d) {
+internal static (byte b, bool ok) getc⁔(/*this*/ ref Decoder d) {
     byte b = default;
 
     if (d.err != nil) {
@@ -1031,20 +1031,20 @@ private static readonly @string unquotedOrMissingˢᵇᴍDecoder = "unquoted or 
 // InputOffset returns the input stream byte offset of the current decoder position.
 // The offset gives the location of the end of the most recently returned token
 // and the beginning of the next token.
-[GoMethodBody("InputOffset")] internal static int64 InputOffsetᴍ(ref Decoder d) {
+internal static int64 InputOffset⁔(/*this*/ ref Decoder d) {
     return d.offset;
 }
 
 // InputPos returns the line of the current decoder position and the 1 based
 // input position of the line. The position gives the location of the end of the
 // most recently returned token.
-[GoMethodBody("InputPos")] internal static (nint line, nint column) InputPosᴍ(ref Decoder d) {
+internal static (nint line, nint column) InputPos⁔(/*this*/ ref Decoder d) {
     return (d.line, (nint)(d.offset - d.linestart) + 1);
 }
 
 // Return saved offset.
 // If we did ungetc (nextByte >= 0), have to back up one.
-[GoMethodBody("savedOffset")] internal static nint savedOffsetᴍ(ref Decoder d) {
+internal static nint savedOffset⁔(/*this*/ ref Decoder d) {
     nint n = d.saved.Len();
     if (d.nextByte >= 0) {
         n--;
@@ -1056,20 +1056,20 @@ private static readonly @string unquotedOrMissingˢᵇᴍDecoder = "unquoted or 
 // If there is no byte to read,
 // set d.err to SyntaxError("unexpected EOF")
 // and return ok==false
-[GoMethodBody("mustgetc")] internal static (byte b, bool ok) mustgetcᴍ(ref Decoder d) {
+internal static (byte b, bool ok) mustgetc⁔(/*this*/ ref Decoder d) {
     byte b = default;
     bool ok = default;
 
     (b, ok) = d.getc(); if (!ok) {
         if (AreEqual(d.err, io.EOF)) {
-            d.err = d.syntaxError(unexpectedEofˢᴍDecoder);
+            d.err = d.syntaxError(unexpectedEofˢ⁔Decoder);
         }
     }
     return (b, ok);
 }
 
 // Unread a single byte.
-[GoMethodBody("ungetc")] internal static void ungetcᴍ(ref Decoder d, byte b) {
+internal static void ungetc⁔(/*this*/ ref Decoder d, byte b) {
     if (b == '\n') {
         d.line--;
     }
@@ -1090,20 +1090,20 @@ internal static map<@string, rune> entity = new map<@string, rune>{
 } partial class xml_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedEofInCdataˢᴍDecoder => ref unexpectedEofInCdataˢᵇᴍDecoder;
-private static readonly @string unexpectedEofInCdataˢᵇᴍDecoder = "unexpected EOF in CDATA section"u8;
-internal static ref readonly @string unescapedNotInCdataˢᴍDecoder => ref unescapedNotInCdataˢᵇᴍDecoder;
-private static readonly @string unescapedNotInCdataˢᵇᴍDecoder = "unescaped ]]> not in CDATA section"u8;
-internal static ref readonly @string unescapedInsideQuotedˢᴍDecoder => ref unescapedInsideQuotedˢᵇᴍDecoder;
-private static readonly @string unescapedInsideQuotedˢᵇᴍDecoder = "unescaped < inside quoted string"u8;
-internal static ref readonly @string invalidUtf8ˢᴍDecoder => ref invalidUtf8ˢᵇᴍDecoder;
-private static readonly @string invalidUtf8ˢᵇᴍDecoder = "invalid UTF-8"u8;
+internal static ref readonly @string unexpectedEofInCdataˢ⁔Decoder => ref unexpectedEofInCdataˢᵇ⁔Decoder;
+private static readonly @string unexpectedEofInCdataˢᵇ⁔Decoder = "unexpected EOF in CDATA section"u8;
+internal static ref readonly @string unescapedNotInCdataˢ⁔Decoder => ref unescapedNotInCdataˢᵇ⁔Decoder;
+private static readonly @string unescapedNotInCdataˢᵇ⁔Decoder = "unescaped ]]> not in CDATA section"u8;
+internal static ref readonly @string unescapedInsideQuotedˢ⁔Decoder => ref unescapedInsideQuotedˢᵇ⁔Decoder;
+private static readonly @string unescapedInsideQuotedˢᵇ⁔Decoder = "unescaped < inside quoted string"u8;
+internal static ref readonly @string invalidUtf8ˢ⁔Decoder => ref invalidUtf8ˢᵇ⁔Decoder;
+private static readonly @string invalidUtf8ˢᵇ⁔Decoder = "invalid UTF-8"u8;
 
 // Read plain text section (XML calls it character data).
 // If quote >= 0, we are in a quoted string and need to find the matching quote.
 // If cdata == true, we are in a <![CDATA[ section and need to find ]]>.
 // On failure return nil and leave the error in d.err.
-[GoMethodBody("text")] internal static slice<byte> textᴍ(ref Decoder d, nint quote, bool cdata) {
+internal static slice<byte> text⁔(/*this*/ ref Decoder d, nint quote, bool cdata) {
     byte b0 = default;
     byte b1 = default;
     nint trunc = default;
@@ -1114,7 +1114,7 @@ Input:
         if (!ok) {
             if (cdata) {
                 if (AreEqual(d.err, io.EOF)) {
-                    d.err = d.syntaxError(unexpectedEofInCdataˢᴍDecoder);
+                    d.err = d.syntaxError(unexpectedEofInCdataˢ⁔Decoder);
                 }
                 return default;
             }
@@ -1129,14 +1129,14 @@ Input:
                 trunc = 2;
                 goto break_Input;
             }
-            d.err = d.syntaxError(unescapedNotInCdataˢᴍDecoder);
+            d.err = d.syntaxError(unescapedNotInCdataˢ⁔Decoder);
             return default;
         }
 
         // Stop reading text if we see a <.
         if (b == '<' && !cdata) {
             if (quote >= 0) {
-                d.err = d.syntaxError(unescapedInsideQuotedˢᴍDecoder);
+                d.err = d.syntaxError(unescapedInsideQuotedˢ⁔Decoder);
                 return default;
             }
             d.ungetc((byte)'<');
@@ -1256,7 +1256,7 @@ break_Input:;
     while (len(buf) > 0) {
         var (r, size) = utf8.DecodeRune(buf);
         if (r == utf8.RuneError && size == 1) {
-            d.err = d.syntaxError(invalidUtf8ˢᴍDecoder);
+            d.err = d.syntaxError(invalidUtf8ˢ⁔Decoder);
             return default;
         }
         buf = buf.slice(size);
@@ -1282,7 +1282,7 @@ internal static bool /*inrange*/ isInCharacterRange(rune r) {
 
 // Get name space name: name with a : stuck in the middle.
 // The part before the : is the name space identifier.
-[GoMethodBody("nsname")] internal static (Name name, bool ok) nsnameᴍ(ref Decoder d) {
+internal static (Name name, bool ok) nsname⁔(/*this*/ ref Decoder d) {
     Name name = default;
     bool ok = default;
 
@@ -1304,7 +1304,7 @@ internal static bool /*inrange*/ isInCharacterRange(rune r) {
 // Get name: /first(first|second)*/
 // Do not set d.err if the name is missing (unless unexpected EOF is received):
 // let the caller provide better context.
-[GoMethodBody("name")] internal static (@string s, bool ok) nameᴍ(ref Decoder d) {
+internal static (@string s, bool ok) name⁔(/*this*/ ref Decoder d) {
     d.buf.Reset();
     if (!d.readName()) {
         return ("", false);
@@ -1322,7 +1322,7 @@ internal static bool /*inrange*/ isInCharacterRange(rune r) {
 // Read a name and append its bytes to d.buf.
 // The name is delimited by any single-byte character not valid in names.
 // All multi-byte characters are accepted; the caller must check their validity.
-[GoMethodBody("readName")] internal static bool /*ok*/ readNameᴍ(ref Decoder d) {
+internal static bool /*ok*/ readName⁔(/*this*/ ref Decoder d) {
     bool ok = default;
 
     byte b = default;
@@ -2101,7 +2101,7 @@ internal static error escapeText(io.Writer w, slice<byte> s, bool escapeNewline)
 
 // EscapeString writes to p the properly escaped XML equivalent
 // of the plain text data s.
-[GoMethodBody("EscapeString")] internal static void EscapeStringᴍ(ref printer p, @string s) {
+internal static void EscapeString⁔(/*this*/ ref printer p, @string s) {
     slice<byte> esc = default;
     nint last = 0;
     for (nint i = 0; i < len(s); ) {

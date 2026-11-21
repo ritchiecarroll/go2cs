@@ -41,14 +41,14 @@ partial struct synctestBubble {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string total0ˢᴍsynctestBubble => ref total0ˢᵇᴍsynctestBubble;
-private static readonly @string total0ˢᵇᴍsynctestBubble = "total < 0"u8;
-internal static ref readonly @string running0ˢᴍsynctestBubble => ref running0ˢᵇᴍsynctestBubble;
-private static readonly @string running0ˢᵇᴍsynctestBubble = "running < 0"u8;
+internal static ref readonly @string total0ˢ⁔synctestBubble => ref total0ˢᵇ⁔synctestBubble;
+private static readonly @string total0ˢᵇ⁔synctestBubble = "total < 0"u8;
+internal static ref readonly @string running0ˢ⁔synctestBubble => ref running0ˢᵇ⁔synctestBubble;
+private static readonly @string running0ˢᵇ⁔synctestBubble = "running < 0"u8;
 
 // changegstatus is called when the non-lock status of a g changes.
 // It is never called with a Gscanstatus.
-[GoMethodBody("changegstatus")] internal static void changegstatusᴍ(ж<synctestBubble> Ꮡbubble, ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
+internal static void changegstatus⁔(/*this*/ ж<synctestBubble> Ꮡbubble, ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
     ref var gp = ref Ꮡgp.DerefOrNull();
 
@@ -111,10 +111,10 @@ private static readonly @string running0ˢᵇᴍsynctestBubble = "running < 0"u8
         }
     }
     if (bubble.total < 0) {
-        fatal(total0ˢᴍsynctestBubble);
+        fatal(total0ˢ⁔synctestBubble);
     }
     if (bubble.running < 0) {
-        fatal(running0ˢᴍsynctestBubble);
+        fatal(running0ˢ⁔synctestBubble);
     }
     var wake = Ꮡbubble.maybeWakeLocked();
     unlock(Ꮡbubble.Ꮡmu);
@@ -125,7 +125,7 @@ private static readonly @string running0ˢᵇᴍsynctestBubble = "running < 0"u8
 
 // incActive increments the active-count for the bubble.
 // A bubble does not become durably blocked while the active-count is non-zero.
-[GoMethodBody("incActive")] internal static void incActiveᴍ(ж<synctestBubble> Ꮡbubble) {
+internal static void incActive⁔(/*this*/ ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     @lock(Ꮡbubble.Ꮡmu);
@@ -134,17 +134,17 @@ private static readonly @string running0ˢᵇᴍsynctestBubble = "running < 0"u8
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string active0ˢᴍsynctestBubble => ref active0ˢᵇᴍsynctestBubble;
-private static readonly @string active0ˢᵇᴍsynctestBubble = "active < 0"u8;
+internal static ref readonly @string active0ˢ⁔synctestBubble => ref active0ˢᵇ⁔synctestBubble;
+private static readonly @string active0ˢᵇ⁔synctestBubble = "active < 0"u8;
 
 // decActive decrements the active-count for the bubble.
-[GoMethodBody("decActive")] internal static void decActiveᴍ(ж<synctestBubble> Ꮡbubble) {
+internal static void decActive⁔(/*this*/ ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     @lock(Ꮡbubble.Ꮡmu);
     bubble.active--;
     if (bubble.active < 0) {
-        @throw(active0ˢᴍsynctestBubble);
+        @throw(active0ˢ⁔synctestBubble);
     }
     var wake = Ꮡbubble.maybeWakeLocked();
     unlock(Ꮡbubble.Ꮡmu);
@@ -154,7 +154,7 @@ private static readonly @string active0ˢᵇᴍsynctestBubble = "active < 0"u8;
 }
 
 // maybeWakeLocked returns a g to wake if the bubble is durably blocked.
-[GoMethodBody("maybeWakeLocked")] internal static ж<g> maybeWakeLockedᴍ(ж<synctestBubble> Ꮡbubble) {
+internal static ж<g> maybeWakeLocked⁔(/*this*/ ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     if (bubble.running > 0 || bubble.active > 0) {
@@ -184,7 +184,7 @@ private static readonly @string active0ˢᵇᴍsynctestBubble = "active < 0"u8;
     return bubble.root;
 }
 
-[GoMethodBody("raceaddr")] internal static @unsafe.Pointer raceaddrᴍ(ж<synctestBubble> Ꮡbubble) {
+internal static @unsafe.Pointer raceaddr⁔(/*this*/ ж<synctestBubble> Ꮡbubble) {
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
     // Address used to record happens-before relationships created by the bubble.
@@ -320,7 +320,7 @@ partial struct synctestDeadlockError {
 
 } partial class runtime_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(synctestDeadlockError e) {
+internal static @string Error⁔(/*this*/ synctestDeadlockError e) {
     return e.reason;
 }
 

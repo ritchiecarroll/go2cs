@@ -70,9 +70,12 @@ using static go.runtime.debug_package;
 
 namespace go.runtime;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static debug_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("debug")]
 public static partial class debug_package
@@ -116,11 +119,11 @@ public static partial class debug_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(debug_package.BuildInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class debugᴛBuildInfo;
+[GoMethodHost(typeof(debug_package.BuildInfo)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class debugᴛBuildInfo;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class debugᴛBuildInfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref BuildInfo bi) => debug_package.Stringᴍ(ref bi);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref BuildInfo bi) => debug_package.String⁔(ref bi);
 }
 // </GlyphForwarders>

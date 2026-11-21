@@ -68,7 +68,7 @@ partial struct PublicKey {
 } partial class ecdh_package {
 
 // Bytes returns a copy of the encoding of the public key.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref PublicKey k) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PublicKey k) {
     // Copy the public key to a fixed size buffer that can get allocated on the
     // caller's stack after inlining.
     array<byte> buf = new(133);
@@ -82,7 +82,7 @@ partial struct PublicKey {
 //
 // This check is performed in constant time as long as the key types and their
 // curve match.
-[GoMethodBody("Equal")] internal static bool Equalᴍ(ref PublicKey k, cryptoꓸPublicKey x) {
+internal static bool Equal⁔(/*this*/ ref PublicKey k, cryptoꓸPublicKey x) {
     var (xx, ok) = x._<ж<PublicKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -90,7 +90,7 @@ partial struct PublicKey {
     return AreEqual(k.curve, xx.curve) && subtle.ConstantTimeCompare(k.publicKey, xx.publicKey) == 1;
 }
 
-[GoMethodBody("Curve")] internal static Curve Curveᴍ(ref PublicKey k) {
+internal static Curve Curve⁔(/*this*/ ref PublicKey k) {
     return k.curve;
 }
 
@@ -124,8 +124,8 @@ partial struct PrivateKey {
 } partial class ecdh_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string cryptoEcdhPrivateKeyAndˢᴍPrivateKey => ref cryptoEcdhPrivateKeyAndˢᵇᴍPrivateKey;
-private static readonly @string cryptoEcdhPrivateKeyAndˢᵇᴍPrivateKey = "crypto/ecdh: private key and public key curves do not match"u8;
+private static ref readonly @string cryptoEcdhPrivateKeyAndˢ⁔PrivateKey => ref cryptoEcdhPrivateKeyAndˢᵇ⁔PrivateKey;
+private static readonly @string cryptoEcdhPrivateKeyAndˢᵇ⁔PrivateKey = "crypto/ecdh: private key and public key curves do not match"u8;
 
 // ECDH performs an ECDH exchange and returns the shared secret. The [PrivateKey]
 // and [PublicKey] must use the same curve.
@@ -138,18 +138,18 @@ private static readonly @string cryptoEcdhPrivateKeyAndˢᵇᴍPrivateKey = "cry
 //
 // For [X25519], this performs ECDH as specified in RFC 7748, Section 6.1. If
 // the result is the all-zero value, ECDH returns an error.
-[GoMethodBody("ECDH")] internal static (slice<byte>, error) ECDHᴍ(ж<PrivateKey> Ꮡk, ж<PublicKey> Ꮡremote) {
+internal static (slice<byte>, error) ECDH⁔(/*this*/ ж<PrivateKey> Ꮡk, ж<PublicKey> Ꮡremote) {
     ref var k = ref Ꮡk.DerefOrNull();
     ref var remote = ref Ꮡremote.DerefOrNull();
 
     if (!AreEqual(k.curve, remote.curve)) {
-        return (default, errors.New(cryptoEcdhPrivateKeyAndˢᴍPrivateKey));
+        return (default, errors.New(cryptoEcdhPrivateKeyAndˢ⁔PrivateKey));
     }
     return k.curve.ecdh(Ꮡk, Ꮡremote);
 }
 
 // Bytes returns a copy of the encoding of the private key.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref PrivateKey k) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PrivateKey k) {
     // Copy the private key to a fixed size buffer that can get allocated on the
     // caller's stack after inlining.
     array<byte> buf = new(66);
@@ -163,7 +163,7 @@ private static readonly @string cryptoEcdhPrivateKeyAndˢᵇᴍPrivateKey = "cry
 //
 // This check is performed in constant time as long as the key types and their
 // curve match.
-[GoMethodBody("Equal")] internal static bool Equalᴍ(ref PrivateKey k, cryptoꓸPrivateKey x) {
+internal static bool Equal⁔(/*this*/ ref PrivateKey k, cryptoꓸPrivateKey x) {
     var (xx, ok) = x._<ж<PrivateKey>>(ᐧ);
     if (!ok) {
         return false;
@@ -171,17 +171,17 @@ private static readonly @string cryptoEcdhPrivateKeyAndˢᵇᴍPrivateKey = "cry
     return AreEqual(k.curve, xx.curve) && subtle.ConstantTimeCompare(k.privateKey, xx.privateKey) == 1;
 }
 
-[GoMethodBody("Curve")] internal static Curve Curveᴍ(ref PrivateKey k) {
+internal static Curve Curve⁔(/*this*/ ref PrivateKey k) {
     return k.curve;
 }
 
-[GoMethodBody("PublicKey")] internal static ж<PublicKey> PublicKeyᴍ(ref PrivateKey k) {
+internal static ж<PublicKey> PublicKey⁔(/*this*/ ref PrivateKey k) {
     return k.publicKey;
 }
 
 // Public implements the implicit interface of all standard library private
 // keys. See the docs of [crypto.PrivateKey].
-[GoMethodBody("Public")] internal static cryptoꓸPublicKey Publicᴍ(ref PrivateKey k) {
+internal static cryptoꓸPublicKey Public⁔(/*this*/ ref PrivateKey k) {
     return k.PublicKey().OrTypedNil();
 }
 

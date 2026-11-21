@@ -44,19 +44,19 @@ internal static (ж<netFD>, error) newFD(nint sysfd, nint family, nint sotype, @
 
 } partial class net_package {
 
-[GoMethodBody("init")] internal static error initᴍ(ж<netFD> Ꮡfd) {
+internal static error init⁔(/*this*/ ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     return Ꮡfd.Ꮡpfd.Init(fd.net, true);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string connectˢᴍnetFD => ref connectˢᵇᴍnetFD;
-private static readonly @string connectˢᵇᴍnetFD = "connect"u8;
-internal static ref readonly @string getsockoptˢᴍnetFD => ref getsockoptˢᵇᴍnetFD;
-private static readonly @string getsockoptˢᵇᴍnetFD = "getsockopt"u8;
+internal static ref readonly @string connectˢ⁔netFD => ref connectˢᵇ⁔netFD;
+private static readonly @string connectˢᵇ⁔netFD = "connect"u8;
+internal static ref readonly @string getsockoptˢ⁔netFD => ref getsockoptˢᵇ⁔netFD;
+private static readonly @string getsockoptˢᵇ⁔netFD = "getsockopt"u8;
 
-[GoMethodBody("connect")] internal static (syscall.Sockaddr rsa, error ret) connectᴍ(ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
+internal static (syscall.Sockaddr rsa, error ret) connect⁔(/*this*/ ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
     syscall.Sockaddr rsa = default;
     error ret = default;
     GoFrame ᒐ = default;
@@ -98,7 +98,7 @@ private static readonly @string getsockoptˢᵇᴍnetFD = "getsockopt"u8;
                 fallthrough = true;
             }
             if (fallthrough || !matchᴛ1) { /* default: */
-                (rsa, ret) = (default, os.NewSyscallError(connectˢᴍnetFD, err)); goto ᒐdone;
+                (rsa, ret) = (default, os.NewSyscallError(connectˢ⁔netFD, err)); goto ᒐdone;
             }
         }
         {
@@ -167,7 +167,7 @@ private static readonly @string getsockoptˢᵇᴍnetFD = "getsockopt"u8;
             }
             var (nerr, err) = getsockoptIntFunc(fd.pfd.Sysfd, syscall.SOL_SOCKET, syscall.SO_ERROR);
             if (err != nil) {
-                (rsa, ret) = (default, os.NewSyscallError(getsockoptˢᴍnetFD, err)); goto ᒐdone;
+                (rsa, ret) = (default, os.NewSyscallError(getsockoptˢ⁔netFD, err)); goto ᒐdone;
             }
             {
                 var errΔ1 = (syscall.Errno)(uintptr)nerr;
@@ -188,7 +188,7 @@ private static readonly @string getsockoptˢᵇᴍnetFD = "getsockopt"u8;
                     break;
                 }
                 default: {
-                    (rsa, ret) = (default, os.NewSyscallError(connectˢᴍnetFD, errΔ1)); goto ᒐdone;
+                    (rsa, ret) = (default, os.NewSyscallError(connectˢ⁔netFD, errΔ1)); goto ᒐdone;
                 }}
             }
             runtime.KeepAlive(Ꮡfd.OrTypedNil());
@@ -199,7 +199,7 @@ private static readonly @string getsockoptˢᵇᴍnetFD = "getsockopt"u8;
     ᒐdone: return (rsa, ret);
 }
 
-[GoMethodBody("accept")] internal static (ж<netFD> netfd, error err) acceptᴍ(ж<netFD> Ꮡfd) {
+internal static (ж<netFD> netfd, error err) accept⁔(/*this*/ ж<netFD> Ꮡfd) {
     ж<netFD> netfd = default;
     error err = default;
     ref var fd = ref Ꮡfd.DerefOrNull();
@@ -234,7 +234,7 @@ private static readonly @string getsockoptˢᵇᴍnetFD = "getsockopt"u8;
 
 } partial class net_package {
 
-[GoMethodBody("dup")] internal static (ж<os.File> f, error err) dupᴍ(ж<netFD> Ꮡfd) {
+internal static (ж<os.File> f, error err) dup⁔(/*this*/ ж<netFD> Ꮡfd) {
     error err = default;
     ref var fd = ref Ꮡfd.DerefOrNull();
 

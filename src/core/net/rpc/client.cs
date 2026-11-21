@@ -23,7 +23,7 @@ partial struct ServerError /*@string*/;
 
 } partial class rpc_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ServerError e) {
+internal static @string Error⁔(/*this*/ ServerError e) {
     return (@string)e;
 }
 
@@ -74,7 +74,7 @@ partial interface ClientCodec :
 
 } partial class rpc_package {
 
-[GoMethodBody("send")] internal static void sendᴍ(ж<Client> Ꮡclient, ж<Call> Ꮡcall) {
+internal static void send⁔(/*this*/ ж<Client> Ꮡclient, ж<Call> Ꮡcall) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -117,9 +117,9 @@ partial interface ClientCodec :
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object rpcClientProtocolErrorˢᴍClient = (@string)"rpc: client protocol error:"u8;
+internal static readonly object rpcClientProtocolErrorˢ⁔Client = (@string)"rpc: client protocol error:"u8;
 
-[GoMethodBody("input")] internal static void inputᴍ(ж<Client> Ꮡclient) {
+internal static void input⁔(/*this*/ ж<Client> Ꮡclient) {
     ref var client = ref Ꮡclient.DerefOrNull();
 
     error err = default;
@@ -189,16 +189,16 @@ internal static readonly object rpcClientProtocolErrorˢᴍClient = (@string)"rp
     client.mutex.Unlock();
     client.reqMutex.Unlock();
     if (debugLog && !AreEqual(err, io.EOF) && !closing) {
-        log.Println(rpcClientProtocolErrorˢᴍClient, err);
+        log.Println(rpcClientProtocolErrorˢ⁔Client, err);
     }
 }
 
 } partial class rpc_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object rpcDiscardingCallReplyˢᴍCall = (@string)"rpc: discarding Call reply due to insufficient Done chan capacity"u8;
+internal static readonly object rpcDiscardingCallReplyˢ⁔Call = (@string)"rpc: discarding Call reply due to insufficient Done chan capacity"u8;
 
-[GoMethodBody("done")] internal static void doneᴍ(ж<Call> Ꮡcall) {
+internal static void done⁔(/*this*/ ж<Call> Ꮡcall) {
     ref var call = ref Ꮡcall.DerefOrNull();
 
     var selᴛ1 = call.Done.ᐸꟷ(Ꮡcall, ꓸꓸꓸ);
@@ -211,7 +211,7 @@ internal static readonly object rpcDiscardingCallReplyˢᴍCall = (@string)"rpc:
         // We don't want to block here. It is the caller's responsibility to make
         // sure the channel has enough buffer space. See comment in Go().
         if (debugLog) {
-            log.Println(rpcDiscardingCallReplyˢᴍCall);
+            log.Println(rpcDiscardingCallReplyˢ⁔Call);
         }
         break;
     }}
@@ -255,7 +255,7 @@ partial struct gobClientCodec {
 
 } partial class rpc_package {
 
-[GoMethodBody("WriteRequest")] internal static error /*err*/ WriteRequestᴍ(ref gobClientCodec c, ж<Request> r, any body) {
+internal static error /*err*/ WriteRequest⁔(/*this*/ ref gobClientCodec c, ж<Request> r, any body) {
     error err = default;
 
     err = c.enc.Encode(r.OrTypedNil()); if (err != nil) {
@@ -267,15 +267,15 @@ partial struct gobClientCodec {
     return c.encBuf.Flush();
 }
 
-[GoMethodBody("ReadResponseHeader")] internal static error ReadResponseHeaderᴍ(ref gobClientCodec c, ж<Response> r) {
+internal static error ReadResponseHeader⁔(/*this*/ ref gobClientCodec c, ж<Response> r) {
     return c.dec.Decode(r.OrTypedNil());
 }
 
-[GoMethodBody("ReadResponseBody")] internal static error ReadResponseBodyᴍ(ref gobClientCodec c, any body) {
+internal static error ReadResponseBody⁔(/*this*/ ref gobClientCodec c, any body) {
     return c.dec.Decode(body);
 }
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ref gobClientCodec c) {
+internal static error Close⁔(/*this*/ ref gobClientCodec c) {
     return c.rwc.Close();
 }
 
@@ -327,7 +327,7 @@ public static (ж<Client>, error) Dial(@string network, @string address) {
 
 // Close calls the underlying codec's Close method. If the connection is already
 // shutting down, [ErrShutdown] is returned.
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<Client> Ꮡclient) {
+internal static error Close⁔(/*this*/ ж<Client> Ꮡclient) {
     ref var client = ref Ꮡclient.DerefOrNull();
 
     client.mutex.Lock();
@@ -341,13 +341,13 @@ public static (ж<Client>, error) Dial(@string network, @string address) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object rpcDoneChannelIsˢᴍClient = (@string)"rpc: done channel is unbuffered"u8;
+internal static readonly object rpcDoneChannelIsˢ⁔Client = (@string)"rpc: done channel is unbuffered"u8;
 
 // Go invokes the function asynchronously. It returns the [Call] structure representing
 // the invocation. The done channel will signal when the call is complete by returning
 // the same Call object. If done is nil, Go will allocate a new channel.
 // If non-nil, done must be buffered or Go will deliberately crash.
-[GoMethodBody("Go")] internal static ж<Call> Goᴍ(ж<Client> Ꮡclient, @string serviceMethod, any args, any reply, channel<ж<Call>> done) {
+internal static ж<Call> Go⁔(/*this*/ ж<Client> Ꮡclient, @string serviceMethod, any args, any reply, channel<ж<Call>> done) {
     var call = @new<Call>();
     call.ServiceMethod = serviceMethod;
     call.Args = args;
@@ -360,7 +360,7 @@ internal static readonly object rpcDoneChannelIsˢᴍClient = (@string)"rpc: don
         // RPCs that will be using that channel. If the channel
         // is totally unbuffered, it's best not to run at all.
         if (cap(done) == 0) {
-            log.Panic(rpcDoneChannelIsˢᴍClient);
+            log.Panic(rpcDoneChannelIsˢ⁔Client);
         }
     }
     call.Done = done;
@@ -369,7 +369,7 @@ internal static readonly object rpcDoneChannelIsˢᴍClient = (@string)"rpc: don
 }
 
 // Call invokes the named function, waits for it to complete, and returns its error status.
-[GoMethodBody("Call")] internal static error Callᴍ(ж<Client> Ꮡclient, @string serviceMethod, any args, any reply) {
+internal static error Call⁔(/*this*/ ж<Client> Ꮡclient, @string serviceMethod, any args, any reply) {
     var call = ᐸꟷ(Ꮡclient.Go(serviceMethod, args, reply, new channel<ж<Call>>(1)).Done);
     return call.Error;
 }

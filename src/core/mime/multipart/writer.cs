@@ -38,17 +38,17 @@ public static ж<Writer> NewWriter(io.Writer w) {
 } partial class multipart_package {
 
 // Boundary returns the [Writer]'s boundary.
-[GoMethodBody("Boundary")] internal static @string Boundaryᴍ(ref Writer w) {
+internal static @string Boundary⁔(/*this*/ ref Writer w) {
     return w.boundary;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mimeSetBoundaryCalledˢᴍWriter => ref mimeSetBoundaryCalledˢᵇᴍWriter;
-private static readonly @string mimeSetBoundaryCalledˢᵇᴍWriter = "mime: SetBoundary called after write"u8;
-internal static ref readonly @string mimeInvalidBoundaryˢᴍWriter => ref mimeInvalidBoundaryˢᵇᴍWriter;
-private static readonly @string mimeInvalidBoundaryˢᵇᴍWriter = "mime: invalid boundary length"u8;
-internal static ref readonly @string mimeInvalidBoundaryˢ2ᴍWriter => ref mimeInvalidBoundaryˢ2ᵇᴍWriter;
-private static readonly @string mimeInvalidBoundaryˢ2ᵇᴍWriter = "mime: invalid boundary character"u8;
+internal static ref readonly @string mimeSetBoundaryCalledˢ⁔Writer => ref mimeSetBoundaryCalledˢᵇ⁔Writer;
+private static readonly @string mimeSetBoundaryCalledˢᵇ⁔Writer = "mime: SetBoundary called after write"u8;
+internal static ref readonly @string mimeInvalidBoundaryˢ⁔Writer => ref mimeInvalidBoundaryˢᵇ⁔Writer;
+private static readonly @string mimeInvalidBoundaryˢᵇ⁔Writer = "mime: invalid boundary length"u8;
+internal static ref readonly @string mimeInvalidBoundaryˢ2⁔Writer => ref mimeInvalidBoundaryˢ2ᵇ⁔Writer;
+private static readonly @string mimeInvalidBoundaryˢ2ᵇ⁔Writer = "mime: invalid boundary character"u8;
 
 // SetBoundary overrides the [Writer]'s default randomly-generated
 // boundary separator with an explicit value.
@@ -56,13 +56,13 @@ private static readonly @string mimeInvalidBoundaryˢ2ᵇᴍWriter = "mime: inva
 // SetBoundary must be called before any parts are created, may only
 // contain certain ASCII characters, and must be non-empty and
 // at most 70 bytes long.
-[GoMethodBody("SetBoundary")] internal static error SetBoundaryᴍ(ref Writer w, @string boundary) {
+internal static error SetBoundary⁔(/*this*/ ref Writer w, @string boundary) {
     if (w.lastpart != nil) {
-        return errors.New(mimeSetBoundaryCalledˢᴍWriter);
+        return errors.New(mimeSetBoundaryCalledˢ⁔Writer);
     }
     // rfc2046#section-5.1.1
     if (len(boundary) < 1 || len(boundary) > 70) {
-        return errors.New(mimeInvalidBoundaryˢᴍWriter);
+        return errors.New(mimeInvalidBoundaryˢ⁔Writer);
     }
     nint end = len(boundary) - 1;
     foreach (var (i, b) in boundary) {
@@ -80,7 +80,7 @@ private static readonly @string mimeInvalidBoundaryˢ2ᵇᴍWriter = "mime: inva
             }
             break;
         }}
-        return errors.New(mimeInvalidBoundaryˢ2ᴍWriter);
+        return errors.New(mimeInvalidBoundaryˢ2⁔Writer);
     }
     w.boundary = boundary;
     return default;
@@ -88,7 +88,7 @@ private static readonly @string mimeInvalidBoundaryˢ2ᵇᴍWriter = "mime: inva
 
 // FormDataContentType returns the Content-Type for an HTTP
 // multipart/form-data with this [Writer]'s Boundary.
-[GoMethodBody("FormDataContentType")] internal static @string FormDataContentTypeᴍ(ref Writer w) {
+internal static @string FormDataContentType⁔(/*this*/ ref Writer w) {
     @string b = w.boundary;
     // We must quote the boundary if it contains any of the
     // tspecials characters defined by RFC 2045, or space.
@@ -115,7 +115,7 @@ internal static @string randomBoundary() {
 // header. The body of the part should be written to the returned
 // [Writer]. After calling CreatePart, any previous part may no longer
 // be written to.
-[GoMethodBody("CreatePart")] internal static (io.Writer, error) CreatePartᴍ(ж<Writer> Ꮡw, textproto.MIMEHeader header) {
+internal static (io.Writer, error) CreatePart⁔(/*this*/ ж<Writer> Ꮡw, textproto.MIMEHeader header) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     if (w.lastpart != nil) {
@@ -170,27 +170,27 @@ internal static @string escapeQuotes(@string s) {
 } partial class multipart_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentDispositionˢᴍWriter => ref contentDispositionˢᵇᴍWriter;
-private static readonly @string contentDispositionˢᵇᴍWriter = "Content-Disposition"u8;
-internal static ref readonly @string contentTypeˢᴍWriter => ref contentTypeˢᵇᴍWriter;
-private static readonly @string contentTypeˢᵇᴍWriter = "Content-Type"u8;
-internal static ref readonly @string applicationOctetStreamˢᴍWriter => ref applicationOctetStreamˢᵇᴍWriter;
-private static readonly @string applicationOctetStreamˢᵇᴍWriter = "application/octet-stream"u8;
+internal static ref readonly @string contentDispositionˢ⁔Writer => ref contentDispositionˢᵇ⁔Writer;
+private static readonly @string contentDispositionˢᵇ⁔Writer = "Content-Disposition"u8;
+internal static ref readonly @string contentTypeˢ⁔Writer => ref contentTypeˢᵇ⁔Writer;
+private static readonly @string contentTypeˢᵇ⁔Writer = "Content-Type"u8;
+internal static ref readonly @string applicationOctetStreamˢ⁔Writer => ref applicationOctetStreamˢᵇ⁔Writer;
+private static readonly @string applicationOctetStreamˢᵇ⁔Writer = "application/octet-stream"u8;
 
 // CreateFormFile is a convenience wrapper around [Writer.CreatePart]. It creates
 // a new form-data header with the provided field name and file name.
-[GoMethodBody("CreateFormFile")] internal static (io.Writer, error) CreateFormFileᴍ(ж<Writer> Ꮡw, @string fieldname, @string filename) {
+internal static (io.Writer, error) CreateFormFile⁔(/*this*/ ж<Writer> Ꮡw, @string fieldname, @string filename) {
     var h = new textproto.MIMEHeader(0);
-    h.Set(contentDispositionˢᴍWriter, FileContentDisposition(fieldname, filename));
-    h.Set(contentTypeˢᴍWriter, applicationOctetStreamˢᴍWriter);
+    h.Set(contentDispositionˢ⁔Writer, FileContentDisposition(fieldname, filename));
+    h.Set(contentTypeˢ⁔Writer, applicationOctetStreamˢ⁔Writer);
     return Ꮡw.CreatePart(h);
 }
 
 // CreateFormField calls [Writer.CreatePart] with a header using the
 // given field name.
-[GoMethodBody("CreateFormField")] internal static (io.Writer, error) CreateFormFieldᴍ(ж<Writer> Ꮡw, @string fieldname) {
+internal static (io.Writer, error) CreateFormField⁔(/*this*/ ж<Writer> Ꮡw, @string fieldname) {
     var h = new textproto.MIMEHeader(0);
-    h.Set(contentDispositionˢᴍWriter,
+    h.Set(contentDispositionˢ⁔Writer,
         fmt.Sprintf(@"form-data; name=""%s"""u8, escapeQuotes(fieldname)));
     return Ꮡw.CreatePart(h);
 }
@@ -207,7 +207,7 @@ public static @string FileContentDisposition(@string fieldname, @string filename
 } partial class multipart_package {
 
 // WriteField calls [Writer.CreateFormField] and then writes the given value.
-[GoMethodBody("WriteField")] internal static error WriteFieldᴍ(ж<Writer> Ꮡw, @string fieldname, @string value) {
+internal static error WriteField⁔(/*this*/ ж<Writer> Ꮡw, @string fieldname, @string value) {
     var (p, err) = Ꮡw.CreateFormField(fieldname);
     if (err != nil) {
         return err;
@@ -218,7 +218,7 @@ public static @string FileContentDisposition(@string fieldname, @string filename
 
 // Close finishes the multipart message and writes the trailing
 // boundary end line to the output.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref Writer w) {
+internal static error Close⁔(/*this*/ ref Writer w) {
     if (w.lastpart != nil) {
         var errΔ1 = w.lastpart.close(); if (errΔ1 != nil) {
             return errΔ1;
@@ -239,21 +239,21 @@ partial struct part {
 
 } partial class multipart_package {
 
-[GoMethodBody("close")] internal static error closeᴍ(ref part p) {
+internal static error close⁔(/*this*/ ref part p) {
     p.closed = true;
     return p.we;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string multipartCanTWriteToˢᴍpart => ref multipartCanTWriteToˢᵇᴍpart;
-private static readonly @string multipartCanTWriteToˢᵇᴍpart = "multipart: can't write to finished part"u8;
+internal static ref readonly @string multipartCanTWriteToˢ⁔part => ref multipartCanTWriteToˢᵇ⁔part;
+private static readonly @string multipartCanTWriteToˢᵇ⁔part = "multipart: can't write to finished part"u8;
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref part p, slice<byte> d) {
+internal static (nint n, error err) Write⁔(/*this*/ ref part p, slice<byte> d) {
     nint n = default;
     error err = default;
 
     if (p.closed) {
-        return (0, errors.New(multipartCanTWriteToˢᴍpart));
+        return (0, errors.New(multipartCanTWriteToˢ⁔part));
     }
     (n, err) = p.mw.w.Write(d);
     if (err != nil) {

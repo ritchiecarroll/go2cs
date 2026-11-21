@@ -33,7 +33,7 @@ internal static (ж<sharedMem>, error) sharedMemMapFile(ж<os.File> f, nint size
 
 // Close unmaps the shared memory and closes the temporary file. If this
 // sharedMem was created with sharedMemTempFile, Close also removes the file.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref sharedMem m) {
+internal static error Close⁔(/*this*/ ref sharedMem m) {
     var errsᴷ = new stackAppend<error>();
 
     // Attempt all operations, even if we get an error for an earlier operation.

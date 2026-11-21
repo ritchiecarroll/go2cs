@@ -15,12 +15,12 @@ partial class x509_package {
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidLeafCertificateˢᴍCertificate => ref invalidLeafCertificateˢᵇᴍCertificate;
-private static readonly @string invalidLeafCertificateˢᵇᴍCertificate = "invalid leaf certificate"u8;
-internal static ref readonly @string x509MacosCertificateˢᴍCertificate => ref x509MacosCertificateˢᵇᴍCertificate;
-private static readonly @string x509MacosCertificateˢᵇᴍCertificate = "x509: macos certificate verification internal error"u8;
+internal static ref readonly @string invalidLeafCertificateˢ⁔Certificate => ref invalidLeafCertificateˢᵇ⁔Certificate;
+private static readonly @string invalidLeafCertificateˢᵇ⁔Certificate = "invalid leaf certificate"u8;
+internal static ref readonly @string x509MacosCertificateˢ⁔Certificate => ref x509MacosCertificateˢᵇ⁔Certificate;
+private static readonly @string x509MacosCertificateˢᵇ⁔Certificate = "x509: macos certificate verification internal error"u8;
 
-[GoMethodBody("systemVerify")] internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerifyᴍ(ж<Certificate> Ꮡc, ж<VerifyOptions> Ꮡopts) {
+internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify⁔(/*this*/ ж<Certificate> Ꮡc, ж<VerifyOptions> Ꮡopts) {
     slice<slice<ж<Certificate>>> chains = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -32,7 +32,7 @@ private static readonly @string x509MacosCertificateˢᵇᴍCertificate = "x509:
         defer(macos.ReleaseCFArray, certs, ref ᒐ);
         (var leaf, err) = macos.SecCertificateCreateWithData(c.Raw);
         if (err != nil) {
-            (chains, err) = (default, errors.New(invalidLeafCertificateˢᴍCertificate)); goto ᒐdone;
+            (chains, err) = (default, errors.New(invalidLeafCertificateˢ⁔Certificate)); goto ᒐdone;
         }
         macos.CFArrayAppendValue(certs, leaf);
         if (opts.Intermediates != nil) {
@@ -109,7 +109,7 @@ private static readonly @string x509MacosCertificateˢᵇᴍCertificate = "x509:
 
         if (len(chain[0]) == 0) {
             // This should _never_ happen, but to be safe
-            (chains, err) = (default, errors.New(x509MacosCertificateˢᴍCertificate)); goto ᒐdone;
+            (chains, err) = (default, errors.New(x509MacosCertificateˢ⁔Certificate)); goto ᒐdone;
         }
 
         if (containsDistrustedSPKIHash(chain[0])) {

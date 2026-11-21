@@ -47,19 +47,19 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
 
 // UseNumber causes the Decoder to unmarshal a number into an
 // interface value as a [Number] instead of as a float64.
-[GoMethodBody("UseNumber")] internal static void UseNumberᴍ(ref Decoder dec) { dec.d.useNumber = true; }
+internal static void UseNumber⁔(/*this*/ ref Decoder dec) { dec.d.useNumber = true; }
 
 // DisallowUnknownFields causes the Decoder to return an error when the destination
 // is a struct and the input contains object keys which do not match any
 // non-ignored, exported fields in the destination.
-[GoMethodBody("DisallowUnknownFields")] internal static void DisallowUnknownFieldsᴍ(ref Decoder dec) { dec.d.disallowUnknownFields = true; }
+internal static void DisallowUnknownFields⁔(/*this*/ ref Decoder dec) { dec.d.disallowUnknownFields = true; }
 
 // Decode reads the next JSON-encoded value from its
 // input and stores it in the value pointed to by v.
 //
 // See the documentation for [Unmarshal] for details about
 // the conversion of JSON into a Go value.
-[GoMethodBody("Decode")] internal static error Decodeᴍ(ж<Decoder> Ꮡdec, any v) {
+internal static error Decode⁔(/*this*/ ж<Decoder> Ꮡdec, any v) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     if (dec.err != nil) {
@@ -95,13 +95,13 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
 
 // Buffered returns a reader of the data remaining in the Decoder's
 // buffer. The reader is valid until the next call to [Decoder.Decode].
-[GoMethodBody("Buffered")] internal static io.Reader Bufferedᴍ(ref Decoder dec) {
+internal static io.Reader Buffered⁔(/*this*/ ref Decoder dec) {
     return new bytes_ReaderжReader(bytes.NewReader(dec.buf.slice(dec.scanp)));
 }
 
 // readValue reads a JSON value into dec.buf.
 // It returns the length of the encoding.
-[GoMethodBody("readValue")] internal static (nint, error) readValueᴍ(ж<Decoder> Ꮡdec) {
+internal static (nint, error) readValue⁔(/*this*/ ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     dec.scan.reset();
@@ -166,7 +166,7 @@ break_Input:;
     return (scanp - dec.scanp, default);
 }
 
-[GoMethodBody("refill")] internal static error refillᴍ(ref Decoder dec) {
+internal static error refill⁔(/*this*/ ref Decoder dec) {
     // Make room to read more into the buffer.
     // First slide down data already consumed.
     if (dec.scanp > 0) {
@@ -225,7 +225,7 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 //
 // See the documentation for [Marshal] for details about the
 // conversion of Go values to JSON.
-[GoMethodBody("Encode")] internal static error Encodeᴍ(ж<Encoder> Ꮡenc, any v) {
+internal static error Encode⁔(/*this*/ ж<Encoder> Ꮡenc, any v) {
     GoFrame ᒐ = default;
     try {
         ref var enc = ref Ꮡenc.DerefOrNull();
@@ -270,7 +270,7 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 // SetIndent instructs the encoder to format each subsequent encoded
 // value as if indented by the package-level function Indent(dst, src, prefix, indent).
 // Calling SetIndent("", "") disables indentation.
-[GoMethodBody("SetIndent")] internal static void SetIndentᴍ(ref Encoder enc, @string prefix, @string indent) {
+internal static void SetIndent⁔(/*this*/ ref Encoder enc, @string prefix, @string indent) {
     enc.indentPrefix = prefix;
     enc.indentValue = indent;
 }
@@ -282,7 +282,7 @@ public static ж<Encoder> NewEncoder(io.Writer w) {
 //
 // In non-HTML settings where the escaping interferes with the readability
 // of the output, SetEscapeHTML(false) disables this behavior.
-[GoMethodBody("SetEscapeHTML")] internal static void SetEscapeHTMLᴍ(ref Encoder enc, bool on) {
+internal static void SetEscapeHTML⁔(/*this*/ ref Encoder enc, bool on) {
     enc.escapeHTML = on;
 }
 
@@ -296,7 +296,7 @@ partial struct RawMessage /*[]byte*/;
 } partial class json_package {
 
 // MarshalJSON returns m as the JSON encoding of m.
-[GoMethodBody("MarshalJSON")] internal static (slice<byte>, error) MarshalJSONᴍ(RawMessage m) {
+internal static (slice<byte>, error) MarshalJSON⁔(/*this*/ RawMessage m) {
     if (m == nil) {
         return (slice<byte>("null"u8), default);
     }
@@ -304,15 +304,15 @@ partial struct RawMessage /*[]byte*/;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string jsonRawMessageˢᴍRawMessage => ref jsonRawMessageˢᵇᴍRawMessage;
-private static readonly @string jsonRawMessageˢᵇᴍRawMessage = "json.RawMessage: UnmarshalJSON on nil pointer"u8;
+internal static ref readonly @string jsonRawMessageˢ⁔RawMessage => ref jsonRawMessageˢᵇ⁔RawMessage;
+private static readonly @string jsonRawMessageˢᵇ⁔RawMessage = "json.RawMessage: UnmarshalJSON on nil pointer"u8;
 
 // UnmarshalJSON sets *m to a copy of data.
-[GoMethodBody("UnmarshalJSON")] internal static error UnmarshalJSONᴍ(ж<RawMessage> Ꮡm, slice<byte> data) {
+internal static error UnmarshalJSON⁔(/*this*/ ж<RawMessage> Ꮡm, slice<byte> data) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (Ꮡm == nil) {
-        return errors.New(jsonRawMessageˢᴍRawMessage);
+        return errors.New(jsonRawMessageˢ⁔RawMessage);
     }
     m = appendꓸꓸꓸ((m)[0..0], data);
     return default;
@@ -336,7 +336,7 @@ internal static UntypedInt tokenObjectComma => 8;
 } partial class json_package {
 
 // advance tokenstate from a separator state to a value state
-[GoMethodBody("tokenPrepareForDecode")] internal static error tokenPrepareForDecodeᴍ(ref Decoder dec) {
+internal static error tokenPrepareForDecode⁔(/*this*/ ref Decoder dec) {
     // Note: Not calling peek before switch, to avoid
     // putting peek into the standard Decode path.
     // peek is only called when using the Token API.
@@ -368,7 +368,7 @@ internal static UntypedInt tokenObjectComma => 8;
     return default;
 }
 
-[GoMethodBody("tokenValueAllowed")] internal static bool tokenValueAllowedᴍ(ref Decoder dec) {
+internal static bool tokenValueAllowed⁔(/*this*/ ref Decoder dec) {
     switch (dec.tokenState) {
     case var ᴛ when ᴛ == tokenTopValue || ᴛ == tokenArrayStart || ᴛ == tokenArrayValue || ᴛ == tokenObjectValue: {
         return true;
@@ -376,7 +376,7 @@ internal static UntypedInt tokenObjectComma => 8;
     return false;
 }
 
-[GoMethodBody("tokenValueEnd")] internal static void tokenValueEndᴍ(ref Decoder dec) {
+internal static void tokenValueEnd⁔(/*this*/ ref Decoder dec) {
     switch (dec.tokenState) {
     case var ᴛ when ᴛ == tokenArrayStart || ᴛ == tokenArrayValue: {
         dec.tokenState = tokenArrayComma;
@@ -395,7 +395,7 @@ partial struct Delim /*num:rune*/;
 
 } partial class json_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Delim d) {
+internal static @string String⁔(/*this*/ Delim d) {
     return (@string)(rune)d;
 }
 
@@ -412,7 +412,7 @@ partial struct Delim /*num:rune*/;
 // number, and null—along with delimiters [ ] { } of type [Delim]
 // to mark the start and end of arrays and objects.
 // Commas and colons are elided.
-[GoMethodBody("Token")] internal static (Token, error) Tokenᴍ(ж<Decoder> Ꮡdec) {
+internal static (Token, error) Token⁔(/*this*/ ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     for (;;) {
@@ -509,42 +509,42 @@ partial struct Delim /*num:rune*/;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string lookingForBeginningOfˢ3ᴍDecoder => ref lookingForBeginningOfˢ3ᵇᴍDecoder;
-private static readonly @string lookingForBeginningOfˢ3ᵇᴍDecoder = " looking for beginning of value"u8;
-internal static ref readonly @string afterArrayElementˢ2ᴍDecoder => ref afterArrayElementˢ2ᵇᴍDecoder;
-private static readonly @string afterArrayElementˢ2ᵇᴍDecoder = " after array element"u8;
-internal static ref readonly @string lookingForBeginningOfˢ4ᴍDecoder => ref lookingForBeginningOfˢ4ᵇᴍDecoder;
-private static readonly @string lookingForBeginningOfˢ4ᵇᴍDecoder = " looking for beginning of object key string"u8;
-internal static ref readonly @string afterObjectKeyˢ2ᴍDecoder => ref afterObjectKeyˢ2ᵇᴍDecoder;
-private static readonly @string afterObjectKeyˢ2ᵇᴍDecoder = " after object key"u8;
-internal static ref readonly @string afterObjectKeyValuePairˢ2ᴍDecoder => ref afterObjectKeyValuePairˢ2ᵇᴍDecoder;
-private static readonly @string afterObjectKeyValuePairˢ2ᵇᴍDecoder = " after object key:value pair"u8;
+internal static ref readonly @string lookingForBeginningOfˢ3⁔Decoder => ref lookingForBeginningOfˢ3ᵇ⁔Decoder;
+private static readonly @string lookingForBeginningOfˢ3ᵇ⁔Decoder = " looking for beginning of value"u8;
+internal static ref readonly @string afterArrayElementˢ2⁔Decoder => ref afterArrayElementˢ2ᵇ⁔Decoder;
+private static readonly @string afterArrayElementˢ2ᵇ⁔Decoder = " after array element"u8;
+internal static ref readonly @string lookingForBeginningOfˢ4⁔Decoder => ref lookingForBeginningOfˢ4ᵇ⁔Decoder;
+private static readonly @string lookingForBeginningOfˢ4ᵇ⁔Decoder = " looking for beginning of object key string"u8;
+internal static ref readonly @string afterObjectKeyˢ2⁔Decoder => ref afterObjectKeyˢ2ᵇ⁔Decoder;
+private static readonly @string afterObjectKeyˢ2ᵇ⁔Decoder = " after object key"u8;
+internal static ref readonly @string afterObjectKeyValuePairˢ2⁔Decoder => ref afterObjectKeyValuePairˢ2ᵇ⁔Decoder;
+private static readonly @string afterObjectKeyValuePairˢ2ᵇ⁔Decoder = " after object key:value pair"u8;
 
-[GoMethodBody("tokenError")] internal static (Token, error) tokenErrorᴍ(ref Decoder dec, byte c) {
+internal static (Token, error) tokenError⁔(/*this*/ ref Decoder dec, byte c) {
     @string context = default;
     switch (dec.tokenState) {
     case var ᴛ when ᴛ == tokenTopValue: {
-        context = lookingForBeginningOfˢ3ᴍDecoder;
+        context = lookingForBeginningOfˢ3⁔Decoder;
         break;
     }
     case var ᴛ when ᴛ == tokenArrayStart || ᴛ == tokenArrayValue || ᴛ == tokenObjectValue: {
-        context = lookingForBeginningOfˢ3ᴍDecoder;
+        context = lookingForBeginningOfˢ3⁔Decoder;
         break;
     }
     case var ᴛ when ᴛ == tokenArrayComma: {
-        context = afterArrayElementˢ2ᴍDecoder;
+        context = afterArrayElementˢ2⁔Decoder;
         break;
     }
     case var ᴛ when ᴛ == tokenObjectKey: {
-        context = lookingForBeginningOfˢ4ᴍDecoder;
+        context = lookingForBeginningOfˢ4⁔Decoder;
         break;
     }
     case var ᴛ when ᴛ == tokenObjectColon: {
-        context = afterObjectKeyˢ2ᴍDecoder;
+        context = afterObjectKeyˢ2⁔Decoder;
         break;
     }
     case var ᴛ when ᴛ == tokenObjectComma: {
-        context = afterObjectKeyValuePairˢ2ᴍDecoder;
+        context = afterObjectKeyValuePairˢ2⁔Decoder;
         break;
     }}
     return (default, new SyntaxErrorжerror(Ꮡ(new SyntaxError("invalid character "u8 + quoteChar(c) + context, dec.InputOffset()))));
@@ -552,12 +552,12 @@ private static readonly @string afterObjectKeyValuePairˢ2ᵇᴍDecoder = " afte
 
 // More reports whether there is another element in the
 // current array or object being parsed.
-[GoMethodBody("More")] internal static bool Moreᴍ(ref Decoder dec) {
+internal static bool More⁔(/*this*/ ref Decoder dec) {
     var (c, err) = dec.peek();
     return err == nil && c != ']' && c != '}';
 }
 
-[GoMethodBody("peek")] internal static (byte, error) peekᴍ(ref Decoder dec) {
+internal static (byte, error) peek⁔(/*this*/ ref Decoder dec) {
     error err = default;
     for (;;) {
         for (nint i = dec.scanp; i < len(dec.buf); i++) {
@@ -579,7 +579,7 @@ private static readonly @string afterObjectKeyValuePairˢ2ᵇᴍDecoder = " afte
 // InputOffset returns the input stream byte offset of the current decoder position.
 // The offset gives the location of the end of the most recently returned token
 // and the beginning of the next token.
-[GoMethodBody("InputOffset")] internal static int64 InputOffsetᴍ(ref Decoder dec) {
+internal static int64 InputOffset⁔(/*this*/ ref Decoder dec) {
     return dec.scanned + (int64)dec.scanp;
 }
 

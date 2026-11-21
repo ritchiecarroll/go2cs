@@ -36,15 +36,15 @@ public static (cipher.AEAD, error) NewX(slice<byte> key) {
 
 } partial class chacha20poly1305_package {
 
-[GoMethodBody("NonceSize")] internal static nint NonceSizeᴍ(ref xchacha20poly1305 _) {
+internal static nint NonceSize⁔(/*this*/ ref xchacha20poly1305 _) {
     return NonceSizeX;
 }
 
-[GoMethodBody("Overhead")] internal static nint Overheadᴍ(ref xchacha20poly1305 _) {
+internal static nint Overhead⁔(/*this*/ ref xchacha20poly1305 _) {
     return chacha20poly1305_package.Overhead;
 }
 
-[GoMethodBody("Seal")] internal static slice<byte> Sealᴍ(ref xchacha20poly1305 x, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> Seal⁔(/*this*/ ref xchacha20poly1305 x, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     if (len(nonce) != NonceSizeX) {
         throw panic("chacha20poly1305: bad nonce length passed to Seal");
     }
@@ -69,7 +69,7 @@ public static (cipher.AEAD, error) NewX(slice<byte> key) {
     return c.seal(dst, cNonce[..], plaintext, additionalData);
 }
 
-[GoMethodBody("Open")] internal static (slice<byte>, error) Openᴍ(ref xchacha20poly1305 x, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Open⁔(/*this*/ ref xchacha20poly1305 x, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     if (len(nonce) != NonceSizeX) {
         throw panic("chacha20poly1305: bad nonce length passed to Open");
     }

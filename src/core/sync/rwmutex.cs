@@ -68,7 +68,7 @@ internal static UntypedInt rwmutexMaxReaders => /* 1 << 30 */ 1073741824;
 // It should not be used for recursive read locking; a blocked Lock
 // call excludes new readers from acquiring the lock. See the
 // documentation on the [RWMutex] type.
-[GoMethodBody("RLock")] internal static void RLockᴍ(ж<RWMutex> Ꮡrw) {
+internal static void RLock⁔(/*this*/ ж<RWMutex> Ꮡrw) {
     if (race.Enabled) {
         race.Read(@unsafe.Pointer.FromPinnedBox(Ꮡrw.Ꮡw));
         race.Disable();
@@ -88,7 +88,7 @@ internal static UntypedInt rwmutexMaxReaders => /* 1 << 30 */ 1073741824;
 // Note that while correct uses of TryRLock do exist, they are rare,
 // and use of TryRLock is often a sign of a deeper problem
 // in a particular use of mutexes.
-[GoMethodBody("TryRLock")] internal static bool TryRLockᴍ(ж<RWMutex> Ꮡrw) {
+internal static bool TryRLock⁔(/*this*/ ж<RWMutex> Ꮡrw) {
     if (race.Enabled) {
         race.Read(@unsafe.Pointer.FromPinnedBox(Ꮡrw.Ꮡw));
         race.Disable();
@@ -115,7 +115,7 @@ internal static UntypedInt rwmutexMaxReaders => /* 1 << 30 */ 1073741824;
 // it does not affect other simultaneous readers.
 // It is a run-time error if rw is not locked for reading
 // on entry to RUnlock.
-[GoMethodBody("RUnlock")] internal static void RUnlockᴍ(ж<RWMutex> Ꮡrw) {
+internal static void RUnlock⁔(/*this*/ ж<RWMutex> Ꮡrw) {
     if (race.Enabled) {
         race.Read(@unsafe.Pointer.FromPinnedBox(Ꮡrw.Ꮡw));
         race.ReleaseMerge(@unsafe.Pointer.FromPinnedBox(Ꮡrw.ᏑwriterSem));
@@ -131,13 +131,13 @@ internal static UntypedInt rwmutexMaxReaders => /* 1 << 30 */ 1073741824;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string syncRUnlockOfUnlockedˢᴍRWMutex => ref syncRUnlockOfUnlockedˢᵇᴍRWMutex;
-private static readonly @string syncRUnlockOfUnlockedˢᵇᴍRWMutex = "sync: RUnlock of unlocked RWMutex"u8;
+internal static ref readonly @string syncRUnlockOfUnlockedˢ⁔RWMutex => ref syncRUnlockOfUnlockedˢᵇ⁔RWMutex;
+private static readonly @string syncRUnlockOfUnlockedˢᵇ⁔RWMutex = "sync: RUnlock of unlocked RWMutex"u8;
 
-[GoMethodBody("rUnlockSlow")] internal static void rUnlockSlowᴍ(ж<RWMutex> Ꮡrw, int32 r) {
+internal static void rUnlockSlow⁔(/*this*/ ж<RWMutex> Ꮡrw, int32 r) {
     if (r + 1 == 0 || r + 1 == (int32)(-rwmutexMaxReaders)) {
         race.Enable();
-        fatal(syncRUnlockOfUnlockedˢᴍRWMutex);
+        fatal(syncRUnlockOfUnlockedˢ⁔RWMutex);
     }
     // A writer is pending.
     if (Ꮡrw.ᏑreaderWait.Add(-1) == 0) {
@@ -149,7 +149,7 @@ private static readonly @string syncRUnlockOfUnlockedˢᵇᴍRWMutex = "sync: RU
 // Lock locks rw for writing.
 // If the lock is already locked for reading or writing,
 // Lock blocks until the lock is available.
-[GoMethodBody("Lock")] internal static void Lockᴍ(ж<RWMutex> Ꮡrw) {
+internal static void Lock⁔(/*this*/ ж<RWMutex> Ꮡrw) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     if (race.Enabled) {
@@ -176,7 +176,7 @@ private static readonly @string syncRUnlockOfUnlockedˢᵇᴍRWMutex = "sync: RU
 // Note that while correct uses of TryLock do exist, they are rare,
 // and use of TryLock is often a sign of a deeper problem
 // in a particular use of mutexes.
-[GoMethodBody("TryLock")] internal static bool TryLockᴍ(ж<RWMutex> Ꮡrw) {
+internal static bool TryLock⁔(/*this*/ ж<RWMutex> Ꮡrw) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     if (race.Enabled) {
@@ -205,8 +205,8 @@ private static readonly @string syncRUnlockOfUnlockedˢᵇᴍRWMutex = "sync: RU
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string syncUnlockOfUnlockedˢᴍRWMutex => ref syncUnlockOfUnlockedˢᵇᴍRWMutex;
-private static readonly @string syncUnlockOfUnlockedˢᵇᴍRWMutex = "sync: Unlock of unlocked RWMutex"u8;
+internal static ref readonly @string syncUnlockOfUnlockedˢ⁔RWMutex => ref syncUnlockOfUnlockedˢᵇ⁔RWMutex;
+private static readonly @string syncUnlockOfUnlockedˢᵇ⁔RWMutex = "sync: Unlock of unlocked RWMutex"u8;
 
 // Unlock unlocks rw for writing. It is a run-time error if rw is
 // not locked for writing on entry to Unlock.
@@ -214,7 +214,7 @@ private static readonly @string syncUnlockOfUnlockedˢᵇᴍRWMutex = "sync: Unl
 // As with Mutexes, a locked [RWMutex] is not associated with a particular
 // goroutine. One goroutine may [RWMutex.RLock] ([RWMutex.Lock]) a RWMutex and then
 // arrange for another goroutine to [RWMutex.RUnlock] ([RWMutex.Unlock]) it.
-[GoMethodBody("Unlock")] internal static void Unlockᴍ(ж<RWMutex> Ꮡrw) {
+internal static void Unlock⁔(/*this*/ ж<RWMutex> Ꮡrw) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     if (race.Enabled) {
@@ -227,7 +227,7 @@ private static readonly @string syncUnlockOfUnlockedˢᵇᴍRWMutex = "sync: Unl
     var r = Ꮡrw.ᏑreaderCount.Add(rwmutexMaxReaders);
     if (r >= rwmutexMaxReaders) {
         race.Enable();
-        fatal(syncUnlockOfUnlockedˢᴍRWMutex);
+        fatal(syncUnlockOfUnlockedˢ⁔RWMutex);
     }
     // Unblock blocked readers, if any.
     for (nint i = 0; i < (nint)r; i++) {
@@ -259,7 +259,7 @@ public static bool syscall_hasWaitingReaders(ж<RWMutex> rw) {
 
 // RLocker returns a [Locker] interface that implements
 // the [Locker.Lock] and [Locker.Unlock] methods by calling rw.RLock and rw.RUnlock.
-[GoMethodBody("RLocker")] internal static Locker RLockerᴍ(ж<RWMutex> Ꮡrw) {
+internal static Locker RLocker⁔(/*this*/ ж<RWMutex> Ꮡrw) {
     return new rlockerжLocker(Ꮡrw.Reinterpret<RWMutex, rlocker>());
 }
 
@@ -269,7 +269,7 @@ partial struct rlocker /*RWMutex*/;
 
 } partial class sync_package {
 
-[GoMethodBody("Lock")] internal static void Lockᴍ(ж<rlocker> Ꮡr) { (Ꮡr.Reinterpret<rlocker, RWMutex>()).RLock(); }
-[GoMethodBody("Unlock")] internal static void Unlockᴍ(ж<rlocker> Ꮡr) { (Ꮡr.Reinterpret<rlocker, RWMutex>()).RUnlock(); }
+internal static void Lock⁔(/*this*/ ж<rlocker> Ꮡr) { (Ꮡr.Reinterpret<rlocker, RWMutex>()).RLock(); }
+internal static void Unlock⁔(/*this*/ ж<rlocker> Ꮡr) { (Ꮡr.Reinterpret<rlocker, RWMutex>()).RUnlock(); }
 
 }

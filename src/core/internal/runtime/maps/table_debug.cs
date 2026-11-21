@@ -14,7 +14,7 @@ internal const bool debugLog = false;
 
 } partial class maps_package {
 
-[GoMethodBody("checkInvariants")] internal static void checkInvariantsᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
+internal static void checkInvariants⁔(/*this*/ ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> Ꮡm) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -91,7 +91,7 @@ internal const bool debugLog = false;
         throw panic("invariant failed: found no empty slots (violates probe invariant)");
     }
 }
-[GoMethodBody("Print")] internal static void Printᴍ(ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> m) {
+internal static void Print⁔(/*this*/ ref table t, ж<abi.MapType> Ꮡtyp, ж<Map> m) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     print((@string)"""

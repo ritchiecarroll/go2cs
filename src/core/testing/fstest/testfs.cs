@@ -118,13 +118,13 @@ partial struct fsTester {
 } partial class fstest_package {
 
 // errorf adds an error to the list of errors.
-[GoMethodBody("errorf")] internal static void errorfᴍ(ref fsTester t, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf⁔(/*this*/ ref fsTester t, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     t.errors = append(t.errors, fmt.Errorf(format, args.ꓸꓸꓸ));
 }
 
-[GoMethodBody("openDir")] internal static fs.ReadDirFile openDirᴍ(ref fsTester t, @string dir) {
+internal static fs.ReadDirFile openDir⁔(/*this*/ ref fsTester t, @string dir) {
     var (f, err) = t.fsys.Open(dir);
     if (err != nil) {
         t.errorf("%s: Open: %w", dir, err);
@@ -140,18 +140,18 @@ partial struct fsTester {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string firstOpenReadDir1VsˢᴍfsTester => ref firstOpenReadDir1VsˢᵇᴍfsTester;
-private static readonly @string firstOpenReadDir1VsˢᵇᴍfsTester = "first Open+ReadDir(-1) vs second Open+ReadDir(-1)"u8;
-internal static ref readonly @string firstOpenReadDir1VsThirdˢᴍfsTester => ref firstOpenReadDir1VsThirdˢᵇᴍfsTester;
-private static readonly @string firstOpenReadDir1VsThirdˢᵇᴍfsTester = "first Open+ReadDir(-1) vs third Open+ReadDir(1,2) loop"u8;
-internal static ref readonly @string firstOpenReadDir1VsFsysˢᴍfsTester => ref firstOpenReadDir1VsFsysˢᵇᴍfsTester;
-private static readonly @string firstOpenReadDir1VsFsysˢᵇᴍfsTester = "first Open+ReadDir(-1) vs fsys.ReadDir"u8;
-internal static ref readonly @string firstOpenReadDir1VsFsˢᴍfsTester => ref firstOpenReadDir1VsFsˢᵇᴍfsTester;
-private static readonly @string firstOpenReadDir1VsFsˢᵇᴍfsTester = "first Open+ReadDir(-1) vs fs.ReadDir"u8;
+internal static ref readonly @string firstOpenReadDir1Vsˢ⁔fsTester => ref firstOpenReadDir1Vsˢᵇ⁔fsTester;
+private static readonly @string firstOpenReadDir1Vsˢᵇ⁔fsTester = "first Open+ReadDir(-1) vs second Open+ReadDir(-1)"u8;
+internal static ref readonly @string firstOpenReadDir1VsThirdˢ⁔fsTester => ref firstOpenReadDir1VsThirdˢᵇ⁔fsTester;
+private static readonly @string firstOpenReadDir1VsThirdˢᵇ⁔fsTester = "first Open+ReadDir(-1) vs third Open+ReadDir(1,2) loop"u8;
+internal static ref readonly @string firstOpenReadDir1VsFsysˢ⁔fsTester => ref firstOpenReadDir1VsFsysˢᵇ⁔fsTester;
+private static readonly @string firstOpenReadDir1VsFsysˢᵇ⁔fsTester = "first Open+ReadDir(-1) vs fsys.ReadDir"u8;
+internal static ref readonly @string firstOpenReadDir1VsFsˢ⁔fsTester => ref firstOpenReadDir1VsFsˢᵇ⁔fsTester;
+private static readonly @string firstOpenReadDir1VsFsˢᵇ⁔fsTester = "first Open+ReadDir(-1) vs fs.ReadDir"u8;
 
 // checkDir checks the directory dir, which is expected to exist
 // (it is either the root or was found in a directory listing with IsDir true).
-[GoMethodBody("checkDir")] internal static void checkDirᴍ(ж<fsTester> Ꮡt, @string dir) {
+internal static void checkDir⁔(/*this*/ ж<fsTester> Ꮡt, @string dir) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -250,7 +250,7 @@ private static readonly @string firstOpenReadDir1VsFsˢᵇᴍfsTester = "first O
             t.errorf("%s: second Open+ReadDir(-1): %w", dir, err);
             return;
         }
-        Ꮡt.checkDirList(dir, firstOpenReadDir1VsˢᴍfsTester, list, list2);
+        Ꮡt.checkDirList(dir, firstOpenReadDir1Vsˢ⁔fsTester, list, list2);
 
         // Reopen directory, read a third time in pieces, make sure contents match.
         d = t.openDir(dir); if (d == nil) {
@@ -282,7 +282,7 @@ private static readonly @string firstOpenReadDir1VsFsˢᵇᴍfsTester = "first O
                 return;
             }
         }
-        Ꮡt.checkDirList(dir, firstOpenReadDir1VsThirdˢᴍfsTester, list, list2);
+        Ꮡt.checkDirList(dir, firstOpenReadDir1VsThirdˢ⁔fsTester, list, list2);
 
         // If fsys has ReadDir, check that it matches and is sorted.
         var (fsys, ok) = t.fsys._<fs.ReadDirFS>(ᐧ); if (ok) {
@@ -291,7 +291,7 @@ private static readonly @string firstOpenReadDir1VsFsˢᵇᴍfsTester = "first O
                 t.errorf("%s: fsys.ReadDir: %w", dir, errΔ3);
                 return;
             }
-            Ꮡt.checkDirList(dir, firstOpenReadDir1VsFsysˢᴍfsTester, list, list2Δ1);
+            Ꮡt.checkDirList(dir, firstOpenReadDir1VsFsysˢ⁔fsTester, list, list2Δ1);
 
             for (nint i = 0; i + 1 < len(list2Δ1); i++) {
                 if (list2Δ1[i].Name() >= list2Δ1[i + 1].Name()) {
@@ -306,7 +306,7 @@ private static readonly @string firstOpenReadDir1VsFsˢᵇᴍfsTester = "first O
             t.errorf("%s: fs.ReadDir: %w", dir, err);
             return;
         }
-        Ꮡt.checkDirList(dir, firstOpenReadDir1VsFsˢᴍfsTester, list, list2);
+        Ꮡt.checkDirList(dir, firstOpenReadDir1VsFsˢ⁔fsTester, list, list2);
 
         for (nint i = 0; i + 1 < len(list2); i++) {
             if (list2[i].Name() >= list2[i + 1].Name()) {
@@ -340,7 +340,7 @@ internal static @string formatInfo(fs.FileInfo info) {
 } partial class fstest_package {
 
 // checkGlob checks that various glob patterns work if the file system implements GlobFS.
-[GoMethodBody("checkGlob")] internal static void checkGlobᴍ(ref fsTester t, @string dir, slice<fs.DirEntry> list) {
+internal static void checkGlob⁔(/*this*/ ref fsTester t, @string dir, slice<fs.DirEntry> list) {
     var patternᴷ = new stackAppend<rune>();
     var wantᴷ = new stackAppend<@string>();
     var problemsᴷ = new stackAppend<@string>();
@@ -457,7 +457,7 @@ internal static @string formatInfo(fs.FileInfo info) {
 
 // checkStat checks that a direct stat of path matches entry,
 // which was found in the parent's directory listing.
-[GoMethodBody("checkStat")] internal static void checkStatᴍ(ref fsTester t, @string path, fs.DirEntry entry) {
+internal static void checkStat⁔(/*this*/ ref fsTester t, @string path, fs.DirEntry entry) {
     var (@file, err) = t.fsys.Open(path);
     if (err != nil) {
         t.errorf("%s: Open: %w", path, err);
@@ -543,7 +543,7 @@ internal static @string formatInfo(fs.FileInfo info) {
 
 // checkDirList checks that two directory lists contain the same files and file info.
 // The order of the lists need not match.
-[GoMethodBody("checkDirList")] internal static void checkDirListᴍ(ж<fsTester> Ꮡt, @string dir, @string desc, slice<fs.DirEntry> list1, slice<fs.DirEntry> list2) {
+internal static void checkDirList⁔(/*this*/ ж<fsTester> Ꮡt, @string dir, @string desc, slice<fs.DirEntry> list1, slice<fs.DirEntry> list2) {
     ref var t = ref Ꮡt.DerefOrNull();
     var diffsᴷ = new stackAppend<@string>();
 
@@ -595,17 +595,17 @@ internal static @string formatInfo(fs.FileInfo info) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string readAllVsFsysReadFileˢᴍfsTester => ref readAllVsFsysReadFileˢᵇᴍfsTester;
-private static readonly @string readAllVsFsysReadFileˢᵇᴍfsTester = "ReadAll vs fsys.ReadFile"u8;
-internal static ref readonly @string readallVsSecondFsysˢᴍfsTester => ref readallVsSecondFsysˢᵇᴍfsTester;
-private static readonly @string readallVsSecondFsysˢᵇᴍfsTester = "Readall vs second fsys.ReadFile"u8;
-internal static ref readonly @string readFileˢᴍfsTester => ref readFileˢᵇᴍfsTester;
-private static readonly @string readFileˢᵇᴍfsTester = "ReadFile"u8;
-internal static ref readonly @string readAllVsFsReadFileˢᴍfsTester => ref readAllVsFsReadFileˢᵇᴍfsTester;
-private static readonly @string readAllVsFsReadFileˢᵇᴍfsTester = "ReadAll vs fs.ReadFile"u8;
+internal static ref readonly @string readAllVsFsysReadFileˢ⁔fsTester => ref readAllVsFsysReadFileˢᵇ⁔fsTester;
+private static readonly @string readAllVsFsysReadFileˢᵇ⁔fsTester = "ReadAll vs fsys.ReadFile"u8;
+internal static ref readonly @string readallVsSecondFsysˢ⁔fsTester => ref readallVsSecondFsysˢᵇ⁔fsTester;
+private static readonly @string readallVsSecondFsysˢᵇ⁔fsTester = "Readall vs second fsys.ReadFile"u8;
+internal static ref readonly @string readFileˢ⁔fsTester => ref readFileˢᵇ⁔fsTester;
+private static readonly @string readFileˢᵇ⁔fsTester = "ReadFile"u8;
+internal static ref readonly @string readAllVsFsReadFileˢ⁔fsTester => ref readAllVsFsReadFileˢᵇ⁔fsTester;
+private static readonly @string readAllVsFsReadFileˢᵇ⁔fsTester = "ReadAll vs fs.ReadFile"u8;
 
 // checkFile checks that basic file reading works correctly.
-[GoMethodBody("checkFile")] internal static void checkFileᴍ(ж<fsTester> Ꮡt, @string @file) {
+internal static void checkFile⁔(/*this*/ ж<fsTester> Ꮡt, @string @file) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -642,7 +642,7 @@ private static readonly @string readAllVsFsReadFileˢᵇᴍfsTester = "ReadAll v
                     t.errorf("%s: fsys.ReadFile: %w", @file, errΔ2);
                     return;
                 }
-                t.checkFileRead(@file, readAllVsFsysReadFileˢᴍfsTester, data, data2Δ1);
+                t.checkFileRead(@file, readAllVsFsysReadFileˢ⁔fsTester, data, data2Δ1);
 
                 // Modify the data and check it again. Modifying the
                 // returned byte slice should not affect the next call.
@@ -654,10 +654,10 @@ private static readonly @string readAllVsFsReadFileˢᵇᴍfsTester = "ReadAll v
                     t.errorf("%s: second call to fsys.ReadFile: %w", @file, errΔ2);
                     return;
                 }
-                t.checkFileRead(@file, readallVsSecondFsysˢᴍfsTester, data, data2Δ1);
+                t.checkFileRead(@file, readallVsSecondFsysˢ⁔fsTester, data, data2Δ1);
 
                     var fsysʗ1 = fsys;
-                t.checkBadPath(@file, readFileˢᴍfsTester,
+                t.checkBadPath(@file, readFileˢ⁔fsTester,
                     (@string name) => {
                         var (_, errΔ3) = fsysʗ1.ReadFile(name);
                         return errΔ3;
@@ -671,7 +671,7 @@ private static readonly @string readAllVsFsReadFileˢᵇᴍfsTester = "ReadAll v
             t.errorf("%s: fs.ReadFile: %w", @file, err);
             return;
         }
-        t.checkFileRead(@file, readAllVsFsReadFileˢᴍfsTester, data, data2);
+        t.checkFileRead(@file, readAllVsFsReadFileˢ⁔fsTester, data, data2);
 
         // Use iotest.TestReader to check small reads, Seek, ReadAt.
         (f, err) = t.fsys.Open(@file);
@@ -689,7 +689,7 @@ private static readonly @string readAllVsFsReadFileˢᵇᴍfsTester = "ReadAll v
     finally { ᒐ.Run(); }
 }
 
-[GoMethodBody("checkFileRead")] internal static void checkFileReadᴍ(ref fsTester t, @string @file, @string desc, slice<byte> data1, slice<byte> data2) {
+internal static void checkFileRead⁔(/*this*/ ref fsTester t, @string @file, @string desc, slice<byte> data1, slice<byte> data2) {
     if (((sstring)data1) != ((sstring)data2)) {
         t.errorf("%s: %s: different data returned\n\t%q\n\t%q", @file, desc, data1, data2);
         return;
@@ -697,14 +697,14 @@ private static readonly @string readAllVsFsReadFileˢᵇᴍfsTester = "ReadAll v
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string openˢᴍfsTester => ref openˢᵇᴍfsTester;
-private static readonly @string openˢᵇᴍfsTester = "Open"u8;
+internal static ref readonly @string openˢ⁔fsTester => ref openˢᵇ⁔fsTester;
+private static readonly @string openˢᵇ⁔fsTester = "Open"u8;
 
 // checkOpen validates file opening behavior by attempting to open and then close the given file path.
-[GoMethodBody("checkOpen")] internal static void checkOpenᴍ(ж<fsTester> Ꮡt, @string @file) {
+internal static void checkOpen⁔(/*this*/ ж<fsTester> Ꮡt, @string @file) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    t.checkBadPath(@file, openˢᴍfsTester, (@string fileΔ1) => {
+    t.checkBadPath(@file, openˢ⁔fsTester, (@string fileΔ1) => {
         var (f, err) = Ꮡt.Value.fsys.Open(fileΔ1);
         if (err == nil) {
             f.Close();
@@ -714,7 +714,7 @@ private static readonly @string openˢᵇᴍfsTester = "Open"u8;
 }
 
 // checkBadPath checks that various invalid forms of file's name cannot be opened using open.
-[GoMethodBody("checkBadPath")] internal static void checkBadPathᴍ(ref fsTester t, @string @file, @string desc, Func<@string, error> open) {
+internal static void checkBadPath⁔(/*this*/ ref fsTester t, @string @file, @string desc, Func<@string, error> open) {
     var badᴷ = new stackAppend<@string>();
 
     var bad = slice<@string>([

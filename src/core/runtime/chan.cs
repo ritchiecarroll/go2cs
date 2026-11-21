@@ -950,7 +950,7 @@ internal static void reflect_chanclose(ж<hchan> c) {
 
 } partial class runtime_package {
 
-[GoMethodBody("enqueue")] internal static void enqueueᴍ(ref waitq q, ж<sudog> Ꮡsgp) {
+internal static void enqueue⁔(/*this*/ ref waitq q, ж<sudog> Ꮡsgp) {
     ref var sgp = ref Ꮡsgp.DerefOrNull();
 
     sgp.next = default;
@@ -966,7 +966,7 @@ internal static void reflect_chanclose(ж<hchan> c) {
     q.last = Ꮡsgp;
 }
 
-[GoMethodBody("dequeue")] internal static ж<sudog> dequeueᴍ(ref waitq q) {
+internal static ж<sudog> dequeue⁔(/*this*/ ref waitq q) {
     for (;;) {
         var sgp = q.first;
         if (sgp == nil) {
@@ -1003,7 +1003,7 @@ internal static void reflect_chanclose(ж<hchan> c) {
 
 } partial class runtime_package {
 
-[GoMethodBody("raceaddr")] internal static @unsafe.Pointer raceaddrᴍ(ж<hchan> Ꮡc) {
+internal static @unsafe.Pointer raceaddr⁔(/*this*/ ж<hchan> Ꮡc) {
     // Treat read-like and write-like operations on the channel to
     // happen at this address. Avoid using the address of qcount
     // or dataqsiz, because the len() and cap() builtins read

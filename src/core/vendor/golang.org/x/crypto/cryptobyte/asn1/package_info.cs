@@ -60,9 +60,12 @@ using static go.vendor.golang.org.x.crypto.cryptobyte.asn1_package;
 
 namespace go.vendor.golang.org.x.crypto.cryptobyte;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static asn1_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("asn1", ImportPath = "vendor/golang.org/x/crypto/cryptobyte/asn1")]
 public static partial class asn1_package
@@ -94,12 +97,12 @@ public static partial class asn1_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(asn1_package.Tag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛTag;
+[GoMethodHost(typeof(asn1_package.Tag)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛTag;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class asn1ᴛTag {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Tag Constructed(this Tag t) => asn1_package.Constructedᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Tag ContextSpecific(this Tag t) => asn1_package.ContextSpecificᴍ(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Tag Constructed(this Tag t) => asn1_package.Constructed⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Tag ContextSpecific(this Tag t) => asn1_package.ContextSpecific⁔(t);
 }
 // </GlyphForwarders>

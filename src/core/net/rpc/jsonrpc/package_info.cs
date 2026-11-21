@@ -72,12 +72,15 @@ using static go.net.rpc.jsonrpc_package;
 
 namespace go.net.rpc;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using rpc = global::go.net.rpc_package;
 using encoding;
 using global::go.net;
 using static jsonrpc_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("jsonrpc")]
 public static partial class jsonrpc_package
@@ -121,29 +124,29 @@ public static partial class jsonrpc_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(jsonrpc_package.clientCodec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpcᴛclientCodec;
-[GoMethodHost(typeof(jsonrpc_package.clientResponse)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpcᴛclientResponse;
-[GoMethodHost(typeof(jsonrpc_package.serverCodec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpcᴛserverCodec;
-[GoMethodHost(typeof(jsonrpc_package.serverRequest)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonrpcᴛserverRequest;
+[GoMethodHost(typeof(jsonrpc_package.clientCodec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonrpcᴛclientCodec;
+[GoMethodHost(typeof(jsonrpc_package.clientResponse)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonrpcᴛclientResponse;
+[GoMethodHost(typeof(jsonrpc_package.serverCodec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonrpcᴛserverCodec;
+[GoMethodHost(typeof(jsonrpc_package.serverRequest)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonrpcᴛserverRequest;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class jsonrpcᴛclientCodec {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteRequest(this ж<clientCodec> Ꮡc, ж<rpc.Request> Ꮡr, any param) => jsonrpc_package.WriteRequestᴍ(Ꮡc, Ꮡr, param);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ReadResponseHeader(this ж<clientCodec> Ꮡc, ж<rpc.Response> Ꮡr) => jsonrpc_package.ReadResponseHeaderᴍ(Ꮡc, Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ReadResponseBody(this ref clientCodec c, any x) => jsonrpc_package.ReadResponseBodyᴍ(ref c, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref clientCodec c) => jsonrpc_package.Closeᴍ(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error WriteRequest(this ж<clientCodec> Ꮡc, ж<rpc.Request> Ꮡr, any param) => jsonrpc_package.WriteRequest⁔(Ꮡc, Ꮡr, param);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadResponseHeader(this ж<clientCodec> Ꮡc, ж<rpc.Response> Ꮡr) => jsonrpc_package.ReadResponseHeader⁔(Ꮡc, Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadResponseBody(this ref clientCodec c, any x) => jsonrpc_package.ReadResponseBody⁔(ref c, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref clientCodec c) => jsonrpc_package.Close⁔(ref c);
 }
 partial class jsonrpcᴛclientResponse {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref clientResponse r) => jsonrpc_package.resetᴍ(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void reset(this ref clientResponse r) => jsonrpc_package.reset⁔(ref r);
 }
 partial class jsonrpcᴛserverRequest {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref serverRequest r) => jsonrpc_package.resetᴍ(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void reset(this ref serverRequest r) => jsonrpc_package.reset⁔(ref r);
 }
 partial class jsonrpcᴛserverCodec {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Request> Ꮡr) => jsonrpc_package.ReadRequestHeaderᴍ(Ꮡc, Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ReadRequestBody(this ref serverCodec c, any x) => jsonrpc_package.ReadRequestBodyᴍ(ref c, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteResponse(this ж<serverCodec> Ꮡc, ж<rpc.Response> Ꮡr, any x) => jsonrpc_package.WriteResponseᴍ(Ꮡc, Ꮡr, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref serverCodec c) => jsonrpc_package.Closeᴍ(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadRequestHeader(this ж<serverCodec> Ꮡc, ж<rpc.Request> Ꮡr) => jsonrpc_package.ReadRequestHeader⁔(Ꮡc, Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadRequestBody(this ref serverCodec c, any x) => jsonrpc_package.ReadRequestBody⁔(ref c, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error WriteResponse(this ж<serverCodec> Ꮡc, ж<rpc.Response> Ꮡr, any x) => jsonrpc_package.WriteResponse⁔(Ꮡc, Ꮡr, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref serverCodec c) => jsonrpc_package.Close⁔(ref c);
 }
 // </GlyphForwarders>

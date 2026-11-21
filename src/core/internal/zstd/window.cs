@@ -23,7 +23,7 @@ partial struct window {
 } partial class zstd_package {
 
 // reset clears stored data and configures window size.
-[GoMethodBody("reset")] internal static void resetᴍ(ref window w, nint size) {
+internal static void reset⁔(/*this*/ ref window w, nint size) {
     var b = w.data[..0];
     if (cap(b) < size) {
         b = new slice<byte>(0, size);
@@ -34,12 +34,12 @@ partial struct window {
 }
 
 // len returns the number of stored bytes.
-[GoMethodBody("len")] internal static uint32 lenᴍ(ref window w) {
+internal static uint32 len⁔(/*this*/ ref window w) {
     return (uint32)builtin.len(w.data);
 }
 
 // save stores up to size last bytes from the buf.
-[GoMethodBody("save")] internal static void saveᴍ(ref window w, slice<byte> buf) {
+internal static void save⁔(/*this*/ ref window w, slice<byte> buf) {
     if (w.size == 0) {
         return;
     }
@@ -75,7 +75,7 @@ partial struct window {
 
 // appendTo appends stored bytes between from and to indices to the buf.
 // Index from must be less or equal to index to and to must be less or equal to w.len().
-[GoMethodBody("appendTo")] internal static slice<byte> appendToᴍ(ref window w, slice<byte> buf, uint32 from, uint32 to) {
+internal static slice<byte> appendTo⁔(/*this*/ ref window w, slice<byte> buf, uint32 from, uint32 to) {
     var dataLen = (uint32)builtin.len(w.data);
     from += (uint32)w.off;
     to += (uint32)w.off;

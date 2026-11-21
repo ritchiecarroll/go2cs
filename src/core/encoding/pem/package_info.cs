@@ -66,10 +66,13 @@ using static go.encoding.pem_package;
 
 namespace go.encoding;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.encoding;
 using static pem_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("pem")]
 public static partial class pem_package
@@ -108,12 +111,12 @@ public static partial class pem_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(pem_package.lineBreaker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pemᴛlineBreaker;
+[GoMethodHost(typeof(pem_package.lineBreaker)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pemᴛlineBreaker;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class pemᴛlineBreaker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref lineBreaker l, slice<byte> b) => pem_package.Writeᴍ(ref l, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ Close(this ref lineBreaker l) => pem_package.Closeᴍ(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref lineBreaker l, slice<byte> b) => pem_package.Write⁔(ref l, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ Close(this ref lineBreaker l) => pem_package.Close⁔(ref l);
 }
 // </GlyphForwarders>

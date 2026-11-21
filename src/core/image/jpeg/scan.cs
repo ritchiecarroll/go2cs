@@ -11,7 +11,7 @@ partial class jpeg_package {
 } partial class jpeg_package {
 
 // makeImg allocates and initializes the destination image.
-[GoMethodBody("makeImg")] internal static void makeImgᴍ(ref decoder d, nint mxx, nint myy) {
+internal static void makeImg⁔(/*this*/ ref decoder d, nint mxx, nint myy) {
     if (d.nComp == 1) {
         var mΔ1 = image.NewGray(image.Rect(0, 0, 8 * mxx, 8 * myy));
         d.img1 = mΔ1.SubImage(image.Rect(0, 0, d.width, d.height))._<ж<image.Gray>>();
@@ -74,38 +74,38 @@ internal partial struct processSOS_scan /*dyn*/ {
 } partial class jpeg_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingSofMarkerˢᴍdecoder => ref missingSofMarkerˢᵇᴍdecoder;
-private static readonly @string missingSofMarkerˢᵇᴍdecoder = "missing SOF marker"u8;
-internal static ref readonly @string sosHasWrongLengthˢᴍdecoder => ref sosHasWrongLengthˢᵇᴍdecoder;
-private static readonly @string sosHasWrongLengthˢᵇᴍdecoder = "SOS has wrong length"u8;
-internal static ref readonly @string sosLengthInconsistentˢᴍdecoder => ref sosLengthInconsistentˢᵇᴍdecoder;
-private static readonly @string sosLengthInconsistentˢᵇᴍdecoder = "SOS length inconsistent with number of components"u8;
-internal static ref readonly @string unknownComponentSelectorˢᴍdecoder => ref unknownComponentSelectorˢᵇᴍdecoder;
-private static readonly @string unknownComponentSelectorˢᵇᴍdecoder = "unknown component selector"u8;
-internal static ref readonly @string repeatedComponentˢ2ᴍdecoder => ref repeatedComponentˢ2ᵇᴍdecoder;
-private static readonly @string repeatedComponentˢ2ᵇᴍdecoder = "repeated component selector"u8;
-internal static ref readonly @string badTdValueˢᴍdecoder => ref badTdValueˢᵇᴍdecoder;
-private static readonly @string badTdValueˢᵇᴍdecoder = "bad Td value"u8;
-internal static ref readonly @string badTaValueˢᴍdecoder => ref badTaValueˢᵇᴍdecoder;
-private static readonly @string badTaValueˢᵇᴍdecoder = "bad Ta value"u8;
-internal static ref readonly @string totalSamplingFactorsTooˢᴍdecoder => ref totalSamplingFactorsTooˢᵇᴍdecoder;
-private static readonly @string totalSamplingFactorsTooˢᵇᴍdecoder = "total sampling factors too large"u8;
-internal static ref readonly @string badSpectralSelectionˢᴍdecoder => ref badSpectralSelectionˢᵇᴍdecoder;
-private static readonly @string badSpectralSelectionˢᵇᴍdecoder = "bad spectral selection bounds"u8;
-internal static ref readonly @string progressiveAcˢᴍdecoder => ref progressiveAcˢᵇᴍdecoder;
-private static readonly @string progressiveAcˢᵇᴍdecoder = "progressive AC coefficients for more than one component"u8;
-internal static ref readonly @string badSuccessiveˢᴍdecoder => ref badSuccessiveˢᵇᴍdecoder;
-private static readonly @string badSuccessiveˢᵇᴍdecoder = "bad successive approximation values"u8;
-internal static ref readonly @string excessiveDcComponentˢᴍdecoder => ref excessiveDcComponentˢᵇᴍdecoder;
-private static readonly @string excessiveDcComponentˢᵇᴍdecoder = "excessive DC component"u8;
+internal static ref readonly @string missingSofMarkerˢ⁔decoder => ref missingSofMarkerˢᵇ⁔decoder;
+private static readonly @string missingSofMarkerˢᵇ⁔decoder = "missing SOF marker"u8;
+internal static ref readonly @string sosHasWrongLengthˢ⁔decoder => ref sosHasWrongLengthˢᵇ⁔decoder;
+private static readonly @string sosHasWrongLengthˢᵇ⁔decoder = "SOS has wrong length"u8;
+internal static ref readonly @string sosLengthInconsistentˢ⁔decoder => ref sosLengthInconsistentˢᵇ⁔decoder;
+private static readonly @string sosLengthInconsistentˢᵇ⁔decoder = "SOS length inconsistent with number of components"u8;
+internal static ref readonly @string unknownComponentSelectorˢ⁔decoder => ref unknownComponentSelectorˢᵇ⁔decoder;
+private static readonly @string unknownComponentSelectorˢᵇ⁔decoder = "unknown component selector"u8;
+internal static ref readonly @string repeatedComponentˢ2⁔decoder => ref repeatedComponentˢ2ᵇ⁔decoder;
+private static readonly @string repeatedComponentˢ2ᵇ⁔decoder = "repeated component selector"u8;
+internal static ref readonly @string badTdValueˢ⁔decoder => ref badTdValueˢᵇ⁔decoder;
+private static readonly @string badTdValueˢᵇ⁔decoder = "bad Td value"u8;
+internal static ref readonly @string badTaValueˢ⁔decoder => ref badTaValueˢᵇ⁔decoder;
+private static readonly @string badTaValueˢᵇ⁔decoder = "bad Ta value"u8;
+internal static ref readonly @string totalSamplingFactorsTooˢ⁔decoder => ref totalSamplingFactorsTooˢᵇ⁔decoder;
+private static readonly @string totalSamplingFactorsTooˢᵇ⁔decoder = "total sampling factors too large"u8;
+internal static ref readonly @string badSpectralSelectionˢ⁔decoder => ref badSpectralSelectionˢᵇ⁔decoder;
+private static readonly @string badSpectralSelectionˢᵇ⁔decoder = "bad spectral selection bounds"u8;
+internal static ref readonly @string progressiveAcˢ⁔decoder => ref progressiveAcˢᵇ⁔decoder;
+private static readonly @string progressiveAcˢᵇ⁔decoder = "progressive AC coefficients for more than one component"u8;
+internal static ref readonly @string badSuccessiveˢ⁔decoder => ref badSuccessiveˢᵇ⁔decoder;
+private static readonly @string badSuccessiveˢᵇ⁔decoder = "bad successive approximation values"u8;
+internal static ref readonly @string excessiveDcComponentˢ⁔decoder => ref excessiveDcComponentˢᵇ⁔decoder;
+private static readonly @string excessiveDcComponentˢᵇ⁔decoder = "excessive DC component"u8;
 
 // Specified in section B.2.3.
-[GoMethodBody("processSOS")] internal static error processSOSᴍ(ref decoder d, nint n) {
+internal static error processSOS⁔(/*this*/ ref decoder d, nint n) {
     if (d.nComp == 0) {
-        return ((FormatError)(@string)missingSofMarkerˢᴍdecoder);
+        return ((FormatError)(@string)missingSofMarkerˢ⁔decoder);
     }
     if (n < 6 || 4 + 2 * d.nComp < n || n % 2 != 0) {
-        return ((FormatError)(@string)sosHasWrongLengthˢᴍdecoder);
+        return ((FormatError)(@string)sosHasWrongLengthˢ⁔decoder);
     }
     {
         var err = d.readFull(d.tmp.slice(0, n)); if (err != nil) {
@@ -114,7 +114,7 @@ private static readonly @string excessiveDcComponentˢᵇᴍdecoder = "excessive
     }
     nint nComp = (nint)d.tmp[0];
     if (n != 4 + 2 * nComp) {
-        return ((FormatError)(@string)sosLengthInconsistentˢᴍdecoder);
+        return ((FormatError)(@string)sosLengthInconsistentˢ⁔decoder);
     }
     array<processSOS_scan> scan = new(4); /* maxComponents */
     nint totalHV = 0;
@@ -127,7 +127,7 @@ private static readonly @string excessiveDcComponentˢᵇᴍdecoder = "excessive
             }
         }
         if (compIndex < 0) {
-            return ((FormatError)(@string)unknownComponentSelectorˢᴍdecoder);
+            return ((FormatError)(@string)unknownComponentSelectorˢ⁔decoder);
         }
         scan[i].compIndex = (uint8)compIndex;
         // Section B.2.3 states that "the value of Cs_j shall be different from
@@ -137,7 +137,7 @@ private static readonly @string excessiveDcComponentˢᵇᴍdecoder = "excessive
         // into d.comp are unique.
         for (nint j = 0; j < i; j++) {
             if (scan[i].compIndex == scan[j].compIndex) {
-                return ((FormatError)(@string)repeatedComponentˢ2ᴍdecoder);
+                return ((FormatError)(@string)repeatedComponentˢ2⁔decoder);
             }
         }
         totalHV += d.comp[compIndex].h * d.comp[compIndex].v;
@@ -146,20 +146,20 @@ private static readonly @string excessiveDcComponentˢᵇᴍdecoder = "excessive
         scan[i].td = (uint8)((d.tmp[2 + 2 * i] >> 4));
         {
             var t = scan[i].td; if (t > maxTh || (d.baseline && t > 1)) {
-                return ((FormatError)(@string)badTdValueˢᴍdecoder);
+                return ((FormatError)(@string)badTdValueˢ⁔decoder);
             }
         }
         scan[i].ta = (uint8)((byte)(d.tmp[2 + 2 * i] & 0x0f));
         {
             var t = scan[i].ta; if (t > maxTh || (d.baseline && t > 1)) {
-                return ((FormatError)(@string)badTaValueˢᴍdecoder);
+                return ((FormatError)(@string)badTaValueˢ⁔decoder);
             }
         }
     }
     // Section B.2.3 states that if there is more than one component then the
     // total H*V values in a scan must be <= 10.
     if (d.nComp > 1 && totalHV > 10) {
-        return ((FormatError)(@string)totalSamplingFactorsTooˢᴍdecoder);
+        return ((FormatError)(@string)totalSamplingFactorsTooˢ⁔decoder);
     }
 
     // zigStart and zigEnd are the spectral selection bounds.
@@ -186,13 +186,13 @@ private static readonly @string excessiveDcComponentˢᵇᴍdecoder = "excessive
         ah = (uint32)(d.tmp[3 + 2 * nComp] >> 4);
         al = (uint32)((byte)(d.tmp[3 + 2 * nComp] & 0x0f));
         if ((zigStart == 0 && zigEnd != 0) || zigStart > zigEnd || blockSize <= zigEnd) {
-            return ((FormatError)(@string)badSpectralSelectionˢᴍdecoder);
+            return ((FormatError)(@string)badSpectralSelectionˢ⁔decoder);
         }
         if (zigStart != 0 && nComp != 1) {
-            return ((FormatError)(@string)progressiveAcˢᴍdecoder);
+            return ((FormatError)(@string)progressiveAcˢ⁔decoder);
         }
         if (ah != 0 && ah != al + 1) {
-            return ((FormatError)(@string)badSuccessiveˢᴍdecoder);
+            return ((FormatError)(@string)badSuccessiveˢ⁔decoder);
         }
     }
 
@@ -290,7 +290,7 @@ private static readonly @string excessiveDcComponentˢᵇᴍdecoder = "excessive
                                 return err;
                             }
                             if (value > 16) {
-                                return ((UnsupportedError)(@string)excessiveDcComponentˢᴍdecoder);
+                                return ((UnsupportedError)(@string)excessiveDcComponentˢ⁔decoder);
                             }
                             (var dcDelta, err) = d.receiveExtend(value);
                             if (err != nil) {
@@ -390,14 +390,14 @@ private static readonly @string excessiveDcComponentˢᵇᴍdecoder = "excessive
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedHuffmanCodeˢᴍdecoder => ref unexpectedHuffmanCodeˢᵇᴍdecoder;
-private static readonly @string unexpectedHuffmanCodeˢᵇᴍdecoder = "unexpected Huffman code"u8;
-internal static ref readonly @string tooManyCoefficientsˢᴍdecoder => ref tooManyCoefficientsˢᵇᴍdecoder;
-private static readonly @string tooManyCoefficientsˢᵇᴍdecoder = "too many coefficients"u8;
+internal static ref readonly @string unexpectedHuffmanCodeˢ⁔decoder => ref unexpectedHuffmanCodeˢᵇ⁔decoder;
+private static readonly @string unexpectedHuffmanCodeˢᵇ⁔decoder = "unexpected Huffman code"u8;
+internal static ref readonly @string tooManyCoefficientsˢ⁔decoder => ref tooManyCoefficientsˢᵇ⁔decoder;
+private static readonly @string tooManyCoefficientsˢᵇ⁔decoder = "too many coefficients"u8;
 
 // refine decodes a successive approximation refinement block, as specified in
 // section G.1.2.
-[GoMethodBody("refine")] internal static error refineᴍ(ref decoder d, ж<block> Ꮡb, ж<huffman> h, int32 zigStart, int32 zigEnd, int32 delta) {
+internal static error refine⁔(/*this*/ ref decoder d, ж<block> Ꮡb, ж<huffman> h, int32 zigStart, int32 zigEnd, int32 delta) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Refining a DC component is trivial.
@@ -455,7 +455,7 @@ loop:
                 break;
             }
             default: {
-                return ((FormatError)(@string)unexpectedHuffmanCodeˢᴍdecoder);
+                return ((FormatError)(@string)unexpectedHuffmanCodeˢ⁔decoder);
             }}
 
             (zig, err) = d.refineNonZeroes(Ꮡb, zig, zigEnd, (int32)val0, delta);
@@ -463,7 +463,7 @@ loop:
                 return err;
             }
             if (zig > zigEnd) {
-                return ((FormatError)(@string)tooManyCoefficientsˢᴍdecoder);
+                return ((FormatError)(@string)tooManyCoefficientsˢ⁔decoder);
             }
             if (z != 0) {
                 b[unzig[zig]] = z;
@@ -483,7 +483,7 @@ break_loop:;
 
 // refineNonZeroes refines non-zero entries of b in zig-zag order. If nz >= 0,
 // the first nz zero entries are skipped over.
-[GoMethodBody("refineNonZeroes")] internal static (int32, error) refineNonZeroesᴍ(ref decoder d, ж<block> Ꮡb, int32 zig, int32 zigEnd, int32 nz, int32 delta) {
+internal static (int32, error) refineNonZeroes⁔(/*this*/ ref decoder d, ж<block> Ꮡb, int32 zig, int32 zigEnd, int32 nz, int32 delta) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     for (; zig <= zigEnd; zig++) {
@@ -511,7 +511,7 @@ break_loop:;
     return (zig, default);
 }
 
-[GoMethodBody("reconstructProgressiveImage")] internal static error reconstructProgressiveImageᴍ(ref decoder d) {
+internal static error reconstructProgressiveImage⁔(/*this*/ ref decoder d) {
     // The h0, mxx, by and bx variables have the same meaning as in the
     // processSOS method.
     nint h0 = d.comp[0].h;
@@ -535,12 +535,12 @@ break_loop:;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tooManyComponentsˢᴍdecoder => ref tooManyComponentsˢᵇᴍdecoder;
-private static readonly @string tooManyComponentsˢᵇᴍdecoder = "too many components"u8;
+internal static ref readonly @string tooManyComponentsˢ⁔decoder => ref tooManyComponentsˢᵇ⁔decoder;
+private static readonly @string tooManyComponentsˢᵇ⁔decoder = "too many components"u8;
 
 // reconstructBlock dequantizes, performs the inverse DCT and stores the block
 // to the image.
-[GoMethodBody("reconstructBlock")] internal static error reconstructBlockᴍ(ref decoder d, ж<block> Ꮡb, nint bx, nint by, nint compIndex) {
+internal static error reconstructBlock⁔(/*this*/ ref decoder d, ж<block> Ꮡb, nint bx, nint by, nint compIndex) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var qt = Ꮡ(d.quant, d.comp[compIndex].tq);
@@ -571,7 +571,7 @@ private static readonly @string tooManyComponentsˢᵇᴍdecoder = "too many com
             break;
         }
         default: {
-            return ((UnsupportedError)(@string)tooManyComponentsˢᴍdecoder);
+            return ((UnsupportedError)(@string)tooManyComponentsˢ⁔decoder);
         }}
     }
     // Level shift by +128, clip to [0, 255], and write to dst.
@@ -594,8 +594,8 @@ private static readonly @string tooManyComponentsˢᵇᴍdecoder = "too many com
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badRstMarkerˢᴍdecoder => ref badRstMarkerˢᵇᴍdecoder;
-private static readonly @string badRstMarkerˢᵇᴍdecoder = "bad RST marker"u8;
+internal static ref readonly @string badRstMarkerˢ⁔decoder => ref badRstMarkerˢᵇ⁔decoder;
+private static readonly @string badRstMarkerˢᵇ⁔decoder = "bad RST marker"u8;
 
 // findRST advances past the next RST restart marker that matches expectedRST.
 // Other than I/O errors, it is also an error if we encounter an {0xFF, M}
@@ -606,7 +606,7 @@ private static readonly @string badRstMarkerˢᵇᴍdecoder = "bad RST marker"u8
 //
 // Precondition: d.tmp[:2] holds the next two bytes of JPEG-encoded input
 // (input in the d.readFull sense).
-[GoMethodBody("findRST")] internal static error findRSTᴍ(ref decoder d, uint8 expectedRST) {
+internal static error findRST⁔(/*this*/ ref decoder d, uint8 expectedRST) {
     for (;;) {
         // i is the index such that, at the bottom of the loop, we read 2-i
         // bytes into d.tmp[i:2], maintaining the invariant that d.tmp[:2]
@@ -627,7 +627,7 @@ private static readonly @string badRstMarkerˢᵇᴍdecoder = "bad RST marker"u8
                 // cases is frequent enough to be worth the complexity, we take
                 // a simpler approach for now. Any marker that's not 0x00, 0xff
                 // or expectedRST is a fatal FormatError.
-                return ((FormatError)(@string)badRstMarkerˢᴍdecoder);
+                return ((FormatError)(@string)badRstMarkerˢ⁔decoder);
             }
         } else if (d.tmp[1] == 0xff) {
             d.tmp[0] = 0xff;

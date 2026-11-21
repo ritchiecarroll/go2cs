@@ -854,11 +854,11 @@ partial struct PanicNilError {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string panicCalledWithNilˢᴍPanicNilError => ref panicCalledWithNilˢᵇᴍPanicNilError;
-private static readonly @string panicCalledWithNilˢᵇᴍPanicNilError = "panic called with nil argument"u8;
+internal static ref readonly @string panicCalledWithNilˢ⁔PanicNilError => ref panicCalledWithNilˢᵇ⁔PanicNilError;
+private static readonly @string panicCalledWithNilˢᵇ⁔PanicNilError = "panic called with nil argument"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref PanicNilError _) { return panicCalledWithNilˢᴍPanicNilError; }
-[GoMethodBody("RuntimeError")] internal static void RuntimeErrorᴍ(ref PanicNilError _) { }
+internal static @string Error⁔(/*this*/ ref PanicNilError _) { return panicCalledWithNilˢ⁔PanicNilError; }
+internal static void RuntimeError⁔(/*this*/ ref PanicNilError _) { }
 
 } partial class runtime_package {
 
@@ -963,7 +963,7 @@ internal static void gopanic(any e) {
 // start initializes a panic to start unwinding the stack.
 //
 // If p.goexit is true, then start may return multiple times.
-[GoMethodBody("start")] internal static void startᴍ(ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp) {
+internal static void start⁔(/*this*/ ж<_panic> Ꮡp, uintptr pc, @unsafe.Pointer sp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var gp = getg();
@@ -1007,28 +1007,28 @@ internal static void gopanic(any e) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badPanicStackˢᴍ_panic => ref badPanicStackˢᵇᴍ_panic;
-private static readonly @string badPanicStackˢᵇᴍ_panic = "bad panic stack"u8;
-internal static ref readonly @string recoveryFailedˢᴍ_panic => ref recoveryFailedˢᵇᴍ_panic;
-private static readonly @string recoveryFailedˢᵇᴍ_panic = "recovery failed"u8;
+internal static ref readonly @string badPanicStackˢ⁔_panic => ref badPanicStackˢᵇ⁔_panic;
+private static readonly @string badPanicStackˢᵇ⁔_panic = "bad panic stack"u8;
+internal static ref readonly @string recoveryFailedˢ⁔_panic => ref recoveryFailedˢᵇ⁔_panic;
+private static readonly @string recoveryFailedˢᵇ⁔_panic = "recovery failed"u8;
 
 // nextDefer returns the next deferred function to invoke, if any.
 //
 // Note: The "ok bool" result is necessary to correctly handle when
 // the deferred function itself was nil (e.g., "defer (func())(nil)").
-[GoMethodBody("nextDefer")] internal static (Action, bool) nextDeferᴍ(ж<_panic> Ꮡp) {
+internal static (Action, bool) nextDefer⁔(/*this*/ ж<_panic> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var gp = getg();
 
     if (!p.deferreturn) {
         if ((~gp)._panic != Ꮡp) {
-            @throw(badPanicStackˢᴍ_panic);
+            @throw(badPanicStackˢ⁔_panic);
         }
 
         if (p.recovered) {
             mcall(recovery); // does not return
-            @throw(recoveryFailedˢᴍ_panic);
+            @throw(recoveryFailedˢ⁔_panic);
         }
     }
 
@@ -1084,7 +1084,7 @@ Recheck:
 }
 
 // nextFrame finds the next frame that contains deferred calls, if any.
-[GoMethodBody("nextFrame")] internal static bool /*ok*/ nextFrameᴍ(ж<_panic> Ꮡp) {
+internal static bool /*ok*/ nextFrame⁔(/*this*/ ж<_panic> Ꮡp) {
     bool ok = default;
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -1135,17 +1135,17 @@ Recheck:
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingDeferreturnˢᴍ_panic => ref missingDeferreturnˢᵇᴍ_panic;
-private static readonly @string missingDeferreturnˢᵇᴍ_panic = "missing deferreturn"u8;
+internal static ref readonly @string missingDeferreturnˢ⁔_panic => ref missingDeferreturnˢᵇ⁔_panic;
+private static readonly @string missingDeferreturnˢᵇ⁔_panic = "missing deferreturn"u8;
 
-[GoMethodBody("initOpenCodedDefers")] internal static bool initOpenCodedDefersᴍ(ref _panic p, funcInfo fn, @unsafe.Pointer varp) {
+internal static bool initOpenCodedDefers⁔(/*this*/ ref _panic p, funcInfo fn, @unsafe.Pointer varp) {
     @unsafe.Pointer fd = funcdata(fn, abi.FUNCDATA_OpenCodedDeferInfo);
     if (fd == nil) {
         return false;
     }
 
     if (fn.deferreturn == 0) {
-        @throw(missingDeferreturnˢᴍ_panic);
+        @throw(missingDeferreturnˢ⁔_panic);
     }
 
     (var deferBitsOffset, fd) = readvarintUnsafe(fd);

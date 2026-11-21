@@ -40,7 +40,7 @@ partial struct Heading {
 
 } partial class comment_package {
 
-[GoMethodBody("block")] internal static void blockᴍ(ref Heading _) { }
+internal static void block⁔(/*this*/ ref Heading _) { }
 
 } partial class comment_package {
 
@@ -71,7 +71,7 @@ partial struct List {
 
 } partial class comment_package {
 
-[GoMethodBody("block")] internal static void blockᴍ(ref List _) { }
+internal static void block⁔(/*this*/ ref List _) { }
 
 // BlankBefore reports whether a reformatting of the comment
 // should include a blank line before the list.
@@ -80,7 +80,7 @@ partial struct List {
 // (meaning at least one item has multiple paragraphs)
 // then the list itself must be preceded by a blank line.
 // A preceding blank line can be forced by setting [List].ForceBlankBefore.
-[GoMethodBody("BlankBefore")] internal static bool BlankBeforeᴍ(ref List l) {
+internal static bool BlankBefore⁔(/*this*/ ref List l) {
     return l.ForceBlankBefore || l.BlankBetween();
 }
 
@@ -90,7 +90,7 @@ partial struct List {
 // (meaning at least one item has multiple paragraphs)
 // then list items must themselves be separated by blank lines.
 // Blank line separators can be forced by setting [List].ForceBlankBetween.
-[GoMethodBody("BlankBetween")] internal static bool BlankBetweenᴍ(ref List l) {
+internal static bool BlankBetween⁔(/*this*/ ref List l) {
     if (l.ForceBlankBetween) {
         return true;
     }
@@ -126,7 +126,7 @@ partial struct Paragraph {
 
 } partial class comment_package {
 
-[GoMethodBody("block")] internal static void blockᴍ(ref Paragraph _) { }
+internal static void block⁔(/*this*/ ref Paragraph _) { }
 
 } partial class comment_package {
 
@@ -140,7 +140,7 @@ partial struct Code {
 
 } partial class comment_package {
 
-[GoMethodBody("block")] internal static void blockᴍ(ref Code _) { }
+internal static void block⁔(/*this*/ ref Code _) { }
 
 } partial class comment_package {
 
@@ -155,7 +155,7 @@ partial struct Plain /*@string*/;
 
 } partial class comment_package {
 
-[GoMethodBody("text")] internal static void textᴍ(Plain _) { }
+internal static void text⁔(/*this*/ Plain _) { }
 
 } partial class comment_package {
 
@@ -164,7 +164,7 @@ partial struct Italic /*@string*/;
 
 } partial class comment_package {
 
-[GoMethodBody("text")] internal static void textᴍ(Italic _) { }
+internal static void text⁔(/*this*/ Italic _) { }
 
 } partial class comment_package {
 
@@ -177,7 +177,7 @@ partial struct Link {
 
 } partial class comment_package {
 
-[GoMethodBody("text")] internal static void textᴍ(ref Link _) { }
+internal static void text⁔(/*this*/ ref Link _) { }
 
 } partial class comment_package {
 
@@ -199,7 +199,7 @@ partial struct DocLink {
 
 } partial class comment_package {
 
-[GoMethodBody("text")] internal static void textᴍ(ref DocLink _) { }
+internal static void text⁔(/*this*/ ref DocLink _) { }
 
 } partial class comment_package {
 
@@ -271,7 +271,7 @@ partial struct parseDoc {
 // like "math" are full import paths but don't contain slashes. We let d.LookupPackage have
 // the first chance to resolve it, in case there's a different package imported as math,
 // and otherwise we refer to a built-in list of single-element standard library package names.
-[GoMethodBody("lookupPkg")] internal static (@string importPath, bool ok) lookupPkgᴍ(ref parseDoc d, @string pkg) {
+internal static (@string importPath, bool ok) lookupPkg⁔(/*this*/ ref parseDoc d, @string pkg) {
     if (strings.Contains(pkg, "/")) { // assume a full import path
         if (validImportPath(pkg)) {
             return (pkg, true);
@@ -313,7 +313,7 @@ public static (@string importPath, bool ok) DefaultLookupPackage(@string name) {
 
 // Parse parses the doc comment text and returns the *[Doc] form.
 // Comment markers (/* // and */) in the text must have already been removed.
-[GoMethodBody("Parse")] internal static ж<Doc> Parseᴍ(ж<Parser> Ꮡp, @string text) {
+internal static ж<Doc> Parse⁔(/*this*/ ж<Parser> Ꮡp, @string text) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var lines = unindent(strings.Split(text, "\n"));
@@ -674,7 +674,7 @@ internal static bool isOldHeading(@string line, slice<@string> all, nint off) {
 } partial class comment_package {
 
 // oldHeading returns the *Heading for the given old-style section heading line.
-[GoMethodBody("oldHeading")] internal static Block oldHeadingᴍ(ref parseDoc d, @string line) {
+internal static Block oldHeading⁔(/*this*/ ref parseDoc d, @string line) {
     return new HeadingжBlock(Ꮡ(new Heading(Text: slice<Text>([((Plain)strings.TrimSpace(line))]))));
 }
 
@@ -688,12 +688,12 @@ internal static bool isHeading(@string line) {
 } partial class comment_package {
 
 // heading returns the *Heading for the given new-style section heading line.
-[GoMethodBody("heading")] internal static Block headingᴍ(ref parseDoc d, @string line) {
+internal static Block heading⁔(/*this*/ ref parseDoc d, @string line) {
     return new HeadingжBlock(Ꮡ(new Heading(Text: slice<Text>([((Plain)strings.TrimSpace(line[1..]))]))));
 }
 
 // code returns a code block built from the lines.
-[GoMethodBody("code")] internal static ж<Code> codeᴍ(ref parseDoc d, slice<@string> lines) {
+internal static ж<Code> code⁔(/*this*/ ref parseDoc d, slice<@string> lines) {
     var bodyᴷ = new stackAppend<@string>();
 
     var body = unindent(lines);
@@ -703,7 +703,7 @@ internal static bool isHeading(@string line) {
 
 // paragraph returns a paragraph block built from the lines.
 // If the lines are link definitions, paragraph adds them to d and returns nil.
-[GoMethodBody("paragraph")] internal static Block paragraphᴍ(ref parseDoc d, slice<@string> lines) {
+internal static Block paragraph⁔(/*this*/ ref parseDoc d, slice<@string> lines) {
     var defsᴷ = new stackAppend<ж<LinkDef>>(moves: true);
 
     // Is this a block of known links? Handle.
@@ -761,7 +761,7 @@ internal static (ж<LinkDef>, bool) parseLink(@string line) {
 
 // list returns a list built from the indented lines,
 // using forceBlankBefore as the value of the List's ForceBlankBefore field.
-[GoMethodBody("list")] internal static ж<List> listᴍ(ж<parseDoc> Ꮡd, slice<@string> lines, bool forceBlankBefore) {
+internal static ж<List> list⁔(/*this*/ ж<parseDoc> Ꮡd, slice<@string> lines, bool forceBlankBefore) {
     var textᴷ = new stackAppend<@string>();
 
     var (num, _, _) = listMarker(lines[0]);
@@ -859,7 +859,7 @@ internal static bool isList(@string line) {
 // must be both preceded and followed by punctuation, spaces, tabs,
 // or the start or end of a line. An example problem would be treating
 // map[ast.Expr]TypeAndValue as containing a link.
-[GoMethodBody("parseLinkedText")] internal static slice<Text> parseLinkedTextᴍ(ж<parseDoc> Ꮡd, @string text) {
+internal static slice<Text> parseLinkedText⁔(/*this*/ ж<parseDoc> Ꮡd, @string text) {
     ref var d = ref Ꮡd.DerefOrNull();
     var bufᴷ = new stackAppend<byte>();
 
@@ -920,7 +920,7 @@ internal static bool isList(@string line) {
 // The before and after strings are the text before the [ and after the ]
 // on the same line. Doc links must be preceded and followed by
 // punctuation, spaces, tabs, or the start or end of a line.
-[GoMethodBody("docLink")] internal static (ж<DocLink> link, bool ok) docLinkᴍ(ref parseDoc d, @string text, @string before, @string after) {
+internal static (ж<DocLink> link, bool ok) docLink⁔(/*this*/ ref parseDoc d, @string text, @string before, @string after) {
     ж<DocLink> link = default;
     bool ok = default;
 
@@ -989,7 +989,7 @@ internal static (@string before, @string name, bool foundDot) splitDocName(@stri
 // those are handled by parseLinkedText.
 // If autoLink is true, then parseText recognizes URLs and words from d.Words
 // and converts those to links as appropriate.
-[GoMethodBody("parseText")] internal static slice<Text> parseTextᴍ(ref parseDoc d, slice<Text> @out, @string s, bool autoLink) {
+internal static slice<Text> parseText⁔(/*this*/ ref parseDoc d, slice<Text> @out, @string s, bool autoLink) {
     ref var w = ref heap(new strings.Builder(), out var Ꮡw);
     nint wrote = 0;
     void writeUntil(nint i) {

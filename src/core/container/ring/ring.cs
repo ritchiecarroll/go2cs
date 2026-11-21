@@ -21,7 +21,7 @@ partial struct Ring {
 
 } partial class ring_package {
 
-[GoMethodBody("init")] internal static ж<Ring> initᴍ(ж<Ring> Ꮡr) {
+internal static ж<Ring> init⁔(/*this*/ ж<Ring> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     r.next = Ꮡr;
@@ -30,7 +30,7 @@ partial struct Ring {
 }
 
 // Next returns the next ring element. r must not be empty.
-[GoMethodBody("Next")] internal static ж<Ring> Nextᴍ(ж<Ring> Ꮡr) {
+internal static ж<Ring> Next⁔(/*this*/ ж<Ring> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.next == nil) {
@@ -40,7 +40,7 @@ partial struct Ring {
 }
 
 // Prev returns the previous ring element. r must not be empty.
-[GoMethodBody("Prev")] internal static ж<Ring> Prevᴍ(ж<Ring> Ꮡr) {
+internal static ж<Ring> Prev⁔(/*this*/ ж<Ring> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.next == nil) {
@@ -51,7 +51,7 @@ partial struct Ring {
 
 // Move moves n % r.Len() elements backward (n < 0) or forward (n >= 0)
 // in the ring and returns that ring element. r must not be empty.
-[GoMethodBody("Move")] internal static ж<Ring> Moveᴍ(ж<Ring> Ꮡr, nint n) {
+internal static ж<Ring> Move⁔(/*this*/ ж<Ring> Ꮡr, nint n) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.next == nil) {
@@ -108,7 +108,7 @@ public static ж<Ring> New(nint n) {
 // them creates a single ring with the elements of s inserted
 // after r. The result points to the element following the
 // last element of s after insertion.
-[GoMethodBody("Link")] internal static ж<Ring> Linkᴍ(ж<Ring> Ꮡr, ж<Ring> Ꮡs) {
+internal static ж<Ring> Link⁔(/*this*/ ж<Ring> Ꮡr, ж<Ring> Ꮡs) {
     ref var r = ref Ꮡr.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -128,7 +128,7 @@ public static ж<Ring> New(nint n) {
 // Unlink removes n % r.Len() elements from the ring r, starting
 // at r.Next(). If n % r.Len() == 0, r remains unchanged.
 // The result is the removed subring. r must not be empty.
-[GoMethodBody("Unlink")] internal static ж<Ring> Unlinkᴍ(ж<Ring> Ꮡr, nint n) {
+internal static ж<Ring> Unlink⁔(/*this*/ ж<Ring> Ꮡr, nint n) {
     if (n <= 0) {
         return default;
     }
@@ -137,7 +137,7 @@ public static ж<Ring> New(nint n) {
 
 // Len computes the number of elements in ring r.
 // It executes in time proportional to the number of elements.
-[GoMethodBody("Len")] internal static nint Lenᴍ(ж<Ring> Ꮡr) {
+internal static nint Len⁔(/*this*/ ж<Ring> Ꮡr) {
     nint n = 0;
     if (Ꮡr != nil) {
         n = 1;
@@ -150,7 +150,7 @@ public static ж<Ring> New(nint n) {
 
 // Do calls function f on each element of the ring, in forward order.
 // The behavior of Do is undefined if f changes *r.
-[GoMethodBody("Do")] internal static void Doᴍ(ж<Ring> Ꮡr, Action<any> f) {
+internal static void Do⁔(/*this*/ ж<Ring> Ꮡr, Action<any> f) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (Ꮡr != nil) {

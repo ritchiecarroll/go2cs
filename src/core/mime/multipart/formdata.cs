@@ -33,7 +33,7 @@ public static error ErrMessageTooLarge = errors.New("multipart: message too larg
 // disk in temporary files.
 // It returns [ErrMessageTooLarge] if all non-file parts can't be stored in
 // memory.
-[GoMethodBody("ReadForm")] internal static (ж<Form>, error) ReadFormᴍ(ж<Reader> Ꮡr, int64 maxMemory) {
+internal static (ж<Form>, error) ReadForm⁔(/*this*/ ж<Reader> Ꮡr, int64 maxMemory) {
     return Ꮡr.readForm(maxMemory);
 }
 
@@ -50,10 +50,10 @@ internal partial struct readForm_writerOnly /*dyn*/ {
 } partial class multipart_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string multipartˢᴍReader => ref multipartˢᵇᴍReader;
-private static readonly @string multipartˢᵇᴍReader = "multipart-"u8;
+internal static ref readonly @string multipartˢ⁔Reader => ref multipartˢᵇ⁔Reader;
+private static readonly @string multipartˢᵇ⁔Reader = "multipart-"u8;
 
-[GoMethodBody("readForm")] internal static (ж<Form>, error err) readFormᴍ(ж<Reader> Ꮡr, int64 maxMemory) {
+internal static (ж<Form>, error err) readForm⁔(/*this*/ ж<Reader> Ꮡr, int64 maxMemory) {
     ж<Form> _ᴛ1 = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -193,7 +193,7 @@ private static readonly @string multipartˢᵇᴍReader = "multipart-"u8;
             }
             if (n > maxFileMemoryBytes) {
                 if (@file == nil) {
-                    (@file, errΔ2) = os.CreateTemp(r.tempDir, multipartˢᴍReader);
+                    (@file, errΔ2) = os.CreateTemp(r.tempDir, multipartˢ⁔Reader);
                     if (errΔ2 != nil) {
                         (_ᴛ1, err) = (default, errΔ2); goto ᒐdone;
                     }
@@ -264,7 +264,7 @@ partial struct Form {
 } partial class multipart_package {
 
 // RemoveAll removes any temporary files associated with a [Form].
-[GoMethodBody("RemoveAll")] internal static error RemoveAllᴍ(ref Form f) {
+internal static error RemoveAll⁔(/*this*/ ref Form f) {
     error err = default;
     foreach (var (_, fhs) in f.File) {
         foreach (var (_, fh) in range(fhs)) {
@@ -295,7 +295,7 @@ partial struct FileHeader {
 } partial class multipart_package {
 
 // Open opens and returns the [FileHeader]'s associated File.
-[GoMethodBody("Open")] internal static (File, error) Openᴍ(ref FileHeader fh) {
+internal static (File, error) Open⁔(/*this*/ ref FileHeader fh) {
     var b = fh.content; if (b != nil) {
         var r = io.NewSectionReader(new bytes_ReaderжReaderAt(bytes.NewReader(b)), 0, (int64)len(b));
         return (new sectionReadCloser(r, default), default);
@@ -334,7 +334,7 @@ partial struct sectionReadCloser {
 
 } partial class multipart_package {
 
-[GoMethodBody("Close")] internal static error Closeᴍ(sectionReadCloser rc) {
+internal static error Close⁔(/*this*/ sectionReadCloser rc) {
     if (rc.Closer != nil) {
         return rc.Closer.Close();
     }

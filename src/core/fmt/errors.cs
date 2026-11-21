@@ -86,11 +86,11 @@ partial struct wrapError {
 
 } partial class fmt_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref wrapError e) {
+internal static @string Error⁔(/*this*/ ref wrapError e) {
     return e.msg;
 }
 
-[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref wrapError e) {
+internal static error Unwrap⁔(/*this*/ ref wrapError e) {
     return e.err;
 }
 
@@ -103,11 +103,11 @@ partial struct wrapErrors {
 
 } partial class fmt_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref wrapErrors e) {
+internal static @string Error⁔(/*this*/ ref wrapErrors e) {
     return e.msg;
 }
 
-[GoMethodBody("Unwrap")] internal static slice<error> Unwrapᴍ(ref wrapErrors e) {
+internal static slice<error> Unwrap⁔(/*this*/ ref wrapErrors e) {
     return e.errs;
 }
 

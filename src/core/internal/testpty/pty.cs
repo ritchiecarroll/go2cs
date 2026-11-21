@@ -25,11 +25,11 @@ internal static ж<PtyError> ptyError(@string name, error err) {
 
 } partial class testpty_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref PtyError e) {
+internal static @string Error⁔(/*this*/ ref PtyError e) {
     return fmt.Sprintf("%s: %s"u8, e.FuncName, e.ErrorString);
 }
 
-[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref PtyError e) { return e.Errno; }
+internal static error Unwrap⁔(/*this*/ ref PtyError e) { return e.Errno; }
 
 } partial class testpty_package {
 

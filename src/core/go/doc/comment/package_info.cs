@@ -90,12 +90,15 @@ using static go.go.doc.comment_package;
 
 namespace go.go.doc;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using bytes = bytes_package;
 using static comment_package;
 using strings = strings_package;
 using global::go.unicode;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("comment")]
 public static partial class comment_package
@@ -157,104 +160,104 @@ public static partial class comment_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(comment_package.Code)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛCode;
-[GoMethodHost(typeof(comment_package.DocLink)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛDocLink;
-[GoMethodHost(typeof(comment_package.Heading)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛHeading;
-[GoMethodHost(typeof(comment_package.Italic)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛItalic;
-[GoMethodHost(typeof(comment_package.Link)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛLink;
-[GoMethodHost(typeof(comment_package.List)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛList;
-[GoMethodHost(typeof(comment_package.Paragraph)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛParagraph;
-[GoMethodHost(typeof(comment_package.Parser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛParser;
-[GoMethodHost(typeof(comment_package.Plain)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛPlain;
-[GoMethodHost(typeof(comment_package.Printer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛPrinter;
-[GoMethodHost(typeof(comment_package.commentPrinter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛcommentPrinter;
-[GoMethodHost(typeof(comment_package.htmlPrinter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛhtmlPrinter;
-[GoMethodHost(typeof(comment_package.mdPrinter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛmdPrinter;
-[GoMethodHost(typeof(comment_package.parseDoc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛparseDoc;
-[GoMethodHost(typeof(comment_package.textPrinter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class commentᴛtextPrinter;
+[GoMethodHost(typeof(comment_package.Code)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛCode;
+[GoMethodHost(typeof(comment_package.DocLink)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛDocLink;
+[GoMethodHost(typeof(comment_package.Heading)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛHeading;
+[GoMethodHost(typeof(comment_package.Italic)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛItalic;
+[GoMethodHost(typeof(comment_package.Link)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛLink;
+[GoMethodHost(typeof(comment_package.List)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛList;
+[GoMethodHost(typeof(comment_package.Paragraph)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛParagraph;
+[GoMethodHost(typeof(comment_package.Parser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛParser;
+[GoMethodHost(typeof(comment_package.Plain)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛPlain;
+[GoMethodHost(typeof(comment_package.Printer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛPrinter;
+[GoMethodHost(typeof(comment_package.commentPrinter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛcommentPrinter;
+[GoMethodHost(typeof(comment_package.htmlPrinter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛhtmlPrinter;
+[GoMethodHost(typeof(comment_package.mdPrinter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛmdPrinter;
+[GoMethodHost(typeof(comment_package.parseDoc)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛparseDoc;
+[GoMethodHost(typeof(comment_package.textPrinter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class commentᴛtextPrinter;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class commentᴛPrinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> HTML(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.HTMLᴍ(Ꮡp, Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> HTML(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.HTML⁔(Ꮡp, Ꮡd);
 }
 partial class commentᴛhtmlPrinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.blockᴍ(ref p, Ꮡout, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) => comment_package.textᴍ(ref p, Ꮡout, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @string s) => comment_package.escapeᴍ(ref p, Ꮡout, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.block⁔(ref p, Ꮡout, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) => comment_package.text⁔(ref p, Ꮡout, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void escape(this ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @string s) => comment_package.escape⁔(ref p, Ꮡout, s);
 }
 partial class commentᴛPrinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Markdown(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.Markdownᴍ(Ꮡp, Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Markdown(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.Markdown⁔(Ꮡp, Ꮡd);
 }
 partial class commentᴛmdPrinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.blockᴍ(Ꮡp, Ꮡout, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slice<Text> x) => comment_package.textᴍ(Ꮡp, Ꮡout, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void rawText(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) => comment_package.rawTextᴍ(ref p, Ꮡout, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void escape(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @string s) => comment_package.escapeᴍ(ref p, Ꮡout, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.block⁔(Ꮡp, Ꮡout, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slice<Text> x) => comment_package.text⁔(Ꮡp, Ꮡout, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void rawText(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) => comment_package.rawText⁔(ref p, Ꮡout, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void escape(this ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @string s) => comment_package.escape⁔(ref p, Ꮡout, s);
 }
 partial class commentᴛHeading {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ref Heading _) => comment_package.blockᴍ(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ref Heading _) => comment_package.block⁔(ref _);
 }
 partial class commentᴛList {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ref List _) => comment_package.blockᴍ(ref _);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool BlankBefore(this ref List l) => comment_package.BlankBeforeᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool BlankBetween(this ref List l) => comment_package.BlankBetweenᴍ(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ref List _) => comment_package.block⁔(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool BlankBefore(this ref List l) => comment_package.BlankBefore⁔(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool BlankBetween(this ref List l) => comment_package.BlankBetween⁔(ref l);
 }
 partial class commentᴛParagraph {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ref Paragraph _) => comment_package.blockᴍ(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ref Paragraph _) => comment_package.block⁔(ref _);
 }
 partial class commentᴛCode {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ref Code _) => comment_package.blockᴍ(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ref Code _) => comment_package.block⁔(ref _);
 }
 partial class commentᴛPlain {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this Plain _) => comment_package.textᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this Plain _) => comment_package.text⁔(_);
 }
 partial class commentᴛItalic {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this Italic _) => comment_package.textᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this Italic _) => comment_package.text⁔(_);
 }
 partial class commentᴛLink {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this ref Link _) => comment_package.textᴍ(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this ref Link _) => comment_package.text⁔(ref _);
 }
 partial class commentᴛDocLink {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this ref DocLink _) => comment_package.textᴍ(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this ref DocLink _) => comment_package.text⁔(ref _);
 }
 partial class commentᴛparseDoc {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string importPath, bool ok) lookupPkg(this ref parseDoc d, @string pkg) => comment_package.lookupPkgᴍ(ref d, pkg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Block oldHeading(this ref parseDoc d, @string line) => comment_package.oldHeadingᴍ(ref d, line);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Block heading(this ref parseDoc d, @string line) => comment_package.headingᴍ(ref d, line);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Code> code(this ref parseDoc d, slice<@string> lines) => comment_package.codeᴍ(ref d, lines);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Block paragraph(this ref parseDoc d, slice<@string> lines) => comment_package.paragraphᴍ(ref d, lines);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool forceBlankBefore) => comment_package.listᴍ(Ꮡd, lines, forceBlankBefore);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Text> parseLinkedText(this ж<parseDoc> Ꮡd, @string text) => comment_package.parseLinkedTextᴍ(Ꮡd, text);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<DocLink> link, bool ok) docLink(this ref parseDoc d, @string text, @string before, @string after) => comment_package.docLinkᴍ(ref d, text, before, after);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Text> parseText(this ref parseDoc d, slice<Text> @out, @string s, bool autoLink) => comment_package.parseTextᴍ(ref d, @out, s, autoLink);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string importPath, bool ok) lookupPkg(this ref parseDoc d, @string pkg) => comment_package.lookupPkg⁔(ref d, pkg);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Block oldHeading(this ref parseDoc d, @string line) => comment_package.oldHeading⁔(ref d, line);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Block heading(this ref parseDoc d, @string line) => comment_package.heading⁔(ref d, line);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Code> code(this ref parseDoc d, slice<@string> lines) => comment_package.code⁔(ref d, lines);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Block paragraph(this ref parseDoc d, slice<@string> lines) => comment_package.paragraph⁔(ref d, lines);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<List> list(this ж<parseDoc> Ꮡd, slice<@string> lines, bool forceBlankBefore) => comment_package.list⁔(Ꮡd, lines, forceBlankBefore);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Text> parseLinkedText(this ж<parseDoc> Ꮡd, @string text) => comment_package.parseLinkedText⁔(Ꮡd, text);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<DocLink> link, bool ok) docLink(this ref parseDoc d, @string text, @string before, @string after) => comment_package.docLink⁔(ref d, text, before, after);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Text> parseText(this ref parseDoc d, slice<Text> @out, @string s, bool autoLink) => comment_package.parseText⁔(ref d, @out, s, autoLink);
 }
 partial class commentᴛParser {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) => comment_package.Parseᴍ(Ꮡp, text);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Doc> Parse(this ж<Parser> Ꮡp, @string text) => comment_package.Parse⁔(Ꮡp, text);
 }
 partial class commentᴛPrinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint headingLevel(this ref Printer p) => comment_package.headingLevelᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string headingID(this ref Printer p, ж<Heading> Ꮡh) => comment_package.headingIDᴍ(ref p, Ꮡh);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string docLinkURL(this ref Printer p, ж<DocLink> Ꮡlink) => comment_package.docLinkURLᴍ(ref p, Ꮡlink);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.Commentᴍ(Ꮡp, Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint headingLevel(this ref Printer p) => comment_package.headingLevel⁔(ref p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string headingID(this ref Printer p, ж<Heading> Ꮡh) => comment_package.headingID⁔(ref p, Ꮡh);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string docLinkURL(this ref Printer p, ж<DocLink> Ꮡlink) => comment_package.docLinkURL⁔(ref p, Ꮡlink);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Comment(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.Comment⁔(Ꮡp, Ꮡd);
 }
 partial class commentᴛDocLink {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string DefaultURL(this ref DocLink l, @string baseURL) => comment_package.DefaultURLᴍ(ref l, baseURL);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string DefaultURL(this ref DocLink l, @string baseURL) => comment_package.DefaultURL⁔(ref l, baseURL);
 }
 partial class commentᴛHeading {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string DefaultID(this ref Heading h) => comment_package.DefaultIDᴍ(ref h);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string DefaultID(this ref Heading h) => comment_package.DefaultID⁔(ref h);
 }
 partial class commentᴛcommentPrinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.blockᴍ(ref p, Ꮡout, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) => comment_package.textᴍ(ref p, Ꮡout, indent, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void indent(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, @string s) => comment_package.indentᴍ(ref p, Ꮡout, indent, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.block⁔(ref p, Ꮡout, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) => comment_package.text⁔(ref p, Ꮡout, indent, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void indent(this ref commentPrinter p, ж<bytes.Buffer> Ꮡout, @string indent, @string s) => comment_package.indent⁔(ref p, Ꮡout, indent, s);
 }
 partial class commentᴛPrinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Text(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.Textᴍ(Ꮡp, Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Text(this ж<Printer> Ꮡp, ж<Doc> Ꮡd) => comment_package.Text⁔(Ꮡp, Ꮡd);
 }
 partial class commentᴛtextPrinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void block(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.blockᴍ(Ꮡp, Ꮡout, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) => comment_package.textᴍ(Ꮡp, Ꮡout, indent, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> @out, slice<Text> x) => comment_package.oneLongLineᴍ(ref p, @out, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void block(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) => comment_package.block⁔(Ꮡp, Ꮡout, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void text(this ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) => comment_package.text⁔(Ꮡp, Ꮡout, indent, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void oneLongLine(this ref textPrinter p, ж<strings.Builder> @out, slice<Text> x) => comment_package.oneLongLine⁔(ref p, @out, x);
 }
 // </GlyphForwarders>

@@ -38,7 +38,7 @@ internal static ref sync.Once serverInit => ref ((StaticBox<sync.Once>)Ꮡserver
 
 } partial class poll_package {
 
-[GoMethodBody("init")] internal static error initᴍ(ref pollDesc pd, ж<FD> Ꮡfd) {
+internal static error init⁔(/*this*/ ref pollDesc pd, ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     ᏑserverInit.Do(runtime_pollServerInit);
@@ -50,7 +50,7 @@ internal static ref sync.Once serverInit => ref ((StaticBox<sync.Once>)Ꮡserver
     return default;
 }
 
-[GoMethodBody("close")] internal static void closeᴍ(ref pollDesc pd) {
+internal static void close⁔(/*this*/ ref pollDesc pd) {
     if (pd.runtimeCtx == 0) {
         return;
     }
@@ -59,14 +59,14 @@ internal static ref sync.Once serverInit => ref ((StaticBox<sync.Once>)Ꮡserver
 }
 
 // Evict evicts fd from the pending list, unblocking any I/O running on fd.
-[GoMethodBody("evict")] internal static void evictᴍ(ref pollDesc pd) {
+internal static void evict⁔(/*this*/ ref pollDesc pd) {
     if (pd.runtimeCtx == 0) {
         return;
     }
     runtime_pollUnblock(pd.runtimeCtx);
 }
 
-[GoMethodBody("prepare")] internal static error prepareᴍ(ref pollDesc pd, nint mode, bool isFile) {
+internal static error prepare⁔(/*this*/ ref pollDesc pd, nint mode, bool isFile) {
     if (pd.runtimeCtx == 0) {
         return default;
     }
@@ -74,42 +74,42 @@ internal static ref sync.Once serverInit => ref ((StaticBox<sync.Once>)Ꮡserver
     return convertErr(res, isFile);
 }
 
-[GoMethodBody("prepareRead")] internal static error prepareReadᴍ(ref pollDesc pd, bool isFile) {
+internal static error prepareRead⁔(/*this*/ ref pollDesc pd, bool isFile) {
     return pd.prepare('r', isFile);
 }
 
-[GoMethodBody("prepareWrite")] internal static error prepareWriteᴍ(ref pollDesc pd, bool isFile) {
+internal static error prepareWrite⁔(/*this*/ ref pollDesc pd, bool isFile) {
     return pd.prepare('w', isFile);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string waitingForUnsupportedˢᴍpollDesc => ref waitingForUnsupportedˢᵇᴍpollDesc;
-private static readonly @string waitingForUnsupportedˢᵇᴍpollDesc = "waiting for unsupported file type"u8;
+internal static ref readonly @string waitingForUnsupportedˢ⁔pollDesc => ref waitingForUnsupportedˢᵇ⁔pollDesc;
+private static readonly @string waitingForUnsupportedˢᵇ⁔pollDesc = "waiting for unsupported file type"u8;
 
-[GoMethodBody("wait")] internal static error waitᴍ(ref pollDesc pd, nint mode, bool isFile) {
+internal static error wait⁔(/*this*/ ref pollDesc pd, nint mode, bool isFile) {
     if (pd.runtimeCtx == 0) {
-        return errors.New(waitingForUnsupportedˢᴍpollDesc);
+        return errors.New(waitingForUnsupportedˢ⁔pollDesc);
     }
     nint res = runtime_pollWait(pd.runtimeCtx, mode);
     return convertErr(res, isFile);
 }
 
-[GoMethodBody("waitRead")] internal static error waitReadᴍ(ref pollDesc pd, bool isFile) {
+internal static error waitRead⁔(/*this*/ ref pollDesc pd, bool isFile) {
     return pd.wait('r', isFile);
 }
 
-[GoMethodBody("waitWrite")] internal static error waitWriteᴍ(ref pollDesc pd, bool isFile) {
+internal static error waitWrite⁔(/*this*/ ref pollDesc pd, bool isFile) {
     return pd.wait('w', isFile);
 }
 
-[GoMethodBody("waitCanceled")] internal static void waitCanceledᴍ(ref pollDesc pd, nint mode) {
+internal static void waitCanceled⁔(/*this*/ ref pollDesc pd, nint mode) {
     if (pd.runtimeCtx == 0) {
         return;
     }
     runtime_pollWaitCanceled(pd.runtimeCtx, mode);
 }
 
-[GoMethodBody("pollable")] internal static bool pollableᴍ(ref pollDesc pd) {
+internal static bool pollable⁔(/*this*/ ref pollDesc pd) {
     return pd.runtimeCtx != 0;
 }
 
@@ -143,17 +143,17 @@ internal static error convertErr(nint res, bool isFile) {
 } partial class poll_package {
 
 // SetDeadline sets the read and write deadlines associated with fd.
-[GoMethodBody("SetDeadline")] internal static error SetDeadlineᴍ(ж<FD> Ꮡfd, time.Time t) {
+internal static error SetDeadline⁔(/*this*/ ж<FD> Ꮡfd, time.Time t) {
     return setDeadlineImpl(Ꮡfd, t, (rune)'r' + (rune)'w');
 }
 
 // SetReadDeadline sets the read deadline associated with fd.
-[GoMethodBody("SetReadDeadline")] internal static error SetReadDeadlineᴍ(ж<FD> Ꮡfd, time.Time t) {
+internal static error SetReadDeadline⁔(/*this*/ ж<FD> Ꮡfd, time.Time t) {
     return setDeadlineImpl(Ꮡfd, t, 'r');
 }
 
 // SetWriteDeadline sets the write deadline associated with fd.
-[GoMethodBody("SetWriteDeadline")] internal static error SetWriteDeadlineᴍ(ж<FD> Ꮡfd, time.Time t) {
+internal static error SetWriteDeadline⁔(/*this*/ ж<FD> Ꮡfd, time.Time t) {
     return setDeadlineImpl(Ꮡfd, t, 'w');
 }
 

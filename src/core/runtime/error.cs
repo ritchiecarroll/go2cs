@@ -44,14 +44,14 @@ partial struct TypeAssertionError {
 
 } partial class runtime_package {
 
-[GoMethodBody("RuntimeError")] internal static void RuntimeErrorᴍ(ref TypeAssertionError _) { }
+internal static void RuntimeError⁔(/*this*/ ref TypeAssertionError _) { }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string interfaceˢᴍTypeAssertionError => ref interfaceˢᵇᴍTypeAssertionError;
-private static readonly @string interfaceˢᵇᴍTypeAssertionError = "interface"u8;
+internal static ref readonly @string interfaceˢ⁔TypeAssertionError => ref interfaceˢᵇ⁔TypeAssertionError;
+private static readonly @string interfaceˢᵇ⁔TypeAssertionError = "interface"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref TypeAssertionError e) {
-    @string inter = interfaceˢᴍTypeAssertionError;
+internal static @string Error⁔(/*this*/ ref TypeAssertionError e) {
+    @string inter = interfaceˢ⁔TypeAssertionError;
     if (e._interface != nil) {
         inter = toRType(e._interface).@string();
     }
@@ -98,9 +98,9 @@ partial struct errorString /*@string*/;
 
 } partial class runtime_package {
 
-[GoMethodBody("RuntimeError")] internal static void RuntimeErrorᴍ(errorString e) { }
+internal static void RuntimeError⁔(/*this*/ errorString e) { }
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(errorString e) {
+internal static @string Error⁔(/*this*/ errorString e) {
     return "runtime error: "u8 + ((@string)e);
 }
 
@@ -113,9 +113,9 @@ partial struct errorAddressString {
 
 } partial class runtime_package {
 
-[GoMethodBody("RuntimeError")] internal static void RuntimeErrorᴍ(errorAddressString e) { }
+internal static void RuntimeError⁔(/*this*/ errorAddressString e) { }
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(errorAddressString e) {
+internal static @string Error⁔(/*this*/ errorAddressString e) {
     return "runtime error: "u8 + e.msg;
 }
 
@@ -124,7 +124,7 @@ partial struct errorAddressString {
 // The veracity of the result may depend on the platform.
 // Errors providing this method will only be returned as
 // a result of using [runtime/debug.SetPanicOnFault].
-[GoMethodBody("Addr")] internal static uintptr Addrᴍ(errorAddressString e) {
+internal static uintptr Addr⁔(/*this*/ errorAddressString e) {
     return e.addr;
 }
 
@@ -137,9 +137,9 @@ partial struct plainError /*@string*/;
 
 } partial class runtime_package {
 
-[GoMethodBody("RuntimeError")] internal static void RuntimeErrorᴍ(plainError e) { }
+internal static void RuntimeError⁔(/*this*/ plainError e) { }
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(plainError e) {
+internal static @string Error⁔(/*this*/ plainError e) {
     return (@string)e;
 }
 
@@ -186,7 +186,7 @@ partial struct boundsError {
 
 } partial class runtime_package {
 
-[GoMethodBody("RuntimeError")] internal static void RuntimeErrorᴍ(boundsError e) { }
+internal static void RuntimeError⁔(/*this*/ boundsError e) { }
 
 } partial class runtime_package {
 
@@ -202,7 +202,7 @@ internal static slice<byte> appendIntStr(slice<byte> b, int64 v, bool signed) {
 
 } partial class runtime_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(boundsError e) {
+internal static @string Error⁔(/*this*/ boundsError e) {
     var bᴷ = new stackAppend<byte>();
 
     @string fmt = boundsErrorFmts[e.code];

@@ -36,13 +36,13 @@ partial struct streamSafe /*num:uint8*/;
 
 // first inserts the first rune of a segment. It is a faster version of next if
 // it is known p represents the first rune in a segment.
-[GoMethodBody("first")] internal static void firstᴍ(ref streamSafe ss, Properties p) {
+internal static void first⁔(/*this*/ ref streamSafe ss, Properties p) {
     ss = (streamSafe)p.nTrailingNonStarters();
 }
 
 // insert returns a ssState value to indicate whether a rune represented by p
 // can be inserted.
-[GoMethodBody("next")] internal static ssState nextᴍ(ref streamSafe ss, Properties p) {
+internal static ssState next⁔(/*this*/ ref streamSafe ss, Properties p) {
     if (ss > maxNonStarters) {
         throw panic("streamSafe was not reset");
     }
@@ -69,7 +69,7 @@ partial struct streamSafe /*num:uint8*/;
 // when traversing a string backwards. Users do not need to call first
 // for the first rune. The state of the streamSafe retains the count of
 // the non-starters loaded.
-[GoMethodBody("backwards")] internal static ssState backwardsᴍ(ref streamSafe ss, Properties p) {
+internal static ssState backwards⁔(/*this*/ ref streamSafe ss, Properties p) {
     if (ss > maxNonStarters) {
         throw panic("streamSafe was not reset");
     }
@@ -84,7 +84,7 @@ partial struct streamSafe /*num:uint8*/;
     return ssSuccess;
 }
 
-[GoMethodBody("isMax")] internal static bool isMaxᴍ(streamSafe ss) {
+internal static bool isMax⁔(/*this*/ streamSafe ss) {
     return ss == maxNonStarters;
 }
 
@@ -115,32 +115,32 @@ partial struct reorderBuffer {
 
 } partial class norm_package {
 
-[GoMethodBody("init")] internal static void initᴍ(ref reorderBuffer rb, Form f, slice<byte> src) {
+internal static void init⁔(/*this*/ ref reorderBuffer rb, Form f, slice<byte> src) {
     rb.f = formTable[f].Value;
     rb.src.setBytes(src);
     rb.nsrc = len(src);
     rb.ss = 0;
 }
 
-[GoMethodBody("initString")] internal static void initStringᴍ(ref reorderBuffer rb, Form f, @string src) {
+internal static void initString⁔(/*this*/ ref reorderBuffer rb, Form f, @string src) {
     rb.f = formTable[f].Value;
     rb.src.setString(src);
     rb.nsrc = len(src);
     rb.ss = 0;
 }
 
-[GoMethodBody("setFlusher")] internal static void setFlusherᴍ(ref reorderBuffer rb, slice<byte> @out, Func<ж<reorderBuffer>, bool> f) {
+internal static void setFlusher⁔(/*this*/ ref reorderBuffer rb, slice<byte> @out, Func<ж<reorderBuffer>, bool> f) {
     rb.@out = @out;
     rb.flushF = f;
 }
 
 // reset discards all characters from the buffer.
-[GoMethodBody("reset")] internal static void resetᴍ(ref reorderBuffer rb) {
+internal static void reset⁔(/*this*/ ref reorderBuffer rb) {
     rb.nrune = 0;
     rb.nbyte = 0;
 }
 
-[GoMethodBody("doFlush")] internal static bool doFlushᴍ(ж<reorderBuffer> Ꮡrb) {
+internal static bool doFlush⁔(/*this*/ ж<reorderBuffer> Ꮡrb) {
     ref var rb = ref Ꮡrb.DerefOrNull();
 
     if (rb.f.composing) {
@@ -168,7 +168,7 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
 } partial class norm_package {
 
 // flush appends the normalized segment to out and resets rb.
-[GoMethodBody("flush")] internal static slice<byte> flushᴍ(ref reorderBuffer rb, slice<byte> @out) {
+internal static slice<byte> flush⁔(/*this*/ ref reorderBuffer rb, slice<byte> @out) {
     for (nint i = 0; i < rb.nrune; i++) {
         var start = rb.rune[i].pos;
         var end = (uint8)(start + rb.rune[i].size);
@@ -180,7 +180,7 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
 
 // flushCopy copies the normalized segment to buf and resets rb.
 // It returns the number of bytes written to buf.
-[GoMethodBody("flushCopy")] internal static nint flushCopyᴍ(ref reorderBuffer rb, slice<byte> buf) {
+internal static nint flushCopy⁔(/*this*/ ref reorderBuffer rb, slice<byte> buf) {
     nint p = 0;
     for (nint i = 0; i < rb.nrune; i++) {
         var runep = rb.rune[i];
@@ -193,7 +193,7 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
 // insertOrdered inserts a rune in the buffer, ordered by Canonical Combining Class.
 // It returns false if the buffer is not large enough to hold the rune.
 // It is used internally by insert and insertString only.
-[GoMethodBody("insertOrdered")] internal static void insertOrderedᴍ(ref reorderBuffer rb, Properties info) {
+internal static void insertOrdered⁔(/*this*/ ref reorderBuffer rb, Properties info) {
     nint n = rb.nrune;
     var b = rb.rune[..];
     var cc = info.ccc;
@@ -229,7 +229,7 @@ internal static insertErr iShortSrc => -2;
 // If a decomposition with multiple segments are encountered, they leading
 // ones are flushed.
 // It returns a non-zero error code if the rune was not inserted.
-[GoMethodBody("insertFlush")] internal static insertErr insertFlushᴍ(ж<reorderBuffer> Ꮡrb, input src, nint i, Properties info) {
+internal static insertErr insertFlush⁔(/*this*/ ж<reorderBuffer> Ꮡrb, input src, nint i, Properties info) {
     ref var rb = ref Ꮡrb.DerefOrNull();
 
     var rune = src.hangul(i); if (rune != 0) {
@@ -247,7 +247,7 @@ internal static insertErr iShortSrc => -2;
 // It is assumed there is sufficient space to hold the runes. It is the
 // responsibility of the caller to ensure this. This can be done by checking
 // the state returned by the streamSafe type.
-[GoMethodBody("insertUnsafe")] internal static void insertUnsafeᴍ(ж<reorderBuffer> Ꮡrb, input src, nint i, Properties info) {
+internal static void insertUnsafe⁔(/*this*/ ж<reorderBuffer> Ꮡrb, input src, nint i, Properties info) {
     ref var rb = ref Ꮡrb.DerefOrNull();
 
     var rune = src.hangul(i); if (rune != 0) {
@@ -264,7 +264,7 @@ internal static insertErr iShortSrc => -2;
 // insertDecomposed inserts an entry in to the reorderBuffer for each rune
 // in dcomp. dcomp must be a sequence of decomposed UTF-8-encoded runes.
 // It flushes the buffer on each new segment start.
-[GoMethodBody("insertDecomposed")] internal static insertErr insertDecomposedᴍ(ж<reorderBuffer> Ꮡrb, slice<byte> dcomp) {
+internal static insertErr insertDecomposed⁔(/*this*/ ж<reorderBuffer> Ꮡrb, slice<byte> dcomp) {
     ref var rb = ref Ꮡrb.DerefOrNull();
 
     rb.tmpBytes.setBytes(dcomp);
@@ -284,18 +284,18 @@ internal static insertErr iShortSrc => -2;
 
 // insertSingle inserts an entry in the reorderBuffer for the rune at
 // position i. info is the runeInfo for the rune at position i.
-[GoMethodBody("insertSingle")] internal static void insertSingleᴍ(ref reorderBuffer rb, input src, nint i, Properties info) {
+internal static void insertSingle⁔(/*this*/ ref reorderBuffer rb, input src, nint i, Properties info) {
     src.copySlice(rb.@byte.slice(rb.nbyte), i, i + (nint)info.size);
     rb.insertOrdered(info);
 }
 
 // insertCGJ inserts a Combining Grapheme Joiner (0x034f) into rb.
-[GoMethodBody("insertCGJ")] internal static void insertCGJᴍ(ref reorderBuffer rb) {
+internal static void insertCGJ⁔(/*this*/ ref reorderBuffer rb) {
     rb.insertSingle(new input(str: GraphemeJoiner), 0, new Properties(size: (uint8)len(GraphemeJoiner)));
 }
 
 // appendRune inserts a rune at the end of the buffer. It is used for Hangul.
-[GoMethodBody("appendRune")] internal static void appendRuneᴍ(ref reorderBuffer rb, rune r) {
+internal static void appendRune⁔(/*this*/ ref reorderBuffer rb, rune r) {
     var bn = rb.nbyte;
     nint sz = utf8.EncodeRune(rb.@byte.slice(bn), (rune)r);
     rb.nbyte += utf8.UTFMax;
@@ -304,14 +304,14 @@ internal static insertErr iShortSrc => -2;
 }
 
 // assignRune sets a rune at position pos. It is used for Hangul and recomposition.
-[GoMethodBody("assignRune")] internal static void assignRuneᴍ(ref reorderBuffer rb, nint pos, rune r) {
+internal static void assignRune⁔(/*this*/ ref reorderBuffer rb, nint pos, rune r) {
     var bn = rb.rune[pos].pos;
     nint sz = utf8.EncodeRune(rb.@byte.slice(bn), (rune)r);
     rb.rune[pos] = new Properties(pos: bn, size: (uint8)sz);
 }
 
 // runeAt returns the rune at position n. It is used for Hangul and recomposition.
-[GoMethodBody("runeAt")] internal static rune runeAtᴍ(ref reorderBuffer rb, nint n) {
+internal static rune runeAt⁔(/*this*/ ref reorderBuffer rb, nint n) {
     var inf = rb.rune[n];
     var (r, _) = utf8.DecodeRune(rb.@byte.slice(inf.pos, (uint8)(inf.pos + inf.size)));
     return r;
@@ -319,7 +319,7 @@ internal static insertErr iShortSrc => -2;
 
 // bytesAt returns the UTF-8 encoding of the rune at position n.
 // It is used for Hangul and recomposition.
-[GoMethodBody("bytesAt")] internal static slice<byte> bytesAtᴍ(ref reorderBuffer rb, nint n) {
+internal static slice<byte> bytesAt⁔(/*this*/ ref reorderBuffer rb, nint n) {
     var inf = rb.rune[n];
     return rb.@byte.slice(inf.pos, (nint)inf.pos + (nint)inf.size);
 }
@@ -436,7 +436,7 @@ internal static nint decomposeHangul(slice<byte> buf, rune r) {
 // decomposeHangul algorithmically decomposes a Hangul rune into
 // its Jamo components.
 // See https://unicode.org/reports/tr15/#Hangul for details on decomposing Hangul.
-[GoMethodBody("decomposeHangul")] internal static void decomposeHangulᴍ(ref reorderBuffer rb, rune r) {
+internal static void decomposeHangul⁔(/*this*/ ref reorderBuffer rb, rune r) {
     r -= hangulBase;
     var x = r % (rune)jamoTCount;
     r /= jamoTCount;
@@ -449,7 +449,7 @@ internal static nint decomposeHangul(slice<byte> buf, rune r) {
 
 // combineHangul algorithmically combines Jamo character components into Hangul.
 // See https://unicode.org/reports/tr15/#Hangul for details on combining Hangul.
-[GoMethodBody("combineHangul")] internal static void combineHangulᴍ(ref reorderBuffer rb, nint s, nint i, nint k) {
+internal static void combineHangul⁔(/*this*/ ref reorderBuffer rb, nint s, nint i, nint k) {
     var b = rb.rune[..];
     nint bn = rb.nrune;
     for (; i < bn; i++) {
@@ -489,7 +489,7 @@ internal static nint decomposeHangul(slice<byte> buf, rune r) {
 // compose recombines the runes in the buffer.
 // It should only be used to recompose a single segment, as it will not
 // handle alternations between Hangul and non-Hangul characters correctly.
-[GoMethodBody("compose")] internal static void composeᴍ(ref reorderBuffer rb) {
+internal static void compose⁔(/*this*/ ref reorderBuffer rb) {
     // Lazily load the map used by the combine func below, but do
     // it outside of the loop.
     ᏑrecompMapOnce.Do(buildRecompMap);

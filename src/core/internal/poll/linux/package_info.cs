@@ -90,7 +90,7 @@ using static go.@internal.poll_package;
 
 namespace go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static poll_package;
 using Δsyscall = syscall_package;
 using go.sync;
@@ -98,7 +98,10 @@ using time = time_package;
 using go;
 using go.@internal;
 using go.@internal.syscall;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("poll")]
 public static partial class poll_package
@@ -147,127 +150,127 @@ public static partial class poll_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(poll_package.DeadlineExceededError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛDeadlineExceededError;
-[GoMethodHost(typeof(poll_package.FD)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛFD;
-[GoMethodHost(typeof(poll_package.SysFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛSysFile;
-[GoMethodHost(typeof(poll_package.errNetClosing)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛerrNetClosing;
-[GoMethodHost(typeof(poll_package.fdMutex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛfdMutex;
-[GoMethodHost(typeof(poll_package.pollDesc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pollᴛpollDesc;
+[GoMethodHost(typeof(poll_package.DeadlineExceededError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pollᴛDeadlineExceededError;
+[GoMethodHost(typeof(poll_package.FD)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pollᴛFD;
+[GoMethodHost(typeof(poll_package.SysFile)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pollᴛSysFile;
+[GoMethodHost(typeof(poll_package.errNetClosing)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pollᴛerrNetClosing;
+[GoMethodHost(typeof(poll_package.fdMutex)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pollᴛfdMutex;
+[GoMethodHost(typeof(poll_package.pollDesc)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pollᴛpollDesc;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class pollᴛerrNetClosing {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this errNetClosing e) => poll_package.Errorᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this errNetClosing e) => poll_package.Timeoutᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Temporary(this errNetClosing e) => poll_package.Temporaryᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this errNetClosing e) => poll_package.Error⁔(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Timeout(this errNetClosing e) => poll_package.Timeout⁔(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Temporary(this errNetClosing e) => poll_package.Temporary⁔(e);
 }
 partial class pollᴛDeadlineExceededError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref DeadlineExceededError e) => poll_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this ref DeadlineExceededError e) => poll_package.Timeoutᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Temporary(this ref DeadlineExceededError e) => poll_package.Temporaryᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref DeadlineExceededError e) => poll_package.Error⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Timeout(this ref DeadlineExceededError e) => poll_package.Timeout⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Temporary(this ref DeadlineExceededError e) => poll_package.Temporary⁔(ref e);
 }
 partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Fsync(this ж<FD> Ꮡfd) => poll_package.Fsyncᴍ(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Fsync(this ж<FD> Ꮡfd) => poll_package.Fsync⁔(Ꮡfd);
 }
 partial class pollᴛfdMutex {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool incref(this ж<fdMutex> Ꮡmu) => poll_package.increfᴍ(Ꮡmu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool decref(this ж<fdMutex> Ꮡmu) => poll_package.decrefᴍ(Ꮡmu);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool incref(this ж<fdMutex> Ꮡmu) => poll_package.incref⁔(Ꮡmu);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool decref(this ж<fdMutex> Ꮡmu) => poll_package.decref⁔(Ꮡmu);
 }
 partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error incref(this ж<FD> Ꮡfd) => poll_package.increfᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error decref(this ж<FD> Ꮡfd) => poll_package.decrefᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readLock(this ж<FD> Ꮡfd) => poll_package.readLockᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readUnlock(this ж<FD> Ꮡfd) => poll_package.readUnlockᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeLock(this ж<FD> Ꮡfd) => poll_package.writeLockᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeUnlock(this ж<FD> Ꮡfd) => poll_package.writeUnlockᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readWriteLock(this ж<FD> Ꮡfd) => poll_package.readWriteLockᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void readWriteUnlock(this ж<FD> Ꮡfd) => poll_package.readWriteUnlockᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool closing(this ж<FD> Ꮡfd) => poll_package.closingᴍ(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error incref(this ж<FD> Ꮡfd) => poll_package.incref⁔(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error decref(this ж<FD> Ꮡfd) => poll_package.decref⁔(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readLock(this ж<FD> Ꮡfd) => poll_package.readLock⁔(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void readUnlock(this ж<FD> Ꮡfd) => poll_package.readUnlock⁔(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeLock(this ж<FD> Ꮡfd) => poll_package.writeLock⁔(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeUnlock(this ж<FD> Ꮡfd) => poll_package.writeUnlock⁔(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readWriteLock(this ж<FD> Ꮡfd) => poll_package.readWriteLock⁔(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void readWriteUnlock(this ж<FD> Ꮡfd) => poll_package.readWriteUnlock⁔(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool closing(this ж<FD> Ꮡfd) => poll_package.closing⁔(Ꮡfd);
 }
 partial class pollᴛpollDesc {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error init(this ref pollDesc pd, ж<FD> Ꮡfd) => poll_package.initᴍ(ref pd, Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void close(this ref pollDesc pd) => poll_package.closeᴍ(ref pd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void evict(this ref pollDesc pd) => poll_package.evictᴍ(ref pd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error prepare(this ref pollDesc pd, nint mode, bool isFile) => poll_package.prepareᴍ(ref pd, mode, isFile);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error prepareRead(this ref pollDesc pd, bool isFile) => poll_package.prepareReadᴍ(ref pd, isFile);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error prepareWrite(this ref pollDesc pd, bool isFile) => poll_package.prepareWriteᴍ(ref pd, isFile);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error wait(this ref pollDesc pd, nint mode, bool isFile) => poll_package.waitᴍ(ref pd, mode, isFile);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error waitRead(this ref pollDesc pd, bool isFile) => poll_package.waitReadᴍ(ref pd, isFile);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error waitWrite(this ref pollDesc pd, bool isFile) => poll_package.waitWriteᴍ(ref pd, isFile);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void waitCanceled(this ref pollDesc pd, nint mode) => poll_package.waitCanceledᴍ(ref pd, mode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool pollable(this ref pollDesc pd) => poll_package.pollableᴍ(ref pd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error init(this ref pollDesc pd, ж<FD> Ꮡfd) => poll_package.init⁔(ref pd, Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void close(this ref pollDesc pd) => poll_package.close⁔(ref pd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void evict(this ref pollDesc pd) => poll_package.evict⁔(ref pd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error prepare(this ref pollDesc pd, nint mode, bool isFile) => poll_package.prepare⁔(ref pd, mode, isFile);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error prepareRead(this ref pollDesc pd, bool isFile) => poll_package.prepareRead⁔(ref pd, isFile);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error prepareWrite(this ref pollDesc pd, bool isFile) => poll_package.prepareWrite⁔(ref pd, isFile);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error wait(this ref pollDesc pd, nint mode, bool isFile) => poll_package.wait⁔(ref pd, mode, isFile);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error waitRead(this ref pollDesc pd, bool isFile) => poll_package.waitRead⁔(ref pd, isFile);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error waitWrite(this ref pollDesc pd, bool isFile) => poll_package.waitWrite⁔(ref pd, isFile);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void waitCanceled(this ref pollDesc pd, nint mode) => poll_package.waitCanceled⁔(ref pd, mode);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool pollable(this ref pollDesc pd) => poll_package.pollable⁔(ref pd);
 }
 partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetDeadline(this ж<FD> Ꮡfd, time.Time t) => poll_package.SetDeadlineᴍ(Ꮡfd, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetReadDeadline(this ж<FD> Ꮡfd, time.Time t) => poll_package.SetReadDeadlineᴍ(Ꮡfd, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetWriteDeadline(this ж<FD> Ꮡfd, time.Time t) => poll_package.SetWriteDeadlineᴍ(Ꮡfd, t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetDeadline(this ж<FD> Ꮡfd, time.Time t) => poll_package.SetDeadline⁔(Ꮡfd, t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetReadDeadline(this ж<FD> Ꮡfd, time.Time t) => poll_package.SetReadDeadline⁔(Ꮡfd, t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetWriteDeadline(this ж<FD> Ꮡfd, time.Time t) => poll_package.SetWriteDeadline⁔(Ꮡfd, t);
 }
 partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error eofError(this ref FD fd, nint n, error err) => poll_package.eofErrorᴍ(ref fd, n, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Shutdown(this ж<FD> Ꮡfd, nint how) => poll_package.Shutdownᴍ(Ꮡfd, how);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Fchown(this ж<FD> Ꮡfd, nint uid, nint gid) => poll_package.Fchownᴍ(Ꮡfd, uid, gid);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Ftruncate(this ж<FD> Ꮡfd, int64 size) => poll_package.Ftruncateᴍ(Ꮡfd, size);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error RawControl(this ж<FD> Ꮡfd, Action<uintptr> f) => poll_package.RawControlᴍ(Ꮡfd, f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error eofError(this ref FD fd, nint n, error err) => poll_package.eofError⁔(ref fd, n, err);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Shutdown(this ж<FD> Ꮡfd, nint how) => poll_package.Shutdown⁔(Ꮡfd, how);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Fchown(this ж<FD> Ꮡfd, nint uid, nint gid) => poll_package.Fchown⁔(Ꮡfd, uid, gid);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Ftruncate(this ж<FD> Ꮡfd, int64 size) => poll_package.Ftruncate⁔(Ꮡfd, size);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error RawControl(this ж<FD> Ꮡfd, Action<uintptr> f) => poll_package.RawControl⁔(Ꮡfd, f);
 }
 partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Init(this ж<FD> Ꮡfd, @string net, bool pollable) => poll_package.Initᴍ(Ꮡfd, net, pollable);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error destroy(this ж<FD> Ꮡfd) => poll_package.destroyᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<FD> Ꮡfd) => poll_package.Closeᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetBlocking(this ж<FD> Ꮡfd) => poll_package.SetBlockingᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Read(this ж<FD> Ꮡfd, slice<byte> p) => poll_package.Readᴍ(Ꮡfd, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Pread(this ж<FD> Ꮡfd, slice<byte> p, int64 off) => poll_package.Preadᴍ(Ꮡfd, p, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, Δsyscall.Sockaddr, error) ReadFrom(this ж<FD> Ꮡfd, slice<byte> p) => poll_package.ReadFromᴍ(Ꮡfd, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) ReadFromInet4(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet4> from) => poll_package.ReadFromInet4ᴍ(Ꮡfd, p, from);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) ReadFromInet6(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet6> from) => poll_package.ReadFromInet6ᴍ(Ꮡfd, p, from);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, nint, nint, Δsyscall.Sockaddr, error) ReadMsg(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags) => poll_package.ReadMsgᴍ(Ꮡfd, p, oob, flags);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, nint, nint, error) ReadMsgInet4(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet4> sa4) => poll_package.ReadMsgInet4ᴍ(Ꮡfd, p, oob, flags, sa4);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, nint, nint, error) ReadMsgInet6(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet6> sa6) => poll_package.ReadMsgInet6ᴍ(Ꮡfd, p, oob, flags, sa6);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> p) => poll_package.Writeᴍ(Ꮡfd, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Pwrite(this ж<FD> Ꮡfd, slice<byte> p, int64 off) => poll_package.Pwriteᴍ(Ꮡfd, p, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteToInet4(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet4> sa) => poll_package.WriteToInet4ᴍ(Ꮡfd, p, sa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteToInet6(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet6> sa) => poll_package.WriteToInet6ᴍ(Ꮡfd, p, sa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteTo(this ж<FD> Ꮡfd, slice<byte> p, Δsyscall.Sockaddr sa) => poll_package.WriteToᴍ(Ꮡfd, p, sa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, nint, error) WriteMsg(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, Δsyscall.Sockaddr sa) => poll_package.WriteMsgᴍ(Ꮡfd, p, oob, sa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, nint, error) WriteMsgInet4(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet4> sa) => poll_package.WriteMsgInet4ᴍ(Ꮡfd, p, oob, sa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, nint, error) WriteMsgInet6(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet6> sa) => poll_package.WriteMsgInet6ᴍ(Ꮡfd, p, oob, sa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, Δsyscall.Sockaddr, @string, error) Accept(this ж<FD> Ꮡfd) => poll_package.Acceptᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Fchmod(this ж<FD> Ꮡfd, uint32 mode) => poll_package.Fchmodᴍ(Ꮡfd, mode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Fstat(this ж<FD> Ꮡfd, ж<Δsyscall.Stat_t> s) => poll_package.Fstatᴍ(Ꮡfd, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, @string, error) Dup(this ж<FD> Ꮡfd) => poll_package.Dupᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WaitWrite(this ref FD fd) => poll_package.WaitWriteᴍ(ref fd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) WriteOnce(this ж<FD> Ꮡfd, slice<byte> p) => poll_package.WriteOnceᴍ(Ꮡfd, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error RawRead(this ж<FD> Ꮡfd, Func<uintptr, bool> f) => poll_package.RawReadᴍ(Ꮡfd, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error RawWrite(this ж<FD> Ꮡfd, Func<uintptr, bool> f) => poll_package.RawWriteᴍ(Ꮡfd, f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Init(this ж<FD> Ꮡfd, @string net, bool pollable) => poll_package.Init⁔(Ꮡfd, net, pollable);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error destroy(this ж<FD> Ꮡfd) => poll_package.destroy⁔(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ж<FD> Ꮡfd) => poll_package.Close⁔(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetBlocking(this ж<FD> Ꮡfd) => poll_package.SetBlocking⁔(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Read(this ж<FD> Ꮡfd, slice<byte> p) => poll_package.Read⁔(Ꮡfd, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Pread(this ж<FD> Ꮡfd, slice<byte> p, int64 off) => poll_package.Pread⁔(Ꮡfd, p, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, Δsyscall.Sockaddr, error) ReadFrom(this ж<FD> Ꮡfd, slice<byte> p) => poll_package.ReadFrom⁔(Ꮡfd, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) ReadFromInet4(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet4> from) => poll_package.ReadFromInet4⁔(Ꮡfd, p, from);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) ReadFromInet6(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet6> from) => poll_package.ReadFromInet6⁔(Ꮡfd, p, from);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, nint, nint, Δsyscall.Sockaddr, error) ReadMsg(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags) => poll_package.ReadMsg⁔(Ꮡfd, p, oob, flags);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, nint, nint, error) ReadMsgInet4(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet4> sa4) => poll_package.ReadMsgInet4⁔(Ꮡfd, p, oob, flags, sa4);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, nint, nint, error) ReadMsgInet6(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet6> sa6) => poll_package.ReadMsgInet6⁔(Ꮡfd, p, oob, flags, sa6);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Write(this ж<FD> Ꮡfd, slice<byte> p) => poll_package.Write⁔(Ꮡfd, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Pwrite(this ж<FD> Ꮡfd, slice<byte> p, int64 off) => poll_package.Pwrite⁔(Ꮡfd, p, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) WriteToInet4(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet4> sa) => poll_package.WriteToInet4⁔(Ꮡfd, p, sa);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) WriteToInet6(this ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet6> sa) => poll_package.WriteToInet6⁔(Ꮡfd, p, sa);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) WriteTo(this ж<FD> Ꮡfd, slice<byte> p, Δsyscall.Sockaddr sa) => poll_package.WriteTo⁔(Ꮡfd, p, sa);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, nint, error) WriteMsg(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, Δsyscall.Sockaddr sa) => poll_package.WriteMsg⁔(Ꮡfd, p, oob, sa);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, nint, error) WriteMsgInet4(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet4> sa) => poll_package.WriteMsgInet4⁔(Ꮡfd, p, oob, sa);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, nint, error) WriteMsgInet6(this ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet6> sa) => poll_package.WriteMsgInet6⁔(Ꮡfd, p, oob, sa);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, Δsyscall.Sockaddr, @string, error) Accept(this ж<FD> Ꮡfd) => poll_package.Accept⁔(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Fchmod(this ж<FD> Ꮡfd, uint32 mode) => poll_package.Fchmod⁔(Ꮡfd, mode);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Fstat(this ж<FD> Ꮡfd, ж<Δsyscall.Stat_t> s) => poll_package.Fstat⁔(Ꮡfd, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, @string, error) Dup(this ж<FD> Ꮡfd) => poll_package.Dup⁔(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error WaitWrite(this ref FD fd) => poll_package.WaitWrite⁔(ref fd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) WriteOnce(this ж<FD> Ꮡfd, slice<byte> p) => poll_package.WriteOnce⁔(Ꮡfd, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error RawRead(this ж<FD> Ꮡfd, Func<uintptr, bool> f) => poll_package.RawRead⁔(Ꮡfd, f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error RawWrite(this ж<FD> Ꮡfd, Func<uintptr, bool> f) => poll_package.RawWrite⁔(Ꮡfd, f);
 }
 partial class pollᴛSysFile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref SysFile s) => poll_package.initᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error destroy(this ref SysFile s, nint fd) => poll_package.destroyᴍ(ref s, fd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ref SysFile s) => poll_package.init⁔(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error destroy(this ref SysFile s, nint fd) => poll_package.destroy⁔(ref s, fd);
 }
 partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Fchdir(this ж<FD> Ꮡfd) => poll_package.Fchdirᴍ(Ꮡfd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) ReadDirent(this ж<FD> Ꮡfd, slice<byte> buf) => poll_package.ReadDirentᴍ(Ꮡfd, buf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) => poll_package.Seekᴍ(Ꮡfd, offset, whence);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Fchdir(this ж<FD> Ꮡfd) => poll_package.Fchdir⁔(Ꮡfd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) ReadDirent(this ж<FD> Ꮡfd, slice<byte> buf) => poll_package.ReadDirent⁔(Ꮡfd, buf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64, error) Seek(this ж<FD> Ꮡfd, int64 offset, nint whence) => poll_package.Seek⁔(Ꮡfd, offset, whence);
 }
 partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Fstatat(this ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t> s, nint flags) => poll_package.Fstatatᴍ(Ꮡfd, name, s, flags);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Fstatat(this ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t> s, nint flags) => poll_package.Fstatat⁔(Ꮡfd, name, s, flags);
 }
 partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetsockoptInt(this ж<FD> Ꮡfd, nint level, nint name, nint arg) => poll_package.SetsockoptIntᴍ(Ꮡfd, level, name, arg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetsockoptInet4Addr(this ж<FD> Ꮡfd, nint level, nint name, /*[4]*/ array<byte> arg) => poll_package.SetsockoptInet4Addrᴍ(Ꮡfd, level, name, arg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetsockoptLinger(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.Linger> l) => poll_package.SetsockoptLingerᴍ(Ꮡfd, level, name, l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) GetsockoptInt(this ж<FD> Ꮡfd, nint level, nint name) => poll_package.GetsockoptIntᴍ(Ꮡfd, level, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetsockoptInt(this ж<FD> Ꮡfd, nint level, nint name, nint arg) => poll_package.SetsockoptInt⁔(Ꮡfd, level, name, arg);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetsockoptInet4Addr(this ж<FD> Ꮡfd, nint level, nint name, /*[4]*/ array<byte> arg) => poll_package.SetsockoptInet4Addr⁔(Ꮡfd, level, name, arg);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetsockoptLinger(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.Linger> l) => poll_package.SetsockoptLinger⁔(Ꮡfd, level, name, l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) GetsockoptInt(this ж<FD> Ꮡfd, nint level, nint name) => poll_package.GetsockoptInt⁔(Ꮡfd, level, name);
 }
 partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetsockoptIPMreqn(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPMreqn> mreq) => poll_package.SetsockoptIPMreqnᴍ(Ꮡfd, level, name, mreq);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetsockoptIPMreqn(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPMreqn> mreq) => poll_package.SetsockoptIPMreqn⁔(Ꮡfd, level, name, mreq);
 }
 partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetsockoptByte(this ж<FD> Ꮡfd, nint level, nint name, byte arg) => poll_package.SetsockoptByteᴍ(Ꮡfd, level, name, arg);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetsockoptByte(this ж<FD> Ꮡfd, nint level, nint name, byte arg) => poll_package.SetsockoptByte⁔(Ꮡfd, level, name, arg);
 }
 partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetsockoptIPMreq(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPMreq> mreq) => poll_package.SetsockoptIPMreqᴍ(Ꮡfd, level, name, mreq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error SetsockoptIPv6Mreq(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPv6Mreq> mreq) => poll_package.SetsockoptIPv6Mreqᴍ(Ꮡfd, level, name, mreq);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetsockoptIPMreq(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPMreq> mreq) => poll_package.SetsockoptIPMreq⁔(Ꮡfd, level, name, mreq);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error SetsockoptIPv6Mreq(this ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPv6Mreq> mreq) => poll_package.SetsockoptIPv6Mreq⁔(Ꮡfd, level, name, mreq);
 }
 partial class pollᴛFD {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> Ꮡv) => poll_package.Writevᴍ(Ꮡfd, Ꮡv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> Ꮡv) => poll_package.Writev⁔(Ꮡfd, Ꮡv);
 }
 // </GlyphForwarders>

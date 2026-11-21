@@ -30,14 +30,14 @@ partial struct Event {
 } partial class raw_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string dataˢᴍEvent => ref dataˢᵇᴍEvent;
-private static readonly @string dataˢᵇᴍEvent = "\n\tdata="u8;
+private static ref readonly @string dataˢ⁔Event => ref dataˢᵇ⁔Event;
+private static readonly @string dataˢᵇ⁔Event = "\n\tdata="u8;
 
 // String returns the canonical string representation of the event.
 //
 // This format is the same format that is parsed by the TextReader
 // and emitted by the TextWriter.
-[GoMethodBody("String")] internal static @string Stringᴍ(ref Event e) {
+internal static @string String⁔(/*this*/ ref Event e) {
     var spec = e.Version.Specs()[e.Ev];
 
     ref var s = ref heap(new strings.Builder(), out var Ꮡs);
@@ -62,14 +62,14 @@ private static readonly @string dataˢᵇᴍEvent = "\n\tdata="u8;
         }
     }
     if (e.Data != nil) {
-        Ꮡs.WriteString(dataˢᴍEvent);
+        Ꮡs.WriteString(dataˢ⁔Event);
         Ꮡs.WriteString(strconv.Quote((@string)e.Data));
     }
     return s.String();
 }
 
 // EncodedSize returns the canonical encoded size of an event.
-[GoMethodBody("EncodedSize")] internal static nint EncodedSizeᴍ(ref Event e) {
+internal static nint EncodedSize⁔(/*this*/ ref Event e) {
     nint size = 1;
     array<byte> buf = new(10); /* binary.MaxVarintLen64 */
     foreach (var (_, arg) in range(e.Args)) {

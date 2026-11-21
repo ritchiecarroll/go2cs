@@ -45,11 +45,11 @@ partial struct PSSOptions {
 } partial class rsa_package {
 
 // HashFunc returns opts.Hash so that [PSSOptions] implements [crypto.SignerOpts].
-[GoMethodBody("HashFunc")] internal static crypto.Hash HashFuncᴍ(ref PSSOptions opts) {
+internal static crypto.Hash HashFunc⁔(/*this*/ ref PSSOptions opts) {
     return opts.Hash;
 }
 
-[GoMethodBody("saltLength")] internal static nint saltLengthᴍ(ж<PSSOptions> Ꮡopts) {
+internal static nint saltLength⁔(/*this*/ ж<PSSOptions> Ꮡopts) {
     ref var opts = ref Ꮡopts.DerefOrNull();
 
     if (Ꮡopts == nil) {

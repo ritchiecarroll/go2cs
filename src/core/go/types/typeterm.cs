@@ -22,7 +22,7 @@ public partial struct term {
 
 } partial class types_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<term> Ꮡx) {
+internal static @string String⁔(/*this*/ ж<term> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     switch (ᐧ) {
@@ -41,7 +41,7 @@ public partial struct term {
 }
 
 // equal reports whether x and y represent the same type set.
-[GoMethodBody("equal")] internal static bool equalᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
+internal static bool equal⁔(/*this*/ ж<term> Ꮡx, ж<term> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -59,7 +59,7 @@ public partial struct term {
 }
 
 // union returns the union x ∪ y: zero, one, or two non-nil terms.
-[GoMethodBody("union")] internal static (ж<term>, ж<term>) unionᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
+internal static (ж<term>, ж<term>) union⁔(/*this*/ ж<term> Ꮡx, ж<term> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -98,7 +98,7 @@ public partial struct term {
 }
 
 // intersect returns the intersection x ∩ y.
-[GoMethodBody("intersect")] internal static ж<term> intersectᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
+internal static ж<term> intersect⁔(/*this*/ ж<term> Ꮡx, ж<term> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -131,7 +131,7 @@ public partial struct term {
 }
 
 // includes reports whether t ∈ x.
-[GoMethodBody("includes")] internal static bool includesᴍ(ж<term> Ꮡx, Type t) {
+internal static bool includes⁔(/*this*/ ж<term> Ꮡx, Type t) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // easy cases
@@ -152,7 +152,7 @@ public partial struct term {
 }
 
 // subsetOf reports whether x ⊆ y.
-[GoMethodBody("subsetOf")] internal static bool subsetOfᴍ(ж<term> Ꮡx, ж<term> Ꮡy) {
+internal static bool subsetOf⁔(/*this*/ ж<term> Ꮡx, ж<term> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -186,7 +186,7 @@ public partial struct term {
 
 // disjoint reports whether x ∩ y == ∅.
 // x.typ and y.typ must not be nil.
-[GoMethodBody("disjoint")] internal static bool disjointᴍ(ref term x, ж<term> Ꮡy) {
+internal static bool disjoint⁔(/*this*/ ref term x, ж<term> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     if (debug && (x.typ == nil || y.typ == nil)) {

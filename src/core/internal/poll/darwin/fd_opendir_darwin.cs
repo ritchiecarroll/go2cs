@@ -12,13 +12,13 @@ partial class poll_package {
 } partial class poll_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fdopendirˢᴍFD => ref fdopendirˢᵇᴍFD;
-private static readonly @string fdopendirˢᵇᴍFD = "fdopendir"u8;
+internal static ref readonly @string fdopendirˢ⁔FD => ref fdopendirˢᵇ⁔FD;
+private static readonly @string fdopendirˢᵇ⁔FD = "fdopendir"u8;
 
 // OpenDir returns a pointer to a DIR structure suitable for
 // ReadDir. In case of an error, the name of the failed
 // syscall is returned along with a syscall.Errno.
-[GoMethodBody("OpenDir")] internal static (uintptr, @string, error) OpenDirᴍ(ж<FD> Ꮡfd) {
+internal static (uintptr, @string, error) OpenDir⁔(/*this*/ ж<FD> Ꮡfd) {
     // fdopendir(3) takes control of the file descriptor,
     // so use a dup.
     var (fd2, call, err) = Ꮡfd.Dup();
@@ -34,7 +34,7 @@ private static readonly @string fdopendirˢᵇᴍFD = "fdopendir"u8;
     }
     if (err != nil) {
         Δsyscall.Close(fd2);
-        return (0, fdopendirˢᴍFD, err);
+        return (0, fdopendirˢ⁔FD, err);
     }
     return (dir, "", default);
 }

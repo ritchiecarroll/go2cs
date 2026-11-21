@@ -64,9 +64,12 @@ using static go.container.ring_package;
 
 namespace go.container;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static ring_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("ring")]
 public static partial class ring_package
@@ -98,18 +101,18 @@ public static partial class ring_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ring_package.Ring)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ringᴛRing;
+[GoMethodHost(typeof(ring_package.Ring)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ringᴛRing;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class ringᴛRing {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Ring> init(this ж<Ring> Ꮡr) => ring_package.initᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Ring> Next(this ж<Ring> Ꮡr) => ring_package.Nextᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Ring> Prev(this ж<Ring> Ꮡr) => ring_package.Prevᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Ring> Move(this ж<Ring> Ꮡr, nint n) => ring_package.Moveᴍ(Ꮡr, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Ring> Link(this ж<Ring> Ꮡr, ж<Ring> Ꮡs) => ring_package.Linkᴍ(Ꮡr, Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Ring> Unlink(this ж<Ring> Ꮡr, nint n) => ring_package.Unlinkᴍ(Ꮡr, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ж<Ring> Ꮡr) => ring_package.Lenᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Do(this ж<Ring> Ꮡr, Action<any> f) => ring_package.Doᴍ(Ꮡr, f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Ring> init(this ж<Ring> Ꮡr) => ring_package.init⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Ring> Next(this ж<Ring> Ꮡr) => ring_package.Next⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Ring> Prev(this ж<Ring> Ꮡr) => ring_package.Prev⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Ring> Move(this ж<Ring> Ꮡr, nint n) => ring_package.Move⁔(Ꮡr, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Ring> Link(this ж<Ring> Ꮡr, ж<Ring> Ꮡs) => ring_package.Link⁔(Ꮡr, Ꮡs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Ring> Unlink(this ж<Ring> Ꮡr, nint n) => ring_package.Unlink⁔(Ꮡr, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this ж<Ring> Ꮡr) => ring_package.Len⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Do(this ж<Ring> Ꮡr, Action<any> f) => ring_package.Do⁔(Ꮡr, f);
 }
 // </GlyphForwarders>

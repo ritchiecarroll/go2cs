@@ -62,12 +62,15 @@ using static go.@internal.filepathlite_package;
 
 namespace go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.@internal;
 using io;
 using ꓸꓸꓸbyte = Span<byte>;
 using static filepathlite_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("filepathlite")]
 public static partial class filepathlite_package
@@ -104,14 +107,14 @@ public static partial class filepathlite_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(filepathlite_package.lazybuf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class filepathliteᴛlazybuf;
+[GoMethodHost(typeof(filepathlite_package.lazybuf)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class filepathliteᴛlazybuf;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class filepathliteᴛlazybuf {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte index(this ref lazybuf b, nint i) => filepathlite_package.indexᴍ(ref b, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void append(this ref lazybuf b, byte c) => filepathlite_package.appendᴍ(ref b, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void prepend(this ref lazybuf b, params ꓸꓸꓸbyte prefixʗp) => filepathlite_package.prependᴍ(ref b, prefixʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ref lazybuf b) => filepathlite_package.@stringᴍ(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static byte index(this ref lazybuf b, nint i) => filepathlite_package.index⁔(ref b, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void append(this ref lazybuf b, byte c) => filepathlite_package.append⁔(ref b, c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void prepend(this ref lazybuf b, params ꓸꓸꓸbyte prefixʗp) => filepathlite_package.prepend⁔(ref b, prefixʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string @string(this ref lazybuf b) => filepathlite_package.@string⁔(ref b);
 }
 // </GlyphForwarders>

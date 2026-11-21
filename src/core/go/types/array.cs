@@ -23,12 +23,12 @@ public static ж<Array> NewArray(Type elem, int64 len) { return Ꮡ(new Array(le
 
 // Len returns the length of array a.
 // A negative result indicates an unknown length.
-[GoMethodBody("Len")] internal static int64 Lenᴍ(ref Array a) { return a.len; }
+internal static int64 Len⁔(/*this*/ ref Array a) { return a.len; }
 
 // Elem returns element type of array a.
-[GoMethodBody("Elem")] internal static Type Elemᴍ(ref Array a) { return a.elem; }
+internal static Type Elem⁔(/*this*/ ref Array a) { return a.elem; }
 
-[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Array> Ꮡa) { return new ArrayжType(Ꮡa); }
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Array> Ꮡa) { return TypeString(new ArrayжType(Ꮡa), default); }
+internal static Type Underlying⁔(/*this*/ ж<Array> Ꮡa) { return new ArrayжType(Ꮡa); }
+internal static @string String⁔(/*this*/ ж<Array> Ꮡa) { return TypeString(new ArrayжType(Ꮡa), default); }
 
 }

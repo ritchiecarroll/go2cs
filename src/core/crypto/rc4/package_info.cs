@@ -61,11 +61,14 @@ using static go.crypto.rc4_package;
 
 namespace go.crypto;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using static rc4_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("rc4")]
 public static partial class rc4_package
@@ -101,16 +104,16 @@ public static partial class rc4_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(rc4_package.Cipher)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rc4ᴛCipher;
-[GoMethodHost(typeof(rc4_package.KeySizeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rc4ᴛKeySizeError;
+[GoMethodHost(typeof(rc4_package.Cipher)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rc4ᴛCipher;
+[GoMethodHost(typeof(rc4_package.KeySizeError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rc4ᴛKeySizeError;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class rc4ᴛKeySizeError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this KeySizeError k) => rc4_package.Errorᴍ(k);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this KeySizeError k) => rc4_package.Error⁔(k);
 }
 partial class rc4ᴛCipher {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Cipher c) => rc4_package.Resetᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void XORKeyStream(this ref Cipher c, slice<byte> dst, slice<byte> src) => rc4_package.XORKeyStreamᴍ(ref c, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Cipher c) => rc4_package.Reset⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void XORKeyStream(this ref Cipher c, slice<byte> dst, slice<byte> src) => rc4_package.XORKeyStream⁔(ref c, dst, src);
 }
 // </GlyphForwarders>

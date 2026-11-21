@@ -53,28 +53,28 @@ internal static ref sync.Pool encBufferPool => ref ((StaticBox<sync.Pool>)Ꮡenc
 
 } partial class gob_package {
 
-[GoMethodBody("writeByte")] internal static void writeByteᴍ(ref encBuffer e, byte c) {
+internal static void writeByte⁔(/*this*/ ref encBuffer e, byte c) {
     e.data = append(e.data, c);
 }
 
-[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ref encBuffer e, slice<byte> p) {
+internal static (nint, error) Write⁔(/*this*/ ref encBuffer e, slice<byte> p) {
     e.data = appendꓸꓸꓸ(e.data, p);
     return (len(p), default);
 }
 
-[GoMethodBody("WriteString")] internal static void WriteStringᴍ(ref encBuffer e, @string s) {
+internal static void WriteString⁔(/*this*/ ref encBuffer e, @string s) {
     e.data = append(e.data, s.ꓸꓸꓸ);
 }
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(ref encBuffer e) {
+internal static nint Len⁔(/*this*/ ref encBuffer e) {
     return len(e.data);
 }
 
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref encBuffer e) {
+internal static slice<byte> Bytes⁔(/*this*/ ref encBuffer e) {
     return e.data;
 }
 
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref encBuffer e) {
+internal static void Reset⁔(/*this*/ ref encBuffer e) {
     if (len(e.data) >= tooBig) {
         e.data = e.scratch[0..0];
     } else {
@@ -84,7 +84,7 @@ internal static ref sync.Pool encBufferPool => ref ((StaticBox<sync.Pool>)Ꮡenc
 
 } partial class gob_package {
 
-[GoMethodBody("newEncoderState")] internal static ж<encoderState> newEncoderStateᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb) {
+internal static ж<encoderState> newEncoderState⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb) {
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -104,7 +104,7 @@ internal static ref sync.Pool encBufferPool => ref ((StaticBox<sync.Pool>)Ꮡenc
     return e;
 }
 
-[GoMethodBody("freeEncoderState")] internal static void freeEncoderStateᴍ(ref Encoder enc, ж<encoderState> Ꮡe) {
+internal static void freeEncoderState⁔(/*this*/ ref Encoder enc, ж<encoderState> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     e.next = enc.freeList;
@@ -119,7 +119,7 @@ internal static ref sync.Pool encBufferPool => ref ((StaticBox<sync.Pool>)Ꮡenc
 // by the byte length, negated.
 
 // encodeUint writes an encoded unsigned integer to state.b.
-[GoMethodBody("encodeUint")] internal static void encodeUintᴍ(ref encoderState state, uint64 x) {
+internal static void encodeUint⁔(/*this*/ ref encoderState state, uint64 x) {
     if (x <= 0x7F) {
         state.b.writeByte((uint8)x);
         return;
@@ -135,7 +135,7 @@ internal static ref sync.Pool encBufferPool => ref ((StaticBox<sync.Pool>)Ꮡenc
 // encodeInt writes an encoded signed integer to state.w.
 // The low bit of the encoding says whether to bit complement the (other bits of the)
 // uint to recover the int.
-[GoMethodBody("encodeInt")] internal static void encodeIntᴍ(ref encoderState state, int64 i) {
+internal static void encodeInt⁔(/*this*/ ref encoderState state, int64 i) {
     uint64 x = default;
     if (i < 0) {
         x = (uint64)(~i << 1) | 1;
@@ -162,7 +162,7 @@ partial struct encInstr {
 
 // update emits a field number and updates the state to record its value for delta encoding.
 // If the instruction pointer is nil, it does nothing
-[GoMethodBody("update")] internal static void updateᴍ(ref encoderState state, ж<encInstr> Ꮡinstr) {
+internal static void update⁔(/*this*/ ref encoderState state, ж<encInstr> Ꮡinstr) {
     ref var instr = ref Ꮡinstr.DerefOrNull();
 
     if (Ꮡinstr != nil) {
@@ -329,7 +329,7 @@ internal static bool valid(reflect.Value v) {
 } partial class gob_package {
 
 // encodeSingle encodes a single top-level non-struct value.
-[GoMethodBody("encodeSingle")] internal static void encodeSingleᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, ж<encEngine> Ꮡengine, reflect.Value value) {
+internal static void encodeSingle⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuffer> b, ж<encEngine> Ꮡengine, reflect.Value value) {
     GoFrame ᒐ = default;
     try {
         ref var engine = ref Ꮡengine.DerefOrNull();
@@ -353,7 +353,7 @@ internal static bool valid(reflect.Value v) {
 }
 
 // encodeStruct encodes a single struct value.
-[GoMethodBody("encodeStruct")] internal static void encodeStructᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, ж<encEngine> Ꮡengine, reflect.Value value) {
+internal static void encodeStruct⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuffer> b, ж<encEngine> Ꮡengine, reflect.Value value) {
     GoFrame ᒐ = default;
     try {
         ref var engine = ref Ꮡengine.DerefOrNull();
@@ -387,7 +387,7 @@ internal static bool valid(reflect.Value v) {
 }
 
 // encodeArray encodes an array.
-[GoMethodBody("encodeArray")] internal static void encodeArrayᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value value, Action<ж<encInstr>, ж<encoderState>, reflect.Value> op, nint elemIndir, nint length, Func<ж<encoderState>, reflect.Value, bool> helper) {
+internal static void encodeArray⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value value, Action<ж<encInstr>, ж<encoderState>, reflect.Value> op, nint elemIndir, nint length, Func<ж<encoderState>, reflect.Value, bool> helper) {
     GoFrame ᒐ = default;
     try {
         var state = Ꮡenc.newEncoderState(b);
@@ -430,7 +430,7 @@ internal static void encodeReflectValue(ж<encoderState> state, reflect.Value v,
 } partial class gob_package {
 
 // encodeMap encodes a map as unsigned count followed by key:value pairs.
-[GoMethodBody("encodeMap")] internal static void encodeMapᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value mv, Action<ж<encInstr>, ж<encoderState>, reflect.Value> keyOp, Action<ж<encInstr>, ж<encoderState>, reflect.Value> elemOp, nint keyIndir, nint elemIndir) {
+internal static void encodeMap⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value mv, Action<ж<encInstr>, ж<encoderState>, reflect.Value> keyOp, Action<ж<encInstr>, ж<encoderState>, reflect.Value> elemOp, nint keyIndir, nint elemIndir) {
     ref var enc = ref Ꮡenc.DerefOrNull();
 
     var state = Ꮡenc.newEncoderState(b);
@@ -450,7 +450,7 @@ internal static void encodeReflectValue(ж<encoderState> state, reflect.Value v,
 // by the type identifier (which might require defining that type right now), followed
 // by the concrete value. A nil value gets sent as the empty string for the name,
 // followed by no value.
-[GoMethodBody("encodeInterface")] internal static void encodeInterfaceᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflect.Value iv) {
+internal static void encodeInterface⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, reflect.Value iv) {
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -503,7 +503,7 @@ internal static void encodeReflectValue(ж<encoderState> state, reflect.Value v,
 
 // encodeGobEncoder encodes a value that implements the GobEncoder interface.
 // The data is sent as a byte array.
-[GoMethodBody("encodeGobEncoder")] internal static void encodeGobEncoderᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, ж<userTypeInfo> Ꮡut, reflect.Value v) {
+internal static void encodeGobEncoder⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuffer> Ꮡb, ж<userTypeInfo> Ꮡut, reflect.Value v) {
     ref var enc = ref Ꮡenc.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
     ref var ut = ref Ꮡut.DerefOrNull();
@@ -768,7 +768,7 @@ internal static ж<encEngine> buildEncEngine(ж<typeInfo> Ꮡinfo, ref userTypeI
 
 } partial class gob_package {
 
-[GoMethodBody("encode")] internal static void encodeᴍ(ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value value, ж<userTypeInfo> Ꮡut) {
+internal static void encode⁔(/*this*/ ж<Encoder> Ꮡenc, ж<encBuffer> b, reflect.Value value, ж<userTypeInfo> Ꮡut) {
     GoFrame ᒐ = default;
     try {
         ref var ut = ref Ꮡut.DerefOrNull();

@@ -47,7 +47,7 @@ partial struct HMAC {
 
 } partial class hmac_package {
 
-[GoMethodBody("Sum")] internal static slice<byte> Sumᴍ(ref HMAC h, slice<byte> @in) {
+internal static slice<byte> Sum⁔(/*this*/ ref HMAC h, slice<byte> @in) {
     // Per FIPS 140-3 IG C.M, key lengths below 112 bits are only allowed for
     // legacy use (i.e. verification only) and we don't support that. However,
     // HKDF-Extract uses the HMAC key for the salt, which is allowed to be shorter.
@@ -80,14 +80,14 @@ partial struct HMAC {
     return h.outer.Sum(@in.slice(0, origLen));
 }
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref HMAC h, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref HMAC h, slice<byte> p) {
     return h.inner.Write(p);
 }
 
-[GoMethodBody("Size")] internal static nint Sizeᴍ(ref HMAC h) { return h.outer.Size(); }
-[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref HMAC h) { return h.inner.BlockSize(); }
+internal static nint Size⁔(/*this*/ ref HMAC h) { return h.outer.Size(); }
+internal static nint BlockSize⁔(/*this*/ ref HMAC h) { return h.inner.BlockSize(); }
 
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref HMAC h) {
+internal static void Reset⁔(/*this*/ ref HMAC h) {
     if (h.marshaled) {
         var errΔ1 = h.inner._<marshalable>().UnmarshalBinary(h.ipad); if (errΔ1 != nil) {
             throw panic(errΔ1);
@@ -146,14 +146,14 @@ partial struct errCloneUnsupported {
 } partial class hmac_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string cryptoHmacHashDoesNotˢᴍerrCloneUnsupported => ref cryptoHmacHashDoesNotˢᵇᴍerrCloneUnsupported;
-private static readonly @string cryptoHmacHashDoesNotˢᵇᴍerrCloneUnsupported = "crypto/hmac: hash does not support hash.Cloner"u8;
+private static ref readonly @string cryptoHmacHashDoesNotˢ⁔errCloneUnsupported => ref cryptoHmacHashDoesNotˢᵇ⁔errCloneUnsupported;
+private static readonly @string cryptoHmacHashDoesNotˢᵇ⁔errCloneUnsupported = "crypto/hmac: hash does not support hash.Cloner"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(errCloneUnsupported e) {
-    return cryptoHmacHashDoesNotˢᴍerrCloneUnsupported;
+internal static @string Error⁔(/*this*/ errCloneUnsupported e) {
+    return cryptoHmacHashDoesNotˢ⁔errCloneUnsupported;
 }
 
-[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(errCloneUnsupported e) {
+internal static error Unwrap⁔(/*this*/ errCloneUnsupported e) {
     return errors.ErrUnsupported;
 }
 
@@ -161,7 +161,7 @@ private static readonly @string cryptoHmacHashDoesNotˢᵇᴍerrCloneUnsupported
 
 // Clone implements [hash.Cloner] if the underlying hash does.
 // Otherwise, it returns an error wrapping [errors.ErrUnsupported].
-[GoMethodBody("Clone")] internal static (hash.Cloner, error) Cloneᴍ(ref HMAC h) {
+internal static (hash.Cloner, error) Clone⁔(/*this*/ ref HMAC h) {
     ref var r = ref heap<HMAC>(h, out var Ꮡr);
     var (ic, ok) = h.inner._<hash.Cloner>(ᐧ);
     if (!ok) {

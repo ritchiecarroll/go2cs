@@ -31,7 +31,7 @@ partial interface sockaddr :
 
 } partial class net_package {
 
-[GoMethodBody("addrFunc")] internal static Func<syscall.Sockaddr, Addr> addrFuncᴍ(ref netFD fd) {
+internal static Func<syscall.Sockaddr, Addr> addrFunc⁔(/*this*/ ref netFD fd) {
     switch (fd.family) {
     case var ᴛ when ᴛ == syscall.AF_INET || ᴛ == syscall.AF_INET6: {
         switch (fd.sotype) {

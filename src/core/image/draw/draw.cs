@@ -57,7 +57,7 @@ public static Op Src => 1;
 
 // Draw implements the [Drawer] interface by calling the Draw function with this
 // [Op].
-[GoMethodBody("Draw")] internal static void Drawᴍ(Op op, Image dst, image.Rectangle r, image.Image src, image.Point sp) {
+internal static void Draw⁔(/*this*/ Op op, Image dst, image.Rectangle r, image.Image src, image.Point sp) {
     DrawMask(dst, r, src, sp, default, new image.Point(), op);
 }
 
@@ -79,7 +79,7 @@ partial struct floydSteinberg {
 
 } partial class draw_package {
 
-[GoMethodBody("Draw")] internal static void Drawᴍ(floydSteinberg _, Image dst, image.Rectangle rʗp, image.Image src, image.Point sp) {
+internal static void Draw⁔(/*this*/ floydSteinberg _, Image dst, image.Rectangle rʗp, image.Image src, image.Point sp) {
     ref var r = ref heap(rʗp, out var Ꮡr);
 
     clip(dst, Ꮡr, src, ref sp, default, nil);

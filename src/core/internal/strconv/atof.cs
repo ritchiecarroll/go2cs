@@ -79,7 +79,7 @@ internal static (float64 f, nint n, bool ok) special(@string s) {
 
 } partial class strconv_package {
 
-[GoMethodBody("set")] internal static bool /*ok*/ setᴍ(ref @decimal b, @string s) {
+internal static bool /*ok*/ set⁔(/*this*/ ref @decimal b, @string s) {
     bool ok = default;
 
     nint i = 0;
@@ -358,7 +358,7 @@ internal static slice<nint> powtab = [1, 3, 6, 9, 13, 16, 19, 23, 26];
 
 } partial class strconv_package {
 
-[GoMethodBody("floatBits")] internal static (uint64 b, bool overflow) floatBitsᴍ(ж<@decimal> Ꮡd, ж<floatInfo> Ꮡflt) {
+internal static (uint64 b, bool overflow) floatBits⁔(/*this*/ ж<@decimal> Ꮡd, ж<floatInfo> Ꮡflt) {
     bool overflow = default;
     ref var d = ref Ꮡd.DerefOrNull();
     ref var flt = ref Ꮡflt.DerefOrNull();

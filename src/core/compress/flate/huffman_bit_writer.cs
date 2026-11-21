@@ -106,12 +106,12 @@ internal static ж<huffmanBitWriter> newHuffmanBitWriter(io.Writer w) {
 
 } partial class flate_package {
 
-[GoMethodBody("reset")] internal static void resetᴍ(ref huffmanBitWriter w, io.Writer writer) {
+internal static void reset⁔(/*this*/ ref huffmanBitWriter w, io.Writer writer) {
     w.writer = writer;
     (w.bits, w.nbits, w.nbytes, w.err) = (0, 0, 0, default);
 }
 
-[GoMethodBody("flush")] internal static void flushᴍ(ref huffmanBitWriter w) {
+internal static void flush⁔(/*this*/ ref huffmanBitWriter w) {
     if (w.err != nil) {
         w.nbits = 0;
         return;
@@ -132,14 +132,14 @@ internal static ж<huffmanBitWriter> newHuffmanBitWriter(io.Writer w) {
     w.nbytes = 0;
 }
 
-[GoMethodBody("write")] internal static void writeᴍ(ref huffmanBitWriter w, slice<byte> b) {
+internal static void write⁔(/*this*/ ref huffmanBitWriter w, slice<byte> b) {
     if (w.err != nil) {
         return;
     }
     (_, w.err) = w.writer.Write(b);
 }
 
-[GoMethodBody("writeBits")] internal static void writeBitsᴍ(ref huffmanBitWriter w, int32 b, nuint nb) {
+internal static void writeBits⁔(/*this*/ ref huffmanBitWriter w, int32 b, nuint nb) {
     if (w.err != nil) {
         return;
     }
@@ -167,16 +167,16 @@ internal static ж<huffmanBitWriter> newHuffmanBitWriter(io.Writer w) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string writeBytesWithUnfinishedˢᴍhuffmanBitWriter => ref writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter;
-private static readonly @string writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter = "writeBytes with unfinished bits"u8;
+internal static ref readonly @string writeBytesWithUnfinishedˢ⁔huffmanBitWriter => ref writeBytesWithUnfinishedˢᵇ⁔huffmanBitWriter;
+private static readonly @string writeBytesWithUnfinishedˢᵇ⁔huffmanBitWriter = "writeBytes with unfinished bits"u8;
 
-[GoMethodBody("writeBytes")] internal static void writeBytesᴍ(ref huffmanBitWriter w, slice<byte> bytes) {
+internal static void writeBytes⁔(/*this*/ ref huffmanBitWriter w, slice<byte> bytes) {
     if (w.err != nil) {
         return;
     }
     nint n = w.nbytes;
     if ((w.nbits & 7) != 0) {
-        w.err = ((InternalError)(@string)writeBytesWithUnfinishedˢᴍhuffmanBitWriter);
+        w.err = ((InternalError)(@string)writeBytesWithUnfinishedˢ⁔huffmanBitWriter);
         return;
     }
     while (w.nbits != 0) {
@@ -204,7 +204,7 @@ private static readonly @string writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter
 //	numLiterals      The number of literals in literalEncoding
 //	numOffsets       The number of offsets in offsetEncoding
 //	litenc, offenc   The literal and offset encoder to use
-[GoMethodBody("generateCodegen")] internal static void generateCodegenᴍ(ref huffmanBitWriter w, nint numLiterals, nint numOffsets, ж<huffmanEncoder> ᏑlitEnc, ж<huffmanEncoder> ᏑoffEnc) {
+internal static void generateCodegen⁔(/*this*/ ref huffmanBitWriter w, nint numLiterals, nint numOffsets, ж<huffmanEncoder> ᏑlitEnc, ж<huffmanEncoder> ᏑoffEnc) {
     ref var litEnc = ref ᏑlitEnc.DerefOrNull();
     ref var offEnc = ref ᏑoffEnc.DerefOrNull();
 
@@ -293,7 +293,7 @@ private static readonly @string writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter
 }
 
 // dynamicSize returns the size of dynamically encoded data in bits.
-[GoMethodBody("dynamicSize")] internal static (nint size, nint numCodegens) dynamicSizeᴍ(ref huffmanBitWriter w, ж<huffmanEncoder> ᏑlitEnc, ж<huffmanEncoder> ᏑoffEnc, nint extraBits) {
+internal static (nint size, nint numCodegens) dynamicSize⁔(/*this*/ ref huffmanBitWriter w, ж<huffmanEncoder> ᏑlitEnc, ж<huffmanEncoder> ᏑoffEnc, nint extraBits) {
     nint size = default;
     nint numCodegens = default;
     ref var litEnc = ref ᏑlitEnc.DerefOrNull();
@@ -310,14 +310,14 @@ private static readonly @string writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter
 }
 
 // fixedSize returns the size of dynamically encoded data in bits.
-[GoMethodBody("fixedSize")] internal static nint fixedSizeᴍ(ref huffmanBitWriter w, nint extraBits) {
+internal static nint fixedSize⁔(/*this*/ ref huffmanBitWriter w, nint extraBits) {
     return 3 + fixedLiteralEncoding.bitLength(w.literalFreq) + fixedOffsetEncoding.bitLength(w.offsetFreq) + extraBits;
 }
 
 // storedSize calculates the stored size, including header.
 // The function returns the size in bits and whether the block
 // fits inside a single block.
-[GoMethodBody("storedSize")] internal static (nint, bool) storedSizeᴍ(ref huffmanBitWriter w, slice<byte> @in) {
+internal static (nint, bool) storedSize⁔(/*this*/ ref huffmanBitWriter w, slice<byte> @in) {
     if (@in == nil) {
         return (0, false);
     }
@@ -327,7 +327,7 @@ private static readonly @string writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter
     return (0, false);
 }
 
-[GoMethodBody("writeCode")] internal static void writeCodeᴍ(ref huffmanBitWriter w, hcode c) {
+internal static void writeCode⁔(/*this*/ ref huffmanBitWriter w, hcode c) {
     if (w.err != nil) {
         return;
     }
@@ -359,7 +359,7 @@ private static readonly @string writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter
 //	numLiterals  The number of literals specified in codegen
 //	numOffsets   The number of offsets specified in codegen
 //	numCodegens  The number of codegens used in codegen
-[GoMethodBody("writeDynamicHeader")] internal static void writeDynamicHeaderᴍ(ref huffmanBitWriter w, nint numLiterals, nint numOffsets, nint numCodegens, bool isEof) {
+internal static void writeDynamicHeader⁔(/*this*/ ref huffmanBitWriter w, nint numLiterals, nint numOffsets, nint numCodegens, bool isEof) {
     if (w.err != nil) {
         return;
     }
@@ -405,7 +405,7 @@ private static readonly @string writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter
     }
 }
 
-[GoMethodBody("writeStoredHeader")] internal static void writeStoredHeaderᴍ(ref huffmanBitWriter w, nint length, bool isEof) {
+internal static void writeStoredHeader⁔(/*this*/ ref huffmanBitWriter w, nint length, bool isEof) {
     if (w.err != nil) {
         return;
     }
@@ -419,7 +419,7 @@ private static readonly @string writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter
     w.writeBits((int32)(((uint16)(~(uint16)length))), 16);
 }
 
-[GoMethodBody("writeFixedHeader")] internal static void writeFixedHeaderᴍ(ref huffmanBitWriter w, bool isEof) {
+internal static void writeFixedHeader⁔(/*this*/ ref huffmanBitWriter w, bool isEof) {
     if (w.err != nil) {
         return;
     }
@@ -436,7 +436,7 @@ private static readonly @string writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter
 // is larger than the original bytes, the data will be written as a
 // stored block.
 // If the input is nil, the tokens will always be Huffman encoded.
-[GoMethodBody("writeBlock")] internal static void writeBlockᴍ(ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) {
+internal static void writeBlock⁔(/*this*/ ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) {
     var tokensᴷ = new stackAppend<token>();
 
     if (w.err != nil) {
@@ -507,7 +507,7 @@ private static readonly @string writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter
 // histogram distribution.
 // If input is supplied and the compression savings are below 1/16th of the
 // input size the block is stored.
-[GoMethodBody("writeBlockDynamic")] internal static void writeBlockDynamicᴍ(ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) {
+internal static void writeBlockDynamic⁔(/*this*/ ref huffmanBitWriter w, slice<token> tokens, bool eof, slice<byte> input) {
     var tokensᴷ = new stackAppend<token>();
 
     if (w.err != nil) {
@@ -541,7 +541,7 @@ private static readonly @string writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter
 // literalFreq and offsetFreq, and generates literalEncoding
 // and offsetEncoding.
 // The number of literal and offset tokens is returned.
-[GoMethodBody("indexTokens")] internal static (nint numLiterals, nint numOffsets) indexTokensᴍ(ref huffmanBitWriter w, slice<token> tokens) {
+internal static (nint numLiterals, nint numOffsets) indexTokens⁔(/*this*/ ref huffmanBitWriter w, slice<token> tokens) {
     nint numLiterals = default;
     nint numOffsets = default;
 
@@ -582,7 +582,7 @@ private static readonly @string writeBytesWithUnfinishedˢᵇᴍhuffmanBitWriter
 
 // writeTokens writes a slice of tokens to the output.
 // codes for literal and offset encoding must be supplied.
-[GoMethodBody("writeTokens")] internal static void writeTokensᴍ(ref huffmanBitWriter w, slice<token> tokens, slice<hcode> leCodes, slice<hcode> oeCodes) {
+internal static void writeTokens⁔(/*this*/ ref huffmanBitWriter w, slice<token> tokens, slice<hcode> leCodes, slice<hcode> oeCodes) {
     if (w.err != nil) {
         return;
     }
@@ -630,7 +630,7 @@ internal static ж<huffmanEncoder> huffOffset;
 // writeBlockHuff encodes a block of bytes as either
 // Huffman encoded literals or uncompressed bytes if the
 // results only gains very little from compression.
-[GoMethodBody("writeBlockHuff")] internal static void writeBlockHuffᴍ(ref huffmanBitWriter w, bool eof, slice<byte> input) {
+internal static void writeBlockHuff⁔(/*this*/ ref huffmanBitWriter w, bool eof, slice<byte> input) {
     if (w.err != nil) {
         return;
     }

@@ -28,7 +28,7 @@ partial struct LinkAddr {
 } partial class routebsd_package {
 
 // Family implements the Family method of Addr interface.
-[GoMethodBody("Family")] internal static nint Familyᴍ(ref LinkAddr a) { return syscall.AF_LINK; }
+internal static nint Family⁔(/*this*/ ref LinkAddr a) { return syscall.AF_LINK; }
 
 } partial class routebsd_package {
 
@@ -99,7 +99,7 @@ partial struct InetAddr {
 
 } partial class routebsd_package {
 
-[GoMethodBody("Family")] internal static nint Familyᴍ(ref InetAddr a) {
+internal static nint Family⁔(/*this*/ ref InetAddr a) {
     if (a.IP.Is4()) {
         return syscall.AF_INET;
     } else {

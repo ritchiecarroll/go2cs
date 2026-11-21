@@ -75,11 +75,14 @@ using static go.math.rand_package;
 
 namespace go.math;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static rand_package;
 using @internal;
 using go.sync;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("rand")]
 public static partial class rand_package
@@ -121,59 +124,59 @@ public static partial class rand_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(rand_package.Rand)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class randᴛRand;
-[GoMethodHost(typeof(rand_package.Zipf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class randᴛZipf;
-[GoMethodHost(typeof(rand_package.lockedSource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class randᴛlockedSource;
-[GoMethodHost(typeof(rand_package.rngSource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class randᴛrngSource;
-[GoMethodHost(typeof(rand_package.runtimeSource)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class randᴛruntimeSource;
+[GoMethodHost(typeof(rand_package.Rand)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class randᴛRand;
+[GoMethodHost(typeof(rand_package.Zipf)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class randᴛZipf;
+[GoMethodHost(typeof(rand_package.lockedSource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class randᴛlockedSource;
+[GoMethodHost(typeof(rand_package.rngSource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class randᴛrngSource;
+[GoMethodHost(typeof(rand_package.runtimeSource)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class randᴛruntimeSource;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class randᴛRand {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 ExpFloat64(this ref Rand r) => rand_package.ExpFloat64ᴍ(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static float64 ExpFloat64(this ref Rand r) => rand_package.ExpFloat64⁔(ref r);
 }
 partial class randᴛRand {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 NormFloat64(this ref Rand r) => rand_package.NormFloat64ᴍ(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static float64 NormFloat64(this ref Rand r) => rand_package.NormFloat64⁔(ref r);
 }
 partial class randᴛRand {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Seed(this ж<Rand> Ꮡr, int64 seed) => rand_package.Seedᴍ(Ꮡr, seed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Int63(this ref Rand r) => rand_package.Int63ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Uint32(this ref Rand r) => rand_package.Uint32ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Uint64(this ref Rand r) => rand_package.Uint64ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int32 Int31(this ref Rand r) => rand_package.Int31ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Int(this ref Rand r) => rand_package.Intᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Int63n(this ref Rand r, int64 n) => rand_package.Int63nᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int32 Int31n(this ref Rand r, int32 n) => rand_package.Int31nᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int32 int31n(this ref Rand r, int32 n) => rand_package.int31nᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Intn(this ref Rand r, nint n) => rand_package.Intnᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 Float64(this ref Rand r) => rand_package.Float64ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float32 Float32(this ref Rand r) => rand_package.Float32ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<nint> Perm(this ref Rand r, nint n) => rand_package.Permᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Shuffle(this ref Rand r, nint n, Action<nint, nint> swap) => rand_package.Shuffleᴍ(ref r, n, swap);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Read(this ж<Rand> Ꮡr, slice<byte> p) => rand_package.Readᴍ(Ꮡr, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Seed(this ж<Rand> Ꮡr, int64 seed) => rand_package.Seed⁔(Ꮡr, seed);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Int63(this ref Rand r) => rand_package.Int63⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 Uint32(this ref Rand r) => rand_package.Uint32⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 Uint64(this ref Rand r) => rand_package.Uint64⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int32 Int31(this ref Rand r) => rand_package.Int31⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Int(this ref Rand r) => rand_package.Int⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Int63n(this ref Rand r, int64 n) => rand_package.Int63n⁔(ref r, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int32 Int31n(this ref Rand r, int32 n) => rand_package.Int31n⁔(ref r, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int32 int31n(this ref Rand r, int32 n) => rand_package.int31n⁔(ref r, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Intn(this ref Rand r, nint n) => rand_package.Intn⁔(ref r, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static float64 Float64(this ref Rand r) => rand_package.Float64⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static float32 Float32(this ref Rand r) => rand_package.Float32⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<nint> Perm(this ref Rand r, nint n) => rand_package.Perm⁔(ref r, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Shuffle(this ref Rand r, nint n, Action<nint, nint> swap) => rand_package.Shuffle⁔(ref r, n, swap);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Read(this ж<Rand> Ꮡr, slice<byte> p) => rand_package.Read⁔(Ꮡr, p);
 }
 partial class randᴛruntimeSource {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 Int63(this ref runtimeSource _) => rand_package.Int63ᴍ(ref _);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Seed(this ref runtimeSource _Δp0, int64 _Δp1) => rand_package.Seedᴍ(ref _Δp0, _Δp1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 Uint64(this ref runtimeSource _) => rand_package.Uint64ᴍ(ref _);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) read(this ж<runtimeSource> Ꮡfs, slice<byte> p, ж<int64> readVal, ж<int8> readPos) => rand_package.readᴍ(Ꮡfs, p, readVal, readPos);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 Int63(this ref runtimeSource _) => rand_package.Int63⁔(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Seed(this ref runtimeSource _Δp0, int64 _Δp1) => rand_package.Seed⁔(ref _Δp0, _Δp1);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 Uint64(this ref runtimeSource _) => rand_package.Uint64⁔(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) read(this ж<runtimeSource> Ꮡfs, slice<byte> p, ж<int64> readVal, ж<int8> readPos) => rand_package.read⁔(Ꮡfs, p, readVal, readPos);
 }
 partial class randᴛlockedSource {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 /*n*/ Int63(this ж<lockedSource> Ꮡr) => rand_package.Int63ᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 /*n*/ Uint64(this ж<lockedSource> Ꮡr) => rand_package.Uint64ᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Seed(this ж<lockedSource> Ꮡr, int64 seed) => rand_package.Seedᴍ(Ꮡr, seed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void seedPos(this ж<lockedSource> Ꮡr, int64 seed, ж<int8> ᏑreadPos) => rand_package.seedPosᴍ(Ꮡr, seed, ᏑreadPos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void seed(this ref lockedSource r, int64 seed) => rand_package.seedᴍ(ref r, seed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) read(this ж<lockedSource> Ꮡr, slice<byte> p, ж<int64> readVal, ж<int8> readPos) => rand_package.readᴍ(Ꮡr, p, readVal, readPos);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 /*n*/ Int63(this ж<lockedSource> Ꮡr) => rand_package.Int63⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 /*n*/ Uint64(this ж<lockedSource> Ꮡr) => rand_package.Uint64⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Seed(this ж<lockedSource> Ꮡr, int64 seed) => rand_package.Seed⁔(Ꮡr, seed);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void seedPos(this ж<lockedSource> Ꮡr, int64 seed, ж<int8> ᏑreadPos) => rand_package.seedPos⁔(Ꮡr, seed, ᏑreadPos);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void seed(this ref lockedSource r, int64 seed) => rand_package.seed⁔(ref r, seed);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) read(this ж<lockedSource> Ꮡr, slice<byte> p, ж<int64> readVal, ж<int8> readPos) => rand_package.read⁔(Ꮡr, p, readVal, readPos);
 }
 partial class randᴛrngSource {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Seed(this ref rngSource rng, int64 seed) => rand_package.Seedᴍ(ref rng, seed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 Int63(this ref rngSource rng) => rand_package.Int63ᴍ(ref rng);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 Uint64(this ref rngSource rng) => rand_package.Uint64ᴍ(ref rng);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Seed(this ref rngSource rng, int64 seed) => rand_package.Seed⁔(ref rng, seed);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 Int63(this ref rngSource rng) => rand_package.Int63⁔(ref rng);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 Uint64(this ref rngSource rng) => rand_package.Uint64⁔(ref rng);
 }
 partial class randᴛZipf {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static float64 h(this ref Zipf z, float64 x) => rand_package.hᴍ(ref z, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static float64 hinv(this ref Zipf z, float64 x) => rand_package.hinvᴍ(ref z, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 Uint64(this ж<Zipf> Ꮡz) => rand_package.Uint64ᴍ(Ꮡz);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static float64 h(this ref Zipf z, float64 x) => rand_package.h⁔(ref z, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static float64 hinv(this ref Zipf z, float64 x) => rand_package.hinv⁔(ref z, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 Uint64(this ж<Zipf> Ꮡz) => rand_package.Uint64⁔(Ꮡz);
 }
 // </GlyphForwarders>

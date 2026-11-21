@@ -69,10 +69,13 @@ using static go.vendor.golang.org.x.text.transform_package;
 
 namespace go.vendor.golang.org.x.text;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using unicode;
 using static transform_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("transform", ImportPath = "vendor/golang.org/x/text/transform")]
 public static partial class transform_package
@@ -116,45 +119,45 @@ public static partial class transform_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(transform_package.NopResetter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛNopResetter;
-[GoMethodHost(typeof(transform_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛReader;
-[GoMethodHost(typeof(transform_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛWriter;
-[GoMethodHost(typeof(transform_package.chain)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛchain;
-[GoMethodHost(typeof(transform_package.discard)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛdiscard;
-[GoMethodHost(typeof(transform_package.link)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛlink;
-[GoMethodHost(typeof(transform_package.nop)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛnop;
-[GoMethodHost(typeof(transform_package.removeF)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class transformᴛremoveF;
+[GoMethodHost(typeof(transform_package.NopResetter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛNopResetter;
+[GoMethodHost(typeof(transform_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛReader;
+[GoMethodHost(typeof(transform_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛWriter;
+[GoMethodHost(typeof(transform_package.chain)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛchain;
+[GoMethodHost(typeof(transform_package.discard)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛdiscard;
+[GoMethodHost(typeof(transform_package.link)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛlink;
+[GoMethodHost(typeof(transform_package.nop)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛnop;
+[GoMethodHost(typeof(transform_package.removeF)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class transformᴛremoveF;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class transformᴛNopResetter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this NopResetter _) => transform_package.Resetᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this NopResetter _) => transform_package.Reset⁔(_);
 }
 partial class transformᴛReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Read(this ref Reader r, slice<byte> p) => transform_package.Readᴍ(ref r, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Read(this ref Reader r, slice<byte> p) => transform_package.Read⁔(ref r, p);
 }
 partial class transformᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ref Writer w, slice<byte> data) => transform_package.Writeᴍ(ref w, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Writer w) => transform_package.Closeᴍ(ref w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ref Writer w, slice<byte> data) => transform_package.Write⁔(ref w, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Writer w) => transform_package.Close⁔(ref w);
 }
 partial class transformᴛnop {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this nop _, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transformᴍ(_, dst, src, atEOF);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Span(this nop _, slice<byte> src, bool atEOF) => transform_package.Spanᴍ(_, src, atEOF);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this nop _, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transform⁔(_, dst, src, atEOF);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Span(this nop _, slice<byte> src, bool atEOF) => transform_package.Span⁔(_, src, atEOF);
 }
 partial class transformᴛdiscard {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this discard _, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transformᴍ(_, dst, src, atEOF);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this discard _, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transform⁔(_, dst, src, atEOF);
 }
 partial class transformᴛchain {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fatalError(this ref chain c, nint errIndex, error err) => transform_package.fatalErrorᴍ(ref c, errIndex, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Reset(this ref chain c) => transform_package.Resetᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transformᴍ(ref c, dst, src, atEOF);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fatalError(this ref chain c, nint errIndex, error err) => transform_package.fatalError⁔(ref c, errIndex, err);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Reset(this ref chain c) => transform_package.Reset⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this ref chain c, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transform⁔(ref c, dst, src, atEOF);
 }
 partial class transformᴛlink {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> src(this ref link l) => transform_package.srcᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> dst(this ref link l) => transform_package.dstᴍ(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> src(this ref link l) => transform_package.src⁔(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> dst(this ref link l) => transform_package.dst⁔(ref l);
 }
 partial class transformᴛremoveF {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Reset(this removeF _) => transform_package.Resetᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this removeF t, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transformᴍ(t, dst, src, atEOF);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Reset(this removeF _) => transform_package.Reset⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint nDst, nint nSrc, error err) Transform(this removeF t, slice<byte> dst, slice<byte> src, bool atEOF) => transform_package.Transform⁔(t, dst, src, atEOF);
 }
 // </GlyphForwarders>

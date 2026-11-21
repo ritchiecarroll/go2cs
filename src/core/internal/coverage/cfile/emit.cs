@@ -354,7 +354,7 @@ internal static error emitCounterDataToDirectory(@string outdir) {
 } partial class cfile_package {
 
 // emitCounterDataToWriter emits counter data for this coverage run to an io.Writer.
-[GoMethodBody("emitCounterDataToWriter")] internal static error emitCounterDataToWriterᴍ(ж<emitState> Ꮡs, io.Writer w) {
+internal static error emitCounterDataToWriter⁔(/*this*/ ж<emitState> Ꮡs, io.Writer w) {
     var err = Ꮡs.emitCounterDataFile(finalHash, w); if (err != nil) {
         return err;
     }
@@ -366,7 +366,7 @@ internal static error emitCounterDataToDirectory(@string outdir) {
 // dir. It updates mfname/mftmp/mf fields in 's', returning an error
 // if something went wrong. See the comment on the emitState type
 // definition above for more on how file opening is managed.
-[GoMethodBody("openMetaFile")] internal static error openMetaFileᴍ(ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen) {
+internal static error openMetaFile⁔(/*this*/ ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen) {
     metaHash = metaHash.Clone();
 
     // Open meta-outfile for reading to see if it exists.
@@ -388,7 +388,7 @@ internal static error emitCounterDataToDirectory(@string outdir) {
 // openCounterFile opens an output file for the counter data portion
 // of a test coverage run. If updates the 'cfname' and 'cf' fields in
 // 's', returning an error if something went wrong.
-[GoMethodBody("openCounterFile")] internal static error openCounterFileᴍ(ref emitState s, /*[16]*/ array<byte> metaHash) {
+internal static error openCounterFile⁔(/*this*/ ref emitState s, /*[16]*/ array<byte> metaHash) {
     metaHash = metaHash.Clone();
 
     nint processID = os.Getpid();
@@ -414,7 +414,7 @@ internal static error emitCounterDataToDirectory(@string outdir) {
 // 'mf', close it, and then rename 'mftmp' to 'mfname'. This function
 // also opens the counter data output file, setting 'cf' and 'cfname'
 // in the state struct.
-[GoMethodBody("openOutputFiles")] internal static error openOutputFilesᴍ(ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen, fileType which) {
+internal static error openOutputFiles⁔(/*this*/ ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen, fileType which) {
     metaHash = metaHash.Clone();
 
     var (fi, err) = os.Stat(s.outdir);
@@ -441,7 +441,7 @@ internal static error emitCounterDataToDirectory(@string outdir) {
 // emitMetaDataFile emits coverage meta-data to a previously opened
 // temporary file (s.mftmp), then renames the generated file to the
 // final path (s.mfname).
-[GoMethodBody("emitMetaDataFile")] internal static error emitMetaDataFileᴍ(ref emitState s, /*[16]*/ array<byte> finalHash, uint64 tlen) {
+internal static error emitMetaDataFile⁔(/*this*/ ref emitState s, /*[16]*/ array<byte> finalHash, uint64 tlen) {
     finalHash = finalHash.Clone();
 
     {
@@ -469,7 +469,7 @@ internal static error emitCounterDataToDirectory(@string outdir) {
 // needMetaDataFile returns TRUE if we need to emit a meta-data file
 // for this program run. It should be used only after
 // openOutputFiles() has been invoked.
-[GoMethodBody("needMetaDataFile")] internal static bool needMetaDataFileᴍ(ref emitState s) {
+internal static bool needMetaDataFile⁔(/*this*/ ref emitState s) {
     return s.mf != nil;
 }
 
@@ -497,7 +497,7 @@ internal static error writeMetaData(io.Writer w, slice<rtcov.CovMetaBlob> metali
 
 } partial class cfile_package {
 
-[GoMethodBody("VisitFuncs")] internal static error VisitFuncsᴍ(ref emitState s, Func<uint32, uint32, slice<uint32>, error> f) {
+internal static error VisitFuncs⁔(/*this*/ ref emitState s, Func<uint32, uint32, slice<uint32>, error> f) {
     slice<uint32> tcounters = default;
 
     slice<uint32> rdCounters(slice<atomic.Uint32> actrs, slice<uint32> ctrs) {
@@ -621,7 +621,7 @@ internal static map<@string, @string> captureOsArgs() {
 
 // emitCounterDataFile emits the counter data portion of a
 // coverage output file (to the file 's.cf').
-[GoMethodBody("emitCounterDataFile")] internal static error emitCounterDataFileᴍ(ж<emitState> Ꮡs, /*[16]*/ array<byte> finalHash, io.Writer w) {
+internal static error emitCounterDataFile⁔(/*this*/ ж<emitState> Ꮡs, /*[16]*/ array<byte> finalHash, io.Writer w) {
     finalHash = finalHash.Clone();
 
     var cfw = encodecounter.NewCoverageDataWriter(w, coverage.CtrULeb128);

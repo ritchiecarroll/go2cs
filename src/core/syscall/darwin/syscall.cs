@@ -84,28 +84,28 @@ internal static ref uintptr _zero => ref ((StaticBox<uintptr>)Ꮡ_zero).ValueSlo
 } partial class syscall_package {
 
 // Unix returns the time stored in ts as seconds plus nanoseconds.
-[GoMethodBody("Unix")] internal static (int64 sec, int64 nsec) Unixᴍ(ref Timespec ts) {
+internal static (int64 sec, int64 nsec) Unix⁔(/*this*/ ref Timespec ts) {
     return ((int64)ts.Sec, (int64)ts.Nsec);
 }
 
 } partial class syscall_package {
 
 // Unix returns the time stored in tv as seconds plus nanoseconds.
-[GoMethodBody("Unix")] internal static (int64 sec, int64 nsec) Unixᴍ(ref Timeval tv) {
+internal static (int64 sec, int64 nsec) Unix⁔(/*this*/ ref Timeval tv) {
     return ((int64)tv.Sec, (int64)tv.Usec * 1000);
 }
 
 } partial class syscall_package {
 
 // Nano returns the time stored in ts as nanoseconds.
-[GoMethodBody("Nano")] internal static int64 Nanoᴍ(ref Timespec ts) {
+internal static int64 Nano⁔(/*this*/ ref Timespec ts) {
     return (int64)ts.Sec * 1000000000 + (int64)ts.Nsec;
 }
 
 } partial class syscall_package {
 
 // Nano returns the time stored in tv as nanoseconds.
-[GoMethodBody("Nano")] internal static int64 Nanoᴍ(ref Timeval tv) {
+internal static int64 Nano⁔(/*this*/ ref Timeval tv) {
     return (int64)tv.Sec * 1000000000 + (int64)tv.Usec * 1000;
 }
 

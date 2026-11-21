@@ -61,7 +61,7 @@ public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<o
 
 } partial class decodemeta_package {
 
-[GoMethodBody("readFileHeader")] internal static error readFileHeaderᴍ(ж<CoverageMetaFileReader> Ꮡr) {
+internal static error readFileHeader⁔(/*this*/ ж<CoverageMetaFileReader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     error err = default;
@@ -128,7 +128,7 @@ public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<o
     return default;
 }
 
-[GoMethodBody("rdUint64")] internal static (uint64, error) rdUint64ᴍ(ref CoverageMetaFileReader r) {
+internal static (uint64, error) rdUint64⁔(/*this*/ ref CoverageMetaFileReader r) {
     r.tmp = r.tmp[..0];
     r.tmp = appendꓸꓸꓸ(r.tmp, makeꓸꓸꓸ<byte>(8));
     var (n, err) = r.fileRdr.Read(r.tmp);
@@ -144,28 +144,28 @@ public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<o
 
 // NumPackages returns the number of packages for which this file
 // contains meta-data.
-[GoMethodBody("NumPackages")] internal static uint64 NumPackagesᴍ(ref CoverageMetaFileReader r) {
+internal static uint64 NumPackages⁔(/*this*/ ref CoverageMetaFileReader r) {
     return r.hdr.Entries;
 }
 
 // CounterMode returns the counter mode (set, count, atomic) used
 // when building for coverage for the program that produce this
 // meta-data file.
-[GoMethodBody("CounterMode")] internal static coverage.CounterMode CounterModeᴍ(ref CoverageMetaFileReader r) {
+internal static coverage.CounterMode CounterMode⁔(/*this*/ ref CoverageMetaFileReader r) {
     return r.hdr.CMode;
 }
 
 // CounterGranularity returns the counter granularity (single counter per
 // function, or counter per block) selected when building for coverage
 // for the program that produce this meta-data file.
-[GoMethodBody("CounterGranularity")] internal static coverage.CounterGranularity CounterGranularityᴍ(ref CoverageMetaFileReader r) {
+internal static coverage.CounterGranularity CounterGranularity⁔(/*this*/ ref CoverageMetaFileReader r) {
     return r.hdr.CGranularity;
 }
 
 // FileHash returns the hash computed for all of the package meta-data
 // blobs. Coverage counter data files refer to this hash, and the
 // hash will be encoded into the meta-data file name.
-[GoMethodBody("FileHash")] internal static array<byte> FileHashᴍ(ref CoverageMetaFileReader r) {
+internal static array<byte> FileHash⁔(/*this*/ ref CoverageMetaFileReader r) {
     return r.hdr.MetaFileHash.Clone();
 }
 
@@ -176,7 +176,7 @@ public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<o
 // 'payloadbuf' will be written to (or if it is not of sufficient
 // size, a new buffer will be allocated). Return value is the decoder,
 // a byte slice with the encoded meta-data, and an error.
-[GoMethodBody("GetPackageDecoder")] internal static (ж<CoverageMetaDataDecoder>, slice<byte>, error) GetPackageDecoderᴍ(ref CoverageMetaFileReader r, uint32 pkIdx, slice<byte> payloadbuf) {
+internal static (ж<CoverageMetaDataDecoder>, slice<byte>, error) GetPackageDecoder⁔(/*this*/ ref CoverageMetaFileReader r, uint32 pkIdx, slice<byte> payloadbuf) {
     var (pp, err) = r.GetPackagePayload(pkIdx, payloadbuf);
     if (r.debug) {
         var h = fnv.New128a();
@@ -201,7 +201,7 @@ public static (ж<CoverageMetaFileReader>, error) NewCoverageMetaFileReader(ж<o
 // 'payloadbuf' will be written to (or if it is not of sufficient
 // size, a new buffer will be allocated). Return value is the decoder,
 // a byte slice with the encoded meta-data, and an error.
-[GoMethodBody("GetPackagePayload")] internal static (slice<byte>, error) GetPackagePayloadᴍ(ref CoverageMetaFileReader r, uint32 pkIdx, slice<byte> payloadbuf) {
+internal static (slice<byte>, error) GetPackagePayload⁔(/*this*/ ref CoverageMetaFileReader r, uint32 pkIdx, slice<byte> payloadbuf) {
     // Determine correct offset/length.
     if ((uint64)pkIdx >= r.hdr.Entries) {
         return (default, fmt.Errorf("GetPackagePayload: illegal pkg index %d"u8, pkIdx));

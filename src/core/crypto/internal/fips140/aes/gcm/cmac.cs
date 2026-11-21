@@ -33,7 +33,7 @@ public static ж<CMAC> NewCMAC(ж<aes.Block> Ꮡb) {
 
 } partial class gcm_package {
 
-[GoMethodBody("deriveSubkeys")] internal static void deriveSubkeysᴍ(ж<CMAC> Ꮡc) {
+internal static void deriveSubkeys⁔(/*this*/ ж<CMAC> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     aes.EncryptBlockInternal(Ꮡc.Ꮡb, c.k1[..], c.k1[..]);
@@ -45,7 +45,7 @@ public static ж<CMAC> NewCMAC(ж<aes.Block> Ꮡb) {
     c.k2[len(c.k2) - 1] ^= (byte)(msb * 0b10000111);
 }
 
-[GoMethodBody("MAC")] internal static array<byte> MACᴍ(ж<CMAC> Ꮡc, slice<byte> m) {
+internal static array<byte> MAC⁔(/*this*/ ж<CMAC> Ꮡc, slice<byte> m) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     fips140.RecordApproved();

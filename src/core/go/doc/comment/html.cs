@@ -21,7 +21,7 @@ partial struct htmlPrinter {
 
 // HTML returns an HTML formatting of the [Doc].
 // See the [Printer] documentation for ways to customize the HTML output.
-[GoMethodBody("HTML")] internal static slice<byte> HTMLᴍ(ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+internal static slice<byte> HTML⁔(/*this*/ ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var hp = Ꮡ(new htmlPrinter(Printer: Ꮡp));
@@ -35,15 +35,15 @@ partial struct htmlPrinter {
 } partial class comment_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string preˢᴍhtmlPrinter => ref preˢᵇᴍhtmlPrinter;
-private static readonly @string preˢᵇᴍhtmlPrinter = "<pre>"u8;
-internal static ref readonly @string preˢ2ᴍhtmlPrinter => ref preˢ2ᵇᴍhtmlPrinter;
-private static readonly @string preˢ2ᵇᴍhtmlPrinter = "</pre>\n"u8;
-internal static ref readonly @string valueˢᴍhtmlPrinter => ref valueˢᵇᴍhtmlPrinter;
-private static readonly @string valueˢᵇᴍhtmlPrinter = @" value="""u8;
+internal static ref readonly @string preˢ⁔htmlPrinter => ref preˢᵇ⁔htmlPrinter;
+private static readonly @string preˢᵇ⁔htmlPrinter = "<pre>"u8;
+internal static ref readonly @string preˢ2⁔htmlPrinter => ref preˢ2ᵇ⁔htmlPrinter;
+private static readonly @string preˢ2ᵇ⁔htmlPrinter = "</pre>\n"u8;
+internal static ref readonly @string valueˢ⁔htmlPrinter => ref valueˢᵇ⁔htmlPrinter;
+private static readonly @string valueˢᵇ⁔htmlPrinter = @" value="""u8;
 
 // block prints the block x to out.
-[GoMethodBody("block")] internal static void blockᴍ(ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
+internal static void block⁔(/*this*/ ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, Block x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     switch (x.type()) {
@@ -77,9 +77,9 @@ private static readonly @string valueˢᵇᴍhtmlPrinter = @" value="""u8;
         break;
     }
     case ж<Code> xΔ1: {
-        @out.WriteString(preˢᴍhtmlPrinter);
+        @out.WriteString(preˢ⁔htmlPrinter);
         p.escape(Ꮡout, xΔ1.Text);
-        @out.WriteString(preˢ2ᴍhtmlPrinter);
+        @out.WriteString(preˢ2⁔htmlPrinter);
         break;
     }
     case ж<List> xΔ1: {
@@ -94,7 +94,7 @@ private static readonly @string valueˢᵇᴍhtmlPrinter = @" value="""u8;
             @out.WriteString("<li");
             @string n = item.Number; if (n != ""u8) {
                 if (n != next) {
-                    @out.WriteString(valueˢᴍhtmlPrinter);
+                    @out.WriteString(valueˢ⁔htmlPrinter);
                     @out.WriteString(n);
                     @out.WriteString(@"""");
                     next = n;
@@ -133,11 +133,11 @@ internal static @string inc(@string s) {
 } partial class comment_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string aHrefˢᴍhtmlPrinter => ref aHrefˢᵇᴍhtmlPrinter;
-private static readonly @string aHrefˢᵇᴍhtmlPrinter = @"<a href="""u8;
+internal static ref readonly @string aHrefˢ⁔htmlPrinter => ref aHrefˢᵇ⁔htmlPrinter;
+private static readonly @string aHrefˢᵇ⁔htmlPrinter = @"<a href="""u8;
 
 // text prints the text sequence x to out.
-[GoMethodBody("text")] internal static void textᴍ(ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
+internal static void text⁔(/*this*/ ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     foreach (var (_, t) in range(x)) {
@@ -153,7 +153,7 @@ private static readonly @string aHrefˢᵇᴍhtmlPrinter = @"<a href="""u8;
             break;
         }
         case ж<Link> tΔ1: {
-            @out.WriteString(aHrefˢᴍhtmlPrinter);
+            @out.WriteString(aHrefˢ⁔htmlPrinter);
             p.escape(Ꮡout, tΔ1.URL);
             @out.WriteString(@""">");
             p.text(Ꮡout, tΔ1.Text);
@@ -163,7 +163,7 @@ private static readonly @string aHrefˢᵇᴍhtmlPrinter = @"<a href="""u8;
         case ж<DocLink> tΔ1: {
             @string url = p.docLinkURL(tΔ1);
             if (url != ""u8) {
-                @out.WriteString(aHrefˢᴍhtmlPrinter);
+                @out.WriteString(aHrefˢ⁔htmlPrinter);
                 p.escape(Ꮡout, url);
                 @out.WriteString(@""">");
             }
@@ -177,17 +177,17 @@ private static readonly @string aHrefˢᵇᴍhtmlPrinter = @"<a href="""u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ampˢᴍhtmlPrinter => ref ampˢᵇᴍhtmlPrinter;
-private static readonly @string ampˢᵇᴍhtmlPrinter = "&amp;"u8;
-internal static ref readonly @string quotˢᴍhtmlPrinter => ref quotˢᵇᴍhtmlPrinter;
-private static readonly @string quotˢᵇᴍhtmlPrinter = "&quot;"u8;
-internal static ref readonly @string aposˢᴍhtmlPrinter => ref aposˢᵇᴍhtmlPrinter;
-private static readonly @string aposˢᵇᴍhtmlPrinter = "&apos;"u8;
+internal static ref readonly @string ampˢ⁔htmlPrinter => ref ampˢᵇ⁔htmlPrinter;
+private static readonly @string ampˢᵇ⁔htmlPrinter = "&amp;"u8;
+internal static ref readonly @string quotˢ⁔htmlPrinter => ref quotˢᵇ⁔htmlPrinter;
+private static readonly @string quotˢᵇ⁔htmlPrinter = "&quot;"u8;
+internal static ref readonly @string aposˢ⁔htmlPrinter => ref aposˢᵇ⁔htmlPrinter;
+private static readonly @string aposˢᵇ⁔htmlPrinter = "&apos;"u8;
 
 // escape prints s to out as plain text,
 // escaping < & " ' and > to avoid being misinterpreted
 // in larger HTML constructs.
-[GoMethodBody("escape")] internal static void escapeᴍ(ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
+internal static void escape⁔(/*this*/ ref htmlPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     nint start = 0;
@@ -201,19 +201,19 @@ private static readonly @string aposˢᵇᴍhtmlPrinter = "&apos;"u8;
         }
         case (byte)'&': {
             @out.WriteString(s.slice(start, i));
-            @out.WriteString(ampˢᴍhtmlPrinter);
+            @out.WriteString(ampˢ⁔htmlPrinter);
             start = i + 1;
             break;
         }
         case (byte)'"': {
             @out.WriteString(s.slice(start, i));
-            @out.WriteString(quotˢᴍhtmlPrinter);
+            @out.WriteString(quotˢ⁔htmlPrinter);
             start = i + 1;
             break;
         }
         case (byte)'\'': {
             @out.WriteString(s.slice(start, i));
-            @out.WriteString(aposˢᴍhtmlPrinter);
+            @out.WriteString(aposˢ⁔htmlPrinter);
             start = i + 1;
             break;
         }

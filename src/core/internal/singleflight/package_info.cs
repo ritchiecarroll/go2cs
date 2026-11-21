@@ -64,10 +64,13 @@ using static go.@internal.singleflight_package;
 
 namespace go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go;
 using static singleflight_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("singleflight")]
 public static partial class singleflight_package
@@ -102,14 +105,14 @@ public static partial class singleflight_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(singleflight_package.Group)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class singleflightᴛGroup;
+[GoMethodHost(typeof(singleflight_package.Group)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class singleflightᴛGroup;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class singleflightᴛGroup {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (any v, error err, bool shared) Do(this ж<Group> Ꮡg, @string key, Func<(any, error)> fn) => singleflight_package.Doᴍ(Ꮡg, key, fn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static /*<-*/channel<Result> DoChan(this ж<Group> Ꮡg, @string key, Func<(any, error)> fn) => singleflight_package.DoChanᴍ(Ꮡg, key, fn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void doCall(this ж<Group> Ꮡg, ж<call> Ꮡc, @string key, Func<(any, error)> fn) => singleflight_package.doCallᴍ(Ꮡg, Ꮡc, key, fn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ForgetUnshared(this ж<Group> Ꮡg, @string key) => singleflight_package.ForgetUnsharedᴍ(Ꮡg, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (any v, error err, bool shared) Do(this ж<Group> Ꮡg, @string key, Func<(any, error)> fn) => singleflight_package.Do⁔(Ꮡg, key, fn);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static /*<-*/channel<Result> DoChan(this ж<Group> Ꮡg, @string key, Func<(any, error)> fn) => singleflight_package.DoChan⁔(Ꮡg, key, fn);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void doCall(this ж<Group> Ꮡg, ж<call> Ꮡc, @string key, Func<(any, error)> fn) => singleflight_package.doCall⁔(Ꮡg, Ꮡc, key, fn);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool ForgetUnshared(this ж<Group> Ꮡg, @string key) => singleflight_package.ForgetUnshared⁔(Ꮡg, key);
 }
 // </GlyphForwarders>

@@ -67,7 +67,7 @@ partial struct TOKEN_MANDATORY_LABEL {
 
 } partial class windows_package {
 
-[GoMethodBody("Size")] internal static uint32 Sizeᴍ(ref TOKEN_MANDATORY_LABEL tml) {
+internal static uint32 Size⁔(/*this*/ ref TOKEN_MANDATORY_LABEL tml) {
     return (uint32)/* unsafe.Sizeof(TOKEN_MANDATORY_LABEL{}) */ (uintptr)16 + syscall.GetLengthSid(tml.Label.Sid);
 }
 

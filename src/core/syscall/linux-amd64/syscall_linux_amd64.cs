@@ -108,25 +108,25 @@ internal static Timeval setTimeval(int64 sec, int64 usec) {
 
 } partial class syscall_package {
 
-[GoMethodBody("PC")] internal static uint64 PCᴍ(ref PtraceRegs r) { return r.Rip; }
+internal static uint64 PC⁔(/*this*/ ref PtraceRegs r) { return r.Rip; }
 
-[GoMethodBody("SetPC")] internal static void SetPCᴍ(ref PtraceRegs r, uint64 pc) { r.Rip = pc; }
+internal static void SetPC⁔(/*this*/ ref PtraceRegs r, uint64 pc) { r.Rip = pc; }
 
 } partial class syscall_package {
 
-[GoMethodBody("SetLen")] internal static void SetLenᴍ(ref Iovec iov, nint length) {
+internal static void SetLen⁔(/*this*/ ref Iovec iov, nint length) {
     iov.Len = (uint64)length;
 }
 
 } partial class syscall_package {
 
-[GoMethodBody("SetControllen")] internal static void SetControllenᴍ(ref Msghdr msghdr, nint length) {
+internal static void SetControllen⁔(/*this*/ ref Msghdr msghdr, nint length) {
     msghdr.Controllen = (uint64)length;
 }
 
 } partial class syscall_package {
 
-[GoMethodBody("SetLen")] internal static void SetLenᴍ(ref Cmsghdr cmsg, nint length) {
+internal static void SetLen⁔(/*this*/ ref Cmsghdr cmsg, nint length) {
     cmsg.Len = (uint64)length;
 }
 

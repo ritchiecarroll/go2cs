@@ -22,7 +22,7 @@ partial struct FormatError /*@string*/;
 
 } partial class jpeg_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(FormatError e) { return "invalid JPEG format: "u8 + ((@string)e); }
+internal static @string Error⁔(/*this*/ FormatError e) { return "invalid JPEG format: "u8 + ((@string)e); }
 
 } partial class jpeg_package {
 
@@ -31,7 +31,7 @@ partial struct UnsupportedError /*@string*/;
 
 } partial class jpeg_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(UnsupportedError e) { return "unsupported JPEG feature: "u8 + ((@string)e); }
+internal static @string Error⁔(/*this*/ UnsupportedError e) { return "unsupported JPEG feature: "u8 + ((@string)e); }
 
 } partial class jpeg_package {
 
@@ -154,7 +154,7 @@ partial struct decoder {
 
 // fill fills up the d.bytes.buf buffer from the underlying io.Reader. It
 // should only be called when there are no unread bytes in d.bytes.
-[GoMethodBody("fill")] internal static error fillᴍ(ref decoder d) {
+internal static error fill⁔(/*this*/ ref decoder d) {
     if (d.bytes.i != d.bytes.j) {
         throw panic("jpeg: fill called when unread bytes exist");
     }
@@ -182,7 +182,7 @@ partial struct decoder {
 // requires at least 8 bits for look-up, which means that Huffman decoding can
 // sometimes overshoot and read one or two too many bytes. Two-byte overshoot
 // can happen when expecting to read a 0xff 0x00 byte-stuffed byte.
-[GoMethodBody("unreadByteStuffedByte")] internal static void unreadByteStuffedByteᴍ(ref decoder d) {
+internal static void unreadByteStuffedByte⁔(/*this*/ ref decoder d) {
     d.bytes.i -= d.bytes.nUnreadable;
     d.bytes.nUnreadable = 0;
     if (d.bits.n >= 8) {
@@ -194,7 +194,7 @@ partial struct decoder {
 
 // readByte returns the next byte, whether buffered or not buffered. It does
 // not care about byte stuffing.
-[GoMethodBody("readByte")] internal static (byte x, error err) readByteᴍ(ref decoder d) {
+internal static (byte x, error err) readByte⁔(/*this*/ ref decoder d) {
     byte x = default;
     error err = default;
 
@@ -218,7 +218,7 @@ internal static FormatError errMissingFF00 = ((FormatError)(@string)"missing 0xf
 } partial class jpeg_package {
 
 // readByteStuffedByte is like readByte but is for byte-stuffed Huffman data.
-[GoMethodBody("readByteStuffedByte")] internal static (byte x, error err) readByteStuffedByteᴍ(ref decoder d) {
+internal static (byte x, error err) readByteStuffedByte⁔(/*this*/ ref decoder d) {
     byte x = default;
     error err = default;
 
@@ -262,7 +262,7 @@ internal static FormatError errMissingFF00 = ((FormatError)(@string)"missing 0xf
 
 // readFull reads exactly len(p) bytes into p. It does not care about byte
 // stuffing.
-[GoMethodBody("readFull")] internal static error readFullᴍ(ref decoder d, slice<byte> p) {
+internal static error readFull⁔(/*this*/ ref decoder d, slice<byte> p) {
     // Unread the overshot bytes, if any.
     if (d.bytes.nUnreadable != 0) {
         if (d.bits.n >= 8) {
@@ -286,7 +286,7 @@ internal static FormatError errMissingFF00 = ((FormatError)(@string)"missing 0xf
 }
 
 // ignore ignores the next n bytes.
-[GoMethodBody("ignore")] internal static error ignoreᴍ(ref decoder d, nint n) {
+internal static error ignore⁔(/*this*/ ref decoder d, nint n) {
     // Unread the overshot bytes, if any.
     if (d.bytes.nUnreadable != 0) {
         if (d.bits.n >= 8) {
@@ -313,25 +313,25 @@ internal static FormatError errMissingFF00 = ((FormatError)(@string)"missing 0xf
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string multipleSofMarkersˢᴍdecoder => ref multipleSofMarkersˢᵇᴍdecoder;
-private static readonly @string multipleSofMarkersˢᵇᴍdecoder = "multiple SOF markers"u8;
-internal static ref readonly @string numberOfComponentsˢᴍdecoder => ref numberOfComponentsˢᵇᴍdecoder;
-private static readonly @string numberOfComponentsˢᵇᴍdecoder = "number of components"u8;
-internal static ref readonly @string precisionˢᴍdecoder => ref precisionˢᵇᴍdecoder;
-private static readonly @string precisionˢᵇᴍdecoder = "precision"u8;
-internal static ref readonly @string sofHasWrongLengthˢᴍdecoder => ref sofHasWrongLengthˢᵇᴍdecoder;
-private static readonly @string sofHasWrongLengthˢᵇᴍdecoder = "SOF has wrong length"u8;
-internal static ref readonly @string repeatedComponentˢᴍdecoder => ref repeatedComponentˢᵇᴍdecoder;
-private static readonly @string repeatedComponentˢᵇᴍdecoder = "repeated component identifier"u8;
-internal static ref readonly @string badTqValueˢᴍdecoder => ref badTqValueˢᵇᴍdecoder;
-private static readonly @string badTqValueˢᵇᴍdecoder = "bad Tq value"u8;
-internal static ref readonly @string lumaChromaSubsamplingˢᴍdecoder => ref lumaChromaSubsamplingˢᵇᴍdecoder;
-private static readonly @string lumaChromaSubsamplingˢᵇᴍdecoder = "luma/chroma subsampling ratio"u8;
+internal static ref readonly @string multipleSofMarkersˢ⁔decoder => ref multipleSofMarkersˢᵇ⁔decoder;
+private static readonly @string multipleSofMarkersˢᵇ⁔decoder = "multiple SOF markers"u8;
+internal static ref readonly @string numberOfComponentsˢ⁔decoder => ref numberOfComponentsˢᵇ⁔decoder;
+private static readonly @string numberOfComponentsˢᵇ⁔decoder = "number of components"u8;
+internal static ref readonly @string precisionˢ⁔decoder => ref precisionˢᵇ⁔decoder;
+private static readonly @string precisionˢᵇ⁔decoder = "precision"u8;
+internal static ref readonly @string sofHasWrongLengthˢ⁔decoder => ref sofHasWrongLengthˢᵇ⁔decoder;
+private static readonly @string sofHasWrongLengthˢᵇ⁔decoder = "SOF has wrong length"u8;
+internal static ref readonly @string repeatedComponentˢ⁔decoder => ref repeatedComponentˢᵇ⁔decoder;
+private static readonly @string repeatedComponentˢᵇ⁔decoder = "repeated component identifier"u8;
+internal static ref readonly @string badTqValueˢ⁔decoder => ref badTqValueˢᵇ⁔decoder;
+private static readonly @string badTqValueˢᵇ⁔decoder = "bad Tq value"u8;
+internal static ref readonly @string lumaChromaSubsamplingˢ⁔decoder => ref lumaChromaSubsamplingˢᵇ⁔decoder;
+private static readonly @string lumaChromaSubsamplingˢᵇ⁔decoder = "luma/chroma subsampling ratio"u8;
 
 // Specified in section B.2.2.
-[GoMethodBody("processSOF")] internal static error processSOFᴍ(ref decoder d, nint n) {
+internal static error processSOF⁔(/*this*/ ref decoder d, nint n) {
     if (d.nComp != 0) {
-        return ((FormatError)(@string)multipleSofMarkersˢᴍdecoder);
+        return ((FormatError)(@string)multipleSofMarkersˢ⁔decoder);
     }
     switch (n) {
     case var ᴛ when ᴛ == 6 + 3 * 1: { // Grayscale image.
@@ -347,19 +347,19 @@ private static readonly @string lumaChromaSubsamplingˢᵇᴍdecoder = "luma/chr
         break;
     }
     default: {
-        return ((UnsupportedError)(@string)numberOfComponentsˢᴍdecoder);
+        return ((UnsupportedError)(@string)numberOfComponentsˢ⁔decoder);
     }}
     var err = d.readFull(d.tmp.slice(0, n)); if (err != nil) {
         return err;
     }
     // We only support 8-bit precision.
     if (d.tmp[0] != 8) {
-        return ((UnsupportedError)(@string)precisionˢᴍdecoder);
+        return ((UnsupportedError)(@string)precisionˢ⁔decoder);
     }
     d.height = ((nint)d.tmp[1] << 8) + (nint)d.tmp[2];
     d.width = ((nint)d.tmp[3] << 8) + (nint)d.tmp[4];
     if ((nint)d.tmp[5] != d.nComp) {
-        return ((FormatError)(@string)sofHasWrongLengthˢᴍdecoder);
+        return ((FormatError)(@string)sofHasWrongLengthˢ⁔decoder);
     }
 
     for (nint i = 0; i < d.nComp; i++) {
@@ -368,20 +368,20 @@ private static readonly @string lumaChromaSubsamplingˢᵇᴍdecoder = "luma/chr
         // the values of C_1 through C_(i-1)".
         for (nint j = 0; j < i; j++) {
             if (d.comp[i].c == d.comp[j].c) {
-                return ((FormatError)(@string)repeatedComponentˢᴍdecoder);
+                return ((FormatError)(@string)repeatedComponentˢ⁔decoder);
             }
         }
 
         d.comp[i].tq = d.tmp[8 + 3 * i];
         if (d.comp[i].tq > maxTq) {
-            return ((FormatError)(@string)badTqValueˢᴍdecoder);
+            return ((FormatError)(@string)badTqValueˢ⁔decoder);
         }
 
         var hv = d.tmp[7 + 3 * i];
         nint h = (nint)(hv >> 4);
         nint v = (nint)((byte)(hv & 0x0f));
         if (h < 1 || 4 < h || v < 1 || 4 < v) {
-            return ((FormatError)(@string)lumaChromaSubsamplingˢᴍdecoder);
+            return ((FormatError)(@string)lumaChromaSubsamplingˢ⁔decoder);
         }
         if (h == 3 || v == 3) {
             return errUnsupportedSubsamplingRatio;
@@ -473,13 +473,13 @@ private static readonly @string lumaChromaSubsamplingˢᵇᴍdecoder = "luma/chr
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badPqValueˢᴍdecoder => ref badPqValueˢᵇᴍdecoder;
-private static readonly @string badPqValueˢᵇᴍdecoder = "bad Pq value"u8;
-internal static ref readonly @string dqtHasWrongLengthˢᴍdecoder => ref dqtHasWrongLengthˢᵇᴍdecoder;
-private static readonly @string dqtHasWrongLengthˢᵇᴍdecoder = "DQT has wrong length"u8;
+internal static ref readonly @string badPqValueˢ⁔decoder => ref badPqValueˢᵇ⁔decoder;
+private static readonly @string badPqValueˢᵇ⁔decoder = "bad Pq value"u8;
+internal static ref readonly @string dqtHasWrongLengthˢ⁔decoder => ref dqtHasWrongLengthˢᵇ⁔decoder;
+private static readonly @string dqtHasWrongLengthˢᵇ⁔decoder = "DQT has wrong length"u8;
 
 // Specified in section B.2.4.1.
-[GoMethodBody("processDQT")] internal static error processDQTᴍ(ref decoder d, nint n) {
+internal static error processDQT⁔(/*this*/ ref decoder d, nint n) {
 loop:
     while (n > 0) {
         n--;
@@ -489,11 +489,11 @@ loop:
         }
         var tq = (byte)(x & 0x0f);
         if (tq > maxTq) {
-            return ((FormatError)(@string)badTqValueˢᴍdecoder);
+            return ((FormatError)(@string)badTqValueˢ⁔decoder);
         }
         switch ((x >> 4)) {
         default: {
-            return ((FormatError)(@string)badPqValueˢᴍdecoder);
+            return ((FormatError)(@string)badPqValueˢ⁔decoder);
         }
         case 0: {
             if (n < blockSize) {
@@ -525,19 +525,19 @@ continue_loop:;
     }
 break_loop:;
     if (n != 0) {
-        return ((FormatError)(@string)dqtHasWrongLengthˢᴍdecoder);
+        return ((FormatError)(@string)dqtHasWrongLengthˢ⁔decoder);
     }
     return default;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string driHasWrongLengthˢᴍdecoder => ref driHasWrongLengthˢᵇᴍdecoder;
-private static readonly @string driHasWrongLengthˢᵇᴍdecoder = "DRI has wrong length"u8;
+internal static ref readonly @string driHasWrongLengthˢ⁔decoder => ref driHasWrongLengthˢᵇ⁔decoder;
+private static readonly @string driHasWrongLengthˢᵇ⁔decoder = "DRI has wrong length"u8;
 
 // Specified in section B.2.4.4.
-[GoMethodBody("processDRI")] internal static error processDRIᴍ(ref decoder d, nint n) {
+internal static error processDRI⁔(/*this*/ ref decoder d, nint n) {
     if (n != 2) {
-        return ((FormatError)(@string)driHasWrongLengthˢᴍdecoder);
+        return ((FormatError)(@string)driHasWrongLengthˢ⁔decoder);
     }
     var err = d.readFull(d.tmp[..2]); if (err != nil) {
         return err;
@@ -546,7 +546,7 @@ private static readonly @string driHasWrongLengthˢᵇᴍdecoder = "DRI has wron
     return default;
 }
 
-[GoMethodBody("processApp0Marker")] internal static error processApp0Markerᴍ(ref decoder d, nint n) {
+internal static error processApp0Marker⁔(/*this*/ ref decoder d, nint n) {
     if (n < 5) {
         return d.ignore(n);
     }
@@ -563,7 +563,7 @@ private static readonly @string driHasWrongLengthˢᵇᴍdecoder = "DRI has wron
     return default;
 }
 
-[GoMethodBody("processApp14Marker")] internal static error processApp14Markerᴍ(ref decoder d, nint n) {
+internal static error processApp14Marker⁔(/*this*/ ref decoder d, nint n) {
     if (n < 12) {
         return d.ignore(n);
     }
@@ -584,17 +584,17 @@ private static readonly @string driHasWrongLengthˢᵇᴍdecoder = "DRI has wron
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingSoiMarkerˢᴍdecoder => ref missingSoiMarkerˢᵇᴍdecoder;
-private static readonly @string missingSoiMarkerˢᵇᴍdecoder = "missing SOI marker"u8;
-internal static ref readonly @string shortSegmentLengthˢᴍdecoder => ref shortSegmentLengthˢᵇᴍdecoder;
-private static readonly @string shortSegmentLengthˢᵇᴍdecoder = "short segment length"u8;
-internal static ref readonly @string unknownMarkerˢᴍdecoder => ref unknownMarkerˢᵇᴍdecoder;
-private static readonly @string unknownMarkerˢᵇᴍdecoder = "unknown marker"u8;
-internal static ref readonly @string missingSosMarkerˢᴍdecoder => ref missingSosMarkerˢᵇᴍdecoder;
-private static readonly @string missingSosMarkerˢᵇᴍdecoder = "missing SOS marker"u8;
+internal static ref readonly @string missingSoiMarkerˢ⁔decoder => ref missingSoiMarkerˢᵇ⁔decoder;
+private static readonly @string missingSoiMarkerˢᵇ⁔decoder = "missing SOI marker"u8;
+internal static ref readonly @string shortSegmentLengthˢ⁔decoder => ref shortSegmentLengthˢᵇ⁔decoder;
+private static readonly @string shortSegmentLengthˢᵇ⁔decoder = "short segment length"u8;
+internal static ref readonly @string unknownMarkerˢ⁔decoder => ref unknownMarkerˢᵇ⁔decoder;
+private static readonly @string unknownMarkerˢᵇ⁔decoder = "unknown marker"u8;
+internal static ref readonly @string missingSosMarkerˢ⁔decoder => ref missingSosMarkerˢᵇ⁔decoder;
+private static readonly @string missingSosMarkerˢᵇ⁔decoder = "missing SOS marker"u8;
 
 // decode reads a JPEG image from r and returns it as an image.Image.
-[GoMethodBody("decode")] internal static (image.Image, error) decodeᴍ(ref decoder d, io.Reader r, bool configOnly) {
+internal static (image.Image, error) decode⁔(/*this*/ ref decoder d, io.Reader r, bool configOnly) {
     d.r = r;
 
     // Check for the Start Of Image marker.
@@ -604,7 +604,7 @@ private static readonly @string missingSosMarkerˢᵇᴍdecoder = "missing SOS m
         }
     }
     if (d.tmp[0] != 0xff || d.tmp[1] != soiMarker) {
-        return (default, ((FormatError)(@string)missingSoiMarkerˢᴍdecoder));
+        return (default, ((FormatError)(@string)missingSoiMarkerˢ⁔decoder));
     }
 
     // Process the remaining segments until the End Of Image marker.
@@ -673,7 +673,7 @@ private static readonly @string missingSosMarkerˢᵇᴍdecoder = "missing SOS m
         }
         nint n = ((nint)d.tmp[0] << 8) + (nint)d.tmp[1] - 2;
         if (n < 0) {
-            return (default, ((FormatError)(@string)shortSegmentLengthˢᴍdecoder));
+            return (default, ((FormatError)(@string)shortSegmentLengthˢ⁔decoder));
         }
 
         switch (marker) {
@@ -729,9 +729,9 @@ private static readonly @string missingSosMarkerˢᵇᴍdecoder = "missing SOS m
             if (app0Marker <= marker && marker <= app15Marker || marker == comMarker) {
                 err = d.ignore(n);
             } else if (marker < 0xc0) { // See Table B.1 "Marker code assignments".
-                err = ((FormatError)(@string)unknownMarkerˢᴍdecoder);
+                err = ((FormatError)(@string)unknownMarkerˢ⁔decoder);
             } else {
-                err = ((UnsupportedError)(@string)unknownMarkerˢᴍdecoder);
+                err = ((UnsupportedError)(@string)unknownMarkerˢ⁔decoder);
             }
             break;
         }}
@@ -756,7 +756,7 @@ private static readonly @string missingSosMarkerˢᵇᴍdecoder = "missing SOS m
         }
         return (new image.YCbCrжImage(d.img3), default);
     }
-    return (default, ((FormatError)(@string)missingSosMarkerˢᴍdecoder));
+    return (default, ((FormatError)(@string)missingSosMarkerˢ⁔decoder));
 }
 
 } partial class jpeg_package {
@@ -769,8 +769,8 @@ internal partial struct applyBlack_translations /*dyn*/ {
 } partial class jpeg_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownColorModel4ˢᴍdecoder => ref unknownColorModel4ˢᵇᴍdecoder;
-private static readonly @string unknownColorModel4ˢᵇᴍdecoder = "unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata"u8;
+internal static ref readonly @string unknownColorModel4ˢ⁔decoder => ref unknownColorModel4ˢᵇ⁔decoder;
+private static readonly @string unknownColorModel4ˢᵇ⁔decoder = "unknown color model: 4-component JPEG doesn't have Adobe APP14 metadata"u8;
 
 // applyBlack combines d.img3 and d.blackPix into a CMYK image. The formula
 // used depends on whether the JPEG image is stored as CMYK or YCbCrK,
@@ -779,9 +779,9 @@ private static readonly @string unknownColorModel4ˢᵇᴍdecoder = "unknown col
 // Adobe CMYK JPEG images are inverted, where 255 means no ink instead of full
 // ink, so we apply "v = 255 - v" at various points. Note that a double
 // inversion is a no-op, so inversions might be implicit in the code below.
-[GoMethodBody("applyBlack")] internal static (image.Image, error) applyBlackᴍ(ref decoder d) {
+internal static (image.Image, error) applyBlack⁔(/*this*/ ref decoder d) {
     if (!d.adobeTransformValid) {
-        return (default, ((UnsupportedError)(@string)unknownColorModel4ˢᴍdecoder));
+        return (default, ((UnsupportedError)(@string)unknownColorModel4ˢ⁔decoder));
     }
 
     // If the 4-component JPEG image isn't explicitly marked as "Unknown (RGB
@@ -841,7 +841,7 @@ private static readonly @string unknownColorModel4ˢᵇᴍdecoder = "unknown col
     return (new image.CMYKжImage(img), default);
 }
 
-[GoMethodBody("isRGB")] internal static bool isRGBᴍ(ref decoder d) {
+internal static bool isRGB⁔(/*this*/ ref decoder d) {
     if (d.jfif) {
         return false;
     }
@@ -853,7 +853,7 @@ private static readonly @string unknownColorModel4ˢᵇᴍdecoder = "unknown col
     return d.comp[0].c == 'R' && d.comp[1].c == 'G' && d.comp[2].c == 'B';
 }
 
-[GoMethodBody("convertToRGB")] internal static (image.Image, error) convertToRGBᴍ(ref decoder d) {
+internal static (image.Image, error) convertToRGB⁔(/*this*/ ref decoder d) {
     nint cScale = quo(d.comp[0].h, d.comp[1].h);
     var bounds = d.img3.Bounds();
     var img = image.NewRGBA(bounds);

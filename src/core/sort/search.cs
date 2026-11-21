@@ -152,16 +152,16 @@ public static nint SearchStrings(slice<@string> a, @string x) {
 } partial class sort_package {
 
 // Search returns the result of applying [SearchInts] to the receiver and x.
-[GoMethodBody("Search")] internal static nint Searchᴍ(IntSlice p, nint x) { return SearchInts(p, x); }
+internal static nint Search⁔(/*this*/ IntSlice p, nint x) { return SearchInts(p, x); }
 
 } partial class sort_package {
 
 // Search returns the result of applying [SearchFloat64s] to the receiver and x.
-[GoMethodBody("Search")] internal static nint Searchᴍ(Float64Slice p, float64 x) { return SearchFloat64s(p, x); }
+internal static nint Search⁔(/*this*/ Float64Slice p, float64 x) { return SearchFloat64s(p, x); }
 
 } partial class sort_package {
 
 // Search returns the result of applying [SearchStrings] to the receiver and x.
-[GoMethodBody("Search")] internal static nint Searchᴍ(StringSlice p, @string x) { return SearchStrings(p, x); }
+internal static nint Search⁔(/*this*/ StringSlice p, @string x) { return SearchStrings(p, x); }
 
 }

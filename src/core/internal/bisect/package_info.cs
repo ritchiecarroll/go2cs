@@ -66,11 +66,14 @@ using static go.@internal.bisect_package;
 
 namespace go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go;
 using go.sync;
 using static bisect_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("bisect")]
 public static partial class bisect_package
@@ -109,27 +112,27 @@ public static partial class bisect_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(bisect_package.Matcher)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bisectᴛMatcher;
-[GoMethodHost(typeof(bisect_package.dedup)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bisectᴛdedup;
-[GoMethodHost(typeof(bisect_package.parseError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bisectᴛparseError;
+[GoMethodHost(typeof(bisect_package.Matcher)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bisectᴛMatcher;
+[GoMethodHost(typeof(bisect_package.dedup)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bisectᴛdedup;
+[GoMethodHost(typeof(bisect_package.parseError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bisectᴛparseError;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class bisectᴛMatcher {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool MarkerOnly(this ref Matcher m) => bisect_package.MarkerOnlyᴍ(ref m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ShouldEnable(this ж<Matcher> Ꮡm, uint64 id) => bisect_package.ShouldEnableᴍ(Ꮡm, id);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) => bisect_package.ShouldPrintᴍ(Ꮡm, id);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool matchResult(this ref Matcher m, uint64 id) => bisect_package.matchResultᴍ(ref m, id);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool FileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) => bisect_package.FileLineᴍ(Ꮡm, w, @file, line);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool fileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) => bisect_package.fileLineᴍ(Ꮡm, w, @file, line);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Stack(this ж<Matcher> Ꮡm, Writer w) => bisect_package.Stackᴍ(Ꮡm, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool stack(this ж<Matcher> Ꮡm, Writer w) => bisect_package.stackᴍ(Ꮡm, w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool MarkerOnly(this ref Matcher m) => bisect_package.MarkerOnly⁔(ref m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool ShouldEnable(this ж<Matcher> Ꮡm, uint64 id) => bisect_package.ShouldEnable⁔(Ꮡm, id);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool ShouldPrint(this ж<Matcher> Ꮡm, uint64 id) => bisect_package.ShouldPrint⁔(Ꮡm, id);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool matchResult(this ref Matcher m, uint64 id) => bisect_package.matchResult⁔(ref m, id);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool FileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) => bisect_package.FileLine⁔(Ꮡm, w, @file, line);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool fileLine(this ж<Matcher> Ꮡm, Writer w, @string @file, nint line) => bisect_package.fileLine⁔(Ꮡm, w, @file, line);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Stack(this ж<Matcher> Ꮡm, Writer w) => bisect_package.Stack⁔(Ꮡm, w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool stack(this ж<Matcher> Ꮡm, Writer w) => bisect_package.stack⁔(Ꮡm, w);
 }
 partial class bisectᴛparseError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref parseError e) => bisect_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref parseError e) => bisect_package.Error⁔(ref e);
 }
 partial class bisectᴛdedup {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool seen(this ж<dedup> Ꮡd, uint64 h) => bisect_package.seenᴍ(Ꮡd, h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool seenLossy(this ref dedup d, uint64 h) => bisect_package.seenLossyᴍ(ref d, h);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool seen(this ж<dedup> Ꮡd, uint64 h) => bisect_package.seen⁔(Ꮡd, h);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool seenLossy(this ref dedup d, uint64 h) => bisect_package.seenLossy⁔(ref d, h);
 }
 // </GlyphForwarders>

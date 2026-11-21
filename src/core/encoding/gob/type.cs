@@ -214,7 +214,7 @@ internal static void setTypeId(gobType typ) {
 
 } partial class gob_package {
 
-[GoMethodBody("gobType")] internal static gobType gobTypeᴍ(typeId t) {
+internal static gobType gobType⁔(/*this*/ typeId t) {
     if (t == 0) {
         return default;
     }
@@ -222,21 +222,21 @@ internal static void setTypeId(gobType typ) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢᴍtypeId => ref nilˢᵇᴍtypeId;
-private static readonly @string nilˢᵇᴍtypeId = "<nil>"u8;
+internal static ref readonly @string nilˢ⁔typeId => ref nilˢᵇ⁔typeId;
+private static readonly @string nilˢᵇ⁔typeId = "<nil>"u8;
 
 // string returns the string representation of the type associated with the typeId.
-[GoMethodBody("string")] internal static @string @stringᴍ(typeId t) {
+internal static @string @string⁔(/*this*/ typeId t) {
     if (t.gobType() == nil) {
-        return nilˢᴍtypeId;
+        return nilˢ⁔typeId;
     }
     return t.gobType().@string();
 }
 
 // Name returns the name of the type associated with the typeId.
-[GoMethodBody("name")] internal static @string nameᴍ(typeId t) {
+internal static @string name⁔(/*this*/ typeId t) {
     if (t.gobType() == nil) {
-        return nilˢᴍtypeId;
+        return nilˢ⁔typeId;
     }
     return t.gobType().name();
 }
@@ -254,17 +254,17 @@ partial struct CommonType {
 
 } partial class gob_package {
 
-[GoMethodBody("id")] internal static typeId idᴍ(ref CommonType t) { return t.Id; }
+internal static typeId id⁔(/*this*/ ref CommonType t) { return t.Id; }
 
-[GoMethodBody("setId")] internal static void setIdᴍ(ref CommonType t, typeId id) { t.Id = id; }
+internal static void setId⁔(/*this*/ ref CommonType t, typeId id) { t.Id = id; }
 
-[GoMethodBody("string")] internal static @string @stringᴍ(ref CommonType t) { return t.Name; }
+internal static @string @string⁔(/*this*/ ref CommonType t) { return t.Name; }
 
-[GoMethodBody("safeString")] internal static @string safeStringᴍ(ref CommonType t, map<typeId, bool> seen) {
+internal static @string safeString⁔(/*this*/ ref CommonType t, map<typeId, bool> seen) {
     return t.Name;
 }
 
-[GoMethodBody("name")] internal static @string nameᴍ(ref CommonType t) { return t.Name; }
+internal static @string name⁔(/*this*/ ref CommonType t) { return t.Name; }
 
 } partial class gob_package {
 
@@ -353,7 +353,7 @@ internal static ж<arrayType> newArrayType(@string name) {
 
 } partial class gob_package {
 
-[GoMethodBody("init")] internal static void initᴍ(ж<arrayType> Ꮡa, gobType elem, nint len) {
+internal static void init⁔(/*this*/ ж<arrayType> Ꮡa, gobType elem, nint len) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     // Set our type id before evaluating the element's, in case it's our own.
@@ -362,7 +362,7 @@ internal static ж<arrayType> newArrayType(@string name) {
     a.Len = len;
 }
 
-[GoMethodBody("safeString")] internal static @string safeStringᴍ(ref arrayType a, map<typeId, bool> seen) {
+internal static @string safeString⁔(/*this*/ ref arrayType a, map<typeId, bool> seen) {
     if (seen[a.Id]) {
         return a.Name;
     }
@@ -370,7 +370,7 @@ internal static ж<arrayType> newArrayType(@string name) {
     return fmt.Sprintf("[%d]%s"u8, a.Len, a.Elem.gobType().safeString(seen));
 }
 
-[GoMethodBody("string")] internal static @string @stringᴍ(ref arrayType a) { return a.safeString(new map<typeId, bool>()); }
+internal static @string @string⁔(/*this*/ ref arrayType a) { return a.safeString(new map<typeId, bool>()); }
 
 } partial class gob_package {
 
@@ -387,11 +387,11 @@ internal static ж<gobEncoderType> newGobEncoderType(@string name) {
 
 } partial class gob_package {
 
-[GoMethodBody("safeString")] internal static @string safeStringᴍ(ref gobEncoderType g, map<typeId, bool> seen) {
+internal static @string safeString⁔(/*this*/ ref gobEncoderType g, map<typeId, bool> seen) {
     return g.Name;
 }
 
-[GoMethodBody("string")] internal static @string @stringᴍ(ref gobEncoderType g) { return g.Name; }
+internal static @string @string⁔(/*this*/ ref gobEncoderType g) { return g.Name; }
 
 } partial class gob_package {
 
@@ -409,7 +409,7 @@ internal static ж<mapType> newMapType(@string name) {
 
 } partial class gob_package {
 
-[GoMethodBody("init")] internal static void initᴍ(ж<mapType> Ꮡm, gobType key, gobType elem) {
+internal static void init⁔(/*this*/ ж<mapType> Ꮡm, gobType key, gobType elem) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     // Set our type id before evaluating the element's, in case it's our own.
@@ -418,7 +418,7 @@ internal static ж<mapType> newMapType(@string name) {
     m.Elem = elem.id();
 }
 
-[GoMethodBody("safeString")] internal static @string safeStringᴍ(ref mapType m, map<typeId, bool> seen) {
+internal static @string safeString⁔(/*this*/ ref mapType m, map<typeId, bool> seen) {
     if (seen[m.Id]) {
         return m.Name;
     }
@@ -428,7 +428,7 @@ internal static ж<mapType> newMapType(@string name) {
     return fmt.Sprintf("map[%s]%s"u8, key, elem);
 }
 
-[GoMethodBody("string")] internal static @string @stringᴍ(ref mapType m) { return m.safeString(new map<typeId, bool>()); }
+internal static @string @string⁔(/*this*/ ref mapType m) { return m.safeString(new map<typeId, bool>()); }
 
 } partial class gob_package {
 
@@ -445,7 +445,7 @@ internal static ж<sliceType> newSliceType(@string name) {
 
 } partial class gob_package {
 
-[GoMethodBody("init")] internal static void initᴍ(ж<sliceType> Ꮡs, gobType elem) {
+internal static void init⁔(/*this*/ ж<sliceType> Ꮡs, gobType elem) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Set our type id before evaluating the element's, in case it's our own.
@@ -458,7 +458,7 @@ internal static ж<sliceType> newSliceType(@string name) {
     s.Elem = elem.id();
 }
 
-[GoMethodBody("safeString")] internal static @string safeStringᴍ(ref sliceType s, map<typeId, bool> seen) {
+internal static @string safeString⁔(/*this*/ ref sliceType s, map<typeId, bool> seen) {
     if (seen[s.Id]) {
         return s.Name;
     }
@@ -466,7 +466,7 @@ internal static ж<sliceType> newSliceType(@string name) {
     return fmt.Sprintf("[]%s"u8, s.Elem.gobType().safeString(seen));
 }
 
-[GoMethodBody("string")] internal static @string @stringᴍ(ref sliceType s) { return s.safeString(new map<typeId, bool>()); }
+internal static @string @string⁔(/*this*/ ref sliceType s) { return s.safeString(new map<typeId, bool>()); }
 
 } partial class gob_package {
 
@@ -484,14 +484,14 @@ public partial struct structType {
 } partial class gob_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢᴍstructType => ref nilˢᵇᴍstructType;
-private static readonly @string nilˢᵇᴍstructType = "<nil>"u8;
+internal static ref readonly @string nilˢ⁔structType => ref nilˢᵇ⁔structType;
+private static readonly @string nilˢᵇ⁔structType = "<nil>"u8;
 
-[GoMethodBody("safeString")] internal static @string safeStringᴍ(ж<structType> Ꮡs, map<typeId, bool> seen) {
+internal static @string safeString⁔(/*this*/ ж<structType> Ꮡs, map<typeId, bool> seen) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (Ꮡs == nil) {
-        return nilˢᴍstructType;
+        return nilˢ⁔structType;
     }
     var (_, ok) = seen[s.Id, ꟷ]; if (ok) {
         return s.Name;
@@ -505,7 +505,7 @@ private static readonly @string nilˢᵇᴍstructType = "<nil>"u8;
     return str;
 }
 
-[GoMethodBody("string")] internal static @string @stringᴍ(ж<structType> Ꮡs) { return Ꮡs.safeString(new map<typeId, bool>()); }
+internal static @string @string⁔(/*this*/ ж<structType> Ꮡs) { return Ꮡs.safeString(new map<typeId, bool>()); }
 
 } partial class gob_package {
 
@@ -742,13 +742,13 @@ partial struct wireType {
 } partial class gob_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string unknownᶜᴍwireType => ref unknownᶜᵇᴍwireType;
-private static readonly @string unknownᶜᵇᴍwireType = "unknown type"u8;
+internal static ref readonly @string unknownᶜ⁔wireType => ref unknownᶜᵇ⁔wireType;
+private static readonly @string unknownᶜᵇ⁔wireType = "unknown type"u8;
 
-[GoMethodBody("string")] internal static @string @stringᴍ(ж<wireType> Ꮡw) {
+internal static @string @string⁔(/*this*/ ж<wireType> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
-    @string unknown = unknownᶜᴍwireType;
+    @string unknown = unknownᶜ⁔wireType;
     if (Ꮡw == nil) {
         return unknown;
     }

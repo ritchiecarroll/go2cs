@@ -211,15 +211,15 @@ partial struct response {
 
 } partial class cgi_package {
 
-[GoMethodBody("Flush")] internal static void Flushᴍ(ref response r) {
+internal static void Flush⁔(/*this*/ ref response r) {
     r.bufw.Flush();
 }
 
-[GoMethodBody("Header")] internal static http.Header Headerᴍ(ref response r) {
+internal static http.Header Header⁔(/*this*/ ref response r) {
     return r.header;
 }
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref response r, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref response r, slice<byte> p) {
     if (!r.wroteHeader) {
         r.WriteHeader(http.StatusOK);
     }
@@ -229,7 +229,7 @@ partial struct response {
     return r.bufw.Write(p);
 }
 
-[GoMethodBody("WriteHeader")] internal static void WriteHeaderᴍ(ref response r, nint code) {
+internal static void WriteHeader⁔(/*this*/ ref response r, nint code) {
     if (r.wroteHeader) {
         // Note: explicitly using Stderr, as Stdout is our HTTP output.
         fmt.Fprintf(new os.FileжWriter(os.Stderr), "CGI attempted to write header twice on request for %s"u8, r.req.URL.OrTypedNil());
@@ -240,21 +240,21 @@ partial struct response {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentTypeˢ2ᴍresponse => ref contentTypeˢ2ᵇᴍresponse;
-private static readonly @string contentTypeˢ2ᵇᴍresponse = "Content-Type"u8;
+internal static ref readonly @string contentTypeˢ2⁔response => ref contentTypeˢ2ᵇ⁔response;
+private static readonly @string contentTypeˢ2ᵇ⁔response = "Content-Type"u8;
 
 // writeCGIHeader finalizes the header sent to the client and writes it to the output.
 // p is not written by writeHeader, but is the first chunk of the body
 // that will be written. It is sniffed for a Content-Type if none is
 // set explicitly.
-[GoMethodBody("writeCGIHeader")] internal static void writeCGIHeaderᴍ(ref response r, slice<byte> p) {
+internal static void writeCGIHeader⁔(/*this*/ ref response r, slice<byte> p) {
     if (r.wroteCGIHeader) {
         return;
     }
     r.wroteCGIHeader = true;
     fmt.Fprintf(new bufio_WriterжWriter(r.bufw), "Status: %d %s\r\n"u8, r.code, http.StatusText(r.code));
-    var (_, hasType) = r.header[contentTypeˢ2ᴍresponse, ꟷ]; if (!hasType) {
-        r.header.Set(contentTypeˢ2ᴍresponse, http.DetectContentType(p));
+    var (_, hasType) = r.header[contentTypeˢ2⁔response, ꟷ]; if (!hasType) {
+        r.header.Set(contentTypeˢ2⁔response, http.DetectContentType(p));
     }
     r.header.Write(new bufio_WriterжWriter(r.bufw));
     r.bufw.WriteString("\r\n");

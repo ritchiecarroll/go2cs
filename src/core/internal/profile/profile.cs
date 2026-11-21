@@ -170,7 +170,7 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
 } partial class profile_package {
 
 // Write writes the profile as a gzip-compressed marshaled protobuf.
-[GoMethodBody("Write")] internal static error Writeᴍ(ж<Profile> Ꮡp, io.Writer w) {
+internal static error Write⁔(/*this*/ ж<Profile> Ꮡp, io.Writer w) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -191,7 +191,7 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
 // not limited to:
 //   - len(Profile.Sample[n].value) == len(Profile.value_unit)
 //   - Sample.id has a corresponding Profile.Location
-[GoMethodBody("CheckValid")] internal static error CheckValidᴍ(ref Profile p) {
+internal static error CheckValid⁔(/*this*/ ref Profile p) {
     // Check that sample values are consistent
     nint sampleLen = len(p.SampleType);
     if (sampleLen == 0 && len(p.Sample) != 0) {
@@ -253,7 +253,7 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
 // Aggregate merges the locations in the profile into equivalence
 // classes preserving the request attributes. It also updates the
 // samples to point to the merged locations.
-[GoMethodBody("Aggregate")] internal static error Aggregateᴍ(ref Profile p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address) {
+internal static error Aggregate⁔(/*this*/ ref Profile p, bool inlineFrame, bool function, bool filename, bool linenumber, bool address) {
     foreach (var (_, m) in range(p.Mapping)) {
         m.HasInlineFrames = m.HasInlineFrames && inlineFrame;
         m.HasFunctions = m.HasFunctions && function;
@@ -295,12 +295,12 @@ internal static (ж<Profile>, error) parseUncompressed(slice<byte> data) {
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string labelHeaderᶜᴍProfile => ref labelHeaderᶜᵇᴍProfile;
-private static readonly @string labelHeaderᶜᵇᴍProfile = "                "u8;
+internal static ref readonly @string labelHeaderᶜ⁔Profile => ref labelHeaderᶜᵇ⁔Profile;
+private static readonly @string labelHeaderᶜᵇ⁔Profile = "                "u8;
 
 // Print dumps a text representation of a profile. Intended mainly
 // for debugging purposes.
-[GoMethodBody("String")] internal static @string Stringᴍ(ref Profile p) {
+internal static @string String⁔(/*this*/ ref Profile p) {
     var ssᴷ = new stackAppend<@string>();
 
     var ss = new slice<@string>(0, len(p.Sample) + len(p.Mapping) + len(p.Location));
@@ -331,7 +331,7 @@ private static readonly @string labelHeaderᶜᵇᴍProfile = "                "
             sv = sv + fmt.Sprintf("%d "u8, l.ID);
         }
         ss = append(ss, sv);
-        @string labelHeader = labelHeaderᶜᴍProfile;
+        @string labelHeader = labelHeaderᶜ⁔Profile;
         if (len(s.Label) > 0) {
             @string ls = labelHeader;
             foreach (var (k, v) in s.Label) {
@@ -405,7 +405,7 @@ private static readonly @string labelHeaderᶜᵇᴍProfile = "                "
 // must be compatible (same Type and SampleType).
 // TODO(rsilvera): consider normalizing the profiles based on the
 // total samples collected.
-[GoMethodBody("Merge")] internal static error Mergeᴍ(ref Profile p, ж<Profile> Ꮡpb, float64 r) {
+internal static error Merge⁔(/*this*/ ref Profile p, ж<Profile> Ꮡpb, float64 r) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     var err = p.Compatible(Ꮡpb); if (err != nil) {
@@ -448,7 +448,7 @@ private static readonly @string labelHeaderᶜᵇᴍProfile = "                "
 // Compatible determines if two profiles can be compared/merged.
 // returns nil if the profiles are compatible; otherwise an error with
 // details on the incompatibility.
-[GoMethodBody("Compatible")] internal static error Compatibleᴍ(ref Profile p, ж<Profile> Ꮡpb) {
+internal static error Compatible⁔(/*this*/ ref Profile p, ж<Profile> Ꮡpb) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     if (!compatibleValueTypes(p.PeriodType, pb.PeriodType)) {
@@ -470,7 +470,7 @@ private static readonly @string labelHeaderᶜᵇᴍProfile = "                "
 
 // HasFunctions determines if all locations in this profile have
 // symbolized function information.
-[GoMethodBody("HasFunctions")] internal static bool HasFunctionsᴍ(ref Profile p) {
+internal static bool HasFunctions⁔(/*this*/ ref Profile p) {
     foreach (var (_, l) in range(p.Location)) {
         if (l.Mapping == nil || !l.Mapping.HasFunctions) {
             return false;
@@ -481,7 +481,7 @@ private static readonly @string labelHeaderᶜᵇᴍProfile = "                "
 
 // HasFileLines determines if all locations in this profile have
 // symbolized file and line number information.
-[GoMethodBody("HasFileLines")] internal static bool HasFileLinesᴍ(ref Profile p) {
+internal static bool HasFileLines⁔(/*this*/ ref Profile p) {
     foreach (var (_, l) in range(p.Location)) {
         if (l.Mapping == nil || (!l.Mapping.HasFilenames || !l.Mapping.HasLineNumbers)) {
             return false;
@@ -505,7 +505,7 @@ internal static bool compatibleValueTypes(ж<ValueType> Ꮡv1, ж<ValueType> Ꮡ
 } partial class profile_package {
 
 // Copy makes a fully independent copy of a profile.
-[GoMethodBody("Copy")] internal static ж<Profile> Copyᴍ(ж<Profile> Ꮡp) {
+internal static ж<Profile> Copy⁔(/*this*/ ж<Profile> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.preEncode();
@@ -538,7 +538,7 @@ internal static bool compatibleValueTypes(ж<ValueType> Ꮡv1, ж<ValueType> Ꮡ
 // Demangle attempts to demangle and optionally simplify any function
 // names referenced in the profile. It works on a best-effort basis:
 // it will silently preserve the original names in case of any errors.
-[GoMethodBody("Demangle")] internal static error Demangleᴍ(ref Profile p, Func<slice<@string>, (map<@string, @string>, error)> d) {
+internal static error Demangle⁔(/*this*/ ref Profile p, Func<slice<@string>, (map<@string, @string>, error)> d) {
     // Collect names to demangle.
     slice<@string> names = default;
     foreach (var (_, fn) in range(p.Function)) {
@@ -559,12 +559,12 @@ internal static bool compatibleValueTypes(ж<ValueType> Ꮡv1, ж<ValueType> Ꮡ
 }
 
 // Empty reports whether the profile contains no samples.
-[GoMethodBody("Empty")] internal static bool Emptyᴍ(ref Profile p) {
+internal static bool Empty⁔(/*this*/ ref Profile p) {
     return len(p.Sample) == 0;
 }
 
 // Scale multiplies all sample values in a profile by a constant.
-[GoMethodBody("Scale")] internal static void Scaleᴍ(ref Profile p, float64 ratio) {
+internal static void Scale⁔(/*this*/ ref Profile p, float64 ratio) {
     if (ratio == 1D) {
         return;
     }
@@ -576,7 +576,7 @@ internal static bool compatibleValueTypes(ж<ValueType> Ꮡv1, ж<ValueType> Ꮡ
 }
 
 // ScaleN multiplies each sample values in a sample by a different amount.
-[GoMethodBody("ScaleN")] internal static error ScaleNᴍ(ref Profile p, slice<float64> ratios) {
+internal static error ScaleN⁔(/*this*/ ref Profile p, slice<float64> ratios) {
     if (len(p.SampleType) != len(ratios)) {
         return fmt.Errorf("mismatched scale ratios, got %d, want %d"u8, len(ratios), len(p.SampleType));
     }

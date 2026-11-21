@@ -69,7 +69,7 @@ public static (ж<DecapsulationKey768>, error) NewDecapsulationKey768(slice<byte
 // Bytes returns the decapsulation key as a 64-byte seed in the "d || z" form.
 //
 // The decapsulation key must be kept secret.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref DecapsulationKey768 dk) {
+internal static slice<byte> Bytes⁔(/*this*/ ref DecapsulationKey768 dk) {
     return dk.key.Bytes();
 }
 
@@ -77,13 +77,13 @@ public static (ж<DecapsulationKey768>, error) NewDecapsulationKey768(slice<byte
 // key. If the ciphertext is not valid, Decapsulate returns an error.
 //
 // The shared key must be kept secret.
-[GoMethodBody("Decapsulate")] internal static (slice<byte> sharedKey, error err) Decapsulateᴍ(ref DecapsulationKey768 dk, slice<byte> ciphertext) {
+internal static (slice<byte> sharedKey, error err) Decapsulate⁔(/*this*/ ref DecapsulationKey768 dk, slice<byte> ciphertext) {
     return dk.key.Decapsulate(ciphertext);
 }
 
 // EncapsulationKey returns the public encapsulation key necessary to produce
 // ciphertexts.
-[GoMethodBody("EncapsulationKey")] internal static ж<EncapsulationKey768> EncapsulationKeyᴍ(ref DecapsulationKey768 dk) {
+internal static ж<EncapsulationKey768> EncapsulationKey⁔(/*this*/ ref DecapsulationKey768 dk) {
     return Ꮡ(new EncapsulationKey768(dk.key.EncapsulationKey()));
 }
 
@@ -91,7 +91,7 @@ public static (ж<DecapsulationKey768>, error) NewDecapsulationKey768(slice<byte
 // [DecapsulationKey768.EncapsulationKey].
 //
 // It implements [crypto.Decapsulator].
-[GoMethodBody("Encapsulator")] internal static crypto.Encapsulator Encapsulatorᴍ(ref DecapsulationKey768 dk) {
+internal static crypto.Encapsulator Encapsulator⁔(/*this*/ ref DecapsulationKey768 dk) {
     return new EncapsulationKey768жEncapsulator(dk.EncapsulationKey());
 }
 
@@ -119,7 +119,7 @@ public static (ж<EncapsulationKey768>, error) NewEncapsulationKey768(slice<byte
 } partial class mlkem_package {
 
 // Bytes returns the encapsulation key as a byte slice.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref EncapsulationKey768 ek) {
+internal static slice<byte> Bytes⁔(/*this*/ ref EncapsulationKey768 ek) {
     return ek.key.Bytes();
 }
 
@@ -130,7 +130,7 @@ public static (ж<EncapsulationKey768>, error) NewEncapsulationKey768(slice<byte
 //
 // For testing, derandomized encapsulation is provided by the
 // [crypto/mlkem/mlkemtest] package.
-[GoMethodBody("Encapsulate")] internal static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulateᴍ(ref EncapsulationKey768 ek) {
+internal static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate⁔(/*this*/ ref EncapsulationKey768 ek) {
     return ek.key.Encapsulate();
 }
 
@@ -169,7 +169,7 @@ public static (ж<DecapsulationKey1024>, error) NewDecapsulationKey1024(slice<by
 // Bytes returns the decapsulation key as a 64-byte seed in the "d || z" form.
 //
 // The decapsulation key must be kept secret.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref DecapsulationKey1024 dk) {
+internal static slice<byte> Bytes⁔(/*this*/ ref DecapsulationKey1024 dk) {
     return dk.key.Bytes();
 }
 
@@ -177,13 +177,13 @@ public static (ж<DecapsulationKey1024>, error) NewDecapsulationKey1024(slice<by
 // key. If the ciphertext is not valid, Decapsulate returns an error.
 //
 // The shared key must be kept secret.
-[GoMethodBody("Decapsulate")] internal static (slice<byte> sharedKey, error err) Decapsulateᴍ(ref DecapsulationKey1024 dk, slice<byte> ciphertext) {
+internal static (slice<byte> sharedKey, error err) Decapsulate⁔(/*this*/ ref DecapsulationKey1024 dk, slice<byte> ciphertext) {
     return dk.key.Decapsulate(ciphertext);
 }
 
 // EncapsulationKey returns the public encapsulation key necessary to produce
 // ciphertexts.
-[GoMethodBody("EncapsulationKey")] internal static ж<EncapsulationKey1024> EncapsulationKeyᴍ(ref DecapsulationKey1024 dk) {
+internal static ж<EncapsulationKey1024> EncapsulationKey⁔(/*this*/ ref DecapsulationKey1024 dk) {
     return Ꮡ(new EncapsulationKey1024(dk.key.EncapsulationKey()));
 }
 
@@ -191,7 +191,7 @@ public static (ж<DecapsulationKey1024>, error) NewDecapsulationKey1024(slice<by
 // [DecapsulationKey1024.EncapsulationKey].
 //
 // It implements [crypto.Decapsulator].
-[GoMethodBody("Encapsulator")] internal static crypto.Encapsulator Encapsulatorᴍ(ref DecapsulationKey1024 dk) {
+internal static crypto.Encapsulator Encapsulator⁔(/*this*/ ref DecapsulationKey1024 dk) {
     return new EncapsulationKey1024жEncapsulator(dk.EncapsulationKey());
 }
 
@@ -219,7 +219,7 @@ public static (ж<EncapsulationKey1024>, error) NewEncapsulationKey1024(slice<by
 } partial class mlkem_package {
 
 // Bytes returns the encapsulation key as a byte slice.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref EncapsulationKey1024 ek) {
+internal static slice<byte> Bytes⁔(/*this*/ ref EncapsulationKey1024 ek) {
     return ek.key.Bytes();
 }
 
@@ -230,7 +230,7 @@ public static (ж<EncapsulationKey1024>, error) NewEncapsulationKey1024(slice<by
 //
 // For testing, derandomized encapsulation is provided by the
 // [crypto/mlkem/mlkemtest] package.
-[GoMethodBody("Encapsulate")] internal static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulateᴍ(ref EncapsulationKey1024 ek) {
+internal static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate⁔(/*this*/ ref EncapsulationKey1024 ek) {
     return ek.key.Encapsulate();
 }
 

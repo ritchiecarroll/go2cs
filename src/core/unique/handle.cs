@@ -28,7 +28,7 @@ partial struct Handle<T> {
 
 // Value returns a shallow copy of the T value that produced the Handle.
 // Value is safe for concurrent use by multiple goroutines.
-[GoMethodBody("Value")] internal static T Valueᴍ<T>(Handle<T> h) {
+internal static T Value⁔<T>(/*this*/ Handle<T> h) {
     return h.value.ValueSlot;
 }
 
@@ -80,6 +80,6 @@ partial struct uniqueMap<T> {
 
 // <GlyphForwarders> (scratch prototype: placed here, an alias of this file conflicts in package_info.cs)
 partial class uniqueᴛHandle {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static T Value<T>(this Handle<T> h) => unique_package.Valueᴍ<T>(h);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static T Value<T>(this Handle<T> h) => unique_package.Value⁔<T>(h);
 }
 // </GlyphForwarders>

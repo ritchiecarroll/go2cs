@@ -91,7 +91,7 @@ internal static ref Δsync.Once localOnce => ref ((StaticBox<Δsync.Once>)Ꮡloc
 
 } partial class time_package {
 
-[GoMethodBody("get")] internal static ж<Location> getᴍ(ж<Location> Ꮡl) {
+internal static ж<Location> get⁔(/*this*/ ж<Location> Ꮡl) {
     if (Ꮡl == nil) {
         return ᏑutcLoc;
     }
@@ -103,7 +103,7 @@ internal static ref Δsync.Once localOnce => ref ((StaticBox<Δsync.Once>)Ꮡloc
 
 // String returns a descriptive name for the time zone information,
 // corresponding to the name argument to [LoadLocation] or [FixedZone].
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Location> Ꮡl) {
+internal static @string String⁔(/*this*/ ж<Location> Ꮡl) {
     return Ꮡl.get().name;
 }
 
@@ -148,8 +148,8 @@ internal static ж<Location> fixedZone(@string name, nint offset) {
 } partial class time_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string utcˢᴍLocation => ref utcˢᵇᴍLocation;
-private static readonly @string utcˢᵇᴍLocation = "UTC"u8;
+internal static ref readonly @string utcˢ⁔Location => ref utcˢᵇ⁔Location;
+private static readonly @string utcˢᵇ⁔Location = "UTC"u8;
 
 // lookup returns information about the time zone in use at an
 // instant in time expressed as seconds since January 1, 1970 00:00:00 UTC.
@@ -158,7 +158,7 @@ private static readonly @string utcˢᵇᴍLocation = "UTC"u8;
 // the start and end times bracketing sec when that zone is in effect,
 // the offset in seconds east of UTC (such as -5*60*60), and whether
 // the daylight savings is being observed at that time.
-[GoMethodBody("lookup")] internal static (@string name, nint offset, int64 start, int64 end, bool isDST) lookupᴍ(ж<Location> Ꮡl, int64 sec) {
+internal static (@string name, nint offset, int64 start, int64 end, bool isDST) lookup⁔(/*this*/ ж<Location> Ꮡl, int64 sec) {
     @string name = default;
     nint offset = default;
     int64 start = default;
@@ -169,7 +169,7 @@ private static readonly @string utcˢᵇᴍLocation = "UTC"u8;
     Ꮡl = Ꮡl.get(); l = ref Ꮡl.DerefOrNull();
 
     if (len(l.zone) == 0) {
-        name = utcˢᴍLocation;
+        name = utcˢ⁔Location;
         offset = 0;
         start = alpha;
         end = omega;
@@ -249,7 +249,7 @@ private static readonly @string utcˢᵇᴍLocation = "UTC"u8;
 //  3. Otherwise, use the first zone that is not daylight time, if
 //     there is one.
 //  4. Otherwise, use the first zone.
-[GoMethodBody("lookupFirstZone")] internal static nint lookupFirstZoneᴍ(ref Location l) {
+internal static nint lookupFirstZone⁔(/*this*/ ref Location l) {
     // Case 1.
     if (!l.firstZoneUsed()) {
         return 0;
@@ -277,7 +277,7 @@ private static readonly @string utcˢᵇᴍLocation = "UTC"u8;
 
 // firstZoneUsed reports whether the first zone is used by some
 // transition.
-[GoMethodBody("firstZoneUsed")] internal static bool firstZoneUsedᴍ(ref Location l) {
+internal static bool firstZoneUsed⁔(/*this*/ ref Location l) {
     foreach (var (_, tx) in range(l.tx)) {
         if (tx.index == 0) {
             return true;
@@ -642,7 +642,7 @@ internal static nint tzruleTime(nint year, rule r, nint off) {
 // lookupName returns information about the time zone with
 // the given name (such as "EST") at the given pseudo-Unix time
 // (what the given time of day would be in UTC).
-[GoMethodBody("lookupName")] internal static (nint offset, bool ok) lookupNameᴍ(ж<Location> Ꮡl, @string name, int64 unix) {
+internal static (nint offset, bool ok) lookupName⁔(/*this*/ ж<Location> Ꮡl, @string name, int64 unix) {
     nint offset = default;
     bool ok = default;
     ref var l = ref Ꮡl.DerefOrNull();

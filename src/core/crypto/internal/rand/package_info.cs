@@ -63,12 +63,15 @@ using static go.crypto.@internal.rand_package;
 
 namespace go.crypto.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.@internal;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using static rand_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("rand")]
 public static partial class rand_package
@@ -105,11 +108,11 @@ public static partial class rand_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(rand_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class randᴛreader;
+[GoMethodHost(typeof(rand_package.reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class randᴛreader;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class randᴛreader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this reader r, slice<byte> b) => rand_package.Readᴍ(r, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this reader r, slice<byte> b) => rand_package.Read⁔(r, b);
 }
 // </GlyphForwarders>

@@ -34,7 +34,7 @@ partial struct nafLookupTable8 {
 // Constructors.
 
 // Builds a lookup table at runtime. Fast.
-[GoMethodBody("FromP3")] internal static void FromP3ᴍ(ref projLookupTable v, ж<Point> q) {
+internal static void FromP3⁔(/*this*/ ref projLookupTable v, ж<Point> q) {
     // Goal: v.points[i] = (i+1)*Q, i.e., Q, 2Q, ..., 8Q
     // This allows lookup of -8Q, ..., -Q, 0, Q, ..., 8Q
     Ꮡ(v.points, 0).FromP3(q);
@@ -51,7 +51,7 @@ partial struct nafLookupTable8 {
 } partial class edwards25519_package {
 
 // This is not optimised for speed; fixed-base tables should be precomputed.
-[GoMethodBody("FromP3")] internal static void FromP3ᴍ(ref affineLookupTable v, ж<Point> q) {
+internal static void FromP3⁔(/*this*/ ref affineLookupTable v, ж<Point> q) {
     // Goal: v.points[i] = (i+1)*Q, i.e., Q, 2Q, ..., 8Q
     // This allows lookup of -8Q, ..., -Q, 0, Q, ..., 8Q
     Ꮡ(v.points, 0).FromP3(q);
@@ -66,7 +66,7 @@ partial struct nafLookupTable8 {
 } partial class edwards25519_package {
 
 // Builds a lookup table at runtime. Fast.
-[GoMethodBody("FromP3")] internal static void FromP3ᴍ(ref nafLookupTable5 v, ж<Point> q) {
+internal static void FromP3⁔(/*this*/ ref nafLookupTable5 v, ж<Point> q) {
     // Goal: v.points[i] = (2*i+1)*Q, i.e., Q, 3Q, 5Q, ..., 15Q
     // This allows lookup of -15Q, ..., -3Q, -Q, 0, Q, 3Q, ..., 15Q
     Ꮡ(v.points, 0).FromP3(q);
@@ -82,7 +82,7 @@ partial struct nafLookupTable8 {
 } partial class edwards25519_package {
 
 // This is not optimised for speed; fixed-base tables should be precomputed.
-[GoMethodBody("FromP3")] internal static void FromP3ᴍ(ref nafLookupTable8 v, ж<Point> q) {
+internal static void FromP3⁔(/*this*/ ref nafLookupTable8 v, ж<Point> q) {
     Ꮡ(v.points, 0).FromP3(q);
     ref var q2 = ref heap<Point>(new Point(), out var Ꮡq2);
     Ꮡq2.Add(q, q);
@@ -98,7 +98,7 @@ partial struct nafLookupTable8 {
 // Selectors.
 
 // Set dest to x*Q, where -8 <= x <= 8, in constant time.
-[GoMethodBody("SelectInto")] internal static void SelectIntoᴍ(ref projLookupTable v, ж<projCached> dest, int8 x) {
+internal static void SelectInto⁔(/*this*/ ref projLookupTable v, ж<projCached> dest, int8 x) {
     // Compute xabs = |x|
     var xmask = (int8)((x >> 7));
     var xabs = (uint8)((int8)((x + xmask) ^ xmask));
@@ -116,7 +116,7 @@ partial struct nafLookupTable8 {
 } partial class edwards25519_package {
 
 // Set dest to x*Q, where -8 <= x <= 8, in constant time.
-[GoMethodBody("SelectInto")] internal static void SelectIntoᴍ(ref affineLookupTable v, ж<affineCached> dest, int8 x) {
+internal static void SelectInto⁔(/*this*/ ref affineLookupTable v, ж<affineCached> dest, int8 x) {
     // Compute xabs = |x|
     var xmask = (int8)((x >> 7));
     var xabs = (uint8)((int8)((x + xmask) ^ xmask));
@@ -134,7 +134,7 @@ partial struct nafLookupTable8 {
 } partial class edwards25519_package {
 
 // Given odd x with 0 < x < 2^4, return x*Q (in variable time).
-[GoMethodBody("SelectInto")] internal static void SelectIntoᴍ(ref nafLookupTable5 v, ж<projCached> Ꮡdest, int8 x) {
+internal static void SelectInto⁔(/*this*/ ref nafLookupTable5 v, ж<projCached> Ꮡdest, int8 x) {
     ref var dest = ref Ꮡdest.DerefOrNull();
 
     dest = v.points[(int8)(x / 2)];
@@ -143,7 +143,7 @@ partial struct nafLookupTable8 {
 } partial class edwards25519_package {
 
 // Given odd x with 0 < x < 2^7, return x*Q (in variable time).
-[GoMethodBody("SelectInto")] internal static void SelectIntoᴍ(ref nafLookupTable8 v, ж<affineCached> Ꮡdest, int8 x) {
+internal static void SelectInto⁔(/*this*/ ref nafLookupTable8 v, ж<affineCached> Ꮡdest, int8 x) {
     ref var dest = ref Ꮡdest.DerefOrNull();
 
     dest = v.points[(int8)(x / 2)];

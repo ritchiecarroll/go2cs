@@ -240,7 +240,7 @@ internal static Token additional_end => 89;
 // token character sequence (e.g., for the token [ADD], the string is
 // "+"). For all other tokens the string corresponds to the token
 // constant name (e.g. for the token [IDENT], the string is "IDENT").
-[GoMethodBody("String")] internal static @string Stringᴍ(Token tok) {
+internal static @string String⁔(/*this*/ Token tok) {
     @string s = ""u8;
     if (0 <= tok && tok < ((Token)len(tokens))) {
         s = tokens[tok];
@@ -267,7 +267,7 @@ public static UntypedInt HighestPrec => 7;
 // Precedence returns the operator precedence of the binary
 // operator op. If op is not a binary operator, the result
 // is LowestPrecedence.
-[GoMethodBody("Precedence")] internal static nint Precedenceᴍ(Token op) {
+internal static nint Precedence⁔(/*this*/ Token op) {
     switch (op) {
     case var ᴛ when ᴛ == LOR: {
         return 1;
@@ -312,17 +312,17 @@ public static Token Lookup(@string ident) {
 
 // IsLiteral returns true for tokens corresponding to identifiers
 // and basic type literals; it returns false otherwise.
-[GoMethodBody("IsLiteral")] internal static bool IsLiteralᴍ(Token tok) { return literal_beg < tok && tok < literal_end; }
+internal static bool IsLiteral⁔(/*this*/ Token tok) { return literal_beg < tok && tok < literal_end; }
 
 // IsOperator returns true for tokens corresponding to operators and
 // delimiters; it returns false otherwise.
-[GoMethodBody("IsOperator")] internal static bool IsOperatorᴍ(Token tok) {
+internal static bool IsOperator⁔(/*this*/ Token tok) {
     return (operator_beg < tok && tok < operator_end) || tok == TILDE;
 }
 
 // IsKeyword returns true for tokens corresponding to keywords;
 // it returns false otherwise.
-[GoMethodBody("IsKeyword")] internal static bool IsKeywordᴍ(Token tok) { return keyword_beg < tok && tok < keyword_end; }
+internal static bool IsKeyword⁔(/*this*/ Token tok) { return keyword_beg < tok && tok < keyword_end; }
 
 } partial class token_package {
 

@@ -27,7 +27,7 @@ partial struct netFD {
 
 } partial class net_package {
 
-[GoMethodBody("name")] internal static @string nameᴍ(ref netFD fd) {
+internal static @string name⁔(/*this*/ ref netFD fd) {
     @string ls = default;
     @string rs = default;
     if (fd.laddr != nil) {
@@ -39,7 +39,7 @@ partial struct netFD {
     return fd.net + ":"u8 + ls + "->"u8 + rs;
 }
 
-[GoMethodBody("setAddr")] internal static void setAddrᴍ(ж<netFD> Ꮡfd, Addr laddr, Addr raddr) {
+internal static void setAddr⁔(/*this*/ ж<netFD> Ꮡfd, Addr laddr, Addr raddr) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     fd.laddr = laddr;
@@ -48,31 +48,31 @@ partial struct netFD {
     runtime.SetFinalizer(Ꮡfd.OrTypedNil(), ((Func<ж<netFD>, error>)(netᴛnetFD.Close)));
 }
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<netFD> Ꮡfd) {
+internal static error Close⁔(/*this*/ ж<netFD> Ꮡfd) {
     // TODO Replace with runtime.AddCleanup.
     runtime.SetFinalizer(Ꮡfd.OrTypedNil(), default);
     return Ꮡfd.Ꮡpfd.Close();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string shutdownˢᴍnetFD => ref shutdownˢᵇᴍnetFD;
-private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
+internal static ref readonly @string shutdownˢ⁔netFD => ref shutdownˢᵇ⁔netFD;
+private static readonly @string shutdownˢᵇ⁔netFD = "shutdown"u8;
 
-[GoMethodBody("shutdown")] internal static error shutdownᴍ(ж<netFD> Ꮡfd, nint how) {
+internal static error shutdown⁔(/*this*/ ж<netFD> Ꮡfd, nint how) {
     var err = Ꮡfd.Ꮡpfd.Shutdown(how);
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
-    return wrapSyscallError(shutdownˢᴍnetFD, err);
+    return wrapSyscallError(shutdownˢ⁔netFD, err);
 }
 
-[GoMethodBody("closeRead")] internal static error closeReadᴍ(ж<netFD> Ꮡfd) {
+internal static error closeRead⁔(/*this*/ ж<netFD> Ꮡfd) {
     return Ꮡfd.shutdown(syscall.SHUT_RD);
 }
 
-[GoMethodBody("closeWrite")] internal static error closeWriteᴍ(ж<netFD> Ꮡfd) {
+internal static error closeWrite⁔(/*this*/ ж<netFD> Ꮡfd) {
     return Ꮡfd.shutdown(syscall.SHUT_WR);
 }
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ж<netFD> Ꮡfd, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ж<netFD> Ꮡfd, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -81,7 +81,7 @@ private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
     return (n, wrapSyscallError(readSyscallName, err));
 }
 
-[GoMethodBody("readFrom")] internal static (nint n, syscall.Sockaddr sa, error err) readFromᴍ(ж<netFD> Ꮡfd, slice<byte> p) {
+internal static (nint n, syscall.Sockaddr sa, error err) readFrom⁔(/*this*/ ж<netFD> Ꮡfd, slice<byte> p) {
     nint n = default;
     syscall.Sockaddr sa = default;
     error err = default;
@@ -90,7 +90,7 @@ private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
     return (n, sa, wrapSyscallError(readFromSyscallName, err));
 }
-[GoMethodBody("readFromInet4")] internal static (nint n, error err) readFromInet4ᴍ(ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet4> from) {
+internal static (nint n, error err) readFromInet4⁔(/*this*/ ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet4> from) {
     nint n = default;
     error err = default;
 
@@ -99,7 +99,7 @@ private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
     return (n, wrapSyscallError(readFromSyscallName, err));
 }
 
-[GoMethodBody("readFromInet6")] internal static (nint n, error err) readFromInet6ᴍ(ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet6> from) {
+internal static (nint n, error err) readFromInet6⁔(/*this*/ ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet6> from) {
     nint n = default;
     error err = default;
 
@@ -108,7 +108,7 @@ private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
     return (n, wrapSyscallError(readFromSyscallName, err));
 }
 
-[GoMethodBody("readMsg")] internal static (nint n, nint oobn, nint retflags, syscall.Sockaddr sa, error err) readMsgᴍ(ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags) {
+internal static (nint n, nint oobn, nint retflags, syscall.Sockaddr sa, error err) readMsg⁔(/*this*/ ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags) {
     nint n = default;
     nint oobn = default;
     nint retflags = default;
@@ -120,7 +120,7 @@ private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
     return (n, oobn, retflags, sa, wrapSyscallError(readMsgSyscallName, err));
 }
 
-[GoMethodBody("readMsgInet4")] internal static (nint n, nint oobn, nint retflags, error err) readMsgInet4ᴍ(ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<syscall.SockaddrInet4> sa) {
+internal static (nint n, nint oobn, nint retflags, error err) readMsgInet4⁔(/*this*/ ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<syscall.SockaddrInet4> sa) {
     nint n = default;
     nint oobn = default;
     nint retflags = default;
@@ -131,7 +131,7 @@ private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
     return (n, oobn, retflags, wrapSyscallError(readMsgSyscallName, err));
 }
 
-[GoMethodBody("readMsgInet6")] internal static (nint n, nint oobn, nint retflags, error err) readMsgInet6ᴍ(ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<syscall.SockaddrInet6> sa) {
+internal static (nint n, nint oobn, nint retflags, error err) readMsgInet6⁔(/*this*/ ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<syscall.SockaddrInet6> sa) {
     nint n = default;
     nint oobn = default;
     nint retflags = default;
@@ -142,7 +142,7 @@ private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
     return (n, oobn, retflags, wrapSyscallError(readMsgSyscallName, err));
 }
 
-[GoMethodBody("Write")] internal static (nint nn, error err) Writeᴍ(ж<netFD> Ꮡfd, slice<byte> p) {
+internal static (nint nn, error err) Write⁔(/*this*/ ж<netFD> Ꮡfd, slice<byte> p) {
     nint nn = default;
     error err = default;
 
@@ -151,7 +151,7 @@ private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
     return (nn, wrapSyscallError(writeSyscallName, err));
 }
 
-[GoMethodBody("writeTo")] internal static (nint n, error err) writeToᴍ(ж<netFD> Ꮡfd, slice<byte> p, syscall.Sockaddr sa) {
+internal static (nint n, error err) writeTo⁔(/*this*/ ж<netFD> Ꮡfd, slice<byte> p, syscall.Sockaddr sa) {
     nint n = default;
     error err = default;
 
@@ -160,7 +160,7 @@ private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
     return (n, wrapSyscallError(writeToSyscallName, err));
 }
 
-[GoMethodBody("writeToInet4")] internal static (nint n, error err) writeToInet4ᴍ(ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet4> sa) {
+internal static (nint n, error err) writeToInet4⁔(/*this*/ ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet4> sa) {
     nint n = default;
     error err = default;
 
@@ -169,7 +169,7 @@ private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
     return (n, wrapSyscallError(writeToSyscallName, err));
 }
 
-[GoMethodBody("writeToInet6")] internal static (nint n, error err) writeToInet6ᴍ(ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet6> sa) {
+internal static (nint n, error err) writeToInet6⁔(/*this*/ ж<netFD> Ꮡfd, slice<byte> p, ж<syscall.SockaddrInet6> sa) {
     nint n = default;
     error err = default;
 
@@ -178,7 +178,7 @@ private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
     return (n, wrapSyscallError(writeToSyscallName, err));
 }
 
-[GoMethodBody("writeMsg")] internal static (nint n, nint oobn, error err) writeMsgᴍ(ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, syscall.Sockaddr sa) {
+internal static (nint n, nint oobn, error err) writeMsg⁔(/*this*/ ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, syscall.Sockaddr sa) {
     nint n = default;
     nint oobn = default;
     error err = default;
@@ -188,7 +188,7 @@ private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
     return (n, oobn, wrapSyscallError(writeMsgSyscallName, err));
 }
 
-[GoMethodBody("writeMsgInet4")] internal static (nint n, nint oobn, error err) writeMsgInet4ᴍ(ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<syscall.SockaddrInet4> sa) {
+internal static (nint n, nint oobn, error err) writeMsgInet4⁔(/*this*/ ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<syscall.SockaddrInet4> sa) {
     nint n = default;
     nint oobn = default;
     error err = default;
@@ -198,7 +198,7 @@ private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
     return (n, oobn, wrapSyscallError(writeMsgSyscallName, err));
 }
 
-[GoMethodBody("writeMsgInet6")] internal static (nint n, nint oobn, error err) writeMsgInet6ᴍ(ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<syscall.SockaddrInet6> sa) {
+internal static (nint n, nint oobn, error err) writeMsgInet6⁔(/*this*/ ж<netFD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<syscall.SockaddrInet6> sa) {
     nint n = default;
     nint oobn = default;
     error err = default;
@@ -208,15 +208,15 @@ private static readonly @string shutdownˢᵇᴍnetFD = "shutdown"u8;
     return (n, oobn, wrapSyscallError(writeMsgSyscallName, err));
 }
 
-[GoMethodBody("SetDeadline")] internal static error SetDeadlineᴍ(ж<netFD> Ꮡfd, time.Time t) {
+internal static error SetDeadline⁔(/*this*/ ж<netFD> Ꮡfd, time.Time t) {
     return Ꮡfd.Ꮡpfd.SetDeadline(t);
 }
 
-[GoMethodBody("SetReadDeadline")] internal static error SetReadDeadlineᴍ(ж<netFD> Ꮡfd, time.Time t) {
+internal static error SetReadDeadline⁔(/*this*/ ж<netFD> Ꮡfd, time.Time t) {
     return Ꮡfd.Ꮡpfd.SetReadDeadline(t);
 }
 
-[GoMethodBody("SetWriteDeadline")] internal static error SetWriteDeadlineᴍ(ж<netFD> Ꮡfd, time.Time t) {
+internal static error SetWriteDeadline⁔(/*this*/ ж<netFD> Ꮡfd, time.Time t) {
     return Ꮡfd.Ꮡpfd.SetWriteDeadline(t);
 }
 

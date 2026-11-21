@@ -116,7 +116,7 @@ partial struct unwinder {
 // iterator on gp's innermost frame. gp must not be the current G.
 //
 // A single unwinder can be reused for multiple unwinds.
-[GoMethodBody("init")] internal static void initᴍ(ж<unwinder> Ꮡu, ж<g> gp, unwindFlags flags) {
+internal static void init⁔(/*this*/ ж<unwinder> Ꮡu, ж<g> gp, unwindFlags flags) {
     // Implementation note: This starts the iterator on the first frame and we
     // provide a "valid" method. Alternatively, this could start in a "before
     // the first frame" state and "next" could return whether it was able to
@@ -127,12 +127,12 @@ partial struct unwinder {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cannotTraceUserGoroutineˢᴍunwinder => ref cannotTraceUserGoroutineˢᵇᴍunwinder;
-private static readonly @string cannotTraceUserGoroutineˢᵇᴍunwinder = "cannot trace user goroutine on its own stack"u8;
-internal static ref readonly @string unknownPcˢᴍunwinder => ref unknownPcˢᵇᴍunwinder;
-private static readonly @string unknownPcˢᵇᴍunwinder = "unknown pc"u8;
+internal static ref readonly @string cannotTraceUserGoroutineˢ⁔unwinder => ref cannotTraceUserGoroutineˢᵇ⁔unwinder;
+private static readonly @string cannotTraceUserGoroutineˢᵇ⁔unwinder = "cannot trace user goroutine on its own stack"u8;
+internal static ref readonly @string unknownPcˢ⁔unwinder => ref unknownPcˢᵇ⁔unwinder;
+private static readonly @string unknownPcˢᵇ⁔unwinder = "unknown pc"u8;
 
-[GoMethodBody("initAt")] internal static void initAtᴍ(ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, uintptr lr0, ж<g> Ꮡgp, unwindFlags flags) {
+internal static void initAt⁔(/*this*/ ж<unwinder> Ꮡu, uintptr pc0, uintptr sp0, uintptr lr0, ж<g> Ꮡgp, unwindFlags flags) {
     ref var u = ref Ꮡu.DerefOrNull();
     ref var gp = ref Ꮡgp.DerefOrNull();
 
@@ -151,7 +151,7 @@ private static readonly @string unknownPcˢᵇᴍunwinder = "unknown pc"u8;
         // accepts an sp for the current goroutine (typically obtained by
         // calling GetCallerSP) must not run on that goroutine's stack but
         // instead on the g0 stack.
-        @throw(cannotTraceUserGoroutineˢᴍunwinder);
+        @throw(cannotTraceUserGoroutineˢ⁔unwinder);
     }
 
     if (pc0 == ~(uintptr)0 && sp0 == ~(uintptr)0) { // Signal to fetch saved values from gp.
@@ -210,7 +210,7 @@ private static readonly @string unknownPcˢᵇᴍunwinder = "unknown pc"u8;
             tracebackHexdump(gp.stack, Ꮡframe, 0);
         }
         if ((unwindFlags)(flags & ((unwindFlags)(unwindPrintErrors | unwindSilentErrors))) == 0) {
-            @throw(unknownPcˢᴍunwinder);
+            @throw(unknownPcˢ⁔unwinder);
         }
         u = new unwinder();
         return;
@@ -230,13 +230,13 @@ private static readonly @string unknownPcˢᵇᴍunwinder = "unknown pc"u8;
     Ꮡu.resolveInternal(true, isSyscall);
 }
 
-[GoMethodBody("valid")] internal static bool validᴍ(ref unwinder u) {
+internal static bool valid⁔(/*this*/ ref unwinder u) {
     return u.frame.pc != 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tracebackˢᴍunwinder => ref tracebackˢᵇᴍunwinder;
-private static readonly @string tracebackˢᵇᴍunwinder = "traceback"u8;
+internal static ref readonly @string tracebackˢ⁔unwinder => ref tracebackˢᵇ⁔unwinder;
+private static readonly @string tracebackˢᵇ⁔unwinder = "traceback"u8;
 
 // resolveInternal fills in u.frame based on u.frame.fn, pc, and sp.
 //
@@ -259,7 +259,7 @@ private static readonly @string tracebackˢᵇᴍunwinder = "traceback"u8;
 // frame state to follow that stack jump.
 //
 // This is internal to unwinder.
-[GoMethodBody("resolveInternal")] internal static void resolveInternalᴍ(ж<unwinder> Ꮡu, bool innermost, bool isSyscall) {
+internal static void resolveInternal⁔(/*this*/ ж<unwinder> Ꮡu, bool innermost, bool isSyscall) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var frame = Ꮡu.Ꮡframe;
@@ -377,7 +377,7 @@ private static readonly @string tracebackˢᵇᴍunwinder = "traceback"u8;
         //  F   F   T  | ignore SPWrite
         if ((unwindFlags)(u.flags & ((unwindFlags)(unwindPrintErrors | unwindSilentErrors))) == 0 && !innermost) {
             println((@string)"traceback: unexpected SPWRITE function", funcname(f));
-            @throw(tracebackˢᴍunwinder);
+            @throw(tracebackˢ⁔unwinder);
         }
         frame.lr = 0;
     } else {
@@ -461,12 +461,12 @@ internal static bool isInjectedCall(abi.FuncID id) {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownCallerPcˢᴍunwinder => ref unknownCallerPcˢᵇᴍunwinder;
-private static readonly @string unknownCallerPcˢᵇᴍunwinder = "unknown caller pc"u8;
-internal static ref readonly @string tracebackStuckˢᴍunwinder => ref tracebackStuckˢᵇᴍunwinder;
-private static readonly @string tracebackStuckˢᵇᴍunwinder = "traceback stuck"u8;
+internal static ref readonly @string unknownCallerPcˢ⁔unwinder => ref unknownCallerPcˢᵇ⁔unwinder;
+private static readonly @string unknownCallerPcˢᵇ⁔unwinder = "unknown caller pc"u8;
+internal static ref readonly @string tracebackStuckˢ⁔unwinder => ref tracebackStuckˢᵇ⁔unwinder;
+private static readonly @string tracebackStuckˢᵇ⁔unwinder = "traceback stuck"u8;
 
-[GoMethodBody("next")] internal static void nextᴍ(ж<unwinder> Ꮡu) {
+internal static void next⁔(/*this*/ ж<unwinder> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     var frame = Ꮡu.Ꮡframe;
@@ -498,7 +498,7 @@ private static readonly @string tracebackStuckˢᵇᴍunwinder = "traceback stuc
             tracebackHexdump((~gp).stack, frame, 0);
         }
         if (fail) {
-            @throw(unknownCallerPcˢᴍunwinder);
+            @throw(unknownCallerPcˢ⁔unwinder);
         }
         frame.lr = 0;
         u.finishInternal();
@@ -509,7 +509,7 @@ private static readonly @string tracebackStuckˢᵇᴍunwinder = "traceback stuc
         // If the next frame is identical to the current frame, we cannot make progress.
         print((@string)"runtime: traceback stuck. pc=", (hex)(uint64)frame.pc, (@string)" sp=", (hex)(uint64)frame.sp, (@string)"\n");
         tracebackHexdump((~gp).stack, frame, frame.sp);
-        @throw(tracebackStuckˢᴍunwinder);
+        @throw(tracebackStuckˢ⁔unwinder);
     }
 
     var injectedCall = isInjectedCall(f.funcID);
@@ -546,13 +546,13 @@ private static readonly @string tracebackStuckˢᵇᴍunwinder = "traceback stuc
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tracebackDidNotUnwindˢᴍunwinder => ref tracebackDidNotUnwindˢᵇᴍunwinder;
-private static readonly @string tracebackDidNotUnwindˢᵇᴍunwinder = "traceback did not unwind completely"u8;
+internal static ref readonly @string tracebackDidNotUnwindˢ⁔unwinder => ref tracebackDidNotUnwindˢᵇ⁔unwinder;
+private static readonly @string tracebackDidNotUnwindˢᵇ⁔unwinder = "traceback did not unwind completely"u8;
 
 // finishInternal is an unwinder-internal helper called after the stack has been
 // exhausted. It sets the unwinder to an invalid state and checks that it
 // successfully unwound the entire stack.
-[GoMethodBody("finishInternal")] internal static void finishInternalᴍ(ref unwinder u) {
+internal static void finishInternal⁔(/*this*/ ref unwinder u) {
     u.frame.pc = 0;
 
     // Note that panic != nil is okay here: there can be leftover panics,
@@ -599,7 +599,7 @@ private static readonly @string tracebackDidNotUnwindˢᵇᴍunwinder = "traceba
     if ((unwindFlags)(u.flags & ((unwindFlags)(unwindPrintErrors | unwindSilentErrors))) == 0 && u.frame.sp != (~gp).stktopsp) {
         print((@string)"runtime: g", (~gp).goid, (@string)": frame.sp=", (hex)(uint64)u.frame.sp, (@string)" top=", (hex)(uint64)(~gp).stktopsp, (@string)"\n");
         print((@string)"\tstack=[", (hex)(uint64)(~gp).stack.lo, (@string)"-", (hex)(uint64)(~gp).stack.hi, (@string)"\n");
-        @throw(tracebackDidNotUnwindˢᴍunwinder);
+        @throw(tracebackDidNotUnwindˢ⁔unwinder);
     }
 }
 
@@ -613,7 +613,7 @@ private static readonly @string tracebackDidNotUnwindˢᵇᴍunwinder = "traceba
 // frame.pc can be at function entry when the frame is initialized without
 // actually running code, like in runtime.mstart, in which case this returns
 // frame.pc because that's the best we can do.
-[GoMethodBody("symPC")] internal static uintptr symPCᴍ(ref unwinder u) {
+internal static uintptr symPC⁔(/*this*/ ref unwinder u) {
     if ((unwindFlags)(u.flags & unwindTrap) == 0 && u.frame.pc > u.frame.fn.entry()) {
         // Regular call.
         return u.frame.pc - 1;
@@ -626,7 +626,7 @@ private static readonly @string tracebackDidNotUnwindˢᵇᴍunwinder = "traceba
 // the registered cgo unwinder. It returns the number of PCs written to pcBuf.
 // If the current frame is not a cgo frame or if there's no registered cgo
 // unwinder, it returns 0.
-[GoMethodBody("cgoCallers")] internal static nint cgoCallersᴍ(ref unwinder u, slice<uintptr> pcBuf) {
+internal static nint cgoCallers⁔(/*this*/ ref unwinder u, slice<uintptr> pcBuf) {
     if (!cgoTracebackAvailable() || u.frame.fn.funcID != abi.FuncID_cgocallback || u.cgoCtxt < 0) {
         // We don't have a cgo unwinder (typical case), or we do but we're not
         // in a cgo frame or we're out of cgo context.

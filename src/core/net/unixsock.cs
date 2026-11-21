@@ -27,30 +27,30 @@ partial struct UnixAddr {
 
 // Network returns the address's network name, "unix", "unixgram" or
 // "unixpacket".
-[GoMethodBody("Network")] internal static @string Networkᴍ(ref UnixAddr a) {
+internal static @string Network⁔(/*this*/ ref UnixAddr a) {
     return a.Net;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢᴍUnixAddr => ref nilˢᵇᴍUnixAddr;
-private static readonly @string nilˢᵇᴍUnixAddr = "<nil>"u8;
+internal static ref readonly @string nilˢ⁔UnixAddr => ref nilˢᵇ⁔UnixAddr;
+private static readonly @string nilˢᵇ⁔UnixAddr = "<nil>"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<UnixAddr> Ꮡa) {
+internal static @string String⁔(/*this*/ ж<UnixAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
-        return nilˢᴍUnixAddr;
+        return nilˢ⁔UnixAddr;
     }
     return a.Name;
 }
 
-[GoMethodBody("isWildcard")] internal static bool isWildcardᴍ(ж<UnixAddr> Ꮡa) {
+internal static bool isWildcard⁔(/*this*/ ж<UnixAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     return Ꮡa == nil || a.Name == ""u8;
 }
 
-[GoMethodBody("opAddr")] internal static Addr opAddrᴍ(ж<UnixAddr> Ꮡa) {
+internal static Addr opAddr⁔(/*this*/ ж<UnixAddr> Ꮡa) {
     if (Ꮡa == nil) {
         return default;
     }
@@ -85,7 +85,7 @@ partial struct UnixConn {
 
 // SyscallConn returns a raw network connection.
 // This implements the [syscall.Conn] interface.
-[GoMethodBody("SyscallConn")] internal static (syscall.RawConn, error) SyscallConnᴍ(ж<UnixConn> Ꮡc) {
+internal static (syscall.RawConn, error) SyscallConn⁔(/*this*/ ж<UnixConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -96,7 +96,7 @@ partial struct UnixConn {
 
 // CloseRead shuts down the reading side of the Unix domain connection.
 // Most callers should just use [UnixConn.Close].
-[GoMethodBody("CloseRead")] internal static error CloseReadᴍ(ж<UnixConn> Ꮡc) {
+internal static error CloseRead⁔(/*this*/ ж<UnixConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -110,7 +110,7 @@ partial struct UnixConn {
 
 // CloseWrite shuts down the writing side of the Unix domain connection.
 // Most callers should just use [UnixConn.Close].
-[GoMethodBody("CloseWrite")] internal static error CloseWriteᴍ(ж<UnixConn> Ꮡc) {
+internal static error CloseWrite⁔(/*this*/ ж<UnixConn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -123,7 +123,7 @@ partial struct UnixConn {
 }
 
 // ReadFromUnix acts like [UnixConn.ReadFrom] but returns a [UnixAddr].
-[GoMethodBody("ReadFromUnix")] internal static (nint, ж<UnixAddr>, error) ReadFromUnixᴍ(ж<UnixConn> Ꮡc, slice<byte> b) {
+internal static (nint, ж<UnixAddr>, error) ReadFromUnix⁔(/*this*/ ж<UnixConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -137,7 +137,7 @@ partial struct UnixConn {
 }
 
 // ReadFrom implements the [PacketConn].ReadFrom method.
-[GoMethodBody("ReadFrom")] internal static (nint, Addr, error) ReadFromᴍ(ж<UnixConn> Ꮡc, slice<byte> b) {
+internal static (nint, Addr, error) ReadFrom⁔(/*this*/ ж<UnixConn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -160,7 +160,7 @@ partial struct UnixConn {
 //
 // Note that if len(b) == 0 and len(oob) > 0, this function will still
 // read (and discard) 1 byte from the connection.
-[GoMethodBody("ReadMsgUnix")] internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) ReadMsgUnixᴍ(ж<UnixConn> Ꮡc, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, ж<UnixAddr> addr, error err) ReadMsgUnix⁔(/*this*/ ж<UnixConn> Ꮡc, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -179,7 +179,7 @@ partial struct UnixConn {
 }
 
 // WriteToUnix acts like [UnixConn.WriteTo] but takes a [UnixAddr].
-[GoMethodBody("WriteToUnix")] internal static (nint, error) WriteToUnixᴍ(ж<UnixConn> Ꮡc, slice<byte> b, ж<UnixAddr> addr) {
+internal static (nint, error) WriteToUnix⁔(/*this*/ ж<UnixConn> Ꮡc, slice<byte> b, ж<UnixAddr> addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -193,7 +193,7 @@ partial struct UnixConn {
 }
 
 // WriteTo implements the [PacketConn].WriteTo method.
-[GoMethodBody("WriteTo")] internal static (nint, error) WriteToᴍ(ж<UnixConn> Ꮡc, slice<byte> b, Addr addr) {
+internal static (nint, error) WriteTo⁔(/*this*/ ж<UnixConn> Ꮡc, slice<byte> b, Addr addr) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(UnixConn.Ꮡconn).ok()) {
@@ -216,7 +216,7 @@ partial struct UnixConn {
 //
 // Note that if len(b) == 0 and len(oob) > 0, this function will still
 // write 1 byte to the connection.
-[GoMethodBody("WriteMsgUnix")] internal static (nint n, nint oobn, error err) WriteMsgUnixᴍ(ж<UnixConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<UnixAddr> addr) {
+internal static (nint n, nint oobn, error err) WriteMsgUnix⁔(/*this*/ ж<UnixConn> Ꮡc, slice<byte> b, slice<byte> oob, ж<UnixAddr> addr) {
     nint n = default;
     nint oobn = default;
     error err = default;
@@ -279,7 +279,7 @@ partial struct UnixListener {
 
 } partial class net_package {
 
-[GoMethodBody("ok")] internal static bool okᴍ(ж<UnixListener> Ꮡln) {
+internal static bool ok⁔(/*this*/ ж<UnixListener> Ꮡln) {
     ref var ln = ref Ꮡln.DerefOrNull();
 
     return Ꮡln != nil && ln.fd != nil;
@@ -290,7 +290,7 @@ partial struct UnixListener {
 //
 // The returned [syscall.RawConn] only supports calling Control. Read and
 // Write return an error.
-[GoMethodBody("SyscallConn")] internal static (syscall.RawConn, error) SyscallConnᴍ(ж<UnixListener> Ꮡl) {
+internal static (syscall.RawConn, error) SyscallConn⁔(/*this*/ ж<UnixListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -301,7 +301,7 @@ partial struct UnixListener {
 
 // AcceptUnix accepts the next incoming call and returns the new
 // connection.
-[GoMethodBody("AcceptUnix")] internal static (ж<UnixConn>, error) AcceptUnixᴍ(ж<UnixListener> Ꮡl) {
+internal static (ж<UnixConn>, error) AcceptUnix⁔(/*this*/ ж<UnixListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -316,7 +316,7 @@ partial struct UnixListener {
 
 // Accept implements the Accept method in the [Listener] interface.
 // Returned connections will be of type [*UnixConn].
-[GoMethodBody("Accept")] internal static (Conn, error) Acceptᴍ(ж<UnixListener> Ꮡl) {
+internal static (Conn, error) Accept⁔(/*this*/ ж<UnixListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -331,7 +331,7 @@ partial struct UnixListener {
 
 // Close stops listening on the Unix address. Already accepted
 // connections are not closed.
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<UnixListener> Ꮡl) {
+internal static error Close⁔(/*this*/ ж<UnixListener> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -346,11 +346,11 @@ partial struct UnixListener {
 // Addr returns the listener's network address.
 // The [Addr] returned is shared by all invocations of Addr, so
 // do not modify it.
-[GoMethodBody("Addr")] internal static Addr Addrᴍ(ref UnixListener l) { return l.fd.laddr; }
+internal static Addr Addr⁔(/*this*/ ref UnixListener l) { return l.fd.laddr; }
 
 // SetDeadline sets the deadline associated with the listener.
 // A zero time value disables the deadline.
-[GoMethodBody("SetDeadline")] internal static error SetDeadlineᴍ(ж<UnixListener> Ꮡl, time.Time t) {
+internal static error SetDeadline⁔(/*this*/ ж<UnixListener> Ꮡl, time.Time t) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (!Ꮡl.ok()) {
@@ -369,7 +369,7 @@ partial struct UnixListener {
 //
 // On Windows, the returned os.File's file descriptor is not
 // usable on other processes.
-[GoMethodBody("File")] internal static (ж<os.File> f, error err) Fileᴍ(ж<UnixListener> Ꮡl) {
+internal static (ж<os.File> f, error err) File⁔(/*this*/ ж<UnixListener> Ꮡl) {
     ж<os.File> f = default;
     error err = default;
     ref var l = ref Ꮡl.DerefOrNull();

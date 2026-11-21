@@ -32,7 +32,7 @@ public static ж<ChaCha8> NewChaCha8(/*[32]*/ array<byte> seed) {
 } partial class rand_package {
 
 // Seed resets the ChaCha8 to behave the same way as NewChaCha8(seed).
-[GoMethodBody("Seed")] internal static void Seedᴍ(ж<ChaCha8> Ꮡc, /*[32]*/ array<byte> seed) {
+internal static void Seed⁔(/*this*/ ж<ChaCha8> Ꮡc, /*[32]*/ array<byte> seed) {
     seed = seed.Clone();
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -42,7 +42,7 @@ public static ж<ChaCha8> NewChaCha8(/*[32]*/ array<byte> seed) {
 }
 
 // Uint64 returns a uniformly distributed random uint64 value.
-[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(ж<ChaCha8> Ꮡc) {
+internal static uint64 Uint64⁔(/*this*/ ж<ChaCha8> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     for (;;) {
@@ -60,7 +60,7 @@ public static ж<ChaCha8> NewChaCha8(/*[32]*/ array<byte> seed) {
 // If calls to Read and Uint64 are interleaved, the order in which bits are
 // returned by the two is undefined, and Read may return bits generated before
 // the last call to Uint64.
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ж<ChaCha8> Ꮡc, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ж<ChaCha8> Ꮡc, slice<byte> p) {
     nint n = default;
     error err = default;
     ref var c = ref Ꮡc.DerefOrNull();
@@ -84,11 +84,11 @@ public static ж<ChaCha8> NewChaCha8(/*[32]*/ array<byte> seed) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidChaCha8ReadBufferˢᴍChaCha8 => ref invalidChaCha8ReadBufferˢᵇᴍChaCha8;
-private static readonly @string invalidChaCha8ReadBufferˢᵇᴍChaCha8 = "invalid ChaCha8 Read buffer encoding"u8;
+internal static ref readonly @string invalidChaCha8ReadBufferˢ⁔ChaCha8 => ref invalidChaCha8ReadBufferˢᵇ⁔ChaCha8;
+private static readonly @string invalidChaCha8ReadBufferˢᵇ⁔ChaCha8 = "invalid ChaCha8 Read buffer encoding"u8;
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
-[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ж<ChaCha8> Ꮡc, slice<byte> data) {
+internal static error UnmarshalBinary⁔(/*this*/ ж<ChaCha8> Ꮡc, slice<byte> data) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     (data, var ok) = cutPrefix(data, slice<byte>("readbuf:"u8));
@@ -96,7 +96,7 @@ private static readonly @string invalidChaCha8ReadBufferˢᵇᴍChaCha8 = "inval
         slice<byte> buf = default;
         (buf, data, ok) = readUint8LengthPrefixed(data);
         if (!ok) {
-            return errors.New(invalidChaCha8ReadBufferˢᴍChaCha8);
+            return errors.New(invalidChaCha8ReadBufferˢ⁔ChaCha8);
         }
         c.readLen = copy(c.readBuf.slice(len(c.readBuf) - len(buf)), buf);
     }
@@ -122,7 +122,7 @@ internal static (slice<byte> buf, slice<byte> rest, bool ok) readUint8LengthPref
 } partial class rand_package {
 
 // AppendBinary implements the [encoding.BinaryAppender] interface.
-[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ж<ChaCha8> Ꮡc, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ж<ChaCha8> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.readLen > 0) {
@@ -134,7 +134,7 @@ internal static (slice<byte> buf, slice<byte> rest, bool ok) readUint8LengthPref
 }
 
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
-[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(ж<ChaCha8> Ꮡc) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ж<ChaCha8> Ꮡc) {
     // the maximum length of (chacha8rand.Marshal + c.readBuf + "readbuf:") is 64
     return Ꮡc.AppendBinary(new slice<byte>(0, 64));
 }

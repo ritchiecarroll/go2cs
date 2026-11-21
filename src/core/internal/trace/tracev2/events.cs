@@ -97,7 +97,7 @@ public static EventType NumEvents => 53;
 
 } partial class tracev2_package {
 
-[GoMethodBody("Experimental")] internal static bool Experimentalᴍ(EventType ev) {
+internal static bool Experimental⁔(/*this*/ EventType ev) {
     return ev > MaxEvent && ev < MaxExperimentalEvent;
 }
 
@@ -513,32 +513,32 @@ public static GoStatus GoWaiting => 4;
 } partial class tracev2_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string runnableˢᴍGoStatus => ref runnableˢᵇᴍGoStatus;
-private static readonly @string runnableˢᵇᴍGoStatus = "Runnable"u8;
-private static ref readonly @string runningˢᴍGoStatus => ref runningˢᵇᴍGoStatus;
-private static readonly @string runningˢᵇᴍGoStatus = "Running"u8;
-private static ref readonly @string syscallˢᴍGoStatus => ref syscallˢᵇᴍGoStatus;
-private static readonly @string syscallˢᵇᴍGoStatus = "Syscall"u8;
-private static ref readonly @string waitingˢᴍGoStatus => ref waitingˢᵇᴍGoStatus;
-private static readonly @string waitingˢᵇᴍGoStatus = "Waiting"u8;
-private static ref readonly @string badˢᴍGoStatus => ref badˢᵇᴍGoStatus;
-private static readonly @string badˢᵇᴍGoStatus = "Bad"u8;
+private static ref readonly @string runnableˢ⁔GoStatus => ref runnableˢᵇ⁔GoStatus;
+private static readonly @string runnableˢᵇ⁔GoStatus = "Runnable"u8;
+private static ref readonly @string runningˢ⁔GoStatus => ref runningˢᵇ⁔GoStatus;
+private static readonly @string runningˢᵇ⁔GoStatus = "Running"u8;
+private static ref readonly @string syscallˢ⁔GoStatus => ref syscallˢᵇ⁔GoStatus;
+private static readonly @string syscallˢᵇ⁔GoStatus = "Syscall"u8;
+private static ref readonly @string waitingˢ⁔GoStatus => ref waitingˢᵇ⁔GoStatus;
+private static readonly @string waitingˢᵇ⁔GoStatus = "Waiting"u8;
+private static ref readonly @string badˢ⁔GoStatus => ref badˢᵇ⁔GoStatus;
+private static readonly @string badˢᵇ⁔GoStatus = "Bad"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(GoStatus s) {
+internal static @string String⁔(/*this*/ GoStatus s) {
     switch (s) {
     case var ᴛ when ᴛ == GoRunnable: {
-        return runnableˢᴍGoStatus;
+        return runnableˢ⁔GoStatus;
     }
     case var ᴛ when ᴛ == GoRunning: {
-        return runningˢᴍGoStatus;
+        return runningˢ⁔GoStatus;
     }
     case var ᴛ when ᴛ == GoSyscall: {
-        return syscallˢᴍGoStatus;
+        return syscallˢ⁔GoStatus;
     }
     case var ᴛ when ᴛ == GoWaiting: {
-        return waitingˢᴍGoStatus;
+        return waitingˢ⁔GoStatus;
     }}
-    return badˢᴍGoStatus;
+    return badˢ⁔GoStatus;
 }
 
 } partial class tracev2_package {
@@ -567,27 +567,27 @@ public static ProcStatus ProcSyscallAbandoned => 4;
 } partial class tracev2_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string runningˢᴍProcStatus => ref runningˢᵇᴍProcStatus;
-private static readonly @string runningˢᵇᴍProcStatus = "Running"u8;
-private static ref readonly @string idleˢᴍProcStatus => ref idleˢᵇᴍProcStatus;
-private static readonly @string idleˢᵇᴍProcStatus = "Idle"u8;
-private static ref readonly @string syscallˢᴍProcStatus => ref syscallˢᵇᴍProcStatus;
-private static readonly @string syscallˢᵇᴍProcStatus = "Syscall"u8;
-private static ref readonly @string badˢᴍProcStatus => ref badˢᵇᴍProcStatus;
-private static readonly @string badˢᵇᴍProcStatus = "Bad"u8;
+private static ref readonly @string runningˢ⁔ProcStatus => ref runningˢᵇ⁔ProcStatus;
+private static readonly @string runningˢᵇ⁔ProcStatus = "Running"u8;
+private static ref readonly @string idleˢ⁔ProcStatus => ref idleˢᵇ⁔ProcStatus;
+private static readonly @string idleˢᵇ⁔ProcStatus = "Idle"u8;
+private static ref readonly @string syscallˢ⁔ProcStatus => ref syscallˢᵇ⁔ProcStatus;
+private static readonly @string syscallˢᵇ⁔ProcStatus = "Syscall"u8;
+private static ref readonly @string badˢ⁔ProcStatus => ref badˢᵇ⁔ProcStatus;
+private static readonly @string badˢᵇ⁔ProcStatus = "Bad"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ProcStatus s) {
+internal static @string String⁔(/*this*/ ProcStatus s) {
     switch (s) {
     case var ᴛ when ᴛ == ProcRunning: {
-        return runningˢᴍProcStatus;
+        return runningˢ⁔ProcStatus;
     }
     case var ᴛ when ᴛ == ProcIdle: {
-        return idleˢᴍProcStatus;
+        return idleˢ⁔ProcStatus;
     }
     case var ᴛ when ᴛ == ProcSyscall: {
-        return syscallˢᴍProcStatus;
+        return syscallˢ⁔ProcStatus;
     }}
-    return badˢᴍProcStatus;
+    return badˢ⁔ProcStatus;
 }
 
 } partial class tracev2_package {

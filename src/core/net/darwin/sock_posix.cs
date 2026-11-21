@@ -80,7 +80,7 @@ internal static (ж<netFD> fd, error err) socket(context.Context ctx, @string ne
 
 } partial class net_package {
 
-[GoMethodBody("ctrlNetwork")] internal static @string ctrlNetworkᴍ(ref netFD fd) {
+internal static @string ctrlNetwork⁔(/*this*/ ref netFD fd) {
     var exprᴛ1 = fd.net;
     switch (ᐧ) {
     case {} when exprᴛ1 == "unix"u8 || exprᴛ1 == "unixgram"u8 || exprᴛ1 == "unixpacket"u8: {
@@ -97,10 +97,10 @@ internal static (ж<netFD> fd, error err) socket(context.Context ctx, @string ne
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bindˢᴍnetFD => ref bindˢᵇᴍnetFD;
-private static readonly @string bindˢᵇᴍnetFD = "bind"u8;
+internal static ref readonly @string bindˢ⁔netFD => ref bindˢᵇ⁔netFD;
+private static readonly @string bindˢᵇ⁔netFD = "bind"u8;
 
-[GoMethodBody("dial")] internal static error dialᴍ(ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, sockaddr raddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
+internal static error dial⁔(/*this*/ ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, sockaddr raddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     ж<rawConn> c = default;
@@ -124,7 +124,7 @@ private static readonly @string bindˢᵇᴍnetFD = "bind"u8;
             return err;
         } else if (lsa != nil) {
             err = syscall.Bind(fd.pfd.Sysfd, lsa); if (err != nil) {
-                return os.NewSyscallError(bindˢᴍnetFD, err);
+                return os.NewSyscallError(bindˢ⁔netFD, err);
             }
         }
     }
@@ -163,10 +163,10 @@ private static readonly @string bindˢᵇᴍnetFD = "bind"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string listenˢᴍnetFD => ref listenˢᵇᴍnetFD;
-private static readonly @string listenˢᵇᴍnetFD = "listen"u8;
+internal static ref readonly @string listenˢ⁔netFD => ref listenˢᵇ⁔netFD;
+private static readonly @string listenˢᵇ⁔netFD = "listen"u8;
 
-[GoMethodBody("listenStream")] internal static error listenStreamᴍ(ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, nint backlog, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
+internal static error listenStream⁔(/*this*/ ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, nint backlog, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     error err = default;
@@ -186,10 +186,10 @@ private static readonly @string listenˢᵇᴍnetFD = "listen"u8;
     }
 
     err = syscall.Bind(fd.pfd.Sysfd, lsa); if (err != nil) {
-        return os.NewSyscallError(bindˢᴍnetFD, err);
+        return os.NewSyscallError(bindˢ⁔netFD, err);
     }
     err = listenFunc(fd.pfd.Sysfd, backlog); if (err != nil) {
-        return os.NewSyscallError(listenˢᴍnetFD, err);
+        return os.NewSyscallError(listenˢ⁔netFD, err);
     }
     err = Ꮡfd.init(); if (err != nil) {
         return err;
@@ -199,7 +199,7 @@ private static readonly @string listenˢᵇᴍnetFD = "listen"u8;
     return default;
 }
 
-[GoMethodBody("listenDatagram")] internal static error listenDatagramᴍ(ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
+internal static error listenDatagram⁔(/*this*/ ж<netFD> Ꮡfd, context.Context ctx, sockaddr laddr, Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     switch (laddr.type()) {
@@ -242,7 +242,7 @@ private static readonly @string listenˢᵇᴍnetFD = "listen"u8;
         }
     }
     err = syscall.Bind(fd.pfd.Sysfd, lsa); if (err != nil) {
-        return os.NewSyscallError(bindˢᴍnetFD, err);
+        return os.NewSyscallError(bindˢ⁔netFD, err);
     }
     err = Ꮡfd.init(); if (err != nil) {
         return err;

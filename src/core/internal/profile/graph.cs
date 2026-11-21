@@ -64,7 +64,7 @@ partial struct Graph {
 
 // FlatValue returns the exclusive value for this node, computing the
 // mean if a divisor is available.
-[GoMethodBody("FlatValue")] internal static int64 FlatValueᴍ(ref Node n) {
+internal static int64 FlatValue⁔(/*this*/ ref Node n) {
     if (n.FlatDiv == 0) {
         return n.Flat;
     }
@@ -73,7 +73,7 @@ partial struct Graph {
 
 // CumValue returns the inclusive value for this node, computing the
 // mean if a divisor is available.
-[GoMethodBody("CumValue")] internal static int64 CumValueᴍ(ref Node n) {
+internal static int64 CumValue⁔(/*this*/ ref Node n) {
     if (n.CumDiv == 0) {
         return n.Cum;
     }
@@ -82,13 +82,13 @@ partial struct Graph {
 
 // AddToEdge increases the weight of an edge between two nodes. If
 // there isn't such an edge one is created.
-[GoMethodBody("AddToEdge")] internal static void AddToEdgeᴍ(ж<Node> Ꮡn, ж<Node> to, int64 v, bool residual, bool inline) {
+internal static void AddToEdge⁔(/*this*/ ж<Node> Ꮡn, ж<Node> to, int64 v, bool residual, bool inline) {
     Ꮡn.AddToEdgeDiv(to, 0, v, residual, inline);
 }
 
 // AddToEdgeDiv increases the weight of an edge between two nodes. If
 // there isn't such an edge one is created.
-[GoMethodBody("AddToEdgeDiv")] internal static void AddToEdgeDivᴍ(ж<Node> Ꮡn, ж<Node> Ꮡto, int64 dv, int64 v, bool residual, bool inline) {
+internal static void AddToEdgeDiv⁔(/*this*/ ж<Node> Ꮡn, ж<Node> Ꮡto, int64 dv, int64 v, bool residual, bool inline) {
     ref var n = ref Ꮡn.DerefOrNull();
     ref var to = ref Ꮡto.DerefOrNull();
 
@@ -121,12 +121,12 @@ partial struct NodeInfo {
 } partial class profile_package {
 
 // PrintableName calls the Node's Formatter function with a single space separator.
-[GoMethodBody("PrintableName")] internal static @string PrintableNameᴍ(ref NodeInfo i) {
+internal static @string PrintableName⁔(/*this*/ ref NodeInfo i) {
     return strings.Join(i.NameComponents(), " ");
 }
 
 // NameComponents returns the components of the printable name to be used for a node.
-[GoMethodBody("NameComponents")] internal static slice<@string> NameComponentsᴍ(ref NodeInfo i) {
+internal static slice<@string> NameComponents⁔(/*this*/ ref NodeInfo i) {
     slice<@string> name = default;
     if (i.Address != 0) {
         name = append(name, fmt.Sprintf("%016x"u8, i.Address));
@@ -177,7 +177,7 @@ partial struct NodePtrSet /*map[ж<Node>, bool]*/;
 // FindOrInsertNode takes the info for a node and either returns a matching node
 // from the node map if one exists, or adds one to the map if one does not.
 // If kept is non-nil, nodes are only added if they can be located on it.
-[GoMethodBody("FindOrInsertNode")] internal static ж<Node> FindOrInsertNodeᴍ(NodeMap nm, NodeInfo info, NodeSet kept) {
+internal static ж<Node> FindOrInsertNode⁔(/*this*/ NodeMap nm, NodeInfo info, NodeSet kept) {
     if (kept != nil) {
         var (_, ok) = kept[info, ꟷ]; if (!ok) {
             return default;
@@ -212,7 +212,7 @@ partial struct EdgeMap /*[]ж<Edge>*/;
 
 } partial class profile_package {
 
-[GoMethodBody("FindTo")] internal static ж<Edge> FindToᴍ(EdgeMap em, ж<Node> n) {
+internal static ж<Edge> FindTo⁔(/*this*/ EdgeMap em, ж<Node> n) {
     foreach (var (_, e) in range<ж<Edge>>(em)) {
         if (e.Dest == n) {
             return e;
@@ -221,11 +221,11 @@ partial struct EdgeMap /*[]ж<Edge>*/;
     return default;
 }
 
-[GoMethodBody("Add")] internal static void Addᴍ(ref EdgeMap em, ж<Edge> e) {
+internal static void Add⁔(/*this*/ ref EdgeMap em, ж<Edge> e) {
     em = append(em, e);
 }
 
-[GoMethodBody("Delete")] internal static void Deleteᴍ(ref EdgeMap em, ж<Edge> e) {
+internal static void Delete⁔(/*this*/ ref EdgeMap em, ж<Edge> e) {
     foreach (var (i, edge) in range<ж<Edge>>(em)) {
         if (edge == e) {
             (em)[i] = (em)[len(em) - 1];
@@ -253,7 +253,7 @@ partial struct Edge {
 
 // WeightValue returns the weight value for this edge, normalizing if a
 // divisor is available.
-[GoMethodBody("WeightValue")] internal static int64 WeightValueᴍ(ref Edge e) {
+internal static int64 WeightValue⁔(/*this*/ ref Edge e) {
     if (e.WeightDiv == 0) {
         return e.Weight;
     }
@@ -375,7 +375,7 @@ public partial struct locationMap {
 
 } partial class profile_package {
 
-[GoMethodBody("add")] internal static void addᴍ(ref locationMap l, uint64 id, Nodes n) {
+internal static void add⁔(/*this*/ ref locationMap l, uint64 id, Nodes n) {
     if (id < (uint64)len(l.s)) {
         l.s[id] = n;
     } else {
@@ -383,7 +383,7 @@ public partial struct locationMap {
     }
 }
 
-[GoMethodBody("get")] internal static Nodes getᴍ(locationMap l, uint64 id) {
+internal static Nodes get⁔(/*this*/ locationMap l, uint64 id) {
     if (id < (uint64)len(l.s)) {
         return l.s[id];
     } else {
@@ -417,7 +417,7 @@ public static (Nodes, locationMap) CreateNodes(ж<Profile> Ꮡprof, ж<Options> 
 
 } partial class profile_package {
 
-[GoMethodBody("nodes")] internal static Nodes nodesᴍ(NodeMap nm) {
+internal static Nodes nodes⁔(/*this*/ NodeMap nm) {
     var nodes = new Nodes(0, len(nm));
     foreach (var (_, n) in nm) {
         nodes = append(nodes, n);
@@ -425,7 +425,7 @@ public static (Nodes, locationMap) CreateNodes(ж<Profile> Ꮡprof, ж<Options> 
     return nodes;
 }
 
-[GoMethodBody("findOrInsertLine")] internal static ж<Node> findOrInsertLineᴍ(NodeMap nm, ж<Location> Ꮡl, Line li, ж<Options> Ꮡo) {
+internal static ж<Node> findOrInsertLine⁔(/*this*/ NodeMap nm, ж<Location> Ꮡl, Line li, ж<Options> Ꮡo) {
     ref var l = ref Ꮡl.DerefOrNull();
     ref var o = ref Ꮡo.DerefOrNull();
 
@@ -458,7 +458,7 @@ internal static ж<NodeInfo> nodeInfo(ref Location l, Line line, @string objfile
 } partial class profile_package {
 
 // Sum adds the flat and cum values of a set of nodes.
-[GoMethodBody("Sum")] internal static (int64 flat, int64 cum) Sumᴍ(Nodes ns) {
+internal static (int64 flat, int64 cum) Sum⁔(/*this*/ Nodes ns) {
     int64 flat = default;
     int64 cum = default;
 
@@ -471,7 +471,7 @@ internal static ж<NodeInfo> nodeInfo(ref Location l, Line line, @string objfile
 
 } partial class profile_package {
 
-[GoMethodBody("addSample")] internal static void addSampleᴍ(ref Node n, int64 dw, int64 w, bool flat) {
+internal static void addSample⁔(/*this*/ ref Node n, int64 dw, int64 w, bool flat) {
     // Update sample value
     if (flat) {
         n.FlatDiv += dw;
@@ -485,7 +485,7 @@ internal static ж<NodeInfo> nodeInfo(ref Location l, Line line, @string objfile
 } partial class profile_package {
 
 // String returns a text representation of a graph, for debugging purposes.
-[GoMethodBody("String")] internal static @string Stringᴍ(ref Graph g) {
+internal static @string String⁔(/*this*/ ref Graph g) {
     var sᴷ = new stackAppend<@string>();
 
     slice<@string> s = default;
@@ -517,7 +517,7 @@ internal static ж<NodeInfo> nodeInfo(ref Location l, Line line, @string objfile
 // Sort returns a slice of the edges in the map, in a consistent
 // order. The sort order is first based on the edge weight
 // (higher-to-lower) and then by the node names to avoid flakiness.
-[GoMethodBody("Sort")] internal static slice<ж<Edge>> Sortᴍ(EdgeMap em) {
+internal static slice<ж<Edge>> Sort⁔(/*this*/ EdgeMap em) {
     var el = new edgeList(0, len(em));
     foreach (var (_, w) in range<ж<Edge>>(em)) {
         el = append(el, w);
@@ -528,7 +528,7 @@ internal static ж<NodeInfo> nodeInfo(ref Location l, Line line, @string objfile
 }
 
 // Sum returns the total weight for a set of nodes.
-[GoMethodBody("Sum")] internal static int64 Sumᴍ(EdgeMap em) {
+internal static int64 Sum⁔(/*this*/ EdgeMap em) {
     int64 ret = default;
     foreach (var (_, edge) in range<ж<Edge>>(em)) {
         ret += edge.Weight;
@@ -542,11 +542,11 @@ partial struct edgeList /*[]ж<Edge>*/;
 
 } partial class profile_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(edgeList el) {
+internal static nint Len⁔(/*this*/ edgeList el) {
     return len(el);
 }
 
-[GoMethodBody("Less")] internal static bool Lessᴍ(edgeList el, nint i, nint j) {
+internal static bool Less⁔(/*this*/ edgeList el, nint i, nint j) {
     if (el[i].Weight != el[j].Weight) {
         return abs64(el[i].Weight) > abs64(el[j].Weight);
     }
@@ -563,7 +563,7 @@ partial struct edgeList /*[]ж<Edge>*/;
     return to1 < to2;
 }
 
-[GoMethodBody("Swap")] internal static void Swapᴍ(edgeList el, nint i, nint j) {
+internal static void Swap⁔(/*this*/ edgeList el, nint i, nint j) {
     (el[i], el[j]) = (el[j], el[i]);
 }
 

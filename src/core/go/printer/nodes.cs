@@ -46,7 +46,7 @@ partial class printer_package {
 // space taken up by them is not considered to reduce the number of
 // linebreaks. At the moment there is no easy way to know about
 // future (not yet interspersed) comments in this function.
-[GoMethodBody("linebreak")] internal static nint /*nbreaks*/ linebreakᴍ(ж<printer> Ꮡp, nint line, nint min, whiteSpace ws, bool newSection) {
+internal static nint /*nbreaks*/ linebreak⁔(/*this*/ ж<printer> Ꮡp, nint line, nint min, whiteSpace ws, bool newSection) {
     nint nbreaks = default;
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -67,13 +67,13 @@ partial class printer_package {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object setCommentFoundPendingˢᴍprinter = (@string)"setComment found pending comments"u8;
+internal static readonly object setCommentFoundPendingˢ⁔printer = (@string)"setComment found pending comments"u8;
 
 // setComment sets g as the next comment if g != nil and if node comments
 // are enabled - this mode is used when printing source code fragments such
 // as exports only. It assumes that there is no pending comment in p.comments
 // and at most one pending comment in the p.comment cache.
-[GoMethodBody("setComment")] internal static void setCommentᴍ(ж<printer> Ꮡp, ж<ast.CommentGroup> Ꮡg) {
+internal static void setComment⁔(/*this*/ ж<printer> Ꮡp, ж<ast.CommentGroup> Ꮡg) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var g = ref Ꮡg.DerefOrNull();
 
@@ -90,7 +90,7 @@ internal static readonly object setCommentFoundPendingˢᴍprinter = (@string)"s
         Ꮡp.flush(p.posFor(g.List[0].Pos()), token.ILLEGAL);
         p.comments = p.comments[0..1];
         // in debug mode, report error
-        p.internalError(setCommentFoundPendingˢᴍprinter);
+        p.internalError(setCommentFoundPendingˢ⁔printer);
     }
     p.comments[0] = Ꮡg;
     p.cindex = 0;
@@ -114,7 +114,7 @@ internal static exprListMode noIndent => 2;                  // no extra indenta
 
 // If indent is set, a multi-line identifier list is indented after the
 // first linebreak encountered.
-[GoMethodBody("identList")] internal static void identListᴍ(ж<printer> Ꮡp, slice<ж<ast.Ident>> list, bool indent) {
+internal static void identList⁔(/*this*/ ж<printer> Ꮡp, slice<ж<ast.Ident>> list, bool indent) {
     // convert into an expression list so we can re-use exprList formatting
     var xlist = new slice<ast.Expr>(len(list));
     foreach (var (i, x) in range(list)) {
@@ -142,7 +142,7 @@ private static readonly @string filteredMsgᵇ = "contains filtered or unexporte
 // so that we can use the algorithm for any kind of list
 //
 //	(e.g., pass list via a channel over which to range).
-[GoMethodBody("exprList")] internal static void exprListᴍ(ж<printer> Ꮡp, token.Pos prev0, slice<ast.Expr> list, nint depth, exprListMode mode, token.Pos next0, bool isIncomplete) {
+internal static void exprList⁔(/*this*/ ж<printer> Ꮡp, token.Pos prev0, slice<ast.Expr> list, nint depth, exprListMode mode, token.Pos next0, bool isIncomplete) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (len(list) == 0) {
@@ -348,7 +348,7 @@ internal static paramMode typeTParam => 2;
 
 } partial class printer_package {
 
-[GoMethodBody("parameters")] internal static void parametersᴍ(ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfields, paramMode mode) {
+internal static void parameters⁔(/*this*/ ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfields, paramMode mode) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var fields = ref Ꮡfields.DerefOrNull();
 
@@ -474,7 +474,7 @@ internal static bool isTypeElem(ast.Expr x) {
 
 } partial class printer_package {
 
-[GoMethodBody("signature")] internal static void signatureᴍ(ж<printer> Ꮡp, ж<ast.FuncType> Ꮡsig) {
+internal static void signature⁔(/*this*/ ж<printer> Ꮡp, ж<ast.FuncType> Ꮡsig) {
     ref var sig = ref Ꮡsig.DerefOrNull();
 
     if (sig.TypeParams != nil) {
@@ -518,7 +518,7 @@ internal static nint /*size*/ identListSize(slice<ж<ast.Ident>> list, nint maxS
 
 } partial class printer_package {
 
-[GoMethodBody("isOneLineFieldList")] internal static bool isOneLineFieldListᴍ(ref printer p, slice<ж<ast.Field>> list) {
+internal static bool isOneLineFieldList⁔(/*this*/ ref printer p, slice<ж<ast.Field>> list) {
     if (len(list) != 1) {
         return false; // allow only one field
     }
@@ -536,15 +536,15 @@ internal static nint /*size*/ identListSize(slice<ж<ast.Ident>> list, nint maxS
     return namesSize + typeSize <= maxSize;
 }
 
-[GoMethodBody("setLineComment")] internal static void setLineCommentᴍ(ж<printer> Ꮡp, @string text) {
+internal static void setLineComment⁔(/*this*/ ж<printer> Ꮡp, @string text) {
     Ꮡp.setComment(Ꮡ(new ast.CommentGroup(List: [Ꮡ(new ast.Comment(Slash: token.NoPos, Text: text))])));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string containsFilteredOrˢᴍprinter => ref containsFilteredOrˢᵇᴍprinter;
-private static readonly @string containsFilteredOrˢᵇᴍprinter = "// contains filtered or unexported methods"u8;
+internal static ref readonly @string containsFilteredOrˢ⁔printer => ref containsFilteredOrˢᵇ⁔printer;
+private static readonly @string containsFilteredOrˢᵇ⁔printer = "// contains filtered or unexported methods"u8;
 
-[GoMethodBody("fieldList")] internal static void fieldListᴍ(ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfields, bool isStruct, bool isIncomplete) {
+internal static void fieldList⁔(/*this*/ ж<printer> Ꮡp, ж<ast.FieldList> Ꮡfields, bool isStruct, bool isIncomplete) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var fields = ref Ꮡfields.DerefOrNull();
 
@@ -689,7 +689,7 @@ private static readonly @string containsFilteredOrˢᵇᴍprinter = "// contains
                 Ꮡp.print(formfeed);
             }
             Ꮡp.flush(p.posFor(rbrace), token.RBRACE); // make sure we don't lose the last line comment
-            Ꮡp.setLineComment(containsFilteredOrˢᴍprinter);
+            Ꮡp.setLineComment(containsFilteredOrˢ⁔printer);
         }
     }
     Ꮡp.print(unindent, formfeed);
@@ -836,7 +836,7 @@ internal static nint reduceDepth(nint depth) {
 //  3. If there are no level 4 operators or no level 5 operators, then the
 //     cutoff is 6 (always use spaces) in Normal mode
 //     and 4 (never use spaces) in Compact mode.
-[GoMethodBody("binaryExpr")] internal static void binaryExprᴍ(ж<printer> Ꮡp, ж<ast.BinaryExpr> Ꮡx, nint prec1, nint cutoff, nint depth) {
+internal static void binaryExpr⁔(/*this*/ ж<printer> Ꮡp, ж<ast.BinaryExpr> Ꮡx, nint prec1, nint cutoff, nint depth) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -889,10 +889,10 @@ internal static bool isBinary(ast.Expr expr) {
 } partial class printer_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object badExprˢᴍprinter = (@string)"BadExpr"u8;
-internal static readonly object depth1ˢᴍprinter = (@string)"depth < 1:"u8;
+internal static readonly object badExprˢ⁔printer = (@string)"BadExpr"u8;
+internal static readonly object depth1ˢ⁔printer = (@string)"depth < 1:"u8;
 
-[GoMethodBody("expr1")] internal static void expr1ᴍ(ж<printer> Ꮡp, ast.Expr expr, nint prec1, nint depth) {
+internal static void expr1⁔(/*this*/ ж<printer> Ꮡp, ast.Expr expr, nint prec1, nint depth) {
     ref var p = ref Ꮡp.DerefOrNull();
     var indicesᴷ = new stackAppend<ast.Expr>();
 
@@ -900,7 +900,7 @@ internal static readonly object depth1ˢᴍprinter = (@string)"depth < 1:"u8;
 
     switch (expr.type()) {
     case ж<ast.BadExpr> x: {
-        Ꮡp.print(badExprˢᴍprinter);
+        Ꮡp.print(badExprˢ⁔printer);
         break;
     }
     case ж<ast.Ident> x: {
@@ -909,7 +909,7 @@ internal static readonly object depth1ˢᴍprinter = (@string)"depth < 1:"u8;
     }
     case ж<ast.BinaryExpr> x: {
         if (depth < 1) {
-            p.internalError(depth1ˢᴍprinter, depth);
+            p.internalError(depth1ˢ⁔printer, depth);
             depth = 1;
         }
         Ꮡp.binaryExpr(x, prec1, cutoff(ref (x).DerefOrNull(), depth), depth);
@@ -1284,7 +1284,7 @@ internal static ж<ast.BasicLit> normalizedNumber(ж<ast.BasicLit> Ꮡlit) {
 
 } partial class printer_package {
 
-[GoMethodBody("possibleSelectorExpr")] internal static bool possibleSelectorExprᴍ(ж<printer> Ꮡp, ast.Expr expr, nint prec1, nint depth) {
+internal static bool possibleSelectorExpr⁔(/*this*/ ж<printer> Ꮡp, ast.Expr expr, nint prec1, nint depth) {
     var (x, ok) = expr._<ж<ast.SelectorExpr>>(ᐧ); if (ok) {
         return Ꮡp.selectorExpr(x, depth, true);
     }
@@ -1294,7 +1294,7 @@ internal static ж<ast.BasicLit> normalizedNumber(ж<ast.BasicLit> Ꮡlit) {
 
 // selectorExpr handles an *ast.SelectorExpr node and reports whether x spans
 // multiple lines.
-[GoMethodBody("selectorExpr")] internal static bool selectorExprᴍ(ж<printer> Ꮡp, ж<ast.SelectorExpr> Ꮡx, nint depth, bool isMethod) {
+internal static bool selectorExpr⁔(/*this*/ ж<printer> Ꮡp, ж<ast.SelectorExpr> Ꮡx, nint depth, bool isMethod) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -1314,11 +1314,11 @@ internal static ж<ast.BasicLit> normalizedNumber(ж<ast.BasicLit> Ꮡlit) {
     return false;
 }
 
-[GoMethodBody("expr0")] internal static void expr0ᴍ(ж<printer> Ꮡp, ast.Expr x, nint depth) {
+internal static void expr0⁔(/*this*/ ж<printer> Ꮡp, ast.Expr x, nint depth) {
     Ꮡp.expr1(x, token.LowestPrec, depth);
 }
 
-[GoMethodBody("expr")] internal static void exprᴍ(ж<printer> Ꮡp, ast.Expr x) {
+internal static void expr⁔(/*this*/ ж<printer> Ꮡp, ast.Expr x) {
     const nint depth = 1;
     Ꮡp.expr1(x, token.LowestPrec, depth);
 }
@@ -1329,7 +1329,7 @@ internal static ж<ast.BasicLit> normalizedNumber(ж<ast.BasicLit> Ꮡlit) {
 // Print the statement list indented, but without a newline after the last statement.
 // Extra line breaks between statements in the source are respected but at most one
 // empty line is printed between statements.
-[GoMethodBody("stmtList")] internal static void stmtListᴍ(ж<printer> Ꮡp, slice<ast.Stmt> list, nint nindent, bool nextIsRBrace) {
+internal static void stmtList⁔(/*this*/ ж<printer> Ꮡp, slice<ast.Stmt> list, nint nindent, bool nextIsRBrace) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (nindent > 0) {
@@ -1369,7 +1369,7 @@ internal static ж<ast.BasicLit> normalizedNumber(ж<ast.BasicLit> Ꮡlit) {
 }
 
 // block prints an *ast.BlockStmt; it always spans at least two lines.
-[GoMethodBody("block")] internal static void blockᴍ(ж<printer> Ꮡp, ж<ast.BlockStmt> Ꮡb, nint nindent) {
+internal static void block⁔(/*this*/ ж<printer> Ꮡp, ж<ast.BlockStmt> Ꮡb, nint nindent) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -1432,7 +1432,7 @@ internal static ast.Expr stripParensAlways(ast.Expr x) {
 
 } partial class printer_package {
 
-[GoMethodBody("controlClause")] internal static void controlClauseᴍ(ж<printer> Ꮡp, bool isForStmt, ast.Stmt init, ast.Expr expr, ast.Stmt post) {
+internal static void controlClause⁔(/*this*/ ж<printer> Ꮡp, bool isForStmt, ast.Stmt init, ast.Expr expr, ast.Stmt post) {
     Ꮡp.print(blank);
     var needsBlank = false;
     if (init == nil && post == nil) {
@@ -1469,7 +1469,7 @@ internal static ast.Expr stripParensAlways(ast.Expr x) {
 // indentList reports whether an expression list would look better if it
 // were indented wholesale (starting with the very first element, rather
 // than starting at the first line break).
-[GoMethodBody("indentList")] internal static bool indentListᴍ(ref printer p, slice<ast.Expr> list) {
+internal static bool indentList⁔(/*this*/ ref printer p, slice<ast.Expr> list) {
     // Heuristic: indentList reports whether there are more than one multi-
     // line element in the list, or if there is any element that is not
     // starting on the same line as the previous one ends.
@@ -1501,16 +1501,16 @@ internal static ast.Expr stripParensAlways(ast.Expr x) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object badStmtˢᴍprinter = (@string)"BadStmt"u8;
+internal static readonly object badStmtˢ⁔printer = (@string)"BadStmt"u8;
 
-[GoMethodBody("stmt")] internal static void stmtᴍ(ж<printer> Ꮡp, ast.Stmt stmt, bool nextIsRBrace) {
+internal static void stmt⁔(/*this*/ ж<printer> Ꮡp, ast.Stmt stmt, bool nextIsRBrace) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.setPos(stmt.Pos());
 
     switch (stmt.type()) {
     case ж<ast.BadStmt> s: {
-        Ꮡp.print(badStmtˢᴍprinter);
+        Ꮡp.print(badStmtˢ⁔printer);
         break;
     }
     case ж<ast.DeclStmt> s: {
@@ -1805,7 +1805,7 @@ internal static slice<bool> keepTypeColumn(slice<ast.Spec> specs) {
 
 } partial class printer_package {
 
-[GoMethodBody("valueSpec")] internal static void valueSpecᴍ(ж<printer> Ꮡp, ж<ast.ValueSpec> Ꮡs, bool keepType) {
+internal static void valueSpec⁔(/*this*/ ж<printer> Ꮡp, ж<ast.ValueSpec> Ꮡs, bool keepType) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     Ꮡp.setComment(s.Doc);
@@ -1886,12 +1886,12 @@ internal static ж<ast.BasicLit> sanitizeImportPath(ж<ast.BasicLit> Ꮡlit) {
 } partial class printer_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object expectedN1Gotˢᴍprinter = (@string)"expected n = 1; got"u8;
+internal static readonly object expectedN1Gotˢ⁔printer = (@string)"expected n = 1; got"u8;
 
 // The parameter n is the number of specs in the group. If doIndent is set,
 // multi-line identifier lists in the spec are indented when the first
 // linebreak is encountered.
-[GoMethodBody("spec")] internal static void specᴍ(ж<printer> Ꮡp, ast.Spec spec, nint n, bool doIndent) {
+internal static void spec⁔(/*this*/ ж<printer> Ꮡp, ast.Spec spec, nint n, bool doIndent) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (spec.type()) {
@@ -1908,7 +1908,7 @@ internal static readonly object expectedN1Gotˢᴍprinter = (@string)"expected n
     }
     case ж<ast.ValueSpec> s: {
         if (n != 1) {
-            p.internalError(expectedN1Gotˢᴍprinter, n);
+            p.internalError(expectedN1Gotˢ⁔printer, n);
         }
         Ꮡp.setComment(s.Doc);
         Ꮡp.identList(s.Names, doIndent); // always present
@@ -1948,7 +1948,7 @@ internal static readonly object expectedN1Gotˢᴍprinter = (@string)"expected n
     }}
 }
 
-[GoMethodBody("genDecl")] internal static void genDeclᴍ(ж<printer> Ꮡp, ж<ast.GenDecl> Ꮡd) {
+internal static void genDecl⁔(/*this*/ ж<printer> Ꮡp, ж<ast.GenDecl> Ꮡd) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -2005,7 +2005,7 @@ partial struct sizeCounter {
 
 } partial class printer_package {
 
-[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ref sizeCounter c, slice<byte> p) {
+internal static (nint, error) Write⁔(/*this*/ ref sizeCounter c, slice<byte> p) {
     if (!c.hasNewline) {
         foreach (var (_, b) in range(p)) {
             if (b == '\n' || b == '\f') {
@@ -2024,7 +2024,7 @@ partial struct sizeCounter {
 // The result is <= maxSize if the node fits on one line with at
 // most maxSize chars and the formatted output doesn't contain
 // any control chars. Otherwise, the result is > maxSize.
-[GoMethodBody("nodeSize")] internal static nint /*size*/ nodeSizeᴍ(ref printer p, ast.Node n, nint maxSize) {
+internal static nint /*size*/ nodeSize⁔(/*this*/ ref printer p, ast.Node n, nint maxSize) {
     nint size = default;
 
     // nodeSize invokes the printer, which may invoke nodeSize
@@ -2055,7 +2055,7 @@ partial struct sizeCounter {
 }
 
 // numLines returns the number of lines spanned by node n in the original source.
-[GoMethodBody("numLines")] internal static nint numLinesᴍ(ref printer p, ast.Node n) {
+internal static nint numLines⁔(/*this*/ ref printer p, ast.Node n) {
     token.Pos from = n.Pos(); if (from.IsValid()) {
         token.Pos to = n.End(); if (to.IsValid()) {
             return p.lineFor(to) - p.lineFor(from) + 1;
@@ -2065,7 +2065,7 @@ partial struct sizeCounter {
 }
 
 // bodySize is like nodeSize but it is specialized for *ast.BlockStmt's.
-[GoMethodBody("bodySize")] internal static nint bodySizeᴍ(ж<printer> Ꮡp, ж<ast.BlockStmt> Ꮡb, nint maxSize) {
+internal static nint bodySize⁔(/*this*/ ж<printer> Ꮡp, ж<ast.BlockStmt> Ꮡb, nint maxSize) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -2098,7 +2098,7 @@ partial struct sizeCounter {
 // the block is printed on the current line, without line breaks, spaced from the header
 // by sep. Otherwise the block's opening "{" is printed on the current line, followed by
 // lines for the block's statements and its closing "}".
-[GoMethodBody("funcBody")] internal static void funcBodyᴍ(ж<printer> Ꮡp, nint headerSize, whiteSpace sep, ж<ast.BlockStmt> Ꮡb) {
+internal static void funcBody⁔(/*this*/ ж<printer> Ꮡp, nint headerSize, whiteSpace sep, ж<ast.BlockStmt> Ꮡb) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -2147,14 +2147,14 @@ partial struct sizeCounter {
 // distanceFrom returns the column difference between p.out (the current output
 // position) and startOutCol. If the start position is on a different line from
 // the current position (or either is unknown), the result is infinity.
-[GoMethodBody("distanceFrom")] internal static nint distanceFromᴍ(ref printer p, token.Pos startPos, nint startOutCol) {
+internal static nint distanceFrom⁔(/*this*/ ref printer p, token.Pos startPos, nint startOutCol) {
     if (startPos.IsValid() && p.pos.IsValid() && p.posFor(startPos).Line == p.pos.Line) {
         return p.@out.Column - startOutCol;
     }
     return infinity;
 }
 
-[GoMethodBody("funcDecl")] internal static void funcDeclᴍ(ж<printer> Ꮡp, ж<ast.FuncDecl> Ꮡd) {
+internal static void funcDecl⁔(/*this*/ ж<printer> Ꮡp, ж<ast.FuncDecl> Ꮡd) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -2175,15 +2175,15 @@ partial struct sizeCounter {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object badDeclˢᴍprinter = (@string)"BadDecl"u8;
+internal static readonly object badDeclˢ⁔printer = (@string)"BadDecl"u8;
 
-[GoMethodBody("decl")] internal static void declᴍ(ж<printer> Ꮡp, ast.Decl decl) {
+internal static void decl⁔(/*this*/ ж<printer> Ꮡp, ast.Decl decl) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (decl.type()) {
     case ж<ast.BadDecl> d: {
         p.setPos(d.Pos());
-        Ꮡp.print(badDeclˢᴍprinter);
+        Ꮡp.print(badDeclˢ⁔printer);
         break;
     }
     case ж<ast.GenDecl> d: {
@@ -2223,7 +2223,7 @@ internal static token.Token /*tok*/ declToken(ast.Decl decl) {
 
 } partial class printer_package {
 
-[GoMethodBody("declList")] internal static void declListᴍ(ж<printer> Ꮡp, slice<ast.Decl> list) {
+internal static void declList⁔(/*this*/ ж<printer> Ꮡp, slice<ast.Decl> list) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     token.Token tok = token.ILLEGAL;
@@ -2252,7 +2252,7 @@ internal static token.Token /*tok*/ declToken(ast.Decl decl) {
     }
 }
 
-[GoMethodBody("file")] internal static void @fileᴍ(ж<printer> Ꮡp, ж<ast.File> Ꮡsrc) {
+internal static void @file⁔(/*this*/ ж<printer> Ꮡp, ж<ast.File> Ꮡsrc) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var src = ref Ꮡsrc.DerefOrNull();
 

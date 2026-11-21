@@ -61,11 +61,14 @@ using static go.crypto.@internal.entropy.v1_0_0.entropy_package;
 
 namespace go.crypto.@internal.entropy.v1_0_0;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.crypto.@internal.fips140deps;
 using sync;
 using static entropy_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("entropy", ImportPath = "crypto/internal/entropy/v1.0.0")]
 public static partial class entropy_package
@@ -102,11 +105,11 @@ public static partial class entropy_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(entropy_package.source)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class entropyᴛsource;
+[GoMethodHost(typeof(entropy_package.source)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class entropyᴛsource;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class entropyᴛsource {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint8 Sample(this ref source s) => entropy_package.Sampleᴍ(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint8 Sample(this ref source s) => entropy_package.Sample⁔(ref s);
 }
 // </GlyphForwarders>

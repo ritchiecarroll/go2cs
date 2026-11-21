@@ -72,13 +72,16 @@ using static go.runtime.trace_package;
 
 namespace go.runtime;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.sync;
 using static trace_package;
 using io = io_package;
 using time = time_package;
 using @internal.trace;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("trace")]
 public static partial class trace_package
@@ -131,46 +134,46 @@ public static partial class trace_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(trace_package.FlightRecorder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛFlightRecorder;
-[GoMethodHost(typeof(trace_package.Region)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛRegion;
-[GoMethodHost(typeof(trace_package.Task)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛTask;
-[GoMethodHost(typeof(trace_package.eventTime)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛeventTime;
-[GoMethodHost(typeof(trace_package.frequency)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛfrequency;
-[GoMethodHost(typeof(trace_package.recorder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛrecorder;
-[GoMethodHost(typeof(trace_package.traceMultiplexer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class traceᴛtraceMultiplexer;
+[GoMethodHost(typeof(trace_package.FlightRecorder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class traceᴛFlightRecorder;
+[GoMethodHost(typeof(trace_package.Region)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class traceᴛRegion;
+[GoMethodHost(typeof(trace_package.Task)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class traceᴛTask;
+[GoMethodHost(typeof(trace_package.eventTime)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class traceᴛeventTime;
+[GoMethodHost(typeof(trace_package.frequency)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class traceᴛfrequency;
+[GoMethodHost(typeof(trace_package.recorder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class traceᴛrecorder;
+[GoMethodHost(typeof(trace_package.traceMultiplexer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class traceᴛtraceMultiplexer;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class traceᴛTask {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void End(this ref Task t) => trace_package.Endᴍ(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void End(this ref Task t) => trace_package.End⁔(ref t);
 }
 partial class traceᴛRegion {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void End(this ж<Region> Ꮡr) => trace_package.Endᴍ(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void End(this ж<Region> Ꮡr) => trace_package.End⁔(Ꮡr);
 }
 partial class traceᴛFlightRecorder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Start(this ж<FlightRecorder> Ꮡfr) => trace_package.Startᴍ(Ꮡfr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Stop(this ref FlightRecorder fr) => trace_package.Stopᴍ(ref fr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Enabled(this ref FlightRecorder fr) => trace_package.Enabledᴍ(ref fr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64 n, error err) WriteTo(this ж<FlightRecorder> Ꮡfr, io.Writer w) => trace_package.WriteToᴍ(Ꮡfr, w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Start(this ж<FlightRecorder> Ꮡfr) => trace_package.Start⁔(Ꮡfr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Stop(this ref FlightRecorder fr) => trace_package.Stop⁔(ref fr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Enabled(this ref FlightRecorder fr) => trace_package.Enabled⁔(ref fr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 n, error err) WriteTo(this ж<FlightRecorder> Ꮡfr, io.Writer w) => trace_package.WriteTo⁔(Ꮡfr, w);
 }
 partial class traceᴛrecorder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ж<recorder> Ꮡw, slice<byte> b) => trace_package.Writeᴍ(Ꮡw, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void endGeneration(this ref recorder w) => trace_package.endGenerationᴍ(ref w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ж<recorder> Ꮡw, slice<byte> b) => trace_package.Write⁔(Ꮡw, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void endGeneration(this ref recorder w) => trace_package.endGeneration⁔(ref w);
 }
 partial class traceᴛfrequency {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static eventTime mul(this frequency f, timestamp t) => trace_package.mulᴍ(f, t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static eventTime mul(this frequency f, timestamp t) => trace_package.mul⁔(f, t);
 }
 partial class traceᴛeventTime {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Duration Sub(this eventTime t, eventTime t0) => trace_package.Subᴍ(t, t0);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static time.Duration Sub(this eventTime t, eventTime t0) => trace_package.Sub⁔(t, t0);
 }
 partial class traceᴛtraceMultiplexer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error subscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt, ж<recorder> r) => trace_package.subscribeFlightRecorderᴍ(Ꮡt, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error unsubscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt) => trace_package.unsubscribeFlightRecorderᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error subscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt, io.Writer w) => trace_package.subscribeTraceStartWriterᴍ(Ꮡt, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unsubscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt) => trace_package.unsubscribeTraceStartWriterᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error addedSubscriber(this ж<traceMultiplexer> Ꮡt) => trace_package.addedSubscriberᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void removingSubscriber(this ж<traceMultiplexer> Ꮡt) => trace_package.removingSubscriberᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void removedSubscriber(this ref traceMultiplexer t) => trace_package.removedSubscriberᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error startLocked(this ж<traceMultiplexer> Ꮡt) => trace_package.startLockedᴍ(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error subscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt, ж<recorder> r) => trace_package.subscribeFlightRecorder⁔(Ꮡt, r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error unsubscribeFlightRecorder(this ж<traceMultiplexer> Ꮡt) => trace_package.unsubscribeFlightRecorder⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error subscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt, io.Writer w) => trace_package.subscribeTraceStartWriter⁔(Ꮡt, w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void unsubscribeTraceStartWriter(this ж<traceMultiplexer> Ꮡt) => trace_package.unsubscribeTraceStartWriter⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error addedSubscriber(this ж<traceMultiplexer> Ꮡt) => trace_package.addedSubscriber⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void removingSubscriber(this ж<traceMultiplexer> Ꮡt) => trace_package.removingSubscriber⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void removedSubscriber(this ref traceMultiplexer t) => trace_package.removedSubscriber⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error startLocked(this ж<traceMultiplexer> Ꮡt) => trace_package.startLocked⁔(Ꮡt);
 }
 // </GlyphForwarders>

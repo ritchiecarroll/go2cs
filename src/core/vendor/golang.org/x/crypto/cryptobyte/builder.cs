@@ -55,13 +55,13 @@ public static ж<Builder> NewFixedBuilder(slice<byte> buffer) {
 
 // SetError sets the value to be returned as the error from Bytes. Writes
 // performed after calling SetError are ignored.
-[GoMethodBody("SetError")] internal static void SetErrorᴍ(ref Builder b, error err) {
+internal static void SetError⁔(/*this*/ ref Builder b, error err) {
     b.err = err;
 }
 
 // Bytes returns the bytes written by the builder or an error if one has
 // occurred during building.
-[GoMethodBody("Bytes")] internal static (slice<byte>, error) Bytesᴍ(ref Builder b) {
+internal static (slice<byte>, error) Bytes⁔(/*this*/ ref Builder b) {
     if (b.err != nil) {
         return (default, b.err);
     }
@@ -70,7 +70,7 @@ public static ж<Builder> NewFixedBuilder(slice<byte> buffer) {
 
 // BytesOrPanic returns the bytes written by the builder or panics if an error
 // has occurred during building.
-[GoMethodBody("BytesOrPanic")] internal static slice<byte> BytesOrPanicᴍ(ref Builder b) {
+internal static slice<byte> BytesOrPanic⁔(/*this*/ ref Builder b) {
     if (b.err != nil) {
         throw panic(b.err);
     }
@@ -78,38 +78,38 @@ public static ж<Builder> NewFixedBuilder(slice<byte> buffer) {
 }
 
 // AddUint8 appends an 8-bit value to the byte string.
-[GoMethodBody("AddUint8")] internal static void AddUint8ᴍ(ref Builder b, uint8 v) {
+internal static void AddUint8⁔(/*this*/ ref Builder b, uint8 v) {
     b.add((byte)v);
 }
 
 // AddUint16 appends a big-endian, 16-bit value to the byte string.
-[GoMethodBody("AddUint16")] internal static void AddUint16ᴍ(ref Builder b, uint16 v) {
+internal static void AddUint16⁔(/*this*/ ref Builder b, uint16 v) {
     b.add((byte)(v >> 8), (byte)v);
 }
 
 // AddUint24 appends a big-endian, 24-bit value to the byte string. The highest
 // byte of the 32-bit input value is silently truncated.
-[GoMethodBody("AddUint24")] internal static void AddUint24ᴍ(ref Builder b, uint32 v) {
+internal static void AddUint24⁔(/*this*/ ref Builder b, uint32 v) {
     b.add((byte)(v >> 16), (byte)(v >> 8), (byte)v);
 }
 
 // AddUint32 appends a big-endian, 32-bit value to the byte string.
-[GoMethodBody("AddUint32")] internal static void AddUint32ᴍ(ref Builder b, uint32 v) {
+internal static void AddUint32⁔(/*this*/ ref Builder b, uint32 v) {
     b.add((byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
 }
 
 // AddUint48 appends a big-endian, 48-bit value to the byte string.
-[GoMethodBody("AddUint48")] internal static void AddUint48ᴍ(ref Builder b, uint64 v) {
+internal static void AddUint48⁔(/*this*/ ref Builder b, uint64 v) {
     b.add((byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
 }
 
 // AddUint64 appends a big-endian, 64-bit value to the byte string.
-[GoMethodBody("AddUint64")] internal static void AddUint64ᴍ(ref Builder b, uint64 v) {
+internal static void AddUint64⁔(/*this*/ ref Builder b, uint64 v) {
     b.add((byte)(v >> 56), (byte)(v >> 48), (byte)(v >> 40), (byte)(v >> 32), (byte)(v >> 24), (byte)(v >> 16), (byte)(v >> 8), (byte)v);
 }
 
 // AddBytes appends a sequence of bytes to the byte string.
-[GoMethodBody("AddBytes")] internal static void AddBytesᴍ(ref Builder b, slice<byte> v) {
+internal static void AddBytes⁔(/*this*/ ref Builder b, slice<byte> v) {
     b.add(v.ꓸꓸꓸ);
 }
 
@@ -149,26 +149,26 @@ partial struct BuildError {
 } partial class cryptobyte_package {
 
 // AddUint8LengthPrefixed adds a 8-bit length-prefixed byte sequence.
-[GoMethodBody("AddUint8LengthPrefixed")] internal static void AddUint8LengthPrefixedᴍ(ж<Builder> Ꮡb, Action<ж<Builder>> f) {
+internal static void AddUint8LengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, Action<ж<Builder>> f) {
     Ꮡb.addLengthPrefixed(1, false, f);
 }
 
 // AddUint16LengthPrefixed adds a big-endian, 16-bit length-prefixed byte sequence.
-[GoMethodBody("AddUint16LengthPrefixed")] internal static void AddUint16LengthPrefixedᴍ(ж<Builder> Ꮡb, Action<ж<Builder>> f) {
+internal static void AddUint16LengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, Action<ж<Builder>> f) {
     Ꮡb.addLengthPrefixed(2, false, f);
 }
 
 // AddUint24LengthPrefixed adds a big-endian, 24-bit length-prefixed byte sequence.
-[GoMethodBody("AddUint24LengthPrefixed")] internal static void AddUint24LengthPrefixedᴍ(ж<Builder> Ꮡb, Action<ж<Builder>> f) {
+internal static void AddUint24LengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, Action<ж<Builder>> f) {
     Ꮡb.addLengthPrefixed(3, false, f);
 }
 
 // AddUint32LengthPrefixed adds a big-endian, 32-bit length-prefixed byte sequence.
-[GoMethodBody("AddUint32LengthPrefixed")] internal static void AddUint32LengthPrefixedᴍ(ж<Builder> Ꮡb, Action<ж<Builder>> f) {
+internal static void AddUint32LengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, Action<ж<Builder>> f) {
     Ꮡb.addLengthPrefixed(4, false, f);
 }
 
-[GoMethodBody("callContinuation")] internal static void callContinuationᴍ(ж<Builder> Ꮡb, Action<ж<Builder>> f, ж<Builder> arg) {
+internal static void callContinuation⁔(/*this*/ ж<Builder> Ꮡb, Action<ж<Builder>> f, ж<Builder> arg) {
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
@@ -199,7 +199,7 @@ partial struct BuildError {
     finally { ᒐ.Run(); }
 }
 
-[GoMethodBody("addLengthPrefixed")] internal static void addLengthPrefixedᴍ(ж<Builder> Ꮡb, nint lenLen, bool isASN1, Action<ж<Builder>> f) {
+internal static void addLengthPrefixed⁔(/*this*/ ж<Builder> Ꮡb, nint lenLen, bool isASN1, Action<ж<Builder>> f) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Subsequent writes can be ignored if the builder has encountered an error.
@@ -231,10 +231,10 @@ partial struct BuildError {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string pendingAsn1ChildTooLongˢᴍBuilder => ref pendingAsn1ChildTooLongˢᵇᴍBuilder;
-private static readonly @string pendingAsn1ChildTooLongˢᵇᴍBuilder = "pending ASN.1 child too long"u8;
+private static ref readonly @string pendingAsn1ChildTooLongˢ⁔Builder => ref pendingAsn1ChildTooLongˢᵇ⁔Builder;
+private static readonly @string pendingAsn1ChildTooLongˢᵇ⁔Builder = "pending ASN.1 child too long"u8;
 
-[GoMethodBody("flushChild")] internal static void flushChildᴍ(ref Builder b) {
+internal static void flushChild⁔(/*this*/ ref Builder b) {
     if (b.child == nil) {
         return;
     }
@@ -263,7 +263,7 @@ private static readonly @string pendingAsn1ChildTooLongˢᵇᴍBuilder = "pendin
         uint8 lenLen = default;
         uint8 lenByte = default;
         if ((int64)length > 0xfffffffeL) {
-            b.err = errors.New(pendingAsn1ChildTooLongˢᴍBuilder);
+            b.err = errors.New(pendingAsn1ChildTooLongˢ⁔Builder);
             return;
         } else if (length > 0xffffff) {
             lenLen = 5;
@@ -314,12 +314,12 @@ private static readonly @string pendingAsn1ChildTooLongˢᵇᴍBuilder = "pendin
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string cryptobyteLengthOverflowˢᴍBuilder => ref cryptobyteLengthOverflowˢᵇᴍBuilder;
-private static readonly @string cryptobyteLengthOverflowˢᵇᴍBuilder = "cryptobyte: length overflow"u8;
-private static ref readonly @string cryptobyteBuilderIsˢᴍBuilder => ref cryptobyteBuilderIsˢᵇᴍBuilder;
-private static readonly @string cryptobyteBuilderIsˢᵇᴍBuilder = "cryptobyte: Builder is exceeding its fixed-size buffer"u8;
+private static ref readonly @string cryptobyteLengthOverflowˢ⁔Builder => ref cryptobyteLengthOverflowˢᵇ⁔Builder;
+private static readonly @string cryptobyteLengthOverflowˢᵇ⁔Builder = "cryptobyte: length overflow"u8;
+private static ref readonly @string cryptobyteBuilderIsˢ⁔Builder => ref cryptobyteBuilderIsˢᵇ⁔Builder;
+private static readonly @string cryptobyteBuilderIsˢᵇ⁔Builder = "cryptobyte: Builder is exceeding its fixed-size buffer"u8;
 
-[GoMethodBody("add")] internal static void addᴍ(ref Builder b, params ꓸꓸꓸbyte bytesʗp) {
+internal static void add⁔(/*this*/ ref Builder b, params ꓸꓸꓸbyte bytesʗp) {
     var bytes = bytesʗp.sslice();
 
     if (b.err != nil) {
@@ -329,10 +329,10 @@ private static readonly @string cryptobyteBuilderIsˢᵇᴍBuilder = "cryptobyte
         throw panic("cryptobyte: attempted write while child is pending");
     }
     if (len(b.result) + len(bytes) < len(bytes)) {
-        b.err = errors.New(cryptobyteLengthOverflowˢᴍBuilder);
+        b.err = errors.New(cryptobyteLengthOverflowˢ⁔Builder);
     }
     if (b.fixedSize && len(b.result) + len(bytes) > cap(b.result)) {
-        b.err = errors.New(cryptobyteBuilderIsˢᴍBuilder);
+        b.err = errors.New(cryptobyteBuilderIsˢ⁔Builder);
         return;
     }
     b.result = appendꓸꓸꓸ(b.result, bytes);
@@ -341,7 +341,7 @@ private static readonly @string cryptobyteBuilderIsˢᵇᴍBuilder = "cryptobyte
 // Unwrite rolls back non-negative n bytes written directly to the Builder.
 // An attempt by a child builder passed to a continuation to unwrite bytes
 // from its parent will panic.
-[GoMethodBody("Unwrite")] internal static void Unwriteᴍ(ref Builder b, nint n) {
+internal static void Unwrite⁔(/*this*/ ref Builder b, nint n) {
     if (b.err != nil) {
         return;
     }
@@ -376,7 +376,7 @@ partial interface MarshalingValue {
 // AddValue calls Marshal on v, passing a pointer to the builder to append to.
 // If Marshal returns an error, it is set on the Builder so that subsequent
 // appends don't have an effect.
-[GoMethodBody("AddValue")] internal static void AddValueᴍ(ж<Builder> Ꮡb, MarshalingValue v) {
+internal static void AddValue⁔(/*this*/ ж<Builder> Ꮡb, MarshalingValue v) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var err = v.Marshal(Ꮡb);

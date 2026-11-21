@@ -175,7 +175,7 @@ partial struct huffmanLUT /*[]uint32*/;
 
 } partial class jpeg_package {
 
-[GoMethodBody("init")] internal static void initᴍ(ref huffmanLUT h, huffmanSpec s) {
+internal static void init⁔(/*this*/ ref huffmanLUT h, huffmanSpec s) {
     s = s.ΔClone();
 
     nint maxValue = 0;
@@ -236,21 +236,21 @@ partial struct encoder {
 
 } partial class jpeg_package {
 
-[GoMethodBody("flush")] internal static void flushᴍ(ref encoder e) {
+internal static void flush⁔(/*this*/ ref encoder e) {
     if (e.err != nil) {
         return;
     }
     e.err = e.w.Flush();
 }
 
-[GoMethodBody("write")] internal static void writeᴍ(ref encoder e, slice<byte> p) {
+internal static void write⁔(/*this*/ ref encoder e, slice<byte> p) {
     if (e.err != nil) {
         return;
     }
     (_, e.err) = e.w.Write(p);
 }
 
-[GoMethodBody("writeByte")] internal static void writeByteᴍ(ref encoder e, byte b) {
+internal static void writeByte⁔(/*this*/ ref encoder e, byte b) {
     if (e.err != nil) {
         return;
     }
@@ -259,7 +259,7 @@ partial struct encoder {
 
 // emit emits the least significant nBits bits of bits to the bit-stream.
 // The precondition is bits < 1<<nBits && nBits <= 16.
-[GoMethodBody("emit")] internal static void emitᴍ(ref encoder e, uint32 bits, uint32 nBits) {
+internal static void emit⁔(/*this*/ ref encoder e, uint32 bits, uint32 nBits) {
     nBits += e.nBits;
     bits.LshAssign((uint64)(32 - nBits));
     bits |= (uint32)(e.bits);
@@ -276,14 +276,14 @@ partial struct encoder {
 }
 
 // emitHuff emits the given value with the given Huffman encoder.
-[GoMethodBody("emitHuff")] internal static void emitHuffᴍ(ref encoder e, huffIndex h, int32 value) {
+internal static void emitHuff⁔(/*this*/ ref encoder e, huffIndex h, int32 value) {
     var x = theHuffmanLUT[h][value];
     e.emit((uint32)(x & ((1 << 24) - 1)), x >> 24);
 }
 
 // emitHuffRLE emits a run of runLength copies of value encoded with the given
 // Huffman encoder.
-[GoMethodBody("emitHuffRLE")] internal static void emitHuffRLEᴍ(ref encoder e, huffIndex h, int32 runLength, int32 value) {
+internal static void emitHuffRLE⁔(/*this*/ ref encoder e, huffIndex h, int32 runLength, int32 value) {
     var (a, b) = (value, value);
     if (a < 0) {
         (a, b) = (-value, value - 1);
@@ -301,7 +301,7 @@ partial struct encoder {
 }
 
 // writeMarkerHeader writes the header for a marker with the given length.
-[GoMethodBody("writeMarkerHeader")] internal static void writeMarkerHeaderᴍ(ref encoder e, uint8 marker, nint markerlen) {
+internal static void writeMarkerHeader⁔(/*this*/ ref encoder e, uint8 marker, nint markerlen) {
     e.buf[0] = 0xff;
     e.buf[1] = marker;
     e.buf[2] = (uint8)(markerlen >> 8);
@@ -310,7 +310,7 @@ partial struct encoder {
 }
 
 // writeDQT writes the Define Quantization Table marker.
-[GoMethodBody("writeDQT")] internal static void writeDQTᴍ(ref encoder e) {
+internal static void writeDQT⁔(/*this*/ ref encoder e) {
     const nint markerlen = /* 2 + int(nQuantIndex)*(1+blockSize) */ 132;
     e.writeMarkerHeader(dqtMarker, markerlen);
     foreach (var i in range(len(e.quant))) {
@@ -320,7 +320,7 @@ partial struct encoder {
 }
 
 // writeSOF0 writes the Start Of Frame (Baseline Sequential) marker.
-[GoMethodBody("writeSOF0")] internal static void writeSOF0ᴍ(ref encoder e, image.Point size, nint nComponent) {
+internal static void writeSOF0⁔(/*this*/ ref encoder e, image.Point size, nint nComponent) {
     nint markerlen = 8 + 3 * nComponent;
     e.writeMarkerHeader(sof0Marker, markerlen);
     e.buf[0] = 8; // 8-bit color.
@@ -346,7 +346,7 @@ partial struct encoder {
 }
 
 // writeDHT writes the Define Huffman Table marker.
-[GoMethodBody("writeDHT")] internal static void writeDHTᴍ(ref encoder e, nint nComponent) {
+internal static void writeDHT⁔(/*this*/ ref encoder e, nint nComponent) {
     nint markerlen = 2;
     var specs = theHuffmanSpec[..];
     if (nComponent == 1) {
@@ -371,7 +371,7 @@ partial struct encoder {
 // writeBlock writes a block of pixel data using the given quantization table,
 // returning the post-quantized DC value of the DCT-transformed block. b is in
 // natural (not zig-zag) order.
-[GoMethodBody("writeBlock")] internal static int32 writeBlockᴍ(ref encoder e, ж<block> Ꮡb, quantIndex q, int32 prevDC) {
+internal static int32 writeBlock⁔(/*this*/ ref encoder e, ж<block> Ꮡb, quantIndex q, int32 prevDC) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     fdct(Ꮡb);
@@ -531,7 +531,7 @@ internal static slice<byte> sosHeaderYCbCr = [
 } partial class jpeg_package {
 
 // writeSOS writes the StartOfScan marker.
-[GoMethodBody("writeSOS")] internal static void writeSOSᴍ(ref encoder e, image.Image m) {
+internal static void writeSOS⁔(/*this*/ ref encoder e, image.Image m) {
     switch (m.type()) {
     case ж<image.Gray>: {
         e.write(sosHeaderY);

@@ -64,39 +64,39 @@ public static ж<Alias> NewAlias(ж<TypeName> obj, Type rhs) {
 
 // Obj returns the type name for the declaration defining the alias type a.
 // For instantiated types, this is same as the type name of the origin type.
-[GoMethodBody("Obj")] internal static ж<TypeName> Objᴍ(ref Alias a) { return a.orig.obj; }
+internal static ж<TypeName> Obj⁔(/*this*/ ref Alias a) { return a.orig.obj; }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Alias> Ꮡa) { return TypeString(new AliasжType(Ꮡa), default); }
+internal static @string String⁔(/*this*/ ж<Alias> Ꮡa) { return TypeString(new AliasжType(Ꮡa), default); }
 
 // Underlying returns the [underlying type] of the alias type a, which is the
 // underlying type of the aliased type. Underlying types are never Named,
 // TypeParam, or Alias types.
 //
 // [underlying type]: https://go.dev/ref/spec#Underlying_types.
-[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Alias> Ꮡa) { return unalias(Ꮡa).Underlying(); }
+internal static Type Underlying⁔(/*this*/ ж<Alias> Ꮡa) { return unalias(Ꮡa).Underlying(); }
 
 // Origin returns the generic Alias type of which a is an instance.
 // If a is not an instance of a generic alias, Origin returns a.
-[GoMethodBody("Origin")] internal static ж<Alias> Originᴍ(ref Alias a) { return a.orig; }
+internal static ж<Alias> Origin⁔(/*this*/ ref Alias a) { return a.orig; }
 
 // TypeParams returns the type parameters of the alias type a, or nil.
 // A generic Alias and its instances have the same type parameters.
-[GoMethodBody("TypeParams")] internal static ж<TypeParamList> TypeParamsᴍ(ref Alias a) { return a.tparams; }
+internal static ж<TypeParamList> TypeParams⁔(/*this*/ ref Alias a) { return a.tparams; }
 
 // SetTypeParams sets the type parameters of the alias type a.
 // The alias a must not have type arguments.
-[GoMethodBody("SetTypeParams")] internal static void SetTypeParamsᴍ(ref Alias a, slice<ж<TypeParam>> tparams) {
+internal static void SetTypeParams⁔(/*this*/ ref Alias a, slice<ж<TypeParam>> tparams) {
     assert(a.targs == nil);
     a.tparams = bindTParams(tparams);
 }
 
 // TypeArgs returns the type arguments used to instantiate the Alias type.
 // If a is not an instance of a generic alias, the result is nil.
-[GoMethodBody("TypeArgs")] internal static ж<TypeList> TypeArgsᴍ(ref Alias a) { return a.targs; }
+internal static ж<TypeList> TypeArgs⁔(/*this*/ ref Alias a) { return a.targs; }
 
 // Rhs returns the type R on the right-hand side of an alias
 // declaration "type A = R", which may be another alias.
-[GoMethodBody("Rhs")] internal static Type Rhsᴍ(ref Alias a) { return a.fromRHS; }
+internal static Type Rhs⁔(/*this*/ ref Alias a) { return a.fromRHS; }
 
 } partial class types_package {
 
@@ -139,7 +139,7 @@ internal static ж<Named> asNamed(Type t) {
 
 // newAlias creates a new Alias type with the given type name and rhs.
 // If rhs is nil, the alias is incomplete.
-[GoMethodBody("newAlias")] internal static ж<Alias> newAliasᴍ(ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, Type rhs) {
+internal static ж<Alias> newAlias⁔(/*this*/ ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, Type rhs) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
 
@@ -162,7 +162,7 @@ internal static ж<Named> asNamed(Type t) {
 // newAliasInstance creates a new alias instance for the given origin and type
 // arguments, recording pos as the position of its synthetic object (for error
 // reporting).
-[GoMethodBody("newAliasInstance")] internal static ж<Alias> newAliasInstanceᴍ(ж<Checker> Ꮡcheck, token.Pos pos, ж<Alias> Ꮡorig, slice<Type> targs, ж<Named> expanding, ж<Context> ctxt) {
+internal static ж<Alias> newAliasInstance⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, ж<Alias> Ꮡorig, slice<Type> targs, ж<Named> expanding, ж<Context> ctxt) {
     ref var orig = ref Ꮡorig.DerefOrNull();
 
     assert(len(targs) > 0);
@@ -177,7 +177,7 @@ internal static ж<Named> asNamed(Type t) {
 
 } partial class types_package {
 
-[GoMethodBody("cleanup")] internal static void cleanupᴍ(ж<Alias> Ꮡa) {
+internal static void cleanup⁔(/*this*/ ж<Alias> Ꮡa) {
     // Ensure a.actual is set before types are published,
     // so unalias is a pure "getter", not a "setter".
     unalias(Ꮡa);

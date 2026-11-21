@@ -60,7 +60,7 @@ partial struct subFS {
 } partial class fs_package {
 
 // fullName maps name to the fully-qualified name dir/name.
-[GoMethodBody("fullName")] internal static (@string, error) fullNameᴍ(ref subFS f, @string op, @string name) {
+internal static (@string, error) fullName⁔(/*this*/ ref subFS f, @string op, @string name) {
     if (!ValidPath(name)) {
         return ("", new PathErrorжerror(Ꮡ(new PathError(Op: op, Path: name, Err: ErrInvalid))));
     }
@@ -68,7 +68,7 @@ partial struct subFS {
 }
 
 // shorten maps name, which should start with f.dir, back to the suffix after f.dir.
-[GoMethodBody("shorten")] internal static (@string rel, bool ok) shortenᴍ(ref subFS f, @string name) {
+internal static (@string rel, bool ok) shorten⁔(/*this*/ ref subFS f, @string name) {
     if (name == f.dir) {
         return (".", true);
     }
@@ -79,7 +79,7 @@ partial struct subFS {
 }
 
 // fixErr shortens any reported names in PathErrors by stripping f.dir.
-[GoMethodBody("fixErr")] internal static error fixErrᴍ(ref subFS f, error err) {
+internal static error fixErr⁔(/*this*/ ref subFS f, error err) {
     var (e, ok) = err._<ж<PathError>>(ᐧ); if (ok) {
         var (@short, okΔ1) = f.shorten(e.Path); if (okΔ1) {
             e.Path = @short;
@@ -89,11 +89,11 @@ partial struct subFS {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string openˢᴍsubFS => ref openˢᵇᴍsubFS;
-private static readonly @string openˢᵇᴍsubFS = "open"u8;
+private static ref readonly @string openˢ⁔subFS => ref openˢᵇ⁔subFS;
+private static readonly @string openˢᵇ⁔subFS = "open"u8;
 
-[GoMethodBody("Open")] internal static (File, error) Openᴍ(ref subFS f, @string name) {
-    var (full, err) = f.fullName(openˢᴍsubFS, name);
+internal static (File, error) Open⁔(/*this*/ ref subFS f, @string name) {
+    var (full, err) = f.fullName(openˢ⁔subFS, name);
     if (err != nil) {
         return (default, err);
     }
@@ -102,11 +102,11 @@ private static readonly @string openˢᵇᴍsubFS = "open"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string readˢᴍsubFS => ref readˢᵇᴍsubFS;
-private static readonly @string readˢᵇᴍsubFS = "read"u8;
+private static ref readonly @string readˢ⁔subFS => ref readˢᵇ⁔subFS;
+private static readonly @string readˢᵇ⁔subFS = "read"u8;
 
-[GoMethodBody("ReadDir")] internal static (slice<DirEntry>, error) ReadDirᴍ(ref subFS f, @string name) {
-    var (full, err) = f.fullName(readˢᴍsubFS, name);
+internal static (slice<DirEntry>, error) ReadDir⁔(/*this*/ ref subFS f, @string name) {
+    var (full, err) = f.fullName(readˢ⁔subFS, name);
     if (err != nil) {
         return (default, err);
     }
@@ -114,8 +114,8 @@ private static readonly @string readˢᵇᴍsubFS = "read"u8;
     return (dir, f.fixErr(err));
 }
 
-[GoMethodBody("ReadFile")] internal static (slice<byte>, error) ReadFileᴍ(ref subFS f, @string name) {
-    var (full, err) = f.fullName(readˢᴍsubFS, name);
+internal static (slice<byte>, error) ReadFile⁔(/*this*/ ref subFS f, @string name) {
+    var (full, err) = f.fullName(readˢ⁔subFS, name);
     if (err != nil) {
         return (default, err);
     }
@@ -124,11 +124,11 @@ private static readonly @string readˢᵇᴍsubFS = "read"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string readlinkˢᴍsubFS => ref readlinkˢᵇᴍsubFS;
-private static readonly @string readlinkˢᵇᴍsubFS = "readlink"u8;
+private static ref readonly @string readlinkˢ⁔subFS => ref readlinkˢᵇ⁔subFS;
+private static readonly @string readlinkˢᵇ⁔subFS = "readlink"u8;
 
-[GoMethodBody("ReadLink")] internal static (@string, error) ReadLinkᴍ(ref subFS f, @string name) {
-    var (full, err) = f.fullName(readlinkˢᴍsubFS, name);
+internal static (@string, error) ReadLink⁔(/*this*/ ref subFS f, @string name) {
+    var (full, err) = f.fullName(readlinkˢ⁔subFS, name);
     if (err != nil) {
         return ("", err);
     }
@@ -140,11 +140,11 @@ private static readonly @string readlinkˢᵇᴍsubFS = "readlink"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string lstatˢᴍsubFS => ref lstatˢᵇᴍsubFS;
-private static readonly @string lstatˢᵇᴍsubFS = "lstat"u8;
+private static ref readonly @string lstatˢ⁔subFS => ref lstatˢᵇ⁔subFS;
+private static readonly @string lstatˢᵇ⁔subFS = "lstat"u8;
 
-[GoMethodBody("Lstat")] internal static (FileInfo, error) Lstatᴍ(ref subFS f, @string name) {
-    var (full, err) = f.fullName(lstatˢᴍsubFS, name);
+internal static (FileInfo, error) Lstat⁔(/*this*/ ref subFS f, @string name) {
+    var (full, err) = f.fullName(lstatˢ⁔subFS, name);
     if (err != nil) {
         return (default, err);
     }
@@ -155,7 +155,7 @@ private static readonly @string lstatˢᵇᴍsubFS = "lstat"u8;
     return (info, default);
 }
 
-[GoMethodBody("Glob")] internal static (slice<@string>, error) Globᴍ(ref subFS f, @string pattern) {
+internal static (slice<@string>, error) Glob⁔(/*this*/ ref subFS f, @string pattern) {
     // Check pattern is well-formed.
     var (_, errΔ1) = path.Match(pattern, ""u8); if (errΔ1 != nil) {
         return (default, errΔ1);
@@ -177,17 +177,17 @@ private static readonly @string lstatˢᵇᴍsubFS = "lstat"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string subˢᴍsubFS => ref subˢᵇᴍsubFS;
-private static readonly @string subˢᵇᴍsubFS = "sub"u8;
+private static ref readonly @string subˢ⁔subFS => ref subˢᵇ⁔subFS;
+private static readonly @string subˢᵇ⁔subFS = "sub"u8;
 
-[GoMethodBody("Sub")] internal static (FS, error) Subᴍ(ж<subFS> Ꮡf, @string dir) {
+internal static (FS, error) Sub⁔(/*this*/ ж<subFS> Ꮡf, @string dir) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (dir == "."u8) {
         return (new subFSжFS(Ꮡf), default);
     }
     ref var full = ref heap<@string>(out var Ꮡfull);
-    (full, var err) = f.fullName(subˢᴍsubFS, dir);
+    (full, var err) = f.fullName(subˢ⁔subFS, dir);
     if (err != nil) {
         return (default, err);
     }

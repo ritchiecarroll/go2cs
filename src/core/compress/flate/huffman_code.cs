@@ -48,7 +48,7 @@ partial struct levelInfo {
 } partial class flate_package {
 
 // set sets the code and length of an hcode.
-[GoMethodBody("set")] internal static void setᴍ(ref hcode h, uint16 code, uint16 length) {
+internal static void set⁔(/*this*/ ref hcode h, uint16 code, uint16 length) {
     h.len = length;
     h.code = code;
 }
@@ -113,7 +113,7 @@ internal static ж<huffmanEncoder> fixedOffsetEncoding = generateFixedOffsetEnco
 
 } partial class flate_package {
 
-[GoMethodBody("bitLength")] internal static nint bitLengthᴍ(ref huffmanEncoder h, slice<int32> freq) {
+internal static nint bitLength⁔(/*this*/ ref huffmanEncoder h, slice<int32> freq) {
     nint total = default;
     foreach (var (i, f) in range(freq)) {
         if (f != 0) {
@@ -143,7 +143,7 @@ internal static UntypedInt maxBitsLimit => 16;
 //
 // bitCounts returns an integer slice in which slice[i] indicates the number of literals
 // that should be encoded in i bits.
-[GoMethodBody("bitCounts")] internal static slice<int32> bitCountsᴍ(ref huffmanEncoder h, slice<literalNode> list, int32 maxBits) {
+internal static slice<int32> bitCounts⁔(/*this*/ ref huffmanEncoder h, slice<literalNode> list, int32 maxBits) {
     if (maxBits >= maxBitsLimit) {
         throw panic("flate: maxBits too large");
     }
@@ -257,7 +257,7 @@ internal static UntypedInt maxBitsLimit => 16;
 
 // Look at the leaves and assign them a bit count and an encoding as specified
 // in RFC 1951 3.2.2
-[GoMethodBody("assignEncodingAndSize")] internal static void assignEncodingAndSizeᴍ(ж<huffmanEncoder> Ꮡh, slice<int32> bitCount, slice<literalNode> list) {
+internal static void assignEncodingAndSize⁔(/*this*/ ж<huffmanEncoder> Ꮡh, slice<int32> bitCount, slice<literalNode> list) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     var code = (uint16)0;
@@ -285,7 +285,7 @@ internal static UntypedInt maxBitsLimit => 16;
 //
 // freq is an array of frequencies, in which freq[i] gives the frequency of literal i.
 // maxBits  The maximum number of bits to use for any literal.
-[GoMethodBody("generate")] internal static void generateᴍ(ж<huffmanEncoder> Ꮡh, slice<int32> freq, int32 maxBits) {
+internal static void generate⁔(/*this*/ ж<huffmanEncoder> Ꮡh, slice<int32> freq, int32 maxBits) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (h.freqcache == nil) {
@@ -331,20 +331,20 @@ partial struct byLiteral /*[]literalNode*/;
 
 } partial class flate_package {
 
-[GoMethodBody("sort")] internal static void sortᴍ(ж<byLiteral> Ꮡs, slice<literalNode> a) {
+internal static void sort⁔(/*this*/ ж<byLiteral> Ꮡs, slice<literalNode> a) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s = (byLiteral)a;
     sort_package.Sort(new byLiteralжInterface(Ꮡs));
 }
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(byLiteral s) { return len(s); }
+internal static nint Len⁔(/*this*/ byLiteral s) { return len(s); }
 
-[GoMethodBody("Less")] internal static bool Lessᴍ(byLiteral s, nint i, nint j) {
+internal static bool Less⁔(/*this*/ byLiteral s, nint i, nint j) {
     return s[i].literal < s[j].literal;
 }
 
-[GoMethodBody("Swap")] internal static void Swapᴍ(byLiteral s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
+internal static void Swap⁔(/*this*/ byLiteral s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
 } partial class flate_package {
 
@@ -352,23 +352,23 @@ partial struct byFreq /*[]literalNode*/;
 
 } partial class flate_package {
 
-[GoMethodBody("sort")] internal static void sortᴍ(ж<byFreq> Ꮡs, slice<literalNode> a) {
+internal static void sort⁔(/*this*/ ж<byFreq> Ꮡs, slice<literalNode> a) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s = (byFreq)a;
     sort_package.Sort(new byFreqжInterface(Ꮡs));
 }
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(byFreq s) { return len(s); }
+internal static nint Len⁔(/*this*/ byFreq s) { return len(s); }
 
-[GoMethodBody("Less")] internal static bool Lessᴍ(byFreq s, nint i, nint j) {
+internal static bool Less⁔(/*this*/ byFreq s, nint i, nint j) {
     if (s[i].freq == s[j].freq) {
         return s[i].literal < s[j].literal;
     }
     return s[i].freq < s[j].freq;
 }
 
-[GoMethodBody("Swap")] internal static void Swapᴍ(byFreq s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
+internal static void Swap⁔(/*this*/ byFreq s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
 } partial class flate_package {
 

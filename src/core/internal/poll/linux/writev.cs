@@ -14,7 +14,7 @@ partial class poll_package {
 } partial class poll_package {
 
 // Writev wraps the writev system call.
-[GoMethodBody("Writev")] internal static (int64, error) Writevᴍ(ж<FD> Ꮡfd, ж<slice<slice<byte>>> Ꮡv) {
+internal static (int64, error) Writev⁔(/*this*/ ж<FD> Ꮡfd, ж<slice<slice<byte>>> Ꮡv) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

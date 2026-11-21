@@ -147,7 +147,7 @@ partial struct exactSig {
 
 } partial class http_package {
 
-[GoMethodBody("match")] internal static @string matchᴍ(ref exactSig e, slice<byte> data, nint firstNonWS) {
+internal static @string match⁔(/*this*/ ref exactSig e, slice<byte> data, nint firstNonWS) {
     if (bytes.HasPrefix(data, e.sig)) {
         return e.ct;
     }
@@ -164,7 +164,7 @@ partial struct maskedSig {
 
 } partial class http_package {
 
-[GoMethodBody("match")] internal static @string matchᴍ(ref maskedSig m, slice<byte> data, nint firstNonWS) {
+internal static @string match⁔(/*this*/ ref maskedSig m, slice<byte> data, nint firstNonWS) {
     // pattern matching algorithm section 6
     // https://mimesniff.spec.whatwg.org/#pattern-matching-algorithm
 
@@ -193,10 +193,10 @@ partial struct htmlSig /*[]byte*/;
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string textHtmlCharsetUtf8ˢᴍhtmlSig => ref textHtmlCharsetUtf8ˢᵇᴍhtmlSig;
-private static readonly @string textHtmlCharsetUtf8ˢᵇᴍhtmlSig = "text/html; charset=utf-8"u8;
+internal static ref readonly @string textHtmlCharsetUtf8ˢ⁔htmlSig => ref textHtmlCharsetUtf8ˢᵇ⁔htmlSig;
+private static readonly @string textHtmlCharsetUtf8ˢᵇ⁔htmlSig = "text/html; charset=utf-8"u8;
 
-[GoMethodBody("match")] internal static @string matchᴍ(htmlSig h, slice<byte> data, nint firstNonWS) {
+internal static @string match⁔(/*this*/ htmlSig h, slice<byte> data, nint firstNonWS) {
     data = data.slice(firstNonWS);
     if (len(data) < len(h) + 1) {
         return ""u8;
@@ -214,7 +214,7 @@ private static readonly @string textHtmlCharsetUtf8ˢᵇᴍhtmlSig = "text/html;
     if (!isTT(data[len(h)])) {
         return ""u8;
     }
-    return textHtmlCharsetUtf8ˢᴍhtmlSig;
+    return textHtmlCharsetUtf8ˢ⁔htmlSig;
 }
 
 } partial class http_package {
@@ -228,10 +228,10 @@ partial struct mp4Sig {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string videoMp4ˢᴍmp4Sig => ref videoMp4ˢᵇᴍmp4Sig;
-private static readonly @string videoMp4ˢᵇᴍmp4Sig = "video/mp4"u8;
+internal static ref readonly @string videoMp4ˢ⁔mp4Sig => ref videoMp4ˢᵇ⁔mp4Sig;
+private static readonly @string videoMp4ˢᵇ⁔mp4Sig = "video/mp4"u8;
 
-[GoMethodBody("match")] internal static @string matchᴍ(mp4Sig _, slice<byte> data, nint firstNonWS) {
+internal static @string match⁔(/*this*/ mp4Sig _, slice<byte> data, nint firstNonWS) {
     // https://mimesniff.spec.whatwg.org/#signature-for-mp4
     // c.f. section 6.2.1
     if (len(data) < 12) {
@@ -250,7 +250,7 @@ private static readonly @string videoMp4ˢᵇᴍmp4Sig = "video/mp4"u8;
             continue;
         }
         if (bytes.Equal(data.slice(st, st + 3), mp4)) {
-            return videoMp4ˢᴍmp4Sig;
+            return videoMp4ˢ⁔mp4Sig;
         }
     }
     return ""u8;
@@ -264,10 +264,10 @@ partial struct textSig {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string textPlainCharsetUtf8ˢᴍtextSig => ref textPlainCharsetUtf8ˢᵇᴍtextSig;
-private static readonly @string textPlainCharsetUtf8ˢᵇᴍtextSig = "text/plain; charset=utf-8"u8;
+internal static ref readonly @string textPlainCharsetUtf8ˢ⁔textSig => ref textPlainCharsetUtf8ˢᵇ⁔textSig;
+private static readonly @string textPlainCharsetUtf8ˢᵇ⁔textSig = "text/plain; charset=utf-8"u8;
 
-[GoMethodBody("match")] internal static @string matchᴍ(textSig _, slice<byte> data, nint firstNonWS) {
+internal static @string match⁔(/*this*/ textSig _, slice<byte> data, nint firstNonWS) {
     // c.f. section 5, step 4.
     foreach (var (_, b) in range(data.slice(firstNonWS))) {
         switch (ᐧ) {
@@ -275,7 +275,7 @@ private static readonly @string textPlainCharsetUtf8ˢᵇᴍtextSig = "text/plai
             return ""u8;
         }}
     }
-    return textPlainCharsetUtf8ˢᴍtextSig;
+    return textPlainCharsetUtf8ˢ⁔textSig;
 }
 
 }

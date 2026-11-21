@@ -76,11 +76,14 @@ using static go.crypto.@internal.fips140.ecdsa_package;
 
 namespace go.crypto.@internal.fips140;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using static ecdsa_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("ecdsa")]
 public static partial class ecdsa_package
@@ -133,28 +136,28 @@ public static partial class ecdsa_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ecdsa_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛPrivateKey;
-[GoMethodHost(typeof(ecdsa_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛPublicKey;
-[GoMethodHost(typeof(ecdsa_package.blockAlignedPersonalizationString)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛblockAlignedPersonalizationString;
-[GoMethodHost(typeof(ecdsa_package.hmacDRBG)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛhmacDRBG;
-[GoMethodHost(typeof(ecdsa_package.plainPersonalizationString)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛplainPersonalizationString;
+[GoMethodHost(typeof(ecdsa_package.PrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdsaᴛPrivateKey;
+[GoMethodHost(typeof(ecdsa_package.PublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdsaᴛPublicKey;
+[GoMethodHost(typeof(ecdsa_package.blockAlignedPersonalizationString)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdsaᴛblockAlignedPersonalizationString;
+[GoMethodHost(typeof(ecdsa_package.hmacDRBG)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdsaᴛhmacDRBG;
+[GoMethodHost(typeof(ecdsa_package.plainPersonalizationString)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdsaᴛplainPersonalizationString;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class ecdsaᴛPrivateKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => ecdsa_package.Bytesᴍ(ref priv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => ecdsa_package.PublicKeyᴍ(Ꮡpriv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => ecdsa_package.Bytes⁔(ref priv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => ecdsa_package.PublicKey⁔(Ꮡpriv);
 }
 partial class ecdsaᴛPublicKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => ecdsa_package.Bytesᴍ(ref pub);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => ecdsa_package.Bytes⁔(ref pub);
 }
 partial class ecdsaᴛplainPersonalizationString {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isPersonalizationString(this plainPersonalizationString _) => ecdsa_package.isPersonalizationStringᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void isPersonalizationString(this plainPersonalizationString _) => ecdsa_package.isPersonalizationString⁔(_);
 }
 partial class ecdsaᴛblockAlignedPersonalizationString {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isPersonalizationString(this blockAlignedPersonalizationString _) => ecdsa_package.isPersonalizationStringᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void isPersonalizationString(this blockAlignedPersonalizationString _) => ecdsa_package.isPersonalizationString⁔(_);
 }
 partial class ecdsaᴛhmacDRBG {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Generate(this ref hmacDRBG d, slice<byte> @out) => ecdsa_package.Generateᴍ(ref d, @out);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Generate(this ref hmacDRBG d, slice<byte> @out) => ecdsa_package.Generate⁔(ref d, @out);
 }
 // </GlyphForwarders>

@@ -109,13 +109,13 @@ partial interface nistPoint<T> {
 
 } partial class elliptic_package {
 
-[GoMethodBody("Params")] internal static ж<CurveParams> Paramsᴍ<Point>(ref nistCurve<Point> curve)
+internal static ж<CurveParams> Params⁔<Point>(/*this*/ ref nistCurve<Point> curve)
     where Point : nistPoint<Point>
 {
     return curve.@params;
 }
 
-[GoMethodBody("IsOnCurve")] internal static bool IsOnCurveᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy)
+internal static bool IsOnCurve⁔<Point>(/*this*/ ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy)
     where Point : nistPoint<Point>
 {
     ref var x = ref Ꮡx.DerefOrNull();
@@ -131,12 +131,12 @@ partial interface nistPoint<T> {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string negativeCoordinateˢᴍnistCurve => ref negativeCoordinateˢᵇᴍnistCurve;
-private static readonly @string negativeCoordinateˢᵇᴍnistCurve = "negative coordinate"u8;
-internal static ref readonly @string overflowingCoordinateˢᴍnistCurve => ref overflowingCoordinateˢᵇᴍnistCurve;
-private static readonly @string overflowingCoordinateˢᵇᴍnistCurve = "overflowing coordinate"u8;
+internal static ref readonly @string negativeCoordinateˢ⁔nistCurve => ref negativeCoordinateˢᵇ⁔nistCurve;
+private static readonly @string negativeCoordinateˢᵇ⁔nistCurve = "negative coordinate"u8;
+internal static ref readonly @string overflowingCoordinateˢ⁔nistCurve => ref overflowingCoordinateˢᵇ⁔nistCurve;
+private static readonly @string overflowingCoordinateˢᵇ⁔nistCurve = "overflowing coordinate"u8;
 
-[GoMethodBody("pointFromAffine")] internal static (Point p, error err) pointFromAffineᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy)
+internal static (Point p, error err) pointFromAffine⁔<Point>(/*this*/ ref nistCurve<Point> curve, ж<big.Int> Ꮡx, ж<big.Int> Ꮡy)
     where Point : nistPoint<Point>
 {
     Point p = GoZero<Point>();
@@ -150,10 +150,10 @@ private static readonly @string overflowingCoordinateˢᵇᴍnistCurve = "overfl
     }
     // Reject values that would not get correctly encoded.
     if (x.Sign() < 0 || y.Sign() < 0) {
-        return (p, errors.New(negativeCoordinateˢᴍnistCurve));
+        return (p, errors.New(negativeCoordinateˢ⁔nistCurve));
     }
     if (x.BitLen() > curve.@params.BitSize || y.BitLen() > curve.@params.BitSize) {
-        return (p, errors.New(overflowingCoordinateˢᴍnistCurve));
+        return (p, errors.New(overflowingCoordinateˢ⁔nistCurve));
     }
     // Encode the coordinates and let SetBytes reject invalid points.
     nint byteLen = (curve.@params.BitSize + 7) / 8;
@@ -164,7 +164,7 @@ private static readonly @string overflowingCoordinateˢᵇᴍnistCurve = "overfl
     return curve.newPoint().SetBytes(buf);
 }
 
-[GoMethodBody("pointToAffine")] internal static (ж<big.Int> x, ж<big.Int> y) pointToAffineᴍ<Point>(ref nistCurve<Point> curve, Point p)
+internal static (ж<big.Int> x, ж<big.Int> y) pointToAffine⁔<Point>(/*this*/ ref nistCurve<Point> curve, Point p)
     where Point : nistPoint<Point>
 {
     ж<big.Int> x = default;
@@ -182,7 +182,7 @@ private static readonly @string overflowingCoordinateˢᵇᴍnistCurve = "overfl
     return (x, y);
 }
 
-[GoMethodBody("Add")] internal static (ж<big.Int>, ж<big.Int>) Addᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> x2, ж<big.Int> y2)
+internal static (ж<big.Int>, ж<big.Int>) Add⁔<Point>(/*this*/ ref nistCurve<Point> curve, ж<big.Int> x1, ж<big.Int> y1, ж<big.Int> x2, ж<big.Int> y2)
     where Point : nistPoint<Point>
 {
     var (p1, err) = curve.pointFromAffine(x1, y1);
@@ -196,7 +196,7 @@ private static readonly @string overflowingCoordinateˢᵇᴍnistCurve = "overfl
     return curve.pointToAffine(p1.Add(p1, p2));
 }
 
-[GoMethodBody("Double")] internal static (ж<big.Int>, ж<big.Int>) Doubleᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> x1, ж<big.Int> y1)
+internal static (ж<big.Int>, ж<big.Int>) Double⁔<Point>(/*this*/ ref nistCurve<Point> curve, ж<big.Int> x1, ж<big.Int> y1)
     where Point : nistPoint<Point>
 {
     var (p, err) = curve.pointFromAffine(x1, y1);
@@ -208,7 +208,7 @@ private static readonly @string overflowingCoordinateˢᵇᴍnistCurve = "overfl
 
 // normalizeScalar brings the scalar within the byte size of the order of the
 // curve, as expected by the nistec scalar multiplication functions.
-[GoMethodBody("normalizeScalar")] internal static slice<byte> normalizeScalarᴍ<Point>(ref nistCurve<Point> curve, slice<byte> scalar)
+internal static slice<byte> normalizeScalar⁔<Point>(/*this*/ ref nistCurve<Point> curve, slice<byte> scalar)
     where Point : nistPoint<Point>
 {
     nint byteSize = (curve.@params.N.BitLen() + 7) / 8;
@@ -223,7 +223,7 @@ private static readonly @string overflowingCoordinateˢᵇᴍnistCurve = "overfl
     return s.FillBytes(@out);
 }
 
-[GoMethodBody("ScalarMult")] internal static (ж<big.Int>, ж<big.Int>) ScalarMultᴍ<Point>(ref nistCurve<Point> curve, ж<big.Int> Bx, ж<big.Int> By, slice<byte> scalar)
+internal static (ж<big.Int>, ж<big.Int>) ScalarMult⁔<Point>(/*this*/ ref nistCurve<Point> curve, ж<big.Int> Bx, ж<big.Int> By, slice<byte> scalar)
     where Point : nistPoint<Point>
 {
     var (p, err) = curve.pointFromAffine(Bx, By);
@@ -238,7 +238,7 @@ private static readonly @string overflowingCoordinateˢᵇᴍnistCurve = "overfl
     return curve.pointToAffine(p);
 }
 
-[GoMethodBody("ScalarBaseMult")] internal static (ж<big.Int>, ж<big.Int>) ScalarBaseMultᴍ<Point>(ref nistCurve<Point> curve, slice<byte> scalar)
+internal static (ж<big.Int>, ж<big.Int>) ScalarBaseMult⁔<Point>(/*this*/ ref nistCurve<Point> curve, slice<byte> scalar)
     where Point : nistPoint<Point>
 {
     scalar = curve.normalizeScalar(scalar);
@@ -249,7 +249,7 @@ private static readonly @string overflowingCoordinateˢᵇᴍnistCurve = "overfl
     return curve.pointToAffine(p);
 }
 
-[GoMethodBody("Unmarshal")] internal static (ж<big.Int> x, ж<big.Int> y) Unmarshalᴍ<Point>(ref nistCurve<Point> curve, slice<byte> data)
+internal static (ж<big.Int> x, ж<big.Int> y) Unmarshal⁔<Point>(/*this*/ ref nistCurve<Point> curve, slice<byte> data)
     where Point : nistPoint<Point>
 {
     ж<big.Int> x = default;
@@ -272,7 +272,7 @@ private static readonly @string overflowingCoordinateˢᵇᴍnistCurve = "overfl
     return (x, y);
 }
 
-[GoMethodBody("UnmarshalCompressed")] internal static (ж<big.Int> x, ж<big.Int> y) UnmarshalCompressedᴍ<Point>(ref nistCurve<Point> curve, slice<byte> data)
+internal static (ж<big.Int> x, ж<big.Int> y) UnmarshalCompressed⁔<Point>(/*this*/ ref nistCurve<Point> curve, slice<byte> data)
     where Point : nistPoint<Point>
 {
     if (len(data) == 0 || (data[0] != 2 && data[0] != 3)) {

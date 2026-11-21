@@ -17,7 +17,7 @@ internal static UntypedInt pidReleased => -1;
 
 } partial class os_package {
 
-[GoMethodBody("wait")] internal static (ж<ProcessState> ps, error err) waitᴍ(ж<Process> Ꮡp) {
+internal static (ж<ProcessState> ps, error err) wait⁔(/*this*/ ж<Process> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Which type of Process do we have?
@@ -31,10 +31,10 @@ internal static UntypedInt pidReleased => -1;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string waitˢᴍProcess => ref waitˢᵇᴍProcess;
-private static readonly @string waitˢᵇᴍProcess = "wait"u8;
+internal static ref readonly @string waitˢ⁔Process => ref waitˢᵇ⁔Process;
+private static readonly @string waitˢᵇ⁔Process = "wait"u8;
 
-[GoMethodBody("pidWait")] internal static (ж<ProcessState>, error) pidWaitᴍ(ж<Process> Ꮡp) {
+internal static (ж<ProcessState>, error) pidWait⁔(/*this*/ ж<Process> Ꮡp) {
     // TODO(go.dev/issue/67642): When there are concurrent Wait calls, one
     // may wait on the wrong process if the PID is reused after the
     // completes its wait.
@@ -66,7 +66,7 @@ private static readonly @string waitˢᵇᴍProcess = "wait"u8;
     ref var pid1 = ref heap<nint>(out var Ꮡpid1);
     (pid1, err) = ignoringEINTR2((nint, error) () => syscall.Wait4(Ꮡp.Value.Pid, Ꮡstatus, 0, Ꮡrusage));
     if (err != nil) {
-        return (default, NewSyscallError(waitˢᴍProcess, err));
+        return (default, NewSyscallError(waitˢ⁔Process, err));
     }
     Ꮡp.doRelease(statusDone);
     return (Ꮡ(new ProcessState(
@@ -77,15 +77,15 @@ private static readonly @string waitˢᵇᴍProcess = "wait"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string osUnsupportedSignalTypeˢᴍProcess => ref osUnsupportedSignalTypeˢᵇᴍProcess;
-private static readonly @string osUnsupportedSignalTypeˢᵇᴍProcess = "os: unsupported signal type"u8;
+internal static ref readonly @string osUnsupportedSignalTypeˢ⁔Process => ref osUnsupportedSignalTypeˢᵇ⁔Process;
+private static readonly @string osUnsupportedSignalTypeˢᵇ⁔Process = "os: unsupported signal type"u8;
 
-[GoMethodBody("signal")] internal static error signalᴍ(ж<Process> Ꮡp, Signal sig) {
+internal static error signal⁔(/*this*/ ж<Process> Ꮡp, Signal sig) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var (s, ok) = sig._<syscall.Signal>(ᐧ);
     if (!ok) {
-        return errors.New(osUnsupportedSignalTypeˢᴍProcess);
+        return errors.New(osUnsupportedSignalTypeˢ⁔Process);
     }
 
     // Which type of Process do we have?
@@ -99,10 +99,10 @@ private static readonly @string osUnsupportedSignalTypeˢᵇᴍProcess = "os: un
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string osProcessNotInitializedˢᴍProcess => ref osProcessNotInitializedˢᵇᴍProcess;
-private static readonly @string osProcessNotInitializedˢᵇᴍProcess = "os: process not initialized"u8;
+internal static ref readonly @string osProcessNotInitializedˢ⁔Process => ref osProcessNotInitializedˢᵇ⁔Process;
+private static readonly @string osProcessNotInitializedˢᵇ⁔Process = "os: process not initialized"u8;
 
-[GoMethodBody("pidSignal")] internal static error pidSignalᴍ(ж<Process> Ꮡp, syscall.Signal s) {
+internal static error pidSignal⁔(/*this*/ ж<Process> Ꮡp, syscall.Signal s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -112,7 +112,7 @@ private static readonly @string osProcessNotInitializedˢᵇᴍProcess = "os: pr
             return errProcessReleased;
         }
         if (p.Pid == pidUnset) {
-            return errors.New(osProcessNotInitializedˢᴍProcess);
+            return errors.New(osProcessNotInitializedˢ⁔Process);
         }
 
         Ꮡp.ᏑsigMu.RLock();
@@ -161,11 +161,11 @@ internal static (ж<Process> p, error err) findProcess(nint pid) {
 
 } partial class os_package {
 
-[GoMethodBody("userTime")] internal static time.Duration userTimeᴍ(ref ProcessState p) {
+internal static time.Duration userTime⁔(/*this*/ ref ProcessState p) {
     return ((time.Duration)p.rusage.ᏑUtime.Nano()) * time.Nanosecond;
 }
 
-[GoMethodBody("systemTime")] internal static time.Duration systemTimeᴍ(ref ProcessState p) {
+internal static time.Duration systemTime⁔(/*this*/ ref ProcessState p) {
     return ((time.Duration)p.rusage.ᏑStime.Nano()) * time.Nanosecond;
 }
 

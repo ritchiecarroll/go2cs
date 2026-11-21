@@ -82,7 +82,7 @@ partial struct Task {
 // TODO(hyangah): record parent id?
 
 // End marks the end of the operation represented by the [Task].
-[GoMethodBody("End")] internal static void Endᴍ(ref Task t) {
+internal static void End⁔(/*this*/ ref Task t) {
     userTaskEnd(t.id);
 }
 
@@ -184,7 +184,7 @@ internal static ж<Region> noopRegion = Ꮡ(new Region());
 } partial class trace_package {
 
 // End marks the end of the traced code region.
-[GoMethodBody("End")] internal static void Endᴍ(ж<Region> Ꮡr) {
+internal static void End⁔(/*this*/ ж<Region> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (Ꮡr == noopRegion) {

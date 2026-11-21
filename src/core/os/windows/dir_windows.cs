@@ -49,7 +49,7 @@ internal static ref Δsync.Pool dirBufPool => ref ((StaticBox<Δsync.Pool>)Ꮡdi
 
 } partial class os_package {
 
-[GoMethodBody("close")] internal static void closeᴍ(ref dirInfo d) {
+internal static void close⁔(/*this*/ ref dirInfo d) {
     d.h = 0;
     if (d.buf != nil) {
         ᏑdirBufPool.Put(d.buf.OrTypedNil());
@@ -67,7 +67,7 @@ internal static ref bool allowReadDirFileID => ref ((StaticBox<bool>)ᏑallowRea
 
 } partial class os_package {
 
-[GoMethodBody("init")] internal static void initᴍ(ж<dirInfo> Ꮡd, syscall.Handle h) {
+internal static void init⁔(/*this*/ ж<dirInfo> Ꮡd, syscall.Handle h) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     d.h = h;
@@ -115,12 +115,12 @@ partial struct dirEntry {
 
 } partial class os_package {
 
-[GoMethodBody("Name")] internal static @string Nameᴍ(dirEntry de) { return de.fs.Name(); }
-[GoMethodBody("IsDir")] internal static bool IsDirᴍ(dirEntry de) { return de.fs.IsDir(); }
-[GoMethodBody("Type")] internal static FileMode Typeᴍ(dirEntry de) { return de.fs.Mode().Type(); }
-[GoMethodBody("Info")] internal static (FileInfo, error) Infoᴍ(dirEntry de) { return (new fileStatжFileInfo(de.fs), default); }
+internal static @string Name⁔(/*this*/ dirEntry de) { return de.fs.Name(); }
+internal static bool IsDir⁔(/*this*/ dirEntry de) { return de.fs.IsDir(); }
+internal static FileMode Type⁔(/*this*/ dirEntry de) { return de.fs.Mode().Type(); }
+internal static (FileInfo, error) Info⁔(/*this*/ dirEntry de) { return (new fileStatжFileInfo(de.fs), default); }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(dirEntry de) {
+internal static @string String⁔(/*this*/ dirEntry de) {
     return fs.FormatDirEntry(de);
 }
 

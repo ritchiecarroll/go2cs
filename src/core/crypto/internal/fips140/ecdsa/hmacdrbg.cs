@@ -36,7 +36,7 @@ partial struct plainPersonalizationString /*[]byte*/;
 
 } partial class ecdsa_package {
 
-[GoMethodBody("isPersonalizationString")] internal static void isPersonalizationStringᴍ(plainPersonalizationString _) { }
+internal static void isPersonalizationString⁔(/*this*/ plainPersonalizationString _) { }
 
 } partial class ecdsa_package {
 
@@ -47,7 +47,7 @@ partial struct blockAlignedPersonalizationString /*[]slice<byte>*/;
 
 } partial class ecdsa_package {
 
-[GoMethodBody("isPersonalizationString")] internal static void isPersonalizationStringᴍ(blockAlignedPersonalizationString _) { }
+internal static void isPersonalizationString⁔(/*this*/ blockAlignedPersonalizationString _) { }
 
 } partial class ecdsa_package {
 
@@ -152,7 +152,7 @@ internal static void pad000(ж<hmac.HMAC> Ꮡh, nint writtenSoFar) {
 } partial class ecdsa_package {
 
 // Generate produces at most maxRequestSize bytes of random data in out.
-[GoMethodBody("Generate")] internal static void Generateᴍ(ref hmacDRBG d, slice<byte> @out) {
+internal static void Generate⁔(/*this*/ ref hmacDRBG d, slice<byte> @out) {
     // HMAC_DRBG_Generate_algorithm, per Section 10.1.2.5.
     fips140.RecordApproved();
 

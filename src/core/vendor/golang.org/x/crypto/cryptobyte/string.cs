@@ -29,7 +29,7 @@ partial struct String /*[]byte*/;
 
 // read advances a String by n bytes and returns them. If less than n bytes
 // remain, it returns nil.
-[GoMethodBody("read")] internal static slice<byte> readᴍ(ref String s, nint n) {
+internal static slice<byte> read⁔(/*this*/ ref String s, nint n) {
     if (len(s) < n || n < 0) {
         return default;
     }
@@ -39,13 +39,13 @@ partial struct String /*[]byte*/;
 }
 
 // Skip advances the String by n byte and reports whether it was successful.
-[GoMethodBody("Skip")] internal static bool Skipᴍ(ref String s, nint n) {
+internal static bool Skip⁔(/*this*/ ref String s, nint n) {
     return s.read(n) != nil;
 }
 
 // ReadUint8 decodes an 8-bit value into out and advances over it.
 // It reports whether the read was successful.
-[GoMethodBody("ReadUint8")] internal static bool ReadUint8ᴍ(ref String s, ж<uint8> Ꮡout) {
+internal static bool ReadUint8⁔(/*this*/ ref String s, ж<uint8> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(1);
@@ -58,7 +58,7 @@ partial struct String /*[]byte*/;
 
 // ReadUint16 decodes a big-endian, 16-bit value into out and advances over it.
 // It reports whether the read was successful.
-[GoMethodBody("ReadUint16")] internal static bool ReadUint16ᴍ(ref String s, ж<uint16> Ꮡout) {
+internal static bool ReadUint16⁔(/*this*/ ref String s, ж<uint16> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(2);
@@ -71,7 +71,7 @@ partial struct String /*[]byte*/;
 
 // ReadUint24 decodes a big-endian, 24-bit value into out and advances over it.
 // It reports whether the read was successful.
-[GoMethodBody("ReadUint24")] internal static bool ReadUint24ᴍ(ref String s, ж<uint32> Ꮡout) {
+internal static bool ReadUint24⁔(/*this*/ ref String s, ж<uint32> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(3);
@@ -84,7 +84,7 @@ partial struct String /*[]byte*/;
 
 // ReadUint32 decodes a big-endian, 32-bit value into out and advances over it.
 // It reports whether the read was successful.
-[GoMethodBody("ReadUint32")] internal static bool ReadUint32ᴍ(ref String s, ж<uint32> Ꮡout) {
+internal static bool ReadUint32⁔(/*this*/ ref String s, ж<uint32> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(4);
@@ -97,7 +97,7 @@ partial struct String /*[]byte*/;
 
 // ReadUint48 decodes a big-endian, 48-bit value into out and advances over it.
 // It reports whether the read was successful.
-[GoMethodBody("ReadUint48")] internal static bool ReadUint48ᴍ(ref String s, ж<uint64> Ꮡout) {
+internal static bool ReadUint48⁔(/*this*/ ref String s, ж<uint64> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(6);
@@ -110,7 +110,7 @@ partial struct String /*[]byte*/;
 
 // ReadUint64 decodes a big-endian, 64-bit value into out and advances over it.
 // It reports whether the read was successful.
-[GoMethodBody("ReadUint64")] internal static bool ReadUint64ᴍ(ref String s, ж<uint64> Ꮡout) {
+internal static bool ReadUint64⁔(/*this*/ ref String s, ж<uint64> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(8);
@@ -121,7 +121,7 @@ partial struct String /*[]byte*/;
     return true;
 }
 
-[GoMethodBody("readUnsigned")] internal static bool readUnsignedᴍ(ref String s, ж<uint32> Ꮡout, nint length) {
+internal static bool readUnsigned⁔(/*this*/ ref String s, ж<uint32> Ꮡout, nint length) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(length);
@@ -137,7 +137,7 @@ partial struct String /*[]byte*/;
     return true;
 }
 
-[GoMethodBody("readLengthPrefixed")] internal static bool readLengthPrefixedᴍ(ref String s, nint lenLen, ж<String> ᏑoutChild) {
+internal static bool readLengthPrefixed⁔(/*this*/ ref String s, nint lenLen, ж<String> ᏑoutChild) {
     ref var outChild = ref ᏑoutChild.DerefOrNull();
 
     var lenBytes = s.read(lenLen);
@@ -159,27 +159,27 @@ partial struct String /*[]byte*/;
 
 // ReadUint8LengthPrefixed reads the content of an 8-bit length-prefixed value
 // into out and advances over it. It reports whether the read was successful.
-[GoMethodBody("ReadUint8LengthPrefixed")] internal static bool ReadUint8LengthPrefixedᴍ(ref String s, ж<String> @out) {
+internal static bool ReadUint8LengthPrefixed⁔(/*this*/ ref String s, ж<String> @out) {
     return s.readLengthPrefixed(1, @out);
 }
 
 // ReadUint16LengthPrefixed reads the content of a big-endian, 16-bit
 // length-prefixed value into out and advances over it. It reports whether the
 // read was successful.
-[GoMethodBody("ReadUint16LengthPrefixed")] internal static bool ReadUint16LengthPrefixedᴍ(ref String s, ж<String> @out) {
+internal static bool ReadUint16LengthPrefixed⁔(/*this*/ ref String s, ж<String> @out) {
     return s.readLengthPrefixed(2, @out);
 }
 
 // ReadUint24LengthPrefixed reads the content of a big-endian, 24-bit
 // length-prefixed value into out and advances over it. It reports whether
 // the read was successful.
-[GoMethodBody("ReadUint24LengthPrefixed")] internal static bool ReadUint24LengthPrefixedᴍ(ref String s, ж<String> @out) {
+internal static bool ReadUint24LengthPrefixed⁔(/*this*/ ref String s, ж<String> @out) {
     return s.readLengthPrefixed(3, @out);
 }
 
 // ReadBytes reads n bytes into out and advances over them. It reports
 // whether the read was successful.
-[GoMethodBody("ReadBytes")] internal static bool ReadBytesᴍ(ref String s, ж<slice<byte>> Ꮡout, nint n) {
+internal static bool ReadBytes⁔(/*this*/ ref String s, ж<slice<byte>> Ꮡout, nint n) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     var v = s.read(n);
@@ -192,7 +192,7 @@ partial struct String /*[]byte*/;
 
 // CopyBytes copies len(out) bytes into out and advances over them. It reports
 // whether the copy operation was successful
-[GoMethodBody("CopyBytes")] internal static bool CopyBytesᴍ(ref String s, slice<byte> @out) {
+internal static bool CopyBytes⁔(/*this*/ ref String s, slice<byte> @out) {
     nint n = len(@out);
     var v = s.read(n);
     if (v == nil) {
@@ -202,7 +202,7 @@ partial struct String /*[]byte*/;
 }
 
 // Empty reports whether the string does not contain any bytes.
-[GoMethodBody("Empty")] internal static bool Emptyᴍ(String s) {
+internal static bool Empty⁔(/*this*/ String s) {
     return len(s) == 0;
 }
 

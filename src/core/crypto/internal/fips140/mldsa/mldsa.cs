@@ -68,18 +68,18 @@ partial struct PrivateKey {
 
 } partial class mldsa_package {
 
-[GoMethodBody("Equal")] internal static bool Equalᴍ(ref PrivateKey priv, ж<PrivateKey> Ꮡx) {
+internal static bool Equal⁔(/*this*/ ref PrivateKey priv, ж<PrivateKey> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     return priv.pub.p == x.pub.p && subtle.ConstantTimeCompare(priv.seed[..], x.seed[..]) == 1;
 }
 
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref PrivateKey priv) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PrivateKey priv) {
     var seed = priv.seed.Clone();
     return seed[..];
 }
 
-[GoMethodBody("PublicKey")] internal static ж<PublicKey> PublicKeyᴍ(ж<PrivateKey> Ꮡpriv) {
+internal static ж<PublicKey> PublicKey⁔(/*this*/ ж<PrivateKey> Ꮡpriv) {
     // Note that this is likely to keep the entire PrivateKey reachable for
     // the lifetime of the PublicKey, which may be undesirable.
     return Ꮡpriv.Ꮡpub;
@@ -97,36 +97,36 @@ partial struct PublicKey {
 
 } partial class mldsa_package {
 
-[GoMethodBody("Equal")] internal static bool Equalᴍ(ref PublicKey pub, ж<PublicKey> Ꮡx) {
+internal static bool Equal⁔(/*this*/ ref PublicKey pub, ж<PublicKey> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     nint size = pubKeySize(pub.p);
     return pub.p == x.p && subtle.ConstantTimeCompare(pub.raw.slice(0, size), x.raw.slice(0, size)) == 1;
 }
 
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref PublicKey pub) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PublicKey pub) {
     nint size = pubKeySize(pub.p);
     return bytes.Clone(pub.raw.slice(0, size));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mlDsa44ˢᴍPublicKey => ref mlDsa44ˢᵇᴍPublicKey;
-private static readonly @string mlDsa44ˢᵇᴍPublicKey = "ML-DSA-44"u8;
-internal static ref readonly @string mlDsa65ˢᴍPublicKey => ref mlDsa65ˢᵇᴍPublicKey;
-private static readonly @string mlDsa65ˢᵇᴍPublicKey = "ML-DSA-65"u8;
-internal static ref readonly @string mlDsa87ˢᴍPublicKey => ref mlDsa87ˢᵇᴍPublicKey;
-private static readonly @string mlDsa87ˢᵇᴍPublicKey = "ML-DSA-87"u8;
+internal static ref readonly @string mlDsa44ˢ⁔PublicKey => ref mlDsa44ˢᵇ⁔PublicKey;
+private static readonly @string mlDsa44ˢᵇ⁔PublicKey = "ML-DSA-44"u8;
+internal static ref readonly @string mlDsa65ˢ⁔PublicKey => ref mlDsa65ˢᵇ⁔PublicKey;
+private static readonly @string mlDsa65ˢᵇ⁔PublicKey = "ML-DSA-65"u8;
+internal static ref readonly @string mlDsa87ˢ⁔PublicKey => ref mlDsa87ˢᵇ⁔PublicKey;
+private static readonly @string mlDsa87ˢᵇ⁔PublicKey = "ML-DSA-87"u8;
 
-[GoMethodBody("Parameters")] internal static @string Parametersᴍ(ref PublicKey pub) {
+internal static @string Parameters⁔(/*this*/ ref PublicKey pub) {
     switch (pub.p) {
     case var ᴛ when ᴛ == params44: {
-        return mlDsa44ˢᴍPublicKey;
+        return mlDsa44ˢ⁔PublicKey;
     }
     case var ᴛ when ᴛ == params65: {
-        return mlDsa65ˢᴍPublicKey;
+        return mlDsa65ˢ⁔PublicKey;
     }
     case var ᴛ when ᴛ == params87: {
-        return mlDsa87ˢᴍPublicKey;
+        return mlDsa87ˢ⁔PublicKey;
     }
     default: {
         throw panic("mldsa: internal error: unknown parameters");

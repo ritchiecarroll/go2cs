@@ -137,7 +137,7 @@ internal static void touchMemory(ж<ScratchBuffer> memory, uint32 idx) {
 
 } partial class entropy_package {
 
-[GoMethodBody("Sample")] internal static uint8 Sampleᴍ(ref source s) {
+internal static uint8 Sample⁔(/*this*/ ref source s) {
     // Perform a few memory accesses in an unpredictable pattern to expose the
     // next measurement to as much system noise as possible.
     var (memory, lcgState) = (s.memory, s.lcgState);

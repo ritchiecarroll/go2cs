@@ -65,9 +65,12 @@ using static go.encoding.hex_package;
 
 namespace go.encoding;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static hex_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("hex")]
 public static partial class hex_package
@@ -107,24 +110,24 @@ public static partial class hex_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(hex_package.InvalidByteError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hexᴛInvalidByteError;
-[GoMethodHost(typeof(hex_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hexᴛdecoder;
-[GoMethodHost(typeof(hex_package.dumper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hexᴛdumper;
-[GoMethodHost(typeof(hex_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hexᴛencoder;
+[GoMethodHost(typeof(hex_package.InvalidByteError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hexᴛInvalidByteError;
+[GoMethodHost(typeof(hex_package.decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hexᴛdecoder;
+[GoMethodHost(typeof(hex_package.dumper)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hexᴛdumper;
+[GoMethodHost(typeof(hex_package.encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hexᴛencoder;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class hexᴛInvalidByteError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this InvalidByteError e) => hex_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this InvalidByteError e) => hex_package.Error⁔(e);
 }
 partial class hexᴛencoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) => hex_package.Writeᴍ(ref e, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) => hex_package.Write⁔(ref e, p);
 }
 partial class hexᴛdecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) => hex_package.Readᴍ(ref d, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) => hex_package.Read⁔(ref d, p);
 }
 partial class hexᴛdumper {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) => hex_package.Writeᴍ(ref h, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ Close(this ref dumper h) => hex_package.Closeᴍ(ref h);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref dumper h, slice<byte> data) => hex_package.Write⁔(ref h, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ Close(this ref dumper h) => hex_package.Close⁔(ref h);
 }
 // </GlyphForwarders>

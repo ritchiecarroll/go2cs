@@ -23,11 +23,11 @@ internal static (uintptr, error) pidfdFind(nint _) {
 
 } partial class os_package {
 
-[GoMethodBody("pidfdWait")] internal static (ж<ProcessState>, error) pidfdWaitᴍ(ref Process _) {
+internal static (ж<ProcessState>, error) pidfdWait⁔(/*this*/ ref Process _) {
     throw panic("unreachable");
 }
 
-[GoMethodBody("pidfdSendSignal")] internal static error pidfdSendSignalᴍ(ref Process _Δp0, syscall.Signal _Δp1) {
+internal static error pidfdSendSignal⁔(/*this*/ ref Process _Δp0, syscall.Signal _Δp1) {
     throw panic("unreachable");
 }
 

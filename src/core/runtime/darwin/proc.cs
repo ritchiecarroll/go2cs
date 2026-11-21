@@ -1139,7 +1139,7 @@ public static partial slice<uintptr> pprof_makeProfStack() { return makeProfStac
 
 } partial class runtime_package {
 
-[GoMethodBody("becomeSpinning")] internal static void becomeSpinningᴍ(ref m mp) {
+internal static void becomeSpinning⁔(/*this*/ ref m mp) {
     mp.spinning = true;
     Ꮡsched.of(schedt.Ꮡnmspinning).Add(1);
     Ꮡsched.of(schedt.Ꮡneedspinning).Store(0);
@@ -1152,7 +1152,7 @@ public static partial slice<uintptr> pprof_makeProfStack() { return makeProfStac
 // alive.
 //
 //go:yeswritebarrierrec
-[GoMethodBody("snapshotAllp")] internal static slice<ж<p>> snapshotAllpᴍ(ref m mp) {
+internal static slice<ж<p>> snapshotAllp⁔(/*this*/ ref m mp) {
     mp.allpSnapshot = allp;
     return mp.allpSnapshot;
 }
@@ -1163,11 +1163,11 @@ public static partial slice<uintptr> pprof_makeProfStack() { return makeProfStac
 // Must be called after reacquiring a P, as it requires a write barrier.
 //
 //go:yeswritebarrierrec
-[GoMethodBody("clearAllpSnapshot")] internal static void clearAllpSnapshotᴍ(ref m mp) {
+internal static void clearAllpSnapshot⁔(/*this*/ ref m mp) {
     mp.allpSnapshot = default;
 }
 
-[GoMethodBody("hasCgoOnStack")] internal static bool hasCgoOnStackᴍ(ref m mp) {
+internal static bool hasCgoOnStack⁔(/*this*/ ref m mp) {
     return mp.ncgo > 0 || mp.isextra;
 }
 
@@ -1547,11 +1547,11 @@ internal static stwReason stwForTestResetDebugLog => 16;        // "ResetDebugLo
 
 } partial class runtime_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(stwReason r) {
+internal static @string String⁔(/*this*/ stwReason r) {
     return stwReasonStrings[r];
 }
 
-[GoMethodBody("isGC")] internal static bool isGCᴍ(stwReason r) {
+internal static bool isGC⁔(/*this*/ stwReason r) {
     return r == stwGCMarkTerm || r == stwGCSweepTerm;
 }
 
@@ -5603,12 +5603,12 @@ internal static void setcpuprofilerate(int32 hz) {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingMcacheˢᴍp => ref missingMcacheˢᵇᴍp;
-private static readonly @string missingMcacheˢᵇᴍp = "missing mcache?"u8;
+internal static ref readonly @string missingMcacheˢ⁔p => ref missingMcacheˢᵇ⁔p;
+private static readonly @string missingMcacheˢᵇ⁔p = "missing mcache?"u8;
 
 // init initializes pp, which may be a freshly allocated p or a
 // previously destroyed p, and transitions it to status _Pgcstop.
-[GoMethodBody("init")] internal static void initᴍ(ж<p> Ꮡpp, int32 id) {
+internal static void init⁔(/*this*/ ж<p> Ꮡpp, int32 id) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     pp.id = id;
@@ -5620,7 +5620,7 @@ private static readonly @string missingMcacheˢᵇᴍp = "missing mcache?"u8;
     if (pp.mcache == nil) {
         if (id == 0) {
             if (mcache0 == nil) {
-                @throw(missingMcacheˢᴍp);
+                @throw(missingMcacheˢ⁔p);
             }
             // Use the bootstrap mcache0. Only one P will get
             // mcache0: the one with ID 0.
@@ -5648,14 +5648,14 @@ private static readonly @string missingMcacheˢᵇᴍp = "missing mcache?"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string pDestroyedWhileGcIsˢᴍp => ref pDestroyedWhileGcIsˢᵇᴍp;
-private static readonly @string pDestroyedWhileGcIsˢᵇᴍp = "P destroyed while GC is running"u8;
+internal static ref readonly @string pDestroyedWhileGcIsˢ⁔p => ref pDestroyedWhileGcIsˢᵇ⁔p;
+private static readonly @string pDestroyedWhileGcIsˢᵇ⁔p = "P destroyed while GC is running"u8;
 
 // destroy releases all of the resources associated with pp and
 // transitions it to status _Pdead.
 //
 // sched.lock must be held and the world must be stopped.
-[GoMethodBody("destroy")] internal static void destroyᴍ(ж<p> Ꮡpp) {
+internal static void destroy⁔(/*this*/ ж<p> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
@@ -5681,7 +5681,7 @@ private static readonly @string pDestroyedWhileGcIsˢᵇᴍp = "P destroyed whil
     // cannot be destroyed during the mark phase.
     var phase = gcphase; if (phase != _GCoff) {
         println((@string)"runtime: p id", pp.id, (@string)"destroyed during GC phase", phase);
-        @throw(pDestroyedWhileGcIsˢᴍp);
+        @throw(pDestroyedWhileGcIsˢ⁔p);
     }
     // We should free the queues though.
     Ꮡpp.of(p.Ꮡgcw).Ꮡspanq.destroy();
@@ -6552,7 +6552,7 @@ internal static (syscallingThread, bool) setBlockOnExitSyscall(ж<p> Ꮡpp) {
 // and moves it into the _Pgcstop state.
 //
 // The caller must be stopping the world.
-[GoMethodBody("gcstopP")] internal static void gcstopPᴍ(syscallingThread s) {
+internal static void gcstopP⁔(/*this*/ syscallingThread s) {
     assertLockHeld(Ꮡsched.of(schedt.Ꮡlock));
 
     s.releaseP(_Pgcstop);
@@ -6562,20 +6562,20 @@ internal static (syscallingThread, bool) setBlockOnExitSyscall(ж<p> Ꮡpp) {
 
 // takeP unwires the P attached to the syscalling thread
 // and moves it into the _Pidle state.
-[GoMethodBody("takeP")] internal static void takePᴍ(syscallingThread s) {
+internal static void takeP⁔(/*this*/ syscallingThread s) {
     s.releaseP(_Pidle);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string attemptedToReleasePIntoAˢᴍsyscallingThread => ref attemptedToReleasePIntoAˢᵇᴍsyscallingThread;
-private static readonly @string attemptedToReleasePIntoAˢᵇᴍsyscallingThread = "attempted to release P into a bad state"u8;
+internal static ref readonly @string attemptedToReleasePIntoAˢ⁔syscallingThread => ref attemptedToReleasePIntoAˢᵇ⁔syscallingThread;
+private static readonly @string attemptedToReleasePIntoAˢᵇ⁔syscallingThread = "attempted to release P into a bad state"u8;
 
 // releaseP unwires the P from the syscalling thread, moving
 // it to the provided state. Callers should prefer to use
 // takeP and gcstopP.
-[GoMethodBody("releaseP")] internal static void releasePᴍ(syscallingThread s, uint32 state) {
+internal static void releaseP⁔(/*this*/ syscallingThread s, uint32 state) {
     if (state != _Pidle && state != _Pgcstop) {
-        @throw(attemptedToReleasePIntoAˢᴍsyscallingThread);
+        @throw(attemptedToReleasePIntoAˢ⁔syscallingThread);
     }
     var trace = traceAcquire();
     s.pp.Value.m = 0;
@@ -6590,7 +6590,7 @@ private static readonly @string attemptedToReleasePIntoAˢᵇᴍsyscallingThread
 }
 
 // resume allows a syscalling thread to advance beyond exitsyscall.
-[GoMethodBody("resume")] internal static void resumeᴍ(syscallingThread s) {
+internal static void resume⁔(/*this*/ syscallingThread s) {
     casfrom_Gscanstatus(s.gp, s.status | (uint32)_Gscan, s.status);
 }
 
@@ -7084,28 +7084,28 @@ partial struct pMask /*[]uint32*/;
 } partial class runtime_package {
 
 // read returns true if P id's bit is set.
-[GoMethodBody("read")] internal static bool readᴍ(pMask p, uint32 id) {
+internal static bool read⁔(/*this*/ pMask p, uint32 id) {
     var word = id / 32;
     var mask = (uint32)1 << (int)(id % 32);
     return (atomic.Load(Ꮡ(p, word)) & mask) != 0;
 }
 
 // set sets P id's bit.
-[GoMethodBody("set")] internal static void setᴍ(pMask p, int32 id) {
+internal static void set⁔(/*this*/ pMask p, int32 id) {
     var word = id / 32;
     var mask = ((uint32)1).Lsh((int64)(id % 32));
     atomic.Or(Ꮡ(p, word), mask);
 }
 
 // clear clears P id's bit.
-[GoMethodBody("clear")] internal static void clearᴍ(pMask p, int32 id) {
+internal static void clear⁔(/*this*/ pMask p, int32 id) {
     var word = id / 32;
     var mask = ((uint32)1).Lsh((int64)(id % 32));
     atomic.And(Ꮡ(p, word), ~mask);
 }
 
 // any returns true if any bit in p is set.
-[GoMethodBody("any")] internal static bool anyᴍ(pMask p) {
+internal static bool any⁔(/*this*/ pMask p) {
     foreach (var i in range(len(p))) {
         if (atomic.Load(Ꮡ(p, i)) != 0) {
             return true;
@@ -7118,7 +7118,7 @@ partial struct pMask /*[]uint32*/;
 //
 // The result may alias p, so callers are encouraged to
 // discard p. Not safe for concurrent use.
-[GoMethodBody("resize")] internal static pMask resizeᴍ(pMask p, int32 nprocs) {
+internal static pMask resize⁔(/*this*/ pMask p, int32 nprocs) {
     var maskWords = (nprocs + 31) / 32;
 
     if (maskWords <= (int32)cap(p)) {
@@ -7547,12 +7547,12 @@ partial struct gQueue {
 } partial class runtime_package {
 
 // empty reports whether q is empty.
-[GoMethodBody("empty")] internal static bool emptyᴍ(ref gQueue q) {
+internal static bool empty⁔(/*this*/ ref gQueue q) {
     return q.head == 0;
 }
 
 // push adds gp to the head of q.
-[GoMethodBody("push")] internal static void pushᴍ(ref gQueue q, ж<g> Ꮡgp) {
+internal static void push⁔(/*this*/ ref gQueue q, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     gp.schedlink = q.head;
@@ -7564,7 +7564,7 @@ partial struct gQueue {
 }
 
 // pushBack adds gp to the tail of q.
-[GoMethodBody("pushBack")] internal static void pushBackᴍ(ref gQueue q, ж<g> Ꮡgp) {
+internal static void pushBack⁔(/*this*/ ref gQueue q, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     gp.schedlink = 0;
@@ -7579,7 +7579,7 @@ partial struct gQueue {
 
 // pushBackAll adds all Gs in q2 to the tail of q. After this q2 must
 // not be used.
-[GoMethodBody("pushBackAll")] internal static void pushBackAllᴍ(ref gQueue q, gQueue q2) {
+internal static void pushBackAll⁔(/*this*/ ref gQueue q, gQueue q2) {
     if (q2.tail == 0) {
         return;
     }
@@ -7595,7 +7595,7 @@ partial struct gQueue {
 
 // pop removes and returns the head of queue q. It returns nil if
 // q is empty.
-[GoMethodBody("pop")] internal static ж<g> popᴍ(ref gQueue q) {
+internal static ж<g> pop⁔(/*this*/ ref gQueue q) {
     var gp = q.head.ptr();
     if (gp != nil) {
         q.head = gp.Value.schedlink;
@@ -7608,7 +7608,7 @@ partial struct gQueue {
 }
 
 // popList takes all Gs in q and returns them as a gList.
-[GoMethodBody("popList")] internal static gList popListᴍ(ref gQueue q) {
+internal static gList popList⁔(/*this*/ ref gQueue q) {
     var stack = new gList(q.head, q.size);
     q = new gQueue();
     return stack;
@@ -7626,12 +7626,12 @@ partial struct gList {
 } partial class runtime_package {
 
 // empty reports whether l is empty.
-[GoMethodBody("empty")] internal static bool emptyᴍ(ref gList l) {
+internal static bool empty⁔(/*this*/ ref gList l) {
     return l.head == 0;
 }
 
 // push adds gp to the head of l.
-[GoMethodBody("push")] internal static void pushᴍ(ref gList l, ж<g> Ꮡgp) {
+internal static void push⁔(/*this*/ ref gList l, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     gp.schedlink = l.head;
@@ -7640,7 +7640,7 @@ partial struct gList {
 }
 
 // pushAll prepends all Gs in q to l. After this q must not be used.
-[GoMethodBody("pushAll")] internal static void pushAllᴍ(ref gList l, gQueue q) {
+internal static void pushAll⁔(/*this*/ ref gList l, gQueue q) {
     if (!q.empty()) {
         q.tail.ptr().Value.schedlink = l.head;
         l.head = q.head;
@@ -7649,7 +7649,7 @@ partial struct gList {
 }
 
 // pop removes and returns the head of l. If l is empty, it returns nil.
-[GoMethodBody("pop")] internal static ж<g> popᴍ(ref gList l) {
+internal static ж<g> pop⁔(/*this*/ ref gList l) {
     var gp = l.head.ptr();
     if (gp != nil) {
         l.head = gp.Value.schedlink;
@@ -7817,7 +7817,7 @@ partial struct randomEnum {
 
 } partial class runtime_package {
 
-[GoMethodBody("reset")] internal static void resetᴍ(ref randomOrder ord, uint32 count) {
+internal static void reset⁔(/*this*/ ref randomOrder ord, uint32 count) {
     ord.count = count;
     ord.coprimes = ord.coprimes[..0];
     for (var i = (uint32)1; i <= count; i++) {
@@ -7827,7 +7827,7 @@ partial struct randomEnum {
     }
 }
 
-[GoMethodBody("start")] internal static randomEnum startᴍ(ref randomOrder ord, uint32 i) {
+internal static randomEnum start⁔(/*this*/ ref randomOrder ord, uint32 i) {
     return new randomEnum(
         count: ord.count,
         pos: i % ord.count,
@@ -7837,16 +7837,16 @@ partial struct randomEnum {
 
 } partial class runtime_package {
 
-[GoMethodBody("done")] internal static bool doneᴍ(ref randomEnum @enum) {
+internal static bool done⁔(/*this*/ ref randomEnum @enum) {
     return @enum.i == @enum.count;
 }
 
-[GoMethodBody("next")] internal static void nextᴍ(ref randomEnum @enum) {
+internal static void next⁔(/*this*/ ref randomEnum @enum) {
     @enum.i++;
     @enum.pos = (@enum.pos + @enum.inc) % @enum.count;
 }
 
-[GoMethodBody("position")] internal static uint32 positionᴍ(ref randomEnum @enum) {
+internal static uint32 position⁔(/*this*/ ref randomEnum @enum) {
     return @enum.pos;
 }
 

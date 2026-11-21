@@ -13,7 +13,7 @@ partial class net_package {
 
 } partial class net_package {
 
-[GoMethodBody("writeBuffers")] internal static (int64, error) writeBuffersᴍ(ж<conn> Ꮡc, ж<Buffers> v) {
+internal static (int64, error) writeBuffers⁔(/*this*/ ж<conn> Ꮡc, ж<Buffers> v) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -29,16 +29,16 @@ partial class net_package {
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string writevˢᴍnetFD => ref writevˢᵇᴍnetFD;
-private static readonly @string writevˢᵇᴍnetFD = "writev"u8;
+internal static ref readonly @string writevˢ⁔netFD => ref writevˢᵇ⁔netFD;
+private static readonly @string writevˢᵇ⁔netFD = "writev"u8;
 
-[GoMethodBody("writeBuffers")] internal static (int64 n, error err) writeBuffersᴍ(ж<netFD> Ꮡfd, ж<Buffers> v) {
+internal static (int64 n, error err) writeBuffers⁔(/*this*/ ж<netFD> Ꮡfd, ж<Buffers> v) {
     int64 n = default;
     error err = default;
 
     (n, err) = Ꮡfd.Ꮡpfd.Writev(v.of(Buffers.Ꮡm_value));
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
-    return (n, wrapSyscallError(writevˢᴍnetFD, err));
+    return (n, wrapSyscallError(writevˢ⁔netFD, err));
 }
 
 }

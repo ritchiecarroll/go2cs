@@ -60,10 +60,13 @@ using static go.@internal.runtime.exithook_package;
 
 namespace go.@internal.runtime;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.@internal.runtime;
 using static exithook_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("exithook")]
 public static partial class exithook_package
@@ -96,11 +99,11 @@ public static partial class exithook_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(exithook_package.exitError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class exithookᴛexitError;
+[GoMethodHost(typeof(exithook_package.exitError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class exithookᴛexitError;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class exithookᴛexitError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this exitError e) => exithook_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this exitError e) => exithook_package.Error⁔(e);
 }
 // </GlyphForwarders>

@@ -72,12 +72,12 @@ partial struct beginRequest {
 } partial class fcgi_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fcgiInvalidBeginRequestˢᴍbeginRequest => ref fcgiInvalidBeginRequestˢᵇᴍbeginRequest;
-private static readonly @string fcgiInvalidBeginRequestˢᵇᴍbeginRequest = "fcgi: invalid begin request record"u8;
+internal static ref readonly @string fcgiInvalidBeginRequestˢ⁔beginRequest => ref fcgiInvalidBeginRequestˢᵇ⁔beginRequest;
+private static readonly @string fcgiInvalidBeginRequestˢᵇ⁔beginRequest = "fcgi: invalid begin request record"u8;
 
-[GoMethodBody("read")] internal static error readᴍ(ref beginRequest br, slice<byte> content) {
+internal static error read⁔(/*this*/ ref beginRequest br, slice<byte> content) {
     if (len(content) != 8) {
-        return errors.New(fcgiInvalidBeginRequestˢᴍbeginRequest);
+        return errors.New(fcgiInvalidBeginRequestˢ⁔beginRequest);
     }
     br.role = binary.BigEndian.Uint16(content);
     br.flags = content[2];
@@ -92,7 +92,7 @@ internal static array<byte> pad = new(255);
 
 } partial class fcgi_package {
 
-[GoMethodBody("init")] internal static void initᴍ(ref header h, recType recType, uint16 reqId, nint contentLength) {
+internal static void init⁔(/*this*/ ref header h, recType recType, uint16 reqId, nint contentLength) {
     h.Version = 1;
     h.Type = recType;
     h.Id = reqId;
@@ -120,7 +120,7 @@ internal static ж<conn> newConn(io.ReadWriteCloser rwc) {
 } partial class fcgi_package {
 
 // Close closes the conn if it is not already closed.
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<conn> Ꮡc) {
+internal static error Close⁔(/*this*/ ж<conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -148,10 +148,10 @@ partial struct record {
 } partial class fcgi_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fcgiInvalidHeaderVersionˢᴍrecord => ref fcgiInvalidHeaderVersionˢᵇᴍrecord;
-private static readonly @string fcgiInvalidHeaderVersionˢᵇᴍrecord = "fcgi: invalid header version"u8;
+internal static ref readonly @string fcgiInvalidHeaderVersionˢ⁔record => ref fcgiInvalidHeaderVersionˢᵇ⁔record;
+private static readonly @string fcgiInvalidHeaderVersionˢᵇ⁔record = "fcgi: invalid header version"u8;
 
-[GoMethodBody("read")] internal static error /*err*/ readᴍ(ж<record> Ꮡrec, io.Reader r) {
+internal static error /*err*/ read⁔(/*this*/ ж<record> Ꮡrec, io.Reader r) {
     error err = default;
     ref var rec = ref Ꮡrec.DerefOrNull();
 
@@ -159,7 +159,7 @@ private static readonly @string fcgiInvalidHeaderVersionˢᵇᴍrecord = "fcgi: 
         return err;
     }
     if (rec.h.Version != 1) {
-        return errors.New(fcgiInvalidHeaderVersionˢᴍrecord);
+        return errors.New(fcgiInvalidHeaderVersionˢ⁔record);
     }
     nint n = (nint)rec.h.ContentLength + (nint)rec.h.PaddingLength;
     (_, err) = io.ReadFull(r, rec.buf.slice(0, n)); if (err != nil) {
@@ -168,14 +168,14 @@ private static readonly @string fcgiInvalidHeaderVersionˢᵇᴍrecord = "fcgi: 
     return default;
 }
 
-[GoMethodBody("content")] internal static slice<byte> contentᴍ(ref record r) {
+internal static slice<byte> content⁔(/*this*/ ref record r) {
     return r.buf.slice(0, r.h.ContentLength);
 }
 
 } partial class fcgi_package {
 
 // writeRecord writes and sends a single record.
-[GoMethodBody("writeRecord")] internal static error writeRecordᴍ(ж<conn> Ꮡc, recType recType, uint16 reqId, slice<byte> b) {
+internal static error writeRecord⁔(/*this*/ ж<conn> Ꮡc, recType recType, uint16 reqId, slice<byte> b) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -201,14 +201,14 @@ private static readonly @string fcgiInvalidHeaderVersionˢᵇᴍrecord = "fcgi: 
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mutex.Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("writeEndRequest")] internal static error writeEndRequestᴍ(ж<conn> Ꮡc, uint16 reqId, nint appStatus, uint8 protocolStatus) {
+internal static error writeEndRequest⁔(/*this*/ ж<conn> Ꮡc, uint16 reqId, nint appStatus, uint8 protocolStatus) {
     var b = new slice<byte>(8);
     binary.BigEndian.PutUint32(b, (uint32)appStatus);
     b[4] = protocolStatus;
     return Ꮡc.writeRecord(typeEndRequest, reqId, b);
 }
 
-[GoMethodBody("writePairs")] internal static error writePairsᴍ(ж<conn> Ꮡc, recType recType, uint16 reqId, map<@string, @string> pairs) {
+internal static error writePairs⁔(/*this*/ ж<conn> Ꮡc, recType recType, uint16 reqId, map<@string, @string> pairs) {
     var w = newWriter(Ꮡc, recType, reqId);
     var b = new slice<byte>(8);
     foreach (var (k, v) in pairs) {
@@ -279,7 +279,7 @@ partial struct bufWriter {
 
 } partial class fcgi_package {
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ref bufWriter w) {
+internal static error Close⁔(/*this*/ ref bufWriter w) {
     var err = w.Writer.Flush(); if (err != nil) {
         w.closer.Close();
         return err;
@@ -305,7 +305,7 @@ partial struct streamWriter {
 
 } partial class fcgi_package {
 
-[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ref streamWriter w, slice<byte> p) {
+internal static (nint, error) Write⁔(/*this*/ ref streamWriter w, slice<byte> p) {
     nint nn = 0;
     while (len(p) > 0) {
         nint n = len(p);
@@ -321,7 +321,7 @@ partial struct streamWriter {
     return (nn, default);
 }
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ref streamWriter w) {
+internal static error Close⁔(/*this*/ ref streamWriter w) {
     // send empty record to close the stream
     return w.c.writeRecord(w.recType, w.reqId, default);
 }

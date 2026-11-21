@@ -73,7 +73,7 @@ public static (ж<Group>, error) LookupGroupId(@string gid) {
 } partial class user_package {
 
 // GroupIds returns the list of group IDs that the user is a member of.
-[GoMethodBody("GroupIds")] internal static (slice<@string>, error) GroupIdsᴍ(ж<User> Ꮡu) {
+internal static (slice<@string>, error) GroupIds⁔(/*this*/ ж<User> Ꮡu) {
     return listGroups(ref (Ꮡu).DerefOrNull());
 }
 

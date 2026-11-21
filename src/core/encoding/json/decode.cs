@@ -134,7 +134,7 @@ partial struct UnmarshalTypeError {
 
 } partial class json_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref UnmarshalTypeError e) {
+internal static @string Error⁔(/*this*/ ref UnmarshalTypeError e) {
     if (e.Struct != ""u8 || e.Field != ""u8) {
         return "json: cannot unmarshal "u8 + e.Value + " into Go struct field "u8 + e.Struct + "."u8 + e.Field + " of type "u8 + e.Type.String();
     }
@@ -155,7 +155,7 @@ partial struct UnmarshalFieldError {
 
 } partial class json_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref UnmarshalFieldError e) {
+internal static @string Error⁔(/*this*/ ref UnmarshalFieldError e) {
     return "json: cannot unmarshal object key "u8 + strconv.Quote(e.Key) + " into unexported field "u8 + e.Field.Name + " of type "u8 + e.Type.String();
 }
 
@@ -170,12 +170,12 @@ partial struct InvalidUnmarshalError {
 } partial class json_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string jsonUnmarshalNilˢᴍInvalidUnmarshalError => ref jsonUnmarshalNilˢᵇᴍInvalidUnmarshalError;
-private static readonly @string jsonUnmarshalNilˢᵇᴍInvalidUnmarshalError = "json: Unmarshal(nil)"u8;
+internal static ref readonly @string jsonUnmarshalNilˢ⁔InvalidUnmarshalError => ref jsonUnmarshalNilˢᵇ⁔InvalidUnmarshalError;
+private static readonly @string jsonUnmarshalNilˢᵇ⁔InvalidUnmarshalError = "json: Unmarshal(nil)"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref InvalidUnmarshalError e) {
+internal static @string Error⁔(/*this*/ ref InvalidUnmarshalError e) {
     if (e.Type == nil) {
-        return jsonUnmarshalNilˢᴍInvalidUnmarshalError;
+        return jsonUnmarshalNilˢ⁔InvalidUnmarshalError;
     }
 
     if (e.Type.Kind() != reflect.Pointer) {
@@ -186,7 +186,7 @@ private static readonly @string jsonUnmarshalNilˢᵇᴍInvalidUnmarshalError = 
 
 } partial class json_package {
 
-[GoMethodBody("unmarshal")] internal static error unmarshalᴍ(ж<decodeState> Ꮡd, any v) {
+internal static error unmarshal⁔(/*this*/ ж<decodeState> Ꮡd, any v) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var rv = reflect.ValueOf(v);
@@ -213,15 +213,15 @@ partial struct Number /*@string*/;
 } partial class json_package {
 
 // String returns the literal text of the number.
-[GoMethodBody("String")] internal static @string Stringᴍ(Number n) { return (@string)n; }
+internal static @string String⁔(/*this*/ Number n) { return (@string)n; }
 
 // Float64 returns the number as a float64.
-[GoMethodBody("Float64")] internal static (float64, error) Float64ᴍ(Number n) {
+internal static (float64, error) Float64⁔(/*this*/ Number n) {
     return strconv.ParseFloat((@string)n, 64);
 }
 
 // Int64 returns the number as an int64.
-[GoMethodBody("Int64")] internal static (int64, error) Int64ᴍ(Number n) {
+internal static (int64, error) Int64⁔(/*this*/ Number n) {
     return strconv.ParseInt((@string)n, 10, 64);
 }
 
@@ -248,7 +248,7 @@ partial struct decodeState {
 } partial class json_package {
 
 // readIndex returns the position of the last byte read.
-[GoMethodBody("readIndex")] internal static nint readIndexᴍ(ref decodeState d) {
+internal static nint readIndex⁔(/*this*/ ref decodeState d) {
     return d.off - 1;
 }
 
@@ -262,7 +262,7 @@ private static readonly @string phasePanicMsgᵇ = "JSON decoder out of sync - d
 
 } partial class json_package {
 
-[GoMethodBody("init")] internal static ж<decodeState> initᴍ(ж<decodeState> Ꮡd, slice<byte> data) {
+internal static ж<decodeState> init⁔(/*this*/ ж<decodeState> Ꮡd, slice<byte> data) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     d.data = data;
@@ -278,14 +278,14 @@ private static readonly @string phasePanicMsgᵇ = "JSON decoder out of sync - d
 
 // saveError saves the first err it is called with,
 // for reporting at the end of the unmarshal.
-[GoMethodBody("saveError")] internal static void saveErrorᴍ(ref decodeState d, error err) {
+internal static void saveError⁔(/*this*/ ref decodeState d, error err) {
     if (d.savedError == nil) {
         d.savedError = d.addErrorContext(err);
     }
 }
 
 // addErrorContext returns a new error enhanced with information from d.errorContext
-[GoMethodBody("addErrorContext")] internal static error addErrorContextᴍ(ref decodeState d, error err) {
+internal static error addErrorContext⁔(/*this*/ ref decodeState d, error err) {
     var fieldStackᴷ = new stackAppend<@string>();
 
     if (d.errorContext != nil && (d.errorContext.Struct != nil || len(d.errorContext.FieldStack) > 0)) {
@@ -304,7 +304,7 @@ private static readonly @string phasePanicMsgᵇ = "JSON decoder out of sync - d
 }
 
 // skip scans to the end of what was started.
-[GoMethodBody("skip")] internal static void skipᴍ(ж<decodeState> Ꮡd) {
+internal static void skip⁔(/*this*/ ж<decodeState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var s = Ꮡd.Ꮡscan;
@@ -323,7 +323,7 @@ private static readonly @string phasePanicMsgᵇ = "JSON decoder out of sync - d
 }
 
 // scanNext processes the byte at d.data[d.off].
-[GoMethodBody("scanNext")] internal static void scanNextᴍ(ж<decodeState> Ꮡd) {
+internal static void scanNext⁔(/*this*/ ж<decodeState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (d.off < len(d.data)) {
@@ -337,7 +337,7 @@ private static readonly @string phasePanicMsgᵇ = "JSON decoder out of sync - d
 
 // scanWhile processes bytes in d.data[d.off:] until it
 // receives a scan code not equal to op.
-[GoMethodBody("scanWhile")] internal static void scanWhileᴍ(ж<decodeState> Ꮡd, nint op) {
+internal static void scanWhile⁔(/*this*/ ж<decodeState> Ꮡd, nint op) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var s = Ꮡd.Ꮡscan;
@@ -365,7 +365,7 @@ private static readonly @string phasePanicMsgᵇ = "JSON decoder out of sync - d
 // Only in the second step do we use decodeState to tokenize literals, so we
 // know there aren't any syntax errors. We can take advantage of that knowledge,
 // and scan a literal's bytes much more quickly.
-[GoMethodBody("rescanLiteral")] internal static void rescanLiteralᴍ(ж<decodeState> Ꮡd) {
+internal static void rescanLiteral⁔(/*this*/ ж<decodeState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var data = d.data;
@@ -424,7 +424,7 @@ Switch:
 // value consumes a JSON value from d.data[d.off-1:], decoding into v, and
 // reads the following byte ahead. If v is invalid, the value is discarded.
 // The first byte of the value has been read already.
-[GoMethodBody("value")] internal static error valueᴍ(ж<decodeState> Ꮡd, reflect.Value v) {
+internal static error value⁔(/*this*/ ж<decodeState> Ꮡd, reflect.Value v) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     switch (d.opcode) {
@@ -480,7 +480,7 @@ partial struct unquotedValue {
 // quoted string literal or literal null into an interface value.
 // If it finds anything other than a quoted string literal or null,
 // valueQuoted returns unquotedValue{}.
-[GoMethodBody("valueQuoted")] internal static any valueQuotedᴍ(ж<decodeState> Ꮡd) {
+internal static any valueQuoted⁔(/*this*/ ж<decodeState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     switch (d.opcode) {
@@ -591,7 +591,7 @@ internal static (Unmarshaler, encoding.TextUnmarshaler, reflect.Value) indirect(
 
 // array consumes an array from d.data[d.off-1:], decoding into v.
 // The first byte of the array ('[') has been read already.
-[GoMethodBody("Δarray")] internal static error Δarrayᴍ(ж<decodeState> Ꮡd, reflect.Value v) {
+internal static error Δarray⁔(/*this*/ ж<decodeState> Ꮡd, reflect.Value v) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Check for unmarshaler.
@@ -699,7 +699,7 @@ internal static reflect.Type textUnmarshalerType = reflect.TypeFor<encoding.Text
 
 // object consumes an object from d.data[d.off-1:], decoding into v.
 // The first byte ('{') of the object has been read already.
-[GoMethodBody("object")] internal static error @objectᴍ(ж<decodeState> Ꮡd, reflect.Value v) {
+internal static error @object⁔(/*this*/ ж<decodeState> Ꮡd, reflect.Value v) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Check for unmarshaler.
@@ -957,7 +957,7 @@ internal static reflect.Type textUnmarshalerType = reflect.TypeFor<encoding.Text
 
 // convertNumber converts the number literal s to a float64 or a Number
 // depending on the setting of d.useNumber.
-[GoMethodBody("convertNumber")] internal static (any, error) convertNumberᴍ(ref decodeState d, @string s) {
+internal static (any, error) convertNumber⁔(/*this*/ ref decodeState d, @string s) {
     if (d.useNumber) {
         return ((Number)s, default);
     }
@@ -975,19 +975,19 @@ internal static reflect.Type numberType = reflect.TypeFor<Number>();
 } partial class json_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string numberˢᴍdecodeState => ref numberˢᵇᴍdecodeState;
-private static readonly @string numberˢᵇᴍdecodeState = "number"u8;
-internal static ref readonly @string nullˢᴍdecodeState => ref nullˢᵇᴍdecodeState;
-private static readonly @string nullˢᵇᴍdecodeState = "null"u8;
-internal static ref readonly @string boolˢᴍdecodeState => ref boolˢᵇᴍdecodeState;
-private static readonly @string boolˢᵇᴍdecodeState = "bool"u8;
+internal static ref readonly @string numberˢ⁔decodeState => ref numberˢᵇ⁔decodeState;
+private static readonly @string numberˢᵇ⁔decodeState = "number"u8;
+internal static ref readonly @string nullˢ⁔decodeState => ref nullˢᵇ⁔decodeState;
+private static readonly @string nullˢᵇ⁔decodeState = "null"u8;
+internal static ref readonly @string boolˢ⁔decodeState => ref boolˢᵇ⁔decodeState;
+private static readonly @string boolˢᵇ⁔decodeState = "bool"u8;
 
 // literalStore decodes a literal stored in item into v.
 //
 // fromQuoted indicates whether this literal came from unwrapping a
 // string from the ",string" struct tag option. this is used only to
 // produce more helpful error messages.
-[GoMethodBody("literalStore")] internal static error literalStoreᴍ(ref decodeState d, slice<byte> item, reflect.Value v, bool fromQuoted) {
+internal static error literalStore⁔(/*this*/ ref decodeState d, slice<byte> item, reflect.Value v, bool fromQuoted) {
     // Check for unmarshaler.
     if (len(item) == 0) {
         // Empty string given.
@@ -1005,14 +1005,14 @@ private static readonly @string boolˢᵇᴍdecodeState = "bool"u8;
                 d.saveError(fmt.Errorf("json: invalid use of ,string struct tag, trying to unmarshal %q into %v"u8, item, v.Type()));
                 return default;
             }
-            ref var val = ref heap<@string>(numberˢᴍdecodeState, out var Ꮡval);
+            ref var val = ref heap<@string>(numberˢ⁔decodeState, out var Ꮡval);
             switch (item[0]) {
             case (byte)'n': {
-                val = nullˢᴍdecodeState;
+                val = nullˢ⁔decodeState;
                 break;
             }
             case (byte)'t' or (byte)'f': {
-                val = boolˢᴍdecodeState;
+                val = boolˢ⁔decodeState;
                 break;
             }}
             d.saveError(new UnmarshalTypeErrorжerror(Ꮡ(new UnmarshalTypeError(Value: val, Type: v.Type(), Offset: (int64)d.readIndex()))));
@@ -1194,7 +1194,7 @@ private static readonly @string boolˢᵇᴍdecodeState = "bool"u8;
 // but they avoid the weight of reflection in this common case.
 
 // valueInterface is like value but returns any.
-[GoMethodBody("valueInterface")] internal static any /*val*/ valueInterfaceᴍ(ж<decodeState> Ꮡd) {
+internal static any /*val*/ valueInterface⁔(/*this*/ ж<decodeState> Ꮡd) {
     any val = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -1221,7 +1221,7 @@ private static readonly @string boolˢᵇᴍdecodeState = "bool"u8;
 }
 
 // arrayInterface is like array but returns []any.
-[GoMethodBody("arrayInterface")] internal static slice<any> arrayInterfaceᴍ(ж<decodeState> Ꮡd) {
+internal static slice<any> arrayInterface⁔(/*this*/ ж<decodeState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     slice<any> v = new slice<any>(0);
@@ -1249,7 +1249,7 @@ private static readonly @string boolˢᵇᴍdecodeState = "bool"u8;
 }
 
 // objectInterface is like object but returns map[string]any.
-[GoMethodBody("objectInterface")] internal static map<@string, any> objectInterfaceᴍ(ж<decodeState> Ꮡd) {
+internal static map<@string, any> objectInterface⁔(/*this*/ ж<decodeState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var m = new map<@string, any>();
@@ -1302,7 +1302,7 @@ private static readonly @string boolˢᵇᴍdecodeState = "bool"u8;
 // literalInterface consumes and returns a literal from d.data[d.off-1:] and
 // it reads the following byte ahead. The first byte of the literal has been
 // read already (that's how the caller knows it's a literal).
-[GoMethodBody("literalInterface")] internal static any literalInterfaceᴍ(ж<decodeState> Ꮡd) {
+internal static any literalInterface⁔(/*this*/ ж<decodeState> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // All bytes inside literal return scanContinue op code.

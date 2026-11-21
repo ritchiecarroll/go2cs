@@ -27,7 +27,7 @@ internal static nint maxSlice = 8;
 } partial class http_package {
 
 // add adds a key-value pair to the mapping.
-[GoMethodBody("add")] internal static void addᴍ<K, V>(ref mapping<K, V> h, K k, V v) {
+internal static void add⁔<K, V>(/*this*/ ref mapping<K, V> h, K k, V v) {
     if (h.m == nil && len(h.s) < maxSlice) {
         h.s = append(h.s, new entry<K, V>(k, v));
     } else {
@@ -45,7 +45,7 @@ internal static nint maxSlice = 8;
 // find returns the value corresponding to the given key.
 // The second return value is false if there is no value
 // with that key.
-[GoMethodBody("find")] internal static (V v, bool found) findᴍ<K, V>(ж<mapping<K, V>> Ꮡh, K k) {
+internal static (V v, bool found) find⁔<K, V>(/*this*/ ж<mapping<K, V>> Ꮡh, K k) {
     V v = GoZero<V>();
     bool found = default;
     ref var h = ref Ꮡh.DerefOrNull();
@@ -67,7 +67,7 @@ internal static nint maxSlice = 8;
 
 // eachPair calls f for each pair in the mapping.
 // If f returns false, pairs returns immediately.
-[GoMethodBody("eachPair")] internal static void eachPairᴍ<K, V>(ж<mapping<K, V>> Ꮡh, Func<K, V, bool> f) {
+internal static void eachPair⁔<K, V>(/*this*/ ж<mapping<K, V>> Ꮡh, Func<K, V, bool> f) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (Ꮡh == nil) {

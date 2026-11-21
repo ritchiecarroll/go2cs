@@ -42,7 +42,7 @@ internal static UntypedInt maxlines => /* 64 * 1024 */ 65536;
 
 } partial class gcimporter_package {
 
-[GoMethodBody("pos")] internal static token.Pos posᴍ(ref fakeFileSet s, @string @file, nint line, nint column) {
+internal static token.Pos pos⁔(/*this*/ ref fakeFileSet s, @string @file, nint line, nint column) {
     // TODO(mdempsky): Make use of column.
 
     // Since we don't know the set of needed file positions, we reserve
@@ -66,7 +66,7 @@ internal static UntypedInt maxlines => /* 64 * 1024 */ 65536;
     return (token.Pos)(f.@file.Base() + line - 1);
 }
 
-[GoMethodBody("setLines")] internal static void setLinesᴍ(ref fakeFileSet s) {
+internal static void setLines⁔(/*this*/ ref fakeFileSet s) {
     ᏑfakeLinesOnce.Do(() => {
         fakeLines = new slice<nint>(maxlines);
         foreach (var i in range(len(fakeLines))) {

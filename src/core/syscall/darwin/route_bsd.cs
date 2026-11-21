@@ -226,7 +226,7 @@ partial struct RouteMessage {
 
 } partial class syscall_package {
 
-[GoMethodBody("sockaddr")] internal static (slice<Sockaddr>, error) sockaddrᴍ(ref RouteMessage m) {
+internal static (slice<Sockaddr>, error) sockaddr⁔(/*this*/ ref RouteMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
     var b = m.Data[..];
     var family = (uint8)AF_UNSPEC;
@@ -281,7 +281,7 @@ partial struct InterfaceMessage {
 
 } partial class syscall_package {
 
-[GoMethodBody("sockaddr")] internal static (slice<Sockaddr>, error) sockaddrᴍ(ref InterfaceMessage m) {
+internal static (slice<Sockaddr>, error) sockaddr⁔(/*this*/ ref InterfaceMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
     if ((m.Header.Addrs & (int32)RTA_IFP) == 0) {
         return (default, default);
@@ -307,7 +307,7 @@ partial struct InterfaceAddrMessage {
 
 } partial class syscall_package {
 
-[GoMethodBody("sockaddr")] internal static (slice<Sockaddr>, error) sockaddrᴍ(ref InterfaceAddrMessage m) {
+internal static (slice<Sockaddr>, error) sockaddr⁔(/*this*/ ref InterfaceAddrMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
     var b = m.Data[..];
     var family = (uint8)AF_UNSPEC;

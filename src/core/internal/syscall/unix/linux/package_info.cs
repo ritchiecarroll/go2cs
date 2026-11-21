@@ -75,6 +75,10 @@ using static go.@internal.syscall.unix_package;
 
 namespace go.@internal.syscall;
 
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
+using System.ComponentModel;
+// </PackageInfoUsings>
+
 [GoPackage("unix")]
 public static partial class unix_package
 {
@@ -110,5 +114,5 @@ public static partial class unix_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(unix_package.SiginfoChild)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class unixᴛSiginfoChild;
+[GoMethodHost(typeof(unix_package.SiginfoChild)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class unixᴛSiginfoChild;
 // </MethodHolders>

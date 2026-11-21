@@ -230,17 +230,17 @@ partial struct Func {
 
 } partial class runtime_package {
 
-[GoMethodBody("raw")] internal static ж<_func> rawᴍ(ж<Func> Ꮡf) {
+internal static ж<_func> raw⁔(/*this*/ ж<Func> Ꮡf) {
     return Ꮡf.Reinterpret<Func, _func>();
 }
 
-[GoMethodBody("funcInfo")] internal static funcInfo funcInfoᴍ(ж<Func> Ꮡf) {
+internal static funcInfo funcInfo⁔(/*this*/ ж<Func> Ꮡf) {
     return Ꮡf.raw().funcInfo();
 }
 
 } partial class runtime_package {
 
-[GoMethodBody("funcInfo")] internal static funcInfo funcInfoᴍ(ж<_func> Ꮡf) {
+internal static funcInfo funcInfo⁔(/*this*/ ж<_func> Ꮡf) {
     // Find the module containing fn. fn is located in the pclntable.
     // The unsafe.Pointer to uintptr conversions and arithmetic
     // are safe because we are working with module addresses.
@@ -568,8 +568,8 @@ internal static void moduledataverify1(ж<moduledata> Ꮡdatap) {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeTextOffsetOutOfˢᴍmoduledata => ref runtimeTextOffsetOutOfˢᵇᴍmoduledata;
-private static readonly @string runtimeTextOffsetOutOfˢᵇᴍmoduledata = "runtime: text offset out of range"u8;
+internal static ref readonly @string runtimeTextOffsetOutOfˢ⁔moduledata => ref runtimeTextOffsetOutOfˢᵇ⁔moduledata;
+private static readonly @string runtimeTextOffsetOutOfˢᵇ⁔moduledata = "runtime: text offset out of range"u8;
 
 // textAddr returns md.text + off, with special handling for multiple text sections.
 // off is a (virtual) offset computed at internal linking time,
@@ -589,7 +589,7 @@ private static readonly @string runtimeTextOffsetOutOfˢᵇᴍmoduledata = "runt
 // It is nosplit because it is part of the findfunc implementation.
 //
 //go:nosplit
-[GoMethodBody("textAddr")] internal static uintptr textAddrᴍ(ref moduledata md, uint32 off32) {
+internal static uintptr textAddr⁔(/*this*/ ref moduledata md, uint32 off32) {
     var off = (uintptr)off32;
     var res = md.text + off;
     if (len(md.textsectmap) > 1) {
@@ -602,7 +602,7 @@ private static readonly @string runtimeTextOffsetOutOfˢᵇᴍmoduledata = "runt
         }
         if (res > md.etext && GOARCH != "wasm"u8) { // on wasm, functions do not live in the same address space as the linear memory
             println((@string)"runtime: textAddr", (hex)(uint64)res, (@string)"out of range", (hex)(uint64)md.text, (@string)"-", (hex)(uint64)md.etext);
-            @throw(runtimeTextOffsetOutOfˢᴍmoduledata);
+            @throw(runtimeTextOffsetOutOfˢ⁔moduledata);
         }
     }
     if (GOARCH == "wasm"u8) {
@@ -614,8 +614,8 @@ private static readonly @string runtimeTextOffsetOutOfˢᵇᴍmoduledata = "runt
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedMultipleTextˢᴍmoduledata => ref unexpectedMultipleTextˢᵇᴍmoduledata;
-private static readonly @string unexpectedMultipleTextˢᵇᴍmoduledata = "unexpected multiple text sections on Wasm"u8;
+internal static ref readonly @string unexpectedMultipleTextˢ⁔moduledata => ref unexpectedMultipleTextˢᵇ⁔moduledata;
+private static readonly @string unexpectedMultipleTextˢᵇ⁔moduledata = "unexpected multiple text sections on Wasm"u8;
 
 // textOff is the opposite of textAddr. It converts a PC to a (virtual) offset
 // to md.text, and returns if the PC is in any Go text section.
@@ -623,7 +623,7 @@ private static readonly @string unexpectedMultipleTextˢᵇᴍmoduledata = "unex
 // It is nosplit because it is part of the findfunc implementation.
 //
 //go:nosplit
-[GoMethodBody("textOff")] internal static (uint32, bool) textOffᴍ(ref moduledata md, uintptr pc) {
+internal static (uint32, bool) textOff⁔(/*this*/ ref moduledata md, uintptr pc) {
     var off = pc - md.text;
     if (GOARCH == "wasm"u8) {
         // On Wasm, the func table contains the function index, whereas
@@ -633,7 +633,7 @@ private static readonly @string unexpectedMultipleTextˢᵇᴍmoduledata = "unex
     var res = (uint32)off;
     if (len(md.textsectmap) > 1) {
         if (GOARCH == "wasm"u8) {
-            fatal(unexpectedMultipleTextˢᴍmoduledata);
+            fatal(unexpectedMultipleTextˢ⁔moduledata);
         }
         foreach (var (i, sect) in range(md.textsectmap)) {
             if (sect.baseaddr > pc) {
@@ -655,7 +655,7 @@ private static readonly @string unexpectedMultipleTextˢᵇᴍmoduledata = "unex
 }
 
 // funcName returns the string at nameOff in the function name table.
-[GoMethodBody("funcName")] internal static @string funcNameᴍ(ref moduledata md, int32 nameOff) {
+internal static @string funcName⁔(/*this*/ ref moduledata md, int32 nameOff) {
     if (nameOff == 0) {
         return ""u8;
     }
@@ -687,7 +687,7 @@ private static readonly @string unexpectedMultipleTextˢᵇᴍmoduledata = "unex
 
 // startLine returns the starting line number of the function. i.e., the line
 // number of the func keyword.
-[GoMethodBody("startLine")] internal static int32 startLineᴍ(ж<Func> Ꮡf) {
+internal static int32 startLine⁔(/*this*/ ж<Func> Ꮡf) {
     var fn = Ꮡf.raw();
     if (fn.isInlined()) { // inlined version
         var fi = fn.Reinterpret<_func, funcinl>();
@@ -720,18 +720,18 @@ partial struct funcInfo {
 
 } partial class runtime_package {
 
-[GoMethodBody("valid")] internal static bool validᴍ(funcInfo f) {
+internal static bool valid⁔(/*this*/ funcInfo f) {
     return f._func != nil;
 }
 
-[GoMethodBody("_Func")] internal static ж<Func> _Funcᴍ(funcInfo f) {
+internal static ж<Func> _Func⁔(/*this*/ funcInfo f) {
     return f._func.Reinterpret<_func, Func>();
 }
 
 } partial class runtime_package {
 
 // isInlined reports whether f should be re-interpreted as a *funcinl.
-[GoMethodBody("isInlined")] internal static bool isInlinedᴍ(ref _func f) {
+internal static bool isInlined⁔(/*this*/ ref _func f) {
     return f.entryOff == ~(uint32)0; // see comment for funcinl.ones
 }
 
@@ -746,7 +746,7 @@ partial struct funcInfo {
 //
 // Do not remove or change the type signature.
 // See go.dev/issue/67401.
-[GoMethodBody("entry")] internal static uintptr entryᴍ(funcInfo f) {
+internal static uintptr entry⁔(/*this*/ funcInfo f) {
     return f.datap.textAddr(f.entryOff);
 }
 
@@ -815,7 +815,7 @@ partial struct srcFunc {
 
 } partial class runtime_package {
 
-[GoMethodBody("srcFunc")] internal static srcFunc srcFuncᴍ(funcInfo f) {
+internal static srcFunc srcFunc⁔(/*this*/ funcInfo f) {
     if (!f.valid()) {
         return new srcFunc();
     }
@@ -831,7 +831,7 @@ partial struct srcFunc {
 //
 // Do not remove or change the type signature.
 // See go.dev/issue/67401.
-[GoMethodBody("name")] internal static @string nameᴍ(srcFunc s) {
+internal static @string name⁔(/*this*/ srcFunc s) {
     if (s.datap == nil) {
         return ""u8;
     }

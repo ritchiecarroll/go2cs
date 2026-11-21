@@ -69,13 +69,16 @@ using static go.crypto.des_package;
 
 namespace go.crypto;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.@internal;
 using static des_package;
 using go.crypto;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("des")]
 public static partial class des_package
@@ -114,26 +117,26 @@ public static partial class des_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(des_package.KeySizeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class desᴛKeySizeError;
-[GoMethodHost(typeof(des_package.desCipher)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class desᴛdesCipher;
-[GoMethodHost(typeof(des_package.tripleDESCipher)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class desᴛtripleDESCipher;
+[GoMethodHost(typeof(des_package.KeySizeError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class desᴛKeySizeError;
+[GoMethodHost(typeof(des_package.desCipher)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class desᴛdesCipher;
+[GoMethodHost(typeof(des_package.tripleDESCipher)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class desᴛtripleDESCipher;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class desᴛdesCipher {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void generateSubkeys(this ref desCipher c, slice<byte> keyBytes) => des_package.generateSubkeysᴍ(ref c, keyBytes);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void generateSubkeys(this ref desCipher c, slice<byte> keyBytes) => des_package.generateSubkeys⁔(ref c, keyBytes);
 }
 partial class desᴛKeySizeError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this KeySizeError k) => des_package.Errorᴍ(k);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this KeySizeError k) => des_package.Error⁔(k);
 }
 partial class desᴛdesCipher {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref desCipher c) => des_package.BlockSizeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) => des_package.Encryptᴍ(ref c, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Decrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) => des_package.Decryptᴍ(ref c, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref desCipher c) => des_package.BlockSize⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) => des_package.Encrypt⁔(ref c, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Decrypt(this ref desCipher c, slice<byte> dst, slice<byte> src) => des_package.Decrypt⁔(ref c, dst, src);
 }
 partial class desᴛtripleDESCipher {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint BlockSize(this ref tripleDESCipher c) => des_package.BlockSizeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) => des_package.Encryptᴍ(ref c, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Decrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) => des_package.Decryptᴍ(ref c, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint BlockSize(this ref tripleDESCipher c) => des_package.BlockSize⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) => des_package.Encrypt⁔(ref c, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Decrypt(this ref tripleDESCipher c, slice<byte> dst, slice<byte> src) => des_package.Decrypt⁔(ref c, dst, src);
 }
 // </GlyphForwarders>

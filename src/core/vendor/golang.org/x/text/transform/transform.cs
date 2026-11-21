@@ -108,7 +108,7 @@ partial struct NopResetter {
 } partial class transform_package {
 
 // Reset implements the Reset method of the Transformer interface.
-[GoMethodBody("Reset")] internal static void Resetᴍ(NopResetter _) { }
+internal static void Reset⁔(/*this*/ NopResetter _) { }
 
 } partial class transform_package {
 
@@ -147,7 +147,7 @@ public static ж<Reader> NewReader(io.Reader r, Transformer t) {
 } partial class transform_package {
 
 // Read implements the io.Reader interface.
-[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref Reader r, slice<byte> p) {
+internal static (nint, error) Read⁔(/*this*/ ref Reader r, slice<byte> p) {
     nint n = 0;
     var err = ((error)default);
     for (;;) {
@@ -247,7 +247,7 @@ public static ж<Writer> NewWriter(io.Writer w, Transformer t) {
 // Write implements the io.Writer interface. If there are not enough
 // bytes available to complete a Transform, the bytes will be buffered
 // for the next write. Call Close to convert the remaining bytes.
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref Writer w, slice<byte> data) {
+internal static (nint n, error err) Write⁔(/*this*/ ref Writer w, slice<byte> data) {
     nint n = default;
 
     var src = data;
@@ -316,7 +316,7 @@ public static ж<Writer> NewWriter(io.Writer w, Transformer t) {
 }
 
 // Close implements the io.Closer interface.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref Writer w) {
+internal static error Close⁔(/*this*/ ref Writer w) {
     var src = w.src.slice(0, w.n);
     for (;;) {
         var (nDst, nSrc, err) = w.t.Transform(w.dst, src, true);
@@ -338,7 +338,7 @@ partial struct nop {
 
 } partial class transform_package {
 
-[GoMethodBody("Transform")] internal static (nint nDst, nint nSrc, error err) Transformᴍ(nop _, slice<byte> dst, slice<byte> src, bool atEOF) {
+internal static (nint nDst, nint nSrc, error err) Transform⁔(/*this*/ nop _, slice<byte> dst, slice<byte> src, bool atEOF) {
     error err = default;
 
     nint n = copy(dst, src);
@@ -348,7 +348,7 @@ partial struct nop {
     return (n, n, err);
 }
 
-[GoMethodBody("Span")] internal static (nint n, error err) Spanᴍ(nop _, slice<byte> src, bool atEOF) {
+internal static (nint n, error err) Span⁔(/*this*/ nop _, slice<byte> src, bool atEOF) {
     return (len(src), default);
 }
 
@@ -360,7 +360,7 @@ partial struct discard {
 
 } partial class transform_package {
 
-[GoMethodBody("Transform")] internal static (nint nDst, nint nSrc, error err) Transformᴍ(discard _, slice<byte> dst, slice<byte> src, bool atEOF) {
+internal static (nint nDst, nint nSrc, error err) Transform⁔(/*this*/ discard _, slice<byte> dst, slice<byte> src, bool atEOF) {
     return (0, len(src), default);
 }
 
@@ -390,7 +390,7 @@ partial struct chain {
 
 } partial class transform_package {
 
-[GoMethodBody("fatalError")] internal static void fatalErrorᴍ(ref chain c, nint errIndex, error err) {
+internal static void fatalError⁔(/*this*/ ref chain c, nint errIndex, error err) {
     nint i = errIndex + 1; if (i > c.errStart) {
         c.errStart = i;
         c.err = err;
@@ -409,11 +409,11 @@ partial struct link {
 
 } partial class transform_package {
 
-[GoMethodBody("src")] internal static slice<byte> srcᴍ(ref link l) {
+internal static slice<byte> src⁔(/*this*/ ref link l) {
     return l.b.slice(l.p, l.n);
 }
 
-[GoMethodBody("dst")] internal static slice<byte> dstᴍ(ref link l) {
+internal static slice<byte> dst⁔(/*this*/ ref link l) {
     return l.b.slice(l.n);
 }
 
@@ -441,7 +441,7 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
 } partial class transform_package {
 
 // Reset resets the state of Chain. It calls Reset on all the Transformers.
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref chain c) {
+internal static void Reset⁔(/*this*/ ref chain c) {
     foreach (var (i, l) in range(c.link)) {
         if (l.t != nil) {
             l.t.Reset();
@@ -453,7 +453,7 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
 // TODO: make chain use Span (is going to be fun to implement!)
 
 // Transform applies the transformers of c in sequence.
-[GoMethodBody("Transform")] internal static (nint nDst, nint nSrc, error err) Transformᴍ(ref chain c, slice<byte> dst, slice<byte> src, bool atEOF) {
+internal static (nint nDst, nint nSrc, error err) Transform⁔(/*this*/ ref chain c, slice<byte> dst, slice<byte> src, bool atEOF) {
     error err = default;
 
     // Set up src and dst in the chain.
@@ -561,10 +561,10 @@ internal delegate bool removeF(rune r);
 
 } partial class transform_package {
 
-[GoMethodBody("Reset")] internal static void Resetᴍ(removeF _) { }
+internal static void Reset⁔(/*this*/ removeF _) { }
 
 // Transform implements the Transformer interface.
-[GoMethodBody("Transform")] internal static (nint nDst, nint nSrc, error err) Transformᴍ(removeF t, slice<byte> dst, slice<byte> src, bool atEOF) {
+internal static (nint nDst, nint nSrc, error err) Transform⁔(/*this*/ removeF t, slice<byte> dst, slice<byte> src, bool atEOF) {
     nint nDst = default;
     nint nSrc = default;
     error err = default;

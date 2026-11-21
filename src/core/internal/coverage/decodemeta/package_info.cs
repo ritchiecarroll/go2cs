@@ -69,14 +69,17 @@ using static go.@internal.coverage.decodemeta_package;
 
 namespace go.@internal.coverage;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using coverage = go.@internal.coverage_package;
 using encoding;
 using go.@internal;
 using go.@internal.coverage;
 using static decodemeta_package;
 using hash;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("decodemeta")]
 public static partial class decodemeta_package
@@ -118,28 +121,28 @@ public static partial class decodemeta_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(decodemeta_package.CoverageMetaDataDecoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class decodemetaᴛCoverageMetaDataDecoder;
-[GoMethodHost(typeof(decodemeta_package.CoverageMetaFileReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class decodemetaᴛCoverageMetaFileReader;
+[GoMethodHost(typeof(decodemeta_package.CoverageMetaDataDecoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class decodemetaᴛCoverageMetaDataDecoder;
+[GoMethodHost(typeof(decodemeta_package.CoverageMetaFileReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class decodemetaᴛCoverageMetaFileReader;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class decodemetaᴛCoverageMetaDataDecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readHeader(this ж<CoverageMetaDataDecoder> Ꮡd) => decodemeta_package.readHeaderᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readStringTable(this ref CoverageMetaDataDecoder d) => decodemeta_package.readStringTableᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string PackagePath(this ref CoverageMetaDataDecoder d) => decodemeta_package.PackagePathᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string PackageName(this ref CoverageMetaDataDecoder d) => decodemeta_package.PackageNameᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string ModulePath(this ref CoverageMetaDataDecoder d) => decodemeta_package.ModulePathᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 NumFuncs(this ref CoverageMetaDataDecoder d) => decodemeta_package.NumFuncsᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error ReadFunc(this ref CoverageMetaDataDecoder d, uint32 fidx, ж<coverage.FuncDesc> Ꮡf) => decodemeta_package.ReadFuncᴍ(ref d, fidx, Ꮡf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readHeader(this ж<CoverageMetaDataDecoder> Ꮡd) => decodemeta_package.readHeader⁔(Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readStringTable(this ref CoverageMetaDataDecoder d) => decodemeta_package.readStringTable⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string PackagePath(this ref CoverageMetaDataDecoder d) => decodemeta_package.PackagePath⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string PackageName(this ref CoverageMetaDataDecoder d) => decodemeta_package.PackageName⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string ModulePath(this ref CoverageMetaDataDecoder d) => decodemeta_package.ModulePath⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint32 NumFuncs(this ref CoverageMetaDataDecoder d) => decodemeta_package.NumFuncs⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error ReadFunc(this ref CoverageMetaDataDecoder d, uint32 fidx, ж<coverage.FuncDesc> Ꮡf) => decodemeta_package.ReadFunc⁔(ref d, fidx, Ꮡf);
 }
 partial class decodemetaᴛCoverageMetaFileReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) => decodemeta_package.readFileHeaderᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, error) rdUint64(this ref CoverageMetaFileReader r) => decodemeta_package.rdUint64ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 NumPackages(this ref CoverageMetaFileReader r) => decodemeta_package.NumPackagesᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static coverage.CounterMode CounterMode(this ref CoverageMetaFileReader r) => decodemeta_package.CounterModeᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static coverage.CounterGranularity CounterGranularity(this ref CoverageMetaFileReader r) => decodemeta_package.CounterGranularityᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static array<byte> FileHash(this ref CoverageMetaFileReader r) => decodemeta_package.FileHashᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<CoverageMetaDataDecoder>, slice<byte>, error) GetPackageDecoder(this ref CoverageMetaFileReader r, uint32 pkIdx, slice<byte> payloadbuf) => decodemeta_package.GetPackageDecoderᴍ(ref r, pkIdx, payloadbuf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) GetPackagePayload(this ref CoverageMetaFileReader r, uint32 pkIdx, slice<byte> payloadbuf) => decodemeta_package.GetPackagePayloadᴍ(ref r, pkIdx, payloadbuf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readFileHeader(this ж<CoverageMetaFileReader> Ꮡr) => decodemeta_package.readFileHeader⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64, error) rdUint64(this ref CoverageMetaFileReader r) => decodemeta_package.rdUint64⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 NumPackages(this ref CoverageMetaFileReader r) => decodemeta_package.NumPackages⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static coverage.CounterMode CounterMode(this ref CoverageMetaFileReader r) => decodemeta_package.CounterMode⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static coverage.CounterGranularity CounterGranularity(this ref CoverageMetaFileReader r) => decodemeta_package.CounterGranularity⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static array<byte> FileHash(this ref CoverageMetaFileReader r) => decodemeta_package.FileHash⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<CoverageMetaDataDecoder>, slice<byte>, error) GetPackageDecoder(this ref CoverageMetaFileReader r, uint32 pkIdx, slice<byte> payloadbuf) => decodemeta_package.GetPackageDecoder⁔(ref r, pkIdx, payloadbuf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) GetPackagePayload(this ref CoverageMetaFileReader r, uint32 pkIdx, slice<byte> payloadbuf) => decodemeta_package.GetPackagePayload⁔(ref r, pkIdx, payloadbuf);
 }
 // </GlyphForwarders>

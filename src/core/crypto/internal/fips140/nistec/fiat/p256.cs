@@ -27,7 +27,7 @@ internal static UntypedInt p256ElementLen => 32;
 } partial class fiat_package {
 
 // One sets e = 1, and returns e.
-[GoMethodBody("One")] internal static ж<P256Element> Oneᴍ(ж<P256Element> Ꮡe) {
+internal static ж<P256Element> One⁔(/*this*/ ж<P256Element> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     p256SetOne(ref nonnil(ref e).x);
@@ -35,21 +35,21 @@ internal static UntypedInt p256ElementLen => 32;
 }
 
 // Equal returns 1 if e == t, and zero otherwise.
-[GoMethodBody("Equal")] internal static nint Equalᴍ(ж<P256Element> Ꮡe, ж<P256Element> t) {
+internal static nint Equal⁔(/*this*/ ж<P256Element> Ꮡe, ж<P256Element> t) {
     var eBytes = Ꮡe.Bytes();
     var tBytes = t.Bytes();
     return subtle.ConstantTimeCompare(eBytes, tBytes);
 }
 
 // IsZero returns 1 if e == 0, and zero otherwise.
-[GoMethodBody("IsZero")] internal static nint IsZeroᴍ(ж<P256Element> Ꮡe) {
+internal static nint IsZero⁔(/*this*/ ж<P256Element> Ꮡe) {
     var zero = new slice<byte>(p256ElementLen);
     var eBytes = Ꮡe.Bytes();
     return subtle.ConstantTimeCompare(eBytes, zero);
 }
 
 // Set sets e = t, and returns e.
-[GoMethodBody("Set")] internal static ж<P256Element> Setᴍ(ж<P256Element> Ꮡe, ж<P256Element> Ꮡt) {
+internal static ж<P256Element> Set⁔(/*this*/ ж<P256Element> Ꮡe, ж<P256Element> Ꮡt) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -58,14 +58,14 @@ internal static UntypedInt p256ElementLen => 32;
 }
 
 // Bytes returns the 32-byte big-endian encoding of e.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ж<P256Element> Ꮡe) {
+internal static slice<byte> Bytes⁔(/*this*/ ж<P256Element> Ꮡe) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(32), out var Ꮡout);
     return Ꮡe.bytes(Ꮡout);
 }
 
-[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ж<P256Element> Ꮡe, /*[32]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes⁔(/*this*/ ж<P256Element> Ꮡe, /*[32]*/ ж<array<byte>> Ꮡout) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -78,17 +78,17 @@ internal static UntypedInt p256ElementLen => 32;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string invalidP256ElementˢᴍP256Element => ref invalidP256ElementˢᵇᴍP256Element;
-private static readonly @string invalidP256ElementˢᵇᴍP256Element = "invalid P256Element encoding"u8;
+private static ref readonly @string invalidP256Elementˢ⁔P256Element => ref invalidP256Elementˢᵇ⁔P256Element;
+private static readonly @string invalidP256Elementˢᵇ⁔P256Element = "invalid P256Element encoding"u8;
 
 // SetBytes sets e = v, where v is a big-endian 32-byte encoding, and returns e.
 // If v is not 32 bytes or it encodes a value higher than 2^256 - 2^224 + 2^192 + 2^96 - 1,
 // SetBytes returns nil and an error, and e is unchanged.
-[GoMethodBody("SetBytes")] internal static (ж<P256Element>, error) SetBytesᴍ(ж<P256Element> Ꮡe, slice<byte> v) {
+internal static (ж<P256Element>, error) SetBytes⁔(/*this*/ ж<P256Element> Ꮡe, slice<byte> v) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (len(v) != p256ElementLen) {
-        return (default, errors.New(invalidP256ElementˢᴍP256Element));
+        return (default, errors.New(invalidP256Elementˢ⁔P256Element));
     }
 
     // Check for non-canonical encodings (p + k, 2p + k, etc.) by comparing to
@@ -96,7 +96,7 @@ private static readonly @string invalidP256ElementˢᵇᴍP256Element = "invalid
     slice<byte> minusOneEncoding = @new<P256Element>().Sub(
         @new<P256Element>(), @new<P256Element>().One()).Bytes();
     if (subtle.ConstantTimeLessOrEqBytes(v, minusOneEncoding) == 0) {
-        return (default, errors.New(invalidP256ElementˢᴍP256Element));
+        return (default, errors.New(invalidP256Elementˢ⁔P256Element));
     }
 
     ref var @in = ref heap(new array<byte>(32), out var Ꮡin);
@@ -110,7 +110,7 @@ private static readonly @string invalidP256ElementˢᵇᴍP256Element = "invalid
 }
 
 // Add sets e = t1 + t2, and returns e.
-[GoMethodBody("Add")] internal static ж<P256Element> Addᴍ(ж<P256Element> Ꮡe, ж<P256Element> Ꮡt1, ж<P256Element> Ꮡt2) {
+internal static ж<P256Element> Add⁔(/*this*/ ж<P256Element> Ꮡe, ж<P256Element> Ꮡt1, ж<P256Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -120,7 +120,7 @@ private static readonly @string invalidP256ElementˢᵇᴍP256Element = "invalid
 }
 
 // Sub sets e = t1 - t2, and returns e.
-[GoMethodBody("Sub")] internal static ж<P256Element> Subᴍ(ж<P256Element> Ꮡe, ж<P256Element> Ꮡt1, ж<P256Element> Ꮡt2) {
+internal static ж<P256Element> Sub⁔(/*this*/ ж<P256Element> Ꮡe, ж<P256Element> Ꮡt1, ж<P256Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -130,7 +130,7 @@ private static readonly @string invalidP256ElementˢᵇᴍP256Element = "invalid
 }
 
 // Mul sets e = t1 * t2, and returns e.
-[GoMethodBody("Mul")] internal static ж<P256Element> Mulᴍ(ж<P256Element> Ꮡe, ж<P256Element> Ꮡt1, ж<P256Element> Ꮡt2) {
+internal static ж<P256Element> Mul⁔(/*this*/ ж<P256Element> Ꮡe, ж<P256Element> Ꮡt1, ж<P256Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -140,7 +140,7 @@ private static readonly @string invalidP256ElementˢᵇᴍP256Element = "invalid
 }
 
 // Square sets e = t * t, and returns e.
-[GoMethodBody("Square")] internal static ж<P256Element> Squareᴍ(ж<P256Element> Ꮡe, ж<P256Element> Ꮡt) {
+internal static ж<P256Element> Square⁔(/*this*/ ж<P256Element> Ꮡe, ж<P256Element> Ꮡt) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -149,7 +149,7 @@ private static readonly @string invalidP256ElementˢᵇᴍP256Element = "invalid
 }
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
-[GoMethodBody("Select")] internal static ж<P256Element> Selectᴍ(ж<P256Element> Ꮡv, ж<P256Element> Ꮡa, ж<P256Element> Ꮡb, nint cond) {
+internal static ж<P256Element> Select⁔(/*this*/ ж<P256Element> Ꮡv, ж<P256Element> Ꮡa, ж<P256Element> Ꮡb, nint cond) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();

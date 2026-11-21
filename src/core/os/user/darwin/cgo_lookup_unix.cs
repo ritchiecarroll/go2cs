@@ -148,7 +148,7 @@ internal static bufferKind groupBuffer = ((bufferKind)_C__SC_GETGR_R_SIZE_MAX);
 
 } partial class user_package {
 
-[GoMethodBody("initialSize")] internal static _C_size_t initialSizeᴍ(bufferKind k) {
+internal static _C_size_t initialSize⁔(/*this*/ bufferKind k) {
     var sz = _C_sysconf((_C_int)k);
     if (sz == -1) {
         // DragonFly and FreeBSD do not have _SC_GETPW_R_SIZE_MAX.

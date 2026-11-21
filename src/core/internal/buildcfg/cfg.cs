@@ -176,7 +176,7 @@ partial struct GoarmFeatures {
 
 } partial class buildcfg_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(GoarmFeatures g) {
+internal static @string String⁔(/*this*/ GoarmFeatures g) {
     @string armStr = strconv.Itoa(g.Version);
     if (g.SoftFloat) {
         armStr += ",softfloat"u8;
@@ -263,7 +263,7 @@ partial struct Goarm64Features {
 
 } partial class buildcfg_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Goarm64Features g) {
+internal static @string String⁔(/*this*/ Goarm64Features g) {
     @string arm64Str = g.Version;
     if (g.LSE) {
         arm64Str += ",lse"u8;
@@ -346,7 +346,7 @@ internal static Goarm64Features /*g*/ goarm64() {
 
 // Returns true if g supports giving ARM64 ISA
 // Note that this function doesn't accept / test suffixes (like ",lse" or ",crypto")
-[GoMethodBody("Supports")] internal static bool Supportsᴍ(Goarm64Features g, @string s) {
+internal static bool Supports⁔(/*this*/ Goarm64Features g, @string s) {
     // We only accept "v{8-9}.{0-9}. Everything else is malformed.
     if (len(s) != 4) {
         return false;
@@ -454,7 +454,7 @@ public partial struct gowasmFeatures {
 // Legacy features, now always enabled
 //SatConv bool
 //SignExt bool
-[GoMethodBody("String")] internal static @string Stringᴍ(gowasmFeatures f) {
+internal static @string String⁔(/*this*/ gowasmFeatures f) {
     slice<@string> flags = default;
     return strings.Join(flags, ",");
 }

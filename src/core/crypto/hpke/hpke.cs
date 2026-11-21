@@ -185,17 +185,17 @@ public static (ж<Recipient>, error) NewRecipient(slice<byte> enc, PrivateKey k,
 } partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string exportOnlyInstantiationˢᴍSender => ref exportOnlyInstantiationˢᵇᴍSender;
-private static readonly @string exportOnlyInstantiationˢᵇᴍSender = "export-only instantiation"u8;
+internal static ref readonly @string exportOnlyInstantiationˢ⁔Sender => ref exportOnlyInstantiationˢᵇ⁔Sender;
+private static readonly @string exportOnlyInstantiationˢᵇ⁔Sender = "export-only instantiation"u8;
 
 // Seal encrypts the provided plaintext, optionally binding to the additional
 // public data aad.
 //
 // Seal uses incrementing counters for each call, and Open on the receiving side
 // must be called in the same order as Seal.
-[GoMethodBody("Seal")] internal static (slice<byte>, error) Sealᴍ(ref Sender s, slice<byte> aad, slice<byte> plaintext) {
+internal static (slice<byte>, error) Seal⁔(/*this*/ ref Sender s, slice<byte> aad, slice<byte> plaintext) {
     if (s.aead == nil) {
-        return (default, errors.New(exportOnlyInstantiationˢᴍSender));
+        return (default, errors.New(exportOnlyInstantiationˢ⁔Sender));
     }
     var ciphertext = s.aead.Seal(default, s.nextNonce(), plaintext, aad);
     s.seqNum++;
@@ -222,14 +222,14 @@ public static (slice<byte>, error) Seal(PublicKey pk, KDF kdf, AEAD aead, slice<
 } partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidLengthˢᴍSender => ref invalidLengthˢᵇᴍSender;
-private static readonly @string invalidLengthˢᵇᴍSender = "invalid length"u8;
+internal static ref readonly @string invalidLengthˢ⁔Sender => ref invalidLengthˢᵇ⁔Sender;
+private static readonly @string invalidLengthˢᵇ⁔Sender = "invalid length"u8;
 
 // Export produces a secret value derived from the shared key between sender and
 // recipient. length must be at most 65,535.
-[GoMethodBody("Export")] internal static (slice<byte>, error) Exportᴍ(ref Sender s, @string exporterContext, nint length) {
+internal static (slice<byte>, error) Export⁔(/*this*/ ref Sender s, @string exporterContext, nint length) {
     if (length < 0 || length > 0xFFFF) {
-        return (default, errors.New(invalidLengthˢᴍSender));
+        return (default, errors.New(invalidLengthˢ⁔Sender));
     }
     return s.export(exporterContext, (uint16)length);
 }
@@ -237,17 +237,17 @@ private static readonly @string invalidLengthˢᵇᴍSender = "invalid length"u8
 } partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string exportOnlyInstantiationˢᴍRecipient => ref exportOnlyInstantiationˢᵇᴍRecipient;
-private static readonly @string exportOnlyInstantiationˢᵇᴍRecipient = "export-only instantiation"u8;
+internal static ref readonly @string exportOnlyInstantiationˢ⁔Recipient => ref exportOnlyInstantiationˢᵇ⁔Recipient;
+private static readonly @string exportOnlyInstantiationˢᵇ⁔Recipient = "export-only instantiation"u8;
 
 // Open decrypts the provided ciphertext, optionally binding to the additional
 // public data aad, or returns an error if decryption fails.
 //
 // Open uses incrementing counters for each successful call, and must be called
 // in the same order as Seal on the sending side.
-[GoMethodBody("Open")] internal static (slice<byte>, error) Openᴍ(ref Recipient r, slice<byte> aad, slice<byte> ciphertext) {
+internal static (slice<byte>, error) Open⁔(/*this*/ ref Recipient r, slice<byte> aad, slice<byte> ciphertext) {
     if (r.aead == nil) {
-        return (default, errors.New(exportOnlyInstantiationˢᴍRecipient));
+        return (default, errors.New(exportOnlyInstantiationˢ⁔Recipient));
     }
     var (plaintext, err) = r.aead.Open(default, r.nextNonce(), ciphertext, aad);
     if (err != nil) {
@@ -283,21 +283,21 @@ public static (slice<byte>, error) Open(PrivateKey k, KDF kdf, AEAD aead, slice<
 } partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidLengthˢᴍRecipient => ref invalidLengthˢᵇᴍRecipient;
-private static readonly @string invalidLengthˢᵇᴍRecipient = "invalid length"u8;
+internal static ref readonly @string invalidLengthˢ⁔Recipient => ref invalidLengthˢᵇ⁔Recipient;
+private static readonly @string invalidLengthˢᵇ⁔Recipient = "invalid length"u8;
 
 // Export produces a secret value derived from the shared key between sender and
 // recipient. length must be at most 65,535.
-[GoMethodBody("Export")] internal static (slice<byte>, error) Exportᴍ(ref Recipient r, @string exporterContext, nint length) {
+internal static (slice<byte>, error) Export⁔(/*this*/ ref Recipient r, @string exporterContext, nint length) {
     if (length < 0 || length > 0xFFFF) {
-        return (default, errors.New(invalidLengthˢᴍRecipient));
+        return (default, errors.New(invalidLengthˢ⁔Recipient));
     }
     return r.export(exporterContext, (uint16)length);
 }
 
 } partial class hpke_package {
 
-[GoMethodBody("nextNonce")] internal static slice<byte> nextNonceᴍ(ref context ctx) {
+internal static slice<byte> nextNonce⁔(/*this*/ ref context ctx) {
     var nonce = new slice<byte>(ctx.aead.NonceSize());
     byteorder.BEPutUint64(nonce.slice(len(nonce) - 8), ctx.seqNum);
     foreach (var i in range(len(ctx.baseNonce))) {

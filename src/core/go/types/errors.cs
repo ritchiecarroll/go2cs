@@ -53,7 +53,7 @@ partial struct error_ {
 } partial class types_package {
 
 // newError returns a new error_ with the given error code.
-[GoMethodBody("newError")] internal static ж<error_> newErrorᴍ(ж<Checker> Ꮡcheck, errors.Code code) {
+internal static ж<error_> newError⁔(/*this*/ ж<Checker> Ꮡcheck, errors.Code code) {
     if (code == 0) {
         throw panic("error code must not be 0");
     }
@@ -68,14 +68,14 @@ partial struct error_ {
 // Subsequent calls to addf provide additional information in the form of additional lines
 // in the error message (types2) or continuation errors identified by a tab-indented error
 // message (go/types).
-[GoMethodBody("addf")] internal static void addfᴍ(ref error_ err, positioner at, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void addf⁔(/*this*/ ref error_ err, positioner at, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     err.desc = append(err.desc, new errorDesc(at, err.check.sprintf(format, args.ꓸꓸꓸ)));
 }
 
 // addAltDecl is a specialized form of addf reporting another declaration of obj.
-[GoMethodBody("addAltDecl")] internal static void addAltDeclᴍ(ref error_ err, Object obj) {
+internal static void addAltDecl⁔(/*this*/ ref error_ err, Object obj) {
     token.Pos pos = obj.Pos(); if (pos.IsValid()) {
         // We use "other" rather than "previous" here because
         // the first declaration seen may not be textually
@@ -84,11 +84,11 @@ partial struct error_ {
     }
 }
 
-[GoMethodBody("empty")] internal static bool emptyᴍ(ref error_ err) {
+internal static bool empty⁔(/*this*/ ref error_ err) {
     return err.desc == nil;
 }
 
-[GoMethodBody("posn")] internal static positioner posnᴍ(ref error_ err) {
+internal static positioner posn⁔(/*this*/ ref error_ err) {
     if (err.empty()) {
         return noposn;
     }
@@ -96,13 +96,13 @@ partial struct error_ {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noErrorˢᴍerror_ => ref noErrorˢᵇᴍerror_;
-private static readonly @string noErrorˢᵇᴍerror_ = "no error"u8;
+internal static ref readonly @string noErrorˢ⁔error_ => ref noErrorˢᵇ⁔error_;
+private static readonly @string noErrorˢᵇ⁔error_ = "no error"u8;
 
 // msg returns the formatted error message without the primary error position pos().
-[GoMethodBody("msg")] internal static @string msgᴍ(ref error_ err) {
+internal static @string msg⁔(/*this*/ ref error_ err) {
     if (err.empty()) {
-        return noErrorˢᴍerror_;
+        return noErrorˢ⁔error_;
     }
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -120,15 +120,15 @@ private static readonly @string noErrorˢᵇᴍerror_ = "no error"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidOperandˢᴍerror_ => ref invalidOperandˢᵇᴍerror_;
-private static readonly @string invalidOperandˢᵇᴍerror_ = "invalid operand"u8;
-internal static ref readonly @string invalidTypeˢᴍerror_ => ref invalidTypeˢᵇᴍerror_;
-private static readonly @string invalidTypeˢᵇᴍerror_ = "invalid type"u8;
-internal static ref readonly @string errorSCodeDˢᴍerror_ => ref errorSCodeDˢᵇᴍerror_;
-private static readonly @string errorSCodeDˢᵇᴍerror_ = "ERROR: %s (code = %d)"u8;
+internal static ref readonly @string invalidOperandˢ⁔error_ => ref invalidOperandˢᵇ⁔error_;
+private static readonly @string invalidOperandˢᵇ⁔error_ = "invalid operand"u8;
+internal static ref readonly @string invalidTypeˢ⁔error_ => ref invalidTypeˢᵇ⁔error_;
+private static readonly @string invalidTypeˢᵇ⁔error_ = "invalid type"u8;
+internal static ref readonly @string errorSCodeDˢ⁔error_ => ref errorSCodeDˢᵇ⁔error_;
+private static readonly @string errorSCodeDˢᵇ⁔error_ = "ERROR: %s (code = %d)"u8;
 
 // report reports the error err, setting check.firstError if necessary.
-[GoMethodBody("report")] internal static void reportᴍ(ref error_ err) {
+internal static void report⁔(/*this*/ ref error_ err) {
     if (err.empty()) {
         throw panic("no error");
     }
@@ -142,13 +142,13 @@ private static readonly @string errorSCodeDˢᵇᴍerror_ = "ERROR: %s (code = %
     if (check.firstErr != nil) {
         // It is sufficient to look at the first sub-error only.
         @string msg = err.desc[0].msg;
-        if (strings.Index(msg, invalidOperandˢᴍerror_) > 0 || strings.Index(msg, invalidTypeˢᴍerror_) > 0) {
+        if (strings.Index(msg, invalidOperandˢ⁔error_) > 0 || strings.Index(msg, invalidTypeˢ⁔error_) > 0) {
             return;
         }
     }
 
     if (check.conf._Trace) {
-        check.trace(err.posn().Pos(), errorSCodeDˢᴍerror_, err.desc[0].msg, err.code);
+        check.trace(err.posn().Pos(), errorSCodeDˢ⁔error_, err.desc[0].msg, err.code);
     }
 
     // In go/types, if there is a sub-error with a valid position,
@@ -180,7 +180,7 @@ private static readonly @string errorSCodeDˢᵇᴍerror_ = "ERROR: %s (code = %
 } partial class types_package {
 
 // handleError should only be called by error_.report.
-[GoMethodBody("handleError")] internal static void handleErrorᴍ(ref Checker check, nint index, positioner posn, errors.Code code, @string msg, bool soft) {
+internal static void handleError⁔(/*this*/ ref Checker check, nint index, positioner posn, errors.Code code, @string msg, bool soft) {
     assert(code != 0);
 
     if (index == 0) {
@@ -262,13 +262,13 @@ partial interface positioner {
 
 } partial class types_package {
 
-[GoMethodBody("error")] internal static void errorᴍ(ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string msg) {
+internal static void error⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string msg) {
     var err = Ꮡcheck.newError(code);
     err.addf(at, "%s", msg);
     err.report();
 }
 
-[GoMethodBody("errorf")] internal static void errorfᴍ(ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var err = Ꮡcheck.newError(code);
@@ -276,7 +276,7 @@ partial interface positioner {
     err.report();
 }
 
-[GoMethodBody("softErrorf")] internal static void softErrorfᴍ(ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void softErrorf⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, errors.Code code, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var err = Ꮡcheck.newError(code);
@@ -285,7 +285,7 @@ partial interface positioner {
     err.report();
 }
 
-[GoMethodBody("versionErrorf")] internal static void versionErrorfᴍ(ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void versionErrorf⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     @string msg = Ꮡcheck.sprintf(format, args.ꓸꓸꓸ);
@@ -301,7 +301,7 @@ partial struct atPos /*global::go.go.token_package.Pos*/;
 
 } partial class types_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(atPos s) {
+internal static token.Pos Pos⁔(/*this*/ atPos s) {
     return (token.Pos)s;
 }
 
@@ -318,7 +318,7 @@ partial struct posSpan {
 
 } partial class types_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(posSpan e) {
+internal static token.Pos Pos⁔(/*this*/ posSpan e) {
     return e.pos;
 }
 

@@ -83,12 +83,12 @@ internal static (uintptr, error) pidfdFind(nint pid) {
 } partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string waitidˢᴍProcess => ref waitidˢᵇᴍProcess;
-private static readonly @string waitidˢᵇᴍProcess = "waitid"u8;
+internal static ref readonly @string waitidˢ⁔Process => ref waitidˢᵇ⁔Process;
+private static readonly @string waitidˢᵇ⁔Process = "waitid"u8;
 
 // pidfdWait waits for the process to complete,
 // and updates the process status to done.
-[GoMethodBody("pidfdWait")] internal static (ж<ProcessState>, error) pidfdWaitᴍ(ж<Process> Ꮡp) {
+internal static (ж<ProcessState>, error) pidfdWait⁔(/*this*/ ж<Process> Ꮡp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -105,7 +105,7 @@ private static readonly @string waitidˢᵇᴍProcess = "waitid"u8;
             // Process already completed Wait, or was not found by
             // pidfdFind. Return ECHILD for consistency with what the wait
             // syscall would return.
-            return (default, NewSyscallError(waitˢᴍProcess, syscall.ECHILD));
+            return (default, NewSyscallError(waitˢ⁔Process, syscall.ECHILD));
         }
         case var ᴛ when ᴛ == statusReleased: {
             return (default, syscall.EINVAL);
@@ -116,7 +116,7 @@ private static readonly @string waitidˢᵇᴍProcess = "waitid"u8;
         ref var rusage = ref heap(new syscall.Rusage(), out var Ꮡrusage);
         var err = ignoringEINTR(() => unix.Waitid(unix.P_PIDFD, (nint)handle, Ꮡinfo, syscall.WEXITED, Ꮡrusage));
         if (err != nil) {
-            return (default, NewSyscallError(waitidˢᴍProcess, err));
+            return (default, NewSyscallError(waitidˢ⁔Process, err));
         }
 
         // Update the Process status to statusDone.
@@ -134,7 +134,7 @@ private static readonly @string waitidˢᵇᴍProcess = "waitid"u8;
 }
 
 // pidfdSendSignal sends a signal to the process.
-[GoMethodBody("pidfdSendSignal")] internal static error pidfdSendSignalᴍ(ж<Process> Ꮡp, syscall.Signal s) {
+internal static error pidfdSendSignal⁔(/*this*/ ж<Process> Ꮡp, syscall.Signal s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

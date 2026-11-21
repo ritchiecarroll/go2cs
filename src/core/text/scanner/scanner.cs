@@ -38,16 +38,16 @@ partial struct Position {
 } partial class scanner_package {
 
 // IsValid reports whether the position is valid.
-[GoMethodBody("IsValid")] internal static bool IsValidᴍ(ref Position pos) { return pos.Line > 0; }
+internal static bool IsValid⁔(/*this*/ ref Position pos) { return pos.Line > 0; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string inputˢᴍPosition => ref inputˢᵇᴍPosition;
-private static readonly @string inputˢᵇᴍPosition = "<input>"u8;
+internal static ref readonly @string inputˢ⁔Position => ref inputˢᵇ⁔Position;
+private static readonly @string inputˢᵇ⁔Position = "<input>"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Position pos) {
+internal static @string String⁔(/*this*/ Position pos) {
     @string s = pos.Filename;
     if (s == ""u8) {
-        s = inputˢᴍPosition;
+        s = inputˢ⁔Position;
     }
     if (pos.IsValid()) {
         s += fmt.Sprintf(":%d:%d"u8, pos.Line, pos.Column);
@@ -177,7 +177,7 @@ partial struct Scanner {
 // Init initializes a [Scanner] with a new source and returns s.
 // [Scanner.Error] is set to nil, [Scanner.ErrorCount] is set to 0, [Scanner.Mode] is set to [GoTokens],
 // and [Scanner.Whitespace] is set to [GoWhitespace].
-[GoMethodBody("Init")] internal static ж<Scanner> Initᴍ(ж<Scanner> Ꮡs, io.Reader src) {
+internal static ж<Scanner> Init⁔(/*this*/ ж<Scanner> Ꮡs, io.Reader src) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.src = src;
@@ -213,16 +213,16 @@ partial struct Scanner {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidUtf8EncodingˢᴍScanner => ref invalidUtf8EncodingˢᵇᴍScanner;
-private static readonly @string invalidUtf8EncodingˢᵇᴍScanner = "invalid UTF-8 encoding"u8;
-internal static ref readonly @string invalidCharacterNulˢᴍScanner => ref invalidCharacterNulˢᵇᴍScanner;
-private static readonly @string invalidCharacterNulˢᵇᴍScanner = "invalid character NUL"u8;
+internal static ref readonly @string invalidUtf8Encodingˢ⁔Scanner => ref invalidUtf8Encodingˢᵇ⁔Scanner;
+private static readonly @string invalidUtf8Encodingˢᵇ⁔Scanner = "invalid UTF-8 encoding"u8;
+internal static ref readonly @string invalidCharacterNulˢ⁔Scanner => ref invalidCharacterNulˢᵇ⁔Scanner;
+private static readonly @string invalidCharacterNulˢᵇ⁔Scanner = "invalid character NUL"u8;
 
 // next reads and returns the next Unicode character. It is designed such
 // that only a minimal amount of work needs to be done in the common ASCII
 // case (one test to check for both ASCII and end-of-buffer, and one test
 // to check for newlines).
-[GoMethodBody("next")] internal static rune nextᴍ(ж<Scanner> Ꮡs) {
+internal static rune next⁔(/*this*/ ж<Scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var ch = (rune)s.srcBuf[s.srcPos];
@@ -280,7 +280,7 @@ private static readonly @string invalidCharacterNulˢᵇᴍScanner = "invalid ch
                 s.srcPos += width;
                 s.lastCharLen = width;
                 s.column++;
-                Ꮡs.error(invalidUtf8EncodingˢᴍScanner);
+                Ꮡs.error(invalidUtf8Encodingˢ⁔Scanner);
                 return ch;
             }
         }
@@ -295,7 +295,7 @@ private static readonly @string invalidCharacterNulˢᵇᴍScanner = "invalid ch
     switch (ch) {
     case 0: {
         // for compatibility with other tools
-        Ꮡs.error(invalidCharacterNulˢᴍScanner);
+        Ꮡs.error(invalidCharacterNulˢ⁔Scanner);
         break;
     }
     case '\n': {
@@ -314,7 +314,7 @@ private static readonly @string invalidCharacterNulˢᵇᴍScanner = "invalid ch
 // it prints an error message to [os.Stderr]. Next does not
 // update the [Scanner.Position] field; use [Scanner.Pos]() to
 // get the current position.
-[GoMethodBody("Next")] internal static rune Nextᴍ(ж<Scanner> Ꮡs) {
+internal static rune Next⁔(/*this*/ ж<Scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.tokPos = -1; // don't collect token text
@@ -329,7 +329,7 @@ private static readonly @string invalidCharacterNulˢᵇᴍScanner = "invalid ch
 // Peek returns the next Unicode character in the source without advancing
 // the scanner. It returns [EOF] if the scanner's position is at the last
 // character of the source.
-[GoMethodBody("Peek")] internal static rune Peekᴍ(ж<Scanner> Ꮡs) {
+internal static rune Peek⁔(/*this*/ ж<Scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.ch == -2) {
@@ -342,7 +342,7 @@ private static readonly @string invalidCharacterNulˢᵇᴍScanner = "invalid ch
     return s.ch;
 }
 
-[GoMethodBody("error")] internal static void errorᴍ(ж<Scanner> Ꮡs, @string msg) {
+internal static void error⁔(/*this*/ ж<Scanner> Ꮡs, @string msg) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.tokEnd = s.srcPos - s.lastCharLen; // make sure token text is terminated
@@ -358,20 +358,20 @@ private static readonly @string invalidCharacterNulˢᵇᴍScanner = "invalid ch
     fmt.Fprintf(new os.FileжWriter(os.Stderr), "%s: %s\n"u8, pos, msg);
 }
 
-[GoMethodBody("errorf")] internal static void errorfᴍ(ж<Scanner> Ꮡs, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf⁔(/*this*/ ж<Scanner> Ꮡs, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     Ꮡs.error(fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
 
-[GoMethodBody("isIdentRune")] internal static bool isIdentRuneᴍ(ref Scanner s, rune ch, nint i) {
+internal static bool isIdentRune⁔(/*this*/ ref Scanner s, rune ch, nint i) {
     if (s.IsIdentRune != nil) {
         return ch != EOF && s.IsIdentRune(ch, i);
     }
     return ch == '_' || unicode.IsLetter(ch) || unicode.IsDigit(ch) && i > 0;
 }
 
-[GoMethodBody("scanIdentifier")] internal static rune scanIdentifierᴍ(ж<Scanner> Ꮡs) {
+internal static rune scanIdentifier⁔(/*this*/ ж<Scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // we know the zero'th rune is OK; start scanning at the next one
@@ -396,7 +396,7 @@ internal static bool isHex(rune ch) { return '0' <= ch && ch <= '9' || 'a' <= lo
 // digits returns the first rune that is not part of the sequence
 // anymore, and a bitset describing whether the sequence contained
 // digits (bit 0 is set), or separators '_' (bit 1 is set).
-[GoMethodBody("digits")] internal static (rune ch, nint digsep) digitsᴍ(ж<Scanner> Ꮡs, rune ch0, nint @base, ж<rune> Ꮡinvalid) {
+internal static (rune ch, nint digsep) digits⁔(/*this*/ ж<Scanner> Ꮡs, rune ch0, nint @base, ж<rune> Ꮡinvalid) {
     rune ch = default;
     nint digsep = default;
     ref var invalid = ref Ꮡinvalid.DerefOrNull();
@@ -428,14 +428,14 @@ internal static bool isHex(rune ch) { return '0' <= ch && ch <= '9' || 'a' <= lo
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string exponentHasNoDigitsˢᴍScanner => ref exponentHasNoDigitsˢᵇᴍScanner;
-private static readonly @string exponentHasNoDigitsˢᵇᴍScanner = "exponent has no digits"u8;
-internal static ref readonly @string hexadecimalMantissaˢᴍScanner => ref hexadecimalMantissaˢᵇᴍScanner;
-private static readonly @string hexadecimalMantissaˢᵇᴍScanner = "hexadecimal mantissa requires a 'p' exponent"u8;
-internal static ref readonly @string mustSeparateSuccessiveˢᴍScanner => ref mustSeparateSuccessiveˢᵇᴍScanner;
-private static readonly @string mustSeparateSuccessiveˢᵇᴍScanner = "'_' must separate successive digits"u8;
+internal static ref readonly @string exponentHasNoDigitsˢ⁔Scanner => ref exponentHasNoDigitsˢᵇ⁔Scanner;
+private static readonly @string exponentHasNoDigitsˢᵇ⁔Scanner = "exponent has no digits"u8;
+internal static ref readonly @string hexadecimalMantissaˢ⁔Scanner => ref hexadecimalMantissaˢᵇ⁔Scanner;
+private static readonly @string hexadecimalMantissaˢᵇ⁔Scanner = "hexadecimal mantissa requires a 'p' exponent"u8;
+internal static ref readonly @string mustSeparateSuccessiveˢ⁔Scanner => ref mustSeparateSuccessiveˢᵇ⁔Scanner;
+private static readonly @string mustSeparateSuccessiveˢᵇ⁔Scanner = "'_' must separate successive digits"u8;
 
-[GoMethodBody("scanNumber")] internal static (rune, rune) scanNumberᴍ(ж<Scanner> Ꮡs, rune ch, bool seenDot) {
+internal static (rune, rune) scanNumber⁔(/*this*/ ж<Scanner> Ꮡs, rune ch, bool seenDot) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     nint @base = 10;                                             // number base
@@ -513,10 +513,10 @@ private static readonly @string mustSeparateSuccessiveˢᵇᴍScanner = "'_' mus
         (ch, ds) = Ꮡs.digits(ch, 10, nil);
         digsep |= (nint)(ds);
         if ((ds & 1) == 0) {
-            Ꮡs.error(exponentHasNoDigitsˢᴍScanner);
+            Ꮡs.error(exponentHasNoDigitsˢ⁔Scanner);
         }
     } else if (prefix == 'x' && tok == Float) {
-        Ꮡs.error(hexadecimalMantissaˢᴍScanner);
+        Ꮡs.error(hexadecimalMantissaˢ⁔Scanner);
     }
 
     if (tok == Int && invalid != 0) {
@@ -526,7 +526,7 @@ private static readonly @string mustSeparateSuccessiveˢᵇᴍScanner = "'_' mus
     if ((digsep & 2) != 0) {
         s.tokEnd = s.srcPos - s.lastCharLen; // make sure token text is terminated
         nint i = invalidSep(Ꮡs.TokenText()); if (i >= 0) {
-            Ꮡs.error(mustSeparateSuccessiveˢᴍScanner);
+            Ꮡs.error(mustSeparateSuccessiveˢ⁔Scanner);
         }
     }
 
@@ -620,21 +620,21 @@ internal static nint digitVal(rune ch) {
 } partial class scanner_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidCharEscapeˢᴍScanner => ref invalidCharEscapeˢᵇᴍScanner;
-private static readonly @string invalidCharEscapeˢᵇᴍScanner = "invalid char escape"u8;
+internal static ref readonly @string invalidCharEscapeˢ⁔Scanner => ref invalidCharEscapeˢᵇ⁔Scanner;
+private static readonly @string invalidCharEscapeˢᵇ⁔Scanner = "invalid char escape"u8;
 
-[GoMethodBody("scanDigits")] internal static rune scanDigitsᴍ(ж<Scanner> Ꮡs, rune ch, nint @base, nint n) {
+internal static rune scanDigits⁔(/*this*/ ж<Scanner> Ꮡs, rune ch, nint @base, nint n) {
     while (n > 0 && digitVal(ch) < @base) {
         ch = Ꮡs.next();
         n--;
     }
     if (n > 0) {
-        Ꮡs.error(invalidCharEscapeˢᴍScanner);
+        Ꮡs.error(invalidCharEscapeˢ⁔Scanner);
     }
     return ch;
 }
 
-[GoMethodBody("scanEscape")] internal static rune scanEscapeᴍ(ж<Scanner> Ꮡs, rune quote) {
+internal static rune scanEscape⁔(/*this*/ ж<Scanner> Ꮡs, rune quote) {
     var ch = Ꮡs.next(); // read character after '/'
     switch (ch) {
     case var ᴛ when ᴛ == 'a' || ᴛ == 'b' || ᴛ == 'f' || ᴛ == 'n' || ᴛ == 'r' || ᴛ == 't' || ᴛ == 'v' || ᴛ == '\\' || ᴛ == quote: {
@@ -659,23 +659,23 @@ private static readonly @string invalidCharEscapeˢᵇᴍScanner = "invalid char
         break;
     }
     default: {
-        Ꮡs.error(invalidCharEscapeˢᴍScanner);
+        Ꮡs.error(invalidCharEscapeˢ⁔Scanner);
         break;
     }}
     return ch;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string literalNotTerminatedˢᴍScanner => ref literalNotTerminatedˢᵇᴍScanner;
-private static readonly @string literalNotTerminatedˢᵇᴍScanner = "literal not terminated"u8;
+internal static ref readonly @string literalNotTerminatedˢ⁔Scanner => ref literalNotTerminatedˢᵇ⁔Scanner;
+private static readonly @string literalNotTerminatedˢᵇ⁔Scanner = "literal not terminated"u8;
 
-[GoMethodBody("scanString")] internal static nint /*n*/ scanStringᴍ(ж<Scanner> Ꮡs, rune quote) {
+internal static nint /*n*/ scanString⁔(/*this*/ ж<Scanner> Ꮡs, rune quote) {
     nint n = default;
 
     var ch = Ꮡs.next(); // read character after quote
     while (ch != quote) {
         if (ch == '\n' || ch < 0) {
-            Ꮡs.error(literalNotTerminatedˢᴍScanner);
+            Ꮡs.error(literalNotTerminatedˢ⁔Scanner);
             return n;
         }
         if (ch == '\\') {
@@ -688,11 +688,11 @@ private static readonly @string literalNotTerminatedˢᵇᴍScanner = "literal n
     return n;
 }
 
-[GoMethodBody("scanRawString")] internal static void scanRawStringᴍ(ж<Scanner> Ꮡs) {
+internal static void scanRawString⁔(/*this*/ ж<Scanner> Ꮡs) {
     var ch = Ꮡs.next(); // read character after '`'
     while (ch != '`') {
         if (ch < 0) {
-            Ꮡs.error(literalNotTerminatedˢᴍScanner);
+            Ꮡs.error(literalNotTerminatedˢ⁔Scanner);
             return;
         }
         ch = Ꮡs.next();
@@ -700,20 +700,20 @@ private static readonly @string literalNotTerminatedˢᵇᴍScanner = "literal n
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidCharLiteralˢᴍScanner => ref invalidCharLiteralˢᵇᴍScanner;
-private static readonly @string invalidCharLiteralˢᵇᴍScanner = "invalid char literal"u8;
+internal static ref readonly @string invalidCharLiteralˢ⁔Scanner => ref invalidCharLiteralˢᵇ⁔Scanner;
+private static readonly @string invalidCharLiteralˢᵇ⁔Scanner = "invalid char literal"u8;
 
-[GoMethodBody("scanChar")] internal static void scanCharᴍ(ж<Scanner> Ꮡs) {
+internal static void scanChar⁔(/*this*/ ж<Scanner> Ꮡs) {
     if (Ꮡs.scanString('\'') != 1) {
-        Ꮡs.error(invalidCharLiteralˢᴍScanner);
+        Ꮡs.error(invalidCharLiteralˢ⁔Scanner);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string commentNotTerminatedˢᴍScanner => ref commentNotTerminatedˢᵇᴍScanner;
-private static readonly @string commentNotTerminatedˢᵇᴍScanner = "comment not terminated"u8;
+internal static ref readonly @string commentNotTerminatedˢ⁔Scanner => ref commentNotTerminatedˢᵇ⁔Scanner;
+private static readonly @string commentNotTerminatedˢᵇ⁔Scanner = "comment not terminated"u8;
 
-[GoMethodBody("scanComment")] internal static rune scanCommentᴍ(ж<Scanner> Ꮡs, rune ch) {
+internal static rune scanComment⁔(/*this*/ ж<Scanner> Ꮡs, rune ch) {
     // ch == '/' || ch == '*'
     if (ch == '/') {
         // line comment
@@ -728,7 +728,7 @@ private static readonly @string commentNotTerminatedˢᵇᴍScanner = "comment n
     ch = Ꮡs.next(); // read character after "/*"
     for (;;) {
         if (ch < 0) {
-            Ꮡs.error(commentNotTerminatedˢᴍScanner);
+            Ꮡs.error(commentNotTerminatedˢ⁔Scanner);
             break;
         }
         var ch0 = ch;
@@ -746,7 +746,7 @@ private static readonly @string commentNotTerminatedˢᵇᴍScanner = "comment n
 // It returns [EOF] at the end of the source. It reports scanner errors (read and
 // token errors) by calling s.Error, if not nil; otherwise it prints an error
 // message to [os.Stderr].
-[GoMethodBody("Scan")] internal static rune Scanᴍ(ж<Scanner> Ꮡs) {
+internal static rune Scan⁔(/*this*/ ж<Scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var ch = Ꮡs.Peek();
@@ -870,7 +870,7 @@ break_redo:;
 // the character or token returned by the last call to [Scanner.Next] or [Scanner.Scan].
 // Use the [Scanner.Position] field for the start position of the most
 // recently scanned token.
-[GoMethodBody("Pos")] internal static Position /*pos*/ Posᴍ(ref Scanner s) {
+internal static Position /*pos*/ Pos⁔(/*this*/ ref Scanner s) {
     Position pos = default;
 
     pos.Filename = s.Filename;
@@ -899,7 +899,7 @@ break_redo:;
 
 // TokenText returns the string corresponding to the most recently scanned token.
 // Valid after calling [Scanner.Scan] and in calls of [Scanner.Error].
-[GoMethodBody("TokenText")] internal static @string TokenTextᴍ(ж<Scanner> Ꮡs) {
+internal static @string TokenText⁔(/*this*/ ж<Scanner> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.tokPos < 0) {

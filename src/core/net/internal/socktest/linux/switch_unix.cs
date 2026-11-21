@@ -13,7 +13,7 @@ partial struct Sockets /*map[nint, Status]*/;
 
 } partial class socktest_package {
 
-[GoMethodBody("sockso")] internal static ж<Status> socksoᴍ(ж<Switch> Ꮡsw, nint s) {
+internal static ж<Status> sockso⁔(/*this*/ ж<Switch> Ꮡsw, nint s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -34,7 +34,7 @@ partial struct Sockets /*map[nint, Status]*/;
 
 // addLocked returns a new Status without locking.
 // sw.smu must be held before call.
-[GoMethodBody("addLocked")] internal static ж<Status> addLockedᴍ(ж<Switch> Ꮡsw, nint s, nint family, nint sotype, nint proto) {
+internal static ж<Status> addLocked⁔(/*this*/ ж<Switch> Ꮡsw, nint s, nint family, nint sotype, nint proto) {
     ref var sw = ref Ꮡsw.DerefOrNull();
 
     Ꮡsw.Ꮡonce.Do(Ꮡsw.init);

@@ -47,7 +47,7 @@ partial struct joinError {
 
 } partial class errors_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref joinError e) {
+internal static @string Error⁔(/*this*/ ref joinError e) {
     // Since Join returns nil if every value in errs is nil,
     // e.errs cannot be empty.
     if (len(e.errs) == 1) {
@@ -63,7 +63,7 @@ partial struct joinError {
     return @unsafe.String(Ꮡ(b, 0), len(b));
 }
 
-[GoMethodBody("Unwrap")] internal static slice<error> Unwrapᴍ(ref joinError e) {
+internal static slice<error> Unwrap⁔(/*this*/ ref joinError e) {
     return e.errs;
 }
 

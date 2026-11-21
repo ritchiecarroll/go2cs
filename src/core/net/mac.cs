@@ -15,7 +15,7 @@ partial struct HardwareAddr /*[]byte*/;
 
 } partial class net_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(HardwareAddr a) {
+internal static @string String⁔(/*this*/ HardwareAddr a) {
     var bufᴷ = new stackAppend<byte>();
 
     if (len(a) == 0) {

@@ -88,11 +88,11 @@ internal static UntypedInt numJoinTypes => 8;
 
 } partial class idna_package {
 
-[GoMethodBody("isMapped")] internal static bool isMappedᴍ(info c) {
+internal static bool isMapped⁔(/*this*/ info c) {
     return (info)(c & 0x3) != 0;
 }
 
-[GoMethodBody("category")] internal static category categoryᴍ(info c) {
+internal static category category⁔(/*this*/ info c) {
     var small = (info)(c & (uint16)catSmallMask);
     if (small != 0) {
         return (category)(uint16)small;
@@ -100,18 +100,18 @@ internal static UntypedInt numJoinTypes => 8;
     return (category)(uint16)((info)(c & (uint16)catBigMask));
 }
 
-[GoMethodBody("joinType")] internal static info joinTypeᴍ(info c) {
+internal static info joinType⁔(/*this*/ info c) {
     if (c.isMapped()) {
         return 0;
     }
     return (info)((c >> (int)(joinShift)) & (uint16)joinMask);
 }
 
-[GoMethodBody("isModifier")] internal static bool isModifierᴍ(info c) {
+internal static bool isModifier⁔(/*this*/ info c) {
     return (info)(c & ((info)((uint16)modifier | (uint16)catSmallMask))) == modifier;
 }
 
-[GoMethodBody("isViramaModifier")] internal static bool isViramaModifierᴍ(info c) {
+internal static bool isViramaModifier⁔(/*this*/ info c) {
     return (info)(c & ((info)((uint16)attributesMask | (uint16)catSmallMask))) == viramaModifier;
 }
 

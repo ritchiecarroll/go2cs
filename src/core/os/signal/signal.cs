@@ -41,15 +41,15 @@ partial struct handler {
 
 } partial class signal_package {
 
-[GoMethodBody("want")] internal static bool wantᴍ(ref handler h, nint sig) {
+internal static bool want⁔(/*this*/ ref handler h, nint sig) {
     return ((h.mask[sig / 32].Rsh((nuint)(sig & 31))) & 1) != 0;
 }
 
-[GoMethodBody("set")] internal static void setᴍ(ref handler h, nint sig) {
+internal static void set⁔(/*this*/ ref handler h, nint sig) {
     h.mask[sig / 32] |= (uint32)(((uint32)1).Lsh((nuint)(sig & 31)));
 }
 
-[GoMethodBody("clear")] internal static void clearᴍ(ref handler h, nint sig) {
+internal static void clear⁔(/*this*/ ref handler h, nint sig) {
     h.mask[sig / 32] &= unchecked((uint32)~(uint32)(((uint32)1).Lsh((nuint)(sig & 31))));
 }
 
@@ -357,7 +357,7 @@ partial struct signalCtx {
 
 } partial class signal_package {
 
-[GoMethodBody("stop")] internal static void stopᴍ(ref signalCtx c) {
+internal static void stop⁔(/*this*/ ref signalCtx c) {
     c.cancel(default);
     Stop(c.ch.AsSendOnly());
 }
@@ -370,7 +370,7 @@ partial interface stringer {
 
 } partial class signal_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref signalCtx c) {
+internal static @string String⁔(/*this*/ ref signalCtx c) {
     var bufᴷ = new stackAppend<byte>();
 
     slice<byte> buf = default;
@@ -399,11 +399,11 @@ partial struct signalError /*@string*/;
 
 } partial class signal_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(signalError s) {
+internal static @string Error⁔(/*this*/ signalError s) {
     return (@string)s;
 }
 
-[GoMethodBody("Is")] internal static bool Isᴍ(signalError s, error target) {
+internal static bool Is⁔(/*this*/ signalError s, error target) {
     if (AreEqual(target, context.Canceled)) {
         return true;
     }

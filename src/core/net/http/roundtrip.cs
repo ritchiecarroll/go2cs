@@ -29,7 +29,7 @@ internal static partial (ж<Response>, error) badRoundTrip(ж<Transport> _Δp0, 
 //
 // Like the RoundTripper interface, the error types returned
 // by RoundTrip are unspecified.
-[GoMethodBody("RoundTrip")] internal static (ж<Response>, error) RoundTripᴍ(ж<Transport> Ꮡt, ж<Request> req) {
+internal static (ж<Response>, error) RoundTrip⁔(/*this*/ ж<Transport> Ꮡt, ж<Request> req) {
     if (Ꮡt == nil) {
         throw panic("transport is nil");
     }

@@ -34,17 +34,17 @@ internal static slog.Handler newFastTextHandler(io.Writer w) {
 
 } partial class benchmarks_package {
 
-[GoMethodBody("Enabled")] internal static bool Enabledᴍ(ref fastTextHandler h, context.Context _Δp1, slog.Level _Δp2) { return true; }
+internal static bool Enabled⁔(/*this*/ ref fastTextHandler h, context.Context _Δp1, slog.Level _Δp2) { return true; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string timeˢᴍfastTextHandler => ref timeˢᵇᴍfastTextHandler;
-private static readonly @string timeˢᵇᴍfastTextHandler = "time="u8;
-internal static ref readonly @string levelˢᴍfastTextHandler => ref levelˢᵇᴍfastTextHandler;
-private static readonly @string levelˢᵇᴍfastTextHandler = "level="u8;
-internal static ref readonly @string msgˢᴍfastTextHandler => ref msgˢᵇᴍfastTextHandler;
-private static readonly @string msgˢᵇᴍfastTextHandler = "msg="u8;
+internal static ref readonly @string timeˢ⁔fastTextHandler => ref timeˢᵇ⁔fastTextHandler;
+private static readonly @string timeˢᵇ⁔fastTextHandler = "time="u8;
+internal static ref readonly @string levelˢ⁔fastTextHandler => ref levelˢᵇ⁔fastTextHandler;
+private static readonly @string levelˢᵇ⁔fastTextHandler = "level="u8;
+internal static ref readonly @string msgˢ⁔fastTextHandler => ref msgˢᵇ⁔fastTextHandler;
+private static readonly @string msgˢᵇ⁔fastTextHandler = "msg="u8;
 
-[GoMethodBody("Handle")] internal static error Handleᴍ(ж<fastTextHandler> Ꮡh, context.Context _Δp1, slog.Record r) {
+internal static error Handle⁔(/*this*/ ж<fastTextHandler> Ꮡh, context.Context _Δp1, slog.Record r) {
     GoFrame ᒐ = default;
     try {
         r = r.ΔClone();
@@ -55,14 +55,14 @@ private static readonly @string msgˢᵇᴍfastTextHandler = "msg="u8;
         defer(bufʗ1.Free, ref ᒐ);
 
         if (!r.Time.IsZero()) {
-            buf.WriteString(timeˢᴍfastTextHandler);
+            buf.WriteString(timeˢ⁔fastTextHandler);
             h.appendTime(buf, r.Time);
             buf.WriteByte((byte)' ');
         }
-        buf.WriteString(levelˢᴍfastTextHandler);
+        buf.WriteString(levelˢ⁔fastTextHandler);
         buf.ValueSlot = strconv.AppendInt(buf.ValueSlot, (int64)r.Level, 10);
         buf.WriteByte((byte)' ');
-        buf.WriteString(msgˢᴍfastTextHandler);
+        buf.WriteString(msgˢ⁔fastTextHandler);
         buf.WriteString(r.Message);
         var bufʗ2 = buf;
         r.Attrs((slog.Attr a) => {
@@ -80,7 +80,7 @@ private static readonly @string msgˢᵇᴍfastTextHandler = "msg="u8;
     finally { ᒐ.Run(); }
 }
 
-[GoMethodBody("appendValue")] internal static void appendValueᴍ(ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, slog.Value v) {
+internal static void appendValue⁔(/*this*/ ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, slog.Value v) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     switch (v.Kind()) {
@@ -132,17 +132,17 @@ private static readonly @string msgˢᵇᴍfastTextHandler = "msg="u8;
     }}
 }
 
-[GoMethodBody("appendTime")] internal static void appendTimeᴍ(ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, time.Time t) {
+internal static void appendTime⁔(/*this*/ ref fastTextHandler h, ж<buffer.Buffer> Ꮡbuf, time.Time t) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     buf = strconv.AppendInt(buf, t.Unix(), 10);
 }
 
-[GoMethodBody("WithAttrs")] internal static slog.Handler WithAttrsᴍ(ref fastTextHandler h, slice<slog.Attr> _) {
+internal static slog.Handler WithAttrs⁔(/*this*/ ref fastTextHandler h, slice<slog.Attr> _) {
     throw panic("fastTextHandler: With unimplemented");
 }
 
-[GoMethodBody("WithGroup")] internal static slog.Handler WithGroupᴍ(ref fastTextHandler _Δp0, @string _Δp1) {
+internal static slog.Handler WithGroup⁔(/*this*/ ref fastTextHandler _Δp0, @string _Δp1) {
     throw panic("fastTextHandler: WithGroup unimplemented");
 }
 
@@ -167,9 +167,9 @@ internal static ж<asyncHandler> newAsyncHandler() {
 
 } partial class benchmarks_package {
 
-[GoMethodBody("Enabled")] internal static bool Enabledᴍ(ref asyncHandler _Δp0, context.Context _Δp1, slog.Level _Δp2) { return true; }
+internal static bool Enabled⁔(/*this*/ ref asyncHandler _Δp0, context.Context _Δp1, slog.Level _Δp2) { return true; }
 
-[GoMethodBody("Handle")] internal static error Handleᴍ(ref asyncHandler h, context.Context _, slog.Record r) {
+internal static error Handle⁔(/*this*/ ref asyncHandler h, context.Context _, slog.Record r) {
     r = r.ΔClone();
 
     h.ringBuffer[h.next].AssignFrom(r.Clone());
@@ -177,11 +177,11 @@ internal static ж<asyncHandler> newAsyncHandler() {
     return default;
 }
 
-[GoMethodBody("WithAttrs")] internal static slog.Handler WithAttrsᴍ(ref asyncHandler _Δp0, slice<slog.Attr> _Δp1) {
+internal static slog.Handler WithAttrs⁔(/*this*/ ref asyncHandler _Δp0, slice<slog.Attr> _Δp1) {
     throw panic("asyncHandler: With unimplemented");
 }
 
-[GoMethodBody("WithGroup")] internal static slog.Handler WithGroupᴍ(ref asyncHandler _Δp0, @string _Δp1) {
+internal static slog.Handler WithGroup⁔(/*this*/ ref asyncHandler _Δp0, @string _Δp1) {
     throw panic("asyncHandler: WithGroup unimplemented");
 }
 
@@ -193,14 +193,14 @@ partial struct disabledHandler {
 
 } partial class benchmarks_package {
 
-[GoMethodBody("Enabled")] internal static bool Enabledᴍ(disabledHandler _Δp0, context.Context _Δp1, slog.Level _Δp2) { return false; }
-[GoMethodBody("Handle")] internal static error Handleᴍ(disabledHandler _Δp0, context.Context _Δp1, slog.Record _Δp2) { throw panic("should not be called"); }
+internal static bool Enabled⁔(/*this*/ disabledHandler _Δp0, context.Context _Δp1, slog.Level _Δp2) { return false; }
+internal static error Handle⁔(/*this*/ disabledHandler _Δp0, context.Context _Δp1, slog.Record _Δp2) { throw panic("should not be called"); }
 
-[GoMethodBody("WithAttrs")] internal static slog.Handler WithAttrsᴍ(disabledHandler _Δp0, slice<slog.Attr> _Δp1) {
+internal static slog.Handler WithAttrs⁔(/*this*/ disabledHandler _Δp0, slice<slog.Attr> _Δp1) {
     throw panic("disabledHandler: With unimplemented");
 }
 
-[GoMethodBody("WithGroup")] internal static slog.Handler WithGroupᴍ(disabledHandler _Δp0, @string _Δp1) {
+internal static slog.Handler WithGroup⁔(/*this*/ disabledHandler _Δp0, @string _Δp1) {
     throw panic("disabledHandler: WithGroup unimplemented");
 }
 

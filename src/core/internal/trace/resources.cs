@@ -49,50 +49,50 @@ public static GoState GoSyscall => 5;                 // Goroutine is in a syste
 
 // Executing returns true if the state indicates that the goroutine is executing
 // and bound to its thread.
-[GoMethodBody("Executing")] internal static bool Executingᴍ(GoState s) {
+internal static bool Executing⁔(/*this*/ GoState s) {
     return s == GoRunning || s == GoSyscall;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string undeterminedˢᴍGoState => ref undeterminedˢᵇᴍGoState;
-private static readonly @string undeterminedˢᵇᴍGoState = "Undetermined"u8;
-internal static ref readonly @string notExistˢᴍGoState => ref notExistˢᵇᴍGoState;
-private static readonly @string notExistˢᵇᴍGoState = "NotExist"u8;
-internal static ref readonly @string runnableˢᴍGoState => ref runnableˢᵇᴍGoState;
-private static readonly @string runnableˢᵇᴍGoState = "Runnable"u8;
-internal static ref readonly @string runningˢᴍGoState => ref runningˢᵇᴍGoState;
-private static readonly @string runningˢᵇᴍGoState = "Running"u8;
-internal static ref readonly @string waitingˢᴍGoState => ref waitingˢᵇᴍGoState;
-private static readonly @string waitingˢᵇᴍGoState = "Waiting"u8;
-internal static ref readonly @string syscallˢᴍGoState => ref syscallˢᵇᴍGoState;
-private static readonly @string syscallˢᵇᴍGoState = "Syscall"u8;
-internal static ref readonly @string badˢᴍGoState => ref badˢᵇᴍGoState;
-private static readonly @string badˢᵇᴍGoState = "Bad"u8;
+internal static ref readonly @string undeterminedˢ⁔GoState => ref undeterminedˢᵇ⁔GoState;
+private static readonly @string undeterminedˢᵇ⁔GoState = "Undetermined"u8;
+internal static ref readonly @string notExistˢ⁔GoState => ref notExistˢᵇ⁔GoState;
+private static readonly @string notExistˢᵇ⁔GoState = "NotExist"u8;
+internal static ref readonly @string runnableˢ⁔GoState => ref runnableˢᵇ⁔GoState;
+private static readonly @string runnableˢᵇ⁔GoState = "Runnable"u8;
+internal static ref readonly @string runningˢ⁔GoState => ref runningˢᵇ⁔GoState;
+private static readonly @string runningˢᵇ⁔GoState = "Running"u8;
+internal static ref readonly @string waitingˢ⁔GoState => ref waitingˢᵇ⁔GoState;
+private static readonly @string waitingˢᵇ⁔GoState = "Waiting"u8;
+internal static ref readonly @string syscallˢ⁔GoState => ref syscallˢᵇ⁔GoState;
+private static readonly @string syscallˢᵇ⁔GoState = "Syscall"u8;
+internal static ref readonly @string badˢ⁔GoState => ref badˢᵇ⁔GoState;
+private static readonly @string badˢᵇ⁔GoState = "Bad"u8;
 
 // String returns a human-readable representation of a GoState.
 //
 // The format of the returned string is for debugging purposes and is subject to change.
-[GoMethodBody("String")] internal static @string Stringᴍ(GoState s) {
+internal static @string String⁔(/*this*/ GoState s) {
     switch (s) {
     case var ᴛ when ᴛ == GoUndetermined: {
-        return undeterminedˢᴍGoState;
+        return undeterminedˢ⁔GoState;
     }
     case var ᴛ when ᴛ == GoNotExist: {
-        return notExistˢᴍGoState;
+        return notExistˢ⁔GoState;
     }
     case var ᴛ when ᴛ == GoRunnable: {
-        return runnableˢᴍGoState;
+        return runnableˢ⁔GoState;
     }
     case var ᴛ when ᴛ == GoRunning: {
-        return runningˢᴍGoState;
+        return runningˢ⁔GoState;
     }
     case var ᴛ when ᴛ == GoWaiting: {
-        return waitingˢᴍGoState;
+        return waitingˢ⁔GoState;
     }
     case var ᴛ when ᴛ == GoSyscall: {
-        return syscallˢᴍGoState;
+        return syscallˢ⁔GoState;
     }}
-    return badˢᴍGoState;
+    return badˢ⁔GoState;
 }
 
 } partial class trace_package {
@@ -112,40 +112,40 @@ public static ProcState ProcIdle => 3;                    // Proc is idle.
 
 // Executing returns true if the state indicates that the proc is executing
 // and bound to its thread.
-[GoMethodBody("Executing")] internal static bool Executingᴍ(ProcState s) {
+internal static bool Executing⁔(/*this*/ ProcState s) {
     return s == ProcRunning;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string undeterminedˢᴍProcState => ref undeterminedˢᵇᴍProcState;
-private static readonly @string undeterminedˢᵇᴍProcState = "Undetermined"u8;
-internal static ref readonly @string notExistˢᴍProcState => ref notExistˢᵇᴍProcState;
-private static readonly @string notExistˢᵇᴍProcState = "NotExist"u8;
-internal static ref readonly @string runningˢᴍProcState => ref runningˢᵇᴍProcState;
-private static readonly @string runningˢᵇᴍProcState = "Running"u8;
-internal static ref readonly @string idleˢᴍProcState => ref idleˢᵇᴍProcState;
-private static readonly @string idleˢᵇᴍProcState = "Idle"u8;
-internal static ref readonly @string badˢᴍProcState => ref badˢᵇᴍProcState;
-private static readonly @string badˢᵇᴍProcState = "Bad"u8;
+internal static ref readonly @string undeterminedˢ⁔ProcState => ref undeterminedˢᵇ⁔ProcState;
+private static readonly @string undeterminedˢᵇ⁔ProcState = "Undetermined"u8;
+internal static ref readonly @string notExistˢ⁔ProcState => ref notExistˢᵇ⁔ProcState;
+private static readonly @string notExistˢᵇ⁔ProcState = "NotExist"u8;
+internal static ref readonly @string runningˢ⁔ProcState => ref runningˢᵇ⁔ProcState;
+private static readonly @string runningˢᵇ⁔ProcState = "Running"u8;
+internal static ref readonly @string idleˢ⁔ProcState => ref idleˢᵇ⁔ProcState;
+private static readonly @string idleˢᵇ⁔ProcState = "Idle"u8;
+internal static ref readonly @string badˢ⁔ProcState => ref badˢᵇ⁔ProcState;
+private static readonly @string badˢᵇ⁔ProcState = "Bad"u8;
 
 // String returns a human-readable representation of a ProcState.
 //
 // The format of the returned string is for debugging purposes and is subject to change.
-[GoMethodBody("String")] internal static @string Stringᴍ(ProcState s) {
+internal static @string String⁔(/*this*/ ProcState s) {
     switch (s) {
     case var ᴛ when ᴛ == ProcUndetermined: {
-        return undeterminedˢᴍProcState;
+        return undeterminedˢ⁔ProcState;
     }
     case var ᴛ when ᴛ == ProcNotExist: {
-        return notExistˢᴍProcState;
+        return notExistˢ⁔ProcState;
     }
     case var ᴛ when ᴛ == ProcRunning: {
-        return runningˢᴍProcState;
+        return runningˢ⁔ProcState;
     }
     case var ᴛ when ᴛ == ProcIdle: {
-        return idleˢᴍProcState;
+        return idleˢ⁔ProcState;
     }}
-    return badˢᴍProcState;
+    return badˢ⁔ProcState;
 }
 
 } partial class trace_package {
@@ -164,35 +164,35 @@ public static ResourceKind ResourceThread => 3;          // Thread.
 } partial class trace_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noneˢᴍResourceKind => ref noneˢᵇᴍResourceKind;
-private static readonly @string noneˢᵇᴍResourceKind = "None"u8;
-internal static ref readonly @string goroutineˢᴍResourceKind => ref goroutineˢᵇᴍResourceKind;
-private static readonly @string goroutineˢᵇᴍResourceKind = "Goroutine"u8;
-internal static ref readonly @string procˢᴍResourceKind => ref procˢᵇᴍResourceKind;
-private static readonly @string procˢᵇᴍResourceKind = "Proc"u8;
-internal static ref readonly @string threadˢᴍResourceKind => ref threadˢᵇᴍResourceKind;
-private static readonly @string threadˢᵇᴍResourceKind = "Thread"u8;
-internal static ref readonly @string badˢᴍResourceKind => ref badˢᵇᴍResourceKind;
-private static readonly @string badˢᵇᴍResourceKind = "Bad"u8;
+internal static ref readonly @string noneˢ⁔ResourceKind => ref noneˢᵇ⁔ResourceKind;
+private static readonly @string noneˢᵇ⁔ResourceKind = "None"u8;
+internal static ref readonly @string goroutineˢ⁔ResourceKind => ref goroutineˢᵇ⁔ResourceKind;
+private static readonly @string goroutineˢᵇ⁔ResourceKind = "Goroutine"u8;
+internal static ref readonly @string procˢ⁔ResourceKind => ref procˢᵇ⁔ResourceKind;
+private static readonly @string procˢᵇ⁔ResourceKind = "Proc"u8;
+internal static ref readonly @string threadˢ⁔ResourceKind => ref threadˢᵇ⁔ResourceKind;
+private static readonly @string threadˢᵇ⁔ResourceKind = "Thread"u8;
+internal static ref readonly @string badˢ⁔ResourceKind => ref badˢᵇ⁔ResourceKind;
+private static readonly @string badˢᵇ⁔ResourceKind = "Bad"u8;
 
 // String returns a human-readable representation of a ResourceKind.
 //
 // The format of the returned string is for debugging purposes and is subject to change.
-[GoMethodBody("String")] internal static @string Stringᴍ(ResourceKind r) {
+internal static @string String⁔(/*this*/ ResourceKind r) {
     switch (r) {
     case var ᴛ when ᴛ == ResourceNone: {
-        return noneˢᴍResourceKind;
+        return noneˢ⁔ResourceKind;
     }
     case var ᴛ when ᴛ == ResourceGoroutine: {
-        return goroutineˢᴍResourceKind;
+        return goroutineˢ⁔ResourceKind;
     }
     case var ᴛ when ᴛ == ResourceProc: {
-        return procˢᴍResourceKind;
+        return procˢ⁔ResourceKind;
     }
     case var ᴛ when ᴛ == ResourceThread: {
-        return threadˢᴍResourceKind;
+        return threadˢ⁔ResourceKind;
     }}
-    return badˢᴍResourceKind;
+    return badˢ⁔ResourceKind;
 }
 
 } partial class trace_package {
@@ -232,7 +232,7 @@ public static ResourceID MakeResourceID<T>(T id)
 // Goroutine obtains a GoID from the resource ID.
 //
 // r.Kind must be ResourceGoroutine or this function will panic.
-[GoMethodBody("Goroutine")] internal static GoID Goroutineᴍ(ResourceID r) {
+internal static GoID Goroutine⁔(/*this*/ ResourceID r) {
     if (r.Kind != ResourceGoroutine) {
         throw panic(fmt.Sprintf("attempted to get GoID from %s resource ID"u8, r.Kind));
     }
@@ -242,7 +242,7 @@ public static ResourceID MakeResourceID<T>(T id)
 // Proc obtains a ProcID from the resource ID.
 //
 // r.Kind must be ResourceProc or this function will panic.
-[GoMethodBody("Proc")] internal static ProcID Procᴍ(ResourceID r) {
+internal static ProcID Proc⁔(/*this*/ ResourceID r) {
     if (r.Kind != ResourceProc) {
         throw panic(fmt.Sprintf("attempted to get ProcID from %s resource ID"u8, r.Kind));
     }
@@ -252,7 +252,7 @@ public static ResourceID MakeResourceID<T>(T id)
 // Thread obtains a ThreadID from the resource ID.
 //
 // r.Kind must be ResourceThread or this function will panic.
-[GoMethodBody("Thread")] internal static ThreadID Threadᴍ(ResourceID r) {
+internal static ThreadID Thread⁔(/*this*/ ResourceID r) {
     if (r.Kind != ResourceThread) {
         throw panic(fmt.Sprintf("attempted to get ThreadID from %s resource ID"u8, r.Kind));
     }
@@ -262,7 +262,7 @@ public static ResourceID MakeResourceID<T>(T id)
 // String returns a human-readable string representation of the ResourceID.
 //
 // This representation is subject to change and is intended primarily for debugging.
-[GoMethodBody("String")] internal static @string Stringᴍ(ResourceID r) {
+internal static @string String⁔(/*this*/ ResourceID r) {
     if (r.Kind == ResourceNone) {
         return r.Kind.String();
     }
@@ -322,7 +322,7 @@ public static StateTransition MakeProcStateTransition(ProcID id, ProcState from,
 // on the same thread will feature the same goroutine until it stops running.
 //
 // Panics if d.Resource.Kind is not ResourceGoroutine.
-[GoMethodBody("Goroutine")] internal static (GoState from, GoState to) Goroutineᴍ(StateTransition d) {
+internal static (GoState from, GoState to) Goroutine⁔(/*this*/ StateTransition d) {
     if (d.Resource.Kind != ResourceGoroutine) {
         throw panic("Goroutine called on non-Goroutine state transition");
     }
@@ -336,7 +336,7 @@ public static StateTransition MakeProcStateTransition(ProcID id, ProcState from,
 // on the same thread will feature the same goroutine until it stops running.
 //
 // Panics if d.Resource.Kind is not ResourceProc.
-[GoMethodBody("Proc")] internal static (ProcState from, ProcState to) Procᴍ(StateTransition d) {
+internal static (ProcState from, ProcState to) Proc⁔(/*this*/ StateTransition d) {
     if (d.Resource.Kind != ResourceProc) {
         throw panic("Proc called on non-Proc state transition");
     }

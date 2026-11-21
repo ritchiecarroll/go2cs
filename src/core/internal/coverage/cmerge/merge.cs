@@ -32,13 +32,13 @@ partial struct Merger {
 
 } partial class cmerge_package {
 
-[GoMethodBody("SetModeMergePolicy")] internal static void SetModeMergePolicyᴍ(ref Merger cm, ModeMergePolicy policy) {
+internal static void SetModeMergePolicy⁔(/*this*/ ref Merger cm, ModeMergePolicy policy) {
     cm.policy = policy;
 }
 
 // MergeCounters takes the counter values in 'src' and merges them
 // into 'dst' according to the correct counter mode.
-[GoMethodBody("MergeCounters")] internal static (error, bool) MergeCountersᴍ(ref Merger m, slice<uint32> dst, slice<uint32> src) {
+internal static (error, bool) MergeCounters⁔(/*this*/ ref Merger m, slice<uint32> dst, slice<uint32> src) {
     if (len(src) != len(dst)) {
         return (fmt.Errorf("merging counters: len(dst)=%d len(src)=%d"u8, len(dst), len(src)), false);
     }
@@ -61,7 +61,7 @@ partial struct Merger {
 // SaturatingAdd does a saturating addition of 'dst' and 'src',
 // returning added value or math.MaxUint32 if there is an overflow.
 // Overflows are recorded in case the client needs to track them.
-[GoMethodBody("SaturatingAdd")] internal static uint32 SaturatingAddᴍ(ref Merger m, uint32 dst, uint32 src) {
+internal static uint32 SaturatingAdd⁔(/*this*/ ref Merger m, uint32 dst, uint32 src) {
     var (result, overflow) = cmerge.SaturatingAdd(dst, src);
     if (overflow) {
         m.overflow = true;
@@ -91,7 +91,7 @@ public static (uint32, bool) SaturatingAdd(uint32 dst, uint32 src) {
 // data files from different binaries, where we're combining data from
 // more than one meta-data file, we need to check for and resolve
 // mode/granularity clashes.
-[GoMethodBody("SetModeAndGranularity")] internal static error SetModeAndGranularityᴍ(ref Merger cm, @string mdf, coverage.CounterMode cmode, coverage.CounterGranularity cgran) {
+internal static error SetModeAndGranularity⁔(/*this*/ ref Merger cm, @string mdf, coverage.CounterMode cmode, coverage.CounterGranularity cgran) {
     if (cm.cmode == coverage.CtrModeInvalid) {
         // Set merger mode based on what we're seeing here.
         cm.cmode = cmode;
@@ -117,17 +117,17 @@ public static (uint32, bool) SaturatingAdd(uint32 dst, uint32 src) {
     return default;
 }
 
-[GoMethodBody("ResetModeAndGranularity")] internal static void ResetModeAndGranularityᴍ(ref Merger cm) {
+internal static void ResetModeAndGranularity⁔(/*this*/ ref Merger cm) {
     cm.cmode = coverage.CtrModeInvalid;
     cm.cgran = coverage.CtrGranularityInvalid;
     cm.overflow = false;
 }
 
-[GoMethodBody("Mode")] internal static coverage.CounterMode Modeᴍ(ref Merger cm) {
+internal static coverage.CounterMode Mode⁔(/*this*/ ref Merger cm) {
     return cm.cmode;
 }
 
-[GoMethodBody("Granularity")] internal static coverage.CounterGranularity Granularityᴍ(ref Merger cm) {
+internal static coverage.CounterGranularity Granularity⁔(/*this*/ ref Merger cm) {
     return cm.cgran;
 }
 

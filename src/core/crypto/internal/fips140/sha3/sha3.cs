@@ -53,26 +53,26 @@ partial struct Digest {
 } partial class sha3_package {
 
 // BlockSize returns the rate of sponge underlying this hash function.
-[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref Digest d) { return d.rate; }
+internal static nint BlockSize⁔(/*this*/ ref Digest d) { return d.rate; }
 
 // Size returns the output size of the hash function in bytes.
-[GoMethodBody("Size")] internal static nint Sizeᴍ(ref Digest d) { return d.outputLen; }
+internal static nint Size⁔(/*this*/ ref Digest d) { return d.outputLen; }
 
 // Reset resets the Digest to its initial state.
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref Digest d) {
+internal static void Reset⁔(/*this*/ ref Digest d) {
     // Zero the permutation's state.
     clear(d.a[..]);
     d.state = spongeAbsorbing;
     d.n = 0;
 }
 
-[GoMethodBody("Clone")] internal static ж<Digest> Cloneᴍ(ref Digest d) {
+internal static ж<Digest> Clone⁔(/*this*/ ref Digest d) {
     ref var ret = ref heap<Digest>(d.ΔClone(), out var Ꮡret);
     return Ꮡret;
 }
 
 // permute applies the KeccakF-1600 permutation.
-[GoMethodBody("permute")] internal static void permuteᴍ(ж<Digest> Ꮡd) {
+internal static void permute⁔(/*this*/ ж<Digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     keccakF1600(Ꮡd.Ꮡa);
@@ -81,7 +81,7 @@ partial struct Digest {
 
 // padAndPermute appends the domain separation bits in dsbyte, applies
 // the multi-bitrate 10..1 padding rule, and permutes the state.
-[GoMethodBody("padAndPermute")] internal static void padAndPermuteᴍ(ж<Digest> Ꮡd) {
+internal static void padAndPermute⁔(/*this*/ ж<Digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Pad with this instance's domain-separator bits. We know that there's
@@ -99,8 +99,8 @@ partial struct Digest {
 }
 
 // Write absorbs more data into the hash's state.
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<Digest> Ꮡd, slice<byte> p) { return Ꮡd.write(p); }
-[GoMethodBody("writeGeneric")] internal static (nint n, error err) writeGenericᴍ(ж<Digest> Ꮡd, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<Digest> Ꮡd, slice<byte> p) { return Ꮡd.write(p); }
+internal static (nint n, error err) writeGeneric⁔(/*this*/ ж<Digest> Ꮡd, slice<byte> p) {
     nint n = default;
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
@@ -126,7 +126,7 @@ partial struct Digest {
 }
 
 // read squeezes an arbitrary number of bytes from the sponge.
-[GoMethodBody("readGeneric")] internal static (nint n, error err) readGenericᴍ(ж<Digest> Ꮡd, slice<byte> @out) {
+internal static (nint n, error err) readGeneric⁔(/*this*/ ж<Digest> Ꮡd, slice<byte> @out) {
     nint n = default;
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
@@ -155,7 +155,7 @@ partial struct Digest {
 
 // Sum appends the current hash to b and returns the resulting slice.
 // It does not change the underlying hash state.
-[GoMethodBody("Sum")] internal static slice<byte> Sumᴍ(ref Digest d, slice<byte> b) {
+internal static slice<byte> Sum⁔(/*this*/ ref Digest d, slice<byte> b) {
     if (d.dsbyte == dsbyteKeccak) {
         fips140.RecordNonApproved();
     } else {
@@ -164,7 +164,7 @@ partial struct Digest {
     return d.sum(b);
 }
 
-[GoMethodBody("sumGeneric")] internal static slice<byte> sumGenericᴍ(ref Digest d, slice<byte> b) {
+internal static slice<byte> sumGeneric⁔(/*this*/ ref Digest d, slice<byte> b) {
     if (d.state != spongeAbsorbing) {
         throw panic("sha3: Sum after Read");
     }
@@ -192,11 +192,11 @@ internal const nint marshaledSize = /* len(magicSHA3) + 1 + 200 + 1 + 1 */ 207;
 
 } partial class sha3_package {
 
-[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(ref Digest d) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref Digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
-[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ref Digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref Digest d, slice<byte> b) {
     switch (d.dsbyte) {
     case var ᴛ when ᴛ == dsbyteSHA3: {
         b = append(b, magicSHA3.ꓸꓸꓸ);
@@ -226,16 +226,16 @@ internal const nint marshaledSize = /* len(magicSHA3) + 1 + 200 + 1 + 1 */ 207;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string sha3InvalidHashStateˢᴍDigest => ref sha3InvalidHashStateˢᵇᴍDigest;
-private static readonly @string sha3InvalidHashStateˢᵇᴍDigest = "sha3: invalid hash state"u8;
-private static ref readonly @string sha3InvalidHashStateˢ2ᴍDigest => ref sha3InvalidHashStateˢ2ᵇᴍDigest;
-private static readonly @string sha3InvalidHashStateˢ2ᵇᴍDigest = "sha3: invalid hash state identifier"u8;
-private static ref readonly @string sha3InvalidHashStateˢ3ᴍDigest => ref sha3InvalidHashStateˢ3ᵇᴍDigest;
-private static readonly @string sha3InvalidHashStateˢ3ᵇᴍDigest = "sha3: invalid hash state function"u8;
+private static ref readonly @string sha3InvalidHashStateˢ⁔Digest => ref sha3InvalidHashStateˢᵇ⁔Digest;
+private static readonly @string sha3InvalidHashStateˢᵇ⁔Digest = "sha3: invalid hash state"u8;
+private static ref readonly @string sha3InvalidHashStateˢ2⁔Digest => ref sha3InvalidHashStateˢ2ᵇ⁔Digest;
+private static readonly @string sha3InvalidHashStateˢ2ᵇ⁔Digest = "sha3: invalid hash state identifier"u8;
+private static ref readonly @string sha3InvalidHashStateˢ3⁔Digest => ref sha3InvalidHashStateˢ3ᵇ⁔Digest;
+private static readonly @string sha3InvalidHashStateˢ3ᵇ⁔Digest = "sha3: invalid hash state function"u8;
 
-[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref Digest d, slice<byte> b) {
+internal static error UnmarshalBinary⁔(/*this*/ ref Digest d, slice<byte> b) {
     if (len(b) != marshaledSize) {
-        return errors.New(sha3InvalidHashStateˢᴍDigest);
+        return errors.New(sha3InvalidHashStateˢ⁔Digest);
     }
 
     @string magic = (@string)(b[..(int)(len(magicSHA3))]);
@@ -254,13 +254,13 @@ private static readonly @string sha3InvalidHashStateˢ3ᵇᴍDigest = "sha3: inv
         break;
     }
     default: {
-        return errors.New(sha3InvalidHashStateˢ2ᴍDigest);
+        return errors.New(sha3InvalidHashStateˢ2⁔Digest);
     }}
 
     nint rate = (nint)b[0];
     b = b[1..];
     if (rate != d.rate) {
-        return errors.New(sha3InvalidHashStateˢ3ᴍDigest);
+        return errors.New(sha3InvalidHashStateˢ3⁔Digest);
     }
 
     copy(d.a[..], b);
@@ -269,11 +269,11 @@ private static readonly @string sha3InvalidHashStateˢ3ᵇᴍDigest = "sha3: inv
     nint n = (nint)b[0];
     spongeDirection state = (spongeDirection)(nint)b[1];
     if (n > d.rate) {
-        return errors.New(sha3InvalidHashStateˢᴍDigest);
+        return errors.New(sha3InvalidHashStateˢ⁔Digest);
     }
     d.n = n;
     if (state != spongeAbsorbing && state != spongeSqueezing) {
-        return errors.New(sha3InvalidHashStateˢᴍDigest);
+        return errors.New(sha3InvalidHashStateˢ⁔Digest);
     }
     d.state = state;
 

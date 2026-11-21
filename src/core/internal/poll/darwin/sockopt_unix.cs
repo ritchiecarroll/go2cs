@@ -12,7 +12,7 @@ partial class poll_package {
 } partial class poll_package {
 
 // SetsockoptByte wraps the setsockopt network call with a byte argument.
-[GoMethodBody("SetsockoptByte")] internal static error SetsockoptByteᴍ(ж<FD> Ꮡfd, nint level, nint name, byte arg) {
+internal static error SetsockoptByte⁔(/*this*/ ж<FD> Ꮡfd, nint level, nint name, byte arg) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

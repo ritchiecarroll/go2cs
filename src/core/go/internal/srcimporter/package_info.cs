@@ -68,7 +68,7 @@ using static go.go.@internal.srcimporter_package;
 
 namespace go.go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using ast = global::go.go.ast_package;
 using build = global::go.go.build_package;
 using types = global::go.go.types_package;
@@ -77,7 +77,10 @@ using global::go.os;
 using path;
 using ꓸꓸꓸstring = Span<@string>;
 using static srcimporter_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("srcimporter")]
 public static partial class srcimporter_package
@@ -121,17 +124,17 @@ public static partial class srcimporter_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(srcimporter_package.Importer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class srcimporterᴛImporter;
+[GoMethodHost(typeof(srcimporter_package.Importer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class srcimporterᴛImporter;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class srcimporterᴛImporter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<types.Package>, error) Import(this ж<Importer> Ꮡp, @string path) => srcimporter_package.Importᴍ(Ꮡp, path);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<types.Package>, error) ImportFrom(this ж<Importer> Ꮡp, @string path, @string srcDir, types.ImportMode mode) => srcimporter_package.ImportFromᴍ(Ꮡp, path, srcDir, mode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<ж<ast.File>>, error) parseFiles(this ж<Importer> Ꮡp, @string dir, slice<@string> filenames) => srcimporter_package.parseFilesᴍ(Ꮡp, dir, filenames);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Package> Ꮡbp) => srcimporter_package.cgoᴍ(Ꮡp, Ꮡbp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) absPath(this ref Importer p, @string path) => srcimporter_package.absPathᴍ(ref p, path);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isAbsPath(this ref Importer p, @string path) => srcimporter_package.isAbsPathᴍ(ref p, path);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string joinPath(this ref Importer p, params ꓸꓸꓸstring elemʗp) => srcimporter_package.joinPathᴍ(ref p, elemʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<types.Package>, error) Import(this ж<Importer> Ꮡp, @string path) => srcimporter_package.Import⁔(Ꮡp, path);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<types.Package>, error) ImportFrom(this ж<Importer> Ꮡp, @string path, @string srcDir, types.ImportMode mode) => srcimporter_package.ImportFrom⁔(Ꮡp, path, srcDir, mode);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<ж<ast.File>>, error) parseFiles(this ж<Importer> Ꮡp, @string dir, slice<@string> filenames) => srcimporter_package.parseFiles⁔(Ꮡp, dir, filenames);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<ast.File>, error) cgo(this ж<Importer> Ꮡp, ж<build.Package> Ꮡbp) => srcimporter_package.cgo⁔(Ꮡp, Ꮡbp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, error) absPath(this ref Importer p, @string path) => srcimporter_package.absPath⁔(ref p, path);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isAbsPath(this ref Importer p, @string path) => srcimporter_package.isAbsPath⁔(ref p, path);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string joinPath(this ref Importer p, params ꓸꓸꓸstring elemʗp) => srcimporter_package.joinPath⁔(ref p, elemʗp);
 }
 // </GlyphForwarders>

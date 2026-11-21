@@ -48,19 +48,19 @@ public static UntypedInt MapIndirectElem => 8;
 
 } partial class abi_package {
 
-[GoMethodBody("NeedKeyUpdate")] internal static bool NeedKeyUpdateᴍ(ref MapType mt) {
+internal static bool NeedKeyUpdate⁔(/*this*/ ref MapType mt) {
     // true if we need to update key on an overwrite
     return (mt.Flags & (uint32)MapNeedKeyUpdate) != 0;
 }
-[GoMethodBody("HashMightPanic")] internal static bool HashMightPanicᴍ(ref MapType mt) {
+internal static bool HashMightPanic⁔(/*this*/ ref MapType mt) {
     // true if hash function might panic
     return (mt.Flags & (uint32)MapHashMightPanic) != 0;
 }
-[GoMethodBody("IndirectKey")] internal static bool IndirectKeyᴍ(ref MapType mt) {
+internal static bool IndirectKey⁔(/*this*/ ref MapType mt) {
     // store ptr to key instead of key itself
     return (mt.Flags & (uint32)MapIndirectKey) != 0;
 }
-[GoMethodBody("IndirectElem")] internal static bool IndirectElemᴍ(ref MapType mt) {
+internal static bool IndirectElem⁔(/*this*/ ref MapType mt) {
     // store ptr to elem instead of elem itself
     return (mt.Flags & (uint32)MapIndirectElem) != 0;
 }

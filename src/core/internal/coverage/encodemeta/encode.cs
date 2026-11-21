@@ -69,7 +69,7 @@ partial struct funcDesc {
 } partial class encodemeta_package {
 
 // AddFunc registers a new function with the meta data builder.
-[GoMethodBody("AddFunc")] internal static nuint AddFuncᴍ(ref CoverageMetaDataBuilder b, coverage.FuncDesc f) {
+internal static nuint AddFunc⁔(/*this*/ ref CoverageMetaDataBuilder b, coverage.FuncDesc f) {
     hashFuncDesc(b.h, ref f, b.tmp);
     var fd = new funcDesc();
     b.tmp = b.tmp[..0];
@@ -94,7 +94,7 @@ partial struct funcDesc {
     return rv;
 }
 
-[GoMethodBody("emitFuncOffsets")] internal static int64 emitFuncOffsetsᴍ(ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off) {
+internal static int64 emitFuncOffsets⁔(/*this*/ ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off) {
     nint nFuncs = len(b.funcs);
     int64 foff = (int64)coverage.CovMetaHeaderSize + (int64)b.stab.Size() + (int64)nFuncs * 4;
     for (nint idx = 0; idx < nFuncs; idx++) {
@@ -104,7 +104,7 @@ partial struct funcDesc {
     return off + ((int64)len(b.funcs) * 4);
 }
 
-[GoMethodBody("emitFunc")] internal static (int64, error) emitFuncᴍ(ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off, funcDesc f) {
+internal static (int64, error) emitFunc⁔(/*this*/ ref CoverageMetaDataBuilder b, io.WriteSeeker w, int64 off, funcDesc f) {
     nint ew = len(f.encoded);
     var (nw, err) = w.Write(f.encoded); if (err != nil) {
         return (0, err);
@@ -114,13 +114,13 @@ partial struct funcDesc {
     return (off + (int64)ew, default);
 }
 
-[GoMethodBody("reportWriteError")] internal static void reportWriteErrorᴍ(ref CoverageMetaDataBuilder b, error err) {
+internal static void reportWriteError⁔(/*this*/ ref CoverageMetaDataBuilder b, error err) {
     if (b.werr != nil) {
         b.werr = err;
     }
 }
 
-[GoMethodBody("wrUint32")] internal static void wrUint32ᴍ(ref CoverageMetaDataBuilder b, io.WriteSeeker w, uint32 v) {
+internal static void wrUint32⁔(/*this*/ ref CoverageMetaDataBuilder b, io.WriteSeeker w, uint32 v) {
     b.tmp = b.tmp[..0];
     b.tmp = append(b.tmp, (byte)0, (byte)0, (byte)0, (byte)0);
     binary.LittleEndian.PutUint32(b.tmp, v);
@@ -133,7 +133,7 @@ partial struct funcDesc {
 
 // Emit writes the meta-data accumulated so far in this builder to 'w'.
 // Returns a hash of the meta-data payload and an error.
-[GoMethodBody("Emit")] internal static (array<byte>, error) Emitᴍ(ж<CoverageMetaDataBuilder> Ꮡb, io.WriteSeeker w) {
+internal static (array<byte>, error) Emit⁔(/*this*/ ж<CoverageMetaDataBuilder> Ꮡb, io.WriteSeeker w) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // Emit header.  Length will initially be zero, we'll

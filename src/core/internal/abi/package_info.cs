@@ -79,11 +79,14 @@ using static go.@internal.abi_package;
 
 namespace go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using @unsafe = unsafe_package;
 using go.@internal;
 using static abi_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("abi")]
 public static partial class abi_package
@@ -160,75 +163,75 @@ public static partial class abi_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(abi_package.FuncType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛFuncType;
-[GoMethodHost(typeof(abi_package.IntArgRegBitmap)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛIntArgRegBitmap;
-[GoMethodHost(typeof(abi_package.InterfaceType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛInterfaceType;
-[GoMethodHost(typeof(abi_package.Kind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛKind;
-[GoMethodHost(typeof(abi_package.MapType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛMapType;
-[GoMethodHost(typeof(abi_package.Name)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛName;
-[GoMethodHost(typeof(abi_package.RegArgs)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛRegArgs;
-[GoMethodHost(typeof(abi_package.StructField)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛStructField;
-[GoMethodHost(typeof(abi_package.Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛType;
-[GoMethodHost(typeof(abi_package.UncommonType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class abiᴛUncommonType;
+[GoMethodHost(typeof(abi_package.FuncType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛFuncType;
+[GoMethodHost(typeof(abi_package.IntArgRegBitmap)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛIntArgRegBitmap;
+[GoMethodHost(typeof(abi_package.InterfaceType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛInterfaceType;
+[GoMethodHost(typeof(abi_package.Kind)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛKind;
+[GoMethodHost(typeof(abi_package.MapType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛMapType;
+[GoMethodHost(typeof(abi_package.Name)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛName;
+[GoMethodHost(typeof(abi_package.RegArgs)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛRegArgs;
+[GoMethodHost(typeof(abi_package.StructField)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛStructField;
+[GoMethodHost(typeof(abi_package.Type)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛType;
+[GoMethodHost(typeof(abi_package.UncommonType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class abiᴛUncommonType;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class abiᴛRegArgs {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Dump(this ref RegArgs r) => abi_package.Dumpᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintptr argSize) => abi_package.IntRegArgAddrᴍ(ref r, reg, argSize);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Dump(this ref RegArgs r) => abi_package.Dump⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintptr argSize) => abi_package.IntRegArgAddr⁔(ref r, reg, argSize);
 }
 partial class abiᴛIntArgRegBitmap {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Set(this ref IntArgRegBitmap b, nint i) => abi_package.Setᴍ(ref b, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Get(this ж<IntArgRegBitmap> Ꮡb, nint i) => abi_package.Getᴍ(Ꮡb, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ref IntArgRegBitmap b, nint i) => abi_package.Set⁔(ref b, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Get(this ж<IntArgRegBitmap> Ꮡb, nint i) => abi_package.Get⁔(Ꮡb, i);
 }
 partial class abiᴛMapType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool NeedKeyUpdate(this ref MapType mt) => abi_package.NeedKeyUpdateᴍ(ref mt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HashMightPanic(this ref MapType mt) => abi_package.HashMightPanicᴍ(ref mt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IndirectKey(this ref MapType mt) => abi_package.IndirectKeyᴍ(ref mt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IndirectElem(this ref MapType mt) => abi_package.IndirectElemᴍ(ref mt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool NeedKeyUpdate(this ref MapType mt) => abi_package.NeedKeyUpdate⁔(ref mt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HashMightPanic(this ref MapType mt) => abi_package.HashMightPanic⁔(ref mt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IndirectKey(this ref MapType mt) => abi_package.IndirectKey⁔(ref mt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IndirectElem(this ref MapType mt) => abi_package.IndirectElem⁔(ref mt);
 }
 partial class abiᴛKind {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Kind k) => abi_package.Stringᴍ(k);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Kind k) => abi_package.String⁔(k);
 }
 partial class abiᴛType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Kind Kind(this ref Type t) => abi_package.Kindᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HasName(this ref Type t) => abi_package.HasNameᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Pointers(this ref Type t) => abi_package.Pointersᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsDirectIface(this ref Type t) => abi_package.IsDirectIfaceᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) => abi_package.GcSliceᴍ(ref t, begin, end);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Type> Common(this ж<Type> Ꮡt) => abi_package.Commonᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) => abi_package.Uncommonᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Align(this ref Type t) => abi_package.Alignᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint FieldAlign(this ref Type t) => abi_package.FieldAlignᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<Method> ExportedMethods(this ж<Type> Ꮡt) => abi_package.ExportedMethodsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumMethod(this ж<Type> Ꮡt) => abi_package.NumMethodᴍ(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Kind Kind(this ref Type t) => abi_package.Kind⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HasName(this ref Type t) => abi_package.HasName⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Pointers(this ref Type t) => abi_package.Pointers⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsDirectIface(this ref Type t) => abi_package.IsDirectIface⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) => abi_package.GcSlice⁔(ref t, begin, end);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Type> Common(this ж<Type> Ꮡt) => abi_package.Common⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<UncommonType> Uncommon(this ж<Type> Ꮡt) => abi_package.Uncommon⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Align(this ref Type t) => abi_package.Align⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint FieldAlign(this ref Type t) => abi_package.FieldAlign⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<Method> ExportedMethods(this ж<Type> Ꮡt) => abi_package.ExportedMethods⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NumMethod(this ж<Type> Ꮡt) => abi_package.NumMethod⁔(Ꮡt);
 }
 partial class abiᴛUncommonType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static unsafe slice<Method> Methods(this ж<UncommonType> Ꮡt) => abi_package.Methodsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static unsafe slice<Method> ExportedMethods(this ж<UncommonType> Ꮡt) => abi_package.ExportedMethodsᴍ(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static unsafe slice<Method> Methods(this ж<UncommonType> Ꮡt) => abi_package.Methods⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static unsafe slice<Method> ExportedMethods(this ж<UncommonType> Ꮡt) => abi_package.ExportedMethods⁔(Ꮡt);
 }
 partial class abiᴛInterfaceType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumMethod(this ref InterfaceType t) => abi_package.NumMethodᴍ(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NumMethod(this ref InterfaceType t) => abi_package.NumMethod⁔(ref t);
 }
 partial class abiᴛFuncType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Type> In(this ж<FuncType> Ꮡt, nint i) => abi_package.Inᴍ(Ꮡt, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumIn(this ref FuncType t) => abi_package.NumInᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint NumOut(this ref FuncType t) => abi_package.NumOutᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Type> Out(this ж<FuncType> Ꮡt, nint i) => abi_package.Outᴍ(Ꮡt, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsVariadic(this ref FuncType t) => abi_package.IsVariadicᴍ(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Type> In(this ж<FuncType> Ꮡt, nint i) => abi_package.In⁔(Ꮡt, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NumIn(this ref FuncType t) => abi_package.NumIn⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint NumOut(this ref FuncType t) => abi_package.NumOut⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Type> Out(this ж<FuncType> Ꮡt, nint i) => abi_package.Out⁔(Ꮡt, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsVariadic(this ref FuncType t) => abi_package.IsVariadic⁔(ref t);
 }
 partial class abiᴛStructField {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Embedded(this ref StructField f) => abi_package.Embeddedᴍ(ref f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Embedded(this ref StructField f) => abi_package.Embedded⁔(ref f);
 }
 partial class abiᴛName {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<byte> DataChecked(this Name n, nint off, @string whySafe) => abi_package.DataCheckedᴍ(n, off, whySafe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<byte> Data(this Name n, nint off) => abi_package.Dataᴍ(n, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsExported(this Name n) => abi_package.IsExportedᴍ(n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool HasTag(this Name n) => abi_package.HasTagᴍ(n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsEmbedded(this Name n) => abi_package.IsEmbeddedᴍ(n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, nint) ReadVarint(this Name n, nint off) => abi_package.ReadVarintᴍ(n, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsBlank(this Name n) => abi_package.IsBlankᴍ(n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Name(this Name n) => abi_package.Nameᴍ(n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Tag(this Name n) => abi_package.Tagᴍ(n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<byte> DataChecked(this Name n, nint off, @string whySafe) => abi_package.DataChecked⁔(n, off, whySafe);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<byte> Data(this Name n, nint off) => abi_package.Data⁔(n, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsExported(this Name n) => abi_package.IsExported⁔(n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool HasTag(this Name n) => abi_package.HasTag⁔(n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsEmbedded(this Name n) => abi_package.IsEmbedded⁔(n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, nint) ReadVarint(this Name n, nint off) => abi_package.ReadVarint⁔(n, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsBlank(this Name n) => abi_package.IsBlank⁔(n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Name(this Name n) => abi_package.Name⁔(n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Tag(this Name n) => abi_package.Tag⁔(n);
 }
 // </GlyphForwarders>

@@ -82,7 +82,7 @@ public static ж<Logger> New(Δio.Writer @out, @string prefix, nint flag) {
 } partial class log_package {
 
 // SetOutput sets the output destination for the logger.
-[GoMethodBody("SetOutput")] internal static void SetOutputᴍ(ж<Logger> Ꮡl, Δio.Writer w) {
+internal static void SetOutput⁔(/*this*/ ж<Logger> Ꮡl, Δio.Writer w) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -210,7 +210,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 // already a newline. Calldepth is used to recover the PC and is
 // provided for generality, although at the moment on all pre-defined
 // paths it will be 2.
-[GoMethodBody("Output")] internal static partial error Outputᴍ(ж<Logger> Ꮡl, nint calldepth, @string s) {
+internal static partial error Output⁔(/*this*/ ж<Logger> Ꮡl, nint calldepth, @string s) {
     return Ꮡl.output(0, calldepth + 1, (slice<byte> b) => { // +1 for this frame.
         return append(b, s.ꓸꓸꓸ);
     });
@@ -218,7 +218,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 
 // output can take either a calldepth or a pc to get source line information.
 // It uses the pc if it is non-zero.
-[GoMethodBody("output")] internal static partial error outputᴍ(ж<Logger> Ꮡl, uintptr pc, nint calldepth, Func<slice<byte>, slice<byte>> appendOutput) {
+internal static partial error output⁔(/*this*/ ж<Logger> Ꮡl, uintptr pc, nint calldepth, Func<slice<byte>, slice<byte>> appendOutput) {
     GoFrame ᒐ = default;
     try {
         ref var l = ref Ꮡl.DerefOrNull();
@@ -285,7 +285,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 
 // Print calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Print].
-[GoMethodBody("Print")] internal static partial void Printᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+internal static partial void Print⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -294,7 +294,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 
 // Printf calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Printf].
-[GoMethodBody("Printf")] internal static partial void Printfᴍ(ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
+internal static partial void Printf⁔(/*this*/ ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -303,7 +303,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 
 // Println calls l.Output to print to the logger.
 // Arguments are handled in the manner of [fmt.Println].
-[GoMethodBody("Println")] internal static partial void Printlnᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+internal static partial void Println⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -311,7 +311,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 }
 
 // Fatal is equivalent to l.Print() followed by a call to [os.Exit](1).
-[GoMethodBody("Fatal")] internal static partial void Fatalᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+internal static partial void Fatal⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -320,7 +320,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 }
 
 // Fatalf is equivalent to l.Printf() followed by a call to [os.Exit](1).
-[GoMethodBody("Fatalf")] internal static partial void Fatalfᴍ(ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
+internal static partial void Fatalf⁔(/*this*/ ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -329,7 +329,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 }
 
 // Fatalln is equivalent to l.Println() followed by a call to [os.Exit](1).
-[GoMethodBody("Fatalln")] internal static partial void Fatallnᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+internal static partial void Fatalln⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.slice();
 
     var vʗ1 = v;
@@ -338,7 +338,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 }
 
 // Panic is equivalent to l.Print() followed by a call to panic().
-[GoMethodBody("Panic")] internal static partial void Panicᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+internal static partial void Panic⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprint(v.ꓸꓸꓸ);
@@ -347,7 +347,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 }
 
 // Panicf is equivalent to l.Printf() followed by a call to panic().
-[GoMethodBody("Panicf")] internal static partial void Panicfᴍ(ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
+internal static partial void Panicf⁔(/*this*/ ж<Logger> Ꮡl, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprintf(format, v.ꓸꓸꓸ);
@@ -356,7 +356,7 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 }
 
 // Panicln is equivalent to l.Println() followed by a call to panic().
-[GoMethodBody("Panicln")] internal static partial void Paniclnᴍ(ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
+internal static partial void Panicln⁔(/*this*/ ж<Logger> Ꮡl, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     @string s = fmt.Sprintln(v.ꓸꓸꓸ);
@@ -366,18 +366,18 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 
 // Flags returns the output flags for the logger.
 // The flag bits are [Ldate], [Ltime], and so on.
-[GoMethodBody("Flags")] internal static nint Flagsᴍ(ж<Logger> Ꮡl) {
+internal static nint Flags⁔(/*this*/ ж<Logger> Ꮡl) {
     return (nint)Ꮡl.Ꮡflag.Load();
 }
 
 // SetFlags sets the output flags for the logger.
 // The flag bits are [Ldate], [Ltime], and so on.
-[GoMethodBody("SetFlags")] internal static void SetFlagsᴍ(ж<Logger> Ꮡl, nint flag) {
+internal static void SetFlags⁔(/*this*/ ж<Logger> Ꮡl, nint flag) {
     Ꮡl.Ꮡflag.Store((int32)flag);
 }
 
 // Prefix returns the output prefix for the logger.
-[GoMethodBody("Prefix")] internal static @string Prefixᴍ(ж<Logger> Ꮡl) {
+internal static @string Prefix⁔(/*this*/ ж<Logger> Ꮡl) {
     var p = Ꮡl.Ꮡprefix.Load(); if (p != nil) {
         return p.Value;
     }
@@ -385,14 +385,14 @@ internal static void putBuffer(ж<slice<byte>> Ꮡp) {
 }
 
 // SetPrefix sets the output prefix for the logger.
-[GoMethodBody("SetPrefix")] internal static void SetPrefixᴍ(ж<Logger> Ꮡl, @string prefixʗp) {
+internal static void SetPrefix⁔(/*this*/ ж<Logger> Ꮡl, @string prefixʗp) {
     ref var prefix = ref heap(prefixʗp, out var Ꮡprefix);
 
     Ꮡl.Ꮡprefix.Store(Ꮡprefix);
 }
 
 // Writer returns the output destination for the logger.
-[GoMethodBody("Writer")] internal static Δio.Writer Writerᴍ(ж<Logger> Ꮡl) {
+internal static Δio.Writer Writer⁔(/*this*/ ж<Logger> Ꮡl) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

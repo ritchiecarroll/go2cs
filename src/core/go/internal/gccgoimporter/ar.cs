@@ -185,7 +185,7 @@ partial struct seekerReadAt {
 
 } partial class gccgoimporter_package {
 
-[GoMethodBody("ReadAt")] internal static (nint, error) ReadAtᴍ(seekerReadAt sra, slice<byte> p, int64 off) {
+internal static (nint, error) ReadAt⁔(/*this*/ seekerReadAt sra, slice<byte> p, int64 off) {
     var (_, err) = sra.seeker.Seek(off, io.SeekStart); if (err != nil) {
         return (0, err);
     }

@@ -17,12 +17,12 @@ partial struct SVCBResource {
 
 } partial class dnsmessage_package {
 
-[GoMethodBody("realType")] internal static Type realTypeᴍ(ref SVCBResource r) {
+internal static Type realType⁔(/*this*/ ref SVCBResource r) {
     return TypeSVCB;
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(ref SVCBResource r) {
+internal static @string GoString⁔(/*this*/ ref SVCBResource r) {
     var b = slice<byte>("dnsmessage.SVCBResource{" + "Priority: " + printUint16(r.Priority) + ", " + "Target: " + r.Target.GoString() + ", " + "Params: []dnsmessage.SVCParam{");
     if (len(r.Params) > 0) {
         b = append(b, r.Params[0].GoString().ꓸꓸꓸ);
@@ -45,19 +45,19 @@ partial struct HTTPSResource {
 
 } partial class dnsmessage_package {
 
-[GoMethodBody("realType")] internal static Type realTypeᴍ(ref HTTPSResource r) {
+internal static Type realType⁔(/*this*/ ref HTTPSResource r) {
     return TypeHTTPS;
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(ref HTTPSResource r) {
+internal static @string GoString⁔(/*this*/ ref HTTPSResource r) {
     return "dnsmessage.HTTPSResource{SVCBResource: "u8 + r.SVCBResource.GoString() + "}"u8;
 }
 
 } partial class dnsmessage_package {
 
 // GetParam returns a parameter value by key.
-[GoMethodBody("GetParam")] internal static (slice<byte> value, bool ok) GetParamᴍ(ref SVCBResource r, SVCParamKey key) {
+internal static (slice<byte> value, bool ok) GetParam⁔(/*this*/ ref SVCBResource r, SVCParamKey key) {
     foreach (var i in range(len(r.Params))) {
         if (r.Params[i].Key == key) {
             return (r.Params[i].Value, true);
@@ -71,7 +71,7 @@ partial struct HTTPSResource {
 
 // SetParam sets a parameter value by key.
 // The Params list is kept sorted by key.
-[GoMethodBody("SetParam")] internal static void SetParamᴍ(ref SVCBResource r, SVCParamKey key, slice<byte> value) {
+internal static void SetParam⁔(/*this*/ ref SVCBResource r, SVCParamKey key, slice<byte> value) {
     nint i = 0;
     while (i < len(r.Params)) {
         if (r.Params[i].Key >= key) {
@@ -90,7 +90,7 @@ partial struct HTTPSResource {
 
 // DeleteParam deletes a parameter by key.
 // It returns true if the parameter was present.
-[GoMethodBody("DeleteParam")] internal static bool DeleteParamᴍ(ref SVCBResource r, SVCParamKey key) {
+internal static bool DeleteParam⁔(/*this*/ ref SVCBResource r, SVCParamKey key) {
     foreach (var i in range(len(r.Params))) {
         if (r.Params[i].Key == key) {
             r.Params = slices.Delete<slice<SVCParam>, SVCParam>(r.Params, i, i + 1);
@@ -114,7 +114,7 @@ partial struct SVCParam {
 } partial class dnsmessage_package {
 
 // GoString implements fmt.GoStringer.GoString.
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(SVCParam p) {
+internal static @string GoString⁔(/*this*/ SVCParam p) {
     return "dnsmessage.SVCParam{"u8 + "Key: "u8 + p.Key.GoString() + ", "u8 + "Value: []byte{"u8 + printByteSlice(p.Value) + "}}"u8;
 }
 
@@ -151,7 +151,7 @@ public static SVCParamKey SVCParamTLSSupportedGroups => 9;
 } partial class dnsmessage_package {
 
 // String implements fmt.Stringer.String.
-[GoMethodBody("String")] internal static @string Stringᴍ(SVCParamKey k) {
+internal static @string String⁔(/*this*/ SVCParamKey k) {
     var (n, ok) = svcParamKeyNames[k, ꟷ]; if (ok) {
         return n;
     }
@@ -159,7 +159,7 @@ public static SVCParamKey SVCParamTLSSupportedGroups => 9;
 }
 
 // GoString implements fmt.GoStringer.GoString.
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(SVCParamKey k) {
+internal static @string GoString⁔(/*this*/ SVCParamKey k) {
     var (n, ok) = svcParamKeyNames[k, ꟷ]; if (ok) {
         return "dnsmessage.SVCParam"u8 + n;
     }
@@ -168,7 +168,7 @@ public static SVCParamKey SVCParamTLSSupportedGroups => 9;
 
 } partial class dnsmessage_package {
 
-[GoMethodBody("pack")] internal static (slice<byte>, error) packᴍ(ref SVCBResource r, slice<byte> msg, map<@string, uint16> _Δp2, nint _Δp3) {
+internal static (slice<byte>, error) pack⁔(/*this*/ ref SVCBResource r, slice<byte> msg, map<@string, uint16> _Δp2, nint _Δp3) {
     var oldMsg = msg;
     msg = packUint16(msg, r.Priority);
     // https://datatracker.ietf.org/doc/html/rfc3597#section-4 prohibits name
@@ -276,7 +276,7 @@ internal static (SVCBResource, error) unpackSVCBResource(slice<byte> msg, nint o
 } partial class dnsmessage_package {
 
 // genericSVCBResource parses a single Resource Record compatible with SVCB.
-[GoMethodBody("genericSVCBResource")] internal static (SVCBResource, error) genericSVCBResourceᴍ(ref Parser p, Type svcbType) {
+internal static (SVCBResource, error) genericSVCBResource⁔(/*this*/ ref Parser p, Type svcbType) {
     if (!p.resHeaderValid || p.resHeaderType != svcbType) {
         return (new SVCBResource(), ErrNotStarted);
     }
@@ -294,7 +294,7 @@ internal static (SVCBResource, error) unpackSVCBResource(slice<byte> msg, nint o
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-[GoMethodBody("SVCBResource")] internal static (SVCBResource, error) SVCBResourceᴍ(ref Parser p) {
+internal static (SVCBResource, error) SVCBResource⁔(/*this*/ ref Parser p) {
     return p.genericSVCBResource(TypeSVCB);
 }
 
@@ -302,7 +302,7 @@ internal static (SVCBResource, error) unpackSVCBResource(slice<byte> msg, nint o
 //
 // One of the XXXHeader methods must have been called before calling this
 // method.
-[GoMethodBody("HTTPSResource")] internal static (HTTPSResource, error) HTTPSResourceᴍ(ref Parser p) {
+internal static (HTTPSResource, error) HTTPSResource⁔(/*this*/ ref Parser p) {
     var (svcb, err) = p.genericSVCBResource(TypeHTTPS);
     if (err != nil) {
         return (new HTTPSResource(), err);
@@ -313,7 +313,7 @@ internal static (SVCBResource, error) unpackSVCBResource(slice<byte> msg, nint o
 } partial class dnsmessage_package {
 
 // genericSVCBResource is the generic implementation for adding SVCB-like resources.
-[GoMethodBody("genericSVCBResource")] internal static error genericSVCBResourceᴍ(ж<Builder> Ꮡb, ResourceHeader h, SVCBResource r) {
+internal static error genericSVCBResource⁔(/*this*/ ж<Builder> Ꮡb, ResourceHeader h, SVCBResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
     ref var b = ref Ꮡb.DerefOrNull();
@@ -340,7 +340,7 @@ internal static (SVCBResource, error) unpackSVCBResource(slice<byte> msg, nint o
 }
 
 // SVCBResource adds a single SVCBResource.
-[GoMethodBody("SVCBResource")] internal static error SVCBResourceᴍ(ж<Builder> Ꮡb, ResourceHeader h, SVCBResource r) {
+internal static error SVCBResource⁔(/*this*/ ж<Builder> Ꮡb, ResourceHeader h, SVCBResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
 
@@ -349,7 +349,7 @@ internal static (SVCBResource, error) unpackSVCBResource(slice<byte> msg, nint o
 }
 
 // HTTPSResource adds a single HTTPSResource.
-[GoMethodBody("HTTPSResource")] internal static error HTTPSResourceᴍ(ж<Builder> Ꮡb, ResourceHeader h, HTTPSResource r) {
+internal static error HTTPSResource⁔(/*this*/ ж<Builder> Ꮡb, ResourceHeader h, HTTPSResource r) {
     h = h.ΔClone();
     r = r.ΔClone();
 

@@ -16,14 +16,14 @@ internal static UntypedInt maxHuffmanBits => 11;
 } partial class zstd_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string huffmanCountOverflowˢᴍReader => ref huffmanCountOverflowˢᵇᴍReader;
-private static readonly @string huffmanCountOverflowˢᵇᴍReader = "Huffman count overflow"u8;
-internal static ref readonly @string huffmanWeightOverflowˢᴍReader => ref huffmanWeightOverflowˢᵇᴍReader;
-private static readonly @string huffmanWeightOverflowˢᵇᴍReader = "Huffman weight overflow"u8;
-internal static ref readonly @string badHuffmanWeightsˢᴍReader => ref badHuffmanWeightsˢᵇᴍReader;
-private static readonly @string badHuffmanWeightsˢᵇᴍReader = "bad Huffman weights"u8;
-internal static ref readonly @string huffmanTableTooSmallˢᴍReader => ref huffmanTableTooSmallˢᵇᴍReader;
-private static readonly @string huffmanTableTooSmallˢᵇᴍReader = "Huffman table too small"u8;
+internal static ref readonly @string huffmanCountOverflowˢ⁔Reader => ref huffmanCountOverflowˢᵇ⁔Reader;
+private static readonly @string huffmanCountOverflowˢᵇ⁔Reader = "Huffman count overflow"u8;
+internal static ref readonly @string huffmanWeightOverflowˢ⁔Reader => ref huffmanWeightOverflowˢᵇ⁔Reader;
+private static readonly @string huffmanWeightOverflowˢᵇ⁔Reader = "Huffman weight overflow"u8;
+internal static ref readonly @string badHuffmanWeightsˢ⁔Reader => ref badHuffmanWeightsˢᵇ⁔Reader;
+private static readonly @string badHuffmanWeightsˢᵇ⁔Reader = "bad Huffman weights"u8;
+internal static ref readonly @string huffmanTableTooSmallˢ⁔Reader => ref huffmanTableTooSmallˢᵇ⁔Reader;
+private static readonly @string huffmanTableTooSmallˢᵇ⁔Reader = "Huffman table too small"u8;
 
 // readHuff reads Huffman table from data starting at off into table.
 // Each entry in a Huffman table is a pair of bytes.
@@ -33,7 +33,7 @@ private static readonly @string huffmanTableTooSmallˢᵇᴍReader = "Huffman ta
 // appear in the table multiple times.
 // This returns the number of bits in the Huffman table and the new offset.
 // RFC 4.2.1.
-[GoMethodBody("readHuff")] internal static (nint tableBits, nint roff, error err) readHuffᴍ(ж<Reader> Ꮡr, block data, nint off, slice<uint16> table) {
+internal static (nint tableBits, nint roff, error err) readHuff⁔(/*this*/ ж<Reader> Ꮡr, block data, nint off, slice<uint16> table) {
     nint tableBits = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -83,7 +83,7 @@ private static readonly @string huffmanTableTooSmallˢᵇᴍReader = "Huffman ta
             var pt = Ꮡ(fseTable, state1);
             if (!rbr.fetch(pt.bits)) {
                 if (count >= 254) {
-                    return (0, 0, rbr.makeError(huffmanCountOverflowˢᴍReader));
+                    return (0, 0, rbr.makeError(huffmanCountOverflowˢ⁔Reader));
                 }
                 weights[count] = pt.sym;
                 weights[count + 1] = fseTable[state2].sym;
@@ -98,7 +98,7 @@ private static readonly @string huffmanTableTooSmallˢᵇᴍReader = "Huffman ta
             state1 = (uint32)pt.@base + v;
 
             if (count >= 255) {
-                return (0, 0, rbr.makeError(huffmanCountOverflowˢᴍReader));
+                return (0, 0, rbr.makeError(huffmanCountOverflowˢ⁔Reader));
             }
 
             weights[count] = pt.sym;
@@ -108,7 +108,7 @@ private static readonly @string huffmanTableTooSmallˢᵇᴍReader = "Huffman ta
 
             if (!rbr.fetch(pt.bits)) {
                 if (count >= 254) {
-                    return (0, 0, rbr.makeError(huffmanCountOverflowˢᴍReader));
+                    return (0, 0, rbr.makeError(huffmanCountOverflowˢ⁔Reader));
                 }
                 weights[count] = pt.sym;
                 weights[count + 1] = fseTable[state1].sym;
@@ -123,7 +123,7 @@ private static readonly @string huffmanTableTooSmallˢᵇᴍReader = "Huffman ta
             state2 = (uint32)pt.@base + v;
 
             if (count >= 255) {
-                return (0, 0, rbr.makeError(huffmanCountOverflowˢᴍReader));
+                return (0, 0, rbr.makeError(huffmanCountOverflowˢ⁔Reader));
             }
 
             weights[count] = pt.sym;
@@ -152,7 +152,7 @@ private static readonly @string huffmanTableTooSmallˢᵇᴍReader = "Huffman ta
     var weightMask = (uint32)0;
     foreach (var (_, w) in range(weights.slice(0, count))) {
         if (w > 12) {
-            return (0, 0, r.makeError(off, huffmanWeightOverflowˢᴍReader));
+            return (0, 0, r.makeError(off, huffmanWeightOverflowˢ⁔Reader));
         }
         weightMark[w]++;
         if (w > 0) {
@@ -160,37 +160,37 @@ private static readonly @string huffmanTableTooSmallˢᵇᴍReader = "Huffman ta
         }
     }
     if (weightMask == 0) {
-        return (0, 0, r.makeError(off, badHuffmanWeightsˢᴍReader));
+        return (0, 0, r.makeError(off, badHuffmanWeightsˢ⁔Reader));
     }
 
     tableBits = 32 - bits.LeadingZeros32(weightMask);
     if (tableBits > maxHuffmanBits) {
-        return (0, 0, r.makeError(off, badHuffmanWeightsˢᴍReader));
+        return (0, 0, r.makeError(off, badHuffmanWeightsˢ⁔Reader));
     }
 
     if (len(table) < ((nint)1).Lsh((int64)(tableBits))) {
-        return (0, 0, r.makeError(off, huffmanTableTooSmallˢᴍReader));
+        return (0, 0, r.makeError(off, huffmanTableTooSmallˢ⁔Reader));
     }
 
     // Work out the last weight value, which is omitted because
     // the weights must sum to a power of two.
     var left = (((uint32)1).Lsh((int64)(tableBits))) - weightMask;
     if (left == 0) {
-        return (0, 0, r.makeError(off, badHuffmanWeightsˢᴍReader));
+        return (0, 0, r.makeError(off, badHuffmanWeightsˢ⁔Reader));
     }
     nint highBit = 31 - bits.LeadingZeros32(left);
     if (((uint32)1).Lsh((int64)(highBit)) != left) {
-        return (0, 0, r.makeError(off, badHuffmanWeightsˢᴍReader));
+        return (0, 0, r.makeError(off, badHuffmanWeightsˢ⁔Reader));
     }
     if (count >= 256) {
-        return (0, 0, r.makeError(off, huffmanWeightOverflowˢᴍReader));
+        return (0, 0, r.makeError(off, huffmanWeightOverflowˢ⁔Reader));
     }
     weights[count] = (uint8)(highBit + 1);
     count++;
     weightMark[highBit + 1]++;
 
     if (weightMark[1] < 2 || (weightMark[1] & 1) != 0) {
-        return (0, 0, r.makeError(off, badHuffmanWeightsˢᴍReader));
+        return (0, 0, r.makeError(off, badHuffmanWeightsˢ⁔Reader));
     }
 
     // Change weightMark from a count of weights to the index of

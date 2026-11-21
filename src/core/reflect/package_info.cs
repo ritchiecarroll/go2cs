@@ -92,7 +92,7 @@ using static go.reflect_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using abi = @internal.abi_package;
 using @unsafe = unsafe_package;
 using @internal;
@@ -100,7 +100,10 @@ using static reflect_package;
 using iter = iter_package;
 using @internal.runtime;
 using go.unicode;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("reflect")]
 public static partial class reflect_package
@@ -185,107 +188,107 @@ public static partial class reflect_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(reflect_package.ChanDir)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛChanDir;
-[GoMethodHost(typeof(reflect_package.Kind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛKind;
-[GoMethodHost(typeof(reflect_package.MapIter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛMapIter;
-[GoMethodHost(typeof(reflect_package.Method)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛMethod;
-[GoMethodHost(typeof(reflect_package.StructField)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛStructField;
-[GoMethodHost(typeof(reflect_package.StructTag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛStructTag;
-[GoMethodHost(typeof(reflect_package.Value)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛValue;
-[GoMethodHost(typeof(reflect_package.ValueError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛValueError;
-[GoMethodHost(typeof(reflect_package.abiDesc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛabiDesc;
-[GoMethodHost(typeof(reflect_package.abiSeq)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛabiSeq;
-[GoMethodHost(typeof(reflect_package.bitVector)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛbitVector;
-[GoMethodHost(typeof(reflect_package.flag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛflag;
-[GoMethodHost(typeof(reflect_package.interfaceType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛinterfaceType;
-[GoMethodHost(typeof(reflect_package.rtype)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛrtype;
-[GoMethodHost(typeof(reflect_package.structType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛstructType;
-[GoMethodHost(typeof(reflect_package.visibleFieldsWalker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class reflectᴛvisibleFieldsWalker;
+[GoMethodHost(typeof(reflect_package.ChanDir)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛChanDir;
+[GoMethodHost(typeof(reflect_package.Kind)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛKind;
+[GoMethodHost(typeof(reflect_package.MapIter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛMapIter;
+[GoMethodHost(typeof(reflect_package.Method)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛMethod;
+[GoMethodHost(typeof(reflect_package.StructField)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛStructField;
+[GoMethodHost(typeof(reflect_package.StructTag)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛStructTag;
+[GoMethodHost(typeof(reflect_package.Value)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛValue;
+[GoMethodHost(typeof(reflect_package.ValueError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛValueError;
+[GoMethodHost(typeof(reflect_package.abiDesc)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛabiDesc;
+[GoMethodHost(typeof(reflect_package.abiSeq)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛabiSeq;
+[GoMethodHost(typeof(reflect_package.bitVector)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛbitVector;
+[GoMethodHost(typeof(reflect_package.flag)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛflag;
+[GoMethodHost(typeof(reflect_package.interfaceType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛinterfaceType;
+[GoMethodHost(typeof(reflect_package.rtype)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛrtype;
+[GoMethodHost(typeof(reflect_package.structType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛstructType;
+[GoMethodHost(typeof(reflect_package.visibleFieldsWalker)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class reflectᴛvisibleFieldsWalker;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class reflectᴛabiSeq {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void dump(this ref abiSeq a) => reflect_package.dumpᴍ(ref a);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<abiStep> stepsForValue(this ref abiSeq a, nint i) => reflect_package.stepsForValueᴍ(ref a, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abiStep> addArg(this ref abiSeq a, ж<abi.Type> Ꮡt) => reflect_package.addArgᴍ(ref a, Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<abiStep>, bool) addRcvr(this ref abiSeq a, ж<abi.Type> Ꮡrcvr) => reflect_package.addRcvrᴍ(ref a, Ꮡrcvr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool assignIntN(this ref abiSeq a, uintptr offset, uintptr size, nint n, uint8 ptrMap) => reflect_package.assignIntNᴍ(ref a, offset, size, n, ptrMap);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool assignFloatN(this ref abiSeq a, uintptr offset, uintptr size, nint n) => reflect_package.assignFloatNᴍ(ref a, offset, size, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stackAssign(this ref abiSeq a, uintptr size, uintptr alignment) => reflect_package.stackAssignᴍ(ref a, size, alignment);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void dump(this ref abiSeq a) => reflect_package.dump⁔(ref a);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<abiStep> stepsForValue(this ref abiSeq a, nint i) => reflect_package.stepsForValue⁔(ref a, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abiStep> addArg(this ref abiSeq a, ж<abi.Type> Ꮡt) => reflect_package.addArg⁔(ref a, Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<abiStep>, bool) addRcvr(this ref abiSeq a, ж<abi.Type> Ꮡrcvr) => reflect_package.addRcvr⁔(ref a, Ꮡrcvr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool assignIntN(this ref abiSeq a, uintptr offset, uintptr size, nint n, uint8 ptrMap) => reflect_package.assignIntN⁔(ref a, offset, size, n, ptrMap);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool assignFloatN(this ref abiSeq a, uintptr offset, uintptr size, nint n) => reflect_package.assignFloatN⁔(ref a, offset, size, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void stackAssign(this ref abiSeq a, uintptr size, uintptr alignment) => reflect_package.stackAssign⁔(ref a, size, alignment);
 }
 partial class reflectᴛabiDesc {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void dump(this ref abiDesc a) => reflect_package.dumpᴍ(ref a);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void dump(this ref abiDesc a) => reflect_package.dump⁔(ref a);
 }
 partial class reflectᴛValue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static iter.Seq<Value> Seq(this Value v) => reflect_package.Seqᴍ(v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static iter.Seq2<Value, Value> Seq2(this Value v) => reflect_package.Seq2ᴍ(v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static iter.Seq<Value> Seq(this Value v) => reflect_package.Seq⁔(v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static iter.Seq2<Value, Value> Seq2(this Value v) => reflect_package.Seq2⁔(v);
 }
 partial class reflectᴛflag {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void panicNotMap(this flag f) => reflect_package.panicNotMapᴍ(f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void panicNotMap(this flag f) => reflect_package.panicNotMap⁔(f);
 }
 partial class reflectᴛrtype {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> common(this ж<rtype> Ꮡt) => reflect_package.commonᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.UncommonType> uncommon(this ж<rtype> Ꮡt) => reflect_package.uncommonᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static abi.Name nameOff(this ж<rtype> Ꮡt, aNameOff off) => reflect_package.nameOffᴍ(Ꮡt, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> typeOff(this ж<rtype> Ꮡt, aTypeOff off) => reflect_package.typeOffᴍ(Ꮡt, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer textOff(this ж<rtype> Ꮡt, aTextOff off) => reflect_package.textOffᴍ(Ꮡt, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uintptr Size(this ref rtype t) => reflect_package.Sizeᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Bits(this ж<rtype> Ꮡt) => reflect_package.Bitsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Align(this ref rtype t) => reflect_package.Alignᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint FieldAlign(this ref rtype t) => reflect_package.FieldAlignᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Kind Kind(this ref rtype t) => reflect_package.Kindᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<abi.Method> exportedMethods(this ж<rtype> Ꮡt) => reflect_package.exportedMethodsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (StructField, bool) FieldByNameFunc(this ж<rtype> Ꮡt, Func<@string, bool> match) => reflect_package.FieldByNameFuncᴍ(Ꮡt, match);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool OverflowComplex(this ж<rtype> Ꮡt, complex128 x) => reflect_package.OverflowComplexᴍ(Ꮡt, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool OverflowFloat(this ж<rtype> Ꮡt, float64 x) => reflect_package.OverflowFloatᴍ(Ꮡt, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool OverflowInt(this ж<rtype> Ꮡt, int64 x) => reflect_package.OverflowIntᴍ(Ꮡt, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool OverflowUint(this ж<rtype> Ꮡt, uint64 x) => reflect_package.OverflowUintᴍ(Ꮡt, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool CanSeq(this ж<rtype> Ꮡt) => reflect_package.CanSeqᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool CanSeq2(this ж<rtype> Ꮡt) => reflect_package.CanSeq2ᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static iter.Seq<StructField> Fields(this ж<rtype> Ꮡt) => reflect_package.Fieldsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static iter.Seq<Method> Methods(this ж<rtype> Ꮡt) => reflect_package.Methodsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static iter.Seq<Type> Ins(this ж<rtype> Ꮡt) => reflect_package.Insᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static iter.Seq<Type> Outs(this ж<rtype> Ꮡt) => reflect_package.Outsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) => reflect_package.ptrToᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool AssignableTo(this ж<rtype> Ꮡt, Type u) => reflect_package.AssignableToᴍ(Ꮡt, u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool ConvertibleTo(this ж<rtype> Ꮡt, Type u) => reflect_package.ConvertibleToᴍ(Ꮡt, u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Comparable(this ref rtype t) => reflect_package.Comparableᴍ(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> common(this ж<rtype> Ꮡt) => reflect_package.common⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.UncommonType> uncommon(this ж<rtype> Ꮡt) => reflect_package.uncommon⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static abi.Name nameOff(this ж<rtype> Ꮡt, aNameOff off) => reflect_package.nameOff⁔(Ꮡt, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> typeOff(this ж<rtype> Ꮡt, aTypeOff off) => reflect_package.typeOff⁔(Ꮡt, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @unsafe.Pointer textOff(this ж<rtype> Ꮡt, aTextOff off) => reflect_package.textOff⁔(Ꮡt, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uintptr Size(this ref rtype t) => reflect_package.Size⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Bits(this ж<rtype> Ꮡt) => reflect_package.Bits⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Align(this ref rtype t) => reflect_package.Align⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint FieldAlign(this ref rtype t) => reflect_package.FieldAlign⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Kind Kind(this ref rtype t) => reflect_package.Kind⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<abi.Method> exportedMethods(this ж<rtype> Ꮡt) => reflect_package.exportedMethods⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (StructField, bool) FieldByNameFunc(this ж<rtype> Ꮡt, Func<@string, bool> match) => reflect_package.FieldByNameFunc⁔(Ꮡt, match);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool OverflowComplex(this ж<rtype> Ꮡt, complex128 x) => reflect_package.OverflowComplex⁔(Ꮡt, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool OverflowFloat(this ж<rtype> Ꮡt, float64 x) => reflect_package.OverflowFloat⁔(Ꮡt, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool OverflowInt(this ж<rtype> Ꮡt, int64 x) => reflect_package.OverflowInt⁔(Ꮡt, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool OverflowUint(this ж<rtype> Ꮡt, uint64 x) => reflect_package.OverflowUint⁔(Ꮡt, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool CanSeq(this ж<rtype> Ꮡt) => reflect_package.CanSeq⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool CanSeq2(this ж<rtype> Ꮡt) => reflect_package.CanSeq2⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static iter.Seq<StructField> Fields(this ж<rtype> Ꮡt) => reflect_package.Fields⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static iter.Seq<Method> Methods(this ж<rtype> Ꮡt) => reflect_package.Methods⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static iter.Seq<Type> Ins(this ж<rtype> Ꮡt) => reflect_package.Ins⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static iter.Seq<Type> Outs(this ж<rtype> Ꮡt) => reflect_package.Outs⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> ptrTo(this ж<rtype> Ꮡt) => reflect_package.ptrTo⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool AssignableTo(this ж<rtype> Ꮡt, Type u) => reflect_package.AssignableTo⁔(Ꮡt, u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool ConvertibleTo(this ж<rtype> Ꮡt, Type u) => reflect_package.ConvertibleTo⁔(Ꮡt, u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Comparable(this ref rtype t) => reflect_package.Comparable⁔(ref t);
 }
 partial class reflectᴛinterfaceType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static abi.Name nameOff(this ж<interfaceType> Ꮡt, aNameOff off) => reflect_package.nameOffᴍ(Ꮡt, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> typeOff(this ж<interfaceType> Ꮡt, aTypeOff off) => reflect_package.typeOffᴍ(Ꮡt, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.Type> common(this ж<interfaceType> Ꮡt) => reflect_package.commonᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<abi.UncommonType> uncommon(this ж<interfaceType> Ꮡt) => reflect_package.uncommonᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Method /*m*/ Method(this ж<interfaceType> Ꮡt, nint i) => reflect_package.Methodᴍ(Ꮡt, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint NumMethod(this ref interfaceType t) => reflect_package.NumMethodᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Method m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, @string name) => reflect_package.MethodByNameᴍ(Ꮡt, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static abi.Name nameOff(this ж<interfaceType> Ꮡt, aNameOff off) => reflect_package.nameOff⁔(Ꮡt, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> typeOff(this ж<interfaceType> Ꮡt, aTypeOff off) => reflect_package.typeOff⁔(Ꮡt, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.Type> common(this ж<interfaceType> Ꮡt) => reflect_package.common⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<abi.UncommonType> uncommon(this ж<interfaceType> Ꮡt) => reflect_package.uncommon⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Method /*m*/ Method(this ж<interfaceType> Ꮡt, nint i) => reflect_package.Method⁔(Ꮡt, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint NumMethod(this ref interfaceType t) => reflect_package.NumMethod⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (Method m, bool ok) MethodByName(this ж<interfaceType> Ꮡt, @string name) => reflect_package.MethodByName⁔(Ꮡt, name);
 }
 partial class reflectᴛMethod {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsExported(this Method m) => reflect_package.IsExportedᴍ(m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsExported(this Method m) => reflect_package.IsExported⁔(m);
 }
 partial class reflectᴛKind {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Kind k) => reflect_package.Stringᴍ(k);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Kind k) => reflect_package.String⁔(k);
 }
 partial class reflectᴛChanDir {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ChanDir d) => reflect_package.Stringᴍ(d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ChanDir d) => reflect_package.String⁔(d);
 }
 partial class reflectᴛStructField {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsExported(this StructField f) => reflect_package.IsExportedᴍ(f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsExported(this StructField f) => reflect_package.IsExported⁔(f);
 }
 partial class reflectᴛStructTag {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Get(this StructTag tag, @string key) => reflect_package.Getᴍ(tag, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string value, bool ok) Lookup(this StructTag tag, @string key) => reflect_package.Lookupᴍ(tag, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Get(this StructTag tag, @string key) => reflect_package.Get⁔(tag, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string value, bool ok) Lookup(this StructTag tag, @string key) => reflect_package.Lookup⁔(tag, key);
 }
 partial class reflectᴛstructType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static StructField /*f*/ Field(this ref structType t, nint i) => reflect_package.Fieldᴍ(ref t, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static StructField /*f*/ FieldByIndex(this ж<structType> Ꮡt, slice<nint> index) => reflect_package.FieldByIndexᴍ(Ꮡt, index);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType> Ꮡt, Func<@string, bool> match) => reflect_package.FieldByNameFuncᴍ(Ꮡt, match);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (StructField f, bool present) FieldByName(this ж<structType> Ꮡt, @string name) => reflect_package.FieldByNameᴍ(Ꮡt, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static StructField /*f*/ Field(this ref structType t, nint i) => reflect_package.Field⁔(ref t, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static StructField /*f*/ FieldByIndex(this ж<structType> Ꮡt, slice<nint> index) => reflect_package.FieldByIndex⁔(Ꮡt, index);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (StructField result, bool ok) FieldByNameFunc(this ж<structType> Ꮡt, Func<@string, bool> match) => reflect_package.FieldByNameFunc⁔(Ꮡt, match);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (StructField f, bool present) FieldByName(this ж<structType> Ꮡt, @string name) => reflect_package.FieldByName⁔(Ꮡt, name);
 }
 partial class reflectᴛbitVector {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void append(this ref bitVector bv, uint8 bit) => reflect_package.appendᴍ(ref bv, bit);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void append(this ref bitVector bv, uint8 bit) => reflect_package.append⁔(ref bv, bit);
 }
 partial class reflectᴛvisibleFieldsWalker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void walk(this ref visibleFieldsWalker w, Type t) => reflect_package.walkᴍ(ref w, t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void walk(this ref visibleFieldsWalker w, Type t) => reflect_package.walk⁔(ref w, t);
 }
 // </GlyphForwarders>

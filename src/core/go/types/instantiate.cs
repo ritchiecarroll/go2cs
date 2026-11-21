@@ -92,7 +92,7 @@ public static (Type, error) Instantiate(ж<Context> Ꮡctxt, Type orig, slice<Ty
 // For Named types the resulting instance may be unexpanded.
 //
 // check may be nil (when not type-checking syntax); pos is used only if check is non-nil.
-[GoMethodBody("instance")] internal static Type /*res*/ instanceᴍ(ж<Checker> Ꮡcheck, token.Pos pos, genericType orig, slice<Type> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
+internal static Type /*res*/ instance⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, genericType orig, slice<Type> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) {
     Type res = default;
     ref var expanding = ref Ꮡexpanding.DerefOrNull();
     ref var ctxt = ref Ꮡctxt.DerefOrNull();
@@ -201,15 +201,15 @@ public static (Type, error) Instantiate(ж<Context> Ꮡctxt, Type orig, slice<Ty
 // validateTArgLen checks that the number of type arguments (got) matches the
 // number of type parameters (want); if they don't match an error is reported.
 // If validation fails and check is nil, validateTArgLen panics.
-[GoMethodBody("validateTArgLen")] internal static bool validateTArgLenᴍ(ж<Checker> Ꮡcheck, token.Pos pos, @string name, nint want, nint got) {
+internal static bool validateTArgLen⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, @string name, nint want, nint got) {
     @string qual = default;
     switch (ᐧ) {
     case {} when got < want: {
-        qual = notEnoughˢᴍChecker;
+        qual = notEnoughˢ⁔Checker;
         break;
     }
     case {} when got > want: {
-        qual = tooManyˢᴍChecker;
+        qual = tooManyˢ⁔Checker;
         break;
     }
     default: {
@@ -226,7 +226,7 @@ public static (Type, error) Instantiate(ж<Context> Ꮡctxt, Type orig, slice<Ty
 }
 
 // check may be nil; pos is used only if check is non-nil.
-[GoMethodBody("verify")] internal static (nint, error) verifyᴍ(ж<Checker> Ꮡcheck, token.Pos pos, slice<ж<TypeParam>> tparams, slice<Type> targs, ж<Context> ctxt) {
+internal static (nint, error) verify⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, slice<ж<TypeParam>> tparams, slice<Type> targs, ж<Context> ctxt) {
     var smap = makeSubstMap(tparams, targs);
     foreach (var (i, tpar) in range(tparams)) {
         // Ensure that we have a (possibly implicit) interface as type bound (go.dev/issue/51048).
@@ -245,10 +245,10 @@ public static (Type, error) Instantiate(ж<Context> Ꮡctxt, Type orig, slice<Ty
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string implementˢᴍChecker => ref implementˢᵇᴍChecker;
-private static readonly @string implementˢᵇᴍChecker = "implement"u8;
-internal static ref readonly @string satisfyˢᴍChecker => ref satisfyˢᵇᴍChecker;
-private static readonly @string satisfyˢᵇᴍChecker = "satisfy"u8;
+internal static ref readonly @string implementˢ⁔Checker => ref implementˢᵇ⁔Checker;
+private static readonly @string implementˢᵇ⁔Checker = "implement"u8;
+internal static ref readonly @string satisfyˢ⁔Checker => ref satisfyˢᵇ⁔Checker;
+private static readonly @string satisfyˢᵇ⁔Checker = "satisfy"u8;
 
 // implements checks if V implements T. The receiver may be nil if implements
 // is called through an exported API call such as AssignableTo. If constraint
@@ -256,7 +256,7 @@ private static readonly @string satisfyˢᵇᴍChecker = "satisfy"u8;
 //
 // If the provided cause is non-nil, it may be set to an error string
 // explaining why V does not implement (or satisfy, for constraints) T.
-[GoMethodBody("implements")] internal static bool implementsᴍ(ж<Checker> Ꮡcheck, Type V, Type T, bool constraint, ж<@string> Ꮡcause) {
+internal static bool implements⁔(/*this*/ ж<Checker> Ꮡcheck, Type V, Type T, bool constraint, ж<@string> Ꮡcause) {
     ref var cause = ref Ꮡcause.DerefOrNull();
 
     var Vu = V.Underlying();
@@ -268,9 +268,9 @@ private static readonly @string satisfyˢᵇᴍChecker = "satisfy"u8;
         return true; // avoid follow-on errors (see go.dev/issue/49541 for an example)
     }
 
-    @string verb = implementˢᴍChecker;
+    @string verb = implementˢ⁔Checker;
     if (constraint) {
-        verb = satisfyˢᴍChecker;
+        verb = satisfyˢ⁔Checker;
     }
 
     var (Ti, _) = Tu._<ж<Interface>>(ᐧ);
@@ -444,9 +444,9 @@ internal static bool mentions(Type T, Type typ) {
 
 // <GlyphForwarders> (scratch prototype: placed here, an alias of this file conflicts in package_info.cs)
 partial class typesᴛChecker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type /*res*/ instance(this ж<Checker> Ꮡcheck, token.Pos pos, genericType orig, slice<Type> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) => types_package.instanceᴍ(Ꮡcheck, pos, orig, targs, Ꮡexpanding, Ꮡctxt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, token.Pos pos, @string name, nint want, nint got) => types_package.validateTArgLenᴍ(Ꮡcheck, pos, name, want, got);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) verify(this ж<Checker> Ꮡcheck, token.Pos pos, slice<ж<TypeParam>> tparams, slice<Type> targs, ж<Context> ctxt) => types_package.verifyᴍ(Ꮡcheck, pos, tparams, targs, ctxt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool implements(this ж<Checker> Ꮡcheck, Type V, Type T, bool constraint, ж<@string> Ꮡcause) => types_package.implementsᴍ(Ꮡcheck, V, T, constraint, Ꮡcause);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Type /*res*/ instance(this ж<Checker> Ꮡcheck, token.Pos pos, genericType orig, slice<Type> targs, ж<Named> Ꮡexpanding, ж<Context> Ꮡctxt) => types_package.instance⁔(Ꮡcheck, pos, orig, targs, Ꮡexpanding, Ꮡctxt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool validateTArgLen(this ж<Checker> Ꮡcheck, token.Pos pos, @string name, nint want, nint got) => types_package.validateTArgLen⁔(Ꮡcheck, pos, name, want, got);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) verify(this ж<Checker> Ꮡcheck, token.Pos pos, slice<ж<TypeParam>> tparams, slice<Type> targs, ж<Context> ctxt) => types_package.verify⁔(Ꮡcheck, pos, tparams, targs, ctxt);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool implements(this ж<Checker> Ꮡcheck, Type V, Type T, bool constraint, ж<@string> Ꮡcause) => types_package.implements⁔(Ꮡcheck, V, T, constraint, Ꮡcause);
 }
 // </GlyphForwarders>

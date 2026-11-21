@@ -213,7 +213,7 @@ internal static slice<byte> nl = [(byte)'\n'];
 
 } partial class pem_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref lineBreaker l, slice<byte> b) {
+internal static (nint n, error err) Write⁔(/*this*/ ref lineBreaker l, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -243,7 +243,7 @@ internal static slice<byte> nl = [(byte)'\n'];
     return l.Write(b.slice(excess));
 }
 
-[GoMethodBody("Close")] internal static error /*err*/ Closeᴍ(ref lineBreaker l) {
+internal static error /*err*/ Close⁔(/*this*/ ref lineBreaker l) {
     error err = default;
 
     if (l.used > 0) {

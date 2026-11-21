@@ -18,7 +18,7 @@ partial class types_package {
 
 } partial class types_package {
 
-[GoMethodBody("record")] internal static void recordᴍ(ref Checker check, ж<operand> Ꮡx) {
+internal static void record⁔(/*this*/ ref Checker check, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // convert x into a user-friendly set of values
@@ -55,10 +55,10 @@ partial class types_package {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string vSTypeSIsTypedˢᴍChecker => ref vSTypeSIsTypedˢᵇᴍChecker;
-private static readonly @string vSTypeSIsTypedˢᵇᴍChecker = "%v: %s (type %s) is typed"u8;
+internal static ref readonly @string vSTypeSIsTypedˢ⁔Checker => ref vSTypeSIsTypedˢᵇ⁔Checker;
+private static readonly @string vSTypeSIsTypedˢᵇ⁔Checker = "%v: %s (type %s) is typed"u8;
 
-[GoMethodBody("recordUntyped")] internal static void recordUntypedᴍ(ж<Checker> Ꮡcheck) {
+internal static void recordUntyped⁔(/*this*/ ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     if (!debug && !check.recordTypes()) {
@@ -67,14 +67,14 @@ private static readonly @string vSTypeSIsTypedˢᵇᴍChecker = "%v: %s (type %s
 
     foreach (var (x, info) in check.untyped) {
         if (debug && isTyped(new BasicжType(info.typ))) {
-            Ꮡcheck.dump(vSTypeSIsTypedˢᴍChecker, x.Pos(), x, info.typ.OrTypedNil());
+            Ꮡcheck.dump(vSTypeSIsTypedˢ⁔Checker, x.Pos(), x, info.typ.OrTypedNil());
             throw panic("unreachable");
         }
         check.recordTypeAndValue(x, info.mode, new BasicжType(info.typ), info.val);
     }
 }
 
-[GoMethodBody("recordTypeAndValue")] internal static void recordTypeAndValueᴍ(ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val) {
+internal static void recordTypeAndValue⁔(/*this*/ ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val) {
     assert(x != nil);
     assert(typ != nil);
     if (mode == invalid) {
@@ -92,7 +92,7 @@ private static readonly @string vSTypeSIsTypedˢᵇᴍChecker = "%v: %s (type %s
     check.recordTypeAndValueInSyntax(x, mode, typ, val);
 }
 
-[GoMethodBody("recordBuiltinType")] internal static void recordBuiltinTypeᴍ(ref Checker check, ast.Expr f, ж<Signature> sig) {
+internal static void recordBuiltinType⁔(/*this*/ ref Checker check, ast.Expr f, ж<Signature> sig) {
     // f must be a (possibly parenthesized, possibly qualified)
     // identifier denoting a built-in (including unsafe's non-constant
     // functions Add and Slice): record the signature for f and possible
@@ -119,7 +119,7 @@ private static readonly @string vSTypeSIsTypedˢᵇᴍChecker = "%v: %s (type %s
 
 // recordCommaOkTypes updates recorded types to reflect that x is used in a commaOk context
 // (and therefore has tuple type).
-[GoMethodBody("recordCommaOkTypes")] internal static void recordCommaOkTypesᴍ(ref Checker check, ast.Expr x, slice<ж<operand>> a) {
+internal static void recordCommaOkTypes⁔(/*this*/ ref Checker check, ast.Expr x, slice<ж<operand>> a) {
     assert(x != nil);
     assert(len(a) == 2);
     if (a[0].mode == invalid) {
@@ -153,7 +153,7 @@ private static readonly @string vSTypeSIsTypedˢᵇᴍChecker = "%v: %s (type %s
 //
 // TODO(rfindley): the expr parameter is fragile. See if we can access the
 // instantiated identifier in some other way.
-[GoMethodBody("recordInstance")] internal static void recordInstanceᴍ(ref Checker check, ast.Expr expr, slice<Type> targs, Type typ) {
+internal static void recordInstance⁔(/*this*/ ref Checker check, ast.Expr expr, slice<Type> targs, Type typ) {
     var ident = instantiatedIdent(expr);
     assert(ident != nil);
     assert(typ != nil);
@@ -162,14 +162,14 @@ private static readonly @string vSTypeSIsTypedˢᵇᴍChecker = "%v: %s (type %s
     }
 }
 
-[GoMethodBody("recordDef")] internal static void recordDefᴍ(ref Checker check, ж<ast.Ident> id, Object obj) {
+internal static void recordDef⁔(/*this*/ ref Checker check, ж<ast.Ident> id, Object obj) {
     assert(id != nil);
     var m = check.Defs; if (m != nil) {
         m[id] = obj;
     }
 }
 
-[GoMethodBody("recordUse")] internal static void recordUseᴍ(ref Checker check, ж<ast.Ident> id, Object obj) {
+internal static void recordUse⁔(/*this*/ ref Checker check, ж<ast.Ident> id, Object obj) {
     assert(id != nil);
     assert(obj != nil);
     var m = check.Uses; if (m != nil) {
@@ -177,7 +177,7 @@ private static readonly @string vSTypeSIsTypedˢᵇᴍChecker = "%v: %s (type %s
     }
 }
 
-[GoMethodBody("recordImplicit")] internal static void recordImplicitᴍ(ref Checker check, ast.Node node, Object obj) {
+internal static void recordImplicit⁔(/*this*/ ref Checker check, ast.Node node, Object obj) {
     assert(node != nil);
     assert(obj != nil);
     var m = check.Implicits; if (m != nil) {
@@ -185,7 +185,7 @@ private static readonly @string vSTypeSIsTypedˢᵇᴍChecker = "%v: %s (type %s
     }
 }
 
-[GoMethodBody("recordSelection")] internal static void recordSelectionᴍ(ref Checker check, ж<ast.SelectorExpr> Ꮡx, SelectionKind kind, Type recv, Object obj, slice<nint> index, bool indirect) {
+internal static void recordSelection⁔(/*this*/ ref Checker check, ж<ast.SelectorExpr> Ꮡx, SelectionKind kind, Type recv, Object obj, slice<nint> index, bool indirect) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     assert(obj != nil && (recv == nil || len(index) > 0));
@@ -195,7 +195,7 @@ private static readonly @string vSTypeSIsTypedˢᵇᴍChecker = "%v: %s (type %s
     }
 }
 
-[GoMethodBody("recordScope")] internal static void recordScopeᴍ(ref Checker check, ast.Node node, ж<Scope> scope) {
+internal static void recordScope⁔(/*this*/ ref Checker check, ast.Node node, ж<Scope> scope) {
     assert(node != nil);
     assert(scope != nil);
     var m = check.Scopes; if (m != nil) {

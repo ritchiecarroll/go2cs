@@ -78,11 +78,14 @@ using static go.net.textproto_package;
 
 namespace go.net;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static textproto_package;
 using io = io_package;
 using ꓸꓸꓸany = Span<any>;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("textproto")]
 public static partial class textproto_package
@@ -133,75 +136,75 @@ public static partial class textproto_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(textproto_package.Conn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛConn;
-[GoMethodHost(typeof(textproto_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛError;
-[GoMethodHost(typeof(textproto_package.MIMEHeader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛMIMEHeader;
-[GoMethodHost(typeof(textproto_package.Pipeline)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛPipeline;
-[GoMethodHost(typeof(textproto_package.ProtocolError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛProtocolError;
-[GoMethodHost(typeof(textproto_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛReader;
-[GoMethodHost(typeof(textproto_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛWriter;
-[GoMethodHost(typeof(textproto_package.dotReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛdotReader;
-[GoMethodHost(typeof(textproto_package.dotWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛdotWriter;
-[GoMethodHost(typeof(textproto_package.sequencer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class textprotoᴛsequencer;
+[GoMethodHost(typeof(textproto_package.Conn)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛConn;
+[GoMethodHost(typeof(textproto_package.Error)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛError;
+[GoMethodHost(typeof(textproto_package.MIMEHeader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛMIMEHeader;
+[GoMethodHost(typeof(textproto_package.Pipeline)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛPipeline;
+[GoMethodHost(typeof(textproto_package.ProtocolError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛProtocolError;
+[GoMethodHost(typeof(textproto_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛReader;
+[GoMethodHost(typeof(textproto_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛWriter;
+[GoMethodHost(typeof(textproto_package.dotReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛdotReader;
+[GoMethodHost(typeof(textproto_package.dotWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛdotWriter;
+[GoMethodHost(typeof(textproto_package.sequencer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class textprotoᴛsequencer;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class textprotoᴛMIMEHeader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Add(this MIMEHeader h, @string key, @string value) => textproto_package.Addᴍ(h, key, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Set(this MIMEHeader h, @string key, @string value) => textproto_package.Setᴍ(h, key, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Get(this MIMEHeader h, @string key) => textproto_package.Getᴍ(h, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<@string> Values(this MIMEHeader h, @string key) => textproto_package.Valuesᴍ(h, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Del(this MIMEHeader h, @string key) => textproto_package.Delᴍ(h, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Add(this MIMEHeader h, @string key, @string value) => textproto_package.Add⁔(h, key, value);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this MIMEHeader h, @string key, @string value) => textproto_package.Set⁔(h, key, value);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Get(this MIMEHeader h, @string key) => textproto_package.Get⁔(h, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<@string> Values(this MIMEHeader h, @string key) => textproto_package.Values⁔(h, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Del(this MIMEHeader h, @string key) => textproto_package.Del⁔(h, key);
 }
 partial class textprotoᴛPipeline {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nuint Next(this ж<Pipeline> Ꮡp) => textproto_package.Nextᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StartRequest(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.StartRequestᴍ(Ꮡp, id);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void EndRequest(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.EndRequestᴍ(Ꮡp, id);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void StartResponse(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.StartResponseᴍ(Ꮡp, id);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void EndResponse(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.EndResponseᴍ(Ꮡp, id);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nuint Next(this ж<Pipeline> Ꮡp) => textproto_package.Next⁔(Ꮡp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StartRequest(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.StartRequest⁔(Ꮡp, id);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void EndRequest(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.EndRequest⁔(Ꮡp, id);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void StartResponse(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.StartResponse⁔(Ꮡp, id);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void EndResponse(this ж<Pipeline> Ꮡp, nuint id) => textproto_package.EndResponse⁔(Ꮡp, id);
 }
 partial class textprotoᴛsequencer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Start(this ж<sequencer> Ꮡs, nuint id) => textproto_package.Startᴍ(Ꮡs, id);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void End(this ж<sequencer> Ꮡs, nuint id) => textproto_package.Endᴍ(Ꮡs, id);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Start(this ж<sequencer> Ꮡs, nuint id) => textproto_package.Start⁔(Ꮡs, id);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void End(this ж<sequencer> Ꮡs, nuint id) => textproto_package.End⁔(Ꮡs, id);
 }
 partial class textprotoᴛReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) ReadLine(this ref Reader r) => textproto_package.ReadLineᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) ReadLineBytes(this ref Reader r) => textproto_package.ReadLineBytesᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) readLineSlice(this ref Reader r, int64 lim) => textproto_package.readLineSliceᴍ(ref r, lim);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) ReadContinuedLine(this ref Reader r) => textproto_package.ReadContinuedLineᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) ReadContinuedLineBytes(this ref Reader r) => textproto_package.ReadContinuedLineBytesᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) readContinuedLineSlice(this ref Reader r, int64 lim, Func<slice<byte>, error> validateFirstLine) => textproto_package.readContinuedLineSliceᴍ(ref r, lim, validateFirstLine);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint skipSpace(this ref Reader r) => textproto_package.skipSpaceᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint code, bool continued, @string message, error err) readCodeLine(this ref Reader r, nint expectCode) => textproto_package.readCodeLineᴍ(ref r, expectCode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint code, @string message, error err) ReadCodeLine(this ref Reader r, nint expectCode) => textproto_package.ReadCodeLineᴍ(ref r, expectCode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint code, @string message, error err) ReadResponse(this ref Reader r, nint expectCode) => textproto_package.ReadResponseᴍ(ref r, expectCode);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.Reader DotReader(this ж<Reader> Ꮡr) => textproto_package.DotReaderᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeDot(this ref Reader r) => textproto_package.closeDotᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) ReadDotBytes(this ж<Reader> Ꮡr) => textproto_package.ReadDotBytesᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) ReadDotLines(this ref Reader r) => textproto_package.ReadDotLinesᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (MIMEHeader, error) ReadMIMEHeader(this ж<Reader> Ꮡr) => textproto_package.ReadMIMEHeaderᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*n*/ upcomingHeaderKeys(this ref Reader r) => textproto_package.upcomingHeaderKeysᴍ(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) ReadLine(this ref Reader r) => textproto_package.ReadLine⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) ReadLineBytes(this ref Reader r) => textproto_package.ReadLineBytes⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) readLineSlice(this ref Reader r, int64 lim) => textproto_package.readLineSlice⁔(ref r, lim);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) ReadContinuedLine(this ref Reader r) => textproto_package.ReadContinuedLine⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) ReadContinuedLineBytes(this ref Reader r) => textproto_package.ReadContinuedLineBytes⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) readContinuedLineSlice(this ref Reader r, int64 lim, Func<slice<byte>, error> validateFirstLine) => textproto_package.readContinuedLineSlice⁔(ref r, lim, validateFirstLine);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint skipSpace(this ref Reader r) => textproto_package.skipSpace⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint code, bool continued, @string message, error err) readCodeLine(this ref Reader r, nint expectCode) => textproto_package.readCodeLine⁔(ref r, expectCode);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint code, @string message, error err) ReadCodeLine(this ref Reader r, nint expectCode) => textproto_package.ReadCodeLine⁔(ref r, expectCode);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint code, @string message, error err) ReadResponse(this ref Reader r, nint expectCode) => textproto_package.ReadResponse⁔(ref r, expectCode);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static io.Reader DotReader(this ж<Reader> Ꮡr) => textproto_package.DotReader⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void closeDot(this ref Reader r) => textproto_package.closeDot⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) ReadDotBytes(this ж<Reader> Ꮡr) => textproto_package.ReadDotBytes⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string>, error) ReadDotLines(this ref Reader r) => textproto_package.ReadDotLines⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (MIMEHeader, error) ReadMIMEHeader(this ж<Reader> Ꮡr) => textproto_package.ReadMIMEHeader⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint /*n*/ upcomingHeaderKeys(this ref Reader r) => textproto_package.upcomingHeaderKeys⁔(ref r);
 }
 partial class textprotoᴛdotReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b) => textproto_package.Readᴍ(Ꮡd, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ж<dotReader> Ꮡd, slice<byte> b) => textproto_package.Read⁔(Ꮡd, b);
 }
 partial class textprotoᴛError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref Error e) => textproto_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref Error e) => textproto_package.Error⁔(ref e);
 }
 partial class textprotoᴛProtocolError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ProtocolError p) => textproto_package.Errorᴍ(p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ProtocolError p) => textproto_package.Error⁔(p);
 }
 partial class textprotoᴛConn {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Conn c) => textproto_package.Closeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nuint id, error err) Cmd(this ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) => textproto_package.Cmdᴍ(Ꮡc, format, argsʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Conn c) => textproto_package.Close⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nuint id, error err) Cmd(this ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) => textproto_package.Cmd⁔(Ꮡc, format, argsʗp);
 }
 partial class textprotoᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error PrintfLine(this ref Writer w, @string format, params ꓸꓸꓸany argsʗp) => textproto_package.PrintfLineᴍ(ref w, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.WriteCloser DotWriter(this ж<Writer> Ꮡw) => textproto_package.DotWriterᴍ(Ꮡw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void closeDot(this ref Writer w) => textproto_package.closeDotᴍ(ref w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error PrintfLine(this ref Writer w, @string format, params ꓸꓸꓸany argsʗp) => textproto_package.PrintfLine⁔(ref w, format, argsʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static io.WriteCloser DotWriter(this ж<Writer> Ꮡw) => textproto_package.DotWriter⁔(Ꮡw);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void closeDot(this ref Writer w) => textproto_package.closeDot⁔(ref w);
 }
 partial class textprotoᴛdotWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref dotWriter d, slice<byte> b) => textproto_package.Writeᴍ(ref d, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<dotWriter> Ꮡd) => textproto_package.Closeᴍ(Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref dotWriter d, slice<byte> b) => textproto_package.Write⁔(ref d, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ж<dotWriter> Ꮡd) => textproto_package.Close⁔(Ꮡd);
 }
 // </GlyphForwarders>

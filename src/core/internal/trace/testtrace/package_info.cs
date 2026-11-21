@@ -77,14 +77,17 @@ using static go.@internal.trace.testtrace_package;
 
 namespace go.@internal.trace;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go;
 using static testtrace_package;
 using trace = go.@internal.trace_package;
 using go.@internal;
 using go.@internal.trace;
 using ꓸꓸꓸany = Span<any>;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("testtrace")]
 public static partial class testtrace_package
@@ -138,26 +141,26 @@ public static partial class testtrace_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(testtrace_package.Expectation)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testtraceᴛExpectation;
-[GoMethodHost(typeof(testtrace_package.Validator)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testtraceᴛValidator;
-[GoMethodHost(typeof(testtrace_package.errAccumulator)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class testtraceᴛerrAccumulator;
+[GoMethodHost(typeof(testtrace_package.Expectation)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class testtraceᴛExpectation;
+[GoMethodHost(typeof(testtrace_package.Validator)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class testtraceᴛValidator;
+[GoMethodHost(typeof(testtrace_package.errAccumulator)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class testtraceᴛerrAccumulator;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class testtraceᴛExpectation {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Check(this ref Expectation e, error err) => testtrace_package.Checkᴍ(ref e, err);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Check(this ref Expectation e, error err) => testtrace_package.Check⁔(ref e, err);
 }
 partial class testtraceᴛValidator {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SkipClockSnapshotChecks(this ref Validator v) => testtrace_package.SkipClockSnapshotChecksᴍ(ref v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Event(this ж<Validator> Ꮡv, trace.Event ev) => testtrace_package.Eventᴍ(Ꮡv, ev);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasRange(this ref Validator v, trace.ResourceID r, @string name) => testtrace_package.hasRangeᴍ(ref v, r, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addRange(this ref Validator v, trace.ResourceID r, @string name) => testtrace_package.addRangeᴍ(ref v, r, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasAnyRange(this ref Validator v, trace.ResourceID r) => testtrace_package.hasAnyRangeᴍ(ref v, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void deleteRange(this ref Validator v, trace.ResourceID r, @string name) => testtrace_package.deleteRangeᴍ(ref v, r, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<schedContext> getOrCreateThread(this ж<Validator> Ꮡv, ж<errAccumulator> Ꮡe, trace.Event ev, trace.ThreadID m) => testtrace_package.getOrCreateThreadᴍ(Ꮡv, Ꮡe, ev, m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SkipClockSnapshotChecks(this ref Validator v) => testtrace_package.SkipClockSnapshotChecks⁔(ref v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Event(this ж<Validator> Ꮡv, trace.Event ev) => testtrace_package.Event⁔(Ꮡv, ev);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasRange(this ref Validator v, trace.ResourceID r, @string name) => testtrace_package.hasRange⁔(ref v, r, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void addRange(this ref Validator v, trace.ResourceID r, @string name) => testtrace_package.addRange⁔(ref v, r, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasAnyRange(this ref Validator v, trace.ResourceID r) => testtrace_package.hasAnyRange⁔(ref v, r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void deleteRange(this ref Validator v, trace.ResourceID r, @string name) => testtrace_package.deleteRange⁔(ref v, r, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<schedContext> getOrCreateThread(this ж<Validator> Ꮡv, ж<errAccumulator> Ꮡe, trace.Event ev, trace.ThreadID m) => testtrace_package.getOrCreateThread⁔(Ꮡv, Ꮡe, ev, m);
 }
 partial class testtraceᴛerrAccumulator {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Errorf(this ref errAccumulator e, @string f, params ꓸꓸꓸany argsʗp) => testtrace_package.Errorfᴍ(ref e, f, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Errors(this ref errAccumulator e) => testtrace_package.Errorsᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Errorf(this ref errAccumulator e, @string f, params ꓸꓸꓸany argsʗp) => testtrace_package.Errorf⁔(ref e, f, argsʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Errors(this ref errAccumulator e) => testtrace_package.Errors⁔(ref e);
 }
 // </GlyphForwarders>

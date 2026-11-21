@@ -27,7 +27,7 @@ internal static UntypedInt p384ElementLen => 48;
 } partial class fiat_package {
 
 // One sets e = 1, and returns e.
-[GoMethodBody("One")] internal static ж<P384Element> Oneᴍ(ж<P384Element> Ꮡe) {
+internal static ж<P384Element> One⁔(/*this*/ ж<P384Element> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     p384SetOne(ref nonnil(ref e).x);
@@ -35,21 +35,21 @@ internal static UntypedInt p384ElementLen => 48;
 }
 
 // Equal returns 1 if e == t, and zero otherwise.
-[GoMethodBody("Equal")] internal static nint Equalᴍ(ж<P384Element> Ꮡe, ж<P384Element> t) {
+internal static nint Equal⁔(/*this*/ ж<P384Element> Ꮡe, ж<P384Element> t) {
     var eBytes = Ꮡe.Bytes();
     var tBytes = t.Bytes();
     return subtle.ConstantTimeCompare(eBytes, tBytes);
 }
 
 // IsZero returns 1 if e == 0, and zero otherwise.
-[GoMethodBody("IsZero")] internal static nint IsZeroᴍ(ж<P384Element> Ꮡe) {
+internal static nint IsZero⁔(/*this*/ ж<P384Element> Ꮡe) {
     var zero = new slice<byte>(p384ElementLen);
     var eBytes = Ꮡe.Bytes();
     return subtle.ConstantTimeCompare(eBytes, zero);
 }
 
 // Set sets e = t, and returns e.
-[GoMethodBody("Set")] internal static ж<P384Element> Setᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt) {
+internal static ж<P384Element> Set⁔(/*this*/ ж<P384Element> Ꮡe, ж<P384Element> Ꮡt) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -58,14 +58,14 @@ internal static UntypedInt p384ElementLen => 48;
 }
 
 // Bytes returns the 48-byte big-endian encoding of e.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ж<P384Element> Ꮡe) {
+internal static slice<byte> Bytes⁔(/*this*/ ж<P384Element> Ꮡe) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(48), out var Ꮡout);
     return Ꮡe.bytes(Ꮡout);
 }
 
-[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ж<P384Element> Ꮡe, /*[48]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes⁔(/*this*/ ж<P384Element> Ꮡe, /*[48]*/ ж<array<byte>> Ꮡout) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -78,17 +78,17 @@ internal static UntypedInt p384ElementLen => 48;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string invalidP384ElementˢᴍP384Element => ref invalidP384ElementˢᵇᴍP384Element;
-private static readonly @string invalidP384ElementˢᵇᴍP384Element = "invalid P384Element encoding"u8;
+private static ref readonly @string invalidP384Elementˢ⁔P384Element => ref invalidP384Elementˢᵇ⁔P384Element;
+private static readonly @string invalidP384Elementˢᵇ⁔P384Element = "invalid P384Element encoding"u8;
 
 // SetBytes sets e = v, where v is a big-endian 48-byte encoding, and returns e.
 // If v is not 48 bytes or it encodes a value higher than 2^384 - 2^128 - 2^96 + 2^32 - 1,
 // SetBytes returns nil and an error, and e is unchanged.
-[GoMethodBody("SetBytes")] internal static (ж<P384Element>, error) SetBytesᴍ(ж<P384Element> Ꮡe, slice<byte> v) {
+internal static (ж<P384Element>, error) SetBytes⁔(/*this*/ ж<P384Element> Ꮡe, slice<byte> v) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (len(v) != p384ElementLen) {
-        return (default, errors.New(invalidP384ElementˢᴍP384Element));
+        return (default, errors.New(invalidP384Elementˢ⁔P384Element));
     }
 
     // Check for non-canonical encodings (p + k, 2p + k, etc.) by comparing to
@@ -96,7 +96,7 @@ private static readonly @string invalidP384ElementˢᵇᴍP384Element = "invalid
     slice<byte> minusOneEncoding = @new<P384Element>().Sub(
         @new<P384Element>(), @new<P384Element>().One()).Bytes();
     if (subtle.ConstantTimeLessOrEqBytes(v, minusOneEncoding) == 0) {
-        return (default, errors.New(invalidP384ElementˢᴍP384Element));
+        return (default, errors.New(invalidP384Elementˢ⁔P384Element));
     }
 
     ref var @in = ref heap(new array<byte>(48), out var Ꮡin);
@@ -110,7 +110,7 @@ private static readonly @string invalidP384ElementˢᵇᴍP384Element = "invalid
 }
 
 // Add sets e = t1 + t2, and returns e.
-[GoMethodBody("Add")] internal static ж<P384Element> Addᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
+internal static ж<P384Element> Add⁔(/*this*/ ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -120,7 +120,7 @@ private static readonly @string invalidP384ElementˢᵇᴍP384Element = "invalid
 }
 
 // Sub sets e = t1 - t2, and returns e.
-[GoMethodBody("Sub")] internal static ж<P384Element> Subᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
+internal static ж<P384Element> Sub⁔(/*this*/ ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -130,7 +130,7 @@ private static readonly @string invalidP384ElementˢᵇᴍP384Element = "invalid
 }
 
 // Mul sets e = t1 * t2, and returns e.
-[GoMethodBody("Mul")] internal static ж<P384Element> Mulᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
+internal static ж<P384Element> Mul⁔(/*this*/ ж<P384Element> Ꮡe, ж<P384Element> Ꮡt1, ж<P384Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -140,7 +140,7 @@ private static readonly @string invalidP384ElementˢᵇᴍP384Element = "invalid
 }
 
 // Square sets e = t * t, and returns e.
-[GoMethodBody("Square")] internal static ж<P384Element> Squareᴍ(ж<P384Element> Ꮡe, ж<P384Element> Ꮡt) {
+internal static ж<P384Element> Square⁔(/*this*/ ж<P384Element> Ꮡe, ж<P384Element> Ꮡt) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -149,7 +149,7 @@ private static readonly @string invalidP384ElementˢᵇᴍP384Element = "invalid
 }
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
-[GoMethodBody("Select")] internal static ж<P384Element> Selectᴍ(ж<P384Element> Ꮡv, ж<P384Element> Ꮡa, ж<P384Element> Ꮡb, nint cond) {
+internal static ж<P384Element> Select⁔(/*this*/ ж<P384Element> Ꮡv, ж<P384Element> Ꮡa, ж<P384Element> Ꮡb, nint cond) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();

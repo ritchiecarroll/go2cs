@@ -96,7 +96,7 @@ internal static nint abs8(uint8 d) {
 
 } partial class png_package {
 
-[GoMethodBody("writeChunk")] internal static void writeChunkᴍ(ref encoder e, slice<byte> b, @string name) {
+internal static void writeChunk⁔(/*this*/ ref encoder e, slice<byte> b, @string name) {
     if (e.err != nil) {
         return;
     }
@@ -127,10 +127,10 @@ internal static nint abs8(uint8 d) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ihdrˢᴍencoder => ref ihdrˢᵇᴍencoder;
-private static readonly @string ihdrˢᵇᴍencoder = "IHDR"u8;
+internal static ref readonly @string ihdrˢ⁔encoder => ref ihdrˢᵇ⁔encoder;
+private static readonly @string ihdrˢᵇ⁔encoder = "IHDR"u8;
 
-[GoMethodBody("writeIHDR")] internal static void writeIHDRᴍ(ref encoder e) {
+internal static void writeIHDR⁔(/*this*/ ref encoder e) {
     var b = e.m.Bounds();
     binary.BigEndian.PutUint32(e.tmp[0..4], (uint32)b.Dx());
     binary.BigEndian.PutUint32(e.tmp[4..8], (uint32)b.Dy());
@@ -189,16 +189,16 @@ private static readonly @string ihdrˢᵇᴍencoder = "IHDR"u8;
     e.tmp[10] = 0; // default compression method
     e.tmp[11] = 0; // default filter method
     e.tmp[12] = 0; // non-interlaced
-    e.writeChunk(e.tmp[..13], ihdrˢᴍencoder);
+    e.writeChunk(e.tmp[..13], ihdrˢ⁔encoder);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string plteˢᴍencoder => ref plteˢᵇᴍencoder;
-private static readonly @string plteˢᵇᴍencoder = "PLTE"u8;
-internal static ref readonly @string tRNSˢᴍencoder => ref tRNSˢᵇᴍencoder;
-private static readonly @string tRNSˢᵇᴍencoder = "tRNS"u8;
+internal static ref readonly @string plteˢ⁔encoder => ref plteˢᵇ⁔encoder;
+private static readonly @string plteˢᵇ⁔encoder = "PLTE"u8;
+internal static ref readonly @string tRNSˢ⁔encoder => ref tRNSˢᵇ⁔encoder;
+private static readonly @string tRNSˢᵇ⁔encoder = "tRNS"u8;
 
-[GoMethodBody("writePLTEAndTRNS")] internal static void writePLTEAndTRNSᴍ(ref encoder e, color.Palette p) {
+internal static void writePLTEAndTRNS⁔(/*this*/ ref encoder e, color.Palette p) {
     if (len(p) < 1 || len(p) > 256) {
         e.err = ((FormatError)("bad palette length: "u8 + strconv.Itoa(len(p))));
         return;
@@ -214,15 +214,15 @@ private static readonly @string tRNSˢᵇᴍencoder = "tRNS"u8;
         }
         e.tmp[3 * 256 + i] = c1.A;
     }
-    e.writeChunk(e.tmp.slice(0, 3 * len(p)), plteˢᴍencoder);
+    e.writeChunk(e.tmp.slice(0, 3 * len(p)), plteˢ⁔encoder);
     if (last != -1) {
-        e.writeChunk(e.tmp.slice(3 * 256, 3 * 256 + 1 + last), tRNSˢᴍencoder);
+        e.writeChunk(e.tmp.slice(3 * 256, 3 * 256 + 1 + last), tRNSˢ⁔encoder);
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string idatˢᴍencoder => ref idatˢᵇᴍencoder;
-private static readonly @string idatˢᵇᴍencoder = "IDAT"u8;
+internal static ref readonly @string idatˢ⁔encoder => ref idatˢᵇ⁔encoder;
+private static readonly @string idatˢᵇ⁔encoder = "IDAT"u8;
 
 // An encoder is an io.Writer that satisfies writes by writing PNG IDAT chunks,
 // including an 8-byte header and 4-byte CRC checksum per Write call. Such calls
@@ -230,8 +230,8 @@ private static readonly @string idatˢᵇᴍencoder = "IDAT"u8;
 //
 // This method should only be called from writeIDATs (via writeImage).
 // No other code should treat an encoder as an io.Writer.
-[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ref encoder e, slice<byte> b) {
-    e.writeChunk(b, idatˢᴍencoder);
+internal static (nint, error) Write⁔(/*this*/ ref encoder e, slice<byte> b) {
+    e.writeChunk(b, idatˢ⁔encoder);
     if (e.err != nil) {
         return (0, e.err);
     }
@@ -335,7 +335,7 @@ internal static nint filter(ref array<slice<byte>> cr, slice<byte> pr, nint bpp)
 
 } partial class png_package {
 
-[GoMethodBody("writeImage")] internal static error writeImageᴍ(ж<encoder> Ꮡe, io.Writer w, image.Image m, nint cb, nint level) {
+internal static error writeImage⁔(/*this*/ ж<encoder> Ꮡe, io.Writer w, image.Image m, nint cb, nint level) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -625,7 +625,7 @@ internal static nint filter(ref array<slice<byte>> cr, slice<byte> pr, nint bpp)
 }
 
 // Write the actual image data to one or more IDAT chunks.
-[GoMethodBody("writeIDATs")] internal static void writeIDATsᴍ(ж<encoder> Ꮡe) {
+internal static void writeIDATs⁔(/*this*/ ж<encoder> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (e.err != nil) {
@@ -669,10 +669,10 @@ internal static nint levelToZlib(CompressionLevel l) {
 } partial class png_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string iendˢᴍencoder => ref iendˢᵇᴍencoder;
-private static readonly @string iendˢᵇᴍencoder = "IEND"u8;
+internal static ref readonly @string iendˢ⁔encoder => ref iendˢᵇ⁔encoder;
+private static readonly @string iendˢᵇ⁔encoder = "IEND"u8;
 
-[GoMethodBody("writeIEND")] internal static void writeIENDᴍ(ref encoder e) { e.writeChunk(default, iendˢᴍencoder); }
+internal static void writeIEND⁔(/*this*/ ref encoder e) { e.writeChunk(default, iendˢ⁔encoder); }
 
 } partial class png_package {
 
@@ -686,7 +686,7 @@ public static error Encode(io.Writer w, image.Image m) {
 } partial class png_package {
 
 // Encode writes the Image m to w in PNG format.
-[GoMethodBody("Encode")] internal static error Encodeᴍ(ж<Encoder> Ꮡenc, io.Writer w, image.Image m) {
+internal static error Encode⁔(/*this*/ ж<Encoder> Ꮡenc, io.Writer w, image.Image m) {
     GoFrame ᒐ = default;
     try {
         ref var enc = ref Ꮡenc.DerefOrNull();

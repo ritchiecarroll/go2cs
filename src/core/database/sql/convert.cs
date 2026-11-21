@@ -50,7 +50,7 @@ partial struct ccChecker {
 
 } partial class sql_package {
 
-[GoMethodBody("CheckNamedValue")] internal static error CheckNamedValueᴍ(ccChecker c, ж<driver.NamedValue> Ꮡnv) {
+internal static error CheckNamedValue⁔(/*this*/ ccChecker c, ж<driver.NamedValue> Ꮡnv) {
     ref var nv = ref Ꮡnv.DerefOrNull();
 
     if (c.cci == nil) {

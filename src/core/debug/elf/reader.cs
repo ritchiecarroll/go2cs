@@ -16,19 +16,19 @@ partial struct errorReader {
 
 } partial class elf_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(errorReader r, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ errorReader r, slice<byte> p) {
     return (0, r.error);
 }
 
-[GoMethodBody("ReadAt")] internal static (nint n, error err) ReadAtᴍ(errorReader r, slice<byte> p, int64 off) {
+internal static (nint n, error err) ReadAt⁔(/*this*/ errorReader r, slice<byte> p, int64 off) {
     return (0, r.error);
 }
 
-[GoMethodBody("Seek")] internal static (int64, error) Seekᴍ(errorReader r, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ errorReader r, int64 offset, nint whence) {
     return (0, r.error);
 }
 
-[GoMethodBody("Close")] internal static error Closeᴍ(errorReader r) {
+internal static error Close⁔(/*this*/ errorReader r) {
     return r.error;
 }
 
@@ -47,7 +47,7 @@ partial struct readSeekerFromReader {
 
 } partial class elf_package {
 
-[GoMethodBody("start")] internal static void startᴍ(ref readSeekerFromReader r) {
+internal static void start⁔(/*this*/ ref readSeekerFromReader r) {
     var (x, err) = r.reset();
     if (err != nil) {
         r.r = new errorReader(err);
@@ -57,7 +57,7 @@ partial struct readSeekerFromReader {
     r.offset = 0;
 }
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref readSeekerFromReader r, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref readSeekerFromReader r, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -69,7 +69,7 @@ partial struct readSeekerFromReader {
     return (n, err);
 }
 
-[GoMethodBody("Seek")] internal static (int64, error) Seekᴍ(ref readSeekerFromReader r, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ref readSeekerFromReader r, int64 offset, nint whence) {
     int64 newOffset = default;
     switch (whence) {
     case var ᴛ when ᴛ == io.SeekStart: {

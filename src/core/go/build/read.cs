@@ -64,7 +64,7 @@ internal static error errNUL = errors.New("unexpected NUL in input");
 } partial class build_package {
 
 // syntaxError records a syntax error, but only if an I/O error has not already been recorded.
-[GoMethodBody("syntaxError")] internal static void syntaxErrorᴍ(ref importReader r) {
+internal static void syntaxError⁔(/*this*/ ref importReader r) {
     if (r.err == nil) {
         r.err = errSyntax;
     }
@@ -72,7 +72,7 @@ internal static error errNUL = errors.New("unexpected NUL in input");
 
 // readByte reads the next byte from the input, saves it in buf, and returns it.
 // If an error occurs, readByte records the error in r.err and returns 0.
-[GoMethodBody("readByte")] internal static byte readByteᴍ(ref importReader r) {
+internal static byte readByte⁔(/*this*/ ref importReader r) {
     var (c, err) = r.b.ReadByte();
     if (err == nil) {
         r.buf = append(r.buf, c);
@@ -92,7 +92,7 @@ internal static error errNUL = errors.New("unexpected NUL in input");
 }
 
 // readRest reads the entire rest of the file into r.buf.
-[GoMethodBody("readRest")] internal static void readRestᴍ(ref importReader r) {
+internal static void readRest⁔(/*this*/ ref importReader r) {
     for (;;) {
         if (len(r.buf) == cap(r.buf)) {
             // Grow the buffer
@@ -113,7 +113,7 @@ internal static error errNUL = errors.New("unexpected NUL in input");
 
 // peekByte returns the next byte from the input reader but does not advance beyond it.
 // If skipSpace is set, peekByte skips leading spaces and comments.
-[GoMethodBody("peekByte")] internal static byte peekByteᴍ(ref importReader r, bool skipSpace) {
+internal static byte peekByte⁔(/*this*/ ref importReader r, bool skipSpace) {
     if (r.err != nil) {
         r.nerr++; if (r.nerr > 10000) {
             throw panic("go/build: import reader looping");
@@ -167,7 +167,7 @@ internal static error errNUL = errors.New("unexpected NUL in input");
 }
 
 // nextByte is like peekByte but advances beyond the returned byte.
-[GoMethodBody("nextByte")] internal static byte nextByteᴍ(ref importReader r, bool skipSpace) {
+internal static byte nextByte⁔(/*this*/ ref importReader r, bool skipSpace) {
     var c = r.peekByte(skipSpace);
     r.peek = 0;
     return c;
@@ -175,7 +175,7 @@ internal static error errNUL = errors.New("unexpected NUL in input");
 
 // readKeyword reads the given keyword from the input.
 // If the keyword is not present, readKeyword records a syntax error.
-[GoMethodBody("readKeyword")] internal static void readKeywordᴍ(ref importReader r, @string kw) {
+internal static void readKeyword⁔(/*this*/ ref importReader r, @string kw) {
     r.peekByte(true);
     for (nint i = 0; i < len(kw); i++) {
         if (r.nextByte(false) != kw[i]) {
@@ -190,7 +190,7 @@ internal static error errNUL = errors.New("unexpected NUL in input");
 
 // readIdent reads an identifier from the input.
 // If an identifier is not present, readIdent records a syntax error.
-[GoMethodBody("readIdent")] internal static void readIdentᴍ(ref importReader r) {
+internal static void readIdent⁔(/*this*/ ref importReader r) {
     var c = r.peekByte(true);
     if (!isIdent(c)) {
         r.syntaxError();
@@ -203,7 +203,7 @@ internal static error errNUL = errors.New("unexpected NUL in input");
 
 // readString reads a quoted string literal from the input.
 // If an identifier is not present, readString records a syntax error.
-[GoMethodBody("readString")] internal static void readStringᴍ(ref importReader r) {
+internal static void readString⁔(/*this*/ ref importReader r) {
     switch (r.nextByte(true)) {
     case (byte)'`': {
         while (r.err == nil) {
@@ -239,7 +239,7 @@ internal static error errNUL = errors.New("unexpected NUL in input");
 
 // readImport reads an import clause - optional identifier followed by quoted string -
 // from the input.
-[GoMethodBody("readImport")] internal static void readImportᴍ(ref importReader r) {
+internal static void readImport⁔(/*this*/ ref importReader r) {
     var c = r.peekByte(true);
     if (c == '.') {
         r.peek = 0;

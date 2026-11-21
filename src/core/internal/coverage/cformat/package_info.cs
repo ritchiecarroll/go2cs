@@ -65,14 +65,17 @@ using static go.@internal.coverage.cformat_package;
 
 namespace go.@internal.coverage;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using coverage = go.@internal.coverage_package;
 using io = io_package;
 using go.@internal;
 using go.@internal.coverage;
 using text;
 using static cformat_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("cformat")]
 public static partial class cformat_package
@@ -116,19 +119,19 @@ public static partial class cformat_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(cformat_package.Formatter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cformatᴛFormatter;
-[GoMethodHost(typeof(cformat_package.pstate)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cformatᴛpstate;
+[GoMethodHost(typeof(cformat_package.Formatter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cformatᴛFormatter;
+[GoMethodHost(typeof(cformat_package.pstate)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cformatᴛpstate;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class cformatᴛFormatter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetPackage(this ref Formatter fm, @string importpath) => cformat_package.SetPackageᴍ(ref fm, importpath);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddUnit(this ref Formatter fm, @string @file, @string fname, bool isfnlit, coverage.CoverableUnit unit, uint32 count) => cformat_package.AddUnitᴍ(ref fm, @file, fname, isfnlit, unit, count);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.Writer w) => cformat_package.EmitTextualᴍ(ref fm, pkgs, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@string> pkgs, @string inpkgs, bool noteEmpty, bool aggregate) => cformat_package.EmitPercentᴍ(ref fm, w, pkgs, inpkgs, noteEmpty, aggregate);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) => cformat_package.EmitFuncsᴍ(Ꮡfm, w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetPackage(this ref Formatter fm, @string importpath) => cformat_package.SetPackage⁔(ref fm, importpath);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AddUnit(this ref Formatter fm, @string @file, @string fname, bool isfnlit, coverage.CoverableUnit unit, uint32 count) => cformat_package.AddUnit⁔(ref fm, @file, fname, isfnlit, unit, count);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error EmitTextual(this ref Formatter fm, slice<@string> pkgs, io.Writer w) => cformat_package.EmitTextual⁔(ref fm, pkgs, w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error EmitPercent(this ref Formatter fm, io.Writer w, slice<@string> pkgs, @string inpkgs, bool noteEmpty, bool aggregate) => cformat_package.EmitPercent⁔(ref fm, w, pkgs, inpkgs, noteEmpty, aggregate);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error EmitFuncs(this ж<Formatter> Ꮡfm, io.Writer w) => cformat_package.EmitFuncs⁔(Ꮡfm, w);
 }
 partial class cformatᴛpstate {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sortUnits(this ж<pstate> Ꮡp, slice<extcu> units) => cformat_package.sortUnitsᴍ(Ꮡp, units);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void sortUnits(this ж<pstate> Ꮡp, slice<extcu> units) => cformat_package.sortUnits⁔(Ꮡp, units);
 }
 // </GlyphForwarders>

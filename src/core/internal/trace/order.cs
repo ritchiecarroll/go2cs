@@ -48,7 +48,7 @@ partial struct ordering {
 // If this returns true, Next is guaranteed to return a complete event. However,
 // multiple events may be added to the ordering, so the caller should (but is not
 // required to) continue to call Next until it is exhausted.
-[GoMethodBody("Advance")] internal static (bool, error) Advanceᴍ(ж<ordering> Ꮡo, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen) {
+internal static (bool, error) Advance⁔(/*this*/ ж<ordering> Ꮡo, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen) {
     ref var o = ref Ꮡo.DerefOrNull();
     ref var ev = ref Ꮡev.DerefOrNull();
 
@@ -96,7 +96,7 @@ partial struct ordering {
     return (ok, err);
 }
 
-[GoMethodBody("evName")] internal static @string evNameᴍ(ref ordering o, tracev2.EventType typ) {
+internal static @string evName⁔(/*this*/ ref ordering o, tracev2.EventType typ) {
     return o.traceVer.EventName(typ);
 }
 
@@ -180,7 +180,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
 
 } partial class trace_package {
 
-[GoMethodBody("advanceProcStatus")] internal static (schedCtx, bool, error) advanceProcStatusᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceProcStatus⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     ref var pid = ref heap<ProcID>((ProcID)(int64)ev.args[0], out var Ꮡpid);
@@ -246,7 +246,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (newCtx, true, default);
 }
 
-[GoMethodBody("advanceProcStart")] internal static (schedCtx, bool, error) advanceProcStartᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceProcStart⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var pid = (ProcID)(int64)ev.args[0];
@@ -279,7 +279,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (newCtx, true, default);
 }
 
-[GoMethodBody("advanceProcStop")] internal static (schedCtx, bool, error) advanceProcStopᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceProcStop⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // We must be able to advance this P.
@@ -309,7 +309,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (newCtx, true, default);
 }
 
-[GoMethodBody("advanceProcSteal")] internal static (schedCtx, bool, error) advanceProcStealᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceProcSteal⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var pid = (ProcID)(int64)ev.args[0];
@@ -382,7 +382,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (newCtx, true, default);
 }
 
-[GoMethodBody("advanceGoStatus")] internal static (schedCtx, bool, error) advanceGoStatusᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoStatus⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     ref var gid = ref heap<GoID>((GoID)(int64)ev.args[0], out var Ꮡgid);
@@ -464,7 +464,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (newCtx, true, default);
 }
 
-[GoMethodBody("advanceGoCreate")] internal static (schedCtx, bool, error) advanceGoCreateᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoCreate⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Goroutines must be created on a running P, but may or may not be created
@@ -491,7 +491,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceGoStopExec")] internal static (schedCtx, bool, error) advanceGoStopExecᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoStopExec⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // These are goroutine events that all require an active running
@@ -533,7 +533,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (newCtx, true, default);
 }
 
-[GoMethodBody("advanceGoStart")] internal static (schedCtx, bool, error) advanceGoStartᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoStart⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var gid = (GoID)(int64)ev.args[0];
@@ -558,7 +558,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (newCtx, true, default);
 }
 
-[GoMethodBody("advanceGoUnblock")] internal static (schedCtx, bool, error) advanceGoUnblockᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoUnblock⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // N.B. These both reference the goroutine to unblock, not the current goroutine.
@@ -579,7 +579,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceGoSwitch")] internal static (schedCtx, bool, error) advanceGoSwitchᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoSwitch⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // GoSwitch and GoSwitchDestroy represent a trio of events:
@@ -646,7 +646,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (newCtx, true, default);
 }
 
-[GoMethodBody("advanceGoSyscallBegin")] internal static (schedCtx, bool, error) advanceGoSyscallBeginᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoSyscallBegin⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Entering a syscall requires an active running goroutine with a
@@ -688,7 +688,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceGoSyscallEnd")] internal static (schedCtx, bool, error) advanceGoSyscallEndᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoSyscallEnd⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // This event is always advance-able because it happens on the same
@@ -719,7 +719,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceGoSyscallEndBlocked")] internal static (schedCtx, bool, error) advanceGoSyscallEndBlockedᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoSyscallEndBlocked⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // This event becomes advanceable when its P is not in a syscall state
@@ -760,7 +760,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (newCtx, true, default);
 }
 
-[GoMethodBody("advanceGoCreateSyscall")] internal static (schedCtx, bool, error) advanceGoCreateSyscallᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoCreateSyscall⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // This event indicates that a goroutine is effectively
@@ -782,7 +782,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (newCtx, true, default);
 }
 
-[GoMethodBody("advanceGoDestroySyscall")] internal static (schedCtx, bool, error) advanceGoDestroySyscallᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoDestroySyscall⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // This event indicates that a goroutine created for a
@@ -839,7 +839,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (newCtx, true, default);
 }
 
-[GoMethodBody("advanceUserTaskBegin")] internal static (schedCtx, bool, error) advanceUserTaskBeginᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceUserTaskBegin⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
     ref var evt = ref Ꮡevt.DerefOrNull();
 
@@ -880,7 +880,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceUserTaskEnd")] internal static (schedCtx, bool, error) advanceUserTaskEndᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceUserTaskEnd⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
     ref var evt = ref Ꮡevt.DerefOrNull();
 
@@ -904,7 +904,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceUserRegionBegin")] internal static (schedCtx, bool, error) advanceUserRegionBeginᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceUserRegionBegin⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
     ref var evt = ref Ꮡevt.DerefOrNull();
 
@@ -932,7 +932,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceUserRegionEnd")] internal static (schedCtx, bool, error) advanceUserRegionEndᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceUserRegionEnd⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> Ꮡevt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
     ref var evt = ref Ꮡevt.DerefOrNull();
 
@@ -967,7 +967,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
 // partial order edge between start and end here, otherwise we're
 // relying entirely on timestamps to make sure we don't advance a
 // GCEnd for a _different_ GC cycle if timestamps are wildly broken.
-[GoMethodBody("advanceGCActive")] internal static (schedCtx, bool, error) advanceGCActiveᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGCActive⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var seq = ev.args[0];
@@ -995,7 +995,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceGCBegin")] internal static (schedCtx, bool, error) advanceGCBeginᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGCBegin⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var seq = ev.args[0];
@@ -1021,7 +1021,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceGCEnd")] internal static (schedCtx, bool, error) advanceGCEndᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGCEnd⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var seq = ev.args[0];
@@ -1044,7 +1044,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceAnnotation")] internal static (schedCtx, bool, error) advanceAnnotationᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceAnnotation⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Handle simple instantaneous events that require a G.
@@ -1055,7 +1055,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceHeapMetric")] internal static (schedCtx, bool, error) advanceHeapMetricᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceHeapMetric⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Handle allocation metrics, which don't require a G.
@@ -1066,7 +1066,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceGCSweepBegin")] internal static (schedCtx, bool, error) advanceGCSweepBeginᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGCSweepBegin⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Handle sweep, which is bound to a P and doesn't require a G.
@@ -1084,7 +1084,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceGCSweepActive")] internal static (schedCtx, bool, error) advanceGCSweepActiveᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGCSweepActive⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var pid = (ProcID)(int64)ev.args[0];
@@ -1103,7 +1103,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceGCSweepEnd")] internal static (schedCtx, bool, error) advanceGCSweepEndᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGCSweepEnd⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var errΔ1 = validateCtx(curCtx, new schedReqs(M: mustHave, P: mustHave, G: mayHave)); if (errΔ1 != nil) {
@@ -1117,7 +1117,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceGoRangeBegin")] internal static (schedCtx, bool, error) advanceGoRangeBeginᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoRangeBegin⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Handle special goroutine-bound event ranges.
@@ -1143,7 +1143,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceGoRangeActive")] internal static (schedCtx, bool, error) advanceGoRangeActiveᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoRangeActive⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var gid = (GoID)(int64)ev.args[0];
@@ -1161,7 +1161,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceGoRangeEnd")] internal static (schedCtx, bool, error) advanceGoRangeEndᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceGoRangeEnd⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     var errΔ1 = validateCtx(curCtx, userGoReqs); if (errΔ1 != nil) {
@@ -1184,7 +1184,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
     return (curCtx, true, default);
 }
 
-[GoMethodBody("advanceAllocFree")] internal static (schedCtx, bool, error) advanceAllocFreeᴍ(ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
+internal static (schedCtx, bool, error) advanceAllocFree⁔(/*this*/ ref ordering o, ж<baseEvent> Ꮡev, ж<evTable> evt, ThreadID m, uint64 gen, schedCtx curCtx) {
     ref var ev = ref Ꮡev.DerefOrNull();
 
     // Handle simple instantaneous events that may or may not have a P.
@@ -1196,7 +1196,7 @@ internal static void initᴛorderingDispatch() { orderingDispatch = new golib.Sp
 }
 
 // Next returns the next event in the ordering.
-[GoMethodBody("Next")] internal static (Event, bool) Nextᴍ(ref ordering o) {
+internal static (Event, bool) Next⁔(/*this*/ ref ordering o) {
     return o.queue.pop();
 }
 
@@ -1247,28 +1247,28 @@ internal static gcState gcRunning => 2;
 } partial class trace_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string undeterminedˢᴍgcState => ref undeterminedˢᵇᴍgcState;
-private static readonly @string undeterminedˢᵇᴍgcState = "Undetermined"u8;
-internal static ref readonly @string notRunningˢᴍgcState => ref notRunningˢᵇᴍgcState;
-private static readonly @string notRunningˢᵇᴍgcState = "NotRunning"u8;
-internal static ref readonly @string runningˢᴍgcState => ref runningˢᵇᴍgcState;
-private static readonly @string runningˢᵇᴍgcState = "Running"u8;
-internal static ref readonly @string badˢᴍgcState => ref badˢᵇᴍgcState;
-private static readonly @string badˢᵇᴍgcState = "Bad"u8;
+internal static ref readonly @string undeterminedˢ⁔gcState => ref undeterminedˢᵇ⁔gcState;
+private static readonly @string undeterminedˢᵇ⁔gcState = "Undetermined"u8;
+internal static ref readonly @string notRunningˢ⁔gcState => ref notRunningˢᵇ⁔gcState;
+private static readonly @string notRunningˢᵇ⁔gcState = "NotRunning"u8;
+internal static ref readonly @string runningˢ⁔gcState => ref runningˢᵇ⁔gcState;
+private static readonly @string runningˢᵇ⁔gcState = "Running"u8;
+internal static ref readonly @string badˢ⁔gcState => ref badˢᵇ⁔gcState;
+private static readonly @string badˢᵇ⁔gcState = "Bad"u8;
 
 // String returns a human-readable string for the GC state.
-[GoMethodBody("String")] internal static @string Stringᴍ(gcState s) {
+internal static @string String⁔(/*this*/ gcState s) {
     switch (s) {
     case var ᴛ when ᴛ == gcUndetermined: {
-        return undeterminedˢᴍgcState;
+        return undeterminedˢ⁔gcState;
     }
     case var ᴛ when ᴛ == gcNotRunning: {
-        return notRunningˢᴍgcState;
+        return notRunningˢ⁔gcState;
     }
     case var ᴛ when ᴛ == gcRunning: {
-        return runningˢᴍgcState;
+        return runningˢ⁔gcState;
     }}
-    return badˢᴍgcState;
+    return badˢ⁔gcState;
 }
 
 } partial class trace_package {
@@ -1314,13 +1314,13 @@ partial struct gState {
 } partial class trace_package {
 
 // beginRegion starts a user region on the goroutine.
-[GoMethodBody("beginRegion")] internal static error beginRegionᴍ(ref gState s, userRegion r) {
+internal static error beginRegion⁔(/*this*/ ref gState s, userRegion r) {
     s.regions = append(s.regions, r);
     return default;
 }
 
 // endRegion ends a user region on the goroutine.
-[GoMethodBody("endRegion")] internal static error endRegionᴍ(ref gState s, userRegion r) {
+internal static error endRegion⁔(/*this*/ ref gState s, userRegion r) {
     if (len(s.regions) == 0) {
         // We do not know about regions that began before tracing started.
         return default;
@@ -1360,7 +1360,7 @@ partial struct rangeState {
 // beginRange begins a special range in time on the goroutine.
 //
 // Returns an error if the range is already in progress.
-[GoMethodBody("beginRange")] internal static error beginRangeᴍ(ref rangeState s, rangeType typ) {
+internal static error beginRange⁔(/*this*/ ref rangeState s, rangeType typ) {
     if (s.hasRange(typ)) {
         return fmt.Errorf("discovered event already in-flight for when starting event %v"u8, tracev2.Specs()[typ.typ].Name);
     }
@@ -1370,7 +1370,7 @@ partial struct rangeState {
 
 // activeRange marks special range in time on the goroutine as active in the
 // initial generation, or confirms that it is indeed active in later generations.
-[GoMethodBody("activeRange")] internal static error activeRangeᴍ(ref rangeState s, rangeType typ, bool isInitialGen) {
+internal static error activeRange⁔(/*this*/ ref rangeState s, rangeType typ, bool isInitialGen) {
     if (isInitialGen) {
         if (s.hasRange(typ)) {
             return fmt.Errorf("found named active range already in first gen: %v"u8, typ);
@@ -1383,14 +1383,14 @@ partial struct rangeState {
 }
 
 // hasRange returns true if a special time range on the goroutine as in progress.
-[GoMethodBody("hasRange")] internal static bool hasRangeᴍ(ref rangeState s, rangeType typ) {
+internal static bool hasRange⁔(/*this*/ ref rangeState s, rangeType typ) {
     return slices.Contains(s.inFlight, typ);
 }
 
 // endRange ends a special range in time on the goroutine.
 //
 // This must line up with the start event type  of the range the goroutine is currently in.
-[GoMethodBody("endRange")] internal static (stringID, error) endRangeᴍ(ref rangeState s, tracev2.EventType typ) {
+internal static (stringID, error) endRange⁔(/*this*/ ref rangeState s, tracev2.EventType typ) {
     var st = tracev2.Specs()[typ].StartEv;
     nint idx = -1;
     foreach (var (i, r) in range(s.inFlight)) {
@@ -1425,12 +1425,12 @@ internal static seqCounter makeSeq(uint64 gen, uint64 seq) {
 } partial class trace_package {
 
 // succeeds returns true if a is the immediate successor of b.
-[GoMethodBody("succeeds")] internal static bool succeedsᴍ(seqCounter a, seqCounter b) {
+internal static bool succeeds⁔(/*this*/ seqCounter a, seqCounter b) {
     return a.gen == b.gen && a.seq == b.seq + 1;
 }
 
 // String returns a debug string representation of the seqCounter.
-[GoMethodBody("String")] internal static @string Stringᴍ(seqCounter c) {
+internal static @string String⁔(/*this*/ seqCounter c) {
     return fmt.Sprintf("%d (gen=%d)"u8, c.seq, c.gen);
 }
 
@@ -1471,7 +1471,7 @@ partial struct queue<T> {
 } partial class trace_package {
 
 // push adds a new event to the back of the queue.
-[GoMethodBody("push")] internal static void pushᴍ<T>(ref queue<T> q, T value) {
+internal static void push⁔<T>(/*this*/ ref queue<T> q, T value) {
     if (q.end - q.start == len(q.buf)) {
         q.grow();
     }
@@ -1480,7 +1480,7 @@ partial struct queue<T> {
 }
 
 // grow increases the size of the queue.
-[GoMethodBody("grow")] internal static void growᴍ<T>(ref queue<T> q) {
+internal static void grow⁔<T>(/*this*/ ref queue<T> q) {
     if (len(q.buf) == 0) {
         q.buf = new slice<T>(2);
         return;
@@ -1501,7 +1501,7 @@ partial struct queue<T> {
 
 // pop removes an event from the front of the queue. If the
 // queue is empty, it returns an EventBad event.
-[GoMethodBody("pop")] internal static (T, bool) popᴍ<T>(ref queue<T> q) {
+internal static (T, bool) pop⁔<T>(/*this*/ ref queue<T> q) {
     if (q.end - q.start == 0) {
         return (@new<T>().ValueSlot, false);
     }

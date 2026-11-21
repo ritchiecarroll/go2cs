@@ -42,18 +42,18 @@ partial struct pairNameValue {
 
 } partial class hpack_package {
 
-[GoMethodBody("init")] internal static void initᴍ(ref headerFieldTable t) {
+internal static void init⁔(/*this*/ ref headerFieldTable t) {
     t.byName = new map<@string, uint64>();
     t.byNameValue = new map<pairNameValue, uint64>();
 }
 
 // len reports the number of entries in the table.
-[GoMethodBody("len")] internal static nint lenᴍ(ref headerFieldTable t) {
+internal static nint len⁔(/*this*/ ref headerFieldTable t) {
     return builtin.len(t.ents);
 }
 
 // addEntry adds a new entry.
-[GoMethodBody("addEntry")] internal static void addEntryᴍ(ref headerFieldTable t, HeaderField f) {
+internal static void addEntry⁔(/*this*/ ref headerFieldTable t, HeaderField f) {
     var id = (uint64)t.len() + t.evictCount + 1;
     t.byName[f.Name] = id;
     t.byNameValue[new pairNameValue(f.Name, f.Value)] = id;
@@ -61,7 +61,7 @@ partial struct pairNameValue {
 }
 
 // evictOldest evicts the n oldest entries in the table.
-[GoMethodBody("evictOldest")] internal static void evictOldestᴍ(ref headerFieldTable t, nint n) {
+internal static void evictOldest⁔(/*this*/ ref headerFieldTable t, nint n) {
     if (n > t.len()) {
         throw panic(fmt.Sprintf("evictOldest(%v) on table with %v entries"u8, n, t.len()));
     }
@@ -99,7 +99,7 @@ partial struct pairNameValue {
 // All tables are assumed to be a dynamic tables except for the global staticTable.
 //
 // See Section 2.3.3.
-[GoMethodBody("search")] internal static (uint64 i, bool nameValueMatch) searchᴍ(ж<headerFieldTable> Ꮡt, HeaderField f) {
+internal static (uint64 i, bool nameValueMatch) search⁔(/*this*/ ж<headerFieldTable> Ꮡt, HeaderField f) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!f.Sensitive) {
@@ -117,7 +117,7 @@ partial struct pairNameValue {
 
 // idToIndex converts a unique id to an HPACK index.
 // See Section 2.3.3.
-[GoMethodBody("idToIndex")] internal static uint64 idToIndexᴍ(ж<headerFieldTable> Ꮡt, uint64 id) {
+internal static uint64 idToIndex⁔(/*this*/ ж<headerFieldTable> Ꮡt, uint64 id) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (id <= t.evictCount) {

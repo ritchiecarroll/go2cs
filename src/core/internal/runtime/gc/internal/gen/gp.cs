@@ -22,11 +22,11 @@ public static Uint64 /*y*/ ConstUint64(uint64 c, @string name) {
 
 } partial class gen_package {
 
-[GoMethodBody("kind")] internal static ж<kind> kindᴍ(Uint64 _) {
+internal static ж<kind> kind⁔(/*this*/ Uint64 _) {
     return kindUint64;
 }
 
-[GoMethodBody("wrap")] internal static Uint64 wrapᴍ(Uint64 _, ж<op> x) {
+internal static Uint64 wrap⁔(/*this*/ Uint64 _, ж<op> x) {
     Uint64 y = new(nil);
     y.valGP.valAny.initOp(x);
     return y;

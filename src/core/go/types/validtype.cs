@@ -17,13 +17,13 @@ partial class types_package {
 // producing a cycle in the type graph.
 // (Cycles involving alias types, as in "type A = [10]A" are detected
 // earlier, via the objDecl cycle detection mechanism.)
-[GoMethodBody("validType")] internal static void validTypeᴍ(ж<Checker> Ꮡcheck, ж<Named> typ) {
+internal static void validType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Named> typ) {
     Ꮡcheck.validType0(nopos, new NamedжType(typ), default, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string validTypeSNestVPathVˢᴍChecker => ref validTypeSNestVPathVˢᵇᴍChecker;
-private static readonly @string validTypeSNestVPathVˢᵇᴍChecker = "validType(%s) nest %v, path %v"u8;
+internal static ref readonly @string validTypeSNestVPathVˢ⁔Checker => ref validTypeSNestVPathVˢᵇ⁔Checker;
+private static readonly @string validTypeSNestVPathVˢᵇ⁔Checker = "validType(%s) nest %v, path %v"u8;
 
 // validType0 checks if the given type is valid. If typ is a type parameter
 // its value is looked up in the type argument list of the instantiated
@@ -35,7 +35,7 @@ private static readonly @string validTypeSNestVPathVˢᵇᴍChecker = "validType
 // of) F in S, leading to the nest S->F. If a type appears in its own nest
 // (say S->F->S) we have an invalid recursive type. The path list is the full
 // path of named types in a cycle, it is only needed for error reporting.
-[GoMethodBody("validType0")] internal static bool validType0ᴍ(ж<Checker> Ꮡcheck, token.Pos pos, Type typ, slice<ж<Named>> nest, slice<ж<Named>> path) {
+internal static bool validType0⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, Type typ, slice<ж<Named>> nest, slice<ж<Named>> path) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -50,7 +50,7 @@ private static readonly @string validTypeSNestVPathVˢᵇᴍChecker = "validType
                 pos = t.obj.pos;
             }
             check.indent++;
-            Ꮡcheck.trace(pos, validTypeSNestVPathVˢᴍChecker, typ, pathString(makeObjList(nest)), pathString(makeObjList(path)));
+            Ꮡcheck.trace(pos, validTypeSNestVPathVˢ⁔Checker, typ, pathString(makeObjList(nest)), pathString(makeObjList(path)));
             defer(() => {
                 Ꮡcheck.Value.indent--;
             }, ref ᒐ);

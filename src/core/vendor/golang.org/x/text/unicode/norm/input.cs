@@ -24,24 +24,24 @@ internal static input inputString(@string str) {
 
 } partial class norm_package {
 
-[GoMethodBody("setBytes")] internal static void setBytesᴍ(ref input @in, slice<byte> str) {
+internal static void setBytes⁔(/*this*/ ref input @in, slice<byte> str) {
     @in.str = ""u8;
     @in.bytes = str;
 }
 
-[GoMethodBody("setString")] internal static void setStringᴍ(ref input @in, @string str) {
+internal static void setString⁔(/*this*/ ref input @in, @string str) {
     @in.str = str;
     @in.bytes = default;
 }
 
-[GoMethodBody("_byte")] internal static byte _byteᴍ(ref input @in, nint p) {
+internal static byte _byte⁔(/*this*/ ref input @in, nint p) {
     if (@in.bytes == nil) {
         return @in.str[p];
     }
     return @in.bytes[p];
 }
 
-[GoMethodBody("skipASCII")] internal static nint skipASCIIᴍ(ref input @in, nint p, nint max) {
+internal static nint skipASCII⁔(/*this*/ ref input @in, nint p, nint max) {
     if (@in.bytes == nil) {
         for (; p < max && @in.str[p] < utf8.RuneSelf; p++) {
         }
@@ -52,7 +52,7 @@ internal static input inputString(@string str) {
     return p;
 }
 
-[GoMethodBody("skipContinuationBytes")] internal static nint skipContinuationBytesᴍ(ref input @in, nint p) {
+internal static nint skipContinuationBytes⁔(/*this*/ ref input @in, nint p) {
     if (@in.bytes == nil) {
         for (; p < len(@in.str) && !utf8.RuneStart(@in.str[p]); p++) {
         }
@@ -63,7 +63,7 @@ internal static input inputString(@string str) {
     return p;
 }
 
-[GoMethodBody("appendSlice")] internal static slice<byte> appendSliceᴍ(ref input @in, slice<byte> buf, nint b, nint e) {
+internal static slice<byte> appendSlice⁔(/*this*/ ref input @in, slice<byte> buf, nint b, nint e) {
     if (@in.bytes != nil) {
         return appendꓸꓸꓸ(buf, @in.bytes.slice(b, e));
     }
@@ -73,28 +73,28 @@ internal static input inputString(@string str) {
     return buf;
 }
 
-[GoMethodBody("copySlice")] internal static nint copySliceᴍ(ref input @in, slice<byte> buf, nint b, nint e) {
+internal static nint copySlice⁔(/*this*/ ref input @in, slice<byte> buf, nint b, nint e) {
     if (@in.bytes == nil) {
         return copy(buf, @in.str.slice(b, e));
     }
     return copy(buf, @in.bytes.slice(b, e));
 }
 
-[GoMethodBody("charinfoNFC")] internal static (uint16, nint) charinfoNFCᴍ(ref input @in, nint p) {
+internal static (uint16, nint) charinfoNFC⁔(/*this*/ ref input @in, nint p) {
     if (@in.bytes == nil) {
         return nfcData.lookupString(@in.str.slice(p));
     }
     return nfcData.lookup(@in.bytes.slice(p));
 }
 
-[GoMethodBody("charinfoNFKC")] internal static (uint16, nint) charinfoNFKCᴍ(ref input @in, nint p) {
+internal static (uint16, nint) charinfoNFKC⁔(/*this*/ ref input @in, nint p) {
     if (@in.bytes == nil) {
         return nfkcData.lookupString(@in.str.slice(p));
     }
     return nfkcData.lookup(@in.bytes.slice(p));
 }
 
-[GoMethodBody("hangul")] internal static rune /*r*/ hangulᴍ(ref input @in, nint p) {
+internal static rune /*r*/ hangul⁔(/*this*/ ref input @in, nint p) {
     rune r = default;
 
     nint size = default;

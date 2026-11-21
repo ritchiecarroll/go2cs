@@ -13,7 +13,7 @@ partial class idna_package {
 
 // appendMapping appends the mapping for the respective rune. isMapped must be
 // true. A mapping is a categorization of a rune as defined in UTS #46.
-[GoMethodBody("appendMapping")] internal static slice<byte> appendMappingᴍ(info c, slice<byte> b, @string s) {
+internal static slice<byte> appendMapping⁔(/*this*/ info c, slice<byte> b, @string s) {
     nint index = (nint)(c >> (int)(indexShift));
     if ((info)(c & (uint16)xorBit) == 0) {
         nint p = index;

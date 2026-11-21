@@ -25,7 +25,7 @@ internal static array<uint8> _RelocTypeGeneric_index = array<uint8>([0, 21, 39, 
 
 } partial class macho_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(RelocTypeGeneric i) {
+internal static @string String⁔(/*this*/ RelocTypeGeneric i) {
     if (i < 0 || i >= ((RelocTypeGeneric)(len(_RelocTypeGeneric_index) - 1))) {
         return "RelocTypeGeneric("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -57,7 +57,7 @@ internal static array<uint8> _RelocTypeX86_64_index = array<uint8>([0, 21, 40, 5
 
 } partial class macho_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(RelocTypeX86_64 i) {
+internal static @string String⁔(/*this*/ RelocTypeX86_64 i) {
     if (i < 0 || i >= ((RelocTypeX86_64)(len(_RelocTypeX86_64_index) - 1))) {
         return "RelocTypeX86_64("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -89,7 +89,7 @@ internal static array<uint8> _RelocTypeARM_index = array<uint8>([0, 17, 31, 49, 
 
 } partial class macho_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(RelocTypeARM i) {
+internal static @string String⁔(/*this*/ RelocTypeARM i) {
     if (i < 0 || i >= ((RelocTypeARM)(len(_RelocTypeARM_index) - 1))) {
         return "RelocTypeARM("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }
@@ -122,7 +122,7 @@ internal static array<uint16> _RelocTypeARM64_index = array<uint16>([0, 20, 42, 
 
 } partial class macho_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(RelocTypeARM64 i) {
+internal static @string String⁔(/*this*/ RelocTypeARM64 i) {
     if (i < 0 || i >= ((RelocTypeARM64)(len(_RelocTypeARM64_index) - 1))) {
         return "RelocTypeARM64("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }

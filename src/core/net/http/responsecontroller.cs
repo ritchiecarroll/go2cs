@@ -50,7 +50,7 @@ internal partial interface Flush_type /*dyn*/ {
 } partial class http_package {
 
 // Flush flushes buffered data to the client.
-[GoMethodBody("Flush")] internal static error Flushᴍ(ref ResponseController c) {
+internal static error Flush⁔(/*this*/ ref ResponseController c) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {
@@ -74,7 +74,7 @@ internal partial interface Flush_type /*dyn*/ {
 
 // Hijack lets the caller take over the connection.
 // See the [Hijacker] interface for details.
-[GoMethodBody("Hijack")] internal static (net.Conn, ж<bufio.ReadWriter>, error) Hijackᴍ(ref ResponseController c) {
+internal static (net.Conn, ж<bufio.ReadWriter>, error) Hijack⁔(/*this*/ ref ResponseController c) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {
@@ -105,7 +105,7 @@ internal partial interface SetReadDeadline_type /*dyn*/ {
 // A zero value means no deadline.
 //
 // Setting the read deadline after it has been exceeded will not extend it.
-[GoMethodBody("SetReadDeadline")] internal static error SetReadDeadlineᴍ(ref ResponseController c, time.Time deadline) {
+internal static error SetReadDeadline⁔(/*this*/ ref ResponseController c, time.Time deadline) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {
@@ -137,7 +137,7 @@ internal partial interface SetWriteDeadline_type /*dyn*/ {
 // A zero value means no deadline.
 //
 // Setting the write deadline after it has been exceeded will not extend it.
-[GoMethodBody("SetWriteDeadline")] internal static error SetWriteDeadlineᴍ(ref ResponseController c, time.Time deadline) {
+internal static error SetWriteDeadline⁔(/*this*/ ref ResponseController c, time.Time deadline) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {
@@ -173,7 +173,7 @@ internal partial interface EnableFullDuplex_type /*dyn*/ {
 // from the request while concurrently writing the response.
 //
 // For HTTP/2 requests, the Go HTTP server always permits concurrent reads and responses.
-[GoMethodBody("EnableFullDuplex")] internal static error EnableFullDuplexᴍ(ref ResponseController c) {
+internal static error EnableFullDuplex⁔(/*this*/ ref ResponseController c) {
     var rw = c.rw;
     for (;;) {
         switch (rw.type()) {

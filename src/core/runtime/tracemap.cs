@@ -63,7 +63,7 @@ partial struct traceMapNode {
 
 // stealID steals an ID from the table, ensuring that it will not
 // appear in the table anymore.
-[GoMethodBody("stealID")] internal static uint64 stealIDᴍ(ж<traceMap> Ꮡtab) {
+internal static uint64 stealID⁔(/*this*/ ж<traceMap> Ꮡtab) {
     return Ꮡtab.Ꮡseq.Add(1);
 }
 
@@ -73,7 +73,7 @@ partial struct traceMapNode {
 //
 // Returns a unique ID for the data and whether this is the first time
 // the data has been added to the map.
-[GoMethodBody("put")] internal static (uint64, bool) putᴍ(ж<traceMap> Ꮡtab, @unsafe.Pointer data, uintptr size) {
+internal static (uint64, bool) put⁔(/*this*/ ж<traceMap> Ꮡtab, @unsafe.Pointer data, uintptr size) {
     if (size == 0) {
         return (0, false);
     }
@@ -127,7 +127,7 @@ partial struct traceMapNode {
 //
 // The caller must ensure that there are no put operations executing concurrently
 // with this function.
-[GoMethodBody("reset")] internal static void resetᴍ(ж<traceMap> Ꮡtab) {
+internal static void reset⁔(/*this*/ ж<traceMap> Ꮡtab) {
     Ꮡtab.Ꮡroot.Store(nil);
     Ꮡtab.Ꮡseq.Store(0);
     Ꮡtab.Ꮡmem.drop();

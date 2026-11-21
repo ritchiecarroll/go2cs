@@ -10,7 +10,7 @@ partial class os_package {
 
 } partial class os_package {
 
-[GoMethodBody("closeHandle")] internal static void closeHandleᴍ(ref processHandle ph) {
+internal static void closeHandle⁔(/*this*/ ref processHandle ph) {
     syscall.Close((nint)ph.handle);
 }
 

@@ -23,7 +23,7 @@ partial struct batchCursor {
 
 } partial class trace_package {
 
-[GoMethodBody("nextEvent")] internal static (bool ok, error err) nextEventᴍ(ж<batchCursor> Ꮡb, slice<batch> batches, frequency freq) {
+internal static (bool ok, error err) nextEvent⁔(/*this*/ ж<batchCursor> Ꮡb, slice<batch> batches, frequency freq) {
     error err = default;
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -58,7 +58,7 @@ partial struct batchCursor {
     return (true, default);
 }
 
-[GoMethodBody("compare")] internal static nint compareᴍ(ref batchCursor b, ж<batchCursor> Ꮡa) {
+internal static nint compare⁔(/*this*/ ref batchCursor b, ж<batchCursor> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     return cmp.Compare(b.ev.time, a.ev.time);

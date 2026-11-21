@@ -47,7 +47,7 @@ internal static array<uint8> _SignatureScheme_index_8 = array<uint8>([0, 13, 26,
 
 } partial class tls_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(SignatureScheme i) {
+internal static @string String⁔(/*this*/ SignatureScheme i) {
     switch (ᐧ) {
     case {} when i == 513: {
         return _SignatureScheme_name_0;
@@ -109,7 +109,7 @@ internal static array<uint8> _CurveID_index_2 = array<uint8>([0, 17, 31, 49]);
 
 } partial class tls_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(CurveID i) {
+internal static @string String⁔(/*this*/ CurveID i) {
     switch (ᐧ) {
     case {} when 23 <= i && i <= 25: {
         i -= 23;
@@ -147,7 +147,7 @@ internal static array<uint8> _ClientAuthType_index = array<uint8>([0, 12, 29, 49
 
 } partial class tls_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ClientAuthType i) {
+internal static @string String⁔(/*this*/ ClientAuthType i) {
     if (i < 0 || i >= ((ClientAuthType)(len(_ClientAuthType_index) - 1))) {
         return "ClientAuthType("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }

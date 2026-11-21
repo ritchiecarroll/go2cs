@@ -27,11 +27,11 @@ partial struct Zipf {
 
 } partial class rand_package {
 
-[GoMethodBody("h")] internal static float64 hᴍ(ref Zipf z, float64 x) {
+internal static float64 h⁔(/*this*/ ref Zipf z, float64 x) {
     return math.Exp(z.oneminusQ * math.Log(z.v + x)) * z.oneminusQinv;
 }
 
-[GoMethodBody("hinv")] internal static float64 hinvᴍ(ref Zipf z, float64 x) {
+internal static float64 hinv⁔(/*this*/ ref Zipf z, float64 x) {
     return math.Exp(z.oneminusQinv * math.Log(z.oneminusQ * x)) - z.v;
 }
 
@@ -64,7 +64,7 @@ public static ж<Zipf> NewZipf(ж<Rand> Ꮡr, float64 s, float64 v, uint64 imax)
 
 // Uint64 returns a value drawn from the Zipf distribution described
 // by the Zipf object.
-[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(ж<Zipf> Ꮡz) {
+internal static uint64 Uint64⁔(/*this*/ ж<Zipf> Ꮡz) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (Ꮡz == nil) {

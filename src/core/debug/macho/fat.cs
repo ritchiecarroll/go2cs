@@ -147,7 +147,7 @@ public static (ж<FatFile>, error) OpenFat(@string name) {
 
 } partial class macho_package {
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ref FatFile ff) {
+internal static error Close⁔(/*this*/ ref FatFile ff) {
     error err = default;
     if (ff.closer != nil) {
         err = ff.closer.Close();

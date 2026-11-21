@@ -39,25 +39,25 @@ internal static map<Version, slice<tracev2.EventSpec>> versions = new map<Versio
 } partial class version_package {
 
 // Specs returns the set of event.Specs for this version.
-[GoMethodBody("Specs")] internal static slice<tracev2.EventSpec> Specsᴍ(Version v) {
+internal static slice<tracev2.EventSpec> Specs⁔(/*this*/ Version v) {
     return versions[v];
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string invalidTraceVersionˢᴍVersion => ref invalidTraceVersionˢᵇᴍVersion;
-private static readonly @string invalidTraceVersionˢᵇᴍVersion = "<invalid trace version>"u8;
-private static ref readonly @string v1TraceEventTypeˢᴍVersion => ref v1TraceEventTypeˢᵇᴍVersion;
-private static readonly @string v1TraceEventTypeˢᵇᴍVersion = "<v1 trace event type>"u8;
+private static ref readonly @string invalidTraceVersionˢ⁔Version => ref invalidTraceVersionˢᵇ⁔Version;
+private static readonly @string invalidTraceVersionˢᵇ⁔Version = "<invalid trace version>"u8;
+private static ref readonly @string v1TraceEventTypeˢ⁔Version => ref v1TraceEventTypeˢᵇ⁔Version;
+private static readonly @string v1TraceEventTypeˢᵇ⁔Version = "<v1 trace event type>"u8;
 
 // EventName returns a string name of a wire format event
 // for a particular trace version.
-[GoMethodBody("EventName")] internal static @string EventNameᴍ(Version v, tracev2.EventType typ) {
+internal static @string EventName⁔(/*this*/ Version v, tracev2.EventType typ) {
     if (!v.Valid()) {
-        return invalidTraceVersionˢᴍVersion;
+        return invalidTraceVersionˢ⁔Version;
     }
     var s = v.Specs();
     if (len(s) == 0) {
-        return v1TraceEventTypeˢᴍVersion;
+        return v1TraceEventTypeˢ⁔Version;
     }
     if ((nint)typ < len(s) && s[typ].Name != ""u8) {
         return s[typ].Name;
@@ -65,7 +65,7 @@ private static readonly @string v1TraceEventTypeˢᵇᴍVersion = "<v1 trace eve
     return fmt.Sprintf("Invalid(%d)"u8, typ);
 }
 
-[GoMethodBody("Valid")] internal static bool Validᴍ(Version v) {
+internal static bool Valid⁔(/*this*/ Version v) {
     var (_, ok) = versions[v, ꟷ];
     return ok;
 }

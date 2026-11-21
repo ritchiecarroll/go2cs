@@ -69,12 +69,12 @@ partial struct Section {
 } partial class plan9obj_package {
 
 // Data reads and returns the contents of the Plan 9 a.out section.
-[GoMethodBody("Data")] internal static (slice<byte>, error) Dataᴍ(ref Section s) {
+internal static (slice<byte>, error) Data⁔(/*this*/ ref Section s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), (uint64)s.Size, 0);
 }
 
 // Open returns a new ReadSeeker reading the Plan 9 a.out section.
-[GoMethodBody("Open")] internal static io.ReadSeeker Openᴍ(ref Section s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
+internal static io.ReadSeeker Open⁔(/*this*/ ref Section s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 } partial class plan9obj_package {
 
@@ -99,7 +99,7 @@ partial struct formatError {
 
 } partial class plan9obj_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref formatError e) {
+internal static @string Error⁔(/*this*/ ref formatError e) {
     @string msg = e.msg;
     if (e.val != nil) {
         msg += fmt.Sprintf(" '%v'"u8, e.val);
@@ -130,7 +130,7 @@ public static (ж<File>, error) Open(@string name) {
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref File f) {
+internal static error Close⁔(/*this*/ ref File f) {
     error err = default;
     if (f.closer != nil) {
         err = f.closer.Close();
@@ -339,21 +339,21 @@ public static error ErrNoSymbols = errors.New("no symbol section");
 } partial class plan9obj_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string symsˢᴍFile => ref symsˢᵇᴍFile;
-private static readonly @string symsˢᵇᴍFile = "syms"u8;
-internal static ref readonly @string cannotLoadSymbolSectionˢᴍFile => ref cannotLoadSymbolSectionˢᵇᴍFile;
-private static readonly @string cannotLoadSymbolSectionˢᵇᴍFile = "cannot load symbol section"u8;
+internal static ref readonly @string symsˢ⁔File => ref symsˢᵇ⁔File;
+private static readonly @string symsˢᵇ⁔File = "syms"u8;
+internal static ref readonly @string cannotLoadSymbolSectionˢ⁔File => ref cannotLoadSymbolSectionˢᵇ⁔File;
+private static readonly @string cannotLoadSymbolSectionˢᵇ⁔File = "cannot load symbol section"u8;
 
 // Symbols returns the symbol table for f.
-[GoMethodBody("Symbols")] internal static (slice<Sym>, error) Symbolsᴍ(ref File f) {
-    var symtabSection = f.Section(symsˢᴍFile);
+internal static (slice<Sym>, error) Symbols⁔(/*this*/ ref File f) {
+    var symtabSection = f.Section(symsˢ⁔File);
     if (symtabSection == nil) {
         return (default, ErrNoSymbols);
     }
 
     var (symtab, err) = symtabSection.Data();
     if (err != nil) {
-        return (default, errors.New(cannotLoadSymbolSectionˢᴍFile));
+        return (default, errors.New(cannotLoadSymbolSectionˢ⁔File));
     }
 
     return newTable(symtab, f.PtrSize);
@@ -361,7 +361,7 @@ private static readonly @string cannotLoadSymbolSectionˢᵇᴍFile = "cannot lo
 
 // Section returns a section with the given name, or nil if no such
 // section exists.
-[GoMethodBody("Section")] internal static ж<Section> Sectionᴍ(ref File f, @string name) {
+internal static ж<Section> Section⁔(/*this*/ ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;

@@ -10,7 +10,7 @@ partial class dag_package {
 } partial class dag_package {
 
 // Transpose reverses all edges in g.
-[GoMethodBody("Transpose")] internal static void Transposeᴍ(ref Graph g) {
+internal static void Transpose⁔(/*this*/ ref Graph g) {
     var old = g.edges;
 
     g.edges = new map<@string, map<@string, bool>>();
@@ -26,7 +26,7 @@ partial class dag_package {
 }
 
 // Topo returns a topological sort of g. This function is deterministic.
-[GoMethodBody("Topo")] internal static slice<@string> Topoᴍ(ж<Graph> Ꮡg) {
+internal static slice<@string> Topo⁔(/*this*/ ж<Graph> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     ref var topo = ref heap<slice<@string>>(new slice<@string>(0, len(g.Nodes)), out var Ꮡtopo);
@@ -55,7 +55,7 @@ partial class dag_package {
 
 // TransitiveReduction removes edges from g that are transitively
 // reachable. g must be transitively closed.
-[GoMethodBody("TransitiveReduction")] internal static void TransitiveReductionᴍ(ref Graph g) {
+internal static void TransitiveReduction⁔(/*this*/ ref Graph g) {
     // For i -> j -> k, if i -> k exists, delete it.
     foreach (var (_, i) in range(g.Nodes)) {
         foreach (var (_, j) in range(g.Nodes)) {

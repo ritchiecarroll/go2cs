@@ -54,7 +54,7 @@ internal static slice<@string> instOpNames = [
 
 } partial class syntax_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(InstOp i) {
+internal static @string String⁔(/*this*/ InstOp i) {
     if ((nuint)i >= (nuint)len(instOpNames)) {
         return ""u8;
     }
@@ -133,14 +133,14 @@ partial struct Inst {
 
 } partial class syntax_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Prog> Ꮡp) {
+internal static @string String⁔(/*this*/ ж<Prog> Ꮡp) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     dumpProg(Ꮡb, Ꮡp);
     return b.String();
 }
 
 // skipNop follows any no-op or capturing instructions.
-[GoMethodBody("skipNop")] internal static ж<Inst> skipNopᴍ(ref Prog p, uint32 pc) {
+internal static ж<Inst> skipNop⁔(/*this*/ ref Prog p, uint32 pc) {
     var i = Ꮡ(p.Inst, pc);
     while (i.Op == InstNop || i.Op == InstCapture) {
         i = Ꮡ(p.Inst, i.Out);
@@ -151,7 +151,7 @@ partial struct Inst {
 } partial class syntax_package {
 
 // op returns i.Op but merges all the Rune special cases into InstRune
-[GoMethodBody("op")] internal static InstOp opᴍ(ref Inst i) {
+internal static InstOp op⁔(/*this*/ ref Inst i) {
     var op = i.Op;
     switch (op) {
     case var ᴛ when ᴛ == InstRune1 || ᴛ == InstRuneAny || ᴛ == InstRuneAnyNotNL: {
@@ -166,7 +166,7 @@ partial struct Inst {
 // Prefix returns a literal string that all matches for the
 // regexp must start with. Complete is true if the prefix
 // is the entire match.
-[GoMethodBody("Prefix")] internal static (@string prefix, bool complete) Prefixᴍ(ref Prog p) {
+internal static (@string prefix, bool complete) Prefix⁔(/*this*/ ref Prog p) {
     var i = p.skipNop((uint32)p.Start);
 
     // Avoid allocation of buffer if prefix is empty.
@@ -185,7 +185,7 @@ partial struct Inst {
 
 // StartCond returns the leading empty-width conditions that must
 // be true in any match. It returns ^EmptyOp(0) if no matches are possible.
-[GoMethodBody("StartCond")] internal static EmptyOp StartCondᴍ(ref Prog p) {
+internal static EmptyOp StartCond⁔(/*this*/ ref Prog p) {
     EmptyOp flag = default;
     var pc = (uint32)p.Start;
     var i = Ꮡ(p.Inst, pc);
@@ -223,7 +223,7 @@ internal static UntypedInt noMatch => -1;
 
 // MatchRune reports whether the instruction matches (and consumes) r.
 // It should only be called when i.Op == [InstRune].
-[GoMethodBody("MatchRune")] internal static bool MatchRuneᴍ(ref Inst i, rune r) {
+internal static bool MatchRune⁔(/*this*/ ref Inst i, rune r) {
     return i.MatchRunePos(r) != noMatch;
 }
 
@@ -232,7 +232,7 @@ internal static UntypedInt noMatch => -1;
 // (or, when len(i.Rune) == 1, rune singleton).
 // If not, MatchRunePos returns -1.
 // MatchRunePos should only be called when i.Op == [InstRune].
-[GoMethodBody("MatchRunePos")] internal static nint MatchRunePosᴍ(ref Inst i, rune r) {
+internal static nint MatchRunePos⁔(/*this*/ ref Inst i, rune r) {
     var rune = i.Rune;
 
     switch (len(rune)) {
@@ -294,7 +294,7 @@ internal static UntypedInt noMatch => -1;
 // MatchEmptyWidth reports whether the instruction matches
 // an empty string between the runes before and after.
 // It should only be called when i.Op == [InstEmptyWidth].
-[GoMethodBody("MatchEmptyWidth")] internal static bool MatchEmptyWidthᴍ(ref Inst i, rune before, rune after) {
+internal static bool MatchEmptyWidth⁔(/*this*/ ref Inst i, rune before, rune after) {
     switch (((EmptyOp)(uint8)i.Arg)) {
     case var ᴛ when ᴛ == EmptyBeginLine: {
         return before == '\n' || before == -1;
@@ -317,7 +317,7 @@ internal static UntypedInt noMatch => -1;
     throw panic("unknown empty width arg");
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Inst> Ꮡi) {
+internal static @string String⁔(/*this*/ ж<Inst> Ꮡi) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     dumpInst(Ꮡb, ref (Ꮡi).DerefOrNull());
     return b.String();

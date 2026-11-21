@@ -139,28 +139,28 @@ public static error Unmarshal(slice<byte> data, any v) {
 
 // Decode works like [Unmarshal], except it reads the decoder
 // stream to find the start element.
-[GoMethodBody("Decode")] internal static error Decodeᴍ(ж<Decoder> Ꮡd, any v) {
+internal static error Decode⁔(/*this*/ ж<Decoder> Ꮡd, any v) {
     return Ꮡd.DecodeElement(v, nil);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nonPointerPassedToˢᴍDecoder => ref nonPointerPassedToˢᵇᴍDecoder;
-private static readonly @string nonPointerPassedToˢᵇᴍDecoder = "non-pointer passed to Unmarshal"u8;
-internal static ref readonly @string nilPointerPassedToˢᴍDecoder => ref nilPointerPassedToˢᵇᴍDecoder;
-private static readonly @string nilPointerPassedToˢᵇᴍDecoder = "nil pointer passed to Unmarshal"u8;
+internal static ref readonly @string nonPointerPassedToˢ⁔Decoder => ref nonPointerPassedToˢᵇ⁔Decoder;
+private static readonly @string nonPointerPassedToˢᵇ⁔Decoder = "non-pointer passed to Unmarshal"u8;
+internal static ref readonly @string nilPointerPassedToˢ⁔Decoder => ref nilPointerPassedToˢᵇ⁔Decoder;
+private static readonly @string nilPointerPassedToˢᵇ⁔Decoder = "nil pointer passed to Unmarshal"u8;
 
 // DecodeElement works like [Unmarshal] except that it takes
 // a pointer to the start XML element to decode into v.
 // It is useful when a client reads some raw XML tokens itself
 // but also wants to defer to [Unmarshal] for some elements.
-[GoMethodBody("DecodeElement")] internal static error DecodeElementᴍ(ж<Decoder> Ꮡd, any v, ж<StartElement> start) {
+internal static error DecodeElement⁔(/*this*/ ж<Decoder> Ꮡd, any v, ж<StartElement> start) {
     var val = reflect.ValueOf(v);
     if (val.Kind() != reflect.Pointer) {
-        return errors.New(nonPointerPassedToˢᴍDecoder);
+        return errors.New(nonPointerPassedToˢ⁔Decoder);
     }
 
     if (val.IsNil()) {
-        return errors.New(nilPointerPassedToˢᴍDecoder);
+        return errors.New(nilPointerPassedToˢ⁔Decoder);
     }
     return Ꮡd.unmarshal(val.Elem(), start);
 }
@@ -172,7 +172,7 @@ partial struct UnmarshalError /*@string*/;
 
 } partial class xml_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(UnmarshalError e) { return (@string)e; }
+internal static @string Error⁔(/*this*/ UnmarshalError e) { return (@string)e; }
 
 } partial class xml_package {
 
@@ -220,7 +220,7 @@ internal static @string receiverType(any val) {
 
 // unmarshalInterface unmarshals a single XML element into val.
 // start is the opening tag of the element.
-[GoMethodBody("unmarshalInterface")] internal static error unmarshalInterfaceᴍ(ж<Decoder> Ꮡd, Unmarshaler val, ж<StartElement> Ꮡstart) {
+internal static error unmarshalInterface⁔(/*this*/ ж<Decoder> Ꮡd, Unmarshaler val, ж<StartElement> Ꮡstart) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -254,7 +254,7 @@ internal static @string receiverType(any val) {
 // unmarshalTextInterface unmarshals a single XML element into val.
 // The chardata contained in the element (but not its children)
 // is passed to the text unmarshaler.
-[GoMethodBody("unmarshalTextInterface")] internal static error unmarshalTextInterfaceᴍ(ref Decoder d, encoding.TextUnmarshaler val) {
+internal static error unmarshalTextInterface⁔(/*this*/ ref Decoder d, encoding.TextUnmarshaler val) {
     slice<byte> buf = default;
     nint depth = 1;
     while (depth > 0) {
@@ -282,7 +282,7 @@ internal static @string receiverType(any val) {
 }
 
 // unmarshalAttr unmarshals a single XML attribute into val.
-[GoMethodBody("unmarshalAttr")] internal static error unmarshalAttrᴍ(ref Decoder d, reflect.Value val, Attr attr) {
+internal static error unmarshalAttr⁔(/*this*/ ref Decoder d, reflect.Value val, Attr attr) {
     if (val.Kind() == reflect.Pointer) {
         if (val.IsNil()) {
             val.Set(reflect.New(val.Type().Elem()));
@@ -357,7 +357,7 @@ internal static error errUnmarshalDepth = errors.New("exceeded max depth");
 } partial class xml_package {
 
 // Unmarshal a single XML element into val.
-[GoMethodBody("unmarshal")] internal static error unmarshalᴍ(ж<Decoder> Ꮡd, reflect.Value val, ж<StartElement> Ꮡstart) {
+internal static error unmarshal⁔(/*this*/ ж<Decoder> Ꮡd, reflect.Value val, ж<StartElement> Ꮡstart) {
     ref var d = ref Ꮡd.DerefOrNull();
     ref var start = ref Ꮡstart.DerefOrNull();
 
@@ -788,7 +788,7 @@ internal static error /*err*/ copyValue(reflect.Value dst, slice<byte> src) {
 // The consumed result tells whether XML elements have been consumed
 // from the Decoder until start's matching end element, or if it's
 // still untouched because start is uninteresting for sv's fields.
-[GoMethodBody("unmarshalPath")] internal static (bool consumed, error err) unmarshalPathᴍ(ж<Decoder> Ꮡd, ж<typeInfo> Ꮡtinfo, reflect.Value sv, slice<@string> parents, ж<StartElement> Ꮡstart) {
+internal static (bool consumed, error err) unmarshalPath⁔(/*this*/ ж<Decoder> Ꮡd, ж<typeInfo> Ꮡtinfo, reflect.Value sv, slice<@string> parents, ж<StartElement> Ꮡstart) {
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
     ref var tinfo = ref Ꮡtinfo.DerefOrNull();
@@ -862,7 +862,7 @@ break_Loop:;
 // skipping nested structures.
 // It returns nil if it finds an end element matching the start
 // element; otherwise it returns an error describing the problem.
-[GoMethodBody("Skip")] internal static error Skipᴍ(ref Decoder d) {
+internal static error Skip⁔(/*this*/ ref Decoder d) {
     int64 depth = default;
     for (;;) {
         var (tok, err) = d.Token();

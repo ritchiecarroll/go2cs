@@ -29,7 +29,7 @@ partial struct xxhash64 {
 
 // reset discards the current state and prepares to compute a new hash.
 // We assume a seed of 0 since that is what zstd uses.
-[GoMethodBody("reset")] internal static void resetᴍ(ref xxhash64 xh) {
+internal static void reset⁔(/*this*/ ref xxhash64 xh) {
     xh.len = 0;
 
     // Separate addition for awkward constant overflow.
@@ -48,7 +48,7 @@ partial struct xxhash64 {
 }
 
 // update adds a buffer to the has.
-[GoMethodBody("update")] internal static void updateᴍ(ref xxhash64 xh, slice<byte> b) {
+internal static void update⁔(/*this*/ ref xxhash64 xh, slice<byte> b) {
     xh.len += (uint64)len(b);
 
     if (xh.cnt + len(b) < len(xh.buf)) {
@@ -82,7 +82,7 @@ partial struct xxhash64 {
 }
 
 // digest returns the final hash value.
-[GoMethodBody("digest")] internal static uint64 digestᴍ(ref xxhash64 xh) {
+internal static uint64 digest⁔(/*this*/ ref xxhash64 xh) {
     uint64 h64 = default;
     if (xh.len < 32) {
         h64 = xh.v[2] + (uint64)xxhPrime64c5;
@@ -129,7 +129,7 @@ partial struct xxhash64 {
 }
 
 // round updates a value.
-[GoMethodBody("round")] internal static uint64 roundᴍ(ref xxhash64 xh, uint64 v, uint64 n) {
+internal static uint64 round⁔(/*this*/ ref xxhash64 xh, uint64 v, uint64 n) {
     v += n * (uint64)xxhPrime64c2;
     v = bits.RotateLeft64(v, 31);
     v *= xxhPrime64c1;
@@ -137,7 +137,7 @@ partial struct xxhash64 {
 }
 
 // mergeRound updates a value in the final round.
-[GoMethodBody("mergeRound")] internal static uint64 mergeRoundᴍ(ref xxhash64 xh, uint64 v, uint64 n) {
+internal static uint64 mergeRound⁔(/*this*/ ref xxhash64 xh, uint64 v, uint64 n) {
     n = xh.round(0, n);
     v ^= (uint64)(n);
     v = v * (uint64)xxhPrime64c1 + (uint64)xxhPrime64c4;

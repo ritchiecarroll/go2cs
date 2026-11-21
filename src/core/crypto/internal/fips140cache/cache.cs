@@ -32,7 +32,7 @@ partial struct Cache<K, V> {
 // it. If check returns false, Get will call new again and return the result.
 //
 // The cache is evicted some time after k becomes unreachable.
-[GoMethodBody("Get")] internal static (ж<V>, error) Getᴍ<K, V>(ж<Cache<K, V>> Ꮡc, ж<K> k, Func<(ж<V>, error)> @new, Func<ж<V>, bool> check) {
+internal static (ж<V>, error) Get⁔<K, V>(/*this*/ ж<Cache<K, V>> Ꮡc, ж<K> k, Func<(ж<V>, error)> @new, Func<ж<V>, bool> check) {
     var p = weak.Make<K>(k);
     var (cached, ok) = Ꮡc.Ꮡm.Load(p); if (ok) {
         var vΔ1 = cached._<ж<V>>();
@@ -52,7 +52,7 @@ partial struct Cache<K, V> {
     return (v, default);
 }
 
-[GoMethodBody("evict")] internal static void evictᴍ<K, V>(ж<Cache<K, V>> Ꮡc, weak.Pointer<K> p) {
+internal static void evict⁔<K, V>(/*this*/ ж<Cache<K, V>> Ꮡc, weak.Pointer<K> p) {
     Ꮡc.Ꮡm.Delete(p);
 }
 

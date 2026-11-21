@@ -10,7 +10,7 @@ partial class bidirule_package {
 
 } partial class bidirule_package {
 
-[GoMethodBody("isFinal")] internal static bool isFinalᴍ(ref Transformer t) {
+internal static bool isFinal⁔(/*this*/ ref Transformer t) {
     return t.state == ruleLTRFinal || t.state == ruleRTLFinal || t.state == ruleInitial;
 }
 

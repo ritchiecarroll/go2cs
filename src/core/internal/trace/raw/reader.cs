@@ -37,12 +37,12 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 } partial class raw_package {
 
 // Version returns the version of the trace that we're reading.
-[GoMethodBody("Version")] internal static version.Version Versionᴍ(ref Reader r) {
+internal static version.Version Version⁔(/*this*/ ref Reader r) {
     return r.v;
 }
 
 // ReadEvent reads and returns the next trace event in the byte stream.
-[GoMethodBody("ReadEvent")] internal static (Event, error) ReadEventᴍ(ref Reader r) {
+internal static (Event, error) ReadEvent⁔(/*this*/ ref Reader r) {
     var (evb, err) = r.r.ReadByte();
     if (AreEqual(err, io.EOF)) {
         return (new Event(), io.EOF);
@@ -85,7 +85,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     ), default);
 }
 
-[GoMethodBody("readArgs")] internal static (slice<uint64>, error) readArgsᴍ(ref Reader r, nint n) {
+internal static (slice<uint64>, error) readArgs⁔(/*this*/ ref Reader r, nint n) {
     var argsᴷ = new stackAppend<uint64>(moves: true);
 
     slice<uint64> args = default;
@@ -100,7 +100,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
     return (args, default);
 }
 
-[GoMethodBody("readData")] internal static (slice<byte>, error) readDataᴍ(ref Reader r) {
+internal static (slice<byte>, error) readData⁔(/*this*/ ref Reader r) {
     var dataᴷ = new stackAppend<byte>(moves: true);
 
     var (len, err) = binary.ReadUvarint(new bufio_ReaderжByteReader(r.r));

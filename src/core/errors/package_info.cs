@@ -72,9 +72,12 @@ using static go.errors_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static errors_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("errors")]
 public static partial class errors_package
@@ -112,16 +115,16 @@ public static partial class errors_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(errors_package.errorString)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class errorsᴛerrorString;
-[GoMethodHost(typeof(errors_package.joinError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class errorsᴛjoinError;
+[GoMethodHost(typeof(errors_package.errorString)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class errorsᴛerrorString;
+[GoMethodHost(typeof(errors_package.joinError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class errorsᴛjoinError;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class errorsᴛerrorString {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref errorString e) => errors_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref errorString e) => errors_package.Error⁔(ref e);
 }
 partial class errorsᴛjoinError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref joinError e) => errors_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<error> Unwrap(this ref joinError e) => errors_package.Unwrapᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref joinError e) => errors_package.Error⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<error> Unwrap(this ref joinError e) => errors_package.Unwrap⁔(ref e);
 }
 // </GlyphForwarders>

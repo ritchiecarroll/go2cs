@@ -85,12 +85,12 @@ internal static ж<pcgRand> newPcgRand() {
 
 } partial class fuzz_package {
 
-[GoMethodBody("step")] internal static void stepᴍ(ref pcgRand r) {
+internal static void step⁔(/*this*/ ref pcgRand r) {
     r.state *= multiplier;
     r.state += r.inc;
 }
 
-[GoMethodBody("save")] internal static void saveᴍ(ref pcgRand r, ж<uint64> ᏑrandState, ж<uint64> ᏑrandInc) {
+internal static void save⁔(/*this*/ ref pcgRand r, ж<uint64> ᏑrandState, ж<uint64> ᏑrandInc) {
     ref var randState = ref ᏑrandState.DerefOrNull();
     ref var randInc = ref ᏑrandInc.DerefOrNull();
 
@@ -98,13 +98,13 @@ internal static ж<pcgRand> newPcgRand() {
     randInc = r.inc;
 }
 
-[GoMethodBody("restore")] internal static void restoreᴍ(ref pcgRand r, uint64 randState, uint64 randInc) {
+internal static void restore⁔(/*this*/ ref pcgRand r, uint64 randState, uint64 randInc) {
     r.state = randState;
     r.inc = randInc;
 }
 
 // uint32 returns a pseudo-random uint32.
-[GoMethodBody("uint32")] internal static uint32 uint32ᴍ(ref pcgRand r) {
+internal static uint32 uint32⁔(/*this*/ ref pcgRand r) {
     var x = r.state;
     r.step();
     return bits.RotateLeft32((uint32)(((x >> 18) ^ x) >> 27), -(nint)(x >> 59));
@@ -112,7 +112,7 @@ internal static ж<pcgRand> newPcgRand() {
 
 // intn returns a pseudo-random number in [0, n).
 // n must fit in a uint32.
-[GoMethodBody("intn")] internal static nint intnᴍ(ref pcgRand r, nint n) {
+internal static nint intn⁔(/*this*/ ref pcgRand r, nint n) {
     if ((nint)(uint32)n != n) {
         throw panic("large Intn");
     }
@@ -124,7 +124,7 @@ internal static ж<pcgRand> newPcgRand() {
 // For implementation details, see:
 // https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction
 // https://lemire.me/blog/2016/06/30/fast-random-shuffling
-[GoMethodBody("uint32n")] internal static uint32 uint32nᴍ(ref pcgRand r, uint32 n) {
+internal static uint32 uint32n⁔(/*this*/ ref pcgRand r, uint32 n) {
     var v = r.uint32();
     var prod = (uint64)v * (uint64)n;
     var low = (uint32)prod;
@@ -140,7 +140,7 @@ internal static ж<pcgRand> newPcgRand() {
 }
 
 // bool generates a random bool.
-[GoMethodBody("bool")] internal static bool @boolᴍ(ref pcgRand r) {
+internal static bool @bool⁔(/*this*/ ref pcgRand r) {
     return (r.uint32() & 1) == 0;
 }
 
@@ -157,7 +157,7 @@ partial struct noCopy {
 } partial class fuzz_package {
 
 // Lock is a no-op used by -copylocks checker from `go vet`.
-[GoMethodBody("Lock")] internal static void Lockᴍ(ref noCopy _) { }
-[GoMethodBody("Unlock")] internal static void Unlockᴍ(ref noCopy _) { }
+internal static void Lock⁔(/*this*/ ref noCopy _) { }
+internal static void Unlock⁔(/*this*/ ref noCopy _) { }
 
 }

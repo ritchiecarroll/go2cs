@@ -20,7 +20,7 @@ internal const byte floatGobVersion = 1;
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
 // The [Float] value and all its attributes (precision,
 // rounding mode, accuracy) are marshaled.
-[GoMethodBody("GobEncode")] internal static (slice<byte>, error) GobEncodeᴍ(ж<Float> Ꮡx) {
+internal static (slice<byte>, error) GobEncode⁔(/*this*/ ж<Float> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
@@ -63,16 +63,16 @@ internal const byte floatGobVersion = 1;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string floatGobDecodeBufferTooˢᴍFloat => ref floatGobDecodeBufferTooˢᵇᴍFloat;
-private static readonly @string floatGobDecodeBufferTooˢᵇᴍFloat = "Float.GobDecode: buffer too small"u8;
-internal static ref readonly @string floatGobDecodeBufferTooˢ2ᴍFloat => ref floatGobDecodeBufferTooˢ2ᵇᴍFloat;
-private static readonly @string floatGobDecodeBufferTooˢ2ᵇᴍFloat = "Float.GobDecode: buffer too small for finite form float"u8;
+internal static ref readonly @string floatGobDecodeBufferTooˢ⁔Float => ref floatGobDecodeBufferTooˢᵇ⁔Float;
+private static readonly @string floatGobDecodeBufferTooˢᵇ⁔Float = "Float.GobDecode: buffer too small"u8;
+internal static ref readonly @string floatGobDecodeBufferTooˢ2⁔Float => ref floatGobDecodeBufferTooˢ2ᵇ⁔Float;
+private static readonly @string floatGobDecodeBufferTooˢ2ᵇ⁔Float = "Float.GobDecode: buffer too small for finite form float"u8;
 
 // GobDecode implements the [encoding/gob.GobDecoder] interface.
 // The result is rounded per the precision and rounding mode of
 // z unless z's precision is 0, in which case z is set exactly
 // to the decoded value.
-[GoMethodBody("GobDecode")] internal static error GobDecodeᴍ(ж<Float> Ꮡz, slice<byte> buf) {
+internal static error GobDecode⁔(/*this*/ ж<Float> Ꮡz, slice<byte> buf) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (len(buf) == 0) {
@@ -81,7 +81,7 @@ private static readonly @string floatGobDecodeBufferTooˢ2ᵇᴍFloat = "Float.G
         return default;
     }
     if (len(buf) < 6) {
-        return errors.New(floatGobDecodeBufferTooˢᴍFloat);
+        return errors.New(floatGobDecodeBufferTooˢ⁔Float);
     }
 
     if (buf[0] != floatGobVersion) {
@@ -100,7 +100,7 @@ private static readonly @string floatGobDecodeBufferTooˢ2ᵇᴍFloat = "Float.G
 
     if (z.form == finite) {
         if (len(buf) < 10) {
-            return errors.New(floatGobDecodeBufferTooˢ2ᴍFloat);
+            return errors.New(floatGobDecodeBufferTooˢ2⁔Float);
         }
         z.exp = (int32)byteorder.BEUint32(buf[6..]);
         z.mant = z.mant.setBytes(buf[10..]);
@@ -121,7 +121,7 @@ private static readonly @string floatGobDecodeBufferTooˢ2ᵇᴍFloat = "Float.G
 // AppendText implements the [encoding.TextAppender] interface.
 // Only the [Float] value is marshaled (in full precision), other
 // attributes such as precision or accuracy are ignored.
-[GoMethodBody("AppendText")] internal static (slice<byte>, error) AppendTextᴍ(ж<Float> Ꮡx, slice<byte> b) {
+internal static (slice<byte>, error) AppendText⁔(/*this*/ ж<Float> Ꮡx, slice<byte> b) {
     if (Ꮡx == nil) {
         return (append(b, ((@string)"<nil>").ꓸꓸꓸ), default);
     }
@@ -131,7 +131,7 @@ private static readonly @string floatGobDecodeBufferTooˢ2ᵇᴍFloat = "Float.G
 // MarshalText implements the [encoding.TextMarshaler] interface.
 // Only the [Float] value is marshaled (in full precision), other
 // attributes such as precision or accuracy are ignored.
-[GoMethodBody("MarshalText")] internal static (slice<byte> text, error err) MarshalTextᴍ(ж<Float> Ꮡx) {
+internal static (slice<byte> text, error err) MarshalText⁔(/*this*/ ж<Float> Ꮡx) {
     return Ꮡx.AppendText(default);
 }
 
@@ -139,7 +139,7 @@ private static readonly @string floatGobDecodeBufferTooˢ2ᵇᴍFloat = "Float.G
 // The result is rounded per the precision and rounding mode of z.
 // If z's precision is 0, it is changed to 64 before rounding takes
 // effect.
-[GoMethodBody("UnmarshalText")] internal static error UnmarshalTextᴍ(ж<Float> Ꮡz, slice<byte> text) {
+internal static error UnmarshalText⁔(/*this*/ ж<Float> Ꮡz, slice<byte> text) {
     // TODO(gri): get rid of the []byte/string conversion
     var (_, _, err) = Ꮡz.Parse((@string)text, 0);
     if (err != nil) {

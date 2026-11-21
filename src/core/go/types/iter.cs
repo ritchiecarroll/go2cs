@@ -21,7 +21,7 @@ partial class types_package {
 // interface, ordered by Id.
 //
 // Example: for m := range t.Methods() { ... }
-[GoMethodBody("Methods")] internal static iter.Seq<ж<Func>> Methodsᴍ(ж<Interface> Ꮡt) {
+internal static iter.Seq<ж<Func>> Methods⁔(/*this*/ ж<Interface> Ꮡt) {
     return (Func<ж<Func>, bool> yield) => {
         foreach (var i in range(Ꮡt.NumMethods())) {
             if (!yield(Ꮡt.Method(i))) {
@@ -35,7 +35,7 @@ partial class types_package {
 // an interface, ordered by Id.
 //
 // Example: for m := range t.ExplicitMethods() { ... }
-[GoMethodBody("ExplicitMethods")] internal static iter.Seq<ж<Func>> ExplicitMethodsᴍ(ж<Interface> Ꮡt) {
+internal static iter.Seq<ж<Func>> ExplicitMethods⁔(/*this*/ ж<Interface> Ꮡt) {
     return (Func<ж<Func>, bool> yield) => {
         foreach (var i in range(Ꮡt.Value.NumExplicitMethods())) {
             if (!yield(Ꮡt.Value.ExplicitMethod(i))) {
@@ -48,7 +48,7 @@ partial class types_package {
 // EmbeddedTypes returns a go1.23 iterator over the types embedded within an interface.
 //
 // Example: for e := range t.EmbeddedTypes() { ... }
-[GoMethodBody("EmbeddedTypes")] internal static iter.Seq<Type> EmbeddedTypesᴍ(ж<Interface> Ꮡt) {
+internal static iter.Seq<Type> EmbeddedTypes⁔(/*this*/ ж<Interface> Ꮡt) {
     return (Func<Type, bool> yield) => {
         foreach (var i in range(Ꮡt.Value.NumEmbeddeds())) {
             if (!yield(Ꮡt.Value.EmbeddedType(i))) {
@@ -63,7 +63,7 @@ partial class types_package {
 // Methods returns a go1.23 iterator over the declared methods of a named type.
 //
 // Example: for m := range t.Methods() { ... }
-[GoMethodBody("Methods")] internal static iter.Seq<ж<Func>> Methodsᴍ(ж<Named> Ꮡt) {
+internal static iter.Seq<ж<Func>> Methods⁔(/*this*/ ж<Named> Ꮡt) {
     return (Func<ж<Func>, bool> yield) => {
         foreach (var i in range(Ꮡt.NumMethods())) {
             if (!yield(Ꮡt.Method(i))) {
@@ -78,7 +78,7 @@ partial class types_package {
 // Children returns a go1.23 iterator over the child scopes nested within scope s.
 //
 // Example: for child := range scope.Children() { ... }
-[GoMethodBody("Children")] internal static iter.Seq<ж<Scope>> Childrenᴍ(ж<Scope> Ꮡs) {
+internal static iter.Seq<ж<Scope>> Children⁔(/*this*/ ж<Scope> Ꮡs) {
     return (Func<ж<Scope>, bool> yield) => {
         foreach (var i in range(Ꮡs.Value.NumChildren())) {
             if (!yield(Ꮡs.Value.Child(i))) {
@@ -93,7 +93,7 @@ partial class types_package {
 // Fields returns a go1.23 iterator over the fields of a struct type.
 //
 // Example: for field := range s.Fields() { ... }
-[GoMethodBody("Fields")] internal static iter.Seq<ж<Var>> Fieldsᴍ(ж<Struct> Ꮡs) {
+internal static iter.Seq<ж<Var>> Fields⁔(/*this*/ ж<Struct> Ꮡs) {
     return (Func<ж<Var>, bool> yield) => {
         foreach (var i in range(Ꮡs.Value.NumFields())) {
             if (!yield(Ꮡs.Value.Field(i))) {
@@ -108,7 +108,7 @@ partial class types_package {
 // Variables returns a go1.23 iterator over the variables of a tuple type.
 //
 // Example: for v := range tuple.Variables() { ... }
-[GoMethodBody("Variables")] internal static iter.Seq<ж<Var>> Variablesᴍ(ж<Tuple> Ꮡt) {
+internal static iter.Seq<ж<Var>> Variables⁔(/*this*/ ж<Tuple> Ꮡt) {
     return (Func<ж<Var>, bool> yield) => {
         foreach (var i in range(Ꮡt.Len())) {
             if (!yield(Ꮡt.Value.At(i))) {
@@ -123,7 +123,7 @@ partial class types_package {
 // Methods returns a go1.23 iterator over the methods of a method set.
 //
 // Example: for method := range s.Methods() { ... }
-[GoMethodBody("Methods")] internal static iter.Seq<ж<Selection>> Methodsᴍ(ж<MethodSet> Ꮡs) {
+internal static iter.Seq<ж<Selection>> Methods⁔(/*this*/ ж<MethodSet> Ꮡs) {
     return (Func<ж<Selection>, bool> yield) => {
         foreach (var i in range(Ꮡs.Value.Len())) {
             if (!yield(Ꮡs.Value.At(i))) {
@@ -138,7 +138,7 @@ partial class types_package {
 // Terms returns a go1.23 iterator over the terms of a union.
 //
 // Example: for term := range union.Terms() { ... }
-[GoMethodBody("Terms")] internal static iter.Seq<ж<Term>> Termsᴍ(ж<Union> Ꮡu) {
+internal static iter.Seq<ж<Term>> Terms⁔(/*this*/ ж<Union> Ꮡu) {
     return (Func<ж<Term>, bool> yield) => {
         foreach (var i in range(Ꮡu.Value.Len())) {
             if (!yield(Ꮡu.Value.Term(i))) {
@@ -153,7 +153,7 @@ partial class types_package {
 // TypeParams returns a go1.23 iterator over a list of type parameters.
 //
 // Example: for tparam := range l.TypeParams() { ... }
-[GoMethodBody("TypeParams")] internal static iter.Seq<ж<TypeParam>> TypeParamsᴍ(ж<TypeParamList> Ꮡl) {
+internal static iter.Seq<ж<TypeParam>> TypeParams⁔(/*this*/ ж<TypeParamList> Ꮡl) {
     return (Func<ж<TypeParam>, bool> yield) => {
         foreach (var i in range(Ꮡl.Len())) {
             if (!yield(Ꮡl.Value.At(i))) {
@@ -168,7 +168,7 @@ partial class types_package {
 // Types returns a go1.23 iterator over the elements of a list of types.
 //
 // Example: for t := range l.Types() { ... }
-[GoMethodBody("Types")] internal static iter.Seq<Type> Typesᴍ(ж<TypeList> Ꮡl) {
+internal static iter.Seq<Type> Types⁔(/*this*/ ж<TypeList> Ꮡl) {
     return (Func<Type, bool> yield) => {
         foreach (var i in range(Ꮡl.Len())) {
             if (!yield(Ꮡl.Value.At(i))) {

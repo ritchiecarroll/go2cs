@@ -83,7 +83,7 @@ using static go.debug.elf_package;
 
 namespace go.debug;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static elf_package;
 using dwarf = go.debug.dwarf_package;
 using io = io_package;
@@ -91,7 +91,10 @@ using @internal;
 using compress;
 using encoding;
 using go.debug;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("elf")]
 public static partial class elf_package
@@ -200,233 +203,233 @@ public static partial class elf_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(elf_package.Class)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛClass;
-[GoMethodHost(typeof(elf_package.CompressionType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛCompressionType;
-[GoMethodHost(typeof(elf_package.Data)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛData;
-[GoMethodHost(typeof(elf_package.DynFlag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛDynFlag;
-[GoMethodHost(typeof(elf_package.DynFlag1)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛDynFlag1;
-[GoMethodHost(typeof(elf_package.DynTag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛDynTag;
-[GoMethodHost(typeof(elf_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛFile;
-[GoMethodHost(typeof(elf_package.FormatError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛFormatError;
-[GoMethodHost(typeof(elf_package.Machine)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛMachine;
-[GoMethodHost(typeof(elf_package.NType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛNType;
-[GoMethodHost(typeof(elf_package.OSABI)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛOSABI;
-[GoMethodHost(typeof(elf_package.Prog)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛProg;
-[GoMethodHost(typeof(elf_package.ProgFlag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛProgFlag;
-[GoMethodHost(typeof(elf_package.ProgType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛProgType;
-[GoMethodHost(typeof(elf_package.R_386)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_386;
-[GoMethodHost(typeof(elf_package.R_390)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_390;
-[GoMethodHost(typeof(elf_package.R_AARCH64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_AARCH64;
-[GoMethodHost(typeof(elf_package.R_ALPHA)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_ALPHA;
-[GoMethodHost(typeof(elf_package.R_ARM)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_ARM;
-[GoMethodHost(typeof(elf_package.R_LARCH)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_LARCH;
-[GoMethodHost(typeof(elf_package.R_MIPS)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_MIPS;
-[GoMethodHost(typeof(elf_package.R_PPC)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_PPC;
-[GoMethodHost(typeof(elf_package.R_PPC64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_PPC64;
-[GoMethodHost(typeof(elf_package.R_RISCV)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_RISCV;
-[GoMethodHost(typeof(elf_package.R_SPARC)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_SPARC;
-[GoMethodHost(typeof(elf_package.R_X86_64)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛR_X86_64;
-[GoMethodHost(typeof(elf_package.Section)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛSection;
-[GoMethodHost(typeof(elf_package.SectionFlag)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛSectionFlag;
-[GoMethodHost(typeof(elf_package.SectionIndex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛSectionIndex;
-[GoMethodHost(typeof(elf_package.SectionType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛSectionType;
-[GoMethodHost(typeof(elf_package.SymBind)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛSymBind;
-[GoMethodHost(typeof(elf_package.SymType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛSymType;
-[GoMethodHost(typeof(elf_package.SymVis)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛSymVis;
-[GoMethodHost(typeof(elf_package.Type)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛType;
-[GoMethodHost(typeof(elf_package.Version)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛVersion;
-[GoMethodHost(typeof(elf_package.VersionIndex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛVersionIndex;
-[GoMethodHost(typeof(elf_package.errorReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛerrorReader;
-[GoMethodHost(typeof(elf_package.nobitsSectionReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛnobitsSectionReader;
-[GoMethodHost(typeof(elf_package.readSeekerFromReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class elfᴛreadSeekerFromReader;
+[GoMethodHost(typeof(elf_package.Class)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛClass;
+[GoMethodHost(typeof(elf_package.CompressionType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛCompressionType;
+[GoMethodHost(typeof(elf_package.Data)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛData;
+[GoMethodHost(typeof(elf_package.DynFlag)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛDynFlag;
+[GoMethodHost(typeof(elf_package.DynFlag1)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛDynFlag1;
+[GoMethodHost(typeof(elf_package.DynTag)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛDynTag;
+[GoMethodHost(typeof(elf_package.File)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛFile;
+[GoMethodHost(typeof(elf_package.FormatError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛFormatError;
+[GoMethodHost(typeof(elf_package.Machine)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛMachine;
+[GoMethodHost(typeof(elf_package.NType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛNType;
+[GoMethodHost(typeof(elf_package.OSABI)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛOSABI;
+[GoMethodHost(typeof(elf_package.Prog)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛProg;
+[GoMethodHost(typeof(elf_package.ProgFlag)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛProgFlag;
+[GoMethodHost(typeof(elf_package.ProgType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛProgType;
+[GoMethodHost(typeof(elf_package.R_386)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛR_386;
+[GoMethodHost(typeof(elf_package.R_390)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛR_390;
+[GoMethodHost(typeof(elf_package.R_AARCH64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛR_AARCH64;
+[GoMethodHost(typeof(elf_package.R_ALPHA)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛR_ALPHA;
+[GoMethodHost(typeof(elf_package.R_ARM)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛR_ARM;
+[GoMethodHost(typeof(elf_package.R_LARCH)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛR_LARCH;
+[GoMethodHost(typeof(elf_package.R_MIPS)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛR_MIPS;
+[GoMethodHost(typeof(elf_package.R_PPC)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛR_PPC;
+[GoMethodHost(typeof(elf_package.R_PPC64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛR_PPC64;
+[GoMethodHost(typeof(elf_package.R_RISCV)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛR_RISCV;
+[GoMethodHost(typeof(elf_package.R_SPARC)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛR_SPARC;
+[GoMethodHost(typeof(elf_package.R_X86_64)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛR_X86_64;
+[GoMethodHost(typeof(elf_package.Section)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛSection;
+[GoMethodHost(typeof(elf_package.SectionFlag)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛSectionFlag;
+[GoMethodHost(typeof(elf_package.SectionIndex)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛSectionIndex;
+[GoMethodHost(typeof(elf_package.SectionType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛSectionType;
+[GoMethodHost(typeof(elf_package.SymBind)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛSymBind;
+[GoMethodHost(typeof(elf_package.SymType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛSymType;
+[GoMethodHost(typeof(elf_package.SymVis)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛSymVis;
+[GoMethodHost(typeof(elf_package.Type)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛType;
+[GoMethodHost(typeof(elf_package.Version)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛVersion;
+[GoMethodHost(typeof(elf_package.VersionIndex)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛVersionIndex;
+[GoMethodHost(typeof(elf_package.errorReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛerrorReader;
+[GoMethodHost(typeof(elf_package.nobitsSectionReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛnobitsSectionReader;
+[GoMethodHost(typeof(elf_package.readSeekerFromReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class elfᴛreadSeekerFromReader;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class elfᴛVersion {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Version i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Version i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Version i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this Version i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛClass {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Class i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Class i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Class i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this Class i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛData {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Data i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Data i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Data i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this Data i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛOSABI {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this OSABI i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this OSABI i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this OSABI i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this OSABI i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Type i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Type i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Type i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this Type i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛMachine {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Machine i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Machine i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Machine i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this Machine i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛSectionIndex {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SectionIndex i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this SectionIndex i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this SectionIndex i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this SectionIndex i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛSectionType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SectionType i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this SectionType i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this SectionType i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this SectionType i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛSectionFlag {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SectionFlag i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this SectionFlag i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this SectionFlag i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this SectionFlag i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛCompressionType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this CompressionType i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this CompressionType i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this CompressionType i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this CompressionType i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛProgType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ProgType i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this ProgType i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ProgType i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ProgType i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛProgFlag {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ProgFlag i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this ProgFlag i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ProgFlag i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this ProgFlag i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛDynTag {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this DynTag i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this DynTag i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this DynTag i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this DynTag i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛDynFlag {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this DynFlag i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this DynFlag i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this DynFlag i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this DynFlag i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛDynFlag1 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this DynFlag1 i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this DynFlag1 i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this DynFlag1 i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this DynFlag1 i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛNType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this NType i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this NType i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this NType i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this NType i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛSymBind {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SymBind i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this SymBind i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this SymBind i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this SymBind i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛSymType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SymType i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this SymType i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this SymType i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this SymType i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛSymVis {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SymVis i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this SymVis i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this SymVis i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this SymVis i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛR_X86_64 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_X86_64 i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_X86_64 i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this R_X86_64 i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this R_X86_64 i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛR_AARCH64 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_AARCH64 i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_AARCH64 i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this R_AARCH64 i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this R_AARCH64 i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛR_ALPHA {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_ALPHA i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_ALPHA i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this R_ALPHA i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this R_ALPHA i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛR_ARM {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_ARM i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_ARM i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this R_ARM i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this R_ARM i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛR_386 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_386 i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_386 i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this R_386 i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this R_386 i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛR_MIPS {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_MIPS i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_MIPS i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this R_MIPS i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this R_MIPS i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛR_LARCH {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_LARCH i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_LARCH i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this R_LARCH i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this R_LARCH i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛR_PPC {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_PPC i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_PPC i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this R_PPC i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this R_PPC i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛR_PPC64 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_PPC64 i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_PPC64 i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this R_PPC64 i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this R_PPC64 i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛR_RISCV {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_RISCV i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_RISCV i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this R_RISCV i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this R_RISCV i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛR_390 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_390 i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_390 i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this R_390 i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this R_390 i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛR_SPARC {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this R_SPARC i) => elf_package.Stringᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this R_SPARC i) => elf_package.GoStringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this R_SPARC i) => elf_package.String⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this R_SPARC i) => elf_package.GoString⁔(i);
 }
 partial class elfᴛSection {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Data(this ж<Section> Ꮡs) => elf_package.Dataᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.ReadSeeker Open(this ж<Section> Ꮡs) => elf_package.Openᴍ(Ꮡs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Data(this ж<Section> Ꮡs) => elf_package.Data⁔(Ꮡs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static io.ReadSeeker Open(this ж<Section> Ꮡs) => elf_package.Open⁔(Ꮡs);
 }
 partial class elfᴛFile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) stringTable(this ref File f, uint32 link) => elf_package.stringTableᴍ(ref f, link);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref File f) => elf_package.Closeᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Section> SectionByType(this ref File f, SectionType typ) => elf_package.SectionByTypeᴍ(ref f, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<Symbol>, slice<byte>, error) getSymbols(this ref File f, SectionType typ) => elf_package.getSymbolsᴍ(ref f, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<Symbol>, slice<byte>, error) getSymbols32(this ref File f, SectionType typ) => elf_package.getSymbols32ᴍ(ref f, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<Symbol>, slice<byte>, error) getSymbols64(this ref File f, SectionType typ) => elf_package.getSymbols64ᴍ(ref f, typ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Section> Section(this ref File f, @string name) => elf_package.Sectionᴍ(ref f, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocations(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsᴍ(ref f, dst, rels);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsAMD64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsAMD64ᴍ(ref f, dst, rels);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocations386(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocations386ᴍ(ref f, dst, rels);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsARM(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsARMᴍ(ref f, dst, rels);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsARM64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsARM64ᴍ(ref f, dst, rels);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsPPC(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsPPCᴍ(ref f, dst, rels);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsPPC64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsPPC64ᴍ(ref f, dst, rels);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsMIPS(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsMIPSᴍ(ref f, dst, rels);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsMIPS64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsMIPS64ᴍ(ref f, dst, rels);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsLOONG64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsLOONG64ᴍ(ref f, dst, rels);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsRISCV64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsRISCV64ᴍ(ref f, dst, rels);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationss390x(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationss390xᴍ(ref f, dst, rels);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error applyRelocationsSPARC64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsSPARC64ᴍ(ref f, dst, rels);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) => elf_package.DWARFᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<Symbol>, error) Symbols(this ref File f) => elf_package.Symbolsᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<Symbol>, error) DynamicSymbols(this ref File f) => elf_package.DynamicSymbolsᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) => elf_package.ImportedSymbolsᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error dynamicVersions(this ref File f, slice<byte> str) => elf_package.dynamicVersionsᴍ(ref f, str);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<DynamicVersion>, error) DynamicVersions(this ref File f) => elf_package.DynamicVersionsᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error dynamicVersionNeeds(this ref File f, slice<byte> str) => elf_package.dynamicVersionNeedsᴍ(ref f, str);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<DynamicVersionNeed>, error) DynamicVersionNeeds(this ref File f) => elf_package.DynamicVersionNeedsᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool, error) gnuVersionInit(this ref File f, slice<byte> str) => elf_package.gnuVersionInitᴍ(ref f, str);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool hasVersion, VersionIndex versionIndex, @string version, @string library) gnuVersion(this ref File f, nint i) => elf_package.gnuVersionᴍ(ref f, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) ImportedLibraries(this ref File f) => elf_package.ImportedLibrariesᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) DynString(this ref File f, DynTag tag) => elf_package.DynStringᴍ(ref f, tag);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<uint64>, error) DynValue(this ref File f, DynTag tag) => elf_package.DynValueᴍ(ref f, tag);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) stringTable(this ref File f, uint32 link) => elf_package.stringTable⁔(ref f, link);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref File f) => elf_package.Close⁔(ref f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Section> SectionByType(this ref File f, SectionType typ) => elf_package.SectionByType⁔(ref f, typ);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<Symbol>, slice<byte>, error) getSymbols(this ref File f, SectionType typ) => elf_package.getSymbols⁔(ref f, typ);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<Symbol>, slice<byte>, error) getSymbols32(this ref File f, SectionType typ) => elf_package.getSymbols32⁔(ref f, typ);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<Symbol>, slice<byte>, error) getSymbols64(this ref File f, SectionType typ) => elf_package.getSymbols64⁔(ref f, typ);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Section> Section(this ref File f, @string name) => elf_package.Section⁔(ref f, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error applyRelocations(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocations⁔(ref f, dst, rels);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error applyRelocationsAMD64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsAMD64⁔(ref f, dst, rels);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error applyRelocations386(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocations386⁔(ref f, dst, rels);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error applyRelocationsARM(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsARM⁔(ref f, dst, rels);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error applyRelocationsARM64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsARM64⁔(ref f, dst, rels);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error applyRelocationsPPC(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsPPC⁔(ref f, dst, rels);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error applyRelocationsPPC64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsPPC64⁔(ref f, dst, rels);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error applyRelocationsMIPS(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsMIPS⁔(ref f, dst, rels);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error applyRelocationsMIPS64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsMIPS64⁔(ref f, dst, rels);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error applyRelocationsLOONG64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsLOONG64⁔(ref f, dst, rels);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error applyRelocationsRISCV64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsRISCV64⁔(ref f, dst, rels);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error applyRelocationss390x(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationss390x⁔(ref f, dst, rels);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error applyRelocationsSPARC64(this ref File f, slice<byte> dst, slice<byte> rels) => elf_package.applyRelocationsSPARC64⁔(ref f, dst, rels);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<dwarf.Data>, error) DWARF(this ж<File> Ꮡf) => elf_package.DWARF⁔(Ꮡf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<Symbol>, error) Symbols(this ref File f) => elf_package.Symbols⁔(ref f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<Symbol>, error) DynamicSymbols(this ref File f) => elf_package.DynamicSymbols⁔(ref f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<ImportedSymbol>, error) ImportedSymbols(this ref File f) => elf_package.ImportedSymbols⁔(ref f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error dynamicVersions(this ref File f, slice<byte> str) => elf_package.dynamicVersions⁔(ref f, str);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<DynamicVersion>, error) DynamicVersions(this ref File f) => elf_package.DynamicVersions⁔(ref f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error dynamicVersionNeeds(this ref File f, slice<byte> str) => elf_package.dynamicVersionNeeds⁔(ref f, str);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<DynamicVersionNeed>, error) DynamicVersionNeeds(this ref File f) => elf_package.DynamicVersionNeeds⁔(ref f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (bool, error) gnuVersionInit(this ref File f, slice<byte> str) => elf_package.gnuVersionInit⁔(ref f, str);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (bool hasVersion, VersionIndex versionIndex, @string version, @string library) gnuVersion(this ref File f, nint i) => elf_package.gnuVersion⁔(ref f, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string>, error) ImportedLibraries(this ref File f) => elf_package.ImportedLibraries⁔(ref f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string>, error) DynString(this ref File f, DynTag tag) => elf_package.DynString⁔(ref f, tag);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<uint64>, error) DynValue(this ref File f, DynTag tag) => elf_package.DynValue⁔(ref f, tag);
 }
 partial class elfᴛProg {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.ReadSeeker Open(this ref Prog p) => elf_package.Openᴍ(ref p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static io.ReadSeeker Open(this ref Prog p) => elf_package.Open⁔(ref p);
 }
 partial class elfᴛFormatError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref FormatError e) => elf_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref FormatError e) => elf_package.Error⁔(ref e);
 }
 partial class elfᴛVersionIndex {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsHidden(this VersionIndex vi) => elf_package.IsHiddenᴍ(vi);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint16 Index(this VersionIndex vi) => elf_package.Indexᴍ(vi);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsHidden(this VersionIndex vi) => elf_package.IsHidden⁔(vi);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint16 Index(this VersionIndex vi) => elf_package.Index⁔(vi);
 }
 partial class elfᴛnobitsSectionReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) => elf_package.ReadAtᴍ(ref _, p, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) => elf_package.ReadAt⁔(ref _, p, off);
 }
 partial class elfᴛerrorReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this errorReader r, slice<byte> p) => elf_package.Readᴍ(r, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) ReadAt(this errorReader r, slice<byte> p, int64 off) => elf_package.ReadAtᴍ(r, p, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) Seek(this errorReader r, int64 offset, nint whence) => elf_package.Seekᴍ(r, offset, whence);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this errorReader r) => elf_package.Closeᴍ(r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this errorReader r, slice<byte> p) => elf_package.Read⁔(r, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) ReadAt(this errorReader r, slice<byte> p, int64 off) => elf_package.ReadAt⁔(r, p, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64, error) Seek(this errorReader r, int64 offset, nint whence) => elf_package.Seek⁔(r, offset, whence);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this errorReader r) => elf_package.Close⁔(r);
 }
 partial class elfᴛreadSeekerFromReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void start(this ref readSeekerFromReader r) => elf_package.startᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref readSeekerFromReader r, slice<byte> p) => elf_package.Readᴍ(ref r, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offset, nint whence) => elf_package.Seekᴍ(ref r, offset, whence);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void start(this ref readSeekerFromReader r) => elf_package.start⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref readSeekerFromReader r, slice<byte> p) => elf_package.Read⁔(ref r, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64, error) Seek(this ref readSeekerFromReader r, int64 offset, nint whence) => elf_package.Seek⁔(ref r, offset, whence);
 }
 // </GlyphForwarders>

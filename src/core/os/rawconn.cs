@@ -18,11 +18,11 @@ partial struct rawConn {
 } partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string syscallConnControlˢᴍrawConn => ref syscallConnControlˢᵇᴍrawConn;
-private static readonly @string syscallConnControlˢᵇᴍrawConn = "SyscallConn.Control"u8;
+internal static ref readonly @string syscallConnControlˢ⁔rawConn => ref syscallConnControlˢᵇ⁔rawConn;
+private static readonly @string syscallConnControlˢᵇ⁔rawConn = "SyscallConn.Control"u8;
 
-[GoMethodBody("Control")] internal static error Controlᴍ(ref rawConn c, Action<uintptr> f) {
-    var errΔ1 = c.@file.checkValid(syscallConnControlˢᴍrawConn); if (errΔ1 != nil) {
+internal static error Control⁔(/*this*/ ref rawConn c, Action<uintptr> f) {
+    var errΔ1 = c.@file.checkValid(syscallConnControlˢ⁔rawConn); if (errΔ1 != nil) {
         return errΔ1;
     }
     var err = c.@file.of(File.Ꮡpfd).RawControl(f);
@@ -31,11 +31,11 @@ private static readonly @string syscallConnControlˢᵇᴍrawConn = "SyscallConn
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string syscallConnReadˢᴍrawConn => ref syscallConnReadˢᵇᴍrawConn;
-private static readonly @string syscallConnReadˢᵇᴍrawConn = "SyscallConn.Read"u8;
+internal static ref readonly @string syscallConnReadˢ⁔rawConn => ref syscallConnReadˢᵇ⁔rawConn;
+private static readonly @string syscallConnReadˢᵇ⁔rawConn = "SyscallConn.Read"u8;
 
-[GoMethodBody("Read")] internal static error Readᴍ(ref rawConn c, Func<uintptr, bool> f) {
-    var errΔ1 = c.@file.checkValid(syscallConnReadˢᴍrawConn); if (errΔ1 != nil) {
+internal static error Read⁔(/*this*/ ref rawConn c, Func<uintptr, bool> f) {
+    var errΔ1 = c.@file.checkValid(syscallConnReadˢ⁔rawConn); if (errΔ1 != nil) {
         return errΔ1;
     }
     var err = c.@file.of(File.Ꮡpfd).RawRead(f);
@@ -44,11 +44,11 @@ private static readonly @string syscallConnReadˢᵇᴍrawConn = "SyscallConn.Re
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string syscallConnWriteˢᴍrawConn => ref syscallConnWriteˢᵇᴍrawConn;
-private static readonly @string syscallConnWriteˢᵇᴍrawConn = "SyscallConn.Write"u8;
+internal static ref readonly @string syscallConnWriteˢ⁔rawConn => ref syscallConnWriteˢᵇ⁔rawConn;
+private static readonly @string syscallConnWriteˢᵇ⁔rawConn = "SyscallConn.Write"u8;
 
-[GoMethodBody("Write")] internal static error Writeᴍ(ref rawConn c, Func<uintptr, bool> f) {
-    var errΔ1 = c.@file.checkValid(syscallConnWriteˢᴍrawConn); if (errΔ1 != nil) {
+internal static error Write⁔(/*this*/ ref rawConn c, Func<uintptr, bool> f) {
+    var errΔ1 = c.@file.checkValid(syscallConnWriteˢ⁔rawConn); if (errΔ1 != nil) {
         return errΔ1;
     }
     var err = c.@file.of(File.Ꮡpfd).RawWrite(f);

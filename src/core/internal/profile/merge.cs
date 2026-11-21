@@ -73,7 +73,7 @@ public static (ж<Profile>, error) Merge(slice<ж<Profile>> srcs) {
 // Normalize normalizes the source profile by multiplying each value in profile by the
 // ratio of the sum of the base profile's values of that sample type to the sum of the
 // source profile's value of that sample type.
-[GoMethodBody("Normalize")] internal static error Normalizeᴍ(ref Profile p, ж<Profile> Ꮡpb) {
+internal static error Normalize⁔(/*this*/ ref Profile p, ж<Profile> Ꮡpb) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     var err = p.compatible(Ꮡpb); if (err != nil) {
@@ -137,7 +137,7 @@ partial struct mapInfo {
 
 } partial class profile_package {
 
-[GoMethodBody("mapSample")] internal static ж<Sample> mapSampleᴍ(ref profileMerger pm, ж<Sample> Ꮡsrc) {
+internal static ж<Sample> mapSample⁔(/*this*/ ref profileMerger pm, ж<Sample> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     var s = Ꮡ(new Sample(
@@ -183,7 +183,7 @@ partial struct mapInfo {
 } partial class profile_package {
 
 // key generates sampleKey to be used as a key for maps.
-[GoMethodBody("key")] internal static sampleKey keyᴍ(ref Sample sample) {
+internal static sampleKey key⁔(/*this*/ ref Sample sample) {
     var labelsᴷ = new stackAppend<@string>();
     var numlabelsᴷ = new stackAppend<@string>();
 
@@ -221,7 +221,7 @@ partial struct sampleKey {
 
 } partial class profile_package {
 
-[GoMethodBody("mapLocation")] internal static ж<Location> mapLocationᴍ(ref profileMerger pm, ж<Location> Ꮡsrc) {
+internal static ж<Location> mapLocation⁔(/*this*/ ref profileMerger pm, ж<Location> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     if (Ꮡsrc == nil) {
@@ -260,7 +260,7 @@ partial struct sampleKey {
 } partial class profile_package {
 
 // key generates locationKey to be used as a key for maps.
-[GoMethodBody("key")] internal static locationKey keyᴍ(ref Location l) {
+internal static locationKey key⁔(/*this*/ ref Location l) {
     var key = new locationKey(
         addr: l.Address,
         isFolded: l.IsFolded
@@ -291,7 +291,7 @@ partial struct locationKey {
 
 } partial class profile_package {
 
-[GoMethodBody("mapMapping")] internal static mapInfo mapMappingᴍ(ref profileMerger pm, ж<Mapping> Ꮡsrc) {
+internal static mapInfo mapMapping⁔(/*this*/ ref profileMerger pm, ж<Mapping> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     if (Ꮡsrc == nil) {
@@ -334,7 +334,7 @@ partial struct locationKey {
 
 // key generates encoded strings of Mapping to be used as a key for
 // maps.
-[GoMethodBody("key")] internal static mappingKey keyᴍ(ref Mapping m) {
+internal static mappingKey key⁔(/*this*/ ref Mapping m) {
     // Normalize addresses to handle address space randomization.
     // Round up to next 4K boundary to avoid minor discrepancies.
     const uint64 mapsizeRounding = 0x1000;
@@ -374,7 +374,7 @@ partial struct mappingKey {
 
 } partial class profile_package {
 
-[GoMethodBody("mapLine")] internal static Line mapLineᴍ(ref profileMerger pm, Line src) {
+internal static Line mapLine⁔(/*this*/ ref profileMerger pm, Line src) {
     var ln = new Line(
         Function: pm.mapFunction(src.Function),
         ΔLine: src.ΔLine
@@ -382,7 +382,7 @@ partial struct mappingKey {
     return ln;
 }
 
-[GoMethodBody("mapFunction")] internal static ж<Function> mapFunctionᴍ(ref profileMerger pm, ж<Function> Ꮡsrc) {
+internal static ж<Function> mapFunction⁔(/*this*/ ref profileMerger pm, ж<Function> Ꮡsrc) {
     ref var src = ref Ꮡsrc.DerefOrNull();
 
     if (Ꮡsrc == nil) {
@@ -412,7 +412,7 @@ partial struct mappingKey {
 } partial class profile_package {
 
 // key generates a struct to be used as a key for maps.
-[GoMethodBody("key")] internal static functionKey keyᴍ(ref Function f) {
+internal static functionKey key⁔(/*this*/ ref Function f) {
     return new functionKey(
         f.StartLine,
         f.Name,
@@ -485,7 +485,7 @@ internal static (ж<Profile>, error) combineHeaders(slice<ж<Profile>> srcs) {
 // compatible determines if two profiles can be compared/merged.
 // returns nil if the profiles are compatible; otherwise an error with
 // details on the incompatibility.
-[GoMethodBody("compatible")] internal static error compatibleᴍ(ref Profile p, ж<Profile> Ꮡpb) {
+internal static error compatible⁔(/*this*/ ref Profile p, ж<Profile> Ꮡpb) {
     ref var pb = ref Ꮡpb.DerefOrNull();
 
     if (!equalValueType(ref (p.PeriodType).DerefOrNull(), ref (pb.PeriodType).DerefOrNull())) {

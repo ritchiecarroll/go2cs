@@ -79,7 +79,7 @@ partial struct gclinkptr /*num:uintptr*/;
 // ptr returns the *gclink form of p.
 // The result should be used for accessing fields, not stored
 // in other data structures.
-[GoMethodBody("ptr")] internal static ж<gclink> ptrᴍ(gclinkptr p) {
+internal static ж<gclink> ptr⁔(/*this*/ gclinkptr p) {
     return @unsafe.Pointer.To<gclink>((@unsafe.Pointer)(uintptr)p);
 }
 
@@ -155,28 +155,28 @@ internal static ж<mcache> getMCache(ref m mp) {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string refillOfSpanWithFreeˢᴍmcache => ref refillOfSpanWithFreeˢᵇᴍmcache;
-private static readonly @string refillOfSpanWithFreeˢᵇᴍmcache = "refill of span with free space remaining"u8;
-internal static ref readonly @string refillOfSpanWithReusableˢᴍmcache => ref refillOfSpanWithReusableˢᵇᴍmcache;
-private static readonly @string refillOfSpanWithReusableˢᵇᴍmcache = "refill of span with reusable pointers remaining on pointer free list"u8;
-internal static ref readonly @string badSweepgenInRefillˢᴍmcache => ref badSweepgenInRefillˢᵇᴍmcache;
-private static readonly @string badSweepgenInRefillˢᵇᴍmcache = "bad sweepgen in refill"u8;
-internal static ref readonly @string outOfMemoryˢᴍmcache => ref outOfMemoryˢᵇᴍmcache;
-private static readonly @string outOfMemoryˢᵇᴍmcache = "out of memory"u8;
-internal static ref readonly @string spanHasNoFreeSpaceˢᴍmcache => ref spanHasNoFreeSpaceˢᵇᴍmcache;
-private static readonly @string spanHasNoFreeSpaceˢᵇᴍmcache = "span has no free space"u8;
+internal static ref readonly @string refillOfSpanWithFreeˢ⁔mcache => ref refillOfSpanWithFreeˢᵇ⁔mcache;
+private static readonly @string refillOfSpanWithFreeˢᵇ⁔mcache = "refill of span with free space remaining"u8;
+internal static ref readonly @string refillOfSpanWithReusableˢ⁔mcache => ref refillOfSpanWithReusableˢᵇ⁔mcache;
+private static readonly @string refillOfSpanWithReusableˢᵇ⁔mcache = "refill of span with reusable pointers remaining on pointer free list"u8;
+internal static ref readonly @string badSweepgenInRefillˢ⁔mcache => ref badSweepgenInRefillˢᵇ⁔mcache;
+private static readonly @string badSweepgenInRefillˢᵇ⁔mcache = "bad sweepgen in refill"u8;
+internal static ref readonly @string outOfMemoryˢ⁔mcache => ref outOfMemoryˢᵇ⁔mcache;
+private static readonly @string outOfMemoryˢᵇ⁔mcache = "out of memory"u8;
+internal static ref readonly @string spanHasNoFreeSpaceˢ⁔mcache => ref spanHasNoFreeSpaceˢᵇ⁔mcache;
+private static readonly @string spanHasNoFreeSpaceˢᵇ⁔mcache = "span has no free space"u8;
 
 // refill acquires a new span of span class spc for c. This span will
 // have at least one free object. The current span in c must be full.
 //
 // Must run in a non-preemptible context since otherwise the owner of
 // c could change.
-[GoMethodBody("refill")] internal static void refillᴍ(ref mcache c, spanClass spc) {
+internal static void refill⁔(/*this*/ ref mcache c, spanClass spc) {
     // Return the current cached span to the central lists.
     var s = c.alloc[spc];
 
     if (s.allocCount != s.nelems) {
-        @throw(refillOfSpanWithFreeˢᴍmcache);
+        @throw(refillOfSpanWithFreeˢ⁔mcache);
     }
 
     // TODO(thepudds): we might be able to allow mallocgcTiny to reuse 16 byte objects from spc==5,
@@ -185,13 +185,13 @@ private static readonly @string spanHasNoFreeSpaceˢᵇᴍmcache = "span has no 
         c.reusableNoscan[spc] = 0;
     }
     if (c.reusableNoscan[spc] != 0) {
-        @throw(refillOfSpanWithReusableˢᴍmcache);
+        @throw(refillOfSpanWithReusableˢ⁔mcache);
     }
 
     if (s != Ꮡemptymspan) {
         // Mark this span as no longer cached.
         if (s.sweepgen != mheap_.sweepgen + 3) {
-            @throw(badSweepgenInRefillˢᴍmcache);
+            @throw(badSweepgenInRefillˢ⁔mcache);
         }
         mheap_.central[spc].mcentral.uncacheSpan(s);
 
@@ -218,11 +218,11 @@ private static readonly @string spanHasNoFreeSpaceˢᵇᴍmcache = "span has no 
     // Get a new cached span from the central lists.
     s = mheap_.central[spc].mcentral.cacheSpan();
     if (s == nil) {
-        @throw(outOfMemoryˢᴍmcache);
+        @throw(outOfMemoryˢ⁔mcache);
     }
 
     if (s.allocCount == s.nelems) {
-        @throw(spanHasNoFreeSpaceˢᴍmcache);
+        @throw(spanHasNoFreeSpaceˢ⁔mcache);
     }
 
     // Indicate that this span is cached and prevent asynchronous
@@ -253,9 +253,9 @@ private static readonly @string spanHasNoFreeSpaceˢᵇᴍmcache = "span has no 
 }
 
 // allocLarge allocates a span for a large object.
-[GoMethodBody("allocLarge")] internal static ж<mspan> allocLargeᴍ(ref mcache c, uintptr size, bool noscan) {
+internal static ж<mspan> allocLarge⁔(/*this*/ ref mcache c, uintptr size, bool noscan) {
     if (size + (uintptr)pageSize < size) {
-        @throw(outOfMemoryˢᴍmcache);
+        @throw(outOfMemoryˢ⁔mcache);
     }
     var npages = size >> (int)(gc.PageShift);
     if ((uintptr)(size & (uintptr)pageMask) != 0) {
@@ -270,7 +270,7 @@ private static readonly @string spanHasNoFreeSpaceˢᵇᴍmcache = "span has no 
     var spc = makeSpanClass(0, noscan);
     var s = Ꮡmheap_.alloc(npages, spc);
     if (s == nil) {
-        @throw(outOfMemoryˢᴍmcache);
+        @throw(outOfMemoryˢ⁔mcache);
     }
 
     // Count the alloc in consistent, external stats.
@@ -301,7 +301,7 @@ private static readonly @string spanHasNoFreeSpaceˢᵇᴍmcache = "span has no 
     return s;
 }
 
-[GoMethodBody("releaseAll")] internal static void releaseAllᴍ(ref mcache c) {
+internal static void releaseAll⁔(/*this*/ ref mcache c) {
     // Take this opportunity to flush scanAlloc.
     var scanAlloc = (int64)c.scanAlloc;
     c.scanAlloc = 0;
@@ -359,13 +359,13 @@ private static readonly @string spanHasNoFreeSpaceˢᵇᴍmcache = "span has no 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badFlushGenˢᴍmcache => ref badFlushGenˢᵇᴍmcache;
-private static readonly @string badFlushGenˢᵇᴍmcache = "bad flushGen"u8;
+internal static ref readonly @string badFlushGenˢ⁔mcache => ref badFlushGenˢᵇ⁔mcache;
+private static readonly @string badFlushGenˢᵇ⁔mcache = "bad flushGen"u8;
 
 // prepareForSweep flushes c if the system has entered a new sweep phase
 // since c was populated. This must happen between the sweep phase
 // starting and the first allocation from c.
-[GoMethodBody("prepareForSweep")] internal static void prepareForSweepᴍ(ж<mcache> Ꮡc) {
+internal static void prepareForSweep⁔(/*this*/ ж<mcache> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Alternatively, instead of making sure we do this on every P
@@ -381,7 +381,7 @@ private static readonly @string badFlushGenˢᵇᴍmcache = "bad flushGen"u8;
         return;
     } else if (flushGen != sg - 2) {
         println((@string)"bad flushGen", flushGen, (@string)"in prepareForSweep; sweepgen", sg);
-        @throw(badFlushGenˢᴍmcache);
+        @throw(badFlushGenˢ⁔mcache);
     }
     c.releaseAll();
     stackcache_clear(ref (Ꮡc).DerefOrNull());
@@ -390,7 +390,7 @@ private static readonly @string badFlushGenˢᵇᴍmcache = "bad flushGen"u8;
 
 // addReusableNoscan adds a noscan object pointer to the reusable pointer free list
 // for a span class.
-[GoMethodBody("addReusableNoscan")] internal static void addReusableNoscanᴍ(ref mcache c, spanClass spc, uintptr ptr) {
+internal static void addReusableNoscan⁔(/*this*/ ref mcache c, spanClass spc, uintptr ptr) {
     if (!runtimeFreegcEnabled) {
         return;
     }
@@ -403,7 +403,7 @@ private static readonly @string badFlushGenˢᵇᴍmcache = "bad flushGen"u8;
 
 // hasReusableNoscan reports whether there is a reusable object available for
 // a noscan spc.
-[GoMethodBody("hasReusableNoscan")] internal static bool hasReusableNoscanᴍ(ref mcache c, spanClass spc) {
+internal static bool hasReusableNoscan⁔(/*this*/ ref mcache c, spanClass spc) {
     if (!runtimeFreegcEnabled) {
         return false;
     }

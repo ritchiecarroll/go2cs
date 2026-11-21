@@ -82,7 +82,7 @@ partial struct DecapsulationKey768 {
 // Bytes returns the decapsulation key as a 64-byte seed in the "d || z" form.
 //
 // The decapsulation key must be kept secret.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref DecapsulationKey768 dk) {
+internal static slice<byte> Bytes⁔(/*this*/ ref DecapsulationKey768 dk) {
     array<byte> b = new(64); /* SeedSize */
     copy(b[..], dk.d[..]);
     copy(b[32..], dk.z[..]);
@@ -123,7 +123,7 @@ public static slice<byte> TestingOnlyExpandedBytes768(ж<DecapsulationKey768> �
 
 // EncapsulationKey returns the public encapsulation key necessary to produce
 // ciphertexts.
-[GoMethodBody("EncapsulationKey")] internal static ж<EncapsulationKey768> EncapsulationKeyᴍ(ref DecapsulationKey768 dk) {
+internal static ж<EncapsulationKey768> EncapsulationKey⁔(/*this*/ ref DecapsulationKey768 dk) {
     return Ꮡ(new EncapsulationKey768(
         ρ: dk.ρ.Clone(),
         h: dk.h.Clone(),
@@ -144,13 +144,13 @@ partial struct EncapsulationKey768 {
 } partial class mlkem_package {
 
 // Bytes returns the encapsulation key as a byte slice.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref EncapsulationKey768 ek) {
+internal static slice<byte> Bytes⁔(/*this*/ ref EncapsulationKey768 ek) {
     // The actual logic is in a separate function to outline this allocation.
     var b = new slice<byte>(0, EncapsulationKeySize768);
     return ek.bytes(b);
 }
 
-[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ref EncapsulationKey768 ek, slice<byte> b) {
+internal static slice<byte> bytes⁔(/*this*/ ref EncapsulationKey768 ek, slice<byte> b) {
     foreach (var i in range(len(ek.t))) {
         b = polyByteEncode(b, ek.t[i]);
     }
@@ -350,13 +350,13 @@ internal static error kemPCT(ж<DecapsulationKey768> Ꮡdk) {
 // encapsulation key, drawing random bytes from a DRBG.
 //
 // The shared key must be kept secret.
-[GoMethodBody("Encapsulate")] internal static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulateᴍ(ж<EncapsulationKey768> Ꮡek) {
+internal static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate⁔(/*this*/ ж<EncapsulationKey768> Ꮡek) {
     // The actual logic is in a separate function to outline this allocation.
     ref var cc = ref heap(new array<byte>(1088), out var Ꮡcc);
     return Ꮡek.encapsulate(Ꮡcc);
 }
 
-[GoMethodBody("encapsulate")] internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulateᴍ(ж<EncapsulationKey768> Ꮡek, /*[1088]*/ ж<array<byte>> cc) {
+internal static (slice<byte> sharedKey, slice<byte> ciphertext) encapsulate⁔(/*this*/ ж<EncapsulationKey768> Ꮡek, /*[1088]*/ ж<array<byte>> cc) {
     fipsSelfTest();
     ref var m = ref heap(new array<byte>(32), out var Ꮡm);
     drbg.Read(m[..]);
@@ -368,7 +368,7 @@ internal static error kemPCT(ж<DecapsulationKey768> Ꮡdk) {
 
 // EncapsulateInternal is a derandomized version of Encapsulate, exclusively for
 // use in tests.
-[GoMethodBody("EncapsulateInternal")] internal static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInternalᴍ(ж<EncapsulationKey768> Ꮡek, /*[32]*/ ж<array<byte>> m) {
+internal static (slice<byte> sharedKey, slice<byte> ciphertext) EncapsulateInternal⁔(/*this*/ ж<EncapsulationKey768> Ꮡek, /*[32]*/ ж<array<byte>> m) {
     fipsSelfTest();
     var cc = Ꮡ(new byte[]{}.array(1088));
     return kemEncaps(cc, ref (Ꮡek).DerefOrNull(), m);
@@ -489,17 +489,17 @@ internal static slice<byte> pkeEncrypt(/*[1088]*/ ж<array<byte>> Ꮡcc, ref enc
 } partial class mlkem_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mlkemInvalidCiphertextˢᴍDecapsulationKey768 => ref mlkemInvalidCiphertextˢᵇᴍDecapsulationKey768;
-private static readonly @string mlkemInvalidCiphertextˢᵇᴍDecapsulationKey768 = "mlkem: invalid ciphertext length"u8;
+internal static ref readonly @string mlkemInvalidCiphertextˢ⁔DecapsulationKey768 => ref mlkemInvalidCiphertextˢᵇ⁔DecapsulationKey768;
+private static readonly @string mlkemInvalidCiphertextˢᵇ⁔DecapsulationKey768 = "mlkem: invalid ciphertext length"u8;
 
 // Decapsulate generates a shared key from a ciphertext and a decapsulation key.
 // If the ciphertext is not valid, Decapsulate returns an error.
 //
 // The shared key must be kept secret.
-[GoMethodBody("Decapsulate")] internal static (slice<byte> sharedKey, error err) Decapsulateᴍ(ж<DecapsulationKey768> Ꮡdk, slice<byte> ciphertext) {
+internal static (slice<byte> sharedKey, error err) Decapsulate⁔(/*this*/ ж<DecapsulationKey768> Ꮡdk, slice<byte> ciphertext) {
     fipsSelfTest();
     if (len(ciphertext) != CiphertextSize768) {
-        return (default, errors.New(mlkemInvalidCiphertextˢᴍDecapsulationKey768));
+        return (default, errors.New(mlkemInvalidCiphertextˢ⁔DecapsulationKey768));
     }
     var c = Ꮡ(array<byte>.Alias(ciphertext, 1088));
     // Note that the hash check (step 3 of the decapsulation input check from

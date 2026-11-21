@@ -79,7 +79,7 @@ using static go.net.rpc_package;
 
 namespace go.net;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using io = io_package;
 using net = net_package;
 using Δhttp = global::go.net.http_package;
@@ -90,7 +90,10 @@ using static rpc_package;
 using html;
 using reflect = reflect_package;
 using global::go.go;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("rpc")]
 public static partial class rpc_package
@@ -152,80 +155,80 @@ public static partial class rpc_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(rpc_package.Call)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛCall;
-[GoMethodHost(typeof(rpc_package.Client)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛClient;
-[GoMethodHost(typeof(rpc_package.Server)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛServer;
-[GoMethodHost(typeof(rpc_package.ServerError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛServerError;
-[GoMethodHost(typeof(rpc_package.debugHTTP)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛdebugHTTP;
-[GoMethodHost(typeof(rpc_package.gobClientCodec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛgobClientCodec;
-[GoMethodHost(typeof(rpc_package.gobServerCodec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛgobServerCodec;
-[GoMethodHost(typeof(rpc_package.methodArray)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛmethodArray;
-[GoMethodHost(typeof(rpc_package.methodType)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛmethodType;
-[GoMethodHost(typeof(rpc_package.service)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛservice;
-[GoMethodHost(typeof(rpc_package.serviceArray)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rpcᴛserviceArray;
+[GoMethodHost(typeof(rpc_package.Call)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛCall;
+[GoMethodHost(typeof(rpc_package.Client)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛClient;
+[GoMethodHost(typeof(rpc_package.Server)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛServer;
+[GoMethodHost(typeof(rpc_package.ServerError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛServerError;
+[GoMethodHost(typeof(rpc_package.debugHTTP)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛdebugHTTP;
+[GoMethodHost(typeof(rpc_package.gobClientCodec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛgobClientCodec;
+[GoMethodHost(typeof(rpc_package.gobServerCodec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛgobServerCodec;
+[GoMethodHost(typeof(rpc_package.methodArray)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛmethodArray;
+[GoMethodHost(typeof(rpc_package.methodType)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛmethodType;
+[GoMethodHost(typeof(rpc_package.service)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛservice;
+[GoMethodHost(typeof(rpc_package.serviceArray)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rpcᴛserviceArray;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class rpcᴛServerError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ServerError e) => rpc_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ServerError e) => rpc_package.Error⁔(e);
 }
 partial class rpcᴛClient {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void send(this ж<Client> Ꮡclient, ж<Call> Ꮡcall) => rpc_package.sendᴍ(Ꮡclient, Ꮡcall);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void input(this ж<Client> Ꮡclient) => rpc_package.inputᴍ(Ꮡclient);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<Client> Ꮡclient) => rpc_package.Closeᴍ(Ꮡclient);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Call> Go(this ж<Client> Ꮡclient, @string serviceMethod, any args, any reply, channel<ж<Call>> done) => rpc_package.Goᴍ(Ꮡclient, serviceMethod, args, reply, done);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Call(this ж<Client> Ꮡclient, @string serviceMethod, any args, any reply) => rpc_package.Callᴍ(Ꮡclient, serviceMethod, args, reply);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void send(this ж<Client> Ꮡclient, ж<Call> Ꮡcall) => rpc_package.send⁔(Ꮡclient, Ꮡcall);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void input(this ж<Client> Ꮡclient) => rpc_package.input⁔(Ꮡclient);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ж<Client> Ꮡclient) => rpc_package.Close⁔(Ꮡclient);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Call> Go(this ж<Client> Ꮡclient, @string serviceMethod, any args, any reply, channel<ж<Call>> done) => rpc_package.Go⁔(Ꮡclient, serviceMethod, args, reply, done);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Call(this ж<Client> Ꮡclient, @string serviceMethod, any args, any reply) => rpc_package.Call⁔(Ꮡclient, serviceMethod, args, reply);
 }
 partial class rpcᴛCall {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void done(this ж<Call> Ꮡcall) => rpc_package.doneᴍ(Ꮡcall);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void done(this ж<Call> Ꮡcall) => rpc_package.done⁔(Ꮡcall);
 }
 partial class rpcᴛgobClientCodec {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ WriteRequest(this ref gobClientCodec c, ж<Request> r, any body) => rpc_package.WriteRequestᴍ(ref c, r, body);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ReadResponseHeader(this ref gobClientCodec c, ж<Response> r) => rpc_package.ReadResponseHeaderᴍ(ref c, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ReadResponseBody(this ref gobClientCodec c, any body) => rpc_package.ReadResponseBodyᴍ(ref c, body);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref gobClientCodec c) => rpc_package.Closeᴍ(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ WriteRequest(this ref gobClientCodec c, ж<Request> r, any body) => rpc_package.WriteRequest⁔(ref c, r, body);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadResponseHeader(this ref gobClientCodec c, ж<Response> r) => rpc_package.ReadResponseHeader⁔(ref c, r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadResponseBody(this ref gobClientCodec c, any body) => rpc_package.ReadResponseBody⁔(ref c, body);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref gobClientCodec c) => rpc_package.Close⁔(ref c);
 }
 partial class rpcᴛserviceArray {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this serviceArray s) => rpc_package.Lenᴍ(s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this serviceArray s, nint i, nint j) => rpc_package.Lessᴍ(s, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Swap(this serviceArray s, nint i, nint j) => rpc_package.Swapᴍ(s, i, j);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this serviceArray s) => rpc_package.Len⁔(s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Less(this serviceArray s, nint i, nint j) => rpc_package.Less⁔(s, i, j);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Swap(this serviceArray s, nint i, nint j) => rpc_package.Swap⁔(s, i, j);
 }
 partial class rpcᴛmethodArray {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this methodArray m) => rpc_package.Lenᴍ(m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this methodArray m, nint i, nint j) => rpc_package.Lessᴍ(m, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Swap(this methodArray m, nint i, nint j) => rpc_package.Swapᴍ(m, i, j);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this methodArray m) => rpc_package.Len⁔(m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Less(this methodArray m, nint i, nint j) => rpc_package.Less⁔(m, i, j);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Swap(this methodArray m, nint i, nint j) => rpc_package.Swap⁔(m, i, j);
 }
 partial class rpcᴛdebugHTTP {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ServeHTTP(this debugHTTP server, Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => rpc_package.ServeHTTPᴍ(server, w, req);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void ServeHTTP(this debugHTTP server, Δhttp.ResponseWriter w, ж<Δhttp.Request> req) => rpc_package.ServeHTTP⁔(server, w, req);
 }
 partial class rpcᴛServer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Register(this ж<Server> Ꮡserver, any rcvr) => rpc_package.Registerᴍ(Ꮡserver, rcvr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error RegisterName(this ж<Server> Ꮡserver, @string name, any rcvr) => rpc_package.RegisterNameᴍ(Ꮡserver, name, rcvr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error register(this ж<Server> Ꮡserver, any rcvr, @string name, bool useName) => rpc_package.registerᴍ(Ꮡserver, rcvr, name, useName);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sendResponse(this ж<Server> Ꮡserver, ж<sync.Mutex> sending, ж<Request> Ꮡreq, any reply, ServerCodec codec, @string errmsg) => rpc_package.sendResponseᴍ(Ꮡserver, sending, Ꮡreq, reply, codec, errmsg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ServeConn(this ж<Server> Ꮡserver, io.ReadWriteCloser conn) => rpc_package.ServeConnᴍ(Ꮡserver, conn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ServeCodec(this ж<Server> Ꮡserver, ServerCodec codec) => rpc_package.ServeCodecᴍ(Ꮡserver, codec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error ServeRequest(this ж<Server> Ꮡserver, ServerCodec codec) => rpc_package.ServeRequestᴍ(Ꮡserver, codec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Request> getRequest(this ж<Server> Ꮡserver) => rpc_package.getRequestᴍ(Ꮡserver);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void freeRequest(this ж<Server> Ꮡserver, ж<Request> Ꮡreq) => rpc_package.freeRequestᴍ(Ꮡserver, Ꮡreq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Response> getResponse(this ж<Server> Ꮡserver) => rpc_package.getResponseᴍ(Ꮡserver);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void freeResponse(this ж<Server> Ꮡserver, ж<Response> Ꮡresp) => rpc_package.freeResponseᴍ(Ꮡserver, Ꮡresp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, reflect.Value argv, reflect.Value replyv, bool keepReading, error err) readRequest(this ж<Server> Ꮡserver, ServerCodec codec) => rpc_package.readRequestᴍ(Ꮡserver, codec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<service> svc, ж<methodType> mtype, ж<Request> req, bool keepReading, error err) readRequestHeader(this ж<Server> Ꮡserver, ServerCodec codec) => rpc_package.readRequestHeaderᴍ(Ꮡserver, codec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Accept(this ж<Server> Ꮡserver, net.Listener lis) => rpc_package.Acceptᴍ(Ꮡserver, lis);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ServeHTTP(this ж<Server> Ꮡserver, Δhttp.ResponseWriter w, ж<Δhttp.Request> Ꮡreq) => rpc_package.ServeHTTPᴍ(Ꮡserver, w, Ꮡreq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void HandleHTTP(this ж<Server> Ꮡserver, @string rpcPath, @string debugPath) => rpc_package.HandleHTTPᴍ(Ꮡserver, rpcPath, debugPath);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Register(this ж<Server> Ꮡserver, any rcvr) => rpc_package.Register⁔(Ꮡserver, rcvr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error RegisterName(this ж<Server> Ꮡserver, @string name, any rcvr) => rpc_package.RegisterName⁔(Ꮡserver, name, rcvr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error register(this ж<Server> Ꮡserver, any rcvr, @string name, bool useName) => rpc_package.register⁔(Ꮡserver, rcvr, name, useName);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void sendResponse(this ж<Server> Ꮡserver, ж<sync.Mutex> sending, ж<Request> Ꮡreq, any reply, ServerCodec codec, @string errmsg) => rpc_package.sendResponse⁔(Ꮡserver, sending, Ꮡreq, reply, codec, errmsg);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void ServeConn(this ж<Server> Ꮡserver, io.ReadWriteCloser conn) => rpc_package.ServeConn⁔(Ꮡserver, conn);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void ServeCodec(this ж<Server> Ꮡserver, ServerCodec codec) => rpc_package.ServeCodec⁔(Ꮡserver, codec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error ServeRequest(this ж<Server> Ꮡserver, ServerCodec codec) => rpc_package.ServeRequest⁔(Ꮡserver, codec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Request> getRequest(this ж<Server> Ꮡserver) => rpc_package.getRequest⁔(Ꮡserver);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void freeRequest(this ж<Server> Ꮡserver, ж<Request> Ꮡreq) => rpc_package.freeRequest⁔(Ꮡserver, Ꮡreq);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Response> getResponse(this ж<Server> Ꮡserver) => rpc_package.getResponse⁔(Ꮡserver);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void freeResponse(this ж<Server> Ꮡserver, ж<Response> Ꮡresp) => rpc_package.freeResponse⁔(Ꮡserver, Ꮡresp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<service> service, ж<methodType> mtype, ж<Request> req, reflect.Value argv, reflect.Value replyv, bool keepReading, error err) readRequest(this ж<Server> Ꮡserver, ServerCodec codec) => rpc_package.readRequest⁔(Ꮡserver, codec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<service> svc, ж<methodType> mtype, ж<Request> req, bool keepReading, error err) readRequestHeader(this ж<Server> Ꮡserver, ServerCodec codec) => rpc_package.readRequestHeader⁔(Ꮡserver, codec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Accept(this ж<Server> Ꮡserver, net.Listener lis) => rpc_package.Accept⁔(Ꮡserver, lis);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void ServeHTTP(this ж<Server> Ꮡserver, Δhttp.ResponseWriter w, ж<Δhttp.Request> Ꮡreq) => rpc_package.ServeHTTP⁔(Ꮡserver, w, Ꮡreq);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void HandleHTTP(this ж<Server> Ꮡserver, @string rpcPath, @string debugPath) => rpc_package.HandleHTTP⁔(Ꮡserver, rpcPath, debugPath);
 }
 partial class rpcᴛmethodType {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nuint /*n*/ NumCalls(this ж<methodType> Ꮡm) => rpc_package.NumCallsᴍ(Ꮡm);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nuint /*n*/ NumCalls(this ж<methodType> Ꮡm) => rpc_package.NumCalls⁔(Ꮡm);
 }
 partial class rpcᴛservice {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void call(this ж<service> Ꮡs, ж<Server> server, ж<sync.Mutex> sending, ж<sync.WaitGroup> wg, ж<methodType> Ꮡmtype, ж<Request> req, reflect.Value argv, reflect.Value replyv, ServerCodec codec) => rpc_package.callᴍ(Ꮡs, server, sending, wg, Ꮡmtype, req, argv, replyv, codec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void call(this ж<service> Ꮡs, ж<Server> server, ж<sync.Mutex> sending, ж<sync.WaitGroup> wg, ж<methodType> Ꮡmtype, ж<Request> req, reflect.Value argv, reflect.Value replyv, ServerCodec codec) => rpc_package.call⁔(Ꮡs, server, sending, wg, Ꮡmtype, req, argv, replyv, codec);
 }
 partial class rpcᴛgobServerCodec {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ReadRequestHeader(this ref gobServerCodec c, ж<Request> r) => rpc_package.ReadRequestHeaderᴍ(ref c, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ReadRequestBody(this ref gobServerCodec c, any body) => rpc_package.ReadRequestBodyᴍ(ref c, body);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ WriteResponse(this ref gobServerCodec c, ж<Response> r, any body) => rpc_package.WriteResponseᴍ(ref c, r, body);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref gobServerCodec c) => rpc_package.Closeᴍ(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadRequestHeader(this ref gobServerCodec c, ж<Request> r) => rpc_package.ReadRequestHeader⁔(ref c, r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ReadRequestBody(this ref gobServerCodec c, any body) => rpc_package.ReadRequestBody⁔(ref c, body);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ WriteResponse(this ref gobServerCodec c, ж<Response> r, any body) => rpc_package.WriteResponse⁔(ref c, r, body);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref gobServerCodec c) => rpc_package.Close⁔(ref c);
 }
 // </GlyphForwarders>

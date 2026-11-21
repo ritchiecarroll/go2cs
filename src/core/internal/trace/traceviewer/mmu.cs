@@ -106,7 +106,7 @@ partial struct mmu {
 
 } partial class traceviewer_package {
 
-[GoMethodBody("get")] internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) getᴍ(ж<mmu> Ꮡm, trace.UtilFlags flags) {
+internal static (slice<slice<trace.MutatorUtil>>, ж<trace.MMUCurve>, error) get⁔(/*this*/ ж<mmu> Ꮡm, trace.UtilFlags flags) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     m.mu.Lock();
@@ -131,11 +131,11 @@ partial struct mmu {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string flagsˢᴍmmu => ref flagsˢᵇᴍmmu;
-private static readonly @string flagsˢᵇᴍmmu = "flags"u8;
+private static ref readonly @string flagsˢ⁔mmu => ref flagsˢᵇ⁔mmu;
+private static readonly @string flagsˢᵇ⁔mmu = "flags"u8;
 
 // HandlePlot serves the JSON data for the MMU plot.
-[GoMethodBody("HandlePlot")] internal static void HandlePlotᴍ(ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
+internal static void HandlePlot⁔(/*this*/ ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
     var (mu, mmuCurve, err) = Ꮡm.get(requestUtilFlags(r));
     if (err != nil) {
         http.Error(w, fmt.Sprintf("failed to produce MMU data: %v"u8, err), http.StatusInternalServerError);
@@ -143,7 +143,7 @@ private static readonly @string flagsˢᵇᴍmmu = "flags"u8;
     }
 
     slice<float64> quantiles = default;
-    foreach (var flagStr in range<@string>(strings.SplitSeq(r.FormValue(flagsˢᴍmmu), "|").Invoke)) {
+    foreach (var flagStr in range<@string>(strings.SplitSeq(r.FormValue(flagsˢ⁔mmu), "|").Invoke)) {
         if (flagStr == "mut"u8) {
             quantiles = [0D, /* 1 - .999 */ 0.001D, /* 1 - .99 */ 0.01D, /* 1 - .95 */ 0.05D];
             break;
@@ -399,11 +399,11 @@ internal static @string templMMU = """
 } partial class traceviewer_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string windowˢᴍmmu => ref windowˢᵇᴍmmu;
-private static readonly @string windowˢᵇᴍmmu = "window"u8;
+private static ref readonly @string windowˢ⁔mmu => ref windowˢᵇ⁔mmu;
+private static readonly @string windowˢᵇ⁔mmu = "window"u8;
 
 // HandleDetails serves details of an MMU graph at a particular window.
-[GoMethodBody("HandleDetails")] internal static void HandleDetailsᴍ(ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
+internal static void HandleDetails⁔(/*this*/ ж<mmu> Ꮡm, http.ResponseWriter w, ж<http.Request> r) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var (_, mmuCurve, err) = Ꮡm.get(requestUtilFlags(r));
@@ -412,7 +412,7 @@ private static readonly @string windowˢᵇᴍmmu = "window"u8;
         return;
     }
 
-    @string windowStr = r.FormValue(windowˢᴍmmu);
+    @string windowStr = r.FormValue(windowˢ⁔mmu);
     (var window, err) = strconv.ParseUint(windowStr, 10, 64);
     if (err != nil) {
         http.Error(w, fmt.Sprintf("failed to parse window parameter %q: %v"u8, windowStr, err), http.StatusBadRequest);
@@ -442,7 +442,7 @@ partial struct linkedUtilWindow {
 
 } partial class traceviewer_package {
 
-[GoMethodBody("newLinkedUtilWindow")] internal static linkedUtilWindow newLinkedUtilWindowᴍ(ref mmu m, trace.UtilWindow ui, time.Duration window) {
+internal static linkedUtilWindow newLinkedUtilWindow⁔(/*this*/ ref mmu m, trace.UtilWindow ui, time.Duration window) {
     // Find the range containing this window.
     Range r = default;
     foreach (var (_, vᴛ1) in range(m.ranges)) {

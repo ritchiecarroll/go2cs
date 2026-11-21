@@ -108,7 +108,7 @@ public static (ж<File>, error) Open(@string name) {
 // Close closes the File.
 // If the File was created using NewFile directly instead of Open,
 // Close has no effect.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref File f) {
+internal static error Close⁔(/*this*/ ref File f) {
     error err = default;
     if (f.closer != nil) {
         err = f.closer.Close();
@@ -121,7 +121,7 @@ public static (ж<File>, error) Open(@string name) {
 // section exists.
 // Xcoff have section's name limited to 8 bytes. Some sections like .gosymtab
 // can be trunked but this method will still find them.
-[GoMethodBody("Section")] internal static ж<Section> Sectionᴍ(ref File f, @string name) {
+internal static ж<Section> Section⁔(/*this*/ ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name || (len(name) > 8 && s.Name == name[..8])) {
             return s;
@@ -132,7 +132,7 @@ public static (ж<File>, error) Open(@string name) {
 
 // SectionByType returns the first section in f with the
 // given type, or nil if there is no such section.
-[GoMethodBody("SectionByType")] internal static ж<Section> SectionByTypeᴍ(ref File f, uint32 typ) {
+internal static ж<Section> SectionByType⁔(/*this*/ ref File f, uint32 typ) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Type == typ) {
             return s;
@@ -523,17 +523,17 @@ partial struct nobitsSectionReader {
 } partial class xcoff_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedReadFromˢᴍnobitsSectionReader => ref unexpectedReadFromˢᵇᴍnobitsSectionReader;
-private static readonly @string unexpectedReadFromˢᵇᴍnobitsSectionReader = "unexpected read from section with uninitialized data"u8;
+internal static ref readonly @string unexpectedReadFromˢ⁔nobitsSectionReader => ref unexpectedReadFromˢᵇ⁔nobitsSectionReader;
+private static readonly @string unexpectedReadFromˢᵇ⁔nobitsSectionReader = "unexpected read from section with uninitialized data"u8;
 
-[GoMethodBody("ReadAt")] internal static (nint n, error err) ReadAtᴍ(ref nobitsSectionReader _, slice<byte> p, int64 off) {
-    return (0, errors.New(unexpectedReadFromˢᴍnobitsSectionReader));
+internal static (nint n, error err) ReadAt⁔(/*this*/ ref nobitsSectionReader _, slice<byte> p, int64 off) {
+    return (0, errors.New(unexpectedReadFromˢ⁔nobitsSectionReader));
 }
 
 } partial class xcoff_package {
 
 // Data reads and returns the contents of the XCOFF section s.
-[GoMethodBody("Data")] internal static (slice<byte>, error) Dataᴍ(ref Section s) {
+internal static (slice<byte>, error) Data⁔(/*this*/ ref Section s) {
     var dat = new slice<byte>((nint)(s.sr.Size()));
     var (n, err) = s.sr.ReadAt(dat, 0);
     if (n == len(dat)) {
@@ -545,7 +545,7 @@ private static readonly @string unexpectedReadFromˢᵇᴍnobitsSectionReader = 
 } partial class xcoff_package {
 
 // CSect reads and returns the contents of a csect.
-[GoMethodBody("CSect")] internal static slice<byte> CSectᴍ(ref File f, @string name) {
+internal static slice<byte> CSect⁔(/*this*/ ref File f, @string name) {
     foreach (var (_, sym) in range(f.Symbols)) {
         if (sym.Name == name && sym.AuxCSect.SymbolType == XTY_SD) {
             nint i = sym.SectionNumber - 1; if (0 <= i && i < len(f.Sections)) {
@@ -565,7 +565,7 @@ private static readonly @string unexpectedReadFromˢᵇᴍnobitsSectionReader = 
     return default;
 }
 
-[GoMethodBody("DWARF")] internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
+internal static (ж<dwarf.Data>, error) DWARF⁔(/*this*/ ref File f) {
     // There are many other DWARF sections, but these
     // are the ones the debug/dwarf package uses.
     // Don't bother loading others.
@@ -588,7 +588,7 @@ private static readonly @string unexpectedReadFromˢᵇᴍnobitsSectionReader = 
 
 // readImportID returns the import file IDs stored inside the .loader section.
 // Library name pattern is either path/base/member or base/member
-[GoMethodBody("readImportIDs")] internal static (slice<@string>, error) readImportIDsᴍ(ref File f, ж<Section> Ꮡs) {
+internal static (slice<@string>, error) readImportIDs⁔(/*this*/ ref File f, ж<Section> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Read loader header
@@ -668,7 +668,7 @@ private static readonly @string unexpectedReadFromˢᵇᴍnobitsSectionReader = 
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
 // It does not return weak symbols.
-[GoMethodBody("ImportedSymbols")] internal static (slice<ImportedSymbol>, error) ImportedSymbolsᴍ(ref File f) {
+internal static (slice<ImportedSymbol>, error) ImportedSymbols⁔(/*this*/ ref File f) {
     var s = f.SectionByType(STYP_LOADER);
     if (s == nil) {
         return (default, default);
@@ -780,7 +780,7 @@ private static readonly @string unexpectedReadFromˢᵇᴍnobitsSectionReader = 
 // ImportedLibraries returns the names of all libraries
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
-[GoMethodBody("ImportedLibraries")] internal static (slice<@string>, error) ImportedLibrariesᴍ(ref File f) {
+internal static (slice<@string>, error) ImportedLibraries⁔(/*this*/ ref File f) {
     var s = f.SectionByType(STYP_LOADER);
     if (s == nil) {
         return (default, default);

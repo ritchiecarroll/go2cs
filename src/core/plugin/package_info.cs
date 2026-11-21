@@ -62,9 +62,12 @@ using static go.plugin_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static plugin_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("plugin")]
 public static partial class plugin_package
@@ -98,11 +101,11 @@ public static partial class plugin_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(plugin_package.Plugin)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pluginᴛPlugin;
+[GoMethodHost(typeof(plugin_package.Plugin)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pluginᴛPlugin;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class pluginᴛPlugin {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Symbol, error) Lookup(this ж<Plugin> Ꮡp, @string symName) => plugin_package.Lookupᴍ(Ꮡp, symName);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Symbol, error) Lookup(this ж<Plugin> Ꮡp, @string symName) => plugin_package.Lookup⁔(Ꮡp, symName);
 }
 // </GlyphForwarders>

@@ -27,19 +27,19 @@ partial struct Writer {
 } partial class stringtab_package {
 
 // InitWriter initializes a stringtab.Writer.
-[GoMethodBody("InitWriter")] internal static void InitWriterᴍ(ref Writer stw) {
+internal static void InitWriter⁔(/*this*/ ref Writer stw) {
     stw.stab = new map<@string, uint32>();
     stw.tmp = new slice<byte>(64);
 }
 
 // Nentries returns the number of strings interned so far.
-[GoMethodBody("Nentries")] internal static uint32 Nentriesᴍ(ref Writer stw) {
+internal static uint32 Nentries⁔(/*this*/ ref Writer stw) {
     return (uint32)len(stw.strs);
 }
 
 // Lookup looks up string 's' in the writer's table, adding
 // a new entry if need be, and returning an index into the table.
-[GoMethodBody("Lookup")] internal static uint32 Lookupᴍ(ref Writer stw, @string s) {
+internal static uint32 Lookup⁔(/*this*/ ref Writer stw, @string s) {
     var (idxΔ1, ok) = stw.stab[s, ꟷ]; if (ok) {
         return idxΔ1;
     }
@@ -54,7 +54,7 @@ partial struct Writer {
 
 // Size computes the memory in bytes needed for the serialized
 // version of a stringtab.Writer.
-[GoMethodBody("Size")] internal static uint32 Sizeᴍ(ref Writer stw) {
+internal static uint32 Size⁔(/*this*/ ref Writer stw) {
     var rval = (uint32)0;
     stw.tmp = stw.tmp[..0];
     stw.tmp = uleb128.AppendUleb128(stw.tmp, (nuint)len(stw.strs));
@@ -70,7 +70,7 @@ partial struct Writer {
 
 // Write writes the string table in serialized form to the specified
 // io.Writer.
-[GoMethodBody("Write")] internal static error Writeᴍ(ж<Writer> Ꮡstw, io.Writer w) {
+internal static error Write⁔(/*this*/ ж<Writer> Ꮡstw, io.Writer w) {
     ref var stw = ref Ꮡstw.DerefOrNull();
 
     error wr128(nuint v) {
@@ -109,7 +109,7 @@ partial struct Writer {
 // allowed, only lookups of existing strings (if a lookup triggers
 // addition, a panic will result). Useful as a mechanism for
 // "finalizing" a string table prior to writing it out.
-[GoMethodBody("Freeze")] internal static void Freezeᴍ(ref Writer stw) {
+internal static void Freeze⁔(/*this*/ ref Writer stw) {
     stw.frozen = true;
 }
 
@@ -134,7 +134,7 @@ public static ж<Reader> NewReader(ж<slicereader.Reader> r) {
 } partial class stringtab_package {
 
 // Read reads/decodes a string table using the reader provided.
-[GoMethodBody("Read")] internal static void Readᴍ(ref Reader str) {
+internal static void Read⁔(/*this*/ ref Reader str) {
     nint numEntries = (nint)str.r.ReadULEB128();
     str.strs = new slice<@string>(0, numEntries);
     for (nint idx = 0; idx < numEntries; idx++) {
@@ -144,12 +144,12 @@ public static ж<Reader> NewReader(ж<slicereader.Reader> r) {
 }
 
 // Entries returns the number of decoded entries in a string table.
-[GoMethodBody("Entries")] internal static nint Entriesᴍ(ref Reader str) {
+internal static nint Entries⁔(/*this*/ ref Reader str) {
     return len(str.strs);
 }
 
 // Get returns string 'idx' within the string table.
-[GoMethodBody("Get")] internal static @string Getᴍ(ref Reader str, uint32 idx) {
+internal static @string Get⁔(/*this*/ ref Reader str, uint32 idx) {
     return str.strs[idx];
 }
 

@@ -25,7 +25,7 @@ internal static array<uint8> _RoundingMode_index = array<uint8>([0, 13, 26, 32, 
 
 } partial class big_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(RoundingMode i) {
+internal static @string String⁔(/*this*/ RoundingMode i) {
     if (i >= ((RoundingMode)(byte)(len(_RoundingMode_index) - 1))) {
         return "RoundingMode("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }

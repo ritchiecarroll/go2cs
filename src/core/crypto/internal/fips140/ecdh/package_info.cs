@@ -69,13 +69,16 @@ using static go.crypto.@internal.fips140.ecdh_package;
 
 namespace go.crypto.@internal.fips140;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140deps;
 using math;
 using static ecdh_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("ecdh")]
 public static partial class ecdh_package
@@ -120,16 +123,16 @@ public static partial class ecdh_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ecdh_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdhᴛPrivateKey;
-[GoMethodHost(typeof(ecdh_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdhᴛPublicKey;
+[GoMethodHost(typeof(ecdh_package.PrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdhᴛPrivateKey;
+[GoMethodHost(typeof(ecdh_package.PublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdhᴛPublicKey;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class ecdhᴛPrivateKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => ecdh_package.Bytesᴍ(ref priv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => ecdh_package.PublicKeyᴍ(Ꮡpriv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => ecdh_package.Bytes⁔(ref priv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<PublicKey> PublicKey(this ж<PrivateKey> Ꮡpriv) => ecdh_package.PublicKey⁔(Ꮡpriv);
 }
 partial class ecdhᴛPublicKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => ecdh_package.Bytesᴍ(ref pub);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => ecdh_package.Bytes⁔(ref pub);
 }
 // </GlyphForwarders>

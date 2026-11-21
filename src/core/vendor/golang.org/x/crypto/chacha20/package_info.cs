@@ -63,13 +63,16 @@ using static go.vendor.golang.org.x.crypto.chacha20_package;
 
 namespace go.vendor.golang.org.x.crypto;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using encoding;
 using go.crypto;
 using go.vendor.golang.org.x.crypto.@internal;
 using math;
 using static chacha20_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("chacha20", ImportPath = "vendor/golang.org/x/crypto/chacha20")]
 public static partial class chacha20_package
@@ -107,16 +110,16 @@ public static partial class chacha20_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(chacha20_package.Cipher)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class chacha20ᴛCipher;
+[GoMethodHost(typeof(chacha20_package.Cipher)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class chacha20ᴛCipher;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class chacha20ᴛCipher {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetCounter(this ref Cipher s, uint32 counter) => chacha20_package.SetCounterᴍ(ref s, counter);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> src) => chacha20_package.XORKeyStreamᴍ(ref s, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void xorKeyStreamBlocksGeneric(this ref Cipher s, slice<byte> dst, slice<byte> src) => chacha20_package.xorKeyStreamBlocksGenericᴍ(ref s, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetCounter(this ref Cipher s, uint32 counter) => chacha20_package.SetCounter⁔(ref s, counter);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void XORKeyStream(this ref Cipher s, slice<byte> dst, slice<byte> src) => chacha20_package.XORKeyStream⁔(ref s, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void xorKeyStreamBlocksGeneric(this ref Cipher s, slice<byte> dst, slice<byte> src) => chacha20_package.xorKeyStreamBlocksGeneric⁔(ref s, dst, src);
 }
 partial class chacha20ᴛCipher {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void xorKeyStreamBlocks(this ref Cipher s, slice<byte> dst, slice<byte> src) => chacha20_package.xorKeyStreamBlocksᴍ(ref s, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void xorKeyStreamBlocks(this ref Cipher s, slice<byte> dst, slice<byte> src) => chacha20_package.xorKeyStreamBlocks⁔(ref s, dst, src);
 }
 // </GlyphForwarders>

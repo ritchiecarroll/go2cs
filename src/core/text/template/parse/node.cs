@@ -41,7 +41,7 @@ partial struct Pos /*num:nint*/;
 
 } partial class parse_package {
 
-[GoMethodBody("Position")] internal static Pos Positionᴍ(Pos p) {
+internal static Pos Position⁔(/*this*/ Pos p) {
     return p;
 }
 
@@ -49,7 +49,7 @@ partial struct Pos /*num:nint*/;
 
 // Type returns itself and provides an easy default implementation
 // for embedding in a Node. Embedded in all non-trivial Nodes.
-[GoMethodBody("Type")] internal static NodeType Typeᴍ(NodeType t) {
+internal static NodeType Type⁔(/*this*/ NodeType t) {
     return t;
 }
 
@@ -91,33 +91,33 @@ partial struct ListNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newList")] internal static ж<ListNode> newListᴍ(ж<Tree> Ꮡt, Pos pos) {
+internal static ж<ListNode> newList⁔(/*this*/ ж<Tree> Ꮡt, Pos pos) {
     return Ꮡ(new ListNode(tr: Ꮡt, NodeType: NodeList, Pos: pos));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("append")] internal static void appendᴍ(ref ListNode l, Node n) {
+internal static void append⁔(/*this*/ ref ListNode l, Node n) {
     l.Nodes = builtin.append(l.Nodes, n);
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref ListNode l) {
+internal static ж<Tree> tree⁔(/*this*/ ref ListNode l) {
     return l.tr;
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref ListNode l) {
+internal static @string String⁔(/*this*/ ref ListNode l) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     l.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref ListNode l, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref ListNode l, ж<strings.Builder> sb) {
     foreach (var (_, n) in range(l.Nodes)) {
         n.writeTo(sb);
     }
 }
 
-[GoMethodBody("CopyList")] internal static ж<ListNode> CopyListᴍ(ж<ListNode> Ꮡl) {
+internal static ж<ListNode> CopyList⁔(/*this*/ ж<ListNode> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (Ꮡl == nil) {
@@ -130,7 +130,7 @@ partial struct ListNode {
     return n;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ж<ListNode> Ꮡl) {
+internal static Node Copy⁔(/*this*/ ж<ListNode> Ꮡl) {
     return new ListNodeжNode(Ꮡl.CopyList());
 }
 
@@ -146,25 +146,25 @@ partial struct TextNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newText")] internal static ж<TextNode> newTextᴍ(ж<Tree> Ꮡt, Pos pos, @string text) {
+internal static ж<TextNode> newText⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, @string text) {
     return Ꮡ(new TextNode(tr: Ꮡt, NodeType: NodeText, Pos: pos, Text: slice<byte>(text)));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref TextNode t) {
+internal static @string String⁔(/*this*/ ref TextNode t) {
     return fmt.Sprintf(textFormat, t.Text);
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref TextNode t, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref TextNode t, ж<strings.Builder> sb) {
     sb.WriteString(t.String());
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref TextNode t) {
+internal static ж<Tree> tree⁔(/*this*/ ref TextNode t) {
     return t.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref TextNode t) {
+internal static Node Copy⁔(/*this*/ ref TextNode t) {
     return new TextNodeжNode(Ꮡ(new TextNode(tr: t.tr, NodeType: NodeText, Pos: t.Pos, Text: appendꓸꓸꓸ(slice<byte>([]), t.Text))));
 }
 
@@ -180,29 +180,29 @@ partial struct CommentNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newComment")] internal static ж<CommentNode> newCommentᴍ(ж<Tree> Ꮡt, Pos pos, @string text) {
+internal static ж<CommentNode> newComment⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, @string text) {
     return Ꮡ(new CommentNode(tr: Ꮡt, NodeType: NodeComment, Pos: pos, Text: text));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref CommentNode c) {
+internal static @string String⁔(/*this*/ ref CommentNode c) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     c.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref CommentNode c, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref CommentNode c, ж<strings.Builder> sb) {
     sb.WriteString("{{");
     sb.WriteString(c.Text);
     sb.WriteString("}}");
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref CommentNode c) {
+internal static ж<Tree> tree⁔(/*this*/ ref CommentNode c) {
     return c.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref CommentNode c) {
+internal static Node Copy⁔(/*this*/ ref CommentNode c) {
     return new CommentNodeжNode(Ꮡ(new CommentNode(tr: c.tr, NodeType: NodeComment, Pos: c.Pos, Text: c.Text)));
 }
 
@@ -221,23 +221,23 @@ partial struct PipeNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newPipeline")] internal static ж<PipeNode> newPipelineᴍ(ж<Tree> Ꮡt, Pos pos, nint line, slice<ж<VariableNode>> vars) {
+internal static ж<PipeNode> newPipeline⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint line, slice<ж<VariableNode>> vars) {
     return Ꮡ(new PipeNode(tr: Ꮡt, NodeType: NodePipe, Pos: pos, Line: line, Decl: vars));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("append")] internal static void appendᴍ(ref PipeNode p, ж<CommandNode> command) {
+internal static void append⁔(/*this*/ ref PipeNode p, ж<CommandNode> command) {
     p.Cmds = builtin.append(p.Cmds, command);
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref PipeNode p) {
+internal static @string String⁔(/*this*/ ref PipeNode p) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     p.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref PipeNode p, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref PipeNode p, ж<strings.Builder> sb) {
     if (len(p.Decl) > 0) {
         foreach (var (i, v) in range(p.Decl)) {
             if (i > 0) {
@@ -259,11 +259,11 @@ partial struct PipeNode {
     }
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref PipeNode p) {
+internal static ж<Tree> tree⁔(/*this*/ ref PipeNode p) {
     return p.tr;
 }
 
-[GoMethodBody("CopyPipe")] internal static ж<PipeNode> CopyPipeᴍ(ж<PipeNode> Ꮡp) {
+internal static ж<PipeNode> CopyPipe⁔(/*this*/ ж<PipeNode> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (Ꮡp == nil) {
@@ -281,7 +281,7 @@ partial struct PipeNode {
     return n;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ж<PipeNode> Ꮡp) {
+internal static Node Copy⁔(/*this*/ ж<PipeNode> Ꮡp) {
     return new PipeNodeжNode(Ꮡp.CopyPipe());
 }
 
@@ -300,29 +300,29 @@ partial struct ActionNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newAction")] internal static ж<ActionNode> newActionᴍ(ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> pipe) {
+internal static ж<ActionNode> newAction⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> pipe) {
     return Ꮡ(new ActionNode(tr: Ꮡt, NodeType: NodeAction, Pos: pos, Line: line, Pipe: pipe));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref ActionNode a) {
+internal static @string String⁔(/*this*/ ref ActionNode a) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     a.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref ActionNode a, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref ActionNode a, ж<strings.Builder> sb) {
     sb.WriteString("{{");
     a.Pipe.writeTo(sb);
     sb.WriteString("}}");
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref ActionNode a) {
+internal static ж<Tree> tree⁔(/*this*/ ref ActionNode a) {
     return a.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref ActionNode a) {
+internal static Node Copy⁔(/*this*/ ref ActionNode a) {
     return new ActionNodeжNode(a.tr.newAction(a.Pos, a.Line, a.Pipe.CopyPipe()));
 }
 
@@ -338,23 +338,23 @@ partial struct CommandNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newCommand")] internal static ж<CommandNode> newCommandᴍ(ж<Tree> Ꮡt, Pos pos) {
+internal static ж<CommandNode> newCommand⁔(/*this*/ ж<Tree> Ꮡt, Pos pos) {
     return Ꮡ(new CommandNode(tr: Ꮡt, NodeType: NodeCommand, Pos: pos));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("append")] internal static void appendᴍ(ref CommandNode c, Node arg) {
+internal static void append⁔(/*this*/ ref CommandNode c, Node arg) {
     c.Args = builtin.append(c.Args, arg);
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref CommandNode c) {
+internal static @string String⁔(/*this*/ ref CommandNode c) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     c.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref CommandNode c, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref CommandNode c, ж<strings.Builder> sb) {
     foreach (var (i, arg) in range(c.Args)) {
         if (i > 0) {
             sb.WriteByte((byte)' ');
@@ -369,11 +369,11 @@ partial struct CommandNode {
     }
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref CommandNode c) {
+internal static ж<Tree> tree⁔(/*this*/ ref CommandNode c) {
     return c.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ж<CommandNode> Ꮡc) {
+internal static Node Copy⁔(/*this*/ ж<CommandNode> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (Ꮡc == nil) {
@@ -406,7 +406,7 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 // SetPos sets the position. [NewIdentifier] is a public method so we can't modify its signature.
 // Chained for convenience.
 // TODO: fix one day?
-[GoMethodBody("SetPos")] internal static ж<IdentifierNode> SetPosᴍ(ж<IdentifierNode> Ꮡi, Pos pos) {
+internal static ж<IdentifierNode> SetPos⁔(/*this*/ ж<IdentifierNode> Ꮡi, Pos pos) {
     ref var i = ref Ꮡi.DerefOrNull();
 
     i.Pos = pos;
@@ -416,26 +416,26 @@ public static ж<IdentifierNode> NewIdentifier(@string ident) {
 // SetTree sets the parent tree for the node. [NewIdentifier] is a public method so we can't modify its signature.
 // Chained for convenience.
 // TODO: fix one day?
-[GoMethodBody("SetTree")] internal static ж<IdentifierNode> SetTreeᴍ(ж<IdentifierNode> Ꮡi, ж<Tree> t) {
+internal static ж<IdentifierNode> SetTree⁔(/*this*/ ж<IdentifierNode> Ꮡi, ж<Tree> t) {
     ref var i = ref Ꮡi.DerefOrNull();
 
     i.tr = t;
     return Ꮡi;
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref IdentifierNode i) {
+internal static @string String⁔(/*this*/ ref IdentifierNode i) {
     return i.Ident;
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref IdentifierNode i, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref IdentifierNode i, ж<strings.Builder> sb) {
     sb.WriteString(i.String());
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref IdentifierNode i) {
+internal static ж<Tree> tree⁔(/*this*/ ref IdentifierNode i) {
     return i.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref IdentifierNode i) {
+internal static Node Copy⁔(/*this*/ ref IdentifierNode i) {
     return new IdentifierNodeжNode(NewIdentifier(i.Ident).SetTree(i.tr).SetPos(i.Pos));
 }
 
@@ -452,19 +452,19 @@ partial struct VariableNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newVariable")] internal static ж<VariableNode> newVariableᴍ(ж<Tree> Ꮡt, Pos pos, @string ident) {
+internal static ж<VariableNode> newVariable⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, @string ident) {
     return Ꮡ(new VariableNode(tr: Ꮡt, NodeType: NodeVariable, Pos: pos, Ident: strings.Split(ident, ".")));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref VariableNode v) {
+internal static @string String⁔(/*this*/ ref VariableNode v) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     v.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref VariableNode v, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref VariableNode v, ж<strings.Builder> sb) {
     foreach (var (i, id) in range(v.Ident)) {
         if (i > 0) {
             sb.WriteByte((byte)'.');
@@ -473,11 +473,11 @@ partial struct VariableNode {
     }
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref VariableNode v) {
+internal static ж<Tree> tree⁔(/*this*/ ref VariableNode v) {
     return v.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref VariableNode v) {
+internal static Node Copy⁔(/*this*/ ref VariableNode v) {
     return new VariableNodeжNode(Ꮡ(new VariableNode(tr: v.tr, NodeType: NodeVariable, Pos: v.Pos, Ident: appendꓸꓸꓸ(slice<@string>([]), v.Ident))));
 }
 
@@ -492,32 +492,32 @@ partial struct DotNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newDot")] internal static ж<DotNode> newDotᴍ(ж<Tree> Ꮡt, Pos pos) {
+internal static ж<DotNode> newDot⁔(/*this*/ ж<Tree> Ꮡt, Pos pos) {
     return Ꮡ(new DotNode(tr: Ꮡt, NodeType: NodeDot, Pos: pos));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("Type")] internal static NodeType Typeᴍ(ref DotNode d) {
+internal static NodeType Type⁔(/*this*/ ref DotNode d) {
     // Override method on embedded NodeType for API compatibility.
     // TODO: Not really a problem; could change API without effect but
     // api tool complains.
     return NodeDot;
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref DotNode d) {
+internal static @string String⁔(/*this*/ ref DotNode d) {
     return ".";
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref DotNode d, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref DotNode d, ж<strings.Builder> sb) {
     sb.WriteString(d.String());
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref DotNode d) {
+internal static ж<Tree> tree⁔(/*this*/ ref DotNode d) {
     return d.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref DotNode d) {
+internal static Node Copy⁔(/*this*/ ref DotNode d) {
     return new DotNodeжNode(d.tr.newDot(d.Pos));
 }
 
@@ -532,13 +532,13 @@ partial struct NilNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newNil")] internal static ж<NilNode> newNilᴍ(ж<Tree> Ꮡt, Pos pos) {
+internal static ж<NilNode> newNil⁔(/*this*/ ж<Tree> Ꮡt, Pos pos) {
     return Ꮡ(new NilNode(tr: Ꮡt, NodeType: NodeNil, Pos: pos));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("Type")] internal static NodeType Typeᴍ(ref NilNode n) {
+internal static NodeType Type⁔(/*this*/ ref NilNode n) {
     // Override method on embedded NodeType for API compatibility.
     // TODO: Not really a problem; could change API without effect but
     // api tool complains.
@@ -546,22 +546,22 @@ partial struct NilNode {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢᴍNilNode => ref nilˢᵇᴍNilNode;
-private static readonly @string nilˢᵇᴍNilNode = "nil"u8;
+internal static ref readonly @string nilˢ⁔NilNode => ref nilˢᵇ⁔NilNode;
+private static readonly @string nilˢᵇ⁔NilNode = "nil"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref NilNode n) {
-    return nilˢᴍNilNode;
+internal static @string String⁔(/*this*/ ref NilNode n) {
+    return nilˢ⁔NilNode;
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref NilNode n, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref NilNode n, ж<strings.Builder> sb) {
     sb.WriteString(n.String());
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref NilNode n) {
+internal static ж<Tree> tree⁔(/*this*/ ref NilNode n) {
     return n.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref NilNode n) {
+internal static Node Copy⁔(/*this*/ ref NilNode n) {
     return new NilNodeжNode(n.tr.newNil(n.Pos));
 }
 
@@ -579,30 +579,30 @@ partial struct FieldNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newField")] internal static ж<FieldNode> newFieldᴍ(ж<Tree> Ꮡt, Pos pos, @string ident) {
+internal static ж<FieldNode> newField⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, @string ident) {
     return Ꮡ(new FieldNode(tr: Ꮡt, NodeType: NodeField, Pos: pos, Ident: strings.Split(ident[1..], "."))); // [1:] to drop leading period
 }
 
 } partial class parse_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref FieldNode f) {
+internal static @string String⁔(/*this*/ ref FieldNode f) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     f.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref FieldNode f, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref FieldNode f, ж<strings.Builder> sb) {
     foreach (var (_, id) in range(f.Ident)) {
         sb.WriteByte((byte)'.');
         sb.WriteString(id);
     }
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref FieldNode f) {
+internal static ж<Tree> tree⁔(/*this*/ ref FieldNode f) {
     return f.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref FieldNode f) {
+internal static Node Copy⁔(/*this*/ ref FieldNode f) {
     return new FieldNodeжNode(Ꮡ(new FieldNode(tr: f.tr, NodeType: NodeField, Pos: f.Pos, Ident: appendꓸꓸꓸ(slice<@string>([]), f.Ident))));
 }
 
@@ -621,14 +621,14 @@ partial struct ChainNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newChain")] internal static ж<ChainNode> newChainᴍ(ж<Tree> Ꮡt, Pos pos, Node node) {
+internal static ж<ChainNode> newChain⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, Node node) {
     return Ꮡ(new ChainNode(tr: Ꮡt, NodeType: NodeChain, Pos: pos, Node: node));
 }
 
 } partial class parse_package {
 
 // Add adds the named field (which should start with a period) to the end of the chain.
-[GoMethodBody("Add")] internal static void Addᴍ(ref ChainNode c, @string field) {
+internal static void Add⁔(/*this*/ ref ChainNode c, @string field) {
     if (len(field) == 0 || field[0] != '.') {
         throw panic("no dot in field");
     }
@@ -639,13 +639,13 @@ partial struct ChainNode {
     c.Field = append(c.Field, field);
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref ChainNode c) {
+internal static @string String⁔(/*this*/ ref ChainNode c) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     c.writeTo(Ꮡsb);
     return sb.String();
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref ChainNode c, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref ChainNode c, ж<strings.Builder> sb) {
     var (_, ok) = c.Node._<ж<PipeNode>>(ᐧ); if (ok) {
         sb.WriteByte((byte)'(');
         c.Node.writeTo(sb);
@@ -659,11 +659,11 @@ partial struct ChainNode {
     }
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref ChainNode c) {
+internal static ж<Tree> tree⁔(/*this*/ ref ChainNode c) {
     return c.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref ChainNode c) {
+internal static Node Copy⁔(/*this*/ ref ChainNode c) {
     return new ChainNodeжNode(Ꮡ(new ChainNode(tr: c.tr, NodeType: NodeChain, Pos: c.Pos, Node: c.Node, Field: appendꓸꓸꓸ(slice<@string>([]), c.Field))));
 }
 
@@ -679,34 +679,34 @@ partial struct BoolNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newBool")] internal static ж<BoolNode> newBoolᴍ(ж<Tree> Ꮡt, Pos pos, bool @true) {
+internal static ж<BoolNode> newBool⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, bool @true) {
     return Ꮡ(new BoolNode(tr: Ꮡt, NodeType: NodeBool, Pos: pos, True: @true));
 }
 
 } partial class parse_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string trueˢᴍBoolNode => ref trueˢᵇᴍBoolNode;
-private static readonly @string trueˢᵇᴍBoolNode = "true"u8;
-internal static ref readonly @string falseˢᴍBoolNode => ref falseˢᵇᴍBoolNode;
-private static readonly @string falseˢᵇᴍBoolNode = "false"u8;
+internal static ref readonly @string trueˢ⁔BoolNode => ref trueˢᵇ⁔BoolNode;
+private static readonly @string trueˢᵇ⁔BoolNode = "true"u8;
+internal static ref readonly @string falseˢ⁔BoolNode => ref falseˢᵇ⁔BoolNode;
+private static readonly @string falseˢᵇ⁔BoolNode = "false"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref BoolNode b) {
+internal static @string String⁔(/*this*/ ref BoolNode b) {
     if (b.True) {
-        return trueˢᴍBoolNode;
+        return trueˢ⁔BoolNode;
     }
-    return falseˢᴍBoolNode;
+    return falseˢ⁔BoolNode;
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref BoolNode b, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref BoolNode b, ж<strings.Builder> sb) {
     sb.WriteString(b.String());
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref BoolNode b) {
+internal static ж<Tree> tree⁔(/*this*/ ref BoolNode b) {
     return b.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref BoolNode b) {
+internal static Node Copy⁔(/*this*/ ref BoolNode b) {
     return new BoolNodeжNode(b.tr.newBool(b.Pos, b.True));
 }
 
@@ -733,10 +733,10 @@ partial struct NumberNode {
 } partial class parse_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string eEpPˢᴍTree => ref eEpPˢᵇᴍTree;
-private static readonly @string eEpPˢᵇᴍTree = ".eEpP"u8;
+internal static ref readonly @string eEpPˢ⁔Tree => ref eEpPˢᵇ⁔Tree;
+private static readonly @string eEpPˢᵇ⁔Tree = ".eEpP"u8;
 
-[GoMethodBody("newNumber")] internal static (ж<NumberNode>, error) newNumberᴍ(ж<Tree> Ꮡt, Pos pos, @string text, itemType typ) {
+internal static (ж<NumberNode>, error) newNumber⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, @string text, itemType typ) {
     var n = Ꮡ(new NumberNode(tr: Ꮡt, NodeType: NodeNumber, Pos: pos, Text: text));
     switch (typ) {
     case var ᴛ when ᴛ == itemCharConstant: {
@@ -801,7 +801,7 @@ private static readonly @string eEpPˢᵇᴍTree = ".eEpP"u8;
         if (errΔ6 == nil) {
             // If we parsed it as a float but it looks like an integer,
             // it's a huge number too large to fit in an int. Reject it.
-            if (!strings.ContainsAny(text, eEpPˢᴍTree)) {
+            if (!strings.ContainsAny(text, eEpPˢ⁔Tree)) {
                 return (default, fmt.Errorf("integer overflow: %q"u8, text));
             }
             n.IsFloat = true;
@@ -827,7 +827,7 @@ private static readonly @string eEpPˢᵇᴍTree = ".eEpP"u8;
 
 // simplifyComplex pulls out any other types that are represented by the complex number.
 // These all require that the imaginary part be zero.
-[GoMethodBody("simplifyComplex")] internal static void simplifyComplexᴍ(ref NumberNode n) {
+internal static void simplifyComplex⁔(/*this*/ ref NumberNode n) {
     n.IsFloat = imag(n.Complex128) == 0D;
     if (n.IsFloat) {
         n.Float64 = real(n.Complex128);
@@ -842,19 +842,19 @@ private static readonly @string eEpPˢᵇᴍTree = ".eEpP"u8;
     }
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref NumberNode n) {
+internal static @string String⁔(/*this*/ ref NumberNode n) {
     return n.Text;
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref NumberNode n, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref NumberNode n, ж<strings.Builder> sb) {
     sb.WriteString(n.String());
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref NumberNode n) {
+internal static ж<Tree> tree⁔(/*this*/ ref NumberNode n) {
     return n.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref NumberNode n) {
+internal static Node Copy⁔(/*this*/ ref NumberNode n) {
     var nn = @new<NumberNode>();
     nn.Value = n; // Easy, fast, correct.
     return new NumberNodeжNode(nn);
@@ -873,25 +873,25 @@ partial struct StringNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newString")] internal static ж<StringNode> newStringᴍ(ж<Tree> Ꮡt, Pos pos, @string orig, @string text) {
+internal static ж<StringNode> newString⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, @string orig, @string text) {
     return Ꮡ(new StringNode(tr: Ꮡt, NodeType: NodeString, Pos: pos, Quoted: orig, Text: text));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref StringNode s) {
+internal static @string String⁔(/*this*/ ref StringNode s) {
     return s.Quoted;
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref StringNode s, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref StringNode s, ж<strings.Builder> sb) {
     sb.WriteString(s.String());
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref StringNode s) {
+internal static ж<Tree> tree⁔(/*this*/ ref StringNode s) {
     return s.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref StringNode s) {
+internal static Node Copy⁔(/*this*/ ref StringNode s) {
     return new StringNodeжNode(s.tr.newString(s.Pos, s.Quoted, s.Text));
 }
 
@@ -907,29 +907,29 @@ partial struct endNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newEnd")] internal static ж<endNode> newEndᴍ(ж<Tree> Ꮡt, Pos pos) {
+internal static ж<endNode> newEnd⁔(/*this*/ ж<Tree> Ꮡt, Pos pos) {
     return Ꮡ(new endNode(tr: Ꮡt, NodeType: nodeEnd, Pos: pos));
 }
 
 } partial class parse_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string endˢᴍendNode => ref endˢᵇᴍendNode;
-private static readonly @string endˢᵇᴍendNode = "{{end}}"u8;
+internal static ref readonly @string endˢ⁔endNode => ref endˢᵇ⁔endNode;
+private static readonly @string endˢᵇ⁔endNode = "{{end}}"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref endNode e) {
-    return endˢᴍendNode;
+internal static @string String⁔(/*this*/ ref endNode e) {
+    return endˢ⁔endNode;
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref endNode e, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref endNode e, ж<strings.Builder> sb) {
     sb.WriteString(e.String());
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref endNode e) {
+internal static ж<Tree> tree⁔(/*this*/ ref endNode e) {
     return e.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref endNode e) {
+internal static Node Copy⁔(/*this*/ ref endNode e) {
     return new endNodeжNode(e.tr.newEnd(e.Pos));
 }
 
@@ -945,33 +945,33 @@ partial struct elseNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newElse")] internal static ж<elseNode> newElseᴍ(ж<Tree> Ꮡt, Pos pos, nint line) {
+internal static ж<elseNode> newElse⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint line) {
     return Ꮡ(new elseNode(tr: Ꮡt, NodeType: nodeElse, Pos: pos, Line: line));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("Type")] internal static NodeType Typeᴍ(ref elseNode e) {
+internal static NodeType Type⁔(/*this*/ ref elseNode e) {
     return nodeElse;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string elseˢᴍelseNode => ref elseˢᵇᴍelseNode;
-private static readonly @string elseˢᵇᴍelseNode = "{{else}}"u8;
+internal static ref readonly @string elseˢ⁔elseNode => ref elseˢᵇ⁔elseNode;
+private static readonly @string elseˢᵇ⁔elseNode = "{{else}}"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref elseNode e) {
-    return elseˢᴍelseNode;
+internal static @string String⁔(/*this*/ ref elseNode e) {
+    return elseˢ⁔elseNode;
 }
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref elseNode e, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref elseNode e, ж<strings.Builder> sb) {
     sb.WriteString(e.String());
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref elseNode e) {
+internal static ж<Tree> tree⁔(/*this*/ ref elseNode e) {
     return e.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref elseNode e) {
+internal static Node Copy⁔(/*this*/ ref elseNode e) {
     return new elseNodeжNode(e.tr.newElse(e.Pos, e.Line));
 }
 
@@ -990,23 +990,23 @@ partial struct BranchNode {
 
 } partial class parse_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref BranchNode b) {
+internal static @string String⁔(/*this*/ ref BranchNode b) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     b.writeTo(Ꮡsb);
     return sb.String();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string rangeˢᴍBranchNode => ref rangeˢᵇᴍBranchNode;
-private static readonly @string rangeˢᵇᴍBranchNode = "range"u8;
-internal static ref readonly @string withˢᴍBranchNode => ref withˢᵇᴍBranchNode;
-private static readonly @string withˢᵇᴍBranchNode = "with"u8;
-internal static ref readonly @string elseˢᴍBranchNode => ref elseˢᵇᴍBranchNode;
-private static readonly @string elseˢᵇᴍBranchNode = "{{else}}"u8;
-internal static ref readonly @string endˢᴍBranchNode => ref endˢᵇᴍBranchNode;
-private static readonly @string endˢᵇᴍBranchNode = "{{end}}"u8;
+internal static ref readonly @string rangeˢ⁔BranchNode => ref rangeˢᵇ⁔BranchNode;
+private static readonly @string rangeˢᵇ⁔BranchNode = "range"u8;
+internal static ref readonly @string withˢ⁔BranchNode => ref withˢᵇ⁔BranchNode;
+private static readonly @string withˢᵇ⁔BranchNode = "with"u8;
+internal static ref readonly @string elseˢ⁔BranchNode => ref elseˢᵇ⁔BranchNode;
+private static readonly @string elseˢᵇ⁔BranchNode = "{{else}}"u8;
+internal static ref readonly @string endˢ⁔BranchNode => ref endˢᵇ⁔BranchNode;
+private static readonly @string endˢᵇ⁔BranchNode = "{{end}}"u8;
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref BranchNode b, ж<strings.Builder> sb) {
+internal static void writeTo⁔(/*this*/ ref BranchNode b, ж<strings.Builder> sb) {
     @string name = ""u8;
     switch (b.NodeType) {
     case var ᴛ when ᴛ == NodeIf: {
@@ -1014,11 +1014,11 @@ private static readonly @string endˢᵇᴍBranchNode = "{{end}}"u8;
         break;
     }
     case var ᴛ when ᴛ == NodeRange: {
-        name = rangeˢᴍBranchNode;
+        name = rangeˢ⁔BranchNode;
         break;
     }
     case var ᴛ when ᴛ == NodeWith: {
-        name = withˢᴍBranchNode;
+        name = withˢ⁔BranchNode;
         break;
     }
     default: {
@@ -1032,17 +1032,17 @@ private static readonly @string endˢᵇᴍBranchNode = "{{end}}"u8;
     sb.WriteString("}}");
     b.List.writeTo(sb);
     if (b.ElseList != nil) {
-        sb.WriteString(elseˢᴍBranchNode);
+        sb.WriteString(elseˢ⁔BranchNode);
         b.ElseList.writeTo(sb);
     }
-    sb.WriteString(endˢᴍBranchNode);
+    sb.WriteString(endˢ⁔BranchNode);
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref BranchNode b) {
+internal static ж<Tree> tree⁔(/*this*/ ref BranchNode b) {
     return b.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref BranchNode b) {
+internal static Node Copy⁔(/*this*/ ref BranchNode b) {
     switch (b.NodeType) {
     case var ᴛ when ᴛ == NodeIf: {
         return new IfNodeжNode(b.tr.newIf(b.Pos, b.Line, b.Pipe, b.List, b.ElseList));
@@ -1068,13 +1068,13 @@ partial struct IfNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newIf")] internal static ж<IfNode> newIfᴍ(ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<ListNode> elseList) {
+internal static ж<IfNode> newIf⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<ListNode> elseList) {
     return Ꮡ(new IfNode(new BranchNode(tr: Ꮡt, NodeType: NodeIf, Pos: pos, Line: line, Pipe: pipe, List: list, ElseList: elseList)));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref IfNode i) {
+internal static Node Copy⁔(/*this*/ ref IfNode i) {
     return new IfNodeжNode(i.tr.newIf(i.Pos, i.Line, i.Pipe.CopyPipe(), i.List.CopyList(), i.ElseList.CopyList()));
 }
 
@@ -1090,20 +1090,20 @@ partial struct BreakNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newBreak")] internal static ж<BreakNode> newBreakᴍ(ж<Tree> Ꮡt, Pos pos, nint line) {
+internal static ж<BreakNode> newBreak⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint line) {
     return Ꮡ(new BreakNode(tr: Ꮡt, NodeType: NodeBreak, Pos: pos, Line: line));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref BreakNode b) { return new BreakNodeжNode(b.tr.newBreak(b.Pos, b.Line)); }
+internal static Node Copy⁔(/*this*/ ref BreakNode b) { return new BreakNodeжNode(b.tr.newBreak(b.Pos, b.Line)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string breakˢᴍBreakNode => ref breakˢᵇᴍBreakNode;
-private static readonly @string breakˢᵇᴍBreakNode = "{{break}}"u8;
+internal static ref readonly @string breakˢ⁔BreakNode => ref breakˢᵇ⁔BreakNode;
+private static readonly @string breakˢᵇ⁔BreakNode = "{{break}}"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref BreakNode b) { return breakˢᴍBreakNode; }
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref BreakNode b) { return b.tr; }
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref BreakNode b, ж<strings.Builder> sb) { sb.WriteString(breakˢᴍBreakNode); }
+internal static @string String⁔(/*this*/ ref BreakNode b) { return breakˢ⁔BreakNode; }
+internal static ж<Tree> tree⁔(/*this*/ ref BreakNode b) { return b.tr; }
+internal static void writeTo⁔(/*this*/ ref BreakNode b, ж<strings.Builder> sb) { sb.WriteString(breakˢ⁔BreakNode); }
 
 } partial class parse_package {
 
@@ -1117,20 +1117,20 @@ partial struct ContinueNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newContinue")] internal static ж<ContinueNode> newContinueᴍ(ж<Tree> Ꮡt, Pos pos, nint line) {
+internal static ж<ContinueNode> newContinue⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint line) {
     return Ꮡ(new ContinueNode(tr: Ꮡt, NodeType: NodeContinue, Pos: pos, Line: line));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref ContinueNode c) { return new ContinueNodeжNode(c.tr.newContinue(c.Pos, c.Line)); }
+internal static Node Copy⁔(/*this*/ ref ContinueNode c) { return new ContinueNodeжNode(c.tr.newContinue(c.Pos, c.Line)); }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string continueˢᴍContinueNode => ref continueˢᵇᴍContinueNode;
-private static readonly @string continueˢᵇᴍContinueNode = "{{continue}}"u8;
+internal static ref readonly @string continueˢ⁔ContinueNode => ref continueˢᵇ⁔ContinueNode;
+private static readonly @string continueˢᵇ⁔ContinueNode = "{{continue}}"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref ContinueNode c) { return continueˢᴍContinueNode; }
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref ContinueNode c) { return c.tr; }
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref ContinueNode c, ж<strings.Builder> sb) { sb.WriteString(continueˢᴍContinueNode); }
+internal static @string String⁔(/*this*/ ref ContinueNode c) { return continueˢ⁔ContinueNode; }
+internal static ж<Tree> tree⁔(/*this*/ ref ContinueNode c) { return c.tr; }
+internal static void writeTo⁔(/*this*/ ref ContinueNode c, ж<strings.Builder> sb) { sb.WriteString(continueˢ⁔ContinueNode); }
 
 } partial class parse_package {
 
@@ -1141,13 +1141,13 @@ partial struct RangeNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newRange")] internal static ж<RangeNode> newRangeᴍ(ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<ListNode> elseList) {
+internal static ж<RangeNode> newRange⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<ListNode> elseList) {
     return Ꮡ(new RangeNode(new BranchNode(tr: Ꮡt, NodeType: NodeRange, Pos: pos, Line: line, Pipe: pipe, List: list, ElseList: elseList)));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref RangeNode r) {
+internal static Node Copy⁔(/*this*/ ref RangeNode r) {
     return new RangeNodeжNode(r.tr.newRange(r.Pos, r.Line, r.Pipe.CopyPipe(), r.List.CopyList(), r.ElseList.CopyList()));
 }
 
@@ -1160,13 +1160,13 @@ partial struct WithNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newWith")] internal static ж<WithNode> newWithᴍ(ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<ListNode> elseList) {
+internal static ж<WithNode> newWith⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<ListNode> elseList) {
     return Ꮡ(new WithNode(new BranchNode(tr: Ꮡt, NodeType: NodeWith, Pos: pos, Line: line, Pipe: pipe, List: list, ElseList: elseList)));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref WithNode w) {
+internal static Node Copy⁔(/*this*/ ref WithNode w) {
     return new WithNodeжNode(w.tr.newWith(w.Pos, w.Line, w.Pipe.CopyPipe(), w.List.CopyList(), w.ElseList.CopyList()));
 }
 
@@ -1184,24 +1184,24 @@ partial struct TemplateNode {
 
 } partial class parse_package {
 
-[GoMethodBody("newTemplate")] internal static ж<TemplateNode> newTemplateᴍ(ж<Tree> Ꮡt, Pos pos, nint line, @string name, ж<PipeNode> pipe) {
+internal static ж<TemplateNode> newTemplate⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint line, @string name, ж<PipeNode> pipe) {
     return Ꮡ(new TemplateNode(tr: Ꮡt, NodeType: NodeTemplate, Pos: pos, Line: line, Name: name, Pipe: pipe));
 }
 
 } partial class parse_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref TemplateNode t) {
+internal static @string String⁔(/*this*/ ref TemplateNode t) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     t.writeTo(Ꮡsb);
     return sb.String();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string templateˢᴍTemplateNode => ref templateˢᵇᴍTemplateNode;
-private static readonly @string templateˢᵇᴍTemplateNode = "{{template "u8;
+internal static ref readonly @string templateˢ⁔TemplateNode => ref templateˢᵇ⁔TemplateNode;
+private static readonly @string templateˢᵇ⁔TemplateNode = "{{template "u8;
 
-[GoMethodBody("writeTo")] internal static void writeToᴍ(ref TemplateNode t, ж<strings.Builder> sb) {
-    sb.WriteString(templateˢᴍTemplateNode);
+internal static void writeTo⁔(/*this*/ ref TemplateNode t, ж<strings.Builder> sb) {
+    sb.WriteString(templateˢ⁔TemplateNode);
     sb.WriteString(strconv.Quote(t.Name));
     if (t.Pipe != nil) {
         sb.WriteByte((byte)' ');
@@ -1210,11 +1210,11 @@ private static readonly @string templateˢᵇᴍTemplateNode = "{{template "u8;
     sb.WriteString("}}");
 }
 
-[GoMethodBody("tree")] internal static ж<Tree> treeᴍ(ref TemplateNode t) {
+internal static ж<Tree> tree⁔(/*this*/ ref TemplateNode t) {
     return t.tr;
 }
 
-[GoMethodBody("Copy")] internal static Node Copyᴍ(ref TemplateNode t) {
+internal static Node Copy⁔(/*this*/ ref TemplateNode t) {
     return new TemplateNodeжNode(t.tr.newTemplate(t.Pos, t.Line, t.Name, t.Pipe.CopyPipe()));
 }
 

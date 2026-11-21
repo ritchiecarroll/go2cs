@@ -66,11 +66,14 @@ using static go.crypto.@internal.fips140.ed25519_package;
 
 namespace go.crypto.@internal.fips140;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using static ed25519_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("ed25519")]
 public static partial class ed25519_package
@@ -112,17 +115,17 @@ public static partial class ed25519_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ed25519_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519ᴛPrivateKey;
-[GoMethodHost(typeof(ed25519_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ed25519ᴛPublicKey;
+[GoMethodHost(typeof(ed25519_package.PrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ed25519ᴛPrivateKey;
+[GoMethodHost(typeof(ed25519_package.PublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ed25519ᴛPublicKey;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class ed25519ᴛPrivateKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => ed25519_package.Bytesᴍ(ref priv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Seed(this ref PrivateKey priv) => ed25519_package.Seedᴍ(ref priv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> PublicKey(this ref PrivateKey priv) => ed25519_package.PublicKeyᴍ(ref priv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PrivateKey priv) => ed25519_package.Bytes⁔(ref priv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Seed(this ref PrivateKey priv) => ed25519_package.Seed⁔(ref priv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> PublicKey(this ref PrivateKey priv) => ed25519_package.PublicKey⁔(ref priv);
 }
 partial class ed25519ᴛPublicKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => ed25519_package.Bytesᴍ(ref pub);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKey pub) => ed25519_package.Bytes⁔(ref pub);
 }
 // </GlyphForwarders>

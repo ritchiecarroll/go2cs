@@ -22,7 +22,7 @@ partial struct DecodingError {
 
 } partial class hpack_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(DecodingError de) {
+internal static @string Error⁔(/*this*/ DecodingError de) {
     return fmt.Sprintf("decoding error: %v"u8, de.Err);
 }
 
@@ -34,7 +34,7 @@ partial struct InvalidIndexError /*num:nint*/;
 
 } partial class hpack_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(InvalidIndexError e) {
+internal static @string Error⁔(/*this*/ InvalidIndexError e) {
     return fmt.Sprintf("invalid indexed representation index %d"u8, (nint)e);
 }
 
@@ -55,24 +55,24 @@ partial struct HeaderField {
 // That is, it reports whether it starts with a colon.
 // It is not otherwise guaranteed to be a valid pseudo header field,
 // though.
-[GoMethodBody("IsPseudo")] internal static bool IsPseudoᴍ(HeaderField hf) {
+internal static bool IsPseudo⁔(/*this*/ HeaderField hf) {
     return len(hf.Name) != 0 && hf.Name[0] == ':';
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string sensitiveˢᴍHeaderField => ref sensitiveˢᵇᴍHeaderField;
-private static readonly @string sensitiveˢᵇᴍHeaderField = " (sensitive)"u8;
+private static ref readonly @string sensitiveˢ⁔HeaderField => ref sensitiveˢᵇ⁔HeaderField;
+private static readonly @string sensitiveˢᵇ⁔HeaderField = " (sensitive)"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(HeaderField hf) {
+internal static @string String⁔(/*this*/ HeaderField hf) {
     @string suffix = default;
     if (hf.Sensitive) {
-        suffix = sensitiveˢᴍHeaderField;
+        suffix = sensitiveˢ⁔HeaderField;
     }
     return fmt.Sprintf("header field %q = %q%s"u8, hf.Name, hf.Value, suffix);
 }
 
 // Size returns the size of an entry per RFC 7541 section 4.1.
-[GoMethodBody("Size")] internal static uint32 Sizeᴍ(HeaderField hf) {
+internal static uint32 Size⁔(/*this*/ HeaderField hf) {
     // https://httpwg.org/specs/rfc7541.html#rfc.section.4.1
     // "The size of the dynamic table is the sum of the size of
     // its entries. The size of an entry is the sum of its name's
@@ -133,14 +133,14 @@ public static error ErrStringLength = errors.New("hpack: string too long");
 // value string. If a string exceeds this length (even after any
 // decompression), Write will return ErrStringLength.
 // A value of 0 means unlimited and is the default from NewDecoder.
-[GoMethodBody("SetMaxStringLength")] internal static void SetMaxStringLengthᴍ(ref Decoder d, nint n) {
+internal static void SetMaxStringLength⁔(/*this*/ ref Decoder d, nint n) {
     d.maxStrLen = n;
 }
 
 // SetEmitFunc changes the callback used when new header fields
 // are decoded.
 // It must be non-nil. It does not affect EmitEnabled.
-[GoMethodBody("SetEmitFunc")] internal static void SetEmitFuncᴍ(ref Decoder d, Action<HeaderField> emitFunc) {
+internal static void SetEmitFunc⁔(/*this*/ ref Decoder d, Action<HeaderField> emitFunc) {
     d.emit = emitFunc;
 }
 
@@ -151,22 +151,22 @@ public static error ErrStringLength = errors.New("hpack: string too long");
 // while still decoding and keeping in-sync with decoder state, but
 // without doing unnecessary decompression or generating unnecessary
 // garbage for header fields past the limit.
-[GoMethodBody("SetEmitEnabled")] internal static void SetEmitEnabledᴍ(ref Decoder d, bool v) { d.emitEnabled = v; }
+internal static void SetEmitEnabled⁔(/*this*/ ref Decoder d, bool v) { d.emitEnabled = v; }
 
 // EmitEnabled reports whether calls to the emitFunc provided to NewDecoder
 // are currently enabled. The default is true.
-[GoMethodBody("EmitEnabled")] internal static bool EmitEnabledᴍ(ref Decoder d) { return d.emitEnabled; }
+internal static bool EmitEnabled⁔(/*this*/ ref Decoder d) { return d.emitEnabled; }
 
 // TODO: add method *Decoder.Reset(maxSize, emitFunc) to let callers re-use Decoders and their
 // underlying buffers for garbage reasons.
-[GoMethodBody("SetMaxDynamicTableSize")] internal static void SetMaxDynamicTableSizeᴍ(ref Decoder d, uint32 v) {
+internal static void SetMaxDynamicTableSize⁔(/*this*/ ref Decoder d, uint32 v) {
     d.dynTab.setMaxSize(v);
 }
 
 // SetAllowedMaxDynamicTableSize sets the upper bound that the encoded
 // stream (via dynamic table size updates) may set the maximum size
 // to.
-[GoMethodBody("SetAllowedMaxDynamicTableSize")] internal static void SetAllowedMaxDynamicTableSizeᴍ(ref Decoder d, uint32 v) {
+internal static void SetAllowedMaxDynamicTableSize⁔(/*this*/ ref Decoder d, uint32 v) {
     d.dynTab.allowedMaxSize = v;
 }
 
@@ -182,19 +182,19 @@ partial struct dynamicTable {
 
 } partial class hpack_package {
 
-[GoMethodBody("setMaxSize")] internal static void setMaxSizeᴍ(ref dynamicTable dt, uint32 v) {
+internal static void setMaxSize⁔(/*this*/ ref dynamicTable dt, uint32 v) {
     dt.maxSize = v;
     dt.evict();
 }
 
-[GoMethodBody("add")] internal static void addᴍ(ref dynamicTable dt, HeaderField f) {
+internal static void add⁔(/*this*/ ref dynamicTable dt, HeaderField f) {
     dt.table.addEntry(f);
     dt.size += f.Size();
     dt.evict();
 }
 
 // If we're too big, evict old stuff.
-[GoMethodBody("evict")] internal static void evictᴍ(ref dynamicTable dt) {
+internal static void evict⁔(/*this*/ ref dynamicTable dt) {
     nint n = default;
     while (dt.size > dt.maxSize && n < dt.table.len()) {
         dt.size -= dt.table.ents[n].Size();
@@ -205,14 +205,14 @@ partial struct dynamicTable {
 
 } partial class hpack_package {
 
-[GoMethodBody("maxTableIndex")] internal static nint maxTableIndexᴍ(ref Decoder d) {
+internal static nint maxTableIndex⁔(/*this*/ ref Decoder d) {
     // This should never overflow. RFC 7540 Section 6.5.2 limits the size of
     // the dynamic table to 2^32 bytes, where each entry will occupy more than
     // one byte. Further, the staticTable has a fixed, small length.
     return d.dynTab.table.len() + staticTable.len();
 }
 
-[GoMethodBody("at")] internal static (HeaderField hf, bool ok) atᴍ(ref Decoder d, uint64 i) {
+internal static (HeaderField hf, bool ok) at⁔(/*this*/ ref Decoder d, uint64 i) {
     HeaderField hf = default;
     bool ok = default;
 
@@ -237,7 +237,7 @@ partial struct dynamicTable {
 //
 // TODO: remove this method and make it incremental later? This is
 // easier for debugging now.
-[GoMethodBody("DecodeFull")] internal static (slice<HeaderField>, error) DecodeFullᴍ(ж<Decoder> Ꮡd, slice<byte> p) {
+internal static (slice<HeaderField>, error) DecodeFull⁔(/*this*/ ж<Decoder> Ꮡd, slice<byte> p) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -268,22 +268,22 @@ partial struct dynamicTable {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string truncatedHeadersˢᴍDecoder => ref truncatedHeadersˢᵇᴍDecoder;
-private static readonly @string truncatedHeadersˢᵇᴍDecoder = "truncated headers"u8;
+private static ref readonly @string truncatedHeadersˢ⁔Decoder => ref truncatedHeadersˢᵇ⁔Decoder;
+private static readonly @string truncatedHeadersˢᵇ⁔Decoder = "truncated headers"u8;
 
 // Close declares that the decoding is complete and resets the Decoder
 // to be reused again for a new header block. If there is any remaining
 // data in the decoder's buffer, Close returns an error.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref Decoder d) {
+internal static error Close⁔(/*this*/ ref Decoder d) {
     if (d.saveBuf.Len() > 0) {
         d.saveBuf.Reset();
-        return new DecodingError(errors.New(truncatedHeadersˢᴍDecoder));
+        return new DecodingError(errors.New(truncatedHeadersˢ⁔Decoder));
     }
     d.firstField = true;
     return default;
 }
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref Decoder d, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref Decoder d, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -341,20 +341,20 @@ internal static indexType indexedNever => 2;
 
 } partial class hpack_package {
 
-[GoMethodBody("indexed")] internal static bool indexedᴍ(indexType v) { return v == indexedTrue; }
-[GoMethodBody("sensitive")] internal static bool sensitiveᴍ(indexType v) { return v == indexedNever; }
+internal static bool indexed⁔(/*this*/ indexType v) { return v == indexedTrue; }
+internal static bool sensitive⁔(/*this*/ indexType v) { return v == indexedNever; }
 
 } partial class hpack_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string invalidEncodingˢᴍDecoder => ref invalidEncodingˢᵇᴍDecoder;
-private static readonly @string invalidEncodingˢᵇᴍDecoder = "invalid encoding"u8;
+private static ref readonly @string invalidEncodingˢ⁔Decoder => ref invalidEncodingˢᵇ⁔Decoder;
+private static readonly @string invalidEncodingˢᵇ⁔Decoder = "invalid encoding"u8;
 
 // returns errNeedMore if there isn't enough data available.
 // any other error is fatal.
 // consumes d.buf iff it returns nil.
 // precondition: must be called with len(d.buf) > 0
-[GoMethodBody("parseHeaderFieldRepr")] internal static error parseHeaderFieldReprᴍ(ref Decoder d) {
+internal static error parseHeaderFieldRepr⁔(/*this*/ ref Decoder d) {
     var b = d.buf[0];
     switch (ᐧ) {
     case {} when (byte)(b & 128) != 0: {
@@ -388,11 +388,11 @@ private static readonly @string invalidEncodingˢᵇᴍDecoder = "invalid encodi
         return d.parseDynamicTableSizeUpdate();
     }}
 
-    return new DecodingError(errors.New(invalidEncodingˢᴍDecoder));
+    return new DecodingError(errors.New(invalidEncodingˢ⁔Decoder));
 }
 
 // (same invariants and behavior as parseHeaderFieldRepr)
-[GoMethodBody("parseFieldIndexed")] internal static error parseFieldIndexedᴍ(ref Decoder d) {
+internal static error parseFieldIndexed⁔(/*this*/ ref Decoder d) {
     var buf = d.buf;
     (var idx, buf, var err) = readVarInt(7, buf);
     if (err != nil) {
@@ -407,7 +407,7 @@ private static readonly @string invalidEncodingˢᵇᴍDecoder = "invalid encodi
 }
 
 // (same invariants and behavior as parseHeaderFieldRepr)
-[GoMethodBody("parseFieldLiteral")] internal static error parseFieldLiteralᴍ(ref Decoder d, uint8 n, indexType it) {
+internal static error parseFieldLiteral⁔(/*this*/ ref Decoder d, uint8 n, indexType it) {
     var buf = d.buf;
     (var nameIdx, buf, var err) = readVarInt(n, buf);
     if (err != nil) {
@@ -453,7 +453,7 @@ private static readonly @string invalidEncodingˢᵇᴍDecoder = "invalid encodi
     return d.callEmit(hf);
 }
 
-[GoMethodBody("callEmit")] internal static error callEmitᴍ(ref Decoder d, HeaderField hf) {
+internal static error callEmit⁔(/*this*/ ref Decoder d, HeaderField hf) {
     if (d.maxStrLen != 0) {
         if (len(hf.Name) > d.maxStrLen || len(hf.Value) > d.maxStrLen) {
             return ErrStringLength;
@@ -466,17 +466,17 @@ private static readonly @string invalidEncodingˢᵇᴍDecoder = "invalid encodi
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string dynamicTableSizeUpdateˢᴍDecoder => ref dynamicTableSizeUpdateˢᵇᴍDecoder;
-private static readonly @string dynamicTableSizeUpdateˢᵇᴍDecoder = "dynamic table size update MUST occur at the beginning of a header block"u8;
-private static ref readonly @string dynamicTableSizeUpdateˢ2ᴍDecoder => ref dynamicTableSizeUpdateˢ2ᵇᴍDecoder;
-private static readonly @string dynamicTableSizeUpdateˢ2ᵇᴍDecoder = "dynamic table size update too large"u8;
+private static ref readonly @string dynamicTableSizeUpdateˢ⁔Decoder => ref dynamicTableSizeUpdateˢᵇ⁔Decoder;
+private static readonly @string dynamicTableSizeUpdateˢᵇ⁔Decoder = "dynamic table size update MUST occur at the beginning of a header block"u8;
+private static ref readonly @string dynamicTableSizeUpdateˢ2⁔Decoder => ref dynamicTableSizeUpdateˢ2ᵇ⁔Decoder;
+private static readonly @string dynamicTableSizeUpdateˢ2ᵇ⁔Decoder = "dynamic table size update too large"u8;
 
 // (same invariants and behavior as parseHeaderFieldRepr)
-[GoMethodBody("parseDynamicTableSizeUpdate")] internal static error parseDynamicTableSizeUpdateᴍ(ref Decoder d) {
+internal static error parseDynamicTableSizeUpdate⁔(/*this*/ ref Decoder d) {
     // RFC 7541, sec 4.2: This dynamic table size update MUST occur at the
     // beginning of the first header block following the change to the dynamic table size.
     if (!d.firstField && d.dynTab.size > 0) {
-        return new DecodingError(errors.New(dynamicTableSizeUpdateˢᴍDecoder));
+        return new DecodingError(errors.New(dynamicTableSizeUpdateˢ⁔Decoder));
     }
 
     var buf = d.buf;
@@ -485,7 +485,7 @@ private static readonly @string dynamicTableSizeUpdateˢ2ᵇᴍDecoder = "dynami
         return err;
     }
     if (size > (uint64)d.dynTab.allowedMaxSize) {
-        return new DecodingError(errors.New(dynamicTableSizeUpdateˢ2ᴍDecoder));
+        return new DecodingError(errors.New(dynamicTableSizeUpdateˢ2⁔Decoder));
     }
     d.dynTab.setMaxSize((uint32)size);
     d.buf = buf;
@@ -545,7 +545,7 @@ internal static (uint64 i, slice<byte> remain, error err) readVarInt(byte n, sli
 //
 // It returns a reference to the encoded string data to permit deferring decode costs
 // until after the caller verifies all data is present.
-[GoMethodBody("readString")] internal static (undecodedString u, slice<byte> remain, error err) readStringᴍ(ref Decoder d, slice<byte> p) {
+internal static (undecodedString u, slice<byte> remain, error err) readString⁔(/*this*/ ref Decoder d, slice<byte> p) {
     undecodedString u = default;
     error err = default;
 
@@ -582,7 +582,7 @@ partial struct undecodedString {
 
 } partial class hpack_package {
 
-[GoMethodBody("decodeString")] internal static (@string, error) decodeStringᴍ(ref Decoder d, undecodedString u) {
+internal static (@string, error) decodeString⁔(/*this*/ ref Decoder d, undecodedString u) {
     if (!u.isHuff) {
         return ((@string)u.b, default);
     }

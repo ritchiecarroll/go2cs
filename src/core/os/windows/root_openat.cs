@@ -30,7 +30,7 @@ partial struct root {
 
 } partial class os_package {
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<root> Ꮡr) {
+internal static error Close⁔(/*this*/ ж<root> Ꮡr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -49,7 +49,7 @@ partial struct root {
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("incref")] internal static error increfᴍ(ж<root> Ꮡr) {
+internal static error incref⁔(/*this*/ ж<root> Ꮡr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -67,7 +67,7 @@ partial struct root {
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("decref")] internal static void decrefᴍ(ж<root> Ꮡr) {
+internal static void decref⁔(/*this*/ ж<root> Ꮡr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -87,7 +87,7 @@ partial struct root {
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("Name")] internal static @string Nameᴍ(ref root r) {
+internal static @string Name⁔(/*this*/ ref root r) {
     return r.name;
 }
 
@@ -551,6 +551,6 @@ partial struct errSymlink /*@string*/;
 
 } partial class os_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(errSymlink _) { throw panic("errSymlink is not user-visible"); }
+internal static @string Error⁔(/*this*/ errSymlink _) { throw panic("errSymlink is not user-visible"); }
 
 }

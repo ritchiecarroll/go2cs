@@ -50,8 +50,8 @@ public static Type TypeBundle => 8;
 
 } partial class macho_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Type t) { return stringName((uint32)t, typeStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(Type t) { return stringName((uint32)t, typeStrings, true); }
+internal static @string String⁔(/*this*/ Type t) { return stringName((uint32)t, typeStrings, false); }
+internal static @string GoString⁔(/*this*/ Type t) { return stringName((uint32)t, typeStrings, true); }
 
 } partial class macho_package {
 
@@ -78,8 +78,8 @@ public static Cpu CpuPpc64 => /* CpuPpc | cpuArch64 */ 16777234;
 
 } partial class macho_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Cpu i) { return stringName((uint32)i, cpuStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(Cpu i) { return stringName((uint32)i, cpuStrings, true); }
+internal static @string String⁔(/*this*/ Cpu i) { return stringName((uint32)i, cpuStrings, false); }
+internal static @string GoString⁔(/*this*/ Cpu i) { return stringName((uint32)i, cpuStrings, true); }
 
 } partial class macho_package {
 
@@ -107,8 +107,8 @@ public static LoadCmd LoadCmdRpath => 0x8000001c;
 
 } partial class macho_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(LoadCmd i) { return stringName((uint32)i, cmdStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(LoadCmd i) { return stringName((uint32)i, cmdStrings, true); }
+internal static @string String⁔(/*this*/ LoadCmd i) { return stringName((uint32)i, cmdStrings, false); }
+internal static @string GoString⁔(/*this*/ LoadCmd i) { return stringName((uint32)i, cmdStrings, true); }
 
 } partial class macho_package {
 

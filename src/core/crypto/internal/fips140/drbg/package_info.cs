@@ -67,13 +67,16 @@ using static go.crypto.@internal.fips140.drbg_package;
 
 namespace go.crypto.@internal.fips140;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140deps;
 using math;
 using static drbg_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("drbg")]
 public static partial class drbg_package
@@ -118,13 +121,13 @@ public static partial class drbg_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(drbg_package.Counter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class drbgᴛCounter;
+[GoMethodHost(typeof(drbg_package.Counter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class drbgᴛCounter;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class drbgᴛCounter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void update(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡseed) => drbg_package.updateᴍ(Ꮡc, Ꮡseed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reseed(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡentropy, /*[48]*/ ж<array<byte>> ᏑadditionalInput) => drbg_package.Reseedᴍ(Ꮡc, Ꮡentropy, ᏑadditionalInput);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool /*reseedRequired*/ Generate(this ж<Counter> Ꮡc, slice<byte> @out, /*[48]*/ ж<array<byte>> ᏑadditionalInput) => drbg_package.Generateᴍ(Ꮡc, @out, ᏑadditionalInput);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void update(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡseed) => drbg_package.update⁔(Ꮡc, Ꮡseed);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reseed(this ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡentropy, /*[48]*/ ж<array<byte>> ᏑadditionalInput) => drbg_package.Reseed⁔(Ꮡc, Ꮡentropy, ᏑadditionalInput);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool /*reseedRequired*/ Generate(this ж<Counter> Ꮡc, slice<byte> @out, /*[48]*/ ж<array<byte>> ᏑadditionalInput) => drbg_package.Generate⁔(Ꮡc, @out, ᏑadditionalInput);
 }
 // </GlyphForwarders>

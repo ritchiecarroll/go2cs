@@ -46,7 +46,7 @@ internal static addrRange makeAddrRange(uintptr @base, uintptr limit) {
 } partial class runtime_package {
 
 // size returns the size of the range represented in bytes.
-[GoMethodBody("size")] internal static uintptr sizeᴍ(addrRange a) {
+internal static uintptr size⁔(/*this*/ addrRange a) {
     if (!a.@base.lessThan(a.limit)) {
         return 0;
     }
@@ -56,23 +56,23 @@ internal static addrRange makeAddrRange(uintptr @base, uintptr limit) {
 }
 
 // contains returns whether or not the range contains a given address.
-[GoMethodBody("contains")] internal static bool containsᴍ(addrRange a, uintptr addr) {
+internal static bool contains⁔(/*this*/ addrRange a, uintptr addr) {
     return a.@base.lessEqual(new offAddr(addr)) && (new offAddr(addr)).lessThan(a.limit);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badPruneˢᴍaddrRange => ref badPruneˢᵇᴍaddrRange;
-private static readonly @string badPruneˢᵇᴍaddrRange = "bad prune"u8;
+internal static ref readonly @string badPruneˢ⁔addrRange => ref badPruneˢᵇ⁔addrRange;
+private static readonly @string badPruneˢᵇ⁔addrRange = "bad prune"u8;
 
 // subtract takes the addrRange toPrune and cuts out any overlap with
 // from, then returns the new range. subtract assumes that a and b
 // either don't overlap at all, only overlap on one side, or are equal.
 // If b is strictly contained in a, thus forcing a split, it will throw.
-[GoMethodBody("subtract")] internal static addrRange subtractᴍ(addrRange a, addrRange b) {
+internal static addrRange subtract⁔(/*this*/ addrRange a, addrRange b) {
     if (b.@base.lessEqual(a.@base) && a.limit.lessEqual(b.limit)) {
         return new addrRange();
     } else if (a.@base.lessThan(b.@base) && b.limit.lessThan(a.limit)) {
-        @throw(badPruneˢᴍaddrRange);
+        @throw(badPruneˢ⁔addrRange);
     } else if (b.limit.lessThan(a.limit) && a.@base.lessThan(b.limit)) {
         a.@base = b.limit;
     } else if (a.@base.lessThan(b.@base) && b.@base.lessThan(a.limit)) {
@@ -84,7 +84,7 @@ private static readonly @string badPruneˢᵇᴍaddrRange = "bad prune"u8;
 // takeFromFront takes len bytes from the front of the address range, aligning
 // the base to align first. On success, returns the aligned start of the region
 // taken and true.
-[GoMethodBody("takeFromFront")] internal static (uintptr, bool) takeFromFrontᴍ(ref addrRange a, uintptr len, uint8 align) {
+internal static (uintptr, bool) takeFromFront⁔(/*this*/ ref addrRange a, uintptr len, uint8 align) {
     var @base = alignUp(a.@base.addr(), (uintptr)align) + len;
     if (@base > a.limit.addr()) {
         return (0, false);
@@ -96,7 +96,7 @@ private static readonly @string badPruneˢᵇᴍaddrRange = "bad prune"u8;
 // takeFromBack takes len bytes from the end of the address range, aligning
 // the limit to align after subtracting len. On success, returns the aligned
 // start of the region taken and true.
-[GoMethodBody("takeFromBack")] internal static (uintptr, bool) takeFromBackᴍ(ref addrRange a, uintptr len, uint8 align) {
+internal static (uintptr, bool) takeFromBack⁔(/*this*/ ref addrRange a, uintptr len, uint8 align) {
     var limit = alignDown(a.limit.addr() - len, (uintptr)align);
     if (a.@base.addr() > limit) {
         return (0, false);
@@ -107,7 +107,7 @@ private static readonly @string badPruneˢᵇᴍaddrRange = "bad prune"u8;
 
 // removeGreaterEqual removes all addresses in a greater than or equal
 // to addr and returns the new range.
-[GoMethodBody("removeGreaterEqual")] internal static addrRange removeGreaterEqualᴍ(addrRange a, uintptr addr) {
+internal static addrRange removeGreaterEqual⁔(/*this*/ addrRange a, uintptr addr) {
     if ((new offAddr(addr)).lessEqual(a.@base)) {
         return new addrRange();
     }
@@ -140,42 +140,42 @@ partial struct offAddr {
 } partial class runtime_package {
 
 // add adds a uintptr offset to the offAddr.
-[GoMethodBody("add")] internal static offAddr addᴍ(offAddr l, uintptr bytes) {
+internal static offAddr add⁔(/*this*/ offAddr l, uintptr bytes) {
     return new offAddr(a: l.a + bytes);
 }
 
 // sub subtracts a uintptr offset from the offAddr.
-[GoMethodBody("sub")] internal static offAddr subᴍ(offAddr l, uintptr bytes) {
+internal static offAddr sub⁔(/*this*/ offAddr l, uintptr bytes) {
     return new offAddr(a: l.a - bytes);
 }
 
 // diff returns the amount of bytes in between the
 // two offAddrs.
-[GoMethodBody("diff")] internal static uintptr diffᴍ(offAddr l1, offAddr l2) {
+internal static uintptr diff⁔(/*this*/ offAddr l1, offAddr l2) {
     return l1.a - l2.a;
 }
 
 // lessThan returns true if l1 is less than l2 in the offset
 // address space.
-[GoMethodBody("lessThan")] internal static bool lessThanᴍ(offAddr l1, offAddr l2) {
+internal static bool lessThan⁔(/*this*/ offAddr l1, offAddr l2) {
     return (l1.a - (uintptr)arenaBaseOffset) < (l2.a - (uintptr)arenaBaseOffset);
 }
 
 // lessEqual returns true if l1 is less than or equal to l2 in
 // the offset address space.
-[GoMethodBody("lessEqual")] internal static bool lessEqualᴍ(offAddr l1, offAddr l2) {
+internal static bool lessEqual⁔(/*this*/ offAddr l1, offAddr l2) {
     return (l1.a - (uintptr)arenaBaseOffset) <= (l2.a - (uintptr)arenaBaseOffset);
 }
 
 // equal returns true if the two offAddr values are equal.
-[GoMethodBody("equal")] internal static bool equalᴍ(offAddr l1, offAddr l2) {
+internal static bool equal⁔(/*this*/ offAddr l1, offAddr l2) {
     // No need to compare in the offset space, it
     // means the same thing.
     return l1 == l2;
 }
 
 // addr returns the virtual address for this offset address.
-[GoMethodBody("addr")] internal static uintptr addrᴍ(offAddr l) {
+internal static uintptr addr⁔(/*this*/ offAddr l) {
     return l.a;
 }
 
@@ -193,7 +193,7 @@ partial struct atomicOffAddr {
 
 // Clear attempts to store minOffAddr in atomicOffAddr. It may fail
 // if a marked value is placed in the box in the meanwhile.
-[GoMethodBody("Clear")] internal static void Clearᴍ(ж<atomicOffAddr> Ꮡb) {
+internal static void Clear⁔(/*this*/ ж<atomicOffAddr> Ꮡb) {
     for (;;) {
         var old = Ꮡb.Ꮡa.Load();
         if (old < 0) {
@@ -207,7 +207,7 @@ partial struct atomicOffAddr {
 
 // StoreMin stores addr if it's less than the current value in the
 // offset address space if the current value is not marked.
-[GoMethodBody("StoreMin")] internal static void StoreMinᴍ(ж<atomicOffAddr> Ꮡb, uintptr addr) {
+internal static void StoreMin⁔(/*this*/ ж<atomicOffAddr> Ꮡb, uintptr addr) {
     var @new = (int64)(addr - (uintptr)arenaBaseOffset);
     for (;;) {
         var old = Ꮡb.Ꮡa.Load();
@@ -224,19 +224,19 @@ partial struct atomicOffAddr {
 // replace it with newAddr. markedAddr must be a marked address
 // returned by Load. This function will not store newAddr if the
 // box no longer contains markedAddr.
-[GoMethodBody("StoreUnmark")] internal static void StoreUnmarkᴍ(ж<atomicOffAddr> Ꮡb, uintptr markedAddr, uintptr newAddr) {
+internal static void StoreUnmark⁔(/*this*/ ж<atomicOffAddr> Ꮡb, uintptr markedAddr, uintptr newAddr) {
     Ꮡb.Ꮡa.CompareAndSwap(-(int64)(markedAddr - (uintptr)arenaBaseOffset), (int64)(newAddr - (uintptr)arenaBaseOffset));
 }
 
 // StoreMarked stores addr but first converted to the offset address
 // space and then negated.
-[GoMethodBody("StoreMarked")] internal static void StoreMarkedᴍ(ж<atomicOffAddr> Ꮡb, uintptr addr) {
+internal static void StoreMarked⁔(/*this*/ ж<atomicOffAddr> Ꮡb, uintptr addr) {
     Ꮡb.Ꮡa.Store(-(int64)(addr - (uintptr)arenaBaseOffset));
 }
 
 // Load returns the address in the box as a virtual address. It also
 // returns if the value was marked or not.
-[GoMethodBody("Load")] internal static (uintptr, bool) Loadᴍ(ж<atomicOffAddr> Ꮡb) {
+internal static (uintptr, bool) Load⁔(/*this*/ ж<atomicOffAddr> Ꮡb) {
     var v = Ꮡb.Ꮡa.Load();
     var wasMarked = false;
     if (v < 0) {
@@ -274,7 +274,7 @@ partial struct addrRanges {
 
 // findSucc returns the first index in a such that addr is
 // less than the base of the addrRange at that index.
-[GoMethodBody("findSucc")] internal static nint findSuccᴍ(ref addrRanges a, uintptr addr) {
+internal static nint findSucc⁔(/*this*/ ref addrRanges a, uintptr addr) {
     var @base = new offAddr(addr);
 
     // Narrow down the search space via a binary search
@@ -320,7 +320,7 @@ partial struct addrRanges {
 // then it returns addr. The second return value indicates whether
 // such an address exists for addr in a. That is, if addr is larger than
 // any address known to a, the second return value will be false.
-[GoMethodBody("findAddrGreaterEqual")] internal static (uintptr, bool) findAddrGreaterEqualᴍ(ref addrRanges a, uintptr addr) {
+internal static (uintptr, bool) findAddrGreaterEqual⁔(/*this*/ ref addrRanges a, uintptr addr) {
     nint i = a.findSucc(addr);
     if (i == 0) {
         return (a.ranges[0].@base.addr(), true);
@@ -335,7 +335,7 @@ partial struct addrRanges {
 }
 
 // contains returns true if a covers the address addr.
-[GoMethodBody("contains")] internal static bool containsᴍ(ref addrRanges a, uintptr addr) {
+internal static bool contains⁔(/*this*/ ref addrRanges a, uintptr addr) {
     nint i = a.findSucc(addr);
     if (i == 0) {
         return false;
@@ -348,7 +348,7 @@ partial struct addrRanges {
 // removeLast removes and returns the highest-addressed contiguous range
 // of a, or the last nBytes of that range, whichever is smaller. If a is
 // empty, it returns an empty range.
-[GoMethodBody("removeLast")] internal static addrRange removeLastᴍ(ref addrRanges a, uintptr nBytes) {
+internal static addrRange removeLast⁔(/*this*/ ref addrRanges a, uintptr nBytes) {
     if (len(a.ranges) == 0) {
         return new addrRange();
     }
@@ -367,7 +367,7 @@ partial struct addrRanges {
 
 // removeGreaterEqual removes the ranges of a which are above addr, and additionally
 // splits any range containing addr.
-[GoMethodBody("removeGreaterEqual")] internal static void removeGreaterEqualᴍ(ref addrRanges a, uintptr addr) {
+internal static void removeGreaterEqual⁔(/*this*/ ref addrRanges a, uintptr addr) {
     nint pivot = a.findSucc(addr);
     if (pivot == 0) {
         // addr is before all ranges in a.

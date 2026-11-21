@@ -78,8 +78,8 @@ partial struct Comment {
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref Comment c) { return c.Slash; }
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref Comment c) { return (token.Pos)((nint)c.Slash + len(c.Text)); }
+internal static token.Pos Pos⁔(/*this*/ ref Comment c) { return c.Slash; }
+internal static token.Pos End⁔(/*this*/ ref Comment c) { return (token.Pos)((nint)c.Slash + len(c.Text)); }
 
 } partial class ast_package {
 
@@ -91,8 +91,8 @@ partial struct CommentGroup {
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref CommentGroup g) { return g.List[0].Pos(); }
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref CommentGroup g) { return g.List[len(g.List) - 1].End(); }
+internal static token.Pos Pos⁔(/*this*/ ref CommentGroup g) { return g.List[0].Pos(); }
+internal static token.Pos End⁔(/*this*/ ref CommentGroup g) { return g.List[len(g.List) - 1].End(); }
 
 } partial class ast_package {
 
@@ -114,7 +114,7 @@ internal static @string stripTrailingWhitespace(@string s) {
 // Comment directives like "//line" and "//go:noinline" are also removed.
 // Multiple empty lines are reduced to one, and trailing space on lines is trimmed.
 // Unless the result is empty, it is newline-terminated.
-[GoMethodBody("Text")] internal static @string Textᴍ(ж<CommentGroup> Ꮡg) {
+internal static @string Text⁔(/*this*/ ж<CommentGroup> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
     var linesᴷ = new stackAppend<@string>();
 
@@ -242,7 +242,7 @@ partial struct Field {
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref Field f) {
+internal static token.Pos Pos⁔(/*this*/ ref Field f) {
     if (len(f.Names) > 0) {
         return f.Names[0].Pos();
     }
@@ -252,7 +252,7 @@ partial struct Field {
     return token.NoPos;
 }
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref Field f) {
+internal static token.Pos End⁔(/*this*/ ref Field f) {
     if (f.Tag != nil) {
         return f.Tag.End();
     }
@@ -277,7 +277,7 @@ partial struct FieldList {
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref FieldList f) {
+internal static token.Pos Pos⁔(/*this*/ ref FieldList f) {
     if (f.Opening.IsValid()) {
         return f.Opening;
     }
@@ -289,7 +289,7 @@ partial struct FieldList {
     return token.NoPos;
 }
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref FieldList f) {
+internal static token.Pos End⁔(/*this*/ ref FieldList f) {
     if (f.Closing.IsValid()) {
         return f.Closing + 1;
     }
@@ -302,7 +302,7 @@ partial struct FieldList {
 }
 
 // NumFields returns the number of parameters or struct fields represented by a [FieldList].
-[GoMethodBody("NumFields")] internal static nint NumFieldsᴍ(ж<FieldList> Ꮡf) {
+internal static nint NumFields⁔(/*this*/ ж<FieldList> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     nint n = 0;
@@ -531,27 +531,27 @@ partial struct ChanType {
 } partial class ast_package {
 
 // Pos and End implementations for expression/type nodes.
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref BadExpr x) { return x.From; }
+internal static token.Pos Pos⁔(/*this*/ ref BadExpr x) { return x.From; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref Ident x) { return x.NamePos; }
+internal static token.Pos Pos⁔(/*this*/ ref Ident x) { return x.NamePos; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref Ellipsis x) { return x.ΔEllipsis; }
+internal static token.Pos Pos⁔(/*this*/ ref Ellipsis x) { return x.ΔEllipsis; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref BasicLit x) { return x.ValuePos; }
+internal static token.Pos Pos⁔(/*this*/ ref BasicLit x) { return x.ValuePos; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref FuncLit x) { return x.Type.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref FuncLit x) { return x.Type.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref CompositeLit x) {
+internal static token.Pos Pos⁔(/*this*/ ref CompositeLit x) {
     if (x.Type != nil) {
         return x.Type.Pos();
     }
@@ -560,59 +560,59 @@ partial struct ChanType {
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref ParenExpr x) { return x.Lparen; }
+internal static token.Pos Pos⁔(/*this*/ ref ParenExpr x) { return x.Lparen; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref SelectorExpr x) { return x.X.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref SelectorExpr x) { return x.X.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref IndexExpr x) { return x.X.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref IndexExpr x) { return x.X.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref IndexListExpr x) { return x.X.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref IndexListExpr x) { return x.X.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref SliceExpr x) { return x.X.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref SliceExpr x) { return x.X.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref TypeAssertExpr x) { return x.X.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref TypeAssertExpr x) { return x.X.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref CallExpr x) { return x.Fun.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref CallExpr x) { return x.Fun.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref StarExpr x) { return x.Star; }
+internal static token.Pos Pos⁔(/*this*/ ref StarExpr x) { return x.Star; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref UnaryExpr x) { return x.OpPos; }
+internal static token.Pos Pos⁔(/*this*/ ref UnaryExpr x) { return x.OpPos; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref BinaryExpr x) { return x.X.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref BinaryExpr x) { return x.X.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref KeyValueExpr x) { return x.Key.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref KeyValueExpr x) { return x.Key.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref ArrayType x) { return x.Lbrack; }
+internal static token.Pos Pos⁔(/*this*/ ref ArrayType x) { return x.Lbrack; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref StructType x) { return x.Struct; }
+internal static token.Pos Pos⁔(/*this*/ ref StructType x) { return x.Struct; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref FuncType x) {
+internal static token.Pos Pos⁔(/*this*/ ref FuncType x) {
     if (x.Func.IsValid() || x.Params == nil) { // see issue 3870
         return x.Func;
     }
@@ -621,27 +621,27 @@ partial struct ChanType {
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref InterfaceType x) { return x.Interface; }
+internal static token.Pos Pos⁔(/*this*/ ref InterfaceType x) { return x.Interface; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref MapType x) { return x.Map; }
+internal static token.Pos Pos⁔(/*this*/ ref MapType x) { return x.Map; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref ChanType x) { return x.Begin; }
+internal static token.Pos Pos⁔(/*this*/ ref ChanType x) { return x.Begin; }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref BadExpr x) { return x.To; }
+internal static token.Pos End⁔(/*this*/ ref BadExpr x) { return x.To; }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref Ident x) { return (token.Pos)((nint)x.NamePos + len(x.Name)); }
+internal static token.Pos End⁔(/*this*/ ref Ident x) { return (token.Pos)((nint)x.NamePos + len(x.Name)); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref Ellipsis x) {
+internal static token.Pos End⁔(/*this*/ ref Ellipsis x) {
     if (x.Elt != nil) {
         return x.Elt.End();
     }
@@ -650,7 +650,7 @@ partial struct ChanType {
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref BasicLit x) {
+internal static token.Pos End⁔(/*this*/ ref BasicLit x) {
     if (!x.ValueEnd.IsValid()) {
         // Not from parser; use a heuristic.
         // (Incorrect for `...` containing \r\n;
@@ -662,67 +662,67 @@ partial struct ChanType {
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref FuncLit x) { return x.Body.End(); }
+internal static token.Pos End⁔(/*this*/ ref FuncLit x) { return x.Body.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref CompositeLit x) { return x.Rbrace + 1; }
+internal static token.Pos End⁔(/*this*/ ref CompositeLit x) { return x.Rbrace + 1; }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref ParenExpr x) { return x.Rparen + 1; }
+internal static token.Pos End⁔(/*this*/ ref ParenExpr x) { return x.Rparen + 1; }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref SelectorExpr x) { return x.Sel.End(); }
+internal static token.Pos End⁔(/*this*/ ref SelectorExpr x) { return x.Sel.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref IndexExpr x) { return x.Rbrack + 1; }
+internal static token.Pos End⁔(/*this*/ ref IndexExpr x) { return x.Rbrack + 1; }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref IndexListExpr x) { return x.Rbrack + 1; }
+internal static token.Pos End⁔(/*this*/ ref IndexListExpr x) { return x.Rbrack + 1; }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref SliceExpr x) { return x.Rbrack + 1; }
+internal static token.Pos End⁔(/*this*/ ref SliceExpr x) { return x.Rbrack + 1; }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref TypeAssertExpr x) { return x.Rparen + 1; }
+internal static token.Pos End⁔(/*this*/ ref TypeAssertExpr x) { return x.Rparen + 1; }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref CallExpr x) { return x.Rparen + 1; }
+internal static token.Pos End⁔(/*this*/ ref CallExpr x) { return x.Rparen + 1; }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref StarExpr x) { return x.X.End(); }
+internal static token.Pos End⁔(/*this*/ ref StarExpr x) { return x.X.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref UnaryExpr x) { return x.X.End(); }
+internal static token.Pos End⁔(/*this*/ ref UnaryExpr x) { return x.X.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref BinaryExpr x) { return x.Y.End(); }
+internal static token.Pos End⁔(/*this*/ ref BinaryExpr x) { return x.Y.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref KeyValueExpr x) { return x.Value.End(); }
+internal static token.Pos End⁔(/*this*/ ref KeyValueExpr x) { return x.Value.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref ArrayType x) { return x.Elt.End(); }
+internal static token.Pos End⁔(/*this*/ ref ArrayType x) { return x.Elt.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref StructType x) { return x.Fields.End(); }
+internal static token.Pos End⁔(/*this*/ ref StructType x) { return x.Fields.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref FuncType x) {
+internal static token.Pos End⁔(/*this*/ ref FuncType x) {
     if (x.Results != nil) {
         return x.Results.End();
     }
@@ -731,109 +731,109 @@ partial struct ChanType {
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref InterfaceType x) { return x.Methods.End(); }
+internal static token.Pos End⁔(/*this*/ ref InterfaceType x) { return x.Methods.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref MapType x) { return x.Value.End(); }
+internal static token.Pos End⁔(/*this*/ ref MapType x) { return x.Value.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref ChanType x) { return x.Value.End(); }
+internal static token.Pos End⁔(/*this*/ ref ChanType x) { return x.Value.End(); }
 
 } partial class ast_package {
 
 // exprNode() ensures that only expression/type nodes can be
 // assigned to an Expr.
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref BadExpr _) { }
+internal static void exprNode⁔(/*this*/ ref BadExpr _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref Ident _) { }
+internal static void exprNode⁔(/*this*/ ref Ident _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref Ellipsis _) { }
+internal static void exprNode⁔(/*this*/ ref Ellipsis _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref BasicLit _) { }
+internal static void exprNode⁔(/*this*/ ref BasicLit _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref FuncLit _) { }
+internal static void exprNode⁔(/*this*/ ref FuncLit _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref CompositeLit _) { }
+internal static void exprNode⁔(/*this*/ ref CompositeLit _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref ParenExpr _) { }
+internal static void exprNode⁔(/*this*/ ref ParenExpr _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref SelectorExpr _) { }
+internal static void exprNode⁔(/*this*/ ref SelectorExpr _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref IndexExpr _) { }
+internal static void exprNode⁔(/*this*/ ref IndexExpr _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref IndexListExpr _) { }
+internal static void exprNode⁔(/*this*/ ref IndexListExpr _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref SliceExpr _) { }
+internal static void exprNode⁔(/*this*/ ref SliceExpr _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref TypeAssertExpr _) { }
+internal static void exprNode⁔(/*this*/ ref TypeAssertExpr _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref CallExpr _) { }
+internal static void exprNode⁔(/*this*/ ref CallExpr _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref StarExpr _) { }
+internal static void exprNode⁔(/*this*/ ref StarExpr _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref UnaryExpr _) { }
+internal static void exprNode⁔(/*this*/ ref UnaryExpr _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref BinaryExpr _) { }
+internal static void exprNode⁔(/*this*/ ref BinaryExpr _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref KeyValueExpr _) { }
+internal static void exprNode⁔(/*this*/ ref KeyValueExpr _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref ArrayType _) { }
+internal static void exprNode⁔(/*this*/ ref ArrayType _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref StructType _) { }
+internal static void exprNode⁔(/*this*/ ref StructType _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref FuncType _) { }
+internal static void exprNode⁔(/*this*/ ref FuncType _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref InterfaceType _) { }
+internal static void exprNode⁔(/*this*/ ref InterfaceType _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref MapType _) { }
+internal static void exprNode⁔(/*this*/ ref MapType _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("exprNode")] internal static void exprNodeᴍ(ref ChanType _) { }
+internal static void exprNode⁔(/*this*/ ref ChanType _) { }
 
 } partial class ast_package {
 
@@ -850,19 +850,19 @@ public static bool IsExported(@string name) { return token.IsExported(name); }
 } partial class ast_package {
 
 // IsExported reports whether id starts with an upper-case letter.
-[GoMethodBody("IsExported")] internal static bool IsExportedᴍ(ref Ident id) { return token.IsExported(id.Name); }
+internal static bool IsExported⁔(/*this*/ ref Ident id) { return token.IsExported(id.Name); }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢᴍIdent => ref nilˢᵇᴍIdent;
-private static readonly @string nilˢᵇᴍIdent = "<nil>"u8;
+internal static ref readonly @string nilˢ⁔Ident => ref nilˢᵇ⁔Ident;
+private static readonly @string nilˢᵇ⁔Ident = "<nil>"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Ident> Ꮡid) {
+internal static @string String⁔(/*this*/ ж<Ident> Ꮡid) {
     ref var id = ref Ꮡid.DerefOrNull();
 
     if (Ꮡid != nil) {
         return id.Name;
     }
-    return nilˢᴍIdent;
+    return nilˢ⁔Ident;
 }
 
 } partial class ast_package {
@@ -1036,99 +1036,99 @@ partial struct RangeStmt {
 } partial class ast_package {
 
 // Pos and End implementations for statement nodes.
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref BadStmt s) { return s.From; }
+internal static token.Pos Pos⁔(/*this*/ ref BadStmt s) { return s.From; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref DeclStmt s) { return s.Decl.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref DeclStmt s) { return s.Decl.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref EmptyStmt s) { return s.Semicolon; }
+internal static token.Pos Pos⁔(/*this*/ ref EmptyStmt s) { return s.Semicolon; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref LabeledStmt s) { return s.Label.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref LabeledStmt s) { return s.Label.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref ExprStmt s) { return s.X.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref ExprStmt s) { return s.X.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref SendStmt s) { return s.Chan.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref SendStmt s) { return s.Chan.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref IncDecStmt s) { return s.X.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref IncDecStmt s) { return s.X.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref AssignStmt s) { return s.Lhs[0].Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref AssignStmt s) { return s.Lhs[0].Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref GoStmt s) { return s.Go; }
+internal static token.Pos Pos⁔(/*this*/ ref GoStmt s) { return s.Go; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref DeferStmt s) { return s.Defer; }
+internal static token.Pos Pos⁔(/*this*/ ref DeferStmt s) { return s.Defer; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref ReturnStmt s) { return s.Return; }
+internal static token.Pos Pos⁔(/*this*/ ref ReturnStmt s) { return s.Return; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref BranchStmt s) { return s.TokPos; }
+internal static token.Pos Pos⁔(/*this*/ ref BranchStmt s) { return s.TokPos; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref BlockStmt s) { return s.Lbrace; }
+internal static token.Pos Pos⁔(/*this*/ ref BlockStmt s) { return s.Lbrace; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref IfStmt s) { return s.If; }
+internal static token.Pos Pos⁔(/*this*/ ref IfStmt s) { return s.If; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref CaseClause s) { return s.Case; }
+internal static token.Pos Pos⁔(/*this*/ ref CaseClause s) { return s.Case; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref SwitchStmt s) { return s.Switch; }
+internal static token.Pos Pos⁔(/*this*/ ref SwitchStmt s) { return s.Switch; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref TypeSwitchStmt s) { return s.Switch; }
+internal static token.Pos Pos⁔(/*this*/ ref TypeSwitchStmt s) { return s.Switch; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref CommClause s) { return s.Case; }
+internal static token.Pos Pos⁔(/*this*/ ref CommClause s) { return s.Case; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref SelectStmt s) { return s.Select; }
+internal static token.Pos Pos⁔(/*this*/ ref SelectStmt s) { return s.Select; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref ForStmt s) { return s.For; }
+internal static token.Pos Pos⁔(/*this*/ ref ForStmt s) { return s.For; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref RangeStmt s) { return s.For; }
+internal static token.Pos Pos⁔(/*this*/ ref RangeStmt s) { return s.For; }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref BadStmt s) { return s.To; }
+internal static token.Pos End⁔(/*this*/ ref BadStmt s) { return s.To; }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref DeclStmt s) { return s.Decl.End(); }
+internal static token.Pos End⁔(/*this*/ ref DeclStmt s) { return s.Decl.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref EmptyStmt s) {
+internal static token.Pos End⁔(/*this*/ ref EmptyStmt s) {
     if (s.Implicit) {
         return s.Semicolon;
     }
@@ -1137,37 +1137,37 @@ partial struct RangeStmt {
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref LabeledStmt s) { return s.Stmt.End(); }
+internal static token.Pos End⁔(/*this*/ ref LabeledStmt s) { return s.Stmt.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref ExprStmt s) { return s.X.End(); }
+internal static token.Pos End⁔(/*this*/ ref ExprStmt s) { return s.X.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref SendStmt s) { return s.Value.End(); }
+internal static token.Pos End⁔(/*this*/ ref SendStmt s) { return s.Value.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref IncDecStmt s) {
+internal static token.Pos End⁔(/*this*/ ref IncDecStmt s) {
     return s.TokPos + 2; /* len("++") */
 }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref AssignStmt s) { return s.Rhs[len(s.Rhs) - 1].End(); }
+internal static token.Pos End⁔(/*this*/ ref AssignStmt s) { return s.Rhs[len(s.Rhs) - 1].End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref GoStmt s) { return s.Call.End(); }
+internal static token.Pos End⁔(/*this*/ ref GoStmt s) { return s.Call.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref DeferStmt s) { return s.Call.End(); }
+internal static token.Pos End⁔(/*this*/ ref DeferStmt s) { return s.Call.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref ReturnStmt s) {
+internal static token.Pos End⁔(/*this*/ ref ReturnStmt s) {
     nint n = len(s.Results); if (n > 0) {
         return s.Results[n - 1].End();
     }
@@ -1176,7 +1176,7 @@ partial struct RangeStmt {
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref BranchStmt s) {
+internal static token.Pos End⁔(/*this*/ ref BranchStmt s) {
     if (s.Label != nil) {
         return s.Label.End();
     }
@@ -1185,7 +1185,7 @@ partial struct RangeStmt {
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref BlockStmt s) {
+internal static token.Pos End⁔(/*this*/ ref BlockStmt s) {
     if (s.Rbrace.IsValid()) {
         return s.Rbrace + 1;
     }
@@ -1197,7 +1197,7 @@ partial struct RangeStmt {
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref IfStmt s) {
+internal static token.Pos End⁔(/*this*/ ref IfStmt s) {
     if (s.Else != nil) {
         return s.Else.End();
     }
@@ -1206,7 +1206,7 @@ partial struct RangeStmt {
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref CaseClause s) {
+internal static token.Pos End⁔(/*this*/ ref CaseClause s) {
     nint n = len(s.Body); if (n > 0) {
         return s.Body[n - 1].End();
     }
@@ -1215,15 +1215,15 @@ partial struct RangeStmt {
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref SwitchStmt s) { return s.Body.End(); }
+internal static token.Pos End⁔(/*this*/ ref SwitchStmt s) { return s.Body.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref TypeSwitchStmt s) { return s.Body.End(); }
+internal static token.Pos End⁔(/*this*/ ref TypeSwitchStmt s) { return s.Body.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref CommClause s) {
+internal static token.Pos End⁔(/*this*/ ref CommClause s) {
     nint n = len(s.Body); if (n > 0) {
         return s.Body[n - 1].End();
     }
@@ -1232,101 +1232,101 @@ partial struct RangeStmt {
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref SelectStmt s) { return s.Body.End(); }
+internal static token.Pos End⁔(/*this*/ ref SelectStmt s) { return s.Body.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref ForStmt s) { return s.Body.End(); }
+internal static token.Pos End⁔(/*this*/ ref ForStmt s) { return s.Body.End(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref RangeStmt s) { return s.Body.End(); }
+internal static token.Pos End⁔(/*this*/ ref RangeStmt s) { return s.Body.End(); }
 
 } partial class ast_package {
 
 // stmtNode() ensures that only statement nodes can be
 // assigned to a Stmt.
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref BadStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref BadStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref DeclStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref DeclStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref EmptyStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref EmptyStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref LabeledStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref LabeledStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref ExprStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref ExprStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref SendStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref SendStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref IncDecStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref IncDecStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref AssignStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref AssignStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref GoStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref GoStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref DeferStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref DeferStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref ReturnStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref ReturnStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref BranchStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref BranchStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref BlockStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref BlockStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref IfStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref IfStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref CaseClause _) { }
+internal static void stmtNode⁔(/*this*/ ref CaseClause _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref SwitchStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref SwitchStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref TypeSwitchStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref TypeSwitchStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref CommClause _) { }
+internal static void stmtNode⁔(/*this*/ ref CommClause _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref SelectStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref SelectStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref ForStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref ForStmt _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("stmtNode")] internal static void stmtNodeᴍ(ref RangeStmt _) { }
+internal static void stmtNode⁔(/*this*/ ref RangeStmt _) { }
 
 } partial class ast_package {
 
@@ -1375,7 +1375,7 @@ partial struct TypeSpec {
 } partial class ast_package {
 
 // Pos and End implementations for spec nodes.
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref ImportSpec s) {
+internal static token.Pos Pos⁔(/*this*/ ref ImportSpec s) {
     if (s.Name != nil) {
         return s.Name.Pos();
     }
@@ -1384,15 +1384,15 @@ partial struct TypeSpec {
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref ValueSpec s) { return s.Names[0].Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref ValueSpec s) { return s.Names[0].Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref TypeSpec s) { return s.Name.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref TypeSpec s) { return s.Name.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref ImportSpec s) {
+internal static token.Pos End⁔(/*this*/ ref ImportSpec s) {
     if (s.EndPos != 0) {
         return s.EndPos;
     }
@@ -1401,7 +1401,7 @@ partial struct TypeSpec {
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref ValueSpec s) {
+internal static token.Pos End⁔(/*this*/ ref ValueSpec s) {
     nint n = len(s.Values); if (n > 0) {
         return s.Values[n - 1].End();
     }
@@ -1413,21 +1413,21 @@ partial struct TypeSpec {
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref TypeSpec s) { return s.Type.End(); }
+internal static token.Pos End⁔(/*this*/ ref TypeSpec s) { return s.Type.End(); }
 
 } partial class ast_package {
 
 // specNode() ensures that only spec nodes can be
 // assigned to a Spec.
-[GoMethodBody("specNode")] internal static void specNodeᴍ(ref ImportSpec _) { }
+internal static void specNode⁔(/*this*/ ref ImportSpec _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("specNode")] internal static void specNodeᴍ(ref ValueSpec _) { }
+internal static void specNode⁔(/*this*/ ref ValueSpec _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("specNode")] internal static void specNodeᴍ(ref TypeSpec _) { }
+internal static void specNode⁔(/*this*/ ref TypeSpec _) { }
 
 } partial class ast_package {
 
@@ -1472,23 +1472,23 @@ partial struct FuncDecl {
 } partial class ast_package {
 
 // Pos and End implementations for declaration nodes.
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref BadDecl d) { return d.From; }
+internal static token.Pos Pos⁔(/*this*/ ref BadDecl d) { return d.From; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref GenDecl d) { return d.TokPos; }
+internal static token.Pos Pos⁔(/*this*/ ref GenDecl d) { return d.TokPos; }
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref FuncDecl d) { return d.Type.Pos(); }
+internal static token.Pos Pos⁔(/*this*/ ref FuncDecl d) { return d.Type.Pos(); }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref BadDecl d) { return d.To; }
+internal static token.Pos End⁔(/*this*/ ref BadDecl d) { return d.To; }
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref GenDecl d) {
+internal static token.Pos End⁔(/*this*/ ref GenDecl d) {
     if (d.Rparen.IsValid()) {
         return d.Rparen + 1;
     }
@@ -1497,7 +1497,7 @@ partial struct FuncDecl {
 
 } partial class ast_package {
 
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref FuncDecl d) {
+internal static token.Pos End⁔(/*this*/ ref FuncDecl d) {
     if (d.Body != nil) {
         return d.Body.End();
     }
@@ -1508,15 +1508,15 @@ partial struct FuncDecl {
 
 // declNode() ensures that only declaration nodes can be
 // assigned to a Decl.
-[GoMethodBody("declNode")] internal static void declNodeᴍ(ref BadDecl _) { }
+internal static void declNode⁔(/*this*/ ref BadDecl _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("declNode")] internal static void declNodeᴍ(ref GenDecl _) { }
+internal static void declNode⁔(/*this*/ ref GenDecl _) { }
 
 } partial class ast_package {
 
-[GoMethodBody("declNode")] internal static void declNodeᴍ(ref FuncDecl _) { }
+internal static void declNode⁔(/*this*/ ref FuncDecl _) { }
 
 } partial class ast_package {
 
@@ -1563,13 +1563,13 @@ partial struct File {
 // It may be invalid, for example in an empty file.
 //
 // (Use FileStart for the start of the entire file. It is always valid.)
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref File f) { return f.Package; }
+internal static token.Pos Pos⁔(/*this*/ ref File f) { return f.Package; }
 
 // End returns the end of the last declaration in the file.
 // It may be invalid, for example in an empty file.
 //
 // (Use FileEnd for the end of the entire file. It is always valid.)
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref File f) {
+internal static token.Pos End⁔(/*this*/ ref File f) {
     nint n = len(f.Decls); if (n > 0) {
         return f.Decls[n - 1].End();
     }
@@ -1591,8 +1591,8 @@ partial struct Package {
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref Package p) { return token.NoPos; }
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref Package p) { return token.NoPos; }
+internal static token.Pos Pos⁔(/*this*/ ref Package p) { return token.NoPos; }
+internal static token.Pos End⁔(/*this*/ ref Package p) { return token.NoPos; }
 
 } partial class ast_package {
 

@@ -63,7 +63,7 @@ partial struct visibleFieldsWalker {
 // (this maintains the required ordering).
 // Fields that have been overridden have their
 // Name field cleared.
-[GoMethodBody("walk")] internal static void walkᴍ(ref visibleFieldsWalker w, Type t) {
+internal static void walk⁔(/*this*/ ref visibleFieldsWalker w, Type t) {
     if (w.visiting[t]) {
         return;
     }

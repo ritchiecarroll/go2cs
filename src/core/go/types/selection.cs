@@ -80,18 +80,18 @@ partial struct Selection {
 } partial class types_package {
 
 // Kind returns the selection kind.
-[GoMethodBody("Kind")] internal static SelectionKind Kindᴍ(ref Selection s) { return s.kind; }
+internal static SelectionKind Kind⁔(/*this*/ ref Selection s) { return s.kind; }
 
 // Recv returns the type of x in x.f.
-[GoMethodBody("Recv")] internal static Type Recvᴍ(ref Selection s) { return s.recv; }
+internal static Type Recv⁔(/*this*/ ref Selection s) { return s.recv; }
 
 // Obj returns the object denoted by x.f; a *Var for
 // a field selection, and a *Func in all other cases.
-[GoMethodBody("Obj")] internal static Object Objᴍ(ref Selection s) { return s.obj; }
+internal static Object Obj⁔(/*this*/ ref Selection s) { return s.obj; }
 
 // Type returns the type of x.f, which may be different from the type of f.
 // See Selection for more information.
-[GoMethodBody("Type")] internal static Type Typeᴍ(ref Selection s) {
+internal static Type Type⁔(/*this*/ ref Selection s) {
     switch (s.kind) {
     case var ᴛ when ᴛ == MethodVal: {
         // The type of x.f is a method with its receiver type set
@@ -133,7 +133,7 @@ partial struct Selection {
 //
 // The earlier index entries are the indices of the embedded fields implicitly
 // traversed to get from (the type of) x to f, starting at embedding depth 0.
-[GoMethodBody("Index")] internal static slice<nint> Indexᴍ(ref Selection s) { return s.index; }
+internal static slice<nint> Index⁔(/*this*/ ref Selection s) { return s.index; }
 
 // Indirect reports whether any pointer indirection was required to get from
 // x to f in x.f.
@@ -142,9 +142,9 @@ partial struct Selection {
 // MethodVal selection in which the receiver argument and parameter
 // both have type *T so there is no indirection.
 // Unfortunately, a fix is too risky.
-[GoMethodBody("Indirect")] internal static bool Indirectᴍ(ref Selection s) { return s.indirect; }
+internal static bool Indirect⁔(/*this*/ ref Selection s) { return s.indirect; }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Selection> Ꮡs) { return SelectionString(Ꮡs, default); }
+internal static @string String⁔(/*this*/ ж<Selection> Ꮡs) { return SelectionString(Ꮡs, default); }
 
 } partial class types_package {
 

@@ -55,7 +55,7 @@ partial struct edge {
 
 // add adds a uniform function over [l, r] scaled so the total weight
 // of the uniform is area. If l==r, this adds a Dirac delta function.
-[GoMethodBody("add")] internal static void addᴍ(ж<mud> Ꮡd, float64 l, float64 r, float64 area) {
+internal static void add⁔(/*this*/ ж<mud> Ꮡd, float64 l, float64 r, float64 area) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (area == 0D) {
@@ -121,7 +121,7 @@ partial struct edge {
 // Specifically, mass is a cumulative duration, and the mutator
 // utilization bounds for this duration can be queried using
 // approxInvCumulativeSum.
-[GoMethodBody("setTrackMass")] internal static void setTrackMassᴍ(ref mud d, float64 mass) {
+internal static void setTrackMass⁔(/*this*/ ref mud d, float64 mass) {
     d.trackMass = mass;
 
     // Find the bucket currently containing trackMass by computing
@@ -146,7 +146,7 @@ partial struct edge {
 // approximation of the inverse cumulative sum.
 //
 // The true inverse cumulative sum will be in the range [lower, upper).
-[GoMethodBody("approxInvCumulativeSum")] internal static (float64, float64, bool) approxInvCumulativeSumᴍ(ref mud d) {
+internal static (float64, float64, bool) approxInvCumulativeSum⁔(/*this*/ ref mud d) {
     if (d.trackBucket == len(d.hist)) {
         return (math.NaN(), math.NaN(), false);
     }
@@ -160,7 +160,7 @@ partial struct edge {
 // Specifically, y is a cumulative duration, and invCumulativeSum
 // returns the mutator utilization x such that at least y time has
 // been spent with mutator utilization <= x.
-[GoMethodBody("invCumulativeSum")] internal static (float64, bool) invCumulativeSumᴍ(ref mud d, float64 y) {
+internal static (float64, bool) invCumulativeSum⁔(/*this*/ ref mud d, float64 y) {
     if (len(d.sorted) == 0 && len(d.unsorted) == 0) {
         return (math.NaN(), false);
     }

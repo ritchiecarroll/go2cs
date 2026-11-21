@@ -61,10 +61,13 @@ using static go.path_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using @internal;
 using static path_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("path")]
 public static partial class path_package
@@ -99,13 +102,13 @@ public static partial class path_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(path_package.lazybuf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class pathᴛlazybuf;
+[GoMethodHost(typeof(path_package.lazybuf)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class pathᴛlazybuf;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class pathᴛlazybuf {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte index(this ref lazybuf b, nint i) => path_package.indexᴍ(ref b, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void append(this ref lazybuf b, byte c) => path_package.appendᴍ(ref b, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ref lazybuf b) => path_package.@stringᴍ(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static byte index(this ref lazybuf b, nint i) => path_package.index⁔(ref b, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void append(this ref lazybuf b, byte c) => path_package.append⁔(ref b, c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string @string(this ref lazybuf b) => path_package.@string⁔(ref b);
 }
 // </GlyphForwarders>

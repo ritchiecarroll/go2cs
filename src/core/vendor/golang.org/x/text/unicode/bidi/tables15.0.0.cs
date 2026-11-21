@@ -21,7 +21,7 @@ internal static slice<int32> xorMasks = [ // 8 elements
 // lookup returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-[GoMethodBody("lookup")] internal static (uint8 v, nint sz) lookupᴍ(ref bidiTrie t, slice<byte> s) {
+internal static (uint8 v, nint sz) lookup⁔(/*this*/ ref bidiTrie t, slice<byte> s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -87,7 +87,7 @@ internal static slice<int32> xorMasks = [ // 8 elements
 
 // lookupUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-[GoMethodBody("lookupUnsafe")] internal static uint8 lookupUnsafeᴍ(ref bidiTrie t, slice<byte> s) {
+internal static uint8 lookupUnsafe⁔(/*this*/ ref bidiTrie t, slice<byte> s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return bidiValues[c0];
@@ -110,7 +110,7 @@ internal static slice<int32> xorMasks = [ // 8 elements
 // lookupString returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-[GoMethodBody("lookupString")] internal static (uint8 v, nint sz) lookupStringᴍ(ref bidiTrie t, @string s) {
+internal static (uint8 v, nint sz) lookupString⁔(/*this*/ ref bidiTrie t, @string s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -176,7 +176,7 @@ internal static slice<int32> xorMasks = [ // 8 elements
 
 // lookupStringUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-[GoMethodBody("lookupStringUnsafe")] internal static uint8 lookupStringUnsafeᴍ(ref bidiTrie t, @string s) {
+internal static uint8 lookupStringUnsafe⁔(/*this*/ ref bidiTrie t, @string s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return bidiValues[c0];
@@ -209,7 +209,7 @@ internal static ж<bidiTrie> newBidiTrie(nint i) {
 } partial class bidi_package {
 
 // lookupValue determines the type of block n and looks up the value for b.
-[GoMethodBody("lookupValue")] internal static uint8 lookupValueᴍ(ref bidiTrie t, uint32 n, byte b) {
+internal static uint8 lookupValue⁔(/*this*/ ref bidiTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     default: {
         return (uint8)bidiValues[(n << 6) + (uint32)b];

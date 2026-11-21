@@ -64,10 +64,13 @@ using static go.crypto.@internal.fips140cache_package;
 
 namespace go.crypto.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using weak = weak_package;
 using static fips140cache_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("fips140cache")]
 public static partial class fips140cache_package
@@ -102,12 +105,12 @@ public static partial class fips140cache_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(fips140cache_package.Cache<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fips140cacheᴛCache;
+[GoMethodHost(typeof(fips140cache_package.Cache<,>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fips140cacheᴛCache;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class fips140cacheᴛCache {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<V>, error) Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> k, Func<(ж<V>, error)> @new, Func<ж<V>, bool> check) => fips140cache_package.Getᴍ<K, V>(Ꮡc, k, @new, check);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void evict<K, V>(this ж<Cache<K, V>> Ꮡc, weak.Pointer<K> p) => fips140cache_package.evictᴍ<K, V>(Ꮡc, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<V>, error) Get<K, V>(this ж<Cache<K, V>> Ꮡc, ж<K> k, Func<(ж<V>, error)> @new, Func<ж<V>, bool> check) => fips140cache_package.Get⁔<K, V>(Ꮡc, k, @new, check);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void evict<K, V>(this ж<Cache<K, V>> Ꮡc, weak.Pointer<K> p) => fips140cache_package.evict⁔<K, V>(Ꮡc, p);
 }
 // </GlyphForwarders>

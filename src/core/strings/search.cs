@@ -104,7 +104,7 @@ internal static nint /*i*/ longestCommonSuffix(@string a, @string b) {
 
 // next returns the index in text of the first occurrence of the pattern. If
 // the pattern is not found, it returns -1.
-[GoMethodBody("next")] internal static nint nextᴍ(ref stringFinder f, @string text) {
+internal static nint next⁔(/*this*/ ref stringFinder f, @string text) {
     nint i = len(f.pattern) - 1;
     while (i < len(text)) {
         // Compare backwards from the end until the first unmatching character.

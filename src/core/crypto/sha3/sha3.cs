@@ -131,14 +131,14 @@ public static ж<SHA3> New512() {
 
 } partial class sha3_package {
 
-[GoMethodBody("init")] internal static void initᴍ(ref SHA3 s) {
+internal static void init⁔(/*this*/ ref SHA3 s) {
     if (s.s.Size() == 0) {
         s.AssignFrom(New256().Value);
     }
 }
 
 // Write absorbs more data into the hash's state.
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<SHA3> Ꮡs, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<SHA3> Ꮡs, slice<byte> p) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.init();
@@ -146,49 +146,49 @@ public static ж<SHA3> New512() {
 }
 
 // Sum appends the current hash to b and returns the resulting slice.
-[GoMethodBody("Sum")] internal static slice<byte> Sumᴍ(ref SHA3 s, slice<byte> b) {
+internal static slice<byte> Sum⁔(/*this*/ ref SHA3 s, slice<byte> b) {
     s.init();
     return s.s.Sum(b);
 }
 
 // Reset resets the hash to its initial state.
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref SHA3 s) {
+internal static void Reset⁔(/*this*/ ref SHA3 s) {
     s.init();
     s.s.Reset();
 }
 
 // Size returns the number of bytes Sum will produce.
-[GoMethodBody("Size")] internal static nint Sizeᴍ(ref SHA3 s) {
+internal static nint Size⁔(/*this*/ ref SHA3 s) {
     s.init();
     return s.s.Size();
 }
 
 // BlockSize returns the hash's rate.
-[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref SHA3 s) {
+internal static nint BlockSize⁔(/*this*/ ref SHA3 s) {
     s.init();
     return s.s.BlockSize();
 }
 
 // MarshalBinary implements [encoding.BinaryMarshaler].
-[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(ref SHA3 s) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref SHA3 s) {
     s.init();
     return s.s.MarshalBinary();
 }
 
 // AppendBinary implements [encoding.BinaryAppender].
-[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ref SHA3 s, slice<byte> p) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref SHA3 s, slice<byte> p) {
     s.init();
     return s.s.AppendBinary(p);
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler].
-[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref SHA3 s, slice<byte> data) {
+internal static error UnmarshalBinary⁔(/*this*/ ref SHA3 s, slice<byte> data) {
     s.init();
     return s.s.UnmarshalBinary(data);
 }
 
 // Clone implements [hash.Cloner].
-[GoMethodBody("Clone")] internal static (hash.Cloner, error) Cloneᴍ(ref SHA3 d) {
+internal static (hash.Cloner, error) Clone⁔(/*this*/ ref SHA3 d) {
     ref var r = ref heap<SHA3>(d.ΔClone(), out var Ꮡr);
     return (new SHA3жCloner(Ꮡr), default);
 }
@@ -203,7 +203,7 @@ partial struct SHAKE {
 
 } partial class sha3_package {
 
-[GoMethodBody("init")] internal static void initᴍ(ref SHAKE s) {
+internal static void init⁔(/*this*/ ref SHAKE s) {
     if (s.s.Size() == 0) {
         s.AssignFrom(NewSHAKE256().Value);
     }
@@ -244,7 +244,7 @@ public static ж<SHAKE> NewCSHAKE256(slice<byte> N, slice<byte> S) {
 // Write absorbs more data into the XOF's state.
 //
 // It panics if any output has already been read.
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<SHAKE> Ꮡs, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<SHAKE> Ꮡs, slice<byte> p) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.init();
@@ -254,7 +254,7 @@ public static ж<SHAKE> NewCSHAKE256(slice<byte> N, slice<byte> S) {
 // Read squeezes more output from the XOF.
 //
 // Any call to Write after a call to Read will panic.
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ж<SHAKE> Ꮡs, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ж<SHAKE> Ꮡs, slice<byte> p) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.init();
@@ -262,7 +262,7 @@ public static ж<SHAKE> NewCSHAKE256(slice<byte> N, slice<byte> S) {
 }
 
 // Reset resets the XOF to its initial state.
-[GoMethodBody("Reset")] internal static void Resetᴍ(ж<SHAKE> Ꮡs) {
+internal static void Reset⁔(/*this*/ ж<SHAKE> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.init();
@@ -270,25 +270,25 @@ public static ж<SHAKE> NewCSHAKE256(slice<byte> N, slice<byte> S) {
 }
 
 // BlockSize returns the rate of the XOF.
-[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref SHAKE s) {
+internal static nint BlockSize⁔(/*this*/ ref SHAKE s) {
     s.init();
     return s.s.BlockSize();
 }
 
 // MarshalBinary implements [encoding.BinaryMarshaler].
-[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(ref SHAKE s) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref SHAKE s) {
     s.init();
     return s.s.MarshalBinary();
 }
 
 // AppendBinary implements [encoding.BinaryAppender].
-[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ref SHAKE s, slice<byte> p) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref SHAKE s, slice<byte> p) {
     s.init();
     return s.s.AppendBinary(p);
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler].
-[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref SHAKE s, slice<byte> data) {
+internal static error UnmarshalBinary⁔(/*this*/ ref SHAKE s, slice<byte> data) {
     s.init();
     return s.s.UnmarshalBinary(data);
 }

@@ -147,13 +147,13 @@ private static readonly @string filterFailsafeᵇ = "ZgotmplZ"u8;
 } partial class template_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string rangeˢᴍescaper => ref rangeˢᵇᴍescaper;
-private static readonly @string rangeˢᵇᴍescaper = "range"u8;
-internal static ref readonly @string withˢᴍescaper => ref withˢᵇᴍescaper;
-private static readonly @string withˢᵇᴍescaper = "with"u8;
+internal static ref readonly @string rangeˢ⁔escaper => ref rangeˢᵇ⁔escaper;
+private static readonly @string rangeˢᵇ⁔escaper = "range"u8;
+internal static ref readonly @string withˢ⁔escaper => ref withˢᵇ⁔escaper;
+private static readonly @string withˢᵇ⁔escaper = "with"u8;
 
 // escape escapes a template node.
-[GoMethodBody("escape")] internal static context escapeᴍ(ref escaper e, context c, parse.Node n) {
+internal static context escape⁔(/*this*/ ref escaper e, context c, parse.Node n) {
     switch (n.type()) {
     case ж<parse.ActionNode> nΔ1: {
         return e.escapeAction(c, nΔ1);
@@ -178,7 +178,7 @@ private static readonly @string withˢᵇᴍescaper = "with"u8;
         return e.escapeList(c, nΔ1);
     }
     case ж<parse.RangeNode> nΔ1: {
-        return e.escapeBranch(c, nΔ1.ᏑBranchNode, rangeˢᴍescaper);
+        return e.escapeBranch(c, nΔ1.ᏑBranchNode, rangeˢ⁔escaper);
     }
     case ж<parse.TemplateNode> nΔ1: {
         return e.escapeTemplate(c, nΔ1);
@@ -187,7 +187,7 @@ private static readonly @string withˢᵇᴍescaper = "with"u8;
         return e.escapeText(c, nΔ1);
     }
     case ж<parse.WithNode> nΔ1: {
-        return e.escapeBranch(c, nΔ1.ᏑBranchNode, withˢᴍescaper);
+        return e.escapeBranch(c, nΔ1.ᏑBranchNode, withˢ⁔escaper);
     }}
     throw panic("escaping " + n.String() + " is unimplemented");
 }
@@ -201,7 +201,7 @@ internal static ж<godebug.Setting> htmlmetacontenturlescape = godebug.New("html
 } partial class template_package {
 
 // escapeAction escapes an action template node.
-[GoMethodBody("escapeAction")] internal static context escapeActionᴍ(ref escaper e, context c, ж<parse.ActionNode> Ꮡn) {
+internal static context escapeAction⁔(/*this*/ ref escaper e, context c, ж<parse.ActionNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (len(n.Pipe.Decl) != 0) {
@@ -604,7 +604,7 @@ internal static context join(context a, context b, parse.Node node, @string node
 } partial class template_package {
 
 // escapeBranch escapes a branch template node: "if", "range" and "with".
-[GoMethodBody("escapeBranch")] internal static context escapeBranchᴍ(ref escaper e, context c, ж<parse.BranchNode> Ꮡn, @string nodeName) {
+internal static context escapeBranch⁔(/*this*/ ref escaper e, context c, ж<parse.BranchNode> Ꮡn, @string nodeName) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (nodeName == "range"u8) {
@@ -677,7 +677,7 @@ internal static context joinRange(context c0, ref rangeContext rc) {
 } partial class template_package {
 
 // escapeList escapes a list template node.
-[GoMethodBody("escapeList")] internal static context escapeListᴍ(ref escaper e, context c, ж<parse.ListNode> Ꮡn) {
+internal static context escapeList⁔(/*this*/ ref escaper e, context c, ж<parse.ListNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (Ꮡn == nil) {
@@ -696,7 +696,7 @@ internal static context joinRange(context c0, ref rangeContext rc) {
 // inferences in e if the inferences and output context satisfy filter.
 // It returns the best guess at an output context, and the result of the filter
 // which is the same as whether e was updated.
-[GoMethodBody("escapeListConditionally")] internal static (context, bool) escapeListConditionallyᴍ(ref escaper e, context c, ж<parse.ListNode> n, Func<ж<escaper>, context, bool> filter) {
+internal static (context, bool) escapeListConditionally⁔(/*this*/ ref escaper e, context c, ж<parse.ListNode> n, Func<ж<escaper>, context, bool> filter) {
     ref var e1 = ref heap<escaper>(makeEscaper(e.ns), out var Ꮡe1);
     e1.rangeContext = e.rangeContext;
     // Make type inferences available to f.
@@ -722,7 +722,7 @@ internal static context joinRange(context c0, ref rangeContext rc) {
 }
 
 // escapeTemplate escapes a {{template}} call node.
-[GoMethodBody("escapeTemplate")] internal static context escapeTemplateᴍ(ref escaper e, context c, ж<parse.TemplateNode> Ꮡn) {
+internal static context escapeTemplate⁔(/*this*/ ref escaper e, context c, ж<parse.TemplateNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     (c, var name) = e.escapeTree(c, new parse.TemplateNodeжNode(Ꮡn), n.Name, n.Line);
@@ -734,7 +734,7 @@ internal static context joinRange(context c0, ref rangeContext rc) {
 
 // escapeTree escapes the named template starting in the given context as
 // necessary and returns its output context.
-[GoMethodBody("escapeTree")] internal static (context, @string) escapeTreeᴍ(ref escaper e, context c, parse.Node node, @string name, nint line) {
+internal static (context, @string) escapeTree⁔(/*this*/ ref escaper e, context c, parse.Node node, @string name, nint line) {
     // Mangle the template name with the input context to produce a reliable
     // identifier.
     ref var dname = ref heap<@string>(c.mangle(name), out var Ꮡdname);
@@ -774,7 +774,7 @@ internal static context joinRange(context c0, ref rangeContext rc) {
 
 // computeOutCtx takes a template and its start context and computes the output
 // context while storing any inferences in e.
-[GoMethodBody("computeOutCtx")] internal static context computeOutCtxᴍ(ref escaper e, context c, ж<template.Template> Ꮡt) {
+internal static context computeOutCtx⁔(/*this*/ ref escaper e, context c, ж<template.Template> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Propagate context over the body.
@@ -798,7 +798,7 @@ internal static context joinRange(context c0, ref rangeContext rc) {
 // escapeTemplateBody escapes the given template assuming the given output
 // context, and returns the best guess at the output context and whether the
 // assumption was correct.
-[GoMethodBody("escapeTemplateBody")] internal static (context, bool) escapeTemplateBodyᴍ(ref escaper e, context c, ж<template.Template> Ꮡt) {
+internal static (context, bool) escapeTemplateBody⁔(/*this*/ ref escaper e, context c, ж<template.Template> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var cʗ1 = c;
@@ -862,7 +862,7 @@ internal static slice<byte> doctypeBytes = slice<byte>("<!DOCTYPE"u8);
 } partial class template_package {
 
 // escapeText escapes a text template node.
-[GoMethodBody("escapeText")] internal static context escapeTextᴍ(ref escaper e, context c, ж<parse.TextNode> Ꮡn) {
+internal static context escapeText⁔(/*this*/ ref escaper e, context c, ж<parse.TextNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     var s = n.Text;
@@ -1013,7 +1013,7 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
 } partial class template_package {
 
 // editActionNode records a change to an action pipeline for later commit.
-[GoMethodBody("editActionNode")] internal static void editActionNodeᴍ(ref escaper e, ж<parse.ActionNode> n, slice<@string> cmds) {
+internal static void editActionNode⁔(/*this*/ ref escaper e, ж<parse.ActionNode> n, slice<@string> cmds) {
     var (_, ok) = e.actionNodeEdits[n, ꟷ]; if (ok) {
         throw panic(fmt.Sprintf("node %s shared between templates"u8, n.OrTypedNil()));
     }
@@ -1021,7 +1021,7 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
 }
 
 // editTemplateNode records a change to a {{template}} callee for later commit.
-[GoMethodBody("editTemplateNode")] internal static void editTemplateNodeᴍ(ref escaper e, ж<parse.TemplateNode> n, @string callee) {
+internal static void editTemplateNode⁔(/*this*/ ref escaper e, ж<parse.TemplateNode> n, @string callee) {
     var (_, ok) = e.templateNodeEdits[n, ꟷ]; if (ok) {
         throw panic(fmt.Sprintf("node %s shared between templates"u8, n.OrTypedNil()));
     }
@@ -1029,7 +1029,7 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
 }
 
 // editTextNode records a change to a text node for later commit.
-[GoMethodBody("editTextNode")] internal static void editTextNodeᴍ(ref escaper e, ж<parse.TextNode> n, slice<byte> text) {
+internal static void editTextNode⁔(/*this*/ ref escaper e, ж<parse.TextNode> n, slice<byte> text) {
     var (_, ok) = e.textNodeEdits[n, ꟷ]; if (ok) {
         throw panic(fmt.Sprintf("node %s shared between templates"u8, n.OrTypedNil()));
     }
@@ -1038,7 +1038,7 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
 
 // commit applies changes to actions and template calls needed to contextually
 // autoescape content and adds any derived templates to the set.
-[GoMethodBody("commit")] internal static void commitᴍ(ref escaper e) {
+internal static void commit⁔(/*this*/ ref escaper e) {
     foreach (var (name, _) in e.output) {
         e.template(name).Funcs(funcMap);
     }
@@ -1068,7 +1068,7 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
 }
 
 // template returns the named template given a mangled template name.
-[GoMethodBody("template")] internal static ж<template.Template> templateᴍ(ref escaper e, @string name) {
+internal static ж<template.Template> template⁔(/*this*/ ref escaper e, @string name) {
     // Any template from the name space associated with this escaper can be used
     // to look up templates in the underlying text/template name space.
     var t = e.arbitraryTemplate().text.Lookup(name);
@@ -1080,7 +1080,7 @@ internal static (context, nint) contextAfterText(context c, slice<byte> s) {
 
 // arbitraryTemplate returns an arbitrary template from the name space
 // associated with e and panics if no templates are found.
-[GoMethodBody("arbitraryTemplate")] internal static ж<Template> arbitraryTemplateᴍ(ref escaper e) {
+internal static ж<Template> arbitraryTemplate⁔(/*this*/ ref escaper e) {
     foreach (var (_, t) in e.ns.set) {
         return t;
     }

@@ -80,12 +80,15 @@ using static go.context_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using time = time_package;
 using @internal;
 using go.sync;
 using static context_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("context")]
 public static partial class context_package
@@ -135,64 +138,64 @@ public static partial class context_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(context_package.afterFuncCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛafterFuncCtx;
-[GoMethodHost(typeof(context_package.backgroundCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛbackgroundCtx;
-[GoMethodHost(typeof(context_package.cancelCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛcancelCtx;
-[GoMethodHost(typeof(context_package.deadlineExceededError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛdeadlineExceededError;
-[GoMethodHost(typeof(context_package.emptyCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛemptyCtx;
-[GoMethodHost(typeof(context_package.timerCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛtimerCtx;
-[GoMethodHost(typeof(context_package.todoCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛtodoCtx;
-[GoMethodHost(typeof(context_package.valueCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛvalueCtx;
-[GoMethodHost(typeof(context_package.withoutCancelCtx)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class contextᴛwithoutCancelCtx;
+[GoMethodHost(typeof(context_package.afterFuncCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛafterFuncCtx;
+[GoMethodHost(typeof(context_package.backgroundCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛbackgroundCtx;
+[GoMethodHost(typeof(context_package.cancelCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛcancelCtx;
+[GoMethodHost(typeof(context_package.deadlineExceededError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛdeadlineExceededError;
+[GoMethodHost(typeof(context_package.emptyCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛemptyCtx;
+[GoMethodHost(typeof(context_package.timerCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛtimerCtx;
+[GoMethodHost(typeof(context_package.todoCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛtodoCtx;
+[GoMethodHost(typeof(context_package.valueCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛvalueCtx;
+[GoMethodHost(typeof(context_package.withoutCancelCtx)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class contextᴛwithoutCancelCtx;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class contextᴛdeadlineExceededError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this deadlineExceededError _) => context_package.Errorᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Timeout(this deadlineExceededError _) => context_package.Timeoutᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Temporary(this deadlineExceededError _) => context_package.Temporaryᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this deadlineExceededError _) => context_package.Error⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Timeout(this deadlineExceededError _) => context_package.Timeout⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Temporary(this deadlineExceededError _) => context_package.Temporary⁔(_);
 }
 partial class contextᴛemptyCtx {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (time.Time deadline, bool ok) Deadline(this emptyCtx _) => context_package.Deadlineᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this emptyCtx _) => context_package.Doneᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Err(this emptyCtx _) => context_package.Errᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Value(this emptyCtx _, any key) => context_package.Valueᴍ(_, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (time.Time deadline, bool ok) Deadline(this emptyCtx _) => context_package.Deadline⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this emptyCtx _) => context_package.Done⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Err(this emptyCtx _) => context_package.Err⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Value(this emptyCtx _, any key) => context_package.Value⁔(_, key);
 }
 partial class contextᴛbackgroundCtx {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this backgroundCtx _) => context_package.Stringᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this backgroundCtx _) => context_package.String⁔(_);
 }
 partial class contextᴛtodoCtx {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this todoCtx _) => context_package.Stringᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this todoCtx _) => context_package.String⁔(_);
 }
 partial class contextᴛafterFuncCtx {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cancel(this ж<afterFuncCtx> Ꮡa, bool removeFromParent, error err, error cause) => context_package.cancelᴍ(Ꮡa, removeFromParent, err, cause);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void cancel(this ж<afterFuncCtx> Ꮡa, bool removeFromParent, error err, error cause) => context_package.cancel⁔(Ꮡa, removeFromParent, err, cause);
 }
 partial class contextᴛcancelCtx {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (time.Time, bool) Deadline(this cancelCtx recvᴛ) => context_package.Deadlineᴍ(recvᴛ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Value(this ж<cancelCtx> Ꮡc, any key) => context_package.Valueᴍ(Ꮡc, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this ж<cancelCtx> Ꮡc) => context_package.Doneᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Err(this ж<cancelCtx> Ꮡc) => context_package.Errᴍ(Ꮡc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void propagateCancel(this ж<cancelCtx> Ꮡc, Context parent, canceler child) => context_package.propagateCancelᴍ(Ꮡc, parent, child);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref cancelCtx c) => context_package.Stringᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cancel(this ж<cancelCtx> Ꮡc, bool removeFromParent, error err, error cause) => context_package.cancelᴍ(Ꮡc, removeFromParent, err, cause);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (time.Time, bool) Deadline(this cancelCtx recvᴛ) => context_package.Deadline⁔(recvᴛ);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Value(this ж<cancelCtx> Ꮡc, any key) => context_package.Value⁔(Ꮡc, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this ж<cancelCtx> Ꮡc) => context_package.Done⁔(Ꮡc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Err(this ж<cancelCtx> Ꮡc) => context_package.Err⁔(Ꮡc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void propagateCancel(this ж<cancelCtx> Ꮡc, Context parent, canceler child) => context_package.propagateCancel⁔(Ꮡc, parent, child);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref cancelCtx c) => context_package.String⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void cancel(this ж<cancelCtx> Ꮡc, bool removeFromParent, error err, error cause) => context_package.cancel⁔(Ꮡc, removeFromParent, err, cause);
 }
 partial class contextᴛwithoutCancelCtx {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (time.Time deadline, bool ok) Deadline(this withoutCancelCtx _) => context_package.Deadlineᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this withoutCancelCtx _) => context_package.Doneᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Err(this withoutCancelCtx _) => context_package.Errᴍ(_);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Value(this withoutCancelCtx c, any key) => context_package.Valueᴍ(c, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this withoutCancelCtx c) => context_package.Stringᴍ(c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (time.Time deadline, bool ok) Deadline(this withoutCancelCtx _) => context_package.Deadline⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this withoutCancelCtx _) => context_package.Done⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Err(this withoutCancelCtx _) => context_package.Err⁔(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Value(this withoutCancelCtx c, any key) => context_package.Value⁔(c, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this withoutCancelCtx c) => context_package.String⁔(c);
 }
 partial class contextᴛtimerCtx {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (time.Time deadline, bool ok) Deadline(this ref timerCtx c) => context_package.Deadlineᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref timerCtx c) => context_package.Stringᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cancel(this ж<timerCtx> Ꮡc, bool removeFromParent, error err, error cause) => context_package.cancelᴍ(Ꮡc, removeFromParent, err, cause);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (time.Time deadline, bool ok) Deadline(this ref timerCtx c) => context_package.Deadline⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref timerCtx c) => context_package.String⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void cancel(this ж<timerCtx> Ꮡc, bool removeFromParent, error err, error cause) => context_package.cancel⁔(Ꮡc, removeFromParent, err, cause);
 }
 partial class contextᴛvalueCtx {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (time.Time, bool) Deadline(this valueCtx recvᴛ) => context_package.Deadlineᴍ(recvᴛ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this valueCtx recvᴛ) => context_package.Doneᴍ(recvᴛ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Err(this valueCtx recvᴛ) => context_package.Errᴍ(recvᴛ);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ref valueCtx c) => context_package.Stringᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Value(this ref valueCtx c, any key) => context_package.Valueᴍ(ref c, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (time.Time, bool) Deadline(this valueCtx recvᴛ) => context_package.Deadline⁔(recvᴛ);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static /*<-*/channel<EmptyStruct> Done(this valueCtx recvᴛ) => context_package.Done⁔(recvᴛ);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Err(this valueCtx recvᴛ) => context_package.Err⁔(recvᴛ);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ref valueCtx c) => context_package.String⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Value(this ref valueCtx c, any key) => context_package.Value⁔(ref c, key);
 }
 // </GlyphForwarders>

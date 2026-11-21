@@ -64,13 +64,16 @@ using static go.compress.zlib_package;
 
 namespace go.compress;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using io = io_package;
 using encoding;
 using go.compress;
 using go.hash;
 using static zlib_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("zlib")]
 public static partial class zlib_package
@@ -112,21 +115,21 @@ public static partial class zlib_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(zlib_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zlibᴛWriter;
-[GoMethodHost(typeof(zlib_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class zlibᴛreader;
+[GoMethodHost(typeof(zlib_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class zlibᴛWriter;
+[GoMethodHost(typeof(zlib_package.reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class zlibᴛreader;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class zlibᴛreader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref reader z, slice<byte> p) => zlib_package.Readᴍ(ref z, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref reader z) => zlib_package.Closeᴍ(ref z);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) => zlib_package.Resetᴍ(ref z, r, dict);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref reader z, slice<byte> p) => zlib_package.Read⁔(ref z, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref reader z) => zlib_package.Close⁔(ref z);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Reset(this ref reader z, io.Reader r, slice<byte> dict) => zlib_package.Reset⁔(ref z, r, dict);
 }
 partial class zlibᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Writer z, io.Writer w) => zlib_package.Resetᴍ(ref z, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ writeHeader(this ref Writer z) => zlib_package.writeHeaderᴍ(ref z);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ref Writer z, slice<byte> p) => zlib_package.Writeᴍ(ref z, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Flush(this ref Writer z) => zlib_package.Flushᴍ(ref z);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Writer z) => zlib_package.Closeᴍ(ref z);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Writer z, io.Writer w) => zlib_package.Reset⁔(ref z, w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ writeHeader(this ref Writer z) => zlib_package.writeHeader⁔(ref z);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ref Writer z, slice<byte> p) => zlib_package.Write⁔(ref z, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Flush(this ref Writer z) => zlib_package.Flush⁔(ref z);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Writer z) => zlib_package.Close⁔(ref z);
 }
 // </GlyphForwarders>

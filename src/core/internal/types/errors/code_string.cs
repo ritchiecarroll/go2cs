@@ -181,7 +181,7 @@ internal static array<uint8> _Code_index_5 = array<uint8>([0, 12, 24, 44, 50]);
 
 } partial class errors_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Code i) {
+internal static @string String⁔(/*this*/ Code i) {
     switch (ᐧ) {
     case {} when i == -1: {
         return _Code_name_0;

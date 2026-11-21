@@ -47,12 +47,12 @@ partial struct echConfigErr {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsMalformedECHConfigˢᴍechConfigErr => ref tlsMalformedECHConfigˢᵇᴍechConfigErr;
-private static readonly @string tlsMalformedECHConfigˢᵇᴍechConfigErr = "tls: malformed ECHConfig"u8;
+internal static ref readonly @string tlsMalformedECHConfigˢ⁔echConfigErr => ref tlsMalformedECHConfigˢᵇ⁔echConfigErr;
+private static readonly @string tlsMalformedECHConfigˢᵇ⁔echConfigErr = "tls: malformed ECHConfig"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref echConfigErr e) {
+internal static @string Error⁔(/*this*/ ref echConfigErr e) {
     if (e.field == ""u8) {
-        return tlsMalformedECHConfigˢᴍechConfigErr;
+        return tlsMalformedECHConfigˢ⁔echConfigErr;
     }
     return fmt.Sprintf("tls: malformed ECHConfig, invalid %s field"u8, e.field);
 }
@@ -548,11 +548,11 @@ partial struct ECHRejectionError {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsServerRejectedEchˢᴍECHRejectionError => ref tlsServerRejectedEchˢᵇᴍECHRejectionError;
-private static readonly @string tlsServerRejectedEchˢᵇᴍECHRejectionError = "tls: server rejected ECH"u8;
+internal static ref readonly @string tlsServerRejectedEchˢ⁔ECHRejectionError => ref tlsServerRejectedEchˢᵇ⁔ECHRejectionError;
+private static readonly @string tlsServerRejectedEchˢᵇ⁔ECHRejectionError = "tls: server rejected ECH"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref ECHRejectionError e) {
-    return tlsServerRejectedEchˢᴍECHRejectionError;
+internal static @string Error⁔(/*this*/ ref ECHRejectionError e) {
+    return tlsServerRejectedEchˢ⁔ECHRejectionError;
 }
 
 } partial class tls_package {
@@ -621,7 +621,7 @@ internal static (echExtType echType, echCipher cs, uint8 configID, slice<byte> e
 
 } partial class tls_package {
 
-[GoMethodBody("processECHClientHello")] internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClientHelloᴍ(ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡouter, slice<EncryptedClientHelloKey> echKeys) {
+internal static (ж<clientHelloMsg>, ж<echServerContext>, error) processECHClientHello⁔(/*this*/ ж<Conn> Ꮡc, ж<clientHelloMsg> Ꮡouter, slice<EncryptedClientHelloKey> echKeys) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var outer = ref Ꮡouter.DerefOrNull();
 

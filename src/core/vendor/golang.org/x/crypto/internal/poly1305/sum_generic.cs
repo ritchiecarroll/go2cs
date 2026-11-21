@@ -62,7 +62,7 @@ partial struct macGeneric {
 
 // Write splits the incoming message into TagSize chunks, and passes them to
 // update. It buffers incomplete chunks.
-[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ж<macGeneric> Ꮡh, slice<byte> p) {
+internal static (nint, error) Write⁔(/*this*/ ж<macGeneric> Ꮡh, slice<byte> p) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     nint nn = len(p);
@@ -91,7 +91,7 @@ partial struct macGeneric {
 // Sum flushes the last incomplete chunk from the buffer, if any, and generates
 // the MAC output. It does not modify its state, in order to allow for multiple
 // calls to Sum, even if no Write is allowed after Sum.
-[GoMethodBody("Sum")] internal static void Sumᴍ(ref macGeneric h, /*[16]*/ ж<array<byte>> @out) {
+internal static void Sum⁔(/*this*/ ref macGeneric h, /*[16]*/ ж<array<byte>> @out) {
     var state = h.macState.ΔClone();
     if (h.offset > 0) {
         updateGeneric(ref state, h.buffer.slice(0, h.offset));

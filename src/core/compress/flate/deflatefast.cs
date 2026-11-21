@@ -64,7 +64,7 @@ internal static ж<deflateFast> newDeflateFast() {
 
 // encode encodes a block given in src and appends tokens
 // to dst and returns the result.
-[GoMethodBody("encode")] internal static slice<token> encodeᴍ(ref deflateFast e, slice<token> dst, slice<byte> src) {
+internal static slice<token> encode⁔(/*this*/ ref deflateFast e, slice<token> dst, slice<byte> src) {
     // Ensure that e.cur doesn't wrap.
     if (e.cur >= bufferReset) {
         e.shiftOffsets();
@@ -210,7 +210,7 @@ internal static slice<token> emitLiteral(slice<token> dst, slice<byte> lit) {
 // matchLen returns the match length between src[s:] and src[t:].
 // t can be negative to indicate the match is starting in e.prev.
 // We assume that src[s-4:s] and src[t-4:t] already match.
-[GoMethodBody("matchLen")] internal static int32 matchLenᴍ(ref deflateFast e, int32 s, int32 t, slice<byte> src) {
+internal static int32 matchLen⁔(/*this*/ ref deflateFast e, int32 s, int32 t, slice<byte> src) {
     nint s1 = (nint)s + (nint)maxMatchLength - 4;
     if (s1 > len(src)) {
         s1 = len(src);
@@ -269,7 +269,7 @@ internal static slice<token> emitLiteral(slice<token> dst, slice<byte> lit) {
 
 // Reset resets the encoding history.
 // This ensures that no matches are made to the previous block.
-[GoMethodBody("reset")] internal static void resetᴍ(ref deflateFast e) {
+internal static void reset⁔(/*this*/ ref deflateFast e) {
     e.prev = e.prev[..0];
     // Bump the offset, so all matches will fail distance check.
     // Nothing should be >= e.cur in the table.
@@ -285,7 +285,7 @@ internal static slice<token> emitLiteral(slice<token> dst, slice<byte> lit) {
 // This is only called in rare situations to prevent integer overflow.
 //
 // See https://golang.org/issue/18636 and https://github.com/golang/go/issues/34121.
-[GoMethodBody("shiftOffsets")] internal static void shiftOffsetsᴍ(ref deflateFast e) {
+internal static void shiftOffsets⁔(/*this*/ ref deflateFast e) {
     if (len(e.prev) == 0) {
         // We have no history; just clear the table.
         clear(e.table[..]);

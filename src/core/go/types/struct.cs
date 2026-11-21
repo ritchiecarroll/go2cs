@@ -44,25 +44,25 @@ public static ж<Struct> NewStruct(slice<ж<Var>> fields, slice<@string> tags) {
 } partial class types_package {
 
 // NumFields returns the number of fields in the struct (including blank and embedded fields).
-[GoMethodBody("NumFields")] internal static nint NumFieldsᴍ(ref Struct s) { return len(s.fields); }
+internal static nint NumFields⁔(/*this*/ ref Struct s) { return len(s.fields); }
 
 // Field returns the i'th field for 0 <= i < NumFields().
-[GoMethodBody("Field")] internal static ж<Var> Fieldᴍ(ref Struct s, nint i) { return s.fields[i]; }
+internal static ж<Var> Field⁔(/*this*/ ref Struct s, nint i) { return s.fields[i]; }
 
 // Tag returns the i'th field tag for 0 <= i < NumFields().
-[GoMethodBody("Tag")] internal static @string Tagᴍ(ref Struct s, nint i) {
+internal static @string Tag⁔(/*this*/ ref Struct s, nint i) {
     if (i < len(s.tags)) {
         return s.tags[i];
     }
     return ""u8;
 }
 
-[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Struct> Ꮡt) { return new StructжType(Ꮡt); }
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Struct> Ꮡt) { return TypeString(new StructжType(Ꮡt), default); }
+internal static Type Underlying⁔(/*this*/ ж<Struct> Ꮡt) { return new StructжType(Ꮡt); }
+internal static @string String⁔(/*this*/ ж<Struct> Ꮡt) { return TypeString(new StructжType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
-[GoMethodBody("markComplete")] internal static void markCompleteᴍ(ref Struct s) {
+internal static void markComplete⁔(/*this*/ ref Struct s) {
     if (s.fields == nil) {
         s.fields = new slice<ж<Var>>(0);
     }
@@ -71,16 +71,16 @@ public static ж<Struct> NewStruct(slice<ж<Var>> fields, slice<@string> tags) {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string embeddedFieldTypeCannotˢᴍChecker => ref embeddedFieldTypeCannotˢᵇᴍChecker;
-private static readonly @string embeddedFieldTypeCannotˢᵇᴍChecker = "embedded field type cannot be unsafe.Pointer"u8;
-internal static ref readonly @string embeddedFieldTypeCannotˢ2ᴍChecker => ref embeddedFieldTypeCannotˢ2ᵇᴍChecker;
-private static readonly @string embeddedFieldTypeCannotˢ2ᵇᴍChecker = "embedded field type cannot be a pointer"u8;
-internal static ref readonly @string embeddedFieldTypeCannotˢ3ᴍChecker => ref embeddedFieldTypeCannotˢ3ᵇᴍChecker;
-private static readonly @string embeddedFieldTypeCannotˢ3ᵇᴍChecker = "embedded field type cannot be a (pointer to a) type parameter"u8;
-internal static ref readonly @string embeddedFieldTypeCannotˢ4ᴍChecker => ref embeddedFieldTypeCannotˢ4ᵇᴍChecker;
-private static readonly @string embeddedFieldTypeCannotˢ4ᵇᴍChecker = "embedded field type cannot be a pointer to an interface"u8;
+internal static ref readonly @string embeddedFieldTypeCannotˢ⁔Checker => ref embeddedFieldTypeCannotˢᵇ⁔Checker;
+private static readonly @string embeddedFieldTypeCannotˢᵇ⁔Checker = "embedded field type cannot be unsafe.Pointer"u8;
+internal static ref readonly @string embeddedFieldTypeCannotˢ2⁔Checker => ref embeddedFieldTypeCannotˢ2ᵇ⁔Checker;
+private static readonly @string embeddedFieldTypeCannotˢ2ᵇ⁔Checker = "embedded field type cannot be a pointer"u8;
+internal static ref readonly @string embeddedFieldTypeCannotˢ3⁔Checker => ref embeddedFieldTypeCannotˢ3ᵇ⁔Checker;
+private static readonly @string embeddedFieldTypeCannotˢ3ᵇ⁔Checker = "embedded field type cannot be a (pointer to a) type parameter"u8;
+internal static ref readonly @string embeddedFieldTypeCannotˢ4⁔Checker => ref embeddedFieldTypeCannotˢ4ᵇ⁔Checker;
+private static readonly @string embeddedFieldTypeCannotˢ4ᵇ⁔Checker = "embedded field type cannot be a pointer to an interface"u8;
 
-[GoMethodBody("structType")] internal static void structTypeᴍ(ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, ж<ast.StructType> Ꮡe) {
+internal static void structType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Struct> Ꮡstyp, ж<ast.StructType> Ꮡe) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var styp = ref Ꮡstyp.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -175,12 +175,12 @@ private static readonly @string embeddedFieldTypeCannotˢ4ᵇᴍChecker = "embed
                     }
                     // unsafe.Pointer is treated like a regular pointer
                     if (u.kind == UnsafePointer) {
-                        Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), InvalidPtrEmbed, embeddedFieldTypeCannotˢᴍChecker);
+                        Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), InvalidPtrEmbed, embeddedFieldTypeCannotˢ⁔Checker);
                     }
                     break;
                 }
                 case ж<Pointer> u: {
-                    Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), InvalidPtrEmbed, embeddedFieldTypeCannotˢ2ᴍChecker);
+                    Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), InvalidPtrEmbed, embeddedFieldTypeCannotˢ2⁔Checker);
                     break;
                 }
                 case ж<Interface> u: {
@@ -188,11 +188,11 @@ private static readonly @string embeddedFieldTypeCannotˢ4ᵇᴍChecker = "embed
                         // The error code here is inconsistent with other error codes for
                         // invalid embedding, because this restriction may be relaxed in the
                         // future, and so it did not warrant a new error code.
-                        Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), MisplacedTypeParam, embeddedFieldTypeCannotˢ3ᴍChecker);
+                        Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), MisplacedTypeParam, embeddedFieldTypeCannotˢ3⁔Checker);
                         break;
                     }
                     if (isPtr) {
-                        Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), InvalidPtrEmbed, embeddedFieldTypeCannotˢ4ᴍChecker);
+                        Ꮡcheck.error(new ast_Exprᴠpositioner(embeddedPosʗ1), InvalidPtrEmbed, embeddedFieldTypeCannotˢ4⁔Checker);
                     }
                     break;
                 }}
@@ -233,7 +233,7 @@ internal static ж<ast.Ident> embeddedFieldIdent(ast.Expr e) {
 
 } partial class types_package {
 
-[GoMethodBody("declareInSet")] internal static bool declareInSetᴍ(ж<Checker> Ꮡcheck, ж<objset> Ꮡoset, token.Pos pos, Object obj) {
+internal static bool declareInSet⁔(/*this*/ ж<Checker> Ꮡcheck, ж<objset> Ꮡoset, token.Pos pos, Object obj) {
     ref var oset = ref Ꮡoset.DerefOrNull();
 
     var alt = oset.insert(obj); if (alt != nil) {
@@ -246,7 +246,7 @@ internal static ж<ast.Ident> embeddedFieldIdent(ast.Expr e) {
     return true;
 }
 
-[GoMethodBody("tag")] internal static @string tagᴍ(ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡt) {
+internal static @string tag⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ast.BasicLit> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt != nil) {

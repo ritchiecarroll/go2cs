@@ -28,7 +28,7 @@ partial struct traceTypeTable {
 // if it's seeing it for the first time.
 //
 // N.B. typ must be kept alive forever for this to work correctly.
-[GoMethodBody("put")] internal static uint64 putᴍ(ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
+internal static uint64 put⁔(/*this*/ ж<traceTypeTable> Ꮡt, ж<abi.Type> Ꮡtyp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     if (Ꮡtyp == nil) {
@@ -43,7 +43,7 @@ partial struct traceTypeTable {
 // dump writes all previously cached types to trace buffers and
 // releases all memory and resets state. It must only be called once the caller
 // can guarantee that there are no more writers to the table.
-[GoMethodBody("dump")] internal static void dumpᴍ(ж<traceTypeTable> Ꮡt, uintptr gen) {
+internal static void dump⁔(/*this*/ ж<traceTypeTable> Ꮡt, uintptr gen) {
     var w = unsafeTraceExpWriter(gen, nil, tracev2.AllocFree);
     var root = @unsafe.Pointer.To<traceMapNode>(Ꮡt.Ꮡtab.Ꮡroot.Load()); if (root != nil) {
         w = dumpTypesRec(root, w);

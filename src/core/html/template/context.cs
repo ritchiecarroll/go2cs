@@ -36,7 +36,7 @@ partial struct context {
 
 } partial class template_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(context c) {
+internal static @string String⁔(/*this*/ context c) {
     error err = default;
     if (c.err != nil) {
         err = new Errorжerror(c.err);
@@ -45,13 +45,13 @@ partial struct context {
 }
 
 // eq reports whether two contexts are equal.
-[GoMethodBody("eq")] internal static bool eqᴍ(context c, context d) {
+internal static bool eq⁔(/*this*/ context c, context d) {
     return c.state == d.state && c.delim == d.delim && c.urlPart == d.urlPart && c.jsCtx == d.jsCtx && slices.Equal<slice<nint>, nint>(c.jsBraceDepth, d.jsBraceDepth) && c.attr == d.attr && c.element == d.element && c.err == d.err;
 }
 
 // mangle produces an identifier that includes a suffix that distinguishes it
 // from template names mangled with different contexts.
-[GoMethodBody("mangle")] internal static @string mangleᴍ(context c, @string templateName) {
+internal static @string mangle⁔(/*this*/ context c, @string templateName) {
     // The mangled name for the default context is the input templateName.
     if (c.state == stateText) {
         return templateName;
@@ -79,7 +79,7 @@ partial struct context {
 }
 
 // clone returns a copy of c with the same field values.
-[GoMethodBody("clone")] internal static context cloneᴍ(context c) {
+internal static context clone⁔(/*this*/ context c) {
     var clone = c;
     clone.jsBraceDepth = slices.Clone<slice<nint>, nint>(c.jsBraceDepth);
     return clone;

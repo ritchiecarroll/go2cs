@@ -100,6 +100,6 @@ partial struct exitError /*@string*/;
 
 } partial class exithook_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(exitError e) { return (@string)e; }
+internal static @string Error⁔(/*this*/ exitError e) { return (@string)e; }
 
 }

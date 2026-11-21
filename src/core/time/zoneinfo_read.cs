@@ -40,7 +40,7 @@ partial struct fileSizeError /*@string*/;
 
 } partial class time_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(fileSizeError f) {
+internal static @string Error⁔(/*this*/ fileSizeError f) {
     return "time: file "u8 + ((@string)f) + " is too large"u8;
 }
 
@@ -59,7 +59,7 @@ partial struct dataIO {
 
 } partial class time_package {
 
-[GoMethodBody("read")] internal static slice<byte> readᴍ(ref dataIO d, nint n) {
+internal static slice<byte> read⁔(/*this*/ ref dataIO d, nint n) {
     if (len(d.p) < n) {
         d.p = default;
         d.error = true;
@@ -70,7 +70,7 @@ partial struct dataIO {
     return p;
 }
 
-[GoMethodBody("big4")] internal static (uint32 n, bool ok) big4ᴍ(ref dataIO d) {
+internal static (uint32 n, bool ok) big4⁔(/*this*/ ref dataIO d) {
     var p = d.read(4);
     if (len(p) < 4) {
         d.error = true;
@@ -79,7 +79,7 @@ partial struct dataIO {
     return ((uint32)p[3] | (uint32)p[2] << 8 | (uint32)p[1] << 16 | (uint32)p[0] << 24, true);
 }
 
-[GoMethodBody("big8")] internal static (uint64 n, bool ok) big8ᴍ(ref dataIO d) {
+internal static (uint64 n, bool ok) big8⁔(/*this*/ ref dataIO d) {
     var (n1, ok1) = d.big4();
     var (n2, ok2) = d.big4();
     if (!ok1 || !ok2) {
@@ -89,7 +89,7 @@ partial struct dataIO {
     return (((uint64)n1 << 32) | (uint64)n2, true);
 }
 
-[GoMethodBody("byte")] internal static (byte n, bool ok) @byteᴍ(ref dataIO d) {
+internal static (byte n, bool ok) @byte⁔(/*this*/ ref dataIO d) {
     var p = d.read(1);
     if (len(p) < 1) {
         d.error = true;
@@ -99,7 +99,7 @@ partial struct dataIO {
 }
 
 // rest returns the rest of the data in the buffer.
-[GoMethodBody("rest")] internal static slice<byte> restᴍ(ref dataIO d) {
+internal static slice<byte> rest⁔(/*this*/ ref dataIO d) {
     var r = d.p;
     d.p = default;
     return r;

@@ -55,7 +55,7 @@ partial struct pinner {
 
 } partial class runtime_package {
 
-[GoMethodBody("unpin")] internal static void unpinᴍ(ж<pinner> Ꮡp) {
+internal static void unpin⁔(/*this*/ ж<pinner> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (Ꮡp == nil || p.refs == nil) {
@@ -189,25 +189,25 @@ partial struct pinState {
 // nosplit, because it's called by isPinned, which is nosplit
 //
 //go:nosplit
-[GoMethodBody("isPinned")] internal static bool isPinnedᴍ(ref pinState v) {
+internal static bool isPinned⁔(/*this*/ ref pinState v) {
     return ((uint8)(v.byteVal & v.mask)) != 0;
 }
 
-[GoMethodBody("isMultiPinned")] internal static bool isMultiPinnedᴍ(ref pinState v) {
+internal static bool isMultiPinned⁔(/*this*/ ref pinState v) {
     return ((uint8)(v.byteVal & ((uint8)(v.mask << 1)))) != 0;
 }
 
-[GoMethodBody("setPinned")] internal static void setPinnedᴍ(ref pinState v, bool val) {
+internal static void setPinned⁔(/*this*/ ref pinState v, bool val) {
     v.set(val, false);
 }
 
-[GoMethodBody("setMultiPinned")] internal static void setMultiPinnedᴍ(ref pinState v, bool val) {
+internal static void setMultiPinned⁔(/*this*/ ref pinState v, bool val) {
     v.set(val, true);
 }
 
 // set sets the pin bit of the pinState to val. If multipin is true, it
 // sets/unsets the multipin bit instead.
-[GoMethodBody("set")] internal static void setᴍ(ref pinState v, bool val, bool multipin) {
+internal static void set⁔(/*this*/ ref pinState v, bool val, bool multipin) {
     var mask = v.mask;
     if (multipin) {
         mask <<= 1;
@@ -230,7 +230,7 @@ partial struct pinnerBits /*gcBits*/;
 // nosplit, because it's called by isPinned, which is nosplit
 //
 //go:nosplit
-[GoMethodBody("ofObject")] internal static pinState ofObjectᴍ(ж<pinnerBits> Ꮡp, uintptr n) {
+internal static pinState ofObject⁔(/*this*/ ж<pinnerBits> Ꮡp, uintptr n) {
     var (bytep, mask) = (Ꮡp.Reinterpret<pinnerBits, gcBits>()).bitp(n * 2);
     var byteVal = atomic.Load8(bytep);
     return new pinState(bytep, byteVal, mask);
@@ -238,32 +238,32 @@ partial struct pinnerBits /*gcBits*/;
 
 } partial class runtime_package {
 
-[GoMethodBody("pinnerBitSize")] internal static uintptr pinnerBitSizeᴍ(ref mspan s) {
+internal static uintptr pinnerBitSize⁔(/*this*/ ref mspan s) {
     return divRoundUp((uintptr)s.nelems * 2, 8);
 }
 
 // newPinnerBits returns a pointer to 8 byte aligned bytes to be used for this
 // span's pinner bits. newPinnerBits is used to mark objects that are pinned.
 // They are copied when the span is swept.
-[GoMethodBody("newPinnerBits")] internal static ж<pinnerBits> newPinnerBitsᴍ(ref mspan s) {
+internal static ж<pinnerBits> newPinnerBits⁔(/*this*/ ref mspan s) {
     return newMarkBits((uintptr)s.nelems * 2).Reinterpret<gcBits, pinnerBits>();
 }
 
 // nosplit, because it's called by isPinned, which is nosplit
 //
 //go:nosplit
-[GoMethodBody("getPinnerBits")] internal static ж<pinnerBits> getPinnerBitsᴍ(ж<mspan> Ꮡs) {
+internal static ж<pinnerBits> getPinnerBits⁔(/*this*/ ж<mspan> Ꮡs) {
     return @unsafe.Pointer.To<pinnerBits>(atomic.Loadp(@unsafe.Pointer.FromBox(Ꮡs.ᏑpinnerBits)));
 }
 
-[GoMethodBody("setPinnerBits")] internal static void setPinnerBitsᴍ(ж<mspan> Ꮡs, ж<pinnerBits> p) {
+internal static void setPinnerBits⁔(/*this*/ ж<mspan> Ꮡs, ж<pinnerBits> p) {
     atomicstorep(@unsafe.Pointer.FromBox(Ꮡs.ᏑpinnerBits), @unsafe.Pointer.FromPinnedBox(p));
 }
 
 // refreshPinnerBits replaces pinnerBits with a fresh copy in the arenas for the
 // next GC cycle. If it does not contain any pinned objects, pinnerBits of the
 // span is set to nil.
-[GoMethodBody("refreshPinnerBits")] internal static void refreshPinnerBitsᴍ(ж<mspan> Ꮡs) {
+internal static void refreshPinnerBits⁔(/*this*/ ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var p = Ꮡs.getPinnerBits();
@@ -296,7 +296,7 @@ partial struct pinnerBits /*gcBits*/;
 
 // incPinCounter is only called for multiple pins of the same object and records
 // the _additional_ pins.
-[GoMethodBody("incPinCounter")] internal static void incPinCounterᴍ(ж<mspan> Ꮡspan, uintptr offset) {
+internal static void incPinCounter⁔(/*this*/ ж<mspan> Ꮡspan, uintptr offset) {
     ж<specialPinCounter> rec = default;
     var (@ref, exists) = Ꮡspan.specialFindSplicePoint(offset, _KindSpecialPinCounter);
     if (!exists) {
@@ -316,17 +316,17 @@ partial struct pinnerBits /*gcBits*/;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimePinnerDecreasedˢᴍmspan => ref runtimePinnerDecreasedˢᵇᴍmspan;
-private static readonly @string runtimePinnerDecreasedˢᵇᴍmspan = "runtime.Pinner: decreased non-existing pin counter"u8;
+internal static ref readonly @string runtimePinnerDecreasedˢ⁔mspan => ref runtimePinnerDecreasedˢᵇ⁔mspan;
+private static readonly @string runtimePinnerDecreasedˢᵇ⁔mspan = "runtime.Pinner: decreased non-existing pin counter"u8;
 
 // decPinCounter decreases the counter. If the counter reaches 0, the counter
 // special is deleted and false is returned. Otherwise true is returned.
-[GoMethodBody("decPinCounter")] internal static bool decPinCounterᴍ(ж<mspan> Ꮡspan, uintptr offset) {
+internal static bool decPinCounter⁔(/*this*/ ж<mspan> Ꮡspan, uintptr offset) {
     ref var span = ref Ꮡspan.DerefOrNull();
 
     var (@ref, exists) = Ꮡspan.specialFindSplicePoint(offset, _KindSpecialPinCounter);
     if (!exists) {
-        @throw(runtimePinnerDecreasedˢᴍmspan);
+        @throw(runtimePinnerDecreasedˢ⁔mspan);
     }
     var counter = @ref.ValueSlot.Reinterpret<special, specialPinCounter>();
     counter.counter--;

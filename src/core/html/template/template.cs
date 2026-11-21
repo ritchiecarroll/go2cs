@@ -52,7 +52,7 @@ partial struct nameSpace {
 
 // Templates returns a slice of the templates associated with t, including t
 // itself.
-[GoMethodBody("Templates")] internal static slice<ж<Template>> Templatesᴍ(ж<Template> Ꮡt) {
+internal static slice<ж<Template>> Templates⁔(/*this*/ ж<Template> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -90,7 +90,7 @@ partial struct nameSpace {
 //		The operation returns the zero value for the map type's element.
 //	"missingkey=error"
 //		Execution stops immediately with an error.
-[GoMethodBody("Option")] internal static ж<Template> Optionᴍ(ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) {
+internal static ж<Template> Option⁔(/*this*/ ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) {
     var opt = optʗp.sslice();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -100,7 +100,7 @@ partial struct nameSpace {
 
 // checkCanParse checks whether it is OK to parse templates.
 // If not, it returns an error.
-[GoMethodBody("checkCanParse")] internal static error checkCanParseᴍ(ж<Template> Ꮡt) {
+internal static error checkCanParse⁔(/*this*/ ж<Template> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -120,7 +120,7 @@ partial struct nameSpace {
 }
 
 // escape escapes all associated templates.
-[GoMethodBody("escape")] internal static error escapeᴍ(ж<Template> Ꮡt) {
+internal static error escape⁔(/*this*/ ж<Template> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -151,7 +151,7 @@ partial struct nameSpace {
 // the output writer.
 // A template may be executed safely in parallel, although if parallel
 // executions share a Writer the output may be interleaved.
-[GoMethodBody("Execute")] internal static error Executeᴍ(ж<Template> Ꮡt, io.Writer wr, any data) {
+internal static error Execute⁔(/*this*/ ж<Template> Ꮡt, io.Writer wr, any data) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var err = Ꮡt.escape(); if (err != nil) {
@@ -167,7 +167,7 @@ partial struct nameSpace {
 // the output writer.
 // A template may be executed safely in parallel, although if parallel
 // executions share a Writer the output may be interleaved.
-[GoMethodBody("ExecuteTemplate")] internal static error ExecuteTemplateᴍ(ж<Template> Ꮡt, io.Writer wr, @string name, any data) {
+internal static error ExecuteTemplate⁔(/*this*/ ж<Template> Ꮡt, io.Writer wr, @string name, any data) {
     var (tmpl, err) = Ꮡt.lookupAndEscapeTemplate(name);
     if (err != nil) {
         return err;
@@ -178,7 +178,7 @@ partial struct nameSpace {
 // lookupAndEscapeTemplate guarantees that the template with the given name
 // is escaped, or returns an error if it cannot be. It returns the named
 // template.
-[GoMethodBody("lookupAndEscapeTemplate")] internal static (ж<Template> tmpl, error err) lookupAndEscapeTemplateᴍ(ж<Template> Ꮡt, @string name) {
+internal static (ж<Template> tmpl, error err) lookupAndEscapeTemplate⁔(/*this*/ ж<Template> Ꮡt, @string name) {
     ж<Template> tmpl = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -213,7 +213,7 @@ partial struct nameSpace {
 // DefinedTemplates returns a string listing the defined templates,
 // prefixed by the string "; defined templates are: ". If there are none,
 // it returns the empty string. Used to generate an error message.
-[GoMethodBody("DefinedTemplates")] internal static @string DefinedTemplatesᴍ(ref Template t) {
+internal static @string DefinedTemplates⁔(/*this*/ ref Template t) {
     return t.text.DefinedTemplates();
 }
 
@@ -228,7 +228,7 @@ partial struct nameSpace {
 // is considered empty and will not replace an existing template's body.
 // This allows using Parse to add new named template definitions without
 // overwriting the main template body.
-[GoMethodBody("Parse")] internal static (ж<Template>, error) Parseᴍ(ж<Template> Ꮡt, @string text) {
+internal static (ж<Template>, error) Parse⁔(/*this*/ ж<Template> Ꮡt, @string text) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -266,7 +266,7 @@ partial struct nameSpace {
 // and associates it with t.
 //
 // It returns an error if t or any associated template has already been executed.
-[GoMethodBody("AddParseTree")] internal static (ж<Template>, error) AddParseTreeᴍ(ж<Template> Ꮡt, @string name, ж<parse.Tree> tree) {
+internal static (ж<Template>, error) AddParseTree⁔(/*this*/ ж<Template> Ꮡt, @string name, ж<parse.Tree> tree) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -302,7 +302,7 @@ partial struct nameSpace {
 // by adding the variants after the clone is made.
 //
 // It returns an error if t has already been executed.
-[GoMethodBody("Clone")] internal static (ж<Template>, error) Cloneᴍ(ж<Template> Ꮡt) {
+internal static (ж<Template>, error) Clone⁔(/*this*/ ж<Template> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -371,7 +371,7 @@ public static ж<Template> New(@string name) {
 // If a template with the given name already exists, the new HTML template
 // will replace it. The existing template will be reset and disassociated with
 // t.
-[GoMethodBody("New")] internal static ж<Template> Newᴍ(ж<Template> Ꮡt, @string name) {
+internal static ж<Template> New⁔(/*this*/ ж<Template> Ꮡt, @string name) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -385,7 +385,7 @@ public static ж<Template> New(@string name) {
 }
 
 // new is the implementation of New, without the lock.
-[GoMethodBody("new")] internal static ж<Template> @newᴍ(ref Template t, @string name) {
+internal static ж<Template> @new⁔(/*this*/ ref Template t, @string name) {
     var tmpl = Ꮡ(new Template(
         default,
         t.text.New(name),
@@ -401,7 +401,7 @@ public static ж<Template> New(@string name) {
 }
 
 // Name returns the name of the template.
-[GoMethodBody("Name")] internal static @string Nameᴍ(ref Template t) {
+internal static @string Name⁔(/*this*/ ref Template t) {
     return t.text.Name();
 }
 
@@ -410,7 +410,7 @@ public static ж<Template> New(@string name) {
 // It panics if a value in the map is not a function with appropriate return
 // type. However, it is legal to overwrite elements of the map. The return
 // value is the template, so calls can be chained.
-[GoMethodBody("Funcs")] internal static ж<Template> Funcsᴍ(ж<Template> Ꮡt, FuncMap funcMap) {
+internal static ж<Template> Funcs⁔(/*this*/ ж<Template> Ꮡt, FuncMap funcMap) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.text.Funcs((template.FuncMap)funcMap);
@@ -422,7 +422,7 @@ public static ж<Template> New(@string name) {
 // definitions will inherit the settings. An empty delimiter stands for the
 // corresponding default: {{ or }}.
 // The return value is the template, so calls can be chained.
-[GoMethodBody("Delims")] internal static ж<Template> Delimsᴍ(ж<Template> Ꮡt, @string left, @string right) {
+internal static ж<Template> Delims⁔(/*this*/ ж<Template> Ꮡt, @string left, @string right) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.text.Delims(left, right);
@@ -431,7 +431,7 @@ public static ж<Template> New(@string name) {
 
 // Lookup returns the template with the given name that is associated with t,
 // or nil if there is no such template.
-[GoMethodBody("Lookup")] internal static ж<Template> Lookupᴍ(ж<Template> Ꮡt, @string name) {
+internal static ж<Template> Lookup⁔(/*this*/ ж<Template> Ꮡt, @string name) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -483,7 +483,7 @@ public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸstring filenames�
 // the last one mentioned will be the one that results.
 //
 // ParseFiles returns an error if t or any associated template has already been executed.
-[GoMethodBody("ParseFiles")] internal static (ж<Template>, error) ParseFilesᴍ(ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
+internal static (ж<Template>, error) ParseFiles⁔(/*this*/ ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.sslice();
 
     return parseFiles(Ꮡt, readFileOS, filenames.ꓸꓸꓸ);
@@ -561,7 +561,7 @@ public static (ж<Template>, error) ParseGlob(@string pattern) {
 // the last one mentioned will be the one that results.
 //
 // ParseGlob returns an error if t or any associated template has already been executed.
-[GoMethodBody("ParseGlob")] internal static (ж<Template>, error) ParseGlobᴍ(ж<Template> Ꮡt, @string pattern) {
+internal static (ж<Template>, error) ParseGlob⁔(/*this*/ ж<Template> Ꮡt, @string pattern) {
     return parseGlob(Ꮡt, pattern);
 }
 
@@ -605,7 +605,7 @@ public static (ж<Template>, error) ParseFS(fs.FS fsΔ1, params ꓸꓸꓸstring 
 // instead of the host operating system's file system.
 // It accepts a list of glob patterns.
 // (Note that most file names serve as glob patterns matching only themselves.)
-[GoMethodBody("ParseFS")] internal static (ж<Template>, error) ParseFSᴍ(ж<Template> Ꮡt, fs.FS fsΔ1, params ꓸꓸꓸstring patternsʗp) {
+internal static (ж<Template>, error) ParseFS⁔(/*this*/ ж<Template> Ꮡt, fs.FS fsΔ1, params ꓸꓸꓸstring patternsʗp) {
     var patterns = patternsʗp.slice();
 
     return parseFS(Ꮡt, fsΔ1, patterns);

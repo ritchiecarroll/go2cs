@@ -104,8 +104,8 @@ partial struct SessionState {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsInternalErrorEmptyˢᴍSessionState => ref tlsInternalErrorEmptyˢᵇᴍSessionState;
-private static readonly @string tlsInternalErrorEmptyˢᵇᴍSessionState = "tls: internal error: empty verified chain"u8;
+internal static ref readonly @string tlsInternalErrorEmptyˢ⁔SessionState => ref tlsInternalErrorEmptyˢᵇ⁔SessionState;
+private static readonly @string tlsInternalErrorEmptyˢᵇ⁔SessionState = "tls: internal error: empty verified chain"u8;
 
 // Bytes encodes the session, including any private fields, so that it can be
 // parsed by [ParseSessionState]. The encoding contains secret values critical
@@ -113,7 +113,7 @@ private static readonly @string tlsInternalErrorEmptyˢᵇᴍSessionState = "tls
 //
 // The specific encoding should be considered opaque and may change incompatibly
 // between Go versions.
-[GoMethodBody("Bytes")] internal static (slice<byte>, error) Bytesᴍ(ж<SessionState> Ꮡs) {
+internal static (slice<byte>, error) Bytes⁔(/*this*/ ж<SessionState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     ref var b = ref heap(new cryptobyte.Builder(), out var Ꮡb);
@@ -157,7 +157,7 @@ private static readonly @string tlsInternalErrorEmptyˢᵇᴍSessionState = "tls
             bΔ4.AddUint24LengthPrefixed((ж<cryptobyte.Builder> bΔ5) => {
                 // We elide the first certificate because it's always the leaf.
                 if (len(chainʗ1) == 0) {
-                    bΔ5.SetError(errors.New(tlsInternalErrorEmptyˢᴍSessionState));
+                    bΔ5.SetError(errors.New(tlsInternalErrorEmptyˢ⁔SessionState));
                     return;
                 }
                 foreach (var (_, cert) in range(chainʗ1[1..])) {
@@ -322,7 +322,7 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
 
 // sessionState returns a partially filled-out [SessionState] with information
 // from the current connection.
-[GoMethodBody("sessionState")] internal static ж<SessionState> sessionStateᴍ(ref Conn c) {
+internal static ж<SessionState> sessionState⁔(/*this*/ ref Conn c) {
     return Ꮡ(new SessionState(
         version: c.vers,
         cipherSuite: c.cipherSuite,
@@ -342,7 +342,7 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
 
 // EncryptTicket encrypts a ticket with the [Config]'s configured (or default)
 // session ticket keys. It can be used as a [Config.WrapSession] implementation.
-[GoMethodBody("EncryptTicket")] internal static (slice<byte>, error) EncryptTicketᴍ(ж<Config> Ꮡc, ConnectionState cs, ж<SessionState> ss) {
+internal static (slice<byte>, error) EncryptTicket⁔(/*this*/ ж<Config> Ꮡc, ConnectionState cs, ж<SessionState> ss) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var ticketKeys = Ꮡc.ticketKeys(nil);
@@ -354,12 +354,12 @@ public static (ж<SessionState>, error) ParseSessionState(slice<byte> data) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsInternalErrorSessionˢᴍConfig => ref tlsInternalErrorSessionˢᵇᴍConfig;
-private static readonly @string tlsInternalErrorSessionˢᵇᴍConfig = "tls: internal error: session ticket keys unavailable"u8;
+internal static ref readonly @string tlsInternalErrorSessionˢ⁔Config => ref tlsInternalErrorSessionˢᵇ⁔Config;
+private static readonly @string tlsInternalErrorSessionˢᵇ⁔Config = "tls: internal error: session ticket keys unavailable"u8;
 
-[GoMethodBody("encryptTicket")] internal static (slice<byte>, error) encryptTicketᴍ(ref Config c, slice<byte> state, slice<ticketKey> ticketKeys) {
+internal static (slice<byte>, error) encryptTicket⁔(/*this*/ ref Config c, slice<byte> state, slice<ticketKey> ticketKeys) {
     if (len(ticketKeys) == 0) {
-        return (default, errors.New(tlsInternalErrorSessionˢᴍConfig));
+        return (default, errors.New(tlsInternalErrorSessionˢ⁔Config));
     }
 
     var encrypted = new slice<byte>((nint)aes.BlockSize + len(state) + (nint)sha256.Size);
@@ -389,7 +389,7 @@ private static readonly @string tlsInternalErrorSessionˢᵇᴍConfig = "tls: in
 // be used as a [Config.UnwrapSession] implementation.
 //
 // If the ticket can't be decrypted or parsed, DecryptTicket returns (nil, nil).
-[GoMethodBody("DecryptTicket")] internal static (ж<SessionState>, error) DecryptTicketᴍ(ж<Config> Ꮡc, slice<byte> identity, ConnectionState cs) {
+internal static (ж<SessionState>, error) DecryptTicket⁔(/*this*/ ж<Config> Ꮡc, slice<byte> identity, ConnectionState cs) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var ticketKeys = Ꮡc.ticketKeys(nil);
@@ -404,7 +404,7 @@ private static readonly @string tlsInternalErrorSessionˢᵇᴍConfig = "tls: in
     return (s, default);
 }
 
-[GoMethodBody("decryptTicket")] internal static slice<byte> decryptTicketᴍ(ref Config c, slice<byte> encrypted, slice<ticketKey> ticketKeys) {
+internal static slice<byte> decryptTicket⁔(/*this*/ ref Config c, slice<byte> encrypted, slice<ticketKey> ticketKeys) {
     if (len(encrypted) < (nint)(aes.BlockSize + sha256.Size)) {
         return default;
     }
@@ -453,7 +453,7 @@ partial struct ClientSessionState {
 //
 // It can be called by [ClientSessionCache.Put] to serialize (with
 // [SessionState.Bytes]) and store the session.
-[GoMethodBody("ResumptionState")] internal static (slice<byte> ticket, ж<SessionState> state, error err) ResumptionStateᴍ(ж<ClientSessionState> Ꮡcs) {
+internal static (slice<byte> ticket, ж<SessionState> state, error err) ResumptionState⁔(/*this*/ ж<ClientSessionState> Ꮡcs) {
     ref var cs = ref Ꮡcs.DerefOrNull();
 
     if (Ꮡcs == nil || cs.session == nil) {

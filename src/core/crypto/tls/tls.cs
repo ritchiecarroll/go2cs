@@ -82,15 +82,15 @@ partial struct listener {
 
 // Go method set entry for the promoted 'Listener.Addr()' - provided ONLY by the embedded
 // interface field in *listener's method set; see the pointer-only satisfaction record.
-[GoMethodBody("Addr")] internal static net.Addr Addrᴍ(listener recvᴛ) => recvᴛ.Listener.Addr();
+internal static net.Addr Addr⁔(/*this*/ listener recvᴛ) => recvᴛ.Listener.Addr();
 
 // Go method set entry for the promoted 'Listener.Close()' - provided ONLY by the embedded
 // interface field in *listener's method set; see the pointer-only satisfaction record.
-[GoMethodBody("Close")] internal static error Closeᴍ(listener recvᴛ) => recvᴛ.Listener.Close();
+internal static error Close⁔(/*this*/ listener recvᴛ) => recvᴛ.Listener.Close();
 
 // Accept waits for and returns the next incoming TLS connection.
 // The returned connection is of type *Conn.
-[GoMethodBody("Accept")] internal static (net.Conn, error) Acceptᴍ(ref listener l) {
+internal static (net.Conn, error) Accept⁔(/*this*/ ref listener l) {
     var (c, err) = l.Listener.Accept();
     if (err != nil) {
         return (default, err);
@@ -141,12 +141,12 @@ partial struct timeoutError {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsDialWithDialerTimedˢᴍtimeoutError => ref tlsDialWithDialerTimedˢᵇᴍtimeoutError;
-private static readonly @string tlsDialWithDialerTimedˢᵇᴍtimeoutError = "tls: DialWithDialer timed out"u8;
+internal static ref readonly @string tlsDialWithDialerTimedˢ⁔timeoutError => ref tlsDialWithDialerTimedˢᵇ⁔timeoutError;
+private static readonly @string tlsDialWithDialerTimedˢᵇ⁔timeoutError = "tls: DialWithDialer timed out"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(timeoutError _) { return tlsDialWithDialerTimedˢᴍtimeoutError; }
-[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(timeoutError _) { return true; }
-[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(timeoutError _) { return true; }
+internal static @string Error⁔(/*this*/ timeoutError _) { return tlsDialWithDialerTimedˢ⁔timeoutError; }
+internal static bool Timeout⁔(/*this*/ timeoutError _) { return true; }
+internal static bool Temporary⁔(/*this*/ timeoutError _) { return true; }
 
 } partial class tls_package {
 
@@ -251,11 +251,11 @@ partial struct Dialer {
 //
 // Dial uses context.Background internally; to specify the context,
 // use [Dialer.DialContext].
-[GoMethodBody("Dial")] internal static (net.Conn, error) Dialᴍ(ref Dialer d, @string network, @string addr) {
+internal static (net.Conn, error) Dial⁔(/*this*/ ref Dialer d, @string network, @string addr) {
     return d.DialContext(context.Background(), network, addr);
 }
 
-[GoMethodBody("netDialer")] internal static ж<net.Dialer> netDialerᴍ(ref Dialer d) {
+internal static ж<net.Dialer> netDialer⁔(/*this*/ ref Dialer d) {
     if (d.NetDialer != nil) {
         return d.NetDialer;
     }
@@ -271,7 +271,7 @@ partial struct Dialer {
 // connection.
 //
 // The returned [Conn], if any, will always be of type *[Conn].
-[GoMethodBody("DialContext")] internal static (net.Conn, error) DialContextᴍ(ref Dialer d, context.Context ctx, @string network, @string addr) {
+internal static (net.Conn, error) DialContext⁔(/*this*/ ref Dialer d, context.Context ctx, @string network, @string addr) {
     var (c, err) = dial(ctx, d.netDialer(), network, addr, d.Config);
     if (err != nil) {
         // Don't return c (a typed nil) in an interface.

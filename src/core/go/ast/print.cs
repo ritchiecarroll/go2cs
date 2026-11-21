@@ -94,7 +94,7 @@ internal static slice<byte> indent = slice<byte>(".  "u8);
 
 } partial class ast_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref printer p, slice<byte> data) {
+internal static (nint n, error err) Write⁔(/*this*/ ref printer p, slice<byte> data) {
     nint n = default;
     error err = default;
 
@@ -140,7 +140,7 @@ partial struct localError {
 } partial class ast_package {
 
 // printf is a convenience wrapper that takes care of print errors.
-[GoMethodBody("printf")] internal static void printfᴍ(ж<printer> Ꮡp, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void printf⁔(/*this*/ ж<printer> Ꮡp, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var (_, err) = fmt.Fprintf(new printerжWriter(Ꮡp), format, args.ꓸꓸꓸ); if (err != nil) {
@@ -156,7 +156,7 @@ partial struct localError {
 // not cycles that are created via slices or maps containing the
 // same slice or map. Code for general data structures probably
 // should catch those as well.
-[GoMethodBody("print")] internal static void printᴍ(ж<printer> Ꮡp, reflect.Value x) {
+internal static void print⁔(/*this*/ ж<printer> Ꮡp, reflect.Value x) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (!NotNilFilter(""u8, x)) {

@@ -96,8 +96,8 @@ partial interface genericClientConn :
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string httpNewClientConnˢᴍTransport => ref httpNewClientConnˢᵇᴍTransport;
-private static readonly @string httpNewClientConnˢᵇᴍTransport = "http: NewClientConn returned something that is not a ClientConn"u8;
+internal static ref readonly @string httpNewClientConnˢ⁔Transport => ref httpNewClientConnˢᵇ⁔Transport;
+private static readonly @string httpNewClientConnˢᵇ⁔Transport = "http: NewClientConn returned something that is not a ClientConn"u8;
 
 // NewClientConn creates a new client connection to the given address.
 //
@@ -119,7 +119,7 @@ private static readonly @string httpNewClientConnˢᵇᴍTransport = "http: NewC
 // It does not count against the MaxIdleConns and MaxConnsPerHost limits.
 //
 // The caller is responsible for closing the new connection.
-[GoMethodBody("NewClientConn")] internal static (ж<ClientConn>, error) NewClientConnᴍ(ж<Transport> Ꮡt, context.Context ctx, @string scheme, @string address) {
+internal static (ж<ClientConn>, error) NewClientConn⁔(/*this*/ ж<Transport> Ꮡt, context.Context ctx, @string scheme, @string address) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -200,7 +200,7 @@ private static readonly @string httpNewClientConnˢᵇᴍTransport = "http: NewC
             // (probably x/net/http2) or the bundled copy in h2_bundle.go.
             var (gc, ok) = pconn.alt._<genericClientConn>(ᐧ);
             if (!ok) {
-                return (default, errors.New(httpNewClientConnˢᴍTransport));
+                return (default, errors.New(httpNewClientConnˢ⁔Transport));
             }
             cc.cc = gc;
             cc.lastAvailable = gc.Available();
@@ -221,7 +221,7 @@ private static readonly @string httpNewClientConnˢᵇᴍTransport = "http: NewC
 
 // Close closes the connection.
 // Outstanding RoundTrip calls are interrupted.
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<ClientConn> Ꮡcc) {
+internal static error Close⁔(/*this*/ ж<ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     try {
         ref var cc = ref Ꮡcc.DerefOrNull();
@@ -236,7 +236,7 @@ private static readonly @string httpNewClientConnˢᵇᴍTransport = "http: NewC
 // Err reports any fatal connection errors.
 // It returns nil if the connection is usable.
 // If it returns non-nil, the connection can no longer be used.
-[GoMethodBody("Err")] internal static error Errᴍ(ref ClientConn cc) {
+internal static error Err⁔(/*this*/ ref ClientConn cc) {
     return cc.cc.Err();
 }
 
@@ -286,7 +286,7 @@ internal static error validateClientConnRequest(ref Request req) {
 // If the connection is at its concurrency limit,
 // RoundTrip waits for the connection to become available
 // before sending the request.
-[GoMethodBody("RoundTrip")] internal static (ж<Response>, error) RoundTripᴍ(ж<ClientConn> Ꮡcc, ж<Request> req) {
+internal static (ж<Response>, error) RoundTrip⁔(/*this*/ ж<ClientConn> Ꮡcc, ж<Request> req) {
     GoFrame ᒐ = default;
     try {
         ref var cc = ref Ꮡcc.DerefOrNull();
@@ -305,14 +305,14 @@ internal static error validateClientConnRequest(ref Request req) {
 // Available reports the number of requests that may be sent
 // to the connection without blocking.
 // It returns 0 if the connection is closed.
-[GoMethodBody("Available")] internal static nint Availableᴍ(ref ClientConn cc) {
+internal static nint Available⁔(/*this*/ ref ClientConn cc) {
     return cc.cc.Available();
 }
 
 // InFlight reports the number of requests in flight,
 // including reserved requests.
 // It returns 0 if the connection is closed.
-[GoMethodBody("InFlight")] internal static nint InFlightᴍ(ref ClientConn cc) {
+internal static nint InFlight⁔(/*this*/ ref ClientConn cc) {
     return cc.cc.InFlight();
 }
 
@@ -329,7 +329,7 @@ internal static error validateClientConnRequest(ref Request req) {
 //
 // If the connection is closed or at its concurrency limit,
 // Reserve returns an error.
-[GoMethodBody("Reserve")] internal static error Reserveᴍ(ж<ClientConn> Ꮡcc) {
+internal static error Reserve⁔(/*this*/ ж<ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     try {
         ref var cc = ref Ꮡcc.DerefOrNull();
@@ -343,7 +343,7 @@ internal static error validateClientConnRequest(ref Request req) {
 
 // Release releases an unused concurrency slot reserved by Reserve.
 // If there are no reserved concurrency slots, it has no effect.
-[GoMethodBody("Release")] internal static void Releaseᴍ(ж<ClientConn> Ꮡcc) {
+internal static void Release⁔(/*this*/ ж<ClientConn> Ꮡcc) {
     GoFrame ᒐ = default;
     try {
         ref var cc = ref Ꮡcc.DerefOrNull();
@@ -357,7 +357,7 @@ internal static error validateClientConnRequest(ref Request req) {
 
 // shouldRunStateHook returns the user's state hook if we should call it,
 // or nil if we don't need to call it at this time.
-[GoMethodBody("shouldRunStateHook")] internal static Action<ж<ClientConn>> shouldRunStateHookᴍ(ж<ClientConn> Ꮡcc, bool stopRunning) {
+internal static Action<ж<ClientConn>> shouldRunStateHook⁔(/*this*/ ж<ClientConn> Ꮡcc, bool stopRunning) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -394,7 +394,7 @@ internal static error validateClientConnRequest(ref Request req) {
     finally { if (ᒐd1) Ꮡcc.DerefOrNull().stateHookMu.Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("maybeRunStateHook")] internal static partial void maybeRunStateHookᴍ(ж<ClientConn> Ꮡcc) {
+internal static partial void maybeRunStateHook⁔(/*this*/ ж<ClientConn> Ꮡcc) {
     ref var hook = ref heap<Action<ж<ClientConn>>>(Ꮡcc.shouldRunStateHook(false), out var Ꮡhook);
     if (hook == nil) {
         return;
@@ -433,7 +433,7 @@ internal static error validateClientConnRequest(ref Request req) {
 // f is called when Available increases (more requests may be sent on the connection),
 // InFlight decreases (existing requests complete), or Err begins returning non-nil
 // (the connection is no longer usable).
-[GoMethodBody("SetStateHook")] internal static void SetStateHookᴍ(ж<ClientConn> Ꮡcc, Action<ж<ClientConn>> f) {
+internal static void SetStateHook⁔(/*this*/ ж<ClientConn> Ꮡcc, Action<ж<ClientConn>> f) {
     ref var cc = ref Ꮡcc.DerefOrNull();
 
     cc.stateHookMu.Lock();
@@ -452,7 +452,7 @@ partial struct http1ClientConn {
 
 } partial class http_package {
 
-[GoMethodBody("RoundTrip")] internal static partial (ж<Response>, error) RoundTripᴍ(http1ClientConn cc, ж<Request> Ꮡreq) {
+internal static partial (ж<Response>, error) RoundTrip⁔(/*this*/ http1ClientConn cc, ж<Request> Ꮡreq) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var ctx = req.Context();
@@ -474,15 +474,15 @@ partial struct http1ClientConn {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string clientConnClosedˢᴍhttp1ClientConn => ref clientConnClosedˢᵇᴍhttp1ClientConn;
-private static readonly @string clientConnClosedˢᵇᴍhttp1ClientConn = "ClientConn closed"u8;
+internal static ref readonly @string clientConnClosedˢ⁔http1ClientConn => ref clientConnClosedˢᵇ⁔http1ClientConn;
+private static readonly @string clientConnClosedˢᵇ⁔http1ClientConn = "ClientConn closed"u8;
 
-[GoMethodBody("Close")] internal static error Closeᴍ(http1ClientConn cc) {
-    cc.pconn.close(errors.New(clientConnClosedˢᴍhttp1ClientConn));
+internal static error Close⁔(/*this*/ http1ClientConn cc) {
+    cc.pconn.close(errors.New(clientConnClosedˢ⁔http1ClientConn));
     return default;
 }
 
-[GoMethodBody("Err")] internal static error Errᴍ(http1ClientConn cc) {
+internal static error Err⁔(/*this*/ http1ClientConn cc) {
     var selᴛ4 = cc.pconn.closech;
     switch (trySelect(ᐸꟷ(selᴛ4, ꓸꓸꓸ))) {
     case 0 when selᴛ4.ꟷᐳ(out _): {
@@ -493,7 +493,7 @@ private static readonly @string clientConnClosedˢᵇᴍhttp1ClientConn = "Clien
     }}
 }
 
-[GoMethodBody("Available")] internal static nint Availableᴍ(http1ClientConn cc) {
+internal static nint Available⁔(/*this*/ http1ClientConn cc) {
     GoFrame ᒐ = default;
     try {
         cc.pconn.Ꮡmu.Lock();
@@ -508,7 +508,7 @@ private static readonly @string clientConnClosedˢᵇᴍhttp1ClientConn = "Clien
     finally { ᒐ.Run(); }
 }
 
-[GoMethodBody("InFlight")] internal static nint InFlightᴍ(http1ClientConn cc) {
+internal static nint InFlight⁔(/*this*/ http1ClientConn cc) {
     GoFrame ᒐ = default;
     try {
         cc.pconn.Ꮡmu.Lock();
@@ -524,10 +524,10 @@ private static readonly @string clientConnClosedˢᵇᴍhttp1ClientConn = "Clien
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string connectionIsUnavailableˢᴍhttp1ClientConn => ref connectionIsUnavailableˢᵇᴍhttp1ClientConn;
-private static readonly @string connectionIsUnavailableˢᵇᴍhttp1ClientConn = "connection is unavailable"u8;
+internal static ref readonly @string connectionIsUnavailableˢ⁔http1ClientConn => ref connectionIsUnavailableˢᵇ⁔http1ClientConn;
+private static readonly @string connectionIsUnavailableˢᵇ⁔http1ClientConn = "connection is unavailable"u8;
 
-[GoMethodBody("Reserve")] internal static error Reserveᴍ(http1ClientConn cc) {
+internal static error Reserve⁔(/*this*/ http1ClientConn cc) {
     GoFrame ᒐ = default;
     try {
         cc.pconn.Ꮡmu.Lock();
@@ -542,7 +542,7 @@ private static readonly @string connectionIsUnavailableˢᵇᴍhttp1ClientConn =
             break;
         }
         default: {
-            return errors.New(connectionIsUnavailableˢᴍhttp1ClientConn);
+            return errors.New(connectionIsUnavailableˢ⁔http1ClientConn);
         }}
         cc.pconn.reserved = true;
         return default;
@@ -551,7 +551,7 @@ private static readonly @string connectionIsUnavailableˢᵇᴍhttp1ClientConn =
     finally { ᒐ.Run(); }
 }
 
-[GoMethodBody("Release")] internal static void Releaseᴍ(http1ClientConn cc) {
+internal static void Release⁔(/*this*/ http1ClientConn cc) {
     GoFrame ᒐ = default;
     try {
         cc.pconn.Ꮡmu.Lock();

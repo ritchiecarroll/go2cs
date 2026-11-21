@@ -31,7 +31,7 @@ partial struct KeySizeError /*num:nint*/;
 
 } partial class aes_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(KeySizeError k) {
+internal static @string Error⁔(/*this*/ KeySizeError k) {
     return "crypto/aes: invalid key size "u8 + strconv.Itoa((nint)k);
 }
 

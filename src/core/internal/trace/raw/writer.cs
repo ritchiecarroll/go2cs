@@ -36,7 +36,7 @@ public static (ж<Writer>, error) NewWriter(io.Writer w, version.Version v) {
 } partial class raw_package {
 
 // WriteEvent writes a single event to the trace wire format stream.
-[GoMethodBody("WriteEvent")] internal static error WriteEventᴍ(ref Writer w, Event e) {
+internal static error WriteEvent⁔(/*this*/ ref Writer w, Event e) {
     // Check version.
     if (e.Version != w.v) {
         return fmt.Errorf("mismatched version between writer (go 1.%d) and event (go 1.%d)"u8, w.v, e.Version);

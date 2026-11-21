@@ -138,7 +138,7 @@ partial struct TextOff /*num:int32*/;
 } partial class abi_package {
 
 // String returns the name of k.
-[GoMethodBody("String")] internal static @string Stringᴍ(Kind k) {
+internal static @string String⁔(/*this*/ Kind k) {
     if ((nint)k < len(kindNames)) {
         return kindNames[k];
     }
@@ -183,21 +183,21 @@ partial struct TextOff /*num:int32*/;
 
 } partial class abi_package {
 
-[GoMethodBody("Kind")] internal static Kind Kindᴍ(ref Type t) { return t.Kind_; }
+internal static Kind Kind⁔(/*this*/ ref Type t) { return t.Kind_; }
 
-[GoMethodBody("HasName")] internal static bool HasNameᴍ(ref Type t) {
+internal static bool HasName⁔(/*this*/ ref Type t) {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;
 }
 
 // Pointers reports whether t contains pointers.
-[GoMethodBody("Pointers")] internal static bool Pointersᴍ(ref Type t) { return t.PtrBytes != 0; }
+internal static bool Pointers⁔(/*this*/ ref Type t) { return t.PtrBytes != 0; }
 
 // IsDirectIface reports whether t is stored directly in an interface value.
-[GoMethodBody("IsDirectIface")] internal static bool IsDirectIfaceᴍ(ref Type t) {
+internal static bool IsDirectIface⁔(/*this*/ ref Type t) {
     return (TFlag)(t.TFlag & TFlagDirectIface) != 0;
 }
 
-[GoMethodBody("GcSlice")] internal static slice<byte> GcSliceᴍ(ref Type t, uintptr begin, uintptr end) {
+internal static slice<byte> GcSlice⁔(/*this*/ ref Type t, uintptr begin, uintptr end) {
     if ((TFlag)(t.TFlag & TFlagGCMaskOnDemand) != 0) {
         throw panic("GcSlice can't handle on-demand gcdata types");
     }
@@ -229,29 +229,29 @@ partial struct UncommonType {
 } partial class abi_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tMcount0ˢᴍUncommonType => ref tMcount0ˢᵇᴍUncommonType;
-private static readonly @string tMcount0ˢᵇᴍUncommonType = "t.mcount > 0"u8;
+internal static ref readonly @string tMcount0ˢ⁔UncommonType => ref tMcount0ˢᵇ⁔UncommonType;
+private static readonly @string tMcount0ˢᵇ⁔UncommonType = "t.mcount > 0"u8;
 
-[GoMethodBody("Methods")] internal static unsafe slice<Method> Methodsᴍ(ж<UncommonType> Ꮡt) {
+internal static unsafe slice<Method> Methods⁔(/*this*/ ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Mcount == 0) {
         return default;
     }
-    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, tMcount0ˢᴍUncommonType)), (int)(t.Mcount)));
+    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, tMcount0ˢ⁔UncommonType)), (int)(t.Mcount)));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tXcount0ˢᴍUncommonType => ref tXcount0ˢᵇᴍUncommonType;
-private static readonly @string tXcount0ˢᵇᴍUncommonType = "t.xcount > 0"u8;
+internal static ref readonly @string tXcount0ˢ⁔UncommonType => ref tXcount0ˢᵇ⁔UncommonType;
+private static readonly @string tXcount0ˢᵇ⁔UncommonType = "t.xcount > 0"u8;
 
-[GoMethodBody("ExportedMethods")] internal static unsafe slice<Method> ExportedMethodsᴍ(ж<UncommonType> Ꮡt) {
+internal static unsafe slice<Method> ExportedMethods⁔(/*this*/ ж<UncommonType> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Xcount == 0) {
         return default;
     }
-    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, tXcount0ˢᴍUncommonType)), (int)(t.Xcount)));
+    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, tXcount0ˢ⁔UncommonType)), (int)(t.Xcount)));
 }
 
 } partial class abi_package {
@@ -285,7 +285,7 @@ partial struct ArrayType {
 
 // go2cs generated this placeholder — func Len is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoMethodBody("Common")] internal static ж<Type> Commonᴍ(ж<Type> Ꮡt) {
+internal static ж<Type> Common⁔(/*this*/ ж<Type> Ꮡt) {
     return Ꮡt;
 }
 
@@ -359,7 +359,7 @@ internal partial struct Uncommon_uᴛ7 /*dyn*/ {
 } partial class abi_package {
 
 // Uncommon returns a pointer to T's "uncommon" data if there is any, otherwise nil
-[GoMethodBody("Uncommon")] internal static ж<UncommonType> Uncommonᴍ(ж<Type> Ꮡt) {
+internal static ж<UncommonType> Uncommon⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if ((TFlag)(t.TFlag & TFlagUncommon) == 0) {
@@ -410,9 +410,9 @@ internal partial struct Uncommon_uᴛ7 /*dyn*/ {
 // go2cs generated this placeholder — func Size is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Align returns the alignment of data with type t.
-[GoMethodBody("Align")] internal static nint Alignᴍ(ref Type t) { return (nint)t.Align_; }
+internal static nint Align⁔(/*this*/ ref Type t) { return (nint)t.Align_; }
 
-[GoMethodBody("FieldAlign")] internal static nint FieldAlignᴍ(ref Type t) { return (nint)t.FieldAlign_; }
+internal static nint FieldAlign⁔(/*this*/ ref Type t) { return (nint)t.FieldAlign_; }
 
 } partial class abi_package {
 
@@ -424,7 +424,7 @@ partial struct InterfaceType {
 
 } partial class abi_package {
 
-[GoMethodBody("ExportedMethods")] internal static slice<Method> ExportedMethodsᴍ(ж<Type> Ꮡt) {
+internal static slice<Method> ExportedMethods⁔(/*this*/ ж<Type> Ꮡt) {
     var ut = Ꮡt.Uncommon();
     if (ut == nil) {
         return default;
@@ -432,7 +432,7 @@ partial struct InterfaceType {
     return ut.ExportedMethods();
 }
 
-[GoMethodBody("NumMethod")] internal static nint NumMethodᴍ(ж<Type> Ꮡt) {
+internal static nint NumMethod⁔(/*this*/ ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Kind() == Interface) {
@@ -445,7 +445,7 @@ partial struct InterfaceType {
 } partial class abi_package {
 
 // NumMethod returns the number of interface methods in the type's method set.
-[GoMethodBody("NumMethod")] internal static nint NumMethodᴍ(ref InterfaceType t) { return len(t.Methods); }
+internal static nint NumMethod⁔(/*this*/ ref InterfaceType t) { return len(t.Methods); }
 
 } partial class abi_package {
 
@@ -477,26 +477,26 @@ partial struct FuncType {
 
 } partial class abi_package {
 
-[GoMethodBody("In")] internal static ж<Type> Inᴍ(ж<FuncType> Ꮡt, nint i) {
+internal static ж<Type> In⁔(/*this*/ ж<FuncType> Ꮡt, nint i) {
     return Ꮡt.InSlice()[i];
 }
 
-[GoMethodBody("NumIn")] internal static nint NumInᴍ(ref FuncType t) {
+internal static nint NumIn⁔(/*this*/ ref FuncType t) {
     return (nint)t.InCount;
 }
 
-[GoMethodBody("NumOut")] internal static nint NumOutᴍ(ref FuncType t) {
+internal static nint NumOut⁔(/*this*/ ref FuncType t) {
     return (nint)((uint16)(t.OutCount & ((1 << 15) - 1)));
 }
 
-[GoMethodBody("Out")] internal static ж<Type> Outᴍ(ж<FuncType> Ꮡt, nint i) {
+internal static ж<Type> Out⁔(/*this*/ ж<FuncType> Ꮡt, nint i) {
     return (Ꮡt.OutSlice()[i]);
 }
 
 // go2cs generated this placeholder — func InSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 // go2cs generated this placeholder — func OutSlice is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoMethodBody("IsVariadic")] internal static bool IsVariadicᴍ(ref FuncType t) {
+internal static bool IsVariadic⁔(/*this*/ ref FuncType t) {
     return (uint16)(t.OutCount & ((uint16)(1 << 15))) != 0;
 }
 
@@ -515,7 +515,7 @@ partial struct StructField {
 
 } partial class abi_package {
 
-[GoMethodBody("Embedded")] internal static bool Embeddedᴍ(ref StructField f) {
+internal static bool Embedded⁔(/*this*/ ref StructField f) {
     return f.Name.IsEmbedded();
 }
 
@@ -560,45 +560,45 @@ partial struct Name {
 
 // DataChecked does pointer arithmetic on n's Bytes, and that arithmetic is asserted to
 // be safe for the reason in whySafe (which can appear in a backtrace, etc.)
-[GoMethodBody("DataChecked")] internal static ж<byte> DataCheckedᴍ(Name n, nint off, @string whySafe) {
+internal static ж<byte> DataChecked⁔(/*this*/ Name n, nint off, @string whySafe) {
     return @unsafe.Pointer.To<byte>(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, whySafe));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string theRuntimeDoesnTNeedToˢᴍName => ref theRuntimeDoesnTNeedToˢᵇᴍName;
-private static readonly @string theRuntimeDoesnTNeedToˢᵇᴍName = "the runtime doesn't need to give you a reason"u8;
+internal static ref readonly @string theRuntimeDoesnTNeedToˢ⁔Name => ref theRuntimeDoesnTNeedToˢᵇ⁔Name;
+private static readonly @string theRuntimeDoesnTNeedToˢᵇ⁔Name = "the runtime doesn't need to give you a reason"u8;
 
 // Data does pointer arithmetic on n's Bytes, and that arithmetic is asserted to
 // be safe because the runtime made the call (other packages use DataChecked)
-[GoMethodBody("Data")] internal static ж<byte> Dataᴍ(Name n, nint off) {
-    return @unsafe.Pointer.To<byte>(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, theRuntimeDoesnTNeedToˢᴍName));
+internal static ж<byte> Data⁔(/*this*/ Name n, nint off) {
+    return @unsafe.Pointer.To<byte>(addChecked(@unsafe.Pointer.FromPinnedBox(n.Bytes), (uintptr)off, theRuntimeDoesnTNeedToˢ⁔Name));
 }
 
 // IsExported returns "is n exported?"
-[GoMethodBody("IsExported")] internal static bool IsExportedᴍ(Name n) {
+internal static bool IsExported⁔(/*this*/ Name n) {
     return (byte)((n.Bytes.Value) & ((byte)(1 << 0))) != 0;
 }
 
 // HasTag returns true iff there is tag data following this name
-[GoMethodBody("HasTag")] internal static bool HasTagᴍ(Name n) {
+internal static bool HasTag⁔(/*this*/ Name n) {
     return (byte)((n.Bytes.Value) & ((byte)(1 << 1))) != 0;
 }
 
 // IsEmbedded returns true iff n is embedded (an anonymous field).
-[GoMethodBody("IsEmbedded")] internal static bool IsEmbeddedᴍ(Name n) {
+internal static bool IsEmbedded⁔(/*this*/ Name n) {
     return (byte)((n.Bytes.Value) & ((byte)(1 << 3))) != 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string readVarintˢᴍName => ref readVarintˢᵇᴍName;
-private static readonly @string readVarintˢᵇᴍName = "read varint"u8;
+internal static ref readonly @string readVarintˢ⁔Name => ref readVarintˢᵇ⁔Name;
+private static readonly @string readVarintˢᵇ⁔Name = "read varint"u8;
 
 // ReadVarint parses a varint as encoded by encoding/binary.
 // It returns the number of encoded bytes and the encoded value.
-[GoMethodBody("ReadVarint")] internal static (nint, nint) ReadVarintᴍ(Name n, nint off) {
+internal static (nint, nint) ReadVarint⁔(/*this*/ Name n, nint off) {
     nint v = 0;
     for (nint i = 0; ; i++) {
-        var x = n.DataChecked(off + i, readVarintˢᴍName).Value;
+        var x = n.DataChecked(off + i, readVarintˢ⁔Name).Value;
         v += ((nint)((byte)(x & 0x7f))).Lsh((int64)(7 * i));
         if ((byte)(x & 0x80) == 0) {
             return (i + 1, v);
@@ -607,7 +607,7 @@ private static readonly @string readVarintˢᵇᴍName = "read varint"u8;
 }
 
 // IsBlank indicates whether n is "_".
-[GoMethodBody("IsBlank")] internal static bool IsBlankᴍ(Name n) {
+internal static bool IsBlank⁔(/*this*/ Name n) {
     if (n.Bytes == nil) {
         return false;
     }
@@ -635,26 +635,26 @@ internal static nint writeVarint(slice<byte> buf, nint n) {
 } partial class abi_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nonEmptyStringˢᴍName => ref nonEmptyStringˢᵇᴍName;
-private static readonly @string nonEmptyStringˢᵇᴍName = "non-empty string"u8;
+internal static ref readonly @string nonEmptyStringˢ⁔Name => ref nonEmptyStringˢᵇ⁔Name;
+private static readonly @string nonEmptyStringˢᵇ⁔Name = "non-empty string"u8;
 
 // Name returns the name of n, or empty if it does not actually have a name.
-[GoMethodBody("Name")] internal static @string Nameᴍ(Name n) {
+internal static @string Name⁔(/*this*/ Name n) {
     if (n.Bytes == nil) {
         return ""u8;
     }
     var (i, l) = n.ReadVarint(1);
-    return @unsafe.String(n.DataChecked(1 + i, nonEmptyStringˢᴍName), l);
+    return @unsafe.String(n.DataChecked(1 + i, nonEmptyStringˢ⁔Name), l);
 }
 
 // Tag returns the tag string for n, or empty if there is none.
-[GoMethodBody("Tag")] internal static @string Tagᴍ(Name n) {
+internal static @string Tag⁔(/*this*/ Name n) {
     if (!n.HasTag()) {
         return ""u8;
     }
     var (i, l) = n.ReadVarint(1);
     var (i2, l2) = n.ReadVarint(1 + i + l);
-    return @unsafe.String(n.DataChecked(1 + i + l + i2, nonEmptyStringˢᴍName), l2);
+    return @unsafe.String(n.DataChecked(1 + i + l + i2, nonEmptyStringˢ⁔Name), l2);
 }
 
 } partial class abi_package {

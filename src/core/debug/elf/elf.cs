@@ -78,8 +78,8 @@ internal static slice<intName> versionStrings = [
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Version i) { return stringName((uint32)i, versionStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(Version i) { return stringName((uint32)i, versionStrings, true); }
+internal static @string String⁔(/*this*/ Version i) { return stringName((uint32)i, versionStrings, false); }
+internal static @string GoString⁔(/*this*/ Version i) { return stringName((uint32)i, versionStrings, true); }
 
 } partial class elf_package {
 
@@ -98,8 +98,8 @@ internal static slice<intName> classStrings = [
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Class i) { return stringName((uint32)i, classStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(Class i) { return stringName((uint32)i, classStrings, true); }
+internal static @string String⁔(/*this*/ Class i) { return stringName((uint32)i, classStrings, false); }
+internal static @string GoString⁔(/*this*/ Class i) { return stringName((uint32)i, classStrings, true); }
 
 } partial class elf_package {
 
@@ -118,8 +118,8 @@ internal static slice<intName> dataStrings = [
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Data i) { return stringName((uint32)i, dataStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(Data i) { return stringName((uint32)i, dataStrings, true); }
+internal static @string String⁔(/*this*/ Data i) { return stringName((uint32)i, dataStrings, false); }
+internal static @string GoString⁔(/*this*/ Data i) { return stringName((uint32)i, dataStrings, true); }
 
 } partial class elf_package {
 
@@ -172,8 +172,8 @@ public static OSABI ELFOSABI_STANDALONE => 255; /* Standalone (embedded) applica
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(OSABI i) { return stringName((uint32)i, osabiStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(OSABI i) { return stringName((uint32)i, osabiStrings, true); }
+internal static @string String⁔(/*this*/ OSABI i) { return stringName((uint32)i, osabiStrings, false); }
+internal static @string GoString⁔(/*this*/ OSABI i) { return stringName((uint32)i, osabiStrings, true); }
 
 } partial class elf_package {
 
@@ -204,8 +204,8 @@ public static Type ET_HIPROC => 0xffff;    /* Last processor-specific. */
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Type i) { return stringName((uint32)i, typeStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(Type i) { return stringName((uint32)i, typeStrings, true); }
+internal static @string String⁔(/*this*/ Type i) { return stringName((uint32)i, typeStrings, false); }
+internal static @string GoString⁔(/*this*/ Type i) { return stringName((uint32)i, typeStrings, true); }
 
 } partial class elf_package {
 
@@ -596,8 +596,8 @@ public static Machine EM_ALPHA => 0x9026;          /* Alpha (written in the abse
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Machine i) { return stringName((uint32)i, machineStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(Machine i) { return stringName((uint32)i, machineStrings, true); }
+internal static @string String⁔(/*this*/ Machine i) { return stringName((uint32)i, machineStrings, false); }
+internal static @string GoString⁔(/*this*/ Machine i) { return stringName((uint32)i, machineStrings, true); }
 
 } partial class elf_package {
 
@@ -626,8 +626,8 @@ public static SectionIndex SHN_HIRESERVE => 0xffff;    /* Last of reserved range
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(SectionIndex i) { return stringName((uint32)i, shnStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(SectionIndex i) { return stringName((uint32)i, shnStrings, true); }
+internal static @string String⁔(/*this*/ SectionIndex i) { return stringName((uint32)i, shnStrings, false); }
+internal static @string GoString⁔(/*this*/ SectionIndex i) { return stringName((uint32)i, shnStrings, true); }
 
 } partial class elf_package {
 
@@ -702,8 +702,8 @@ public static SectionType SHT_HIUSER => 0xffffffff;                  /* specific
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(SectionType i) { return stringName((uint32)i, shtStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(SectionType i) { return stringName((uint32)i, shtStrings, true); }
+internal static @string String⁔(/*this*/ SectionType i) { return stringName((uint32)i, shtStrings, false); }
+internal static @string GoString⁔(/*this*/ SectionType i) { return stringName((uint32)i, shtStrings, true); }
 
 } partial class elf_package {
 
@@ -740,8 +740,8 @@ public static SectionFlag SHF_MASKPROC => 0xf0000000;                /* Processo
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(SectionFlag i) { return flagName((uint32)i, shfStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(SectionFlag i) { return flagName((uint32)i, shfStrings, true); }
+internal static @string String⁔(/*this*/ SectionFlag i) { return flagName((uint32)i, shfStrings, false); }
+internal static @string GoString⁔(/*this*/ SectionFlag i) { return flagName((uint32)i, shfStrings, true); }
 
 } partial class elf_package {
 
@@ -766,8 +766,8 @@ public static CompressionType COMPRESS_HIPROC => 0x7fffffff;        /* Last proc
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(CompressionType i) { return stringName((uint32)i, compressionStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(CompressionType i) { return stringName((uint32)i, compressionStrings, true); }
+internal static @string String⁔(/*this*/ CompressionType i) { return stringName((uint32)i, compressionStrings, false); }
+internal static @string GoString⁔(/*this*/ CompressionType i) { return stringName((uint32)i, compressionStrings, true); }
 
 } partial class elf_package {
 
@@ -851,8 +851,8 @@ public static ProgType PT_HIPROC => 0x7fffffff;        /* Last processor-specifi
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ProgType i) { return stringName((uint32)i, ptStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(ProgType i) { return stringName((uint32)i, ptStrings, true); }
+internal static @string String⁔(/*this*/ ProgType i) { return stringName((uint32)i, ptStrings, false); }
+internal static @string GoString⁔(/*this*/ ProgType i) { return stringName((uint32)i, ptStrings, true); }
 
 } partial class elf_package {
 
@@ -873,8 +873,8 @@ internal static slice<intName> pfStrings = [
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ProgFlag i) { return flagName((uint32)i, pfStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(ProgFlag i) { return flagName((uint32)i, pfStrings, true); }
+internal static @string String⁔(/*this*/ ProgFlag i) { return flagName((uint32)i, pfStrings, false); }
+internal static @string GoString⁔(/*this*/ ProgFlag i) { return flagName((uint32)i, pfStrings, true); }
 
 } partial class elf_package {
 
@@ -1108,8 +1108,8 @@ public static DynTag DT_HIPROC => 0x7fffffff;        /* Last processor-specific 
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(DynTag i) { return stringName((uint32)i, dtStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(DynTag i) { return stringName((uint32)i, dtStrings, true); }
+internal static @string String⁔(/*this*/ DynTag i) { return stringName((uint32)i, dtStrings, false); }
+internal static @string GoString⁔(/*this*/ DynTag i) { return stringName((uint32)i, dtStrings, true); }
 
 } partial class elf_package {
 
@@ -1139,8 +1139,8 @@ internal static slice<intName> dflagStrings = [
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(DynFlag i) { return flagName((uint32)i, dflagStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(DynFlag i) { return flagName((uint32)i, dflagStrings, true); }
+internal static @string String⁔(/*this*/ DynFlag i) { return flagName((uint32)i, dflagStrings, false); }
+internal static @string GoString⁔(/*this*/ DynFlag i) { return flagName((uint32)i, dflagStrings, true); }
 
 } partial class elf_package {
 
@@ -1259,8 +1259,8 @@ public static DynFlag1 DF_1_NOCOMMON => 0x40000000;
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(DynFlag1 i) { return flagName((uint32)i, dflag1Strings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(DynFlag1 i) { return flagName((uint32)i, dflag1Strings, true); }
+internal static @string String⁔(/*this*/ DynFlag1 i) { return flagName((uint32)i, dflag1Strings, false); }
+internal static @string GoString⁔(/*this*/ DynFlag1 i) { return flagName((uint32)i, dflag1Strings, true); }
 
 } partial class elf_package {
 
@@ -1279,8 +1279,8 @@ internal static slice<intName> ntypeStrings = [
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(NType i) { return stringName((uint32)i, ntypeStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(NType i) { return stringName((uint32)i, ntypeStrings, true); }
+internal static @string String⁔(/*this*/ NType i) { return stringName((uint32)i, ntypeStrings, false); }
+internal static @string GoString⁔(/*this*/ NType i) { return stringName((uint32)i, ntypeStrings, true); }
 
 } partial class elf_package {
 
@@ -1307,8 +1307,8 @@ public static SymBind STB_HIPROC => 15; /*   specific semantics. */
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(SymBind i) { return stringName((uint32)i, stbStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(SymBind i) { return stringName((uint32)i, stbStrings, true); }
+internal static @string String⁔(/*this*/ SymBind i) { return stringName((uint32)i, stbStrings, false); }
+internal static @string GoString⁔(/*this*/ SymBind i) { return stringName((uint32)i, stbStrings, true); }
 
 } partial class elf_package {
 
@@ -1350,8 +1350,8 @@ public static SymType STT_GNU_IFUNC => 10; /* Indirect code object. */
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(SymType i) { return stringName((uint32)i, sttStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(SymType i) { return stringName((uint32)i, sttStrings, true); }
+internal static @string String⁔(/*this*/ SymType i) { return stringName((uint32)i, sttStrings, false); }
+internal static @string GoString⁔(/*this*/ SymType i) { return stringName((uint32)i, sttStrings, true); }
 
 } partial class elf_package {
 
@@ -1372,8 +1372,8 @@ internal static slice<intName> stvStrings = [
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(SymVis i) { return stringName((uint32)i, stvStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(SymVis i) { return stringName((uint32)i, stvStrings, true); }
+internal static @string String⁔(/*this*/ SymVis i) { return stringName((uint32)i, stvStrings, false); }
+internal static @string GoString⁔(/*this*/ SymVis i) { return stringName((uint32)i, stvStrings, true); }
 
 } partial class elf_package {
 
@@ -1476,8 +1476,8 @@ public static R_X86_64 R_X86_64_REX_GOTPCRELX => 42;
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(R_X86_64 i) { return stringName((uint32)i, rx86_64Strings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(R_X86_64 i) { return stringName((uint32)i, rx86_64Strings, true); }
+internal static @string String⁔(/*this*/ R_X86_64 i) { return stringName((uint32)i, rx86_64Strings, false); }
+internal static @string GoString⁔(/*this*/ R_X86_64 i) { return stringName((uint32)i, rx86_64Strings, true); }
 
 } partial class elf_package {
 
@@ -1750,8 +1750,8 @@ public static R_AARCH64 R_AARCH64_IRELATIVE => 1032;
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(R_AARCH64 i) { return stringName((uint32)i, raarch64Strings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(R_AARCH64 i) { return stringName((uint32)i, raarch64Strings, true); }
+internal static @string String⁔(/*this*/ R_AARCH64 i) { return stringName((uint32)i, raarch64Strings, false); }
+internal static @string GoString⁔(/*this*/ R_AARCH64 i) { return stringName((uint32)i, raarch64Strings, true); }
 
 } partial class elf_package {
 
@@ -1820,8 +1820,8 @@ public static R_ALPHA R_ALPHA_RELATIVE => 27;      /* Adjust by program base */
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(R_ALPHA i) { return stringName((uint32)i, ralphaStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(R_ALPHA i) { return stringName((uint32)i, ralphaStrings, true); }
+internal static @string String⁔(/*this*/ R_ALPHA i) { return stringName((uint32)i, ralphaStrings, false); }
+internal static @string GoString⁔(/*this*/ R_ALPHA i) { return stringName((uint32)i, ralphaStrings, true); }
 
 } partial class elf_package {
 
@@ -2122,8 +2122,8 @@ public static R_ARM R_ARM_RBASE => 255;
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(R_ARM i) { return stringName((uint32)i, rarmStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(R_ARM i) { return stringName((uint32)i, rarmStrings, true); }
+internal static @string String⁔(/*this*/ R_ARM i) { return stringName((uint32)i, rarmStrings, false); }
+internal static @string GoString⁔(/*this*/ R_ARM i) { return stringName((uint32)i, rarmStrings, true); }
 
 } partial class elf_package {
 
@@ -2220,8 +2220,8 @@ public static R_386 R_386_GOT32X => 43;
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(R_386 i) { return stringName((uint32)i, r386Strings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(R_386 i) { return stringName((uint32)i, r386Strings, true); }
+internal static @string String⁔(/*this*/ R_386 i) { return stringName((uint32)i, r386Strings, false); }
+internal static @string GoString⁔(/*this*/ R_386 i) { return stringName((uint32)i, r386Strings, true); }
 
 } partial class elf_package {
 
@@ -2334,8 +2334,8 @@ public static R_MIPS R_MIPS_PC32 => 248; /* 32 bit PC relative reference */
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(R_MIPS i) { return stringName((uint32)i, rmipsStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(R_MIPS i) { return stringName((uint32)i, rmipsStrings, true); }
+internal static @string String⁔(/*this*/ R_MIPS i) { return stringName((uint32)i, rmipsStrings, false); }
+internal static @string GoString⁔(/*this*/ R_MIPS i) { return stringName((uint32)i, rmipsStrings, true); }
 
 } partial class elf_package {
 
@@ -2582,8 +2582,8 @@ public static R_LARCH R_LARCH_TLS_DESC_PCREL20_S2 => 126;
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(R_LARCH i) { return stringName((uint32)i, rlarchStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(R_LARCH i) { return stringName((uint32)i, rlarchStrings, true); }
+internal static @string String⁔(/*this*/ R_LARCH i) { return stringName((uint32)i, rlarchStrings, false); }
+internal static @string GoString⁔(/*this*/ R_LARCH i) { return stringName((uint32)i, rlarchStrings, true); }
 
 } partial class elf_package {
 
@@ -2755,8 +2755,8 @@ public static R_PPC R_PPC_EMB_RELSDA => 116;
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(R_PPC i) { return stringName((uint32)i, rppcStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(R_PPC i) { return stringName((uint32)i, rppcStrings, true); }
+internal static @string String⁔(/*this*/ R_PPC i) { return stringName((uint32)i, rppcStrings, false); }
+internal static @string GoString⁔(/*this*/ R_PPC i) { return stringName((uint32)i, rppcStrings, true); }
 
 } partial class elf_package {
 
@@ -3096,8 +3096,8 @@ public static R_PPC64 R_PPC64_GNU_VTENTRY => 254;
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(R_PPC64 i) { return stringName((uint32)i, rppc64Strings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(R_PPC64 i) { return stringName((uint32)i, rppc64Strings, true); }
+internal static @string String⁔(/*this*/ R_PPC64 i) { return stringName((uint32)i, rppc64Strings, false); }
+internal static @string GoString⁔(/*this*/ R_PPC64 i) { return stringName((uint32)i, rppc64Strings, true); }
 
 } partial class elf_package {
 
@@ -3218,8 +3218,8 @@ public static R_RISCV R_RISCV_32_PCREL => 57;     /* 32-bit PC relative */
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(R_RISCV i) { return stringName((uint32)i, rriscvStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(R_RISCV i) { return stringName((uint32)i, rriscvStrings, true); }
+internal static @string String⁔(/*this*/ R_RISCV i) { return stringName((uint32)i, rriscvStrings, false); }
+internal static @string GoString⁔(/*this*/ R_RISCV i) { return stringName((uint32)i, rriscvStrings, true); }
 
 } partial class elf_package {
 
@@ -3354,8 +3354,8 @@ public static R_390 R_390_TLS_GOTIE20 => 60;
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(R_390 i) { return stringName((uint32)i, r390Strings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(R_390 i) { return stringName((uint32)i, r390Strings, true); }
+internal static @string String⁔(/*this*/ R_390 i) { return stringName((uint32)i, r390Strings, false); }
+internal static @string GoString⁔(/*this*/ R_390 i) { return stringName((uint32)i, r390Strings, true); }
 
 } partial class elf_package {
 
@@ -3480,8 +3480,8 @@ public static R_SPARC R_SPARC_UA16 => 55;
 
 } partial class elf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(R_SPARC i) { return stringName((uint32)i, rsparcStrings, false); }
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(R_SPARC i) { return stringName((uint32)i, rsparcStrings, true); }
+internal static @string String⁔(/*this*/ R_SPARC i) { return stringName((uint32)i, rsparcStrings, false); }
+internal static @string GoString⁔(/*this*/ R_SPARC i) { return stringName((uint32)i, rsparcStrings, true); }
 
 } partial class elf_package {
 

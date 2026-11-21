@@ -988,7 +988,7 @@ internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
 } partial class bytes_package {
 
 // contains reports whether c is inside the set.
-[GoMethodBody("contains")] internal static bool containsᴍ(ref asciiSet @as, byte c) {
+internal static bool contains⁔(/*this*/ ref asciiSet @as, byte c) {
     return (@as.Value[c / 32] & ((uint32)1 << (int)(c % 32))) != 0;
 }
 

@@ -32,11 +32,11 @@ partial struct byteEncoder /*num:byte*/;
 
 } partial class asn1_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(byteEncoder c) {
+internal static nint Len⁔(/*this*/ byteEncoder c) {
     return 1;
 }
 
-[GoMethodBody("Encode")] internal static void Encodeᴍ(byteEncoder c, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ byteEncoder c, slice<byte> dst) {
     dst[0] = (byte)c;
 }
 
@@ -46,11 +46,11 @@ partial struct bytesEncoder /*[]byte*/;
 
 } partial class asn1_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(bytesEncoder b) {
+internal static nint Len⁔(/*this*/ bytesEncoder b) {
     return len(b);
 }
 
-[GoMethodBody("Encode")] internal static void Encodeᴍ(bytesEncoder b, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ bytesEncoder b, slice<byte> dst) {
     if (copy(dst, b) != len(b)) {
         throw panic("internal error");
     }
@@ -62,11 +62,11 @@ partial struct stringEncoder /*@string*/;
 
 } partial class asn1_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(stringEncoder s) {
+internal static nint Len⁔(/*this*/ stringEncoder s) {
     return len(s);
 }
 
-[GoMethodBody("Encode")] internal static void Encodeᴍ(stringEncoder s, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ stringEncoder s, slice<byte> dst) {
     if (copy(dst, s) != len(s)) {
         throw panic("internal error");
     }
@@ -78,7 +78,7 @@ partial struct multiEncoder /*[]encoder*/;
 
 } partial class asn1_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(multiEncoder m) {
+internal static nint Len⁔(/*this*/ multiEncoder m) {
     nint size = default;
     foreach (var (_, e) in range<encoder>(m)) {
         size += e.Len();
@@ -86,7 +86,7 @@ partial struct multiEncoder /*[]encoder*/;
     return size;
 }
 
-[GoMethodBody("Encode")] internal static void Encodeᴍ(multiEncoder m, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ multiEncoder m, slice<byte> dst) {
     nint off = default;
     foreach (var (_, e) in range<encoder>(m)) {
         e.Encode(dst.slice(off));
@@ -100,7 +100,7 @@ partial struct setEncoder /*[]encoder*/;
 
 } partial class asn1_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(setEncoder s) {
+internal static nint Len⁔(/*this*/ setEncoder s) {
     nint size = default;
     foreach (var (_, e) in range<encoder>(s)) {
         size += e.Len();
@@ -108,7 +108,7 @@ partial struct setEncoder /*[]encoder*/;
     return size;
 }
 
-[GoMethodBody("Encode")] internal static void Encodeᴍ(setEncoder s, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ setEncoder s, slice<byte> dst) {
     // Per X690 Section 11.6: The encodings of the component values of a
     // set-of value shall appear in ascending order, the encodings being
     // compared as octet strings with the shorter components being padded
@@ -150,11 +150,11 @@ partial struct taggedEncoder {
 
 } partial class asn1_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(ref taggedEncoder t) {
+internal static nint Len⁔(/*this*/ ref taggedEncoder t) {
     return t.tag.Len() + t.body.Len();
 }
 
-[GoMethodBody("Encode")] internal static void Encodeᴍ(ref taggedEncoder t, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ ref taggedEncoder t, slice<byte> dst) {
     t.tag.Encode(dst);
     t.body.Encode(dst.slice(t.tag.Len()));
 }
@@ -165,7 +165,7 @@ partial struct int64Encoder /*num:int64*/;
 
 } partial class asn1_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(int64Encoder i) {
+internal static nint Len⁔(/*this*/ int64Encoder i) {
     nint n = 1;
 
     while (i > 127) {
@@ -181,7 +181,7 @@ partial struct int64Encoder /*num:int64*/;
     return n;
 }
 
-[GoMethodBody("Encode")] internal static void Encodeᴍ(int64Encoder i, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ int64Encoder i, slice<byte> dst) {
     nint n = i.Len();
 
     for (nint j = 0; j < n; j++) {
@@ -306,11 +306,11 @@ partial struct bitStringEncoder /*BitString*/;
 
 } partial class asn1_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(bitStringEncoder b) {
+internal static nint Len⁔(/*this*/ bitStringEncoder b) {
     return len(b.Bytes) + 1;
 }
 
-[GoMethodBody("Encode")] internal static void Encodeᴍ(bitStringEncoder b, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ bitStringEncoder b, slice<byte> dst) {
     dst[0] = (byte)((8 - b.BitLength % 8) % 8);
     if (copy(dst[1..], b.Bytes) != len(b.Bytes)) {
         throw panic("internal error");
@@ -323,7 +323,7 @@ partial struct oidEncoder /*[]nint*/;
 
 } partial class asn1_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(oidEncoder oid) {
+internal static nint Len⁔(/*this*/ oidEncoder oid) {
     nint l = base128IntLength((int64)(oid[0] * 40 + oid[1]));
     for (nint i = 2; i < len(oid); i++) {
         l += base128IntLength((int64)oid[i]);
@@ -331,7 +331,7 @@ partial struct oidEncoder /*[]nint*/;
     return l;
 }
 
-[GoMethodBody("Encode")] internal static void Encodeᴍ(oidEncoder oid, slice<byte> dst) {
+internal static void Encode⁔(/*this*/ oidEncoder oid, slice<byte> dst) {
     dst = appendBase128Int(dst[..0], (int64)(oid[0] * 40 + oid[1]));
     for (nint i = 2; i < len(oid); i++) {
         dst = appendBase128Int(dst, (int64)oid[i]);

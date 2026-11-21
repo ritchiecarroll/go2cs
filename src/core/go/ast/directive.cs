@@ -97,8 +97,8 @@ internal static bool isalnum(byte b) {
 
 } partial class ast_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref Directive d) { return d.Slash; }
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref Directive d) { return (token.Pos)((nint)d.ArgsPos + len(d.Args)); }
+internal static token.Pos Pos⁔(/*this*/ ref Directive d) { return d.Slash; }
+internal static token.Pos End⁔(/*this*/ ref Directive d) { return (token.Pos)((nint)d.ArgsPos + len(d.Args)); }
 
 } partial class ast_package {
 
@@ -119,7 +119,7 @@ partial struct DirectiveArg {
 // separated by one or more Unicode spaces.
 //
 // If the arguments do not conform to this syntax, it returns an error.
-[GoMethodBody("ParseArgs")] internal static (slice<DirectiveArg>, error) ParseArgsᴍ(ref Directive d) {
+internal static (slice<DirectiveArg>, error) ParseArgs⁔(/*this*/ ref Directive d) {
     var listᴷ = new stackAppend<DirectiveArg>(moves: true);
 
     var args = new directiveScanner(d.Args, d.ArgsPos);
@@ -169,18 +169,18 @@ partial struct directiveScanner {
 
 } partial class ast_package {
 
-[GoMethodBody("skip")] internal static void skipᴍ(ref directiveScanner s, nint n) {
+internal static void skip⁔(/*this*/ ref directiveScanner s, nint n) {
     s.pos += ((token.Pos)n);
     s.str = s.str.slice(n);
 }
 
-[GoMethodBody("take")] internal static @string takeᴍ(ref directiveScanner s, nint n) {
+internal static @string take⁔(/*this*/ ref directiveScanner s, nint n) {
     @string res = s.str.slice(0, n);
     s.skip(n);
     return res;
 }
 
-[GoMethodBody("takeNonSpace")] internal static @string takeNonSpaceᴍ(ref directiveScanner s) {
+internal static @string takeNonSpace⁔(/*this*/ ref directiveScanner s) {
     nint i = strings.IndexFunc(s.str, unicode.IsSpace);
     if (i == -1) {
         i = len(s.str);
@@ -188,7 +188,7 @@ partial struct directiveScanner {
     return s.take(i);
 }
 
-[GoMethodBody("skipSpace")] internal static void skipSpaceᴍ(ref directiveScanner s) {
+internal static void skipSpace⁔(/*this*/ ref directiveScanner s) {
     @string trim = strings.TrimLeftFunc(s.str, unicode.IsSpace);
     s.skip(len(s.str) - len(trim));
 }

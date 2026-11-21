@@ -219,7 +219,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 //
 // All others:
 // Effectively, nothing happens.
-[GoMethodBody("unpack")] internal static ж<Named> unpackᴍ(ж<Named> Ꮡn) {
+internal static ж<Named> unpack⁔(/*this*/ ж<Named> Ꮡn) {
     GoFrame ᒐ = default;
     try {
         ref var n = ref Ꮡn.DerefOrNull();
@@ -294,13 +294,13 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 }
 
 // stateHas atomically determines whether the current state includes any active bit in sm.
-[GoMethodBody("stateHas")] internal static bool stateHasᴍ(ж<Named> Ꮡn, stateMask m) {
+internal static bool stateHas⁔(/*this*/ ж<Named> Ꮡn, stateMask m) {
     return (stateMask)(((stateMask)atomic.LoadUint32(Ꮡn.Ꮡstate_)) & m) != 0;
 }
 
 // setState atomically sets the current state to include each active bit in sm.
 // Must only be called while holding n.mu.
-[GoMethodBody("setState")] internal static void setStateᴍ(ж<Named> Ꮡn, stateMask m) {
+internal static void setState⁔(/*this*/ ж<Named> Ꮡn, stateMask m) {
     atomic.OrUint32(Ꮡn.Ꮡstate_, (uint32)m);
     // verify state transitions
     if (debug) {
@@ -328,7 +328,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 } partial class types_package {
 
 // newNamed is like NewNamed but with a *Checker receiver.
-[GoMethodBody("newNamed")] internal static ж<Named> newNamedᴍ(ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, Type fromRHS, slice<ж<Func>> methods) {
+internal static ж<Named> newNamed⁔(/*this*/ ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, Type fromRHS, slice<ж<Func>> methods) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
 
@@ -349,7 +349,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 //
 // If set, expanding is the named type instance currently being expanded, that
 // led to the creation of this instance.
-[GoMethodBody("newNamedInstance")] internal static ж<Named> newNamedInstanceᴍ(ж<Checker> Ꮡcheck, token.Pos pos, ж<Named> Ꮡorig, slice<Type> targs, ж<Named> Ꮡexpanding) {
+internal static ж<Named> newNamedInstance⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, ж<Named> Ꮡorig, slice<Type> targs, ж<Named> Ꮡexpanding) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var orig = ref Ꮡorig.DerefOrNull();
     ref var expanding = ref Ꮡexpanding.DerefOrNull();
@@ -378,7 +378,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 
 } partial class types_package {
 
-[GoMethodBody("cleanup")] internal static void cleanupᴍ(ж<Named> Ꮡn) {
+internal static void cleanup⁔(/*this*/ ж<Named> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     // Instances can have a nil underlying at the end of type checking — they
@@ -391,7 +391,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 
 // Obj returns the type name for the declaration defining the named type t. For
 // instantiated types, this is same as the type name of the origin type.
-[GoMethodBody("Obj")] internal static ж<TypeName> Objᴍ(ref Named t) {
+internal static ж<TypeName> Obj⁔(/*this*/ ref Named t) {
     if (t.inst == nil) {
         return t.obj;
     }
@@ -400,7 +400,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 
 // Origin returns the generic type from which the named type t is
 // instantiated. If t is not an instantiated type, the result is t.
-[GoMethodBody("Origin")] internal static ж<Named> Originᴍ(ж<Named> Ꮡt) {
+internal static ж<Named> Origin⁔(/*this*/ ж<Named> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.inst == nil) {
@@ -411,11 +411,11 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 
 // TypeParams returns the type parameters of the named type t, or nil.
 // The result is non-nil for an (originally) generic type even if it is instantiated.
-[GoMethodBody("TypeParams")] internal static ж<TypeParamList> TypeParamsᴍ(ж<Named> Ꮡt) { return Ꮡt.unpack().tparams; }
+internal static ж<TypeParamList> TypeParams⁔(/*this*/ ж<Named> Ꮡt) { return Ꮡt.unpack().tparams; }
 
 // SetTypeParams sets the type parameters of the named type t.
 // t must not have type arguments.
-[GoMethodBody("SetTypeParams")] internal static void SetTypeParamsᴍ(ж<Named> Ꮡt, slice<ж<TypeParam>> tparams) {
+internal static void SetTypeParams⁔(/*this*/ ж<Named> Ꮡt, slice<ж<TypeParam>> tparams) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     assert(t.inst == nil);
@@ -423,7 +423,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 }
 
 // TypeArgs returns the type arguments used to instantiate the named type t.
-[GoMethodBody("TypeArgs")] internal static ж<TypeList> TypeArgsᴍ(ref Named t) {
+internal static ж<TypeList> TypeArgs⁔(/*this*/ ref Named t) {
     if (t.inst == nil) {
         return default;
     }
@@ -431,7 +431,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 }
 
 // NumMethods returns the number of explicit methods defined for t.
-[GoMethodBody("NumMethods")] internal static nint NumMethodsᴍ(ж<Named> Ꮡt) {
+internal static nint NumMethods⁔(/*this*/ ж<Named> Ꮡt) {
     return len(Ꮡt.Origin().unpack().methods);
 }
 
@@ -446,7 +446,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 // calls, the mapping from method index to corresponding method remains the same.
 // But the specific ordering is not specified and must not be relied on as it may
 // change in the future.
-[GoMethodBody("Method")] internal static ж<Func> Methodᴍ(ж<Named> Ꮡt, nint i) {
+internal static ж<Func> Method⁔(/*this*/ ж<Named> Ꮡt, nint i) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -490,7 +490,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 
 // expandMethod substitutes type arguments in the i'th method for an
 // instantiated receiver.
-[GoMethodBody("expandMethod")] internal static ж<Func> expandMethodᴍ(ж<Named> Ꮡt, nint i) {
+internal static ж<Func> expandMethod⁔(/*this*/ ж<Named> Ꮡt, nint i) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // t.orig.methods is not lazy. origm is the method instantiated with its
@@ -551,7 +551,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 
 // SetUnderlying sets the underlying type and marks t as complete.
 // t must not have type arguments.
-[GoMethodBody("SetUnderlying")] internal static void SetUnderlyingᴍ(ж<Named> Ꮡt, Type u) {
+internal static void SetUnderlying⁔(/*this*/ ж<Named> Ꮡt, Type u) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -583,7 +583,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 // AddMethod adds method m unless it is already in the method list.
 // The method must be in the same package as t, and t must not have
 // type arguments.
-[GoMethodBody("AddMethod")] internal static void AddMethodᴍ(ж<Named> Ꮡt, ж<Func> Ꮡm) {
+internal static void AddMethod⁔(/*this*/ ж<Named> Ꮡt, ж<Func> Ꮡm) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 
@@ -598,7 +598,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 // methodIndex returns the index of the method with the given name.
 // If foldCase is set, capitalization in the name is ignored.
 // The result is negative if no such method exists.
-[GoMethodBody("methodIndex")] internal static nint methodIndexᴍ(ref Named t, @string name, bool foldCase) {
+internal static nint methodIndex⁔(/*this*/ ref Named t, @string name, bool foldCase) {
     if (name == "_"u8) {
         return -1;
     }
@@ -621,7 +621,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 // rhs returns [Named.fromRHS].
 //
 // In debug mode, it also asserts that n is in an appropriate state.
-[GoMethodBody("rhs")] internal static Type rhsᴍ(ж<Named> Ꮡn) {
+internal static Type rhs⁔(/*this*/ ж<Named> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (debug) {
@@ -635,7 +635,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 // Alias types.
 //
 // [underlying type]: https://go.dev/ref/spec#Underlying_types.
-[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Named> Ꮡn) {
+internal static Type Underlying⁔(/*this*/ ж<Named> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     Ꮡn.unpack();
@@ -657,7 +657,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
     return n.underlying;
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Named> Ꮡt) { return TypeString(new NamedжType(Ꮡt), default); }
+internal static @string String⁔(/*this*/ ж<Named> Ꮡt) { return TypeString(new NamedжType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
@@ -676,7 +676,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 // resolveUnderlying assumes that there are no direct cycles; if there were
 // any, they were broken (by setting the respective types to invalid) during
 // the directCycles check phase.
-[GoMethodBody("resolveUnderlying")] internal static void resolveUnderlyingᴍ(ж<Named> Ꮡn) {
+internal static void resolveUnderlying⁔(/*this*/ ж<Named> Ꮡn) {
     var pathᴷ = new stackAppend<ж<Named>>(moves: true);
 
     assert(Ꮡn.stateHas(unpacked));
@@ -751,7 +751,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
     }
 }
 
-[GoMethodBody("lookupMethod")] internal static (nint, ж<Func>) lookupMethodᴍ(ж<Named> Ꮡn, ж<Package> Ꮡpkg, @string name, bool foldCase) {
+internal static (nint, ж<Func>) lookupMethod⁔(/*this*/ ж<Named> Ꮡn, ж<Package> Ꮡpkg, @string name, bool foldCase) {
     ref var n = ref Ꮡn.DerefOrNull();
     ref var pkg = ref Ꮡpkg.DerefOrNull();
 
@@ -771,7 +771,7 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 } partial class types_package {
 
 // context returns the type-checker context.
-[GoMethodBody("context")] internal static ж<Context> contextᴍ(ref Checker check) {
+internal static ж<Context> context⁔(/*this*/ ref Checker check) {
     if (check.ctxt == nil) {
         check.ctxt = NewContext();
     }
@@ -781,10 +781,10 @@ public static ж<Named> NewNamed(ж<TypeName> obj, Type underlying, slice<ж<Fun
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string namedExpandRHSSˢᴍNamed => ref namedExpandRHSSˢᵇᴍNamed;
-private static readonly @string namedExpandRHSSˢᵇᴍNamed = "-- Named.expandRHS %s"u8;
-internal static ref readonly @string sRhsSˢᴍNamed => ref sRhsSˢᵇᴍNamed;
-private static readonly @string sRhsSˢᵇᴍNamed = "=> %s (rhs = %s)"u8;
+internal static ref readonly @string namedExpandRHSSˢ⁔Named => ref namedExpandRHSSˢᵇ⁔Named;
+private static readonly @string namedExpandRHSSˢᵇ⁔Named = "-- Named.expandRHS %s"u8;
+internal static ref readonly @string sRhsSˢ⁔Named => ref sRhsSˢᵇ⁔Named;
+private static readonly @string sRhsSˢᵇ⁔Named = "=> %s (rhs = %s)"u8;
 
 // expandRHS crafts a synthetic RHS for an instantiated type using the RHS of
 // its origin type (which must be a generic type).
@@ -817,7 +817,7 @@ private static readonly @string sRhsSˢᵇᴍNamed = "=> %s (rhs = %s)"u8;
 //	type T[U] U
 //
 // Whereas the underlying of V is int, not U.
-[GoMethodBody("expandRHS")] internal static Type /*rhs*/ expandRHSᴍ(ж<Named> Ꮡn) {
+internal static Type /*rhs*/ expandRHS⁔(/*this*/ ж<Named> Ꮡn) {
     Type rhs = default;
     GoFrame ᒐ = default;
     try {
@@ -825,12 +825,12 @@ private static readonly @string sRhsSˢᵇᴍNamed = "=> %s (rhs = %s)"u8;
 
         var check = n.check;
         if (check != nil && check.conf._Trace) {
-            check.trace(n.obj.pos, namedExpandRHSSˢᴍNamed, Ꮡn.OrTypedNil());
+            check.trace(n.obj.pos, namedExpandRHSSˢ⁔Named, Ꮡn.OrTypedNil());
             check.indent++;
             var checkʗ1 = check;
             defer(() => {
                 checkʗ1.indent--;
-                checkʗ1.trace(Ꮡn.Value.obj.pos, sRhsSˢᴍNamed, Ꮡn.OrTypedNil(), rhs);
+                checkʗ1.trace(Ꮡn.Value.obj.pos, sRhsSˢ⁔Named, Ꮡn.OrTypedNil(), rhs);
             }, ref ᒐ);
         }
 

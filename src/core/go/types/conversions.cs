@@ -21,7 +21,7 @@ partial class types_package {
 
 // conversion type-checks the conversion T(x).
 // The result is in x.
-[GoMethodBody("conversion")] internal static void conversionᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T) {
+internal static void conversion⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     var constArg = x.mode == constant_;
@@ -141,10 +141,10 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string conversionOfSliceToArrayˢᴍoperand => ref conversionOfSliceToArrayˢᵇᴍoperand;
-private static readonly @string conversionOfSliceToArrayˢᵇᴍoperand = "conversion of slice to array requires go1.20 or later"u8;
-internal static ref readonly @string conversionOfSliceToArrayˢ2ᴍoperand => ref conversionOfSliceToArrayˢ2ᵇᴍoperand;
-private static readonly @string conversionOfSliceToArrayˢ2ᵇᴍoperand = "conversion of slice to array pointer requires go1.17 or later"u8;
+internal static ref readonly @string conversionOfSliceToArrayˢ⁔operand => ref conversionOfSliceToArrayˢᵇ⁔operand;
+private static readonly @string conversionOfSliceToArrayˢᵇ⁔operand = "conversion of slice to array requires go1.20 or later"u8;
+internal static ref readonly @string conversionOfSliceToArrayˢ2⁔operand => ref conversionOfSliceToArrayˢ2ᵇ⁔operand;
+private static readonly @string conversionOfSliceToArrayˢ2ᵇ⁔operand = "conversion of slice to array pointer requires go1.17 or later"u8;
 
 // TODO(gri) convertibleTo checks if T(x) is valid. It assumes that the type
 // of x is fully known, but that's not the case for say string(1<<s + 1.0):
@@ -160,7 +160,7 @@ private static readonly @string conversionOfSliceToArrayˢ2ᵇᴍoperand = "conv
 // may be set to the cause for the failure.
 // The check parameter may be nil if convertibleTo is invoked through an
 // exported API call, i.e., when all methods have been type-checked.
-[GoMethodBody("convertibleTo")] internal static bool convertibleToᴍ(ж<operand> Ꮡx, ж<Checker> Ꮡcheck, Type T, ж<@string> Ꮡcause) {
+internal static bool convertibleTo⁔(/*this*/ ж<operand> Ꮡx, ж<Checker> Ꮡcheck, Type T, ж<@string> Ꮡcause) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var cause = ref Ꮡcause.DerefOrNull();
@@ -237,7 +237,7 @@ private static readonly @string conversionOfSliceToArrayˢ2ᵇᴍoperand = "conv
                 // check != nil
                 if (Ꮡcause != nil) {
                     // TODO(gri) consider restructuring versionErrorf so we can use it here and below
-                    cause = conversionOfSliceToArrayˢᴍoperand;
+                    cause = conversionOfSliceToArrayˢ⁔operand;
                 }
                 return false;
             }
@@ -251,7 +251,7 @@ private static readonly @string conversionOfSliceToArrayˢ2ᵇᴍoperand = "conv
                     }
                     // check != nil
                     if (Ꮡcause != nil) {
-                        cause = conversionOfSliceToArrayˢ2ᴍoperand;
+                        cause = conversionOfSliceToArrayˢ2⁔operand;
                     }
                     return false;
                 }

@@ -85,7 +85,7 @@ partial struct abiSeq {
 
 } partial class reflect_package {
 
-[GoMethodBody("dump")] internal static void dumpᴍ(ref abiSeq a) {
+internal static void dump⁔(/*this*/ ref abiSeq a) {
     foreach (var (i, p) in range(a.steps)) {
         println((@string)"part", i, p.kind, p.offset, p.size, p.stkOff, p.ireg, p.freg);
     }
@@ -102,7 +102,7 @@ partial struct abiSeq {
 // stepsForValue returns the ABI instructions for translating
 // the i'th Go argument or return value represented by this
 // abiSeq to the Go ABI.
-[GoMethodBody("stepsForValue")] internal static slice<abiStep> stepsForValueᴍ(ref abiSeq a, nint i) {
+internal static slice<abiStep> stepsForValue⁔(/*this*/ ref abiSeq a, nint i) {
     nint s = a.valueStart[i];
     nint e = default;
     if (i == len(a.valueStart) - 1) {
@@ -117,7 +117,7 @@ partial struct abiSeq {
 //
 // If the value was stack-assigned, returns the single
 // abiStep describing that translation, and nil otherwise.
-[GoMethodBody("addArg")] internal static ж<abiStep> addArgᴍ(ref abiSeq a, ж<abi.Type> Ꮡt) {
+internal static ж<abiStep> addArg⁔(/*this*/ ref abiSeq a, ж<abi.Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // We'll always be adding a new value, so do that first.
@@ -160,7 +160,7 @@ partial struct abiSeq {
 // If the receiver was stack-assigned, returns the single
 // abiStep describing that translation, and nil otherwise.
 // Returns true if the receiver is a pointer.
-[GoMethodBody("addRcvr")] internal static (ж<abiStep>, bool) addRcvrᴍ(ref abiSeq a, ж<abi.Type> Ꮡrcvr) {
+internal static (ж<abiStep>, bool) addRcvr⁔(/*this*/ ref abiSeq a, ж<abi.Type> Ꮡrcvr) {
     ref var rcvr = ref Ꮡrcvr.DerefOrNull();
 
     // The receiver is always one word.
@@ -198,7 +198,7 @@ partial struct abiSeq {
 // n must be <= 8.
 //
 // Returns whether assignment succeeded.
-[GoMethodBody("assignIntN")] internal static bool assignIntNᴍ(ref abiSeq a, uintptr offset, uintptr size, nint n, uint8 ptrMap) {
+internal static bool assignIntN⁔(/*this*/ ref abiSeq a, uintptr offset, uintptr size, nint n, uint8 ptrMap) {
     if (n > 8 || n < 0) {
         throw panic("invalid n");
     }
@@ -230,7 +230,7 @@ partial struct abiSeq {
 // next n floating-point registers.
 //
 // Returns whether assignment succeeded.
-[GoMethodBody("assignFloatN")] internal static bool assignFloatNᴍ(ref abiSeq a, uintptr offset, uintptr size, nint n) {
+internal static bool assignFloatN⁔(/*this*/ ref abiSeq a, uintptr offset, uintptr size, nint n) {
     if (n < 0) {
         throw panic("invalid n");
     }
@@ -253,7 +253,7 @@ partial struct abiSeq {
 // large with alignment "alignment" to the stack.
 //
 // Should not be called directly; use addArg instead.
-[GoMethodBody("stackAssign")] internal static void stackAssignᴍ(ref abiSeq a, uintptr size, uintptr alignment) {
+internal static void stackAssign⁔(/*this*/ ref abiSeq a, uintptr size, uintptr alignment) {
     a.stackBytes = align(a.stackBytes, alignment);
     a.steps = append(a.steps, new abiStep(
         kind: abiStepStack,
@@ -298,7 +298,7 @@ partial struct abiDesc {
 
 } partial class reflect_package {
 
-[GoMethodBody("dump")] internal static void dumpᴍ(ref abiDesc a) {
+internal static void dump⁔(/*this*/ ref abiDesc a) {
     println((@string)"ABI");
     println((@string)"call");
     a.call.dump();

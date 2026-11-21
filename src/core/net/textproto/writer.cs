@@ -29,7 +29,7 @@ internal static slice<byte> dotcrnl = [(byte)'.', (byte)'\r', (byte)'\n'];
 } partial class textproto_package {
 
 // PrintfLine writes the formatted output followed by \r\n.
-[GoMethodBody("PrintfLine")] internal static error PrintfLineᴍ(ref Writer w, @string format, params ꓸꓸꓸany argsʗp) {
+internal static error PrintfLine⁔(/*this*/ ref Writer w, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     w.closeDot();
@@ -45,7 +45,7 @@ internal static slice<byte> dotcrnl = [(byte)'.', (byte)'\r', (byte)'\n'];
 // DotWriter before the next call to a method on w.
 //
 // See the documentation for the [Reader.DotReader] method for details about dot-encoding.
-[GoMethodBody("DotWriter")] internal static io.WriteCloser DotWriterᴍ(ж<Writer> Ꮡw) {
+internal static io.WriteCloser DotWriter⁔(/*this*/ ж<Writer> Ꮡw) {
     ref var w = ref Ꮡw.DerefOrNull();
 
     w.closeDot();
@@ -53,7 +53,7 @@ internal static slice<byte> dotcrnl = [(byte)'.', (byte)'\r', (byte)'\n'];
     return new dotWriterжWriteCloser(w.dot);
 }
 
-[GoMethodBody("closeDot")] internal static void closeDotᴍ(ref Writer w) {
+internal static void closeDot⁔(/*this*/ ref Writer w) {
     if (w.dot != nil) {
         w.dot.Close(); // sets w.dot = nil
     }
@@ -73,7 +73,7 @@ internal static UntypedInt wstateData => 3;      // writing data in middle of li
 
 } partial class textproto_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref dotWriter d, slice<byte> b) {
+internal static (nint n, error err) Write⁔(/*this*/ ref dotWriter d, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -113,7 +113,7 @@ internal static UntypedInt wstateData => 3;      // writing data in middle of li
     return (n, err);
 }
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<dotWriter> Ꮡd) {
+internal static error Close⁔(/*this*/ ж<dotWriter> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (d.w.dot == Ꮡd) {

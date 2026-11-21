@@ -29,9 +29,9 @@ public static ж<CBCEncrypter> NewCBCEncrypter(ж<Block> Ꮡb, /*[16]*/ array<by
 
 } partial class aes_package {
 
-[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref CBCEncrypter c) { return aes.BlockSize; }
+internal static nint BlockSize⁔(/*this*/ ref CBCEncrypter c) { return aes.BlockSize; }
 
-[GoMethodBody("CryptBlocks")] internal static void CryptBlocksᴍ(ж<CBCEncrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
+internal static void CryptBlocks⁔(/*this*/ ж<CBCEncrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (len(src) % (nint)aes.BlockSize != 0) {
@@ -50,7 +50,7 @@ public static ж<CBCEncrypter> NewCBCEncrypter(ж<Block> Ꮡb, /*[16]*/ array<by
     cryptBlocksEnc(ref nonnil(ref c).b, Ꮡc.Ꮡiv, dst, src);
 }
 
-[GoMethodBody("SetIV")] internal static void SetIVᴍ(ref CBCEncrypter x, slice<byte> iv) {
+internal static void SetIV⁔(/*this*/ ref CBCEncrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }
@@ -94,9 +94,9 @@ public static ж<CBCDecrypter> NewCBCDecrypter(ж<Block> Ꮡb, /*[16]*/ array<by
 
 } partial class aes_package {
 
-[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref CBCDecrypter c) { return aes.BlockSize; }
+internal static nint BlockSize⁔(/*this*/ ref CBCDecrypter c) { return aes.BlockSize; }
 
-[GoMethodBody("CryptBlocks")] internal static void CryptBlocksᴍ(ж<CBCDecrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
+internal static void CryptBlocks⁔(/*this*/ ж<CBCDecrypter> Ꮡc, slice<byte> dst, slice<byte> src) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (len(src) % (nint)aes.BlockSize != 0) {
@@ -115,7 +115,7 @@ public static ж<CBCDecrypter> NewCBCDecrypter(ж<Block> Ꮡb, /*[16]*/ array<by
     cryptBlocksDec(ref nonnil(ref c).b, Ꮡc.Ꮡiv, dst, src);
 }
 
-[GoMethodBody("SetIV")] internal static void SetIVᴍ(ref CBCDecrypter x, slice<byte> iv) {
+internal static void SetIV⁔(/*this*/ ref CBCDecrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }

@@ -13,7 +13,7 @@ partial class poll_package {
 
 } partial class poll_package {
 
-[GoMethodBody("Fstatat")] internal static error Fstatatᴍ(ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t> s, nint flags) {
+internal static error Fstatat⁔(/*this*/ ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t> s, nint flags) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

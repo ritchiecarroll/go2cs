@@ -70,7 +70,7 @@ using static go.@internal.coverage.cfile_package;
 
 namespace go.@internal.coverage;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using io = io_package;
 using go;
 using go.@internal;
@@ -80,7 +80,10 @@ using hash;
 using path;
 using sync;
 using static cfile_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("cfile")]
 public static partial class cfile_package
@@ -134,19 +137,19 @@ public static partial class cfile_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(cfile_package.emitState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cfileᴛemitState;
-[GoMethodHost(typeof(cfile_package.tstate)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cfileᴛtstate;
+[GoMethodHost(typeof(cfile_package.emitState)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cfileᴛemitState;
+[GoMethodHost(typeof(cfile_package.tstate)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cfileᴛtstate;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class cfileᴛemitState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error emitCounterDataToWriter(this ж<emitState> Ꮡs, io.Writer w) => cfile_package.emitCounterDataToWriterᴍ(Ꮡs, w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error openMetaFile(this ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen) => cfile_package.openMetaFileᴍ(ref s, metaHash, metaLen);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error openCounterFile(this ref emitState s, /*[16]*/ array<byte> metaHash) => cfile_package.openCounterFileᴍ(ref s, metaHash);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error openOutputFiles(this ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen, fileType which) => cfile_package.openOutputFilesᴍ(ref s, metaHash, metaLen, which);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error emitMetaDataFile(this ref emitState s, /*[16]*/ array<byte> finalHash, uint64 tlen) => cfile_package.emitMetaDataFileᴍ(ref s, finalHash, tlen);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool needMetaDataFile(this ref emitState s) => cfile_package.needMetaDataFileᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slice<uint32>, error> f) => cfile_package.VisitFuncsᴍ(ref s, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error emitCounterDataFile(this ж<emitState> Ꮡs, /*[16]*/ array<byte> finalHash, io.Writer w) => cfile_package.emitCounterDataFileᴍ(Ꮡs, finalHash, w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error emitCounterDataToWriter(this ж<emitState> Ꮡs, io.Writer w) => cfile_package.emitCounterDataToWriter⁔(Ꮡs, w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error openMetaFile(this ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen) => cfile_package.openMetaFile⁔(ref s, metaHash, metaLen);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error openCounterFile(this ref emitState s, /*[16]*/ array<byte> metaHash) => cfile_package.openCounterFile⁔(ref s, metaHash);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error openOutputFiles(this ref emitState s, /*[16]*/ array<byte> metaHash, uint64 metaLen, fileType which) => cfile_package.openOutputFiles⁔(ref s, metaHash, metaLen, which);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error emitMetaDataFile(this ref emitState s, /*[16]*/ array<byte> finalHash, uint64 tlen) => cfile_package.emitMetaDataFile⁔(ref s, finalHash, tlen);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool needMetaDataFile(this ref emitState s) => cfile_package.needMetaDataFile⁔(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error VisitFuncs(this ref emitState s, Func<uint32, uint32, slice<uint32>, error> f) => cfile_package.VisitFuncs⁔(ref s, f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error emitCounterDataFile(this ж<emitState> Ꮡs, /*[16]*/ array<byte> finalHash, io.Writer w) => cfile_package.emitCounterDataFile⁔(Ꮡs, finalHash, w);
 }
 // </GlyphForwarders>

@@ -57,7 +57,7 @@ internal static nint maxStackDepth = 10000;
 } partial class parse_package {
 
 // Copy returns a copy of the [Tree]. Any parsing state is discarded.
-[GoMethodBody("Copy")] internal static ж<Tree> Copyᴍ(ж<Tree> Ꮡt) {
+internal static ж<Tree> Copy⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt == nil) {
@@ -90,7 +90,7 @@ public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, 
 } partial class parse_package {
 
 // next returns the next token.
-[GoMethodBody("next")] internal static item nextᴍ(ref Tree t) {
+internal static item next⁔(/*this*/ ref Tree t) {
     if (t.peekCount > 0) {
         t.peekCount--;
     } else {
@@ -100,20 +100,20 @@ public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, 
 }
 
 // backup backs the input stream up one token.
-[GoMethodBody("backup")] internal static void backupᴍ(ref Tree t) {
+internal static void backup⁔(/*this*/ ref Tree t) {
     t.peekCount++;
 }
 
 // backup2 backs the input stream up two tokens.
 // The zeroth token is already there.
-[GoMethodBody("backup2")] internal static void backup2ᴍ(ref Tree t, item t1) {
+internal static void backup2⁔(/*this*/ ref Tree t, item t1) {
     t.token[1] = t1;
     t.peekCount = 2;
 }
 
 // backup3 backs the input stream up three tokens
 // The zeroth token is already there.
-[GoMethodBody("backup3")] internal static void backup3ᴍ(ref Tree t, item t2, item t1) {
+internal static void backup3⁔(/*this*/ ref Tree t, item t2, item t1) {
     // Reverse order: we're pushing back.
     t.token[1] = t1;
     t.token[2] = t2;
@@ -121,7 +121,7 @@ public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, 
 }
 
 // peek returns but does not consume the next token.
-[GoMethodBody("peek")] internal static item peekᴍ(ref Tree t) {
+internal static item peek⁔(/*this*/ ref Tree t) {
     if (t.peekCount > 0) {
         return t.token[t.peekCount - 1];
     }
@@ -131,7 +131,7 @@ public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, 
 }
 
 // nextNonSpace returns the next non-space token.
-[GoMethodBody("nextNonSpace")] internal static item /*token*/ nextNonSpaceᴍ(ref Tree t) {
+internal static item /*token*/ nextNonSpace⁔(/*this*/ ref Tree t) {
     item token = default;
 
     for (;;) {
@@ -144,7 +144,7 @@ public static (map<@string, ж<Tree>>, error) Parse(@string name, @string text, 
 }
 
 // peekNonSpace returns but does not consume the next non-space token.
-[GoMethodBody("peekNonSpace")] internal static item peekNonSpaceᴍ(ref Tree t) {
+internal static item peekNonSpace⁔(/*this*/ ref Tree t) {
     var token = t.nextNonSpace();
     t.backup();
     return token;
@@ -169,7 +169,7 @@ public static ж<Tree> New(@string name, params Span<map<@string, any>> funcsʗp
 // ErrorContext returns a textual representation of the location of the node in the input text.
 // The receiver is only used when the node does not have a pointer to the tree inside,
 // which can occur in old code.
-[GoMethodBody("ErrorContext")] internal static (@string location, @string context) ErrorContextᴍ(ж<Tree> Ꮡt, Node n) {
+internal static (@string location, @string context) ErrorContext⁔(/*this*/ ж<Tree> Ꮡt, Node n) {
     @string context = default;
 
     nint pos = (nint)n.Position();
@@ -191,7 +191,7 @@ public static ж<Tree> New(@string name, params Span<map<@string, any>> funcsʗp
 }
 
 // errorf formats the error and terminates processing.
-[GoMethodBody("errorf")] internal static void errorfᴍ(ref Tree t, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf⁔(/*this*/ ref Tree t, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     t.Root = default;
@@ -200,12 +200,12 @@ public static ж<Tree> New(@string name, params Span<map<@string, any>> funcsʗp
 }
 
 // error terminates processing.
-[GoMethodBody("error")] internal static void errorᴍ(ref Tree t, error err) {
+internal static void error⁔(/*this*/ ref Tree t, error err) {
     t.errorf("%s", err);
 }
 
 // expect consumes the next token and guarantees it has the required type.
-[GoMethodBody("expect")] internal static item expectᴍ(ref Tree t, itemType expected, @string context) {
+internal static item expect⁔(/*this*/ ref Tree t, itemType expected, @string context) {
     var token = t.nextNonSpace();
     if (token.typ != expected) {
         t.unexpected(token, context);
@@ -214,7 +214,7 @@ public static ж<Tree> New(@string name, params Span<map<@string, any>> funcsʗp
 }
 
 // expectOneOf consumes the next token and guarantees it has one of the required types.
-[GoMethodBody("expectOneOf")] internal static item expectOneOfᴍ(ref Tree t, itemType expected1, itemType expected2, @string context) {
+internal static item expectOneOf⁔(/*this*/ ref Tree t, itemType expected1, itemType expected2, @string context) {
     var token = t.nextNonSpace();
     if (token.typ != expected1 && token.typ != expected2) {
         t.unexpected(token, context);
@@ -223,16 +223,16 @@ public static ж<Tree> New(@string name, params Span<map<@string, any>> funcsʗp
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string actionˢᴍTree => ref actionˢᵇᴍTree;
-private static readonly @string actionˢᵇᴍTree = " action"u8;
+internal static ref readonly @string actionˢ⁔Tree => ref actionˢᵇ⁔Tree;
+private static readonly @string actionˢᵇ⁔Tree = " action"u8;
 
 // unexpected complains about the token and terminates processing.
-[GoMethodBody("unexpected")] internal static void unexpectedᴍ(ref Tree t, item token, @string context) {
+internal static void unexpected⁔(/*this*/ ref Tree t, item token, @string context) {
     if (token.typ == itemError) {
         @string extra = ""u8;
         if (t.actionLine != 0 && t.actionLine != token.line) {
             extra = fmt.Sprintf(" in action started at %s:%d"u8, t.ParseName, t.actionLine);
-            if (strings.HasSuffix(token.val, actionˢᴍTree)) {
+            if (strings.HasSuffix(token.val, actionˢ⁔Tree)) {
                 extra = extra[(int)(len(" in action"))..]; // avoid "action in action"
             }
         }
@@ -242,7 +242,7 @@ private static readonly @string actionˢᵇᴍTree = " action"u8;
 }
 
 // recover is the handler that turns panics into returns from the top level of Parse.
-[GoMethodBody("recover")] internal static void recoverᴍ(ж<Tree> Ꮡt, ж<error> Ꮡerrp) {
+internal static void recover⁔(/*this*/ ж<Tree> Ꮡt, ж<error> Ꮡerrp) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
@@ -265,13 +265,13 @@ private static readonly @string actionˢᵇᴍTree = " action"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string breakˢ2ᴍTree => ref breakˢ2ᵇᴍTree;
-private static readonly @string breakˢ2ᵇᴍTree = "break"u8;
-internal static ref readonly @string continueˢ2ᴍTree => ref continueˢ2ᵇᴍTree;
-private static readonly @string continueˢ2ᵇᴍTree = "continue"u8;
+internal static ref readonly @string breakˢ2⁔Tree => ref breakˢ2ᵇ⁔Tree;
+private static readonly @string breakˢ2ᵇ⁔Tree = "break"u8;
+internal static ref readonly @string continueˢ2⁔Tree => ref continueˢ2ᵇ⁔Tree;
+private static readonly @string continueˢ2ᵇ⁔Tree = "continue"u8;
 
 // startParse initializes the parser, using the lexer.
-[GoMethodBody("startParse")] internal static void startParseᴍ(ref Tree t, slice<map<@string, any>> funcs, ж<lexer> Ꮡlex, map<@string, ж<Tree>> treeSet) {
+internal static void startParse⁔(/*this*/ ref Tree t, slice<map<@string, any>> funcs, ж<lexer> Ꮡlex, map<@string, ж<Tree>> treeSet) {
     ref var lex = ref Ꮡlex.DerefOrNull();
 
     t.Root = default;
@@ -282,13 +282,13 @@ private static readonly @string continueˢ2ᵇᴍTree = "continue"u8;
     t.stackDepth = 0;
     lex.options = new lexOptions(
         emitComment: (Mode)(t.Mode & ParseComments) != 0,
-        breakOK: !t.hasFunction(breakˢ2ᴍTree),
-        continueOK: !t.hasFunction(continueˢ2ᴍTree)
+        breakOK: !t.hasFunction(breakˢ2⁔Tree),
+        continueOK: !t.hasFunction(continueˢ2⁔Tree)
     );
 }
 
 // stopParse terminates parsing.
-[GoMethodBody("stopParse")] internal static void stopParseᴍ(ref Tree t) {
+internal static void stopParse⁔(/*this*/ ref Tree t) {
     t.lex = default;
     t.vars = default;
     t.funcs = default;
@@ -299,7 +299,7 @@ private static readonly @string continueˢ2ᵇᴍTree = "continue"u8;
 // the template for execution. If either action delimiter string is empty, the
 // default ("{{" or "}}") is used. Embedded template definitions are added to
 // the treeSet map.
-[GoMethodBody("Parse")] internal static (ж<Tree> tree, error err) Parseᴍ(ж<Tree> Ꮡt, @string text, @string leftDelim, @string rightDelim, map<@string, ж<Tree>> treeSet, params Span<map<@string, any>> funcsʗp) {
+internal static (ж<Tree> tree, error err) Parse⁔(/*this*/ ж<Tree> Ꮡt, @string text, @string leftDelim, @string rightDelim, map<@string, ж<Tree>> treeSet, params Span<map<@string, any>> funcsʗp) {
     ж<Tree> tree = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
@@ -324,7 +324,7 @@ private static readonly @string continueˢ2ᵇᴍTree = "continue"u8;
 }
 
 // add adds tree to t.treeSet.
-[GoMethodBody("add")] internal static void addᴍ(ж<Tree> Ꮡt) {
+internal static void add⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var tree = t.treeSet[t.Name];
@@ -385,13 +385,13 @@ public static bool IsEmptyTree(Node n) {
 } partial class parse_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string definitionˢᴍTree => ref definitionˢᵇᴍTree;
-private static readonly @string definitionˢᵇᴍTree = "definition"u8;
+internal static ref readonly @string definitionˢ⁔Tree => ref definitionˢᵇ⁔Tree;
+private static readonly @string definitionˢᵇ⁔Tree = "definition"u8;
 
 // parse is the top-level parser for a template, essentially the same
 // as itemList except it also parses {{define}} actions.
 // It runs to EOF.
-[GoMethodBody("parse")] internal static void parseᴍ(ж<Tree> Ꮡt) {
+internal static void parse⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.Root = Ꮡt.newList(t.peek().pos);
@@ -399,7 +399,7 @@ private static readonly @string definitionˢᵇᴍTree = "definition"u8;
         if (t.peek().typ == itemLeftDelim) {
             var delim = t.next();
             if (t.nextNonSpace().typ == itemDefine) {
-                var newT = New(definitionˢᴍTree); // name will be updated once we know it.
+                var newT = New(definitionˢ⁔Tree); // name will be updated once we know it.
                 newT.text = t.text;
                 newT.Mode = t.Mode;
                 newT.ParseName = t.ParseName;
@@ -423,16 +423,16 @@ private static readonly @string definitionˢᵇᴍTree = "definition"u8;
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string contextᶜᴍTree => ref contextᶜᵇᴍTree;
-private static readonly @string contextᶜᵇᴍTree = "define clause"u8;
+internal static ref readonly @string contextᶜ⁔Tree => ref contextᶜᵇ⁔Tree;
+private static readonly @string contextᶜᵇ⁔Tree = "define clause"u8;
 
 // parseDefinition parses a {{define}} ...  {{end}} template definition and
 // installs the definition in t.treeSet. The "define" keyword has already
 // been scanned.
-[GoMethodBody("parseDefinition")] internal static void parseDefinitionᴍ(ж<Tree> Ꮡt) {
+internal static void parseDefinition⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    @string context = contextᶜᴍTree;
+    @string context = contextᶜ⁔Tree;
     var name = t.expectOneOf(itemString, itemRawString, context);
     error err = default;
     (t.Name, err) = strconv.Unquote(name.val);
@@ -454,7 +454,7 @@ private static readonly @string contextᶜᵇᴍTree = "define clause"u8;
 //	textOrAction*
 //
 // Terminates at {{end}} or {{else}}, returned separately.
-[GoMethodBody("itemList")] internal static (ж<ListNode> list, Node next) itemListᴍ(ж<Tree> Ꮡt) {
+internal static (ж<ListNode> list, Node next) itemList⁔(/*this*/ ж<Tree> Ꮡt) {
     ж<ListNode> list = default;
     Node next = default;
     ref var t = ref Ꮡt.DerefOrNull();
@@ -473,13 +473,13 @@ private static readonly @string contextᶜᵇᴍTree = "define clause"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string inputˢᴍTree => ref inputˢᵇᴍTree;
-private static readonly @string inputˢᵇᴍTree = "input"u8;
+internal static ref readonly @string inputˢ⁔Tree => ref inputˢᵇ⁔Tree;
+private static readonly @string inputˢᵇ⁔Tree = "input"u8;
 
 // textOrAction:
 //
 //	text | comment | action
-[GoMethodBody("textOrAction")] internal static Node textOrActionᴍ(ж<Tree> Ꮡt) {
+internal static Node textOrAction⁔(/*this*/ ж<Tree> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -500,7 +500,7 @@ private static readonly @string inputˢᵇᴍTree = "input"u8;
                 return new CommentNodeжNode(Ꮡt.newComment(token.pos, token.val));
             }
             default: {
-                t.unexpected(token, inputˢᴍTree);
+                t.unexpected(token, inputˢ⁔Tree);
                 break;
             }}
         }
@@ -510,13 +510,13 @@ private static readonly @string inputˢᵇᴍTree = "input"u8;
     finally { if (ᒐd1) Ꮡt.DerefOrNull().clearActionLine(); ᒐ.Run(); }
 }
 
-[GoMethodBody("clearActionLine")] internal static void clearActionLineᴍ(ref Tree t) {
+internal static void clearActionLine⁔(/*this*/ ref Tree t) {
     t.actionLine = 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string commandˢᴍTree => ref commandˢᵇᴍTree;
-private static readonly @string commandˢᵇᴍTree = "command"u8;
+internal static ref readonly @string commandˢ⁔Tree => ref commandˢᵇ⁔Tree;
+private static readonly @string commandˢᵇ⁔Tree = "command"u8;
 
 // Action:
 //
@@ -525,7 +525,7 @@ private static readonly @string commandˢᵇᴍTree = "command"u8;
 //
 // Left delim is past. Now get actions.
 // First word could be a keyword such as range.
-[GoMethodBody("action")] internal static Node /*n*/ actionᴍ(ж<Tree> Ꮡt) {
+internal static Node /*n*/ action⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var tokenΔ1 = t.nextNonSpace();
@@ -560,23 +560,23 @@ private static readonly @string commandˢᵇᴍTree = "command"u8;
     t.backup();
     var token = t.peek();
     // Do not pop variables; they persist until "end".
-    return new ActionNodeжNode(Ꮡt.newAction(token.pos, token.line, Ꮡt.pipeline(commandˢᴍTree, itemRightDelim)));
+    return new ActionNodeжNode(Ꮡt.newAction(token.pos, token.line, Ꮡt.pipeline(commandˢ⁔Tree, itemRightDelim)));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string breakˢᴍTree => ref breakˢᵇᴍTree;
-private static readonly @string breakˢᵇᴍTree = "{{break}}"u8;
+internal static ref readonly @string breakˢ⁔Tree => ref breakˢᵇ⁔Tree;
+private static readonly @string breakˢᵇ⁔Tree = "{{break}}"u8;
 
 // Break:
 //
 //	{{break}}
 //
 // Break keyword is past.
-[GoMethodBody("breakControl")] internal static Node breakControlᴍ(ж<Tree> Ꮡt, Pos pos, nint line) {
+internal static Node breakControl⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint line) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var token = t.nextNonSpace(); if (token.typ != itemRightDelim) {
-        t.unexpected(token, breakˢᴍTree);
+        t.unexpected(token, breakˢ⁔Tree);
     }
     if (t.rangeDepth == 0) {
         t.errorf("{{break}} outside {{range}}");
@@ -585,19 +585,19 @@ private static readonly @string breakˢᵇᴍTree = "{{break}}"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string continueˢᴍTree => ref continueˢᵇᴍTree;
-private static readonly @string continueˢᵇᴍTree = "{{continue}}"u8;
+internal static ref readonly @string continueˢ⁔Tree => ref continueˢᵇ⁔Tree;
+private static readonly @string continueˢᵇ⁔Tree = "{{continue}}"u8;
 
 // Continue:
 //
 //	{{continue}}
 //
 // Continue keyword is past.
-[GoMethodBody("continueControl")] internal static Node continueControlᴍ(ж<Tree> Ꮡt, Pos pos, nint line) {
+internal static Node continueControl⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, nint line) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var token = t.nextNonSpace(); if (token.typ != itemRightDelim) {
-        t.unexpected(token, continueˢᴍTree);
+        t.unexpected(token, continueˢ⁔Tree);
     }
     if (t.rangeDepth == 0) {
         t.errorf("{{continue}} outside {{range}}");
@@ -608,7 +608,7 @@ private static readonly @string continueˢᵇᴍTree = "{{continue}}"u8;
 // Pipeline:
 //
 //	declarations? command ('|' command)*
-[GoMethodBody("pipeline")] internal static ж<PipeNode> /*pipe*/ pipelineᴍ(ж<Tree> Ꮡt, @string context, itemType end) {
+internal static ж<PipeNode> /*pipe*/ pipeline⁔(/*this*/ ж<Tree> Ꮡt, @string context, itemType end) {
     ж<PipeNode> pipe = default;
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -680,7 +680,7 @@ decls:
     }
 }
 
-[GoMethodBody("checkPipeline")] internal static void checkPipelineᴍ(ref Tree t, ж<PipeNode> Ꮡpipe, @string context) {
+internal static void checkPipeline⁔(/*this*/ ref Tree t, ж<PipeNode> Ꮡpipe, @string context) {
     ref var pipe = ref Ꮡpipe.DerefOrNull();
 
     // Reject empty pipelines
@@ -698,7 +698,7 @@ decls:
     }
 }
 
-[GoMethodBody("parseControl")] internal static (Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<ListNode> elseList) parseControlᴍ(ж<Tree> Ꮡt, @string context) {
+internal static (Pos pos, nint line, ж<PipeNode> pipe, ж<ListNode> list, ж<ListNode> elseList) parseControl⁔(/*this*/ ж<Tree> Ꮡt, @string context) {
     Pos pos = default;
     nint line = default;
     ж<PipeNode> pipe = default;
@@ -762,14 +762,14 @@ decls:
 //	{{if pipeline}} itemList {{else}} itemList {{end}}
 //
 // If keyword is past.
-[GoMethodBody("ifControl")] internal static Node ifControlᴍ(ж<Tree> Ꮡt) {
+internal static Node ifControl⁔(/*this*/ ж<Tree> Ꮡt) {
     var (ᴛ1, ᴛ2, ᴛ3, ᴛ4, ᴛ5) = Ꮡt.parseControl("if");
     return new IfNodeжNode(Ꮡt.newIf(ᴛ1, ᴛ2, ᴛ3, ᴛ4, ᴛ5));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string rangeˢᴍTree => ref rangeˢᵇᴍTree;
-private static readonly @string rangeˢᵇᴍTree = "range"u8;
+internal static ref readonly @string rangeˢ⁔Tree => ref rangeˢᵇ⁔Tree;
+private static readonly @string rangeˢᵇ⁔Tree = "range"u8;
 
 // Range:
 //
@@ -777,15 +777,15 @@ private static readonly @string rangeˢᵇᴍTree = "range"u8;
 //	{{range pipeline}} itemList {{else}} itemList {{end}}
 //
 // Range keyword is past.
-[GoMethodBody("rangeControl")] internal static Node rangeControlᴍ(ж<Tree> Ꮡt) {
-    var (ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10) = Ꮡt.parseControl(rangeˢᴍTree);
+internal static Node rangeControl⁔(/*this*/ ж<Tree> Ꮡt) {
+    var (ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10) = Ꮡt.parseControl(rangeˢ⁔Tree);
     var r = Ꮡt.newRange(ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10);
     return new RangeNodeжNode(r);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string withˢᴍTree => ref withˢᵇᴍTree;
-private static readonly @string withˢᵇᴍTree = "with"u8;
+internal static ref readonly @string withˢ⁔Tree => ref withˢᵇ⁔Tree;
+private static readonly @string withˢᵇ⁔Tree = "with"u8;
 
 // With:
 //
@@ -793,36 +793,36 @@ private static readonly @string withˢᵇᴍTree = "with"u8;
 //	{{with pipeline}} itemList {{else}} itemList {{end}}
 //
 // If keyword is past.
-[GoMethodBody("withControl")] internal static Node withControlᴍ(ж<Tree> Ꮡt) {
-    var (ᴛ11, ᴛ12, ᴛ13, ᴛ14, ᴛ15) = Ꮡt.parseControl(withˢᴍTree);
+internal static Node withControl⁔(/*this*/ ж<Tree> Ꮡt) {
+    var (ᴛ11, ᴛ12, ᴛ13, ᴛ14, ᴛ15) = Ꮡt.parseControl(withˢ⁔Tree);
     return new WithNodeжNode(Ꮡt.newWith(ᴛ11, ᴛ12, ᴛ13, ᴛ14, ᴛ15));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string endˢ2ᴍTree => ref endˢ2ᵇᴍTree;
-private static readonly @string endˢ2ᵇᴍTree = "end"u8;
+internal static ref readonly @string endˢ2⁔Tree => ref endˢ2ᵇ⁔Tree;
+private static readonly @string endˢ2ᵇ⁔Tree = "end"u8;
 
 // End:
 //
 //	{{end}}
 //
 // End keyword is past.
-[GoMethodBody("endControl")] internal static Node endControlᴍ(ж<Tree> Ꮡt) {
+internal static Node endControl⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    return new endNodeжNode(Ꮡt.newEnd(t.expect(itemRightDelim, endˢ2ᴍTree).pos));
+    return new endNodeжNode(Ꮡt.newEnd(t.expect(itemRightDelim, endˢ2⁔Tree).pos));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string elseˢ2ᴍTree => ref elseˢ2ᵇᴍTree;
-private static readonly @string elseˢ2ᵇᴍTree = "else"u8;
+internal static ref readonly @string elseˢ2⁔Tree => ref elseˢ2ᵇ⁔Tree;
+private static readonly @string elseˢ2ᵇ⁔Tree = "else"u8;
 
 // Else:
 //
 //	{{else}}
 //
 // Else keyword is past.
-[GoMethodBody("elseControl")] internal static Node elseControlᴍ(ж<Tree> Ꮡt) {
+internal static Node elseControl⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var peek = t.peekNonSpace();
@@ -832,13 +832,13 @@ private static readonly @string elseˢ2ᵇᴍTree = "else"u8;
     if (peek.typ == itemIf || peek.typ == itemWith) {
         return new elseNodeжNode(Ꮡt.newElse(peek.pos, peek.line));
     }
-    var token = t.expect(itemRightDelim, elseˢ2ᴍTree);
+    var token = t.expect(itemRightDelim, elseˢ2⁔Tree);
     return new elseNodeжNode(Ꮡt.newElse(token.pos, token.line));
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string contextᶜ1ᴍTree => ref contextᶜ1ᵇᴍTree;
-private static readonly @string contextᶜ1ᵇᴍTree = "block clause"u8;
+internal static ref readonly @string contextᶜ1⁔Tree => ref contextᶜ1ᵇ⁔Tree;
+private static readonly @string contextᶜ1ᵇ⁔Tree = "block clause"u8;
 
 // Block:
 //
@@ -847,10 +847,10 @@ private static readonly @string contextᶜ1ᵇᴍTree = "block clause"u8;
 // Block keyword is past.
 // The name must be something that can evaluate to a string.
 // The pipeline is mandatory.
-[GoMethodBody("blockControl")] internal static Node blockControlᴍ(ж<Tree> Ꮡt) {
+internal static Node blockControl⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    @string context = contextᶜ1ᴍTree;
+    @string context = contextᶜ1⁔Tree;
 
     var token = t.nextNonSpace();
     @string name = t.parseTemplateName(token, context);
@@ -873,8 +873,8 @@ private static readonly @string contextᶜ1ᵇᴍTree = "block clause"u8;
 }
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string contextᶜ2ᴍTree => ref contextᶜ2ᵇᴍTree;
-private static readonly @string contextᶜ2ᵇᴍTree = "template clause"u8;
+internal static ref readonly @string contextᶜ2⁔Tree => ref contextᶜ2ᵇ⁔Tree;
+private static readonly @string contextᶜ2ᵇ⁔Tree = "template clause"u8;
 
 // Template:
 //
@@ -882,10 +882,10 @@ private static readonly @string contextᶜ2ᵇᴍTree = "template clause"u8;
 //
 // Template keyword is past. The name must be something that can evaluate
 // to a string.
-[GoMethodBody("templateControl")] internal static Node templateControlᴍ(ж<Tree> Ꮡt) {
+internal static Node templateControl⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    @string context = contextᶜ2ᴍTree;
+    @string context = contextᶜ2⁔Tree;
     var token = t.nextNonSpace();
     @string name = t.parseTemplateName(token, context);
     ж<PipeNode> pipe = default;
@@ -897,7 +897,7 @@ private static readonly @string contextᶜ2ᵇᴍTree = "template clause"u8;
     return new TemplateNodeжNode(Ꮡt.newTemplate(token.pos, token.line, name, pipe));
 }
 
-[GoMethodBody("parseTemplateName")] internal static @string /*name*/ parseTemplateNameᴍ(ref Tree t, item token, @string context) {
+internal static @string /*name*/ parseTemplateName⁔(/*this*/ ref Tree t, item token, @string context) {
     @string name = default;
 
     switch (token.typ) {
@@ -917,8 +917,8 @@ private static readonly @string contextᶜ2ᵇᴍTree = "template clause"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string operandˢᴍTree => ref operandˢᵇᴍTree;
-private static readonly @string operandˢᵇᴍTree = "operand"u8;
+internal static ref readonly @string operandˢ⁔Tree => ref operandˢᵇ⁔Tree;
+private static readonly @string operandˢᵇ⁔Tree = "operand"u8;
 
 // command:
 //
@@ -926,7 +926,7 @@ private static readonly @string operandˢᵇᴍTree = "operand"u8;
 //
 // space-separated arguments up to a pipeline character or right delimiter.
 // we consume the pipe character but leave the right delim to terminate the action.
-[GoMethodBody("command")] internal static ж<CommandNode> commandᴍ(ж<Tree> Ꮡt) {
+internal static ж<CommandNode> command⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var cmd = Ꮡt.newCommand(t.peekNonSpace().pos);
@@ -951,7 +951,7 @@ private static readonly @string operandˢᵇᴍTree = "operand"u8;
             break;
         }
         default: {
-            t.unexpected(token, operandˢᴍTree);
+            t.unexpected(token, operandˢ⁔Tree);
             break;
         }}
         break;
@@ -969,7 +969,7 @@ private static readonly @string operandˢᵇᴍTree = "operand"u8;
 // An operand is a space-separated component of a command,
 // a term possibly followed by field accesses.
 // A nil return means the next item is not an operand.
-[GoMethodBody("operand")] internal static Node operandᴍ(ж<Tree> Ꮡt) {
+internal static Node operand⁔(/*this*/ ж<Tree> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var node = Ꮡt.term();
@@ -1008,8 +1008,8 @@ private static readonly @string operandˢᵇᴍTree = "operand"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string parenthesizedPipelineˢᴍTree => ref parenthesizedPipelineˢᵇᴍTree;
-private static readonly @string parenthesizedPipelineˢᵇᴍTree = "parenthesized pipeline"u8;
+internal static ref readonly @string parenthesizedPipelineˢ⁔Tree => ref parenthesizedPipelineˢᵇ⁔Tree;
+private static readonly @string parenthesizedPipelineˢᵇ⁔Tree = "parenthesized pipeline"u8;
 
 // term:
 //
@@ -1022,7 +1022,7 @@ private static readonly @string parenthesizedPipelineˢᵇᴍTree = "parenthesiz
 //
 // A term is a simple "expression".
 // A nil return means the next item is not a term.
-[GoMethodBody("term")] internal static Node termᴍ(ж<Tree> Ꮡt) {
+internal static Node term⁔(/*this*/ ж<Tree> Ꮡt) {
     GoFrame ᒐ = default;
     try {
         ref var t = ref Ꮡt.DerefOrNull();
@@ -1067,7 +1067,7 @@ private static readonly @string parenthesizedPipelineˢᵇᴍTree = "parenthesiz
                 defer(() => {
                     Ꮡt.Value.stackDepth--;
                 }, ref ᒐ);
-                return new PipeNodeжNode(Ꮡt.pipeline(parenthesizedPipelineˢᴍTree, itemRightParen));
+                return new PipeNodeжNode(Ꮡt.pipeline(parenthesizedPipelineˢ⁔Tree, itemRightParen));
             }
             case var ᴛ when ᴛ == itemString || ᴛ == itemRawString: {
                 var (s, err) = strconv.Unquote(token.val);
@@ -1085,7 +1085,7 @@ private static readonly @string parenthesizedPipelineˢᵇᴍTree = "parenthesiz
 }
 
 // hasFunction reports if a function name exists in the Tree's maps.
-[GoMethodBody("hasFunction")] internal static bool hasFunctionᴍ(ref Tree t, @string name) {
+internal static bool hasFunction⁔(/*this*/ ref Tree t, @string name) {
     foreach (var (_, funcMap) in range(t.funcs)) {
         if (funcMap == nil) {
             continue;
@@ -1098,13 +1098,13 @@ private static readonly @string parenthesizedPipelineˢᵇᴍTree = "parenthesiz
 }
 
 // popVars trims the variable list to the specified length
-[GoMethodBody("popVars")] internal static void popVarsᴍ(ref Tree t, nint n) {
+internal static void popVars⁔(/*this*/ ref Tree t, nint n) {
     t.vars = t.vars.slice(0, n);
 }
 
 // useVar returns a node for a variable reference. It errors if the
 // variable is not defined.
-[GoMethodBody("useVar")] internal static Node useVarᴍ(ж<Tree> Ꮡt, Pos pos, @string name) {
+internal static Node useVar⁔(/*this*/ ж<Tree> Ꮡt, Pos pos, @string name) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var v = Ꮡt.newVariable(pos, name);

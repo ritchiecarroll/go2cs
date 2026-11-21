@@ -54,12 +54,12 @@ partial struct SyscallError {
 
 } partial class os_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref SyscallError e) { return e.Syscall + ": "u8 + e.Err.Error(); }
+internal static @string Error⁔(/*this*/ ref SyscallError e) { return e.Syscall + ": "u8 + e.Err.Error(); }
 
-[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref SyscallError e) { return e.Err; }
+internal static error Unwrap⁔(/*this*/ ref SyscallError e) { return e.Err; }
 
 // Timeout reports whether this error represents a timeout.
-[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref SyscallError e) {
+internal static bool Timeout⁔(/*this*/ ref SyscallError e) {
     var (t, ok) = e.Err._<timeout>(ᐧ);
     return ok && t.Timeout();
 }

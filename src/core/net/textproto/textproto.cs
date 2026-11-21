@@ -44,7 +44,7 @@ partial struct Error {
 
 } partial class textproto_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref Error e) {
+internal static @string Error⁔(/*this*/ ref Error e) {
     return fmt.Sprintf("%03d %q"u8, e.Code, e.Msg);
 }
 
@@ -56,7 +56,7 @@ partial struct ProtocolError /*@string*/;
 
 } partial class textproto_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ProtocolError p) {
+internal static @string Error⁔(/*this*/ ProtocolError p) {
     return (@string)p;
 }
 
@@ -86,7 +86,7 @@ public static ж<Conn> NewConn(io.ReadWriteCloser conn) {
 } partial class textproto_package {
 
 // Close closes the connection.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref Conn c) {
+internal static error Close⁔(/*this*/ ref Conn c) {
     return c.conn.Close();
 }
 
@@ -128,7 +128,7 @@ public static (ж<Conn>, error) Dial(@string network, @string addr) {
 //		return nil, err
 //	}
 //	return c.ReadCodeLine(250)
-[GoMethodBody("Cmd")] internal static (nuint id, error err) Cmdᴍ(ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
+internal static (nuint id, error err) Cmd⁔(/*this*/ ж<Conn> Ꮡc, @string format, params ꓸꓸꓸany argsʗp) {
     nuint id = default;
     error err = default;
     var args = argsʗp.sslice();

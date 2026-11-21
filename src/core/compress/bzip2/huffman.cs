@@ -38,7 +38,7 @@ internal static UntypedInt invalidNodeValue => 0xffff;
 
 // Decode reads bits from the given bitReader and navigates the tree until a
 // symbol is found.
-[GoMethodBody("Decode")] internal static uint16 /*v*/ Decodeᴍ(ref huffmanTree t, ж<bitReader> Ꮡbr) {
+internal static uint16 /*v*/ Decode⁔(/*this*/ ref huffmanTree t, ж<bitReader> Ꮡbr) {
     uint16 v = default;
     ref var br = ref Ꮡbr.DerefOrNull();
 

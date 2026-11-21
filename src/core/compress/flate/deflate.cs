@@ -113,7 +113,7 @@ partial struct compressor {
 
 } partial class flate_package {
 
-[GoMethodBody("fillDeflate")] internal static nint fillDeflateᴍ(ref compressor d, slice<byte> b) {
+internal static nint fillDeflate⁔(/*this*/ ref compressor d, slice<byte> b) {
     if (d.index >= (nint)(2 * windowSize - (minMatchLength + maxMatchLength))) {
         // shift the window by windowSize
         copy(d.window, d.window[(int)(windowSize)..(int)(2 * windowSize)]);
@@ -153,7 +153,7 @@ partial struct compressor {
     return n;
 }
 
-[GoMethodBody("writeBlock")] internal static error writeBlockᴍ(ref compressor d, slice<token> tokens, nint index) {
+internal static error writeBlock⁔(/*this*/ ref compressor d, slice<token> tokens, nint index) {
     if (index > 0) {
         slice<byte> window = default;
         if (d.blockStart <= index) {
@@ -170,7 +170,7 @@ partial struct compressor {
 // dictionary and calculate all hashes.
 // This is much faster than doing a full encode.
 // Should only be used after a reset.
-[GoMethodBody("fillWindow")] internal static void fillWindowᴍ(ref compressor d, slice<byte> b) {
+internal static void fillWindow⁔(/*this*/ ref compressor d, slice<byte> b) {
     // Do not fill window if we are in store-only mode.
     if (d.compressionLevel.level < 2) {
         return;
@@ -220,7 +220,7 @@ partial struct compressor {
 
 // Try to find a match starting at index whose length is greater than prevSize.
 // We only look at chainCount possibilities before giving up.
-[GoMethodBody("findMatch")] internal static (nint length, nint offset, bool ok) findMatchᴍ(ref compressor d, nint pos, nint prevHead, nint prevLength, nint lookahead) {
+internal static (nint length, nint offset, bool ok) findMatch⁔(/*this*/ ref compressor d, nint pos, nint prevHead, nint prevLength, nint lookahead) {
     nint length = default;
     nint offset = default;
     bool ok = default;
@@ -276,7 +276,7 @@ partial struct compressor {
     return (length, offset, ok);
 }
 
-[GoMethodBody("writeStoredBlock")] internal static error writeStoredBlockᴍ(ref compressor d, slice<byte> buf) {
+internal static error writeStoredBlock⁔(/*this*/ ref compressor d, slice<byte> buf) {
     d.w.writeStoredHeader(len(buf), false); if (d.w.err != nil) {
         return d.w.err;
     }
@@ -329,7 +329,7 @@ internal static nint matchLen(slice<byte> a, slice<byte> b, nint max) {
 // encSpeed will compress and store the currently added data,
 // if enough has been accumulated or we at the end of the stream.
 // Any error that occurred will be in d.err
-[GoMethodBody("encSpeed")] internal static void encSpeedᴍ(ref compressor d) {
+internal static void encSpeed⁔(/*this*/ ref compressor d) {
     // We only compress if we have maxStoreBlockSize.
     if (d.windowEnd < maxStoreBlockSize) {
         if (!d.sync) {
@@ -369,7 +369,7 @@ internal static nint matchLen(slice<byte> a, slice<byte> b, nint max) {
     d.windowEnd = 0;
 }
 
-[GoMethodBody("initDeflate")] internal static void initDeflateᴍ(ref compressor d) {
+internal static void initDeflate⁔(/*this*/ ref compressor d) {
     d.window = new slice<byte>(2 * windowSize);
     d.hashOffset = 1;
     d.tokens = new slice<token>(0, maxFlateBlockTokens + 1);
@@ -381,7 +381,7 @@ internal static nint matchLen(slice<byte> a, slice<byte> b, nint max) {
     d.bulkHasher = bulkHash4;
 }
 
-[GoMethodBody("deflate")] internal static void deflateᴍ(ref compressor d) {
+internal static void deflate⁔(/*this*/ ref compressor d) {
     if (d.windowEnd - d.index < (nint)(minMatchLength + maxMatchLength) && !d.sync) {
         return;
     }
@@ -513,13 +513,13 @@ continue_Loop:;
 break_Loop:;
 }
 
-[GoMethodBody("fillStore")] internal static nint fillStoreᴍ(ref compressor d, slice<byte> b) {
+internal static nint fillStore⁔(/*this*/ ref compressor d, slice<byte> b) {
     nint n = copy(d.window.slice(d.windowEnd), b);
     d.windowEnd += n;
     return n;
 }
 
-[GoMethodBody("store")] internal static void storeᴍ(ref compressor d) {
+internal static void store⁔(/*this*/ ref compressor d) {
     if (d.windowEnd > 0 && (d.windowEnd == maxStoreBlockSize || d.sync)) {
         d.err = d.writeStoredBlock(d.window.slice(0, d.windowEnd));
         d.windowEnd = 0;
@@ -529,7 +529,7 @@ break_Loop:;
 // storeHuff compresses and stores the currently added data
 // when the d.window is full or we are at the end of the stream.
 // Any error that occurred will be in d.err
-[GoMethodBody("storeHuff")] internal static void storeHuffᴍ(ref compressor d) {
+internal static void storeHuff⁔(/*this*/ ref compressor d) {
     if (d.windowEnd < len(d.window) && !d.sync || d.windowEnd == 0) {
         return;
     }
@@ -538,7 +538,7 @@ break_Loop:;
     d.windowEnd = 0;
 }
 
-[GoMethodBody("write")] internal static (nint n, error err) writeᴍ(ж<compressor> Ꮡd, slice<byte> b) {
+internal static (nint n, error err) write⁔(/*this*/ ж<compressor> Ꮡd, slice<byte> b) {
     nint n = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -556,7 +556,7 @@ break_Loop:;
     return (n, default);
 }
 
-[GoMethodBody("syncFlush")] internal static error syncFlushᴍ(ж<compressor> Ꮡd) {
+internal static error syncFlush⁔(/*this*/ ж<compressor> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (d.err != nil) {
@@ -573,7 +573,7 @@ break_Loop:;
     return d.err;
 }
 
-[GoMethodBody("init")] internal static error /*err*/ initᴍ(ref compressor d, io.Writer w, nint level) {
+internal static error /*err*/ init⁔(/*this*/ ref compressor d, io.Writer w, nint level) {
     d.w = newHuffmanBitWriter(w);
 
     var matchᴛ1 = false;
@@ -611,7 +611,7 @@ break_Loop:;
     return default;
 }
 
-[GoMethodBody("reset")] internal static void resetᴍ(ref compressor d, io.Writer w) {
+internal static void reset⁔(/*this*/ ref compressor d, io.Writer w) {
     d.w.reset(w);
     d.sync = false;
     d.err = default;
@@ -641,7 +641,7 @@ break_Loop:;
     }}
 }
 
-[GoMethodBody("close")] internal static error closeᴍ(ж<compressor> Ꮡd) {
+internal static error close⁔(/*this*/ ж<compressor> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (AreEqual(d.err, errWriterClosed)) {
@@ -711,7 +711,7 @@ partial struct dictWriter {
 
 } partial class flate_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref dictWriter w, slice<byte> b) {
+internal static (nint n, error err) Write⁔(/*this*/ ref dictWriter w, slice<byte> b) {
     return w.w.Write(b);
 }
 
@@ -730,7 +730,7 @@ partial struct Writer {
 
 // Write writes data to w, which will eventually write the
 // compressed form of data to its underlying writer.
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<Writer> Ꮡw, slice<byte> data) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<Writer> Ꮡw, slice<byte> data) {
     return Ꮡw.Ꮡd.write(data);
 }
 
@@ -743,21 +743,21 @@ partial struct Writer {
 // If the underlying writer returns an error, Flush returns that error.
 //
 // In the terminology of the zlib library, Flush is equivalent to Z_SYNC_FLUSH.
-[GoMethodBody("Flush")] internal static error Flushᴍ(ж<Writer> Ꮡw) {
+internal static error Flush⁔(/*this*/ ж<Writer> Ꮡw) {
     // For more about flushing:
     // https://www.bolet.org/~pornin/deflate-flush.html
     return Ꮡw.Ꮡd.syncFlush();
 }
 
 // Close flushes and closes the writer.
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<Writer> Ꮡw) {
+internal static error Close⁔(/*this*/ ж<Writer> Ꮡw) {
     return Ꮡw.Ꮡd.close();
 }
 
 // Reset discards the writer's state and makes it equivalent to
 // the result of [NewWriter] or [NewWriterDict] called with dst
 // and w's level and dictionary.
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref Writer w, io.Writer dst) {
+internal static void Reset⁔(/*this*/ ref Writer w, io.Writer dst) {
     var (dw, ok) = w.d.w.writer._<ж<dictWriter>>(ᐧ); if (ok) {
         // w was created with NewWriterDict
         dw.w = dst;

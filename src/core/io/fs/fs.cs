@@ -209,15 +209,15 @@ public static FileMode ModePerm => /* 0777 */ 511; // Unix permission bits
 } partial class fs_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static ref readonly @string strᶜᴍFileMode => ref strᶜᵇᴍFileMode;
-private static readonly @string strᶜᵇᴍFileMode = "dalTLDpSugct?"u8;
+private static ref readonly @string strᶜ⁔FileMode => ref strᶜᵇ⁔FileMode;
+private static readonly @string strᶜᵇ⁔FileMode = "dalTLDpSugct?"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static ref readonly @string rwxᶜᴍFileMode => ref rwxᶜᵇᴍFileMode;
-private static readonly @string rwxᶜᵇᴍFileMode = "rwxrwxrwx"u8;
+private static ref readonly @string rwxᶜ⁔FileMode => ref rwxᶜᵇ⁔FileMode;
+private static readonly @string rwxᶜᵇ⁔FileMode = "rwxrwxrwx"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(FileMode m) {
-    @string str = strᶜᴍFileMode;
+internal static @string String⁔(/*this*/ FileMode m) {
+    @string str = strᶜ⁔FileMode;
     array<byte> buf = new(32); // Mode is uint32.
     nint w = 0;
     foreach (var (i, c) in (@string)str) {
@@ -230,7 +230,7 @@ private static readonly @string rwxᶜᵇᴍFileMode = "rwxrwxrwx"u8;
         buf[w] = (byte)'-';
         w++;
     }
-    @string rwx = rwxᶜᴍFileMode;
+    @string rwx = rwxᶜ⁔FileMode;
     foreach (var (i, c) in (@string)rwx) {
         if ((FileMode)(m & ((FileMode)((uint32)1 << (int)((nuint)(9 - 1 - i))))) != 0) {
             buf[w] = (byte)c;
@@ -244,23 +244,23 @@ private static readonly @string rwxᶜᵇᴍFileMode = "rwxrwxrwx"u8;
 
 // IsDir reports whether m describes a directory.
 // That is, it tests for the [ModeDir] bit being set in m.
-[GoMethodBody("IsDir")] internal static bool IsDirᴍ(FileMode m) {
+internal static bool IsDir⁔(/*this*/ FileMode m) {
     return (FileMode)(m & ModeDir) != 0;
 }
 
 // IsRegular reports whether m describes a regular file.
 // That is, it tests that no mode type bits are set.
-[GoMethodBody("IsRegular")] internal static bool IsRegularᴍ(FileMode m) {
+internal static bool IsRegular⁔(/*this*/ FileMode m) {
     return (FileMode)(m & ModeType) == 0;
 }
 
 // Perm returns the Unix permission bits in m (m & [ModePerm]).
-[GoMethodBody("Perm")] internal static FileMode Permᴍ(FileMode m) {
+internal static FileMode Perm⁔(/*this*/ FileMode m) {
     return (FileMode)(m & ModePerm);
 }
 
 // Type returns type bits in m (m & [ModeType]).
-[GoMethodBody("Type")] internal static FileMode Typeᴍ(FileMode m) {
+internal static FileMode Type⁔(/*this*/ FileMode m) {
     return (FileMode)(m & ModeType);
 }
 
@@ -275,9 +275,9 @@ partial struct PathError {
 
 } partial class fs_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref PathError e) { return e.Op + " "u8 + e.Path + ": "u8 + e.Err.Error(); }
+internal static @string Error⁔(/*this*/ ref PathError e) { return e.Op + " "u8 + e.Path + ": "u8 + e.Err.Error(); }
 
-[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref PathError e) { return e.Err; }
+internal static error Unwrap⁔(/*this*/ ref PathError e) { return e.Err; }
 
 } partial class fs_package {
 
@@ -288,7 +288,7 @@ internal partial interface Timeout_type /*dyn*/ {
 } partial class fs_package {
 
 // Timeout reports whether this error represents a timeout.
-[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref PathError e) {
+internal static bool Timeout⁔(/*this*/ ref PathError e) {
     var (t, ok) = e.Err._<Timeout_type>(ᐧ);
     return ok && t.Timeout();
 }

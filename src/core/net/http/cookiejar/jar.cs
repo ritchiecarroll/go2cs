@@ -117,21 +117,21 @@ partial struct entry {
 } partial class cookiejar_package {
 
 // id returns the domain;path;name triple of e as an id.
-[GoMethodBody("id")] internal static @string idᴍ(ref entry e) {
+internal static @string id⁔(/*this*/ ref entry e) {
     return fmt.Sprintf("%s;%s;%s"u8, e.Domain, e.Path, e.Name);
 }
 
 // shouldSend determines whether e's cookie qualifies to be included in a
 // request to host/path. It is the caller's responsibility to check if the
 // cookie is expired.
-[GoMethodBody("shouldSend")] internal static bool shouldSendᴍ(ref entry e, bool https, @string host, @string path) {
+internal static bool shouldSend⁔(/*this*/ ref entry e, bool https, @string host, @string path) {
     return e.domainMatch(host) && e.pathMatch(path) && e.secureMatch(https);
 }
 
 // domainMatch checks whether e's Domain allows sending e back to host.
 // It differs from "domain-match" of RFC 6265 section 5.1.3 because we treat
 // a cookie with an IP address in the Domain always as a host cookie.
-[GoMethodBody("domainMatch")] internal static bool domainMatchᴍ(ref entry e, @string host) {
+internal static bool domainMatch⁔(/*this*/ ref entry e, @string host) {
     if (e.Domain == host) {
         return true;
     }
@@ -139,7 +139,7 @@ partial struct entry {
 }
 
 // pathMatch implements "path-match" according to RFC 6265 section 5.1.4.
-[GoMethodBody("pathMatch")] internal static bool pathMatchᴍ(ref entry e, @string requestPath) {
+internal static bool pathMatch⁔(/*this*/ ref entry e, @string requestPath) {
     if (requestPath == e.Path) {
         return true;
     }
@@ -156,7 +156,7 @@ partial struct entry {
 // secureMatch checks whether a cookie should be sent based on the protocol
 // and the Secure flag. Localhost is considered a secure origin regardless
 // of protocol, matching browser behavior.
-[GoMethodBody("secureMatch")] internal static bool secureMatchᴍ(ref entry e, bool https) {
+internal static bool secureMatch⁔(/*this*/ ref entry e, bool https) {
     if (!e.Secure) {
         // Cookies not marked secure are always sent.
         return true;
@@ -201,12 +201,12 @@ internal static bool hasDotSuffix(@string s, @string suffix) {
 // Cookies implements the Cookies method of the [http.CookieJar] interface.
 //
 // It returns an empty slice if the URL's scheme is not HTTP or HTTPS.
-[GoMethodBody("Cookies")] internal static slice<ж<http.Cookie>> /*cookies*/ Cookiesᴍ(ж<Jar> Ꮡj, ж<url.URL> u) {
+internal static slice<ж<http.Cookie>> /*cookies*/ Cookies⁔(/*this*/ ж<Jar> Ꮡj, ж<url.URL> u) {
     return Ꮡj.cookies(u, time.Now());
 }
 
 // cookies is like Cookies but takes the current time as a parameter.
-[GoMethodBody("cookies")] internal static slice<ж<http.Cookie>> /*cookies*/ cookiesᴍ(ж<Jar> Ꮡj, ж<url.URL> Ꮡu, time.Time now) {
+internal static slice<ж<http.Cookie>> /*cookies*/ cookies⁔(/*this*/ ж<Jar> Ꮡj, ж<url.URL> Ꮡu, time.Time now) {
     slice<ж<http.Cookie>> cookies = default;
     GoFrame ᒐ = default;
     try {
@@ -289,12 +289,12 @@ internal static bool hasDotSuffix(@string s, @string suffix) {
 // SetCookies implements the SetCookies method of the [http.CookieJar] interface.
 //
 // It does nothing if the URL's scheme is not HTTP or HTTPS.
-[GoMethodBody("SetCookies")] internal static void SetCookiesᴍ(ж<Jar> Ꮡj, ж<url.URL> u, slice<ж<http.Cookie>> cookies) {
+internal static void SetCookies⁔(/*this*/ ж<Jar> Ꮡj, ж<url.URL> u, slice<ж<http.Cookie>> cookies) {
     Ꮡj.setCookies(u, cookies, time.Now());
 }
 
 // setCookies is like SetCookies but takes the current time as parameter.
-[GoMethodBody("setCookies")] internal static void setCookiesᴍ(ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<http.Cookie>> cookies, time.Time now) {
+internal static void setCookies⁔(/*this*/ ж<Jar> Ꮡj, ж<url.URL> Ꮡu, slice<ж<http.Cookie>> cookies, time.Time now) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -460,12 +460,12 @@ internal static @string defaultPath(@string path) {
 } partial class cookiejar_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sameSiteˢᴍJar => ref sameSiteˢᵇᴍJar;
-private static readonly @string sameSiteˢᵇᴍJar = "SameSite"u8;
-internal static ref readonly @string sameSiteStrictˢᴍJar => ref sameSiteStrictˢᵇᴍJar;
-private static readonly @string sameSiteStrictˢᵇᴍJar = "SameSite=Strict"u8;
-internal static ref readonly @string sameSiteLaxˢᴍJar => ref sameSiteLaxˢᵇᴍJar;
-private static readonly @string sameSiteLaxˢᵇᴍJar = "SameSite=Lax"u8;
+internal static ref readonly @string sameSiteˢ⁔Jar => ref sameSiteˢᵇ⁔Jar;
+private static readonly @string sameSiteˢᵇ⁔Jar = "SameSite"u8;
+internal static ref readonly @string sameSiteStrictˢ⁔Jar => ref sameSiteStrictˢᵇ⁔Jar;
+private static readonly @string sameSiteStrictˢᵇ⁔Jar = "SameSite=Strict"u8;
+internal static ref readonly @string sameSiteLaxˢ⁔Jar => ref sameSiteLaxˢᵇ⁔Jar;
+private static readonly @string sameSiteLaxˢᵇ⁔Jar = "SameSite=Lax"u8;
 
 // newEntry creates an entry from an http.Cookie c. now is the current time and
 // is compared to c.Expires to determine deletion of c. defPath and host are the
@@ -476,7 +476,7 @@ private static readonly @string sameSiteLaxˢᵇᴍJar = "SameSite=Lax"u8;
 // be valid to call e.id (which depends on e's Name, Domain and Path).
 //
 // A malformed c.Domain will result in an error.
-[GoMethodBody("newEntry")] internal static (entry e, bool remove, error err) newEntryᴍ(ref Jar j, ж<http.Cookie> Ꮡc, time.Time now, @string defPath, @string host) {
+internal static (entry e, bool remove, error err) newEntry⁔(/*this*/ ref Jar j, ж<http.Cookie> Ꮡc, time.Time now, @string defPath, @string host) {
     entry e = default;
     error err = default;
     ref var c = ref Ꮡc.DerefOrNull();
@@ -520,15 +520,15 @@ private static readonly @string sameSiteLaxˢᵇᴍJar = "SameSite=Lax"u8;
 
     switch (c.SameSite) {
     case var ᴛ when ᴛ == http.SameSiteDefaultMode: {
-        e.SameSite = sameSiteˢᴍJar;
+        e.SameSite = sameSiteˢ⁔Jar;
         break;
     }
     case var ᴛ when ᴛ == http.SameSiteStrictMode: {
-        e.SameSite = sameSiteStrictˢᴍJar;
+        e.SameSite = sameSiteStrictˢ⁔Jar;
         break;
     }
     case var ᴛ when ᴛ == http.SameSiteLaxMode: {
-        e.SameSite = sameSiteLaxˢᴍJar;
+        e.SameSite = sameSiteLaxˢ⁔Jar;
         break;
     }}
 
@@ -548,7 +548,7 @@ internal static time.Time endOfTime = time.Date(9999, 12, 31, 23, 59, 59, 0, tim
 } partial class cookiejar_package {
 
 // domainAndType determines the cookie's domain and hostOnly attribute.
-[GoMethodBody("domainAndType")] internal static (@string, bool, error) domainAndTypeᴍ(ref Jar j, @string host, @string domain) {
+internal static (@string, bool, error) domainAndType⁔(/*this*/ ref Jar j, @string host, @string domain) {
     if (domain == ""u8) {
         // No domain attribute in the SetCookie header indicates a
         // host cookie.

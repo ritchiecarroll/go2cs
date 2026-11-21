@@ -51,7 +51,7 @@ partial struct muxEntry {
 } partial class http_package {
 
 // Formerly ServeMux.Handle.
-[GoMethodBody("handle")] internal static void handleᴍ(ж<serveMux121> Ꮡmux, @string pattern, Handler handler) {
+internal static void handle⁔(/*this*/ ж<serveMux121> Ꮡmux, @string pattern, Handler handler) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -106,7 +106,7 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
 } partial class http_package {
 
 // Formerly ServeMux.HandleFunc.
-[GoMethodBody("handleFunc")] internal static void handleFuncᴍ(ж<serveMux121> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
+internal static void handleFunc⁔(/*this*/ ж<serveMux121> Ꮡmux, @string pattern, Action<ResponseWriter, ж<Request>> handler) {
     if (handler == nil) {
         throw panic("http: nil handler");
     }
@@ -114,7 +114,7 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
 }
 
 // Formerly ServeMux.Handler.
-[GoMethodBody("findHandler")] internal static (Handler h, @string pattern) findHandlerᴍ(ж<serveMux121> Ꮡmux, ж<Request> Ꮡr) {
+internal static (Handler h, @string pattern) findHandler⁔(/*this*/ ж<serveMux121> Ꮡmux, ж<Request> Ꮡr) {
     @string pattern = default;
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -154,7 +154,7 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
 
 // handler is the main implementation of findHandler.
 // The path is known to be in canonical form, except for CONNECT methods.
-[GoMethodBody("handler")] internal static (Handler h, @string pattern) handlerᴍ(ж<serveMux121> Ꮡmux, @string host, @string path) {
+internal static (Handler h, @string pattern) handler⁔(/*this*/ ж<serveMux121> Ꮡmux, @string host, @string path) {
     Handler h = default;
     @string pattern = default;
     GoFrame ᒐ = default;
@@ -182,7 +182,7 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
 
 // Find a handler on a handler map given a path string.
 // Most-specific (longest) pattern wins.
-[GoMethodBody("match")] internal static (Handler h, @string pattern) matchᴍ(ref serveMux121 mux, @string path) {
+internal static (Handler h, @string pattern) match⁔(/*this*/ ref serveMux121 mux, @string path) {
     // Check for exact match first.
     var (v, ok) = mux.m[path, ꟷ];
     if (ok) {
@@ -203,7 +203,7 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
 // This occurs when a handler for path + "/" was already registered, but
 // not for path itself. If the path needs appending to, it creates a new
 // URL, setting the path to u.Path + "/" and returning true to indicate so.
-[GoMethodBody("redirectToPathSlash")] internal static (ж<url.URL>, bool) redirectToPathSlashᴍ(ж<serveMux121> Ꮡmux, @string host, @string path, ж<url.URL> Ꮡu) {
+internal static (ж<url.URL>, bool) redirectToPathSlash⁔(/*this*/ ж<serveMux121> Ꮡmux, @string host, @string path, ж<url.URL> Ꮡu) {
     ref var mux = ref Ꮡmux.DerefOrNull();
     ref var u = ref Ꮡu.DerefOrNull();
 
@@ -221,7 +221,7 @@ internal static slice<muxEntry> appendSorted(slice<muxEntry> es, muxEntry e) {
 // shouldRedirectRLocked reports whether the given path and host should be redirected to
 // path+"/". This should happen if a handler is registered for path+"/" but
 // not path -- see comments at ServeMux.
-[GoMethodBody("shouldRedirectRLocked")] internal static bool shouldRedirectRLockedᴍ(ref serveMux121 mux, @string host, @string path) {
+internal static bool shouldRedirectRLocked⁔(/*this*/ ref serveMux121 mux, @string host, @string path) {
     var p = slice<@string>([path, host + path]);
 
     foreach (var (_, c) in range(p)) {

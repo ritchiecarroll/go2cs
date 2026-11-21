@@ -29,15 +29,15 @@ partial struct binaryLittleEndian {
 
 } partial class routebsd_package {
 
-[GoMethodBody("Uint16")] internal static uint16 Uint16ᴍ(binaryLittleEndian _, slice<byte> b) {
+internal static uint16 Uint16⁔(/*this*/ binaryLittleEndian _, slice<byte> b) {
     return byteorder.LEUint16(b);
 }
 
-[GoMethodBody("Uint32")] internal static uint32 Uint32ᴍ(binaryLittleEndian _, slice<byte> b) {
+internal static uint32 Uint32⁔(/*this*/ binaryLittleEndian _, slice<byte> b) {
     return byteorder.LEUint32(b);
 }
 
-[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(binaryLittleEndian _, slice<byte> b) {
+internal static uint64 Uint64⁔(/*this*/ binaryLittleEndian _, slice<byte> b) {
     return byteorder.LEUint64(b);
 }
 
@@ -48,15 +48,15 @@ partial struct binaryBigEndian {
 
 } partial class routebsd_package {
 
-[GoMethodBody("Uint16")] internal static uint16 Uint16ᴍ(binaryBigEndian _, slice<byte> b) {
+internal static uint16 Uint16⁔(/*this*/ binaryBigEndian _, slice<byte> b) {
     return byteorder.BEUint16(b);
 }
 
-[GoMethodBody("Uint32")] internal static uint32 Uint32ᴍ(binaryBigEndian _, slice<byte> b) {
+internal static uint32 Uint32⁔(/*this*/ binaryBigEndian _, slice<byte> b) {
     return byteorder.BEUint32(b);
 }
 
-[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(binaryBigEndian _, slice<byte> b) {
+internal static uint64 Uint64⁔(/*this*/ binaryBigEndian _, slice<byte> b) {
     return byteorder.BEUint64(b);
 }
 

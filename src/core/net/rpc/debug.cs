@@ -65,15 +65,15 @@ partial struct serviceArray /*[]debugService*/;
 
 } partial class rpc_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(serviceArray s) { return len(s); }
-[GoMethodBody("Less")] internal static bool Lessᴍ(serviceArray s, nint i, nint j) { return s[i].Name < s[j].Name; }
-[GoMethodBody("Swap")] internal static void Swapᴍ(serviceArray s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
+internal static nint Len⁔(/*this*/ serviceArray s) { return len(s); }
+internal static bool Less⁔(/*this*/ serviceArray s, nint i, nint j) { return s[i].Name < s[j].Name; }
+internal static void Swap⁔(/*this*/ serviceArray s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
 } partial class rpc_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(methodArray m) { return len(m); }
-[GoMethodBody("Less")] internal static bool Lessᴍ(methodArray m, nint i, nint j) { return m[i].Name < m[j].Name; }
-[GoMethodBody("Swap")] internal static void Swapᴍ(methodArray m, nint i, nint j) { (m[i], m[j]) = (m[j], m[i]); }
+internal static nint Len⁔(/*this*/ methodArray m) { return len(m); }
+internal static bool Less⁔(/*this*/ methodArray m, nint i, nint j) { return m[i].Name < m[j].Name; }
+internal static void Swap⁔(/*this*/ methodArray m, nint i, nint j) { (m[i], m[j]) = (m[j], m[i]); }
 
 } partial class rpc_package {
 
@@ -84,10 +84,10 @@ partial struct debugHTTP {
 } partial class rpc_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object rpcErrorExecutingˢᴍdebugHTTP = (@string)"rpc: error executing template:"u8;
+internal static readonly object rpcErrorExecutingˢ⁔debugHTTP = (@string)"rpc: error executing template:"u8;
 
 // Runs at /debug/rpc
-[GoMethodBody("ServeHTTP")] internal static void ServeHTTPᴍ(debugHTTP server, Δhttp.ResponseWriter w, ж<Δhttp.Request> req) {
+internal static void ServeHTTP⁔(/*this*/ debugHTTP server, Δhttp.ResponseWriter w, ж<Δhttp.Request> req) {
     // Build a sorted version of the data.
     ref var services = ref heap<serviceArray>(out var Ꮡservices);
     Ꮡ(server).of(debugHTTP.ᏑserviceMap).Range((any snamei, any svci) => {
@@ -103,7 +103,7 @@ internal static readonly object rpcErrorExecutingˢᴍdebugHTTP = (@string)"rpc:
     slices.SortFunc(services, (debugService a, debugService b) => strings.Compare(a.Name, b.Name));
     var err = debug.Execute(new http_ResponseWriterᴠWriter(w), services);
     if (err != nil) {
-        fmt.Fprintln(new http_ResponseWriterᴠWriter(w), rpcErrorExecutingˢᴍdebugHTTP, err.Error());
+        fmt.Fprintln(new http_ResponseWriterᴠWriter(w), rpcErrorExecutingˢ⁔debugHTTP, err.Error());
     }
 }
 

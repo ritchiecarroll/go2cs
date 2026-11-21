@@ -169,9 +169,11 @@ namespace go;
 
         string name = method.Name;
 
-        // SCRATCH PROTOTYPE (the global ᴍ cost test): a method body is named by its stamp (GoMethodBodyAttribute).
-        if (method.GetCustomAttribute<GoMethodBodyAttribute>(inherit: false) is { GoName: { } bodyName })
-            name = bodyName;
+        // SCRATCH PROTOTYPE (the global-glyph cost test): a method body `<name>⁔` is the Go method `<name>`. U+2054 is
+        // connector punctuation no Go identifier can spell, so the trailing suffix alone marks a body (runtime
+        // managed_impl.cs, glyphMethodGoName).
+        if (method.IsStatic && name.Length > 1 && name.EndsWith('\u2054'))
+            name = name[..^1];
 
         // An sstring twin's canonical value delegate (`Sprintfᶠ`) is a lambda. Its method is a
         // compiler-generated `<.cctor>b__X_Y` on the nested `<>c` class, so the function's Go name is

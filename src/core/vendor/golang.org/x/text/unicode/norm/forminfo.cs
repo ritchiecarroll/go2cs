@@ -90,7 +90,7 @@ partial struct formInfo {
 
 // BoundaryBefore returns true if this rune starts a new segment and
 // cannot combine with any rune on the left.
-[GoMethodBody("BoundaryBefore")] internal static bool BoundaryBeforeᴍ(Properties p) {
+internal static bool BoundaryBefore⁔(/*this*/ Properties p) {
     if (p.ccc == 0 && !p.combinesBackward()) {
         return true;
     }
@@ -102,7 +102,7 @@ partial struct formInfo {
 
 // BoundaryAfter returns true if runes cannot combine with or otherwise
 // interact with this or previous runes.
-[GoMethodBody("BoundaryAfter")] internal static bool BoundaryAfterᴍ(Properties p) {
+internal static bool BoundaryAfter⁔(/*this*/ Properties p) {
     // TODO: loosen these conditions.
     return p.isInert();
 }
@@ -122,32 +122,32 @@ partial struct qcInfo /*num:uint8*/;
 
 } partial class norm_package {
 
-[GoMethodBody("isYesC")] internal static bool isYesCᴍ(Properties p) { return (qcInfo)(p.flags & 0x10) == 0; }
-[GoMethodBody("isYesD")] internal static bool isYesDᴍ(Properties p) { return (qcInfo)(p.flags & 0x4) == 0; }
+internal static bool isYesC⁔(/*this*/ Properties p) { return (qcInfo)(p.flags & 0x10) == 0; }
+internal static bool isYesD⁔(/*this*/ Properties p) { return (qcInfo)(p.flags & 0x4) == 0; }
 
-[GoMethodBody("combinesForward")] internal static bool combinesForwardᴍ(Properties p) { return (qcInfo)(p.flags & 0x20) != 0; }
-[GoMethodBody("combinesBackward")] internal static bool combinesBackwardᴍ(Properties p) { return (qcInfo)(p.flags & 0x8) != 0; } // == isMaybe
-[GoMethodBody("hasDecomposition")] internal static bool hasDecompositionᴍ(Properties p) { return (qcInfo)(p.flags & 0x4) != 0; } // == isNoD
+internal static bool combinesForward⁔(/*this*/ Properties p) { return (qcInfo)(p.flags & 0x20) != 0; }
+internal static bool combinesBackward⁔(/*this*/ Properties p) { return (qcInfo)(p.flags & 0x8) != 0; } // == isMaybe
+internal static bool hasDecomposition⁔(/*this*/ Properties p) { return (qcInfo)(p.flags & 0x4) != 0; } // == isNoD
 
-[GoMethodBody("isInert")] internal static bool isInertᴍ(Properties p) {
+internal static bool isInert⁔(/*this*/ Properties p) {
     return (qcInfo)(p.flags & (uint8)qcInfoMask) == 0 && p.ccc == 0;
 }
 
-[GoMethodBody("multiSegment")] internal static bool multiSegmentᴍ(Properties p) {
+internal static bool multiSegment⁔(/*this*/ Properties p) {
     return p.index >= firstMulti && p.index < endMulti;
 }
 
-[GoMethodBody("nLeadingNonStarters")] internal static uint8 nLeadingNonStartersᴍ(Properties p) {
+internal static uint8 nLeadingNonStarters⁔(/*this*/ Properties p) {
     return p.nLead;
 }
 
-[GoMethodBody("nTrailingNonStarters")] internal static uint8 nTrailingNonStartersᴍ(Properties p) {
+internal static uint8 nTrailingNonStarters⁔(/*this*/ Properties p) {
     return (uint8)((qcInfo)(p.flags & 0x03));
 }
 
 // Decomposition returns the decomposition for the underlying rune
 // or nil if there is none.
-[GoMethodBody("Decomposition")] internal static slice<byte> Decompositionᴍ(Properties p) {
+internal static slice<byte> Decomposition⁔(/*this*/ Properties p) {
     // TODO: create the decomposition for Hangul?
     if (p.index == 0) {
         return default;
@@ -159,12 +159,12 @@ partial struct qcInfo /*num:uint8*/;
 }
 
 // Size returns the length of UTF-8 encoding of the rune.
-[GoMethodBody("Size")] internal static nint Sizeᴍ(Properties p) {
+internal static nint Size⁔(/*this*/ Properties p) {
     return (nint)p.size;
 }
 
 // CCC returns the canonical combining class of the underlying rune.
-[GoMethodBody("CCC")] internal static uint8 CCCᴍ(Properties p) {
+internal static uint8 CCC⁔(/*this*/ Properties p) {
     if (p.index >= firstCCCZeroExcept) {
         return 0;
     }
@@ -173,13 +173,13 @@ partial struct qcInfo /*num:uint8*/;
 
 // LeadCCC returns the CCC of the first rune in the decomposition.
 // If there is no decomposition, LeadCCC equals CCC.
-[GoMethodBody("LeadCCC")] internal static uint8 LeadCCCᴍ(Properties p) {
+internal static uint8 LeadCCC⁔(/*this*/ Properties p) {
     return ccc[p.ccc];
 }
 
 // TrailCCC returns the CCC of the last rune in the decomposition.
 // If there is no decomposition, TrailCCC equals CCC.
-[GoMethodBody("TrailCCC")] internal static uint8 TrailCCCᴍ(Properties p) {
+internal static uint8 TrailCCC⁔(/*this*/ Properties p) {
     return ccc[p.tccc];
 }
 
@@ -228,7 +228,7 @@ internal static Properties lookupInfoNFKC(input b, nint i) {
 } partial class norm_package {
 
 // Properties returns properties for the first rune in s.
-[GoMethodBody("Properties")] internal static Properties Propertiesᴍ(Form f, slice<byte> s) {
+internal static Properties Properties⁔(/*this*/ Form f, slice<byte> s) {
     if (f == NFC || f == NFD) {
         var (ᴛ1, ᴛ2) = nfcData.lookup(s);
         return compInfo(ᴛ1, ᴛ2);
@@ -238,7 +238,7 @@ internal static Properties lookupInfoNFKC(input b, nint i) {
 }
 
 // PropertiesString returns properties for the first rune in s.
-[GoMethodBody("PropertiesString")] internal static Properties PropertiesStringᴍ(Form f, @string s) {
+internal static Properties PropertiesString⁔(/*this*/ Form f, @string s) {
     if (f == NFC || f == NFD) {
         var (ᴛ5, ᴛ6) = nfcData.lookupString(s);
         return compInfo(ᴛ5, ᴛ6);

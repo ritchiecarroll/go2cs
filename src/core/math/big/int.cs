@@ -44,7 +44,7 @@ internal static void initᴛintOne() { intOne = Ꮡ(new Int(false, natOne)); }
 //   - -1 if x < 0;
 //   - 0 if x == 0;
 //   - +1 if x > 0.
-[GoMethodBody("Sign")] internal static nint Signᴍ(ref Int x) {
+internal static nint Sign⁔(/*this*/ ref Int x) {
     // This function is used in cryptographic operations. It must not leak
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
@@ -58,7 +58,7 @@ internal static void initᴛintOne() { intOne = Ꮡ(new Int(false, natOne)); }
 }
 
 // SetInt64 sets z to x and returns z.
-[GoMethodBody("SetInt64")] internal static ж<Int> SetInt64ᴍ(ж<Int> Ꮡz, int64 x) {
+internal static ж<Int> SetInt64⁔(/*this*/ ж<Int> Ꮡz, int64 x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     var neg = false;
@@ -72,7 +72,7 @@ internal static void initᴛintOne() { intOne = Ꮡ(new Int(false, natOne)); }
 }
 
 // SetUint64 sets z to x and returns z.
-[GoMethodBody("SetUint64")] internal static ж<Int> SetUint64ᴍ(ж<Int> Ꮡz, uint64 x) {
+internal static ж<Int> SetUint64⁔(/*this*/ ж<Int> Ꮡz, uint64 x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     z.abs = z.abs.setUint64(x);
@@ -103,7 +103,7 @@ public static ж<Int> NewInt(int64 x) {
 } partial class big_package {
 
 // Set sets z to x and returns z.
-[GoMethodBody("Set")] internal static ж<Int> Setᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx) {
+internal static ж<Int> Set⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -119,7 +119,7 @@ public static ж<Int> NewInt(int64 x) {
 // the same underlying array.
 // Bits is intended to support implementation of missing low-level [Int]
 // functionality outside this package; it should be avoided otherwise.
-[GoMethodBody("Bits")] internal static slice<Word> Bitsᴍ(ref Int x) {
+internal static slice<Word> Bits⁔(/*this*/ ref Int x) {
     // This function is used in cryptographic operations. It must not leak
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
@@ -131,7 +131,7 @@ public static ж<Int> NewInt(int64 x) {
 // z. The result and abs share the same underlying array.
 // SetBits is intended to support implementation of missing low-level [Int]
 // functionality outside this package; it should be avoided otherwise.
-[GoMethodBody("SetBits")] internal static ж<Int> SetBitsᴍ(ж<Int> Ꮡz, slice<Word> abs) {
+internal static ж<Int> SetBits⁔(/*this*/ ж<Int> Ꮡz, slice<Word> abs) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     z.abs = ((nat)abs).norm();
@@ -140,7 +140,7 @@ public static ж<Int> NewInt(int64 x) {
 }
 
 // Abs sets z to |x| (the absolute value of x) and returns z.
-[GoMethodBody("Abs")] internal static ж<Int> Absᴍ(ж<Int> Ꮡz, ж<Int> x) {
+internal static ж<Int> Abs⁔(/*this*/ ж<Int> Ꮡz, ж<Int> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     Ꮡz.Set(x);
@@ -149,7 +149,7 @@ public static ж<Int> NewInt(int64 x) {
 }
 
 // Neg sets z to -x and returns z.
-[GoMethodBody("Neg")] internal static ж<Int> Negᴍ(ж<Int> Ꮡz, ж<Int> x) {
+internal static ж<Int> Neg⁔(/*this*/ ж<Int> Ꮡz, ж<Int> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     Ꮡz.Set(x);
@@ -158,7 +158,7 @@ public static ж<Int> NewInt(int64 x) {
 }
 
 // Add sets z to the sum x+y and returns z.
-[GoMethodBody("Add")] internal static ж<Int> Addᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
+internal static ж<Int> Add⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -183,7 +183,7 @@ public static ж<Int> NewInt(int64 x) {
 }
 
 // Sub sets z to the difference x-y and returns z.
-[GoMethodBody("Sub")] internal static ж<Int> Subᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
+internal static ж<Int> Sub⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -208,7 +208,7 @@ public static ж<Int> NewInt(int64 x) {
 }
 
 // Mul sets z to the product x*y and returns z.
-[GoMethodBody("Mul")] internal static ж<Int> Mulᴍ(ж<Int> Ꮡz, ж<Int> x, ж<Int> y) {
+internal static ж<Int> Mul⁔(/*this*/ ж<Int> Ꮡz, ж<Int> x, ж<Int> y) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     z.mul(nil, x, y);
@@ -218,7 +218,7 @@ public static ж<Int> NewInt(int64 x) {
 // mul is like Mul but takes an explicit stack to use, for internal use.
 // It does not return a *Int because doing so makes the stack-allocated Ints
 // used in natmul.go escape to the heap (even though the result is unused).
-[GoMethodBody("mul")] internal static void mulᴍ(ref Int z, ж<stack> stk, ж<Int> Ꮡx, ж<Int> Ꮡy) {
+internal static void mul⁔(/*this*/ ref Int z, ж<stack> stk, ж<Int> Ꮡx, ж<Int> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -238,7 +238,7 @@ public static ж<Int> NewInt(int64 x) {
 // MulRange sets z to the product of all integers
 // in the range [a, b] inclusively and returns z.
 // If a > b (empty range), the result is 1.
-[GoMethodBody("MulRange")] internal static ж<Int> MulRangeᴍ(ж<Int> Ꮡz, int64 a, int64 b) {
+internal static ж<Int> MulRange⁔(/*this*/ ж<Int> Ꮡz, int64 a, int64 b) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     switch (ᐧ) {
@@ -262,7 +262,7 @@ public static ж<Int> NewInt(int64 x) {
 }
 
 // Binomial sets z to the binomial coefficient C(n, k) and returns z.
-[GoMethodBody("Binomial")] internal static ж<Int> Binomialᴍ(ж<Int> Ꮡz, int64 n, int64 k) {
+internal static ж<Int> Binomial⁔(/*this*/ ж<Int> Ꮡz, int64 n, int64 k) {
     if (k > n) {
         return Ꮡz.SetInt64(0);
     }
@@ -309,7 +309,7 @@ public static ж<Int> NewInt(int64 x) {
 // Quo sets z to the quotient x/y for y != 0 and returns z.
 // If y == 0, a division-by-zero run-time panic occurs.
 // Quo implements truncated division (like Go); see [Int.QuoRem] for more details.
-[GoMethodBody("Quo")] internal static ж<Int> Quoᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
+internal static ж<Int> Quo⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -322,7 +322,7 @@ public static ж<Int> NewInt(int64 x) {
 // Rem sets z to the remainder x%y for y != 0 and returns z.
 // If y == 0, a division-by-zero run-time panic occurs.
 // Rem implements truncated modulus (like Go); see [Int.QuoRem] for more details.
-[GoMethodBody("Rem")] internal static ж<Int> Remᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
+internal static ж<Int> Rem⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -343,7 +343,7 @@ public static ж<Int> NewInt(int64 x) {
 //
 // (See Daan Leijen, “Division and Modulus for Computer Scientists”.)
 // See [Int.DivMod] for Euclidean division and modulus (unlike Go).
-[GoMethodBody("QuoRem")] internal static (ж<Int>, ж<Int>) QuoRemᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy, ж<Int> Ꮡr) {
+internal static (ж<Int>, ж<Int>) QuoRem⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy, ж<Int> Ꮡr) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -357,7 +357,7 @@ public static ж<Int> NewInt(int64 x) {
 // Div sets z to the quotient x/y for y != 0 and returns z.
 // If y == 0, a division-by-zero run-time panic occurs.
 // Div implements Euclidean division (unlike Go); see [Int.DivMod] for more details.
-[GoMethodBody("Div")] internal static ж<Int> Divᴍ(ж<Int> Ꮡz, ж<Int> x, ж<Int> Ꮡy) {
+internal static ж<Int> Div⁔(/*this*/ ж<Int> Ꮡz, ж<Int> x, ж<Int> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     var y_neg = y.neg; // z may be an alias for y
@@ -376,7 +376,7 @@ public static ж<Int> NewInt(int64 x) {
 // Mod sets z to the modulus x%y for y != 0 and returns z.
 // If y == 0, a division-by-zero run-time panic occurs.
 // Mod implements Euclidean modulus (unlike Go); see [Int.DivMod] for more details.
-[GoMethodBody("Mod")] internal static ж<Int> Modᴍ(ж<Int> Ꮡz, ж<Int> x, ж<Int> Ꮡy) {
+internal static ж<Int> Mod⁔(/*this*/ ж<Int> Ꮡz, ж<Int> x, ж<Int> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -410,7 +410,7 @@ public static ж<Int> NewInt(int64 x) {
 // Systems (TOPLAS), 14(2):127-144, New York, NY, USA, 4/1992.
 // ACM press.)
 // See [Int.QuoRem] for T-division and modulus (like Go).
-[GoMethodBody("DivMod")] internal static (ж<Int>, ж<Int>) DivModᴍ(ж<Int> Ꮡz, ж<Int> x, ж<Int> Ꮡy, ж<Int> Ꮡm) {
+internal static (ж<Int>, ж<Int>) DivMod⁔(/*this*/ ж<Int> Ꮡz, ж<Int> x, ж<Int> Ꮡy, ж<Int> Ꮡm) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
@@ -436,7 +436,7 @@ public static ж<Int> NewInt(int64 x) {
 //   - -1 if x < y;
 //   - 0 if x == y;
 //   - +1 if x > y.
-[GoMethodBody("Cmp")] internal static nint /*r*/ Cmpᴍ(ж<Int> Ꮡx, ж<Int> Ꮡy) {
+internal static nint /*r*/ Cmp⁔(/*this*/ ж<Int> Ꮡx, ж<Int> Ꮡy) {
     nint r = default;
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -472,7 +472,7 @@ public static ж<Int> NewInt(int64 x) {
 //   - -1 if |x| < |y|;
 //   - 0 if |x| == |y|;
 //   - +1 if |x| > |y|.
-[GoMethodBody("CmpAbs")] internal static nint CmpAbsᴍ(ref Int x, ж<Int> Ꮡy) {
+internal static nint CmpAbs⁔(/*this*/ ref Int x, ж<Int> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     return x.abs.cmp(y.abs);
@@ -504,7 +504,7 @@ internal static uint64 low64(nat x) {
 
 // Int64 returns the int64 representation of x.
 // If x cannot be represented in an int64, the result is undefined.
-[GoMethodBody("Int64")] internal static int64 Int64ᴍ(ref Int x) {
+internal static int64 Int64⁔(/*this*/ ref Int x) {
     var v = (int64)low64(x.abs);
     if (x.neg) {
         v = -v;
@@ -514,12 +514,12 @@ internal static uint64 low64(nat x) {
 
 // Uint64 returns the uint64 representation of x.
 // If x cannot be represented in a uint64, the result is undefined.
-[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(ref Int x) {
+internal static uint64 Uint64⁔(/*this*/ ref Int x) {
     return low64(x.abs);
 }
 
 // IsInt64 reports whether x can be represented as an int64.
-[GoMethodBody("IsInt64")] internal static bool IsInt64ᴍ(ref Int x) {
+internal static bool IsInt64⁔(/*this*/ ref Int x) {
     if (len(x.abs) <= (nint)(64 / _W)) {
         var w = (int64)low64(x.abs);
         return w >= 0 || x.neg && w == -w;
@@ -528,13 +528,13 @@ internal static uint64 low64(nat x) {
 }
 
 // IsUint64 reports whether x can be represented as a uint64.
-[GoMethodBody("IsUint64")] internal static bool IsUint64ᴍ(ref Int x) {
+internal static bool IsUint64⁔(/*this*/ ref Int x) {
     return !x.neg && len(x.abs) <= (nint)(64 / _W);
 }
 
 // Float64 returns the float64 value nearest x,
 // and an indication of any rounding that occurred.
-[GoMethodBody("Float64")] internal static (float64, Accuracy) Float64ᴍ(ж<Int> Ꮡx) {
+internal static (float64, Accuracy) Float64⁔(/*this*/ ж<Int> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     nint n = x.abs.bitLen(); // NB: still uses slow crypto impl!
@@ -576,13 +576,13 @@ internal static uint64 low64(nat x) {
 // Incorrect placement of underscores is reported as an error if there
 // are no other errors. If base != 0, underscores are not recognized
 // and act like any other character that is not a valid digit.
-[GoMethodBody("SetString")] internal static (ж<Int>, bool) SetStringᴍ(ж<Int> Ꮡz, @string s, nint @base) {
+internal static (ж<Int>, bool) SetString⁔(/*this*/ ж<Int> Ꮡz, @string s, nint @base) {
     return Ꮡz.setFromScanner(new strings_ReaderжByteScanner(strings.NewReader(s)), @base);
 }
 
 // setFromScanner implements SetString given an io.ByteScanner.
 // For documentation see comments of SetString.
-[GoMethodBody("setFromScanner")] internal static (ж<Int>, bool) setFromScannerᴍ(ж<Int> Ꮡz, io.ByteScanner r, nint @base) {
+internal static (ж<Int>, bool) setFromScanner⁔(/*this*/ ж<Int> Ꮡz, io.ByteScanner r, nint @base) {
     {
         var (_, _, err) = Ꮡz.scan(r, @base); if (err != nil) {
             return (default, false);
@@ -599,7 +599,7 @@ internal static uint64 low64(nat x) {
 
 // SetBytes interprets buf as the bytes of a big-endian unsigned
 // integer, sets z to that value, and returns z.
-[GoMethodBody("SetBytes")] internal static ж<Int> SetBytesᴍ(ж<Int> Ꮡz, slice<byte> buf) {
+internal static ж<Int> SetBytes⁔(/*this*/ ж<Int> Ꮡz, slice<byte> buf) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     z.abs = z.abs.setBytes(buf);
@@ -610,7 +610,7 @@ internal static uint64 low64(nat x) {
 // Bytes returns the absolute value of x as a big-endian byte slice.
 //
 // To use a fixed length slice, or a preallocated one, use [Int.FillBytes].
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref Int x) {
+internal static slice<byte> Bytes⁔(/*this*/ ref Int x) {
     // This function is used in cryptographic operations. It must not leak
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
@@ -622,7 +622,7 @@ internal static uint64 low64(nat x) {
 // big-endian byte slice, and returns buf.
 //
 // If the absolute value of x doesn't fit in buf, FillBytes will panic.
-[GoMethodBody("FillBytes")] internal static slice<byte> FillBytesᴍ(ref Int x, slice<byte> buf) {
+internal static slice<byte> FillBytes⁔(/*this*/ ref Int x, slice<byte> buf) {
     // Clear whole buffer.
     clear(buf);
     x.abs.bytes(buf);
@@ -631,7 +631,7 @@ internal static uint64 low64(nat x) {
 
 // BitLen returns the length of the absolute value of x in bits.
 // The bit length of 0 is 0.
-[GoMethodBody("BitLen")] internal static nint BitLenᴍ(ref Int x) {
+internal static nint BitLen⁔(/*this*/ ref Int x) {
     // This function is used in cryptographic operations. It must not leak
     // anything but the Int's sign and bit size through side-channels. Any
     // changes must be reviewed by a security expert.
@@ -640,7 +640,7 @@ internal static uint64 low64(nat x) {
 
 // TrailingZeroBits returns the number of consecutive least significant zero
 // bits of |x|.
-[GoMethodBody("TrailingZeroBits")] internal static nuint TrailingZeroBitsᴍ(ref Int x) {
+internal static nuint TrailingZeroBits⁔(/*this*/ ref Int x) {
     return x.abs.trailingZeroBits();
 }
 
@@ -650,15 +650,15 @@ internal static uint64 low64(nat x) {
 //
 // Modular exponentiation of inputs of a particular size is not a
 // cryptographically constant-time operation.
-[GoMethodBody("Exp")] internal static ж<Int> Expᴍ(ж<Int> Ꮡz, ж<Int> x, ж<Int> y, ж<Int> m) {
+internal static ж<Int> Exp⁔(/*this*/ ж<Int> Ꮡz, ж<Int> x, ж<Int> y, ж<Int> m) {
     return Ꮡz.exp(x, y, m, false);
 }
 
-[GoMethodBody("expSlow")] internal static ж<Int> expSlowᴍ(ж<Int> Ꮡz, ж<Int> x, ж<Int> y, ж<Int> m) {
+internal static ж<Int> expSlow⁔(/*this*/ ж<Int> Ꮡz, ж<Int> x, ж<Int> y, ж<Int> m) {
     return Ꮡz.exp(x, y, m, true);
 }
 
-[GoMethodBody("exp")] internal static ж<Int> expᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy, ж<Int> Ꮡm, bool slow) {
+internal static ж<Int> exp⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy, ж<Int> Ꮡm, bool slow) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -709,7 +709,7 @@ internal static uint64 low64(nat x) {
 // If a == 0 and b != 0, GCD sets z = |b|, x = 0, y = sign(b) * 1.
 //
 // If a != 0 and b == 0, GCD sets z = |a|, x = sign(a) * 1, y = 0.
-[GoMethodBody("GCD")] internal static ж<Int> GCDᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy, ж<Int> Ꮡa, ж<Int> Ꮡb) {
+internal static ж<Int> GCD⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy, ж<Int> Ꮡa, ж<Int> Ꮡb) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -878,7 +878,7 @@ internal static (ж<Int> nA, ж<Int> nB, ж<Int> nr, ж<Int> nUa, ж<Int> nUb) e
 // Design and Implementation of Symbolic Computation Systems, pp 45-58.
 // The cosequences are updated according to Algorithm 10.45 from
 // Cohen et al. "Handbook of Elliptic and Hyperelliptic Curve Cryptography" pp 192.
-[GoMethodBody("lehmerGCD")] internal static ж<Int> lehmerGCDᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy, ж<Int> Ꮡa, ж<Int> b) {
+internal static ж<Int> lehmerGCD⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy, ж<Int> Ꮡa, ж<Int> b) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
@@ -1004,7 +1004,7 @@ internal static (ж<Int> nA, ж<Int> nB, ж<Int> nr, ж<Int> nUa, ж<Int> nUb) e
 //
 // As this uses the [math/rand] package, it must not be used for
 // security-sensitive work. Use [crypto/rand.Int] instead.
-[GoMethodBody("Rand")] internal static ж<Int> Randᴍ(ж<Int> Ꮡz, ж<rand.Rand> rnd, ж<Int> Ꮡn) {
+internal static ж<Int> Rand⁔(/*this*/ ж<Int> Ꮡz, ж<rand.Rand> rnd, ж<Int> Ꮡn) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var n = ref Ꮡn.DerefOrNull();
 
@@ -1023,7 +1023,7 @@ internal static (ж<Int> nA, ж<Int> nB, ж<Int> nr, ж<Int> nUa, ж<Int> nUb) e
 // and returns z. If g and n are not relatively prime, g has no multiplicative
 // inverse in the ring ℤ/nℤ.  In this case, z is unchanged and the return value
 // is nil. If n == 0, a division-by-zero run-time panic occurs.
-[GoMethodBody("ModInverse")] internal static ж<Int> ModInverseᴍ(ж<Int> Ꮡz, ж<Int> Ꮡg, ж<Int> Ꮡn) {
+internal static ж<Int> ModInverse⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡg, ж<Int> Ꮡn) {
     ref var g = ref Ꮡg.DerefOrNull();
     ref var n = ref Ꮡn.DerefOrNull();
 
@@ -1057,7 +1057,7 @@ internal static (ж<Int> nA, ж<Int> nB, ж<Int> nr, ж<Int> nUa, ж<Int> nUb) e
 
 } partial class big_package {
 
-[GoMethodBody("modInverse")] internal static nat modInverseᴍ(nat z, nat g, nat n) {
+internal static nat modInverse⁔(/*this*/ nat z, nat g, nat n) {
     // TODO(rsc): ModInverse should be implemented in terms of this function.
     return (Ꮡ(new Int(abs: z))).ModInverse(Ꮡ(new Int(abs: g)), Ꮡ(new Int(abs: n))).abs;
 }
@@ -1133,7 +1133,7 @@ public static nint Jacobi(ж<Int> x, ж<Int> Ꮡy) {
 //
 // to calculate the square root of any quadratic residue mod p quickly for 3
 // mod 4 primes.
-[GoMethodBody("modSqrt3Mod4Prime")] internal static ж<Int> modSqrt3Mod4Primeᴍ(ж<Int> Ꮡz, ж<Int> x, ж<Int> p) {
+internal static ж<Int> modSqrt3Mod4Prime⁔(/*this*/ ж<Int> Ꮡz, ж<Int> x, ж<Int> p) {
     var e = @new<Int>().Add(p, intOne); // e = p + 1
     e.Rsh(e, 2);                        // e = (p + 1) / 4
     Ꮡz.Exp(x, e, p);                    // z = x^e mod p
@@ -1148,7 +1148,7 @@ public static nint Jacobi(ж<Int> x, ж<Int> Ꮡy) {
 //
 // to calculate the square root of any quadratic residue mod p quickly for 5
 // mod 8 primes.
-[GoMethodBody("modSqrt5Mod8Prime")] internal static ж<Int> modSqrt5Mod8Primeᴍ(ж<Int> Ꮡz, ж<Int> x, ж<Int> p) {
+internal static ж<Int> modSqrt5Mod8Prime⁔(/*this*/ ж<Int> Ꮡz, ж<Int> x, ж<Int> p) {
     // p == 5 mod 8 implies p = e*8 + 5
     // e is the quotient and 5 the remainder on division by 8
     var e = @new<Int>().Rsh(p, 3);  // e = (p - 5) / 8
@@ -1168,7 +1168,7 @@ public static nint Jacobi(ж<Int> x, ж<Int> Ꮡy) {
 
 // modSqrtTonelliShanks uses the Tonelli-Shanks algorithm to find the square
 // root of a quadratic residue modulo any prime.
-[GoMethodBody("modSqrtTonelliShanks")] internal static ж<Int> modSqrtTonelliShanksᴍ(ж<Int> Ꮡz, ж<Int> x, ж<Int> p) {
+internal static ж<Int> modSqrtTonelliShanks⁔(/*this*/ ж<Int> Ꮡz, ж<Int> x, ж<Int> p) {
     // Break p-1 into s*2^e such that s is odd.
     ref var s = ref heap(new Int(), out var Ꮡs);
     Ꮡs.Sub(p, intOne);
@@ -1222,7 +1222,7 @@ public static nint Jacobi(ж<Int> x, ж<Int> Ꮡy) {
 // returns z. The modulus p must be an odd prime. If x is not a square mod p,
 // ModSqrt leaves z unchanged and returns nil. This function panics if p is
 // not an odd integer, its behavior is undefined if p is odd but not prime.
-[GoMethodBody("ModSqrt")] internal static ж<Int> ModSqrtᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡp) {
+internal static ж<Int> ModSqrt⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡp) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -1257,7 +1257,7 @@ public static nint Jacobi(ж<Int> x, ж<Int> Ꮡy) {
 }
 
 // Lsh sets z = x << n and returns z.
-[GoMethodBody("Lsh")] internal static ж<Int> Lshᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, nuint n) {
+internal static ж<Int> Lsh⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, nuint n) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -1267,7 +1267,7 @@ public static nint Jacobi(ж<Int> x, ж<Int> Ꮡy) {
 }
 
 // Rsh sets z = x >> n and returns z.
-[GoMethodBody("Rsh")] internal static ж<Int> Rshᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, nuint n) {
+internal static ж<Int> Rsh⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, nuint n) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -1287,7 +1287,7 @@ public static nint Jacobi(ж<Int> x, ж<Int> Ꮡy) {
 
 // Bit returns the value of the i'th bit of x. That is, it
 // returns (x>>i)&1. The bit index i must be >= 0.
-[GoMethodBody("Bit")] internal static nuint Bitᴍ(ref Int x, nint i) {
+internal static nuint Bit⁔(/*this*/ ref Int x, nint i) {
     if (i == 0) {
         // optimization for common case: odd/even test of x
         if (len(x.abs) > 0) {
@@ -1311,7 +1311,7 @@ public static nint Jacobi(ж<Int> x, ж<Int> Ꮡy) {
 //   - if b is 1, SetBit sets z = x | (1 << i);
 //   - if b is 0, SetBit sets z = x &^ (1 << i);
 //   - if b is not 0 or 1, SetBit will panic.
-[GoMethodBody("SetBit")] internal static ж<Int> SetBitᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, nint i, nuint b) {
+internal static ж<Int> SetBit⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, nint i, nuint b) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -1331,7 +1331,7 @@ public static nint Jacobi(ж<Int> x, ж<Int> Ꮡy) {
 }
 
 // And sets z = x & y and returns z.
-[GoMethodBody("And")] internal static ж<Int> Andᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
+internal static ж<Int> And⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -1365,7 +1365,7 @@ public static nint Jacobi(ж<Int> x, ж<Int> Ꮡy) {
 }
 
 // AndNot sets z = x &^ y and returns z.
-[GoMethodBody("AndNot")] internal static ж<Int> AndNotᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
+internal static ж<Int> AndNot⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -1402,7 +1402,7 @@ public static nint Jacobi(ж<Int> x, ж<Int> Ꮡy) {
 }
 
 // Or sets z = x | y and returns z.
-[GoMethodBody("Or")] internal static ж<Int> Orᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
+internal static ж<Int> Or⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -1436,7 +1436,7 @@ public static nint Jacobi(ж<Int> x, ж<Int> Ꮡy) {
 }
 
 // Xor sets z = x ^ y and returns z.
-[GoMethodBody("Xor")] internal static ж<Int> Xorᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
+internal static ж<Int> Xor⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx, ж<Int> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -1470,7 +1470,7 @@ public static nint Jacobi(ж<Int> x, ж<Int> Ꮡy) {
 }
 
 // Not sets z = ^x and returns z.
-[GoMethodBody("Not")] internal static ж<Int> Notᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx) {
+internal static ж<Int> Not⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -1489,7 +1489,7 @@ public static nint Jacobi(ж<Int> x, ж<Int> Ꮡy) {
 
 // Sqrt sets z to ⌊√x⌋, the largest integer such that z² ≤ x, and returns z.
 // It panics if x is negative.
-[GoMethodBody("Sqrt")] internal static ж<Int> Sqrtᴍ(ж<Int> Ꮡz, ж<Int> Ꮡx) {
+internal static ж<Int> Sqrt⁔(/*this*/ ж<Int> Ꮡz, ж<Int> Ꮡx) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 

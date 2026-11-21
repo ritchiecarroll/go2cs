@@ -37,7 +37,7 @@ partial class types_package {
 //
 // If an error (other than a version error) occurs in any case, it is reported
 // and x.mode is set to invalid.
-[GoMethodBody("funcInst")] internal static slice<Type> funcInstᴍ(ж<Checker> Ꮡcheck, ж<target> ᏑT, token.Pos pos, ж<operand> Ꮡx, ж<indexedExpr> Ꮡix, bool infer) {
+internal static slice<Type> funcInst⁔(/*this*/ ж<Checker> Ꮡcheck, ж<target> ᏑT, token.Pos pos, ж<operand> Ꮡx, ж<indexedExpr> Ꮡix, bool infer) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var T = ref ᏑT.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
@@ -142,12 +142,12 @@ partial class types_package {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string instantiatingSignatureSˢᴍChecker => ref instantiatingSignatureSˢᵇᴍChecker;
-private static readonly @string instantiatingSignatureSˢᵇᴍChecker = "-- instantiating signature %s with %s"u8;
-internal static ref readonly @string sUnderSˢᴍChecker => ref sUnderSˢᵇᴍChecker;
-private static readonly @string sUnderSˢᵇᴍChecker = "=> %s (under = %s)"u8;
+internal static ref readonly @string instantiatingSignatureSˢ⁔Checker => ref instantiatingSignatureSˢᵇ⁔Checker;
+private static readonly @string instantiatingSignatureSˢᵇ⁔Checker = "-- instantiating signature %s with %s"u8;
+internal static ref readonly @string sUnderSˢ⁔Checker => ref sUnderSˢᵇ⁔Checker;
+private static readonly @string sUnderSˢᵇ⁔Checker = "=> %s (under = %s)"u8;
 
-[GoMethodBody("instantiateSignature")] internal static ж<Signature> /*res*/ instantiateSignatureᴍ(ж<Checker> Ꮡcheck, token.Pos pos, ast.Expr expr, ж<Signature> Ꮡtyp, slice<Type> targs, slice<ast.Expr> xlist) {
+internal static ж<Signature> /*res*/ instantiateSignature⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, ast.Expr expr, ж<Signature> Ꮡtyp, slice<Type> targs, slice<ast.Expr> xlist) {
     ж<Signature> res = default;
     GoFrame ᒐ = default;
     try {
@@ -158,11 +158,11 @@ private static readonly @string sUnderSˢᵇᴍChecker = "=> %s (under = %s)"u8;
         assert(len(targs) == typ.TypeParams().Len());
 
         if (check.conf._Trace) {
-            Ꮡcheck.trace(pos, instantiatingSignatureSˢᴍChecker, Ꮡtyp.OrTypedNil(), targs);
+            Ꮡcheck.trace(pos, instantiatingSignatureSˢ⁔Checker, Ꮡtyp.OrTypedNil(), targs);
             check.indent++;
             defer(() => {
                 Ꮡcheck.Value.indent--;
-                Ꮡcheck.trace(pos, sUnderSˢᴍChecker, res.OrTypedNil(), res.Underlying());
+                Ꮡcheck.trace(pos, sUnderSˢ⁔Checker, res.OrTypedNil(), res.Underlying());
             }, ref ᒐ);
         }
 
@@ -199,7 +199,7 @@ private static readonly @string sUnderSˢᵇᴍChecker = "=> %s (under = %s)"u8;
     return res;
 }
 
-[GoMethodBody("callExpr")] internal static exprKind callExprᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall) {
+internal static exprKind callExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.CallExpr> Ꮡcall) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var call = ref Ꮡcall.DerefOrNull();
@@ -386,7 +386,7 @@ private static readonly @string sUnderSˢᵇᴍChecker = "=> %s (under = %s)"u8;
 
 // exprList evaluates a list of expressions and returns the corresponding operands.
 // A single-element expression list may evaluate to multiple operands.
-[GoMethodBody("exprList")] internal static slice<ж<operand>> /*xlist*/ exprListᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> elist) {
+internal static slice<ж<operand>> /*xlist*/ exprList⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ast.Expr> elist) {
     slice<ж<operand>> xlist = default;
 
     nint n = len(elist); if (n == 1) {
@@ -410,7 +410,7 @@ private static readonly @string sUnderSˢᵇᴍChecker = "=> %s (under = %s)"u8;
 // elements do not exist (targsList is nil) or the elements are nil.
 // For each partially instantiated generic function operand, the corresponding
 // targsList elements are the operand's partial type arguments.
-[GoMethodBody("genericExprList")] internal static (slice<ж<operand>> resList, slice<slice<Type>> targsList) genericExprListᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> elist) {
+internal static (slice<ж<operand>> resList, slice<slice<Type>> targsList) genericExprList⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ast.Expr> elist) {
     slice<ж<operand>> resList = default;
     slice<slice<Type>> targsList = default;
     GoFrame ᒐ = default;
@@ -515,7 +515,7 @@ private static readonly @string sUnderSˢᵇᴍChecker = "=> %s (under = %s)"u8;
 // functions are instantiated as necessary.
 // The result signature is the (possibly adjusted and instantiated) function signature.
 // If an error occurred, the result signature is the incoming sig.
-[GoMethodBody("arguments")] internal static ж<Signature> /*rsig*/ argumentsᴍ(ж<Checker> Ꮡcheck, ж<ast.CallExpr> Ꮡcall, ж<Signature> Ꮡsig, slice<Type> targs, slice<ast.Expr> xlist, slice<ж<operand>> args, slice<slice<Type>> atargs) {
+internal static ж<Signature> /*rsig*/ arguments⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ast.CallExpr> Ꮡcall, ж<Signature> Ꮡsig, slice<Type> targs, slice<ast.Expr> xlist, slice<ж<operand>> args, slice<slice<Type>> atargs) {
     ж<Signature> rsig = default;
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var call = ref Ꮡcall.DerefOrNull();
@@ -581,10 +581,10 @@ private static readonly @string sUnderSˢᵇᴍChecker = "=> %s (under = %s)"u8;
     // check argument count
     if (nargs != npars) {
         positioner at = new ast_CallExprжpositioner(Ꮡcall);
-        @string qualifier = notEnoughˢᴍChecker;
+        @string qualifier = notEnoughˢ⁔Checker;
         if (nargs > npars) {
             at = new ast_Exprᴠpositioner(args[npars].expr); // report at first extra argument
-            qualifier = tooManyˢᴍChecker;
+            qualifier = tooManyˢ⁔Checker;
         } else {
             at = ((atPos)call.Rparen); // report at closing )
         }
@@ -743,20 +743,20 @@ internal static array<@string> cgoPrefixes = array<@string>([
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cMallocˢᴍChecker => ref cMallocˢᵇᴍChecker;
-private static readonly @string cMallocˢᵇᴍChecker = "_CMalloc"u8;
-internal static ref readonly @string cvarˢᴍChecker => ref cvarˢᵇᴍChecker;
-private static readonly @string cvarˢᵇᴍChecker = "_Cvar_"u8;
-internal static ref readonly @string cmacroˢᴍChecker => ref cmacroˢᵇᴍChecker;
-private static readonly @string cmacroˢᵇᴍChecker = "_Cmacro_"u8;
-internal static ref readonly @string vUnexpectedObjectVˢᴍChecker => ref vUnexpectedObjectVˢᵇᴍChecker;
-private static readonly @string vUnexpectedObjectVˢᵇᴍChecker = "%v: unexpected object %v"u8;
-internal static ref readonly @string illegalCycleInMethodˢᴍChecker => ref illegalCycleInMethodˢᵇᴍChecker;
-private static readonly @string illegalCycleInMethodˢᵇᴍChecker = "illegal cycle in method declaration"u8;
-internal static ref readonly @string vSVSˢᴍChecker => ref vSVSˢᵇᴍChecker;
-private static readonly @string vSVSˢᵇᴍChecker = "%v: (%s).%v -> %s"u8;
+internal static ref readonly @string cMallocˢ⁔Checker => ref cMallocˢᵇ⁔Checker;
+private static readonly @string cMallocˢᵇ⁔Checker = "_CMalloc"u8;
+internal static ref readonly @string cvarˢ⁔Checker => ref cvarˢᵇ⁔Checker;
+private static readonly @string cvarˢᵇ⁔Checker = "_Cvar_"u8;
+internal static ref readonly @string cmacroˢ⁔Checker => ref cmacroˢᵇ⁔Checker;
+private static readonly @string cmacroˢᵇ⁔Checker = "_Cmacro_"u8;
+internal static ref readonly @string vUnexpectedObjectVˢ⁔Checker => ref vUnexpectedObjectVˢᵇ⁔Checker;
+private static readonly @string vUnexpectedObjectVˢᵇ⁔Checker = "%v: unexpected object %v"u8;
+internal static ref readonly @string illegalCycleInMethodˢ⁔Checker => ref illegalCycleInMethodˢᵇ⁔Checker;
+private static readonly @string illegalCycleInMethodˢᵇ⁔Checker = "illegal cycle in method declaration"u8;
+internal static ref readonly @string vSVSˢ⁔Checker => ref vSVSˢᵇ⁔Checker;
+private static readonly @string vSVSˢᵇ⁔Checker = "%v: (%s).%v -> %s"u8;
 
-[GoMethodBody("selector")] internal static void selectorᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.SelectorExpr> Ꮡe, bool wantType) {
+internal static void selector⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.SelectorExpr> Ꮡe, bool wantType) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -786,7 +786,7 @@ private static readonly @string vSVSˢᵇᴍChecker = "%v: (%s).%v -> %s"u8;
                 // rewritten to _CMalloc and does not
                 // support two-result calls.
                 if (sel == "malloc"u8) {
-                    sel = cMallocˢᴍChecker;
+                    sel = cMallocˢ⁔Checker;
                 } else {
                     funcMode = cgofunc;
                 }
@@ -845,7 +845,7 @@ private static readonly @string vSVSˢᵇᴍChecker = "%v: (%s).%v -> %s"u8;
             case ж<Var> expΔ1: {
                 x.mode = variable;
                 x.typ = expΔ1.typ;
-                if (pkg.cgo && strings.HasPrefix(expΔ1.name, cvarˢᴍChecker)) {
+                if (pkg.cgo && strings.HasPrefix(expΔ1.name, cvarˢ⁔Checker)) {
                     x.typ = x.typ._<ж<Pointer>>().@base;
                 }
                 break;
@@ -853,7 +853,7 @@ private static readonly @string vSVSˢᵇᴍChecker = "%v: (%s).%v -> %s"u8;
             case ж<Func> expΔ1: {
                 x.mode = funcMode;
                 x.typ = expΔ1.typ;
-                if (pkg.cgo && strings.HasPrefix(expΔ1.name, cmacroˢᴍChecker)) {
+                if (pkg.cgo && strings.HasPrefix(expΔ1.name, cmacroˢ⁔Checker)) {
                     x.mode = value;
                     x.typ = x.typ._<ж<Signature>>().results.vars[0].typ;
                 }
@@ -867,7 +867,7 @@ private static readonly @string vSVSˢᵇᴍChecker = "%v: (%s).%v -> %s"u8;
             }
             default: {
                 var expΔ1 = exp;
-                Ꮡcheck.dump(vUnexpectedObjectVˢᴍChecker, e.Sel.Pos(), expΔ1);
+                Ꮡcheck.dump(vUnexpectedObjectVˢ⁔Checker, e.Sel.Pos(), expΔ1);
                 throw panic("unreachable");
                 break;
             }}
@@ -960,7 +960,7 @@ private static readonly @string vSVSˢᵇᴍChecker = "%v: (%s).%v -> %s"u8;
 
         var sig = m.typ._<ж<Signature>>();
         if (sig.recv == nil) {
-            Ꮡcheck.error(new ast_SelectorExprжpositioner(Ꮡe), InvalidDeclCycle, illegalCycleInMethodˢᴍChecker);
+            Ꮡcheck.error(new ast_SelectorExprжpositioner(Ꮡe), InvalidDeclCycle, illegalCycleInMethodˢ⁔Checker);
             goto Error;
         }
 
@@ -1046,7 +1046,7 @@ private static readonly @string vSVSˢᵇᴍChecker = "%v: (%s).%v -> %s"u8;
                 // lookup.
                 var mset = NewMethodSet(typ);
                 var m = mset.Lookup(check.pkg, sel); if (m == nil || !AreEqual(m.obj, objΔ2)) {
-                    Ꮡcheck.dump(vSVSˢᴍChecker, e.Pos(), typ, objΔ2.name, m.OrTypedNil());
+                    Ꮡcheck.dump(vSVSˢ⁔Checker, e.Pos(), typ, objΔ2.name, m.OrTypedNil());
                     Ꮡcheck.dump("%s\n", mset.OrTypedNil());
                     // Caution: MethodSets are supposed to be used externally
                     // only (after all interface types were completed). It's
@@ -1089,7 +1089,7 @@ Error:
 // (and variables are "used") in the presence of
 // other errors. Arguments may be nil.
 // Reports if all arguments evaluated without error.
-[GoMethodBody("use")] internal static bool useᴍ(ж<Checker> Ꮡcheck, params ꓸꓸꓸastꓸExpr argsʗp) {
+internal static bool use⁔(/*this*/ ж<Checker> Ꮡcheck, params ꓸꓸꓸastꓸExpr argsʗp) {
     var args = argsʗp.slice();
 
     return Ꮡcheck.useN(args, false);
@@ -1098,13 +1098,13 @@ Error:
 // useLHS is like use, but doesn't "use" top-level identifiers.
 // It should be called instead of use if the arguments are
 // expressions on the lhs of an assignment.
-[GoMethodBody("useLHS")] internal static bool useLHSᴍ(ж<Checker> Ꮡcheck, params ꓸꓸꓸastꓸExpr argsʗp) {
+internal static bool useLHS⁔(/*this*/ ж<Checker> Ꮡcheck, params ꓸꓸꓸastꓸExpr argsʗp) {
     var args = argsʗp.slice();
 
     return Ꮡcheck.useN(args, true);
 }
 
-[GoMethodBody("useN")] internal static bool useNᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> args, bool lhs) {
+internal static bool useN⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ast.Expr> args, bool lhs) {
     var ok = true;
     foreach (var (_, e) in range(args)) {
         if (!Ꮡcheck.use1(e, lhs)) {
@@ -1114,7 +1114,7 @@ Error:
     return ok;
 }
 
-[GoMethodBody("use1")] internal static bool use1ᴍ(ж<Checker> Ꮡcheck, ast.Expr e, bool lhs) {
+internal static bool use1⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e, bool lhs) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     ref var x = ref heap(new operand(), out var Ꮡx);

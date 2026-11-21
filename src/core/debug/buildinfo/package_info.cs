@@ -91,7 +91,7 @@ using static go.debug.buildinfo_package;
 
 namespace go.debug;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using io = io_package;
 using @internal;
 using encoding;
@@ -99,7 +99,10 @@ using go.debug;
 using go.io;
 using runtime;
 using static buildinfo_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("buildinfo")]
 public static partial class buildinfo_package
@@ -150,33 +153,33 @@ public static partial class buildinfo_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(buildinfo_package.elfExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛelfExe;
-[GoMethodHost(typeof(buildinfo_package.machoExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛmachoExe;
-[GoMethodHost(typeof(buildinfo_package.peExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛpeExe;
-[GoMethodHost(typeof(buildinfo_package.plan9objExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛplan9objExe;
-[GoMethodHost(typeof(buildinfo_package.xcoffExe)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class buildinfoᴛxcoffExe;
+[GoMethodHost(typeof(buildinfo_package.elfExe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class buildinfoᴛelfExe;
+[GoMethodHost(typeof(buildinfo_package.machoExe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class buildinfoᴛmachoExe;
+[GoMethodHost(typeof(buildinfo_package.peExe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class buildinfoᴛpeExe;
+[GoMethodHost(typeof(buildinfo_package.plan9objExe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class buildinfoᴛplan9objExe;
+[GoMethodHost(typeof(buildinfo_package.xcoffExe)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class buildinfoᴛxcoffExe;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class buildinfoᴛelfExe {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref elfExe x, uint64 addr) => buildinfo_package.DataReaderᴍ(ref x, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref elfExe x) => buildinfo_package.DataStartᴍ(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref elfExe x, uint64 addr) => buildinfo_package.DataReader⁔(ref x, addr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref elfExe x) => buildinfo_package.DataStart⁔(ref x);
 }
 partial class buildinfoᴛpeExe {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 imageBase(this ref peExe x) => buildinfo_package.imageBaseᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref peExe x, uint64 addr) => buildinfo_package.DataReaderᴍ(ref x, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref peExe x) => buildinfo_package.DataStartᴍ(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 imageBase(this ref peExe x) => buildinfo_package.imageBase⁔(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref peExe x, uint64 addr) => buildinfo_package.DataReader⁔(ref x, addr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref peExe x) => buildinfo_package.DataStart⁔(ref x);
 }
 partial class buildinfoᴛmachoExe {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref machoExe x, uint64 addr) => buildinfo_package.DataReaderᴍ(ref x, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref machoExe x) => buildinfo_package.DataStartᴍ(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref machoExe x, uint64 addr) => buildinfo_package.DataReader⁔(ref x, addr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref machoExe x) => buildinfo_package.DataStart⁔(ref x);
 }
 partial class buildinfoᴛxcoffExe {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref xcoffExe x, uint64 addr) => buildinfo_package.DataReaderᴍ(ref x, addr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref xcoffExe x) => buildinfo_package.DataStartᴍ(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref xcoffExe x, uint64 addr) => buildinfo_package.DataReader⁔(ref x, addr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref xcoffExe x) => buildinfo_package.DataStart⁔(ref x);
 }
 partial class buildinfoᴛplan9objExe {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref plan9objExe x) => buildinfo_package.DataStartᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref plan9objExe x, uint64 addr) => buildinfo_package.DataReaderᴍ(ref x, addr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64, uint64) DataStart(this ref plan9objExe x) => buildinfo_package.DataStart⁔(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (io.ReaderAt, error) DataReader(this ref plan9objExe x, uint64 addr) => buildinfo_package.DataReader⁔(ref x, addr);
 }
 // </GlyphForwarders>

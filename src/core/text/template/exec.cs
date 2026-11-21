@@ -52,23 +52,23 @@ partial struct variable {
 } partial class template_package {
 
 // push pushes a new variable on the stack.
-[GoMethodBody("push")] internal static void pushᴍ(ref state s, @string name, reflect.Value value) {
+internal static void push⁔(/*this*/ ref state s, @string name, reflect.Value value) {
     s.vars = append(s.vars, new variable(name, value));
 }
 
 // mark returns the length of the variable stack.
-[GoMethodBody("mark")] internal static nint markᴍ(ref state s) {
+internal static nint mark⁔(/*this*/ ref state s) {
     return len(s.vars);
 }
 
 // pop pops the variable stack up to the mark.
-[GoMethodBody("pop")] internal static void popᴍ(ref state s, nint mark) {
+internal static void pop⁔(/*this*/ ref state s, nint mark) {
     s.vars = s.vars.slice(0, mark);
 }
 
 // setVar overwrites the last declared variable with the given name.
 // Used by variable assignments.
-[GoMethodBody("setVar")] internal static void setVarᴍ(ref state s, @string name, reflect.Value value) {
+internal static void setVar⁔(/*this*/ ref state s, @string name, reflect.Value value) {
     for (nint i = s.mark() - 1; i >= 0; i--) {
         if (s.vars[i].name == name) {
             s.vars[i].value = value;
@@ -79,12 +79,12 @@ partial struct variable {
 }
 
 // setTopVar overwrites the top-nth variable on the stack. Used by range iterations.
-[GoMethodBody("setTopVar")] internal static void setTopVarᴍ(ref state s, nint n, reflect.Value value) {
+internal static void setTopVar⁔(/*this*/ ref state s, nint n, reflect.Value value) {
     s.vars[len(s.vars) - n].value = value;
 }
 
 // varValue returns the value of the named variable.
-[GoMethodBody("varValue")] internal static reflect.Value varValueᴍ(ref state s, @string name) {
+internal static reflect.Value varValue⁔(/*this*/ ref state s, @string name) {
     for (nint i = s.mark() - 1; i >= 0; i--) {
         if (s.vars[i].name == name) {
             return s.vars[i].value;
@@ -112,7 +112,7 @@ internal static bool isMissing(reflect.Value v) {
 } partial class template_package {
 
 // at marks the state to be on node n, for error reporting.
-[GoMethodBody("at")] internal static void atᴍ(ref state s, parse.Node node) {
+internal static void at⁔(/*this*/ ref state s, parse.Node node) {
     s.node = node;
 }
 
@@ -138,18 +138,18 @@ partial struct ExecError {
 
 } partial class template_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ExecError e) {
+internal static @string Error⁔(/*this*/ ExecError e) {
     return e.Err.Error();
 }
 
-[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ExecError e) {
+internal static error Unwrap⁔(/*this*/ ExecError e) {
     return e.Err;
 }
 
 } partial class template_package {
 
 // errorf records an ExecError and terminates processing.
-[GoMethodBody("errorf")] internal static void errorfᴍ(ref state s, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf⁔(/*this*/ ref state s, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     @string name = doublePercent(s.tmpl.Name());
@@ -177,7 +177,7 @@ partial struct writeError {
 
 } partial class template_package {
 
-[GoMethodBody("writeError")] internal static void writeErrorᴍ(ref state s, error err) {
+internal static void writeError⁔(/*this*/ ref state s, error err) {
     throw panic(new writeError(
         Err: err
     ));
@@ -227,7 +227,7 @@ internal static void errRecover(ref error errp) {
 // the output writer.
 // A template may be executed safely in parallel, although if parallel
 // executions share a Writer the output may be interleaved.
-[GoMethodBody("ExecuteTemplate")] internal static error ExecuteTemplateᴍ(ж<Template> Ꮡt, io.Writer wr, @string name, any data) {
+internal static error ExecuteTemplate⁔(/*this*/ ж<Template> Ꮡt, io.Writer wr, @string name, any data) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var tmpl = Ꮡt.Lookup(name);
@@ -247,11 +247,11 @@ internal static void errRecover(ref error errp) {
 //
 // If data is a [reflect.Value], the template applies to the concrete
 // value that the reflect.Value holds, as in [fmt.Print].
-[GoMethodBody("Execute")] internal static error Executeᴍ(ж<Template> Ꮡt, io.Writer wr, any data) {
+internal static error Execute⁔(/*this*/ ж<Template> Ꮡt, io.Writer wr, any data) {
     return Ꮡt.execute(wr, data);
 }
 
-[GoMethodBody("execute")] internal static error /*err*/ executeᴍ(ж<Template> Ꮡt, io.Writer wr, any data) {
+internal static error /*err*/ execute⁔(/*this*/ ж<Template> Ꮡt, io.Writer wr, any data) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -279,14 +279,14 @@ internal static void errRecover(ref error errp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string definedTemplatesAreˢᴍTemplate => ref definedTemplatesAreˢᵇᴍTemplate;
-private static readonly @string definedTemplatesAreˢᵇᴍTemplate = "; defined templates are: "u8;
+internal static ref readonly @string definedTemplatesAreˢ⁔Template => ref definedTemplatesAreˢᵇ⁔Template;
+private static readonly @string definedTemplatesAreˢᵇ⁔Template = "; defined templates are: "u8;
 
 // DefinedTemplates returns a string listing the defined templates,
 // prefixed by the string "; defined templates are: ". If there are none,
 // it returns the empty string. For generating an error message here
 // and in [html/template].
-[GoMethodBody("DefinedTemplates")] internal static @string DefinedTemplatesᴍ(ж<Template> Ꮡt) {
+internal static @string DefinedTemplates⁔(/*this*/ ж<Template> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -303,7 +303,7 @@ private static readonly @string definedTemplatesAreˢᵇᴍTemplate = "; defined
                 continue;
             }
             if (b.Len() == 0) {
-                Ꮡb.WriteString(definedTemplatesAreˢᴍTemplate);
+                Ꮡb.WriteString(definedTemplatesAreˢ⁔Template);
             } else {
                 Ꮡb.WriteString(", ");
             }
@@ -325,7 +325,7 @@ internal static error walkContinue = errors.New("continue");
 
 // Walk functions step through the major pieces of the template structure,
 // generating output as they go.
-[GoMethodBody("walk")] internal static void walkᴍ(ж<state> Ꮡs, reflect.Value dot, parse.Node node) {
+internal static void walk⁔(/*this*/ ж<state> Ꮡs, reflect.Value dot, parse.Node node) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.at(node);
@@ -387,7 +387,7 @@ internal static error walkContinue = errors.New("continue");
 
 // walkIfOrWith walks an 'if' or 'with' node. The two control structures
 // are identical in behavior except that 'with' sets dot.
-[GoMethodBody("walkIfOrWith")] internal static void walkIfOrWithᴍ(ж<state> Ꮡs, parse.NodeType typ, reflect.Value dot, ж<parse.PipeNode> pipe, ж<parse.ListNode> list, ж<parse.ListNode> elseList) {
+internal static void walkIfOrWith⁔(/*this*/ ж<state> Ꮡs, parse.NodeType typ, reflect.Value dot, ж<parse.PipeNode> pipe, ж<parse.ListNode> list, ж<parse.ListNode> elseList) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -470,7 +470,7 @@ internal static (bool truth, bool ok) isTrue(reflect.Value val) {
 
 } partial class template_package {
 
-[GoMethodBody("walkRange")] internal static void walkRangeᴍ(ж<state> Ꮡs, reflect.Value dot, ж<parse.RangeNode> Ꮡr) {
+internal static void walkRange⁔(/*this*/ ж<state> Ꮡs, reflect.Value dot, ж<parse.RangeNode> Ꮡr) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -647,7 +647,7 @@ internal static (bool truth, bool ok) isTrue(reflect.Value val) {
     finally { ᒐ.Run(); }
 }
 
-[GoMethodBody("walkTemplate")] internal static void walkTemplateᴍ(ref state s, reflect.Value dot, ж<parse.TemplateNode> Ꮡt) {
+internal static void walkTemplate⁔(/*this*/ ref state s, reflect.Value dot, ж<parse.TemplateNode> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     s.at(new parse.TemplateNodeжNode(Ꮡt));
@@ -676,7 +676,7 @@ internal static (bool truth, bool ok) isTrue(reflect.Value val) {
 // pipeline has a variable declaration, the variable will be pushed on the
 // stack. Callers should therefore pop the stack after they are finished
 // executing commands depending on the pipeline value.
-[GoMethodBody("evalPipeline")] internal static reflect.Value /*value*/ evalPipelineᴍ(ref state s, reflect.Value dot, ж<parse.PipeNode> Ꮡpipe) {
+internal static reflect.Value /*value*/ evalPipeline⁔(/*this*/ ref state s, reflect.Value dot, ж<parse.PipeNode> Ꮡpipe) {
     reflect.Value value = new(nil);
     ref var pipe = ref Ꮡpipe.DerefOrNull();
 
@@ -702,13 +702,13 @@ internal static (bool truth, bool ok) isTrue(reflect.Value val) {
     return value;
 }
 
-[GoMethodBody("notAFunction")] internal static void notAFunctionᴍ(ref state s, slice<parse.Node> args, reflect.Value final) {
+internal static void notAFunction⁔(/*this*/ ref state s, slice<parse.Node> args, reflect.Value final) {
     if (len(args) > 1 || !isMissing(final)) {
         s.errorf("can't give argument to non-function %s", args[0]);
     }
 }
 
-[GoMethodBody("evalCommand")] internal static reflect.Value evalCommandᴍ(ref state s, reflect.Value dot, ж<parse.CommandNode> Ꮡcmd, reflect.Value final) {
+internal static reflect.Value evalCommand⁔(/*this*/ ref state s, reflect.Value dot, ж<parse.CommandNode> Ꮡcmd, reflect.Value final) {
     ref var cmd = ref Ꮡcmd.DerefOrNull();
 
     var firstWord = cmd.Args[0];
@@ -755,14 +755,14 @@ internal static (bool truth, bool ok) isTrue(reflect.Value val) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string eEpPˢᴍstate => ref eEpPˢᵇᴍstate;
-private static readonly @string eEpPˢᵇᴍstate = ".eEpP"u8;
+internal static ref readonly @string eEpPˢ⁔state => ref eEpPˢᵇ⁔state;
+private static readonly @string eEpPˢᵇ⁔state = ".eEpP"u8;
 
 // idealConstant is called to return the value of a number in a context where
 // we don't know the type. In that case, the syntax of the number tells us
 // its type, and we use Go rules to resolve. Note there is no such thing as
 // a uint ideal constant in this situation - the value must be of int type.
-[GoMethodBody("idealConstant")] internal static reflect.Value idealConstantᴍ(ref state s, ж<parse.NumberNode> Ꮡconstant) {
+internal static reflect.Value idealConstant⁔(/*this*/ ref state s, ж<parse.NumberNode> Ꮡconstant) {
     ref var constant = ref Ꮡconstant.DerefOrNull();
 
     // These are ideal constants but we don't know the type
@@ -773,7 +773,7 @@ private static readonly @string eEpPˢᵇᴍstate = ".eEpP"u8;
     case {} when constant.IsComplex: {
         return reflect.ValueOf(constant.Complex128); // incontrovertible.
     }
-    case {} when constant.IsFloat && !isHexInt(constant.Text) && !isRuneInt(constant.Text) && strings.ContainsAny(constant.Text, eEpPˢᴍstate): {
+    case {} when constant.IsFloat && !isHexInt(constant.Text) && !isRuneInt(constant.Text) && strings.ContainsAny(constant.Text, eEpPˢ⁔state): {
         return reflect.ValueOf(constant.Float64);
     }
     case {} when constant.IsInt: {
@@ -802,14 +802,14 @@ internal static bool isHexInt(@string s) {
 
 } partial class template_package {
 
-[GoMethodBody("evalFieldNode")] internal static reflect.Value evalFieldNodeᴍ(ref state s, reflect.Value dot, ж<parse.FieldNode> Ꮡfield, slice<parse.Node> args, reflect.Value final) {
+internal static reflect.Value evalFieldNode⁔(/*this*/ ref state s, reflect.Value dot, ж<parse.FieldNode> Ꮡfield, slice<parse.Node> args, reflect.Value final) {
     ref var field = ref Ꮡfield.DerefOrNull();
 
     s.at(new parse.FieldNodeжNode(Ꮡfield));
     return s.evalFieldChain(dot, dot, new parse.FieldNodeжNode(Ꮡfield), field.Ident, args, final);
 }
 
-[GoMethodBody("evalChainNode")] internal static reflect.Value evalChainNodeᴍ(ref state s, reflect.Value dot, ж<parse.ChainNode> Ꮡchain, slice<parse.Node> args, reflect.Value final) {
+internal static reflect.Value evalChainNode⁔(/*this*/ ref state s, reflect.Value dot, ж<parse.ChainNode> Ꮡchain, slice<parse.Node> args, reflect.Value final) {
     ref var chain = ref Ꮡchain.DerefOrNull();
 
     s.at(new parse.ChainNodeжNode(Ꮡchain));
@@ -824,7 +824,7 @@ internal static bool isHexInt(@string s) {
     return s.evalFieldChain(dot, pipe, new parse.ChainNodeжNode(Ꮡchain), chain.Field, args, final);
 }
 
-[GoMethodBody("evalVariableNode")] internal static reflect.Value evalVariableNodeᴍ(ref state s, reflect.Value dot, ж<parse.VariableNode> Ꮡvariable, slice<parse.Node> args, reflect.Value final) {
+internal static reflect.Value evalVariableNode⁔(/*this*/ ref state s, reflect.Value dot, ж<parse.VariableNode> Ꮡvariable, slice<parse.Node> args, reflect.Value final) {
     ref var variable = ref Ꮡvariable.DerefOrNull();
 
     // $x.Field has $x as the first ident, Field as the second. Eval the var, then the fields.
@@ -840,7 +840,7 @@ internal static bool isHexInt(@string s) {
 // evalFieldChain evaluates .X.Y.Z possibly followed by arguments.
 // dot is the environment in which to evaluate arguments, while
 // receiver is the value being walked along the chain.
-[GoMethodBody("evalFieldChain")] internal static reflect.Value evalFieldChainᴍ(ref state s, reflect.Value dot, reflect.Value receiver, parse.Node node, slice<@string> ident, slice<parse.Node> args, reflect.Value final) {
+internal static reflect.Value evalFieldChain⁔(/*this*/ ref state s, reflect.Value dot, reflect.Value receiver, parse.Node node, slice<@string> ident, slice<parse.Node> args, reflect.Value final) {
     nint n = len(ident);
     for (nint i = 0; i < n - 1; i++) {
         receiver = s.evalField(dot, ident[i], node, default, missingVal, receiver);
@@ -849,7 +849,7 @@ internal static bool isHexInt(@string s) {
     return s.evalField(dot, ident[n - 1], node, args, final, receiver);
 }
 
-[GoMethodBody("evalFunction")] internal static reflect.Value evalFunctionᴍ(ref state s, reflect.Value dot, ж<parse.IdentifierNode> Ꮡnode, parse.Node cmd, slice<parse.Node> args, reflect.Value final) {
+internal static reflect.Value evalFunction⁔(/*this*/ ref state s, reflect.Value dot, ж<parse.IdentifierNode> Ꮡnode, parse.Node cmd, slice<parse.Node> args, reflect.Value final) {
     ref var node = ref Ꮡnode.DerefOrNull();
 
     s.at(new parse.IdentifierNodeжNode(Ꮡnode));
@@ -864,7 +864,7 @@ internal static bool isHexInt(@string s) {
 // evalField evaluates an expression like (.Field) or (.Field arg1 arg2).
 // The 'final' argument represents the return value from the preceding
 // value of the pipeline, if any.
-[GoMethodBody("evalField")] internal static reflect.Value evalFieldᴍ(ref state s, reflect.Value dot, @string fieldName, parse.Node node, slice<parse.Node> args, reflect.Value final, reflect.Value receiver) {
+internal static reflect.Value evalField⁔(/*this*/ ref state s, reflect.Value dot, @string fieldName, parse.Node node, slice<parse.Node> args, reflect.Value final, reflect.Value receiver) {
     if (!receiver.IsValid()) {
         if (s.tmpl.option.missingKey == mapError) { // Treat invalid value as missing map key.
             s.errorf("nil data; no entry for key %q", fieldName);
@@ -966,7 +966,7 @@ internal static reflect.Type reflectValueType = reflect.TypeFor<reflect.Value>()
 // evalCall executes a function or method call. If it's a method, fun already has the receiver bound, so
 // it looks just like a function call. The arg list, if non-nil, includes (in the manner of the shell), arg[0]
 // as the function itself.
-[GoMethodBody("evalCall")] internal static reflect.Value evalCallᴍ(ref state s, reflect.Value dot, reflect.Value fun, bool isBuiltin, parse.Node node, @string name, slice<parse.Node> args, reflect.Value final) {
+internal static reflect.Value evalCall⁔(/*this*/ ref state s, reflect.Value dot, reflect.Value fun, bool isBuiltin, parse.Node node, @string name, slice<parse.Node> args, reflect.Value final) {
     if (args != nil) {
         args = args[1..]; // Zeroth arg is function name/node; not passed to function.
     }
@@ -1091,7 +1091,7 @@ internal static bool canBeNil(reflect.Type typ) {
 } partial class template_package {
 
 // validateType guarantees that the value is valid and assignable to the type.
-[GoMethodBody("validateType")] internal static reflect.Value validateTypeᴍ(ref state s, reflect.Value value, reflect.Type typ) {
+internal static reflect.Value validateType⁔(/*this*/ ref state s, reflect.Value value, reflect.Type typ) {
     if (!value.IsValid()) {
         if (typ == nil) {
             // An untyped nil interface{}. Accept as a proper nil value.
@@ -1138,7 +1138,7 @@ internal static bool canBeNil(reflect.Type typ) {
     return value;
 }
 
-[GoMethodBody("evalArg")] internal static reflect.Value evalArgᴍ(ref state s, reflect.Value dot, reflect.Type typ, parse.Node n) {
+internal static reflect.Value evalArg⁔(/*this*/ ref state s, reflect.Value dot, reflect.Type typ, parse.Node n) {
     s.at(n);
     switch (n.type()) {
     case ж<parse.DotNode> arg: {
@@ -1201,7 +1201,7 @@ internal static bool canBeNil(reflect.Type typ) {
     throw panic("not reached");
 }
 
-[GoMethodBody("evalBool")] internal static reflect.Value evalBoolᴍ(ref state s, reflect.Type typ, parse.Node n) {
+internal static reflect.Value evalBool⁔(/*this*/ ref state s, reflect.Type typ, parse.Node n) {
     s.at(n);
     var (nΔ1, ok) = n._<ж<parse.BoolNode>>(ᐧ); if (ok) {
         var value = reflect.New(typ).Elem();
@@ -1212,7 +1212,7 @@ internal static bool canBeNil(reflect.Type typ) {
     throw panic("not reached");
 }
 
-[GoMethodBody("evalString")] internal static reflect.Value evalStringᴍ(ref state s, reflect.Type typ, parse.Node n) {
+internal static reflect.Value evalString⁔(/*this*/ ref state s, reflect.Type typ, parse.Node n) {
     s.at(n);
     var (nΔ1, ok) = n._<ж<parse.StringNode>>(ᐧ); if (ok) {
         var value = reflect.New(typ).Elem();
@@ -1223,7 +1223,7 @@ internal static bool canBeNil(reflect.Type typ) {
     throw panic("not reached");
 }
 
-[GoMethodBody("evalInteger")] internal static reflect.Value evalIntegerᴍ(ref state s, reflect.Type typ, parse.Node n) {
+internal static reflect.Value evalInteger⁔(/*this*/ ref state s, reflect.Type typ, parse.Node n) {
     s.at(n);
     var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsInt) {
         var value = reflect.New(typ).Elem();
@@ -1234,7 +1234,7 @@ internal static bool canBeNil(reflect.Type typ) {
     throw panic("not reached");
 }
 
-[GoMethodBody("evalUnsignedInteger")] internal static reflect.Value evalUnsignedIntegerᴍ(ref state s, reflect.Type typ, parse.Node n) {
+internal static reflect.Value evalUnsignedInteger⁔(/*this*/ ref state s, reflect.Type typ, parse.Node n) {
     s.at(n);
     var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsUint) {
         var value = reflect.New(typ).Elem();
@@ -1245,7 +1245,7 @@ internal static bool canBeNil(reflect.Type typ) {
     throw panic("not reached");
 }
 
-[GoMethodBody("evalFloat")] internal static reflect.Value evalFloatᴍ(ref state s, reflect.Type typ, parse.Node n) {
+internal static reflect.Value evalFloat⁔(/*this*/ ref state s, reflect.Type typ, parse.Node n) {
     s.at(n);
     var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsFloat) {
         var value = reflect.New(typ).Elem();
@@ -1256,7 +1256,7 @@ internal static bool canBeNil(reflect.Type typ) {
     throw panic("not reached");
 }
 
-[GoMethodBody("evalComplex")] internal static reflect.Value evalComplexᴍ(ref state s, reflect.Type typ, parse.Node n) {
+internal static reflect.Value evalComplex⁔(/*this*/ ref state s, reflect.Type typ, parse.Node n) {
     var (nΔ1, ok) = n._<ж<parse.NumberNode>>(ᐧ); if (ok && nΔ1.IsComplex) {
         var value = reflect.New(typ).Elem();
         value.SetComplex(nΔ1.Complex128);
@@ -1266,7 +1266,7 @@ internal static bool canBeNil(reflect.Type typ) {
     throw panic("not reached");
 }
 
-[GoMethodBody("evalEmptyInterface")] internal static reflect.Value evalEmptyInterfaceᴍ(ref state s, reflect.Value dot, parse.Node n) {
+internal static reflect.Value evalEmptyInterface⁔(/*this*/ ref state s, reflect.Value dot, parse.Node n) {
     s.at(n);
     switch (n.type()) {
     case ж<parse.BoolNode> nΔ1: {
@@ -1334,7 +1334,7 @@ internal static reflect.Value indirectInterface(reflect.Value v) {
 
 // printValue writes the textual representation of the value to the output of
 // the template.
-[GoMethodBody("printValue")] internal static void printValueᴍ(ref state s, parse.Node n, reflect.Value v) {
+internal static void printValue⁔(/*this*/ ref state s, parse.Node n, reflect.Value v) {
     s.at(n);
     var (iface, ok) = printableValue(v);
     if (!ok) {

@@ -53,7 +53,7 @@ public static RoundTripper NewFileTransportFS(fs.FS fsys) {
 
 } partial class http_package {
 
-[GoMethodBody("RoundTrip")] internal static partial (ж<Response> resp, error err) RoundTripᴍ(fileTransport t, ж<Request> req) {
+internal static partial (ж<Response> resp, error err) RoundTrip⁔(/*this*/ fileTransport t, ж<Request> req) {
     // We start ServeHTTP in a goroutine, which may take a long
     // time if the file is large. The newPopulateResponseWriter
     // call returns a channel which either ServeHTTP or finish()
@@ -103,7 +103,7 @@ partial struct populateResponse {
 
 } partial class http_package {
 
-[GoMethodBody("finish")] internal static void finishᴍ(ref populateResponse pr) {
+internal static void finish⁔(/*this*/ ref populateResponse pr) {
     if (!pr.wroteHeader) {
         pr.WriteHeader(500);
     }
@@ -113,7 +113,7 @@ partial struct populateResponse {
     pr.pw.Close();
 }
 
-[GoMethodBody("sendResponse")] internal static void sendResponseᴍ(ref populateResponse pr) {
+internal static void sendResponse⁔(/*this*/ ref populateResponse pr) {
     if (pr.sentResponse) {
         return;
     }
@@ -125,11 +125,11 @@ partial struct populateResponse {
     pr.ch.ᐸꟷ(pr.res);
 }
 
-[GoMethodBody("Header")] internal static Header Headerᴍ(ref populateResponse pr) {
+internal static Header Header⁔(/*this*/ ref populateResponse pr) {
     return pr.res.Header;
 }
 
-[GoMethodBody("WriteHeader")] internal static void WriteHeaderᴍ(ref populateResponse pr, nint code) {
+internal static void WriteHeader⁔(/*this*/ ref populateResponse pr, nint code) {
     if (pr.wroteHeader) {
         return;
     }
@@ -139,7 +139,7 @@ partial struct populateResponse {
     pr.res.Status = fmt.Sprintf("%d %s"u8, code, StatusText(code));
 }
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref populateResponse pr, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref populateResponse pr, slice<byte> p) {
     if (!pr.wroteHeader) {
         pr.WriteHeader(StatusOK);
     }

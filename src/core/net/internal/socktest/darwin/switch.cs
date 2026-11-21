@@ -24,14 +24,14 @@ partial struct Switch {
 
 } partial class socktest_package {
 
-[GoMethodBody("init")] internal static void initᴍ(ref Switch sw) {
+internal static void init⁔(/*this*/ ref Switch sw) {
     sw.fltab = new map<FilterType, Filter>();
     sw.sotab = new Sockets(0);
     sw.stats = new stats(0);
 }
 
 // Stats returns a list of per-cookie socket statistics.
-[GoMethodBody("Stats")] internal static slice<Stat> Statsᴍ(ж<Switch> Ꮡsw) {
+internal static slice<Stat> Stats⁔(/*this*/ ж<Switch> Ꮡsw) {
     ref var sw = ref Ꮡsw.DerefOrNull();
 
     slice<Stat> st = default;
@@ -45,7 +45,7 @@ partial struct Switch {
 }
 
 // Sockets returns mappings of socket descriptor to socket status.
-[GoMethodBody("Sockets")] internal static Sockets Socketsᴍ(ж<Switch> Ꮡsw) {
+internal static Sockets Sockets⁔(/*this*/ ж<Switch> Ꮡsw) {
     ref var sw = ref Ꮡsw.DerefOrNull();
 
     Ꮡsw.Ꮡsmu.RLock();
@@ -66,13 +66,13 @@ partial struct Cookie /*num:uint64*/;
 } partial class socktest_package {
 
 // Family returns an address family.
-[GoMethodBody("Family")] internal static nint Familyᴍ(Cookie c) { return (nint)(c >> 48); }
+internal static nint Family⁔(/*this*/ Cookie c) { return (nint)(c >> 48); }
 
 // Type returns a socket type.
-[GoMethodBody("Type")] internal static nint Typeᴍ(Cookie c) { return (nint)((c << 16) >> 32); }
+internal static nint Type⁔(/*this*/ Cookie c) { return (nint)((c << 16) >> 32); }
 
 // Protocol returns a protocol number.
-[GoMethodBody("Protocol")] internal static nint Protocolᴍ(Cookie c) { return (nint)((Cookie)(c & 0xff)); }
+internal static nint Protocol⁔(/*this*/ Cookie c) { return (nint)((Cookie)(c & 0xff)); }
 
 } partial class socktest_package {
 
@@ -89,7 +89,7 @@ partial struct Status {
 
 } partial class socktest_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Status so) {
+internal static @string String⁔(/*this*/ Status so) {
     return fmt.Sprintf("(%s, %s, %s): syscallerr=%v socketerr=%v"u8, familyString(so.Cookie.Family()), typeString(so.Cookie.Type()), protocolString(so.Cookie.Protocol()), so.Err, so.SocketErr);
 }
 
@@ -114,7 +114,7 @@ partial struct Stat {
 
 } partial class socktest_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Stat st) {
+internal static @string String⁔(/*this*/ Stat st) {
     return fmt.Sprintf("(%s, %s, %s): opened=%d connected=%d listened=%d accepted=%d closed=%d openfailed=%d connectfailed=%d listenfailed=%d acceptfailed=%d closefailed=%d"u8, familyString(st.Family), typeString(st.Type), protocolString(st.Protocol), st.Opened, st.Connected, st.Listened, st.Accepted, st.Closed, st.OpenFailed, st.ConnectFailed, st.ListenFailed, st.AcceptFailed, st.CloseFailed);
 }
 
@@ -124,7 +124,7 @@ partial struct stats /*map[Cookie, ж<Stat>]*/;
 
 } partial class socktest_package {
 
-[GoMethodBody("getLocked")] internal static ж<Stat> getLockedᴍ(stats st, Cookie c) {
+internal static ж<Stat> getLocked⁔(/*this*/ stats st, Cookie c) {
     var (s, ok) = st[c, ꟷ];
     if (!ok) {
         s = Ꮡ(new Stat(Family: c.Family(), Type: c.Type(), Protocol: c.Protocol()));
@@ -158,7 +158,7 @@ public delegate (AfterFilter, error) Filter(ж<Status> _);
 
 } partial class socktest_package {
 
-[GoMethodBody("apply")] internal static (AfterFilter, error) applyᴍ(Filter f, ж<Status> st) {
+internal static (AfterFilter, error) apply⁔(/*this*/ Filter f, ж<Status> st) {
     if (f == nil) {
         return (default, default);
     }
@@ -178,7 +178,7 @@ public delegate error AfterFilter(ж<Status> _);
 
 } partial class socktest_package {
 
-[GoMethodBody("apply")] internal static error applyᴍ(AfterFilter f, ж<Status> st) {
+internal static error apply⁔(/*this*/ AfterFilter f, ж<Status> st) {
     if (f == nil) {
         return default;
     }
@@ -188,7 +188,7 @@ public delegate error AfterFilter(ж<Status> _);
 } partial class socktest_package {
 
 // Set deploys the socket system call filter f for the filter type t.
-[GoMethodBody("Set")] internal static void Setᴍ(ж<Switch> Ꮡsw, FilterType t, Filter f) {
+internal static void Set⁔(/*this*/ ж<Switch> Ꮡsw, FilterType t, Filter f) {
     ref var sw = ref Ꮡsw.DerefOrNull();
 
     Ꮡsw.Ꮡonce.Do(Ꮡsw.init);

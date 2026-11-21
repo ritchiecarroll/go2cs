@@ -21,17 +21,17 @@ partial struct pkgBuilder {
 
 } partial class ast_package {
 
-[GoMethodBody("error")] internal static void errorᴍ(ref pkgBuilder p, token.Pos pos, @string msg) {
+internal static void error⁔(/*this*/ ref pkgBuilder p, token.Pos pos, @string msg) {
     p.errors.Add(p.fset.Position(pos), msg);
 }
 
-[GoMethodBody("errorf")] internal static void errorfᴍ(ref pkgBuilder p, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void errorf⁔(/*this*/ ref pkgBuilder p, token.Pos pos, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     p.error(pos, fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
 
-[GoMethodBody("declare")] internal static void declareᴍ(ref pkgBuilder p, ж<Scope> Ꮡscope, ж<Scope> ᏑaltScope, ж<Object> Ꮡobj) {
+internal static void declare⁔(/*this*/ ref pkgBuilder p, ж<Scope> Ꮡscope, ж<Scope> ᏑaltScope, ж<Object> Ꮡobj) {
     ref var scope = ref Ꮡscope.DerefOrNull();
     ref var altScope = ref ᏑaltScope.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();

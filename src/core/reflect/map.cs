@@ -149,7 +149,7 @@ partial struct MapIter {
 // TODO: undo when the inliner is no longer bottom-up only.
 //
 //go:noinline
-[GoMethodBody("panicNotMap")] internal static partial void panicNotMapᴍ(flag f) {
+internal static partial void panicNotMap⁔(/*this*/ flag f) {
     f.mustBe(Map);
 }
 

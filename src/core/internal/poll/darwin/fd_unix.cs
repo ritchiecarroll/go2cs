@@ -48,7 +48,7 @@ partial struct FD {
 // The net argument is a network name from the net package (e.g., "tcp"),
 // or "file".
 // Set pollable to true if fd should be managed by runtime netpoll.
-[GoMethodBody("Init")] internal static error Initᴍ(ж<FD> Ꮡfd, @string net, bool pollable) {
+internal static error Init⁔(/*this*/ ж<FD> Ꮡfd, @string net, bool pollable) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     fd.SysFile.init();
@@ -72,7 +72,7 @@ partial struct FD {
 
 // Destroy closes the file descriptor. This is called when there are
 // no remaining references.
-[GoMethodBody("destroy")] internal static error destroyᴍ(ж<FD> Ꮡfd) {
+internal static error destroy⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     // Poller may want to unregister fd in readiness notification mechanism,
@@ -88,7 +88,7 @@ partial struct FD {
 
 // Close closes the FD. The underlying file descriptor is closed by the
 // destroy method when there are no remaining references.
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<FD> Ꮡfd) {
+internal static error Close⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (!fd.fdmu.increfAndClose()) {
@@ -120,7 +120,7 @@ partial struct FD {
 }
 
 // SetBlocking puts the file into blocking mode.
-[GoMethodBody("SetBlocking")] internal static error SetBlockingᴍ(ж<FD> Ꮡfd) {
+internal static error SetBlocking⁔(/*this*/ ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -152,7 +152,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 } partial class poll_package {
 
 // Read implements io.Reader.
-[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ж<FD> Ꮡfd, slice<byte> p) {
+internal static (nint, error) Read⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -199,7 +199,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // Pread wraps the pread system call.
-[GoMethodBody("Pread")] internal static (nint, error) Preadᴍ(ж<FD> Ꮡfd, slice<byte> p, int64 off) {
+internal static (nint, error) Pread⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p, int64 off) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     // Call incref, not readLock, because since pread specifies the
@@ -222,7 +222,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // ReadFrom wraps the recvfrom network call.
-[GoMethodBody("ReadFrom")] internal static (nint, Δsyscall.Sockaddr, error) ReadFromᴍ(ж<FD> Ꮡfd, slice<byte> p) {
+internal static (nint, Δsyscall.Sockaddr, error) ReadFrom⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -261,7 +261,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // ReadFromInet4 wraps the recvfrom network call for IPv4.
-[GoMethodBody("ReadFromInet4")] internal static (nint, error) ReadFromInet4ᴍ(ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet4> from) {
+internal static (nint, error) ReadFromInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet4> from) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -300,7 +300,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // ReadFromInet6 wraps the recvfrom network call for IPv6.
-[GoMethodBody("ReadFromInet6")] internal static (nint, error) ReadFromInet6ᴍ(ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet6> from) {
+internal static (nint, error) ReadFromInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet6> from) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -339,7 +339,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // ReadMsg wraps the recvmsg network call.
-[GoMethodBody("ReadMsg")] internal static (nint, nint, nint, Δsyscall.Sockaddr, error) ReadMsgᴍ(ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags) {
+internal static (nint, nint, nint, Δsyscall.Sockaddr, error) ReadMsg⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -378,7 +378,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // ReadMsgInet4 is ReadMsg, but specialized for syscall.SockaddrInet4.
-[GoMethodBody("ReadMsgInet4")] internal static (nint, nint, nint, error) ReadMsgInet4ᴍ(ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet4> sa4) {
+internal static (nint, nint, nint, error) ReadMsgInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet4> sa4) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -417,7 +417,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // ReadMsgInet6 is ReadMsg, but specialized for syscall.SockaddrInet6.
-[GoMethodBody("ReadMsgInet6")] internal static (nint, nint, nint, error) ReadMsgInet6ᴍ(ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet6> sa6) {
+internal static (nint, nint, nint, error) ReadMsgInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, nint flags, ж<Δsyscall.SockaddrInet6> sa6) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -456,7 +456,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // Write implements io.Writer.
-[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ж<FD> Ꮡfd, slice<byte> p) {
+internal static (nint, error) Write⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -512,7 +512,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // Pwrite wraps the pwrite system call.
-[GoMethodBody("Pwrite")] internal static (nint, error) Pwriteᴍ(ж<FD> Ꮡfd, slice<byte> p, int64 off) {
+internal static (nint, error) Pwrite⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p, int64 off) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -556,7 +556,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // WriteToInet4 wraps the sendto network call for IPv4 addresses.
-[GoMethodBody("WriteToInet4")] internal static (nint, error) WriteToInet4ᴍ(ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet4> sa) {
+internal static (nint, error) WriteToInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet4> sa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -594,7 +594,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // WriteToInet6 wraps the sendto network call for IPv6 addresses.
-[GoMethodBody("WriteToInet6")] internal static (nint, error) WriteToInet6ᴍ(ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet6> sa) {
+internal static (nint, error) WriteToInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p, ж<Δsyscall.SockaddrInet6> sa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -632,7 +632,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // WriteTo wraps the sendto network call.
-[GoMethodBody("WriteTo")] internal static (nint, error) WriteToᴍ(ж<FD> Ꮡfd, slice<byte> p, Δsyscall.Sockaddr sa) {
+internal static (nint, error) WriteTo⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p, Δsyscall.Sockaddr sa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -670,7 +670,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // WriteMsg wraps the sendmsg network call.
-[GoMethodBody("WriteMsg")] internal static (nint, nint, error) WriteMsgᴍ(ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, Δsyscall.Sockaddr sa) {
+internal static (nint, nint, error) WriteMsg⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, Δsyscall.Sockaddr sa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -708,7 +708,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // WriteMsgInet4 is WriteMsg specialized for syscall.SockaddrInet4.
-[GoMethodBody("WriteMsgInet4")] internal static (nint, nint, error) WriteMsgInet4ᴍ(ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet4> sa) {
+internal static (nint, nint, error) WriteMsgInet4⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet4> sa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -746,7 +746,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // WriteMsgInet6 is WriteMsg specialized for syscall.SockaddrInet6.
-[GoMethodBody("WriteMsgInet6")] internal static (nint, nint, error) WriteMsgInet6ᴍ(ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet6> sa) {
+internal static (nint, nint, error) WriteMsgInet6⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p, slice<byte> oob, ж<Δsyscall.SockaddrInet6> sa) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -784,7 +784,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // Accept wraps the accept network call.
-[GoMethodBody("Accept")] internal static (nint, Δsyscall.Sockaddr, @string, error) Acceptᴍ(ж<FD> Ꮡfd) {
+internal static (nint, Δsyscall.Sockaddr, @string, error) Accept⁔(/*this*/ ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -835,7 +835,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // Fchmod wraps syscall.Fchmod.
-[GoMethodBody("Fchmod")] internal static error Fchmodᴍ(ж<FD> Ꮡfd, uint32 mode) {
+internal static error Fchmod⁔(/*this*/ ж<FD> Ꮡfd, uint32 mode) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -850,7 +850,7 @@ internal static UntypedInt maxRW => /* 1 << 30 */ 1073741824;
 }
 
 // Fstat wraps syscall.Fstat
-[GoMethodBody("Fstat")] internal static error Fstatᴍ(ж<FD> Ꮡfd, ж<Δsyscall.Stat_t> s) {
+internal static error Fstat⁔(/*this*/ ж<FD> Ꮡfd, ж<Δsyscall.Stat_t> s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -899,7 +899,7 @@ public static (nint, @string, error) DupCloseOnExec(nint fd) {
 } partial class poll_package {
 
 // Dup duplicates the file descriptor.
-[GoMethodBody("Dup")] internal static (nint, @string, error) Dupᴍ(ж<FD> Ꮡfd) {
+internal static (nint, @string, error) Dup⁔(/*this*/ ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -918,12 +918,12 @@ public static (nint, @string, error) DupCloseOnExec(nint fd) {
 // On Unix variants only, expose the IO event for the net code.
 
 // WaitWrite waits until data can be written to fd.
-[GoMethodBody("WaitWrite")] internal static error WaitWriteᴍ(ref FD fd) {
+internal static error WaitWrite⁔(/*this*/ ref FD fd) {
     return fd.pd.waitWrite(fd.isFile);
 }
 
 // WriteOnce is for testing only. It makes a single write call.
-[GoMethodBody("WriteOnce")] internal static (nint, error) WriteOnceᴍ(ж<FD> Ꮡfd, slice<byte> p) {
+internal static (nint, error) WriteOnce⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -940,7 +940,7 @@ public static (nint, @string, error) DupCloseOnExec(nint fd) {
 }
 
 // RawRead invokes the user-defined function f for a read operation.
-[GoMethodBody("RawRead")] internal static error RawReadᴍ(ж<FD> Ꮡfd, Func<uintptr, bool> f) {
+internal static error RawRead⁔(/*this*/ ж<FD> Ꮡfd, Func<uintptr, bool> f) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -971,7 +971,7 @@ public static (nint, @string, error) DupCloseOnExec(nint fd) {
 }
 
 // RawWrite invokes the user-defined function f for a write operation.
-[GoMethodBody("RawWrite")] internal static error RawWriteᴍ(ж<FD> Ꮡfd, Func<uintptr, bool> f) {
+internal static error RawWrite⁔(/*this*/ ж<FD> Ꮡfd, Func<uintptr, bool> f) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

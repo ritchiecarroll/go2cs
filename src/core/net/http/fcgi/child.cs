@@ -49,7 +49,7 @@ internal static ж<request> newRequest(uint16 reqId, uint8 flags) {
 } partial class fcgi_package {
 
 // parseParams reads an encoded []byte into Params.
-[GoMethodBody("parseParams")] internal static void parseParamsᴍ(ref request r) {
+internal static void parseParams⁔(/*this*/ ref request r) {
     var text = r.rawParams;
     r.rawParams = default;
     while (len(text) > 0) {
@@ -98,11 +98,11 @@ internal static ж<response> newResponse(ref child c, ж<request> Ꮡreq) {
 
 } partial class fcgi_package {
 
-[GoMethodBody("Header")] internal static http.Header Headerᴍ(ref response r) {
+internal static http.Header Header⁔(/*this*/ ref response r) {
     return r.header;
 }
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref response r, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref response r, slice<byte> p) {
     if (!r.wroteHeader) {
         r.WriteHeader(http.StatusOK);
     }
@@ -113,16 +113,16 @@ internal static ж<response> newResponse(ref child c, ж<request> Ꮡreq) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentTypeˢᴍresponse => ref contentTypeˢᵇᴍresponse;
-private static readonly @string contentTypeˢᵇᴍresponse = "Content-Type"u8;
-internal static ref readonly @string contentLengthˢᴍresponse => ref contentLengthˢᵇᴍresponse;
-private static readonly @string contentLengthˢᵇᴍresponse = "Content-Length"u8;
-internal static ref readonly @string transferEncodingˢᴍresponse => ref transferEncodingˢᵇᴍresponse;
-private static readonly @string transferEncodingˢᵇᴍresponse = "Transfer-Encoding"u8;
-internal static ref readonly @string dateˢᴍresponse => ref dateˢᵇᴍresponse;
-private static readonly @string dateˢᵇᴍresponse = "Date"u8;
+internal static ref readonly @string contentTypeˢ⁔response => ref contentTypeˢᵇ⁔response;
+private static readonly @string contentTypeˢᵇ⁔response = "Content-Type"u8;
+internal static ref readonly @string contentLengthˢ⁔response => ref contentLengthˢᵇ⁔response;
+private static readonly @string contentLengthˢᵇ⁔response = "Content-Length"u8;
+internal static ref readonly @string transferEncodingˢ⁔response => ref transferEncodingˢᵇ⁔response;
+private static readonly @string transferEncodingˢᵇ⁔response = "Transfer-Encoding"u8;
+internal static ref readonly @string dateˢ⁔response => ref dateˢᵇ⁔response;
+private static readonly @string dateˢᵇ⁔response = "Date"u8;
 
-[GoMethodBody("WriteHeader")] internal static void WriteHeaderᴍ(ref response r, nint code) {
+internal static void WriteHeader⁔(/*this*/ ref response r, nint code) {
     if (r.wroteHeader) {
         return;
     }
@@ -130,12 +130,12 @@ private static readonly @string dateˢᵇᴍresponse = "Date"u8;
     r.code = code;
     if (code == http.StatusNotModified) {
         // Must not have body.
-        r.header.Del(contentTypeˢᴍresponse);
-        r.header.Del(contentLengthˢᴍresponse);
-        r.header.Del(transferEncodingˢᴍresponse);
+        r.header.Del(contentTypeˢ⁔response);
+        r.header.Del(contentLengthˢ⁔response);
+        r.header.Del(transferEncodingˢ⁔response);
     }
-    if (r.header.Get(dateˢᴍresponse) == ""u8) {
-        r.header.Set(dateˢᴍresponse, time.Now().UTC().Format(http.TimeFormat));
+    if (r.header.Get(dateˢ⁔response) == ""u8) {
+        r.header.Set(dateˢ⁔response, time.Now().UTC().Format(http.TimeFormat));
     }
 }
 
@@ -143,28 +143,28 @@ private static readonly @string dateˢᵇᴍresponse = "Date"u8;
 // p is not written by writeHeader, but is the first chunk of the body
 // that will be written. It is sniffed for a Content-Type if none is
 // set explicitly.
-[GoMethodBody("writeCGIHeader")] internal static void writeCGIHeaderᴍ(ref response r, slice<byte> p) {
+internal static void writeCGIHeader⁔(/*this*/ ref response r, slice<byte> p) {
     if (r.wroteCGIHeader) {
         return;
     }
     r.wroteCGIHeader = true;
     fmt.Fprintf(new bufWriterжWriter(r.w), "Status: %d %s\r\n"u8, r.code, http.StatusText(r.code));
-    var (_, hasType) = r.header[contentTypeˢᴍresponse, ꟷ]; if (r.code != http.StatusNotModified && !hasType) {
-        r.header.Set(contentTypeˢᴍresponse, http.DetectContentType(p));
+    var (_, hasType) = r.header[contentTypeˢ⁔response, ꟷ]; if (r.code != http.StatusNotModified && !hasType) {
+        r.header.Set(contentTypeˢ⁔response, http.DetectContentType(p));
     }
     r.header.Write(new bufWriterжWriter(r.w));
     r.w.Value.Writer.Value.WriteString("\r\n");
     r.w.Value.Writer.Value.Flush();
 }
 
-[GoMethodBody("Flush")] internal static void Flushᴍ(ref response r) {
+internal static void Flush⁔(/*this*/ ref response r) {
     if (!r.wroteHeader) {
         r.WriteHeader(http.StatusOK);
     }
     r.w.Value.Writer.Value.Flush();
 }
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ref response r) {
+internal static error Close⁔(/*this*/ ref response r) {
     r.Flush();
     return r.w.Close();
 }
@@ -187,7 +187,7 @@ internal static ж<child> newChild(io.ReadWriteCloser rwc, http.Handler handler)
 
 } partial class fcgi_package {
 
-[GoMethodBody("serve")] internal static void serveᴍ(ж<child> Ꮡc) {
+internal static void serve⁔(/*this*/ ж<child> Ꮡc) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -229,10 +229,10 @@ public static error ErrConnClosed = errors.New("fcgi: connection to web server c
 } partial class fcgi_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fcgiReceivedIdThatIsˢᴍchild => ref fcgiReceivedIdThatIsˢᵇᴍchild;
-private static readonly @string fcgiReceivedIdThatIsˢᵇᴍchild = "fcgi: received ID that is already in-flight"u8;
+internal static ref readonly @string fcgiReceivedIdThatIsˢ⁔child => ref fcgiReceivedIdThatIsˢᵇ⁔child;
+private static readonly @string fcgiReceivedIdThatIsˢᵇ⁔child = "fcgi: received ID that is already in-flight"u8;
 
-[GoMethodBody("handleRecord")] internal static partial error handleRecordᴍ(ж<child> Ꮡc, ж<record> Ꮡrec) {
+internal static partial error handleRecord⁔(/*this*/ ж<child> Ꮡc, ж<record> Ꮡrec) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var rec = ref Ꮡrec.DerefOrNull();
 
@@ -247,7 +247,7 @@ private static readonly @string fcgiReceivedIdThatIsˢᵇᴍchild = "fcgi: recei
         if (req != nil) {
             // The server is trying to begin a request with the same ID
             // as an in-progress request. This is an error.
-            return errors.New(fcgiReceivedIdThatIsˢᴍchild);
+            return errors.New(fcgiReceivedIdThatIsˢ⁔child);
         }
 
         beginRequest br = new();
@@ -343,7 +343,7 @@ internal static map<@string, @string> filterOutUsedEnvVars(map<@string, @string>
 
 } partial class fcgi_package {
 
-[GoMethodBody("serveRequest")] internal static void serveRequestᴍ(ж<child> Ꮡc, ж<request> Ꮡreq, io.ReadCloser body) {
+internal static void serveRequest⁔(/*this*/ ж<child> Ꮡc, ж<request> Ꮡreq, io.ReadCloser body) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var req = ref Ꮡreq.DerefOrNull();
 
@@ -380,7 +380,7 @@ internal static map<@string, @string> filterOutUsedEnvVars(map<@string, @string>
     }
 }
 
-[GoMethodBody("cleanUp")] internal static void cleanUpᴍ(ref child c) {
+internal static void cleanUp⁔(/*this*/ ref child c) {
     foreach (var (_, req) in c.requests) {
         if (req.pw != nil) {
             // race with call to Close in c.serveRequest doesn't matter because

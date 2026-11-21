@@ -15,7 +15,7 @@ partial struct MIMEHeader /*map[@string, slice<@string>]*/;
 
 // Add adds the key, value pair to the header.
 // It appends to any existing values associated with key.
-[GoMethodBody("Add")] internal static void Addᴍ(MIMEHeader h, @string key, @string value) {
+internal static void Add⁔(/*this*/ MIMEHeader h, @string key, @string value) {
     key = CanonicalMIMEHeaderKey(key);
     h[key] = append(h[key], value);
 }
@@ -23,7 +23,7 @@ partial struct MIMEHeader /*map[@string, slice<@string>]*/;
 // Set sets the header entries associated with key to
 // the single element value. It replaces any existing
 // values associated with key.
-[GoMethodBody("Set")] internal static void Setᴍ(MIMEHeader h, @string key, @string value) {
+internal static void Set⁔(/*this*/ MIMEHeader h, @string key, @string value) {
     h[CanonicalMIMEHeaderKey(key)] = [value];
 }
 
@@ -32,7 +32,7 @@ partial struct MIMEHeader /*map[@string, slice<@string>]*/;
 // to canonicalize the provided key.
 // If there are no values associated with the key, Get returns "".
 // To use non-canonical keys, access the map directly.
-[GoMethodBody("Get")] internal static @string Getᴍ(MIMEHeader h, @string key) {
+internal static @string Get⁔(/*this*/ MIMEHeader h, @string key) {
     if (h == nil) {
         return ""u8;
     }
@@ -48,7 +48,7 @@ partial struct MIMEHeader /*map[@string, slice<@string>]*/;
 // used to canonicalize the provided key. To use non-canonical
 // keys, access the map directly.
 // The returned slice is not a copy.
-[GoMethodBody("Values")] internal static slice<@string> Valuesᴍ(MIMEHeader h, @string key) {
+internal static slice<@string> Values⁔(/*this*/ MIMEHeader h, @string key) {
     if (h == nil) {
         return default;
     }
@@ -56,7 +56,7 @@ partial struct MIMEHeader /*map[@string, slice<@string>]*/;
 }
 
 // Del deletes the values associated with key.
-[GoMethodBody("Del")] internal static void Delᴍ(MIMEHeader h, @string key) {
+internal static void Del⁔(/*this*/ MIMEHeader h, @string key) {
     delete(h, CanonicalMIMEHeaderKey(key));
 }
 

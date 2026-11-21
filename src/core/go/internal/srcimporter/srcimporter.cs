@@ -61,7 +61,7 @@ internal static ref types.Package importing => ref ((StaticBox<types.Package>)�
 } partial class srcimporter_package {
 
 // Import(path) is a shortcut for ImportFrom(path, ".", 0).
-[GoMethodBody("Import")] internal static (ж<types.Package>, error) Importᴍ(ж<Importer> Ꮡp, @string path) {
+internal static (ж<types.Package>, error) Import⁔(/*this*/ ж<Importer> Ꮡp, @string path) {
     return Ꮡp.ImportFrom(path, ".", 0); // use "." rather than "" (see issue #24441)
 }
 
@@ -71,7 +71,7 @@ internal static ref types.Package importing => ref ((StaticBox<types.Package>)�
 // maintained with the importer. The import mode must be zero but is otherwise ignored.
 // Packages that are not comprised entirely of pure Go files may fail to import because the
 // type checker may not be able to determine all exported entities (e.g. due to cgo dependencies).
-[GoMethodBody("ImportFrom")] internal static (ж<types.Package>, error) ImportFromᴍ(ж<Importer> Ꮡp, @string path, @string srcDir, types.ImportMode mode) {
+internal static (ж<types.Package>, error) ImportFrom⁔(/*this*/ ж<Importer> Ꮡp, @string path, @string srcDir, types.ImportMode mode) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
@@ -182,7 +182,7 @@ internal static ref types.Package importing => ref ((StaticBox<types.Package>)�
     finally { ᒐ.Run(); }
 }
 
-[GoMethodBody("parseFiles")] internal static partial (slice<ж<ast.File>>, error) parseFilesᴍ(ж<Importer> Ꮡp, @string dir, slice<@string> filenames) {
+internal static partial (slice<ж<ast.File>>, error) parseFiles⁔(/*this*/ ж<Importer> Ꮡp, @string dir, slice<@string> filenames) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // use build.Context's OpenFile if there is one
@@ -232,25 +232,25 @@ internal static ref types.Package importing => ref ((StaticBox<types.Package>)�
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string srcimporterˢᴍImporter => ref srcimporterˢᵇᴍImporter;
-private static readonly @string srcimporterˢᵇᴍImporter = "srcimporter"u8;
-internal static ref readonly @string binˢᴍImporter => ref binˢᵇᴍImporter;
-private static readonly @string binˢᵇᴍImporter = "bin"u8;
-internal static ref readonly @string cgoCppflagsˢᴍImporter => ref cgoCppflagsˢᵇᴍImporter;
-private static readonly @string cgoCppflagsˢᵇᴍImporter = "CGO_CPPFLAGS"u8;
-internal static ref readonly @string cgoCflagsˢᴍImporter => ref cgoCflagsˢᵇᴍImporter;
-private static readonly @string cgoCflagsˢᵇᴍImporter = "CGO_CFLAGS"u8;
-internal static ref readonly @string cgoGotypesGoˢᴍImporter => ref cgoGotypesGoˢᵇᴍImporter;
-private static readonly @string cgoGotypesGoˢᵇᴍImporter = "_cgo_gotypes.go"u8;
+internal static ref readonly @string srcimporterˢ⁔Importer => ref srcimporterˢᵇ⁔Importer;
+private static readonly @string srcimporterˢᵇ⁔Importer = "srcimporter"u8;
+internal static ref readonly @string binˢ⁔Importer => ref binˢᵇ⁔Importer;
+private static readonly @string binˢᵇ⁔Importer = "bin"u8;
+internal static ref readonly @string cgoCppflagsˢ⁔Importer => ref cgoCppflagsˢᵇ⁔Importer;
+private static readonly @string cgoCppflagsˢᵇ⁔Importer = "CGO_CPPFLAGS"u8;
+internal static ref readonly @string cgoCflagsˢ⁔Importer => ref cgoCflagsˢᵇ⁔Importer;
+private static readonly @string cgoCflagsˢᵇ⁔Importer = "CGO_CFLAGS"u8;
+internal static ref readonly @string cgoGotypesGoˢ⁔Importer => ref cgoGotypesGoˢᵇ⁔Importer;
+private static readonly @string cgoGotypesGoˢᵇ⁔Importer = "_cgo_gotypes.go"u8;
 
-[GoMethodBody("cgo")] internal static (ж<ast.File>, error) cgoᴍ(ж<Importer> Ꮡp, ж<build.Package> Ꮡbp) {
+internal static (ж<ast.File>, error) cgo⁔(/*this*/ ж<Importer> Ꮡp, ж<build.Package> Ꮡbp) {
     GoFrame ᒐ = default;
     try {
         ref var p = ref Ꮡp.DerefOrNull();
         ref var bp = ref Ꮡbp.DerefOrNull();
         var argsᴷ = new stackAppend<@string>();
 
-        var (tmpdir, err) = os.MkdirTemp(""u8, srcimporterˢᴍImporter);
+        var (tmpdir, err) = os.MkdirTemp(""u8, srcimporterˢ⁔Importer);
         if (err != nil) {
             return (default, err);
         }
@@ -258,7 +258,7 @@ private static readonly @string cgoGotypesGoˢᵇᴍImporter = "_cgo_gotypes.go"
 
         @string goCmd = "go";
         if (p.ctxt.GOROOT != ""u8) {
-            goCmd = filepath.Join(p.ctxt.GOROOT, binˢᴍImporter, "go");
+            goCmd = filepath.Join(p.ctxt.GOROOT, binˢ⁔Importer, "go");
         }
         var args = slice<@string>([goCmd, "tool", "cgo", "-objdir", tmpdir]);
         if (bp.Goroot) {
@@ -274,7 +274,7 @@ private static readonly @string cgoGotypesGoˢᵇᴍImporter = "_cgo_gotypes.go"
             }}
         }
         args = append(args, (@string)"--");
-        args = appendꓸꓸꓸ(args, strings.Fields(os.Getenv(cgoCppflagsˢᴍImporter)));
+        args = appendꓸꓸꓸ(args, strings.Fields(os.Getenv(cgoCppflagsˢ⁔Importer)));
         args = appendꓸꓸꓸ(args, bp.CgoCPPFLAGS);
         if (len(bp.CgoPkgConfig) > 0) {
             var cmdΔ1 = exec.Command("pkg-config"u8, appendꓸꓸꓸ(slice<@string>(["--cflags"]), bp.CgoPkgConfig).ꓸꓸꓸ);
@@ -285,7 +285,7 @@ private static readonly @string cgoGotypesGoˢᵇᴍImporter = "_cgo_gotypes.go"
             args = appendꓸꓸꓸ(args, strings.Fields((@string)@out));
         }
         args = append(args, (@string)"-I", tmpdir);
-        args = appendꓸꓸꓸ(args, strings.Fields(os.Getenv(cgoCflagsˢᴍImporter)));
+        args = appendꓸꓸꓸ(args, strings.Fields(os.Getenv(cgoCflagsˢ⁔Importer)));
         args = appendꓸꓸꓸ(args, bp.CgoCFLAGS);
         args = appendꓸꓸꓸ(args, bp.CgoFiles);
 
@@ -295,27 +295,27 @@ private static readonly @string cgoGotypesGoˢᵇᴍImporter = "_cgo_gotypes.go"
             return (default, fmt.Errorf("go tool cgo: %w"u8, errΔ2));
         }
 
-        return parser.ParseFile(p.fset, filepath.Join(tmpdir, cgoGotypesGoˢᴍImporter), default, parser.SkipObjectResolution);
+        return parser.ParseFile(p.fset, filepath.Join(tmpdir, cgoGotypesGoˢ⁔Importer), default, parser.SkipObjectResolution);
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
 }
 
 // context-controlled file system operations
-[GoMethodBody("absPath")] internal static (@string, error) absPathᴍ(ref Importer p, @string path) {
+internal static (@string, error) absPath⁔(/*this*/ ref Importer p, @string path) {
     // TODO(gri) This should be using p.ctxt.AbsPath which doesn't
     // exist but probably should. See also issue #14282.
     return filepath.Abs(path);
 }
 
-[GoMethodBody("isAbsPath")] internal static bool isAbsPathᴍ(ref Importer p, @string path) {
+internal static bool isAbsPath⁔(/*this*/ ref Importer p, @string path) {
     var f = p.ctxt.IsAbsPath; if (f != nil) {
         return f(path);
     }
     return filepath.IsAbs(path);
 }
 
-[GoMethodBody("joinPath")] internal static @string joinPathᴍ(ref Importer p, params ꓸꓸꓸstring elemʗp) {
+internal static @string joinPath⁔(/*this*/ ref Importer p, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
 
     var f = p.ctxt.JoinPath; if (f != nil) {

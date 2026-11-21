@@ -42,7 +42,7 @@ partial struct labelMap {
 
 // String satisfies Stringer and returns key, value pairs in a consistent
 // order.
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<labelMap> Ꮡl) {
+internal static @string String⁔(/*this*/ ж<labelMap> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
     var keyValsᴷ = new stackAppend<@string>();
 

@@ -65,11 +65,11 @@ internal const nint marshaledSize = /* len(magic256) + 8*4 + chunk + 8 */ 108;
 
 } partial class sha256_package {
 
-[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(ref Digest d) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref Digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
-[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ref Digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref Digest d, slice<byte> b) {
     if (d.is224) {
         b = append(b, magic224.ꓸꓸꓸ);
     } else {
@@ -90,17 +90,17 @@ internal const nint marshaledSize = /* len(magic256) + 8*4 + chunk + 8 */ 108;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string cryptoSha256InvalidHashˢᴍDigest => ref cryptoSha256InvalidHashˢᵇᴍDigest;
-private static readonly @string cryptoSha256InvalidHashˢᵇᴍDigest = "crypto/sha256: invalid hash state identifier"u8;
-private static ref readonly @string cryptoSha256InvalidHashˢ2ᴍDigest => ref cryptoSha256InvalidHashˢ2ᵇᴍDigest;
-private static readonly @string cryptoSha256InvalidHashˢ2ᵇᴍDigest = "crypto/sha256: invalid hash state size"u8;
+private static ref readonly @string cryptoSha256InvalidHashˢ⁔Digest => ref cryptoSha256InvalidHashˢᵇ⁔Digest;
+private static readonly @string cryptoSha256InvalidHashˢᵇ⁔Digest = "crypto/sha256: invalid hash state identifier"u8;
+private static ref readonly @string cryptoSha256InvalidHashˢ2⁔Digest => ref cryptoSha256InvalidHashˢ2ᵇ⁔Digest;
+private static readonly @string cryptoSha256InvalidHashˢ2ᵇ⁔Digest = "crypto/sha256: invalid hash state size"u8;
 
-[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref Digest d, slice<byte> b) {
+internal static error UnmarshalBinary⁔(/*this*/ ref Digest d, slice<byte> b) {
     if (len(b) < len(magic224) || (d.is224 && ((sstring)(b[..(int)(len(magic224))])) != magic224) || (!d.is224 && ((sstring)(b[..(int)(len(magic256))])) != magic256)) {
-        return errors.New(cryptoSha256InvalidHashˢᴍDigest);
+        return errors.New(cryptoSha256InvalidHashˢ⁔Digest);
     }
     if (len(b) != marshaledSize) {
-        return errors.New(cryptoSha256InvalidHashˢ2ᴍDigest);
+        return errors.New(cryptoSha256InvalidHashˢ2⁔Digest);
     }
     b = b[(int)(len(magic224))..];
     (b, d.h[0]) = consumeUint32(b);
@@ -129,12 +129,12 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
 
 } partial class sha256_package {
 
-[GoMethodBody("Clone")] internal static (hash.Cloner, error) Cloneᴍ(ref Digest d) {
+internal static (hash.Cloner, error) Clone⁔(/*this*/ ref Digest d) {
     ref var r = ref heap<Digest>(d.ΔClone(), out var Ꮡr);
     return (new DigestжCloner(Ꮡr), default);
 }
 
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref Digest d) {
+internal static void Reset⁔(/*this*/ ref Digest d) {
     if (!d.is224) {
         d.h[0] = init0;
         d.h[1] = init1;
@@ -177,16 +177,16 @@ public static ж<Digest> New224() {
 
 } partial class sha256_package {
 
-[GoMethodBody("Size")] internal static nint Sizeᴍ(ref Digest d) {
+internal static nint Size⁔(/*this*/ ref Digest d) {
     if (!d.is224) {
         return size;
     }
     return size224;
 }
 
-[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref Digest d) { return blockSize; }
+internal static nint BlockSize⁔(/*this*/ ref Digest d) { return blockSize; }
 
-[GoMethodBody("Write")] internal static (nint nn, error err) Writeᴍ(ж<Digest> Ꮡd, slice<byte> p) {
+internal static (nint nn, error err) Write⁔(/*this*/ ж<Digest> Ꮡd, slice<byte> p) {
     nint nn = default;
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
@@ -218,7 +218,7 @@ public static ж<Digest> New224() {
     return (nn, err);
 }
 
-[GoMethodBody("Sum")] internal static slice<byte> Sumᴍ(ref Digest d, slice<byte> @in) {
+internal static slice<byte> Sum⁔(/*this*/ ref Digest d, slice<byte> @in) {
     fips140.RecordApproved();
     // Make a copy of d so that caller can keep writing and summing.
     ref var d0 = ref heap<Digest>(d.ΔClone(), out var Ꮡd0);
@@ -229,7 +229,7 @@ public static ж<Digest> New224() {
     return appendꓸꓸꓸ(@in, hash[..]);
 }
 
-[GoMethodBody("checkSum")] internal static array<byte> checkSumᴍ(ж<Digest> Ꮡd) {
+internal static array<byte> checkSum⁔(/*this*/ ж<Digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var len = d.len;

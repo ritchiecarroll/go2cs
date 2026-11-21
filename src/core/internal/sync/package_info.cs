@@ -67,11 +67,14 @@ using static go.@internal.sync_package;
 
 namespace go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.@internal;
 using sync;
 using static sync_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("sync")]
 public static partial class sync_package
@@ -106,16 +109,16 @@ public static partial class sync_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(sync_package.HashTrieMap<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛHashTrieMap;
-[GoMethodHost(typeof(sync_package.Mutex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syncᴛMutex;
+[GoMethodHost(typeof(sync_package.HashTrieMap<,>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛHashTrieMap;
+[GoMethodHost(typeof(sync_package.Mutex)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syncᴛMutex;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class syncᴛMutex {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Lock(this ж<Mutex> Ꮡm) => sync_package.Lockᴍ(Ꮡm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool TryLock(this ж<Mutex> Ꮡm) => sync_package.TryLockᴍ(Ꮡm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void lockSlow(this ж<Mutex> Ꮡm) => sync_package.lockSlowᴍ(Ꮡm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Unlock(this ж<Mutex> Ꮡm) => sync_package.Unlockᴍ(Ꮡm);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void unlockSlow(this ж<Mutex> Ꮡm, int32 @new) => sync_package.unlockSlowᴍ(Ꮡm, @new);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Lock(this ж<Mutex> Ꮡm) => sync_package.Lock⁔(Ꮡm);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool TryLock(this ж<Mutex> Ꮡm) => sync_package.TryLock⁔(Ꮡm);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void lockSlow(this ж<Mutex> Ꮡm) => sync_package.lockSlow⁔(Ꮡm);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Unlock(this ж<Mutex> Ꮡm) => sync_package.Unlock⁔(Ꮡm);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void unlockSlow(this ж<Mutex> Ꮡm, int32 @new) => sync_package.unlockSlow⁔(Ꮡm, @new);
 }
 // </GlyphForwarders>

@@ -59,6 +59,10 @@ using static go.weak_package;
 
 namespace go;
 
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
+using System.ComponentModel;
+// </PackageInfoUsings>
+
 [GoPackage("weak")]
 public static partial class weak_package
 {
@@ -90,5 +94,5 @@ public static partial class weak_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(weak_package.Pointer<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class weakᴛPointer;
+[GoMethodHost(typeof(weak_package.Pointer<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class weakᴛPointer;
 // </MethodHolders>

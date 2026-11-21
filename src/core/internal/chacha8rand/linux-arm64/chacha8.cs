@@ -51,7 +51,7 @@ partial struct State {
 // with per-m data without holding the per-m lock.
 //
 //go:nosplit
-[GoMethodBody("Next")] internal static (uint64, bool) Nextᴍ(ref State s) {
+internal static (uint64, bool) Next⁔(/*this*/ ref State s) {
     var i = s.i;
     if (i >= s.n) {
         return (0, false);
@@ -61,7 +61,7 @@ partial struct State {
 }
 
 // Init seeds the State with the given seed value.
-[GoMethodBody("Init")] internal static void Initᴍ(ж<State> Ꮡs, /*[32]*/ array<byte> seed) {
+internal static void Init⁔(/*this*/ ж<State> Ꮡs, /*[32]*/ array<byte> seed) {
     seed = seed.Clone();
 
     Ꮡs.Init64(array<uint64>([
@@ -73,7 +73,7 @@ partial struct State {
 }
 
 // Init64 seeds the state with the given seed value.
-[GoMethodBody("Init64")] internal static void Init64ᴍ(ж<State> Ꮡs, /*[4]*/ array<uint64> seed) {
+internal static void Init64⁔(/*this*/ ж<State> Ꮡs, /*[4]*/ array<uint64> seed) {
     seed = seed.Clone();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -87,7 +87,7 @@ partial struct State {
 // Refill refills the state with more random values.
 // After a call to Refill, an immediate call to Next will succeed
 // (unless multiple goroutines are incorrectly sharing a state).
-[GoMethodBody("Refill")] internal static void Refillᴍ(ж<State> Ꮡs) {
+internal static void Refill⁔(/*this*/ ж<State> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     s.c += ctrInc;
@@ -117,7 +117,7 @@ partial struct State {
 // After a call to Reseed, any previously returned random values
 // have been erased from the memory of the state and cannot be
 // recovered.
-[GoMethodBody("Reseed")] internal static void Reseedᴍ(ж<State> Ꮡs) {
+internal static void Reseed⁔(/*this*/ ж<State> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     array<uint64> seed = new(4);
@@ -160,11 +160,11 @@ partial struct errUnmarshalChaCha8 {
 } partial class chacha8rand_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidChaCha8EncodingˢᴍerrUnmarshalChaCha8 => ref invalidChaCha8EncodingˢᵇᴍerrUnmarshalChaCha8;
-private static readonly @string invalidChaCha8EncodingˢᵇᴍerrUnmarshalChaCha8 = "invalid ChaCha8 encoding"u8;
+internal static ref readonly @string invalidChaCha8Encodingˢ⁔errUnmarshalChaCha8 => ref invalidChaCha8Encodingˢᵇ⁔errUnmarshalChaCha8;
+private static readonly @string invalidChaCha8Encodingˢᵇ⁔errUnmarshalChaCha8 = "invalid ChaCha8 encoding"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref errUnmarshalChaCha8 _) {
-    return invalidChaCha8EncodingˢᴍerrUnmarshalChaCha8;
+internal static @string Error⁔(/*this*/ ref errUnmarshalChaCha8 _) {
+    return invalidChaCha8Encodingˢ⁔errUnmarshalChaCha8;
 }
 
 } partial class chacha8rand_package {

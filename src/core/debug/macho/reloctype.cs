@@ -19,7 +19,7 @@ public static RelocTypeGeneric GENERIC_RELOC_TLV => 5;
 
 } partial class macho_package {
 
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(RelocTypeGeneric r) { return "macho."u8 + r.String(); }
+internal static @string GoString⁔(/*this*/ RelocTypeGeneric r) { return "macho."u8 + r.String(); }
 
 } partial class macho_package {
 
@@ -38,7 +38,7 @@ public static RelocTypeX86_64 X86_64_RELOC_TLV => 9;
 
 } partial class macho_package {
 
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(RelocTypeX86_64 r) { return "macho."u8 + r.String(); }
+internal static @string GoString⁔(/*this*/ RelocTypeX86_64 r) { return "macho."u8 + r.String(); }
 
 } partial class macho_package {
 
@@ -57,7 +57,7 @@ public static RelocTypeARM ARM_RELOC_HALF_SECTDIFF => 9;
 
 } partial class macho_package {
 
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(RelocTypeARM r) { return "macho."u8 + r.String(); }
+internal static @string GoString⁔(/*this*/ RelocTypeARM r) { return "macho."u8 + r.String(); }
 
 } partial class macho_package {
 
@@ -77,6 +77,6 @@ public static RelocTypeARM64 ARM64_RELOC_ADDEND => 10;
 
 } partial class macho_package {
 
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(RelocTypeARM64 r) { return "macho."u8 + r.String(); }
+internal static @string GoString⁔(/*this*/ RelocTypeARM64 r) { return "macho."u8 + r.String(); }
 
 }

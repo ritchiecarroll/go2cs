@@ -20,13 +20,13 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string constantResultIsNotˢᴍChecker => ref constantResultIsNotˢᵇᴍChecker;
-private static readonly @string constantResultIsNotˢᵇᴍChecker = "constant result is not representable"u8;
+internal static ref readonly @string constantResultIsNotˢ⁔Checker => ref constantResultIsNotˢᵇ⁔Checker;
+private static readonly @string constantResultIsNotˢᵇ⁔Checker = "constant result is not representable"u8;
 
 // overflow checks that the constant x is representable by its type.
 // For untyped constants, it checks that the value doesn't become
 // arbitrarily large.
-[GoMethodBody("overflow")] internal static void overflowᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, token.Pos opPos) {
+internal static void overflow⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, token.Pos opPos) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     assert(x.mode == constant_);
@@ -35,7 +35,7 @@ private static readonly @string constantResultIsNotˢᵇᴍChecker = "constant r
         // TODO(gri) We should report exactly what went wrong. At the
         //           moment we don't have the (go/constant) API for that.
         //           See also TODO in go/constant/value.go.
-        Ꮡcheck.error((atPos)opPos, InvalidConstVal, constantResultIsNotˢᴍChecker);
+        Ꮡcheck.error((atPos)opPos, InvalidConstVal, constantResultIsNotˢ⁔Checker);
         return;
     }
 
@@ -285,7 +285,7 @@ internal static constant.Value roundFloat64(constant.Value x) {
 
 // representable checks that a constant operand is representable in the given
 // basic type.
-[GoMethodBody("representable")] internal static void representableᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Basic> typ) {
+internal static void representable⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Basic> typ) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     var (v, code) = Ꮡcheck.representation(Ꮡx, typ);
@@ -302,7 +302,7 @@ internal static constant.Value roundFloat64(constant.Value x) {
 // basic type typ.
 //
 // If no such representation is possible, it returns a non-zero error code.
-[GoMethodBody("representation")] internal static (constant.Value, errors.Code) representationᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Basic> Ꮡtyp) {
+internal static (constant.Value, errors.Code) representation⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Basic> Ꮡtyp) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
@@ -329,29 +329,29 @@ internal static constant.Value roundFloat64(constant.Value x) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cannotConvertSToTypeSˢᴍChecker => ref cannotConvertSToTypeSˢᵇᴍChecker;
-private static readonly @string cannotConvertSToTypeSˢᵇᴍChecker = "cannot convert %s to type %s"u8;
-internal static ref readonly @string sTruncatedToSˢᴍChecker => ref sTruncatedToSˢᵇᴍChecker;
-private static readonly @string sTruncatedToSˢᵇᴍChecker = "%s truncated to %s"u8;
-internal static ref readonly @string sOverflowsSˢᴍChecker => ref sOverflowsSˢᵇᴍChecker;
-private static readonly @string sOverflowsSˢᵇᴍChecker = "%s overflows %s"u8;
+internal static ref readonly @string cannotConvertSToTypeSˢ⁔Checker => ref cannotConvertSToTypeSˢᵇ⁔Checker;
+private static readonly @string cannotConvertSToTypeSˢᵇ⁔Checker = "cannot convert %s to type %s"u8;
+internal static ref readonly @string sTruncatedToSˢ⁔Checker => ref sTruncatedToSˢᵇ⁔Checker;
+private static readonly @string sTruncatedToSˢᵇ⁔Checker = "%s truncated to %s"u8;
+internal static ref readonly @string sOverflowsSˢ⁔Checker => ref sOverflowsSˢᵇ⁔Checker;
+private static readonly @string sOverflowsSˢᵇ⁔Checker = "%s overflows %s"u8;
 
-[GoMethodBody("invalidConversion")] internal static void invalidConversionᴍ(ж<Checker> Ꮡcheck, errors.Code code, ж<operand> x, Type target) {
-    @string msg = cannotConvertSToTypeSˢᴍChecker;
+internal static void invalidConversion⁔(/*this*/ ж<Checker> Ꮡcheck, errors.Code code, ж<operand> x, Type target) {
+    @string msg = cannotConvertSToTypeSˢ⁔Checker;
     switch (code) {
     case var ᴛ when ᴛ == TruncatedFloat: {
-        msg = sTruncatedToSˢᴍChecker;
+        msg = sTruncatedToSˢ⁔Checker;
         break;
     }
     case var ᴛ when ᴛ == NumericOverflow: {
-        msg = sOverflowsSˢᴍChecker;
+        msg = sOverflowsSˢ⁔Checker;
         break;
     }}
     Ꮡcheck.errorf(new operandжpositioner(x), code, msg, x.OrTypedNil(), target);
 }
 
 // convertUntyped attempts to set the type of an untyped value to the target type.
-[GoMethodBody("convertUntyped")] internal static void convertUntypedᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type target) {
+internal static void convertUntyped⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type target) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 

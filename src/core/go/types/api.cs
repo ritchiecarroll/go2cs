@@ -70,7 +70,7 @@ partial struct Error {
 
 // Error returns an error string formatted as follows:
 // filename:line:column: message
-[GoMethodBody("Error")] internal static @string Errorᴍ(Error err) {
+internal static @string Error⁔(/*this*/ Error err) {
     return fmt.Sprintf("%s: %s"u8, err.Fset.Position(err.Pos), err.Msg);
 }
 
@@ -84,8 +84,8 @@ partial struct ArgumentError {
 
 } partial class types_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref ArgumentError e) { return e.Err.Error(); }
-[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref ArgumentError e) { return e.Err; }
+internal static @string Error⁔(/*this*/ ref ArgumentError e) { return e.Err.Error(); }
+internal static error Unwrap⁔(/*this*/ ref ArgumentError e) { return e.Err; }
 
 } partial class types_package {
 
@@ -332,13 +332,13 @@ partial struct Info {
 
 } partial class types_package {
 
-[GoMethodBody("recordTypes")] internal static bool recordTypesᴍ(ref Info info) {
+internal static bool recordTypes⁔(/*this*/ ref Info info) {
     return info.Types != nil;
 }
 
 // TypeOf returns the type of expression e, or nil if not found.
 // Precondition: the Types, Uses and Defs maps are populated.
-[GoMethodBody("TypeOf")] internal static Type TypeOfᴍ(ref Info info, ast.Expr e) {
+internal static Type TypeOf⁔(/*this*/ ref Info info, ast.Expr e) {
     var (t, ok) = info.Types[e, ꟷ]; if (ok) {
         return t.Type;
     }
@@ -357,7 +357,7 @@ partial struct Info {
 // it defines, not the type (*[TypeName]) it uses.
 //
 // Precondition: the Uses and Defs maps are populated.
-[GoMethodBody("ObjectOf")] internal static Object ObjectOfᴍ(ref Info info, ж<ast.Ident> id) {
+internal static Object ObjectOf⁔(/*this*/ ref Info info, ж<ast.Ident> id) {
     var obj = info.Defs[id]; if (obj != nil) {
         return obj;
     }
@@ -370,7 +370,7 @@ partial struct Info {
 // For dot-imports, the package name is ".".
 //
 // Precondition: the Defs and Implicts maps are populated.
-[GoMethodBody("PkgNameOf")] internal static ж<PkgName> PkgNameOfᴍ(ref Info info, ж<ast.ImportSpec> Ꮡimp) {
+internal static ж<PkgName> PkgNameOf⁔(/*this*/ ref Info info, ж<ast.ImportSpec> Ꮡimp) {
     ref var imp = ref Ꮡimp.DerefOrNull();
 
     Object obj = default;
@@ -397,25 +397,25 @@ partial struct TypeAndValue {
 
 // IsVoid reports whether the corresponding expression
 // is a function call without results.
-[GoMethodBody("IsVoid")] internal static bool IsVoidᴍ(TypeAndValue tv) {
+internal static bool IsVoid⁔(/*this*/ TypeAndValue tv) {
     return tv.mode == novalue;
 }
 
 // IsType reports whether the corresponding expression specifies a type.
-[GoMethodBody("IsType")] internal static bool IsTypeᴍ(TypeAndValue tv) {
+internal static bool IsType⁔(/*this*/ TypeAndValue tv) {
     return tv.mode == typexpr;
 }
 
 // IsBuiltin reports whether the corresponding expression denotes
 // a (possibly parenthesized) built-in function.
-[GoMethodBody("IsBuiltin")] internal static bool IsBuiltinᴍ(TypeAndValue tv) {
+internal static bool IsBuiltin⁔(/*this*/ TypeAndValue tv) {
     return tv.mode == Δbuiltin;
 }
 
 // IsValue reports whether the corresponding expression is a value.
 // Builtins are not considered values. Constant values have a non-
 // nil Value.
-[GoMethodBody("IsValue")] internal static bool IsValueᴍ(TypeAndValue tv) {
+internal static bool IsValue⁔(/*this*/ TypeAndValue tv) {
     switch (tv.mode) {
     case var ᴛ when ᴛ == constant_ || ᴛ == variable || ᴛ == mapindex || ᴛ == value || ᴛ == commaok || ᴛ == commaerr: {
         return true;
@@ -425,25 +425,25 @@ partial struct TypeAndValue {
 
 // IsNil reports whether the corresponding expression denotes the
 // predeclared value nil.
-[GoMethodBody("IsNil")] internal static bool IsNilᴍ(TypeAndValue tv) {
+internal static bool IsNil⁔(/*this*/ TypeAndValue tv) {
     return tv.mode == value && AreEqual(tv.Type, Typ[UntypedNil]);
 }
 
 // Addressable reports whether the corresponding expression
 // is addressable (https://golang.org/ref/spec#Address_operators).
-[GoMethodBody("Addressable")] internal static bool Addressableᴍ(TypeAndValue tv) {
+internal static bool Addressable⁔(/*this*/ TypeAndValue tv) {
     return tv.mode == variable;
 }
 
 // Assignable reports whether the corresponding expression
 // is assignable to (provided a value of the right type).
-[GoMethodBody("Assignable")] internal static bool Assignableᴍ(TypeAndValue tv) {
+internal static bool Assignable⁔(/*this*/ TypeAndValue tv) {
     return tv.mode == variable || tv.mode == mapindex;
 }
 
 // HasOk reports whether the corresponding expression may be
 // used on the rhs of a comma-ok assignment.
-[GoMethodBody("HasOk")] internal static bool HasOkᴍ(TypeAndValue tv) {
+internal static bool HasOk⁔(/*this*/ TypeAndValue tv) {
     return tv.mode == commaok || tv.mode == mapindex;
 }
 
@@ -468,7 +468,7 @@ partial struct Initializer {
 
 } partial class types_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref Initializer init) {
+internal static @string String⁔(/*this*/ ref Initializer init) {
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     foreach (var (i, lhs) in range(init.Lhs)) {
         if (i > 0) {
@@ -494,7 +494,7 @@ partial struct Initializer {
 // The package is specified by a list of *ast.Files and corresponding
 // file set, and the package path the package is identified with.
 // The clean path must not be empty or dot (".").
-[GoMethodBody("Check")] internal static (ж<Package>, error) Checkᴍ(ж<Config> Ꮡconf, @string path, ж<token.FileSet> fset, slice<ж<ast.File>> files, ж<Info> info) {
+internal static (ж<Package>, error) Check⁔(/*this*/ ж<Config> Ꮡconf, @string path, ж<token.FileSet> fset, slice<ж<ast.File>> files, ж<Info> info) {
     var pkg = NewPackage(path, ""u8);
     return (pkg, NewChecker(Ꮡconf, fset, pkg, info).Files(files));
 }

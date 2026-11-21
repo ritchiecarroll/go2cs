@@ -65,23 +65,23 @@ partial struct dirInfo {
 
 } partial class fs_package {
 
-[GoMethodBody("IsDir")] internal static bool IsDirᴍ(dirInfo di) {
+internal static bool IsDir⁔(/*this*/ dirInfo di) {
     return di.fileInfo.IsDir();
 }
 
-[GoMethodBody("Type")] internal static FileMode Typeᴍ(dirInfo di) {
+internal static FileMode Type⁔(/*this*/ dirInfo di) {
     return di.fileInfo.Mode().Type();
 }
 
-[GoMethodBody("Info")] internal static (FileInfo, error) Infoᴍ(dirInfo di) {
+internal static (FileInfo, error) Info⁔(/*this*/ dirInfo di) {
     return (di.fileInfo, default);
 }
 
-[GoMethodBody("Name")] internal static @string Nameᴍ(dirInfo di) {
+internal static @string Name⁔(/*this*/ dirInfo di) {
     return di.fileInfo.Name();
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(dirInfo di) {
+internal static @string String⁔(/*this*/ dirInfo di) {
     return FormatDirEntry(di);
 }
 

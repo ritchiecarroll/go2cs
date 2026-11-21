@@ -15,7 +15,7 @@ partial struct OSArch {
 
 } partial class platform_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(OSArch p) {
+internal static @string String⁔(/*this*/ OSArch p) {
     return p.GOOS + "/"u8 + p.GOARCH;
 }
 

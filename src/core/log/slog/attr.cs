@@ -101,17 +101,17 @@ public static Attr Any(@string key, any value) {
 } partial class slog_package {
 
 // Equal reports whether a and b have equal keys and values.
-[GoMethodBody("Equal")] internal static bool Equalᴍ(Attr a, Attr b) {
+internal static bool Equal⁔(/*this*/ Attr a, Attr b) {
     return a.Key == b.Key && a.Value.Equal(b.Value);
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Attr a) {
+internal static @string String⁔(/*this*/ Attr a) {
     return a.Key + "="u8 + a.Value.String();
 }
 
 // isEmpty reports whether a has an empty key and a nil value.
 // That can be written as Attr{} or Any("", nil).
-[GoMethodBody("isEmpty")] internal static bool isEmptyᴍ(Attr a) {
+internal static bool isEmpty⁔(/*this*/ Attr a) {
     return a.Key == ""u8 && a.Value.num == 0 && a.Value.any == nil;
 }
 

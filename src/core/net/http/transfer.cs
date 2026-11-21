@@ -40,7 +40,7 @@ partial struct errorReader {
 
 } partial class http_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(errorReader r, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ errorReader r, slice<byte> p) {
     return (0, r.err);
 }
 
@@ -53,7 +53,7 @@ partial struct byteReader {
 
 } partial class http_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref byteReader br, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref byteReader br, slice<byte> p) {
     if (br.done) {
         return (0, io.EOF);
     }
@@ -185,7 +185,7 @@ internal static (ж<transferWriter> t, error err) newTransferWriter(any r) {
 // a non-nil content-less ReadCloser (the more common case). In that more
 // common case, we act as if their Body were nil instead, and don't send
 // a body.
-[GoMethodBody("shouldSendChunkedRequestBody")] internal static bool shouldSendChunkedRequestBodyᴍ(ж<transferWriter> Ꮡt) {
+internal static bool shouldSendChunkedRequestBody⁔(/*this*/ ж<transferWriter> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Note that t.ContentLength is the corrected content length
@@ -225,7 +225,7 @@ internal static (ж<transferWriter> t, error err) newTransferWriter(any r) {
 //
 // In other words, this delay will not normally affect anybody, and there
 // are workarounds if it does.
-[GoMethodBody("probeRequestBody")] internal static partial void probeRequestBodyᴍ(ж<transferWriter> Ꮡt) {
+internal static partial void probeRequestBody⁔(/*this*/ ж<transferWriter> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.ByteReadCh = new channel<readResult>(1);
@@ -282,7 +282,7 @@ internal static bool noResponseBodyExpected(@string requestMethod) {
 
 } partial class http_package {
 
-[GoMethodBody("shouldSendContentLength")] internal static bool shouldSendContentLengthᴍ(ref transferWriter t) {
+internal static bool shouldSendContentLength⁔(/*this*/ ref transferWriter t) {
     if (chunked(t.TransferEncoding)) {
         return false;
     }
@@ -307,34 +307,34 @@ internal static bool noResponseBodyExpected(@string requestMethod) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string connectionˢᴍtransferWriter => ref connectionˢᵇᴍtransferWriter;
-private static readonly @string connectionˢᵇᴍtransferWriter = "Connection"u8;
-internal static ref readonly @string closeˢᴍtransferWriter => ref closeˢᵇᴍtransferWriter;
-private static readonly @string closeˢᵇᴍtransferWriter = "close"u8;
-internal static ref readonly @string connectionCloseˢᴍtransferWriter => ref connectionCloseˢᵇᴍtransferWriter;
-private static readonly @string connectionCloseˢᵇᴍtransferWriter = "Connection: close\r\n"u8;
-internal static ref readonly @string contentLengthˢ3ᴍtransferWriter => ref contentLengthˢ3ᵇᴍtransferWriter;
-private static readonly @string contentLengthˢ3ᵇᴍtransferWriter = "Content-Length: "u8;
-internal static ref readonly @string contentLengthˢᴍtransferWriter => ref contentLengthˢᵇᴍtransferWriter;
-private static readonly @string contentLengthˢᵇᴍtransferWriter = "Content-Length"u8;
-internal static ref readonly @string transferEncodingChunkedˢᴍtransferWriter => ref transferEncodingChunkedˢᵇᴍtransferWriter;
-private static readonly @string transferEncodingChunkedˢᵇᴍtransferWriter = "Transfer-Encoding: chunked\r\n"u8;
-internal static ref readonly @string transferEncodingˢᴍtransferWriter => ref transferEncodingˢᵇᴍtransferWriter;
-private static readonly @string transferEncodingˢᵇᴍtransferWriter = "Transfer-Encoding"u8;
-internal static ref readonly @string invalidTrailerKeyˢᴍtransferWriter => ref invalidTrailerKeyˢᵇᴍtransferWriter;
-private static readonly @string invalidTrailerKeyˢᵇᴍtransferWriter = "invalid Trailer key"u8;
-internal static ref readonly @string trailerˢᴍtransferWriter => ref trailerˢᵇᴍtransferWriter;
-private static readonly @string trailerˢᵇᴍtransferWriter = "Trailer"u8;
+internal static ref readonly @string connectionˢ⁔transferWriter => ref connectionˢᵇ⁔transferWriter;
+private static readonly @string connectionˢᵇ⁔transferWriter = "Connection"u8;
+internal static ref readonly @string closeˢ⁔transferWriter => ref closeˢᵇ⁔transferWriter;
+private static readonly @string closeˢᵇ⁔transferWriter = "close"u8;
+internal static ref readonly @string connectionCloseˢ⁔transferWriter => ref connectionCloseˢᵇ⁔transferWriter;
+private static readonly @string connectionCloseˢᵇ⁔transferWriter = "Connection: close\r\n"u8;
+internal static ref readonly @string contentLengthˢ3⁔transferWriter => ref contentLengthˢ3ᵇ⁔transferWriter;
+private static readonly @string contentLengthˢ3ᵇ⁔transferWriter = "Content-Length: "u8;
+internal static ref readonly @string contentLengthˢ⁔transferWriter => ref contentLengthˢᵇ⁔transferWriter;
+private static readonly @string contentLengthˢᵇ⁔transferWriter = "Content-Length"u8;
+internal static ref readonly @string transferEncodingChunkedˢ⁔transferWriter => ref transferEncodingChunkedˢᵇ⁔transferWriter;
+private static readonly @string transferEncodingChunkedˢᵇ⁔transferWriter = "Transfer-Encoding: chunked\r\n"u8;
+internal static ref readonly @string transferEncodingˢ⁔transferWriter => ref transferEncodingˢᵇ⁔transferWriter;
+private static readonly @string transferEncodingˢᵇ⁔transferWriter = "Transfer-Encoding"u8;
+internal static ref readonly @string invalidTrailerKeyˢ⁔transferWriter => ref invalidTrailerKeyˢᵇ⁔transferWriter;
+private static readonly @string invalidTrailerKeyˢᵇ⁔transferWriter = "invalid Trailer key"u8;
+internal static ref readonly @string trailerˢ⁔transferWriter => ref trailerˢᵇ⁔transferWriter;
+private static readonly @string trailerˢᵇ⁔transferWriter = "Trailer"u8;
 
-[GoMethodBody("writeHeader")] internal static error writeHeaderᴍ(ref transferWriter t, io.Writer w, ж<httptrace.ClientTrace> Ꮡtrace) {
+internal static error writeHeader⁔(/*this*/ ref transferWriter t, io.Writer w, ж<httptrace.ClientTrace> Ꮡtrace) {
     ref var trace = ref Ꮡtrace.DerefOrNull();
 
-    if (t.Close && !hasToken(t.Header.get(connectionˢᴍtransferWriter), closeˢᴍtransferWriter)) {
-        var (_, err) = io.WriteString(w, connectionCloseˢᴍtransferWriter); if (err != nil) {
+    if (t.Close && !hasToken(t.Header.get(connectionˢ⁔transferWriter), closeˢ⁔transferWriter)) {
+        var (_, err) = io.WriteString(w, connectionCloseˢ⁔transferWriter); if (err != nil) {
             return err;
         }
         if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
-            trace.WroteHeaderField(connectionˢᴍtransferWriter, ["close"]);
+            trace.WroteHeaderField(connectionˢ⁔transferWriter, ["close"]);
         }
     }
 
@@ -343,7 +343,7 @@ private static readonly @string trailerˢᵇᴍtransferWriter = "Trailer"u8;
     // TransferEncoding)
     if (t.shouldSendContentLength()) {
         {
-            var (_, err) = io.WriteString(w, contentLengthˢ3ᴍtransferWriter); if (err != nil) {
+            var (_, err) = io.WriteString(w, contentLengthˢ3⁔transferWriter); if (err != nil) {
                 return err;
             }
         }
@@ -353,14 +353,14 @@ private static readonly @string trailerˢᵇᴍtransferWriter = "Trailer"u8;
             }
         }
         if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
-            trace.WroteHeaderField(contentLengthˢᴍtransferWriter, slice<@string>([strconv.FormatInt(t.ContentLength, 10)]));
+            trace.WroteHeaderField(contentLengthˢ⁔transferWriter, slice<@string>([strconv.FormatInt(t.ContentLength, 10)]));
         }
     } else if (chunked(t.TransferEncoding)) {
-        var (_, err) = io.WriteString(w, transferEncodingChunkedˢᴍtransferWriter); if (err != nil) {
+        var (_, err) = io.WriteString(w, transferEncodingChunkedˢ⁔transferWriter); if (err != nil) {
             return err;
         }
         if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
-            trace.WroteHeaderField(transferEncodingˢᴍtransferWriter, ["chunked"]);
+            trace.WroteHeaderField(transferEncodingˢ⁔transferWriter, ["chunked"]);
         }
     }
 
@@ -373,7 +373,7 @@ private static readonly @string trailerˢᵇᴍtransferWriter = "Trailer"u8;
             k = CanonicalHeaderKey(k);
             switch (ᐧ) {
             case {} when k == "Transfer-Encoding"u8 || k == "Trailer"u8 || k == "Content-Length"u8: {
-                return badStringError(invalidTrailerKeyˢᴍtransferWriter, k);
+                return badStringError(invalidTrailerKeyˢ⁔transferWriter, k);
             }}
             keys = append(keys, k);
         }
@@ -385,7 +385,7 @@ private static readonly @string trailerˢᵇᴍtransferWriter = "Trailer"u8;
                 return err;
             }
             if (Ꮡtrace != nil && trace.WroteHeaderField != nil) {
-                trace.WroteHeaderField(trailerˢᴍtransferWriter, keys);
+                trace.WroteHeaderField(trailerˢ⁔transferWriter, keys);
             }
         }
     }
@@ -394,7 +394,7 @@ private static readonly @string trailerˢᵇᴍtransferWriter = "Trailer"u8;
 }
 
 // always closes t.BodyCloser
-[GoMethodBody("writeBody")] internal static error /*err*/ writeBodyᴍ(ж<transferWriter> Ꮡt, io.Writer w) {
+internal static error /*err*/ writeBody⁔(/*this*/ ж<transferWriter> Ꮡt, io.Writer w) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -477,7 +477,7 @@ private static readonly @string trailerˢᵇᴍtransferWriter = "Trailer"u8;
 // being saved in bodyReadError.
 //
 // This function is only intended for use in writeBody.
-[GoMethodBody("doBodyCopy")] internal static (int64 n, error err) doBodyCopyᴍ(ж<transferWriter> Ꮡt, io.Writer dst, io.Reader src) {
+internal static (int64 n, error err) doBodyCopy⁔(/*this*/ ж<transferWriter> Ꮡt, io.Writer dst, io.Reader src) {
     int64 n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -502,7 +502,7 @@ private static readonly @string trailerˢᵇᴍtransferWriter = "Trailer"u8;
 // files (*os.File types) are properly optimized.
 //
 // This function is only intended for use in writeBody.
-[GoMethodBody("unwrapBody")] internal static io.Reader unwrapBodyᴍ(ref transferWriter t) {
+internal static io.Reader unwrapBody⁔(/*this*/ ref transferWriter t) {
     {
         var (r, ok) = unwrapNopCloser(t.Body); if (ok) {
             return r;
@@ -536,7 +536,7 @@ partial struct transferReader {
 
 } partial class http_package {
 
-[GoMethodBody("protoAtLeast")] internal static bool protoAtLeastᴍ(ref transferReader t, nint m, nint n) {
+internal static bool protoAtLeast⁔(/*this*/ ref transferReader t, nint m, nint n) {
     return t.ProtoMajor > m || (t.ProtoMajor == m && t.ProtoMinor >= n);
 }
 
@@ -724,7 +724,7 @@ partial struct unsupportedTEError {
 
 } partial class http_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref unsupportedTEError uste) {
+internal static @string Error⁔(/*this*/ ref unsupportedTEError uste) {
     return uste.err;
 }
 
@@ -740,14 +740,14 @@ internal static bool isUnsupportedTEError(error err) {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string transferEncodingˢᴍtransferReader => ref transferEncodingˢᵇᴍtransferReader;
-private static readonly @string transferEncodingˢᵇᴍtransferReader = "Transfer-Encoding"u8;
-internal static ref readonly @string chunkedˢᴍtransferReader => ref chunkedˢᵇᴍtransferReader;
-private static readonly @string chunkedˢᵇᴍtransferReader = "chunked"u8;
+internal static ref readonly @string transferEncodingˢ⁔transferReader => ref transferEncodingˢᵇ⁔transferReader;
+private static readonly @string transferEncodingˢᵇ⁔transferReader = "Transfer-Encoding"u8;
+internal static ref readonly @string chunkedˢ⁔transferReader => ref chunkedˢᵇ⁔transferReader;
+private static readonly @string chunkedˢᵇ⁔transferReader = "chunked"u8;
 
 // parseTransferEncoding sets t.Chunked based on the Transfer-Encoding header.
-[GoMethodBody("parseTransferEncoding")] internal static error parseTransferEncodingᴍ(ref transferReader t) {
-    var (raw, present) = t.Header[transferEncodingˢᴍtransferReader, ꟷ];
+internal static error parseTransferEncoding⁔(/*this*/ ref transferReader t) {
+    var (raw, present) = t.Header[transferEncodingˢ⁔transferReader, ꟷ];
     if (!present) {
         return default;
     }
@@ -765,7 +765,7 @@ private static readonly @string chunkedˢᵇᴍtransferReader = "chunked"u8;
     if (len(raw) != 1) {
         return new unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(fmt.Sprintf("too many transfer encodings: %q"u8, raw))));
     }
-    if (!ascii.EqualFold(raw[0], chunkedˢᴍtransferReader)) {
+    if (!ascii.EqualFold(raw[0], chunkedˢ⁔transferReader)) {
         return new unsupportedTEErrorжerror(Ꮡ(new unsupportedTEError(fmt.Sprintf("unsupported transfer encoding: %q"u8, raw[0]))));
     }
 
@@ -964,7 +964,7 @@ public static error ErrBodyReadAfterClose = errors.New("http: invalid Read on cl
 
 } partial class http_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ж<body> Ꮡb, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ж<body> Ꮡb, slice<byte> p) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -987,7 +987,7 @@ public static error ErrBodyReadAfterClose = errors.New("http: invalid Read on cl
 }
 
 // Must hold b.mu.
-[GoMethodBody("readLocked")] internal static (nint n, error err) readLockedᴍ(ref body b, slice<byte> p) {
+internal static (nint n, error err) readLocked⁔(/*this*/ ref body b, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -1065,10 +1065,10 @@ internal static error errTrailerEOF = errors.New("http: unexpected EOF reading t
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string httpSuspiciouslyLongˢᴍbody => ref httpSuspiciouslyLongˢᵇᴍbody;
-private static readonly @string httpSuspiciouslyLongˢᵇᴍbody = "http: suspiciously long trailer after chunked body"u8;
+internal static ref readonly @string httpSuspiciouslyLongˢ⁔body => ref httpSuspiciouslyLongˢᵇ⁔body;
+private static readonly @string httpSuspiciouslyLongˢᵇ⁔body = "http: suspiciously long trailer after chunked body"u8;
 
-[GoMethodBody("readTrailer")] internal static error readTrailerᴍ(ref body b) {
+internal static error readTrailer⁔(/*this*/ ref body b) {
     // The common case, since nobody uses trailers.
     var (buf, err) = b.r.Peek(2);
     if (bytes.Equal(buf, singleCRLF)) {
@@ -1091,7 +1091,7 @@ private static readonly @string httpSuspiciouslyLongˢᵇᴍbody = "http: suspic
     // to the bufio.Reader's max size, looking for a double CRLF.
     // This limits the trailer to the underlying buffer size, typically 4kB.
     if (!seeUpcomingDoubleCRLF(b.r)) {
-        return errors.New(httpSuspiciouslyLongˢᴍbody);
+        return errors.New(httpSuspiciouslyLongˢ⁔body);
     }
 
     (var hdr, err) = textproto.NewReader(b.r).ReadMIMEHeader();
@@ -1128,14 +1128,14 @@ internal static void mergeSetHeader(ref Header dst, Header src) {
 // unreadDataSizeLocked returns the number of bytes of unread input.
 // It returns -1 if unknown.
 // b.mu must be held.
-[GoMethodBody("unreadDataSizeLocked")] internal static int64 unreadDataSizeLockedᴍ(ref body b) {
+internal static int64 unreadDataSizeLocked⁔(/*this*/ ref body b) {
     var (lr, ok) = b.src._<ж<io.LimitedReader>>(ᐧ); if (ok) {
         return lr.N;
     }
     return -1;
 }
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<body> Ꮡb) {
+internal static error Close⁔(/*this*/ ж<body> Ꮡb) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1196,7 +1196,7 @@ internal static void mergeSetHeader(ref Header dst, Header src) {
     finally { if (ᒐd1) Ꮡb.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("didEarlyClose")] internal static bool didEarlyCloseᴍ(ж<body> Ꮡb) {
+internal static bool didEarlyClose⁔(/*this*/ ж<body> Ꮡb) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1212,7 +1212,7 @@ internal static void mergeSetHeader(ref Header dst, Header src) {
 
 // bodyRemains reports whether future Read calls might
 // yield data.
-[GoMethodBody("bodyRemains")] internal static bool bodyRemainsᴍ(ж<body> Ꮡb) {
+internal static bool bodyRemains⁔(/*this*/ ж<body> Ꮡb) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1229,7 +1229,7 @@ internal static void mergeSetHeader(ref Header dst, Header src) {
     finally { if (ᒐd1) Ꮡb.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("registerOnHitEOF")] internal static void registerOnHitEOFᴍ(ж<body> Ꮡb, Action fn) {
+internal static void registerOnHitEOF⁔(/*this*/ ж<body> Ꮡb, Action fn) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1256,7 +1256,7 @@ partial struct bodyLocked {
 
 } partial class http_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(bodyLocked bl, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ bodyLocked bl, slice<byte> p) {
     if (bl.b.closed) {
         return (0, ErrBodyReadAfterClose);
     }
@@ -1306,7 +1306,7 @@ partial struct finishAsyncByteRead {
 
 } partial class http_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(finishAsyncByteRead fr, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ finishAsyncByteRead fr, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -1372,7 +1372,7 @@ partial struct bufioFlushWriter {
 
 } partial class http_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(bufioFlushWriter fw, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ bufioFlushWriter fw, slice<byte> p) {
     nint n = default;
     error err = default;
 

@@ -87,20 +87,20 @@ public static ж<Trace> NewTrace(version.Version ver) {
 
 // ExpectFailure writes down that the trace should be broken. The caller
 // must provide a pattern matching the expected error produced by the parser.
-[GoMethodBody("ExpectFailure")] internal static void ExpectFailureᴍ(ref Trace t, @string pattern) {
+internal static void ExpectFailure⁔(/*this*/ ref Trace t, @string pattern) {
     t.bad = true;
     t.badMatch = regexp.MustCompile(pattern);
 }
 
 // ExpectSuccess writes down that the trace should successfully parse.
-[GoMethodBody("ExpectSuccess")] internal static void ExpectSuccessᴍ(ref Trace t) {
+internal static void ExpectSuccess⁔(/*this*/ ref Trace t) {
     t.bad = false;
 }
 
 // RawEvent emits an event into the trace. name must correspond to one
 // of the names in Specs() result for the version that was passed to
 // this trace.
-[GoMethodBody("RawEvent")] internal static void RawEventᴍ(ref Trace t, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
+internal static void RawEvent⁔(/*this*/ ref Trace t, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
     var args = argsʗp.sslice();
 
     t.events = append(t.events, t.createEvent(typ, data, args.ꓸꓸꓸ));
@@ -109,7 +109,7 @@ public static ж<Trace> NewTrace(version.Version ver) {
 // DisableTimestamps makes the timestamps for all events generated after
 // this call zero. Raw events are exempted from this because the caller
 // has to pass their own timestamp into those events anyway.
-[GoMethodBody("DisableTimestamps")] internal static void DisableTimestampsᴍ(ref Trace t) {
+internal static void DisableTimestamps⁔(/*this*/ ref Trace t) {
     t.validTimestamps = false;
 }
 
@@ -117,7 +117,7 @@ public static ж<Trace> NewTrace(version.Version ver) {
 //
 // This provides more structure than Event to allow for more easily
 // creating complex traces that are mostly or completely correct.
-[GoMethodBody("Generation")] internal static ж<Generation> Generationᴍ(ж<Trace> Ꮡt, uint64 gen) {
+internal static ж<Generation> Generation⁔(/*this*/ ж<Trace> Ꮡt, uint64 gen) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var g = Ꮡ(new Generation(
@@ -132,7 +132,7 @@ public static ж<Trace> NewTrace(version.Version ver) {
 }
 
 // Generate creates a test file for the trace.
-[GoMethodBody("Generate")] internal static slice<byte> Generateᴍ(ref Trace t) {
+internal static slice<byte> Generate⁔(/*this*/ ref Trace t) {
     // Trace file contents.
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
     var (tw, err) = raw.NewTextWriter(new bytes_BufferжWriter(Ꮡbuf), t.ver);
@@ -165,7 +165,7 @@ public static ж<Trace> NewTrace(version.Version ver) {
     )));
 }
 
-[GoMethodBody("createEvent")] internal static raw.Event createEventᴍ(ref Trace t, tracev2.EventType ev, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
+internal static raw.Event createEvent⁔(/*this*/ ref Trace t, tracev2.EventType ev, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
     var args = argsʗp.slice();
 
     var spec = t.specs[ev];
@@ -212,7 +212,7 @@ partial struct Generation {
 // Batch starts a new event batch in the trace data.
 //
 // This is convenience function for generating correct batches.
-[GoMethodBody("Batch")] internal static ж<Batch> Batchᴍ(ж<Generation> Ꮡg, trace.ThreadID thread, Time time) {
+internal static ж<Batch> Batch⁔(/*this*/ ж<Generation> Ꮡg, trace.ThreadID thread, Time time) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     var b = Ꮡ(new Batch(
@@ -228,7 +228,7 @@ partial struct Generation {
 //
 // This is a convenience function for easily adding correct
 // strings to traces.
-[GoMethodBody("String")] internal static uint64 Stringᴍ(ref Generation g, @string s) {
+internal static uint64 String⁔(/*this*/ ref Generation g, @string s) {
     if (len(s) == 0) {
         return 0;
     }
@@ -244,7 +244,7 @@ partial struct Generation {
 //
 // This is a convenience function for easily adding correct
 // stacks to traces.
-[GoMethodBody("Stack")] internal static uint64 Stackᴍ(ref Generation g, slice<trace.StackFrame> stk) {
+internal static uint64 Stack⁔(/*this*/ ref Generation g, slice<trace.StackFrame> stk) {
     if (len(stk) == 0) {
         return 0;
     }
@@ -266,7 +266,7 @@ partial struct Generation {
 // the time value is the timestamp of the EvClockSnapshot event. For earlier
 // version, the time value is the timestamp of the batch containing a lone
 // EvFrequency event.
-[GoMethodBody("Sync")] internal static void Syncᴍ(ref Generation g, uint64 freq, Time timeΔ1, uint64 mono, time.Time wall) {
+internal static void Sync⁔(/*this*/ ref Generation g, uint64 freq, Time timeΔ1, uint64 mono, time.Time wall) {
     if (g.trace.ver < version.Go125 && (mono != 0 || !wall.IsZero())) {
         throw panic(fmt.Sprintf("mono and wall args are not supported in go1.%d traces"u8, g.trace.ver));
     }
@@ -290,11 +290,11 @@ partial struct sync {
 } partial class testgen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string clockSnapshotˢᴍGeneration => ref clockSnapshotˢᵇᴍGeneration;
-private static readonly @string clockSnapshotˢᵇᴍGeneration = "ClockSnapshot"u8;
+private static ref readonly @string clockSnapshotˢ⁔Generation => ref clockSnapshotˢᵇ⁔Generation;
+private static readonly @string clockSnapshotˢᵇ⁔Generation = "ClockSnapshot"u8;
 
 // writeEventsTo emits event batches in the generation to tw.
-[GoMethodBody("writeEventsTo")] internal static void writeEventsToᴍ(ж<Generation> Ꮡg, ж<raw.TextWriter> Ꮡtw) {
+internal static void writeEventsTo⁔(/*this*/ ж<Generation> Ꮡg, ж<raw.TextWriter> Ꮡtw) {
     ref var g = ref Ꮡg.DerefOrNull();
     ref var tw = ref Ꮡtw.DerefOrNull();
 
@@ -307,7 +307,7 @@ private static readonly @string clockSnapshotˢᵇᴍGeneration = "ClockSnapshot
         bΔ1.RawEvent(tracev2.EvFrequency, default, g.sync.freq);
         var sec = (uint64)g.sync.walltime.Unix();
         var nsec = (uint64)g.sync.walltime.Nanosecond();
-        bΔ1.Event(clockSnapshotˢᴍGeneration, g.sync.mono, sec, nsec);
+        bΔ1.Event(clockSnapshotˢ⁔Generation, g.sync.mono, sec, nsec);
         bΔ1.writeEventsTo(Ꮡtw);
     }
 
@@ -368,7 +368,7 @@ private static readonly @string clockSnapshotˢᵇᴍGeneration = "ClockSnapshot
     }
 }
 
-[GoMethodBody("newStructuralBatch")] internal static ж<Batch> newStructuralBatchᴍ(ж<Generation> Ꮡg) {
+internal static ж<Batch> newStructuralBatch⁔(/*this*/ ж<Generation> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     var b = Ꮡ(new Batch(gen: Ꮡg, thread: trace.NoThread));
@@ -392,7 +392,7 @@ partial struct Batch {
 // Event emits an event into a batch. name must correspond to one
 // of the names in Specs() result for the version that was passed to
 // this trace. Callers must omit the timestamp delta.
-[GoMethodBody("Event")] internal static void Eventᴍ(ref Batch b, @string name, params ꓸꓸꓸany argsʗp) {
+internal static void Event⁔(/*this*/ ref Batch b, @string name, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var (ev, ok) = b.gen.trace.names[name, ꟷ];
@@ -420,7 +420,7 @@ partial struct Batch {
     b.RawEvent(ev, default, uintArgs.ꓸꓸꓸ);
 }
 
-[GoMethodBody("uintArgFor")] internal static uint64 uintArgForᴍ(ref Batch b, any arg, @string argSpec) {
+internal static uint64 uintArgFor⁔(/*this*/ ref Batch b, any arg, @string argSpec) {
     var components = strings.SplitN(argSpec, "_", 2);
     @string typStr = components[0];
     if (len(components) == 2) {
@@ -478,7 +478,7 @@ partial struct Batch {
 // RawEvent emits an event into a batch. name must correspond to one
 // of the names in Specs() result for the version that was passed to
 // this trace.
-[GoMethodBody("RawEvent")] internal static void RawEventᴍ(ref Batch b, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
+internal static void RawEvent⁔(/*this*/ ref Batch b, tracev2.EventType typ, slice<byte> data, params ꓸꓸꓸuint64 argsʗp) {
     var args = argsʗp.sslice();
 
     var ev = b.gen.trace.createEvent(typ, data, args.ꓸꓸꓸ);
@@ -499,7 +499,7 @@ partial struct Batch {
 }
 
 // writeEventsTo emits events in the batch, including the batch header, to tw.
-[GoMethodBody("writeEventsTo")] internal static void writeEventsToᴍ(ref Batch b, ж<raw.TextWriter> Ꮡtw) {
+internal static void writeEventsTo⁔(/*this*/ ref Batch b, ж<raw.TextWriter> Ꮡtw) {
     ref var tw = ref Ꮡtw.DerefOrNull();
 
     tw.WriteEvent(new raw.Event(
@@ -513,7 +513,7 @@ partial struct Batch {
 }
 
 // setTimestamp sets the timestamp for the batch.
-[GoMethodBody("setTimestamp")] internal static void setTimestampᴍ(ref Batch b, Time t) {
+internal static void setTimestamp⁔(/*this*/ ref Batch b, Time t) {
     if (b.gen.trace.validTimestamps) {
         b.timestamp = t;
         b.gen.trace.lastTs = t;

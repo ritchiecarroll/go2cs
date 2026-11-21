@@ -41,7 +41,7 @@ internal static moveToFrontDecoder newMTFDecoderWithRange(nint n) {
 
 } partial class bzip2_package {
 
-[GoMethodBody("Decode")] internal static byte /*b*/ Decodeᴍ(moveToFrontDecoder m, nint n) {
+internal static byte /*b*/ Decode⁔(/*this*/ moveToFrontDecoder m, nint n) {
     byte b = default;
 
     // Implement move-to-front with a simple copy. This approach
@@ -55,7 +55,7 @@ internal static moveToFrontDecoder newMTFDecoderWithRange(nint n) {
 }
 
 // First returns the symbol at the front of the list.
-[GoMethodBody("First")] internal static byte Firstᴍ(moveToFrontDecoder m) {
+internal static byte First⁔(/*this*/ moveToFrontDecoder m) {
     return m[0];
 }
 

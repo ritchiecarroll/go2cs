@@ -48,13 +48,13 @@ partial struct fmt {
 
 } partial class fmt_package {
 
-[GoMethodBody("clearflags")] internal static void clearflagsᴍ(ref fmt f) {
+internal static void clearflags⁔(/*this*/ ref fmt f) {
     f.fmtFlags = new fmtFlags();
     f.wid = 0;
     f.prec = 0;
 }
 
-[GoMethodBody("init")] internal static void initᴍ(ref fmt f, ж<buffer> Ꮡbuf) {
+internal static void init⁔(/*this*/ ref fmt f, ж<buffer> Ꮡbuf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     f.buf = Ꮡbuf;
@@ -62,7 +62,7 @@ partial struct fmt {
 }
 
 // writePadding generates n bytes of padding.
-[GoMethodBody("writePadding")] internal static void writePaddingᴍ(ref fmt f, nint n) {
+internal static void writePadding⁔(/*this*/ ref fmt f, nint n) {
     if (n <= 0) { // No padding bytes needed.
         return;
     }
@@ -89,7 +89,7 @@ partial struct fmt {
 }
 
 // pad appends b to f.buf, padded on left (!f.minus) or right (f.minus).
-[GoMethodBody("pad")] internal static void padᴍ(ref fmt f, slice<byte> b) {
+internal static void pad⁔(/*this*/ ref fmt f, slice<byte> b) {
     if (!f.widPresent || f.wid == 0) {
         f.buf.write(b);
         return;
@@ -107,7 +107,7 @@ partial struct fmt {
 }
 
 // padString appends s to f.buf, padded on left (!f.minus) or right (f.minus).
-[GoMethodBody("padString")] internal static void padStringᴍ(ref fmt f, sstring s) {
+internal static void padString⁔(/*this*/ ref fmt f, sstring s) {
     if (!f.widPresent || f.wid == 0) {
         f.buf.writeString(s);
         return;
@@ -125,22 +125,22 @@ partial struct fmt {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string trueˢᴍfmt => ref trueˢᵇᴍfmt;
-private static readonly @string trueˢᵇᴍfmt = "true"u8;
-internal static ref readonly @string falseˢᴍfmt => ref falseˢᵇᴍfmt;
-private static readonly @string falseˢᵇᴍfmt = "false"u8;
+internal static ref readonly @string trueˢ⁔fmt => ref trueˢᵇ⁔fmt;
+private static readonly @string trueˢᵇ⁔fmt = "true"u8;
+internal static ref readonly @string falseˢ⁔fmt => ref falseˢᵇ⁔fmt;
+private static readonly @string falseˢᵇ⁔fmt = "false"u8;
 
 // fmtBoolean formats a boolean.
-[GoMethodBody("fmtBoolean")] internal static void fmtBooleanᴍ(ref fmt f, bool v) {
+internal static void fmtBoolean⁔(/*this*/ ref fmt f, bool v) {
     if (v) {
-        f.padString(trueˢᴍfmt);
+        f.padString(trueˢ⁔fmt);
     } else {
-        f.padString(falseˢᴍfmt);
+        f.padString(falseˢ⁔fmt);
     }
 }
 
 // fmtUnicode formats a uint64 as "U+0078" or with f.sharp set as "U+0078 'x'".
-[GoMethodBody("fmtUnicode")] internal static void fmtUnicodeᴍ(ref fmt f, uint64 u) {
+internal static void fmtUnicode⁔(/*this*/ ref fmt f, uint64 u) {
     var buf = f.intbuf[0..];
 
     // With default precision set the maximum needed buf length is 18
@@ -199,7 +199,7 @@ private static readonly @string falseˢᵇᴍfmt = "false"u8;
 }
 
 // fmtInteger formats signed and unsigned integers.
-[GoMethodBody("fmtInteger")] internal static void fmtIntegerᴍ(ref fmt f, uint64 u, nint @base, bool isSigned, rune verb, sstring digits) {
+internal static void fmtInteger⁔(/*this*/ ref fmt f, uint64 u, nint @base, bool isSigned, rune verb, sstring digits) {
     var negative = isSigned && (int64)u < 0;
     if (negative) {
         u = ((uint64)0 - u);
@@ -343,7 +343,7 @@ private static readonly @string falseˢᵇᴍfmt = "false"u8;
 }
 
 // truncateString truncates the string s to the specified precision, if present.
-[GoMethodBody("truncateString")] internal static @string truncateStringᴍ(ref fmt f, @string s) {
+internal static @string truncateString⁔(/*this*/ ref fmt f, @string s) {
     if (f.precPresent) {
         nint n = f.prec;
         foreach (var (i, _) in s) {
@@ -357,7 +357,7 @@ private static readonly @string falseˢᵇᴍfmt = "false"u8;
 }
 
 // truncate truncates the byte slice b as a string of the specified precision, if present.
-[GoMethodBody("truncate")] internal static slice<byte> truncateᴍ(ref fmt f, slice<byte> b) {
+internal static slice<byte> truncate⁔(/*this*/ ref fmt f, slice<byte> b) {
     if (f.precPresent) {
         nint n = f.prec;
         for (nint i = 0; i < len(b); ) {
@@ -373,19 +373,19 @@ private static readonly @string falseˢᵇᴍfmt = "false"u8;
 }
 
 // fmtS formats a string.
-[GoMethodBody("fmtS")] internal static void fmtSᴍ(ref fmt f, @string s) {
+internal static void fmtS⁔(/*this*/ ref fmt f, @string s) {
     s = f.truncateString(s);
     f.padString(s);
 }
 
 // fmtBs formats the byte slice b as if it was formatted as string with fmtS.
-[GoMethodBody("fmtBs")] internal static void fmtBsᴍ(ref fmt f, slice<byte> b) {
+internal static void fmtBs⁔(/*this*/ ref fmt f, slice<byte> b) {
     b = f.truncate(b);
     f.pad(b);
 }
 
 // fmtSbx formats a string or byte slice as a hexadecimal encoding of its bytes.
-[GoMethodBody("fmtSbx")] internal static void fmtSbxᴍ(ref fmt f, sstring s, slice<byte> b, sstring digits) {
+internal static void fmtSbx⁔(/*this*/ ref fmt f, sstring s, slice<byte> b, sstring digits) {
     nint length = len(b);
     if (b == nil) {
         // No byte slice present. Assume string s should be encoded.
@@ -451,19 +451,19 @@ private static readonly @string falseˢᵇᴍfmt = "false"u8;
 }
 
 // fmtSx formats a string as a hexadecimal encoding of its bytes.
-[GoMethodBody("fmtSx")] internal static void fmtSxᴍ(ref fmt f, sstring s, sstring digits) {
+internal static void fmtSx⁔(/*this*/ ref fmt f, sstring s, sstring digits) {
     f.fmtSbx(s, default, digits);
 }
 
 // fmtBx formats a byte slice as a hexadecimal encoding of its bytes.
-[GoMethodBody("fmtBx")] internal static void fmtBxᴍ(ref fmt f, slice<byte> b, sstring digits) {
+internal static void fmtBx⁔(/*this*/ ref fmt f, slice<byte> b, sstring digits) {
     f.fmtSbx(""u8, b, digits);
 }
 
 // fmtQ formats a string as a double-quoted, escaped Go string constant.
 // If f.sharp is set a raw (backquoted) string may be returned instead
 // if the string does not contain any control characters other than tab.
-[GoMethodBody("fmtQ")] internal static void fmtQᴍ(ref fmt f, @string s) {
+internal static void fmtQ⁔(/*this*/ ref fmt f, @string s) {
     s = f.truncateString(s);
     if (f.sharp && strconv.CanBackquote(s)) {
         f.padString("`"u8 + s + "`"u8);
@@ -479,7 +479,7 @@ private static readonly @string falseˢᵇᴍfmt = "false"u8;
 
 // fmtC formats an integer as a Unicode character.
 // If the character is not valid Unicode, it will print '\ufffd'.
-[GoMethodBody("fmtC")] internal static void fmtCᴍ(ref fmt f, uint64 c) {
+internal static void fmtC⁔(/*this*/ ref fmt f, uint64 c) {
     // Explicitly check whether c exceeds utf8.MaxRune since the conversion
     // of a uint64 to a rune may lose precision that indicates an overflow.
     var r = (rune)c;
@@ -492,7 +492,7 @@ private static readonly @string falseˢᵇᴍfmt = "false"u8;
 
 // fmtQc formats an integer as a single-quoted, escaped Go character constant.
 // If the character is not valid Unicode, it will print '\ufffd'.
-[GoMethodBody("fmtQc")] internal static void fmtQcᴍ(ref fmt f, uint64 c) {
+internal static void fmtQc⁔(/*this*/ ref fmt f, uint64 c) {
     var r = (rune)c;
     if (c > utf8.MaxRune) {
         r = utf8.RuneError;
@@ -507,7 +507,7 @@ private static readonly @string falseˢᵇᴍfmt = "false"u8;
 
 // fmtFloat formats a float64. It assumes that verb is a valid format specifier
 // for strconv.AppendFloat and therefore fits into a byte.
-[GoMethodBody("fmtFloat")] internal static void fmtFloatᴍ(ref fmt f, float64 v, nint size, rune verb, nint prec) {
+internal static void fmtFloat⁔(/*this*/ ref fmt f, float64 v, nint size, rune verb, nint prec) {
     var numᴷ = new stackAppend<byte>();
 
     // Explicit precision in format specifier overrules default precision.

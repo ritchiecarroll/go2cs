@@ -65,7 +65,7 @@ public static ж<Cond> NewCond(Locker l) {
 //	}
 //	... make use of condition ...
 //	c.L.Unlock()
-[GoMethodBody("Wait")] internal static void Waitᴍ(ж<Cond> Ꮡc) {
+internal static void Wait⁔(/*this*/ ж<Cond> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     Ꮡc.Ꮡchecker.check();
@@ -82,7 +82,7 @@ public static ж<Cond> NewCond(Locker l) {
 //
 // Signal() does not affect goroutine scheduling priority; if other goroutines
 // are attempting to lock c.L, they may be awoken before a "waiting" goroutine.
-[GoMethodBody("Signal")] internal static void Signalᴍ(ж<Cond> Ꮡc) {
+internal static void Signal⁔(/*this*/ ж<Cond> Ꮡc) {
     Ꮡc.Ꮡchecker.check();
     runtime_notifyListNotifyOne(Ꮡc.Ꮡnotify);
 }
@@ -91,7 +91,7 @@ public static ж<Cond> NewCond(Locker l) {
 //
 // It is allowed but not required for the caller to hold c.L
 // during the call.
-[GoMethodBody("Broadcast")] internal static void Broadcastᴍ(ж<Cond> Ꮡc) {
+internal static void Broadcast⁔(/*this*/ ж<Cond> Ꮡc) {
     Ꮡc.Ꮡchecker.check();
     runtime_notifyListNotifyAll(Ꮡc.Ꮡnotify);
 }
@@ -120,7 +120,7 @@ partial struct noCopy {
 } partial class sync_package {
 
 // Lock is a no-op used by -copylocks checker from `go vet`.
-[GoMethodBody("Lock")] internal static void Lockᴍ(ref noCopy _) { }
-[GoMethodBody("Unlock")] internal static void Unlockᴍ(ref noCopy _) { }
+internal static void Lock⁔(/*this*/ ref noCopy _) { }
+internal static void Unlock⁔(/*this*/ ref noCopy _) { }
 
 }

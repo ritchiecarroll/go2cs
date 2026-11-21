@@ -108,11 +108,11 @@ partial struct queueOnePass {
 
 } partial class regexp_package {
 
-[GoMethodBody("empty")] internal static bool emptyᴍ(ref queueOnePass q) {
+internal static bool empty⁔(/*this*/ ref queueOnePass q) {
     return q.nextIndex >= q.size;
 }
 
-[GoMethodBody("next")] internal static uint32 /*n*/ nextᴍ(ref queueOnePass q) {
+internal static uint32 /*n*/ next⁔(/*this*/ ref queueOnePass q) {
     uint32 n = default;
 
     n = q.dense[q.nextIndex];
@@ -120,25 +120,25 @@ partial struct queueOnePass {
     return n;
 }
 
-[GoMethodBody("clear")] internal static void clearᴍ(ref queueOnePass q) {
+internal static void clear⁔(/*this*/ ref queueOnePass q) {
     q.size = 0;
     q.nextIndex = 0;
 }
 
-[GoMethodBody("contains")] internal static bool containsᴍ(ref queueOnePass q, uint32 u) {
+internal static bool contains⁔(/*this*/ ref queueOnePass q, uint32 u) {
     if (u >= (uint32)len(q.sparse)) {
         return false;
     }
     return q.sparse[u] < q.size && q.dense[q.sparse[u]] == u;
 }
 
-[GoMethodBody("insert")] internal static void insertᴍ(ref queueOnePass q, uint32 u) {
+internal static void insert⁔(/*this*/ ref queueOnePass q, uint32 u) {
     if (!q.contains(u)) {
         q.insertNew(u);
     }
 }
 
-[GoMethodBody("insertNew")] internal static void insertNewᴍ(ref queueOnePass q, uint32 u) {
+internal static void insertNew⁔(/*this*/ ref queueOnePass q, uint32 u) {
     if (u >= (uint32)len(q.sparse)) {
         return;
     }

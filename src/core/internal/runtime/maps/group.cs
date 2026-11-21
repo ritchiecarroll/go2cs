@@ -47,7 +47,7 @@ partial struct bitset /*num:uint64*/;
 // is in the set.
 //
 // Preconditions: b is not 0 (empty).
-[GoMethodBody("first")] internal static uintptr firstᴍ(bitset b) {
+internal static uintptr first⁔(/*this*/ bitset b) {
     return bitsetFirst(b);
 }
 
@@ -65,12 +65,12 @@ internal static uintptr bitsetFirst(bitset b) {
 
 // removeFirst clears the first set bit (that is, resets the least significant
 // set bit to 0).
-[GoMethodBody("removeFirst")] internal static bitset removeFirstᴍ(bitset b) {
+internal static bitset removeFirst⁔(/*this*/ bitset b) {
     return (bitset)(b & (b - 1));
 }
 
 // removeBelow clears all set bits below slot i (non-inclusive).
-[GoMethodBody("removeBelow")] internal static bitset removeBelowᴍ(bitset b, uintptr i) {
+internal static bitset removeBelow⁔(/*this*/ bitset b, uintptr i) {
     return bitsetRemoveBelow(b, i);
 }
 
@@ -91,7 +91,7 @@ internal static bitset bitsetRemoveBelow(bitset b, uintptr i) {
 //
 // This is intended for use with shiftOutLowest to loop over all entries in the
 // bitset regardless of whether they are set.
-[GoMethodBody("lowestSet")] internal static bool lowestSetᴍ(bitset b) {
+internal static bool lowestSet⁔(/*this*/ bitset b) {
     return bitsetLowestSet(b);
 }
 
@@ -108,7 +108,7 @@ internal static bool bitsetLowestSet(bitset b) {
 
 // shiftOutLowest shifts the lowest entry out of the bitset. Afterwards, the
 // lowest entry in the bitset corresponds to the next slot.
-[GoMethodBody("shiftOutLowest")] internal static bitset shiftOutLowestᴍ(bitset b) {
+internal static bitset shiftOutLowest⁔(/*this*/ bitset b) {
     return bitsetShiftOutLowest(b);
 }
 
@@ -124,7 +124,7 @@ internal static bitset bitsetShiftOutLowest(bitset b) {
 } partial class maps_package {
 
 // count returns the number of bits set in b.
-[GoMethodBody("count")] internal static nint countᴍ(bitset b) {
+internal static nint count⁔(/*this*/ bitset b) {
     // Note: works for both bitset representations (AMD64 and generic)
     return sys.OnesCount64((uint64)b);
 }
@@ -148,7 +148,7 @@ partial struct ctrlGroup /*num:uint64*/;
 } partial class maps_package {
 
 // get returns the i-th control byte.
-[GoMethodBody("get")] internal static ctrl getᴍ(ж<ctrlGroup> Ꮡg, uintptr i) {
+internal static ctrl get⁔(/*this*/ ж<ctrlGroup> Ꮡg, uintptr i) {
     if (goarch.BigEndian) {
         return ~@unsafe.Pointer.To<ctrl>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡg), 7 - i));
     }
@@ -156,7 +156,7 @@ partial struct ctrlGroup /*num:uint64*/;
 }
 
 // set sets the i-th control byte.
-[GoMethodBody("set")] internal static void setᴍ(ж<ctrlGroup> Ꮡg, uintptr i, ctrl c) {
+internal static void set⁔(/*this*/ ж<ctrlGroup> Ꮡg, uintptr i, ctrl c) {
     if (goarch.BigEndian) {
         (@unsafe.Pointer.To<ctrl>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡg), 7 - i))).Value = c;
         return;
@@ -165,13 +165,13 @@ partial struct ctrlGroup /*num:uint64*/;
 }
 
 // setEmpty sets all the control bytes to empty.
-[GoMethodBody("setEmpty")] internal static void setEmptyᴍ(ref ctrlGroup g) {
+internal static void setEmpty⁔(/*this*/ ref ctrlGroup g) {
     g = (ctrlGroup)bitsetEmpty;
 }
 
 // matchH2 returns the set of slots which are full and for which the 7-bit hash
 // matches the given value. May return false positives.
-[GoMethodBody("matchH2")] internal static bitset matchH2ᴍ(ctrlGroup g, uintptr h) {
+internal static bitset matchH2⁔(/*this*/ ctrlGroup g, uintptr h) {
     return ctrlGroupMatchH2(g, h);
 }
 
@@ -197,7 +197,7 @@ internal static bitset ctrlGroupMatchH2(ctrlGroup g, uintptr h) {
 } partial class maps_package {
 
 // matchEmpty returns the set of slots in the group that are empty.
-[GoMethodBody("matchEmpty")] internal static bitset matchEmptyᴍ(ctrlGroup g) {
+internal static bitset matchEmpty⁔(/*this*/ ctrlGroup g) {
     return ctrlGroupMatchEmpty(g);
 }
 
@@ -222,7 +222,7 @@ internal static bitset ctrlGroupMatchEmpty(ctrlGroup g) {
 
 // matchEmptyOrDeleted returns the set of slots in the group that are empty or
 // deleted.
-[GoMethodBody("matchEmptyOrDeleted")] internal static bitset matchEmptyOrDeletedᴍ(ctrlGroup g) {
+internal static bitset matchEmptyOrDeleted⁔(/*this*/ ctrlGroup g) {
     return ctrlGroupMatchEmptyOrDeleted(g);
 }
 
@@ -245,12 +245,12 @@ internal static bitset ctrlGroupMatchEmptyOrDeleted(ctrlGroup g) {
 } partial class maps_package {
 
 // matchFull returns the set of slots in the group that are full.
-[GoMethodBody("matchFull")] internal static bitset matchFullᴍ(ctrlGroup g) {
+internal static bitset matchFull⁔(/*this*/ ctrlGroup g) {
     return ctrlGroupMatchFull(g);
 }
 
 // anyFull reports whether any slots in the group are full.
-[GoMethodBody("anyFull")] internal static bool anyFullᴍ(ctrlGroup g) {
+internal static bool anyFull⁔(/*this*/ ctrlGroup g) {
     // A slot is full iff bit 7 is unset. Test whether any slot has bit 7 unset.
     return (ctrlGroup)((~g) & (uint64)bitsetMSB) != 0;
 }
@@ -317,12 +317,12 @@ internal static (uint64, bool) alignUpPow2(uint64 n) {
 } partial class maps_package {
 
 // ctrls returns the group control word.
-[GoMethodBody("ctrls")] internal static ж<ctrlGroup> ctrlsᴍ(ref groupReference g) {
+internal static ж<ctrlGroup> ctrls⁔(/*this*/ ref groupReference g) {
     return @unsafe.Pointer.To<ctrlGroup>(g.data);
 }
 
 // key returns a pointer to the key at index i.
-[GoMethodBody("key")] internal static @unsafe.Pointer keyᴍ(ref groupReference g, ж<abi.MapType> Ꮡtyp, uintptr i) {
+internal static @unsafe.Pointer key⁔(/*this*/ ref groupReference g, ж<abi.MapType> Ꮡtyp, uintptr i) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var offset = groupSlotsOffset + i * typ.SlotSize;
@@ -331,7 +331,7 @@ internal static (uint64, bool) alignUpPow2(uint64 n) {
 }
 
 // elem returns a pointer to the element at index i.
-[GoMethodBody("elem")] internal static @unsafe.Pointer elemᴍ(ref groupReference g, ж<abi.MapType> Ꮡtyp, uintptr i) {
+internal static @unsafe.Pointer elem⁔(/*this*/ ref groupReference g, ж<abi.MapType> Ꮡtyp, uintptr i) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     var offset = groupSlotsOffset + i * typ.SlotSize + typ.ElemOff;
@@ -367,7 +367,7 @@ internal static groupsReference newGroups(ref abi.MapType typ, uint64 length) {
 } partial class maps_package {
 
 // group returns the group at index i.
-[GoMethodBody("group")] internal static groupReference groupᴍ(ref groupsReference g, ж<abi.MapType> Ꮡtyp, uint64 i) {
+internal static groupReference group⁔(/*this*/ ref groupsReference g, ж<abi.MapType> Ꮡtyp, uint64 i) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
     // TODO(prattmic): Do something here about truncation on cast to

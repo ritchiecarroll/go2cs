@@ -82,7 +82,7 @@ internal static ref slice<rfc1423Algo> rfc1423Algos => ref ((StaticBox<slice<rfc
 // deriveKey uses a key derivation function to stretch the password into a key
 // with the number of bits our cipher requires. This algorithm was derived from
 // the OpenSSL source.
-[GoMethodBody("deriveKey")] internal static slice<byte> deriveKeyᴍ(rfc1423Algo c, slice<byte> password, slice<byte> salt) {
+internal static slice<byte> deriveKey⁔(/*this*/ rfc1423Algo c, slice<byte> password, slice<byte> salt) {
     var hash = md5.New();
     var @out = new slice<byte>(c.keySize);
     slice<byte> digest = default;

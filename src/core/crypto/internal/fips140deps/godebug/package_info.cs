@@ -60,10 +60,13 @@ using static go.crypto.@internal.fips140deps.godebug_package;
 
 namespace go.crypto.@internal.fips140deps;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.@internal;
 using static godebug_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("godebug")]
 public static partial class godebug_package
@@ -96,11 +99,11 @@ public static partial class godebug_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(godebug_package.Setting)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class godebugᴛSetting;
+[GoMethodHost(typeof(godebug_package.Setting)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class godebugᴛSetting;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class godebugᴛSetting {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Value(this ж<Setting> Ꮡs) => godebug_package.Valueᴍ(Ꮡs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Value(this ж<Setting> Ꮡs) => godebug_package.Value⁔(Ꮡs);
 }
 // </GlyphForwarders>

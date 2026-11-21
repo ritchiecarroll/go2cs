@@ -25,7 +25,7 @@ partial struct Reader {
 
 // Len returns the number of bytes of the unread portion of the
 // string.
-[GoMethodBody("Len")] internal static nint Lenᴍ(ref Reader r) {
+internal static nint Len⁔(/*this*/ ref Reader r) {
     if (r.i >= (int64)len(r.s)) {
         return 0;
     }
@@ -36,10 +36,10 @@ partial struct Reader {
 // Size is the number of bytes available for reading via [Reader.ReadAt].
 // The returned value is always the same and is not affected by calls
 // to any other method.
-[GoMethodBody("Size")] internal static int64 Sizeᴍ(ref Reader r) { return (int64)len(r.s); }
+internal static int64 Size⁔(/*this*/ ref Reader r) { return (int64)len(r.s); }
 
 // Read implements the [io.Reader] interface.
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref Reader r, slice<byte> b) {
+internal static (nint n, error err) Read⁔(/*this*/ ref Reader r, slice<byte> b) {
     nint n = default;
     error err = default;
 
@@ -53,17 +53,17 @@ partial struct Reader {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string stringsReaderReadAtˢᴍReader => ref stringsReaderReadAtˢᵇᴍReader;
-private static readonly @string stringsReaderReadAtˢᵇᴍReader = "strings.Reader.ReadAt: negative offset"u8;
+internal static ref readonly @string stringsReaderReadAtˢ⁔Reader => ref stringsReaderReadAtˢᵇ⁔Reader;
+private static readonly @string stringsReaderReadAtˢᵇ⁔Reader = "strings.Reader.ReadAt: negative offset"u8;
 
 // ReadAt implements the [io.ReaderAt] interface.
-[GoMethodBody("ReadAt")] internal static (nint n, error err) ReadAtᴍ(ref Reader r, slice<byte> b, int64 off) {
+internal static (nint n, error err) ReadAt⁔(/*this*/ ref Reader r, slice<byte> b, int64 off) {
     nint n = default;
     error err = default;
 
     // cannot modify state - see io.ReaderAt
     if (off < 0) {
-        return (0, errors.New(stringsReaderReadAtˢᴍReader));
+        return (0, errors.New(stringsReaderReadAtˢ⁔Reader));
     }
     if (off >= (int64)len(r.s)) {
         return (0, io.EOF);
@@ -76,7 +76,7 @@ private static readonly @string stringsReaderReadAtˢᵇᴍReader = "strings.Rea
 }
 
 // ReadByte implements the [io.ByteReader] interface.
-[GoMethodBody("ReadByte")] internal static (byte, error) ReadByteᴍ(ref Reader r) {
+internal static (byte, error) ReadByte⁔(/*this*/ ref Reader r) {
     r.prevRune = -1;
     if (r.i >= (int64)len(r.s)) {
         return (0, io.EOF);
@@ -87,13 +87,13 @@ private static readonly @string stringsReaderReadAtˢᵇᴍReader = "strings.Rea
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string stringsReaderUnreadByteˢᴍReader => ref stringsReaderUnreadByteˢᵇᴍReader;
-private static readonly @string stringsReaderUnreadByteˢᵇᴍReader = "strings.Reader.UnreadByte: at beginning of string"u8;
+internal static ref readonly @string stringsReaderUnreadByteˢ⁔Reader => ref stringsReaderUnreadByteˢᵇ⁔Reader;
+private static readonly @string stringsReaderUnreadByteˢᵇ⁔Reader = "strings.Reader.UnreadByte: at beginning of string"u8;
 
 // UnreadByte implements the [io.ByteScanner] interface.
-[GoMethodBody("UnreadByte")] internal static error UnreadByteᴍ(ref Reader r) {
+internal static error UnreadByte⁔(/*this*/ ref Reader r) {
     if (r.i <= 0) {
-        return errors.New(stringsReaderUnreadByteˢᴍReader);
+        return errors.New(stringsReaderUnreadByteˢ⁔Reader);
     }
     r.prevRune = -1;
     r.i--;
@@ -101,7 +101,7 @@ private static readonly @string stringsReaderUnreadByteˢᵇᴍReader = "strings
 }
 
 // ReadRune implements the [io.RuneReader] interface.
-[GoMethodBody("ReadRune")] internal static (rune ch, nint size, error err) ReadRuneᴍ(ref Reader r) {
+internal static (rune ch, nint size, error err) ReadRune⁔(/*this*/ ref Reader r) {
     rune ch = default;
     nint size = default;
     error err = default;
@@ -117,18 +117,18 @@ private static readonly @string stringsReaderUnreadByteˢᵇᴍReader = "strings
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string stringsReaderUnreadRuneˢᴍReader => ref stringsReaderUnreadRuneˢᵇᴍReader;
-private static readonly @string stringsReaderUnreadRuneˢᵇᴍReader = "strings.Reader.UnreadRune: at beginning of string"u8;
-internal static ref readonly @string stringsReaderUnreadRuneˢ2ᴍReader => ref stringsReaderUnreadRuneˢ2ᵇᴍReader;
-private static readonly @string stringsReaderUnreadRuneˢ2ᵇᴍReader = "strings.Reader.UnreadRune: previous operation was not ReadRune"u8;
+internal static ref readonly @string stringsReaderUnreadRuneˢ⁔Reader => ref stringsReaderUnreadRuneˢᵇ⁔Reader;
+private static readonly @string stringsReaderUnreadRuneˢᵇ⁔Reader = "strings.Reader.UnreadRune: at beginning of string"u8;
+internal static ref readonly @string stringsReaderUnreadRuneˢ2⁔Reader => ref stringsReaderUnreadRuneˢ2ᵇ⁔Reader;
+private static readonly @string stringsReaderUnreadRuneˢ2ᵇ⁔Reader = "strings.Reader.UnreadRune: previous operation was not ReadRune"u8;
 
 // UnreadRune implements the [io.RuneScanner] interface.
-[GoMethodBody("UnreadRune")] internal static error UnreadRuneᴍ(ref Reader r) {
+internal static error UnreadRune⁔(/*this*/ ref Reader r) {
     if (r.i <= 0) {
-        return errors.New(stringsReaderUnreadRuneˢᴍReader);
+        return errors.New(stringsReaderUnreadRuneˢ⁔Reader);
     }
     if (r.prevRune < 0) {
-        return errors.New(stringsReaderUnreadRuneˢ2ᴍReader);
+        return errors.New(stringsReaderUnreadRuneˢ2⁔Reader);
     }
     r.i = (int64)r.prevRune;
     r.prevRune = -1;
@@ -136,13 +136,13 @@ private static readonly @string stringsReaderUnreadRuneˢ2ᵇᴍReader = "string
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string stringsReaderSeekInvalidˢᴍReader => ref stringsReaderSeekInvalidˢᵇᴍReader;
-private static readonly @string stringsReaderSeekInvalidˢᵇᴍReader = "strings.Reader.Seek: invalid whence"u8;
-internal static ref readonly @string stringsReaderSeekˢᴍReader => ref stringsReaderSeekˢᵇᴍReader;
-private static readonly @string stringsReaderSeekˢᵇᴍReader = "strings.Reader.Seek: negative position"u8;
+internal static ref readonly @string stringsReaderSeekInvalidˢ⁔Reader => ref stringsReaderSeekInvalidˢᵇ⁔Reader;
+private static readonly @string stringsReaderSeekInvalidˢᵇ⁔Reader = "strings.Reader.Seek: invalid whence"u8;
+internal static ref readonly @string stringsReaderSeekˢ⁔Reader => ref stringsReaderSeekˢᵇ⁔Reader;
+private static readonly @string stringsReaderSeekˢᵇ⁔Reader = "strings.Reader.Seek: negative position"u8;
 
 // Seek implements the [io.Seeker] interface.
-[GoMethodBody("Seek")] internal static (int64, error) Seekᴍ(ref Reader r, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ref Reader r, int64 offset, nint whence) {
     r.prevRune = -1;
     int64 abs = default;
     switch (whence) {
@@ -159,17 +159,17 @@ private static readonly @string stringsReaderSeekˢᵇᴍReader = "strings.Reade
         break;
     }
     default: {
-        return (0, errors.New(stringsReaderSeekInvalidˢᴍReader));
+        return (0, errors.New(stringsReaderSeekInvalidˢ⁔Reader));
     }}
     if (abs < 0) {
-        return (0, errors.New(stringsReaderSeekˢᴍReader));
+        return (0, errors.New(stringsReaderSeekˢ⁔Reader));
     }
     r.i = abs;
     return (abs, default);
 }
 
 // WriteTo implements the [io.WriterTo] interface.
-[GoMethodBody("WriteTo")] internal static (int64 n, error err) WriteToᴍ(ref Reader r, io.Writer w) {
+internal static (int64 n, error err) WriteTo⁔(/*this*/ ref Reader r, io.Writer w) {
     int64 n = default;
     error err = default;
 
@@ -191,7 +191,7 @@ private static readonly @string stringsReaderSeekˢᵇᴍReader = "strings.Reade
 }
 
 // Reset resets the [Reader] to be reading from s.
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref Reader r, @string s) { r = new Reader(s, 0, -1); }
+internal static void Reset⁔(/*this*/ ref Reader r, @string s) { r = new Reader(s, 0, -1); }
 
 } partial class strings_package {
 

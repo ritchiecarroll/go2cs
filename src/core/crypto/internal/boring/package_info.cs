@@ -60,11 +60,14 @@ using static go.crypto.@internal.boring_package;
 
 namespace go.crypto.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.crypto;
 using go.crypto.@internal.boring;
 using static boring_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("boring")]
 public static partial class boring_package
@@ -106,19 +109,19 @@ public static partial class boring_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(boring_package.PrivateKeyECDH)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class boringᴛPrivateKeyECDH;
-[GoMethodHost(typeof(boring_package.PublicKeyECDH)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class boringᴛPublicKeyECDH;
-[GoMethodHost(typeof(boring_package.randReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class boringᴛrandReader;
+[GoMethodHost(typeof(boring_package.PrivateKeyECDH)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class boringᴛPrivateKeyECDH;
+[GoMethodHost(typeof(boring_package.PublicKeyECDH)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class boringᴛPublicKeyECDH;
+[GoMethodHost(typeof(boring_package.randReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class boringᴛrandReader;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class boringᴛrandReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Read(this randReader _, slice<byte> b) => boring_package.Readᴍ(_, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Read(this randReader _, slice<byte> b) => boring_package.Read⁔(_, b);
 }
 partial class boringᴛPublicKeyECDH {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKeyECDH _) => boring_package.Bytesᴍ(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref PublicKeyECDH _) => boring_package.Bytes⁔(ref _);
 }
 partial class boringᴛPrivateKeyECDH {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<PublicKeyECDH>, error) PublicKey(this ref PrivateKeyECDH _) => boring_package.PublicKeyᴍ(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<PublicKeyECDH>, error) PublicKey(this ref PrivateKeyECDH _) => boring_package.PublicKey⁔(ref _);
 }
 // </GlyphForwarders>

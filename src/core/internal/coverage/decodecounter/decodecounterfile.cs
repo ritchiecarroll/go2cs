@@ -92,7 +92,7 @@ internal static bool checkMagic(/*[4]*/ array<byte> v) {
 
 } partial class decodecounter_package {
 
-[GoMethodBody("readFooter")] internal static error readFooterᴍ(ж<CounterDataReader> Ꮡcdr) {
+internal static error readFooter⁔(/*this*/ ж<CounterDataReader> Ꮡcdr) {
     ref var cdr = ref Ꮡcdr.DerefOrNull();
 
     var ftrSize = (int64)/* unsafe.Sizeof(cdr.ftr) */ (uintptr)16;
@@ -117,7 +117,7 @@ internal static bool checkMagic(/*[4]*/ array<byte> v) {
 
 // readSegmentPreamble reads and consumes the segment header, segment string
 // table, and segment args table.
-[GoMethodBody("readSegmentPreamble")] internal static error readSegmentPreambleᴍ(ж<CounterDataReader> Ꮡcdr) {
+internal static error readSegmentPreamble⁔(/*this*/ ж<CounterDataReader> Ꮡcdr) {
     ref var cdr = ref Ꮡcdr.DerefOrNull();
 
     // Read segment header.
@@ -160,7 +160,7 @@ internal static bool checkMagic(/*[4]*/ array<byte> v) {
     return default;
 }
 
-[GoMethodBody("readStringTable")] internal static error readStringTableᴍ(ref CounterDataReader cdr) {
+internal static error readStringTable⁔(/*this*/ ref CounterDataReader cdr) {
     var b = new slice<byte>((nint)(cdr.shdr.StrTabLen));
     var (nr, err) = cdr.mr.Read(b);
     if (err != nil) {
@@ -176,14 +176,14 @@ internal static bool checkMagic(/*[4]*/ array<byte> v) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string argcˢᴍCounterDataReader => ref argcˢᵇᴍCounterDataReader;
-private static readonly @string argcˢᵇᴍCounterDataReader = "argc"u8;
-private static ref readonly @string goosˢᴍCounterDataReader => ref goosˢᵇᴍCounterDataReader;
-private static readonly @string goosˢᵇᴍCounterDataReader = "GOOS"u8;
-private static ref readonly @string goarchˢᴍCounterDataReader => ref goarchˢᵇᴍCounterDataReader;
-private static readonly @string goarchˢᵇᴍCounterDataReader = "GOARCH"u8;
+private static ref readonly @string argcˢ⁔CounterDataReader => ref argcˢᵇ⁔CounterDataReader;
+private static readonly @string argcˢᵇ⁔CounterDataReader = "argc"u8;
+private static ref readonly @string goosˢ⁔CounterDataReader => ref goosˢᵇ⁔CounterDataReader;
+private static readonly @string goosˢᵇ⁔CounterDataReader = "GOOS"u8;
+private static ref readonly @string goarchˢ⁔CounterDataReader => ref goarchˢᵇ⁔CounterDataReader;
+private static readonly @string goarchˢᵇ⁔CounterDataReader = "GOARCH"u8;
 
-[GoMethodBody("readArgs")] internal static error readArgsᴍ(ж<CounterDataReader> Ꮡcdr) {
+internal static error readArgs⁔(/*this*/ ж<CounterDataReader> Ꮡcdr) {
     ref var cdr = ref Ꮡcdr.DerefOrNull();
 
     var b = new slice<byte>((nint)(cdr.shdr.ArgsLen));
@@ -219,7 +219,7 @@ private static readonly @string goarchˢᵇᴍCounterDataReader = "GOARCH"u8;
         }
         cdr.args[k] = v;
     }
-    if (cdr.args[argcˢᴍCounterDataReader, ꟷ] is (var argcs, true)) {
+    if (cdr.args[argcˢ⁔CounterDataReader, ꟷ] is (var argcs, true)) {
         var (argc, errΔ1) = strconv.Atoi(argcs);
         if (errΔ1 != nil) {
             return fmt.Errorf("malformed argc in counter data file args section"u8);
@@ -230,10 +230,10 @@ private static readonly @string goarchˢᵇᴍCounterDataReader = "GOARCH"u8;
             cdr.osargs = append(cdr.osargs, arg);
         }
     }
-    if (cdr.args[goosˢᴍCounterDataReader, ꟷ] is (var goos, true)) {
+    if (cdr.args[goosˢ⁔CounterDataReader, ꟷ] is (var goos, true)) {
         cdr.goos = goos;
     }
-    if (cdr.args[goarchˢᴍCounterDataReader, ꟷ] is (var goarch, true)) {
+    if (cdr.args[goarchˢ⁔CounterDataReader, ꟷ] is (var goarch, true)) {
         cdr.goarch = goarch;
     }
     return default;
@@ -245,7 +245,7 @@ private static readonly @string goarchˢᵇᴍCounterDataReader = "GOARCH"u8;
 // for example, if a data file is produced by merging coverage
 // data from two distinct runs, no os args will be available (an
 // empty list is returned).
-[GoMethodBody("OsArgs")] internal static slice<@string> OsArgsᴍ(ref CounterDataReader cdr) {
+internal static slice<@string> OsArgs⁔(/*this*/ ref CounterDataReader cdr) {
     return cdr.osargs;
 }
 
@@ -253,7 +253,7 @@ private static readonly @string goarchˢᵇᴍCounterDataReader = "GOARCH"u8;
 // that produced this counter data file. The GOOS value may be
 // empty in the case where the counter data file was produced
 // from a merge in which more than one GOOS value was present.
-[GoMethodBody("Goos")] internal static @string Goosᴍ(ref CounterDataReader cdr) {
+internal static @string Goos⁔(/*this*/ ref CounterDataReader cdr) {
     return cdr.goos;
 }
 
@@ -261,7 +261,7 @@ private static readonly @string goarchˢᵇᴍCounterDataReader = "GOARCH"u8;
 // that produced this counter data file. The GOARCH value may be
 // empty in the case where the counter data file was produced
 // from a merge in which more than one GOARCH value was present.
-[GoMethodBody("Goarch")] internal static @string Goarchᴍ(ref CounterDataReader cdr) {
+internal static @string Goarch⁔(/*this*/ ref CounterDataReader cdr) {
     return cdr.goarch;
 }
 
@@ -278,7 +278,7 @@ partial struct FuncPayload {
 } partial class decodecounter_package {
 
 // NumSegments returns the number of execution segments in the file.
-[GoMethodBody("NumSegments")] internal static uint32 NumSegmentsᴍ(ref CounterDataReader cdr) {
+internal static uint32 NumSegments⁔(/*this*/ ref CounterDataReader cdr) {
     return cdr.ftr.NumSegments;
 }
 
@@ -286,7 +286,7 @@ partial struct FuncPayload {
 // returning TRUE if we do have another segment to read, or FALSE
 // if we're done with all the segments (also an error if
 // something went wrong).
-[GoMethodBody("BeginNextSegment")] internal static (bool, error) BeginNextSegmentᴍ(ж<CounterDataReader> Ꮡcdr) {
+internal static (bool, error) BeginNextSegment⁔(/*this*/ ж<CounterDataReader> Ꮡcdr) {
     ref var cdr = ref Ꮡcdr.DerefOrNull();
 
     if (cdr.segCount >= cdr.ftr.NumSegments) {
@@ -312,7 +312,7 @@ partial struct FuncPayload {
 
 // NumFunctionsInSegment returns the number of live functions
 // in the currently selected segment.
-[GoMethodBody("NumFunctionsInSegment")] internal static uint32 NumFunctionsInSegmentᴍ(ref CounterDataReader cdr) {
+internal static uint32 NumFunctionsInSegment⁔(/*this*/ ref CounterDataReader cdr) {
     return (uint32)cdr.shdr.FcnEntries;
 }
 
@@ -327,7 +327,7 @@ internal const bool supportDeadFunctionsInCounterData = false;
 // if we've read all the functions already (also an error if
 // something went wrong with the read or we hit a premature
 // EOF).
-[GoMethodBody("NextFunc")] internal static (bool, error) NextFuncᴍ(ж<CounterDataReader> Ꮡcdr, ж<FuncPayload> Ꮡp) {
+internal static (bool, error) NextFunc⁔(/*this*/ ж<CounterDataReader> Ꮡcdr, ж<FuncPayload> Ꮡp) {
     ref var cdr = ref Ꮡcdr.DerefOrNull();
     ref var p = ref Ꮡp.DerefOrNull();
 

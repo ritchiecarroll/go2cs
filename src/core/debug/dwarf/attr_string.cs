@@ -262,7 +262,7 @@ private static readonly @string _Attr_nameᵇ = "SiblingLocationNameOrderingByte
 
 } partial class dwarf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Attr i) {
+internal static @string String⁔(/*this*/ Attr i) {
     var (str, ok) = _Attr_map[i, ꟷ]; if (ok) {
         return str;
     }

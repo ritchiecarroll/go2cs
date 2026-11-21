@@ -61,11 +61,14 @@ using static go.testing.cryptotest_package;
 
 namespace go.testing;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using @internal;
 using math.rand;
 using static cryptotest_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("cryptotest")]
 public static partial class cryptotest_package
@@ -102,11 +105,11 @@ public static partial class cryptotest_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(cryptotest_package.lockedReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cryptotestᴛlockedReader;
+[GoMethodHost(typeof(cryptotest_package.lockedReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cryptotestᴛlockedReader;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class cryptotestᴛlockedReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ж<lockedReader> Ꮡlr, slice<byte> b) => cryptotest_package.Readᴍ(Ꮡlr, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ж<lockedReader> Ꮡlr, slice<byte> b) => cryptotest_package.Read⁔(Ꮡlr, b);
 }
 // </GlyphForwarders>

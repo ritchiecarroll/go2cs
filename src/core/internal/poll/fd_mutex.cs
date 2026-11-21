@@ -54,7 +54,7 @@ private static readonly @string overflowMsgᵇ = "too many concurrent operations
 
 // incref adds a reference to mu.
 // It reports whether mu is available for reading or writing.
-[GoMethodBody("incref")] internal static bool increfᴍ(ж<fdMutex> Ꮡmu) {
+internal static bool incref⁔(/*this*/ ж<fdMutex> Ꮡmu) {
     for (;;) {
         var old = atomic.LoadUint64(Ꮡmu.Ꮡstate);
         if ((old & (uint64)mutexClosed) != 0) {
@@ -74,7 +74,7 @@ private static readonly @string overflowMsgᵇ = "too many concurrent operations
 
 // decref removes a reference from mu.
 // It reports whether there is no remaining reference.
-[GoMethodBody("decref")] internal static bool decrefᴍ(ж<fdMutex> Ꮡmu) {
+internal static bool decref⁔(/*this*/ ж<fdMutex> Ꮡmu) {
     for (;;) {
         var old = atomic.LoadUint64(Ꮡmu.Ꮡstate);
         if ((old & (uint64)mutexRefMask) == 0) {
@@ -101,7 +101,7 @@ internal static partial void runtime_Semrelease(ж<uint32> sema);
 
 // incref adds a reference to fd.
 // It returns an error when fd cannot be used.
-[GoMethodBody("incref")] internal static error increfᴍ(ж<FD> Ꮡfd) {
+internal static error incref⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (!Ꮡfd.Ꮡfdmu.incref()) {
@@ -113,7 +113,7 @@ internal static partial void runtime_Semrelease(ж<uint32> sema);
 // decref removes a reference from fd.
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
-[GoMethodBody("decref")] internal static error decrefᴍ(ж<FD> Ꮡfd) {
+internal static error decref⁔(/*this*/ ж<FD> Ꮡfd) {
     if (Ꮡfd.Ꮡfdmu.decref()) {
         return Ꮡfd.destroy();
     }
@@ -122,7 +122,7 @@ internal static partial void runtime_Semrelease(ж<uint32> sema);
 
 // readLock adds a reference to fd and locks fd for reading.
 // It returns an error when fd cannot be used for reading.
-[GoMethodBody("readLock")] internal static error readLockᴍ(ж<FD> Ꮡfd) {
+internal static error readLock⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (!fd.fdmu.rwlock(true)) {
@@ -134,7 +134,7 @@ internal static partial void runtime_Semrelease(ж<uint32> sema);
 // readUnlock removes a reference from fd and unlocks fd for reading.
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
-[GoMethodBody("readUnlock")] internal static void readUnlockᴍ(ж<FD> Ꮡfd) {
+internal static void readUnlock⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (fd.fdmu.rwunlock(true)) {
@@ -144,7 +144,7 @@ internal static partial void runtime_Semrelease(ж<uint32> sema);
 
 // writeLock adds a reference to fd and locks fd for writing.
 // It returns an error when fd cannot be used for writing.
-[GoMethodBody("writeLock")] internal static error writeLockᴍ(ж<FD> Ꮡfd) {
+internal static error writeLock⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (!fd.fdmu.rwlock(false)) {
@@ -156,7 +156,7 @@ internal static partial void runtime_Semrelease(ж<uint32> sema);
 // writeUnlock removes a reference from fd and unlocks fd for writing.
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
-[GoMethodBody("writeUnlock")] internal static void writeUnlockᴍ(ж<FD> Ꮡfd) {
+internal static void writeUnlock⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (fd.fdmu.rwunlock(false)) {
@@ -166,7 +166,7 @@ internal static partial void runtime_Semrelease(ж<uint32> sema);
 
 // readWriteLock adds a reference to fd and locks fd for reading and writing.
 // It returns an error when fd cannot be used for reading and writing.
-[GoMethodBody("readWriteLock")] internal static error readWriteLockᴍ(ж<FD> Ꮡfd) {
+internal static error readWriteLock⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     if (!fd.fdmu.rwlock(true) || !fd.fdmu.rwlock(false)) {
@@ -178,7 +178,7 @@ internal static partial void runtime_Semrelease(ж<uint32> sema);
 // readWriteUnlock removes a reference from fd and unlocks fd for reading and writing.
 // It also closes fd when the state of fd is set to closed and there
 // is no remaining reference.
-[GoMethodBody("readWriteUnlock")] internal static void readWriteUnlockᴍ(ж<FD> Ꮡfd) {
+internal static void readWriteUnlock⁔(/*this*/ ж<FD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     fd.fdmu.rwunlock(true);
@@ -188,7 +188,7 @@ internal static partial void runtime_Semrelease(ж<uint32> sema);
 }
 
 // closing returns true if fd is closing.
-[GoMethodBody("closing")] internal static bool closingᴍ(ж<FD> Ꮡfd) {
+internal static bool closing⁔(/*this*/ ж<FD> Ꮡfd) {
     return (atomic.LoadUint64(Ꮡfd.Ꮡfdmu.Ꮡstate) & (uint64)mutexClosed) != 0;
 }
 

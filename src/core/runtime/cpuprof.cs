@@ -104,7 +104,7 @@ public static void SetCPUProfileRate(nint hz) {
 // of stack.
 //
 //go:nowritebarrierrec
-[GoMethodBody("add")] internal static void addᴍ(ref cpuProfile p, ж<@unsafe.Pointer> tagPtr, slice<uintptr> stk) {
+internal static void add⁔(/*this*/ ref cpuProfile p, ж<@unsafe.Pointer> tagPtr, slice<uintptr> stk) {
     // Simple cas-lock to coordinate with setcpuprofilerate.
     while (!Ꮡprof.of(profᴛ1.ᏑsignalLock).CompareAndSwap(0, 1)) {
         // TODO: Is it safe to osyield here? https://go.dev/issue/52672
@@ -136,7 +136,7 @@ public static void SetCPUProfileRate(nint hz) {
 //
 //go:nosplit
 //go:nowritebarrierrec
-[GoMethodBody("addNonGo")] internal static void addNonGoᴍ(ref cpuProfile p, slice<uintptr> stk) {
+internal static void addNonGo⁔(/*this*/ ref cpuProfile p, slice<uintptr> stk) {
     // Simple cas-lock to coordinate with SetCPUProfileRate.
     // (Other calls to add or addNonGo should be blocked out
     // by the fact that only one SIGPROF can be handled by the
@@ -165,7 +165,7 @@ public static void SetCPUProfileRate(nint hz) {
 // addExtra is called either from a signal handler on a Go thread
 // or from an ordinary goroutine; either way it can use stack
 // and has a g. The world may be stopped, though.
-[GoMethodBody("addExtra")] internal static void addExtraᴍ(ref cpuProfile p) {
+internal static void addExtra⁔(/*this*/ ref cpuProfile p) {
     // Copy accumulated non-Go profile events.
     var hdr = array<uint64>([1]);
     for (nint i = 0; i < p.numExtra; ) {

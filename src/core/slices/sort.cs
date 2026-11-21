@@ -207,7 +207,7 @@ partial struct xorshift /*num:uint64*/;
 
 } partial class slices_package {
 
-[GoMethodBody("Next")] internal static uint64 Nextᴍ(ref xorshift r) {
+internal static uint64 Next⁔(/*this*/ ref xorshift r) {
     r ^= (xorshift)((r << 13));
     r ^= (xorshift)((r >> 7));
     r ^= (xorshift)((r << 17));

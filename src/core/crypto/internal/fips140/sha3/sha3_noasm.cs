@@ -14,13 +14,13 @@ internal static void keccakF1600(/*[200]*/ ж<array<byte>> a) {
 
 } partial class sha3_package {
 
-[GoMethodBody("write")] internal static (nint n, error err) writeᴍ(ж<Digest> Ꮡd, slice<byte> p) {
+internal static (nint n, error err) write⁔(/*this*/ ж<Digest> Ꮡd, slice<byte> p) {
     return Ꮡd.writeGeneric(p);
 }
-[GoMethodBody("read")] internal static (nint n, error err) readᴍ(ж<Digest> Ꮡd, slice<byte> @out) {
+internal static (nint n, error err) read⁔(/*this*/ ж<Digest> Ꮡd, slice<byte> @out) {
     return Ꮡd.readGeneric(@out);
 }
-[GoMethodBody("sum")] internal static slice<byte> sumᴍ(ref Digest d, slice<byte> b) {
+internal static slice<byte> sum⁔(/*this*/ ref Digest d, slice<byte> b) {
     return d.sumGeneric(b);
 }
 

@@ -287,7 +287,7 @@ internal static policyTable rfc6724policyTable = new policyTable(new policyTable
 // Classify returns the policyTableEntry of the entry with the longest
 // matching prefix that contains ip.
 // The table t must be sorted from largest mask size to smallest.
-[GoMethodBody("Classify")] internal static policyTableEntry Classifyᴍ(policyTable t, netip.Addr ip) {
+internal static policyTableEntry Classify⁔(/*this*/ policyTable t, netip.Addr ip) {
     // Prefix.Contains() will not match an IPv6 prefix for an IPv4 address.
     if (ip.Is4()) {
         ip = netip.AddrFrom16(ip.As16());

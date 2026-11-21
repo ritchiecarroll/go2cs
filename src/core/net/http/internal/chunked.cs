@@ -46,10 +46,10 @@ partial struct chunkedReader {
 } partial class internal_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string chunkedEncodingContainsˢᴍchunkedReader => ref chunkedEncodingContainsˢᵇᴍchunkedReader;
-private static readonly @string chunkedEncodingContainsˢᵇᴍchunkedReader = "chunked encoding contains too much non-data"u8;
+internal static ref readonly @string chunkedEncodingContainsˢ⁔chunkedReader => ref chunkedEncodingContainsˢᵇ⁔chunkedReader;
+private static readonly @string chunkedEncodingContainsˢᵇ⁔chunkedReader = "chunked encoding contains too much non-data"u8;
 
-[GoMethodBody("beginChunk")] internal static void beginChunkᴍ(ref chunkedReader cr) {
+internal static void beginChunk⁔(/*this*/ ref chunkedReader cr) {
     // chunk-size CRLF
     slice<byte> line = default;
     (line, cr.err) = readChunkLine(cr.r);
@@ -84,14 +84,14 @@ private static readonly @string chunkedEncodingContainsˢᵇᴍchunkedReader = "
     cr.excess -= 16 + (2 * (int64)cr.n);
     cr.excess = max(cr.excess, 0);
     if (cr.excess > 16 * 1024) {
-        cr.err = errors.New(chunkedEncodingContainsˢᴍchunkedReader);
+        cr.err = errors.New(chunkedEncodingContainsˢ⁔chunkedReader);
     }
     if (cr.n == 0) {
         cr.err = io.EOF;
     }
 }
 
-[GoMethodBody("chunkHeaderAvailable")] internal static bool chunkHeaderAvailableᴍ(ref chunkedReader cr) {
+internal static bool chunkHeaderAvailable⁔(/*this*/ ref chunkedReader cr) {
     nint n = cr.r.Buffered();
     if (n > 0) {
         var (peek, _) = cr.r.Peek(n);
@@ -101,10 +101,10 @@ private static readonly @string chunkedEncodingContainsˢᵇᴍchunkedReader = "
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string malformedChunkedEncodingˢᴍchunkedReader => ref malformedChunkedEncodingˢᵇᴍchunkedReader;
-private static readonly @string malformedChunkedEncodingˢᵇᴍchunkedReader = "malformed chunked encoding"u8;
+internal static ref readonly @string malformedChunkedEncodingˢ⁔chunkedReader => ref malformedChunkedEncodingˢᵇ⁔chunkedReader;
+private static readonly @string malformedChunkedEncodingˢᵇ⁔chunkedReader = "malformed chunked encoding"u8;
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref chunkedReader cr, slice<uint8> b) {
+internal static (nint n, error err) Read⁔(/*this*/ ref chunkedReader cr, slice<uint8> b) {
     nint n = default;
 
     while (cr.err == nil) {
@@ -117,7 +117,7 @@ private static readonly @string malformedChunkedEncodingˢᵇᴍchunkedReader = 
             }
             (_, cr.err) = io.ReadFull(new bufio_ReaderжReader(cr.r), cr.buf[..2]); if (cr.err == nil) {
                 if (((sstring)(cr.buf[..])) != "\r\n"u8) {
-                    cr.err = errors.New(malformedChunkedEncodingˢᴍchunkedReader);
+                    cr.err = errors.New(malformedChunkedEncodingˢ⁔chunkedReader);
                     break;
                 }
             } else {
@@ -259,7 +259,7 @@ partial struct chunkedWriter {
 // Write the contents of data as one chunk to Wire.
 // NOTE: Note that the corresponding chunk-writing procedure in Conn.Write has
 // a bug since it does not check for success of [io.WriteString]
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref chunkedWriter cw, slice<byte> data) {
+internal static (nint n, error err) Write⁔(/*this*/ ref chunkedWriter cw, slice<byte> data) {
     nint n = default;
     error err = default;
 
@@ -287,7 +287,7 @@ partial struct chunkedWriter {
     return (n, err);
 }
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ref chunkedWriter cw) {
+internal static error Close⁔(/*this*/ ref chunkedWriter cw) {
     var (_, err) = io.WriteString(cw.Wire, "0\r\n");
     return err;
 }

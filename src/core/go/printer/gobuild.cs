@@ -14,7 +14,7 @@ partial class printer_package {
 
 } partial class printer_package {
 
-[GoMethodBody("fixGoBuildLines")] internal static void fixGoBuildLinesᴍ(ref printer p) {
+internal static void fixGoBuildLines⁔(/*this*/ ref printer p) {
     var blockᴷ = new stackAppend<byte>();
 
     if (len(p.goBuild) + len(p.plusBuild) == 0) {
@@ -156,7 +156,7 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
 
 } partial class printer_package {
 
-[GoMethodBody("lineAt")] internal static slice<byte> lineAtᴍ(ref printer p, nint start) {
+internal static slice<byte> lineAt⁔(/*this*/ ref printer p, nint start) {
     nint pos = start;
     while (pos < len(p.output) && !isNL(p.output[pos])) {
         pos++;
@@ -167,7 +167,7 @@ internal static slice<byte> appendLines(slice<byte> x, slice<byte> y) {
     return p.output.slice(start, pos);
 }
 
-[GoMethodBody("commentTextAt")] internal static @string commentTextAtᴍ(ref printer p, nint start) {
+internal static @string commentTextAt⁔(/*this*/ ref printer p, nint start) {
     if (start < len(p.output) && p.output[start] == tabwriter.Escape) {
         start++;
     }

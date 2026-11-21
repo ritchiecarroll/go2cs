@@ -61,7 +61,7 @@ internal static level implicitLevel => -1;
 } partial class bidi_package {
 
 // in returns if x is equal to any of the values in set.
-[GoMethodBody("in")] internal static bool @inᴍ(Class c, params ꓸꓸꓸClass setʗp) {
+internal static bool @in⁔(/*this*/ Class c, params ꓸꓸꓸClass setʗp) {
     var set = setʗp.sslice();
 
     foreach (var (_, s) in range(set)) {
@@ -132,11 +132,11 @@ internal static (ж<paragraph>, error) newParagraph(slice<Class> types, slice<br
 
 } partial class bidi_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(ref paragraph p) { return len(p.initialTypes); }
+internal static nint Len⁔(/*this*/ ref paragraph p) { return len(p.initialTypes); }
 
 // The algorithm. Does not include line-based processing (Rules L1, L2).
 // These are applied later in the line-based phase of the algorithm.
-[GoMethodBody("run")] internal static void runᴍ(ж<paragraph> Ꮡp) {
+internal static void run⁔(/*this*/ ж<paragraph> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.determineMatchingIsolates();
@@ -207,7 +207,7 @@ internal static (ж<paragraph>, error) newParagraph(slice<Class> types, slice<br
 //     index of the matching isolate initiator character for each PDI character.
 //     If there is no matching isolate initiator, or the character is not a PDI,
 //     it is set to -1.
-[GoMethodBody("determineMatchingIsolates")] internal static void determineMatchingIsolatesᴍ(ref paragraph p) {
+internal static void determineMatchingIsolates⁔(/*this*/ ref paragraph p) {
     p.matchingPDI = new slice<nint>(p.Len());
     p.matchingIsolateInitiator = new slice<nint>(p.Len());
 
@@ -239,14 +239,14 @@ internal static (ж<paragraph>, error) newParagraph(slice<Class> types, slice<br
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object assertIEndˢᴍparagraph = (@string)"assert (i <= end)"u8;
+private static readonly object assertIEndˢ⁔paragraph = (@string)"assert (i <= end)"u8;
 
 // determineParagraphEmbeddingLevel reports the resolved paragraph direction of
 // the substring limited by the given range [start, end).
 //
 // Determines the paragraph level based on rules P2, P3. This is also used
 // in rule X5c to find if an FSI should resolve to LRI or RLI.
-[GoMethodBody("determineParagraphEmbeddingLevel")] internal static level determineParagraphEmbeddingLevelᴍ(ref paragraph p, nint start, nint end) {
+internal static level determineParagraphEmbeddingLevel⁔(/*this*/ ref paragraph p, nint start, nint end) {
     Class strongType = unknownClass;
 
     // Rule P2.
@@ -257,7 +257,7 @@ private static readonly object assertIEndˢᴍparagraph = (@string)"assert (i <=
         } else if (t.@in(FSI, LRI, RLI)) {
             i = p.matchingPDI[i]; // skip over to the matching PDI
             if (i > end) {
-                log.Panic(assertIEndˢᴍparagraph);
+                log.Panic(assertIEndˢ⁔paragraph);
             }
         }
     }
@@ -290,33 +290,33 @@ partial struct directionalStatusStack {
 
 } partial class bidi_package {
 
-[GoMethodBody("empty")] internal static void emptyᴍ(ref directionalStatusStack s) { s.stackCounter = 0; }
-[GoMethodBody("pop")] internal static void popᴍ(ref directionalStatusStack s) { s.stackCounter--; }
-[GoMethodBody("depth")] internal static nint depthᴍ(ref directionalStatusStack s) { return s.stackCounter; }
+internal static void empty⁔(/*this*/ ref directionalStatusStack s) { s.stackCounter = 0; }
+internal static void pop⁔(/*this*/ ref directionalStatusStack s) { s.stackCounter--; }
+internal static nint depth⁔(/*this*/ ref directionalStatusStack s) { return s.stackCounter; }
 
-[GoMethodBody("push")] internal static void pushᴍ(ref directionalStatusStack s, level level, Class overrideStatus, bool isolateStatus) {
+internal static void push⁔(/*this*/ ref directionalStatusStack s, level level, Class overrideStatus, bool isolateStatus) {
     s.embeddingLevelStack[s.stackCounter] = level;
     s.overrideStatusStack[s.stackCounter] = overrideStatus;
     s.isolateStatusStack[s.stackCounter] = isolateStatus;
     s.stackCounter++;
 }
 
-[GoMethodBody("lastEmbeddingLevel")] internal static level lastEmbeddingLevelᴍ(ref directionalStatusStack s) {
+internal static level lastEmbeddingLevel⁔(/*this*/ ref directionalStatusStack s) {
     return s.embeddingLevelStack[s.stackCounter - 1];
 }
 
-[GoMethodBody("lastDirectionalOverrideStatus")] internal static Class lastDirectionalOverrideStatusᴍ(ref directionalStatusStack s) {
+internal static Class lastDirectionalOverrideStatus⁔(/*this*/ ref directionalStatusStack s) {
     return s.overrideStatusStack[s.stackCounter - 1];
 }
 
-[GoMethodBody("lastDirectionalIsolateStatus")] internal static bool lastDirectionalIsolateStatusᴍ(ref directionalStatusStack s) {
+internal static bool lastDirectionalIsolateStatus⁔(/*this*/ ref directionalStatusStack s) {
     return s.isolateStatusStack[s.stackCounter - 1];
 }
 
 } partial class bidi_package {
 
 // Determine explicit levels using rules X1 - X8
-[GoMethodBody("determineExplicitEmbeddingLevels")] internal static void determineExplicitEmbeddingLevelsᴍ(ref paragraph p) {
+internal static void determineExplicitEmbeddingLevels⁔(/*this*/ ref paragraph p) {
     directionalStatusStack stack = new();
     nint overflowIsolateCount = default;
     nint overflowEmbeddingCount = default;
@@ -456,13 +456,13 @@ partial struct isolatingRunSequence {
 
 } partial class bidi_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(ref isolatingRunSequence i) { return len(i.indexes); }
+internal static nint Len⁔(/*this*/ ref isolatingRunSequence i) { return len(i.indexes); }
 
 } partial class bidi_package {
 
 // Rule X10, second bullet: Determine the start-of-sequence (sos) and end-of-sequence (eos) types,
 // either L or R, for each isolating run sequence.
-[GoMethodBody("isolatingRunSequence")] internal static ж<isolatingRunSequence> isolatingRunSequenceᴍ(ж<paragraph> Ꮡp, slice<nint> indexes) {
+internal static ж<isolatingRunSequence> isolatingRunSequence⁔(/*this*/ ж<paragraph> Ꮡp, slice<nint> indexes) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     nint length = len(indexes);
@@ -512,7 +512,7 @@ partial struct isolatingRunSequence {
 //
 // Note that some weak types (EN, AN) remain after this processing is
 // complete.
-[GoMethodBody("resolveWeakTypes")] internal static void resolveWeakTypesᴍ(ref isolatingRunSequence s) {
+internal static void resolveWeakTypes⁔(/*this*/ ref isolatingRunSequence s) {
     // on entry, only these types remain
     s.assertOnly(L, R, AL, EN, ES, ET, AN, CS, B, S, WS, ON, NSM, LRI, RLI, FSI, PDI);
 
@@ -635,7 +635,7 @@ partial struct isolatingRunSequence {
 }
 
 // 6) resolving neutral types Rules N1-N2.
-[GoMethodBody("resolveNeutralTypes")] internal static void resolveNeutralTypesᴍ(ref isolatingRunSequence s) {
+internal static void resolveNeutralTypes⁔(/*this*/ ref isolatingRunSequence s) {
     // on entry, only these types can be in resultTypes
     s.assertOnly(L, R, EN, AN, B, S, WS, ON, RLI, LRI, FSI, PDI);
 
@@ -708,7 +708,7 @@ internal static void setTypes(slice<Class> types, Class newType) {
 } partial class bidi_package {
 
 // 7) resolving implicit embedding levels Rules I1, I2.
-[GoMethodBody("resolveImplicitLevels")] internal static void resolveImplicitLevelsᴍ(ref isolatingRunSequence s) {
+internal static void resolveImplicitLevels⁔(/*this*/ ref isolatingRunSequence s) {
     // on entry, only these types can be in resultTypes
     s.assertOnly(L, R, EN, AN);
 
@@ -740,7 +740,7 @@ internal static void setTypes(slice<Class> types, Class newType) {
 
 // Applies the levels and types resolved in rules W1-I2 to the
 // resultLevels array.
-[GoMethodBody("applyLevelsAndTypes")] internal static void applyLevelsAndTypesᴍ(ref isolatingRunSequence s) {
+internal static void applyLevelsAndTypes⁔(/*this*/ ref isolatingRunSequence s) {
     foreach (var (i, x) in range(s.indexes)) {
         s.p.resultTypes[x] = s.types[i];
         s.p.resultLevels[x] = s.resolvedLevels[i];
@@ -750,7 +750,7 @@ internal static void setTypes(slice<Class> types, Class newType) {
 // Return the limit of the run consisting only of the types in validSet
 // starting at index. This checks the value at index, and will return
 // index if that value is not in validSet.
-[GoMethodBody("findRunLimit")] internal static nint findRunLimitᴍ(ref isolatingRunSequence s, nint index, params ꓸꓸꓸClass validSetʗp) {
+internal static nint findRunLimit⁔(/*this*/ ref isolatingRunSequence s, nint index, params ꓸꓸꓸClass validSetʗp) {
     var validSet = validSetʗp.sslice();
 
 loop:
@@ -770,7 +770,7 @@ break_loop:;
 
 // Algorithm validation. Assert that all values in types are in the
 // provided set.
-[GoMethodBody("assertOnly")] internal static void assertOnlyᴍ(ref isolatingRunSequence s, params ꓸꓸꓸClass codesʗp) {
+internal static void assertOnly⁔(/*this*/ ref isolatingRunSequence s, params ꓸꓸꓸClass codesʗp) {
     var codes = codesʗp.sslice();
 
 loop:
@@ -794,7 +794,7 @@ break_loop:;
 // Determines the level runs. Rule X9 will be applied in determining the
 // runs, in the way that makes sure the characters that are supposed to be
 // removed are not included in the runs.
-[GoMethodBody("determineLevelRuns")] internal static slice<slice<nint>> determineLevelRunsᴍ(ref paragraph p) {
+internal static slice<slice<nint>> determineLevelRuns⁔(/*this*/ ref paragraph p) {
     var run = slice<nint>([]);
     var allRuns = slice<slice<nint>>([]);
     var currentLevel = implicitLevel;
@@ -821,7 +821,7 @@ break_loop:;
 }
 
 // Definition BD13. Determine isolating run sequences.
-[GoMethodBody("determineIsolatingRunSequences")] internal static slice<ж<isolatingRunSequence>> determineIsolatingRunSequencesᴍ(ж<paragraph> Ꮡp) {
+internal static slice<ж<isolatingRunSequence>> determineIsolatingRunSequences⁔(/*this*/ ж<paragraph> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
     var sequencesᴷ = new stackAppend<ж<isolatingRunSequence>>(moves: true);
 
@@ -869,7 +869,7 @@ break_loop:;
 // ease of relating the level information to the original input data. Note
 // that the levels assigned to these codes are arbitrary, they're chosen so
 // as to avoid breaking level runs.
-[GoMethodBody("assignLevelsToCharactersRemovedByX9")] internal static void assignLevelsToCharactersRemovedByX9ᴍ(ref paragraph p) {
+internal static void assignLevelsToCharactersRemovedByX9⁔(/*this*/ ref paragraph p) {
     foreach (var (i, t) in range(p.initialTypes)) {
         if (t.@in(LRE, RLE, LRO, RLO, PDF, BN)) {
             p.resultTypes[i] = t;
@@ -902,7 +902,7 @@ break_loop:;
 // The linebreaks array must include at least one value. The values must be
 // in strictly increasing order (no duplicates) between 1 and the length of
 // the text, inclusive. The last value must be the length of the text.
-[GoMethodBody("getLevels")] internal static slice<level> getLevelsᴍ(ref paragraph p, slice<nint> linebreaks) {
+internal static slice<level> getLevels⁔(/*this*/ ref paragraph p, slice<nint> linebreaks) {
     // Note that since the previous processing has removed all
     // P, S, and WS values from resultTypes, the values referred to
     // in these rules are the initial types, before any processing
@@ -968,7 +968,7 @@ break_loop:;
 // The linebreaks array must include at least one value. The values must be
 // in strictly increasing order (no duplicates) between 1 and the length of
 // the text, inclusive. The last value must be the length of the text.
-[GoMethodBody("getReordering")] internal static slice<nint> getReorderingᴍ(ref paragraph p, slice<nint> linebreaks) {
+internal static slice<nint> getReordering⁔(/*this*/ ref paragraph p, slice<nint> linebreaks) {
     validateLineBreaks(linebreaks, p.Len());
 
     return computeMultilineReordering(p.getLevels(linebreaks), linebreaks);

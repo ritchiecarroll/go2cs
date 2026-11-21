@@ -59,7 +59,7 @@ internal static UntypedInt pagesPerSpanRoot => /* min(512, pagesPerArena) */ 512
 // Such goroutines are never leak detection candidates according to the GC.
 //
 //go:nosplit
-[GoMethodBody("internalBlocked")] internal static bool internalBlockedᴍ(ref g gp) {
+internal static bool internalBlocked⁔(/*this*/ ref g gp) {
     var reason = gp.waitreason;
     return reason < waitReasonChanReceiveNilChan || waitReasonSyncWaitGroupWait < reason;
 }

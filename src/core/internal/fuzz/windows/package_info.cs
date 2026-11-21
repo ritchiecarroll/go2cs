@@ -100,7 +100,7 @@ using static go.@internal.fuzz_package;
 
 namespace go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using context = context_package;
 using time = time_package;
 using crypto;
@@ -116,7 +116,10 @@ using encoding;
 using global::go;
 using global::go.sync;
 using global::go.os;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("fuzz")]
 public static partial class fuzz_package
@@ -202,111 +205,111 @@ public static partial class fuzz_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(fuzz_package.MalformedCorpusError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛMalformedCorpusError;
-[GoMethodHost(typeof(fuzz_package.contextReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛcontextReader;
-[GoMethodHost(typeof(fuzz_package.coordinator)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛcoordinator;
-[GoMethodHost(typeof(fuzz_package.crashError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛcrashError;
-[GoMethodHost(typeof(fuzz_package.mutator)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛmutator;
-[GoMethodHost(typeof(fuzz_package.noCopy)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛnoCopy;
-[GoMethodHost(typeof(fuzz_package.pcgRand)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛpcgRand;
-[GoMethodHost(typeof(fuzz_package.queue)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛqueue;
-[GoMethodHost(typeof(fuzz_package.sharedMem)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛsharedMem;
-[GoMethodHost(typeof(fuzz_package.worker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛworker;
-[GoMethodHost(typeof(fuzz_package.workerClient)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛworkerClient;
-[GoMethodHost(typeof(fuzz_package.workerServer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fuzzᴛworkerServer;
+[GoMethodHost(typeof(fuzz_package.MalformedCorpusError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fuzzᴛMalformedCorpusError;
+[GoMethodHost(typeof(fuzz_package.contextReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fuzzᴛcontextReader;
+[GoMethodHost(typeof(fuzz_package.coordinator)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fuzzᴛcoordinator;
+[GoMethodHost(typeof(fuzz_package.crashError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fuzzᴛcrashError;
+[GoMethodHost(typeof(fuzz_package.mutator)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fuzzᴛmutator;
+[GoMethodHost(typeof(fuzz_package.noCopy)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fuzzᴛnoCopy;
+[GoMethodHost(typeof(fuzz_package.pcgRand)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fuzzᴛpcgRand;
+[GoMethodHost(typeof(fuzz_package.queue)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fuzzᴛqueue;
+[GoMethodHost(typeof(fuzz_package.sharedMem)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fuzzᴛsharedMem;
+[GoMethodHost(typeof(fuzz_package.worker)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fuzzᴛworker;
+[GoMethodHost(typeof(fuzz_package.workerClient)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fuzzᴛworkerClient;
+[GoMethodHost(typeof(fuzz_package.workerServer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fuzzᴛworkerServer;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class fuzzᴛcrashError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref crashError e) => fuzz_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Unwrap(this ref crashError e) => fuzz_package.Unwrapᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string CrashPath(this ref crashError e) => fuzz_package.CrashPathᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref crashError e) => fuzz_package.Error⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Unwrap(this ref crashError e) => fuzz_package.Unwrap⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string CrashPath(this ref crashError e) => fuzz_package.CrashPath⁔(ref e);
 }
 partial class fuzzᴛcoordinator {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool, error) addCorpusEntries(this ref coordinator c, bool addToCache, params ꓸꓸꓸCorpusEntry entriesʗp) => fuzz_package.addCorpusEntriesᴍ(ref c, addToCache, entriesʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void updateStats(this ref coordinator c, fuzzResult result) => fuzz_package.updateStatsᴍ(ref c, result);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void logStats(this ref coordinator c) => fuzz_package.logStatsᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fuzzInput, bool) peekInput(this ref coordinator c) => fuzz_package.peekInputᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sentInput(this ref coordinator c, fuzzInput input) => fuzz_package.sentInputᴍ(ref c, input);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void refillInputQueue(this ref coordinator c) => fuzz_package.refillInputQueueᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void queueForMinimization(this ref coordinator c, fuzzResult result, slice<byte> keepCoverage) => fuzz_package.queueForMinimizationᴍ(ref c, result, keepCoverage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fuzzMinimizeInput, bool) peekMinimizeInput(this ref coordinator c) => fuzz_package.peekMinimizeInputᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sentMinimizeInput(this ref coordinator c, fuzzMinimizeInput input) => fuzz_package.sentMinimizeInputᴍ(ref c, input);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool warmupRun(this ref coordinator c) => fuzz_package.warmupRunᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint updateCoverage(this ref coordinator c, slice<byte> newCoverage) => fuzz_package.updateCoverageᴍ(ref c, newCoverage);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool canMinimize(this ref coordinator c) => fuzz_package.canMinimizeᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Duration elapsed(this ref coordinator c) => fuzz_package.elapsedᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readCache(this ref coordinator c) => fuzz_package.readCacheᴍ(ref c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void debugLogf(this ref coordinator c, @string format, params ꓸꓸꓸany argsʗp) => fuzz_package.debugLogfᴍ(ref c, format, argsʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (bool, error) addCorpusEntries(this ref coordinator c, bool addToCache, params ꓸꓸꓸCorpusEntry entriesʗp) => fuzz_package.addCorpusEntries⁔(ref c, addToCache, entriesʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void updateStats(this ref coordinator c, fuzzResult result) => fuzz_package.updateStats⁔(ref c, result);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void logStats(this ref coordinator c) => fuzz_package.logStats⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (fuzzInput, bool) peekInput(this ref coordinator c) => fuzz_package.peekInput⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void sentInput(this ref coordinator c, fuzzInput input) => fuzz_package.sentInput⁔(ref c, input);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void refillInputQueue(this ref coordinator c) => fuzz_package.refillInputQueue⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void queueForMinimization(this ref coordinator c, fuzzResult result, slice<byte> keepCoverage) => fuzz_package.queueForMinimization⁔(ref c, result, keepCoverage);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (fuzzMinimizeInput, bool) peekMinimizeInput(this ref coordinator c) => fuzz_package.peekMinimizeInput⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void sentMinimizeInput(this ref coordinator c, fuzzMinimizeInput input) => fuzz_package.sentMinimizeInput⁔(ref c, input);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool warmupRun(this ref coordinator c) => fuzz_package.warmupRun⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint updateCoverage(this ref coordinator c, slice<byte> newCoverage) => fuzz_package.updateCoverage⁔(ref c, newCoverage);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool canMinimize(this ref coordinator c) => fuzz_package.canMinimize⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static time.Duration elapsed(this ref coordinator c) => fuzz_package.elapsed⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readCache(this ref coordinator c) => fuzz_package.readCache⁔(ref c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void debugLogf(this ref coordinator c, @string format, params ꓸꓸꓸany argsʗp) => fuzz_package.debugLogf⁔(ref c, format, argsʗp);
 }
 partial class fuzzᴛMalformedCorpusError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref MalformedCorpusError e) => fuzz_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref MalformedCorpusError e) => fuzz_package.Error⁔(ref e);
 }
 partial class fuzzᴛsharedMem {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<sharedMemHeader> header(this ref sharedMem m) => fuzz_package.headerᴍ(ref m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> valueRef(this ref sharedMem m) => fuzz_package.valueRefᴍ(ref m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> valueCopy(this ref sharedMem m) => fuzz_package.valueCopyᴍ(ref m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setValue(this ref sharedMem m, slice<byte> b) => fuzz_package.setValueᴍ(ref m, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setValueLen(this ref sharedMem m, nint n) => fuzz_package.setValueLenᴍ(ref m, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<sharedMemHeader> header(this ref sharedMem m) => fuzz_package.header⁔(ref m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> valueRef(this ref sharedMem m) => fuzz_package.valueRef⁔(ref m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> valueCopy(this ref sharedMem m) => fuzz_package.valueCopy⁔(ref m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setValue(this ref sharedMem m, slice<byte> b) => fuzz_package.setValue⁔(ref m, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setValueLen(this ref sharedMem m, nint n) => fuzz_package.setValueLen⁔(ref m, n);
 }
 partial class fuzzᴛmutator {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint rand(this ref mutator m, nint n) => fuzz_package.randᴍ(ref m, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static binary.ByteOrder randByteOrder(this ref mutator m) => fuzz_package.randByteOrderᴍ(ref m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint chooseLen(this ref mutator m, nint n) => fuzz_package.chooseLenᴍ(ref m, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxBytes) => fuzz_package.mutateᴍ(Ꮡm, vals, maxBytes);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 mutateInt(this ref mutator m, int64 v, int64 maxValue) => fuzz_package.mutateIntᴍ(ref m, v, maxValue);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 mutateUInt(this ref mutator m, uint64 v, uint64 maxValue) => fuzz_package.mutateUIntᴍ(ref m, v, maxValue);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxValue) => fuzz_package.mutateFloatᴍ(ref m, v, maxValue);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB) => fuzz_package.mutateBytesᴍ(Ꮡm, ᏑptrB);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint rand(this ref mutator m, nint n) => fuzz_package.rand⁔(ref m, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static binary.ByteOrder randByteOrder(this ref mutator m) => fuzz_package.randByteOrder⁔(ref m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint chooseLen(this ref mutator m, nint n) => fuzz_package.chooseLen⁔(ref m, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void mutate(this ж<mutator> Ꮡm, slice<any> vals, nint maxBytes) => fuzz_package.mutate⁔(Ꮡm, vals, maxBytes);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 mutateInt(this ref mutator m, int64 v, int64 maxValue) => fuzz_package.mutateInt⁔(ref m, v, maxValue);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 mutateUInt(this ref mutator m, uint64 v, uint64 maxValue) => fuzz_package.mutateUInt⁔(ref m, v, maxValue);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static float64 mutateFloat(this ref mutator m, float64 v, float64 maxValue) => fuzz_package.mutateFloat⁔(ref m, v, maxValue);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void mutateBytes(this ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB) => fuzz_package.mutateBytes⁔(Ꮡm, ᏑptrB);
 }
 partial class fuzzᴛpcgRand {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void step(this ref pcgRand r) => fuzz_package.stepᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void save(this ref pcgRand r, ж<uint64> ᏑrandState, ж<uint64> ᏑrandInc) => fuzz_package.saveᴍ(ref r, ᏑrandState, ᏑrandInc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void restore(this ref pcgRand r, uint64 randState, uint64 randInc) => fuzz_package.restoreᴍ(ref r, randState, randInc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 uint32(this ref pcgRand r) => fuzz_package.uint32ᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint intn(this ref pcgRand r, nint n) => fuzz_package.intnᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 uint32n(this ref pcgRand r, uint32 n) => fuzz_package.uint32nᴍ(ref r, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool @bool(this ref pcgRand r) => fuzz_package.@boolᴍ(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void step(this ref pcgRand r) => fuzz_package.step⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void save(this ref pcgRand r, ж<uint64> ᏑrandState, ж<uint64> ᏑrandInc) => fuzz_package.save⁔(ref r, ᏑrandState, ᏑrandInc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void restore(this ref pcgRand r, uint64 randState, uint64 randInc) => fuzz_package.restore⁔(ref r, randState, randInc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 uint32(this ref pcgRand r) => fuzz_package.uint32⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint intn(this ref pcgRand r, nint n) => fuzz_package.intn⁔(ref r, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 uint32n(this ref pcgRand r, uint32 n) => fuzz_package.uint32n⁔(ref r, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool @bool(this ref pcgRand r) => fuzz_package.@bool⁔(ref r);
 }
 partial class fuzzᴛnoCopy {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Lock(this ref noCopy _) => fuzz_package.Lockᴍ(ref _);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Unlock(this ref noCopy _) => fuzz_package.Unlockᴍ(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Lock(this ref noCopy _) => fuzz_package.Lock⁔(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Unlock(this ref noCopy _) => fuzz_package.Unlock⁔(ref _);
 }
 partial class fuzzᴛqueue {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint cap(this ref queue q) => fuzz_package.capᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void grow(this ref queue q) => fuzz_package.growᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void enqueue(this ref queue q, any e) => fuzz_package.enqueueᴍ(ref q, e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (any, bool) dequeue(this ref queue q) => fuzz_package.dequeueᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (any, bool) peek(this ref queue q) => fuzz_package.peekᴍ(ref q);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void clear(this ref queue q) => fuzz_package.clearᴍ(ref q);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint cap(this ref queue q) => fuzz_package.cap⁔(ref q);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void grow(this ref queue q) => fuzz_package.grow⁔(ref q);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void enqueue(this ref queue q, any e) => fuzz_package.enqueue⁔(ref q, e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (any, bool) dequeue(this ref queue q) => fuzz_package.dequeue⁔(ref q);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (any, bool) peek(this ref queue q) => fuzz_package.peek⁔(ref q);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void clear(this ref queue q) => fuzz_package.clear⁔(ref q);
 }
 partial class fuzzᴛsharedMem {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref sharedMem m) => fuzz_package.Closeᴍ(ref m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref sharedMem m) => fuzz_package.Close⁔(ref m);
 }
 partial class fuzzᴛworker {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error cleanup(this ref worker w) => fuzz_package.cleanupᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error coordinate(this ж<worker> Ꮡw, context.Context ctx) => fuzz_package.coordinateᴍ(Ꮡw, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fuzzResult min, error err) minimize(this ж<worker> Ꮡw, context.Context ctx, fuzzMinimizeInput input) => fuzz_package.minimizeᴍ(Ꮡw, ctx, input);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isRunning(this ref worker w) => fuzz_package.isRunningᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error startAndPing(this ж<worker> Ꮡw, context.Context ctx) => fuzz_package.startAndPingᴍ(Ꮡw, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ start(this ж<worker> Ꮡw) => fuzz_package.startᴍ(Ꮡw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error stop(this ж<worker> Ꮡw) => fuzz_package.stopᴍ(Ꮡw);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error cleanup(this ref worker w) => fuzz_package.cleanup⁔(ref w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error coordinate(this ж<worker> Ꮡw, context.Context ctx) => fuzz_package.coordinate⁔(Ꮡw, ctx);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (fuzzResult min, error err) minimize(this ж<worker> Ꮡw, context.Context ctx, fuzzMinimizeInput input) => fuzz_package.minimize⁔(Ꮡw, ctx, input);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isRunning(this ref worker w) => fuzz_package.isRunning⁔(ref w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error startAndPing(this ж<worker> Ꮡw, context.Context ctx) => fuzz_package.startAndPing⁔(Ꮡw, ctx);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ start(this ж<worker> Ꮡw) => fuzz_package.start⁔(Ꮡw);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error stop(this ж<worker> Ꮡw) => fuzz_package.stop⁔(Ꮡw);
 }
 partial class fuzzᴛworkerServer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error serve(this ж<workerServer> Ꮡws, context.Context ctx) => fuzz_package.serveᴍ(Ꮡws, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.Context ctx, fuzzArgs args) => fuzz_package.fuzzᴍ(Ꮡws, ctx, args);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static minimizeResponse /*resp*/ minimize(this ж<workerServer> Ꮡws, context.Context ctx, minimizeArgs args) => fuzz_package.minimizeᴍ(Ꮡws, ctx, args);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool success, error retErr) minimizeInput(this ж<workerServer> Ꮡws, context.Context ctx, slice<any> vals, ж<sharedMem> Ꮡmem, minimizeArgs args) => fuzz_package.minimizeInputᴍ(Ꮡws, ctx, vals, Ꮡmem, args);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static pingResponse ping(this ref workerServer ws, context.Context ctx, pingArgs args) => fuzz_package.pingᴍ(ref ws, ctx, args);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error serve(this ж<workerServer> Ꮡws, context.Context ctx) => fuzz_package.serve⁔(Ꮡws, ctx);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static fuzzResponse /*resp*/ fuzz(this ж<workerServer> Ꮡws, context.Context ctx, fuzzArgs args) => fuzz_package.fuzz⁔(Ꮡws, ctx, args);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static minimizeResponse /*resp*/ minimize(this ж<workerServer> Ꮡws, context.Context ctx, minimizeArgs args) => fuzz_package.minimize⁔(Ꮡws, ctx, args);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (bool success, error retErr) minimizeInput(this ж<workerServer> Ꮡws, context.Context ctx, slice<any> vals, ж<sharedMem> Ꮡmem, minimizeArgs args) => fuzz_package.minimizeInput⁔(Ꮡws, ctx, vals, Ꮡmem, args);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static pingResponse ping(this ref workerServer ws, context.Context ctx, pingArgs args) => fuzz_package.ping⁔(ref ws, ctx, args);
 }
 partial class fuzzᴛworkerClient {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ж<workerClient> Ꮡwc) => fuzz_package.Closeᴍ(Ꮡwc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) minimize(this ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, minimizeArgs argsʗp) => fuzz_package.minimizeᴍ(Ꮡwc, ctx, entryIn, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, error err) fuzz(this ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, fuzzArgs argsʗp) => fuzz_package.fuzzᴍ(Ꮡwc, ctx, entryIn, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error ping(this ж<workerClient> Ꮡwc, context.Context ctx) => fuzz_package.pingᴍ(Ꮡwc, ctx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ callLocked(this ref workerClient wc, context.Context ctx, call c, any resp) => fuzz_package.callLockedᴍ(ref wc, ctx, c, resp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ж<workerClient> Ꮡwc) => fuzz_package.Close⁔(Ꮡwc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (CorpusEntry entryOut, minimizeResponse resp, error retErr) minimize(this ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, minimizeArgs argsʗp) => fuzz_package.minimize⁔(Ꮡwc, ctx, entryIn, argsʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (CorpusEntry entryOut, fuzzResponse resp, bool isInternalError, error err) fuzz(this ж<workerClient> Ꮡwc, context.Context ctx, CorpusEntry entryIn, fuzzArgs argsʗp) => fuzz_package.fuzz⁔(Ꮡwc, ctx, entryIn, argsʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error ping(this ж<workerClient> Ꮡwc, context.Context ctx) => fuzz_package.ping⁔(Ꮡwc, ctx);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ callLocked(this ref workerClient wc, context.Context ctx, call c, any resp) => fuzz_package.callLocked⁔(ref wc, ctx, c, resp);
 }
 partial class fuzzᴛcontextReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ж<contextReader> Ꮡcr, slice<byte> b) => fuzz_package.Readᴍ(Ꮡcr, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ж<contextReader> Ꮡcr, slice<byte> b) => fuzz_package.Read⁔(Ꮡcr, b);
 }
 // </GlyphForwarders>

@@ -12,14 +12,14 @@ partial class profile_package {
 
 } partial class profile_package {
 
-[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Profile p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Profile p) {
     return profileDecoder;
 }
 
 // preEncode populates the unexported fields to be used by encode
 // (with suffix X) from the corresponding exported fields. The
 // exported fields are cleared up to facilitate testing.
-[GoMethodBody("preEncode")] internal static void preEncodeᴍ(ref Profile p) {
+internal static void preEncode⁔(/*this*/ ref Profile p) {
     var keysᴷ = new stackAppend<@string>();
     var numKeysᴷ = new stackAppend<@string>();
 
@@ -108,7 +108,7 @@ partial class profile_package {
     }
 }
 
-[GoMethodBody("encode")] internal static void encodeᴍ(ref Profile p, ж<buffer> b) {
+internal static void encode⁔(/*this*/ ref Profile p, ж<buffer> b) {
     foreach (var (_, x) in range(p.SampleType)) {
         encodeMessage(b, 1, new ValueTypeжmessage(x));
     }
@@ -213,7 +213,7 @@ partial class profile_package {
 // postDecode takes the unexported fields populated by decode (with
 // suffix X) and populates the corresponding exported fields.
 // The unexported fields are cleared up to facilitate testing.
-[GoMethodBody("postDecode")] internal static error postDecodeᴍ(ж<Profile> Ꮡp) {
+internal static error postDecode⁔(/*this*/ ж<Profile> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     error err = default;
@@ -314,11 +314,11 @@ partial class profile_package {
 
 } partial class profile_package {
 
-[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref ValueType p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref ValueType p) {
     return valueTypeDecoder;
 }
 
-[GoMethodBody("encode")] internal static void encodeᴍ(ref ValueType p, ж<buffer> b) {
+internal static void encode⁔(/*this*/ ref ValueType p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 1, p.typeX);
     encodeInt64Opt(ref (b).DerefOrNull(), 2, p.unitX);
 }
@@ -335,11 +335,11 @@ partial class profile_package {
 
 } partial class profile_package {
 
-[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Sample p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Sample p) {
     return sampleDecoder;
 }
 
-[GoMethodBody("encode")] internal static void encodeᴍ(ref Sample p, ж<buffer> b) {
+internal static void encode⁔(/*this*/ ref Sample p, ж<buffer> b) {
     encodeUint64s(ref (b).DerefOrNull(), 1, p.locationIDX);
     foreach (var (_, x) in range(p.Value)) {
         encodeInt64(ref (b).DerefOrNull(), 2, x);
@@ -368,11 +368,11 @@ partial class profile_package {
 
 } partial class profile_package {
 
-[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(Label p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ Label p) {
     return labelDecoder;
 }
 
-[GoMethodBody("encode")] internal static void encodeᴍ(Label p, ж<buffer> b) {
+internal static void encode⁔(/*this*/ Label p, ж<buffer> b) {
     encodeInt64Opt(ref (b).DerefOrNull(), 1, p.keyX);
     encodeInt64Opt(ref (b).DerefOrNull(), 2, p.strX);
     encodeInt64Opt(ref (b).DerefOrNull(), 3, p.numX);
@@ -392,11 +392,11 @@ partial class profile_package {
 
 } partial class profile_package {
 
-[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Mapping p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Mapping p) {
     return mappingDecoder;
 }
 
-[GoMethodBody("encode")] internal static void encodeᴍ(ref Mapping p, ж<buffer> b) {
+internal static void encode⁔(/*this*/ ref Mapping p, ж<buffer> b) {
     encodeUint64Opt(ref (b).DerefOrNull(), 1, p.ID);
     encodeUint64Opt(ref (b).DerefOrNull(), 2, p.Start);
     encodeUint64Opt(ref (b).DerefOrNull(), 3, p.Limit);
@@ -427,11 +427,11 @@ partial class profile_package {
 
 } partial class profile_package {
 
-[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Location p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Location p) {
     return locationDecoder;
 }
 
-[GoMethodBody("encode")] internal static void encodeᴍ(ref Location p, ж<buffer> b) {
+internal static void encode⁔(/*this*/ ref Location p, ж<buffer> b) {
     encodeUint64Opt(ref (b).DerefOrNull(), 1, p.ID);
     encodeUint64Opt(ref (b).DerefOrNull(), 2, p.mappingIDX);
     encodeUint64Opt(ref (b).DerefOrNull(), 3, p.Address);
@@ -457,11 +457,11 @@ partial class profile_package {
 
 } partial class profile_package {
 
-[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Line p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Line p) {
     return lineDecoder;
 }
 
-[GoMethodBody("encode")] internal static void encodeᴍ(ref Line p, ж<buffer> b) {
+internal static void encode⁔(/*this*/ ref Line p, ж<buffer> b) {
     encodeUint64Opt(ref (b).DerefOrNull(), 1, p.functionIDX);
     encodeInt64Opt(ref (b).DerefOrNull(), 2, p.ΔLine);
 }
@@ -478,11 +478,11 @@ partial class profile_package {
 
 } partial class profile_package {
 
-[GoMethodBody("decoder")] internal static slice<Func<ж<buffer>, message, error>> decoderᴍ(ref Function p) {
+internal static slice<Func<ж<buffer>, message, error>> decoder⁔(/*this*/ ref Function p) {
     return functionDecoder;
 }
 
-[GoMethodBody("encode")] internal static void encodeᴍ(ref Function p, ж<buffer> b) {
+internal static void encode⁔(/*this*/ ref Function p, ж<buffer> b) {
     encodeUint64Opt(ref (b).DerefOrNull(), 1, p.ID);
     encodeInt64Opt(ref (b).DerefOrNull(), 2, p.nameX);
     encodeInt64Opt(ref (b).DerefOrNull(), 3, p.systemNameX);

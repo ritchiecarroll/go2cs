@@ -40,7 +40,7 @@ internal static iter.Seq<Value> rangeNum<T, N>(N num, Type t)
 // Otherwise v's kind must be Int, Int8, Int16, Int32, Int64,
 // Uint, Uint8, Uint16, Uint32, Uint64, Uintptr,
 // Array, Chan, Map, Slice, or String.
-[GoMethodBody("Seq")] internal static iter.Seq<Value> Seqᴍ(Value v) {
+internal static iter.Seq<Value> Seq⁔(/*this*/ Value v) {
     if (canRangeFunc(v.abiType())) {
         return (Func<Value, bool> yield) => {
             var rf = MakeFunc(v.Type().In(0), (slice<Value> @in) => slice<Value>([ValueOf(yield(@in[0]))]));
@@ -139,7 +139,7 @@ internal static iter.Seq<Value> rangeNum<T, N>(N num, Type t)
 // that takes a single argument of type func(K, V) bool for some type K, V.
 // If v's kind is Pointer, the pointer element type must have kind Array.
 // Otherwise v's kind must be Array, Map, Slice, or String.
-[GoMethodBody("Seq2")] internal static iter.Seq2<Value, Value> Seq2ᴍ(Value v) {
+internal static iter.Seq2<Value, Value> Seq2⁔(/*this*/ Value v) {
     if (canRangeFunc2(v.abiType())) {
         return (Func<Value, Value, bool> yield) => {
             var rf = MakeFunc(v.Type().In(0), (slice<Value> @in) => slice<Value>([ValueOf(yield(@in[0], @in[1]))]));

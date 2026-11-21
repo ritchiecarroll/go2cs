@@ -20,13 +20,13 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object objectDependencyGraphˢᴍChecker = (@string)"Object dependency graph:"u8;
-internal static readonly object transposedObjectˢᴍChecker = (@string)"Transposed object dependency graph (functions eliminated):"u8;
-internal static readonly object processingNodesˢᴍChecker = (@string)"Processing nodes:"u8;
-internal static readonly object initializationOrderˢᴍChecker = (@string)"Initialization order:"u8;
+internal static readonly object objectDependencyGraphˢ⁔Checker = (@string)"Object dependency graph:"u8;
+internal static readonly object transposedObjectˢ⁔Checker = (@string)"Transposed object dependency graph (functions eliminated):"u8;
+internal static readonly object processingNodesˢ⁔Checker = (@string)"Processing nodes:"u8;
+internal static readonly object initializationOrderˢ⁔Checker = (@string)"Initialization order:"u8;
 
 // initOrder computes the Info.InitOrder for package variables.
-[GoMethodBody("initOrder")] internal static void initOrderᴍ(ж<Checker> Ꮡcheck) {
+internal static void initOrder⁔(/*this*/ ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // An InitOrder may already have been computed if a package is
@@ -41,7 +41,7 @@ internal static readonly object initializationOrderˢᴍChecker = (@string)"Init
     const bool debug = false;
     if (debug) {
         fmt.Printf("Computing initialization order for %s\n\n"u8, check.pkg.OrTypedNil());
-        fmt.Println(objectDependencyGraphˢᴍChecker);
+        fmt.Println(objectDependencyGraphˢ⁔Checker);
         foreach (var (obj, d) in check.objMap) {
             // only print objects that may appear in the dependency graph
             var (objΔ1, _) = obj._<dependency>(ᐧ); if (objΔ1 != nil) {
@@ -57,7 +57,7 @@ internal static readonly object initializationOrderˢᴍChecker = (@string)"Init
         }
         fmt.Println();
 
-        fmt.Println(transposedObjectˢᴍChecker);
+        fmt.Println(transposedObjectˢ⁔Checker);
         foreach (var (_, n) in range<ж<graphNode>>(pq)) {
             fmt.Printf("\t%s depends on %d nodes\n"u8, n.obj.Name(), n.ndeps);
             foreach (var (p, _) in n.pred) {
@@ -66,7 +66,7 @@ internal static readonly object initializationOrderˢᴍChecker = (@string)"Init
         }
         fmt.Println();
 
-        fmt.Println(processingNodesˢᴍChecker);
+        fmt.Println(processingNodesˢ⁔Checker);
     }
 
     // Determine initialization order by removing the highest priority node
@@ -137,7 +137,7 @@ internal static readonly object initializationOrderˢᴍChecker = (@string)"Init
 
     if (debug) {
         fmt.Println();
-        fmt.Println(initializationOrderˢᴍChecker);
+        fmt.Println(initializationOrderˢ⁔Checker);
         foreach (var (_, init) in range(check.Info.InitOrder)) {
             fmt.Printf("\t%s\n"u8, init.OrTypedNil());
         }
@@ -179,7 +179,7 @@ internal static slice<Object> findPath(map<Object, ж<declInfo>> objMap, Object 
 } partial class types_package {
 
 // reportCycle reports an error for the given cycle.
-[GoMethodBody("reportCycle")] internal static void reportCycleᴍ(ж<Checker> Ꮡcheck, slice<Object> cycle) {
+internal static void reportCycle⁔(/*this*/ ж<Checker> Ꮡcheck, slice<Object> cycle) {
     var obj = cycle[0];
 
     // report a more concise error for self references
@@ -229,7 +229,7 @@ partial struct graphNode {
 
 // cost returns the cost of removing this node, which involves copying each
 // predecessor to each successor (and vice-versa).
-[GoMethodBody("cost")] internal static nint costᴍ(ref graphNode n) {
+internal static nint cost⁔(/*this*/ ref graphNode n) {
     return len(n.pred) * len(n.succ);
 }
 
@@ -239,7 +239,7 @@ partial struct nodeSet /*map[ж<graphNode>, bool]*/;
 
 } partial class types_package {
 
-[GoMethodBody("add")] internal static void addᴍ(ref nodeSet s, ж<graphNode> p) {
+internal static void add⁔(/*this*/ ref nodeSet s, ж<graphNode> p) {
     if (s == nil) {
         s = new nodeSet(0);
     }
@@ -340,15 +340,15 @@ partial struct nodeQueue /*[]ж<graphNode>*/;
 
 } partial class types_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(nodeQueue a) { return len(a); }
+internal static nint Len⁔(/*this*/ nodeQueue a) { return len(a); }
 
-[GoMethodBody("Swap")] internal static void Swapᴍ(nodeQueue a, nint i, nint j) {
+internal static void Swap⁔(/*this*/ nodeQueue a, nint i, nint j) {
     var (x, y) = (a[i], a[j]);
     (a[i], a[j]) = (y, x);
     (x.index, y.index) = (j, i);
 }
 
-[GoMethodBody("Less")] internal static bool Lessᴍ(nodeQueue a, nint i, nint j) {
+internal static bool Less⁔(/*this*/ nodeQueue a, nint i, nint j) {
     var (x, y) = (a[i], a[j]);
 
     // Prioritize all constants before non-constants. See go.dev/issue/66575/.
@@ -363,11 +363,11 @@ partial struct nodeQueue /*[]ж<graphNode>*/;
     return x.ndeps < y.ndeps || x.ndeps == y.ndeps && x.obj.order() < y.obj.order();
 }
 
-[GoMethodBody("Push")] internal static void Pushᴍ(ref nodeQueue a, any x) {
+internal static void Push⁔(/*this*/ ref nodeQueue a, any x) {
     throw panic("unreachable");
 }
 
-[GoMethodBody("Pop")] internal static any Popᴍ(ref nodeQueue a) {
+internal static any Pop⁔(/*this*/ ref nodeQueue a) {
     nint n = len(a);
     var x = (a)[n - 1];
     x.index = -1; // for safety

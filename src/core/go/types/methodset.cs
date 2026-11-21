@@ -22,17 +22,17 @@ partial struct MethodSet {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string methodSetˢᴍMethodSet => ref methodSetˢᵇᴍMethodSet;
-private static readonly @string methodSetˢᵇᴍMethodSet = "MethodSet {}"u8;
-internal static readonly object methodSetˢ2ᴍMethodSet = (@string)"MethodSet {"u8;
+internal static ref readonly @string methodSetˢ⁔MethodSet => ref methodSetˢᵇ⁔MethodSet;
+private static readonly @string methodSetˢᵇ⁔MethodSet = "MethodSet {}"u8;
+internal static readonly object methodSetˢ2⁔MethodSet = (@string)"MethodSet {"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref MethodSet s) {
+internal static @string String⁔(/*this*/ ref MethodSet s) {
     if (s.Len() == 0) {
-        return methodSetˢᴍMethodSet;
+        return methodSetˢ⁔MethodSet;
     }
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), methodSetˢ2ᴍMethodSet);
+    fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), methodSetˢ2⁔MethodSet);
     foreach (var (_, f) in range(s.list)) {
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "\t%s\n"u8, f.OrTypedNil());
     }
@@ -41,13 +41,13 @@ internal static readonly object methodSetˢ2ᴍMethodSet = (@string)"MethodSet {
 }
 
 // Len returns the number of methods in s.
-[GoMethodBody("Len")] internal static nint Lenᴍ(ref MethodSet s) { return len(s.list); }
+internal static nint Len⁔(/*this*/ ref MethodSet s) { return len(s.list); }
 
 // At returns the i'th method in s for 0 <= i < s.Len().
-[GoMethodBody("At")] internal static ж<Selection> Atᴍ(ref MethodSet s, nint i) { return s.list[i]; }
+internal static ж<Selection> At⁔(/*this*/ ref MethodSet s, nint i) { return s.list[i]; }
 
 // Lookup returns the method with matching package and name, or nil if not found.
-[GoMethodBody("Lookup")] internal static ж<Selection> Lookupᴍ(ж<MethodSet> Ꮡs, ж<Package> pkg, @string name) {
+internal static ж<Selection> Lookup⁔(/*this*/ ж<MethodSet> Ꮡs, ж<Package> pkg, @string name) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.Len() == 0) {
@@ -234,7 +234,7 @@ partial struct methodSet /*map[@string, ж<Selection>]*/; // a nil entry indicat
 // Add adds all functions in list to the method set s.
 // If multiples is set, every function in list appears multiple times
 // and is treated as a collision.
-[GoMethodBody("add")] internal static methodSet addᴍ(methodSet s, slice<ж<Func>> list, slice<nint> index, bool indirect, bool multiples) {
+internal static methodSet add⁔(/*this*/ methodSet s, slice<ж<Func>> list, slice<nint> index, bool indirect, bool multiples) {
     if (len(list) == 0) {
         return s;
     }
@@ -244,7 +244,7 @@ partial struct methodSet /*map[@string, ж<Selection>]*/; // a nil entry indicat
     return s;
 }
 
-[GoMethodBody("addOne")] internal static methodSet addOneᴍ(methodSet s, ж<Func> Ꮡf, slice<nint> index, bool indirect, bool multiples) {
+internal static methodSet addOne⁔(/*this*/ methodSet s, ж<Func> Ꮡf, slice<nint> index, bool indirect, bool multiples) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (s == nil) {

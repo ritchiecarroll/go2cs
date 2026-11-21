@@ -36,7 +36,7 @@ partial struct Position {
 } partial class token_package {
 
 // IsValid reports whether the position is valid.
-[GoMethodBody("IsValid")] internal static bool IsValidᴍ(ref Position pos) { return pos.Line > 0; }
+internal static bool IsValid⁔(/*this*/ ref Position pos) { return pos.Line > 0; }
 
 // String returns a string in one of several forms:
 //
@@ -46,7 +46,7 @@ partial struct Position {
 //	line                valid position without file name and no column (column == 0)
 //	file                invalid position with file name
 //	-                   invalid position without file name
-[GoMethodBody("String")] internal static @string Stringᴍ(Position pos) {
+internal static @string String⁔(/*this*/ Position pos) {
     @string s = pos.Filename;
     if (pos.IsValid()) {
         if (s != ""u8) {
@@ -98,7 +98,7 @@ public static Pos NoPos => 0;
 } partial class token_package {
 
 // IsValid reports whether the position is valid.
-[GoMethodBody("IsValid")] internal static bool IsValidᴍ(Pos p) {
+internal static bool IsValid⁔(/*this*/ Pos p) {
     return p != NoPos;
 }
 
@@ -125,27 +125,27 @@ partial struct File {
 } partial class token_package {
 
 // Name returns the file name of file f as registered with AddFile.
-[GoMethodBody("Name")] internal static @string Nameᴍ(ref File f) {
+internal static @string Name⁔(/*this*/ ref File f) {
     return f.name;
 }
 
 // Base returns the base offset of file f as registered with AddFile.
-[GoMethodBody("Base")] internal static nint Baseᴍ(ref File f) {
+internal static nint Base⁔(/*this*/ ref File f) {
     return f.@base;
 }
 
 // Size returns the size of file f as registered with AddFile.
-[GoMethodBody("Size")] internal static nint Sizeᴍ(ref File f) {
+internal static nint Size⁔(/*this*/ ref File f) {
     return f.size;
 }
 
 // End returns the end position of file f as registered with AddFile.
-[GoMethodBody("End")] internal static Pos Endᴍ(ref File f) {
+internal static Pos End⁔(/*this*/ ref File f) {
     return (Pos)(f.@base + f.size);
 }
 
 // LineCount returns the number of lines in file f.
-[GoMethodBody("LineCount")] internal static nint LineCountᴍ(ж<File> Ꮡf) {
+internal static nint LineCount⁔(/*this*/ ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.mutex.Lock();
@@ -157,7 +157,7 @@ partial struct File {
 // AddLine adds the line offset for a new line.
 // The line offset must be larger than the offset for the previous line
 // and smaller than the file size; otherwise the line offset is ignored.
-[GoMethodBody("AddLine")] internal static void AddLineᴍ(ж<File> Ꮡf, nint offset) {
+internal static void AddLine⁔(/*this*/ ж<File> Ꮡf, nint offset) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.mutex.Lock();
@@ -171,7 +171,7 @@ partial struct File {
 // the newline character at the end of the line with a space (to not change the
 // remaining offsets). To obtain the line number, consult e.g. [Position.Line].
 // MergeLine will panic if given an invalid line number.
-[GoMethodBody("MergeLine")] internal static void MergeLineᴍ(ж<File> Ꮡf, nint line) {
+internal static void MergeLine⁔(/*this*/ ж<File> Ꮡf, nint line) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -199,7 +199,7 @@ partial struct File {
 
 // Lines returns the effective line offset table of the form described by [File.SetLines].
 // Callers must not mutate the result.
-[GoMethodBody("Lines")] internal static slice<nint> Linesᴍ(ж<File> Ꮡf) {
+internal static slice<nint> Lines⁔(/*this*/ ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.mutex.Lock();
@@ -216,7 +216,7 @@ partial struct File {
 // and smaller than the file size; otherwise SetLines fails and returns
 // false.
 // Callers must not mutate the provided slice after SetLines returns.
-[GoMethodBody("SetLines")] internal static bool SetLinesᴍ(ж<File> Ꮡf, slice<nint> lines) {
+internal static bool SetLines⁔(/*this*/ ж<File> Ꮡf, slice<nint> lines) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     // verify validity of lines table
@@ -236,7 +236,7 @@ partial struct File {
 
 // SetLinesForContent sets the line offsets for the given file content.
 // It ignores position-altering //line comments.
-[GoMethodBody("SetLinesForContent")] internal static void SetLinesForContentᴍ(ж<File> Ꮡf, slice<byte> content) {
+internal static void SetLinesForContent⁔(/*this*/ ж<File> Ꮡf, slice<byte> content) {
     ref var f = ref Ꮡf.DerefOrNull();
     var linesᴷ = new stackAppend<nint>(moves: true);
 
@@ -262,7 +262,7 @@ partial struct File {
 // LineStart returns the [Pos] value of the start of the specified line.
 // It ignores any alternative positions set using [File.AddLineColumnInfo].
 // LineStart panics if the 1-based line number is invalid.
-[GoMethodBody("LineStart")] internal static Pos LineStartᴍ(ж<File> Ꮡf, nint line) {
+internal static Pos LineStart⁔(/*this*/ ж<File> Ꮡf, nint line) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -298,7 +298,7 @@ public partial struct lineInfo {
 
 // AddLineInfo is like [File.AddLineColumnInfo] with a column = 1 argument.
 // It is here for backward-compatibility for code prior to Go 1.11.
-[GoMethodBody("AddLineInfo")] internal static void AddLineInfoᴍ(ж<File> Ꮡf, nint offset, @string filename, nint line) {
+internal static void AddLineInfo⁔(/*this*/ ж<File> Ꮡf, nint offset, @string filename, nint line) {
     Ꮡf.AddLineColumnInfo(offset, filename, line, 1);
 }
 
@@ -310,7 +310,7 @@ public partial struct lineInfo {
 //
 // AddLineColumnInfo is typically used to register alternative position
 // information for line directives such as //line filename:line:column.
-[GoMethodBody("AddLineColumnInfo")] internal static void AddLineColumnInfoᴍ(ж<File> Ꮡf, nint offset, @string filename, nint line, nint column) {
+internal static void AddLineColumnInfo⁔(/*this*/ ж<File> Ꮡf, nint offset, @string filename, nint line, nint column) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     f.mutex.Lock();
@@ -321,7 +321,7 @@ public partial struct lineInfo {
 }
 
 // fixOffset fixes an out-of-bounds offset such that 0 <= offset <= f.size.
-[GoMethodBody("fixOffset")] internal static nint fixOffsetᴍ(ref File f, nint offset) {
+internal static nint fixOffset⁔(/*this*/ ref File f, nint offset) {
     switch (ᐧ) {
     case {} when offset is < 0: {
         if (!debug) {
@@ -357,7 +357,7 @@ public partial struct lineInfo {
 // The following invariant, though not true for Pos values
 // in general, holds for the result p:
 // f.Pos(f.Offset(p)) == p.
-[GoMethodBody("Pos")] internal static Pos Posᴍ(ref File f, nint offset) {
+internal static Pos Pos⁔(/*this*/ ref File f, nint offset) {
     return (Pos)(f.@base + f.fixOffset(offset));
 }
 
@@ -370,13 +370,13 @@ public partial struct lineInfo {
 // The following invariant, though not true for offset values
 // in general, holds for the result offset:
 // f.Offset(f.Pos(offset)) == offset
-[GoMethodBody("Offset")] internal static nint Offsetᴍ(ref File f, Pos p) {
+internal static nint Offset⁔(/*this*/ ref File f, Pos p) {
     return f.fixOffset((nint)p - f.@base);
 }
 
 // Line returns the line number for the given file position p;
 // p must be a [Pos] value in that file or [NoPos].
-[GoMethodBody("Line")] internal static nint Lineᴍ(ж<File> Ꮡf, Pos p) {
+internal static nint Line⁔(/*this*/ ж<File> Ꮡf, Pos p) {
     return Ꮡf.Position(p).Line;
 }
 
@@ -397,7 +397,7 @@ internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
 // unpack returns the filename and line and column number for a file offset.
 // If adjusted is set, unpack will return the filename and line information
 // possibly adjusted by //line comments; otherwise those comments are ignored.
-[GoMethodBody("unpack")] internal static (@string filename, nint line, nint column) unpackᴍ(ж<File> Ꮡf, nint offset, bool adjusted) {
+internal static (@string filename, nint line, nint column) unpack⁔(/*this*/ ж<File> Ꮡf, nint offset, bool adjusted) {
     @string filename = default;
     nint line = default;
     nint column = default;
@@ -439,7 +439,7 @@ internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
     return (filename, line, column);
 }
 
-[GoMethodBody("position")] internal static Position /*pos*/ positionᴍ(ж<File> Ꮡf, Pos p, bool adjusted) {
+internal static Position /*pos*/ position⁔(/*this*/ ж<File> Ꮡf, Pos p, bool adjusted) {
     Position pos = default;
     ref var f = ref Ꮡf.DerefOrNull();
 
@@ -454,7 +454,7 @@ internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
 // If adjusted is set, the position may be adjusted by position-altering
 // //line comments; otherwise those comments are ignored.
 // p must be a Pos value in f or NoPos.
-[GoMethodBody("PositionFor")] internal static Position /*pos*/ PositionForᴍ(ж<File> Ꮡf, Pos p, bool adjusted) {
+internal static Position /*pos*/ PositionFor⁔(/*this*/ ж<File> Ꮡf, Pos p, bool adjusted) {
     Position pos = default;
 
     if (p != NoPos) {
@@ -466,7 +466,7 @@ internal static nint searchLineInfos(slice<lineInfo> a, nint x) {
 // Position returns the Position value for the given file position p.
 // If p is out of bounds, it is adjusted to match the File.Offset behavior.
 // Calling f.Position(p) is equivalent to calling f.PositionFor(p, true).
-[GoMethodBody("Position")] internal static Position /*pos*/ Positionᴍ(ж<File> Ꮡf, Pos p) {
+internal static Position /*pos*/ Position⁔(/*this*/ ж<File> Ꮡf, Pos p) {
     return Ꮡf.PositionFor(p, true);
 }
 
@@ -515,7 +515,7 @@ public static ж<FileSet> NewFileSet() {
 
 // Base returns the minimum base offset that must be provided to
 // [FileSet.AddFile] when adding the next file.
-[GoMethodBody("Base")] internal static nint Baseᴍ(ж<FileSet> Ꮡs) {
+internal static nint Base⁔(/*this*/ ж<FileSet> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     Ꮡs.Ꮡmutex.RLock();
@@ -539,7 +539,7 @@ public static ж<FileSet> NewFileSet() {
 // with offs in the range [0, size] and thus p in the range [base, base+size].
 // For convenience, [File.Pos] may be used to create file-specific position
 // values from a file offset.
-[GoMethodBody("AddFile")] internal static ж<File> AddFileᴍ(ж<FileSet> Ꮡs, @string filename, nint @base, nint size) {
+internal static ж<File> AddFile⁔(/*this*/ ж<FileSet> Ꮡs, @string filename, nint @base, nint size) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -579,7 +579,7 @@ public static ж<FileSet> NewFileSet() {
 // FileSet if they are not already present.
 // The caller must ensure that no pair of Files that
 // would appear in the resulting FileSet overlap.
-[GoMethodBody("AddExistingFiles")] internal static void AddExistingFilesᴍ(ж<FileSet> Ꮡs, params ꓸꓸꓸжFile filesʗp) {
+internal static void AddExistingFiles⁔(/*this*/ ж<FileSet> Ꮡs, params ꓸꓸꓸжFile filesʗp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -622,7 +622,7 @@ public static ж<FileSet> NewFileSet() {
 // encounters an unbounded stream of files.
 //
 // Removing a file that does not belong to the set has no effect.
-[GoMethodBody("RemoveFile")] internal static void RemoveFileᴍ(ж<FileSet> Ꮡs, ж<File> Ꮡfile) {
+internal static void RemoveFile⁔(/*this*/ ж<FileSet> Ꮡs, ж<File> Ꮡfile) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -645,7 +645,7 @@ public static ж<FileSet> NewFileSet() {
 
 // Iterate calls yield for the files in the file set in ascending Base
 // order until yield returns false.
-[GoMethodBody("Iterate")] internal static void Iterateᴍ(ж<FileSet> Ꮡs, Func<ж<File>, bool> yield) {
+internal static void Iterate⁔(/*this*/ ж<FileSet> Ꮡs, Func<ж<File>, bool> yield) {
     GoFrame ᒐ = default;
     try {
         Ꮡs.Ꮡmutex.RLock();
@@ -669,7 +669,7 @@ public static ж<FileSet> NewFileSet() {
     finally { ᒐ.Run(); }
 }
 
-[GoMethodBody("file")] internal static ж<File> @fileᴍ(ж<FileSet> Ꮡs, Pos p) {
+internal static ж<File> @file⁔(/*this*/ ж<FileSet> Ꮡs, Pos p) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -697,7 +697,7 @@ public static ж<FileSet> NewFileSet() {
 // File returns the file that contains the position p.
 // If no such file is found (for instance for p == [NoPos]),
 // the result is nil.
-[GoMethodBody("File")] internal static ж<File> /*f*/ Fileᴍ(ж<FileSet> Ꮡs, Pos p) {
+internal static ж<File> /*f*/ File⁔(/*this*/ ж<FileSet> Ꮡs, Pos p) {
     ж<File> f = default;
 
     if (p != NoPos) {
@@ -710,7 +710,7 @@ public static ж<FileSet> NewFileSet() {
 // If adjusted is set, the position may be adjusted by position-altering
 // //line comments; otherwise those comments are ignored.
 // p must be a [Pos] value in s or [NoPos].
-[GoMethodBody("PositionFor")] internal static Position /*pos*/ PositionForᴍ(ж<FileSet> Ꮡs, Pos p, bool adjusted) {
+internal static Position /*pos*/ PositionFor⁔(/*this*/ ж<FileSet> Ꮡs, Pos p, bool adjusted) {
     Position pos = default;
 
     if (p != NoPos) {
@@ -723,7 +723,7 @@ public static ж<FileSet> NewFileSet() {
 
 // Position converts a [Pos] p in the fileset into a Position value.
 // Calling s.Position(p) is equivalent to calling s.PositionFor(p, true).
-[GoMethodBody("Position")] internal static Position /*pos*/ Positionᴍ(ж<FileSet> Ꮡs, Pos p) {
+internal static Position /*pos*/ Position⁔(/*this*/ ж<FileSet> Ꮡs, Pos p) {
     return Ꮡs.PositionFor(p, true);
 }
 

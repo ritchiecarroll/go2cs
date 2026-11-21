@@ -81,7 +81,7 @@ partial struct processHandle {
 // The bool result reports whether acquire succeeded;
 // it fails if the handle is already closed.
 // Every successful call to acquire should be paired with a call to release.
-[GoMethodBody("acquire")] internal static (uintptr, bool) acquireᴍ(ж<processHandle> Ꮡph) {
+internal static (uintptr, bool) acquire⁔(/*this*/ ж<processHandle> Ꮡph) {
     ref var ph = ref Ꮡph.DerefOrNull();
 
     for (;;) {
@@ -99,7 +99,7 @@ partial struct processHandle {
 }
 
 // release releases a reference to the handle.
-[GoMethodBody("release")] internal static void releaseᴍ(ж<processHandle> Ꮡph) {
+internal static void release⁔(/*this*/ ж<processHandle> Ꮡph) {
     ref var ph = ref Ꮡph.DerefOrNull();
 
     for (;;) {
@@ -161,7 +161,7 @@ internal static ж<Process> newDoneProcess(nint pid) {
 
 // handleTransientAcquire returns the process handle or,
 // if the process is not ready, the current status.
-[GoMethodBody("handleTransientAcquire")] internal static (uintptr, processStatus) handleTransientAcquireᴍ(ж<Process> Ꮡp) {
+internal static (uintptr, processStatus) handleTransientAcquire⁔(/*this*/ ж<Process> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (p.handle == nil) {
@@ -189,7 +189,7 @@ internal static ж<Process> newDoneProcess(nint pid) {
 }
 
 // handleTransientRelease releases a handle returned by handleTransientAcquire.
-[GoMethodBody("handleTransientRelease")] internal static void handleTransientReleaseᴍ(ref Process p) {
+internal static void handleTransientRelease⁔(/*this*/ ref Process p) {
     if (p.handle == nil) {
         throw panic("handleTransientRelease called in invalid mode");
     }
@@ -197,7 +197,7 @@ internal static ж<Process> newDoneProcess(nint pid) {
 }
 
 // pidStatus returns the current process status.
-[GoMethodBody("pidStatus")] internal static processStatus pidStatusᴍ(ж<Process> Ꮡp) {
+internal static processStatus pidStatus⁔(/*this*/ ж<Process> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (p.handle != nil) {
@@ -285,7 +285,7 @@ public static (ж<Process>, error) StartProcess(@string name, slice<@string> arg
 // Release releases any resources associated with the [Process] p,
 // rendering it unusable in the future.
 // Release only needs to be called if [Process.Wait] is not.
-[GoMethodBody("Release")] internal static error Releaseᴍ(ж<Process> Ꮡp) {
+internal static error Release⁔(/*this*/ ж<Process> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Unfortunately, for historical reasons, on systems other
@@ -312,7 +312,7 @@ public static (ж<Process>, error) StartProcess(@string name, slice<@string> arg
 // doRelease releases a [Process], setting the status to newStatus.
 // If the previous status is not statusOK, this does nothing.
 // It returns the previous status.
-[GoMethodBody("doRelease")] internal static processStatus doReleaseᴍ(ж<Process> Ꮡp, processStatus newStatus) {
+internal static processStatus doRelease⁔(/*this*/ ж<Process> Ꮡp, processStatus newStatus) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     for (;;) {
@@ -347,7 +347,7 @@ public static (ж<Process>, error) StartProcess(@string name, slice<@string> arg
 // Kill causes the [Process] to exit immediately. Kill does not wait until
 // the Process has actually exited. This only kills the Process itself,
 // not any other processes it may have started.
-[GoMethodBody("Kill")] internal static error Killᴍ(ж<Process> Ꮡp) {
+internal static error Kill⁔(/*this*/ ж<Process> Ꮡp) {
     return Ꮡp.kill();
 }
 
@@ -356,13 +356,13 @@ public static (ж<Process>, error) StartProcess(@string name, slice<@string> arg
 // Wait releases any resources associated with the Process.
 // On most operating systems, the Process must be a child
 // of the current process or an error will be returned.
-[GoMethodBody("Wait")] internal static (ж<ProcessState>, error) Waitᴍ(ж<Process> Ꮡp) {
+internal static (ж<ProcessState>, error) Wait⁔(/*this*/ ж<Process> Ꮡp) {
     return Ꮡp.wait();
 }
 
 // Signal sends a signal to the [Process].
 // Sending [Interrupt] on Windows is not implemented.
-[GoMethodBody("Signal")] internal static error Signalᴍ(ж<Process> Ꮡp, Signal sig) {
+internal static error Signal⁔(/*this*/ ж<Process> Ꮡp, Signal sig) {
     return Ꮡp.signal(sig);
 }
 
@@ -374,39 +374,39 @@ public static (ж<Process>, error) StartProcess(@string name, slice<@string> arg
 // If process handles are not supported or a handle is not available,
 // it returns [ErrNoHandle]. Currently, process handles are supported
 // on Linux 5.4 or later (pidfd) and Windows.
-[GoMethodBody("WithHandle")] internal static error WithHandleᴍ(ж<Process> Ꮡp, Action<uintptr> f) {
+internal static error WithHandle⁔(/*this*/ ж<Process> Ꮡp, Action<uintptr> f) {
     return Ꮡp.withHandle(f);
 }
 
 } partial class os_package {
 
 // UserTime returns the user CPU time of the exited process and its children.
-[GoMethodBody("UserTime")] internal static time.Duration UserTimeᴍ(ref ProcessState p) {
+internal static time.Duration UserTime⁔(/*this*/ ref ProcessState p) {
     return p.userTime();
 }
 
 // SystemTime returns the system CPU time of the exited process and its children.
-[GoMethodBody("SystemTime")] internal static time.Duration SystemTimeᴍ(ref ProcessState p) {
+internal static time.Duration SystemTime⁔(/*this*/ ref ProcessState p) {
     return p.systemTime();
 }
 
 // Exited reports whether the program has exited.
 // On Unix systems this reports true if the program exited due to calling exit,
 // but false if the program terminated due to a signal.
-[GoMethodBody("Exited")] internal static bool Exitedᴍ(ref ProcessState p) {
+internal static bool Exited⁔(/*this*/ ref ProcessState p) {
     return p.exited();
 }
 
 // Success reports whether the program exited successfully,
 // such as with exit status 0 on Unix.
-[GoMethodBody("Success")] internal static bool Successᴍ(ref ProcessState p) {
+internal static bool Success⁔(/*this*/ ref ProcessState p) {
     return p.success();
 }
 
 // Sys returns system-dependent exit information about
 // the process. Convert it to the appropriate underlying
 // type, such as [syscall.WaitStatus] on Unix, to access its contents.
-[GoMethodBody("Sys")] internal static any Sysᴍ(ref ProcessState p) {
+internal static any Sys⁔(/*this*/ ref ProcessState p) {
     return p.sys();
 }
 
@@ -415,7 +415,7 @@ public static (ж<Process>, error) StartProcess(@string name, slice<@string> arg
 // type, such as [*syscall.Rusage] on Unix, to access its contents.
 // (On Unix, *syscall.Rusage matches struct rusage as defined in the
 // getrusage(2) manual page.)
-[GoMethodBody("SysUsage")] internal static any SysUsageᴍ(ref ProcessState p) {
+internal static any SysUsage⁔(/*this*/ ref ProcessState p) {
     return p.sysUsage();
 }
 

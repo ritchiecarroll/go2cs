@@ -37,7 +37,7 @@ public static ж<P224Point> NewP224Point() {
 } partial class nistec_package {
 
 // SetGenerator sets p to the canonical generator and returns p.
-[GoMethodBody("SetGenerator")] internal static ж<P224Point> SetGeneratorᴍ(ж<P224Point> Ꮡp) {
+internal static ж<P224Point> SetGenerator⁔(/*this*/ ж<P224Point> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.x.SetBytes([0xb7, 0xe, 0xc, 0xbd, 0x6b, 0xb4, 0xbf, 0x7f, 0x32, 0x13, 0x90, 0xb9, 0x4a, 0x3, 0xc1, 0xd3, 0x56, 0xc2, 0x11, 0x22, 0x34, 0x32, 0x80, 0xd6, 0x11, 0x5c, 0x1d, 0x21]);
@@ -47,7 +47,7 @@ public static ж<P224Point> NewP224Point() {
 }
 
 // Set sets p = q and returns p.
-[GoMethodBody("Set")] internal static ж<P224Point> Setᴍ(ж<P224Point> Ꮡp, ж<P224Point> Ꮡq) {
+internal static ж<P224Point> Set⁔(/*this*/ ж<P224Point> Ꮡp, ж<P224Point> Ꮡq) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var q = ref Ꮡq.DerefOrNull();
 
@@ -58,16 +58,16 @@ public static ж<P224Point> NewP224Point() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidP224CompressedˢᴍP224Point => ref invalidP224CompressedˢᵇᴍP224Point;
-private static readonly @string invalidP224CompressedˢᵇᴍP224Point = "invalid P224 compressed point encoding"u8;
-internal static ref readonly @string invalidP224PointEncodingˢᴍP224Point => ref invalidP224PointEncodingˢᵇᴍP224Point;
-private static readonly @string invalidP224PointEncodingˢᵇᴍP224Point = "invalid P224 point encoding"u8;
+internal static ref readonly @string invalidP224Compressedˢ⁔P224Point => ref invalidP224Compressedˢᵇ⁔P224Point;
+private static readonly @string invalidP224Compressedˢᵇ⁔P224Point = "invalid P224 compressed point encoding"u8;
+internal static ref readonly @string invalidP224PointEncodingˢ⁔P224Point => ref invalidP224PointEncodingˢᵇ⁔P224Point;
+private static readonly @string invalidP224PointEncodingˢᵇ⁔P224Point = "invalid P224 point encoding"u8;
 
 // SetBytes sets p to the compressed, uncompressed, or infinity value encoded in
 // b, as specified in SEC 1, Version 2.0, Section 2.3.4. If the point is not on
 // the curve, it returns nil and an error, and the receiver is unchanged.
 // Otherwise, it returns p.
-[GoMethodBody("SetBytes")] internal static (ж<P224Point>, error) SetBytesᴍ(ж<P224Point> Ꮡp, slice<byte> b) {
+internal static (ж<P224Point>, error) SetBytes⁔(/*this*/ ж<P224Point> Ꮡp, slice<byte> b) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (ᐧ) {
@@ -103,7 +103,7 @@ private static readonly @string invalidP224PointEncodingˢᵇᴍP224Point = "inv
         // y² = x³ - 3x + b
         var y = p224Polynomial(@new<fiat.P224Element>(), x);
         if (!p224Sqrt(y, y)) {
-            return (default, errors.New(invalidP224CompressedˢᴍP224Point));
+            return (default, errors.New(invalidP224Compressedˢ⁔P224Point));
         }
 
         // Select the positive or negative root, as indicated by the least
@@ -119,7 +119,7 @@ private static readonly @string invalidP224PointEncodingˢᵇᴍP224Point = "inv
         return (Ꮡp, default);
     }
     default: {
-        return (default, errors.New(invalidP224PointEncodingˢᴍP224Point));
+        return (default, errors.New(invalidP224PointEncodingˢ⁔P224Point));
     }}
 }
 
@@ -167,14 +167,14 @@ internal static error p224CheckOnCurve(ж<fiat.P224Element> x, ж<fiat.P224Eleme
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
 // infinity is shorter than all other encodings.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref P224Point p) {
+internal static slice<byte> Bytes⁔(/*this*/ ref P224Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(57), out var Ꮡout);
     return p.bytes(Ꮡout);
 }
 
-[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ref P224Point p, /*[57]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes⁔(/*this*/ ref P224Point p, /*[57]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -193,7 +193,7 @@ internal static error p224CheckOnCurve(ж<fiat.P224Element> x, ж<fiat.P224Eleme
 
 // BytesX returns the encoding of the x-coordinate of p, as specified in SEC 1,
 // Version 2.0, Section 2.3.5, or an error if p is the point at infinity.
-[GoMethodBody("BytesX")] internal static (slice<byte>, error) BytesXᴍ(ref P224Point p) {
+internal static (slice<byte>, error) BytesX⁔(/*this*/ ref P224Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(28), out var Ꮡout);
@@ -201,14 +201,14 @@ internal static error p224CheckOnCurve(ж<fiat.P224Element> x, ж<fiat.P224Eleme
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string p224PointIsThePointAtˢᴍP224Point => ref p224PointIsThePointAtˢᵇᴍP224Point;
-private static readonly @string p224PointIsThePointAtˢᵇᴍP224Point = "P224 point is the point at infinity"u8;
+internal static ref readonly @string p224PointIsThePointAtˢ⁔P224Point => ref p224PointIsThePointAtˢᵇ⁔P224Point;
+private static readonly @string p224PointIsThePointAtˢᵇ⁔P224Point = "P224 point is the point at infinity"u8;
 
-[GoMethodBody("bytesX")] internal static (slice<byte>, error) bytesXᴍ(ref P224Point p, /*[28]*/ ж<array<byte>> Ꮡout) {
+internal static (slice<byte>, error) bytesX⁔(/*this*/ ref P224Point p, /*[28]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
-        return (default, errors.New(p224PointIsThePointAtˢᴍP224Point));
+        return (default, errors.New(p224PointIsThePointAtˢ⁔P224Point));
     }
 
     var zinv = @new<fiat.P224Element>().Invert(p.z);
@@ -220,14 +220,14 @@ private static readonly @string p224PointIsThePointAtˢᵇᴍP224Point = "P224 p
 // BytesCompressed returns the compressed or infinity encoding of p, as
 // specified in SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the
 // point at infinity is shorter than all other encodings.
-[GoMethodBody("BytesCompressed")] internal static slice<byte> BytesCompressedᴍ(ref P224Point p) {
+internal static slice<byte> BytesCompressed⁔(/*this*/ ref P224Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(29), out var Ꮡout);
     return p.bytesCompressed(Ꮡout);
 }
 
-[GoMethodBody("bytesCompressed")] internal static slice<byte> bytesCompressedᴍ(ref P224Point p, /*[29]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytesCompressed⁔(/*this*/ ref P224Point p, /*[29]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -247,7 +247,7 @@ private static readonly @string p224PointIsThePointAtˢᵇᴍP224Point = "P224 p
 }
 
 // Add sets q = p1 + p2, and returns q. The points may overlap.
-[GoMethodBody("Add")] internal static ж<P224Point> Addᴍ(ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2) {
+internal static ж<P224Point> Add⁔(/*this*/ ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -306,7 +306,7 @@ private static readonly @string p224PointIsThePointAtˢᵇᴍP224Point = "P224 p
 }
 
 // Double sets q = p + p, and returns q. The points may overlap.
-[GoMethodBody("Double")] internal static ж<P224Point> Doubleᴍ(ж<P224Point> Ꮡq, ж<P224Point> Ꮡp) {
+internal static ж<P224Point> Double⁔(/*this*/ ж<P224Point> Ꮡq, ж<P224Point> Ꮡp) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -355,7 +355,7 @@ private static readonly @string p224PointIsThePointAtˢᵇᴍP224Point = "P224 p
 }
 
 // Select sets q to p1 if cond == 1, and to p2 if cond == 0.
-[GoMethodBody("Select")] internal static ж<P224Point> Selectᴍ(ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2, nint cond) {
+internal static ж<P224Point> Select⁔(/*this*/ ж<P224Point> Ꮡq, ж<P224Point> Ꮡp1, ж<P224Point> Ꮡp2, nint cond) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -377,7 +377,7 @@ partial struct p224Table /*[15]ж<P224Point>*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
-[GoMethodBody("Select")] internal static void Selectᴍ(ref p224Table table, ж<P224Point> p, uint8 n) {
+internal static void Select⁔(/*this*/ ref p224Table table, ж<P224Point> p, uint8 n) {
     if (n >= 16) {
         throw panic("nistec: internal error: p224Table called with out-of-bounds value");
     }
@@ -391,7 +391,7 @@ partial struct p224Table /*[15]ж<P224Point>*/;
 } partial class nistec_package {
 
 // ScalarMult sets p = scalar * q, and returns p.
-[GoMethodBody("ScalarMult")] internal static (ж<P224Point>, error) ScalarMultᴍ(ж<P224Point> Ꮡp, ж<P224Point> q, slice<byte> scalar) {
+internal static (ж<P224Point>, error) ScalarMult⁔(/*this*/ ж<P224Point> Ꮡp, ж<P224Point> q, slice<byte> scalar) {
     // Compute a p224Table for the base point q. The explicit NewP224Point
     // calls get inlined, letting the allocations live on the stack.
     p224Table table = new p224Table(new ж<P224Point>[]{NewP224Point(), NewP224Point(), NewP224Point(),
@@ -446,7 +446,7 @@ internal static ref sync.Once p224GeneratorTableOnce => ref ((StaticBox<sync.Onc
 // generatorTable returns a sequence of p224Tables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four
 // times.
-[GoMethodBody("generatorTable")] internal static ж<array<p224Table>> generatorTableᴍ(ref P224Point p) {
+internal static ж<array<p224Table>> generatorTable⁔(/*this*/ ref P224Point p) {
     Ꮡp224GeneratorTableOnce.Do(() => {
         p224GeneratorTable = Ꮡ(new array<p224Table>(56));
         var @base = NewP224Point().SetGenerator();
@@ -465,16 +465,16 @@ internal static ref sync.Once p224GeneratorTableOnce => ref ((StaticBox<sync.Onc
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidScalarLengthˢᴍP224Point => ref invalidScalarLengthˢᵇᴍP224Point;
-private static readonly @string invalidScalarLengthˢᵇᴍP224Point = "invalid scalar length"u8;
+internal static ref readonly @string invalidScalarLengthˢ⁔P224Point => ref invalidScalarLengthˢᵇ⁔P224Point;
+private static readonly @string invalidScalarLengthˢᵇ⁔P224Point = "invalid scalar length"u8;
 
 // ScalarBaseMult sets p = scalar * B, where B is the canonical generator, and
 // returns p.
-[GoMethodBody("ScalarBaseMult")] internal static (ж<P224Point>, error) ScalarBaseMultᴍ(ж<P224Point> Ꮡp, slice<byte> scalar) {
+internal static (ж<P224Point>, error) ScalarBaseMult⁔(/*this*/ ж<P224Point> Ꮡp, slice<byte> scalar) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (len(scalar) != p224ElementLength) {
-        return (default, errors.New(invalidScalarLengthˢᴍP224Point));
+        return (default, errors.New(invalidScalarLengthˢ⁔P224Point));
     }
     var tables = p.generatorTable();
 

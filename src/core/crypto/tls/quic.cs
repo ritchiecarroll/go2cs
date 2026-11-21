@@ -24,28 +24,28 @@ public static QUICEncryptionLevel QUICEncryptionLevelApplication => 3;
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string initialˢᴍQUICEncryptionLevel => ref initialˢᵇᴍQUICEncryptionLevel;
-private static readonly @string initialˢᵇᴍQUICEncryptionLevel = "Initial"u8;
-internal static ref readonly @string earlyˢᴍQUICEncryptionLevel => ref earlyˢᵇᴍQUICEncryptionLevel;
-private static readonly @string earlyˢᵇᴍQUICEncryptionLevel = "Early"u8;
-internal static ref readonly @string handshakeˢᴍQUICEncryptionLevel => ref handshakeˢᵇᴍQUICEncryptionLevel;
-private static readonly @string handshakeˢᵇᴍQUICEncryptionLevel = "Handshake"u8;
-internal static ref readonly @string applicationˢᴍQUICEncryptionLevel => ref applicationˢᵇᴍQUICEncryptionLevel;
-private static readonly @string applicationˢᵇᴍQUICEncryptionLevel = "Application"u8;
+internal static ref readonly @string initialˢ⁔QUICEncryptionLevel => ref initialˢᵇ⁔QUICEncryptionLevel;
+private static readonly @string initialˢᵇ⁔QUICEncryptionLevel = "Initial"u8;
+internal static ref readonly @string earlyˢ⁔QUICEncryptionLevel => ref earlyˢᵇ⁔QUICEncryptionLevel;
+private static readonly @string earlyˢᵇ⁔QUICEncryptionLevel = "Early"u8;
+internal static ref readonly @string handshakeˢ⁔QUICEncryptionLevel => ref handshakeˢᵇ⁔QUICEncryptionLevel;
+private static readonly @string handshakeˢᵇ⁔QUICEncryptionLevel = "Handshake"u8;
+internal static ref readonly @string applicationˢ⁔QUICEncryptionLevel => ref applicationˢᵇ⁔QUICEncryptionLevel;
+private static readonly @string applicationˢᵇ⁔QUICEncryptionLevel = "Application"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(QUICEncryptionLevel l) {
+internal static @string String⁔(/*this*/ QUICEncryptionLevel l) {
     switch (l) {
     case var ᴛ when ᴛ == QUICEncryptionLevelInitial: {
-        return initialˢᴍQUICEncryptionLevel;
+        return initialˢ⁔QUICEncryptionLevel;
     }
     case var ᴛ when ᴛ == QUICEncryptionLevelEarly: {
-        return earlyˢᴍQUICEncryptionLevel;
+        return earlyˢ⁔QUICEncryptionLevel;
     }
     case var ᴛ when ᴛ == QUICEncryptionLevelHandshake: {
-        return handshakeˢᴍQUICEncryptionLevel;
+        return handshakeˢ⁔QUICEncryptionLevel;
     }
     case var ᴛ when ᴛ == QUICEncryptionLevelApplication: {
-        return applicationˢᴍQUICEncryptionLevel;
+        return applicationˢ⁔QUICEncryptionLevel;
     }
     default: {
         return fmt.Sprintf("QUICEncryptionLevel(%v)"u8, (nint)l);
@@ -218,24 +218,24 @@ internal static ж<QUICConn> newQUICConn(ж<Conn> Ꮡconn, ref QUICConfig config
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsStartCalledMoreThanˢᴍQUICConn => ref tlsStartCalledMoreThanˢᵇᴍQUICConn;
-private static readonly @string tlsStartCalledMoreThanˢᵇᴍQUICConn = "tls: Start called more than once"u8;
-internal static ref readonly @string tlsConfigMinVersionMustˢᴍQUICConn => ref tlsConfigMinVersionMustˢᵇᴍQUICConn;
-private static readonly @string tlsConfigMinVersionMustˢᵇᴍQUICConn = "tls: Config MinVersion must be at least TLS 1.3"u8;
+internal static ref readonly @string tlsStartCalledMoreThanˢ⁔QUICConn => ref tlsStartCalledMoreThanˢᵇ⁔QUICConn;
+private static readonly @string tlsStartCalledMoreThanˢᵇ⁔QUICConn = "tls: Start called more than once"u8;
+internal static ref readonly @string tlsConfigMinVersionMustˢ⁔QUICConn => ref tlsConfigMinVersionMustˢᵇ⁔QUICConn;
+private static readonly @string tlsConfigMinVersionMustˢᵇ⁔QUICConn = "tls: Config MinVersion must be at least TLS 1.3"u8;
 
 // Start starts the client or server handshake protocol.
 // It may produce connection events, which may be read with [QUICConn.NextEvent].
 //
 // Start must be called at most once.
-[GoMethodBody("Start")] internal static partial error Startᴍ(ж<QUICConn> Ꮡq, context.Context ctx) {
+internal static partial error Start⁔(/*this*/ ж<QUICConn> Ꮡq, context.Context ctx) {
     ref var q = ref Ꮡq.DerefOrNull();
 
     if (q.conn.quic.started) {
-        return quicError(errors.New(tlsStartCalledMoreThanˢᴍQUICConn));
+        return quicError(errors.New(tlsStartCalledMoreThanˢ⁔QUICConn));
     }
     q.conn.quic.started = true;
     if (q.conn.config.MinVersion < VersionTLS13) {
-        return quicError(errors.New(tlsConfigMinVersionMustˢᴍQUICConn));
+        return quicError(errors.New(tlsConfigMinVersionMustˢ⁔QUICConn));
     }
     goǃ((ᴛ0, ᴛ1) => ᴛ0.HandshakeContext(ᴛ1), Ꮡq.Value.conn, ctx);
     var (_, ok) = ᐸꟷ(q.conn.quic.blockedc, ꟷ); if (!ok) {
@@ -246,7 +246,7 @@ private static readonly @string tlsConfigMinVersionMustˢᵇᴍQUICConn = "tls: 
 
 // NextEvent returns the next event occurring on the connection.
 // It returns an event with a Kind of [QUICNoEvent] when no events are available.
-[GoMethodBody("NextEvent")] internal static QUICEvent NextEventᴍ(ref QUICConn q) {
+internal static QUICEvent NextEvent⁔(/*this*/ ref QUICConn q) {
     var qs = q.conn.quic;
     nint last = qs.nextEvent - 1; if (last >= 0 && len(qs.events[last].Data) > 0) {
         // Write over some of the previous event's data,
@@ -279,7 +279,7 @@ private static readonly @string tlsConfigMinVersionMustˢᵇᴍQUICConn = "tls: 
 }
 
 // Close closes the connection and stops any in-progress handshake.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref QUICConn q) {
+internal static error Close⁔(/*this*/ ref QUICConn q) {
     if (q.conn.quic.ctx == nil) {
         return default; // never started
     }
@@ -292,19 +292,19 @@ private static readonly @string tlsConfigMinVersionMustˢᵇᴍQUICConn = "tls: 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsHandshakeDataReceivedˢᴍQUICConn => ref tlsHandshakeDataReceivedˢᵇᴍQUICConn;
-private static readonly @string tlsHandshakeDataReceivedˢᵇᴍQUICConn = "tls: handshake data received at wrong level"u8;
+internal static ref readonly @string tlsHandshakeDataReceivedˢ⁔QUICConn => ref tlsHandshakeDataReceivedˢᵇ⁔QUICConn;
+private static readonly @string tlsHandshakeDataReceivedˢᵇ⁔QUICConn = "tls: handshake data received at wrong level"u8;
 
 // HandleData handles handshake bytes received from the peer.
 // It may produce connection events, which may be read with [QUICConn.NextEvent].
-[GoMethodBody("HandleData")] internal static error HandleDataᴍ(ж<QUICConn> Ꮡq, QUICEncryptionLevel level, slice<byte> data) {
+internal static error HandleData⁔(/*this*/ ж<QUICConn> Ꮡq, QUICEncryptionLevel level, slice<byte> data) {
     GoFrame ᒐ = default;
     try {
         ref var q = ref Ꮡq.DerefOrNull();
 
         var c = q.conn;
         if (c.@in.level != level) {
-            return quicError(c.Ꮡin.setErrorLocked(errors.New(tlsHandshakeDataReceivedˢᴍQUICConn)));
+            return quicError(c.Ꮡin.setErrorLocked(errors.New(tlsHandshakeDataReceivedˢ⁔QUICConn)));
         }
         c.quic.readbuf = data;
         ᐸꟷ(c.quic.signalc);
@@ -353,46 +353,46 @@ partial struct QUICSessionTicketOptions {
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsSendSessionTicketˢᴍQUICConn => ref tlsSendSessionTicketˢᵇᴍQUICConn;
-private static readonly @string tlsSendSessionTicketˢᵇᴍQUICConn = "tls: SendSessionTicket called before handshake completed"u8;
-internal static ref readonly @string tlsSendSessionTicketˢ2ᴍQUICConn => ref tlsSendSessionTicketˢ2ᵇᴍQUICConn;
-private static readonly @string tlsSendSessionTicketˢ2ᵇᴍQUICConn = "tls: SendSessionTicket called on the client"u8;
-internal static ref readonly @string tlsSendSessionTicketˢ3ᴍQUICConn => ref tlsSendSessionTicketˢ3ᵇᴍQUICConn;
-private static readonly @string tlsSendSessionTicketˢ3ᵇᴍQUICConn = "tls: SendSessionTicket called multiple times"u8;
+internal static ref readonly @string tlsSendSessionTicketˢ⁔QUICConn => ref tlsSendSessionTicketˢᵇ⁔QUICConn;
+private static readonly @string tlsSendSessionTicketˢᵇ⁔QUICConn = "tls: SendSessionTicket called before handshake completed"u8;
+internal static ref readonly @string tlsSendSessionTicketˢ2⁔QUICConn => ref tlsSendSessionTicketˢ2ᵇ⁔QUICConn;
+private static readonly @string tlsSendSessionTicketˢ2ᵇ⁔QUICConn = "tls: SendSessionTicket called on the client"u8;
+internal static ref readonly @string tlsSendSessionTicketˢ3⁔QUICConn => ref tlsSendSessionTicketˢ3ᵇ⁔QUICConn;
+private static readonly @string tlsSendSessionTicketˢ3ᵇ⁔QUICConn = "tls: SendSessionTicket called multiple times"u8;
 
 // SendSessionTicket sends a session ticket to the client.
 // It produces connection events, which may be read with [QUICConn.NextEvent].
 // Currently, it can only be called once.
-[GoMethodBody("SendSessionTicket")] internal static error SendSessionTicketᴍ(ref QUICConn q, QUICSessionTicketOptions opts) {
+internal static error SendSessionTicket⁔(/*this*/ ref QUICConn q, QUICSessionTicketOptions opts) {
     var c = q.conn;
     if (c.config.SessionTicketsDisabled) {
         return default;
     }
     if (!c.ᏑisHandshakeComplete.Load()) {
-        return quicError(errors.New(tlsSendSessionTicketˢᴍQUICConn));
+        return quicError(errors.New(tlsSendSessionTicketˢ⁔QUICConn));
     }
     if (c.isClient) {
-        return quicError(errors.New(tlsSendSessionTicketˢ2ᴍQUICConn));
+        return quicError(errors.New(tlsSendSessionTicketˢ2⁔QUICConn));
     }
     if (q.sessionTicketSent) {
-        return quicError(errors.New(tlsSendSessionTicketˢ3ᴍQUICConn));
+        return quicError(errors.New(tlsSendSessionTicketˢ3⁔QUICConn));
     }
     q.sessionTicketSent = true;
     return quicError(c.sendSessionTicket(opts.EarlyData, opts.Extra));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsStoreSessionTicketˢᴍQUICConn => ref tlsStoreSessionTicketˢᵇᴍQUICConn;
-private static readonly @string tlsStoreSessionTicketˢᵇᴍQUICConn = "tls: StoreSessionTicket called on the server"u8;
+internal static ref readonly @string tlsStoreSessionTicketˢ⁔QUICConn => ref tlsStoreSessionTicketˢᵇ⁔QUICConn;
+private static readonly @string tlsStoreSessionTicketˢᵇ⁔QUICConn = "tls: StoreSessionTicket called on the server"u8;
 
 // StoreSession stores a session previously received in a QUICStoreSession event
 // in the ClientSessionCache.
 // The application may process additional events or modify the SessionState
 // before storing the session.
-[GoMethodBody("StoreSession")] internal static error StoreSessionᴍ(ref QUICConn q, ж<SessionState> session) {
+internal static error StoreSession⁔(/*this*/ ref QUICConn q, ж<SessionState> session) {
     var c = q.conn;
     if (!c.isClient) {
-        return quicError(errors.New(tlsStoreSessionTicketˢᴍQUICConn));
+        return quicError(errors.New(tlsStoreSessionTicketˢ⁔QUICConn));
     }
     @string cacheKey = c.clientSessionCacheKey();
     if (cacheKey == ""u8) {
@@ -404,7 +404,7 @@ private static readonly @string tlsStoreSessionTicketˢᵇᴍQUICConn = "tls: St
 }
 
 // ConnectionState returns basic TLS details about the connection.
-[GoMethodBody("ConnectionState")] internal static ConnectionState ConnectionStateᴍ(ref QUICConn q) {
+internal static ConnectionState ConnectionState⁔(/*this*/ ref QUICConn q) {
     return q.conn.ConnectionState();
 }
 
@@ -412,7 +412,7 @@ private static readonly @string tlsStoreSessionTicketˢᵇᴍQUICConn = "tls: St
 //
 // Server connections may delay setting the transport parameters until after
 // receiving the client's transport parameters. See [QUICTransportParametersRequired].
-[GoMethodBody("SetTransportParameters")] internal static void SetTransportParametersᴍ(ref QUICConn q, slice<byte> @params) {
+internal static void SetTransportParameters⁔(/*this*/ ref QUICConn q, slice<byte> @params) {
     if (@params == nil) {
         @params = [];
     }
@@ -445,7 +445,7 @@ internal static error quicError(error err) {
 
 } partial class tls_package {
 
-[GoMethodBody("quicReadHandshakeBytes")] internal static error quicReadHandshakeBytesᴍ(ж<Conn> Ꮡc, nint n) {
+internal static error quicReadHandshakeBytes⁔(/*this*/ ж<Conn> Ꮡc, nint n) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     while (c.hand.Len() < n) {
@@ -456,7 +456,7 @@ internal static error quicError(error err) {
     return default;
 }
 
-[GoMethodBody("quicSetReadSecret")] internal static error quicSetReadSecretᴍ(ж<Conn> Ꮡc, QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
+internal static error quicSetReadSecret⁔(/*this*/ ж<Conn> Ꮡc, QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Ensure that there are no buffered handshake messages before changing the
@@ -465,7 +465,7 @@ internal static error quicError(error err) {
     // TODO(roland): we should merge this check with the similar one in setReadTrafficSecret.
     if (c.hand.Len() != 0) {
         Ꮡc.sendAlert(alertUnexpectedMessage);
-        return errors.New(tlsHandshakeBufferNotˢᴍConn);
+        return errors.New(tlsHandshakeBufferNotˢ⁔Conn);
     }
     c.quic.events = append(c.quic.events, new QUICEvent(
         Kind: QUICSetReadSecret,
@@ -476,7 +476,7 @@ internal static error quicError(error err) {
     return default;
 }
 
-[GoMethodBody("quicSetWriteSecret")] internal static void quicSetWriteSecretᴍ(ref Conn c, QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
+internal static void quicSetWriteSecret⁔(/*this*/ ref Conn c, QUICEncryptionLevel level, uint16 suite, slice<byte> secret) {
     c.quic.events = append(c.quic.events, new QUICEvent(
         Kind: QUICSetWriteSecret,
         Level: level,
@@ -485,7 +485,7 @@ internal static error quicError(error err) {
     ));
 }
 
-[GoMethodBody("quicWriteCryptoData")] internal static void quicWriteCryptoDataᴍ(ref Conn c, QUICEncryptionLevel level, slice<byte> data) {
+internal static void quicWriteCryptoData⁔(/*this*/ ref Conn c, QUICEncryptionLevel level, slice<byte> data) {
     ж<QUICEvent> last = default;
     if (len(c.quic.events) > 0) {
         last = Ꮡ(c.quic.events, len(c.quic.events) - 1);
@@ -500,7 +500,7 @@ internal static error quicError(error err) {
     last.Data = appendꓸꓸꓸ(last.Data, data);
 }
 
-[GoMethodBody("quicResumeSession")] internal static error quicResumeSessionᴍ(ж<Conn> Ꮡc, ж<SessionState> session) {
+internal static error quicResumeSession⁔(/*this*/ ж<Conn> Ꮡc, ж<SessionState> session) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.quic.events = append(c.quic.events, new QUICEvent(
@@ -516,21 +516,21 @@ internal static error quicError(error err) {
     return default;
 }
 
-[GoMethodBody("quicStoreSession")] internal static void quicStoreSessionᴍ(ref Conn c, ж<SessionState> session) {
+internal static void quicStoreSession⁔(/*this*/ ref Conn c, ж<SessionState> session) {
     c.quic.events = append(c.quic.events, new QUICEvent(
         Kind: QUICStoreSession,
         SessionState: session
     ));
 }
 
-[GoMethodBody("quicSetTransportParameters")] internal static void quicSetTransportParametersᴍ(ref Conn c, slice<byte> @params) {
+internal static void quicSetTransportParameters⁔(/*this*/ ref Conn c, slice<byte> @params) {
     c.quic.events = append(c.quic.events, new QUICEvent(
         Kind: QUICTransportParameters,
         Data: @params
     ));
 }
 
-[GoMethodBody("quicGetTransportParameters")] internal static (slice<byte>, error) quicGetTransportParametersᴍ(ж<Conn> Ꮡc) {
+internal static (slice<byte>, error) quicGetTransportParameters⁔(/*this*/ ж<Conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.quic.transportParams == nil) {
@@ -546,13 +546,13 @@ internal static error quicError(error err) {
     return (c.quic.transportParams, default);
 }
 
-[GoMethodBody("quicHandshakeComplete")] internal static void quicHandshakeCompleteᴍ(ref Conn c) {
+internal static void quicHandshakeComplete⁔(/*this*/ ref Conn c) {
     c.quic.events = append(c.quic.events, new QUICEvent(
         Kind: QUICHandshakeDone
     ));
 }
 
-[GoMethodBody("quicRejectedEarlyData")] internal static void quicRejectedEarlyDataᴍ(ref Conn c) {
+internal static void quicRejectedEarlyData⁔(/*this*/ ref Conn c) {
     c.quic.events = append(c.quic.events, new QUICEvent(
         Kind: QUICRejectedEarlyData
     ));
@@ -563,7 +563,7 @@ internal static error quicError(error err) {
 //
 // The handshake may become blocked waiting for handshake bytes
 // or for the user to provide transport parameters.
-[GoMethodBody("quicWaitForSignal")] internal static error quicWaitForSignalᴍ(ж<Conn> Ꮡc) {
+internal static error quicWaitForSignal⁔(/*this*/ ж<Conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

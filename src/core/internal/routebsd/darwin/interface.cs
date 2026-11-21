@@ -44,14 +44,14 @@ partial struct InterfaceMulticastAddrMessage {
 } partial class routebsd_package {
 
 // Implement the Message interface.
-[GoMethodBody("message")] internal static void messageᴍ(InterfaceMessage _) { }
+internal static void message⁔(/*this*/ InterfaceMessage _) { }
 
 } partial class routebsd_package {
 
-[GoMethodBody("message")] internal static void messageᴍ(InterfaceAddrMessage _) { }
+internal static void message⁔(/*this*/ InterfaceAddrMessage _) { }
 
 } partial class routebsd_package {
 
-[GoMethodBody("message")] internal static void messageᴍ(InterfaceMulticastAddrMessage _) { }
+internal static void message⁔(/*this*/ InterfaceMulticastAddrMessage _) { }
 
 }

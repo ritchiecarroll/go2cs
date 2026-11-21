@@ -49,18 +49,18 @@ partial struct ints {
 
 } partial class suffixarray_package {
 
-[GoMethodBody("len")] internal static nint lenᴍ(ref ints a) {
+internal static nint len⁔(/*this*/ ref ints a) {
     return builtin.len(a.int32) + builtin.len(a.int64);
 }
 
-[GoMethodBody("get")] internal static int64 getᴍ(ref ints a, nint i) {
+internal static int64 get⁔(/*this*/ ref ints a, nint i) {
     if (a.int32 != nil) {
         return (int64)a.int32[i];
     }
     return a.int64[i];
 }
 
-[GoMethodBody("set")] internal static void setᴍ(ref ints a, nint i, int64 v) {
+internal static void set⁔(/*this*/ ref ints a, nint i, int64 v) {
     if (a.int32 != nil) {
         a.int32[i] = (int32)v;
     } else {
@@ -68,7 +68,7 @@ partial struct ints {
     }
 }
 
-[GoMethodBody("Δslice")] internal static ints Δsliceᴍ(ref ints a, nint i, nint j) {
+internal static ints Δslice⁔(/*this*/ ref ints a, nint i, nint j) {
     if (a.int32 != nil) {
         return new ints(a.int32.slice(i, j), default);
     }
@@ -166,7 +166,7 @@ internal static UntypedInt bufSize => /* 16 << 10 */ 16384; // reasonable for Be
 } partial class suffixarray_package {
 
 // Read reads the index from r into x; x must not be nil.
-[GoMethodBody("Read")] internal static error Readᴍ(ref Index x, io.Reader r) {
+internal static error Read⁔(/*this*/ ref Index x, io.Reader r) {
     // buffer for all reads
     var buf = new slice<byte>(bufSize);
 
@@ -216,7 +216,7 @@ internal static UntypedInt bufSize => /* 16 << 10 */ 16384; // reasonable for Be
 }
 
 // Write writes the index x to w.
-[GoMethodBody("Write")] internal static error Writeᴍ(ref Index x, io.Writer w) {
+internal static error Write⁔(/*this*/ ref Index x, io.Writer w) {
     // buffer for all writes
     var buf = new slice<byte>(bufSize);
 
@@ -248,17 +248,17 @@ internal static UntypedInt bufSize => /* 16 << 10 */ 16384; // reasonable for Be
 
 // Bytes returns the data over which the index was created.
 // It must not be modified.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref Index x) {
+internal static slice<byte> Bytes⁔(/*this*/ ref Index x) {
     return x.data;
 }
 
-[GoMethodBody("at")] internal static slice<byte> atᴍ(ref Index x, nint i) {
+internal static slice<byte> at⁔(/*this*/ ref Index x, nint i) {
     return x.data.slice((nint)(x.sa.get(i)));
 }
 
 // lookupAll returns a slice into the matching region of the index.
 // The runtime is O(log(N)*len(s)).
-[GoMethodBody("lookupAll")] internal static ints lookupAllᴍ(ж<Index> Ꮡx, slice<byte> s) {
+internal static ints lookupAll⁔(/*this*/ ж<Index> Ꮡx, slice<byte> s) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // find matching suffix index range [i:j]
@@ -276,7 +276,7 @@ internal static UntypedInt bufSize => /* 16 << 10 */ 16384; // reasonable for Be
 // The result is nil if s is empty, s is not found, or n == 0.
 // Lookup time is O(log(N)*len(s) + len(result)) where N is the
 // size of the indexed data.
-[GoMethodBody("Lookup")] internal static slice<nint> /*result*/ Lookupᴍ(ж<Index> Ꮡx, slice<byte> s, nint n) {
+internal static slice<nint> /*result*/ Lookup⁔(/*this*/ ж<Index> Ꮡx, slice<byte> s, nint n) {
     slice<nint> result = default;
 
     if (len(s) > 0 && n != 0) {
@@ -308,7 +308,7 @@ internal static UntypedInt bufSize => /* 16 << 10 */ 16384; // reasonable for Be
 // in successive order. Otherwise, at most n matches are returned and
 // they may not be successive. The result is nil if there are no matches,
 // or if n == 0.
-[GoMethodBody("FindAllIndex")] internal static slice<slice<nint>> /*result*/ FindAllIndexᴍ(ж<Index> Ꮡx, ж<regexp.Regexp> Ꮡr, nint n) {
+internal static slice<slice<nint>> /*result*/ FindAllIndex⁔(/*this*/ ж<Index> Ꮡx, ж<regexp.Regexp> Ꮡr, nint n) {
     slice<slice<nint>> result = default;
     ref var x = ref Ꮡx.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();

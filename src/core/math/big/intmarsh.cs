@@ -17,7 +17,7 @@ internal const byte intGobVersion = 1;
 } partial class big_package {
 
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
-[GoMethodBody("GobEncode")] internal static (slice<byte>, error) GobEncodeᴍ(ж<Int> Ꮡx) {
+internal static (slice<byte>, error) GobEncode⁔(/*this*/ ж<Int> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
@@ -34,7 +34,7 @@ internal const byte intGobVersion = 1;
 }
 
 // GobDecode implements the [encoding/gob.GobDecoder] interface.
-[GoMethodBody("GobDecode")] internal static error GobDecodeᴍ(ref Int z, slice<byte> buf) {
+internal static error GobDecode⁔(/*this*/ ref Int z, slice<byte> buf) {
     if (len(buf) == 0) {
         // Other side sent a nil or default value.
         z = new Int();
@@ -50,17 +50,17 @@ internal const byte intGobVersion = 1;
 }
 
 // AppendText implements the [encoding.TextAppender] interface.
-[GoMethodBody("AppendText")] internal static (slice<byte> text, error err) AppendTextᴍ(ж<Int> Ꮡx, slice<byte> b) {
+internal static (slice<byte> text, error err) AppendText⁔(/*this*/ ж<Int> Ꮡx, slice<byte> b) {
     return (Ꮡx.Append(b, 10), default);
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-[GoMethodBody("MarshalText")] internal static (slice<byte> text, error err) MarshalTextᴍ(ж<Int> Ꮡx) {
+internal static (slice<byte> text, error err) MarshalText⁔(/*this*/ ж<Int> Ꮡx) {
     return Ꮡx.AppendText(default);
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-[GoMethodBody("UnmarshalText")] internal static error UnmarshalTextᴍ(ж<Int> Ꮡz, slice<byte> text) {
+internal static error UnmarshalText⁔(/*this*/ ж<Int> Ꮡz, slice<byte> text) {
     var (_, ok) = Ꮡz.setFromScanner(new bytes_ReaderжByteScanner(bytes.NewReader(text)), 0); if (!ok) {
         return fmt.Errorf("math/big: cannot unmarshal %q into a *big.Int"u8, text);
     }
@@ -72,7 +72,7 @@ internal const byte intGobVersion = 1;
 // fine with the TextMarshaler only.
 
 // MarshalJSON implements the [encoding/json.Marshaler] interface.
-[GoMethodBody("MarshalJSON")] internal static (slice<byte>, error) MarshalJSONᴍ(ж<Int> Ꮡx) {
+internal static (slice<byte>, error) MarshalJSON⁔(/*this*/ ж<Int> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
@@ -82,7 +82,7 @@ internal const byte intGobVersion = 1;
 }
 
 // UnmarshalJSON implements the [encoding/json.Unmarshaler] interface.
-[GoMethodBody("UnmarshalJSON")] internal static error UnmarshalJSONᴍ(ж<Int> Ꮡz, slice<byte> text) {
+internal static error UnmarshalJSON⁔(/*this*/ ж<Int> Ꮡz, slice<byte> text) {
     // Ignore null, like in the main JSON package.
     if (((sstring)text) == "null"u8) {
         return default;

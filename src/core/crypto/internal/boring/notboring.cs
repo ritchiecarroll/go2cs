@@ -33,7 +33,7 @@ public partial struct randReader /*num:nint*/;
 
 } partial class boring_package {
 
-[GoMethodBody("Read")] internal static (nint, error) Readᴍ(randReader _, slice<byte> b) { throw panic("boringcrypto: not available"); }
+internal static (nint, error) Read⁔(/*this*/ randReader _, slice<byte> b) { throw panic("boringcrypto: not available"); }
 
 } partial class boring_package {
 
@@ -137,10 +137,10 @@ public static (ж<PublicKeyECDH>, error) NewPublicKeyECDH(@string _Δp0, slice<b
 
 } partial class boring_package {
 
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref PublicKeyECDH _) { throw panic("boringcrypto: not available"); }
+internal static slice<byte> Bytes⁔(/*this*/ ref PublicKeyECDH _) { throw panic("boringcrypto: not available"); }
 
 } partial class boring_package {
 
-[GoMethodBody("PublicKey")] internal static (ж<PublicKeyECDH>, error) PublicKeyᴍ(ref PrivateKeyECDH _) { throw panic("boringcrypto: not available"); }
+internal static (ж<PublicKeyECDH>, error) PublicKey⁔(/*this*/ ref PrivateKeyECDH _) { throw panic("boringcrypto: not available"); }
 
 }

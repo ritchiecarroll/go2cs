@@ -78,25 +78,25 @@ partial struct CertificateInvalidError {
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509CertificateIsNotˢᴍCertificateInvalidError => ref x509CertificateIsNotˢᵇᴍCertificateInvalidError;
-private static readonly @string x509CertificateIsNotˢᵇᴍCertificateInvalidError = "x509: certificate is not authorized to sign other certificates"u8;
-internal static ref readonly @string x509TooManyIntermediatesˢᴍCertificateInvalidError => ref x509TooManyIntermediatesˢᵇᴍCertificateInvalidError;
-private static readonly @string x509TooManyIntermediatesˢᵇᴍCertificateInvalidError = "x509: too many intermediates for path length constraint"u8;
-internal static ref readonly @string x509CertificateSpecifiesˢᴍCertificateInvalidError => ref x509CertificateSpecifiesˢᵇᴍCertificateInvalidError;
-private static readonly @string x509CertificateSpecifiesˢᵇᴍCertificateInvalidError = "x509: certificate specifies an incompatible key usage"u8;
-internal static ref readonly @string x509IssuerNameDoesNotˢᴍCertificateInvalidError => ref x509IssuerNameDoesNotˢᵇᴍCertificateInvalidError;
-private static readonly @string x509IssuerNameDoesNotˢᵇᴍCertificateInvalidError = "x509: issuer name does not match subject from issuing certificate"u8;
-internal static ref readonly @string x509IssuerHasNameˢᴍCertificateInvalidError => ref x509IssuerHasNameˢᵇᴍCertificateInvalidError;
-private static readonly @string x509IssuerHasNameˢᵇᴍCertificateInvalidError = "x509: issuer has name constraints but leaf doesn't have a SAN extension"u8;
-internal static ref readonly @string x509NoValidChainsBuiltˢᴍCertificateInvalidError => ref x509NoValidChainsBuiltˢᵇᴍCertificateInvalidError;
-private static readonly @string x509NoValidChainsBuiltˢᵇᴍCertificateInvalidError = "x509: no valid chains built"u8;
-internal static ref readonly @string x509UnknownErrorˢᴍCertificateInvalidError => ref x509UnknownErrorˢᵇᴍCertificateInvalidError;
-private static readonly @string x509UnknownErrorˢᵇᴍCertificateInvalidError = "x509: unknown error"u8;
+internal static ref readonly @string x509CertificateIsNotˢ⁔CertificateInvalidError => ref x509CertificateIsNotˢᵇ⁔CertificateInvalidError;
+private static readonly @string x509CertificateIsNotˢᵇ⁔CertificateInvalidError = "x509: certificate is not authorized to sign other certificates"u8;
+internal static ref readonly @string x509TooManyIntermediatesˢ⁔CertificateInvalidError => ref x509TooManyIntermediatesˢᵇ⁔CertificateInvalidError;
+private static readonly @string x509TooManyIntermediatesˢᵇ⁔CertificateInvalidError = "x509: too many intermediates for path length constraint"u8;
+internal static ref readonly @string x509CertificateSpecifiesˢ⁔CertificateInvalidError => ref x509CertificateSpecifiesˢᵇ⁔CertificateInvalidError;
+private static readonly @string x509CertificateSpecifiesˢᵇ⁔CertificateInvalidError = "x509: certificate specifies an incompatible key usage"u8;
+internal static ref readonly @string x509IssuerNameDoesNotˢ⁔CertificateInvalidError => ref x509IssuerNameDoesNotˢᵇ⁔CertificateInvalidError;
+private static readonly @string x509IssuerNameDoesNotˢᵇ⁔CertificateInvalidError = "x509: issuer name does not match subject from issuing certificate"u8;
+internal static ref readonly @string x509IssuerHasNameˢ⁔CertificateInvalidError => ref x509IssuerHasNameˢᵇ⁔CertificateInvalidError;
+private static readonly @string x509IssuerHasNameˢᵇ⁔CertificateInvalidError = "x509: issuer has name constraints but leaf doesn't have a SAN extension"u8;
+internal static ref readonly @string x509NoValidChainsBuiltˢ⁔CertificateInvalidError => ref x509NoValidChainsBuiltˢᵇ⁔CertificateInvalidError;
+private static readonly @string x509NoValidChainsBuiltˢᵇ⁔CertificateInvalidError = "x509: no valid chains built"u8;
+internal static ref readonly @string x509UnknownErrorˢ⁔CertificateInvalidError => ref x509UnknownErrorˢᵇ⁔CertificateInvalidError;
+private static readonly @string x509UnknownErrorˢᵇ⁔CertificateInvalidError = "x509: unknown error"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(CertificateInvalidError e) {
+internal static @string Error⁔(/*this*/ CertificateInvalidError e) {
     switch (e.Reason) {
     case var ᴛ when ᴛ == NotAuthorizedToSign: {
-        return x509CertificateIsNotˢᴍCertificateInvalidError;
+        return x509CertificateIsNotˢ⁔CertificateInvalidError;
     }
     case var ᴛ when ᴛ == Expired: {
         return "x509: certificate has expired or is not yet valid: "u8 + e.Detail;
@@ -108,28 +108,28 @@ private static readonly @string x509UnknownErrorˢᵇᴍCertificateInvalidError 
         return "x509: a root or intermediate certificate is not authorized for an extended key usage: "u8 + e.Detail;
     }
     case var ᴛ when ᴛ == TooManyIntermediates: {
-        return x509TooManyIntermediatesˢᴍCertificateInvalidError;
+        return x509TooManyIntermediatesˢ⁔CertificateInvalidError;
     }
     case var ᴛ when ᴛ == IncompatibleUsage: {
-        return x509CertificateSpecifiesˢᴍCertificateInvalidError;
+        return x509CertificateSpecifiesˢ⁔CertificateInvalidError;
     }
     case var ᴛ when ᴛ == NameMismatch: {
-        return x509IssuerNameDoesNotˢᴍCertificateInvalidError;
+        return x509IssuerNameDoesNotˢ⁔CertificateInvalidError;
     }
     case var ᴛ when ᴛ == NameConstraintsWithoutSANs: {
-        return x509IssuerHasNameˢᴍCertificateInvalidError;
+        return x509IssuerHasNameˢ⁔CertificateInvalidError;
     }
     case var ᴛ when ᴛ == UnconstrainedName: {
         return "x509: issuer has name constraints but leaf contains unknown or unconstrained name: "u8 + e.Detail;
     }
     case var ᴛ when ᴛ == NoValidChains: {
-        @string s = x509NoValidChainsBuiltˢᴍCertificateInvalidError;
+        @string s = x509NoValidChainsBuiltˢ⁔CertificateInvalidError;
         if (e.Detail != ""u8) {
             s = fmt.Sprintf("%s: %s"u8, s, e.Detail);
         }
         return s;
     }}
-    return x509UnknownErrorˢᴍCertificateInvalidError;
+    return x509UnknownErrorˢ⁔CertificateInvalidError;
 }
 
 } partial class x509_package {
@@ -144,15 +144,15 @@ partial struct HostnameError {
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509CertificateReliesOnˢᴍHostnameError => ref x509CertificateReliesOnˢᵇᴍHostnameError;
-private static readonly @string x509CertificateReliesOnˢᵇᴍHostnameError = "x509: certificate relies on legacy Common Name field, use SANs instead"u8;
+internal static ref readonly @string x509CertificateReliesOnˢ⁔HostnameError => ref x509CertificateReliesOnˢᵇ⁔HostnameError;
+private static readonly @string x509CertificateReliesOnˢᵇ⁔HostnameError = "x509: certificate relies on legacy Common Name field, use SANs instead"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(HostnameError h) {
+internal static @string Error⁔(/*this*/ HostnameError h) {
     var c = h.Certificate;
     nint maxNamesIncluded = 100;
 
     if (!c.hasSANExtension() && matchHostnames(c.Subject.CommonName, splitHostname(h.Host))) {
-        return x509CertificateReliesOnˢᴍHostnameError;
+        return x509CertificateReliesOnˢ⁔HostnameError;
     }
 
     ref var valid = ref heap(new strings.Builder(), out var Ꮡvalid);
@@ -199,11 +199,11 @@ partial struct UnknownAuthorityError {
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509CertificateSignedByˢᴍUnknownAuthorityError => ref x509CertificateSignedByˢᵇᴍUnknownAuthorityError;
-private static readonly @string x509CertificateSignedByˢᵇᴍUnknownAuthorityError = "x509: certificate signed by unknown authority"u8;
+internal static ref readonly @string x509CertificateSignedByˢ⁔UnknownAuthorityError => ref x509CertificateSignedByˢᵇ⁔UnknownAuthorityError;
+private static readonly @string x509CertificateSignedByˢᵇ⁔UnknownAuthorityError = "x509: certificate signed by unknown authority"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(UnknownAuthorityError e) {
-    @string s = x509CertificateSignedByˢᴍUnknownAuthorityError;
+internal static @string Error⁔(/*this*/ UnknownAuthorityError e) {
+    @string s = x509CertificateSignedByˢ⁔UnknownAuthorityError;
     if (e.hintErr != nil) {
         @string certName = e.hintCert.Subject.CommonName;
         if (len(certName) == 0) {
@@ -228,18 +228,18 @@ partial struct SystemRootsError {
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509FailedToLoadSystemˢᴍSystemRootsError => ref x509FailedToLoadSystemˢᵇᴍSystemRootsError;
-private static readonly @string x509FailedToLoadSystemˢᵇᴍSystemRootsError = "x509: failed to load system roots and no roots provided"u8;
+internal static ref readonly @string x509FailedToLoadSystemˢ⁔SystemRootsError => ref x509FailedToLoadSystemˢᵇ⁔SystemRootsError;
+private static readonly @string x509FailedToLoadSystemˢᵇ⁔SystemRootsError = "x509: failed to load system roots and no roots provided"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(SystemRootsError se) {
-    @string msg = x509FailedToLoadSystemˢᴍSystemRootsError;
+internal static @string Error⁔(/*this*/ SystemRootsError se) {
+    @string msg = x509FailedToLoadSystemˢ⁔SystemRootsError;
     if (se.Err != nil) {
         return msg + "; "u8 + se.Err.Error();
     }
     return msg;
 }
 
-[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(SystemRootsError se) { return se.Err; }
+internal static error Unwrap⁔(/*this*/ SystemRootsError se) { return se.Err; }
 
 } partial class x509_package {
 
@@ -304,7 +304,7 @@ partial struct rfc2821Mailbox {
 
 } partial class x509_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(rfc2821Mailbox s) {
+internal static @string String⁔(/*this*/ rfc2821Mailbox s) {
     return fmt.Sprintf("%s@%s"u8, s.local, s.domain);
 }
 
@@ -487,12 +487,12 @@ internal static (slice<@string> reverseLabels, bool ok) domainToReverseLabels(@s
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509InternalErrorEmptyˢᴍCertificate => ref x509InternalErrorEmptyˢᵇᴍCertificate;
-private static readonly @string x509InternalErrorEmptyˢᵇᴍCertificate = "x509: internal error: empty chain when appending CA cert"u8;
+internal static ref readonly @string x509InternalErrorEmptyˢ⁔Certificate => ref x509InternalErrorEmptyˢᵇ⁔Certificate;
+private static readonly @string x509InternalErrorEmptyˢᵇ⁔Certificate = "x509: internal error: empty chain when appending CA cert"u8;
 
 // isValid performs validity checks on c given that it is a candidate to append
 // to the chain in currentChain.
-[GoMethodBody("isValid")] internal static error isValidᴍ(ж<Certificate> Ꮡc, nint certType, slice<ж<Certificate>> currentChain, ж<VerifyOptions> Ꮡopts) {
+internal static error isValid⁔(/*this*/ ж<Certificate> Ꮡc, nint certType, slice<ж<Certificate>> currentChain, ж<VerifyOptions> Ꮡopts) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var opts = ref Ꮡopts.DerefOrNull();
 
@@ -527,7 +527,7 @@ private static readonly @string x509InternalErrorEmptyˢᵇᴍCertificate = "x50
 
     if (certType == intermediateCertificate || certType == rootCertificate) {
         if (len(currentChain) == 0) {
-            return errors.New(x509InternalErrorEmptyˢᴍCertificate);
+            return errors.New(x509InternalErrorEmptyˢ⁔Certificate);
         }
     }
 
@@ -594,7 +594,7 @@ private static readonly @string x509InternalErrorEmptyˢᵇᴍCertificate = "x50
 // Certificates other than c in the returned chains should not be modified.
 //
 // WARNING: this function doesn't do any revocation checking.
-[GoMethodBody("Verify")] internal static (slice<slice<ж<Certificate>>>, error) Verifyᴍ(ж<Certificate> Ꮡc, VerifyOptions optsʗp) {
+internal static (slice<slice<ж<Certificate>>>, error) Verify⁔(/*this*/ ж<Certificate> Ꮡc, VerifyOptions optsʗp) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var opts = ref heap(optsʗp, out var Ꮡopts);
     var detailsᴷ = new stackAppend<@string>();
@@ -799,7 +799,7 @@ internal partial struct buildChains_type /*dyn*/ {
 
 } partial class x509_package {
 
-[GoMethodBody("buildChains")] internal static (slice<slice<ж<Certificate>>> chains, error err) buildChainsᴍ(ж<Certificate> Ꮡc, slice<ж<Certificate>> currentChain, ж<nint> sigChecks, ж<VerifyOptions> Ꮡopts) {
+internal static (slice<slice<ж<Certificate>>> chains, error err) buildChains⁔(/*this*/ ж<Certificate> Ꮡc, slice<ж<Certificate>> currentChain, ж<nint> sigChecks, ж<VerifyOptions> Ꮡopts) {
     slice<slice<ж<Certificate>>> chains = default;
     error err = default;
     ref var opts = ref Ꮡopts.DerefOrNull();
@@ -1019,7 +1019,7 @@ internal static @string toLowerCaseASCII(@string @in) {
 // fields can have a wildcard as the complete left-most label (e.g. *.example.com).
 //
 // Note that the legacy Common Name field is ignored.
-[GoMethodBody("VerifyHostname")] internal static error VerifyHostnameᴍ(ж<Certificate> Ꮡc, @string h) {
+internal static error VerifyHostname⁔(/*this*/ ж<Certificate> Ꮡc, @string h) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // IP addresses may be written in [ ].
@@ -1181,42 +1181,42 @@ internal static ж<policyGraph> newPolicyGraph() {
 
 } partial class x509_package {
 
-[GoMethodBody("insert")] internal static void insertᴍ(ref policyGraph pg, ж<policyGraphNode> Ꮡn) {
+internal static void insert⁔(/*this*/ ref policyGraph pg, ж<policyGraphNode> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     pg.strata[pg.depth].Set(((@string)n.validPolicy.der), Ꮡn);
 }
 
-[GoMethodBody("parentsWithExpected")] internal static slice<ж<policyGraphNode>> parentsWithExpectedᴍ(ref policyGraph pg, OID expected) {
+internal static slice<ж<policyGraphNode>> parentsWithExpected⁔(/*this*/ ref policyGraph pg, OID expected) {
     if (pg.depth == 0) {
         return default;
     }
     return pg.parentIndex[tmpstring(expected.der)];
 }
 
-[GoMethodBody("parentWithAnyPolicy")] internal static ж<policyGraphNode> parentWithAnyPolicyᴍ(ref policyGraph pg) {
+internal static ж<policyGraphNode> parentWithAnyPolicy⁔(/*this*/ ref policyGraph pg) {
     if (pg.depth == 0) {
         return default;
     }
     return pg.strata[pg.depth - 1][tmpstring(anyPolicyOID.der)];
 }
 
-[GoMethodBody("parents")] internal static iter.Seq<ж<policyGraphNode>> parentsᴍ(ref policyGraph pg) {
+internal static iter.Seq<ж<policyGraphNode>> parents⁔(/*this*/ ref policyGraph pg) {
     if (pg.depth == 0) {
         return default;
     }
     return maps.Values<map<@string, ж<policyGraphNode>>, @string, ж<policyGraphNode>>(pg.strata[pg.depth - 1]);
 }
 
-[GoMethodBody("leaves")] internal static map<@string, ж<policyGraphNode>> leavesᴍ(ref policyGraph pg) {
+internal static map<@string, ж<policyGraphNode>> leaves⁔(/*this*/ ref policyGraph pg) {
     return pg.strata[pg.depth];
 }
 
-[GoMethodBody("leafWithPolicy")] internal static ж<policyGraphNode> leafWithPolicyᴍ(ref policyGraph pg, OID policy) {
+internal static ж<policyGraphNode> leafWithPolicy⁔(/*this*/ ref policyGraph pg, OID policy) {
     return pg.strata[pg.depth][tmpstring(policy.der)];
 }
 
-[GoMethodBody("deleteLeaf")] internal static void deleteLeafᴍ(ref policyGraph pg, OID policy) {
+internal static void deleteLeaf⁔(/*this*/ ref policyGraph pg, OID policy) {
     var n = pg.strata[pg.depth][tmpstring(policy.der)];
     if (n == nil) {
         return;
@@ -1230,7 +1230,7 @@ internal static ж<policyGraph> newPolicyGraph() {
     delete(pg.strata[pg.depth], (@string)policy.der);
 }
 
-[GoMethodBody("validPolicyNodes")] internal static slice<ж<policyGraphNode>> validPolicyNodesᴍ(ref policyGraph pg) {
+internal static slice<ж<policyGraphNode>> validPolicyNodes⁔(/*this*/ ref policyGraph pg) {
     var validNodesᴷ = new stackAppend<ж<policyGraphNode>>(moves: true);
 
     slice<ж<policyGraphNode>> validNodes = default;
@@ -1253,7 +1253,7 @@ internal static ж<policyGraph> newPolicyGraph() {
     return validNodes;
 }
 
-[GoMethodBody("prune")] internal static void pruneᴍ(ref policyGraph pg) {
+internal static void prune⁔(/*this*/ ref policyGraph pg) {
     for (nint i = pg.depth - 1; i > 0; i--) {
         foreach (var (_, n) in pg.strata[i]) {
             if (len(n.children) == 0) {
@@ -1266,7 +1266,7 @@ internal static ж<policyGraph> newPolicyGraph() {
     }
 }
 
-[GoMethodBody("incrDepth")] internal static void incrDepthᴍ(ref policyGraph pg) {
+internal static void incrDepth⁔(/*this*/ ref policyGraph pg) {
     pg.parentIndex = new map<@string, slice<ж<policyGraphNode>>>{};
     foreach (var (_, n) in pg.strata[pg.depth]) {
         foreach (var (_, e) in range(n.expectedPolicySet)) {

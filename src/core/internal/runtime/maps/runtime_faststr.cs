@@ -16,7 +16,7 @@ partial class maps_package {
 
 } partial class maps_package {
 
-[GoMethodBody("getWithoutKeySmallFastStr")] internal static @unsafe.Pointer getWithoutKeySmallFastStrᴍ(ref Map m, ж<abi.MapType> Ꮡtyp, @string keyʗp) {
+internal static @unsafe.Pointer getWithoutKeySmallFastStr⁔(/*this*/ ref Map m, ж<abi.MapType> Ꮡtyp, @string keyʗp) {
     ref var typ = ref Ꮡtyp.DerefOrNull();
     ref var key = ref heap(keyʗp, out var Ꮡkey);
 
@@ -241,7 +241,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_faststr(ж<abi.MapTyp
 
 } partial class maps_package {
 
-[GoMethodBody("putSlotSmallFastStr")] internal static @unsafe.Pointer putSlotSmallFastStrᴍ(ref Map m, ж<abi.MapType> typ, uintptr hash, @string key) {
+internal static @unsafe.Pointer putSlotSmallFastStr⁔(/*this*/ ref Map m, ж<abi.MapType> typ, uintptr hash, @string key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -267,7 +267,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_faststr(ж<abi.MapTyp
     // more efficient than matchEmpty.
     match = g.ctrls().matchEmptyOrDeleted();
     if (match == 0) {
-        fatal(smallMapWithNoEmptySlotˢᴍMap);
+        fatal(smallMapWithNoEmptySlotˢ⁔Map);
     }
 
     var i = match.first();

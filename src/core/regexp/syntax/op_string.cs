@@ -41,7 +41,7 @@ private static readonly @string _Op_name_1ᵇ = "opPseudo"u8;
 
 } partial class syntax_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Op i) {
+internal static @string String⁔(/*this*/ Op i) {
     switch (ᐧ) {
     case {} when 1 <= i && i <= 19: {
         i -= 1;

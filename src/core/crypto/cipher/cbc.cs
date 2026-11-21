@@ -76,9 +76,9 @@ internal static BlockMode newCBCGenericEncrypter(Block b, slice<byte> iv) {
 
 } partial class cipher_package {
 
-[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref cbcEncrypter x) { return x.blockSize; }
+internal static nint BlockSize⁔(/*this*/ ref cbcEncrypter x) { return x.blockSize; }
 
-[GoMethodBody("CryptBlocks")] internal static void CryptBlocksᴍ(ref cbcEncrypter x, slice<byte> dst, slice<byte> src) {
+internal static void CryptBlocks⁔(/*this*/ ref cbcEncrypter x, slice<byte> dst, slice<byte> src) {
     if (len(src) % x.blockSize != 0) {
         throw panic("crypto/cipher: input not full blocks");
     }
@@ -109,7 +109,7 @@ internal static BlockMode newCBCGenericEncrypter(Block b, slice<byte> iv) {
     copy(x.iv, iv);
 }
 
-[GoMethodBody("SetIV")] internal static void SetIVᴍ(ref cbcEncrypter x, slice<byte> iv) {
+internal static void SetIV⁔(/*this*/ ref cbcEncrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }
@@ -159,9 +159,9 @@ internal static BlockMode newCBCGenericDecrypter(Block b, slice<byte> iv) {
 
 } partial class cipher_package {
 
-[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref cbcDecrypter x) { return x.blockSize; }
+internal static nint BlockSize⁔(/*this*/ ref cbcDecrypter x) { return x.blockSize; }
 
-[GoMethodBody("CryptBlocks")] internal static void CryptBlocksᴍ(ref cbcDecrypter x, slice<byte> dst, slice<byte> src) {
+internal static void CryptBlocks⁔(/*this*/ ref cbcDecrypter x, slice<byte> dst, slice<byte> src) {
     if (len(src) % x.blockSize != 0) {
         throw panic("crypto/cipher: input not full blocks");
     }
@@ -205,7 +205,7 @@ internal static BlockMode newCBCGenericDecrypter(Block b, slice<byte> iv) {
     (x.iv, x.tmp) = (x.tmp, x.iv);
 }
 
-[GoMethodBody("SetIV")] internal static void SetIVᴍ(ref cbcDecrypter x, slice<byte> iv) {
+internal static void SetIV⁔(/*this*/ ref cbcDecrypter x, slice<byte> iv) {
     if (len(iv) != len(x.iv)) {
         throw panic("cipher: incorrect length IV");
     }

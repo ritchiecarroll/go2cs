@@ -79,12 +79,12 @@ internal static token matchToken(uint32 xlength, uint32 xoffset) {
 } partial class flate_package {
 
 // Returns the literal of a literal token.
-[GoMethodBody("literal")] internal static uint32 literalᴍ(token t) { return (uint32)(t - (uint32)literalType); }
+internal static uint32 literal⁔(/*this*/ token t) { return (uint32)(t - (uint32)literalType); }
 
 // Returns the extra offset of a match token.
-[GoMethodBody("offset")] internal static uint32 offsetᴍ(token t) { return (uint32)t & (uint32)offsetMask; }
+internal static uint32 offset⁔(/*this*/ token t) { return (uint32)t & (uint32)offsetMask; }
 
-[GoMethodBody("length")] internal static uint32 lengthᴍ(token t) { return (uint32)((t - (uint32)matchType) >> (int)(lengthShift)); }
+internal static uint32 length⁔(/*this*/ token t) { return (uint32)((t - (uint32)matchType) >> (int)(lengthShift)); }
 
 } partial class flate_package {
 

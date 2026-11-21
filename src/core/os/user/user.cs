@@ -67,7 +67,7 @@ partial struct UnknownUserIdError /*num:nint*/;
 
 } partial class user_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(UnknownUserIdError e) {
+internal static @string Error⁔(/*this*/ UnknownUserIdError e) {
     return "user: unknown userid "u8 + strconv.Itoa((nint)e);
 }
 
@@ -79,7 +79,7 @@ partial struct UnknownUserError /*@string*/;
 
 } partial class user_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(UnknownUserError e) {
+internal static @string Error⁔(/*this*/ UnknownUserError e) {
     return "user: unknown user "u8 + ((@string)e);
 }
 
@@ -91,7 +91,7 @@ partial struct UnknownGroupIdError /*@string*/;
 
 } partial class user_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(UnknownGroupIdError e) {
+internal static @string Error⁔(/*this*/ UnknownGroupIdError e) {
     return "group: unknown groupid "u8 + ((@string)e);
 }
 
@@ -103,7 +103,7 @@ partial struct UnknownGroupError /*@string*/;
 
 } partial class user_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(UnknownGroupError e) {
+internal static @string Error⁔(/*this*/ UnknownGroupError e) {
     return "group: unknown group "u8 + ((@string)e);
 }
 

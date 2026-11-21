@@ -69,7 +69,7 @@ public static ж<Counter> NewCounter(/*[48]*/ ж<array<byte>> entropy) {
 
 } partial class drbg_package {
 
-[GoMethodBody("update")] internal static void updateᴍ(ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡseed) {
+internal static void update⁔(/*this*/ ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡseed) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var seed = ref Ꮡseed.DerefOrNull();
 
@@ -105,7 +105,7 @@ internal static void increment(/*[16]*/ ж<array<byte>> Ꮡv) {
 
 } partial class drbg_package {
 
-[GoMethodBody("Reseed")] internal static void Reseedᴍ(ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡentropy, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
+internal static void Reseed⁔(/*this*/ ж<Counter> Ꮡc, /*[48]*/ ж<array<byte>> Ꮡentropy, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var entropy = ref Ꮡentropy.DerefOrNull();
     ref var additionalInput = ref ᏑadditionalInput.DerefOrNull();
@@ -120,7 +120,7 @@ internal static void increment(/*[16]*/ ж<array<byte>> Ꮡv) {
 }
 
 // Generate produces at most maxRequestSize bytes of random data in out.
-[GoMethodBody("Generate")] internal static bool /*reseedRequired*/ Generateᴍ(ж<Counter> Ꮡc, slice<byte> @out, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
+internal static bool /*reseedRequired*/ Generate⁔(/*this*/ ж<Counter> Ꮡc, slice<byte> @out, /*[48]*/ ж<array<byte>> ᏑadditionalInput) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var additionalInput = ref ᏑadditionalInput.DerefOrNull();
 

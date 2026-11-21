@@ -53,7 +53,7 @@ partial struct key {
 
 } partial class token_package {
 
-[GoMethodBody("key")] internal static key keyᴍ(ref File f) {
+internal static key key⁔(/*this*/ ref File f) {
     return new key(f.@base, f.@base + f.size);
 }
 
@@ -83,7 +83,7 @@ internal static nint compareKey(key x, key y) {
 
 // check asserts that each node's height, subtree, and parent link is
 // correct.
-[GoMethodBody("check")] internal static void checkᴍ(ж<node> Ꮡn, ж<node> Ꮡparent) {
+internal static void check⁔(/*this*/ ж<node> Ꮡn, ж<node> Ꮡparent) {
     ref var n = ref Ꮡn.DerefOrNull();
     ref var parent = ref Ꮡparent.DerefOrNull();
 
@@ -101,7 +101,7 @@ internal static nint compareKey(key x, key y) {
     }
 }
 
-[GoMethodBody("checkBalance")] internal static void checkBalanceᴍ(ref node n) {
+internal static void checkBalance⁔(/*this*/ ref node n) {
     var (lheight, rheight) = (n.left.safeHeight(), n.right.safeHeight());
     var balance = rheight - lheight;
     if (balance != n.balance) {
@@ -122,7 +122,7 @@ internal static nint compareKey(key x, key y) {
 // identified by k, along with its parent, if any. If the key is not
 // present, it returns a pointer to the node where the key should be
 // inserted by a subsequent call to [tree.set].
-[GoMethodBody("locate")] internal static (ж<ж<node>> pos, ж<node> parent) locateᴍ(ж<tree> Ꮡt, key k) {
+internal static (ж<ж<node>> pos, ж<node> parent) locate⁔(/*this*/ ж<tree> Ꮡt, key k) {
     ж<ж<node>> pos = default;
     ж<node> parent = default;
     ref var t = ref Ꮡt.DerefOrNull();
@@ -146,7 +146,7 @@ internal static nint compareKey(key x, key y) {
 // If t is modified during the iteration,
 // some files may not be visited.
 // No file will be visited multiple times.
-[GoMethodBody("all")] internal static iter.Seq<ж<File>> allᴍ(ж<tree> Ꮡt) {
+internal static iter.Seq<ж<File>> all⁔(/*this*/ ж<tree> Ꮡt) {
     return (Func<ж<File>, bool> yield) => {
         if (Ꮡt == nil) {
             return;
@@ -172,7 +172,7 @@ internal static nint compareKey(key x, key y) {
 
 // nextAfter returns the node in the key sequence following
 // (pos, parent), a result pair from [tree.locate].
-[GoMethodBody("nextAfter")] internal static ж<node> nextAfterᴍ(ref tree t, ж<ж<node>> Ꮡpos, ж<node> parent) {
+internal static ж<node> nextAfter⁔(/*this*/ ref tree t, ж<ж<node>> Ꮡpos, ж<node> parent) {
     ref var pos = ref Ꮡpos.DerefOrNull();
 
     switch (ᐧ) {
@@ -192,7 +192,7 @@ internal static nint compareKey(key x, key y) {
 
 } partial class token_package {
 
-[GoMethodBody("next")] internal static ж<node> nextᴍ(ж<node> Ꮡx) {
+internal static ж<node> next⁔(/*this*/ ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.right == nil) {
@@ -210,7 +210,7 @@ internal static nint compareKey(key x, key y) {
 
 } partial class token_package {
 
-[GoMethodBody("setRoot")] internal static void setRootᴍ(ref tree t, ж<node> Ꮡx) {
+internal static void setRoot⁔(/*this*/ ref tree t, ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     t.root = Ꮡx;
@@ -221,7 +221,7 @@ internal static nint compareKey(key x, key y) {
 
 } partial class token_package {
 
-[GoMethodBody("setLeft")] internal static void setLeftᴍ(ж<node> Ꮡx, ж<node> Ꮡy) {
+internal static void setLeft⁔(/*this*/ ж<node> Ꮡx, ж<node> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -231,7 +231,7 @@ internal static nint compareKey(key x, key y) {
     }
 }
 
-[GoMethodBody("setRight")] internal static void setRightᴍ(ж<node> Ꮡx, ж<node> Ꮡy) {
+internal static void setRight⁔(/*this*/ ж<node> Ꮡx, ж<node> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -241,7 +241,7 @@ internal static nint compareKey(key x, key y) {
     }
 }
 
-[GoMethodBody("safeHeight")] internal static int32 safeHeightᴍ(ж<node> Ꮡn) {
+internal static int32 safeHeight⁔(/*this*/ ж<node> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (Ꮡn == nil) {
@@ -250,7 +250,7 @@ internal static nint compareKey(key x, key y) {
     return n.height;
 }
 
-[GoMethodBody("update")] internal static void updateᴍ(ref node n) {
+internal static void update⁔(/*this*/ ref node n) {
     var (lheight, rheight) = (n.left.safeHeight(), n.right.safeHeight());
     n.height = max(lheight, rheight) + 1;
     n.balance = rheight - lheight;
@@ -258,7 +258,7 @@ internal static nint compareKey(key x, key y) {
 
 } partial class token_package {
 
-[GoMethodBody("replaceChild")] internal static void replaceChildᴍ(ref tree t, ж<node> Ꮡparent, ж<node> old, ж<node> @new) {
+internal static void replaceChild⁔(/*this*/ ref tree t, ж<node> Ꮡparent, ж<node> old, ж<node> @new) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     switch (ᐧ) {
@@ -289,7 +289,7 @@ internal static nint compareKey(key x, key y) {
 // x is a node that has just been mutated, and so the height and
 // balance of x and its ancestors may be stale, but the children of x
 // must be in a valid state.
-[GoMethodBody("rebalanceUp")] internal static void rebalanceUpᴍ(ref tree t, ж<node> Ꮡx) {
+internal static void rebalanceUp⁔(/*this*/ ref tree t, ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     while (Ꮡx != nil) {
@@ -322,7 +322,7 @@ internal static nint compareKey(key x, key y) {
 
 // rotateRight rotates the subtree rooted at node y.
 // turning (y (x a b) c) into (x a (y b c)).
-[GoMethodBody("rotateRight")] internal static ж<node> rotateRightᴍ(ref tree t, ж<node> Ꮡy) {
+internal static ж<node> rotateRight⁔(/*this*/ ref tree t, ж<node> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     // p -> (y (x a b) c)
@@ -344,7 +344,7 @@ internal static nint compareKey(key x, key y) {
 
 // rotateLeft rotates the subtree rooted at node x.
 // turning (x a (y b c)) into (y (x a b) c).
-[GoMethodBody("rotateLeft")] internal static ж<node> rotateLeftᴍ(ref tree t, ж<node> Ꮡx) {
+internal static ж<node> rotateLeft⁔(/*this*/ ref tree t, ж<node> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // p -> (x a (y b c))
@@ -366,7 +366,7 @@ internal static nint compareKey(key x, key y) {
 
 // add inserts file into the tree, if not present.
 // It panics if file overlaps with another.
-[GoMethodBody("add")] internal static void addᴍ(ж<tree> Ꮡt, ж<File> Ꮡfile) {
+internal static void add⁔(/*this*/ ж<tree> Ꮡt, ж<File> Ꮡfile) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var @file = ref Ꮡfile.DerefOrNull();
 
@@ -384,7 +384,7 @@ internal static nint compareKey(key x, key y) {
 
 // set updates the existing node at (pos, parent) if present, or
 // inserts a new node if not, so that it refers to file.
-[GoMethodBody("set")] internal static void setᴍ(ref tree t, ж<File> Ꮡfile, ж<ж<node>> Ꮡpos, ж<node> parent) {
+internal static void set⁔(/*this*/ ref tree t, ж<File> Ꮡfile, ж<ж<node>> Ꮡpos, ж<node> parent) {
     ref var @file = ref Ꮡfile.DerefOrNull();
     ref var pos = ref Ꮡpos.DerefOrNull();
 
@@ -404,7 +404,7 @@ internal static nint compareKey(key x, key y) {
 }
 
 // delete deletes the node at pos.
-[GoMethodBody("delete")] internal static void deleteᴍ(ref tree t, ж<ж<node>> Ꮡpos) {
+internal static void delete⁔(/*this*/ ref tree t, ж<ж<node>> Ꮡpos) {
     ref var pos = ref Ꮡpos.DerefOrNull();
 
     t.root.check(nil);
@@ -448,7 +448,7 @@ internal static nint compareKey(key x, key y) {
 
 // deleteSwap deletes a node that has two children by replacing
 // it by its in-order successor, then triggers a rebalance.
-[GoMethodBody("deleteSwap")] internal static void deleteSwapᴍ(ref tree t, ж<ж<node>> Ꮡpos) {
+internal static void deleteSwap⁔(/*this*/ ref tree t, ж<ж<node>> Ꮡpos) {
     ref var pos = ref Ꮡpos.DerefOrNull();
 
     var x = pos;
@@ -471,7 +471,7 @@ internal static nint compareKey(key x, key y) {
 // deleteMin updates the subtree rooted at *zpos to delete its minimum
 // (leftmost) element, which may be *zpos itself. It returns the
 // deleted node.
-[GoMethodBody("deleteMin")] internal static ж<node> /*z*/ deleteMinᴍ(ref tree t, ж<ж<node>> Ꮡzpos) {
+internal static ж<node> /*z*/ deleteMin⁔(/*this*/ ref tree t, ж<ж<node>> Ꮡzpos) {
     ж<node> z = default;
     ref var zpos = ref Ꮡzpos.DerefOrNull();
 

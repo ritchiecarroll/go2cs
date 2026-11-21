@@ -22,7 +22,7 @@ internal static array<uint8> _Accuracy_index = array<uint8>([0, 5, 10, 15]);
 
 } partial class big_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Accuracy i) {
+internal static @string String⁔(/*this*/ Accuracy i) {
     i -= (Accuracy)(-1);
     if (i < 0 || i >= ((Accuracy)(int8)(len(_Accuracy_index) - 1))) {
         return "Accuracy("u8 + strconv.FormatInt((int64)(i + -1), 10) + ")"u8;

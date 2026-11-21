@@ -19,11 +19,11 @@ internal const byte ratGobVersion = 1;
 } partial class big_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ratGobEncodeNumeratorTooˢᴍRat => ref ratGobEncodeNumeratorTooˢᵇᴍRat;
-private static readonly @string ratGobEncodeNumeratorTooˢᵇᴍRat = "Rat.GobEncode: numerator too large"u8;
+internal static ref readonly @string ratGobEncodeNumeratorTooˢ⁔Rat => ref ratGobEncodeNumeratorTooˢᵇ⁔Rat;
+private static readonly @string ratGobEncodeNumeratorTooˢᵇ⁔Rat = "Rat.GobEncode: numerator too large"u8;
 
 // GobEncode implements the [encoding/gob.GobEncoder] interface.
-[GoMethodBody("GobEncode")] internal static (slice<byte>, error) GobEncodeᴍ(ж<Rat> Ꮡx) {
+internal static (slice<byte>, error) GobEncode⁔(/*this*/ ж<Rat> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (Ꮡx == nil) {
@@ -35,7 +35,7 @@ private static readonly @string ratGobEncodeNumeratorTooˢᵇᴍRat = "Rat.GobEn
     nint n = i - j;
     if ((nint)(uint32)n != n) {
         // this should never happen
-        return (default, errors.New(ratGobEncodeNumeratorTooˢᴍRat));
+        return (default, errors.New(ratGobEncodeNumeratorTooˢ⁔Rat));
     }
     byteorder.BEPutUint32(buf.slice(j - 4, j), (uint32)n);
     j -= 1 + 4;
@@ -48,20 +48,20 @@ private static readonly @string ratGobEncodeNumeratorTooˢᵇᴍRat = "Rat.GobEn
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ratGobDecodeBufferTooˢᴍRat => ref ratGobDecodeBufferTooˢᵇᴍRat;
-private static readonly @string ratGobDecodeBufferTooˢᵇᴍRat = "Rat.GobDecode: buffer too small"u8;
-internal static ref readonly @string ratGobDecodeInvalidˢᴍRat => ref ratGobDecodeInvalidˢᵇᴍRat;
-private static readonly @string ratGobDecodeInvalidˢᵇᴍRat = "Rat.GobDecode: invalid length"u8;
+internal static ref readonly @string ratGobDecodeBufferTooˢ⁔Rat => ref ratGobDecodeBufferTooˢᵇ⁔Rat;
+private static readonly @string ratGobDecodeBufferTooˢᵇ⁔Rat = "Rat.GobDecode: buffer too small"u8;
+internal static ref readonly @string ratGobDecodeInvalidˢ⁔Rat => ref ratGobDecodeInvalidˢᵇ⁔Rat;
+private static readonly @string ratGobDecodeInvalidˢᵇ⁔Rat = "Rat.GobDecode: invalid length"u8;
 
 // GobDecode implements the [encoding/gob.GobDecoder] interface.
-[GoMethodBody("GobDecode")] internal static error GobDecodeᴍ(ref Rat z, slice<byte> buf) {
+internal static error GobDecode⁔(/*this*/ ref Rat z, slice<byte> buf) {
     if (len(buf) == 0) {
         // Other side sent a nil or default value.
         z = new Rat();
         return default;
     }
     if (len(buf) < 5) {
-        return errors.New(ratGobDecodeBufferTooˢᴍRat);
+        return errors.New(ratGobDecodeBufferTooˢ⁔Rat);
     }
     var b = buf[0];
     if ((byte)((b >> 1)) != ratGobVersion) {
@@ -70,11 +70,11 @@ private static readonly @string ratGobDecodeInvalidˢᵇᴍRat = "Rat.GobDecode:
     UntypedInt j = /* 1 + 4 */ 5;
     var ln = byteorder.BEUint32(buf[(int)(j - 4)..(int)(j)]);
     if ((uint64)ln > (uint64)(math.MaxInt - j)) {
-        return errors.New(ratGobDecodeInvalidˢᴍRat);
+        return errors.New(ratGobDecodeInvalidˢ⁔Rat);
     }
     nint i = (nint)j + (nint)ln;
     if (len(buf) < i) {
-        return errors.New(ratGobDecodeBufferTooˢᴍRat);
+        return errors.New(ratGobDecodeBufferTooˢ⁔Rat);
     }
     z.a.neg = (byte)(b & 1) != 0;
     z.a.abs = z.a.abs.setBytes(buf.slice(j, i));
@@ -83,7 +83,7 @@ private static readonly @string ratGobDecodeInvalidˢᵇᴍRat = "Rat.GobDecode:
 }
 
 // AppendText implements the [encoding.TextAppender] interface.
-[GoMethodBody("AppendText")] internal static (slice<byte>, error) AppendTextᴍ(ж<Rat> Ꮡx, slice<byte> b) {
+internal static (slice<byte>, error) AppendText⁔(/*this*/ ж<Rat> Ꮡx, slice<byte> b) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.IsInt()) {
@@ -93,12 +93,12 @@ private static readonly @string ratGobDecodeInvalidˢᵇᴍRat = "Rat.GobDecode:
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-[GoMethodBody("MarshalText")] internal static (slice<byte> text, error err) MarshalTextᴍ(ж<Rat> Ꮡx) {
+internal static (slice<byte> text, error err) MarshalText⁔(/*this*/ ж<Rat> Ꮡx) {
     return Ꮡx.AppendText(default);
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-[GoMethodBody("UnmarshalText")] internal static error UnmarshalTextᴍ(ж<Rat> Ꮡz, slice<byte> text) {
+internal static error UnmarshalText⁔(/*this*/ ж<Rat> Ꮡz, slice<byte> text) {
     // TODO(gri): get rid of the []byte/string conversion
     var (_, ok) = Ꮡz.SetString((@string)text); if (!ok) {
         return fmt.Errorf("math/big: cannot unmarshal %q into a *big.Rat"u8, text);

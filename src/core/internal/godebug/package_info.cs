@@ -64,6 +64,10 @@ using static go.@internal.godebug_package;
 
 namespace go.@internal;
 
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
+using System.ComponentModel;
+// </PackageInfoUsings>
+
 [GoPackage("godebug")]
 public static partial class godebug_package
 {
@@ -97,6 +101,6 @@ public static partial class godebug_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(godebug_package.Setting)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class godebugᴛSetting;
-[GoMethodHost(typeof(godebug_package.runtimeStderr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class godebugᴛruntimeStderr;
+[GoMethodHost(typeof(godebug_package.Setting)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class godebugᴛSetting;
+[GoMethodHost(typeof(godebug_package.runtimeStderr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class godebugᴛruntimeStderr;
 // </MethodHolders>

@@ -33,7 +33,7 @@ partial struct RGBA {
 
 } partial class color_package {
 
-[GoMethodBody("RGBA")] internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBAᴍ(RGBA c) {
+internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ RGBA c) {
     uint32 r = default;
     uint32 g = default;
     uint32 b = default;
@@ -63,7 +63,7 @@ partial struct RGBA64 {
 
 } partial class color_package {
 
-[GoMethodBody("RGBA")] internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBAᴍ(RGBA64 c) {
+internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ RGBA64 c) {
     return ((uint32)c.R, (uint32)c.G, (uint32)c.B, (uint32)c.A);
 }
 
@@ -76,7 +76,7 @@ partial struct NRGBA {
 
 } partial class color_package {
 
-[GoMethodBody("RGBA")] internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBAᴍ(NRGBA c) {
+internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ NRGBA c) {
     uint32 r = default;
     uint32 g = default;
     uint32 b = default;
@@ -109,7 +109,7 @@ partial struct NRGBA64 {
 
 } partial class color_package {
 
-[GoMethodBody("RGBA")] internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBAᴍ(NRGBA64 c) {
+internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ NRGBA64 c) {
     uint32 r = default;
     uint32 g = default;
     uint32 b = default;
@@ -137,7 +137,7 @@ partial struct Alpha {
 
 } partial class color_package {
 
-[GoMethodBody("RGBA")] internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBAᴍ(Alpha c) {
+internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ Alpha c) {
     uint32 a = default;
 
     a = (uint32)c.A;
@@ -154,7 +154,7 @@ partial struct Alpha16 {
 
 } partial class color_package {
 
-[GoMethodBody("RGBA")] internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBAᴍ(Alpha16 c) {
+internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ Alpha16 c) {
     uint32 a = default;
 
     a = (uint32)c.A;
@@ -170,7 +170,7 @@ partial struct Gray {
 
 } partial class color_package {
 
-[GoMethodBody("RGBA")] internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBAᴍ(Gray c) {
+internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ Gray c) {
     var y = (uint32)c.Y;
     y |= (uint32)((y << 8));
     return (y, y, y, 0xffff);
@@ -185,7 +185,7 @@ partial struct Gray16 {
 
 } partial class color_package {
 
-[GoMethodBody("RGBA")] internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBAᴍ(Gray16 c) {
+internal static (uint32 r, uint32 g, uint32 b, uint32 a) RGBA⁔(/*this*/ Gray16 c) {
     var y = (uint32)c.Y;
     return (y, y, y, 0xffff);
 }
@@ -214,7 +214,7 @@ partial struct modelFunc {
 
 } partial class color_package {
 
-[GoMethodBody("Convert")] internal static Color Convertᴍ(ref modelFunc m, Color c) {
+internal static Color Convert⁔(/*this*/ ref modelFunc m, Color c) {
     return m.f(c);
 }
 
@@ -339,7 +339,7 @@ partial struct Palette /*[]Color*/;
 } partial class color_package {
 
 // Convert returns the palette color closest to c in Euclidean R,G,B space.
-[GoMethodBody("Convert")] internal static Color Convertᴍ(Palette p, Color c) {
+internal static Color Convert⁔(/*this*/ Palette p, Color c) {
     if (len(p) == 0) {
         return default;
     }
@@ -348,7 +348,7 @@ partial struct Palette /*[]Color*/;
 
 // Index returns the index of the palette color closest to c in Euclidean
 // R,G,B,A space.
-[GoMethodBody("Index")] internal static nint Indexᴍ(Palette p, Color c) {
+internal static nint Index⁔(/*this*/ Palette p, Color c) {
     // A batch version of this computation is in image/draw/draw.go.
 
     var (cr, cg, cb, ca) = c.RGBA();

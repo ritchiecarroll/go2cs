@@ -25,7 +25,7 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
 
 } partial class net_package {
 
-[GoMethodBody("family")] internal static nint familyᴍ(ж<UDPAddr> Ꮡa) {
+internal static nint family⁔(/*this*/ ж<UDPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil || len(a.IP) <= IPv4len) {
@@ -37,7 +37,7 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
     return syscall.AF_INET6;
 }
 
-[GoMethodBody("sockaddr")] internal static (syscall.Sockaddr, error) sockaddrᴍ(ж<UDPAddr> Ꮡa, nint family) {
+internal static (syscall.Sockaddr, error) sockaddr⁔(/*this*/ ж<UDPAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -46,13 +46,13 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
     return ipToSockaddr(family, a.IP, a.Port, a.Zone);
 }
 
-[GoMethodBody("toLocal")] internal static sockaddr toLocalᴍ(ref UDPAddr a, @string net) {
+internal static sockaddr toLocal⁔(/*this*/ ref UDPAddr a, @string net) {
     return new UDPAddrжsockaddr(Ꮡ(new UDPAddr(loopbackIP(net), a.Port, a.Zone)));
 }
 
 } partial class net_package {
 
-[GoMethodBody("readFrom")] internal static (nint, ж<UDPAddr>, error) readFromᴍ(ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
+internal static (nint, ж<UDPAddr>, error) readFrom⁔(/*this*/ ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
     nint n = default;
@@ -83,7 +83,7 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
     return (n, Ꮡaddr, err);
 }
 
-[GoMethodBody("readFromAddrPort")] internal static (nint n, netip.AddrPort addr, error err) readFromAddrPortᴍ(ref UDPConn c, slice<byte> b) {
+internal static (nint n, netip.AddrPort addr, error err) readFromAddrPort⁔(/*this*/ ref UDPConn c, slice<byte> b) {
     nint n = default;
     netip.AddrPort addr = default;
     error err = default;
@@ -115,7 +115,7 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
     return (n, addr, err);
 }
 
-[GoMethodBody("readMsg")] internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) readMsgᴍ(ref UDPConn c, slice<byte> b, slice<byte> oob) {
+internal static (nint n, nint oobn, nint flags, netip.AddrPort addr, error err) readMsg⁔(/*this*/ ref UDPConn c, slice<byte> b, slice<byte> oob) {
     nint n = default;
     nint oobn = default;
     nint flags = default;
@@ -140,7 +140,7 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
     return (n, oobn, flags, addr, err);
 }
 
-[GoMethodBody("writeTo")] internal static (nint, error) writeToᴍ(ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
+internal static (nint, error) writeTo⁔(/*this*/ ref UDPConn c, slice<byte> b, ж<UDPAddr> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.DerefOrNull();
 
     if (c.fd.isConnected) {
@@ -172,7 +172,7 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
     }}
 }
 
-[GoMethodBody("writeToAddrPort")] internal static (nint, error) writeToAddrPortᴍ(ref UDPConn c, slice<byte> b, netip.AddrPort addr) {
+internal static (nint, error) writeToAddrPort⁔(/*this*/ ref UDPConn c, slice<byte> b, netip.AddrPort addr) {
     if (c.fd.isConnected) {
         return (0, ErrWriteToConnected);
     }
@@ -202,7 +202,7 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
     }}
 }
 
-[GoMethodBody("writeMsg")] internal static (nint n, nint oobn, error err) writeMsgᴍ(ref UDPConn c, slice<byte> b, slice<byte> oob, ж<UDPAddr> addr) {
+internal static (nint n, nint oobn, error err) writeMsg⁔(/*this*/ ref UDPConn c, slice<byte> b, slice<byte> oob, ж<UDPAddr> addr) {
     error err = default;
 
     if (c.fd.isConnected && addr != nil) {
@@ -218,7 +218,7 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
     return c.fd.writeMsg(b, oob, sa);
 }
 
-[GoMethodBody("writeMsgAddrPort")] internal static (nint n, nint oobn, error err) writeMsgAddrPortᴍ(ref UDPConn c, slice<byte> b, slice<byte> oob, netip.AddrPort addr) {
+internal static (nint n, nint oobn, error err) writeMsgAddrPort⁔(/*this*/ ref UDPConn c, slice<byte> b, slice<byte> oob, netip.AddrPort addr) {
     if (c.fd.isConnected && addr.IsValid()) {
         return (0, 0, ErrWriteToConnected);
     }
@@ -258,14 +258,14 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
 
 } partial class net_package {
 
-[GoMethodBody("dialUDP")] internal static (ж<UDPConn>, error) dialUDPᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<UDPAddr> laddr, ж<UDPAddr> raddr) {
+internal static (ж<UDPConn>, error) dialUDP⁔(/*this*/ ж<sysDialer> Ꮡsd, context.Context ctx, ж<UDPAddr> laddr, ж<UDPAddr> raddr) {
     ref var sd = ref Ꮡsd.DerefOrNull();
 
     var ctrlCtxFn = sd.Dialer.ControlContext;
     if (ctrlCtxFn == nil && sd.Dialer.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
     }
-    var (fd, err) = internetSocket(ctx, sd.network, new UDPAddrжsockaddr(laddr), new UDPAddrжsockaddr(raddr), syscall.SOCK_DGRAM, 0, dialˢᴍsysDialer, ctrlCtxFn);
+    var (fd, err) = internetSocket(ctx, sd.network, new UDPAddrжsockaddr(laddr), new UDPAddrжsockaddr(raddr), syscall.SOCK_DGRAM, 0, dialˢ⁔sysDialer, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }
@@ -274,21 +274,21 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
 
 } partial class net_package {
 
-[GoMethodBody("listenUDP")] internal static (ж<UDPConn>, error) listenUDPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<UDPAddr> laddr) {
+internal static (ж<UDPConn>, error) listenUDP⁔(/*this*/ ж<sysListener> Ꮡsl, context.Context ctx, ж<UDPAddr> laddr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default;
     if (sl.ListenConfig.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
     }
-    var (fd, err) = internetSocket(ctx, sl.network, new UDPAddrжsockaddr(laddr), default, syscall.SOCK_DGRAM, 0, listenˢᴍsysListener, ctrlCtxFn);
+    var (fd, err) = internetSocket(ctx, sl.network, new UDPAddrжsockaddr(laddr), default, syscall.SOCK_DGRAM, 0, listenˢ⁔sysListener, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }
     return (newUDPConn(fd), default);
 }
 
-[GoMethodBody("listenMulticastUDP")] internal static (ж<UDPConn>, error) listenMulticastUDPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<Interface> ifi, ж<UDPAddr> Ꮡgaddr) {
+internal static (ж<UDPConn>, error) listenMulticastUDP⁔(/*this*/ ж<sysListener> Ꮡsl, context.Context ctx, ж<Interface> ifi, ж<UDPAddr> Ꮡgaddr) {
     ref var sl = ref Ꮡsl.DerefOrNull();
     ref var gaddr = ref Ꮡgaddr.DerefOrNull();
 
@@ -296,7 +296,7 @@ internal static Addr sockaddrToUDP(syscall.Sockaddr sa) {
     if (sl.ListenConfig.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn cΔ1) => Ꮡsl.Value.ListenConfig.Control(network, address, cΔ1);
     }
-    var (fd, err) = internetSocket(ctx, sl.network, new UDPAddrжsockaddr(Ꮡgaddr), default, syscall.SOCK_DGRAM, 0, listenˢᴍsysListener, ctrlCtxFn);
+    var (fd, err) = internetSocket(ctx, sl.network, new UDPAddrжsockaddr(Ꮡgaddr), default, syscall.SOCK_DGRAM, 0, listenˢ⁔sysListener, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }

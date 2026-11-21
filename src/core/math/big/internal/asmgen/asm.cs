@@ -64,24 +64,24 @@ internal static @string asmHeader = """
 } partial class asmgen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string textˢᴍAsm => ref textˢᵇᴍAsm;
-private static readonly @string textˢᵇᴍAsm = "\nTEXT"u8;
+internal static ref readonly @string textˢ⁔Asm => ref textˢᵇ⁔Asm;
+private static readonly @string textˢᵇ⁔Asm = "\nTEXT"u8;
 
 // Fatalf reports a fatal error by panicking.
 // Panicking is appropriate because there is a bug in the generator,
 // and panicking will show the exact source lines leading to that bug.
-[GoMethodBody("Fatalf")] internal static void Fatalfᴍ(ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void Fatalf⁔(/*this*/ ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var a = ref Ꮡa.DerefOrNull();
 
     @string text = Ꮡa.Ꮡout.String();
-    nint i = strings.LastIndex(text, textˢᴍAsm);
+    nint i = strings.LastIndex(text, textˢ⁔Asm);
     text = text.slice(i + 1);
     throw panic("[" + a.Arch.Name + "] asmgen internal error: " + fmt.Sprintf(format, args.ꓸꓸꓸ) + "\n" + text);
 }
 
 // hint returns the register name for the given hint.
-[GoMethodBody("hint")] internal static @string hintᴍ(ж<Asm> Ꮡa, Hint h) {
+internal static @string hint⁔(/*this*/ ж<Asm> Ꮡa, Hint h) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (h == HintCarry && a.Arch.regCarry != ""u8) {
@@ -98,7 +98,7 @@ private static readonly @string textˢᵇᴍAsm = "\nTEXT"u8;
 
 // ZR returns the zero register (the specific register guaranteed to hold the integer 0),
 // or else the zero Reg (Reg{}, which has r.Valid() == false).
-[GoMethodBody("ZR")] internal static Reg ZRᴍ(ref Asm a) {
+internal static Reg ZR⁔(/*this*/ ref Asm a) {
     return new Reg(a.Arch.reg0);
 }
 
@@ -111,22 +111,22 @@ private static readonly @string textˢᵇᴍAsm = "\nTEXT"u8;
 // a live value. In general it is the architecture implementation's responsibility
 // not to suggest the use of any such pseudo-instructions in situations
 // where they would cause problems.
-[GoMethodBody("tmp")] internal static Reg tmpᴍ(ref Asm a) {
+internal static Reg tmp⁔(/*this*/ ref Asm a) {
     return new Reg(a.Arch.regTmp);
 }
 
 // Carry returns the carry register, or else the zero Reg.
-[GoMethodBody("Carry")] internal static Reg Carryᴍ(ref Asm a) {
+internal static Reg Carry⁔(/*this*/ ref Asm a) {
     return new Reg(a.Arch.regCarry);
 }
 
 // AltCarry returns the secondary carry register, or else the zero Reg.
-[GoMethodBody("AltCarry")] internal static Reg AltCarryᴍ(ref Asm a) {
+internal static Reg AltCarry⁔(/*this*/ ref Asm a) {
     return new Reg(a.Arch.regAltCarry);
 }
 
 // Imm returns a Reg representing an immediate (constant) value.
-[GoMethodBody("Imm")] internal static Reg Immᴍ(ref Asm a, nint x) {
+internal static Reg Imm⁔(/*this*/ ref Asm a, nint x) {
     if (x == 0 && a.Arch.reg0 != ""u8) {
         return new Reg(a.Arch.reg0);
     }
@@ -134,12 +134,12 @@ private static readonly @string textˢᵇᴍAsm = "\nTEXT"u8;
 }
 
 // IsZero reports whether r is a zero immediate or the zero register.
-[GoMethodBody("IsZero")] internal static bool IsZeroᴍ(ref Asm a, Reg r) {
+internal static bool IsZero⁔(/*this*/ ref Asm a, Reg r) {
     return r.name == "$0"u8 || a.Arch.reg0 != ""u8 && r.name == a.Arch.reg0;
 }
 
 // Reg allocates a new register.
-[GoMethodBody("Reg")] internal static Reg Regᴍ(ж<Asm> Ꮡa) {
+internal static Reg Reg⁔(/*this*/ ж<Asm> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     nint i = bits.TrailingZeros64(a.regavail);
@@ -151,7 +151,7 @@ private static readonly @string textˢᵇᴍAsm = "\nTEXT"u8;
 }
 
 // RegHint allocates a new register, with a hint as to its purpose.
-[GoMethodBody("RegHint")] internal static Reg RegHintᴍ(ж<Asm> Ꮡa, Hint hint) {
+internal static Reg RegHint⁔(/*this*/ ж<Asm> Ꮡa, Hint hint) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     @string name = Ꮡa.hint(hint); if (name != ""u8) {
@@ -170,7 +170,7 @@ private static readonly @string textˢᵇᴍAsm = "\nTEXT"u8;
 
 // Free frees a previously allocated register.
 // If r is not a register (if it's an immediate or a memory reference), Free is a no-op.
-[GoMethodBody("Free")] internal static void Freeᴍ(ж<Asm> Ꮡa, Reg r) {
+internal static void Free⁔(/*this*/ ж<Asm> Ꮡa, Reg r) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     nint i = slices.Index(a.Arch.regs, r.name);
@@ -188,7 +188,7 @@ private static readonly @string textˢᵇᴍAsm = "\nTEXT"u8;
 // If r is not free for allocation, Unfree panics.
 // A Free paired with Unfree can release a register for use temporarily
 // but then reclaim it, such as at the end of a loop body when it must be restored.
-[GoMethodBody("Unfree")] internal static void Unfreeᴍ(ж<Asm> Ꮡa, Reg r) {
+internal static void Unfree⁔(/*this*/ ж<Asm> Ꮡa, Reg r) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     nint i = slices.Index(a.Arch.regs, r.name);
@@ -212,24 +212,24 @@ partial struct RegsUsed {
 
 // RegsUsed returns a snapshot of which registers are currently allocated,
 // which can be passed to a future call to [Asm.SetRegsUsed].
-[GoMethodBody("RegsUsed")] internal static RegsUsed RegsUsedᴍ(ref Asm a) {
+internal static RegsUsed RegsUsed⁔(/*this*/ ref Asm a) {
     return new RegsUsed(a.regavail);
 }
 
 // SetRegsUsed sets which registers are currently allocated.
 // The argument should have been returned from a previous
 // call to [Asm.RegsUsed].
-[GoMethodBody("SetRegsUsed")] internal static void SetRegsUsedᴍ(ref Asm a, RegsUsed used) {
+internal static void SetRegsUsed⁔(/*this*/ ref Asm a, RegsUsed used) {
     a.regavail = used.avail;
 }
 
 // FreeAll frees all known registers.
-[GoMethodBody("FreeAll")] internal static void FreeAllᴍ(ref Asm a) {
+internal static void FreeAll⁔(/*this*/ ref Asm a) {
     a.regavail = ((uint64)1).Lsh((int64)(len(a.Arch.regs))) - 1;
 }
 
 // Printf emits to the assembly output.
-[GoMethodBody("Printf")] internal static void Printfᴍ(ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void Printf⁔(/*this*/ ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var a = ref Ꮡa.DerefOrNull();
 
@@ -241,14 +241,14 @@ partial struct RegsUsed {
 }
 
 // Comment emits a line comment to the assembly output.
-[GoMethodBody("Comment")] internal static void Commentᴍ(ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void Comment⁔(/*this*/ ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     fmt.Fprintf(new bytes_BufferжWriter(Ꮡa.Ꮡout), "\t// %s\n"u8, fmt.Sprintf(format, args.ꓸꓸꓸ));
 }
 
 // EOL appends an end-of-line comment to the previous line.
-[GoMethodBody("EOL")] internal static void EOLᴍ(ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void EOL⁔(/*this*/ ж<Asm> Ꮡa, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var a = ref Ꮡa.DerefOrNull();
 
@@ -261,7 +261,7 @@ partial struct RegsUsed {
 
 // JmpEnable emits a test for the optional CPU feature that jumps to label if the feature is present.
 // If JmpEnable returns false, the feature is not available on this architecture and no code was emitted.
-[GoMethodBody("JmpEnable")] internal static bool JmpEnableᴍ(ж<Asm> Ꮡa, Option option, @string label) {
+internal static bool JmpEnable⁔(/*this*/ ж<Asm> Ꮡa, Option option, @string label) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var jmpEnable = a.Arch.options[option];
@@ -274,20 +274,20 @@ partial struct RegsUsed {
 
 // Enabled reports whether the optional CPU feature is considered
 // to be enabled at this point in the assembly output.
-[GoMethodBody("Enabled")] internal static bool Enabledᴍ(ref Asm a, Option option) {
+internal static bool Enabled⁔(/*this*/ ref Asm a, Option option) {
     return a.enabled[option];
 }
 
 // SetOption changes whether the optional CPU feature should be
 // considered to be enabled.
-[GoMethodBody("SetOption")] internal static void SetOptionᴍ(ref Asm a, Option option, bool on) {
+internal static void SetOption⁔(/*this*/ ref Asm a, Option option, bool on) {
     a.enabled[option] = on;
 }
 
 // op3 emits a 3-operand instruction op src1, src2, dst,
 // taking care to handle 2-operand machines and also
 // to simplify the printout when src2==dst.
-[GoMethodBody("op3")] internal static void op3ᴍ(ж<Asm> Ꮡa, @string op, Reg src1, Reg src2, Reg dst) {
+internal static void op3⁔(/*this*/ ж<Asm> Ꮡa, @string op, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (op == ""u8) {
@@ -310,7 +310,7 @@ partial struct RegsUsed {
 }
 
 // Mov emits dst = src.
-[GoMethodBody("Mov")] internal static void Movᴍ(ж<Asm> Ꮡa, Reg src, Reg dst) {
+internal static void Mov⁔(/*this*/ ж<Asm> Ꮡa, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (src != dst) {
@@ -320,7 +320,7 @@ partial struct RegsUsed {
 
 // AddWords emits dst = src1*WordBytes + src2.
 // It does not set or use the carry flag.
-[GoMethodBody("AddWords")] internal static void AddWordsᴍ(ж<Asm> Ꮡa, Reg src1, RegPtr src2, RegPtr dst) {
+internal static void AddWords⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, RegPtr src2, RegPtr dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Arch.addWords == ""u8) {
@@ -337,7 +337,7 @@ partial struct RegsUsed {
 
 // And emits dst = src1 & src2
 // It may modify the carry flag.
-[GoMethodBody("And")] internal static void Andᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
+internal static void And⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.op3(a.Arch.and, src1, src2, dst);
@@ -345,7 +345,7 @@ partial struct RegsUsed {
 
 // Or emits dst = src1 | src2
 // It may modify the carry flag.
-[GoMethodBody("Or")] internal static void Orᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
+internal static void Or⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.op3(a.Arch.or, src1, src2, dst);
@@ -353,7 +353,7 @@ partial struct RegsUsed {
 
 // Xor emits dst = src1 ^ src2
 // It may modify the carry flag.
-[GoMethodBody("Xor")] internal static void Xorᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
+internal static void Xor⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.op3(a.Arch.xor, src1, src2, dst);
@@ -361,7 +361,7 @@ partial struct RegsUsed {
 
 // Neg emits dst = -src.
 // It may modify the carry flag.
-[GoMethodBody("Neg")] internal static void Negᴍ(ж<Asm> Ꮡa, Reg src, Reg dst) {
+internal static void Neg⁔(/*this*/ ж<Asm> Ꮡa, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Arch.neg == ""u8) {
@@ -383,13 +383,13 @@ partial struct RegsUsed {
 }
 
 // HasRegShift reports whether the architecture can use shift expressions as operands.
-[GoMethodBody("HasRegShift")] internal static bool HasRegShiftᴍ(ref Asm a) {
+internal static bool HasRegShift⁔(/*this*/ ref Asm a) {
     return a.Arch.regShift;
 }
 
 // LshReg returns a shift-expression operand src<<shift.
 // If a.HasRegShift() == false, LshReg panics.
-[GoMethodBody("LshReg")] internal static Reg LshRegᴍ(ж<Asm> Ꮡa, Reg shift, Reg src) {
+internal static Reg LshReg⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg src) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (!a.HasRegShift()) {
@@ -400,7 +400,7 @@ partial struct RegsUsed {
 
 // Lsh emits dst = src << shift.
 // It may modify the carry flag.
-[GoMethodBody("Lsh")] internal static void Lshᴍ(ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) {
+internal static void Lsh⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
@@ -415,7 +415,7 @@ partial struct RegsUsed {
 
 // LshWide emits dst = src << shift with low bits shifted from adj.
 // It may modify the carry flag.
-[GoMethodBody("LshWide")] internal static void LshWideᴍ(ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg dst) {
+internal static void LshWide⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Arch.lshd == ""u8) {
@@ -429,7 +429,7 @@ partial struct RegsUsed {
 
 // RshReg returns a shift-expression operand src>>shift.
 // If a.HasRegShift() == false, RshReg panics.
-[GoMethodBody("RshReg")] internal static Reg RshRegᴍ(ж<Asm> Ꮡa, Reg shift, Reg src) {
+internal static Reg RshReg⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg src) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (!a.HasRegShift()) {
@@ -440,7 +440,7 @@ partial struct RegsUsed {
 
 // Rsh emits dst = src >> shift.
 // It may modify the carry flag.
-[GoMethodBody("Rsh")] internal static void Rshᴍ(ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) {
+internal static void Rsh⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     @string need = Ꮡa.hint(HintShiftCount); if (need != ""u8 && shift.name != need && !shift.IsImm()) {
@@ -455,7 +455,7 @@ partial struct RegsUsed {
 
 // RshWide emits dst = src >> shift with high bits shifted from adj.
 // It may modify the carry flag.
-[GoMethodBody("RshWide")] internal static void RshWideᴍ(ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg dst) {
+internal static void RshWide⁔(/*this*/ ж<Asm> Ꮡa, Reg shift, Reg adj, Reg src, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Arch.lshd == ""u8) {
@@ -468,7 +468,7 @@ partial struct RegsUsed {
 }
 
 // SLTU emits dst = src2 < src1 (0 or 1), using an unsigned comparison.
-[GoMethodBody("SLTU")] internal static void SLTUᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
+internal static void SLTU⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -487,23 +487,23 @@ partial struct RegsUsed {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string addSSˢᴍAsm => ref addSSˢᵇᴍAsm;
-private static readonly @string addSSˢᵇᴍAsm = "ADD %s, %s"u8;
-internal static ref readonly @string addSSSˢᴍAsm => ref addSSSˢᵇᴍAsm;
-private static readonly @string addSSSˢᵇᴍAsm = "ADD %s, %s, %s"u8;
-internal static ref readonly @string adc0SSˢᴍAsm => ref adc0SSˢᵇᴍAsm;
-private static readonly @string adc0SSˢᵇᴍAsm = "ADC $0, %s, %s"u8;
-internal static ref readonly @string adcSSSCrSˢᴍAsm => ref adcSSSCrSˢᵇᴍAsm;
-private static readonly @string adcSSSCrSˢᵇᴍAsm = "ADC %s, %s, %s (cr=%s)"u8;
-internal static ref readonly @string addsSSSCrSˢᴍAsm => ref addsSSSCrSˢᵇᴍAsm;
-private static readonly @string addsSSSCrSˢᵇᴍAsm = "ADDS %s, %s, %s (cr=%s)"u8;
-internal static ref readonly @string adcs0SSCrSˢᴍAsm => ref adcs0SSCrSˢᵇᴍAsm;
-private static readonly @string adcs0SSCrSˢᵇᴍAsm = "ADCS $0, %s, %s (cr=%s)"u8;
-internal static ref readonly @string adcsSSSCrSˢᴍAsm => ref adcsSSSCrSˢᵇᴍAsm;
-private static readonly @string adcsSSSCrSˢᵇᴍAsm = "ADCS %s, %s, %s (cr=%s)"u8;
+internal static ref readonly @string addSSˢ⁔Asm => ref addSSˢᵇ⁔Asm;
+private static readonly @string addSSˢᵇ⁔Asm = "ADD %s, %s"u8;
+internal static ref readonly @string addSSSˢ⁔Asm => ref addSSSˢᵇ⁔Asm;
+private static readonly @string addSSSˢᵇ⁔Asm = "ADD %s, %s, %s"u8;
+internal static ref readonly @string adc0SSˢ⁔Asm => ref adc0SSˢᵇ⁔Asm;
+private static readonly @string adc0SSˢᵇ⁔Asm = "ADC $0, %s, %s"u8;
+internal static ref readonly @string adcSSSCrSˢ⁔Asm => ref adcSSSCrSˢᵇ⁔Asm;
+private static readonly @string adcSSSCrSˢᵇ⁔Asm = "ADC %s, %s, %s (cr=%s)"u8;
+internal static ref readonly @string addsSSSCrSˢ⁔Asm => ref addsSSSCrSˢᵇ⁔Asm;
+private static readonly @string addsSSSCrSˢᵇ⁔Asm = "ADDS %s, %s, %s (cr=%s)"u8;
+internal static ref readonly @string adcs0SSCrSˢ⁔Asm => ref adcs0SSCrSˢᵇ⁔Asm;
+private static readonly @string adcs0SSCrSˢᵇ⁔Asm = "ADCS $0, %s, %s (cr=%s)"u8;
+internal static ref readonly @string adcsSSSCrSˢ⁔Asm => ref adcsSSSCrSˢᵇ⁔Asm;
+private static readonly @string adcsSSSCrSˢᵇ⁔Asm = "ADCS %s, %s, %s (cr=%s)"u8;
 
 // Add emits dst = src1+src2, with the specified carry behavior.
-[GoMethodBody("Add")] internal static void Addᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
+internal static void Add⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -538,9 +538,9 @@ private static readonly @string adcsSSSCrSˢᵇᴍAsm = "ADCS %s, %s, %s (cr=%s)
             Ꮡa.Printf("\t%s (%s)(%s), %s\n", a.Arch.lea, src1, src2, dst);
         }
         if (src2 == dst) {
-            Ꮡa.EOL(addSSˢᴍAsm, src1, dst);
+            Ꮡa.EOL(addSSˢ⁔Asm, src1, dst);
         } else {
-            Ꮡa.EOL(addSSSˢᴍAsm, src1, src2, dst);
+            Ꮡa.EOL(addSSSˢ⁔Asm, src1, src2, dst);
         }
         break;
     }
@@ -576,11 +576,11 @@ private static readonly @string adcsSSSCrSˢᵇᴍAsm = "ADCS %s, %s, %s (cr=%s)
             if (a.IsZero(src1)) {
                 // Only here to use the carry.
                 Ꮡa.Add(cr, src2, dst, KeepCarry);
-                Ꮡa.EOL(adc0SSˢᴍAsm, src2, dst);
+                Ꮡa.EOL(adc0SSˢ⁔Asm, src2, dst);
                 break;
             }
             Ꮡa.Add(src1, src2, dst, KeepCarry);
-            Ꮡa.EOL(adcSSSCrSˢᴍAsm, src1, src2, dst, cr);
+            Ꮡa.EOL(adcSSSCrSˢ⁔Asm, src1, src2, dst, cr);
             Ꮡa.Add(cr, dst, dst, KeepCarry);
             Ꮡa.EOL("...");
             break;
@@ -605,13 +605,13 @@ private static readonly @string adcsSSSCrSˢᵇᴍAsm = "ADCS %s, %s, %s (cr=%s)
                 // src1 == src2 == dst.
                 // Overflows if and only if the high bit is set, so copy high bit to carry.
                 Ꮡa.Rsh(a.Imm(a.Arch.WordBits - 1), src1, cr);
-                Ꮡa.EOL(addsSSSCrSˢᴍAsm, src1, src2, dst, cr);
+                Ꮡa.EOL(addsSSSCrSˢ⁔Asm, src1, src2, dst, cr);
                 Ꮡa.Add(src1, src2, dst, KeepCarry);
                 Ꮡa.EOL("...");
                 return;
             }}
             Ꮡa.Add(src1, src2, dst, KeepCarry);
-            Ꮡa.EOL(addsSSSCrSˢᴍAsm, src1, src2, dst, cr);
+            Ꮡa.EOL(addsSSSCrSˢ⁔Asm, src1, src2, dst, cr);
             Ꮡa.SLTU(old, dst, cr); // dst < old (one of the src) implies carry
             Ꮡa.EOL("...");
             break;
@@ -621,7 +621,7 @@ private static readonly @string adcsSSSCrSˢᵇᴍAsm = "ADCS %s, %s, %s (cr=%s)
                 // Only here to use and then set the carry.
                 // Easy since carry is not aliased to dst.
                 Ꮡa.Add(cr, src2, dst, KeepCarry);
-                Ꮡa.EOL(adcs0SSCrSˢᴍAsm, src2, dst, cr);
+                Ꮡa.EOL(adcs0SSCrSˢ⁔Asm, src2, dst, cr);
                 Ꮡa.SLTU(cr, dst, cr); // dst < cr implies carry
                 Ꮡa.EOL("...");
                 break;
@@ -641,14 +641,14 @@ private static readonly @string adcsSSSCrSˢᵇᴍAsm = "ADCS %s, %s, %s (cr=%s)
             }}
             if (old.Valid()) {
                 Ꮡa.Add(src1, src2, dst, KeepCarry);
-                Ꮡa.EOL(adcsSSSCrSˢᴍAsm, src1, src2, dst, cr);
+                Ꮡa.EOL(adcsSSSCrSˢ⁔Asm, src1, src2, dst, cr);
                 Ꮡa.SLTU(old, dst, tmp); // // dst < old (one of the src) implies carry
                 Ꮡa.EOL("...");
             } else {
                 // src1 == src2 == dst, like above. Sign bit is carry bit,
                 // but we copy it into tmp, not cr.
                 Ꮡa.Rsh(a.Imm(a.Arch.WordBits - 1), src1, tmp);
-                Ꮡa.EOL(adcsSSSCrSˢᴍAsm, src1, src2, dst, cr);
+                Ꮡa.EOL(adcsSSSCrSˢ⁔Asm, src1, src2, dst, cr);
                 Ꮡa.Add(src1, src2, dst, KeepCarry);
                 Ꮡa.EOL("...");
             }
@@ -667,19 +667,19 @@ private static readonly @string adcsSSSCrSˢᵇᴍAsm = "ADCS %s, %s, %s (cr=%s)
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sbc0SSˢᴍAsm => ref sbc0SSˢᵇᴍAsm;
-private static readonly @string sbc0SSˢᵇᴍAsm = "SBC $0, %s, %s"u8;
-internal static ref readonly @string sbcSSSˢᴍAsm => ref sbcSSSˢᵇᴍAsm;
-private static readonly @string sbcSSSˢᵇᴍAsm = "SBC %s, %s, %s"u8;
-internal static ref readonly @string subsSSSˢᴍAsm => ref subsSSSˢᵇᴍAsm;
-private static readonly @string subsSSSˢᵇᴍAsm = "SUBS %s, %s, %s"u8;
-internal static ref readonly @string sbcs0SSˢᴍAsm => ref sbcs0SSˢᵇᴍAsm;
-private static readonly @string sbcs0SSˢᵇᴍAsm = "SBCS $0, %s, %s"u8;
-internal static ref readonly @string sbcsSSSˢᴍAsm => ref sbcsSSSˢᵇᴍAsm;
-private static readonly @string sbcsSSSˢᵇᴍAsm = "SBCS %s, %s, %s"u8;
+internal static ref readonly @string sbc0SSˢ⁔Asm => ref sbc0SSˢᵇ⁔Asm;
+private static readonly @string sbc0SSˢᵇ⁔Asm = "SBC $0, %s, %s"u8;
+internal static ref readonly @string sbcSSSˢ⁔Asm => ref sbcSSSˢᵇ⁔Asm;
+private static readonly @string sbcSSSˢᵇ⁔Asm = "SBC %s, %s, %s"u8;
+internal static ref readonly @string subsSSSˢ⁔Asm => ref subsSSSˢᵇ⁔Asm;
+private static readonly @string subsSSSˢᵇ⁔Asm = "SUBS %s, %s, %s"u8;
+internal static ref readonly @string sbcs0SSˢ⁔Asm => ref sbcs0SSˢᵇ⁔Asm;
+private static readonly @string sbcs0SSˢᵇ⁔Asm = "SBCS $0, %s, %s"u8;
+internal static ref readonly @string sbcsSSSˢ⁔Asm => ref sbcsSSSˢᵇ⁔Asm;
+private static readonly @string sbcsSSSˢᵇ⁔Asm = "SBCS %s, %s, %s"u8;
 
 // Sub emits dst = src2-src1, with the specified carry behavior.
-[GoMethodBody("Sub")] internal static void Subᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
+internal static void Sub⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dst, Carry carry) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -747,11 +747,11 @@ private static readonly @string sbcsSSSˢᵇᴍAsm = "SBCS %s, %s, %s"u8;
             if (a.IsZero(src1)) {
                 // Only here to use the carry.
                 Ꮡa.Sub(cr, src2, dst, KeepCarry);
-                Ꮡa.EOL(sbc0SSˢᴍAsm, src2, dst);
+                Ꮡa.EOL(sbc0SSˢ⁔Asm, src2, dst);
                 break;
             }
             Ꮡa.Sub(src1, src2, dst, KeepCarry);
-            Ꮡa.EOL(sbcSSSˢᴍAsm, src1, src2, dst);
+            Ꮡa.EOL(sbcSSSˢ⁔Asm, src1, src2, dst);
             Ꮡa.Sub(cr, dst, dst, KeepCarry);
             Ꮡa.EOL("...");
             break;
@@ -764,7 +764,7 @@ private static readonly @string sbcsSSSˢᵇᴍAsm = "SBCS %s, %s, %s"u8;
             }
             // Compute the new carry first, in case dst is src1 or src2.
             Ꮡa.SLTU(src1, src2, cr);
-            Ꮡa.EOL(subsSSSˢᴍAsm, src1, src2, dst);
+            Ꮡa.EOL(subsSSSˢ⁔Asm, src1, src2, dst);
             Ꮡa.Sub(src1, src2, dst, KeepCarry);
             Ꮡa.EOL("...");
             break;
@@ -780,7 +780,7 @@ private static readonly @string sbcsSSSˢᵇᴍAsm = "SBCS %s, %s, %s"u8;
                     // But we want to use the carry, so we can't compute it before
                     // the SUB either. Compute into a temporary and MOV.
                     Ꮡa.SLTU(cr, src2, tmp);
-                    Ꮡa.EOL(sbcs0SSˢᴍAsm, src2, dst);
+                    Ꮡa.EOL(sbcs0SSˢ⁔Asm, src2, dst);
                     Ꮡa.Sub(cr, src2, dst, KeepCarry);
                     Ꮡa.EOL("...");
                     Ꮡa.Mov(tmp, cr);
@@ -795,7 +795,7 @@ private static readonly @string sbcsSSSˢᵇᴍAsm = "SBCS %s, %s, %s"u8;
             // computing carry bits for both, and add'ing them together.
             // Doing src2 - cr first frees up cr to store the carry from the sub of src1.
             Ꮡa.SLTU(cr, src2, tmp);
-            Ꮡa.EOL(sbcsSSSˢᴍAsm, src1, src2, dst);
+            Ꮡa.EOL(sbcsSSSˢ⁔Asm, src1, src2, dst);
             Ꮡa.Sub(cr, src2, dst, KeepCarry);
             Ꮡa.EOL("...");
             Ꮡa.SLTU(src1, dst, cr);
@@ -811,13 +811,13 @@ private static readonly @string sbcsSSSˢᵇᴍAsm = "SBCS %s, %s, %s"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string clearCarryˢᴍAsm => ref clearCarryˢᵇᴍAsm;
-private static readonly @string clearCarryˢᵇᴍAsm = "clear carry"u8;
+internal static ref readonly @string clearCarryˢ⁔Asm => ref clearCarryˢᵇ⁔Asm;
+private static readonly @string clearCarryˢᵇ⁔Asm = "clear carry"u8;
 
 // ClearCarry clears the carry flag.
 // The ‘which’ parameter must be AddCarry or SubCarry to specify how the flag will be used.
 // (On some systems, the sub carry's actual processor bit is inverted from its usual value.)
-[GoMethodBody("ClearCarry")] internal static void ClearCarryᴍ(ж<Asm> Ꮡa, Carry which) {
+internal static void ClearCarry⁔(/*this*/ ж<Asm> Ꮡa, Carry which) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var dst = new Reg(a.Arch.regs[0]); // not actually modified
@@ -834,17 +834,17 @@ private static readonly @string clearCarryˢᵇᴍAsm = "clear carry"u8;
         Ꮡa.Sub(a.Imm(0), dst, dst, (Carry)(SetCarry | (Carry)(which & asmgen.AltCarry)));
         break;
     }}
-    Ꮡa.EOL(clearCarryˢᴍAsm);
+    Ꮡa.EOL(clearCarryˢ⁔Asm);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string saveCarryˢᴍAsm => ref saveCarryˢᵇᴍAsm;
-private static readonly @string saveCarryˢᵇᴍAsm = "save carry"u8;
+internal static ref readonly @string saveCarryˢ⁔Asm => ref saveCarryˢᵇ⁔Asm;
+private static readonly @string saveCarryˢᵇ⁔Asm = "save carry"u8;
 
 // SaveCarry saves the carry flag into dst.
 // The meaning of the bits in dst is architecture-dependent.
 // The carry flag is left in an undefined state.
-[GoMethodBody("SaveCarry")] internal static void SaveCarryᴍ(ж<Asm> Ꮡa, Reg dst) {
+internal static void SaveCarry⁔(/*this*/ ж<Asm> Ꮡa, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     // Note: As implemented here, the carry flag is actually left unmodified,
@@ -858,16 +858,16 @@ private static readonly @string saveCarryˢᵇᴍAsm = "save carry"u8;
     } else {
         Ꮡa.Sub(dst, dst, dst, (Carry)(UseCarry | SmashCarry));
     }
-    Ꮡa.EOL(saveCarryˢᴍAsm);
+    Ꮡa.EOL(saveCarryˢ⁔Asm);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string restoreCarryˢᴍAsm => ref restoreCarryˢᵇᴍAsm;
-private static readonly @string restoreCarryˢᵇᴍAsm = "restore carry"u8;
+internal static ref readonly @string restoreCarryˢ⁔Asm => ref restoreCarryˢᵇ⁔Asm;
+private static readonly @string restoreCarryˢᵇ⁔Asm = "restore carry"u8;
 
 // RestoreCarry restores the carry flag from src.
 // src is left in an undefined state.
-[GoMethodBody("RestoreCarry")] internal static void RestoreCarryᴍ(ж<Asm> Ꮡa, Reg src) {
+internal static void RestoreCarry⁔(/*this*/ ж<Asm> Ꮡa, Reg src) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var cr = a.Carry(); if (cr.Valid()) {
@@ -884,18 +884,18 @@ private static readonly @string restoreCarryˢᵇᴍAsm = "restore carry"u8;
         // (This may seem too clever, but on GOARCH=arm we have no other good options.)
         Ꮡa.Sub(src, cmp.Or(a.ZR(), new Reg("SP")), src, SetCarry);
     }
-    Ꮡa.EOL(restoreCarryˢᴍAsm);
+    Ꮡa.EOL(restoreCarryˢ⁔Asm);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string convertAddCarryˢᴍAsm => ref convertAddCarryˢᵇᴍAsm;
-private static readonly @string convertAddCarryˢᵇᴍAsm = "convert add carry"u8;
-internal static ref readonly @string convertSubCarryˢᴍAsm => ref convertSubCarryˢᵇᴍAsm;
-private static readonly @string convertSubCarryˢᵇᴍAsm = "convert sub carry"u8;
+internal static ref readonly @string convertAddCarryˢ⁔Asm => ref convertAddCarryˢᵇ⁔Asm;
+private static readonly @string convertAddCarryˢᵇ⁔Asm = "convert add carry"u8;
+internal static ref readonly @string convertSubCarryˢ⁔Asm => ref convertSubCarryˢᵇ⁔Asm;
+private static readonly @string convertSubCarryˢᵇ⁔Asm = "convert sub carry"u8;
 
 // ConvertCarry converts the carry flag in dst from the internal format to a 0 or 1.
 // The carry flag is left in an undefined state.
-[GoMethodBody("ConvertCarry")] internal static void ConvertCarryᴍ(ж<Asm> Ꮡa, Carry which, Reg dst) {
+internal static void ConvertCarry⁔(/*this*/ ж<Asm> Ꮡa, Carry which, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (a.Carry().Valid()) { // already 0 or 1
@@ -908,23 +908,23 @@ private static readonly @string convertSubCarryˢᵇᴍAsm = "convert sub carry"
         } else {
             Ꮡa.Add(a.Imm(1), dst, dst, SmashCarry);
         }
-        Ꮡa.EOL(convertAddCarryˢᴍAsm);
+        Ꮡa.EOL(convertAddCarryˢ⁔Asm);
         break;
     }
     case var ᴛ when ᴛ == SubCarry: {
         Ꮡa.Neg(dst, dst);
-        Ꮡa.EOL(convertSubCarryˢᴍAsm);
+        Ꮡa.EOL(convertSubCarryˢ⁔Asm);
         break;
     }}
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string saveConvertAddCarryˢᴍAsm => ref saveConvertAddCarryˢᵇᴍAsm;
-private static readonly @string saveConvertAddCarryˢᵇᴍAsm = "save & convert add carry"u8;
+internal static ref readonly @string saveConvertAddCarryˢ⁔Asm => ref saveConvertAddCarryˢᵇ⁔Asm;
+private static readonly @string saveConvertAddCarryˢᵇ⁔Asm = "save & convert add carry"u8;
 
 // SaveConvertCarry saves and converts the carry flag into dst: 0 unset, 1 set.
 // The carry flag is left in an undefined state.
-[GoMethodBody("SaveConvertCarry")] internal static void SaveConvertCarryᴍ(ж<Asm> Ꮡa, Carry which, Reg dst) {
+internal static void SaveConvertCarry⁔(/*this*/ ж<Asm> Ꮡa, Carry which, Reg dst) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (which) {
@@ -935,7 +935,7 @@ private static readonly @string saveConvertAddCarryˢᵇᴍAsm = "save & convert
     case var ᴛ when ᴛ == AddCarry: {
         if ((a.Arch.adc != ""u8 || a.Arch.adcs != ""u8) && a.ZR().Valid()) {
             Ꮡa.Add(a.ZR(), a.ZR(), dst, (Carry)(UseCarry | SmashCarry));
-            Ꮡa.EOL(saveConvertAddCarryˢᴍAsm);
+            Ꮡa.EOL(saveConvertAddCarryˢ⁔Asm);
             return;
         }
         break;
@@ -951,7 +951,7 @@ private static readonly @string saveConvertAddCarryˢᵇᴍAsm = "save & convert
 // MulWide emits dstlo = src1 * src2 and dsthi = (src1 * src2) >> WordBits.
 // The carry flag is left in an undefined state.
 // If dstlo or dsthi is the zero Reg, then those outputs are discarded.
-[GoMethodBody("MulWide")] internal static void MulWideᴍ(ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dstlo, Reg dsthi) {
+internal static void MulWide⁔(/*this*/ ж<Asm> Ꮡa, Reg src1, Reg src2, Reg dstlo, Reg dsthi) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     switch (ᐧ) {
@@ -984,14 +984,14 @@ private static readonly @string saveConvertAddCarryˢᵇᴍAsm = "save & convert
 }
 
 // Jmp jumps to the label.
-[GoMethodBody("Jmp")] internal static void Jmpᴍ(ж<Asm> Ꮡa, @string label) {
+internal static void Jmp⁔(/*this*/ ж<Asm> Ꮡa, @string label) {
     // Note: Some systems prefer the spelling B or BR, but all accept JMP.
     Ꮡa.Printf("\tJMP %s\n", label);
 }
 
 // JmpZero jumps to the label if src is zero.
 // It may modify the carry flag unless a.Arch.CarrySafeLoop is true.
-[GoMethodBody("JmpZero")] internal static void JmpZeroᴍ(ж<Asm> Ꮡa, Reg src, @string label) {
+internal static void JmpZero⁔(/*this*/ ж<Asm> Ꮡa, Reg src, @string label) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.Printf("\t"u8 + a.Arch.jmpZero + "\n"u8, src, label);
@@ -999,19 +999,19 @@ private static readonly @string saveConvertAddCarryˢᵇᴍAsm = "save & convert
 
 // JmpNonZero jumps to the label if src is non-zero.
 // It may modify the carry flag unless a.Arch,CarrySafeLoop is true.
-[GoMethodBody("JmpNonZero")] internal static void JmpNonZeroᴍ(ж<Asm> Ꮡa, Reg src, @string label) {
+internal static void JmpNonZero⁔(/*this*/ ж<Asm> Ꮡa, Reg src, @string label) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.Printf("\t"u8 + a.Arch.jmpNonZero + "\n"u8, src, label);
 }
 
 // Label emits a label with the given name.
-[GoMethodBody("Label")] internal static void Labelᴍ(ж<Asm> Ꮡa, @string name) {
+internal static void Label⁔(/*this*/ ж<Asm> Ꮡa, @string name) {
     Ꮡa.Printf("%s:\n", name);
 }
 
 // Ret returns.
-[GoMethodBody("Ret")] internal static void Retᴍ(ж<Asm> Ꮡa) {
+internal static void Ret⁔(/*this*/ ж<Asm> Ꮡa) {
     Ꮡa.Printf("\tRET\n");
 }
 

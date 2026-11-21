@@ -65,10 +65,13 @@ using static go.compress.lzw_package;
 
 namespace go.compress;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using io = io_package;
 using static lzw_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("lzw")]
 public static partial class lzw_package
@@ -107,27 +110,27 @@ public static partial class lzw_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(lzw_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class lzwᴛReader;
-[GoMethodHost(typeof(lzw_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class lzwᴛWriter;
+[GoMethodHost(typeof(lzw_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class lzwᴛReader;
+[GoMethodHost(typeof(lzw_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class lzwᴛWriter;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class lzwᴛReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint16, error) readLSB(this ref Reader r) => lzw_package.readLSBᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint16, error) readMSB(this ref Reader r) => lzw_package.readMSBᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> b) => lzw_package.Readᴍ(Ꮡr, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void decode(this ж<Reader> Ꮡr) => lzw_package.decodeᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Reader r) => lzw_package.Closeᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Reader r, io.Reader src, Order order, nint litWidth) => lzw_package.Resetᴍ(ref r, src, order, litWidth);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref Reader r, io.Reader src, Order order, nint litWidth) => lzw_package.initᴍ(ref r, src, order, litWidth);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16, error) readLSB(this ref Reader r) => lzw_package.readLSB⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint16, error) readMSB(this ref Reader r) => lzw_package.readMSB⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint, error) Read(this ж<Reader> Ꮡr, slice<byte> b) => lzw_package.Read⁔(Ꮡr, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void decode(this ж<Reader> Ꮡr) => lzw_package.decode⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Reader r) => lzw_package.Close⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Reader r, io.Reader src, Order order, nint litWidth) => lzw_package.Reset⁔(ref r, src, order, litWidth);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ref Reader r, io.Reader src, Order order, nint litWidth) => lzw_package.init⁔(ref r, src, order, litWidth);
 }
 partial class lzwᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeLSB(this ref Writer w, uint32 c) => lzw_package.writeLSBᴍ(ref w, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeMSB(this ref Writer w, uint32 c) => lzw_package.writeMSBᴍ(ref w, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error incHi(this ж<Writer> Ꮡw) => lzw_package.incHiᴍ(Ꮡw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) => lzw_package.Writeᴍ(Ꮡw, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<Writer> Ꮡw) => lzw_package.Closeᴍ(Ꮡw);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref Writer w, io.Writer dst, Order order, nint litWidth) => lzw_package.Resetᴍ(ref w, dst, order, litWidth);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref Writer w, io.Writer dst, Order order, nint litWidth) => lzw_package.initᴍ(ref w, dst, order, litWidth);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeLSB(this ref Writer w, uint32 c) => lzw_package.writeLSB⁔(ref w, c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeMSB(this ref Writer w, uint32 c) => lzw_package.writeMSB⁔(ref w, c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error incHi(this ж<Writer> Ꮡw) => lzw_package.incHi⁔(Ꮡw);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ж<Writer> Ꮡw, slice<byte> p) => lzw_package.Write⁔(Ꮡw, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ж<Writer> Ꮡw) => lzw_package.Close⁔(Ꮡw);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref Writer w, io.Writer dst, Order order, nint litWidth) => lzw_package.Reset⁔(ref w, dst, order, litWidth);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ref Writer w, io.Writer dst, Order order, nint litWidth) => lzw_package.init⁔(ref w, dst, order, litWidth);
 }
 // </GlyphForwarders>

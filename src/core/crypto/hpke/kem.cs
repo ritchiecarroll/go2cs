@@ -124,25 +124,25 @@ partial struct dhKEM {
 } partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string eaePrkˢᴍdhKEM => ref eaePrkˢᵇᴍdhKEM;
-private static readonly @string eaePrkˢᵇᴍdhKEM = "eae_prk"u8;
-internal static ref readonly @string sharedSecretˢᴍdhKEM => ref sharedSecretˢᵇᴍdhKEM;
-private static readonly @string sharedSecretˢᵇᴍdhKEM = "shared_secret"u8;
+internal static ref readonly @string eaePrkˢ⁔dhKEM => ref eaePrkˢᵇ⁔dhKEM;
+private static readonly @string eaePrkˢᵇ⁔dhKEM = "eae_prk"u8;
+internal static ref readonly @string sharedSecretˢ⁔dhKEM => ref sharedSecretˢᵇ⁔dhKEM;
+private static readonly @string sharedSecretˢᵇ⁔dhKEM = "shared_secret"u8;
 
-[GoMethodBody("extractAndExpand")] internal static (slice<byte>, error) extractAndExpandᴍ(ref dhKEM kem, slice<byte> dhKey, slice<byte> kemContext) {
+internal static (slice<byte>, error) extractAndExpand⁔(/*this*/ ref dhKEM kem, slice<byte> dhKey, slice<byte> kemContext) {
     var suiteID = byteorder.BEAppendUint16(slice<byte>("KEM"u8), kem.id);
-    var (eaePRK, err) = kem.kdf.labeledExtract(suiteID, default, eaePrkˢᴍdhKEM, dhKey);
+    var (eaePRK, err) = kem.kdf.labeledExtract(suiteID, default, eaePrkˢ⁔dhKEM, dhKey);
     if (err != nil) {
         return (default, err);
     }
-    return kem.kdf.labeledExpand(suiteID, eaePRK, sharedSecretˢᴍdhKEM, kemContext, kem.Nsecret);
+    return kem.kdf.labeledExpand(suiteID, eaePRK, sharedSecretˢ⁔dhKEM, kemContext, kem.Nsecret);
 }
 
-[GoMethodBody("ID")] internal static uint16 IDᴍ(ref dhKEM kem) {
+internal static uint16 ID⁔(/*this*/ ref dhKEM kem) {
     return kem.id;
 }
 
-[GoMethodBody("encSize")] internal static nint encSizeᴍ(ref dhKEM kem) {
+internal static nint encSize⁔(/*this*/ ref dhKEM kem) {
     return kem.Nenc;
 }
 
@@ -192,26 +192,26 @@ partial struct unsupportedCurveKEM {
 
 } partial class hpke_package {
 
-[GoMethodBody("ID")] internal static uint16 IDᴍ(unsupportedCurveKEM _) {
+internal static uint16 ID⁔(/*this*/ unsupportedCurveKEM _) {
     return 0;
 }
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unsupportedCurveˢᴍunsupportedCurveKEM => ref unsupportedCurveˢᵇᴍunsupportedCurveKEM;
-private static readonly @string unsupportedCurveˢᵇᴍunsupportedCurveKEM = "unsupported curve"u8;
+internal static ref readonly @string unsupportedCurveˢ⁔unsupportedCurveKEM => ref unsupportedCurveˢᵇ⁔unsupportedCurveKEM;
+private static readonly @string unsupportedCurveˢᵇ⁔unsupportedCurveKEM = "unsupported curve"u8;
 
-[GoMethodBody("GenerateKey")] internal static (PrivateKey, error) GenerateKeyᴍ(unsupportedCurveKEM _) {
-    return (default, errors.New(unsupportedCurveˢᴍunsupportedCurveKEM));
+internal static (PrivateKey, error) GenerateKey⁔(/*this*/ unsupportedCurveKEM _) {
+    return (default, errors.New(unsupportedCurveˢ⁔unsupportedCurveKEM));
 }
-[GoMethodBody("NewPublicKey")] internal static (PublicKey, error) NewPublicKeyᴍ(unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
-    return (default, errors.New(unsupportedCurveˢᴍunsupportedCurveKEM));
+internal static (PublicKey, error) NewPublicKey⁔(/*this*/ unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
+    return (default, errors.New(unsupportedCurveˢ⁔unsupportedCurveKEM));
 }
-[GoMethodBody("NewPrivateKey")] internal static (PrivateKey, error) NewPrivateKeyᴍ(unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
-    return (default, errors.New(unsupportedCurveˢᴍunsupportedCurveKEM));
+internal static (PrivateKey, error) NewPrivateKey⁔(/*this*/ unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
+    return (default, errors.New(unsupportedCurveˢ⁔unsupportedCurveKEM));
 }
-[GoMethodBody("DeriveKeyPair")] internal static (PrivateKey, error) DeriveKeyPairᴍ(unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
-    return (default, errors.New(unsupportedCurveˢᴍunsupportedCurveKEM));
+internal static (PrivateKey, error) DeriveKeyPair⁔(/*this*/ unsupportedCurveKEM _Δp0, slice<byte> _Δp1) {
+    return (default, errors.New(unsupportedCurveˢ⁔unsupportedCurveKEM));
 }
-[GoMethodBody("encSize")] internal static nint encSizeᴍ(unsupportedCurveKEM _) {
+internal static nint encSize⁔(/*this*/ unsupportedCurveKEM _) {
     return 0;
 }
 
@@ -254,7 +254,7 @@ public static (PublicKey, error) NewDHKEMPublicKey(ж<ecdh.PublicKey> Ꮡpub) {
 
 } partial class hpke_package {
 
-[GoMethodBody("NewPublicKey")] internal static (PublicKey, error) NewPublicKeyᴍ(ref dhKEM kem, slice<byte> data) {
+internal static (PublicKey, error) NewPublicKey⁔(/*this*/ ref dhKEM kem, slice<byte> data) {
     var (pub, err) = kem.curve.NewPublicKey(data);
     if (err != nil) {
         return (default, err);
@@ -264,11 +264,11 @@ public static (PublicKey, error) NewDHKEMPublicKey(ж<ecdh.PublicKey> Ꮡpub) {
 
 } partial class hpke_package {
 
-[GoMethodBody("KEM")] internal static KEM KEMᴍ(ref dhKEMPublicKey pk) {
+internal static KEM KEM⁔(/*this*/ ref dhKEMPublicKey pk) {
     return new dhKEMжKEM(pk.kem);
 }
 
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref dhKEMPublicKey pk) {
+internal static slice<byte> Bytes⁔(/*this*/ ref dhKEMPublicKey pk) {
     return pk.pub.Bytes();
 }
 
@@ -280,7 +280,7 @@ internal static Func<ж<ecdh.PrivateKey>> testingOnlyGenerateKey;
 
 } partial class hpke_package {
 
-[GoMethodBody("encap")] internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encapᴍ(ref dhKEMPublicKey pk) {
+internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encap⁔(/*this*/ ref dhKEMPublicKey pk) {
     slice<byte> sharedSecret = default;
     error err = default;
 
@@ -340,7 +340,7 @@ public static (PrivateKey, error) NewDHKEMPrivateKey(ecdh.KeyExchanger priv) {
 
 } partial class hpke_package {
 
-[GoMethodBody("GenerateKey")] internal static (PrivateKey, error) GenerateKeyᴍ(ref dhKEM kem) {
+internal static (PrivateKey, error) GenerateKey⁔(/*this*/ ref dhKEM kem) {
     var (priv, err) = kem.curve.GenerateKey(rand.Reader);
     if (err != nil) {
         return (default, err);
@@ -348,7 +348,7 @@ public static (PrivateKey, error) NewDHKEMPrivateKey(ecdh.KeyExchanger priv) {
     return NewDHKEMPrivateKey(new ecdh.PrivateKeyжKeyExchanger(priv));
 }
 
-[GoMethodBody("NewPrivateKey")] internal static (PrivateKey, error) NewPrivateKeyᴍ(ref dhKEM kem, slice<byte> ikm) {
+internal static (PrivateKey, error) NewPrivateKey⁔(/*this*/ ref dhKEM kem, slice<byte> ikm) {
     var (priv, err) = kem.curve.NewPrivateKey(ikm);
     if (err != nil) {
         return (default, err);
@@ -357,17 +357,17 @@ public static (PrivateKey, error) NewDHKEMPrivateKey(ecdh.KeyExchanger priv) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string dkpPrkˢᴍdhKEM => ref dkpPrkˢᵇᴍdhKEM;
-private static readonly @string dkpPrkˢᵇᴍdhKEM = "dkp_prk"u8;
-internal static ref readonly @string candidateˢᴍdhKEM => ref candidateˢᵇᴍdhKEM;
-private static readonly @string candidateˢᵇᴍdhKEM = "candidate"u8;
+internal static ref readonly @string dkpPrkˢ⁔dhKEM => ref dkpPrkˢᵇ⁔dhKEM;
+private static readonly @string dkpPrkˢᵇ⁔dhKEM = "dkp_prk"u8;
+internal static ref readonly @string candidateˢ⁔dhKEM => ref candidateˢᵇ⁔dhKEM;
+private static readonly @string candidateˢᵇ⁔dhKEM = "candidate"u8;
 
-[GoMethodBody("DeriveKeyPair")] internal static (PrivateKey, error) DeriveKeyPairᴍ(ж<dhKEM> Ꮡkem, slice<byte> ikm) {
+internal static (PrivateKey, error) DeriveKeyPair⁔(/*this*/ ж<dhKEM> Ꮡkem, slice<byte> ikm) {
     ref var kem = ref Ꮡkem.DerefOrNull();
 
     // DeriveKeyPair from RFC 9180 Section 7.1.3.
     var suiteID = byteorder.BEAppendUint16(slice<byte>("KEM"u8), kem.id);
-    var (prk, err) = kem.kdf.labeledExtract(suiteID, default, dkpPrkˢᴍdhKEM, ikm);
+    var (prk, err) = kem.kdf.labeledExtract(suiteID, default, dkpPrkˢ⁔dhKEM, ikm);
     if (err != nil) {
         return (default, err);
     }
@@ -380,7 +380,7 @@ private static readonly @string candidateˢᵇᴍdhKEM = "candidate"u8;
     }
     uint8 counter = default;
     while (counter < 4) {
-        var (s, errΔ2) = kem.kdf.labeledExpand(suiteID, prk, candidateˢᴍdhKEM, [counter], kem.Nsk);
+        var (s, errΔ2) = kem.kdf.labeledExpand(suiteID, prk, candidateˢ⁔dhKEM, [counter], kem.Nsk);
         if (errΔ2 != nil) {
             return (default, errΔ2);
         }
@@ -399,15 +399,15 @@ private static readonly @string candidateˢᵇᴍdhKEM = "candidate"u8;
 
 } partial class hpke_package {
 
-[GoMethodBody("KEM")] internal static KEM KEMᴍ(ref dhKEMPrivateKey k) {
+internal static KEM KEM⁔(/*this*/ ref dhKEMPrivateKey k) {
     return new dhKEMжKEM(k.kem);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ecdhPrivateKeyDoesNotˢᴍdhKEMPrivateKey => ref ecdhPrivateKeyDoesNotˢᵇᴍdhKEMPrivateKey;
-private static readonly @string ecdhPrivateKeyDoesNotˢᵇᴍdhKEMPrivateKey = "ecdh: private key does not support Bytes"u8;
+internal static ref readonly @string ecdhPrivateKeyDoesNotˢ⁔dhKEMPrivateKey => ref ecdhPrivateKeyDoesNotˢᵇ⁔dhKEMPrivateKey;
+private static readonly @string ecdhPrivateKeyDoesNotˢᵇ⁔dhKEMPrivateKey = "ecdh: private key does not support Bytes"u8;
 
-[GoMethodBody("Bytes")] internal static (slice<byte>, error) Bytesᴍ(ref dhKEMPrivateKey k) {
+internal static (slice<byte>, error) Bytes⁔(/*this*/ ref dhKEMPrivateKey k) {
     // Bizarrely, RFC 9180, Section 7.1.2 says SerializePrivateKey MUST clamp
     // the output, which I thought we all agreed to instead do as part of the DH
     // function, letting private keys be random bytes.
@@ -419,7 +419,7 @@ private static readonly @string ecdhPrivateKeyDoesNotˢᵇᴍdhKEMPrivateKey = "
     // I'm sure this will not lead to any unexpected behavior or interop issue.
     var (priv, ok) = k.priv._<ж<ecdh.PrivateKey>>(ᐧ);
     if (!ok) {
-        return (default, errors.New(ecdhPrivateKeyDoesNotˢᴍdhKEMPrivateKey));
+        return (default, errors.New(ecdhPrivateKeyDoesNotˢ⁔dhKEMPrivateKey));
     }
     if (k.kem == dhKEMX25519) {
         var b = priv.Bytes();
@@ -431,14 +431,14 @@ private static readonly @string ecdhPrivateKeyDoesNotˢᵇᴍdhKEMPrivateKey = "
     return (priv.Bytes(), default);
 }
 
-[GoMethodBody("PublicKey")] internal static PublicKey PublicKeyᴍ(ref dhKEMPrivateKey k) {
+internal static PublicKey PublicKey⁔(/*this*/ ref dhKEMPrivateKey k) {
     return new dhKEMPublicKeyжPublicKey(Ꮡ(new dhKEMPublicKey(
         kem: k.kem,
         pub: k.priv.PublicKey()
     )));
 }
 
-[GoMethodBody("decap")] internal static (slice<byte>, error) decapᴍ(ref dhKEMPrivateKey k, slice<byte> encPubEph) {
+internal static (slice<byte>, error) decap⁔(/*this*/ ref dhKEMPrivateKey k, slice<byte> encPubEph) {
     var (pubEph, err) = k.priv.Curve().NewPublicKey(encPubEph);
     if (err != nil) {
         return (default, err);

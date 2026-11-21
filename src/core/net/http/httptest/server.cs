@@ -128,12 +128,12 @@ public static ж<Server> NewUnstartedServer(http.Handler handler) {
 } partial class httptest_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string exampleCom80ˢᴍServer => ref exampleCom80ˢᵇᴍServer;
-private static readonly @string exampleCom80ˢᵇᴍServer = ".example.com:80"u8;
-internal static readonly object httptestServingOnˢᴍServer = (@string)"httptest: serving on"u8;
+internal static ref readonly @string exampleCom80ˢ⁔Server => ref exampleCom80ˢᵇ⁔Server;
+private static readonly @string exampleCom80ˢᵇ⁔Server = ".example.com:80"u8;
+internal static readonly object httptestServingOnˢ⁔Server = (@string)"httptest: serving on"u8;
 
 // Start starts a server from NewUnstartedServer.
-[GoMethodBody("Start")] internal static void Startᴍ(ж<Server> Ꮡs) {
+internal static void Start⁔(/*this*/ ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.URL != ""u8) {
@@ -151,7 +151,7 @@ internal static readonly object httptestServingOnˢᴍServer = (@string)"httptes
             if (trʗ1.Dial != nil) {
                 return trʗ1.Dial(network, addr);
             }
-            if (addr == "example.com:80"u8 || strings.HasSuffix(addr, exampleCom80ˢᴍServer)) {
+            if (addr == "example.com:80"u8 || strings.HasSuffix(addr, exampleCom80ˢ⁔Server)) {
                 addr = Ꮡs.Value.Listener.Addr().String();
             }
             return Ꮡdialer.DialContext(ctx, network, addr);
@@ -162,17 +162,17 @@ internal static readonly object httptestServingOnˢᴍServer = (@string)"httptes
     Ꮡs.wrap();
     Ꮡs.goServe();
     if (serveFlag != ""u8) {
-        fmt.Fprintln(new os.FileжWriter(os.Stderr), httptestServingOnˢᴍServer, s.URL);
+        fmt.Fprintln(new os.FileжWriter(os.Stderr), httptestServingOnˢ⁔Server, s.URL);
         select();
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string exampleCom443ˢᴍServer => ref exampleCom443ˢᵇᴍServer;
-private static readonly @string exampleCom443ˢᵇᴍServer = ".example.com:443"u8;
+internal static ref readonly @string exampleCom443ˢ⁔Server => ref exampleCom443ˢᵇ⁔Server;
+private static readonly @string exampleCom443ˢᵇ⁔Server = ".example.com:443"u8;
 
 // StartTLS starts TLS on a server from NewUnstartedServer.
-[GoMethodBody("StartTLS")] internal static void StartTLSᴍ(ж<Server> Ꮡs) {
+internal static void StartTLS⁔(/*this*/ ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (s.URL != ""u8) {
@@ -220,7 +220,7 @@ private static readonly @string exampleCom443ˢᵇᴍServer = ".example.com:443"
         if (trʗ1.Dial != nil) {
             return trʗ1.Dial(network, addr);
         }
-        if (addr == "example.com:443"u8 || strings.HasSuffix(addr, exampleCom443ˢᴍServer)) {
+        if (addr == "example.com:443"u8 || strings.HasSuffix(addr, exampleCom443ˢ⁔Server)) {
             addr = Ꮡs.Value.Listener.Addr().String();
         }
         return Ꮡdialer.DialContext(ctx, network, addr);
@@ -250,7 +250,7 @@ partial interface closeIdleTransport {
 
 // Close shuts down the server and blocks until all outstanding
 // requests on this server have completed.
-[GoMethodBody("Close")] internal static void Closeᴍ(ж<Server> Ꮡs) {
+internal static void Close⁔(/*this*/ ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -313,10 +313,10 @@ partial interface closeIdleTransport {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string httptestServerBlockedInˢᴍServer => ref httptestServerBlockedInˢᵇᴍServer;
-private static readonly @string httptestServerBlockedInˢᵇᴍServer = "httptest.Server blocked in Close after 5 seconds, waiting for connections:\n"u8;
+internal static ref readonly @string httptestServerBlockedInˢ⁔Server => ref httptestServerBlockedInˢᵇ⁔Server;
+private static readonly @string httptestServerBlockedInˢᵇ⁔Server = "httptest.Server blocked in Close after 5 seconds, waiting for connections:\n"u8;
 
-[GoMethodBody("logCloseHangDebugInfo")] internal static void logCloseHangDebugInfoᴍ(ж<Server> Ꮡs) {
+internal static void logCloseHangDebugInfo⁔(/*this*/ ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -325,7 +325,7 @@ private static readonly @string httptestServerBlockedInˢᵇᴍServer = "httptes
         s.mu.Lock();
         ᒐd1 = true;
         ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-        Ꮡbuf.WriteString(httptestServerBlockedInˢᴍServer);
+        Ꮡbuf.WriteString(httptestServerBlockedInˢ⁔Server);
         foreach (var (c, st) in s.conns) {
             fmt.Fprintf(new strings_BuilderжWriter(Ꮡbuf), "  %T %p %v in state %v\n"u8, c, c, c.RemoteAddr(), st);
         }
@@ -336,7 +336,7 @@ private static readonly @string httptestServerBlockedInˢᵇᴍServer = "httptes
 }
 
 // CloseClientConnections closes any open HTTP connections to the test Server.
-[GoMethodBody("CloseClientConnections")] internal static partial void CloseClientConnectionsᴍ(ж<Server> Ꮡs) {
+internal static partial void CloseClientConnections⁔(/*this*/ ж<Server> Ꮡs) {
     GoFrame ᒐ = default;
     try {
         ref var s = ref Ꮡs.DerefOrNull();
@@ -377,7 +377,7 @@ private static readonly @string httptestServerBlockedInˢᵇᴍServer = "httptes
 
 // Certificate returns the certificate used by the server, or nil if
 // the server doesn't use TLS.
-[GoMethodBody("Certificate")] internal static ж<x509.Certificate> Certificateᴍ(ref Server s) {
+internal static ж<x509.Certificate> Certificate⁔(/*this*/ ref Server s) {
     return s.certificate;
 }
 
@@ -387,11 +387,11 @@ private static readonly @string httptestServerBlockedInˢᵇᴍServer = "httptes
 // Use Server.URL as the base URL to send requests to the server.
 // The returned client will also redirect any requests to "example.com"
 // or its subdomains to the server.
-[GoMethodBody("Client")] internal static ж<http.Client> Clientᴍ(ref Server s) {
+internal static ж<http.Client> Client⁔(/*this*/ ref Server s) {
     return s.client;
 }
 
-[GoMethodBody("goServe")] internal static partial void goServeᴍ(ж<Server> Ꮡs) {
+internal static partial void goServe⁔(/*this*/ ж<Server> Ꮡs) {
     Ꮡs.Ꮡwg.Add(1);
     goǃ(() => {
         GoFrame ᒐ = default;
@@ -406,7 +406,7 @@ private static readonly @string httptestServerBlockedInˢᵇᴍServer = "httptes
 
 // wrap installs the connection state-tracking hook to know which
 // connections are idle.
-[GoMethodBody("wrap")] internal static void wrapᴍ(ж<Server> Ꮡs) {
+internal static void wrap⁔(/*this*/ ж<Server> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var oldHook = s.Config.ConnState;
@@ -487,11 +487,11 @@ private static readonly @string httptestServerBlockedInˢᵇᴍServer = "httptes
 
 // closeConn closes c.
 // s.mu must be held.
-[GoMethodBody("closeConn")] internal static void closeConnᴍ(ref Server s, net.Conn c) { s.closeConnChan(c, default); }
+internal static void closeConn⁔(/*this*/ ref Server s, net.Conn c) { s.closeConnChan(c, default); }
 
 // closeConnChan is like closeConn, but takes an optional channel to receive a value
 // when the goroutine closing c is done.
-[GoMethodBody("closeConnChan")] internal static void closeConnChanᴍ(ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) {
+internal static void closeConnChan⁔(/*this*/ ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) {
     c.Close();
     if (done != nil) {
         done.ᐸꟷ(new EmptyStruct());

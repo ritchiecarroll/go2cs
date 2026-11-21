@@ -41,12 +41,12 @@ public static ж<Replacer> NewReplacer(params ꓸꓸꓸstring oldnewʗp) {
 
 } partial class strings_package {
 
-[GoMethodBody("buildOnce")] internal static void buildOnceᴍ(ref Replacer r) {
+internal static void buildOnce⁔(/*this*/ ref Replacer r) {
     r.r = r.build();
     r.oldnew = default;
 }
 
-[GoMethodBody("build")] internal static replacer buildᴍ(ref Replacer b) {
+internal static replacer build⁔(/*this*/ ref Replacer b) {
     var oldnew = b.oldnew;
     if (len(oldnew) == 2 && len(oldnew[0]) > 1) {
         return new singleStringReplacerжreplacer(makeSingleStringReplacer(oldnew[0], oldnew[1]));
@@ -96,7 +96,7 @@ public static ж<Replacer> NewReplacer(params ꓸꓸꓸstring oldnewʗp) {
 }
 
 // Replace returns a copy of s with all replacements performed.
-[GoMethodBody("Replace")] internal static @string Replaceᴍ(ж<Replacer> Ꮡr, @string s) {
+internal static @string Replace⁔(/*this*/ ж<Replacer> Ꮡr, @string s) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Ꮡonce.Do(Ꮡr.buildOnce);
@@ -104,7 +104,7 @@ public static ж<Replacer> NewReplacer(params ꓸꓸꓸstring oldnewʗp) {
 }
 
 // WriteString writes s to w with all replacements performed.
-[GoMethodBody("WriteString")] internal static (nint n, error err) WriteStringᴍ(ж<Replacer> Ꮡr, io.Writer w, @string s) {
+internal static (nint n, error err) WriteString⁔(/*this*/ ж<Replacer> Ꮡr, io.Writer w, @string s) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Ꮡonce.Do(Ꮡr.buildOnce);
@@ -165,7 +165,7 @@ partial struct trieNode {
 
 } partial class strings_package {
 
-[GoMethodBody("add")] internal static void addᴍ(ref trieNode t, @string key, @string val, nint priority, ж<genericReplacer> Ꮡr) {
+internal static void add⁔(/*this*/ ref trieNode t, @string key, @string val, nint priority, ж<genericReplacer> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (key == ""u8) {
@@ -232,7 +232,7 @@ partial struct trieNode {
 
 } partial class strings_package {
 
-[GoMethodBody("lookup")] internal static (@string val, nint keylen, bool found) lookupᴍ(ж<genericReplacer> Ꮡr, @string s, bool ignoreRoot) {
+internal static (@string val, nint keylen, bool found) lookup⁔(/*this*/ ж<genericReplacer> Ꮡr, @string s, bool ignoreRoot) {
     @string val = default;
     nint keylen = default;
     bool found = default;
@@ -323,13 +323,13 @@ partial struct appendSliceWriter /*[]byte*/;
 } partial class strings_package {
 
 // Write writes to the buffer to satisfy [io.Writer].
-[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ref appendSliceWriter w, slice<byte> p) {
+internal static (nint, error) Write⁔(/*this*/ ref appendSliceWriter w, slice<byte> p) {
     w = appendꓸꓸꓸ(w, p);
     return (len(p), default);
 }
 
 // WriteString writes to the buffer without string->[]byte->string allocations.
-[GoMethodBody("WriteString")] internal static (nint, error) WriteStringᴍ(ref appendSliceWriter w, @string s) {
+internal static (nint, error) WriteString⁔(/*this*/ ref appendSliceWriter w, @string s) {
     w = append(w, s.ꓸꓸꓸ);
     return (len(s), default);
 }
@@ -342,7 +342,7 @@ partial struct stringWriter {
 
 } partial class strings_package {
 
-[GoMethodBody("WriteString")] internal static (nint, error) WriteStringᴍ(stringWriter w, @string s) {
+internal static (nint, error) WriteString⁔(/*this*/ stringWriter w, @string s) {
     return w.w.Write(slice<byte>(s));
 }
 
@@ -358,13 +358,13 @@ internal static io.StringWriter getStringWriter(io.Writer w) {
 
 } partial class strings_package {
 
-[GoMethodBody("Replace")] internal static @string Replaceᴍ(ж<genericReplacer> Ꮡr, @string s) {
+internal static @string Replace⁔(/*this*/ ж<genericReplacer> Ꮡr, @string s) {
     ref var buf = ref heap<appendSliceWriter>(new appendSliceWriter(0, len(s)), out var Ꮡbuf);
     Ꮡr.WriteString(new appendSliceWriterжWriter(Ꮡbuf), s);
     return (@string)(slice<byte>)buf;
 }
 
-[GoMethodBody("WriteString")] internal static (nint n, error err) WriteStringᴍ(ж<genericReplacer> Ꮡr, io.Writer w, @string s) {
+internal static (nint n, error err) WriteString⁔(/*this*/ ж<genericReplacer> Ꮡr, io.Writer w, @string s) {
     nint n = default;
     error err = default;
     ref var r = ref Ꮡr.DerefOrNull();
@@ -426,7 +426,7 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
 
 } partial class strings_package {
 
-[GoMethodBody("Replace")] internal static @string Replaceᴍ(ref singleStringReplacer r, @string s) {
+internal static @string Replace⁔(/*this*/ ref singleStringReplacer r, @string s) {
     ref var buf = ref heap(new Builder(), out var Ꮡbuf);
     nint i = 0;
     var matched = false;
@@ -448,7 +448,7 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
     return buf.String();
 }
 
-[GoMethodBody("WriteString")] internal static (nint n, error err) WriteStringᴍ(ref singleStringReplacer r, io.Writer w, @string s) {
+internal static (nint n, error err) WriteString⁔(/*this*/ ref singleStringReplacer r, io.Writer w, @string s) {
     nint n = default;
     error err = default;
 
@@ -486,7 +486,7 @@ partial struct byteReplacer /*[256]byte*/;
 
 } partial class strings_package {
 
-[GoMethodBody("Replace")] internal static @string Replaceᴍ(ref byteReplacer r, @string s) {
+internal static @string Replace⁔(/*this*/ ref byteReplacer r, @string s) {
     slice<byte> buf = default; // lazily allocated
     for (nint i = 0; i < len(s); i++) {
         var b = s[i];
@@ -503,7 +503,7 @@ partial struct byteReplacer /*[256]byte*/;
     return (@string)buf;
 }
 
-[GoMethodBody("WriteString")] internal static (nint n, error err) WriteStringᴍ(ref byteReplacer r, io.Writer w, @string s) {
+internal static (nint n, error err) WriteString⁔(/*this*/ ref byteReplacer r, io.Writer w, @string s) {
     nint n = default;
 
     var sw = getStringWriter(w);
@@ -562,7 +562,7 @@ internal static UntypedInt countCutOff => 8;
 
 } partial class strings_package {
 
-[GoMethodBody("Replace")] internal static @string Replaceᴍ(ref byteStringReplacer r, @string s) {
+internal static @string Replace⁔(/*this*/ ref byteStringReplacer r, @string s) {
     nint newSize = len(s);
     var anyChanges = false;
     // Is it faster to use Count?
@@ -601,7 +601,7 @@ internal static UntypedInt countCutOff => 8;
     return (@string)buf;
 }
 
-[GoMethodBody("WriteString")] internal static (nint n, error err) WriteStringᴍ(ref byteStringReplacer r, io.Writer w, @string s) {
+internal static (nint n, error err) WriteString⁔(/*this*/ ref byteStringReplacer r, io.Writer w, @string s) {
     nint n = default;
     error err = default;
 

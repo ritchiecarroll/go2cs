@@ -233,7 +233,7 @@ public static ErrorCode ErrJSTemplate => 12;
 
 } partial class template_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref Error e) {
+internal static @string Error⁔(/*this*/ ref Error e) {
     switch (ᐧ) {
     case {} when e.Node != nil: {
         var (loc, _) = (((ж<parse.Tree>)nil)).ErrorContext(e.Node);

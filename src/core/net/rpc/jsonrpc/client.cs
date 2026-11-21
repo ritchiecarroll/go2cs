@@ -52,7 +52,7 @@ partial struct clientRequest {
 
 } partial class jsonrpc_package {
 
-[GoMethodBody("WriteRequest")] internal static error WriteRequestᴍ(ж<clientCodec> Ꮡc, ж<rpc.Request> Ꮡr, any param) {
+internal static error WriteRequest⁔(/*this*/ ж<clientCodec> Ꮡc, ж<rpc.Request> Ꮡr, any param) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -75,7 +75,7 @@ partial struct clientResponse {
 
 } partial class jsonrpc_package {
 
-[GoMethodBody("reset")] internal static void resetᴍ(ref clientResponse r) {
+internal static void reset⁔(/*this*/ ref clientResponse r) {
     r.Id = 0;
     r.Result = default;
     r.Error = default;
@@ -84,10 +84,10 @@ partial struct clientResponse {
 } partial class jsonrpc_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unspecifiedErrorˢᴍclientCodec => ref unspecifiedErrorˢᵇᴍclientCodec;
-private static readonly @string unspecifiedErrorˢᵇᴍclientCodec = "unspecified error"u8;
+internal static ref readonly @string unspecifiedErrorˢ⁔clientCodec => ref unspecifiedErrorˢᵇ⁔clientCodec;
+private static readonly @string unspecifiedErrorˢᵇ⁔clientCodec = "unspecified error"u8;
 
-[GoMethodBody("ReadResponseHeader")] internal static error ReadResponseHeaderᴍ(ж<clientCodec> Ꮡc, ж<rpc.Response> Ꮡr) {
+internal static error ReadResponseHeader⁔(/*this*/ ж<clientCodec> Ꮡc, ж<rpc.Response> Ꮡr) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var r = ref Ꮡr.DerefOrNull();
 
@@ -109,21 +109,21 @@ private static readonly @string unspecifiedErrorˢᵇᴍclientCodec = "unspecifi
             return fmt.Errorf("invalid error %v"u8, c.resp.Error);
         }
         if (x == ""u8) {
-            x = unspecifiedErrorˢᴍclientCodec;
+            x = unspecifiedErrorˢ⁔clientCodec;
         }
         r.Error = x;
     }
     return default;
 }
 
-[GoMethodBody("ReadResponseBody")] internal static error ReadResponseBodyᴍ(ref clientCodec c, any x) {
+internal static error ReadResponseBody⁔(/*this*/ ref clientCodec c, any x) {
     if (x == nil) {
         return default;
     }
     return json.Unmarshal(c.resp.Result.ValueSlot, x);
 }
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ref clientCodec c) {
+internal static error Close⁔(/*this*/ ref clientCodec c) {
     return c.c.Close();
 }
 

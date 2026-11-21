@@ -75,10 +75,13 @@ using static go.go.build.constraint_package;
 
 namespace go.go.build;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using global::go.unicode;
 using static constraint_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("constraint")]
 public static partial class constraint_package
@@ -121,43 +124,43 @@ public static partial class constraint_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(constraint_package.AndExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛAndExpr;
-[GoMethodHost(typeof(constraint_package.NotExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛNotExpr;
-[GoMethodHost(typeof(constraint_package.OrExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛOrExpr;
-[GoMethodHost(typeof(constraint_package.SyntaxError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛSyntaxError;
-[GoMethodHost(typeof(constraint_package.TagExpr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛTagExpr;
-[GoMethodHost(typeof(constraint_package.exprParser)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class constraintᴛexprParser;
+[GoMethodHost(typeof(constraint_package.AndExpr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constraintᴛAndExpr;
+[GoMethodHost(typeof(constraint_package.NotExpr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constraintᴛNotExpr;
+[GoMethodHost(typeof(constraint_package.OrExpr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constraintᴛOrExpr;
+[GoMethodHost(typeof(constraint_package.SyntaxError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constraintᴛSyntaxError;
+[GoMethodHost(typeof(constraint_package.TagExpr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constraintᴛTagExpr;
+[GoMethodHost(typeof(constraint_package.exprParser)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class constraintᴛexprParser;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class constraintᴛTagExpr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isExpr(this ref TagExpr x) => constraint_package.isExprᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Eval(this ref TagExpr x, Func<@string, bool> ok) => constraint_package.Evalᴍ(ref x, ok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref TagExpr x) => constraint_package.Stringᴍ(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void isExpr(this ref TagExpr x) => constraint_package.isExpr⁔(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Eval(this ref TagExpr x, Func<@string, bool> ok) => constraint_package.Eval⁔(ref x, ok);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref TagExpr x) => constraint_package.String⁔(ref x);
 }
 partial class constraintᴛNotExpr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isExpr(this ref NotExpr x) => constraint_package.isExprᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Eval(this ref NotExpr x, Func<@string, bool> ok) => constraint_package.Evalᴍ(ref x, ok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref NotExpr x) => constraint_package.Stringᴍ(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void isExpr(this ref NotExpr x) => constraint_package.isExpr⁔(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Eval(this ref NotExpr x, Func<@string, bool> ok) => constraint_package.Eval⁔(ref x, ok);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref NotExpr x) => constraint_package.String⁔(ref x);
 }
 partial class constraintᴛAndExpr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isExpr(this ref AndExpr x) => constraint_package.isExprᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Eval(this ref AndExpr x, Func<@string, bool> ok) => constraint_package.Evalᴍ(ref x, ok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref AndExpr x) => constraint_package.Stringᴍ(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void isExpr(this ref AndExpr x) => constraint_package.isExpr⁔(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Eval(this ref AndExpr x, Func<@string, bool> ok) => constraint_package.Eval⁔(ref x, ok);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref AndExpr x) => constraint_package.String⁔(ref x);
 }
 partial class constraintᴛOrExpr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void isExpr(this ref OrExpr x) => constraint_package.isExprᴍ(ref x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Eval(this ref OrExpr x, Func<@string, bool> ok) => constraint_package.Evalᴍ(ref x, ok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref OrExpr x) => constraint_package.Stringᴍ(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void isExpr(this ref OrExpr x) => constraint_package.isExpr⁔(ref x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Eval(this ref OrExpr x, Func<@string, bool> ok) => constraint_package.Eval⁔(ref x, ok);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref OrExpr x) => constraint_package.String⁔(ref x);
 }
 partial class constraintᴛSyntaxError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref SyntaxError e) => constraint_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref SyntaxError e) => constraint_package.Error⁔(ref e);
 }
 partial class constraintᴛexprParser {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Expr or(this ж<exprParser> Ꮡp) => constraint_package.orᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Expr and(this ж<exprParser> Ꮡp) => constraint_package.andᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Expr not(this ж<exprParser> Ꮡp) => constraint_package.notᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Expr atom(this ж<exprParser> Ꮡp) => constraint_package.atomᴍ(Ꮡp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void lex(this ref exprParser p) => constraint_package.lexᴍ(ref p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Expr or(this ж<exprParser> Ꮡp) => constraint_package.or⁔(Ꮡp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Expr and(this ж<exprParser> Ꮡp) => constraint_package.and⁔(Ꮡp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Expr not(this ж<exprParser> Ꮡp) => constraint_package.not⁔(Ꮡp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Expr atom(this ж<exprParser> Ꮡp) => constraint_package.atom⁔(Ꮡp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void lex(this ref exprParser p) => constraint_package.lex⁔(ref p);
 }
 // </GlyphForwarders>

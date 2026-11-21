@@ -23,7 +23,7 @@ internal static array<uint8> _urlPart_index = array<uint8>([0, 11, 26, 44, 58]);
 
 } partial class template_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(urlPart i) {
+internal static @string String⁔(/*this*/ urlPart i) {
     if (i >= ((urlPart)(uint8)(len(_urlPart_index) - 1))) {
         return "urlPart("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }

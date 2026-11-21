@@ -11,7 +11,7 @@ partial class http_package {
 
 } partial class http_package {
 
-[GoMethodBody("As")] internal static bool Asᴍ(http2StreamError e, any target) {
+internal static bool As⁔(/*this*/ http2StreamError e, any target) {
     var dst = reflect.ValueOf(target).Elem();
     var dstType = dst.Type();
     if (dstType.Kind() != reflect.Struct) {

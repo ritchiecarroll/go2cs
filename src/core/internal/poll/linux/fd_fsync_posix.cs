@@ -12,7 +12,7 @@ partial class poll_package {
 } partial class poll_package {
 
 // Fsync wraps syscall.Fsync.
-[GoMethodBody("Fsync")] internal static error Fsyncᴍ(ж<FD> Ꮡfd) {
+internal static error Fsync⁔(/*this*/ ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

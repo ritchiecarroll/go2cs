@@ -108,7 +108,7 @@ partial struct encoder {
 
 } partial class ascii85_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref encoder e, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref encoder e, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -161,7 +161,7 @@ partial struct encoder {
 
 // Close flushes any pending output from the encoder.
 // It is an error to call Write after calling Close.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref encoder e) {
+internal static error Close⁔(/*this*/ ref encoder e) {
     // If there's anything left in the buffer, flush it out
     if (e.err == nil && e.nbuf > 0) {
         nint nout = Encode(e.@out[0..], e.buf.slice(0, e.nbuf));
@@ -180,7 +180,7 @@ partial struct CorruptInputError /*num:int64*/;
 /*
  * Decoder
  */
-[GoMethodBody("Error")] internal static @string Errorᴍ(CorruptInputError e) {
+internal static @string Error⁔(/*this*/ CorruptInputError e) {
     return "illegal ascii85 data at input byte "u8 + strconv.FormatInt((int64)e, 10);
 }
 
@@ -280,7 +280,7 @@ partial struct decoder {
 
 } partial class ascii85_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref decoder d, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref decoder d, slice<byte> p) {
     nint n = default;
     error err = default;
 

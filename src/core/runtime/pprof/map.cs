@@ -29,7 +29,7 @@ partial struct profMapEntry {
 
 } partial class pprof_package {
 
-[GoMethodBody("lookup")] internal static ж<profMapEntry> lookupᴍ(ref profMap m, slice<uint64> stk, @unsafe.Pointer tag) {
+internal static ж<profMapEntry> lookup⁔(/*this*/ ref profMap m, slice<uint64> stk, @unsafe.Pointer tag) {
     // Compute hash of (stk, tag).
     var h = (uintptr)0;
     foreach (var (_, x) in range(stk)) {

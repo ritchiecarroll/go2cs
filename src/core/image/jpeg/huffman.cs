@@ -47,7 +47,7 @@ internal static FormatError errShortHuffmanData = ((FormatError)(@string)"short 
 // ensureNBits reads bytes from the byte buffer to ensure that d.bits.n is at
 // least n. For best performance (avoiding function calls inside hot loops),
 // the caller is the one responsible for first checking that d.bits.n < n.
-[GoMethodBody("ensureNBits")] internal static error ensureNBitsᴍ(ref decoder d, int32 n) {
+internal static error ensureNBits⁔(/*this*/ ref decoder d, int32 n) {
     for (;;) {
         var (c, err) = d.readByteStuffedByte();
         if (err != nil) {
@@ -72,7 +72,7 @@ internal static FormatError errShortHuffmanData = ((FormatError)(@string)"short 
 
 // receiveExtend is the composition of RECEIVE and EXTEND, specified in section
 // F.2.2.1.
-[GoMethodBody("receiveExtend")] internal static (int32, error) receiveExtendᴍ(ref decoder d, uint8 t) {
+internal static (int32, error) receiveExtend⁔(/*this*/ ref decoder d, uint8 t) {
     if (d.bits.n < (int32)t) {
         var err = d.ensureNBits((int32)t); if (err != nil) {
             return (0, err);
@@ -89,23 +89,23 @@ internal static FormatError errShortHuffmanData = ((FormatError)(@string)"short 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string dhtHasWrongLengthˢᴍdecoder => ref dhtHasWrongLengthˢᵇᴍdecoder;
-private static readonly @string dhtHasWrongLengthˢᵇᴍdecoder = "DHT has wrong length"u8;
-internal static ref readonly @string badTcValueˢᴍdecoder => ref badTcValueˢᵇᴍdecoder;
-private static readonly @string badTcValueˢᵇᴍdecoder = "bad Tc value"u8;
-internal static ref readonly @string badThValueˢᴍdecoder => ref badThValueˢᵇᴍdecoder;
-private static readonly @string badThValueˢᵇᴍdecoder = "bad Th value"u8;
-internal static ref readonly @string huffmanTableHasZeroˢᴍdecoder => ref huffmanTableHasZeroˢᵇᴍdecoder;
-private static readonly @string huffmanTableHasZeroˢᵇᴍdecoder = "Huffman table has zero length"u8;
-internal static ref readonly @string huffmanTableHasExcessiveˢᴍdecoder => ref huffmanTableHasExcessiveˢᵇᴍdecoder;
-private static readonly @string huffmanTableHasExcessiveˢᵇᴍdecoder = "Huffman table has excessive length"u8;
+internal static ref readonly @string dhtHasWrongLengthˢ⁔decoder => ref dhtHasWrongLengthˢᵇ⁔decoder;
+private static readonly @string dhtHasWrongLengthˢᵇ⁔decoder = "DHT has wrong length"u8;
+internal static ref readonly @string badTcValueˢ⁔decoder => ref badTcValueˢᵇ⁔decoder;
+private static readonly @string badTcValueˢᵇ⁔decoder = "bad Tc value"u8;
+internal static ref readonly @string badThValueˢ⁔decoder => ref badThValueˢᵇ⁔decoder;
+private static readonly @string badThValueˢᵇ⁔decoder = "bad Th value"u8;
+internal static ref readonly @string huffmanTableHasZeroˢ⁔decoder => ref huffmanTableHasZeroˢᵇ⁔decoder;
+private static readonly @string huffmanTableHasZeroˢᵇ⁔decoder = "Huffman table has zero length"u8;
+internal static ref readonly @string huffmanTableHasExcessiveˢ⁔decoder => ref huffmanTableHasExcessiveˢᵇ⁔decoder;
+private static readonly @string huffmanTableHasExcessiveˢᵇ⁔decoder = "Huffman table has excessive length"u8;
 
 // processDHT processes a Define Huffman Table marker, and initializes a huffman
 // struct from its contents. Specified in section B.2.4.2.
-[GoMethodBody("processDHT")] internal static error processDHTᴍ(ref decoder d, nint n) {
+internal static error processDHT⁔(/*this*/ ref decoder d, nint n) {
     while (n > 0) {
         if (n < 17) {
-            return ((FormatError)(@string)dhtHasWrongLengthˢᴍdecoder);
+            return ((FormatError)(@string)dhtHasWrongLengthˢ⁔decoder);
         }
         {
             var err = d.readFull(d.tmp[..17]); if (err != nil) {
@@ -114,12 +114,12 @@ private static readonly @string huffmanTableHasExcessiveˢᵇᴍdecoder = "Huffm
         }
         var tc = (byte)((d.tmp[0] >> 4));
         if (tc > maxTc) {
-            return ((FormatError)(@string)badTcValueˢᴍdecoder);
+            return ((FormatError)(@string)badTcValueˢ⁔decoder);
         }
         var th = (byte)(d.tmp[0] & 0x0f);
         // The baseline th <= 1 restriction is specified in table B.5.
         if (th > maxTh || (d.baseline && th > 1)) {
-            return ((FormatError)(@string)badThValueˢᴍdecoder);
+            return ((FormatError)(@string)badThValueˢ⁔decoder);
         }
         var h = Ꮡ(d.huff[tc], th);
 
@@ -133,14 +133,14 @@ private static readonly @string huffmanTableHasExcessiveˢᵇᴍdecoder = "Huffm
             h.nCodes += nCodes[i];
         }
         if (h.nCodes == 0) {
-            return ((FormatError)(@string)huffmanTableHasZeroˢᴍdecoder);
+            return ((FormatError)(@string)huffmanTableHasZeroˢ⁔decoder);
         }
         if (h.nCodes > maxNCodes) {
-            return ((FormatError)(@string)huffmanTableHasExcessiveˢᴍdecoder);
+            return ((FormatError)(@string)huffmanTableHasExcessiveˢ⁔decoder);
         }
         n -= (nint)h.nCodes + 17;
         if (n < 0) {
-            return ((FormatError)(@string)dhtHasWrongLengthˢᴍdecoder);
+            return ((FormatError)(@string)dhtHasWrongLengthˢ⁔decoder);
         }
         {
             var err = d.readFull(h.vals.slice(0, h.nCodes)); if (err != nil) {
@@ -192,18 +192,18 @@ private static readonly @string huffmanTableHasExcessiveˢᵇᴍdecoder = "Huffm
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string uninitializedHuffmanˢᴍdecoder => ref uninitializedHuffmanˢᵇᴍdecoder;
-private static readonly @string uninitializedHuffmanˢᵇᴍdecoder = "uninitialized Huffman table"u8;
-internal static ref readonly @string badHuffmanCodeˢᴍdecoder => ref badHuffmanCodeˢᵇᴍdecoder;
-private static readonly @string badHuffmanCodeˢᵇᴍdecoder = "bad Huffman code"u8;
+internal static ref readonly @string uninitializedHuffmanˢ⁔decoder => ref uninitializedHuffmanˢᵇ⁔decoder;
+private static readonly @string uninitializedHuffmanˢᵇ⁔decoder = "uninitialized Huffman table"u8;
+internal static ref readonly @string badHuffmanCodeˢ⁔decoder => ref badHuffmanCodeˢᵇ⁔decoder;
+private static readonly @string badHuffmanCodeˢᵇ⁔decoder = "bad Huffman code"u8;
 
 // decodeHuffman returns the next Huffman-coded value from the bit-stream,
 // decoded according to h.
-[GoMethodBody("decodeHuffman")] internal static (uint8, error) decodeHuffmanᴍ(ref decoder d, ж<huffman> Ꮡh) {
+internal static (uint8, error) decodeHuffman⁔(/*this*/ ref decoder d, ж<huffman> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (h.nCodes == 0) {
-        return (0, ((FormatError)(@string)uninitializedHuffmanˢᴍdecoder));
+        return (0, ((FormatError)(@string)uninitializedHuffmanˢ⁔decoder));
     }
 
     if (d.bits.n < 8) {
@@ -246,10 +246,10 @@ slowPath:
 continue_slowPath:;
     }
 break_slowPath:;
-    return (0, ((FormatError)(@string)badHuffmanCodeˢᴍdecoder));
+    return (0, ((FormatError)(@string)badHuffmanCodeˢ⁔decoder));
 }
 
-[GoMethodBody("decodeBit")] internal static (bool, error) decodeBitᴍ(ref decoder d) {
+internal static (bool, error) decodeBit⁔(/*this*/ ref decoder d) {
     if (d.bits.n == 0) {
         var err = d.ensureNBits(1); if (err != nil) {
             return (false, err);
@@ -261,7 +261,7 @@ break_slowPath:;
     return (ret, default);
 }
 
-[GoMethodBody("decodeBits")] internal static (uint32, error) decodeBitsᴍ(ref decoder d, int32 n) {
+internal static (uint32, error) decodeBits⁔(/*this*/ ref decoder d, int32 n) {
     if (d.bits.n < n) {
         var err = d.ensureNBits(n); if (err != nil) {
             return (0, err);

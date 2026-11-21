@@ -178,12 +178,12 @@ partial struct deadlineExceededError {
 } partial class context_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contextDeadlineExceededˢᴍdeadlineExceededError => ref contextDeadlineExceededˢᵇᴍdeadlineExceededError;
-private static readonly @string contextDeadlineExceededˢᵇᴍdeadlineExceededError = "context deadline exceeded"u8;
+internal static ref readonly @string contextDeadlineExceededˢ⁔deadlineExceededError => ref contextDeadlineExceededˢᵇ⁔deadlineExceededError;
+private static readonly @string contextDeadlineExceededˢᵇ⁔deadlineExceededError = "context deadline exceeded"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(deadlineExceededError _) { return contextDeadlineExceededˢᴍdeadlineExceededError; }
-[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(deadlineExceededError _) { return true; }
-[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(deadlineExceededError _) { return true; }
+internal static @string Error⁔(/*this*/ deadlineExceededError _) { return contextDeadlineExceededˢ⁔deadlineExceededError; }
+internal static bool Timeout⁔(/*this*/ deadlineExceededError _) { return true; }
+internal static bool Temporary⁔(/*this*/ deadlineExceededError _) { return true; }
 
 } partial class context_package {
 
@@ -194,22 +194,22 @@ partial struct emptyCtx {
 
 } partial class context_package {
 
-[GoMethodBody("Deadline")] internal static (time.Time deadline, bool ok) Deadlineᴍ(emptyCtx _) {
+internal static (time.Time deadline, bool ok) Deadline⁔(/*this*/ emptyCtx _) {
     time.Time deadline = default;
     bool ok = default;
 
     return (deadline, ok);
 }
 
-[GoMethodBody("Done")] internal static /*<-*/channel<EmptyStruct> Doneᴍ(emptyCtx _) {
+internal static /*<-*/channel<EmptyStruct> Done⁔(/*this*/ emptyCtx _) {
     return default;
 }
 
-[GoMethodBody("Err")] internal static error Errᴍ(emptyCtx _) {
+internal static error Err⁔(/*this*/ emptyCtx _) {
     return default;
 }
 
-[GoMethodBody("Value")] internal static any Valueᴍ(emptyCtx _, any key) {
+internal static any Value⁔(/*this*/ emptyCtx _, any key) {
     return default;
 }
 
@@ -222,11 +222,11 @@ partial struct backgroundCtx {
 } partial class context_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contextBackgroundˢᴍbackgroundCtx => ref contextBackgroundˢᵇᴍbackgroundCtx;
-private static readonly @string contextBackgroundˢᵇᴍbackgroundCtx = "context.Background"u8;
+internal static ref readonly @string contextBackgroundˢ⁔backgroundCtx => ref contextBackgroundˢᵇ⁔backgroundCtx;
+private static readonly @string contextBackgroundˢᵇ⁔backgroundCtx = "context.Background"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(backgroundCtx _) {
-    return contextBackgroundˢᴍbackgroundCtx;
+internal static @string String⁔(/*this*/ backgroundCtx _) {
+    return contextBackgroundˢ⁔backgroundCtx;
 }
 
 } partial class context_package {
@@ -238,11 +238,11 @@ partial struct todoCtx {
 } partial class context_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contextTodoˢᴍtodoCtx => ref contextTodoˢᵇᴍtodoCtx;
-private static readonly @string contextTodoˢᵇᴍtodoCtx = "context.TODO"u8;
+internal static ref readonly @string contextTodoˢ⁔todoCtx => ref contextTodoˢᵇ⁔todoCtx;
+private static readonly @string contextTodoˢᵇ⁔todoCtx = "context.TODO"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(todoCtx _) {
-    return contextTodoˢᴍtodoCtx;
+internal static @string String⁔(/*this*/ todoCtx _) {
+    return contextTodoˢ⁔todoCtx;
 }
 
 } partial class context_package {
@@ -397,7 +397,7 @@ partial struct afterFuncCtx {
 
 } partial class context_package {
 
-[GoMethodBody("cancel")] internal static void cancelᴍ(ж<afterFuncCtx> Ꮡa, bool removeFromParent, error err, error cause) {
+internal static void cancel⁔(/*this*/ ж<afterFuncCtx> Ꮡa, bool removeFromParent, error err, error cause) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡa.ᏑcancelCtx.cancel(false, err, cause);
@@ -495,9 +495,9 @@ partial struct cancelCtx {
 
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded
 // interface field in *cancelCtx's method set; see the pointer-only satisfaction record.
-[GoMethodBody("Deadline")] internal static (time.Time, bool) Deadlineᴍ(cancelCtx recvᴛ) => recvᴛ.Context.Deadline();
+internal static (time.Time, bool) Deadline⁔(/*this*/ cancelCtx recvᴛ) => recvᴛ.Context.Deadline();
 
-[GoMethodBody("Value")] internal static any Valueᴍ(ж<cancelCtx> Ꮡc, any key) {
+internal static any Value⁔(/*this*/ ж<cancelCtx> Ꮡc, any key) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (AreEqual(key, ᏑcancelCtxKey)) {
@@ -506,7 +506,7 @@ partial struct cancelCtx {
     return value(c.Context, key);
 }
 
-[GoMethodBody("Done")] internal static /*<-*/channel<EmptyStruct> Doneᴍ(ж<cancelCtx> Ꮡc) {
+internal static /*<-*/channel<EmptyStruct> Done⁔(/*this*/ ж<cancelCtx> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -529,7 +529,7 @@ partial struct cancelCtx {
     finally { if (ᒐd1) Ꮡc.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("Err")] internal static error Errᴍ(ж<cancelCtx> Ꮡc) {
+internal static error Err⁔(/*this*/ ж<cancelCtx> Ꮡc) {
     // An atomic load is ~5x faster than a mutex, which can matter in tight loops.
     var err = Ꮡc.Ꮡerr.Load(); if (err != nil) {
         // Ensure the done channel has been closed before returning a non-nil error.
@@ -541,7 +541,7 @@ partial struct cancelCtx {
 
 // propagateCancel arranges for child to be canceled when parent is.
 // It sets the parent context of cancelCtx.
-[GoMethodBody("propagateCancel")] internal static partial void propagateCancelᴍ(ж<cancelCtx> Ꮡc, Context parent, canceler child) {
+internal static partial void propagateCancel⁔(/*this*/ ж<cancelCtx> Ꮡc, Context parent, canceler child) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.Context = parent;
@@ -626,14 +626,14 @@ internal static @string contextName(Context c) {
 
 } partial class context_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref cancelCtx c) {
+internal static @string String⁔(/*this*/ ref cancelCtx c) {
     return contextName(c.Context) + ".WithCancel"u8;
 }
 
 // cancel closes c.done, cancels each of c's children, and, if
 // removeFromParent is true, removes c from its parent's children.
 // cancel sets c.cause to cause if this is the first time c is canceled.
-[GoMethodBody("cancel")] internal static void cancelᴍ(ж<cancelCtx> Ꮡc, bool removeFromParent, error err, error cause) {
+internal static void cancel⁔(/*this*/ ж<cancelCtx> Ꮡc, bool removeFromParent, error err, error cause) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (err == nil) {
@@ -686,26 +686,26 @@ partial struct withoutCancelCtx {
 
 } partial class context_package {
 
-[GoMethodBody("Deadline")] internal static (time.Time deadline, bool ok) Deadlineᴍ(withoutCancelCtx _) {
+internal static (time.Time deadline, bool ok) Deadline⁔(/*this*/ withoutCancelCtx _) {
     time.Time deadline = default;
     bool ok = default;
 
     return (deadline, ok);
 }
 
-[GoMethodBody("Done")] internal static /*<-*/channel<EmptyStruct> Doneᴍ(withoutCancelCtx _) {
+internal static /*<-*/channel<EmptyStruct> Done⁔(/*this*/ withoutCancelCtx _) {
     return default;
 }
 
-[GoMethodBody("Err")] internal static error Errᴍ(withoutCancelCtx _) {
+internal static error Err⁔(/*this*/ withoutCancelCtx _) {
     return default;
 }
 
-[GoMethodBody("Value")] internal static any Valueᴍ(withoutCancelCtx c, any key) {
+internal static any Value⁔(/*this*/ withoutCancelCtx c, any key) {
     return value(c, key);
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(withoutCancelCtx c) {
+internal static @string String⁔(/*this*/ withoutCancelCtx c) {
     return contextName(c.c) + ".WithoutCancel"u8;
 }
 
@@ -778,15 +778,15 @@ partial struct timerCtx {
 
 } partial class context_package {
 
-[GoMethodBody("Deadline")] internal static (time.Time deadline, bool ok) Deadlineᴍ(ref timerCtx c) {
+internal static (time.Time deadline, bool ok) Deadline⁔(/*this*/ ref timerCtx c) {
     return (c.deadline, true);
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref timerCtx c) {
+internal static @string String⁔(/*this*/ ref timerCtx c) {
     return contextName(c.cancelCtx.Context) + ".WithDeadline("u8 + c.deadline.String() + " ["u8 + time.Until(c.deadline).String() + "])"u8;
 }
 
-[GoMethodBody("cancel")] internal static void cancelᴍ(ж<timerCtx> Ꮡc, bool removeFromParent, error err, error cause) {
+internal static void cancel⁔(/*this*/ ж<timerCtx> Ꮡc, bool removeFromParent, error err, error cause) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     Ꮡc.ᏑcancelCtx.cancel(false, err, cause);
@@ -862,15 +862,15 @@ partial struct valueCtx {
 
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded
 // interface field in *valueCtx's method set; see the pointer-only satisfaction record.
-[GoMethodBody("Deadline")] internal static (time.Time, bool) Deadlineᴍ(valueCtx recvᴛ) => recvᴛ.Context.Deadline();
+internal static (time.Time, bool) Deadline⁔(/*this*/ valueCtx recvᴛ) => recvᴛ.Context.Deadline();
 
 // Go method set entry for the promoted 'Context.Done()' - provided ONLY by the embedded
 // interface field in *valueCtx's method set; see the pointer-only satisfaction record.
-[GoMethodBody("Done")] internal static /*<-*/channel<EmptyStruct> Doneᴍ(valueCtx recvᴛ) => recvᴛ.Context.Done();
+internal static /*<-*/channel<EmptyStruct> Done⁔(/*this*/ valueCtx recvᴛ) => recvᴛ.Context.Done();
 
 // Go method set entry for the promoted 'Context.Err()' - provided ONLY by the embedded
 // interface field in *valueCtx's method set; see the pointer-only satisfaction record.
-[GoMethodBody("Err")] internal static error Errᴍ(valueCtx recvᴛ) => recvᴛ.Context.Err();
+internal static error Err⁔(/*this*/ valueCtx recvᴛ) => recvᴛ.Context.Err();
 
 } partial class context_package {
 
@@ -897,11 +897,11 @@ internal static @string stringify(any v) {
 
 } partial class context_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref valueCtx c) {
+internal static @string String⁔(/*this*/ ref valueCtx c) {
     return contextName(c.Context) + ".WithValue("u8 + stringify(c.key) + ", "u8 + stringify(c.val) + ")"u8;
 }
 
-[GoMethodBody("Value")] internal static any Valueᴍ(ref valueCtx c, any key) {
+internal static any Value⁔(/*this*/ ref valueCtx c, any key) {
     if (AreEqual(c.key, key)) {
         return c.val;
     }

@@ -66,7 +66,7 @@ public static ж<Context> NewContext() {
 // instanceHash returns a string representation of typ instantiated with targs.
 // The hash should be a perfect hash, though out of caution the type checker
 // does not assume this. The result is guaranteed to not contain blanks.
-[GoMethodBody("instanceHash")] internal static @string instanceHashᴍ(ж<Context> Ꮡctxt, Type orig, slice<Type> targs) {
+internal static @string instanceHash⁔(/*this*/ ж<Context> Ꮡctxt, Type orig, slice<Type> targs) {
     assert(Ꮡctxt != nil);
     assert(orig != nil);
     ref var buf = ref heap(new bytes.Buffer(), out var Ꮡbuf);
@@ -88,7 +88,7 @@ public static ж<Context> NewContext() {
 
 // lookup returns an existing instantiation of orig with targs, if it exists.
 // Otherwise, it returns nil.
-[GoMethodBody("lookup")] internal static Type lookupᴍ(ж<Context> Ꮡctxt, @string h, Type orig, slice<Type> targs) {
+internal static Type lookup⁔(/*this*/ ж<Context> Ꮡctxt, @string h, Type orig, slice<Type> targs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -117,7 +117,7 @@ public static ж<Context> NewContext() {
 // If an identical type is found with the type hash h, the previously seen
 // type is returned. Otherwise, inst is returned, and recorded in the Context
 // for the hash h.
-[GoMethodBody("update")] internal static Type updateᴍ(ж<Context> Ꮡctxt, @string h, Type orig, slice<Type> targs, Type inst) {
+internal static Type update⁔(/*this*/ ж<Context> Ꮡctxt, @string h, Type orig, slice<Type> targs, Type inst) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -151,7 +151,7 @@ public static ж<Context> NewContext() {
 }
 
 // getID returns a unique ID for the type t.
-[GoMethodBody("getID")] internal static nint getIDᴍ(ж<Context> Ꮡctxt, Type t) {
+internal static nint getID⁔(/*this*/ ж<Context> Ꮡctxt, Type t) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

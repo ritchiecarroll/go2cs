@@ -31,7 +31,7 @@ public static ж<Buffer> New() {
 
 } partial class buffer_package {
 
-[GoMethodBody("Free")] internal static void Freeᴍ(ж<Buffer> Ꮡb) {
+internal static void Free⁔(/*this*/ ж<Buffer> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     // To reduce peak allocation, return only smaller buffers to the pool.
@@ -42,34 +42,34 @@ public static ж<Buffer> New() {
     }
 }
 
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref Buffer b) {
+internal static void Reset⁔(/*this*/ ref Buffer b) {
     b.SetLen(0);
 }
 
-[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ref Buffer b, slice<byte> p) {
+internal static (nint, error) Write⁔(/*this*/ ref Buffer b, slice<byte> p) {
     b = appendꓸꓸꓸ(b, p);
     return (len(p), default);
 }
 
-[GoMethodBody("WriteString")] internal static (nint, error) WriteStringᴍ(ref Buffer b, @string s) {
+internal static (nint, error) WriteString⁔(/*this*/ ref Buffer b, @string s) {
     b = append(b, s.ꓸꓸꓸ);
     return (len(s), default);
 }
 
-[GoMethodBody("WriteByte")] internal static error WriteByteᴍ(ref Buffer b, byte c) {
+internal static error WriteByte⁔(/*this*/ ref Buffer b, byte c) {
     b = append(b, c);
     return default;
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref Buffer b) {
+internal static @string String⁔(/*this*/ ref Buffer b) {
     return (@string)(slice<byte>)b;
 }
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(ref Buffer b) {
+internal static nint Len⁔(/*this*/ ref Buffer b) {
     return len(b);
 }
 
-[GoMethodBody("SetLen")] internal static void SetLenᴍ(ref Buffer b, nint n) {
+internal static void SetLen⁔(/*this*/ ref Buffer b, nint n) {
     b = (b).slice(0, n);
 }
 

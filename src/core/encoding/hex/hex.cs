@@ -56,7 +56,7 @@ partial struct InvalidByteError /*num:byte*/;
 
 } partial class hex_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(InvalidByteError e) {
+internal static @string Error⁔(/*this*/ InvalidByteError e) {
     return fmt.Sprintf("encoding/hex: invalid byte: %#U"u8, (rune)e);
 }
 
@@ -166,7 +166,7 @@ public static io.Writer NewEncoder(io.Writer w) {
 
 } partial class hex_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref encoder e, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref encoder e, slice<byte> p) {
     nint n = default;
 
     while (len(p) > 0 && e.err == nil) {
@@ -201,7 +201,7 @@ public static io.Reader NewDecoder(io.Reader r) {
 
 } partial class hex_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref decoder d, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref decoder d, slice<byte> p) {
     error err = default;
 
     // Fill internal buffer with sufficient bytes to decode
@@ -264,15 +264,15 @@ internal static byte toChar(byte b) {
 } partial class hex_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string encodingHexDumperClosedˢᴍdumper => ref encodingHexDumperClosedˢᵇᴍdumper;
-private static readonly @string encodingHexDumperClosedˢᵇᴍdumper = "encoding/hex: dumper closed"u8;
+internal static ref readonly @string encodingHexDumperClosedˢ⁔dumper => ref encodingHexDumperClosedˢᵇ⁔dumper;
+private static readonly @string encodingHexDumperClosedˢᵇ⁔dumper = "encoding/hex: dumper closed"u8;
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref dumper h, slice<byte> data) {
+internal static (nint n, error err) Write⁔(/*this*/ ref dumper h, slice<byte> data) {
     nint n = default;
     error err = default;
 
     if (h.closed) {
-        return (0, errors.New(encodingHexDumperClosedˢᴍdumper));
+        return (0, errors.New(encodingHexDumperClosedˢ⁔dumper));
     }
 
     // Output lines look like:
@@ -329,7 +329,7 @@ private static readonly @string encodingHexDumperClosedˢᵇᴍdumper = "encodin
     return (n, err);
 }
 
-[GoMethodBody("Close")] internal static error /*err*/ Closeᴍ(ref dumper h) {
+internal static error /*err*/ Close⁔(/*this*/ ref dumper h) {
     error err = default;
 
     // See the comments in Write() for the details of this format.

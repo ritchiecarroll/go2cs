@@ -70,7 +70,7 @@ partial struct reflectMethodValue {
 } partial class runtime_package {
 
 // argBytes returns the argument frame size for a call to frame.fn.
-[GoMethodBody("argBytes")] internal static uintptr argBytesᴍ(ref stkframe frame) {
+internal static uintptr argBytes⁔(/*this*/ ref stkframe frame) {
     if (frame.fn.args != abi.ArgsSizeUnknown) {
         return (uintptr)frame.fn.args;
     }
@@ -81,8 +81,8 @@ partial struct reflectMethodValue {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string reflectMismatchˢᴍstkframe => ref reflectMismatchˢᵇᴍstkframe;
-private static readonly @string reflectMismatchˢᵇᴍstkframe = "reflect mismatch"u8;
+internal static ref readonly @string reflectMismatchˢ⁔stkframe => ref reflectMismatchˢᵇ⁔stkframe;
+private static readonly @string reflectMismatchˢᵇ⁔stkframe = "reflect mismatch"u8;
 
 // argMapInternal is used internally by stkframe to fetch special
 // argument maps.
@@ -96,7 +96,7 @@ private static readonly @string reflectMismatchˢᵇᴍstkframe = "reflect misma
 //
 // hasReflectStackObj indicates that this frame also has a reflect
 // function stack object, which the caller must synthesize.
-[GoMethodBody("argMapInternal")] internal static (bitvector argMap, bool hasReflectStackObj) argMapInternalᴍ(ref stkframe frame) {
+internal static (bitvector argMap, bool hasReflectStackObj) argMapInternal⁔(/*this*/ ref stkframe frame) {
     bitvector argMap = default;
     bool hasReflectStackObj = default;
 
@@ -134,7 +134,7 @@ private static readonly @string reflectMismatchˢᵇᴍstkframe = "reflect misma
             // empty.
             if (frame.pc != f.entry()) {
                 print((@string)"runtime: confused by ", funcname(f), (@string)": no frame (sp=", (hex)(uint64)frame.sp, (@string)" fp=", (hex)(uint64)frame.fp, (@string)") at entry+", (hex)(uint64)(frame.pc - f.entry()), (@string)"\n");
-                @throw(reflectMismatchˢᴍstkframe);
+                @throw(reflectMismatchˢ⁔stkframe);
             }
             return (new bitvector(), false); // No locals, so also no stack objects
         }
@@ -146,7 +146,7 @@ private static readonly @string reflectMismatchˢᵇᴍstkframe = "reflect misma
         var retValid = ~@unsafe.Pointer.To<bool>((@unsafe.Pointer)(arg0 + (uintptr)(4 * goarch.PtrSize)));
         if (mv.fn != f.entry()) {
             print((@string)"runtime: confused by ", funcname(f), (@string)"\n");
-            @throw(reflectMismatchˢᴍstkframe);
+            @throw(reflectMismatchˢ⁔stkframe);
         }
         argMap = mv.stack.Value;
         if (!retValid) {
@@ -163,14 +163,14 @@ private static readonly @string reflectMismatchˢᵇᴍstkframe = "reflect misma
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingStackmapˢᴍstkframe => ref missingStackmapˢᵇᴍstkframe;
-private static readonly @string missingStackmapˢᵇᴍstkframe = "missing stackmap"u8;
-internal static ref readonly @string badSymbolTableˢᴍstkframe => ref badSymbolTableˢᵇᴍstkframe;
-private static readonly @string badSymbolTableˢᵇᴍstkframe = "bad symbol table"u8;
+internal static ref readonly @string missingStackmapˢ⁔stkframe => ref missingStackmapˢᵇ⁔stkframe;
+private static readonly @string missingStackmapˢᵇ⁔stkframe = "missing stackmap"u8;
+internal static ref readonly @string badSymbolTableˢ⁔stkframe => ref badSymbolTableˢᵇ⁔stkframe;
+private static readonly @string badSymbolTableˢᵇ⁔stkframe = "bad symbol table"u8;
 
 // getStackMap returns the locals and arguments live pointer maps, and
 // stack object list for frame.
-[GoMethodBody("getStackMap")] internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs) getStackMapᴍ(ref stkframe frame, bool debug) {
+internal static (bitvector locals, bitvector args, slice<stackObjectRecord> objs) getStackMap⁔(/*this*/ ref stkframe frame, bool debug) {
     bitvector locals = default;
     bitvector args = default;
     slice<stackObjectRecord> objs = default;
@@ -215,14 +215,14 @@ private static readonly @string badSymbolTableˢᵇᴍstkframe = "bad symbol tab
         var stkmap = @unsafe.Pointer.To<stackmap>(funcdata(f, abi.FUNCDATA_LocalsPointerMaps));
         if (stkmap == nil || stkmap.n <= 0) {
             print((@string)"runtime: frame ", funcname(f), (@string)" untyped locals ", (hex)(uint64)(frame.varp - size), (@string)"+", (hex)(uint64)size, (@string)"\n");
-            @throw(missingStackmapˢᴍstkframe);
+            @throw(missingStackmapˢ⁔stkframe);
         }
         // If nbit == 0, there's no work to do.
         if (stkmap.nbit > 0) {
             if (stackid < 0 || stackid >= stkmap.n) {
                 // don't know where we are
                 print((@string)"runtime: pcdata is ", stackid, (@string)" and ", stkmap.n, (@string)" locals stack map entries for ", funcname(f), (@string)" (targetpc=", (hex)(uint64)targetpc, (@string)")\n");
-                @throw(badSymbolTableˢᴍstkframe);
+                @throw(badSymbolTableˢ⁔stkframe);
             }
             locals = stackmapdata(stkmap, stackid);
             if (stackDebug >= 3 && debug) {
@@ -242,12 +242,12 @@ private static readonly @string badSymbolTableˢᵇᴍstkframe = "bad symbol tab
         var stackmap = @unsafe.Pointer.To<stackmap>(funcdata(f, abi.FUNCDATA_ArgsPointerMaps));
         if (stackmap == nil || stackmap.n <= 0) {
             print((@string)"runtime: frame ", funcname(f), (@string)" untyped args ", (hex)(uint64)frame.argp, (@string)"+", (hex)(uint64)(args.n * (int32)goarch.PtrSize), (@string)"\n");
-            @throw(missingStackmapˢᴍstkframe);
+            @throw(missingStackmapˢ⁔stkframe);
         }
         if (pcdata < 0 || pcdata >= stackmap.n) {
             // don't know where we are
             print((@string)"runtime: pcdata is ", pcdata, (@string)" and ", stackmap.n, (@string)" args stack map entries for ", funcname(f), (@string)" (targetpc=", (hex)(uint64)targetpc, (@string)")\n");
-            @throw(badSymbolTableˢᴍstkframe);
+            @throw(badSymbolTableˢ⁔stkframe);
         }
         if (stackmap.nbit == 0) {
             args.n = 0;

@@ -33,7 +33,7 @@ public static ж<CounterKDF> NewCounterKDF(ж<aes.Block> b) {
 } partial class gcm_package {
 
 // DeriveKey derives a key from the given label and context.
-[GoMethodBody("DeriveKey")] internal static array<byte> DeriveKeyᴍ(ж<CounterKDF> Ꮡkdf, byte label, /*[12]*/ array<byte> context) {
+internal static array<byte> DeriveKey⁔(/*this*/ ж<CounterKDF> Ꮡkdf, byte label, /*[12]*/ array<byte> context) {
     context = context.Clone();
 
     fips140.RecordApproved();

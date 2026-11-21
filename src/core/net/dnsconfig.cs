@@ -52,7 +52,7 @@ partial struct dnsConfig {
 // indices of servers in c.servers when making queries.
 // When the rotate option is enabled, this offset increases.
 // Otherwise it is always 0.
-[GoMethodBody("serverOffset")] internal static uint32 serverOffsetᴍ(ж<dnsConfig> Ꮡc) {
+internal static uint32 serverOffset⁔(/*this*/ ж<dnsConfig> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.rotate) {

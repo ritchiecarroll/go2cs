@@ -33,40 +33,40 @@ partial struct unit5 {
 } partial class dwarf_package {
 
 // Implement the dataFormat interface.
-[GoMethodBody("version")] internal static nint versionᴍ(ref unit u) {
+internal static nint version⁔(/*this*/ ref unit u) {
     return u.vers;
 }
 
-[GoMethodBody("dwarf64")] internal static (bool, bool) dwarf64ᴍ(ref unit u) {
+internal static (bool, bool) dwarf64⁔(/*this*/ ref unit u) {
     return (u.is64, true);
 }
 
-[GoMethodBody("addrsize")] internal static nint addrsizeᴍ(ref unit u) {
+internal static nint addrsize⁔(/*this*/ ref unit u) {
     return u.asize;
 }
 
-[GoMethodBody("addrBase")] internal static uint64 addrBaseᴍ(ref unit u) {
+internal static uint64 addrBase⁔(/*this*/ ref unit u) {
     if (u.unit5 != nil) {
         return u.unit5.addrBase;
     }
     return 0;
 }
 
-[GoMethodBody("strOffsetsBase")] internal static uint64 strOffsetsBaseᴍ(ref unit u) {
+internal static uint64 strOffsetsBase⁔(/*this*/ ref unit u) {
     if (u.unit5 != nil) {
         return u.unit5.strOffsetsBase;
     }
     return 0;
 }
 
-[GoMethodBody("rngListsBase")] internal static uint64 rngListsBaseᴍ(ref unit u) {
+internal static uint64 rngListsBase⁔(/*this*/ ref unit u) {
     if (u.unit5 != nil) {
         return u.unit5.rngListsBase;
     }
     return 0;
 }
 
-[GoMethodBody("locListsBase")] internal static uint64 locListsBaseᴍ(ref unit u) {
+internal static uint64 locListsBase⁔(/*this*/ ref unit u) {
     if (u.unit5 != nil) {
         return u.unit5.locListsBase;
     }
@@ -76,19 +76,19 @@ partial struct unit5 {
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unitLengthOverflowˢᴍData => ref unitLengthOverflowˢᵇᴍData;
-private static readonly @string unitLengthOverflowˢᵇᴍData = "unit length overflow"u8;
+internal static ref readonly @string unitLengthOverflowˢ⁔Data => ref unitLengthOverflowˢᵇ⁔Data;
+private static readonly @string unitLengthOverflowˢᵇ⁔Data = "unit length overflow"u8;
 
-[GoMethodBody("parseUnits")] internal static (slice<unit>, error) parseUnitsᴍ(ж<Data> Ꮡd) {
+internal static (slice<unit>, error) parseUnits⁔(/*this*/ ж<Data> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Count units.
     nint nunit = 0;
-    var b = makeBuf(Ꮡd, new unknownFormat(), infoˢᴍData, 0, d.info);
+    var b = makeBuf(Ꮡd, new unknownFormat(), infoˢ⁔Data, 0, d.info);
     while (len(b.data) > 0) {
         var (lenΔ1, _) = b.unitLength();
         if (lenΔ1 != ((Offset)(uint32)lenΔ1)) {
-            b.error(unitLengthOverflowˢᴍData);
+            b.error(unitLengthOverflowˢ⁔Data);
             break;
         }
         b.skip((nint)lenΔ1);
@@ -101,7 +101,7 @@ private static readonly @string unitLengthOverflowˢᵇᴍData = "unit length ov
     }
 
     // Again, this time writing them down.
-    b = makeBuf(Ꮡd, new unknownFormat(), infoˢᴍData, 0, d.info);
+    b = makeBuf(Ꮡd, new unknownFormat(), infoˢ⁔Data, 0, d.info);
     var units = new slice<unit>(nunit, () => new(nil));
     foreach (var i in range(len(units))) {
         var u = Ꮡ(units, i);
@@ -168,7 +168,7 @@ private static readonly @string unitLengthOverflowˢᵇᴍData = "unit length ov
 
 // offsetToUnit returns the index of the unit containing offset off.
 // It returns -1 if no unit contains this offset.
-[GoMethodBody("offsetToUnit")] internal static nint offsetToUnitᴍ(ж<Data> Ꮡd, Offset off) {
+internal static nint offsetToUnit⁔(/*this*/ ж<Data> Ꮡd, Offset off) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     // Find the unit after off
@@ -183,13 +183,13 @@ private static readonly @string unitLengthOverflowˢᵇᴍData = "unit length ov
     return -1;
 }
 
-[GoMethodBody("collectDwarf5BaseOffsets")] internal static error collectDwarf5BaseOffsetsᴍ(ж<Data> Ꮡd, ж<unit> Ꮡu) {
+internal static error collectDwarf5BaseOffsets⁔(/*this*/ ж<Data> Ꮡd, ж<unit> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     if (u.unit5 == nil) {
         throw panic("expected unit5 to be set up already");
     }
-    ref var b = ref heap<buf>(makeBuf(Ꮡd, new unitжdataFormat(Ꮡu), infoˢᴍData, u.off, u.data), out var Ꮡb);
+    ref var b = ref heap<buf>(makeBuf(Ꮡd, new unitжdataFormat(Ꮡu), infoˢ⁔Data, u.off, u.data), out var Ꮡb);
     var cu = Ꮡb.entry(nil, Ꮡu);
     if (cu == nil) {
         // Unknown abbreviation table entry or some other fatal

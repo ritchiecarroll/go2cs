@@ -101,7 +101,7 @@ internal static array<uint8> _Tag_index_4 = array<uint8>([0, 11, 24, 35, 45, 55]
 
 } partial class dwarf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Tag i) {
+internal static @string String⁔(/*this*/ Tag i) {
     switch (ᐧ) {
     case {} when 1 <= i && i <= 5: {
         i -= 1;

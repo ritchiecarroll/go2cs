@@ -12,7 +12,7 @@ partial class socktest_package {
 } partial class socktest_package {
 
 // Socket wraps [syscall.Socket].
-[GoMethodBody("Socket")] internal static (nint s, error err) Socketᴍ(ж<Switch> Ꮡsw, nint family, nint sotype, nint proto) {
+internal static (nint s, error err) Socket⁔(/*this*/ ж<Switch> Ꮡsw, nint family, nint sotype, nint proto) {
     nint s = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -54,7 +54,7 @@ partial class socktest_package {
 }
 
 // Close wraps syscall.Close.
-[GoMethodBody("Close")] internal static error /*err*/ Closeᴍ(ж<Switch> Ꮡsw, nint s) {
+internal static error /*err*/ Close⁔(/*this*/ ж<Switch> Ꮡsw, nint s) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -93,7 +93,7 @@ partial class socktest_package {
 }
 
 // Connect wraps syscall.Connect.
-[GoMethodBody("Connect")] internal static error /*err*/ Connectᴍ(ж<Switch> Ꮡsw, nint s, syscall.Sockaddr sa) {
+internal static error /*err*/ Connect⁔(/*this*/ ж<Switch> Ꮡsw, nint s, syscall.Sockaddr sa) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -131,7 +131,7 @@ partial class socktest_package {
 }
 
 // Listen wraps syscall.Listen.
-[GoMethodBody("Listen")] internal static error /*err*/ Listenᴍ(ж<Switch> Ꮡsw, nint s, nint backlog) {
+internal static error /*err*/ Listen⁔(/*this*/ ж<Switch> Ꮡsw, nint s, nint backlog) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -169,7 +169,7 @@ partial class socktest_package {
 }
 
 // Accept wraps syscall.Accept.
-[GoMethodBody("Accept")] internal static (nint ns, syscall.Sockaddr sa, error err) Acceptᴍ(ж<Switch> Ꮡsw, nint s) {
+internal static (nint ns, syscall.Sockaddr sa, error err) Accept⁔(/*this*/ ж<Switch> Ꮡsw, nint s) {
     nint ns = default;
     syscall.Sockaddr sa = default;
     error err = default;
@@ -213,7 +213,7 @@ partial class socktest_package {
 }
 
 // GetsockoptInt wraps syscall.GetsockoptInt.
-[GoMethodBody("GetsockoptInt")] internal static (nint soerr, error err) GetsockoptIntᴍ(ж<Switch> Ꮡsw, nint s, nint level, nint opt) {
+internal static (nint soerr, error err) GetsockoptInt⁔(/*this*/ ж<Switch> Ꮡsw, nint s, nint level, nint opt) {
     nint soerr = default;
     error err = default;
     ref var sw = ref Ꮡsw.DerefOrNull();

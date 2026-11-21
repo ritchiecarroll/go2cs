@@ -61,7 +61,7 @@ internal static UntypedFloat starvationThresholdNs => 1e6;
 // Lock locks m.
 //
 // See package [sync.Mutex] documentation.
-[GoMethodBody("Lock")] internal static void Lockᴍ(ж<Mutex> Ꮡm) {
+internal static void Lock⁔(/*this*/ ж<Mutex> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     // Fast path: grab unlocked mutex.
@@ -78,7 +78,7 @@ internal static UntypedFloat starvationThresholdNs => 1e6;
 // TryLock tries to lock m and reports whether it succeeded.
 //
 // See package [sync.Mutex] documentation.
-[GoMethodBody("TryLock")] internal static bool TryLockᴍ(ж<Mutex> Ꮡm) {
+internal static bool TryLock⁔(/*this*/ ж<Mutex> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var old = m.state;
@@ -100,10 +100,10 @@ internal static UntypedFloat starvationThresholdNs => 1e6;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string syncInconsistentMutexˢᴍMutex => ref syncInconsistentMutexˢᵇᴍMutex;
-private static readonly @string syncInconsistentMutexˢᵇᴍMutex = "sync: inconsistent mutex state"u8;
+internal static ref readonly @string syncInconsistentMutexˢ⁔Mutex => ref syncInconsistentMutexˢᵇ⁔Mutex;
+private static readonly @string syncInconsistentMutexˢᵇ⁔Mutex = "sync: inconsistent mutex state"u8;
 
-[GoMethodBody("lockSlow")] internal static void lockSlowᴍ(ж<Mutex> Ꮡm) {
+internal static void lockSlow⁔(/*this*/ ж<Mutex> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     int64 waitStartTime = default;
@@ -145,7 +145,7 @@ private static readonly @string syncInconsistentMutexˢᵇᴍMutex = "sync: inco
             // The goroutine has been woken from sleep,
             // so we need to reset the flag in either case.
             if ((@new & (int32)mutexWoken) == 0) {
-                @throw(syncInconsistentMutexˢᴍMutex);
+                @throw(syncInconsistentMutexˢ⁔Mutex);
             }
             @new &= ~(int32)(mutexWoken);
         }
@@ -167,7 +167,7 @@ private static readonly @string syncInconsistentMutexˢᵇᴍMutex = "sync: inco
                 // inconsistent state: mutexLocked is not set and we are still
                 // accounted as waiter. Fix that.
                 if ((int32)(old & ((int32)((int32)mutexLocked | (int32)mutexWoken))) != 0 || old >> (int)(mutexWaiterShift) == 0) {
-                    @throw(syncInconsistentMutexˢᴍMutex);
+                    @throw(syncInconsistentMutexˢ⁔Mutex);
                 }
                 var delta = (int32)(mutexLocked - (1 << (int)(mutexWaiterShift)));
                 if (!starving || old >> (int)(mutexWaiterShift) == 1) {
@@ -196,7 +196,7 @@ private static readonly @string syncInconsistentMutexˢᵇᴍMutex = "sync: inco
 // Unlock unlocks m.
 //
 // See package [sync.Mutex] documentation.
-[GoMethodBody("Unlock")] internal static void Unlockᴍ(ж<Mutex> Ꮡm) {
+internal static void Unlock⁔(/*this*/ ж<Mutex> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (race.Enabled) {
@@ -214,14 +214,14 @@ private static readonly @string syncInconsistentMutexˢᵇᴍMutex = "sync: inco
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string syncUnlockOfUnlockedˢᴍMutex => ref syncUnlockOfUnlockedˢᵇᴍMutex;
-private static readonly @string syncUnlockOfUnlockedˢᵇᴍMutex = "sync: unlock of unlocked mutex"u8;
+internal static ref readonly @string syncUnlockOfUnlockedˢ⁔Mutex => ref syncUnlockOfUnlockedˢᵇ⁔Mutex;
+private static readonly @string syncUnlockOfUnlockedˢᵇ⁔Mutex = "sync: unlock of unlocked mutex"u8;
 
-[GoMethodBody("unlockSlow")] internal static void unlockSlowᴍ(ж<Mutex> Ꮡm, int32 @new) {
+internal static void unlockSlow⁔(/*this*/ ж<Mutex> Ꮡm, int32 @new) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (((@new + (int32)mutexLocked) & (int32)mutexLocked) == 0) {
-        fatal(syncUnlockOfUnlockedˢᴍMutex);
+        fatal(syncUnlockOfUnlockedˢ⁔Mutex);
     }
     if ((@new & (int32)mutexStarving) == 0) {
         var old = @new;

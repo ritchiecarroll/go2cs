@@ -25,7 +25,7 @@ partial struct pageCache {
 } partial class runtime_package {
 
 // empty reports whether the page cache has no free pages.
-[GoMethodBody("empty")] internal static bool emptyᴍ(ref pageCache c) {
+internal static bool empty⁔(/*this*/ ref pageCache c) {
     return c.cache == 0;
 }
 
@@ -37,7 +37,7 @@ partial struct pageCache {
 //
 // Returns a base address of zero on failure, in which case the
 // amount of scavenged memory should be ignored.
-[GoMethodBody("alloc")] internal static (uintptr, uintptr) allocᴍ(ref pageCache c, uintptr npages) {
+internal static (uintptr, uintptr) alloc⁔(/*this*/ ref pageCache c, uintptr npages) {
     if (c.cache == 0) {
         return (0, 0);
     }
@@ -57,7 +57,7 @@ partial struct pageCache {
 //
 // Returns a base address and the amount of scavenged memory in the
 // allocated region in bytes.
-[GoMethodBody("allocN")] internal static (uintptr, uintptr) allocNᴍ(ref pageCache c, uintptr npages) {
+internal static (uintptr, uintptr) allocN⁔(/*this*/ ref pageCache c, uintptr npages) {
     nuint i = findBitRange64(c.cache, (nuint)npages);
     if (i >= 64) {
         return (0, 0);
@@ -78,7 +78,7 @@ partial struct pageCache {
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-[GoMethodBody("flush")] internal static void flushᴍ(ref pageCache c, ж<pageAlloc> Ꮡp) {
+internal static void flush⁔(/*this*/ ref pageCache c, ж<pageAlloc> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     assertLockHeld(p.mheapLock);
@@ -123,7 +123,7 @@ partial struct pageCache {
 // Must run on the system stack because p.mheapLock must be held.
 //
 //go:systemstack
-[GoMethodBody("allocToCache")] internal static pageCache allocToCacheᴍ(ref pageAlloc p) {
+internal static pageCache allocToCache⁔(/*this*/ ref pageAlloc p) {
     assertLockHeld(p.mheapLock);
 
     // If the searchAddr refers to a region which has a higher address than
@@ -139,7 +139,7 @@ partial struct pageCache {
         chunk = p.chunkOf(ci);
         var (j, _) = chunk.of(pallocData.ᏑpallocBits).find(1, chunkPageIndex(p.searchAddr.addr()));
         if (j == ~(nuint)0) {
-            @throw(badSummaryDataˢᴍpageAlloc);
+            @throw(badSummaryDataˢ⁔pageAlloc);
         }
         c = new pageCache(
             @base: chunkBase(ci) + alignDown((uintptr)j, 64) * (uintptr)pageSize,

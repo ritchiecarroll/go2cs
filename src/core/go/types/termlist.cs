@@ -28,7 +28,7 @@ private static readonly @string termSepᵇ = " | "u8;
 } partial class types_package {
 
 // String prints the termlist exactly (without normalization).
-[GoMethodBody("String")] internal static @string Stringᴍ(termlist xl) {
+internal static @string String⁔(/*this*/ termlist xl) {
     if (len(xl) == 0) {
         return "∅";
     }
@@ -43,7 +43,7 @@ private static readonly @string termSepᵇ = " | "u8;
 }
 
 // isEmpty reports whether the termlist xl represents the empty set of types.
-[GoMethodBody("isEmpty")] internal static bool isEmptyᴍ(termlist xl) {
+internal static bool isEmpty⁔(/*this*/ termlist xl) {
     // If there's a non-nil term, the entire list is not empty.
     // If the termlist is in normal form, this requires at most
     // one iteration.
@@ -56,7 +56,7 @@ private static readonly @string termSepᵇ = " | "u8;
 }
 
 // isAll reports whether the termlist xl represents the set of all types.
-[GoMethodBody("isAll")] internal static bool isAllᴍ(termlist xl) {
+internal static bool isAll⁔(/*this*/ termlist xl) {
     // If there's a 𝓤 term, the entire list is 𝓤.
     // If the termlist is in normal form, this requires at most
     // one iteration.
@@ -69,7 +69,7 @@ private static readonly @string termSepᵇ = " | "u8;
 }
 
 // norm returns the normal form of xl.
-[GoMethodBody("norm")] internal static termlist normᴍ(termlist xl) {
+internal static termlist norm⁔(/*this*/ termlist xl) {
     var rlᴷ = new stackAppend<ж<term>>(moves: true);
 
     // Quadratic algorithm, but good enough for now.
@@ -108,12 +108,12 @@ private static readonly @string termSepᵇ = " | "u8;
 }
 
 // union returns the union xl ∪ yl.
-[GoMethodBody("union")] internal static termlist unionᴍ(termlist xl, termlist yl) {
+internal static termlist union⁔(/*this*/ termlist xl, termlist yl) {
     return appendꓸꓸꓸ(xl, yl).norm();
 }
 
 // intersect returns the intersection xl ∩ yl.
-[GoMethodBody("intersect")] internal static termlist intersectᴍ(termlist xl, termlist yl) {
+internal static termlist intersect⁔(/*this*/ termlist xl, termlist yl) {
     var rlᴷ = new stackAppend<ж<term>>();
 
     if (xl.isEmpty() || yl.isEmpty()) {
@@ -134,13 +134,13 @@ private static readonly @string termSepᵇ = " | "u8;
 }
 
 // equal reports whether xl and yl represent the same type set.
-[GoMethodBody("equal")] internal static bool equalᴍ(termlist xl, termlist yl) {
+internal static bool equal⁔(/*this*/ termlist xl, termlist yl) {
     // TODO(gri) this should be more efficient
     return xl.subsetOf(yl) && yl.subsetOf(xl);
 }
 
 // includes reports whether t ∈ xl.
-[GoMethodBody("includes")] internal static bool includesᴍ(termlist xl, Type t) {
+internal static bool includes⁔(/*this*/ termlist xl, Type t) {
     foreach (var (_, x) in range<ж<term>>(xl)) {
         if (x.includes(t)) {
             return true;
@@ -150,7 +150,7 @@ private static readonly @string termSepᵇ = " | "u8;
 }
 
 // supersetOf reports whether y ⊆ xl.
-[GoMethodBody("supersetOf")] internal static bool supersetOfᴍ(termlist xl, ж<term> y) {
+internal static bool supersetOf⁔(/*this*/ termlist xl, ж<term> y) {
     foreach (var (_, x) in range<ж<term>>(xl)) {
         if (y.subsetOf(x)) {
             return true;
@@ -160,7 +160,7 @@ private static readonly @string termSepᵇ = " | "u8;
 }
 
 // subsetOf reports whether xl ⊆ yl.
-[GoMethodBody("subsetOf")] internal static bool subsetOfᴍ(termlist xl, termlist yl) {
+internal static bool subsetOf⁔(/*this*/ termlist xl, termlist yl) {
     if (yl.isEmpty()) {
         return xl.isEmpty();
     }

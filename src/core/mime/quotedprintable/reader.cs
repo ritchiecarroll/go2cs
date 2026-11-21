@@ -76,7 +76,7 @@ internal static @string lwspChar = " \t";
 } partial class quotedprintable_package {
 
 // Read reads and decodes quoted-printable data from the underlying reader.
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref Reader r, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref Reader r, slice<byte> p) {
     nint n = default;
     error err = default;
 

@@ -31,14 +31,14 @@ public static ValueKind ValueString => 2;
 //
 // New ValueKinds may be added in the future. Users of this type must be robust
 // to that possibility.
-[GoMethodBody("Kind")] internal static ValueKind Kindᴍ(Value v) {
+internal static ValueKind Kind⁔(/*this*/ Value v) {
     return v.kind;
 }
 
 // Uint64 returns the uint64 value for a ValueUint64.
 //
 // Panics if this Value's Kind is not ValueUint64.
-[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(Value v) {
+internal static uint64 Uint64⁔(/*this*/ Value v) {
     if (v.kind != ValueUint64) {
         throw panic("Uint64 called on Value of a different Kind");
     }
@@ -46,12 +46,12 @@ public static ValueKind ValueString => 2;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string valueBadˢᴍValue => ref valueBadˢᵇᴍValue;
-private static readonly @string valueBadˢᵇᴍValue = "Value{Bad}"u8;
+internal static ref readonly @string valueBadˢ⁔Value => ref valueBadˢᵇ⁔Value;
+private static readonly @string valueBadˢᵇ⁔Value = "Value{Bad}"u8;
 
 // String returns the string value for a ValueString, and otherwise
 // a string representation of the value for other kinds of values.
-[GoMethodBody("String")] internal static @string Stringᴍ(Value v) {
+internal static @string String⁔(/*this*/ Value v) {
     if (v.kind == ValueString) {
         return @unsafe.String(@unsafe.Pointer.To<byte>(v.pointer), (nint)v.scalar);
     }
@@ -59,7 +59,7 @@ private static readonly @string valueBadˢᵇᴍValue = "Value{Bad}"u8;
     case var ᴛ when ᴛ == ValueUint64: {
         return fmt.Sprintf("Value{Uint64(%d)}"u8, v.Uint64());
     }}
-    return valueBadˢᴍValue;
+    return valueBadˢ⁔Value;
 }
 
 } partial class trace_package {

@@ -61,7 +61,7 @@ internal static void initMPTCPavailable() {
 
 } partial class net_package {
 
-[GoMethodBody("dialMPTCP")] internal static (ж<TCPConn>, error) dialMPTCPᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
+internal static (ж<TCPConn>, error) dialMPTCP⁔(/*this*/ ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
     if (supportsMultipathTCP()) {
         var (conn, err) = Ꮡsd.doDialTCPProto(ctx, laddr, raddr, _IPPROTO_MPTCP); if (err == nil) {
             return (conn, default);
@@ -79,7 +79,7 @@ internal static void initMPTCPavailable() {
 
 } partial class net_package {
 
-[GoMethodBody("listenMPTCP")] internal static (ж<TCPListener>, error) listenMPTCPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) {
+internal static (ж<TCPListener>, error) listenMPTCP⁔(/*this*/ ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) {
     if (supportsMultipathTCP()) {
         var (dial, err) = Ꮡsl.listenTCPProto(ctx, laddr, _IPPROTO_MPTCP); if (err == nil) {
             return (dial, default);

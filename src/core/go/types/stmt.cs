@@ -19,11 +19,11 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string missingReturnˢᴍChecker => ref missingReturnˢᵇᴍChecker;
-private static readonly @string missingReturnˢᵇᴍChecker = "missing return"u8;
+internal static ref readonly @string missingReturnˢ⁔Checker => ref missingReturnˢᵇ⁔Checker;
+private static readonly @string missingReturnˢᵇ⁔Checker = "missing return"u8;
 
 // decl may be nil
-[GoMethodBody("funcBody")] internal static void funcBodyᴍ(ж<Checker> Ꮡcheck, ж<declInfo> decl, @string name, ж<Signature> Ꮡsig, ж<ast.BlockStmt> Ꮡbody, constant.Value iota) {
+internal static void funcBody⁔(/*this*/ ж<Checker> Ꮡcheck, ж<declInfo> decl, @string name, ж<Signature> Ꮡsig, ж<ast.BlockStmt> Ꮡbody, constant.Value iota) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -60,7 +60,7 @@ private static readonly @string missingReturnˢᵇᴍChecker = "missing return"u
         }
 
         if (sig.results.Len() > 0 && !check.isTerminating(new ast.BlockStmtжStmt(Ꮡbody), ""u8)) {
-            Ꮡcheck.error((atPos)body.Rbrace, MissingReturn, missingReturnˢᴍChecker);
+            Ꮡcheck.error((atPos)body.Rbrace, MissingReturn, missingReturnˢ⁔Checker);
         }
 
         // spec: "Implementation restriction: A compiler may make it illegal to
@@ -71,7 +71,7 @@ private static readonly @string missingReturnˢᵇᴍChecker = "missing return"u
     finally { ᒐ.Run(); }
 }
 
-[GoMethodBody("usage")] internal static void usageᴍ(ж<Checker> Ꮡcheck, ж<Scope> Ꮡscope) {
+internal static void usage⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Scope> Ꮡscope) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var scope = ref Ꮡscope.DerefOrNull();
     var unusedᴷ = new stackAppend<ж<Var>>();
@@ -119,7 +119,7 @@ internal static stmtContext inTypeSwitch => 16;
 
 } partial class types_package {
 
-[GoMethodBody("simpleStmt")] internal static void simpleStmtᴍ(ж<Checker> Ꮡcheck, ast.Stmt s) {
+internal static void simpleStmt⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Stmt s) {
     if (s != nil) {
         Ꮡcheck.stmt(0, s);
     }
@@ -138,7 +138,7 @@ internal static slice<ast.Stmt> trimTrailingEmptyStmts(slice<ast.Stmt> list) {
 
 } partial class types_package {
 
-[GoMethodBody("stmtList")] internal static void stmtListᴍ(ж<Checker> Ꮡcheck, stmtContext ctxt, slice<ast.Stmt> list) {
+internal static void stmtList⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt, slice<ast.Stmt> list) {
     var ok = (stmtContext)(ctxt & fallthroughOk) != 0;
     stmtContext inner = (stmtContext)(ctxt & ~fallthroughOk);
     list = trimTrailingEmptyStmts(list); // trailing empty statements are "invisible" to fallthrough analysis
@@ -152,10 +152,10 @@ internal static slice<ast.Stmt> trimTrailingEmptyStmts(slice<ast.Stmt> list) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string caseCommunicationClauseˢᴍChecker => ref caseCommunicationClauseˢᵇᴍChecker;
-private static readonly @string caseCommunicationClauseˢᵇᴍChecker = "case/communication clause expected"u8;
+internal static ref readonly @string caseCommunicationClauseˢ⁔Checker => ref caseCommunicationClauseˢᵇ⁔Checker;
+private static readonly @string caseCommunicationClauseˢᵇ⁔Checker = "case/communication clause expected"u8;
 
-[GoMethodBody("multipleDefaults")] internal static void multipleDefaultsᴍ(ж<Checker> Ꮡcheck, slice<ast.Stmt> list) {
+internal static void multipleDefaults⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ast.Stmt> list) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     ast.Stmt first = default;
@@ -176,7 +176,7 @@ private static readonly @string caseCommunicationClauseˢᵇᴍChecker = "case/c
         }
         default: {
             var c = s;
-            Ꮡcheck.error(new ast_Stmtᴠpositioner(s), InvalidSyntaxTree, caseCommunicationClauseˢᴍChecker);
+            Ꮡcheck.error(new ast_Stmtᴠpositioner(s), InvalidSyntaxTree, caseCommunicationClauseˢ⁔Checker);
             break;
         }}
         if (d != nil) {
@@ -189,13 +189,13 @@ private static readonly @string caseCommunicationClauseˢᵇᴍChecker = "case/c
     }
 }
 
-[GoMethodBody("openScope")] internal static void openScopeᴍ(ref Checker check, ast.Node node, @string comment) {
+internal static void openScope⁔(/*this*/ ref Checker check, ast.Node node, @string comment) {
     var scope = NewScope(check.scope, node.Pos(), node.End(), comment);
     check.recordScope(node, scope);
     check.scope = scope;
 }
 
-[GoMethodBody("closeScope")] internal static void closeScopeᴍ(ref Checker check) {
+internal static void closeScope⁔(/*this*/ ref Checker check) {
     check.scope = check.scope.Parent();
 }
 
@@ -212,18 +212,18 @@ internal static token.Token assignOp(token.Token op) {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string requiresFunctionCallNotˢᴍChecker => ref requiresFunctionCallNotˢᵇᴍChecker;
-private static readonly @string requiresFunctionCallNotˢᵇᴍChecker = "requires function call, not conversion"u8;
-internal static ref readonly @string discardsResultOfˢᴍChecker => ref discardsResultOfˢᵇᴍChecker;
-private static readonly @string discardsResultOfˢᵇᴍChecker = "discards result of"u8;
+internal static ref readonly @string requiresFunctionCallNotˢ⁔Checker => ref requiresFunctionCallNotˢᵇ⁔Checker;
+private static readonly @string requiresFunctionCallNotˢᵇ⁔Checker = "requires function call, not conversion"u8;
+internal static ref readonly @string discardsResultOfˢ⁔Checker => ref discardsResultOfˢᵇ⁔Checker;
+private static readonly @string discardsResultOfˢᵇ⁔Checker = "discards result of"u8;
 
-[GoMethodBody("suspendedCall")] internal static void suspendedCallᴍ(ж<Checker> Ꮡcheck, @string keyword, ж<ast.CallExpr> call) {
+internal static void suspendedCall⁔(/*this*/ ж<Checker> Ꮡcheck, @string keyword, ж<ast.CallExpr> call) {
     ref var x = ref heap(new operand(), out var Ꮡx);
     @string msg = default;
     errors.Code code = default;
     switch (Ꮡcheck.rawExpr(nil, Ꮡx, new ast.CallExprжExpr(call), default, false)) {
     case var ᴛ when ᴛ == types.conversion: {
-        msg = requiresFunctionCallNotˢᴍChecker;
+        msg = requiresFunctionCallNotˢ⁔Checker;
         code = InvalidDefer;
         if (keyword == "go"u8) {
             code = InvalidGo;
@@ -231,7 +231,7 @@ private static readonly @string discardsResultOfˢᵇᴍChecker = "discards resu
         break;
     }
     case var ᴛ when ᴛ == expression: {
-        msg = discardsResultOfˢᴍChecker;
+        msg = discardsResultOfˢ⁔Checker;
         code = UnusedResults;
         break;
     }
@@ -300,7 +300,7 @@ partial struct valueType {
 
 } partial class types_package {
 
-[GoMethodBody("caseValues")] internal static void caseValuesᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> values, valueMap seen) {
+internal static void caseValues⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> values, valueMap seen) {
     ref var x = ref Ꮡx.DerefOrNull();
 
 L:
@@ -344,7 +344,7 @@ break_L:;
 }
 
 // isNil reports whether the expression e denotes the predeclared value nil.
-[GoMethodBody("isNil")] internal static bool isNilᴍ(ref Checker check, ast.Expr e) {
+internal static bool isNil⁔(/*this*/ ref Checker check, ast.Expr e) {
     // The only way to express the nil value is by literally writing nil (possibly in parentheses).
     var (name, _) = ast.Unparen(e)._<ж<ast.Ident>>(ᐧ); if (name != nil) {
         var (_, ok) = check.environment.lookup(name.Name)._<ж<Nil>>(ᐧ);
@@ -354,8 +354,8 @@ break_L:;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ2ᴍChecker => ref nilˢ2ᵇᴍChecker;
-private static readonly @string nilˢ2ᵇᴍChecker = "nil"u8;
+internal static ref readonly @string nilˢ2⁔Checker => ref nilˢ2ᵇ⁔Checker;
+private static readonly @string nilˢ2ᵇ⁔Checker = "nil"u8;
 
 // caseTypes typechecks the type expressions of a type case, checks for duplicate types
 // using the seen map, and verifies that each type is valid with respect to the type of
@@ -378,7 +378,7 @@ private static readonly @string nilˢ2ᵇᴍChecker = "nil"u8;
 // If there is exactly one type expression, T is the type of that expression. If there
 // are multiple type expressions, or if predeclared nil is among the types, the result
 // is the type of x. If x is invalid (nil), the result is the invalid type.
-[GoMethodBody("caseTypes")] internal static Type caseTypesᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> types, map<Type, ast.Expr> seen) {
+internal static Type caseTypes⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, slice<ast.Expr> types, map<Type, ast.Expr> seen) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -401,7 +401,7 @@ L:
         foreach (var (t, other) in seen) {
             if (T == nil && t == nil || T != nil && t != nil && Identical(T, t)) {
                 // talk about "case" rather than "type" because of nil case
-                @string Ts = nilˢ2ᴍChecker;
+                @string Ts = nilˢ2⁔Checker;
                 if (T != nil) {
                     Ts = TypeString(T, new Func<ж<Package>, @string>(Ꮡcheck.qualifier));
                 }
@@ -434,12 +434,12 @@ break_L:;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢᴍChecker => ref nilˢᵇᴍChecker;
-private static readonly @string nilˢᵇᴍChecker = "<nil>"u8;
+internal static ref readonly @string nilˢ⁔Checker => ref nilˢᵇ⁔Checker;
+private static readonly @string nilˢᵇ⁔Checker = "<nil>"u8;
 
 // TODO(gri) Once we are certain that typeHash is correct in all situations, use this version of caseTypes instead.
 // (Currently it may be possible that different types have identical names and import paths due to ImporterFrom.)
-[GoMethodBody("caseTypes_currently_unused")] internal static Type caseTypes_currently_unusedᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Interface> xtyp, slice<ast.Expr> types, map<@string, ast.Expr> seen) {
+internal static Type caseTypes_currently_unused⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<Interface> xtyp, slice<ast.Expr> types, map<@string, ast.Expr> seen) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -452,7 +452,7 @@ L:
         if (check.isNil(e)) {
             Ꮡcheck.expr(nil, Ꮡdummy, e); // run e through expr so we get the usual Info recordings
             T = default;
-            hash = nilˢᴍChecker; // avoid collision with a type named nil
+            hash = nilˢ⁔Checker; // avoid collision with a type named nil
         } else {
             T = Ꮡcheck.varType(e);
             if (!isValid(T)) {
@@ -465,7 +465,7 @@ L:
         {
             var other = seen[hash]; if (other != nil) {
                 // talk about "case" rather than "type" because of nil case
-                @string Ts = nilˢ2ᴍChecker;
+                @string Ts = nilˢ2⁔Checker;
                 if (T != nil) {
                     Ts = TypeString(T, new Func<ж<Package>, @string>(Ꮡcheck.qualifier));
                 }
@@ -498,59 +498,59 @@ break_L:;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string isNotUsedˢᴍChecker => ref isNotUsedˢᵇᴍChecker;
-private static readonly @string isNotUsedˢᵇᴍChecker = "is not used"u8;
-internal static ref readonly @string mustBeCalledˢᴍChecker => ref mustBeCalledˢᵇᴍChecker;
-private static readonly @string mustBeCalledˢᵇᴍChecker = "must be called"u8;
-internal static ref readonly @string isNotAnExpressionˢᴍChecker => ref isNotAnExpressionˢᵇᴍChecker;
-private static readonly @string isNotAnExpressionˢᵇᴍChecker = "is not an expression"u8;
-internal static ref readonly @string sendˢᴍChecker => ref sendˢᵇᴍChecker;
-private static readonly @string sendˢᵇᴍChecker = "send"u8;
-internal static ref readonly @string missingLhsInAssignmentˢᴍChecker => ref missingLhsInAssignmentˢᵇᴍChecker;
-private static readonly @string missingLhsInAssignmentˢᵇᴍChecker = "missing lhs in assignment"u8;
-internal static ref readonly @string deferˢᴍChecker => ref deferˢᵇᴍChecker;
-private static readonly @string deferˢᵇᴍChecker = "defer"u8;
-internal static ref readonly @string breakNotInForSwitchOrˢᴍChecker => ref breakNotInForSwitchOrˢᵇᴍChecker;
-private static readonly @string breakNotInForSwitchOrˢᵇᴍChecker = "break not in for, switch, or select statement"u8;
-internal static ref readonly @string continueNotInForˢᴍChecker => ref continueNotInForˢᵇᴍChecker;
-private static readonly @string continueNotInForˢᵇᴍChecker = "continue not in for statement"u8;
-internal static ref readonly @string cannotFallthroughFinalˢᴍChecker => ref cannotFallthroughFinalˢᵇᴍChecker;
-private static readonly @string cannotFallthroughFinalˢᵇᴍChecker = "cannot fallthrough final case in switch"u8;
-internal static ref readonly @string cannotFallthroughInTypeˢᴍChecker => ref cannotFallthroughInTypeˢᵇᴍChecker;
-private static readonly @string cannotFallthroughInTypeˢᵇᴍChecker = "cannot fallthrough in type switch"u8;
-internal static ref readonly @string fallthroughStatementOutˢᴍChecker => ref fallthroughStatementOutˢᵇᴍChecker;
-private static readonly @string fallthroughStatementOutˢᵇᴍChecker = "fallthrough statement out of place"u8;
-internal static ref readonly @string blockˢᴍChecker => ref blockˢᵇᴍChecker;
-private static readonly @string blockˢᵇᴍChecker = "block"u8;
-internal static ref readonly @string nonBooleanConditionInIfˢᴍChecker => ref nonBooleanConditionInIfˢᵇᴍChecker;
-private static readonly @string nonBooleanConditionInIfˢᵇᴍChecker = "non-boolean condition in if statement"u8;
-internal static ref readonly @string invalidElseBranchInIfˢᴍChecker => ref invalidElseBranchInIfˢᵇᴍChecker;
-private static readonly @string invalidElseBranchInIfˢᵇᴍChecker = "invalid else branch in if statement"u8;
-internal static ref readonly @string switchˢᴍChecker => ref switchˢᵇᴍChecker;
-private static readonly @string switchˢᵇᴍChecker = "switch"u8;
-internal static ref readonly @string switchExpressionˢᴍChecker => ref switchExpressionˢᵇᴍChecker;
-private static readonly @string switchExpressionˢᵇᴍChecker = "switch expression"u8;
-internal static ref readonly @string incorrectExpressionˢᴍChecker => ref incorrectExpressionˢᵇᴍChecker;
-private static readonly @string incorrectExpressionˢᵇᴍChecker = "incorrect expression switch case"u8;
-internal static ref readonly @string caseˢᴍChecker => ref caseˢᵇᴍChecker;
-private static readonly @string caseˢᵇᴍChecker = "case"u8;
-internal static ref readonly @string typeSwitchˢᴍChecker => ref typeSwitchˢᵇᴍChecker;
-private static readonly @string typeSwitchˢᵇᴍChecker = "type switch"u8;
-internal static ref readonly @string incorrectFormOfTypeˢᴍChecker => ref incorrectFormOfTypeˢᵇᴍChecker;
-private static readonly @string incorrectFormOfTypeˢᵇᴍChecker = "incorrect form of type switch guard"u8;
-internal static ref readonly @string incorrectTypeSwitchCaseˢᴍChecker => ref incorrectTypeSwitchCaseˢᵇᴍChecker;
-private static readonly @string incorrectTypeSwitchCaseˢᵇᴍChecker = "incorrect type switch case"u8;
-internal static ref readonly @string selectCaseMustBeSendOrˢᴍChecker => ref selectCaseMustBeSendOrˢᵇᴍChecker;
-private static readonly @string selectCaseMustBeSendOrˢᵇᴍChecker = "select case must be send or receive (possibly with assignment)"u8;
-internal static ref readonly @string forˢᴍChecker => ref forˢᵇᴍChecker;
-private static readonly @string forˢᵇᴍChecker = "for"u8;
-internal static ref readonly @string nonBooleanConditionInForˢᴍChecker => ref nonBooleanConditionInForˢᵇᴍChecker;
-private static readonly @string nonBooleanConditionInForˢᵇᴍChecker = "non-boolean condition in for statement"u8;
-internal static ref readonly @string invalidStatementˢᴍChecker => ref invalidStatementˢᵇᴍChecker;
-private static readonly @string invalidStatementˢᵇᴍChecker = "invalid statement"u8;
+internal static ref readonly @string isNotUsedˢ⁔Checker => ref isNotUsedˢᵇ⁔Checker;
+private static readonly @string isNotUsedˢᵇ⁔Checker = "is not used"u8;
+internal static ref readonly @string mustBeCalledˢ⁔Checker => ref mustBeCalledˢᵇ⁔Checker;
+private static readonly @string mustBeCalledˢᵇ⁔Checker = "must be called"u8;
+internal static ref readonly @string isNotAnExpressionˢ⁔Checker => ref isNotAnExpressionˢᵇ⁔Checker;
+private static readonly @string isNotAnExpressionˢᵇ⁔Checker = "is not an expression"u8;
+internal static ref readonly @string sendˢ⁔Checker => ref sendˢᵇ⁔Checker;
+private static readonly @string sendˢᵇ⁔Checker = "send"u8;
+internal static ref readonly @string missingLhsInAssignmentˢ⁔Checker => ref missingLhsInAssignmentˢᵇ⁔Checker;
+private static readonly @string missingLhsInAssignmentˢᵇ⁔Checker = "missing lhs in assignment"u8;
+internal static ref readonly @string deferˢ⁔Checker => ref deferˢᵇ⁔Checker;
+private static readonly @string deferˢᵇ⁔Checker = "defer"u8;
+internal static ref readonly @string breakNotInForSwitchOrˢ⁔Checker => ref breakNotInForSwitchOrˢᵇ⁔Checker;
+private static readonly @string breakNotInForSwitchOrˢᵇ⁔Checker = "break not in for, switch, or select statement"u8;
+internal static ref readonly @string continueNotInForˢ⁔Checker => ref continueNotInForˢᵇ⁔Checker;
+private static readonly @string continueNotInForˢᵇ⁔Checker = "continue not in for statement"u8;
+internal static ref readonly @string cannotFallthroughFinalˢ⁔Checker => ref cannotFallthroughFinalˢᵇ⁔Checker;
+private static readonly @string cannotFallthroughFinalˢᵇ⁔Checker = "cannot fallthrough final case in switch"u8;
+internal static ref readonly @string cannotFallthroughInTypeˢ⁔Checker => ref cannotFallthroughInTypeˢᵇ⁔Checker;
+private static readonly @string cannotFallthroughInTypeˢᵇ⁔Checker = "cannot fallthrough in type switch"u8;
+internal static ref readonly @string fallthroughStatementOutˢ⁔Checker => ref fallthroughStatementOutˢᵇ⁔Checker;
+private static readonly @string fallthroughStatementOutˢᵇ⁔Checker = "fallthrough statement out of place"u8;
+internal static ref readonly @string blockˢ⁔Checker => ref blockˢᵇ⁔Checker;
+private static readonly @string blockˢᵇ⁔Checker = "block"u8;
+internal static ref readonly @string nonBooleanConditionInIfˢ⁔Checker => ref nonBooleanConditionInIfˢᵇ⁔Checker;
+private static readonly @string nonBooleanConditionInIfˢᵇ⁔Checker = "non-boolean condition in if statement"u8;
+internal static ref readonly @string invalidElseBranchInIfˢ⁔Checker => ref invalidElseBranchInIfˢᵇ⁔Checker;
+private static readonly @string invalidElseBranchInIfˢᵇ⁔Checker = "invalid else branch in if statement"u8;
+internal static ref readonly @string switchˢ⁔Checker => ref switchˢᵇ⁔Checker;
+private static readonly @string switchˢᵇ⁔Checker = "switch"u8;
+internal static ref readonly @string switchExpressionˢ⁔Checker => ref switchExpressionˢᵇ⁔Checker;
+private static readonly @string switchExpressionˢᵇ⁔Checker = "switch expression"u8;
+internal static ref readonly @string incorrectExpressionˢ⁔Checker => ref incorrectExpressionˢᵇ⁔Checker;
+private static readonly @string incorrectExpressionˢᵇ⁔Checker = "incorrect expression switch case"u8;
+internal static ref readonly @string caseˢ⁔Checker => ref caseˢᵇ⁔Checker;
+private static readonly @string caseˢᵇ⁔Checker = "case"u8;
+internal static ref readonly @string typeSwitchˢ⁔Checker => ref typeSwitchˢᵇ⁔Checker;
+private static readonly @string typeSwitchˢᵇ⁔Checker = "type switch"u8;
+internal static ref readonly @string incorrectFormOfTypeˢ⁔Checker => ref incorrectFormOfTypeˢᵇ⁔Checker;
+private static readonly @string incorrectFormOfTypeˢᵇ⁔Checker = "incorrect form of type switch guard"u8;
+internal static ref readonly @string incorrectTypeSwitchCaseˢ⁔Checker => ref incorrectTypeSwitchCaseˢᵇ⁔Checker;
+private static readonly @string incorrectTypeSwitchCaseˢᵇ⁔Checker = "incorrect type switch case"u8;
+internal static ref readonly @string selectCaseMustBeSendOrˢ⁔Checker => ref selectCaseMustBeSendOrˢᵇ⁔Checker;
+private static readonly @string selectCaseMustBeSendOrˢᵇ⁔Checker = "select case must be send or receive (possibly with assignment)"u8;
+internal static ref readonly @string forˢ⁔Checker => ref forˢᵇ⁔Checker;
+private static readonly @string forˢᵇ⁔Checker = "for"u8;
+internal static ref readonly @string nonBooleanConditionInForˢ⁔Checker => ref nonBooleanConditionInForˢᵇ⁔Checker;
+private static readonly @string nonBooleanConditionInForˢᵇ⁔Checker = "non-boolean condition in for statement"u8;
+internal static ref readonly @string invalidStatementˢ⁔Checker => ref invalidStatementˢᵇ⁔Checker;
+private static readonly @string invalidStatementˢᵇ⁔Checker = "invalid statement"u8;
 
 // stmt typechecks statement s.
-[GoMethodBody("stmt")] internal static void stmtᴍ(ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt s) {
+internal static void stmt⁔(/*this*/ ж<Checker> Ꮡcheck, stmtContext ctxt, ast.Stmt s) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -602,17 +602,17 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
                 if (kind == statement) {
                     return;
                 }
-                msg = isNotUsedˢᴍChecker;
+                msg = isNotUsedˢ⁔Checker;
                 code = UnusedExpr;
                 break;
             }
             case var ᴛ when ᴛ == types.Δbuiltin: {
-                msg = mustBeCalledˢᴍChecker;
+                msg = mustBeCalledˢ⁔Checker;
                 code = UncalledBuiltin;
                 break;
             }
             case var ᴛ when ᴛ == typexpr: {
-                msg = isNotAnExpressionˢᴍChecker;
+                msg = isNotAnExpressionˢ⁔Checker;
                 code = NotAnExpr;
                 break;
             }}
@@ -628,7 +628,7 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
                 return;
             }
             var elem = Ꮡcheck.chanElem(inNode(new ast.SendStmtжNode(sΔ1), sΔ1.Arrow), Ꮡch, false); if (elem != nil) {
-                Ꮡcheck.assignment(Ꮡval, elem, sendˢᴍChecker);
+                Ꮡcheck.assignment(Ꮡval, elem, sendˢ⁔Checker);
             }
             break;
         }
@@ -663,14 +663,14 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
             if (x.mode == invalid) {
                 return;
             }
-            Ꮡcheck.assignVar(sΔ1.X, default, Ꮡx, assignmentˢᴍChecker);
+            Ꮡcheck.assignVar(sΔ1.X, default, Ꮡx, assignmentˢ⁔Checker);
             break;
         }
         case ж<ast.AssignStmt> sΔ1: {
             switch (sΔ1.Tok) {
             case var ᴛ when ᴛ == token.ASSIGN || ᴛ == token.DEFINE: {
                 if (len(sΔ1.Lhs) == 0) {
-                    Ꮡcheck.error(new ast_AssignStmtжpositioner(sΔ1), InvalidSyntaxTree, missingLhsInAssignmentˢᴍChecker);
+                    Ꮡcheck.error(new ast_AssignStmtжpositioner(sΔ1), InvalidSyntaxTree, missingLhsInAssignmentˢ⁔Checker);
                     return;
                 }
                 if (sΔ1.Tok == token.DEFINE) {
@@ -697,7 +697,7 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
                 if (x.mode == invalid) {
                     return;
                 }
-                Ꮡcheck.assignVar(sΔ1.Lhs[0], default, Ꮡx, assignmentˢᴍChecker);
+                Ꮡcheck.assignVar(sΔ1.Lhs[0], default, Ꮡx, assignmentˢ⁔Checker);
                 break;
             }}
             break;
@@ -707,7 +707,7 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
             break;
         }
         case ж<ast.DeferStmt> sΔ1: {
-            Ꮡcheck.suspendedCall(deferˢᴍChecker, sΔ1.Call);
+            Ꮡcheck.suspendedCall(deferˢ⁔Checker, sΔ1.Call);
             break;
         }
         case ж<ast.ReturnStmt> sΔ1: {
@@ -744,13 +744,13 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
             switch (sΔ1.Tok) {
             case var ᴛ when ᴛ == token.BREAK: {
                 if ((stmtContext)(ctxt & breakOk) == 0) {
-                    Ꮡcheck.error(new ast_BranchStmtжpositioner(sΔ1), MisplacedBreak, breakNotInForSwitchOrˢᴍChecker);
+                    Ꮡcheck.error(new ast_BranchStmtжpositioner(sΔ1), MisplacedBreak, breakNotInForSwitchOrˢ⁔Checker);
                 }
                 break;
             }
             case var ᴛ when ᴛ == token.CONTINUE: {
                 if ((stmtContext)(ctxt & continueOk) == 0) {
-                    Ꮡcheck.error(new ast_BranchStmtжpositioner(sΔ1), MisplacedContinue, continueNotInForˢᴍChecker);
+                    Ꮡcheck.error(new ast_BranchStmtжpositioner(sΔ1), MisplacedContinue, continueNotInForˢ⁔Checker);
                 }
                 break;
             }
@@ -759,15 +759,15 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
                     @string msg = default;
                     switch (ᐧ) {
                     case {} when (stmtContext)(ctxt & finalSwitchCase) != 0: {
-                        msg = cannotFallthroughFinalˢᴍChecker;
+                        msg = cannotFallthroughFinalˢ⁔Checker;
                         break;
                     }
                     case {} when (stmtContext)(ctxt & inTypeSwitch) != 0: {
-                        msg = cannotFallthroughInTypeˢᴍChecker;
+                        msg = cannotFallthroughInTypeˢ⁔Checker;
                         break;
                     }
                     default: {
-                        msg = fallthroughStatementOutˢᴍChecker;
+                        msg = fallthroughStatementOutˢ⁔Checker;
                         break;
                     }}
                     Ꮡcheck.error(new ast_BranchStmtжpositioner(sΔ1), MisplacedFallthrough, msg);
@@ -781,7 +781,7 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
             break;
         }
         case ж<ast.BlockStmt> sΔ1: {
-            check.openScope(new ast.BlockStmtжNode(sΔ1), blockˢᴍChecker);
+            check.openScope(new ast.BlockStmtжNode(sΔ1), blockˢ⁔Checker);
             defer(Ꮡcheck.closeScope, ref ᒐ);
 
             Ꮡcheck.stmtList(inner, sΔ1.List);
@@ -795,7 +795,7 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
             ref var x = ref heap(new operand(), out var Ꮡx);
             Ꮡcheck.expr(nil, Ꮡx, sΔ1.Cond);
             if (x.mode != invalid && !allBoolean(x.typ)) {
-                Ꮡcheck.error(new ast_Exprᴠpositioner(sΔ1.Cond), InvalidCond, nonBooleanConditionInIfˢᴍChecker);
+                Ꮡcheck.error(new ast_Exprᴠpositioner(sΔ1.Cond), InvalidCond, nonBooleanConditionInIfˢ⁔Checker);
             }
             Ꮡcheck.stmt(inner, new ast.BlockStmtжStmt(sΔ1.Body));
             // The parser produces a correct AST but if it was modified
@@ -812,14 +812,14 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
                 break;
             }
             default: {
-                Ꮡcheck.error(new ast_Stmtᴠpositioner(sΔ1.Else), InvalidSyntaxTree, invalidElseBranchInIfˢᴍChecker);
+                Ꮡcheck.error(new ast_Stmtᴠpositioner(sΔ1.Else), InvalidSyntaxTree, invalidElseBranchInIfˢ⁔Checker);
                 break;
             }}
             break;
         }
         case ж<ast.SwitchStmt> sΔ1: {
             inner |= (stmtContext)(breakOk);
-            check.openScope(new ast.SwitchStmtжNode(sΔ1), switchˢᴍChecker);
+            check.openScope(new ast.SwitchStmtжNode(sΔ1), switchˢ⁔Checker);
             defer(Ꮡcheck.closeScope, ref ᒐ);
 
             Ꮡcheck.simpleStmt(sΔ1.Init);
@@ -828,7 +828,7 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
                 Ꮡcheck.expr(nil, Ꮡx, sΔ1.Tag);
                 // By checking assignment of x to an invisible temporary
                 // (as a compiler would), we get all the relevant checks.
-                Ꮡcheck.assignment(Ꮡx, default, switchExpressionˢᴍChecker);
+                Ꮡcheck.assignment(Ꮡx, default, switchExpressionˢ⁔Checker);
                 if (x.mode != invalid && !Comparable(x.typ) && !hasNil(x.typ)) {
                     Ꮡcheck.errorf(new operandжpositioner(Ꮡx), InvalidExprSwitch, "cannot switch on %s (%s is not comparable)", Ꮡx, x.typ);
                     x.mode = invalid;
@@ -848,11 +848,11 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
             foreach (var (i, c) in range(sΔ1.Body.List)) {
                 var (clause, _) = c._<ж<ast.CaseClause>>(ᐧ);
                 if (clause == nil) {
-                    Ꮡcheck.error(new ast_Stmtᴠpositioner(c), InvalidSyntaxTree, incorrectExpressionˢᴍChecker);
+                    Ꮡcheck.error(new ast_Stmtᴠpositioner(c), InvalidSyntaxTree, incorrectExpressionˢ⁔Checker);
                     continue;
                 }
                 Ꮡcheck.caseValues(Ꮡx, clause.List, seen);
-                check.openScope(new ast.CaseClauseжNode(clause), caseˢᴍChecker);
+                check.openScope(new ast.CaseClauseжNode(clause), caseˢ⁔Checker);
                 stmtContext innerΔ1 = inner;
                 if (i + 1 < len(sΔ1.Body.List)) {
                     innerΔ1 |= (stmtContext)(fallthroughOk);
@@ -866,7 +866,7 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
         }
         case ж<ast.TypeSwitchStmt> sΔ1: {
             inner |= (stmtContext)((stmtContext)(breakOk | inTypeSwitch));
-            check.openScope(new ast.TypeSwitchStmtжNode(sΔ1), typeSwitchˢᴍChecker);
+            check.openScope(new ast.TypeSwitchStmtжNode(sΔ1), typeSwitchˢ⁔Checker);
             defer(Ꮡcheck.closeScope, ref ᒐ);
 
             Ꮡcheck.simpleStmt(sΔ1.Init);
@@ -888,13 +888,13 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
             }
             case ж<ast.AssignStmt> guard: {
                 if (len(guard.Lhs) != 1 || guard.Tok != token.DEFINE || len(guard.Rhs) != 1) {
-                    Ꮡcheck.error(new ast_TypeSwitchStmtжpositioner(sΔ1), InvalidSyntaxTree, incorrectFormOfTypeˢᴍChecker);
+                    Ꮡcheck.error(new ast_TypeSwitchStmtжpositioner(sΔ1), InvalidSyntaxTree, incorrectFormOfTypeˢ⁔Checker);
                     return;
                 }
 
                 (lhs, _) = guard.Lhs[0]._<ж<ast.Ident>>(ᐧ);
                 if (lhs == nil) {
-                    Ꮡcheck.error(new ast_TypeSwitchStmtжpositioner(sΔ1), InvalidSyntaxTree, incorrectFormOfTypeˢᴍChecker);
+                    Ꮡcheck.error(new ast_TypeSwitchStmtжpositioner(sΔ1), InvalidSyntaxTree, incorrectFormOfTypeˢ⁔Checker);
                     return;
                 }
 
@@ -911,14 +911,14 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
             }
             default: {
                 var guard = sΔ1.Assign;
-                Ꮡcheck.error(new ast_TypeSwitchStmtжpositioner(sΔ1), InvalidSyntaxTree, incorrectFormOfTypeˢᴍChecker);
+                Ꮡcheck.error(new ast_TypeSwitchStmtжpositioner(sΔ1), InvalidSyntaxTree, incorrectFormOfTypeˢ⁔Checker);
                 return;
             }}
 
             // rhs must be of the form: expr.(type) and expr must be an ordinary interface
             var (expr, _) = rhs._<ж<ast.TypeAssertExpr>>(ᐧ);
             if (expr == nil || expr.Type != nil) {
-                Ꮡcheck.error(new ast_TypeSwitchStmtжpositioner(sΔ1), InvalidSyntaxTree, incorrectFormOfTypeˢᴍChecker);
+                Ꮡcheck.error(new ast_TypeSwitchStmtжpositioner(sΔ1), InvalidSyntaxTree, incorrectFormOfTypeˢ⁔Checker);
                 return;
             }
 
@@ -944,12 +944,12 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
             foreach (var (_, sΔ2) in range(sΔ1.Body.List)) {
                 var (clause, _) = sΔ2._<ж<ast.CaseClause>>(ᐧ);
                 if (clause == nil) {
-                    Ꮡcheck.error(new ast_Stmtᴠpositioner(sΔ2), InvalidSyntaxTree, incorrectTypeSwitchCaseˢᴍChecker);
+                    Ꮡcheck.error(new ast_Stmtᴠpositioner(sΔ2), InvalidSyntaxTree, incorrectTypeSwitchCaseˢ⁔Checker);
                     continue;
                 }
                 // Check each type in this type switch case.
                 var T = Ꮡcheck.caseTypes(sx, clause.List, seen);
-                check.openScope(new ast.CaseClauseжNode(clause), caseˢᴍChecker);
+                check.openScope(new ast.CaseClauseжNode(clause), caseˢ⁔Checker);
                 // If lhs exists, declare a corresponding variable in the case-local scope.
                 if (lhs != nil) {
                     var obj = newVar(LocalVar, lhs.Pos(), check.pkg, lhs.Name, T);
@@ -1023,11 +1023,11 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
                 }
 
                 if (!valid) {
-                    Ꮡcheck.error(new ast_Stmtᴠpositioner(clause.Comm), InvalidSelectCase, selectCaseMustBeSendOrˢᴍChecker);
+                    Ꮡcheck.error(new ast_Stmtᴠpositioner(clause.Comm), InvalidSelectCase, selectCaseMustBeSendOrˢ⁔Checker);
                     continue;
                 }
 
-                check.openScope(sΔ3, caseˢᴍChecker);
+                check.openScope(sΔ3, caseˢ⁔Checker);
                 if (clause.Comm != nil) {
                     Ꮡcheck.stmt(inner, clause.Comm);
                 }
@@ -1038,7 +1038,7 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
         }
         case ж<ast.ForStmt> sΔ1: {
             inner |= (stmtContext)((stmtContext)(breakOk | continueOk));
-            check.openScope(new ast.ForStmtжNode(sΔ1), forˢᴍChecker);
+            check.openScope(new ast.ForStmtжNode(sΔ1), forˢ⁔Checker);
             defer(Ꮡcheck.closeScope, ref ᒐ);
 
             Ꮡcheck.simpleStmt(sΔ1.Init);
@@ -1046,7 +1046,7 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
                 ref var x = ref heap(new operand(), out var Ꮡx);
                 Ꮡcheck.expr(nil, Ꮡx, sΔ1.Cond);
                 if (x.mode != invalid && !allBoolean(x.typ)) {
-                    Ꮡcheck.error(new ast_Exprᴠpositioner(sΔ1.Cond), InvalidCond, nonBooleanConditionInForˢᴍChecker);
+                    Ꮡcheck.error(new ast_Exprᴠpositioner(sΔ1.Cond), InvalidCond, nonBooleanConditionInForˢ⁔Checker);
                 }
             }
             Ꮡcheck.simpleStmt(sΔ1.Post);
@@ -1069,7 +1069,7 @@ private static readonly @string invalidStatementˢᵇᴍChecker = "invalid state
         }
         default: {
             var sΔ1 = s;
-            Ꮡcheck.error(new ast_Stmtᴠpositioner(sΔ1), InvalidSyntaxTree, invalidStatementˢᴍChecker);
+            Ꮡcheck.error(new ast_Stmtᴠpositioner(sΔ1), InvalidSyntaxTree, invalidStatementˢ⁔Checker);
             break;
         }}
     }

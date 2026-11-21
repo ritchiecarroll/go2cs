@@ -116,25 +116,25 @@ internal static profIndex profWriteExtra => /* 1 << 33 */ unchecked((profIndex)8
 
 } partial class runtime_package {
 
-[GoMethodBody("load")] internal static profIndex loadᴍ(ж<profAtomic> Ꮡx) {
+internal static profIndex load⁔(/*this*/ ж<profAtomic> Ꮡx) {
     return (profIndex)atomic.Load64(Ꮡx.Reinterpret<profAtomic, uint64>());
 }
 
-[GoMethodBody("store")] internal static void storeᴍ(ж<profAtomic> Ꮡx, profIndex @new) {
+internal static void store⁔(/*this*/ ж<profAtomic> Ꮡx, profIndex @new) {
     atomic.Store64(Ꮡx.Reinterpret<profAtomic, uint64>(), (uint64)@new);
 }
 
-[GoMethodBody("cas")] internal static bool casᴍ(ж<profAtomic> Ꮡx, profIndex old, profIndex @new) {
+internal static bool cas⁔(/*this*/ ж<profAtomic> Ꮡx, profIndex old, profIndex @new) {
     return atomic.Cas64(Ꮡx.Reinterpret<profAtomic, uint64>(), (uint64)old, (uint64)@new);
 }
 
 } partial class runtime_package {
 
-[GoMethodBody("dataCount")] internal static uint32 dataCountᴍ(profIndex x) {
+internal static uint32 dataCount⁔(/*this*/ profIndex x) {
     return (uint32)x;
 }
 
-[GoMethodBody("tagCount")] internal static uint32 tagCountᴍ(profIndex x) {
+internal static uint32 tagCount⁔(/*this*/ profIndex x) {
     return (uint32)(x >> 34);
 }
 
@@ -153,21 +153,21 @@ internal static nint countSub(uint32 x, uint32 y) {
 } partial class runtime_package {
 
 // addCountsAndClearFlags returns the packed form of "x + (data, tag) - all flags".
-[GoMethodBody("addCountsAndClearFlags")] internal static profIndex addCountsAndClearFlagsᴍ(profIndex x, nint data, nint tag) {
+internal static profIndex addCountsAndClearFlags⁔(/*this*/ profIndex x, nint data, nint tag) {
     return (profIndex)((((uint64)x >> 34) + (uint64)(((uint32)tag << 2) >> 2)) << 34 | (uint64)((uint32)x + (uint32)data));
 }
 
 } partial class runtime_package {
 
 // hasOverflow reports whether b has any overflow records pending.
-[GoMethodBody("hasOverflow")] internal static bool hasOverflowᴍ(ж<profBuf> Ꮡb) {
+internal static bool hasOverflow⁔(/*this*/ ж<profBuf> Ꮡb) {
     return (uint32)Ꮡb.Ꮡoverflow.Load() > 0;
 }
 
 // takeOverflow consumes the pending overflow records, returning the overflow count
 // and the time of the first overflow.
 // When called by the reader, it is racing against incrementOverflow.
-[GoMethodBody("takeOverflow")] internal static (uint32 count, uint64 time) takeOverflowᴍ(ж<profBuf> Ꮡb) {
+internal static (uint32 count, uint64 time) takeOverflow⁔(/*this*/ ж<profBuf> Ꮡb) {
     uint32 count = default;
     uint64 time = default;
 
@@ -191,7 +191,7 @@ internal static nint countSub(uint32 x, uint32 y) {
 
 // incrementOverflow records a single overflow at time now.
 // It is racing against a possible takeOverflow in the reader.
-[GoMethodBody("incrementOverflow")] internal static void incrementOverflowᴍ(ж<profBuf> Ꮡb, int64 now) {
+internal static void incrementOverflow⁔(/*this*/ ж<profBuf> Ꮡb, int64 now) {
     for (;;) {
         var overflow = Ꮡb.Ꮡoverflow.Load();
 
@@ -256,7 +256,7 @@ internal static ж<profBuf> newProfBuf(nint hdrsize, nint bufwords, nint tags) {
 
 // canWriteRecord reports whether the buffer has room
 // for a single contiguous record with a stack of length nstk.
-[GoMethodBody("canWriteRecord")] internal static bool canWriteRecordᴍ(ж<profBuf> Ꮡb, nint nstk) {
+internal static bool canWriteRecord⁔(/*this*/ ж<profBuf> Ꮡb, nint nstk) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var br = Ꮡb.Ꮡr.load();
@@ -284,7 +284,7 @@ internal static ж<profBuf> newProfBuf(nint hdrsize, nint bufwords, nint tags) {
 // Each record must be contiguous on its own, but the two
 // records need not be contiguous (one can be at the end of the buffer
 // and the other can wrap around and start at the beginning of the buffer).
-[GoMethodBody("canWriteTwoRecords")] internal static bool canWriteTwoRecordsᴍ(ж<profBuf> Ꮡb, nint nstk1, nint nstk2) {
+internal static bool canWriteTwoRecords⁔(/*this*/ ж<profBuf> Ꮡb, nint nstk1, nint nstk2) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     var br = Ꮡb.Ꮡr.load();
@@ -324,14 +324,14 @@ internal static ж<profBuf> newProfBuf(nint hdrsize, nint bufwords, nint tags) {
 // go2cs generated this placeholder — func write is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeProfBufAlreadyˢᴍprofBuf => ref runtimeProfBufAlreadyˢᵇᴍprofBuf;
-private static readonly @string runtimeProfBufAlreadyˢᵇᴍprofBuf = "runtime: profBuf already closed"u8;
+internal static ref readonly @string runtimeProfBufAlreadyˢ⁔profBuf => ref runtimeProfBufAlreadyˢᵇ⁔profBuf;
+private static readonly @string runtimeProfBufAlreadyˢᵇ⁔profBuf = "runtime: profBuf already closed"u8;
 
 // close signals that there will be no more writes on the buffer.
 // Once all the data has been read from the buffer, reads will return eof=true.
-[GoMethodBody("close")] internal static void closeᴍ(ж<profBuf> Ꮡb) {
+internal static void close⁔(/*this*/ ж<profBuf> Ꮡb) {
     if (Ꮡb.Ꮡeof.Load() > 0) {
-        @throw(runtimeProfBufAlreadyˢᴍprofBuf);
+        @throw(runtimeProfBufAlreadyˢ⁔profBuf);
     }
     Ꮡb.Ꮡeof.Store(1);
     Ꮡb.wakeupExtra();
@@ -340,7 +340,7 @@ private static readonly @string runtimeProfBufAlreadyˢᵇᴍprofBuf = "runtime:
 // wakeupExtra must be called after setting one of the "extra"
 // atomic fields b.overflow or b.eof.
 // It records the change in b.w and wakes up the reader if needed.
-[GoMethodBody("wakeupExtra")] internal static void wakeupExtraᴍ(ж<profBuf> Ꮡb) {
+internal static void wakeupExtra⁔(/*this*/ ж<profBuf> Ꮡb) {
     for (;;) {
         var old = Ꮡb.Ꮡw.load();
         var @new = (profIndex)(old | profWriteExtra);
@@ -372,12 +372,12 @@ internal static array<@unsafe.Pointer> overflowTag = new(1); // always nil
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runtimeMalformedProfBufˢᴍprofBuf => ref runtimeMalformedProfBufˢᵇᴍprofBuf;
-private static readonly @string runtimeMalformedProfBufˢᵇᴍprofBuf = "runtime: malformed profBuf buffer - tag and data out of sync"u8;
-internal static ref readonly @string runtimeMalformedProfBufˢ2ᴍprofBuf => ref runtimeMalformedProfBufˢ2ᵇᴍprofBuf;
-private static readonly @string runtimeMalformedProfBufˢ2ᵇᴍprofBuf = "runtime: malformed profBuf buffer - invalid size"u8;
+internal static ref readonly @string runtimeMalformedProfBufˢ⁔profBuf => ref runtimeMalformedProfBufˢᵇ⁔profBuf;
+private static readonly @string runtimeMalformedProfBufˢᵇ⁔profBuf = "runtime: malformed profBuf buffer - tag and data out of sync"u8;
+internal static ref readonly @string runtimeMalformedProfBufˢ2⁔profBuf => ref runtimeMalformedProfBufˢ2ᵇ⁔profBuf;
+private static readonly @string runtimeMalformedProfBufˢ2ᵇ⁔profBuf = "runtime: malformed profBuf buffer - invalid size"u8;
 
-[GoMethodBody("read")] internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) readᴍ(ж<profBuf> Ꮡb, profBufReadMode mode) {
+internal static (slice<uint64> data, slice<@unsafe.Pointer> tags, bool eof) read⁔(/*this*/ ж<profBuf> Ꮡb, profBufReadMode mode) {
     slice<uint64> data = default;
     slice<@unsafe.Pointer> tags = default;
     ref var b = ref Ꮡb.DerefOrNull();
@@ -471,7 +471,7 @@ Read:
 
     nint ntag = countSub(bw.tagCount(), br.tagCount());
     if (ntag == 0) {
-        @throw(runtimeMalformedProfBufˢᴍprofBuf);
+        @throw(runtimeMalformedProfBufˢ⁔profBuf);
     }
     tags = b.tags.slice((nint)(br.tagCount() % (uint32)len(b.tags)));
     if (len(tags) > ntag) {
@@ -486,7 +486,7 @@ Read:
     nint ti = 0;
     while (di < len(data) && data[di] != 0 && ti < len(tags)) {
         if ((uintptr)di + (uintptr)data[di] > (uintptr)len(data)) {
-            @throw(runtimeMalformedProfBufˢ2ᴍprofBuf);
+            @throw(runtimeMalformedProfBufˢ2⁔profBuf);
         }
         di += (nint)data[di];
         ti++;

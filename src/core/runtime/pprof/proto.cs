@@ -128,7 +128,7 @@ internal static UntypedInt tagFunction_StartLine => 5;  // int64
 
 // stringIndex adds s to the string table if not already present
 // and returns the index of s in the string table.
-[GoMethodBody("stringIndex")] internal static int64 stringIndexᴍ(ref profileBuilder b, @string s) {
+internal static int64 stringIndex⁔(/*this*/ ref profileBuilder b, @string s) {
     var (id, ok) = b.stringMap[s, ꟷ];
     if (!ok) {
         id = len(b.strings);
@@ -138,7 +138,7 @@ internal static UntypedInt tagFunction_StartLine => 5;  // int64
     return (int64)id;
 }
 
-[GoMethodBody("flush")] internal static void flushᴍ(ref profileBuilder b) {
+internal static void flush⁔(/*this*/ ref profileBuilder b) {
     const nint dataFlush = 4096;
     if (b.pb.nest == 0 && len(b.pb.data) > dataFlush) {
         b.zw.Write(b.pb.data);
@@ -147,7 +147,7 @@ internal static UntypedInt tagFunction_StartLine => 5;  // int64
 }
 
 // pbValueType encodes a ValueType message to b.pb.
-[GoMethodBody("pbValueType")] internal static void pbValueTypeᴍ(ref profileBuilder b, nint tag, @string typ, @string unit) {
+internal static void pbValueType⁔(/*this*/ ref profileBuilder b, nint tag, @string typ, @string unit) {
     msgOffset start = b.pb.startMessage();
     b.pb.int64(tagValueType_Type, b.stringIndex(typ));
     b.pb.int64(tagValueType_Unit, b.stringIndex(unit));
@@ -155,7 +155,7 @@ internal static UntypedInt tagFunction_StartLine => 5;  // int64
 }
 
 // pbSample encodes a Sample message to b.pb.
-[GoMethodBody("pbSample")] internal static void pbSampleᴍ(ref profileBuilder b, slice<int64> values, slice<uint64> locs, Action labels) {
+internal static void pbSample⁔(/*this*/ ref profileBuilder b, slice<int64> values, slice<uint64> locs, Action labels) {
     msgOffset start = b.pb.startMessage();
     b.pb.int64s(tagSample_Value, values);
     b.pb.uint64s(tagSample_Location, locs);
@@ -167,7 +167,7 @@ internal static UntypedInt tagFunction_StartLine => 5;  // int64
 }
 
 // pbLabel encodes a Label message to b.pb.
-[GoMethodBody("pbLabel")] internal static void pbLabelᴍ(ref profileBuilder b, nint tag, @string key, @string str, int64 num) {
+internal static void pbLabel⁔(/*this*/ ref profileBuilder b, nint tag, @string key, @string str, int64 num) {
     msgOffset start = b.pb.startMessage();
     b.pb.int64Opt(tagLabel_Key, b.stringIndex(key));
     b.pb.int64Opt(tagLabel_Str, b.stringIndex(str));
@@ -176,7 +176,7 @@ internal static UntypedInt tagFunction_StartLine => 5;  // int64
 }
 
 // pbLine encodes a Line message to b.pb.
-[GoMethodBody("pbLine")] internal static void pbLineᴍ(ref profileBuilder b, nint tag, uint64 funcID, int64 line) {
+internal static void pbLine⁔(/*this*/ ref profileBuilder b, nint tag, uint64 funcID, int64 line) {
     msgOffset start = b.pb.startMessage();
     b.pb.uint64Opt(tagLine_FunctionID, funcID);
     b.pb.int64Opt(tagLine_Line, line);
@@ -184,7 +184,7 @@ internal static UntypedInt tagFunction_StartLine => 5;  // int64
 }
 
 // pbMapping encodes a Mapping message to b.pb.
-[GoMethodBody("pbMapping")] internal static void pbMappingᴍ(ref profileBuilder b, nint tag, uint64 id, uint64 @base, uint64 limit, uint64 offset, @string @file, @string buildID, bool hasFuncs) {
+internal static void pbMapping⁔(/*this*/ ref profileBuilder b, nint tag, uint64 id, uint64 @base, uint64 limit, uint64 offset, @string @file, @string buildID, bool hasFuncs) {
     msgOffset start = b.pb.startMessage();
     b.pb.uint64Opt(tagMapping_ID, id);
     b.pb.uint64Opt(tagMapping_Start, @base);
@@ -275,7 +275,7 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
 //
 // The data must be a whole number of records, as delivered by the runtime.
 // len(tags) must be equal to the number of records in data.
-[GoMethodBody("addCPUData")] internal static error addCPUDataᴍ(ref profileBuilder b, slice<uint64> data, slice<@unsafe.Pointer> tags) {
+internal static error addCPUData⁔(/*this*/ ref profileBuilder b, slice<uint64> data, slice<@unsafe.Pointer> tags) {
     if (!b.havePeriod) {
         // first record is period
         if (len(data) < 3) {
@@ -345,27 +345,27 @@ internal static ж<profileBuilder> newProfileBuilder(io.Writer w) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string samplesˢᴍprofileBuilder => ref samplesˢᵇᴍprofileBuilder;
-private static readonly @string samplesˢᵇᴍprofileBuilder = "samples"u8;
-internal static ref readonly @string countˢᴍprofileBuilder => ref countˢᵇᴍprofileBuilder;
-private static readonly @string countˢᵇᴍprofileBuilder = "count"u8;
-internal static ref readonly @string cpuˢᴍprofileBuilder => ref cpuˢᵇᴍprofileBuilder;
-private static readonly @string cpuˢᵇᴍprofileBuilder = "cpu"u8;
-internal static ref readonly @string nanosecondsˢᴍprofileBuilder => ref nanosecondsˢᵇᴍprofileBuilder;
-private static readonly @string nanosecondsˢᵇᴍprofileBuilder = "nanoseconds"u8;
+internal static ref readonly @string samplesˢ⁔profileBuilder => ref samplesˢᵇ⁔profileBuilder;
+private static readonly @string samplesˢᵇ⁔profileBuilder = "samples"u8;
+internal static ref readonly @string countˢ⁔profileBuilder => ref countˢᵇ⁔profileBuilder;
+private static readonly @string countˢᵇ⁔profileBuilder = "count"u8;
+internal static ref readonly @string cpuˢ⁔profileBuilder => ref cpuˢᵇ⁔profileBuilder;
+private static readonly @string cpuˢᵇ⁔profileBuilder = "cpu"u8;
+internal static ref readonly @string nanosecondsˢ⁔profileBuilder => ref nanosecondsˢᵇ⁔profileBuilder;
+private static readonly @string nanosecondsˢᵇ⁔profileBuilder = "nanoseconds"u8;
 
 // build completes and returns the constructed profile.
-[GoMethodBody("build")] internal static error buildᴍ(ж<profileBuilder> Ꮡb) {
+internal static error build⁔(/*this*/ ж<profileBuilder> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.end = time.Now();
 
     b.pb.int64Opt(tagProfile_TimeNanos, b.start.UnixNano());
     if (b.havePeriod) { // must be CPU profile
-        b.pbValueType(tagProfile_SampleType, samplesˢᴍprofileBuilder, countˢᴍprofileBuilder);
-        b.pbValueType(tagProfile_SampleType, cpuˢᴍprofileBuilder, nanosecondsˢᴍprofileBuilder);
+        b.pbValueType(tagProfile_SampleType, samplesˢ⁔profileBuilder, countˢ⁔profileBuilder);
+        b.pbValueType(tagProfile_SampleType, cpuˢ⁔profileBuilder, nanosecondsˢ⁔profileBuilder);
         b.pb.int64Opt(tagProfile_DurationNanos, b.end.Sub(b.start).Nanoseconds());
-        b.pbValueType(tagProfile_PeriodType, cpuˢᴍprofileBuilder, nanosecondsˢᴍprofileBuilder);
+        b.pbValueType(tagProfile_PeriodType, cpuˢ⁔profileBuilder, nanosecondsˢ⁔profileBuilder);
         b.pb.int64Opt(tagProfile_Period, b.period);
     }
 
@@ -417,7 +417,7 @@ private static readonly @string nanosecondsˢᵇᴍprofileBuilder = "nanoseconds
 // get the right cumulative sample count.
 //
 // It may emit to b.pb, so there must be no message encoding in progress.
-[GoMethodBody("appendLocsForStack")] internal static slice<uint64> /*newLocs*/ appendLocsForStackᴍ(ж<profileBuilder> Ꮡb, slice<uint64> locs, slice<uintptr> stk) {
+internal static slice<uint64> /*newLocs*/ appendLocsForStack⁔(/*this*/ ж<profileBuilder> Ꮡb, slice<uint64> locs, slice<uintptr> stk) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     b.deck.reset();
@@ -570,7 +570,7 @@ partial struct pcDeck {
 
 } partial class pprof_package {
 
-[GoMethodBody("reset")] internal static void resetᴍ(ref pcDeck d) {
+internal static void reset⁔(/*this*/ ref pcDeck d) {
     d.pcs = d.pcs[..0];
     d.frames = d.frames[..0];
     d.symbolizeResult = 0;
@@ -581,7 +581,7 @@ partial struct pcDeck {
 // tryAdd tries to add the pc and Frames expanded from it (most likely one,
 // since the stack trace is already fully expanded) and the symbolizeResult
 // to the deck. If it fails the caller needs to flush the deck and retry.
-[GoMethodBody("tryAdd")] internal static bool /*success*/ tryAddᴍ(ref pcDeck d, uintptr pc, slice<runtime.Frame> frames, symbolizeFlag symbolizeResult) {
+internal static bool /*success*/ tryAdd⁔(/*this*/ ref pcDeck d, uintptr pc, slice<runtime.Frame> frames, symbolizeFlag symbolizeResult) {
     nint existing = len(d.frames); if (existing > 0) {
         // 'd.frames' are all expanded from one 'pc' and represent all
         // inlined functions so we check only the last one.
@@ -628,7 +628,7 @@ internal partial struct emitLocation_newFunc /*dyn*/ {
 // and returns the location ID encoded in the profile protobuf.
 // It emits to b.pb, so there must be no message encoding in progress.
 // It resets the deck.
-[GoMethodBody("emitLocation")] internal static uint64 emitLocationᴍ(ж<profileBuilder> Ꮡb) {
+internal static uint64 emitLocation⁔(/*this*/ ж<profileBuilder> Ꮡb) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -805,11 +805,11 @@ internal static void parseProcSelfMaps(slice<byte> data, Action<uint64, uint64, 
 
 } partial class pprof_package {
 
-[GoMethodBody("addMapping")] internal static void addMappingᴍ(ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID) {
+internal static void addMapping⁔(/*this*/ ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID) {
     b.addMappingEntry(lo, hi, offset, @file, buildID, false);
 }
 
-[GoMethodBody("addMappingEntry")] internal static void addMappingEntryᴍ(ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID, bool fake) {
+internal static void addMappingEntry⁔(/*this*/ ref profileBuilder b, uint64 lo, uint64 hi, uint64 offset, @string @file, @string buildID, bool fake) {
     b.mem = append(b.mem, new memMap(
         start: (uintptr)lo,
         end: (uintptr)hi,

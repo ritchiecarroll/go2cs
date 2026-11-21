@@ -38,11 +38,11 @@ internal static substMap makeRenameMap(slice<ж<TypeParam>> from, slice<ж<TypeP
 
 } partial class types_package {
 
-[GoMethodBody("empty")] internal static bool emptyᴍ(substMap m) {
+internal static bool empty⁔(/*this*/ substMap m) {
     return len(m) == 0;
 }
 
-[GoMethodBody("lookup")] internal static Type lookupᴍ(substMap m, ж<TypeParam> tpar) {
+internal static Type lookup⁔(/*this*/ substMap m, ж<TypeParam> tpar) {
     var t = m[tpar]; if (t != nil) {
         return t;
     }
@@ -58,7 +58,7 @@ internal static substMap makeRenameMap(slice<ж<TypeParam>> from, slice<ж<TypeP
 //
 // If expanding is non-nil, it is the instance type currently being expanded.
 // One of expanding or ctxt must be non-nil.
-[GoMethodBody("subst")] internal static Type substᴍ(ж<Checker> Ꮡcheck, token.Pos pos, Type typ, substMap smap, ж<Named> expanding, ж<Context> ctxt) {
+internal static Type subst⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, Type typ, substMap smap, ж<Named> expanding, ж<Context> ctxt) {
     assert(expanding != nil || ctxt != nil);
 
     if (smap.empty()) {
@@ -97,7 +97,7 @@ partial struct subster {
 
 } partial class types_package {
 
-[GoMethodBody("typ")] internal static Type typᴍ(ж<subster> Ꮡsubst, Type typ) {
+internal static Type typ⁔(/*this*/ ж<subster> Ꮡsubst, Type typ) {
     ref var subst = ref Ꮡsubst.DerefOrNull();
 
     switch (typ.type()) {
@@ -312,14 +312,14 @@ partial struct subster {
 // typOrNil is like typ but if the argument is nil it is replaced with Typ[Invalid].
 // A nil type may appear in pathological cases such as type T[P any] []func(_ T([]_))
 // where an array/slice element is accessed before it is set up.
-[GoMethodBody("typOrNil")] internal static Type typOrNilᴍ(ж<subster> Ꮡsubst, Type typ) {
+internal static Type typOrNil⁔(/*this*/ ж<subster> Ꮡsubst, Type typ) {
     if (typ == nil) {
         return new BasicжType(Typ[Invalid]);
     }
     return Ꮡsubst.typ(typ);
 }
 
-[GoMethodBody("var_")] internal static ж<Var> var_ᴍ(ж<subster> Ꮡsubst, ж<Var> Ꮡv) {
+internal static ж<Var> var_⁔(/*this*/ ж<subster> Ꮡsubst, ж<Var> Ꮡv) {
     ref var v = ref Ꮡv.DerefOrNull();
 
     if (Ꮡv != nil) {
@@ -343,7 +343,7 @@ internal static ж<Var> cloneVar(ж<Var> Ꮡv, Type typ) {
 
 } partial class types_package {
 
-[GoMethodBody("tuple")] internal static ж<Tuple> tupleᴍ(ж<subster> Ꮡsubst, ж<Tuple> Ꮡt) {
+internal static ж<Tuple> tuple⁔(/*this*/ ж<subster> Ꮡsubst, ж<Tuple> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt != nil) {
@@ -380,7 +380,7 @@ internal static slice<T> /*out*/ substList<T>(slice<T> @in, Func<T, T> subst) {
 
 } partial class types_package {
 
-[GoMethodBody("func_")] internal static ж<Func> func_ᴍ(ж<subster> Ꮡsubst, ж<Func> Ꮡf) {
+internal static ж<Func> func_⁔(/*this*/ ж<subster> Ꮡsubst, ж<Func> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf != nil) {
@@ -404,7 +404,7 @@ internal static ж<Func> cloneFunc(ж<Func> Ꮡf, Type typ) {
 
 } partial class types_package {
 
-[GoMethodBody("term")] internal static ж<Term> termᴍ(ж<subster> Ꮡsubst, ж<Term> Ꮡt) {
+internal static ж<Term> term⁔(/*this*/ ж<subster> Ꮡsubst, ж<Term> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var typ = Ꮡsubst.typ(t.typ); if (!AreEqual(typ, t.typ)) {

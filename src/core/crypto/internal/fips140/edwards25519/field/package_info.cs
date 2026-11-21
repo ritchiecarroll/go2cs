@@ -62,12 +62,15 @@ using static go.crypto.@internal.fips140.edwards25519.field_package;
 
 namespace go.crypto.@internal.fips140.edwards25519;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.crypto.@internal.fips140;
 using go.crypto.@internal.fips140deps;
 using math;
 using static field_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("field")]
 public static partial class field_package
@@ -104,34 +107,34 @@ public static partial class field_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(field_package.Element)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fieldᴛElement;
+[GoMethodHost(typeof(field_package.Element)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fieldᴛElement;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class fieldᴛElement {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Zero(this ж<Element> Ꮡv) => field_package.Zeroᴍ(Ꮡv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> One(this ж<Element> Ꮡv) => field_package.Oneᴍ(Ꮡv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Element> reduce(this ж<Element> Ꮡv) => field_package.reduceᴍ(Ꮡv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Add(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) => field_package.Addᴍ(Ꮡv, Ꮡa, Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Subtract(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) => field_package.Subtractᴍ(Ꮡv, Ꮡa, Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Negate(this ж<Element> Ꮡv, ж<Element> a) => field_package.Negateᴍ(Ꮡv, a);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Invert(this ж<Element> Ꮡv, ж<Element> z) => field_package.Invertᴍ(Ꮡv, z);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Set(this ж<Element> Ꮡv, ж<Element> Ꮡa) => field_package.Setᴍ(Ꮡv, Ꮡa);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Element>, error) SetBytes(this ж<Element> Ꮡv, slice<byte> x) => field_package.SetBytesᴍ(Ꮡv, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref Element v) => field_package.Bytesᴍ(ref v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> bytes(this ref Element v, /*[32]*/ ж<array<byte>> Ꮡout) => field_package.bytesᴍ(ref v, Ꮡout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Equal(this ref Element v, ж<Element> Ꮡu) => field_package.Equalᴍ(ref v, Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Select(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb, nint cond) => field_package.Selectᴍ(Ꮡv, Ꮡa, Ꮡb, cond);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Swap(this ref Element v, ж<Element> Ꮡu, nint cond) => field_package.Swapᴍ(ref v, Ꮡu, cond);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint IsNegative(this ref Element v) => field_package.IsNegativeᴍ(ref v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Absolute(this ж<Element> Ꮡv, ж<Element> Ꮡu) => field_package.Absoluteᴍ(Ꮡv, Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Multiply(this ж<Element> Ꮡv, ж<Element> x, ж<Element> y) => field_package.Multiplyᴍ(Ꮡv, x, y);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Square(this ж<Element> Ꮡv, ж<Element> x) => field_package.Squareᴍ(Ꮡv, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Mult32(this ж<Element> Ꮡv, ж<Element> Ꮡx, uint32 y) => field_package.Mult32ᴍ(Ꮡv, Ꮡx, y);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Pow22523(this ж<Element> Ꮡv, ж<Element> x) => field_package.Pow22523ᴍ(Ꮡv, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<Element> R, nint wasSquare) SqrtRatio(this ж<Element> Ꮡr, ж<Element> u, ж<Element> v) => field_package.SqrtRatioᴍ(Ꮡr, u, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Zero(this ж<Element> Ꮡv) => field_package.Zero⁔(Ꮡv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> One(this ж<Element> Ꮡv) => field_package.One⁔(Ꮡv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Element> reduce(this ж<Element> Ꮡv) => field_package.reduce⁔(Ꮡv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Add(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) => field_package.Add⁔(Ꮡv, Ꮡa, Ꮡb);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Subtract(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb) => field_package.Subtract⁔(Ꮡv, Ꮡa, Ꮡb);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Negate(this ж<Element> Ꮡv, ж<Element> a) => field_package.Negate⁔(Ꮡv, a);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Invert(this ж<Element> Ꮡv, ж<Element> z) => field_package.Invert⁔(Ꮡv, z);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Set(this ж<Element> Ꮡv, ж<Element> Ꮡa) => field_package.Set⁔(Ꮡv, Ꮡa);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Element>, error) SetBytes(this ж<Element> Ꮡv, slice<byte> x) => field_package.SetBytes⁔(Ꮡv, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref Element v) => field_package.Bytes⁔(ref v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> bytes(this ref Element v, /*[32]*/ ж<array<byte>> Ꮡout) => field_package.bytes⁔(ref v, Ꮡout);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Equal(this ref Element v, ж<Element> Ꮡu) => field_package.Equal⁔(ref v, Ꮡu);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Select(this ж<Element> Ꮡv, ж<Element> Ꮡa, ж<Element> Ꮡb, nint cond) => field_package.Select⁔(Ꮡv, Ꮡa, Ꮡb, cond);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Swap(this ref Element v, ж<Element> Ꮡu, nint cond) => field_package.Swap⁔(ref v, Ꮡu, cond);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint IsNegative(this ref Element v) => field_package.IsNegative⁔(ref v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Absolute(this ж<Element> Ꮡv, ж<Element> Ꮡu) => field_package.Absolute⁔(Ꮡv, Ꮡu);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Multiply(this ж<Element> Ꮡv, ж<Element> x, ж<Element> y) => field_package.Multiply⁔(Ꮡv, x, y);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Square(this ж<Element> Ꮡv, ж<Element> x) => field_package.Square⁔(Ꮡv, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Mult32(this ж<Element> Ꮡv, ж<Element> Ꮡx, uint32 y) => field_package.Mult32⁔(Ꮡv, Ꮡx, y);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Pow22523(this ж<Element> Ꮡv, ж<Element> x) => field_package.Pow22523⁔(Ꮡv, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<Element> R, nint wasSquare) SqrtRatio(this ж<Element> Ꮡr, ж<Element> u, ж<Element> v) => field_package.SqrtRatio⁔(Ꮡr, u, v);
 }
 partial class fieldᴛElement {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Element> carryPropagate(this ж<Element> Ꮡv) => field_package.carryPropagateᴍ(Ꮡv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Element> carryPropagate(this ж<Element> Ꮡv) => field_package.carryPropagate⁔(Ꮡv);
 }
 // </GlyphForwarders>

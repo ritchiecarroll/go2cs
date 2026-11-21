@@ -30,7 +30,7 @@ partial struct traceMultiplexer {
 
 } partial class trace_package {
 
-[GoMethodBody("subscribeFlightRecorder")] internal static error subscribeFlightRecorderᴍ(ж<traceMultiplexer> Ꮡt, ж<recorder> r) {
+internal static error subscribeFlightRecorder⁔(/*this*/ ж<traceMultiplexer> Ꮡt, ж<recorder> r) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -59,7 +59,7 @@ partial struct traceMultiplexer {
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("unsubscribeFlightRecorder")] internal static error unsubscribeFlightRecorderᴍ(ж<traceMultiplexer> Ꮡt) {
+internal static error unsubscribeFlightRecorder⁔(/*this*/ ж<traceMultiplexer> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -85,7 +85,7 @@ partial struct traceMultiplexer {
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("subscribeTraceStartWriter")] internal static error subscribeTraceStartWriterᴍ(ж<traceMultiplexer> Ꮡt, io.Writer w) {
+internal static error subscribeTraceStartWriter⁔(/*this*/ ж<traceMultiplexer> Ꮡt, io.Writer w) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -114,7 +114,7 @@ partial struct traceMultiplexer {
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("unsubscribeTraceStartWriter")] internal static void unsubscribeTraceStartWriterᴍ(ж<traceMultiplexer> Ꮡt) {
+internal static void unsubscribeTraceStartWriter⁔(/*this*/ ж<traceMultiplexer> Ꮡt) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -140,7 +140,7 @@ partial struct traceMultiplexer {
     finally { if (ᒐd1) Ꮡt.of(traceMultiplexer.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("addedSubscriber")] internal static error addedSubscriberᴍ(ж<traceMultiplexer> Ꮡt) {
+internal static error addedSubscriber⁔(/*this*/ ж<traceMultiplexer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt.Ꮡenabled.Load()) {
@@ -155,7 +155,7 @@ partial struct traceMultiplexer {
     return default;
 }
 
-[GoMethodBody("removingSubscriber")] internal static void removingSubscriberᴍ(ж<traceMultiplexer> Ꮡt) {
+internal static void removingSubscriber⁔(/*this*/ ж<traceMultiplexer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.subscribers == 0) {
@@ -171,14 +171,14 @@ partial struct traceMultiplexer {
     }
 }
 
-[GoMethodBody("removedSubscriber")] internal static void removedSubscriberᴍ(ref traceMultiplexer t) {
+internal static void removedSubscriber⁔(/*this*/ ref traceMultiplexer t) {
     if (t.subscribers > 0) {
         // This is necessary for the trace reader goroutine to pick up on the new subscriber.
         runtime_traceAdvance(false);
     }
 }
 
-[GoMethodBody("startLocked")] internal static partial error startLockedᴍ(ж<traceMultiplexer> Ꮡt) {
+internal static partial error startLocked⁔(/*this*/ ж<traceMultiplexer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var err = runtime.StartTrace(); if (err != nil) {

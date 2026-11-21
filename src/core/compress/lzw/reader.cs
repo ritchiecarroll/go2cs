@@ -82,7 +82,7 @@ partial struct Reader {
 } partial class lzw_package {
 
 // readLSB returns the next code for "Least Significant Bits first" data.
-[GoMethodBody("readLSB")] internal static (uint16, error) readLSBᴍ(ref Reader r) {
+internal static (uint16, error) readLSB⁔(/*this*/ ref Reader r) {
     while (r.nBits < r.width) {
         var (x, err) = r.r.ReadByte();
         if (err != nil) {
@@ -98,7 +98,7 @@ partial struct Reader {
 }
 
 // readMSB returns the next code for "Most Significant Bits first" data.
-[GoMethodBody("readMSB")] internal static (uint16, error) readMSBᴍ(ref Reader r) {
+internal static (uint16, error) readMSB⁔(/*this*/ ref Reader r) {
     while (r.nBits < r.width) {
         var (x, err) = r.r.ReadByte();
         if (err != nil) {
@@ -114,7 +114,7 @@ partial struct Reader {
 }
 
 // Read implements io.Reader, reading uncompressed bytes from its underlying reader.
-[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ж<Reader> Ꮡr, slice<byte> b) {
+internal static (nint, error) Read⁔(/*this*/ ж<Reader> Ꮡr, slice<byte> b) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     for (;;) {
@@ -131,13 +131,13 @@ partial struct Reader {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string lzwInvalidCodeˢᴍReader => ref lzwInvalidCodeˢᵇᴍReader;
-private static readonly @string lzwInvalidCodeˢᵇᴍReader = "lzw: invalid code"u8;
+internal static ref readonly @string lzwInvalidCodeˢ⁔Reader => ref lzwInvalidCodeˢᵇ⁔Reader;
+private static readonly @string lzwInvalidCodeˢᵇ⁔Reader = "lzw: invalid code"u8;
 
 // decode decompresses bytes from r and leaves them in d.toRead.
 // read specifies how to decode bytes into codes.
 // litWidth is the width in bits of literal codes.
-[GoMethodBody("decode")] internal static void decodeᴍ(ж<Reader> Ꮡr) {
+internal static void decode⁔(/*this*/ ж<Reader> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     // Loop over the code stream, converting codes into decompressed bytes.
@@ -207,7 +207,7 @@ loop:
             break;
         }
         default: {
-            r.err = errors.New(lzwInvalidCodeˢᴍReader);
+            r.err = errors.New(lzwInvalidCodeˢ⁔Reader);
             goto break_loop;
             break;
         }}
@@ -246,14 +246,14 @@ internal static error errClosed = errors.New("lzw: reader/writer is closed");
 
 // Close closes the [Reader] and returns an error for any future read operation.
 // It does not close the underlying [io.Reader].
-[GoMethodBody("Close")] internal static error Closeᴍ(ref Reader r) {
+internal static error Close⁔(/*this*/ ref Reader r) {
     r.err = errClosed; // in case any Reads come along
     return default;
 }
 
 // Reset clears the [Reader]'s state and allows it to be reused again
 // as a new [Reader].
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref Reader r, io.Reader src, Order order, nint litWidth) {
+internal static void Reset⁔(/*this*/ ref Reader r, io.Reader src, Order order, nint litWidth) {
     r.AssignFrom(new Reader());
     r.init(src, order, litWidth);
 }
@@ -285,10 +285,10 @@ internal static ж<Reader> newReader(io.Reader src, Order order, nint litWidth) 
 } partial class lzw_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string lzwUnknownOrderˢᴍReader => ref lzwUnknownOrderˢᵇᴍReader;
-private static readonly @string lzwUnknownOrderˢᵇᴍReader = "lzw: unknown order"u8;
+internal static ref readonly @string lzwUnknownOrderˢ⁔Reader => ref lzwUnknownOrderˢᵇ⁔Reader;
+private static readonly @string lzwUnknownOrderˢᵇ⁔Reader = "lzw: unknown order"u8;
 
-[GoMethodBody("init")] internal static void initᴍ(ref Reader r, io.Reader src, Order order, nint litWidth) {
+internal static void init⁔(/*this*/ ref Reader r, io.Reader src, Order order, nint litWidth) {
     switch (order) {
     case var ᴛ when ᴛ == LSB: {
         r.read = ((Func<ж<Reader>, (uint16, error)>)(lzwᴛReader.readLSB));
@@ -299,7 +299,7 @@ private static readonly @string lzwUnknownOrderˢᵇᴍReader = "lzw: unknown or
         break;
     }
     default: {
-        r.err = errors.New(lzwUnknownOrderˢᴍReader);
+        r.err = errors.New(lzwUnknownOrderˢ⁔Reader);
         return;
     }}
     if (litWidth < 2 || 8 < litWidth) {

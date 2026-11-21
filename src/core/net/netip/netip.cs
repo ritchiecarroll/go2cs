@@ -150,7 +150,7 @@ partial struct parseAddrError {
 
 } partial class netip_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(parseAddrError err) {
+internal static @string Error⁔(/*this*/ parseAddrError err) {
     var q = strconv.Quote;
     if (err.at != ""u8) {
         return "ParseAddr("u8 + q(err.@in) + "): "u8 + err.msg + " (at "u8 + q(err.at) + ")"u8;
@@ -372,13 +372,13 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 
 // v4 returns the i'th byte of ip. If ip is not an IPv4, v4 returns
 // unspecified garbage.
-[GoMethodBody("v4")] internal static uint8 v4ᴍ(Addr ip, uint8 i) {
+internal static uint8 v4⁔(/*this*/ Addr ip, uint8 i) {
     return (uint8)(ip.addr.lo.Rsh((uint64)((uint8)((3 - i) * 8))));
 }
 
 // v6 returns the i'th byte of ip. If ip is an IPv4 address, this
 // accesses the IPv4-mapped IPv6 address form of the IP.
-[GoMethodBody("v6")] internal static uint8 v6ᴍ(Addr ipʗp, uint8 i) {
+internal static uint8 v6⁔(/*this*/ Addr ipʗp, uint8 i) {
     ref var ip = ref heap(ipʗp, out var Ꮡip);
 
     return (uint8)(((Ꮡip.Ꮡaddr.halves()[(i / 8) % 2]).Value).Rsh((uint64)((uint8)((7 - i % 8) * 8))));
@@ -386,7 +386,7 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 
 // v6u16 returns the i'th 16-bit word of ip. If ip is an IPv4 address,
 // this accesses the IPv4-mapped IPv6 address form of the IP.
-[GoMethodBody("v6u16")] internal static uint16 v6u16ᴍ(Addr ipʗp, uint8 i) {
+internal static uint16 v6u16⁔(/*this*/ Addr ipʗp, uint8 i) {
     ref var ip = ref heap(ipʗp, out var Ꮡip);
 
     return (uint16)(((Ꮡip.Ꮡaddr.halves()[(i / 4) % 2]).Value).Rsh((uint64)((uint8)((3 - i % 4) * 16))));
@@ -397,7 +397,7 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 //
 // Note that "0.0.0.0" and "::" are not the zero value. Use IsUnspecified to
 // check for these values instead.
-[GoMethodBody("isZero")] internal static bool isZeroᴍ(Addr ip) {
+internal static bool isZero⁔(/*this*/ Addr ip) {
     // Faster than comparing ip == Addr{}, but effectively equivalent,
     // as there's no way to make an IP with a nil z from this package.
     return ip.z == z0;
@@ -406,14 +406,14 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 // IsValid reports whether the [Addr] is an initialized address (not the zero Addr).
 //
 // Note that "0.0.0.0" and "::" are both valid values.
-[GoMethodBody("IsValid")] internal static bool IsValidᴍ(Addr ip) { return ip.z != z0; }
+internal static bool IsValid⁔(/*this*/ Addr ip) { return ip.z != z0; }
 
 // BitLen returns the number of bits in the IP address:
 // 128 for IPv6, 32 for IPv4, and 0 for the zero [Addr].
 //
 // Note that IPv4-mapped IPv6 addresses are considered IPv6 addresses
 // and therefore have bit length 128.
-[GoMethodBody("BitLen")] internal static nint BitLenᴍ(Addr ip) {
+internal static nint BitLen⁔(/*this*/ Addr ip) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         return 0;
@@ -425,7 +425,7 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 }
 
 // Zone returns ip's IPv6 scoped addressing zone, if any.
-[GoMethodBody("Zone")] internal static @string Zoneᴍ(Addr ip) {
+internal static @string Zone⁔(/*this*/ Addr ip) {
     if (ip.z == z0) {
         return ""u8;
     }
@@ -435,7 +435,7 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 // Compare returns an integer comparing two IPs.
 // The result will be 0 if ip == ip2, -1 if ip < ip2, and +1 if ip > ip2.
 // The definition of "less than" is the same as the [Addr.Less] method.
-[GoMethodBody("Compare")] internal static nint Compareᴍ(Addr ip, Addr ip2) {
+internal static nint Compare⁔(/*this*/ Addr ip, Addr ip2) {
     nint f1 = ip.BitLen();
     nint f2 = ip2.BitLen();
     if (f1 < f2) {
@@ -474,25 +474,25 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 // Less reports whether ip sorts before ip2.
 // IP addresses sort first by length, then their address.
 // IPv6 addresses with zones sort just after the same address without a zone.
-[GoMethodBody("Less")] internal static bool Lessᴍ(Addr ip, Addr ip2) { return ip.Compare(ip2) == -1; }
+internal static bool Less⁔(/*this*/ Addr ip, Addr ip2) { return ip.Compare(ip2) == -1; }
 
 // Is4 reports whether ip is an IPv4 address.
 //
 // It returns false for IPv4-mapped IPv6 addresses. See [Addr.Unmap].
-[GoMethodBody("Is4")] internal static bool Is4ᴍ(Addr ip) {
+internal static bool Is4⁔(/*this*/ Addr ip) {
     return ip.z == z4;
 }
 
 // Is4In6 reports whether ip is an "IPv4-mapped IPv6 address"
 // as defined by RFC 4291.
 // That is, it reports whether ip is in ::ffff:0:0/96.
-[GoMethodBody("Is4In6")] internal static bool Is4In6ᴍ(Addr ip) {
+internal static bool Is4In6⁔(/*this*/ Addr ip) {
     return ip.Is6() && ip.addr.hi == 0 && ip.addr.lo >> 32 == 0xffff;
 }
 
 // Is6 reports whether ip is an IPv6 address, including IPv4-mapped
 // IPv6 addresses.
-[GoMethodBody("Is6")] internal static bool Is6ᴍ(Addr ip) {
+internal static bool Is6⁔(/*this*/ Addr ip) {
     return ip.z != z0 && ip.z != z4;
 }
 
@@ -500,7 +500,7 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 //
 // That is, if ip is an IPv6 address wrapping an IPv4 address, it
 // returns the wrapped IPv4 address. Otherwise it returns ip unmodified.
-[GoMethodBody("Unmap")] internal static Addr Unmapᴍ(Addr ip) {
+internal static Addr Unmap⁔(/*this*/ Addr ip) {
     if (ip.Is4In6()) {
         ip.z = z4;
     }
@@ -510,7 +510,7 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 // WithZone returns an IP that's the same as ip but with the provided
 // zone. If zone is empty, the zone is removed. If ip is an IPv4
 // address, WithZone is a no-op and returns ip unchanged.
-[GoMethodBody("WithZone")] internal static Addr WithZoneᴍ(Addr ip, @string zone) {
+internal static Addr WithZone⁔(/*this*/ Addr ip, @string zone) {
     if (!ip.Is6()) {
         return ip;
     }
@@ -524,7 +524,7 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 
 // withoutZone unconditionally strips the zone from ip.
 // It's similar to WithZone, but small enough to be inlinable.
-[GoMethodBody("withoutZone")] internal static Addr withoutZoneᴍ(Addr ip) {
+internal static Addr withoutZone⁔(/*this*/ Addr ip) {
     if (!ip.Is6()) {
         return ip;
     }
@@ -533,12 +533,12 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 }
 
 // hasZone reports whether ip has an IPv6 zone.
-[GoMethodBody("hasZone")] internal static bool hasZoneᴍ(Addr ip) {
+internal static bool hasZone⁔(/*this*/ Addr ip) {
     return ip.z != z0 && ip.z != z4 && ip.z != z6noz;
 }
 
 // IsLinkLocalUnicast reports whether ip is a link-local unicast address.
-[GoMethodBody("IsLinkLocalUnicast")] internal static bool IsLinkLocalUnicastᴍ(Addr ip) {
+internal static bool IsLinkLocalUnicast⁔(/*this*/ Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -557,7 +557,7 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 }
 
 // IsLoopback reports whether ip is a loopback address.
-[GoMethodBody("IsLoopback")] internal static bool IsLoopbackᴍ(Addr ip) {
+internal static bool IsLoopback⁔(/*this*/ Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -576,7 +576,7 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 }
 
 // IsMulticast reports whether ip is a multicast address.
-[GoMethodBody("IsMulticast")] internal static bool IsMulticastᴍ(Addr ip) {
+internal static bool IsMulticast⁔(/*this*/ Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -596,7 +596,7 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 
 // IsInterfaceLocalMulticast reports whether ip is an IPv6 interface-local
 // multicast address.
-[GoMethodBody("IsInterfaceLocalMulticast")] internal static bool IsInterfaceLocalMulticastᴍ(Addr ip) {
+internal static bool IsInterfaceLocalMulticast⁔(/*this*/ Addr ip) {
     // IPv6 Addressing Architecture (2.7.1. Pre-Defined Multicast Addresses)
     // https://datatracker.ietf.org/doc/html/rfc4291#section-2.7.1
     if (ip.Is6() && !ip.Is4In6()) {
@@ -606,7 +606,7 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 }
 
 // IsLinkLocalMulticast reports whether ip is a link-local multicast address.
-[GoMethodBody("IsLinkLocalMulticast")] internal static bool IsLinkLocalMulticastᴍ(Addr ip) {
+internal static bool IsLinkLocalMulticast⁔(/*this*/ Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -633,7 +633,7 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 // It returns false for the zero [Addr].
 //
 // For reference, see RFC 1122, RFC 4291, and RFC 4632.
-[GoMethodBody("IsGlobalUnicast")] internal static bool IsGlobalUnicastᴍ(Addr ip) {
+internal static bool IsGlobalUnicast⁔(/*this*/ Addr ip) {
     if (ip.z == z0) {
         // Invalid or zero-value.
         return false;
@@ -656,7 +656,7 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 // (IPv4 addresses) and RFC 4193 (IPv6 addresses). That is, it reports whether
 // ip is in 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, or fc00::/7. This is the
 // same as [net.IP.IsPrivate].
-[GoMethodBody("IsPrivate")] internal static bool IsPrivateᴍ(Addr ip) {
+internal static bool IsPrivate⁔(/*this*/ Addr ip) {
     if (ip.Is4In6()) {
         ip = ip.Unmap();
     }
@@ -681,22 +681,22 @@ public static (Addr ip, bool ok) AddrFromSlice(slice<byte> Δslice) {
 // address "0.0.0.0" or the IPv6 address "::".
 //
 // Note that the zero [Addr] is not an unspecified address.
-[GoMethodBody("IsUnspecified")] internal static bool IsUnspecifiedᴍ(Addr ip) {
+internal static bool IsUnspecified⁔(/*this*/ Addr ip) {
     return ip == IPv4Unspecified() || ip == IPv6Unspecified();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string negativePrefixBitsˢᴍAddr => ref negativePrefixBitsˢᵇᴍAddr;
-private static readonly @string negativePrefixBitsˢᵇᴍAddr = "negative Prefix bits"u8;
+internal static ref readonly @string negativePrefixBitsˢ⁔Addr => ref negativePrefixBitsˢᵇ⁔Addr;
+private static readonly @string negativePrefixBitsˢᵇ⁔Addr = "negative Prefix bits"u8;
 
 // Prefix keeps only the top b bits of IP, producing a Prefix
 // of the specified length.
 // If ip is a zero [Addr], Prefix always returns a zero Prefix and a nil error.
 // Otherwise, if bits is less than zero or greater than ip.BitLen(),
 // Prefix returns an error.
-[GoMethodBody("Prefix")] internal static (Prefix, error) Prefixᴍ(Addr ip, nint b) {
+internal static (Prefix, error) Prefix⁔(/*this*/ Addr ip, nint b) {
     if (b < 0) {
-        return (new Prefix(), errors.New(negativePrefixBitsˢᴍAddr));
+        return (new Prefix(), errors.New(negativePrefixBitsˢ⁔Addr));
     }
     nint effectiveBits = b;
     switch (ip.z) {
@@ -725,7 +725,7 @@ private static readonly @string negativePrefixBitsˢᵇᴍAddr = "negative Prefi
 // IPv6 addresses with zones are returned without their zone (use the
 // [Addr.Zone] method to get it).
 // The ip zero value returns all zeroes.
-[GoMethodBody("As16")] internal static array<byte> /*a16*/ As16ᴍ(Addr ip) {
+internal static array<byte> /*a16*/ As16⁔(/*this*/ Addr ip) {
     array<byte> a16 = new(16);
 
     byteorder.BEPutUint64(a16[..8], ip.addr.hi);
@@ -736,7 +736,7 @@ private static readonly @string negativePrefixBitsˢᵇᴍAddr = "negative Prefi
 // As4 returns an IPv4 or IPv4-in-IPv6 address in its 4-byte representation.
 // If ip is the zero [Addr] or an IPv6 address, As4 panics.
 // Note that 0.0.0.0 is not the zero Addr.
-[GoMethodBody("As4")] internal static array<byte> /*a4*/ As4ᴍ(Addr ip) {
+internal static array<byte> /*a4*/ As4⁔(/*this*/ Addr ip) {
     array<byte> a4 = new(4);
 
     if (ip.z == z4 || ip.Is4In6()) {
@@ -750,7 +750,7 @@ private static readonly @string negativePrefixBitsˢᵇᴍAddr = "negative Prefi
 }
 
 // AsSlice returns an IPv4 or IPv6 address in its respective 4-byte or 16-byte representation.
-[GoMethodBody("AsSlice")] internal static slice<byte> AsSliceᴍ(Addr ip) {
+internal static slice<byte> AsSlice⁔(/*this*/ Addr ip) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         return default;
@@ -770,7 +770,7 @@ private static readonly @string negativePrefixBitsˢᵇᴍAddr = "negative Prefi
 
 // Next returns the address following ip.
 // If there is none, it returns the zero [Addr].
-[GoMethodBody("Next")] internal static Addr Nextᴍ(Addr ip) {
+internal static Addr Next⁔(/*this*/ Addr ip) {
     ip.addr = ip.addr.addOne();
     if (ip.Is4()) {
         if ((uint32)ip.addr.lo == 0) {
@@ -788,7 +788,7 @@ private static readonly @string negativePrefixBitsˢᵇᴍAddr = "negative Prefi
 
 // Prev returns the IP before ip.
 // If there is none, it returns the IP zero value.
-[GoMethodBody("Prev")] internal static Addr Prevᴍ(Addr ip) {
+internal static Addr Prev⁔(/*this*/ Addr ip) {
     if (ip.Is4()) {
         if ((uint32)ip.addr.lo == 0) {
             return new Addr();
@@ -801,8 +801,8 @@ private static readonly @string negativePrefixBitsˢᵇᴍAddr = "negative Prefi
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidIpˢᴍAddr => ref invalidIpˢᵇᴍAddr;
-private static readonly @string invalidIpˢᵇᴍAddr = "invalid IP"u8;
+internal static ref readonly @string invalidIpˢ⁔Addr => ref invalidIpˢᵇ⁔Addr;
+private static readonly @string invalidIpˢᵇ⁔Addr = "invalid IP"u8;
 
 // String returns the string form of the IP address ip.
 // It returns one of 5 forms:
@@ -816,10 +816,10 @@ private static readonly @string invalidIpˢᵇᴍAddr = "invalid IP"u8;
 // Note that unlike package net's IP.String method,
 // IPv4-mapped IPv6 addresses format with a "::ffff:"
 // prefix before the dotted quad.
-[GoMethodBody("String")] internal static @string Stringᴍ(Addr ip) {
+internal static @string String⁔(/*this*/ Addr ip) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
-        return invalidIpˢᴍAddr;
+        return invalidIpˢ⁔Addr;
     }
     case var ᴛ when ᴛ == z4: {
         return ip.string4();
@@ -835,7 +835,7 @@ private static readonly @string invalidIpˢᵇᴍAddr = "invalid IP"u8;
 // AppendTo appends a text encoding of ip,
 // as generated by [Addr.MarshalText],
 // to b and returns the extended buffer.
-[GoMethodBody("AppendTo")] internal static slice<byte> AppendToᴍ(Addr ip, slice<byte> b) {
+internal static slice<byte> AppendTo⁔(/*this*/ Addr ip, slice<byte> b) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         return b;
@@ -896,14 +896,14 @@ internal static slice<byte> appendHexPad(slice<byte> b, uint16 x) {
 
 } partial class netip_package {
 
-[GoMethodBody("string4")] internal static @string string4ᴍ(Addr ip) {
+internal static @string string4⁔(/*this*/ Addr ip) {
     const nint max = /* len("255.255.255.255") */ 15;
     var ret = new slice<byte>(0, max);
     ret = ip.appendTo4(ret);
     return (@string)ret;
 }
 
-[GoMethodBody("appendTo4")] internal static slice<byte> appendTo4ᴍ(Addr ip, slice<byte> ret) {
+internal static slice<byte> appendTo4⁔(/*this*/ Addr ip, slice<byte> ret) {
     ret = appendDecimal(ret, ip.v4(0));
     ret = append(ret, (byte)'.');
     ret = appendDecimal(ret, ip.v4(1));
@@ -914,14 +914,14 @@ internal static slice<byte> appendHexPad(slice<byte> b, uint16 x) {
     return ret;
 }
 
-[GoMethodBody("string4In6")] internal static @string string4In6ᴍ(Addr ip) {
+internal static @string string4In6⁔(/*this*/ Addr ip) {
     const nint max = /* len("::ffff:255.255.255.255%enp5s0") */ 29;
     var ret = new slice<byte>(0, max);
     ret = ip.appendTo4In6(ret);
     return (@string)ret;
 }
 
-[GoMethodBody("appendTo4In6")] internal static slice<byte> appendTo4In6ᴍ(Addr ip, slice<byte> ret) {
+internal static slice<byte> appendTo4In6⁔(/*this*/ Addr ip, slice<byte> ret) {
     ret = append(ret, ((@string)"::ffff:").ꓸꓸꓸ);
     ret = ip.Unmap().appendTo4(ret);
     if (ip.z != z6noz) {
@@ -936,7 +936,7 @@ internal static slice<byte> appendHexPad(slice<byte> b, uint16 x) {
 // (https://tools.ietf.org/html/rfc5952#section-4): no unnecessary
 // zeros, use :: to elide the longest run of zeros, and don't use ::
 // to compact a single zero field.
-[GoMethodBody("string6")] internal static @string string6ᴍ(Addr ip) {
+internal static @string string6⁔(/*this*/ Addr ip) {
     // Use a zone with a "plausibly long" name, so that most zone-ful
     // IP addresses won't require additional allocation.
     //
@@ -950,7 +950,7 @@ internal static slice<byte> appendHexPad(slice<byte> b, uint16 x) {
     return (@string)ret;
 }
 
-[GoMethodBody("appendTo6")] internal static slice<byte> appendTo6ᴍ(Addr ip, slice<byte> ret) {
+internal static slice<byte> appendTo6⁔(/*this*/ Addr ip, slice<byte> ret) {
     var (zeroStart, zeroEnd) = ((uint8)255, (uint8)255);
     for (var i = (uint8)0; i < 8; i++) {
         var j = i;
@@ -986,7 +986,7 @@ internal static slice<byte> appendHexPad(slice<byte> b, uint16 x) {
 // StringExpanded is like [Addr.String] but IPv6 addresses are expanded with leading
 // zeroes and no "::" compression. For example, "2001:db8::1" becomes
 // "2001:0db8:0000:0000:0000:0000:0000:0001".
-[GoMethodBody("StringExpanded")] internal static @string StringExpandedᴍ(Addr ip) {
+internal static @string StringExpanded⁔(/*this*/ Addr ip) {
     var retᴷ = new stackAppend<byte>();
 
     switch (ip.z) {
@@ -1015,14 +1015,14 @@ internal static slice<byte> appendHexPad(slice<byte> b, uint16 x) {
 
 // AppendText implements the [encoding.TextAppender] interface,
 // It is the same as [Addr.AppendTo].
-[GoMethodBody("AppendText")] internal static (slice<byte>, error) AppendTextᴍ(Addr ip, slice<byte> b) {
+internal static (slice<byte>, error) AppendText⁔(/*this*/ Addr ip, slice<byte> b) {
     return (ip.AppendTo(b), default);
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface,
 // The encoding is the same as returned by [Addr.String], with one exception:
 // If ip is the zero [Addr], the encoding is the empty string.
-[GoMethodBody("MarshalText")] internal static (slice<byte>, error) MarshalTextᴍ(Addr ip) {
+internal static (slice<byte>, error) MarshalText⁔(/*this*/ Addr ip) {
     var buf = slice<byte>([]);
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
@@ -1051,7 +1051,7 @@ internal static slice<byte> appendHexPad(slice<byte> b, uint16 x) {
 //
 // If text is empty, UnmarshalText sets *ip to the zero [Addr] and
 // returns no error.
-[GoMethodBody("UnmarshalText")] internal static error UnmarshalTextᴍ(ref Addr ip, slice<byte> text) {
+internal static error UnmarshalText⁔(/*this*/ ref Addr ip, slice<byte> text) {
     if (len(text) == 0) {
         ip = new Addr();
         return default;
@@ -1062,7 +1062,7 @@ internal static slice<byte> appendHexPad(slice<byte> b, uint16 x) {
 }
 
 // AppendBinary implements the [encoding.BinaryAppender] interface.
-[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(Addr ip, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ Addr ip, slice<byte> b) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         break;
@@ -1080,7 +1080,7 @@ internal static slice<byte> appendHexPad(slice<byte> b, uint16 x) {
     return (b, default);
 }
 
-[GoMethodBody("marshalBinarySize")] internal static nint marshalBinarySizeᴍ(Addr ip) {
+internal static nint marshalBinarySize⁔(/*this*/ Addr ip) {
     switch (ip.z) {
     case var ᴛ when ᴛ == z0: {
         return 0;
@@ -1097,17 +1097,17 @@ internal static slice<byte> appendHexPad(slice<byte> b, uint16 x) {
 // It returns a zero-length slice for the zero [Addr],
 // the 4-byte form for an IPv4 address,
 // and the 16-byte form with zone appended for an IPv6 address.
-[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(Addr ip) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ Addr ip) {
     return ip.AppendBinary(new slice<byte>(0, ip.marshalBinarySize()));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedSliceSizeˢᴍAddr => ref unexpectedSliceSizeˢᵇᴍAddr;
-private static readonly @string unexpectedSliceSizeˢᵇᴍAddr = "unexpected slice size"u8;
+internal static ref readonly @string unexpectedSliceSizeˢ⁔Addr => ref unexpectedSliceSizeˢᵇ⁔Addr;
+private static readonly @string unexpectedSliceSizeˢᵇ⁔Addr = "unexpected slice size"u8;
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
 // It expects data in the form generated by MarshalBinary.
-[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref Addr ip, slice<byte> b) {
+internal static error UnmarshalBinary⁔(/*this*/ ref Addr ip, slice<byte> b) {
     nint n = len(b);
     switch (ᐧ) {
     case {} when n is 0: {
@@ -1126,7 +1126,7 @@ private static readonly @string unexpectedSliceSizeˢᵇᴍAddr = "unexpected sl
         ip = AddrFrom16(new array<byte>(b[..16], 16)).WithZone((@string)(b[16..]));
         return default;
     }}
-    return errors.New(unexpectedSliceSizeˢᴍAddr);
+    return errors.New(unexpectedSliceSizeˢ⁔Addr);
 }
 
 } partial class netip_package {
@@ -1144,10 +1144,10 @@ public static AddrPort AddrPortFrom(Addr ip, uint16 port) { return new AddrPort(
 } partial class netip_package {
 
 // Addr returns p's IP address.
-[GoMethodBody("Addr")] internal static Addr Addrᴍ(AddrPort p) { return p.ip; }
+internal static Addr Addr⁔(/*this*/ AddrPort p) { return p.ip; }
 
 // Port returns p's port.
-[GoMethodBody("Port")] internal static uint16 Portᴍ(AddrPort p) { return p.port; }
+internal static uint16 Port⁔(/*this*/ AddrPort p) { return p.port; }
 
 } partial class netip_package {
 
@@ -1235,12 +1235,12 @@ public static AddrPort MustParseAddrPort(@string s) {
 
 // IsValid reports whether p.Addr() is valid.
 // All ports are valid, including zero.
-[GoMethodBody("IsValid")] internal static bool IsValidᴍ(AddrPort p) { return p.ip.IsValid(); }
+internal static bool IsValid⁔(/*this*/ AddrPort p) { return p.ip.IsValid(); }
 
 // Compare returns an integer comparing two AddrPorts.
 // The result will be 0 if p == p2, -1 if p < p2, and +1 if p > p2.
 // AddrPorts sort first by IP address, then port.
-[GoMethodBody("Compare")] internal static nint Compareᴍ(AddrPort p, AddrPort p2) {
+internal static nint Compare⁔(/*this*/ AddrPort p, AddrPort p2) {
     nint c = p.Addr().Compare(p2.Addr()); if (c != 0) {
         return c;
     }
@@ -1248,16 +1248,16 @@ public static AddrPort MustParseAddrPort(@string s) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidAddrPortˢᴍAddrPort => ref invalidAddrPortˢᵇᴍAddrPort;
-private static readonly @string invalidAddrPortˢᵇᴍAddrPort = "invalid AddrPort"u8;
+internal static ref readonly @string invalidAddrPortˢ⁔AddrPort => ref invalidAddrPortˢᵇ⁔AddrPort;
+private static readonly @string invalidAddrPortˢᵇ⁔AddrPort = "invalid AddrPort"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(AddrPort p) {
+internal static @string String⁔(/*this*/ AddrPort p) {
     var bᴷ = new stackAppend<byte>();
 
     slice<byte> b = default;
     switch (p.ip.z) {
     case var ᴛ when ᴛ == z0: {
-        return invalidAddrPortˢᴍAddrPort;
+        return invalidAddrPortˢ⁔AddrPort;
     }
     case var ᴛ when ᴛ == z4: {
         const nint max = /* len("255.255.255.255:65535") */ 21;
@@ -1288,7 +1288,7 @@ private static readonly @string invalidAddrPortˢᵇᴍAddrPort = "invalid AddrP
 // AppendTo appends a text encoding of p,
 // as generated by [AddrPort.MarshalText],
 // to b and returns the extended buffer.
-[GoMethodBody("AppendTo")] internal static slice<byte> AppendToᴍ(AddrPort p, slice<byte> b) {
+internal static slice<byte> AppendTo⁔(/*this*/ AddrPort p, slice<byte> b) {
     switch (p.ip.z) {
     case var ᴛ when ᴛ == z0: {
         return b;
@@ -1314,14 +1314,14 @@ private static readonly @string invalidAddrPortˢᵇᴍAddrPort = "invalid AddrP
 
 // AppendText implements the [encoding.TextAppender] interface. The
 // encoding is the same as returned by [AddrPort.AppendTo].
-[GoMethodBody("AppendText")] internal static (slice<byte>, error) AppendTextᴍ(AddrPort p, slice<byte> b) {
+internal static (slice<byte>, error) AppendText⁔(/*this*/ AddrPort p, slice<byte> b) {
     return (p.AppendTo(b), default);
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface. The
 // encoding is the same as returned by [AddrPort.String], with one exception: if
 // p.Addr() is the zero [Addr], the encoding is the empty string.
-[GoMethodBody("MarshalText")] internal static (slice<byte>, error) MarshalTextᴍ(AddrPort p) {
+internal static (slice<byte>, error) MarshalText⁔(/*this*/ AddrPort p) {
     var buf = slice<byte>([]);
     switch (p.ip.z) {
     case var ᴛ when ᴛ == z0: {
@@ -1343,7 +1343,7 @@ private static readonly @string invalidAddrPortˢᵇᴍAddrPort = "invalid AddrP
 // UnmarshalText implements the encoding.TextUnmarshaler
 // interface. The [AddrPort] is expected in a form
 // generated by [AddrPort.MarshalText] or accepted by [ParseAddrPort].
-[GoMethodBody("UnmarshalText")] internal static error UnmarshalTextᴍ(ref AddrPort p, slice<byte> text) {
+internal static error UnmarshalText⁔(/*this*/ ref AddrPort p, slice<byte> text) {
     if (len(text) == 0) {
         p = new AddrPort();
         return default;
@@ -1356,7 +1356,7 @@ private static readonly @string invalidAddrPortˢᵇᴍAddrPort = "invalid AddrP
 // AppendBinary implements the [encoding.BinaryAppendler] interface.
 // It returns [Addr.AppendBinary] with an additional two bytes appended
 // containing the port in little-endian.
-[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(AddrPort p, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ AddrPort p, slice<byte> b) {
     (b, var err) = p.Addr().AppendBinary(b);
     if (err != nil) {
         return (default, err);
@@ -1367,19 +1367,19 @@ private static readonly @string invalidAddrPortˢᵇᴍAddrPort = "invalid AddrP
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
 // It returns [Addr.MarshalBinary] with an additional two bytes appended
 // containing the port in little-endian.
-[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(AddrPort p) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ AddrPort p) {
     return p.AppendBinary(new slice<byte>(0, p.Addr().marshalBinarySize() + 2));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedSliceSizeˢᴍAddrPort => ref unexpectedSliceSizeˢᵇᴍAddrPort;
-private static readonly @string unexpectedSliceSizeˢᵇᴍAddrPort = "unexpected slice size"u8;
+internal static ref readonly @string unexpectedSliceSizeˢ⁔AddrPort => ref unexpectedSliceSizeˢᵇ⁔AddrPort;
+private static readonly @string unexpectedSliceSizeˢᵇ⁔AddrPort = "unexpected slice size"u8;
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
 // It expects data in the form generated by [AddrPort.MarshalBinary].
-[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref AddrPort p, slice<byte> b) {
+internal static error UnmarshalBinary⁔(/*this*/ ref AddrPort p, slice<byte> b) {
     if (len(b) < 2) {
-        return errors.New(unexpectedSliceSizeˢᴍAddrPort);
+        return errors.New(unexpectedSliceSizeˢ⁔AddrPort);
     }
     Addr addr = default;
     var err = addr.UnmarshalBinary(b.slice(0, len(b) - 2));
@@ -1425,29 +1425,29 @@ public static Prefix PrefixFrom(Addr ip, nint bits) {
 } partial class netip_package {
 
 // Addr returns p's IP address.
-[GoMethodBody("Addr")] internal static Addr Addrᴍ(Prefix p) { return p.ip; }
+internal static Addr Addr⁔(/*this*/ Prefix p) { return p.ip; }
 
 // Bits returns p's prefix length.
 //
 // It reports -1 if invalid.
-[GoMethodBody("Bits")] internal static nint Bitsᴍ(Prefix p) { return (nint)p.bitsPlusOne - 1; }
+internal static nint Bits⁔(/*this*/ Prefix p) { return (nint)p.bitsPlusOne - 1; }
 
 // IsValid reports whether p.Bits() has a valid range for p.Addr().
 // If p.Addr() is the zero [Addr], IsValid returns false.
 // Note that if p is the zero [Prefix], then p.IsValid() == false.
-[GoMethodBody("IsValid")] internal static bool IsValidᴍ(Prefix p) { return p.bitsPlusOne > 0; }
+internal static bool IsValid⁔(/*this*/ Prefix p) { return p.bitsPlusOne > 0; }
 
-[GoMethodBody("isZero")] internal static bool isZeroᴍ(Prefix p) { return p == new Prefix(); }
+internal static bool isZero⁔(/*this*/ Prefix p) { return p == new Prefix(); }
 
 // IsSingleIP reports whether p contains exactly one IP.
-[GoMethodBody("IsSingleIP")] internal static bool IsSingleIPᴍ(Prefix p) { return p.IsValid() && p.Bits() == p.ip.BitLen(); }
+internal static bool IsSingleIP⁔(/*this*/ Prefix p) { return p.IsValid() && p.Bits() == p.ip.BitLen(); }
 
 // Compare returns an integer comparing two prefixes.
 // The result will be 0 if p == p2, -1 if p < p2, and +1 if p > p2.
 // Prefixes sort first by validity (invalid before valid), then
 // address family (IPv4 before IPv6), then masked prefix address, then
 // prefix length, then unmasked address.
-[GoMethodBody("Compare")] internal static nint Compareᴍ(Prefix p, Prefix p2) {
+internal static nint Compare⁔(/*this*/ Prefix p, Prefix p2) {
     // Aside from sorting based on the masked address, this use of
     // Addr.Compare also enforces the valid vs. invalid and address
     // family ordering for the prefix.
@@ -1475,7 +1475,7 @@ partial struct parsePrefixError {
 
 } partial class netip_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(parsePrefixError err) {
+internal static @string Error⁔(/*this*/ parsePrefixError err) {
     return "netip.ParsePrefix("u8 + strconv.Quote(err.@in) + "): "u8 + err.msg;
 }
 
@@ -1539,7 +1539,7 @@ public static Prefix MustParsePrefix(@string s) {
 // p.Bits() bits of p.Addr() masked off.
 //
 // If p is zero or otherwise invalid, Masked returns the zero [Prefix].
-[GoMethodBody("Masked")] internal static Prefix Maskedᴍ(Prefix p) {
+internal static Prefix Masked⁔(/*this*/ Prefix p) {
     var (m, _) = p.ip.Prefix(p.Bits());
     return m;
 }
@@ -1551,7 +1551,7 @@ public static Prefix MustParsePrefix(@string s) {
 // A zero-value IP will not match any prefix.
 // If ip has an IPv6 zone, Contains returns false,
 // because Prefixes strip zones.
-[GoMethodBody("Contains")] internal static bool Containsᴍ(Prefix p, Addr ip) {
+internal static bool Contains⁔(/*this*/ Prefix p, Addr ip) {
     if (!p.IsValid() || ip.hasZone()) {
         return false;
     }
@@ -1582,7 +1582,7 @@ public static Prefix MustParsePrefix(@string s) {
 // If p and o are of different address families or either have a zero
 // IP, it reports false. Like the Contains method, a prefix with an
 // IPv4-mapped IPv6 address is still treated as an IPv6 mask.
-[GoMethodBody("Overlaps")] internal static bool Overlapsᴍ(Prefix p, Prefix o) {
+internal static bool Overlaps⁔(/*this*/ Prefix p, Prefix o) {
     if (!p.IsValid() || !o.IsValid()) {
         return false;
     }
@@ -1619,7 +1619,7 @@ public static Prefix MustParsePrefix(@string s) {
 // AppendTo appends a text encoding of p,
 // as generated by [Prefix.MarshalText],
 // to b and returns the extended buffer.
-[GoMethodBody("AppendTo")] internal static slice<byte> AppendToᴍ(Prefix p, slice<byte> b) {
+internal static slice<byte> AppendTo⁔(/*this*/ Prefix p, slice<byte> b) {
     if (p.isZero()) {
         return b;
     }
@@ -1646,14 +1646,14 @@ public static Prefix MustParsePrefix(@string s) {
 
 // AppendText implements the [encoding.TextAppender] interface.
 // It is the same as [Prefix.AppendTo].
-[GoMethodBody("AppendText")] internal static (slice<byte>, error) AppendTextᴍ(Prefix p, slice<byte> b) {
+internal static (slice<byte>, error) AppendText⁔(/*this*/ Prefix p, slice<byte> b) {
     return (p.AppendTo(b), default);
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface,
 // The encoding is the same as returned by [Prefix.String], with one exception:
 // If p is the zero value, the encoding is the empty string.
-[GoMethodBody("MarshalText")] internal static (slice<byte>, error) MarshalTextᴍ(Prefix p) {
+internal static (slice<byte>, error) MarshalText⁔(/*this*/ Prefix p) {
     var buf = slice<byte>([]);
     switch (p.ip.z) {
     case var ᴛ when ᴛ == z0: {
@@ -1675,7 +1675,7 @@ public static Prefix MustParsePrefix(@string s) {
 // UnmarshalText implements the encoding.TextUnmarshaler interface.
 // The IP address is expected in a form accepted by [ParsePrefix]
 // or generated by [Prefix.MarshalText].
-[GoMethodBody("UnmarshalText")] internal static error UnmarshalTextᴍ(ref Prefix p, slice<byte> text) {
+internal static error UnmarshalText⁔(/*this*/ ref Prefix p, slice<byte> text) {
     if (len(text) == 0) {
         p = new Prefix();
         return default;
@@ -1688,7 +1688,7 @@ public static Prefix MustParsePrefix(@string s) {
 // AppendBinary implements the [encoding.AppendMarshaler] interface.
 // It returns [Addr.AppendBinary] with an additional byte appended
 // containing the prefix bits.
-[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(Prefix p, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ Prefix p, slice<byte> b) {
     (b, var err) = p.Addr().withoutZone().AppendBinary(b);
     if (err != nil) {
         return (default, err);
@@ -1699,20 +1699,20 @@ public static Prefix MustParsePrefix(@string s) {
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
 // It returns [Addr.MarshalBinary] with an additional byte appended
 // containing the prefix bits.
-[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(Prefix p) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ Prefix p) {
     // without the zone the max length is 16, plus an additional byte is 17
     return p.AppendBinary(new slice<byte>(0, p.Addr().withoutZone().marshalBinarySize() + 1));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedSliceSizeˢᴍPrefix => ref unexpectedSliceSizeˢᵇᴍPrefix;
-private static readonly @string unexpectedSliceSizeˢᵇᴍPrefix = "unexpected slice size"u8;
+internal static ref readonly @string unexpectedSliceSizeˢ⁔Prefix => ref unexpectedSliceSizeˢᵇ⁔Prefix;
+private static readonly @string unexpectedSliceSizeˢᵇ⁔Prefix = "unexpected slice size"u8;
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
 // It expects data in the form generated by [Prefix.MarshalBinary].
-[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref Prefix p, slice<byte> b) {
+internal static error UnmarshalBinary⁔(/*this*/ ref Prefix p, slice<byte> b) {
     if (len(b) < 1) {
-        return errors.New(unexpectedSliceSizeˢᴍPrefix);
+        return errors.New(unexpectedSliceSizeˢ⁔Prefix);
     }
     Addr addr = default;
     var err = addr.UnmarshalBinary(b.slice(0, len(b) - 1));
@@ -1724,13 +1724,13 @@ private static readonly @string unexpectedSliceSizeˢᵇᴍPrefix = "unexpected 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidPrefixˢᴍPrefix => ref invalidPrefixˢᵇᴍPrefix;
-private static readonly @string invalidPrefixˢᵇᴍPrefix = "invalid Prefix"u8;
+internal static ref readonly @string invalidPrefixˢ⁔Prefix => ref invalidPrefixˢᵇ⁔Prefix;
+private static readonly @string invalidPrefixˢᵇ⁔Prefix = "invalid Prefix"u8;
 
 // String returns the CIDR notation of p: "<ip>/<bits>".
-[GoMethodBody("String")] internal static @string Stringᴍ(Prefix p) {
+internal static @string String⁔(/*this*/ Prefix p) {
     if (!p.IsValid()) {
-        return invalidPrefixˢᴍPrefix;
+        return invalidPrefixˢ⁔Prefix;
     }
     return p.ip.String() + "/"u8 + strconv.Itoa(p.Bits());
 }

@@ -239,7 +239,7 @@ public static ж<Profile> New(params Span<Action<ж<options>>> oʗp) {
 // ToASCII("bücher.example.com") is "xn--bcher-kva.example.com", and
 // ToASCII("golang") is "golang". If an error is encountered it will return
 // an error and a (partially) processed result.
-[GoMethodBody("ToASCII")] internal static (@string, error) ToASCIIᴍ(ж<Profile> Ꮡp, @string s) {
+internal static (@string, error) ToASCII⁔(/*this*/ ж<Profile> Ꮡp, @string s) {
     return Ꮡp.process(s, true);
 }
 
@@ -247,26 +247,26 @@ public static ж<Profile> New(params Span<Action<ж<options>>> oʗp) {
 // ToUnicode("xn--bcher-kva.example.com") is "bücher.example.com", and
 // ToUnicode("golang") is "golang". If an error is encountered it will return
 // an error and a (partially) processed result.
-[GoMethodBody("ToUnicode")] internal static (@string, error) ToUnicodeᴍ(ref Profile p, @string s) {
+internal static (@string, error) ToUnicode⁔(/*this*/ ref Profile p, @string s) {
     ref var pp = ref heap<Profile>(p, out var Ꮡpp);
     pp.transitional = false;
     return Ꮡpp.process(s, false);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string transitionalˢᴍProfile => ref transitionalˢᵇᴍProfile;
-private static readonly @string transitionalˢᵇᴍProfile = "Transitional"u8;
-private static ref readonly @string nonTransitionalˢᴍProfile => ref nonTransitionalˢᵇᴍProfile;
-private static readonly @string nonTransitionalˢᵇᴍProfile = "NonTransitional"u8;
+private static ref readonly @string transitionalˢ⁔Profile => ref transitionalˢᵇ⁔Profile;
+private static readonly @string transitionalˢᵇ⁔Profile = "Transitional"u8;
+private static ref readonly @string nonTransitionalˢ⁔Profile => ref nonTransitionalˢᵇ⁔Profile;
+private static readonly @string nonTransitionalˢᵇ⁔Profile = "NonTransitional"u8;
 
 // String reports a string with a description of the profile for debugging
 // purposes. The string format may change with different versions.
-[GoMethodBody("String")] internal static @string Stringᴍ(ref Profile p) {
+internal static @string String⁔(/*this*/ ref Profile p) {
     @string s = ""u8;
     if (p.transitional) {
-        s = transitionalˢᴍProfile;
+        s = transitionalˢ⁔Profile;
     } else {
-        s = nonTransitionalˢᴍProfile;
+        s = nonTransitionalˢ⁔Profile;
     }
     if (p.useSTD3Rules) {
         s += ":UseSTD3Rules"u8;
@@ -346,8 +346,8 @@ partial struct labelError {
 
 } partial class idna_package {
 
-[GoMethodBody("code")] internal static @string codeᴍ(labelError e) { return e.code_; }
-[GoMethodBody("Error")] internal static @string Errorᴍ(labelError e) {
+internal static @string code⁔(/*this*/ labelError e) { return e.code_; }
+internal static @string Error⁔(/*this*/ labelError e) {
     return fmt.Sprintf("idna: invalid label %q"u8, e.label);
 }
 
@@ -357,8 +357,8 @@ partial struct runeError /*num:rune*/;
 
 } partial class idna_package {
 
-[GoMethodBody("code")] internal static @string codeᴍ(runeError e) { return "P1"; }
-[GoMethodBody("Error")] internal static @string Errorᴍ(runeError e) {
+internal static @string code⁔(/*this*/ runeError e) { return "P1"; }
+internal static @string Error⁔(/*this*/ runeError e) {
     return fmt.Sprintf("idna: disallowed rune %U"u8, e);
 }
 
@@ -366,7 +366,7 @@ partial struct runeError /*num:rune*/;
 
 // process implements the algorithm described in section 4 of UTS #46,
 // see https://www.unicode.org/reports/tr46.
-[GoMethodBody("process")] internal static (@string, error) processᴍ(ж<Profile> Ꮡp, @string s, bool toASCII) {
+internal static (@string, error) process⁔(/*this*/ ж<Profile> Ꮡp, @string s, bool toASCII) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     error err = default;
@@ -518,7 +518,7 @@ internal static (@string idem, bool bidi, error err) validateRegistration(ж<Pro
 
 } partial class idna_package {
 
-[GoMethodBody("isBidi")] internal static bool isBidiᴍ(info c, @string s) {
+internal static bool isBidi⁔(/*this*/ info c, @string s) {
     if (!c.isMapped()) {
         return (info)(c & (uint16)attributesMask) == rtl;
     }
@@ -619,24 +619,24 @@ partial struct labelIter {
 
 } partial class idna_package {
 
-[GoMethodBody("reset")] internal static void resetᴍ(ref labelIter l) {
+internal static void reset⁔(/*this*/ ref labelIter l) {
     l.curStart = 0;
     l.curEnd = 0;
     l.i = 0;
 }
 
-[GoMethodBody("done")] internal static bool doneᴍ(ref labelIter l) {
+internal static bool done⁔(/*this*/ ref labelIter l) {
     return l.curStart >= len(l.orig);
 }
 
-[GoMethodBody("result")] internal static @string resultᴍ(ref labelIter l) {
+internal static @string result⁔(/*this*/ ref labelIter l) {
     if (l.Δslice != nil) {
         return strings.Join(l.Δslice, ".");
     }
     return l.orig;
 }
 
-[GoMethodBody("label")] internal static @string labelᴍ(ref labelIter l) {
+internal static @string label⁔(/*this*/ ref labelIter l) {
     if (l.Δslice != nil) {
         return l.Δslice[l.i];
     }
@@ -649,7 +649,7 @@ partial struct labelIter {
 }
 
 // next sets the value to the next label. It skips the last label if it is empty.
-[GoMethodBody("next")] internal static void nextᴍ(ref labelIter l) {
+internal static void next⁔(/*this*/ ref labelIter l) {
     l.i++;
     if (l.Δslice != nil) {
         if (l.i >= len(l.Δslice) || l.i == len(l.Δslice) - 1 && l.Δslice[l.i] == "") {
@@ -663,7 +663,7 @@ partial struct labelIter {
     }
 }
 
-[GoMethodBody("set")] internal static void setᴍ(ref labelIter l, @string s) {
+internal static void set⁔(/*this*/ ref labelIter l, @string s) {
     if (l.Δslice == nil) {
         l.Δslice = strings.Split(l.orig, ".");
     }
@@ -678,7 +678,7 @@ private static readonly @string acePrefixᵇ = "xn--"u8;
 
 } partial class idna_package {
 
-[GoMethodBody("simplify")] internal static category simplifyᴍ(ref Profile p, category cat) {
+internal static category simplify⁔(/*this*/ ref Profile p, category cat) {
     switch (cat) {
     case var ᴛ when ᴛ == disallowedSTD3Mapped: {
         if (p.useSTD3Rules) {
@@ -792,7 +792,7 @@ internal static joinState stateFAIL => 5;
 
 // validateLabel validates the criteria from Section 4.1. Item 1, 4, and 6 are
 // already implicitly satisfied by the overall implementation.
-[GoMethodBody("validateLabel")] internal static error /*err*/ validateLabelᴍ(ref Profile p, @string s) {
+internal static error /*err*/ validateLabel⁔(/*this*/ ref Profile p, @string s) {
     if (s == ""u8) {
         if (p.verifyDNSLength) {
             return new labelErrorжerror(Ꮡ(new labelError(s, "A4")));

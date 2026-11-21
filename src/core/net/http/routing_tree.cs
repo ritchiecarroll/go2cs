@@ -41,7 +41,7 @@ partial struct routingNode {
 
 // addPattern adds a pattern and its associated Handler to the tree
 // at root.
-[GoMethodBody("addPattern")] internal static void addPatternᴍ(ж<routingNode> Ꮡroot, ж<pattern> Ꮡp, Handler h) {
+internal static void addPattern⁔(/*this*/ ж<routingNode> Ꮡroot, ж<pattern> Ꮡp, Handler h) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // First level of tree is host.
@@ -55,7 +55,7 @@ partial struct routingNode {
 // addSegments adds the given segments to the tree rooted at n.
 // If there are no segments, then n is a leaf node that holds
 // the given pattern and handler.
-[GoMethodBody("addSegments")] internal static void addSegmentsᴍ(ж<routingNode> Ꮡn, slice<segment> segs, ж<pattern> p, Handler h) {
+internal static void addSegments⁔(/*this*/ ж<routingNode> Ꮡn, slice<segment> segs, ж<pattern> p, Handler h) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (len(segs) == 0) {
@@ -79,7 +79,7 @@ partial struct routingNode {
 
 // set sets the pattern and handler for n, which
 // must be a leaf node.
-[GoMethodBody("set")] internal static void setᴍ(ref routingNode n, ж<pattern> p, Handler h) {
+internal static void set⁔(/*this*/ ref routingNode n, ж<pattern> p, Handler h) {
     if (n.pattern != nil || n.handler != nil) {
         throw panic("non-nil leaf fields");
     }
@@ -89,7 +89,7 @@ partial struct routingNode {
 
 // addChild adds a child node with the given key to n
 // if one does not exist, and returns the child.
-[GoMethodBody("addChild")] internal static ж<routingNode> addChildᴍ(ж<routingNode> Ꮡn, @string key) {
+internal static ж<routingNode> addChild⁔(/*this*/ ж<routingNode> Ꮡn, @string key) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (key == ""u8) {
@@ -108,7 +108,7 @@ partial struct routingNode {
 
 // findChild returns the child of n with the given key, or nil
 // if there is no child with that key.
-[GoMethodBody("findChild")] internal static ж<routingNode> findChildᴍ(ж<routingNode> Ꮡn, @string key) {
+internal static ж<routingNode> findChild⁔(/*this*/ ж<routingNode> Ꮡn, @string key) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (key == ""u8) {
@@ -122,7 +122,7 @@ partial struct routingNode {
 // of values for pattern wildcards in the order that the wildcards appear.
 // For example, if the request path is "/a/b/c" and the pattern is "/{x}/b/{y}",
 // then the second return value will be []string{"a", "c"}.
-[GoMethodBody("match")] internal static (ж<routingNode>, slice<@string>) matchᴍ(ж<routingNode> Ꮡroot, @string host, @string method, @string path) {
+internal static (ж<routingNode>, slice<@string>) match⁔(/*this*/ ж<routingNode> Ꮡroot, @string host, @string method, @string path) {
     ref var root = ref Ꮡroot.DerefOrNull();
 
     if (host != ""u8) {
@@ -137,13 +137,13 @@ partial struct routingNode {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string getˢᴍroutingNode => ref getˢᵇᴍroutingNode;
-private static readonly @string getˢᵇᴍroutingNode = "GET"u8;
+internal static ref readonly @string getˢ⁔routingNode => ref getˢᵇ⁔routingNode;
+private static readonly @string getˢᵇ⁔routingNode = "GET"u8;
 
 // matchMethodAndPath matches the method and path.
 // Its return values are the same as [routingNode.match].
 // The receiver should be a child of the root.
-[GoMethodBody("matchMethodAndPath")] internal static (ж<routingNode>, slice<@string>) matchMethodAndPathᴍ(ж<routingNode> Ꮡn, @string method, @string path) {
+internal static (ж<routingNode>, slice<@string>) matchMethodAndPath⁔(/*this*/ ж<routingNode> Ꮡn, @string method, @string path) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (Ꮡn == nil) {
@@ -157,7 +157,7 @@ private static readonly @string getˢᵇᴍroutingNode = "GET"u8;
     }
     if (method == "HEAD"u8) {
         // GET matches HEAD too.
-        var (l, m) = Ꮡn.findChild(getˢᴍroutingNode).matchPath(path, default); if (l != nil) {
+        var (l, m) = Ꮡn.findChild(getˢ⁔routingNode).matchPath(path, default); if (l != nil) {
             return (l, m);
         }
     }
@@ -169,7 +169,7 @@ private static readonly @string getˢᵇᴍroutingNode = "GET"u8;
 // Its return values are the same as [routingNode.match].
 // matchPath calls itself recursively. The matches argument holds the wildcard matches
 // found so far.
-[GoMethodBody("matchPath")] internal static (ж<routingNode>, slice<@string>) matchPathᴍ(ж<routingNode> Ꮡn, @string path, slice<@string> matches) {
+internal static (ж<routingNode>, slice<@string>) matchPath⁔(/*this*/ ж<routingNode> Ꮡn, @string path, slice<@string> matches) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (Ꮡn == nil) {
@@ -241,24 +241,24 @@ internal static (@string seg, @string rest) firstSegment(@string path) {
 } partial class http_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string headˢᴍroutingNode => ref headˢᵇᴍroutingNode;
-private static readonly @string headˢᵇᴍroutingNode = "HEAD"u8;
+internal static ref readonly @string headˢ⁔routingNode => ref headˢᵇ⁔routingNode;
+private static readonly @string headˢᵇ⁔routingNode = "HEAD"u8;
 
 // matchingMethods adds to methodSet all the methods that would result in a
 // match if passed to routingNode.match with the given host and path.
-[GoMethodBody("matchingMethods")] internal static void matchingMethodsᴍ(ж<routingNode> Ꮡroot, @string host, @string path, map<@string, bool> methodSet) {
+internal static void matchingMethods⁔(/*this*/ ж<routingNode> Ꮡroot, @string host, @string path, map<@string, bool> methodSet) {
     ref var root = ref Ꮡroot.DerefOrNull();
 
     if (host != ""u8) {
         Ꮡroot.findChild(host).matchingMethodsPath(path, methodSet);
     }
     root.emptyChild.matchingMethodsPath(path, methodSet);
-    if (methodSet[getˢᴍroutingNode]) {
-        methodSet[headˢᴍroutingNode] = true;
+    if (methodSet[getˢ⁔routingNode]) {
+        methodSet[headˢ⁔routingNode] = true;
     }
 }
 
-[GoMethodBody("matchingMethodsPath")] internal static void matchingMethodsPathᴍ(ж<routingNode> Ꮡn, @string path, map<@string, bool> set) {
+internal static void matchingMethodsPath⁔(/*this*/ ж<routingNode> Ꮡn, @string path, map<@string, bool> set) {
     if (Ꮡn == nil) {
         return;
     }

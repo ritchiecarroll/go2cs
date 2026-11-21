@@ -26,32 +26,32 @@ public static Error ErrBitSize => 4;
 } partial class strconv_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string valueOutOfRangeˢᴍError => ref valueOutOfRangeˢᵇᴍError;
-private static readonly @string valueOutOfRangeˢᵇᴍError = "value out of range"u8;
-internal static ref readonly @string invalidSyntaxˢᴍError => ref invalidSyntaxˢᵇᴍError;
-private static readonly @string invalidSyntaxˢᵇᴍError = "invalid syntax"u8;
-internal static ref readonly @string invalidBaseˢᴍError => ref invalidBaseˢᵇᴍError;
-private static readonly @string invalidBaseˢᵇᴍError = "invalid base"u8;
-internal static ref readonly @string invalidBitSizeˢᴍError => ref invalidBitSizeˢᵇᴍError;
-private static readonly @string invalidBitSizeˢᵇᴍError = "invalid bit size"u8;
-internal static ref readonly @string unknownErrorˢᴍError => ref unknownErrorˢᵇᴍError;
-private static readonly @string unknownErrorˢᵇᴍError = "unknown error"u8;
+internal static ref readonly @string valueOutOfRangeˢ⁔Error => ref valueOutOfRangeˢᵇ⁔Error;
+private static readonly @string valueOutOfRangeˢᵇ⁔Error = "value out of range"u8;
+internal static ref readonly @string invalidSyntaxˢ⁔Error => ref invalidSyntaxˢᵇ⁔Error;
+private static readonly @string invalidSyntaxˢᵇ⁔Error = "invalid syntax"u8;
+internal static ref readonly @string invalidBaseˢ⁔Error => ref invalidBaseˢᵇ⁔Error;
+private static readonly @string invalidBaseˢᵇ⁔Error = "invalid base"u8;
+internal static ref readonly @string invalidBitSizeˢ⁔Error => ref invalidBitSizeˢᵇ⁔Error;
+private static readonly @string invalidBitSizeˢᵇ⁔Error = "invalid bit size"u8;
+internal static ref readonly @string unknownErrorˢ⁔Error => ref unknownErrorˢᵇ⁔Error;
+private static readonly @string unknownErrorˢᵇ⁔Error = "unknown error"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(Error e) {
+internal static @string Error⁔(/*this*/ Error e) {
     switch (e) {
     case var ᴛ when ᴛ == ErrRange: {
-        return valueOutOfRangeˢᴍError;
+        return valueOutOfRangeˢ⁔Error;
     }
     case var ᴛ when ᴛ == ErrSyntax: {
-        return invalidSyntaxˢᴍError;
+        return invalidSyntaxˢ⁔Error;
     }
     case var ᴛ when ᴛ == ErrBase: {
-        return invalidBaseˢᴍError;
+        return invalidBaseˢ⁔Error;
     }
     case var ᴛ when ᴛ == ErrBitSize: {
-        return invalidBitSizeˢᴍError;
+        return invalidBitSizeˢ⁔Error;
     }}
-    return unknownErrorˢᴍError;
+    return unknownErrorˢ⁔Error;
 }
 
 } partial class strconv_package {

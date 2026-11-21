@@ -73,14 +73,17 @@ using static go.expvar_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using @internal;
 using encoding;
 using go.sync;
 using net;
 using unicode;
 using static expvar_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("expvar")]
 public static partial class expvar_package
@@ -130,49 +133,49 @@ public static partial class expvar_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(expvar_package.Float)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛFloat;
-[GoMethodHost(typeof(expvar_package.Func)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛFunc;
-[GoMethodHost(typeof(expvar_package.Int)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛInt;
-[GoMethodHost(typeof(expvar_package.Map)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛMap;
-[GoMethodHost(typeof(expvar_package.String)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class expvarᴛString;
+[GoMethodHost(typeof(expvar_package.Float)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class expvarᴛFloat;
+[GoMethodHost(typeof(expvar_package.Func)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class expvarᴛFunc;
+[GoMethodHost(typeof(expvar_package.Int)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class expvarᴛInt;
+[GoMethodHost(typeof(expvar_package.Map)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class expvarᴛMap;
+[GoMethodHost(typeof(expvar_package.String)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class expvarᴛString;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class expvarᴛInt {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Value(this ж<Int> Ꮡv) => expvar_package.Valueᴍ(Ꮡv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Int> Ꮡv) => expvar_package.Stringᴍ(Ꮡv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendJSON(this ж<Int> Ꮡv, slice<byte> b) => expvar_package.appendJSONᴍ(Ꮡv, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Add(this ж<Int> Ꮡv, int64 delta) => expvar_package.Addᴍ(Ꮡv, delta);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Set(this ж<Int> Ꮡv, int64 value) => expvar_package.Setᴍ(Ꮡv, value);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Value(this ж<Int> Ꮡv) => expvar_package.Value⁔(Ꮡv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ж<Int> Ꮡv) => expvar_package.String⁔(Ꮡv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendJSON(this ж<Int> Ꮡv, slice<byte> b) => expvar_package.appendJSON⁔(Ꮡv, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Add(this ж<Int> Ꮡv, int64 delta) => expvar_package.Add⁔(Ꮡv, delta);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ж<Int> Ꮡv, int64 value) => expvar_package.Set⁔(Ꮡv, value);
 }
 partial class expvarᴛFloat {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 Value(this ж<Float> Ꮡv) => expvar_package.Valueᴍ(Ꮡv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Float> Ꮡv) => expvar_package.Stringᴍ(Ꮡv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendJSON(this ж<Float> Ꮡv, slice<byte> b) => expvar_package.appendJSONᴍ(Ꮡv, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Add(this ж<Float> Ꮡv, float64 delta) => expvar_package.Addᴍ(Ꮡv, delta);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Set(this ж<Float> Ꮡv, float64 value) => expvar_package.Setᴍ(Ꮡv, value);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static float64 Value(this ж<Float> Ꮡv) => expvar_package.Value⁔(Ꮡv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ж<Float> Ꮡv) => expvar_package.String⁔(Ꮡv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendJSON(this ж<Float> Ꮡv, slice<byte> b) => expvar_package.appendJSON⁔(Ꮡv, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Add(this ж<Float> Ꮡv, float64 delta) => expvar_package.Add⁔(Ꮡv, delta);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ж<Float> Ꮡv, float64 value) => expvar_package.Set⁔(Ꮡv, value);
 }
 partial class expvarᴛMap {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Map> Ꮡv) => expvar_package.Stringᴍ(Ꮡv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendJSON(this ж<Map> Ꮡv, slice<byte> b) => expvar_package.appendJSONᴍ(Ꮡv, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendJSONMayExpand(this ж<Map> Ꮡv, slice<byte> b, bool expand) => expvar_package.appendJSONMayExpandᴍ(Ꮡv, b, expand);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Map> Init(this ж<Map> Ꮡv) => expvar_package.Initᴍ(Ꮡv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addKey(this ж<Map> Ꮡv, @string key) => expvar_package.addKeyᴍ(Ꮡv, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Var Get(this ж<Map> Ꮡv, @string key) => expvar_package.Getᴍ(Ꮡv, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Set(this ж<Map> Ꮡv, @string key, Var av) => expvar_package.Setᴍ(Ꮡv, key, av);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Add(this ж<Map> Ꮡv, @string key, int64 delta) => expvar_package.Addᴍ(Ꮡv, key, delta);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddFloat(this ж<Map> Ꮡv, @string key, float64 delta) => expvar_package.AddFloatᴍ(Ꮡv, key, delta);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Delete(this ж<Map> Ꮡv, @string key) => expvar_package.Deleteᴍ(Ꮡv, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Do(this ж<Map> Ꮡv, Action<KeyValue> f) => expvar_package.Doᴍ(Ꮡv, f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ж<Map> Ꮡv) => expvar_package.String⁔(Ꮡv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendJSON(this ж<Map> Ꮡv, slice<byte> b) => expvar_package.appendJSON⁔(Ꮡv, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendJSONMayExpand(this ж<Map> Ꮡv, slice<byte> b, bool expand) => expvar_package.appendJSONMayExpand⁔(Ꮡv, b, expand);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Map> Init(this ж<Map> Ꮡv) => expvar_package.Init⁔(Ꮡv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void addKey(this ж<Map> Ꮡv, @string key) => expvar_package.addKey⁔(Ꮡv, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Var Get(this ж<Map> Ꮡv, @string key) => expvar_package.Get⁔(Ꮡv, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ж<Map> Ꮡv, @string key, Var av) => expvar_package.Set⁔(Ꮡv, key, av);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Add(this ж<Map> Ꮡv, @string key, int64 delta) => expvar_package.Add⁔(Ꮡv, key, delta);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void AddFloat(this ж<Map> Ꮡv, @string key, float64 delta) => expvar_package.AddFloat⁔(Ꮡv, key, delta);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Delete(this ж<Map> Ꮡv, @string key) => expvar_package.Delete⁔(Ꮡv, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Do(this ж<Map> Ꮡv, Action<KeyValue> f) => expvar_package.Do⁔(Ꮡv, f);
 }
 partial class expvarᴛString {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Value(this ж<String> Ꮡv) => expvar_package.Valueᴍ(Ꮡv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<String> Ꮡv) => expvar_package.Stringᴍ(Ꮡv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendJSON(this ж<String> Ꮡv, slice<byte> b) => expvar_package.appendJSONᴍ(Ꮡv, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Set(this ж<String> Ꮡv, @string value) => expvar_package.Setᴍ(Ꮡv, value);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Value(this ж<String> Ꮡv) => expvar_package.Value⁔(Ꮡv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ж<String> Ꮡv) => expvar_package.String⁔(Ꮡv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendJSON(this ж<String> Ꮡv, slice<byte> b) => expvar_package.appendJSON⁔(Ꮡv, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this ж<String> Ꮡv, @string value) => expvar_package.Set⁔(Ꮡv, value);
 }
 partial class expvarᴛFunc {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static any Value(this Func f) => expvar_package.Valueᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Func f) => expvar_package.Stringᴍ(f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static any Value(this Func f) => expvar_package.Value⁔(f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Func f) => expvar_package.String⁔(f);
 }
 // </GlyphForwarders>

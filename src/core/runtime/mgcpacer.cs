@@ -341,7 +341,7 @@ partial struct gcControllerState {
 
 } partial class runtime_package {
 
-[GoMethodBody("init")] internal static void initᴍ(ж<gcControllerState> Ꮡc, int32 gcPercent, int64 memoryLimit) {
+internal static void init⁔(/*this*/ ж<gcControllerState> Ꮡc, int32 gcPercent, int64 memoryLimit) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.heapMinimum = defaultHeapMinimum;
@@ -358,7 +358,7 @@ partial struct gcControllerState {
 // startCycle resets the GC controller's state and computes estimates
 // for a new GC cycle. The caller must hold worldsema and the world
 // must be stopped.
-[GoMethodBody("startCycle")] internal static void startCycleᴍ(ж<gcControllerState> Ꮡc, int64 markStartTime, nint procs, gcTrigger trigger) {
+internal static void startCycle⁔(/*this*/ ж<gcControllerState> Ꮡc, int64 markStartTime, nint procs, gcTrigger trigger) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     Ꮡc.ᏑheapScanWork.Store(0);
@@ -466,7 +466,7 @@ partial struct gcControllerState {
 // It should only be called when gcBlackenEnabled != 0 (because this
 // is when assists are enabled and the necessary statistics are
 // available).
-[GoMethodBody("revise")] internal static void reviseᴍ(ж<gcControllerState> Ꮡc) {
+internal static void revise⁔(/*this*/ ж<gcControllerState> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var gcPercent = Ꮡc.ᏑgcPercent.Load();
@@ -576,7 +576,7 @@ partial struct gcControllerState {
 // endCycle computes the consMark estimate for the next cycle.
 // userForced indicates whether the current GC cycle was forced
 // by the application.
-[GoMethodBody("endCycle")] internal static void endCycleᴍ(ж<gcControllerState> Ꮡc, int64 now, nint procs, bool userForced) {
+internal static void endCycle⁔(/*this*/ ж<gcControllerState> Ꮡc, int64 now, nint procs, bool userForced) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Record last heap goal for the scavenger.
@@ -674,7 +674,7 @@ partial struct gcControllerState {
 // the static lock ranking.
 //
 //go:nowritebarrier
-[GoMethodBody("enlistWorker")] internal static void enlistWorkerᴍ(ж<gcControllerState> Ꮡc) {
+internal static void enlistWorker⁔(/*this*/ ж<gcControllerState> Ꮡc) {
     var needDedicated = Ꮡc.ᏑdedicatedMarkWorkersNeeded.Load() > 0;
 
     // Create new workers from idle Ps with goexperiment.GreenTeaGC.
@@ -730,8 +730,8 @@ partial struct gcControllerState {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gcControllerStateˢᴍgcControllerState => ref gcControllerStateˢᵇᴍgcControllerState;
-private static readonly @string gcControllerStateˢᵇᴍgcControllerState = "gcControllerState.findRunnable: blackening not enabled"u8;
+internal static ref readonly @string gcControllerStateˢ⁔gcControllerState => ref gcControllerStateˢᵇ⁔gcControllerState;
+private static readonly @string gcControllerStateˢᵇ⁔gcControllerState = "gcControllerState.findRunnable: blackening not enabled"u8;
 
 // assignWaitingGCWorker assigns a background mark worker to pp if one should
 // be run.
@@ -745,12 +745,12 @@ private static readonly @string gcControllerStateˢᵇᴍgcControllerState = "gc
 // - Or, call c.releaseNextGCMarkWorker.
 //
 // This must only be called when gcBlackenEnabled != 0.
-[GoMethodBody("assignWaitingGCWorker")] internal static (bool, int64) assignWaitingGCWorkerᴍ(ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 now) {
+internal static (bool, int64) assignWaitingGCWorker⁔(/*this*/ ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 now) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     if (gcBlackenEnabled == 0) {
-        @throw(gcControllerStateˢᴍgcControllerState);
+        @throw(gcControllerStateˢ⁔gcControllerState);
     }
 
     if (now == 0) {
@@ -845,7 +845,7 @@ private static readonly @string gcControllerStateˢᵇᴍgcControllerState = "gc
 // the portion of findRunnable that always has a P.
 //
 //go:yeswritebarrierrec
-[GoMethodBody("findRunnableGCWorker")] internal static (ж<g>, int64) findRunnableGCWorkerᴍ(ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 now) {
+internal static (ж<g>, int64) findRunnableGCWorker⁔(/*this*/ ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 now) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     // Since we have the current time, check if the GC CPU limiter
@@ -887,7 +887,7 @@ private static readonly @string gcControllerStateˢᵇᴍgcControllerState = "gc
 // the portion of schedule.
 //
 //go:yeswritebarrierrec
-[GoMethodBody("releaseNextGCMarkWorker")] internal static void releaseNextGCMarkWorkerᴍ(ж<gcControllerState> Ꮡc, ж<p> Ꮡpp) {
+internal static void releaseNextGCMarkWorker⁔(/*this*/ ж<gcControllerState> Ꮡc, ж<p> Ꮡpp) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     var node = pp.nextGCMarkWorker;
@@ -905,7 +905,7 @@ private static readonly @string gcControllerStateˢᵇᴍgcControllerState = "gc
 // the world is started.
 //
 // The world must be stopped.
-[GoMethodBody("resetLive")] internal static void resetLiveᴍ(ж<gcControllerState> Ꮡc, uint64 bytesMarked) {
+internal static void resetLive⁔(/*this*/ ж<gcControllerState> Ꮡc, uint64 bytesMarked) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.heapMarked = bytesMarked;
@@ -924,8 +924,8 @@ private static readonly @string gcControllerStateˢᵇᴍgcControllerState = "gc
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string markWorkerStopUnknownˢᴍgcControllerState => ref markWorkerStopUnknownˢᵇᴍgcControllerState;
-private static readonly @string markWorkerStopUnknownˢᵇᴍgcControllerState = "markWorkerStop: unknown mark worker mode"u8;
+internal static ref readonly @string markWorkerStopUnknownˢ⁔gcControllerState => ref markWorkerStopUnknownˢᵇ⁔gcControllerState;
+private static readonly @string markWorkerStopUnknownˢᵇ⁔gcControllerState = "markWorkerStop: unknown mark worker mode"u8;
 
 // markWorkerStop must be called whenever a mark worker stops executing.
 //
@@ -933,7 +933,7 @@ private static readonly @string markWorkerStopUnknownˢᵇᴍgcControllerState =
 // work in nanoseconds and other bookkeeping.
 //
 // Safe to execute at any time.
-[GoMethodBody("markWorkerStop")] internal static void markWorkerStopᴍ(ж<gcControllerState> Ꮡc, gcMarkWorkerMode mode, int64 duration) {
+internal static void markWorkerStop⁔(/*this*/ ж<gcControllerState> Ꮡc, gcMarkWorkerMode mode, int64 duration) {
     switch (mode) {
     case var ᴛ when ᴛ == gcMarkWorkerDedicatedMode: {
         Ꮡc.ᏑdedicatedMarkTime.Add(duration);
@@ -950,12 +950,12 @@ private static readonly @string markWorkerStopUnknownˢᵇᴍgcControllerState =
         break;
     }
     default: {
-        @throw(markWorkerStopUnknownˢᴍgcControllerState);
+        @throw(markWorkerStopUnknownˢ⁔gcControllerState);
         break;
     }}
 }
 
-[GoMethodBody("update")] internal static void updateᴍ(ж<gcControllerState> Ꮡc, int64 dHeapLive, int64 dHeapScan) {
+internal static void update⁔(/*this*/ ж<gcControllerState> Ꮡc, int64 dHeapLive, int64 dHeapScan) {
     if (dHeapLive != 0) {
         var trace = traceAcquire();
         var live = ᏑgcController.ᏑheapLive.Add(dHeapLive);
@@ -977,7 +977,7 @@ private static readonly @string markWorkerStopUnknownˢᵇᴍgcControllerState =
     }
 }
 
-[GoMethodBody("addScannableStack")] internal static void addScannableStackᴍ(ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 amount) {
+internal static void addScannableStack⁔(/*this*/ ж<gcControllerState> Ꮡc, ж<p> Ꮡpp, int64 amount) {
     ref var pp = ref Ꮡpp.DerefOrNull();
 
     if (Ꮡpp == nil) {
@@ -991,12 +991,12 @@ private static readonly @string markWorkerStopUnknownˢᵇᴍgcControllerState =
     }
 }
 
-[GoMethodBody("addGlobals")] internal static void addGlobalsᴍ(ж<gcControllerState> Ꮡc, int64 amount) {
+internal static void addGlobals⁔(/*this*/ ж<gcControllerState> Ꮡc, int64 amount) {
     Ꮡc.ᏑglobalsScan.Add(amount);
 }
 
 // heapGoal returns the current heap goal.
-[GoMethodBody("heapGoal")] internal static uint64 heapGoalᴍ(ж<gcControllerState> Ꮡc) {
+internal static uint64 heapGoal⁔(/*this*/ ж<gcControllerState> Ꮡc) {
     var (goal, _) = Ꮡc.heapGoalInternal();
     return goal;
 }
@@ -1005,7 +1005,7 @@ private static readonly @string markWorkerStopUnknownˢᵇᴍgcControllerState =
 // information that is necessary for computing the trigger.
 //
 // The returned minTrigger is always <= goal.
-[GoMethodBody("heapGoalInternal")] internal static (uint64 goal, uint64 minTrigger) heapGoalInternalᴍ(ж<gcControllerState> Ꮡc) {
+internal static (uint64 goal, uint64 minTrigger) heapGoalInternal⁔(/*this*/ ж<gcControllerState> Ꮡc) {
     uint64 goal = default;
     uint64 minTrigger = default;
     ref var c = ref Ꮡc.DerefOrNull();
@@ -1055,7 +1055,7 @@ private static readonly @string markWorkerStopUnknownˢᵇᴍgcControllerState =
 }
 
 // memoryLimitHeapGoal returns a heap goal derived from memoryLimit.
-[GoMethodBody("memoryLimitHeapGoal")] internal static uint64 memoryLimitHeapGoalᴍ(ж<gcControllerState> Ꮡc) {
+internal static uint64 memoryLimitHeapGoal⁔(/*this*/ ж<gcControllerState> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Start by pulling out some values we'll need. Be careful about overflow.
@@ -1197,8 +1197,8 @@ internal static UntypedInt maxTriggerRatioNum => 61; // ~0.95
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string producedATriggerGreaterˢᴍgcControllerState => ref producedATriggerGreaterˢᵇᴍgcControllerState;
-private static readonly @string producedATriggerGreaterˢᵇᴍgcControllerState = "produced a trigger greater than the heap goal"u8;
+internal static ref readonly @string producedATriggerGreaterˢ⁔gcControllerState => ref producedATriggerGreaterˢᵇ⁔gcControllerState;
+private static readonly @string producedATriggerGreaterˢᵇ⁔gcControllerState = "produced a trigger greater than the heap goal"u8;
 
 // trigger returns the current point at which a GC should trigger along with
 // the heap goal.
@@ -1207,7 +1207,7 @@ private static readonly @string producedATriggerGreaterˢᵇᴍgcControllerState
 // the GC should trigger. Thus, the GC trigger condition should be (but may
 // not be, in the case of small movements for efficiency) checked whenever
 // the heap goal may change.
-[GoMethodBody("trigger")] internal static (uint64, uint64) triggerᴍ(ж<gcControllerState> Ꮡc) {
+internal static (uint64, uint64) trigger⁔(/*this*/ ж<gcControllerState> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (goal, minTrigger) = Ꮡc.heapGoalInternal();
@@ -1273,7 +1273,7 @@ private static readonly @string producedATriggerGreaterˢᵇᴍgcControllerState
     if (trigger > goal) {
         print((@string)"trigger=", trigger, (@string)" heapGoal=", goal, (@string)"\n");
         print((@string)"minTrigger=", minTrigger, (@string)" maxTrigger=", maxTrigger, (@string)"\n");
-        @throw(producedATriggerGreaterˢᴍgcControllerState);
+        @throw(producedATriggerGreaterˢ⁔gcControllerState);
     }
     return (trigger, goal);
 }
@@ -1295,7 +1295,7 @@ private static readonly @string producedATriggerGreaterˢᵇᴍgcControllerState
 // function if the GC is enabled.
 //
 // mheap_.lock must be held or the world must be stopped.
-[GoMethodBody("commit")] internal static void commitᴍ(ж<gcControllerState> Ꮡc, bool isSweepDone) {
+internal static void commit⁔(/*this*/ ж<gcControllerState> Ꮡc, bool isSweepDone) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!c.test) {
@@ -1357,7 +1357,7 @@ private static readonly @string producedATriggerGreaterˢᵇᴍgcControllerState
 // Returns the old value of gcPercent.
 //
 // The world must be stopped, or mheap_.lock must be held.
-[GoMethodBody("setGCPercent")] internal static int32 setGCPercentᴍ(ж<gcControllerState> Ꮡc, int32 @in) {
+internal static int32 setGCPercent⁔(/*this*/ ж<gcControllerState> Ꮡc, int32 @in) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!c.test) {
@@ -1418,7 +1418,7 @@ internal static int32 readGOGC() {
 // Returns the old value of memoryLimit.
 //
 // The world must be stopped, or mheap_.lock must be held.
-[GoMethodBody("setMemoryLimit")] internal static int64 setMemoryLimitᴍ(ж<gcControllerState> Ꮡc, int64 @in) {
+internal static int64 setMemoryLimit⁔(/*this*/ ж<gcControllerState> Ꮡc, int64 @in) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!c.test) {
@@ -1477,8 +1477,8 @@ internal static int64 readGOMEMLIMIT() {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string negativeIdleMarkWorkersˢᴍgcControllerState => ref negativeIdleMarkWorkersˢᵇᴍgcControllerState;
-private static readonly @string negativeIdleMarkWorkersˢᵇᴍgcControllerState = "negative idle mark workers"u8;
+internal static ref readonly @string negativeIdleMarkWorkersˢ⁔gcControllerState => ref negativeIdleMarkWorkersˢᵇ⁔gcControllerState;
+private static readonly @string negativeIdleMarkWorkersˢᵇ⁔gcControllerState = "negative idle mark workers"u8;
 
 // addIdleMarkWorker attempts to add a new idle mark worker.
 //
@@ -1490,7 +1490,7 @@ private static readonly @string negativeIdleMarkWorkersˢᵇᴍgcControllerState
 // nosplit because it may be called without a P.
 //
 //go:nosplit
-[GoMethodBody("addIdleMarkWorker")] internal static bool addIdleMarkWorkerᴍ(ж<gcControllerState> Ꮡc) {
+internal static bool addIdleMarkWorker⁔(/*this*/ ж<gcControllerState> Ꮡc) {
     for (;;) {
         var old = Ꮡc.ᏑidleMarkWorkers.Load();
         var (n, max) = ((int32)(old & (uint64)(~(uint32)0)), (int32)(old >> 32));
@@ -1501,7 +1501,7 @@ private static readonly @string negativeIdleMarkWorkersˢᵇᴍgcControllerState
         }
         if (n < 0) {
             print((@string)"n=", n, (@string)" max=", max, (@string)"\n");
-            @throw(negativeIdleMarkWorkersˢᴍgcControllerState);
+            @throw(negativeIdleMarkWorkersˢ⁔gcControllerState);
         }
         var @new = (uint64)(uint32)(n + 1) | ((uint64)max << 32);
         if (Ꮡc.ᏑidleMarkWorkers.CompareAndSwap(old, @new)) {
@@ -1518,20 +1518,20 @@ private static readonly @string negativeIdleMarkWorkersˢᵇᴍgcControllerState
 // nosplit because it may be called without a P.
 //
 //go:nosplit
-[GoMethodBody("needIdleMarkWorker")] internal static bool needIdleMarkWorkerᴍ(ж<gcControllerState> Ꮡc) {
+internal static bool needIdleMarkWorker⁔(/*this*/ ж<gcControllerState> Ꮡc) {
     var p = Ꮡc.ᏑidleMarkWorkers.Load();
     var (n, max) = ((int32)(p & (uint64)(~(uint32)0)), (int32)(p >> 32));
     return n < max;
 }
 
 // removeIdleMarkWorker must be called when a new idle mark worker stops executing.
-[GoMethodBody("removeIdleMarkWorker")] internal static void removeIdleMarkWorkerᴍ(ж<gcControllerState> Ꮡc) {
+internal static void removeIdleMarkWorker⁔(/*this*/ ж<gcControllerState> Ꮡc) {
     for (;;) {
         var old = Ꮡc.ᏑidleMarkWorkers.Load();
         var (n, max) = ((int32)(old & (uint64)(~(uint32)0)), (int32)(old >> 32));
         if (n - 1 < 0) {
             print((@string)"n=", n, (@string)" max=", max, (@string)"\n");
-            @throw(negativeIdleMarkWorkersˢᴍgcControllerState);
+            @throw(negativeIdleMarkWorkersˢ⁔gcControllerState);
         }
         var @new = (uint64)(uint32)(n - 1) | ((uint64)max << 32);
         if (Ꮡc.ᏑidleMarkWorkers.CompareAndSwap(old, @new)) {
@@ -1545,13 +1545,13 @@ private static readonly @string negativeIdleMarkWorkersˢᵇᴍgcControllerState
 // This method is optimistic in that it does not wait for the number of
 // idle mark workers to reduce to max before returning; it assumes the workers
 // will deschedule themselves.
-[GoMethodBody("setMaxIdleMarkWorkers")] internal static void setMaxIdleMarkWorkersᴍ(ж<gcControllerState> Ꮡc, int32 max) {
+internal static void setMaxIdleMarkWorkers⁔(/*this*/ ж<gcControllerState> Ꮡc, int32 max) {
     for (;;) {
         var old = Ꮡc.ᏑidleMarkWorkers.Load();
         var n = (int32)(old & (uint64)(~(uint32)0));
         if (n < 0) {
             print((@string)"n=", n, (@string)" max=", max, (@string)"\n");
-            @throw(negativeIdleMarkWorkersˢᴍgcControllerState);
+            @throw(negativeIdleMarkWorkersˢ⁔gcControllerState);
         }
         var @new = (uint64)(uint32)n | ((uint64)max << 32);
         if (Ꮡc.ᏑidleMarkWorkers.CompareAndSwap(old, @new)) {

@@ -78,12 +78,15 @@ using static go.encoding.asn1_package;
 
 namespace go.encoding;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using @internal;
 using go.math;
 using unicode;
 using static asn1_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("asn1")]
 public static partial class asn1_package
@@ -150,74 +153,74 @@ public static partial class asn1_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(asn1_package.BitString)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛBitString;
-[GoMethodHost(typeof(asn1_package.ObjectIdentifier)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛObjectIdentifier;
-[GoMethodHost(typeof(asn1_package.StructuralError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛStructuralError;
-[GoMethodHost(typeof(asn1_package.SyntaxError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛSyntaxError;
-[GoMethodHost(typeof(asn1_package.bitStringEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛbitStringEncoder;
-[GoMethodHost(typeof(asn1_package.byteEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛbyteEncoder;
-[GoMethodHost(typeof(asn1_package.bytesEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛbytesEncoder;
-[GoMethodHost(typeof(asn1_package.int64Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛint64Encoder;
-[GoMethodHost(typeof(asn1_package.invalidUnmarshalError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛinvalidUnmarshalError;
-[GoMethodHost(typeof(asn1_package.multiEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛmultiEncoder;
-[GoMethodHost(typeof(asn1_package.oidEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛoidEncoder;
-[GoMethodHost(typeof(asn1_package.setEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛsetEncoder;
-[GoMethodHost(typeof(asn1_package.stringEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛstringEncoder;
-[GoMethodHost(typeof(asn1_package.taggedEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class asn1ᴛtaggedEncoder;
+[GoMethodHost(typeof(asn1_package.BitString)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛBitString;
+[GoMethodHost(typeof(asn1_package.ObjectIdentifier)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛObjectIdentifier;
+[GoMethodHost(typeof(asn1_package.StructuralError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛStructuralError;
+[GoMethodHost(typeof(asn1_package.SyntaxError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛSyntaxError;
+[GoMethodHost(typeof(asn1_package.bitStringEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛbitStringEncoder;
+[GoMethodHost(typeof(asn1_package.byteEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛbyteEncoder;
+[GoMethodHost(typeof(asn1_package.bytesEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛbytesEncoder;
+[GoMethodHost(typeof(asn1_package.int64Encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛint64Encoder;
+[GoMethodHost(typeof(asn1_package.invalidUnmarshalError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛinvalidUnmarshalError;
+[GoMethodHost(typeof(asn1_package.multiEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛmultiEncoder;
+[GoMethodHost(typeof(asn1_package.oidEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛoidEncoder;
+[GoMethodHost(typeof(asn1_package.setEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛsetEncoder;
+[GoMethodHost(typeof(asn1_package.stringEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛstringEncoder;
+[GoMethodHost(typeof(asn1_package.taggedEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class asn1ᴛtaggedEncoder;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class asn1ᴛStructuralError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this StructuralError e) => asn1_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this StructuralError e) => asn1_package.Error⁔(e);
 }
 partial class asn1ᴛSyntaxError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this SyntaxError e) => asn1_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this SyntaxError e) => asn1_package.Error⁔(e);
 }
 partial class asn1ᴛBitString {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint At(this BitString b, nint i) => asn1_package.Atᴍ(b, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> RightAlign(this BitString b) => asn1_package.RightAlignᴍ(b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint At(this BitString b, nint i) => asn1_package.At⁔(b, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> RightAlign(this BitString b) => asn1_package.RightAlign⁔(b);
 }
 partial class asn1ᴛObjectIdentifier {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ObjectIdentifier oi, ObjectIdentifier other) => asn1_package.Equalᴍ(oi, other);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ObjectIdentifier oi) => asn1_package.Stringᴍ(oi);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this ObjectIdentifier oi, ObjectIdentifier other) => asn1_package.Equal⁔(oi, other);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ObjectIdentifier oi) => asn1_package.String⁔(oi);
 }
 partial class asn1ᴛinvalidUnmarshalError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref invalidUnmarshalError e) => asn1_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref invalidUnmarshalError e) => asn1_package.Error⁔(ref e);
 }
 partial class asn1ᴛbyteEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this byteEncoder c) => asn1_package.Lenᴍ(c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this byteEncoder c, slice<byte> dst) => asn1_package.Encodeᴍ(c, dst);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this byteEncoder c) => asn1_package.Len⁔(c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this byteEncoder c, slice<byte> dst) => asn1_package.Encode⁔(c, dst);
 }
 partial class asn1ᴛbytesEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this bytesEncoder b) => asn1_package.Lenᴍ(b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this bytesEncoder b, slice<byte> dst) => asn1_package.Encodeᴍ(b, dst);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this bytesEncoder b) => asn1_package.Len⁔(b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this bytesEncoder b, slice<byte> dst) => asn1_package.Encode⁔(b, dst);
 }
 partial class asn1ᴛstringEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this stringEncoder s) => asn1_package.Lenᴍ(s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this stringEncoder s, slice<byte> dst) => asn1_package.Encodeᴍ(s, dst);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this stringEncoder s) => asn1_package.Len⁔(s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this stringEncoder s, slice<byte> dst) => asn1_package.Encode⁔(s, dst);
 }
 partial class asn1ᴛmultiEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this multiEncoder m) => asn1_package.Lenᴍ(m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this multiEncoder m, slice<byte> dst) => asn1_package.Encodeᴍ(m, dst);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this multiEncoder m) => asn1_package.Len⁔(m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this multiEncoder m, slice<byte> dst) => asn1_package.Encode⁔(m, dst);
 }
 partial class asn1ᴛsetEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this setEncoder s) => asn1_package.Lenᴍ(s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this setEncoder s, slice<byte> dst) => asn1_package.Encodeᴍ(s, dst);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this setEncoder s) => asn1_package.Len⁔(s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this setEncoder s, slice<byte> dst) => asn1_package.Encode⁔(s, dst);
 }
 partial class asn1ᴛtaggedEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this ref taggedEncoder t) => asn1_package.Lenᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this ref taggedEncoder t, slice<byte> dst) => asn1_package.Encodeᴍ(ref t, dst);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this ref taggedEncoder t) => asn1_package.Len⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this ref taggedEncoder t, slice<byte> dst) => asn1_package.Encode⁔(ref t, dst);
 }
 partial class asn1ᴛint64Encoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this int64Encoder i) => asn1_package.Lenᴍ(i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this int64Encoder i, slice<byte> dst) => asn1_package.Encodeᴍ(i, dst);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this int64Encoder i) => asn1_package.Len⁔(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this int64Encoder i, slice<byte> dst) => asn1_package.Encode⁔(i, dst);
 }
 partial class asn1ᴛbitStringEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this bitStringEncoder b) => asn1_package.Lenᴍ(b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this bitStringEncoder b, slice<byte> dst) => asn1_package.Encodeᴍ(b, dst);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this bitStringEncoder b) => asn1_package.Len⁔(b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this bitStringEncoder b, slice<byte> dst) => asn1_package.Encode⁔(b, dst);
 }
 partial class asn1ᴛoidEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Len(this oidEncoder oid) => asn1_package.Lenᴍ(oid);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Encode(this oidEncoder oid, slice<byte> dst) => asn1_package.Encodeᴍ(oid, dst);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Len(this oidEncoder oid) => asn1_package.Len⁔(oid);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Encode(this oidEncoder oid, slice<byte> dst) => asn1_package.Encode⁔(oid, dst);
 }
 // </GlyphForwarders>

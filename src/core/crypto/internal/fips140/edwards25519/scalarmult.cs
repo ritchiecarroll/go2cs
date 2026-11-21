@@ -36,7 +36,7 @@ internal static ref basepointTablePrecompᴛ1 basepointTablePrecomp => ref ((Sta
 // returns v.
 //
 // The scalar multiplication is done in constant time.
-[GoMethodBody("ScalarBaseMult")] internal static ж<Point> ScalarBaseMultᴍ(ж<Point> Ꮡv, ж<Scalar> x) {
+internal static ж<Point> ScalarBaseMult⁔(/*this*/ ж<Point> Ꮡv, ж<Scalar> x) {
     var basepointTableΔ1 = basepointTable();
 
     // Write x = sum(x_i * 16^i) so  x*B = sum( B*x_i*16^i )
@@ -88,7 +88,7 @@ internal static ref basepointTablePrecompᴛ1 basepointTablePrecomp => ref ((Sta
 // ScalarMult sets v = x * q, and returns v.
 //
 // The scalar multiplication is done in constant time.
-[GoMethodBody("ScalarMult")] internal static ж<Point> ScalarMultᴍ(ж<Point> Ꮡv, ж<Scalar> x, ж<Point> q) {
+internal static ж<Point> ScalarMult⁔(/*this*/ ж<Point> Ꮡv, ж<Scalar> x, ж<Point> q) {
     checkInitialized(q);
 
     projLookupTable table = new();
@@ -152,7 +152,7 @@ internal static ref basepointNafTablePrecompᴛ1 basepointNafTablePrecomp => ref
 // generator, and returns v.
 //
 // Execution time depends on the inputs.
-[GoMethodBody("VarTimeDoubleScalarBaseMult")] internal static ж<Point> VarTimeDoubleScalarBaseMultᴍ(ж<Point> Ꮡv, ж<Scalar> a, ж<Point> A, ж<Scalar> b) {
+internal static ж<Point> VarTimeDoubleScalarBaseMult⁔(/*this*/ ж<Point> Ꮡv, ж<Scalar> a, ж<Point> A, ж<Scalar> b) {
     checkInitialized(A);
 
     // Similarly to the single variable-base approach, we compute

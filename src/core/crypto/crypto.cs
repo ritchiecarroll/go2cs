@@ -47,108 +47,108 @@ partial struct Hash /*num:nuint*/;
 } partial class crypto_package {
 
 // HashFunc simply returns the value of h so that [Hash] implements [SignerOpts].
-[GoMethodBody("HashFunc")] internal static Hash HashFuncᴍ(Hash h) {
+internal static Hash HashFunc⁔(/*this*/ Hash h) {
     return h;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string md4ˢᴍHash => ref md4ˢᵇᴍHash;
-private static readonly @string md4ˢᵇᴍHash = "MD4"u8;
-private static ref readonly @string md5ˢᴍHash => ref md5ˢᵇᴍHash;
-private static readonly @string md5ˢᵇᴍHash = "MD5"u8;
-private static ref readonly @string sha1ˢᴍHash => ref sha1ˢᵇᴍHash;
-private static readonly @string sha1ˢᵇᴍHash = "SHA-1"u8;
-private static ref readonly @string sha224ˢᴍHash => ref sha224ˢᵇᴍHash;
-private static readonly @string sha224ˢᵇᴍHash = "SHA-224"u8;
-private static ref readonly @string sha256ˢᴍHash => ref sha256ˢᵇᴍHash;
-private static readonly @string sha256ˢᵇᴍHash = "SHA-256"u8;
-private static ref readonly @string sha384ˢᴍHash => ref sha384ˢᵇᴍHash;
-private static readonly @string sha384ˢᵇᴍHash = "SHA-384"u8;
-private static ref readonly @string sha512ˢᴍHash => ref sha512ˢᵇᴍHash;
-private static readonly @string sha512ˢᵇᴍHash = "SHA-512"u8;
-private static ref readonly @string md5Sha1ˢᴍHash => ref md5Sha1ˢᵇᴍHash;
-private static readonly @string md5Sha1ˢᵇᴍHash = "MD5+SHA1"u8;
-private static ref readonly @string ripemd160ˢᴍHash => ref ripemd160ˢᵇᴍHash;
-private static readonly @string ripemd160ˢᵇᴍHash = "RIPEMD-160"u8;
-private static ref readonly @string sha3224ˢᴍHash => ref sha3224ˢᵇᴍHash;
-private static readonly @string sha3224ˢᵇᴍHash = "SHA3-224"u8;
-private static ref readonly @string sha3256ˢᴍHash => ref sha3256ˢᵇᴍHash;
-private static readonly @string sha3256ˢᵇᴍHash = "SHA3-256"u8;
-private static ref readonly @string sha3384ˢᴍHash => ref sha3384ˢᵇᴍHash;
-private static readonly @string sha3384ˢᵇᴍHash = "SHA3-384"u8;
-private static ref readonly @string sha3512ˢᴍHash => ref sha3512ˢᵇᴍHash;
-private static readonly @string sha3512ˢᵇᴍHash = "SHA3-512"u8;
-private static ref readonly @string sha512224ˢᴍHash => ref sha512224ˢᵇᴍHash;
-private static readonly @string sha512224ˢᵇᴍHash = "SHA-512/224"u8;
-private static ref readonly @string sha512256ˢᴍHash => ref sha512256ˢᵇᴍHash;
-private static readonly @string sha512256ˢᵇᴍHash = "SHA-512/256"u8;
-private static ref readonly @string blake2s256ˢᴍHash => ref blake2s256ˢᵇᴍHash;
-private static readonly @string blake2s256ˢᵇᴍHash = "BLAKE2s-256"u8;
-private static ref readonly @string blake2b256ˢᴍHash => ref blake2b256ˢᵇᴍHash;
-private static readonly @string blake2b256ˢᵇᴍHash = "BLAKE2b-256"u8;
-private static ref readonly @string blake2b384ˢᴍHash => ref blake2b384ˢᵇᴍHash;
-private static readonly @string blake2b384ˢᵇᴍHash = "BLAKE2b-384"u8;
-private static ref readonly @string blake2b512ˢᴍHash => ref blake2b512ˢᵇᴍHash;
-private static readonly @string blake2b512ˢᵇᴍHash = "BLAKE2b-512"u8;
+private static ref readonly @string md4ˢ⁔Hash => ref md4ˢᵇ⁔Hash;
+private static readonly @string md4ˢᵇ⁔Hash = "MD4"u8;
+private static ref readonly @string md5ˢ⁔Hash => ref md5ˢᵇ⁔Hash;
+private static readonly @string md5ˢᵇ⁔Hash = "MD5"u8;
+private static ref readonly @string sha1ˢ⁔Hash => ref sha1ˢᵇ⁔Hash;
+private static readonly @string sha1ˢᵇ⁔Hash = "SHA-1"u8;
+private static ref readonly @string sha224ˢ⁔Hash => ref sha224ˢᵇ⁔Hash;
+private static readonly @string sha224ˢᵇ⁔Hash = "SHA-224"u8;
+private static ref readonly @string sha256ˢ⁔Hash => ref sha256ˢᵇ⁔Hash;
+private static readonly @string sha256ˢᵇ⁔Hash = "SHA-256"u8;
+private static ref readonly @string sha384ˢ⁔Hash => ref sha384ˢᵇ⁔Hash;
+private static readonly @string sha384ˢᵇ⁔Hash = "SHA-384"u8;
+private static ref readonly @string sha512ˢ⁔Hash => ref sha512ˢᵇ⁔Hash;
+private static readonly @string sha512ˢᵇ⁔Hash = "SHA-512"u8;
+private static ref readonly @string md5Sha1ˢ⁔Hash => ref md5Sha1ˢᵇ⁔Hash;
+private static readonly @string md5Sha1ˢᵇ⁔Hash = "MD5+SHA1"u8;
+private static ref readonly @string ripemd160ˢ⁔Hash => ref ripemd160ˢᵇ⁔Hash;
+private static readonly @string ripemd160ˢᵇ⁔Hash = "RIPEMD-160"u8;
+private static ref readonly @string sha3224ˢ⁔Hash => ref sha3224ˢᵇ⁔Hash;
+private static readonly @string sha3224ˢᵇ⁔Hash = "SHA3-224"u8;
+private static ref readonly @string sha3256ˢ⁔Hash => ref sha3256ˢᵇ⁔Hash;
+private static readonly @string sha3256ˢᵇ⁔Hash = "SHA3-256"u8;
+private static ref readonly @string sha3384ˢ⁔Hash => ref sha3384ˢᵇ⁔Hash;
+private static readonly @string sha3384ˢᵇ⁔Hash = "SHA3-384"u8;
+private static ref readonly @string sha3512ˢ⁔Hash => ref sha3512ˢᵇ⁔Hash;
+private static readonly @string sha3512ˢᵇ⁔Hash = "SHA3-512"u8;
+private static ref readonly @string sha512224ˢ⁔Hash => ref sha512224ˢᵇ⁔Hash;
+private static readonly @string sha512224ˢᵇ⁔Hash = "SHA-512/224"u8;
+private static ref readonly @string sha512256ˢ⁔Hash => ref sha512256ˢᵇ⁔Hash;
+private static readonly @string sha512256ˢᵇ⁔Hash = "SHA-512/256"u8;
+private static ref readonly @string blake2s256ˢ⁔Hash => ref blake2s256ˢᵇ⁔Hash;
+private static readonly @string blake2s256ˢᵇ⁔Hash = "BLAKE2s-256"u8;
+private static ref readonly @string blake2b256ˢ⁔Hash => ref blake2b256ˢᵇ⁔Hash;
+private static readonly @string blake2b256ˢᵇ⁔Hash = "BLAKE2b-256"u8;
+private static ref readonly @string blake2b384ˢ⁔Hash => ref blake2b384ˢᵇ⁔Hash;
+private static readonly @string blake2b384ˢᵇ⁔Hash = "BLAKE2b-384"u8;
+private static ref readonly @string blake2b512ˢ⁔Hash => ref blake2b512ˢᵇ⁔Hash;
+private static readonly @string blake2b512ˢᵇ⁔Hash = "BLAKE2b-512"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Hash h) {
+internal static @string String⁔(/*this*/ Hash h) {
     switch (h) {
     case var ᴛ when ᴛ == MD4: {
-        return md4ˢᴍHash;
+        return md4ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == MD5: {
-        return md5ˢᴍHash;
+        return md5ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == SHA1: {
-        return sha1ˢᴍHash;
+        return sha1ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == SHA224: {
-        return sha224ˢᴍHash;
+        return sha224ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == SHA256: {
-        return sha256ˢᴍHash;
+        return sha256ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == SHA384: {
-        return sha384ˢᴍHash;
+        return sha384ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == SHA512: {
-        return sha512ˢᴍHash;
+        return sha512ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == MD5SHA1: {
-        return md5Sha1ˢᴍHash;
+        return md5Sha1ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == RIPEMD160: {
-        return ripemd160ˢᴍHash;
+        return ripemd160ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == SHA3_224: {
-        return sha3224ˢᴍHash;
+        return sha3224ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == SHA3_256: {
-        return sha3256ˢᴍHash;
+        return sha3256ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == SHA3_384: {
-        return sha3384ˢᴍHash;
+        return sha3384ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == SHA3_512: {
-        return sha3512ˢᴍHash;
+        return sha3512ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == SHA512_224: {
-        return sha512224ˢᴍHash;
+        return sha512224ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == SHA512_256: {
-        return sha512256ˢᴍHash;
+        return sha512256ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == BLAKE2s_256: {
-        return blake2s256ˢᴍHash;
+        return blake2s256ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == BLAKE2b_256: {
-        return blake2b256ˢᴍHash;
+        return blake2b256ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == BLAKE2b_384: {
-        return blake2b384ˢᴍHash;
+        return blake2b384ˢ⁔Hash;
     }
     case var ᴛ when ᴛ == BLAKE2b_512: {
-        return blake2b512ˢᴍHash;
+        return blake2b512ˢ⁔Hash;
     }
     default: {
         return "unknown hash value "u8 + strconv.Itoa((nint)h);
@@ -205,7 +205,7 @@ internal static Hash maxHash => 20;
 // Size returns the length, in bytes, of a digest resulting from the given hash
 // function. It doesn't require that the hash function in question be linked
 // into the program.
-[GoMethodBody("Size")] internal static nint Sizeᴍ(Hash h) {
+internal static nint Size⁔(/*this*/ Hash h) {
     if (h > 0 && h < maxHash) {
         return (nint)digestSizes[h];
     }
@@ -220,7 +220,7 @@ internal static slice<Func<hash.Hash>> hashes = new slice<Func<hash.Hash>>((nint
 
 // New returns a new hash.Hash calculating the given hash function. New panics
 // if the hash function is not linked into the binary.
-[GoMethodBody("New")] internal static hash.Hash Newᴍ(Hash h) {
+internal static hash.Hash New⁔(/*this*/ Hash h) {
     if (h > 0 && h < maxHash) {
         var f = hashes[h];
         if (f != nil) {
@@ -231,7 +231,7 @@ internal static slice<Func<hash.Hash>> hashes = new slice<Func<hash.Hash>>((nint
 }
 
 // Available reports whether the given hash function is linked into the binary.
-[GoMethodBody("Available")] internal static bool Availableᴍ(Hash h) {
+internal static bool Available⁔(/*this*/ Hash h) {
     return h < maxHash && hashes[h] != nil;
 }
 

@@ -27,20 +27,20 @@ partial struct Template {
 
 } partial class lazytemplate_package {
 
-[GoMethodBody("tp")] internal static ж<template.Template> tpᴍ(ж<Template> Ꮡr) {
+internal static ж<template.Template> tp⁔(/*this*/ ж<Template> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Ꮡonce.Do(Ꮡr.build);
     return r.tmpl;
 }
 
-[GoMethodBody("build")] internal static void buildᴍ(ref Template r) {
+internal static void build⁔(/*this*/ ref Template r) {
     var (ᴛ1, ᴛ2) = template.New(r.name).Parse(r.text);
     r.tmpl = template.Must(ᴛ1, ᴛ2);
     (r.name, r.text) = ("", "");
 }
 
-[GoMethodBody("Execute")] internal static error Executeᴍ(ж<Template> Ꮡr, io.Writer w, any data) {
+internal static error Execute⁔(/*this*/ ж<Template> Ꮡr, io.Writer w, any data) {
     return Ꮡr.tp().Execute(w, data);
 }
 

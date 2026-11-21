@@ -20,9 +20,9 @@ public static ж<Slice> NewSlice(Type elem) { return Ꮡ(new Slice(elem: elem));
 } partial class types_package {
 
 // Elem returns the element type of slice s.
-[GoMethodBody("Elem")] internal static Type Elemᴍ(ref Slice s) { return s.elem; }
+internal static Type Elem⁔(/*this*/ ref Slice s) { return s.elem; }
 
-[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Slice> Ꮡs) { return new SliceжType(Ꮡs); }
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Slice> Ꮡs) { return TypeString(new SliceжType(Ꮡs), default); }
+internal static Type Underlying⁔(/*this*/ ж<Slice> Ꮡs) { return new SliceжType(Ꮡs); }
+internal static @string String⁔(/*this*/ ж<Slice> Ꮡs) { return TypeString(new SliceжType(Ꮡs), default); }
 
 }

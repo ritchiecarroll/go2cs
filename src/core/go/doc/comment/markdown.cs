@@ -22,7 +22,7 @@ partial struct mdPrinter {
 
 // Markdown returns a Markdown formatting of the Doc.
 // See the [Printer] documentation for ways to customize the Markdown output.
-[GoMethodBody("Markdown")] internal static slice<byte> Markdownᴍ(ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+internal static slice<byte> Markdown⁔(/*this*/ ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -44,11 +44,11 @@ partial struct mdPrinter {
 } partial class comment_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string fourSpaceᶜᴍmdPrinter => ref fourSpaceᶜᵇᴍmdPrinter;
-private static readonly @string fourSpaceᶜᵇᴍmdPrinter = "    "u8;
+internal static ref readonly @string fourSpaceᶜ⁔mdPrinter => ref fourSpaceᶜᵇ⁔mdPrinter;
+private static readonly @string fourSpaceᶜᵇ⁔mdPrinter = "    "u8;
 
 // block prints the block x to out.
-[GoMethodBody("block")] internal static void blockᴍ(ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) {
+internal static void block⁔(/*this*/ ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -101,7 +101,7 @@ private static readonly @string fourSpaceᶜᵇᴍmdPrinter = "    "u8;
                 @out.WriteString("  - "); // SP SP - SP
             }
             foreach (var (iΔ1, blk) in range(item.Content)) {
-                @string fourSpace = fourSpaceᶜᴍmdPrinter;
+                @string fourSpace = fourSpaceᶜ⁔mdPrinter;
                 if (iΔ1 > 0) {
                     @out.WriteString("\n" + fourSpace);
                 }
@@ -114,7 +114,7 @@ private static readonly @string fourSpaceᶜᵇᴍmdPrinter = "    "u8;
 }
 
 // text prints the text sequence x to out.
-[GoMethodBody("text")] internal static void textᴍ(ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
+internal static void text⁔(/*this*/ ж<mdPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -149,7 +149,7 @@ private static readonly @string fourSpaceᶜᵇᴍmdPrinter = "    "u8;
 // rawText prints the text sequence x to out,
 // without worrying about escaping characters
 // that have special meaning at the start of a Markdown line.
-[GoMethodBody("rawText")] internal static void rawTextᴍ(ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
+internal static void rawText⁔(/*this*/ ref mdPrinter p, ж<bytes.Buffer> Ꮡout, slice<Text> x) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     foreach (var (_, t) in range(x)) {
@@ -193,7 +193,7 @@ private static readonly @string fourSpaceᶜᵇᴍmdPrinter = "    "u8;
 // escape prints s to out as plain text,
 // escaping special characters to avoid being misinterpreted
 // as Markdown markup sequences.
-[GoMethodBody("escape")] internal static void escapeᴍ(ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
+internal static void escape⁔(/*this*/ ref mdPrinter p, ж<bytes.Buffer> Ꮡout, @string s) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     nint start = 0;

@@ -30,26 +30,26 @@ partial struct CgroupV2 {
 
 } partial class cgrouptest_package {
 
-[GoMethodBody("Path")] internal static @string Pathᴍ(ref CgroupV2 c) {
+internal static @string Path⁔(/*this*/ ref CgroupV2 c) {
     return c.path;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cpuMaxˢᴍCgroupV2 => ref cpuMaxˢᵇᴍCgroupV2;
-private static readonly @string cpuMaxˢᵇᴍCgroupV2 = "cpu.max"u8;
+internal static ref readonly @string cpuMaxˢ⁔CgroupV2 => ref cpuMaxˢᵇ⁔CgroupV2;
+private static readonly @string cpuMaxˢᵇ⁔CgroupV2 = "cpu.max"u8;
 
 // Path to cpu.max.
-[GoMethodBody("CPUMaxPath")] internal static @string CPUMaxPathᴍ(ref CgroupV2 c) {
-    return filepath.Join(c.path, cpuMaxˢᴍCgroupV2);
+internal static @string CPUMaxPath⁔(/*this*/ ref CgroupV2 c) {
+    return filepath.Join(c.path, cpuMaxˢ⁔CgroupV2);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string maxˢᴍCgroupV2 => ref maxˢᵇᴍCgroupV2;
-private static readonly @string maxˢᵇᴍCgroupV2 = "max"u8;
+internal static ref readonly @string maxˢ⁔CgroupV2 => ref maxˢᵇ⁔CgroupV2;
+private static readonly @string maxˢᵇ⁔CgroupV2 = "max"u8;
 
 // Set cpu.max. Pass -1 for quota to disable the limit.
-[GoMethodBody("SetCPUMax")] internal static error SetCPUMaxᴍ(ref CgroupV2 c, int64 quota, int64 period) {
-    @string q = maxˢᴍCgroupV2;
+internal static error SetCPUMax⁔(/*this*/ ref CgroupV2 c, int64 quota, int64 period) {
+    @string q = maxˢ⁔CgroupV2;
     if (quota >= 0) {
         q = strconv.FormatInt(quota, 10);
     }

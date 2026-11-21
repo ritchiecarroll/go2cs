@@ -163,7 +163,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast32(ж<abi.MapType
 
 } partial class maps_package {
 
-[GoMethodBody("putSlotSmallFast32")] internal static @unsafe.Pointer putSlotSmallFast32ᴍ(ref Map m, ж<abi.MapType> typ, uintptr hash, uint32 key) {
+internal static @unsafe.Pointer putSlotSmallFast32⁔(/*this*/ ref Map m, ж<abi.MapType> typ, uintptr hash, uint32 key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -187,7 +187,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast32(ж<abi.MapType
     // more efficient than matchEmpty.
     match = g.ctrls().matchEmptyOrDeleted();
     if (match == 0) {
-        fatal(smallMapWithNoEmptySlotˢᴍMap);
+        fatal(smallMapWithNoEmptySlotˢ⁔Map);
     }
 
     var i = match.first();

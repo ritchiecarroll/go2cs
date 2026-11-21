@@ -210,7 +210,7 @@ internal static slice<uint32> /*out*/ ksRotate(uint32 @in) {
 } partial class des_package {
 
 // creates 16 56-bit subkeys from the original key.
-[GoMethodBody("generateSubkeys")] internal static void generateSubkeysᴍ(ref desCipher c, slice<byte> keyBytes) {
+internal static void generateSubkeys⁔(/*this*/ ref desCipher c, slice<byte> keyBytes) {
     ᏑfeistelBoxOnce.Do(initFeistelBox);
 
     // apply PC1 permutation to key

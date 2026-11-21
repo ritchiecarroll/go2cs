@@ -58,7 +58,7 @@ partial struct rwmutex {
 //     belongs.
 //   - writeRank is placed in the lock order wherever a write lock of this
 //     rwmutex belongs.
-[GoMethodBody("init")] internal static void initᴍ(ж<rwmutex> Ꮡrw, lockRank readRank, lockRank readRankInternal, lockRank writeRank) {
+internal static void init⁔(/*this*/ ж<rwmutex> Ꮡrw, lockRank readRank, lockRank readRankInternal, lockRank writeRank) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     rw.readRank = readRank;
@@ -74,7 +74,7 @@ internal static UntypedInt rwmutexMaxReaders => /* 1 << 30 */ 1073741824;
 } partial class runtime_package {
 
 // rlock locks rw for reading.
-[GoMethodBody("rlock")] internal static void rlockᴍ(ж<rwmutex> Ꮡrw) {
+internal static void rlock⁔(/*this*/ ж<rwmutex> Ꮡrw) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     // The reader must not be allowed to lose its P or else other
@@ -107,16 +107,16 @@ internal static UntypedInt rwmutexMaxReaders => /* 1 << 30 */ 1073741824;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runlockOfUnlockedRwmutexˢᴍrwmutex => ref runlockOfUnlockedRwmutexˢᵇᴍrwmutex;
-private static readonly @string runlockOfUnlockedRwmutexˢᵇᴍrwmutex = "runlock of unlocked rwmutex"u8;
+internal static ref readonly @string runlockOfUnlockedRwmutexˢ⁔rwmutex => ref runlockOfUnlockedRwmutexˢᵇ⁔rwmutex;
+private static readonly @string runlockOfUnlockedRwmutexˢᵇ⁔rwmutex = "runlock of unlocked rwmutex"u8;
 
 // runlock undoes a single rlock call on rw.
-[GoMethodBody("runlock")] internal static void runlockᴍ(ж<rwmutex> Ꮡrw) {
+internal static void runlock⁔(/*this*/ ж<rwmutex> Ꮡrw) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     var r = Ꮡrw.ᏑreaderCount.Add(-1); if (r < 0) {
         if (r + 1 == 0 || r + 1 == (int32)(-rwmutexMaxReaders)) {
-            @throw(runlockOfUnlockedRwmutexˢᴍrwmutex);
+            @throw(runlockOfUnlockedRwmutexˢ⁔rwmutex);
         }
         // A writer is pending.
         if (Ꮡrw.ᏑreaderWait.Add(-1) == 0) {
@@ -133,7 +133,7 @@ private static readonly @string runlockOfUnlockedRwmutexˢᵇᴍrwmutex = "runlo
 }
 
 // lock locks rw for writing.
-[GoMethodBody("lock")] internal static void @lockᴍ(ж<rwmutex> Ꮡrw) {
+internal static void @lock⁔(/*this*/ ж<rwmutex> Ꮡrw) {
     // Resolve competition with other writers and stick to our P.
     runtime.@lock(Ꮡrw.ᏑwLock);
     var m = getg().Value.m;
@@ -156,17 +156,17 @@ private static readonly @string runlockOfUnlockedRwmutexˢᵇᴍrwmutex = "runlo
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unlockOfUnlockedRwmutexˢᴍrwmutex => ref unlockOfUnlockedRwmutexˢᵇᴍrwmutex;
-private static readonly @string unlockOfUnlockedRwmutexˢᵇᴍrwmutex = "unlock of unlocked rwmutex"u8;
+internal static ref readonly @string unlockOfUnlockedRwmutexˢ⁔rwmutex => ref unlockOfUnlockedRwmutexˢᵇ⁔rwmutex;
+private static readonly @string unlockOfUnlockedRwmutexˢᵇ⁔rwmutex = "unlock of unlocked rwmutex"u8;
 
 // unlock unlocks rw for writing.
-[GoMethodBody("unlock")] internal static void unlockᴍ(ж<rwmutex> Ꮡrw) {
+internal static void unlock⁔(/*this*/ ж<rwmutex> Ꮡrw) {
     ref var rw = ref Ꮡrw.DerefOrNull();
 
     // Announce to readers that there is no active writer.
     var r = Ꮡrw.ᏑreaderCount.Add(rwmutexMaxReaders);
     if (r >= rwmutexMaxReaders) {
-        @throw(unlockOfUnlockedRwmutexˢᴍrwmutex);
+        @throw(unlockOfUnlockedRwmutexˢ⁔rwmutex);
     }
     // Unblock blocked readers.
     runtime.@lock(Ꮡrw.ᏑrLock);

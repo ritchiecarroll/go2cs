@@ -41,7 +41,7 @@ public static ж<File> NewFile(io.Writer w) {
 
 } partial class gen_package {
 
-[GoMethodBody("AddFunc")] internal static void AddFuncᴍ(ref File f, ж<Func> fn) {
+internal static void AddFunc⁔(/*this*/ ref File f, ж<Func> fn) {
     f.funcs = append(f.funcs, fn);
 }
 
@@ -54,7 +54,7 @@ partial struct fileConst {
 
 } partial class gen_package {
 
-[GoMethodBody("AddConst")] internal static void AddConstᴍ(ref File f, @string name, any data) {
+internal static void AddConst⁔(/*this*/ ref File f, @string name, any data) {
     // TODO: It would be nice if this were unified with "const" ops, but the
     // reason I added this was for []*Func consts, which would take an overhaul
     // to represent in "const" ops.
@@ -79,7 +79,7 @@ public static ж<Func> NewFunc(@string name) {
 
 // attach adds x to fn's op list. If x has any unattached arguments, this adds
 // those first (recursively).
-[GoMethodBody("attach")] internal static void attachᴍ(ж<Func> Ꮡfn, ж<op> Ꮡx) {
+internal static void attach⁔(/*this*/ ж<Func> Ꮡfn, ж<op> Ꮡx) {
     ref var fn = ref Ꮡfn.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -143,7 +143,7 @@ public partial struct op {
 
 } partial class gen_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref op o) {
+internal static @string String⁔(/*this*/ ref op o) {
     return fmt.Sprintf("v%02d"u8, o.id);
 }
 
@@ -155,7 +155,7 @@ internal static ж<op> imm(any val) {
 
 } partial class gen_package {
 
-[GoMethodBody("equalNoName")] internal static bool equalNoNameᴍ(ref op o, ж<op> Ꮡo2) {
+internal static bool equalNoName⁔(/*this*/ ref op o, ж<op> Ꮡo2) {
     ref var o2 = ref Ꮡo2.DerefOrNull();
 
     if (o.Δop != o2.Δop || !AreEqual(o.c, o2.c) || len(o.args) != len(o2.args)) {
@@ -169,7 +169,7 @@ internal static ж<op> imm(any val) {
     return true;
 }
 
-[GoMethodBody("write")] internal static void writeᴍ(ref op o, io.Writer w) {
+internal static void write⁔(/*this*/ ref op o, io.Writer w) {
     fmt.Fprintf(w, "v%02d = %s"u8, o.id, o.Δop);
     foreach (var (_, arg) in range(o.args)) {
         fmt.Fprintf(w, " v%02d"u8, arg.id);
@@ -188,7 +188,7 @@ internal static ж<op> imm(any val) {
 
 } partial class gen_package {
 
-[GoMethodBody("write")] internal static void writeᴍ(ref Func fn, io.Writer w) {
+internal static void write⁔(/*this*/ ref Func fn, io.Writer w) {
     fmt.Fprintf(w, "FUNC %s\n"u8, fn.name);
     foreach (var (_, op) in range(fn.ops)) {
         op.write(w);
@@ -198,18 +198,18 @@ internal static ж<op> imm(any val) {
 } partial class gen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string initialˢᴍFile => ref initialˢᵇᴍFile;
-private static readonly @string initialˢᵇᴍFile = "initial"u8;
-private static ref readonly @string postCseˢᴍFile => ref postCseˢᵇᴍFile;
-private static readonly @string postCseˢᵇᴍFile = "post cse"u8;
-private static ref readonly @string postDeadcodeˢᴍFile => ref postDeadcodeˢᵇᴍFile;
-private static readonly @string postDeadcodeˢᵇᴍFile = "post deadcode"u8;
-private static ref readonly @string postAddLoadsˢᴍFile => ref postAddLoadsˢᵇᴍFile;
-private static readonly @string postAddLoadsˢᵇᴍFile = "post addLoads"u8;
-private static ref readonly @string postScheduleˢᴍFile => ref postScheduleˢᵇᴍFile;
-private static readonly @string postScheduleˢᵇᴍFile = "post schedule"u8;
+private static ref readonly @string initialˢ⁔File => ref initialˢᵇ⁔File;
+private static readonly @string initialˢᵇ⁔File = "initial"u8;
+private static ref readonly @string postCseˢ⁔File => ref postCseˢᵇ⁔File;
+private static readonly @string postCseˢᵇ⁔File = "post cse"u8;
+private static ref readonly @string postDeadcodeˢ⁔File => ref postDeadcodeˢᵇ⁔File;
+private static readonly @string postDeadcodeˢᵇ⁔File = "post deadcode"u8;
+private static ref readonly @string postAddLoadsˢ⁔File => ref postAddLoadsˢᵇ⁔File;
+private static readonly @string postAddLoadsˢᵇ⁔File = "post addLoads"u8;
+private static ref readonly @string postScheduleˢ⁔File => ref postScheduleˢᵇ⁔File;
+private static readonly @string postScheduleˢᵇ⁔File = "post schedule"u8;
 
-[GoMethodBody("Compile")] internal static void Compileᴍ(ж<File> Ꮡf) {
+internal static void Compile⁔(/*this*/ ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     // TODO: CSE constants across the whole file
@@ -234,25 +234,25 @@ private static readonly @string postScheduleˢᵇᴍFile = "post schedule"u8;
     }
 
     foreach (var (_, fn) in range(f.funcs)) {
-        trace(fn, initialˢᴍFile);
+        trace(fn, initialˢ⁔File);
 
         for (;;) {
             if (fn.cse()) {
-                trace(fn, postCseˢᴍFile);
+                trace(fn, postCseˢ⁔File);
                 continue;
             }
             if (fn.deadcode()) {
-                trace(fn, postDeadcodeˢᴍFile);
+                trace(fn, postDeadcodeˢ⁔File);
                 continue;
             }
             break;
         }
         fn.addLoads();
-        trace(fn, postAddLoadsˢᴍFile);
+        trace(fn, postAddLoadsˢ⁔File);
 
         // Assigning locations requires ops to be in dependency order.
         fn.schedule();
-        trace(fn, postScheduleˢᴍFile);
+        trace(fn, postScheduleˢ⁔File);
 
         var locs = fn.assignLocs();
 
@@ -263,7 +263,7 @@ private static readonly @string postScheduleˢᵇᴍFile = "post schedule"u8;
 } partial class gen_package {
 
 // cse performs common subexpression elimination.
-[GoMethodBody("cse")] internal static bool cseᴍ(ref Func fn) {
+internal static bool cse⁔(/*this*/ ref Func fn) {
     // Compute structural hashes
     var hashes = new map<ж<op>, uint64>();
     maphash.Hash h = new();
@@ -312,7 +312,7 @@ private static readonly @string postScheduleˢᵇᴍFile = "post schedule"u8;
 }
 
 // deadcode eliminates unused ops.
-[GoMethodBody("deadcode")] internal static bool deadcodeᴍ(ref Func fn) {
+internal static bool deadcode⁔(/*this*/ ref Func fn) {
     var marks = new map<ж<op>, bool>();
     ref var mark = ref heap<Action<ж<op>>>(out var Ꮡmark);
     var marksʗ1 = marks;
@@ -365,7 +365,7 @@ private static readonly @string postScheduleˢᵇᴍFile = "post schedule"u8;
 } partial class gen_package {
 
 // addLoads inserts load ops for ops that can't take memory inputs directly.
-[GoMethodBody("addLoads")] internal static void addLoadsᴍ(ж<Func> Ꮡfn) {
+internal static void addLoads⁔(/*this*/ ж<Func> Ꮡfn) {
     ref var fn = ref Ꮡfn.DerefOrNull();
 
     // A lot of operations can directly take memory locations. If there's only a
@@ -399,7 +399,7 @@ private static readonly @string postScheduleˢᵇᴍFile = "post schedule"u8;
     }
 }
 
-[GoMethodBody("opRefs")] internal static map<ж<op>, nint> opRefsᴍ(ref Func fn) {
+internal static map<ж<op>, nint> opRefs⁔(/*this*/ ref Func fn) {
     var refs = new map<ж<op>, nint>();
     foreach (var (_, o1) in range(fn.ops)) {
         foreach (var (_, arg) in range(o1.args)) {
@@ -445,9 +445,9 @@ partial struct opHeap /*[]ж<op>*/;
 
 } partial class gen_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(opHeap h) { return len(h); }
-[GoMethodBody("Swap")] internal static void Swapᴍ(opHeap h, nint i, nint j) { (h[i], h[j]) = (h[j], h[i]); }
-[GoMethodBody("Less")] internal static bool Lessᴍ(opHeap h, nint i, nint j) {
+internal static nint Len⁔(/*this*/ opHeap h) { return len(h); }
+internal static void Swap⁔(/*this*/ opHeap h, nint i, nint j) { (h[i], h[j]) = (h[j], h[i]); }
+internal static bool Less⁔(/*this*/ opHeap h, nint i, nint j) {
     nint priority(ж<op> o) {
         if (o.Δop == "deref"u8 || o.Δop == "const"u8) {
             // Input to memory load
@@ -466,11 +466,11 @@ partial struct opHeap /*[]ж<op>*/;
     return h[i].id < h[j].id;
 }
 
-[GoMethodBody("Push")] internal static void Pushᴍ(ref opHeap h, any x) {
+internal static void Push⁔(/*this*/ ref opHeap h, any x) {
     h = append(h, x._<ж<op>>());
 }
 
-[GoMethodBody("Pop")] internal static any Popᴍ(ref opHeap h) {
+internal static any Pop⁔(/*this*/ ref opHeap h) {
     var old = h;
     nint n = len(old);
     var x = old[n - 1];
@@ -481,13 +481,13 @@ partial struct opHeap /*[]ж<op>*/;
 } partial class gen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object scheduleDidnTScheduleAllˢᴍFunc = (@string)"schedule didn't schedule all ops"u8;
-private static readonly object beforeˢᴍFunc = (@string)"before:"u8;
-private static readonly object afterˢᴍFunc = (@string)"after:"u8;
-private static readonly object badScheduleˢᴍFunc = (@string)"bad schedule"u8;
+private static readonly object scheduleDidnTScheduleAllˢ⁔Func = (@string)"schedule didn't schedule all ops"u8;
+private static readonly object beforeˢ⁔Func = (@string)"before:"u8;
+private static readonly object afterˢ⁔Func = (@string)"after:"u8;
+private static readonly object badScheduleˢ⁔Func = (@string)"bad schedule"u8;
 
 // schedule ensures fn's ops are in dependency order.
-[GoMethodBody("schedule")] internal static void scheduleᴍ(ref Func fn) {
+internal static void schedule⁔(/*this*/ ref Func fn) {
     // TODO: This tends to generate a huge amount of register pressure, mostly
     // because it floats loads as early as possible and partly because it has no
     // concept of rematerialization and CSE can make rematerializable values
@@ -525,23 +525,23 @@ private static readonly object badScheduleˢᴍFunc = (@string)"bad schedule"u8;
         }
     }
     if (len(newOps) != len(fn.ops)) {
-        log.Print(scheduleDidnTScheduleAllˢᴍFunc);
-        log.Print(beforeˢᴍFunc);
+        log.Print(scheduleDidnTScheduleAllˢ⁔Func);
+        log.Print(beforeˢ⁔Func);
         fn.write(new os.FileжWriter(os.Stderr));
         fn.ops = newOps;
-        log.Print(afterˢᴍFunc);
+        log.Print(afterˢ⁔Func);
         fn.write(new os.FileжWriter(os.Stderr));
-        log.Fatal(badScheduleˢᴍFunc);
+        log.Fatal(badScheduleˢ⁔Func);
     }
 
     fn.ops = newOps;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string maskˢᴍFunc => ref maskˢᵇᴍFunc;
-private static readonly @string maskˢᵇᴍFunc = ".mask"u8;
+private static ref readonly @string maskˢ⁔Func => ref maskˢᵇ⁔Func;
+private static readonly @string maskˢᵇ⁔Func = ".mask"u8;
 
-[GoMethodBody("emit")] internal static void emitᴍ(ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs) {
+internal static void emit⁔(/*this*/ ref Func fn, ж<File> Ꮡf, map<ж<op>, loc> locs) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var w = f.w;
@@ -575,7 +575,7 @@ private static readonly @string maskˢᵇᴍFunc = ".mask"u8;
         @string opName = o.Δop;
         // A ".mask" suffix is used to distinguish AVX-512 ops that use the same
         // mnemonic for regular and masked mode.
-        opName = strings.TrimSuffix(opName, maskˢᴍFunc);
+        opName = strings.TrimSuffix(opName, maskˢ⁔Func);
 
         fmt.Fprintf(w, "\t%s"u8, opName);
         if (o.Δop == "VGF2P8AFFINEQB"u8) {
@@ -610,7 +610,7 @@ private static readonly @string maskˢᵇᴍFunc = ".mask"u8;
 
 } partial class gen_package {
 
-[GoMethodBody("emitConst")] internal static void emitConstᴍ(ref File f, @string name, any data) {
+internal static void emitConst⁔(/*this*/ ref File f, @string name, any data) {
     switch (data.type()) {
     case slice<ж<Func>> dataΔ1: {
         fmt.Fprintf(f.w, "GLOBL %s(SB), RODATA, $%#x\n"u8, name, len(dataΔ1) * 8);

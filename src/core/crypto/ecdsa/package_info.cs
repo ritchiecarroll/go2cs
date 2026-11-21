@@ -73,7 +73,7 @@ using static go.crypto.ecdsa_package;
 
 namespace go.crypto;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using crypto = crypto_package;
 using ecdh = go.crypto.ecdh_package;
 using io = io_package;
@@ -85,7 +85,10 @@ using math;
 using vendor.golang.org.x.crypto;
 using vendor.golang.org.x.crypto.cryptobyte;
 using static ecdsa_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("ecdsa")]
 public static partial class ecdsa_package
@@ -136,21 +139,21 @@ public static partial class ecdsa_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(ecdsa_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛPrivateKey;
-[GoMethodHost(typeof(ecdsa_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class ecdsaᴛPublicKey;
+[GoMethodHost(typeof(ecdsa_package.PrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdsaᴛPrivateKey;
+[GoMethodHost(typeof(ecdsa_package.PublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class ecdsaᴛPublicKey;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class ecdsaᴛPublicKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<ecdh.PublicKey>, error) ECDH(this ж<PublicKey> Ꮡpub) => ecdsa_package.ECDHᴍ(Ꮡpub);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) => ecdsa_package.Equalᴍ(ref pub, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Bytes(this ж<PublicKey> Ꮡpub) => ecdsa_package.Bytesᴍ(Ꮡpub);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<ecdh.PublicKey>, error) ECDH(this ж<PublicKey> Ꮡpub) => ecdsa_package.ECDH⁔(Ꮡpub);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) => ecdsa_package.Equal⁔(ref pub, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Bytes(this ж<PublicKey> Ꮡpub) => ecdsa_package.Bytes⁔(Ꮡpub);
 }
 partial class ecdsaᴛPrivateKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<ecdh.PrivateKey>, error) ECDH(this ж<PrivateKey> Ꮡpriv) => ecdsa_package.ECDHᴍ(Ꮡpriv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡpriv) => ecdsa_package.Publicᴍ(Ꮡpriv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) => ecdsa_package.Equalᴍ(ref priv, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Bytes(this ж<PrivateKey> Ꮡpriv) => ecdsa_package.Bytesᴍ(Ꮡpriv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader random, slice<byte> digest, crypto.SignerOpts opts) => ecdsa_package.Signᴍ(Ꮡpriv, random, digest, opts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<ecdh.PrivateKey>, error) ECDH(this ж<PrivateKey> Ꮡpriv) => ecdsa_package.ECDH⁔(Ꮡpriv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡpriv) => ecdsa_package.Public⁔(Ꮡpriv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) => ecdsa_package.Equal⁔(ref priv, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Bytes(this ж<PrivateKey> Ꮡpriv) => ecdsa_package.Bytes⁔(Ꮡpriv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader random, slice<byte> digest, crypto.SignerOpts opts) => ecdsa_package.Sign⁔(Ꮡpriv, random, digest, opts);
 }
 // </GlyphForwarders>

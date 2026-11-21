@@ -65,14 +65,14 @@ public static ж<Scalar> NewScalar() {
 
 // MultiplyAdd sets s = x * y + z mod l, and returns s. It is equivalent to
 // using Multiply and then Add.
-[GoMethodBody("MultiplyAdd")] internal static ж<Scalar> MultiplyAddᴍ(ж<Scalar> Ꮡs, ж<Scalar> x, ж<Scalar> y, ж<Scalar> z) {
+internal static ж<Scalar> MultiplyAdd⁔(/*this*/ ж<Scalar> Ꮡs, ж<Scalar> x, ж<Scalar> y, ж<Scalar> z) {
     // Make a copy of z in case it aliases s.
     var zCopy = @new<Scalar>().Set(z);
     return Ꮡs.Multiply(x, y).Add(Ꮡs, zCopy);
 }
 
 // Add sets s = x + y mod l, and returns s.
-[GoMethodBody("Add")] internal static ж<Scalar> Addᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
+internal static ж<Scalar> Add⁔(/*this*/ ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -83,7 +83,7 @@ public static ж<Scalar> NewScalar() {
 }
 
 // Subtract sets s = x - y mod l, and returns s.
-[GoMethodBody("Subtract")] internal static ж<Scalar> Subtractᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
+internal static ж<Scalar> Subtract⁔(/*this*/ ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -94,7 +94,7 @@ public static ж<Scalar> NewScalar() {
 }
 
 // Negate sets s = -x mod l, and returns s.
-[GoMethodBody("Negate")] internal static ж<Scalar> Negateᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) {
+internal static ж<Scalar> Negate⁔(/*this*/ ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -104,7 +104,7 @@ public static ж<Scalar> NewScalar() {
 }
 
 // Multiply sets s = x * y mod l, and returns s.
-[GoMethodBody("Multiply")] internal static ж<Scalar> Multiplyᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
+internal static ж<Scalar> Multiply⁔(/*this*/ ж<Scalar> Ꮡs, ж<Scalar> Ꮡx, ж<Scalar> Ꮡy) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -115,7 +115,7 @@ public static ж<Scalar> NewScalar() {
 }
 
 // Set sets s = x, and returns s.
-[GoMethodBody("Set")] internal static ж<Scalar> Setᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) {
+internal static ж<Scalar> Set⁔(/*this*/ ж<Scalar> Ꮡs, ж<Scalar> Ꮡx) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -124,8 +124,8 @@ public static ж<Scalar> NewScalar() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string edwards25519InvalidˢᴍScalar => ref edwards25519InvalidˢᵇᴍScalar;
-private static readonly @string edwards25519InvalidˢᵇᴍScalar = "edwards25519: invalid SetUniformBytes input length"u8;
+internal static ref readonly @string edwards25519Invalidˢ⁔Scalar => ref edwards25519Invalidˢᵇ⁔Scalar;
+private static readonly @string edwards25519Invalidˢᵇ⁔Scalar = "edwards25519: invalid SetUniformBytes input length"u8;
 
 // SetUniformBytes sets s = x mod l, where x is a 64-byte little-endian integer.
 // If x is not of the right length, SetUniformBytes returns nil and an error,
@@ -133,9 +133,9 @@ private static readonly @string edwards25519InvalidˢᵇᴍScalar = "edwards2551
 //
 // SetUniformBytes can be used to set s to a uniformly distributed value given
 // 64 uniformly distributed random bytes.
-[GoMethodBody("SetUniformBytes")] internal static (ж<Scalar>, error) SetUniformBytesᴍ(ж<Scalar> Ꮡs, slice<byte> x) {
+internal static (ж<Scalar>, error) SetUniformBytes⁔(/*this*/ ж<Scalar> Ꮡs, slice<byte> x) {
     if (len(x) != 64) {
-        return (default, errors.New(edwards25519InvalidˢᴍScalar));
+        return (default, errors.New(edwards25519Invalidˢ⁔Scalar));
     }
 
     // We have a value x of 512 bits, but our fiatScalarFromBytes function
@@ -174,7 +174,7 @@ internal static ж<Scalar> scalarTwo336 = Ꮡ(new Scalar(s: array<uint64>([0xbd3
 
 // setShortBytes sets s = x mod l, where x is a little-endian integer shorter
 // than 32 bytes.
-[GoMethodBody("setShortBytes")] internal static ж<Scalar> setShortBytesᴍ(ж<Scalar> Ꮡs, slice<byte> x) {
+internal static ж<Scalar> setShortBytes⁔(/*this*/ ж<Scalar> Ꮡs, slice<byte> x) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (len(x) >= 32) {
@@ -190,22 +190,22 @@ internal static ж<Scalar> scalarTwo336 = Ꮡ(new Scalar(s: array<uint64>([0xbd3
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidScalarLengthˢᴍScalar => ref invalidScalarLengthˢᵇᴍScalar;
-private static readonly @string invalidScalarLengthˢᵇᴍScalar = "invalid scalar length"u8;
-internal static ref readonly @string invalidScalarEncodingˢᴍScalar => ref invalidScalarEncodingˢᵇᴍScalar;
-private static readonly @string invalidScalarEncodingˢᵇᴍScalar = "invalid scalar encoding"u8;
+internal static ref readonly @string invalidScalarLengthˢ⁔Scalar => ref invalidScalarLengthˢᵇ⁔Scalar;
+private static readonly @string invalidScalarLengthˢᵇ⁔Scalar = "invalid scalar length"u8;
+internal static ref readonly @string invalidScalarEncodingˢ⁔Scalar => ref invalidScalarEncodingˢᵇ⁔Scalar;
+private static readonly @string invalidScalarEncodingˢᵇ⁔Scalar = "invalid scalar encoding"u8;
 
 // SetCanonicalBytes sets s = x, where x is a 32-byte little-endian encoding of
 // s, and returns s. If x is not a canonical encoding of s, SetCanonicalBytes
 // returns nil and an error, and the receiver is unchanged.
-[GoMethodBody("SetCanonicalBytes")] internal static (ж<Scalar>, error) SetCanonicalBytesᴍ(ж<Scalar> Ꮡs, slice<byte> x) {
+internal static (ж<Scalar>, error) SetCanonicalBytes⁔(/*this*/ ж<Scalar> Ꮡs, slice<byte> x) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (len(x) != 32) {
-        return (default, errors.New(invalidScalarLengthˢᴍScalar));
+        return (default, errors.New(invalidScalarLengthˢ⁔Scalar));
     }
     if (!isReduced(x)) {
-        return (default, errors.New(invalidScalarEncodingˢᴍScalar));
+        return (default, errors.New(invalidScalarEncodingˢ⁔Scalar));
     }
 
     var ᴛ3 = nonnil(ref s).s.Value;
@@ -250,8 +250,8 @@ internal static bool isReduced(slice<byte> s) {
 } partial class edwards25519_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string edwards25519Invalidˢ2ᴍScalar => ref edwards25519Invalidˢ2ᵇᴍScalar;
-private static readonly @string edwards25519Invalidˢ2ᵇᴍScalar = "edwards25519: invalid SetBytesWithClamping input length"u8;
+internal static ref readonly @string edwards25519Invalidˢ2⁔Scalar => ref edwards25519Invalidˢ2ᵇ⁔Scalar;
+private static readonly @string edwards25519Invalidˢ2ᵇ⁔Scalar = "edwards25519: invalid SetBytesWithClamping input length"u8;
 
 // SetBytesWithClamping applies the buffer pruning described in RFC 8032,
 // Section 5.1.5 (also known as clamping) and sets s to the result. The input
@@ -264,13 +264,13 @@ private static readonly @string edwards25519Invalidˢ2ᵇᴍScalar = "edwards255
 // expected as long as it is applied to points on the prime order subgroup, like
 // in Ed25519. In fact, it is lost to history why RFC 8032 adopted the
 // irrelevant RFC 7748 clamping, but it is now required for compatibility.
-[GoMethodBody("SetBytesWithClamping")] internal static (ж<Scalar>, error) SetBytesWithClampingᴍ(ж<Scalar> Ꮡs, slice<byte> x) {
+internal static (ж<Scalar>, error) SetBytesWithClamping⁔(/*this*/ ж<Scalar> Ꮡs, slice<byte> x) {
     // The description above omits the purpose of the high bits of the clamping
     // for brevity, but those are also lost to reductions, and are also
     // irrelevant to edwards25519 as they protect against a specific
     // implementation bug that was once observed in a generic Montgomery ladder.
     if (len(x) != 32) {
-        return (default, errors.New(edwards25519Invalidˢ2ᴍScalar));
+        return (default, errors.New(edwards25519Invalidˢ2⁔Scalar));
     }
 
     // We need to use the wide reduction from SetUniformBytes, since clamping
@@ -284,14 +284,14 @@ private static readonly @string edwards25519Invalidˢ2ᵇᴍScalar = "edwards255
 }
 
 // Bytes returns the canonical 32-byte little-endian encoding of s.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ж<Scalar> Ꮡs) {
+internal static slice<byte> Bytes⁔(/*this*/ ж<Scalar> Ꮡs) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var encoded = ref heap(new array<byte>(32), out var Ꮡencoded);
     return Ꮡs.bytes(Ꮡencoded);
 }
 
-[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ж<Scalar> Ꮡs, /*[32]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes⁔(/*this*/ ж<Scalar> Ꮡs, /*[32]*/ ж<array<byte>> Ꮡout) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -303,7 +303,7 @@ private static readonly @string edwards25519Invalidˢ2ᵇᴍScalar = "edwards255
 }
 
 // Equal returns 1 if s and t are equal, and 0 otherwise.
-[GoMethodBody("Equal")] internal static nint Equalᴍ(ж<Scalar> Ꮡs, ж<Scalar> Ꮡt) {
+internal static nint Equal⁔(/*this*/ ж<Scalar> Ꮡs, ж<Scalar> Ꮡt) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -324,7 +324,7 @@ private static readonly @string edwards25519Invalidˢ2ᵇᴍScalar = "edwards255
 // nonAdjacentForm computes a width-w non-adjacent form for this scalar.
 //
 // w must be between 2 and 8, or nonAdjacentForm will panic.
-[GoMethodBody("nonAdjacentForm")] internal static array<int8> nonAdjacentFormᴍ(ж<Scalar> Ꮡs, nuint w) {
+internal static array<int8> nonAdjacentForm⁔(/*this*/ ж<Scalar> Ꮡs, nuint w) {
     // This implementation is adapted from the one
     // in curve25519-dalek and is documented there:
     // https://github.com/dalek-cryptography/curve25519-dalek/blob/f630041af28e9a405255f98a8a93adca18e4315b/src/scalar.rs#L800-L871
@@ -389,7 +389,7 @@ private static readonly @string edwards25519Invalidˢ2ᵇᴍScalar = "edwards255
     return naf.Clone();
 }
 
-[GoMethodBody("signedRadix16")] internal static array<int8> signedRadix16ᴍ(ж<Scalar> Ꮡs) {
+internal static array<int8> signedRadix16⁔(/*this*/ ж<Scalar> Ꮡs) {
     var b = Ꮡs.Bytes();
     if (b[31] > 127) {
         throw panic("scalar has high bit set illegally");

@@ -62,10 +62,10 @@ internal static (ж<netFD>, error) newFD(syscall.Handle sysfd, nint family, nint
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string wsaioctlˢᴍnetFD => ref wsaioctlˢᵇᴍnetFD;
-private static readonly @string wsaioctlˢᵇᴍnetFD = "wsaioctl"u8;
+internal static ref readonly @string wsaioctlˢ⁔netFD => ref wsaioctlˢᵇ⁔netFD;
+private static readonly @string wsaioctlˢᵇ⁔netFD = "wsaioctl"u8;
 
-[GoMethodBody("init")] internal static error initᴍ(ж<netFD> Ꮡfd) {
+internal static error init⁔(/*this*/ ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     {
@@ -83,7 +83,7 @@ private static readonly @string wsaioctlˢᵇᴍnetFD = "wsaioctl"u8;
         var size = (uint32)/* unsafe.Sizeof(flag) */ (uintptr)4;
         var err = syscall.WSAIoctl(fd.pfd.Sysfd, syscall.SIO_UDP_CONNRESET, Ꮡflag.Reinterpret<uint32, byte>(), size, nil, 0, Ꮡret, nil, 0);
         if (err != nil) {
-            return wrapSyscallError(wsaioctlˢᴍnetFD, err);
+            return wrapSyscallError(wsaioctlˢ⁔netFD, err);
         }
         // Disable reporting of NET_UNREACHABLE errors.
         // See https://go.dev/issue/68614.
@@ -92,7 +92,7 @@ private static readonly @string wsaioctlˢᵇᴍnetFD = "wsaioctl"u8;
         size = (uint32)/* unsafe.Sizeof(flag) */ (uintptr)4;
         err = syscall.WSAIoctl(fd.pfd.Sysfd, windows.SIO_UDP_NETRESET, Ꮡflag.Reinterpret<uint32, byte>(), size, nil, 0, Ꮡret, nil, 0);
         if (err != nil) {
-            return wrapSyscallError(wsaioctlˢᴍnetFD, err);
+            return wrapSyscallError(wsaioctlˢ⁔netFD, err);
         }
         break;
     }}
@@ -100,17 +100,17 @@ private static readonly @string wsaioctlˢᵇᴍnetFD = "wsaioctl"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string connectˢᴍnetFD => ref connectˢᵇᴍnetFD;
-private static readonly @string connectˢᵇᴍnetFD = "connect"u8;
-internal static ref readonly @string bindˢᴍnetFD => ref bindˢᵇᴍnetFD;
-private static readonly @string bindˢᵇᴍnetFD = "bind"u8;
-internal static ref readonly @string connectexˢᴍnetFD => ref connectexˢᵇᴍnetFD;
-private static readonly @string connectexˢᵇᴍnetFD = "connectex"u8;
-internal static ref readonly @string setsockoptˢᴍnetFD => ref setsockoptˢᵇᴍnetFD;
-private static readonly @string setsockoptˢᵇᴍnetFD = "setsockopt"u8;
+internal static ref readonly @string connectˢ⁔netFD => ref connectˢᵇ⁔netFD;
+private static readonly @string connectˢᵇ⁔netFD = "connect"u8;
+internal static ref readonly @string bindˢ⁔netFD => ref bindˢᵇ⁔netFD;
+private static readonly @string bindˢᵇ⁔netFD = "bind"u8;
+internal static ref readonly @string connectexˢ⁔netFD => ref connectexˢᵇ⁔netFD;
+private static readonly @string connectexˢᵇ⁔netFD = "connectex"u8;
+internal static ref readonly @string setsockoptˢ⁔netFD => ref setsockoptˢᵇ⁔netFD;
+private static readonly @string setsockoptˢᵇ⁔netFD = "setsockopt"u8;
 
 // Always returns nil for connected peer address result.
-[GoMethodBody("connect")] internal static (syscall.Sockaddr, error) connectᴍ(ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
+internal static (syscall.Sockaddr, error) connect⁔(/*this*/ ж<netFD> Ꮡfd, context.Context ctx, syscall.Sockaddr la, syscall.Sockaddr ra) {
     GoFrame ᒐ = default;
     try {
         ref var fd = ref Ꮡfd.DerefOrNull();
@@ -160,7 +160,7 @@ private static readonly @string setsockoptˢᵇᴍnetFD = "setsockopt"u8;
 
         if (!canUseConnectEx(fd.net)) {
             var err = connectFunc(fd.pfd.Sysfd, ra);
-            return (default, os.NewSyscallError(connectˢᴍnetFD, err));
+            return (default, os.NewSyscallError(connectˢ⁔netFD, err));
         }
         // ConnectEx windows API requires an unconnected, previously bound socket.
         if (la == nil) {
@@ -178,7 +178,7 @@ private static readonly @string setsockoptˢᵇᴍnetFD = "setsockopt"u8;
                 break;
             }}
             var err = syscall.Bind(fd.pfd.Sysfd, la); if (err != nil) {
-                return (default, os.NewSyscallError(bindˢᴍnetFD, err));
+                return (default, os.NewSyscallError(bindˢ⁔netFD, err));
             }
         }
 
@@ -224,14 +224,14 @@ private static readonly @string setsockoptˢᵇᴍnetFD = "setsockopt"u8;
                 }
                 default: {
                     var (_, ok) = err._<syscall.Errno>(ᐧ); if (ok) {
-                        err = os.NewSyscallError(connectexˢᴍnetFD, err);
+                        err = os.NewSyscallError(connectexˢ⁔netFD, err);
                     }
                     return (default, err);
                 }}
             }
         }
         // Refresh socket properties.
-        return (default, os.NewSyscallError(setsockoptˢᴍnetFD, syscall.Setsockopt(fd.pfd.Sysfd, syscall.SOL_SOCKET, syscall.SO_UPDATE_CONNECT_CONTEXT, Ꮡfd.Ꮡpfd.ᏑSysfd.Reinterpret<syscall.Handle, byte>(), (int32)/* unsafe.Sizeof(fd.pfd.Sysfd) */ (uintptr)8)));
+        return (default, os.NewSyscallError(setsockoptˢ⁔netFD, syscall.Setsockopt(fd.pfd.Sysfd, syscall.SOL_SOCKET, syscall.SO_UPDATE_CONNECT_CONTEXT, Ꮡfd.Ꮡpfd.ᏑSysfd.Reinterpret<syscall.Handle, byte>(), (int32)/* unsafe.Sizeof(fd.pfd.Sysfd) */ (uintptr)8)));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); return default; }
     finally { ᒐ.Run(); }
@@ -239,7 +239,7 @@ private static readonly @string setsockoptˢᵇᴍnetFD = "setsockopt"u8;
 
 } partial class net_package {
 
-[GoMethodBody("writeBuffers")] internal static (int64, error) writeBuffersᴍ(ж<conn> Ꮡc, ж<Buffers> v) {
+internal static (int64, error) writeBuffers⁔(/*this*/ ж<conn> Ꮡc, ж<Buffers> v) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -255,16 +255,16 @@ private static readonly @string setsockoptˢᵇᴍnetFD = "setsockopt"u8;
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string wsasendˢᴍnetFD => ref wsasendˢᵇᴍnetFD;
-private static readonly @string wsasendˢᵇᴍnetFD = "wsasend"u8;
+internal static ref readonly @string wsasendˢ⁔netFD => ref wsasendˢᵇ⁔netFD;
+private static readonly @string wsasendˢᵇ⁔netFD = "wsasend"u8;
 
-[GoMethodBody("writeBuffers")] internal static (int64, error) writeBuffersᴍ(ж<netFD> Ꮡfd, ж<Buffers> buf) {
+internal static (int64, error) writeBuffers⁔(/*this*/ ж<netFD> Ꮡfd, ж<Buffers> buf) {
     var (n, err) = Ꮡfd.Ꮡpfd.Writev(buf.of(Buffers.Ꮡm_value));
     runtime.KeepAlive(Ꮡfd.OrTypedNil());
-    return (n, wrapSyscallError(wsasendˢᴍnetFD, err));
+    return (n, wrapSyscallError(wsasendˢ⁔netFD, err));
 }
 
-[GoMethodBody("accept")] internal static (ж<netFD>, error) acceptᴍ(ж<netFD> Ꮡfd) {
+internal static (ж<netFD>, error) accept⁔(/*this*/ ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     var (s, rawsa, rsan, errcall, err) = Ꮡfd.Ꮡpfd.Accept(() => sysSocket(Ꮡfd.Value.family, Ꮡfd.Value.sotype, 0));
@@ -310,7 +310,7 @@ private static readonly @string wsasendˢᵇᴍnetFD = "wsasend"u8;
 
 } partial class net_package {
 
-[GoMethodBody("dup")] internal static (ж<os.File>, error) dupᴍ(ж<netFD> Ꮡfd) {
+internal static (ж<os.File>, error) dup⁔(/*this*/ ж<netFD> Ꮡfd) {
     ref var fd = ref Ꮡfd.DerefOrNull();
 
     // Disassociate the IOCP from the socket,

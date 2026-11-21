@@ -67,12 +67,12 @@ internal static ValueConverter _ᴛ3ʗ = new boolType();
 } partial class driver_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string boolˢᴍboolType => ref boolˢᵇᴍboolType;
-private static readonly @string boolˢᵇᴍboolType = "Bool"u8;
+internal static ref readonly @string boolˢ⁔boolType => ref boolˢᵇ⁔boolType;
+private static readonly @string boolˢᵇ⁔boolType = "Bool"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(boolType _) { return boolˢᴍboolType; }
+internal static @string String⁔(/*this*/ boolType _) { return boolˢ⁔boolType; }
 
-[GoMethodBody("ConvertValue")] internal static (Value, error) ConvertValueᴍ(boolType _, any src) {
+internal static (Value, error) ConvertValue⁔(/*this*/ boolType _, any src) {
     switch (src.type()) {
     case bool s: {
         return (s, default);
@@ -126,7 +126,7 @@ internal static ValueConverter _ᴛ4ʗ = new int32Type();
 
 } partial class driver_package {
 
-[GoMethodBody("ConvertValue")] internal static (Value, error) ConvertValueᴍ(int32Type _, any v) {
+internal static (Value, error) ConvertValue⁔(/*this*/ int32Type _, any v) {
     var rv = reflect.ValueOf(v);
     switch (rv.Kind()) {
     case var ᴛ when ᴛ == reflect.Int || ᴛ == reflect.Int8 || ᴛ == reflect.Int16 || ᴛ == reflect.Int32 || ᴛ == reflect.Int64: {
@@ -167,7 +167,7 @@ public partial struct stringType {
 
 } partial class driver_package {
 
-[GoMethodBody("ConvertValue")] internal static (Value, error) ConvertValueᴍ(stringType _, any v) {
+internal static (Value, error) ConvertValue⁔(/*this*/ stringType _, any v) {
     switch (v.type()) {
     case @string _:
     case slice<byte> _: {
@@ -186,7 +186,7 @@ partial struct Null {
 
 } partial class driver_package {
 
-[GoMethodBody("ConvertValue")] internal static (Value, error) ConvertValueᴍ(Null n, any v) {
+internal static (Value, error) ConvertValue⁔(/*this*/ Null n, any v) {
     if (v == nil) {
         return (default, default);
     }
@@ -203,7 +203,7 @@ partial struct NotNull {
 
 } partial class driver_package {
 
-[GoMethodBody("ConvertValue")] internal static (Value, error) ConvertValueᴍ(NotNull n, any v) {
+internal static (Value, error) ConvertValue⁔(/*this*/ NotNull n, any v) {
     if (v == nil) {
         return (default, fmt.Errorf("nil value not allowed"u8));
     }
@@ -282,7 +282,7 @@ internal static (Value v, error err) callValuerValue(Valuer vr) {
 
 } partial class driver_package {
 
-[GoMethodBody("ConvertValue")] internal static (Value, error) ConvertValueᴍ(defaultConverter _, any v) {
+internal static (Value, error) ConvertValue⁔(/*this*/ defaultConverter _, any v) {
     if (IsValue(v)) {
         return (v, default);
     }

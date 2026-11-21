@@ -58,7 +58,7 @@ public static (ж<Template>, error) ParseFiles(params ꓸꓸꓸstring filenames�
 //
 // When parsing multiple files with the same name in different directories,
 // the last one mentioned will be the one that results.
-[GoMethodBody("ParseFiles")] internal static (ж<Template>, error) ParseFilesᴍ(ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
+internal static (ж<Template>, error) ParseFiles⁔(/*this*/ ж<Template> Ꮡt, params ꓸꓸꓸstring filenamesʗp) {
     var filenames = filenamesʗp.sslice();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -130,7 +130,7 @@ public static (ж<Template>, error) ParseGlob(@string pattern) {
 //
 // When parsing multiple files with the same name in different directories,
 // the last one mentioned will be the one that results.
-[GoMethodBody("ParseGlob")] internal static (ж<Template>, error) ParseGlobᴍ(ж<Template> Ꮡt, @string pattern) {
+internal static (ж<Template>, error) ParseGlob⁔(/*this*/ ж<Template> Ꮡt, @string pattern) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     t.init();
@@ -167,7 +167,7 @@ public static (ж<Template>, error) ParseFS(fs.FS fsys, params ꓸꓸꓸstring p
 // instead of the host operating system's file system.
 // It accepts a list of glob patterns (see [path.Match]).
 // (Note that most file names serve as glob patterns matching only themselves.)
-[GoMethodBody("ParseFS")] internal static (ж<Template>, error) ParseFSᴍ(ж<Template> Ꮡt, fs.FS fsys, params ꓸꓸꓸstring patternsʗp) {
+internal static (ж<Template>, error) ParseFS⁔(/*this*/ ж<Template> Ꮡt, fs.FS fsys, params ꓸꓸꓸstring patternsʗp) {
     var patterns = patternsʗp.slice();
     ref var t = ref Ꮡt.DerefOrNull();
 

@@ -99,13 +99,13 @@ public static ж<EarlySecret> NewEarlySecret<H>(Func<H> h, slice<byte> psk)
 
 } partial class tls13_package {
 
-[GoMethodBody("ResumptionBinderKey")] internal static slice<byte> ResumptionBinderKeyᴍ(ref EarlySecret s) {
+internal static slice<byte> ResumptionBinderKey⁔(/*this*/ ref EarlySecret s) {
     return deriveSecret(s.hash, s.secret, resumptionBinderLabel, default);
 }
 
 // ClientEarlyTrafficSecret derives the client_early_traffic_secret from the
 // early secret and the transcript up to the ClientHello.
-[GoMethodBody("ClientEarlyTrafficSecret")] internal static slice<byte> ClientEarlyTrafficSecretᴍ(ref EarlySecret s, hash.Hash transcript) {
+internal static slice<byte> ClientEarlyTrafficSecret⁔(/*this*/ ref EarlySecret s, hash.Hash transcript) {
     return deriveSecret(s.hash, s.secret, clientEarlyTrafficLabel, transcript);
 }
 
@@ -119,11 +119,11 @@ partial struct HandshakeSecret {
 } partial class tls13_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string derivedˢᴍEarlySecret => ref derivedˢᵇᴍEarlySecret;
-private static readonly @string derivedˢᵇᴍEarlySecret = "derived"u8;
+private static ref readonly @string derivedˢ⁔EarlySecret => ref derivedˢᵇ⁔EarlySecret;
+private static readonly @string derivedˢᵇ⁔EarlySecret = "derived"u8;
 
-[GoMethodBody("HandshakeSecret")] internal static ж<HandshakeSecret> HandshakeSecretᴍ(ref EarlySecret s, slice<byte> sharedSecret) {
-    var derived = deriveSecret(s.hash, s.secret, derivedˢᴍEarlySecret, default);
+internal static ж<HandshakeSecret> HandshakeSecret⁔(/*this*/ ref EarlySecret s, slice<byte> sharedSecret) {
+    var derived = deriveSecret(s.hash, s.secret, derivedˢ⁔EarlySecret, default);
     return Ꮡ(new HandshakeSecret(
         secret: extract(s.hash, sharedSecret, derived),
         hash: s.hash
@@ -134,13 +134,13 @@ private static readonly @string derivedˢᵇᴍEarlySecret = "derived"u8;
 
 // ClientHandshakeTrafficSecret derives the client_handshake_traffic_secret from
 // the handshake secret and the transcript up to the ServerHello.
-[GoMethodBody("ClientHandshakeTrafficSecret")] internal static slice<byte> ClientHandshakeTrafficSecretᴍ(ref HandshakeSecret s, hash.Hash transcript) {
+internal static slice<byte> ClientHandshakeTrafficSecret⁔(/*this*/ ref HandshakeSecret s, hash.Hash transcript) {
     return deriveSecret(s.hash, s.secret, clientHandshakeTrafficLabel, transcript);
 }
 
 // ServerHandshakeTrafficSecret derives the server_handshake_traffic_secret from
 // the handshake secret and the transcript up to the ServerHello.
-[GoMethodBody("ServerHandshakeTrafficSecret")] internal static slice<byte> ServerHandshakeTrafficSecretᴍ(ref HandshakeSecret s, hash.Hash transcript) {
+internal static slice<byte> ServerHandshakeTrafficSecret⁔(/*this*/ ref HandshakeSecret s, hash.Hash transcript) {
     return deriveSecret(s.hash, s.secret, serverHandshakeTrafficLabel, transcript);
 }
 
@@ -154,11 +154,11 @@ partial struct MasterSecret {
 } partial class tls13_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string derivedˢᴍHandshakeSecret => ref derivedˢᵇᴍHandshakeSecret;
-private static readonly @string derivedˢᵇᴍHandshakeSecret = "derived"u8;
+private static ref readonly @string derivedˢ⁔HandshakeSecret => ref derivedˢᵇ⁔HandshakeSecret;
+private static readonly @string derivedˢᵇ⁔HandshakeSecret = "derived"u8;
 
-[GoMethodBody("MasterSecret")] internal static ж<MasterSecret> MasterSecretᴍ(ref HandshakeSecret s) {
-    var derived = deriveSecret(s.hash, s.secret, derivedˢᴍHandshakeSecret, default);
+internal static ж<MasterSecret> MasterSecret⁔(/*this*/ ref HandshakeSecret s) {
+    var derived = deriveSecret(s.hash, s.secret, derivedˢ⁔HandshakeSecret, default);
     return Ꮡ(new MasterSecret(
         secret: extract(s.hash, default, derived),
         hash: s.hash
@@ -169,19 +169,19 @@ private static readonly @string derivedˢᵇᴍHandshakeSecret = "derived"u8;
 
 // ClientApplicationTrafficSecret derives the client_application_traffic_secret_0
 // from the master secret and the transcript up to the server Finished.
-[GoMethodBody("ClientApplicationTrafficSecret")] internal static slice<byte> ClientApplicationTrafficSecretᴍ(ref MasterSecret s, hash.Hash transcript) {
+internal static slice<byte> ClientApplicationTrafficSecret⁔(/*this*/ ref MasterSecret s, hash.Hash transcript) {
     return deriveSecret(s.hash, s.secret, clientApplicationTrafficLabel, transcript);
 }
 
 // ServerApplicationTrafficSecret derives the server_application_traffic_secret_0
 // from the master secret and the transcript up to the server Finished.
-[GoMethodBody("ServerApplicationTrafficSecret")] internal static slice<byte> ServerApplicationTrafficSecretᴍ(ref MasterSecret s, hash.Hash transcript) {
+internal static slice<byte> ServerApplicationTrafficSecret⁔(/*this*/ ref MasterSecret s, hash.Hash transcript) {
     return deriveSecret(s.hash, s.secret, serverApplicationTrafficLabel, transcript);
 }
 
 // ResumptionMasterSecret derives the resumption_master_secret from the master secret
 // and the transcript up to the client Finished.
-[GoMethodBody("ResumptionMasterSecret")] internal static slice<byte> ResumptionMasterSecretᴍ(ref MasterSecret s, hash.Hash transcript) {
+internal static slice<byte> ResumptionMasterSecret⁔(/*this*/ ref MasterSecret s, hash.Hash transcript) {
     return deriveSecret(s.hash, s.secret, resumptionLabel, transcript);
 }
 
@@ -196,7 +196,7 @@ partial struct ExporterMasterSecret {
 
 // ExporterMasterSecret derives the exporter_master_secret from the master secret
 // and the transcript up to the server Finished.
-[GoMethodBody("ExporterMasterSecret")] internal static ж<ExporterMasterSecret> ExporterMasterSecretᴍ(ref MasterSecret s, hash.Hash transcript) {
+internal static ж<ExporterMasterSecret> ExporterMasterSecret⁔(/*this*/ ref MasterSecret s, hash.Hash transcript) {
     return Ꮡ(new ExporterMasterSecret(
         secret: deriveSecret(s.hash, s.secret, exporterLabel, transcript),
         hash: s.hash
@@ -207,7 +207,7 @@ partial struct ExporterMasterSecret {
 
 // EarlyExporterMasterSecret derives the exporter_master_secret from the early secret
 // and the transcript up to the ClientHello.
-[GoMethodBody("EarlyExporterMasterSecret")] internal static ж<ExporterMasterSecret> EarlyExporterMasterSecretᴍ(ref EarlySecret s, hash.Hash transcript) {
+internal static ж<ExporterMasterSecret> EarlyExporterMasterSecret⁔(/*this*/ ref EarlySecret s, hash.Hash transcript) {
     return Ꮡ(new ExporterMasterSecret(
         secret: deriveSecret(s.hash, s.secret, earlyExporterLabel, transcript),
         hash: s.hash
@@ -217,14 +217,14 @@ partial struct ExporterMasterSecret {
 } partial class tls13_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string exporterˢᴍExporterMasterSecret => ref exporterˢᵇᴍExporterMasterSecret;
-private static readonly @string exporterˢᵇᴍExporterMasterSecret = "exporter"u8;
+private static ref readonly @string exporterˢ⁔ExporterMasterSecret => ref exporterˢᵇ⁔ExporterMasterSecret;
+private static readonly @string exporterˢᵇ⁔ExporterMasterSecret = "exporter"u8;
 
-[GoMethodBody("Exporter")] internal static slice<byte> Exporterᴍ(ref ExporterMasterSecret s, @string label, slice<byte> context, nint length) {
+internal static slice<byte> Exporter⁔(/*this*/ ref ExporterMasterSecret s, @string label, slice<byte> context, nint length) {
     var secret = deriveSecret(s.hash, s.secret, label, default);
     var h = s.hash();
     h.Write(context);
-    return ExpandLabel(s.hash, secret, exporterˢᴍExporterMasterSecret, h.Sum(default), length);
+    return ExpandLabel(s.hash, secret, exporterˢ⁔ExporterMasterSecret, h.Sum(default), length);
 }
 
 } partial class tls13_package {

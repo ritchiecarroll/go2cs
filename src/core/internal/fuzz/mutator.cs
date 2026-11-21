@@ -23,11 +23,11 @@ internal static ж<mutator> newMutator() {
 
 } partial class fuzz_package {
 
-[GoMethodBody("rand")] internal static nint randᴍ(ref mutator m, nint n) {
+internal static nint rand⁔(/*this*/ ref mutator m, nint n) {
     return m.r.intn(n);
 }
 
-[GoMethodBody("randByteOrder")] internal static binary.ByteOrder randByteOrderᴍ(ref mutator m) {
+internal static binary.ByteOrder randByteOrder⁔(/*this*/ ref mutator m) {
     if (m.r.@bool()) {
         return binary.LittleEndian;
     }
@@ -36,7 +36,7 @@ internal static ж<mutator> newMutator() {
 
 // chooseLen chooses length of range mutation in range [1,n]. It gives
 // preference to shorter ranges.
-[GoMethodBody("chooseLen")] internal static nint chooseLenᴍ(ref mutator m, nint n) {
+internal static nint chooseLen⁔(/*this*/ ref mutator m, nint n) {
     nint x = m.rand(100);
     switch (ᐧ) {
     case {} when x is < 90: {
@@ -51,7 +51,7 @@ internal static ж<mutator> newMutator() {
 }
 
 // mutate performs several mutations on the provided values.
-[GoMethodBody("mutate")] internal static void mutateᴍ(ж<mutator> Ꮡm, slice<any> vals, nint maxBytes) {
+internal static void mutate⁔(/*this*/ ж<mutator> Ꮡm, slice<any> vals, nint maxBytes) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     // TODO(katiehockman): pull some of these functions into helper methods and
@@ -156,7 +156,7 @@ internal static ж<mutator> newMutator() {
     }}
 }
 
-[GoMethodBody("mutateInt")] internal static int64 mutateIntᴍ(ref mutator m, int64 v, int64 maxValue) {
+internal static int64 mutateInt⁔(/*this*/ ref mutator m, int64 v, int64 maxValue) {
     int64 max = default;
     for (;;) {
         max = 100;
@@ -188,7 +188,7 @@ internal static ж<mutator> newMutator() {
     }
 }
 
-[GoMethodBody("mutateUInt")] internal static uint64 mutateUIntᴍ(ref mutator m, uint64 v, uint64 maxValue) {
+internal static uint64 mutateUInt⁔(/*this*/ ref mutator m, uint64 v, uint64 maxValue) {
     uint64 max = default;
     for (;;) {
         max = 100;
@@ -221,7 +221,7 @@ internal static ж<mutator> newMutator() {
     }
 }
 
-[GoMethodBody("mutateFloat")] internal static float64 mutateFloatᴍ(ref mutator m, float64 v, float64 maxValue) {
+internal static float64 mutateFloat⁔(/*this*/ ref mutator m, float64 v, float64 maxValue) {
     float64 max = default;
     for (;;) {
         switch (m.rand(4)) {
@@ -303,7 +303,7 @@ internal static ж<mutator> newMutator() {
 
 } partial class fuzz_package {
 
-[GoMethodBody("mutateBytes")] internal static void mutateBytesᴍ(ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB) {
+internal static void mutateBytes⁔(/*this*/ ж<mutator> Ꮡm, ж<slice<byte>> ᏑptrB) {
     GoFrame ᒐ = default;
     try {
         ref var m = ref Ꮡm.DerefOrNull();

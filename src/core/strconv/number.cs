@@ -287,11 +287,11 @@ partial struct NumError {
 
 } partial class strconv_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref NumError e) {
+internal static @string Error⁔(/*this*/ ref NumError e) {
     return "strconv."u8 + e.Func + ": "u8 + "parsing "u8 + Quote(e.Num) + ": "u8 + e.Err.Error();
 }
 
-[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref NumError e) { return e.Err; }
+internal static error Unwrap⁔(/*this*/ ref NumError e) { return e.Err; }
 
 } partial class strconv_package {
 

@@ -60,7 +60,7 @@ internal static (StringTable, error) readStringTable(ref FileHeader fh, io.ReadS
 // TODO(brainman): decide if start parameter should be int instead of uint32
 
 // String extracts string from COFF string table st at offset start.
-[GoMethodBody("String")] internal static (@string, error) Stringᴍ(StringTable st, uint32 start) {
+internal static (@string, error) String⁔(/*this*/ StringTable st, uint32 start) {
     // start includes 4 bytes of string table length
     if (start < 4) {
         return ("", fmt.Errorf("offset %d is before the start of string table"u8, start));

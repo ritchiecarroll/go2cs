@@ -22,7 +22,7 @@ internal static array<uint8> _jsCtx_index = array<uint8>([0, 11, 21, 33]);
 
 } partial class template_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(jsCtx i) {
+internal static @string String⁔(/*this*/ jsCtx i) {
     if (i >= ((jsCtx)(uint8)(len(_jsCtx_index) - 1))) {
         return "jsCtx("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }

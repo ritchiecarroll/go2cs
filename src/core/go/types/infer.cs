@@ -27,8 +27,8 @@ internal const bool enableReverseTypeInference = true; // disable for debugging
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string inferSSSˢᴍChecker => ref inferSSSˢᵇᴍChecker;
-private static readonly @string inferSSSˢᵇᴍChecker = "== infer : %s%s ➞ %s"u8;
+internal static ref readonly @string inferSSSˢ⁔Checker => ref inferSSSˢᵇ⁔Checker;
+private static readonly @string inferSSSˢᵇ⁔Checker = "== infer : %s%s ➞ %s"u8;
 
 // infer attempts to infer the complete set of type arguments for generic function instantiation/call
 // based on the given type parameters tparams, type arguments targs, function parameters params, and
@@ -39,7 +39,7 @@ private static readonly @string inferSSSˢᵇᴍChecker = "== infer : %s%s ➞ %
 // If successful, infer returns the complete list of given and inferred type arguments, one for each
 // type parameter. Otherwise the result is nil. Errors are reported through the err parameter.
 // Note: infer may fail (return nil) due to invalid args operands without reporting additional errors.
-[GoMethodBody("infer")] internal static slice<Type> /*inferred*/ inferᴍ(ж<Checker> Ꮡcheck, positioner posn, slice<ж<TypeParam>> tparams, slice<Type> targs, ж<Tuple> Ꮡparams, slice<ж<operand>> args, bool reverse, ж<error_> Ꮡerr) {
+internal static slice<Type> /*inferred*/ infer⁔(/*this*/ ж<Checker> Ꮡcheck, positioner posn, slice<ж<TypeParam>> tparams, slice<Type> targs, ж<Tuple> Ꮡparams, slice<ж<operand>> args, bool reverse, ж<error_> Ꮡerr) {
     slice<Type> inferred = default;
     GoFrame ᒐ = default;
     try {
@@ -61,7 +61,7 @@ private static readonly @string inferSSSˢᵇᴍChecker = "== infer : %s%s ➞ %
         }
 
         if (traceInference) {
-            Ꮡcheck.dump(inferSSSˢᴍChecker, tparams, Ꮡparams.OrTypedNil(), targs); // aligned with rename print below
+            Ꮡcheck.dump(inferSSSˢ⁔Checker, tparams, Ꮡparams.OrTypedNil(), targs); // aligned with rename print below
             var tparamsʗ2 = tparams;
             defer(() => {
                 Ꮡcheck.dump("=> %s ➞ %s\n", tparamsʗ2, inferred);
@@ -495,7 +495,7 @@ private static readonly @string inferSSSˢᵇᴍChecker = "== infer : %s%s ➞ %
 // If typ is a generic function, type parameters held with typ are not changed and
 // must be updated separately if desired.
 // The positions is only used for debug traces.
-[GoMethodBody("renameTParams")] internal static (slice<ж<TypeParam>>, Type) renameTParamsᴍ(ж<Checker> Ꮡcheck, token.Pos pos, slice<ж<TypeParam>> tparams, Type typ) {
+internal static (slice<ж<TypeParam>>, Type) renameTParams⁔(/*this*/ ж<Checker> Ꮡcheck, token.Pos pos, slice<ж<TypeParam>> tparams, Type typ) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // For the purpose of type inference we must differentiate type parameters
@@ -597,7 +597,7 @@ partial struct tpWalker {
 
 } partial class types_package {
 
-[GoMethodBody("isParameterized")] internal static bool /*res*/ isParameterizedᴍ(ж<tpWalker> Ꮡw, Type typ) {
+internal static bool /*res*/ isParameterized⁔(/*this*/ ж<tpWalker> Ꮡw, Type typ) {
     bool res = default;
     GoFrame ᒐ = default;
     try {
@@ -689,7 +689,7 @@ partial struct tpWalker {
     ᒐdone: return res;
 }
 
-[GoMethodBody("varList")] internal static bool varListᴍ(ж<tpWalker> Ꮡw, slice<ж<Var>> list) {
+internal static bool varList⁔(/*this*/ ж<tpWalker> Ꮡw, slice<ж<Var>> list) {
     foreach (var (_, v) in range(list)) {
         if (Ꮡw.isParameterized(v.typ)) {
             return true;
@@ -761,7 +761,7 @@ partial struct cycleFinder {
 
 } partial class types_package {
 
-[GoMethodBody("typ")] internal static void typᴍ(ж<cycleFinder> Ꮡw, Type typ) {
+internal static void typ⁔(/*this*/ ж<cycleFinder> Ꮡw, Type typ) {
     GoFrame ᒐ = default;
     try {
         ref var w = ref Ꮡw.DerefOrNull();
@@ -866,7 +866,7 @@ partial struct cycleFinder {
     finally { ᒐ.Run(); }
 }
 
-[GoMethodBody("varList")] internal static void varListᴍ(ж<cycleFinder> Ꮡw, slice<ж<Var>> list) {
+internal static void varList⁔(/*this*/ ж<cycleFinder> Ꮡw, slice<ж<Var>> list) {
     foreach (var (_, v) in range(list)) {
         Ꮡw.typ(v.typ);
     }

@@ -199,7 +199,7 @@ internal static int32 seedrand(int32 x) {
 } partial class rand_package {
 
 // Seed uses the provided seed value to initialize the generator to a deterministic state.
-[GoMethodBody("Seed")] internal static void Seedᴍ(ref rngSource rng, int64 seed) {
+internal static void Seed⁔(/*this*/ ref rngSource rng, int64 seed) {
     rng.tap = 0;
     rng.feed = rngLen - rngTap;
 
@@ -228,12 +228,12 @@ internal static int32 seedrand(int32 x) {
 }
 
 // Int63 returns a non-negative pseudo-random 63-bit integer as an int64.
-[GoMethodBody("Int63")] internal static int64 Int63ᴍ(ref rngSource rng) {
+internal static int64 Int63⁔(/*this*/ ref rngSource rng) {
     return (int64)(rng.Uint64() & (uint64)rngMask);
 }
 
 // Uint64 returns a non-negative pseudo-random 64-bit integer as a uint64.
-[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(ref rngSource rng) {
+internal static uint64 Uint64⁔(/*this*/ ref rngSource rng) {
     rng.tap--;
     if (rng.tap < 0) {
         rng.tap += rngLen;

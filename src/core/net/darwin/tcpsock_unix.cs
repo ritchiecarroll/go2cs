@@ -13,7 +13,7 @@ partial class net_package {
 } partial class net_package {
 
 // SetKeepAliveConfig configures keep-alive messages sent by the operating system.
-[GoMethodBody("SetKeepAliveConfig")] internal static error SetKeepAliveConfigᴍ(ж<TCPConn> Ꮡc, KeepAliveConfig config) {
+internal static error SetKeepAliveConfig⁔(/*this*/ ж<TCPConn> Ꮡc, KeepAliveConfig config) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {

@@ -18,7 +18,7 @@ partial class types_package {
 
 } partial class types_package {
 
-[GoMethodBody("declare")] internal static void declareᴍ(ж<Checker> Ꮡcheck, ж<Scope> scope, ж<ast.Ident> id, Object obj, token.Pos pos) {
+internal static void declare⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Scope> scope, ж<ast.Ident> id, Object obj, token.Pos pos) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // spec: "The blank identifier, represented by the underscore
@@ -57,11 +57,11 @@ internal static @string pathString(slice<Object> path) {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string checkingSObjPathSˢᴍChecker => ref checkingSObjPathSˢᵇᴍChecker;
-private static readonly @string checkingSObjPathSˢᵇᴍChecker = "-- checking %s (objPath = %s)"u8;
+internal static ref readonly @string checkingSObjPathSˢ⁔Checker => ref checkingSObjPathSˢᵇ⁔Checker;
+private static readonly @string checkingSObjPathSˢᵇ⁔Checker = "-- checking %s (objPath = %s)"u8;
 
 // objDecl type-checks the declaration of obj in its respective (file) environment.
-[GoMethodBody("objDecl")] internal static void objDeclᴍ(ж<Checker> Ꮡcheck, Object obj) {
+internal static void objDecl⁔(/*this*/ ж<Checker> Ꮡcheck, Object obj) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -81,7 +81,7 @@ private static readonly @string checkingSObjPathSˢᵇᴍChecker = "-- checking 
             if (check.indent == 0) {
                 fmt.Println(); // empty line between top-level objects for readability
             }
-            Ꮡcheck.trace(obj.Pos(), checkingSObjPathSˢᴍChecker, obj, pathString(check.objPath));
+            Ꮡcheck.trace(obj.Pos(), checkingSObjPathSˢ⁔Checker, obj, pathString(check.objPath));
             check.indent++;
             defer(() => {
                 Ꮡcheck.Value.indent--;
@@ -209,22 +209,22 @@ private static readonly @string checkingSObjPathSˢᵇᴍChecker = "-- checking 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string vInconsistentObjectMapˢᴍChecker => ref vInconsistentObjectMapˢᵇᴍChecker;
-private static readonly @string vInconsistentObjectMapˢᵇᴍChecker = "%v: inconsistent object map for %s (isPkgObj = %v, inObjMap = %v)"u8;
-internal static ref readonly @string cycleDetectedObjPathSSˢᴍChecker => ref cycleDetectedObjPathSSˢᵇᴍChecker;
-private static readonly @string cycleDetectedObjPathSSˢᵇᴍChecker = "## cycle detected: objPath = %s->%s (len = %d)"u8;
-internal static ref readonly @string cycleContainsGenericTypeˢᴍChecker => ref cycleContainsGenericTypeˢᵇᴍChecker;
-private static readonly @string cycleContainsGenericTypeˢᵇᴍChecker = "## cycle contains: generic type in a type parameter list"u8;
-internal static ref readonly @string cycleContainsDValuesDˢᴍChecker => ref cycleContainsDValuesDˢᵇᴍChecker;
-private static readonly @string cycleContainsDValuesDˢᵇᴍChecker = "## cycle contains: %d values, %d type definitions"u8;
-internal static ref readonly @string cycleIsValidˢᴍChecker => ref cycleIsValidˢᵇᴍChecker;
-private static readonly @string cycleIsValidˢᵇᴍChecker = "=> cycle is valid"u8;
-internal static ref readonly @string errorCycleIsInvalidˢᴍChecker => ref errorCycleIsInvalidˢᵇᴍChecker;
-private static readonly @string errorCycleIsInvalidˢᵇᴍChecker = "=> error: cycle is invalid"u8;
+internal static ref readonly @string vInconsistentObjectMapˢ⁔Checker => ref vInconsistentObjectMapˢᵇ⁔Checker;
+private static readonly @string vInconsistentObjectMapˢᵇ⁔Checker = "%v: inconsistent object map for %s (isPkgObj = %v, inObjMap = %v)"u8;
+internal static ref readonly @string cycleDetectedObjPathSSˢ⁔Checker => ref cycleDetectedObjPathSSˢᵇ⁔Checker;
+private static readonly @string cycleDetectedObjPathSSˢᵇ⁔Checker = "## cycle detected: objPath = %s->%s (len = %d)"u8;
+internal static ref readonly @string cycleContainsGenericTypeˢ⁔Checker => ref cycleContainsGenericTypeˢᵇ⁔Checker;
+private static readonly @string cycleContainsGenericTypeˢᵇ⁔Checker = "## cycle contains: generic type in a type parameter list"u8;
+internal static ref readonly @string cycleContainsDValuesDˢ⁔Checker => ref cycleContainsDValuesDˢᵇ⁔Checker;
+private static readonly @string cycleContainsDValuesDˢᵇ⁔Checker = "## cycle contains: %d values, %d type definitions"u8;
+internal static ref readonly @string cycleIsValidˢ⁔Checker => ref cycleIsValidˢᵇ⁔Checker;
+private static readonly @string cycleIsValidˢᵇ⁔Checker = "=> cycle is valid"u8;
+internal static ref readonly @string errorCycleIsInvalidˢ⁔Checker => ref errorCycleIsInvalidˢᵇ⁔Checker;
+private static readonly @string errorCycleIsInvalidˢᵇ⁔Checker = "=> error: cycle is invalid"u8;
 
 // validCycle checks if the cycle starting with obj is valid and
 // reports an error if it is not.
-[GoMethodBody("validCycle")] internal static bool /*valid*/ validCycleᴍ(ж<Checker> Ꮡcheck, Object obj) {
+internal static bool /*valid*/ validCycle⁔(/*this*/ ж<Checker> Ꮡcheck, Object obj) {
     bool valid = default;
     GoFrame ᒐ = default;
     try {
@@ -236,7 +236,7 @@ private static readonly @string errorCycleIsInvalidˢᵇᴍChecker = "=> error: 
             var inObjMap = info != nil && (info.fdecl == nil || info.fdecl.Recv == nil); // exclude methods
             var isPkgObj = obj.Parent() == check.pkg.scope;
             if (isPkgObj != inObjMap) {
-                Ꮡcheck.dump(vInconsistentObjectMapˢᴍChecker, obj.Pos(), obj, isPkgObj, inObjMap);
+                Ꮡcheck.dump(vInconsistentObjectMapˢ⁔Checker, obj.Pos(), obj, isPkgObj, inObjMap);
                 throw panic("unreachable");
             }
         }
@@ -304,17 +304,17 @@ continue_loop:;
 break_loop:;
 
         if (check.conf._Trace) {
-            Ꮡcheck.trace(obj.Pos(), cycleDetectedObjPathSSˢᴍChecker, pathString(cycle), obj.Name(), len(cycle));
+            Ꮡcheck.trace(obj.Pos(), cycleDetectedObjPathSSˢ⁔Checker, pathString(cycle), obj.Name(), len(cycle));
             if (tparCycle) {
-                Ꮡcheck.trace(obj.Pos(), cycleContainsGenericTypeˢᴍChecker);
+                Ꮡcheck.trace(obj.Pos(), cycleContainsGenericTypeˢ⁔Checker);
             } else {
-                Ꮡcheck.trace(obj.Pos(), cycleContainsDValuesDˢᴍChecker, nval, ndef);
+                Ꮡcheck.trace(obj.Pos(), cycleContainsDValuesDˢ⁔Checker, nval, ndef);
             }
             defer(() => {
                 if (valid) {
-                    Ꮡcheck.trace(obj.Pos(), cycleIsValidˢᴍChecker);
+                    Ꮡcheck.trace(obj.Pos(), cycleIsValidˢ⁔Checker);
                 } else {
-                    Ꮡcheck.trace(obj.Pos(), errorCycleIsInvalidˢᴍChecker);
+                    Ꮡcheck.trace(obj.Pos(), errorCycleIsInvalidˢ⁔Checker);
                 }
             }, ref ᒐ);
         }
@@ -347,7 +347,7 @@ break_loop:;
 }
 
 // cycleError reports a declaration cycle starting with the object at cycle[start].
-[GoMethodBody("cycleError")] internal static void cycleErrorᴍ(ж<Checker> Ꮡcheck, slice<Object> cycle, nint start) {
+internal static void cycleError⁔(/*this*/ ж<Checker> Ꮡcheck, slice<Object> cycle, nint start) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // name returns the (possibly qualified) object name.
@@ -441,33 +441,33 @@ partial struct funcDecl {
 
 } partial class types_package {
 
-[GoMethodBody("node")] internal static ast.Node nodeᴍ(importDecl d) { return new ast.ImportSpecжNode(d.spec); }
+internal static ast.Node node⁔(/*this*/ importDecl d) { return new ast.ImportSpecжNode(d.spec); }
 
 } partial class types_package {
 
-[GoMethodBody("node")] internal static ast.Node nodeᴍ(constDecl d) { return new ast.ValueSpecжNode(d.spec); }
+internal static ast.Node node⁔(/*this*/ constDecl d) { return new ast.ValueSpecжNode(d.spec); }
 
 } partial class types_package {
 
-[GoMethodBody("node")] internal static ast.Node nodeᴍ(varDecl d) { return new ast.ValueSpecжNode(d.spec); }
+internal static ast.Node node⁔(/*this*/ varDecl d) { return new ast.ValueSpecжNode(d.spec); }
 
 } partial class types_package {
 
-[GoMethodBody("node")] internal static ast.Node nodeᴍ(typeDecl d) { return new ast.TypeSpecжNode(d.spec); }
+internal static ast.Node node⁔(/*this*/ typeDecl d) { return new ast.TypeSpecжNode(d.spec); }
 
 } partial class types_package {
 
-[GoMethodBody("node")] internal static ast.Node nodeᴍ(funcDecl d) { return new ast.FuncDeclжNode(d.decl); }
+internal static ast.Node node⁔(/*this*/ funcDecl d) { return new ast.FuncDeclжNode(d.decl); }
 
 } partial class types_package {
 
-[GoMethodBody("walkDecls")] internal static void walkDeclsᴍ(ж<Checker> Ꮡcheck, slice<ast.Decl> decls, Action<decl> f) {
+internal static void walkDecls⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ast.Decl> decls, Action<decl> f) {
     foreach (var (_, d) in range(decls)) {
         Ꮡcheck.walkDecl(d, f);
     }
 }
 
-[GoMethodBody("walkDecl")] internal static void walkDeclᴍ(ж<Checker> Ꮡcheck, ast.Decl d, Action<decl> f) {
+internal static void walkDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Decl d, Action<decl> f) {
     switch (d.type()) {
     case ж<ast.BadDecl> dΔ1: {
         // ignore
@@ -535,7 +535,7 @@ partial struct funcDecl {
     }}
 }
 
-[GoMethodBody("constDecl")] internal static void constDeclᴍ(ж<Checker> Ꮡcheck, ж<Const> Ꮡobj, ast.Expr typ, ast.Expr init, bool inherited) {
+internal static void constDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Const> Ꮡobj, ast.Expr typ, ast.Expr init, bool inherited) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -590,10 +590,10 @@ partial struct funcDecl {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string variableDeclarationˢᴍChecker => ref variableDeclarationˢᵇᴍChecker;
-private static readonly @string variableDeclarationˢᵇᴍChecker = "variable declaration"u8;
+internal static ref readonly @string variableDeclarationˢ⁔Checker => ref variableDeclarationˢᵇ⁔Checker;
+private static readonly @string variableDeclarationˢᵇ⁔Checker = "variable declaration"u8;
 
-[GoMethodBody("varDecl")] internal static void varDeclᴍ(ж<Checker> Ꮡcheck, ж<Var> Ꮡobj, slice<ж<Var>> lhs, ast.Expr typ, ast.Expr init) {
+internal static void varDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Var> Ꮡobj, slice<ж<Var>> lhs, ast.Expr typ, ast.Expr init) {
     ref var obj = ref Ꮡobj.DerefOrNull();
 
     assert(obj.typ == nil);
@@ -624,7 +624,7 @@ private static readonly @string variableDeclarationˢᵇᴍChecker = "variable d
         assert(lhs == nil || lhs[0] == Ꮡobj);
         ref var x = ref heap(new operand(), out var Ꮡx);
         Ꮡcheck.expr(newTarget(obj.typ, obj.name), Ꮡx, init);
-        Ꮡcheck.initVar(Ꮡobj, Ꮡx, variableDeclarationˢᴍChecker);
+        Ꮡcheck.initVar(Ꮡobj, Ꮡx, variableDeclarationˢ⁔Checker);
         return;
     }
 
@@ -649,7 +649,7 @@ private static readonly @string variableDeclarationˢᵇᴍChecker = "variable d
 }
 
 // isImportedConstraint reports whether typ is an imported type constraint.
-[GoMethodBody("isImportedConstraint")] internal static bool isImportedConstraintᴍ(ref Checker check, Type typ) {
+internal static bool isImportedConstraint⁔(/*this*/ ref Checker check, Type typ) {
     var named = asNamed(typ);
     if (named == nil || named.obj.pkg == check.pkg || named.obj.pkg == nil) {
         return false;
@@ -659,16 +659,16 @@ private static readonly @string variableDeclarationˢᵇᴍChecker = "variable d
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeParametersˢᴍChecker => ref typeParametersˢᵇᴍChecker;
-private static readonly @string typeParametersˢᵇᴍChecker = "type parameters"u8;
-internal static ref readonly @string cannotUseTypeParameterˢᴍChecker => ref cannotUseTypeParameterˢᵇᴍChecker;
-private static readonly @string cannotUseTypeParameterˢᵇᴍChecker = "cannot use type parameter declared in alias declaration as RHS"u8;
-internal static ref readonly @string genericTypeAliasRequiresˢᴍChecker => ref genericTypeAliasRequiresˢᵇᴍChecker;
-private static readonly @string genericTypeAliasRequiresˢᵇᴍChecker = "generic type alias requires GODEBUG=gotypesalias=1 or unset"u8;
-internal static ref readonly @string cannotUseATypeParameterˢᴍChecker => ref cannotUseATypeParameterˢᵇᴍChecker;
-private static readonly @string cannotUseATypeParameterˢᵇᴍChecker = "cannot use a type parameter as RHS in type declaration"u8;
+internal static ref readonly @string typeParametersˢ⁔Checker => ref typeParametersˢᵇ⁔Checker;
+private static readonly @string typeParametersˢᵇ⁔Checker = "type parameters"u8;
+internal static ref readonly @string cannotUseTypeParameterˢ⁔Checker => ref cannotUseTypeParameterˢᵇ⁔Checker;
+private static readonly @string cannotUseTypeParameterˢᵇ⁔Checker = "cannot use type parameter declared in alias declaration as RHS"u8;
+internal static ref readonly @string genericTypeAliasRequiresˢ⁔Checker => ref genericTypeAliasRequiresˢᵇ⁔Checker;
+private static readonly @string genericTypeAliasRequiresˢᵇ⁔Checker = "generic type alias requires GODEBUG=gotypesalias=1 or unset"u8;
+internal static ref readonly @string cannotUseATypeParameterˢ⁔Checker => ref cannotUseATypeParameterˢᵇ⁔Checker;
+private static readonly @string cannotUseATypeParameterˢᵇ⁔Checker = "cannot use a type parameter as RHS in type declaration"u8;
 
-[GoMethodBody("typeDecl")] internal static void typeDeclᴍ(ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж<ast.TypeSpec> Ꮡtdecl) {
+internal static void typeDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj, ж<ast.TypeSpec> Ꮡtdecl) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -721,7 +721,7 @@ private static readonly @string cannotUseATypeParameterˢᵇᴍChecker = "cannot
 
                 // handle type parameters even if not allowed (Alias type is supported)
                 if (tparam0 != nil) {
-                    check.openScope(new ast.TypeSpecжNode(Ꮡtdecl), typeParametersˢᴍChecker);
+                    check.openScope(new ast.TypeSpecжNode(Ꮡtdecl), typeParametersˢ⁔Checker);
                     defer(Ꮡcheck.closeScope, ref ᒐ);
                     Ꮡcheck.collectTypeParams(alias.Ꮡtparams, tdecl.TypeParams);
                 }
@@ -733,7 +733,7 @@ private static readonly @string cannotUseATypeParameterˢᵇᴍChecker = "cannot
                 // spec: In an alias declaration the given type cannot be a type parameter declared in the same declaration."
                 // (see also go.dev/issue/75884, go.dev/issue/#75885)
                 var (tpar, ok) = rhs._<ж<TypeParam>>(ᐧ); if (ok && alias.tparams != nil && slices.Index(alias.tparams.list(), tpar) >= 0) {
-                    Ꮡcheck.error(new ast_Exprᴠpositioner(tdecl.Type), MisplacedTypeParam, cannotUseTypeParameterˢᴍChecker);
+                    Ꮡcheck.error(new ast_Exprᴠpositioner(tdecl.Type), MisplacedTypeParam, cannotUseTypeParameterˢ⁔Checker);
                     alias.fromRHS = new BasicжType(Typ[Invalid]);
                 }
             } else {
@@ -745,7 +745,7 @@ private static readonly @string cannotUseATypeParameterˢᵇᴍChecker = "cannot
                 gotypesalias.IncNonDefault();
 
                 if (!versionErr && tparam0 != nil) {
-                    Ꮡcheck.error(new ast_TypeSpecжpositioner(Ꮡtdecl), UnsupportedFeature, genericTypeAliasRequiresˢᴍChecker);
+                    Ꮡcheck.error(new ast_TypeSpecжpositioner(Ꮡtdecl), UnsupportedFeature, genericTypeAliasRequiresˢ⁔Checker);
                     versionErr = true;
                 }
 
@@ -779,7 +779,7 @@ private static readonly @string cannotUseATypeParameterˢᵇᴍChecker = "cannot
         }, ref ᒐ);
 
         if (tdecl.TypeParams != nil) {
-            check.openScope(new ast.TypeSpecжNode(Ꮡtdecl), typeParametersˢᴍChecker);
+            check.openScope(new ast.TypeSpecжNode(Ꮡtdecl), typeParametersˢ⁔Checker);
             defer(Ꮡcheck.closeScope, ref ᒐ);
             Ꮡcheck.collectTypeParams(named.Ꮡtparams, tdecl.TypeParams);
         }
@@ -791,7 +791,7 @@ private static readonly @string cannotUseATypeParameterˢᵇᴍChecker = "cannot
         // spec: "In a type definition the given type cannot be a type parameter."
         // (See also go.dev/issue/45639.)
         if (isTypeParam(rhs)) {
-            Ꮡcheck.error(new ast_Exprᴠpositioner(tdecl.Type), MisplacedTypeParam, cannotUseATypeParameterˢᴍChecker);
+            Ꮡcheck.error(new ast_Exprᴠpositioner(tdecl.Type), MisplacedTypeParam, cannotUseATypeParameterˢ⁔Checker);
             named.fromRHS = new BasicжType(Typ[Invalid]);
         }
     }
@@ -800,10 +800,10 @@ private static readonly @string cannotUseATypeParameterˢᵇᴍChecker = "cannot
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cannotUseATypeParameterˢ2ᴍChecker => ref cannotUseATypeParameterˢ2ᵇᴍChecker;
-private static readonly @string cannotUseATypeParameterˢ2ᵇᴍChecker = "cannot use a type parameter as constraint"u8;
+internal static ref readonly @string cannotUseATypeParameterˢ2⁔Checker => ref cannotUseATypeParameterˢ2ᵇ⁔Checker;
+private static readonly @string cannotUseATypeParameterˢ2ᵇ⁔Checker = "cannot use a type parameter as constraint"u8;
 
-[GoMethodBody("collectTypeParams")] internal static void collectTypeParamsᴍ(ж<Checker> Ꮡcheck, ж<ж<TypeParamList>> Ꮡdst, ж<ast.FieldList> Ꮡlist) {
+internal static void collectTypeParams⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ж<TypeParamList>> Ꮡdst, ж<ast.FieldList> Ꮡlist) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -851,7 +851,7 @@ private static readonly @string cannotUseATypeParameterˢ2ᵇᴍChecker = "canno
                     // the underlying type and thus type set of a type parameter is.
                     // But we may need some additional form of cycle detection within
                     // type parameter lists.
-                    Ꮡcheck.error(new ast_Exprᴠpositioner(f.Type), MisplacedTypeParam, cannotUseATypeParameterˢ2ᴍChecker);
+                    Ꮡcheck.error(new ast_Exprᴠpositioner(f.Type), MisplacedTypeParam, cannotUseATypeParameterˢ2⁔Checker);
                     bound = new BasicжType(Typ[Invalid]);
                 }
             } else {
@@ -867,7 +867,7 @@ private static readonly @string cannotUseATypeParameterˢ2ᵇᴍChecker = "canno
     finally { ᒐ.Run(); }
 }
 
-[GoMethodBody("bound")] internal static Type boundᴍ(ж<Checker> Ꮡcheck, ast.Expr x) {
+internal static Type bound⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr x) {
     // A type set literal of the form ~T and A|B may only appear as constraint;
     // embed it in an implicit interface so that only interface type-checking
     // needs to take care of such type expressions.
@@ -893,7 +893,7 @@ private static readonly @string cannotUseATypeParameterˢ2ᵇᴍChecker = "canno
     return Ꮡcheck.typ(x);
 }
 
-[GoMethodBody("declareTypeParam")] internal static ж<TypeParam> declareTypeParamᴍ(ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡname, token.Pos scopePos) {
+internal static ж<TypeParam> declareTypeParam⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ast.Ident> Ꮡname, token.Pos scopePos) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var name = ref Ꮡname.DerefOrNull();
 
@@ -909,7 +909,7 @@ private static readonly @string cannotUseATypeParameterˢ2ᵇᴍChecker = "canno
     return tpar;
 }
 
-[GoMethodBody("collectMethods")] internal static void collectMethodsᴍ(ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj) {
+internal static void collectMethods⁔(/*this*/ ж<Checker> Ꮡcheck, ж<TypeName> Ꮡobj) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
 
@@ -970,7 +970,7 @@ private static readonly @string cannotUseATypeParameterˢ2ᵇᴍChecker = "canno
     }
 }
 
-[GoMethodBody("checkFieldUniqueness")] internal static void checkFieldUniquenessᴍ(ж<Checker> Ꮡcheck, ж<Named> @base) {
+internal static void checkFieldUniqueness⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Named> @base) {
     var (t, _) = @base.Underlying()._<ж<Struct>>(ᐧ); if (t != nil) {
         objset mset = default;
         for (nint i = 0; i < @base.NumMethods(); i++) {
@@ -1000,7 +1000,7 @@ private static readonly @string cannotUseATypeParameterˢ2ᵇᴍChecker = "canno
     }
 }
 
-[GoMethodBody("funcDecl")] internal static void funcDeclᴍ(ж<Checker> Ꮡcheck, ж<Func> Ꮡobj, ж<declInfo> Ꮡdecl) {
+internal static void funcDecl⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Func> Ꮡobj, ж<declInfo> Ꮡdecl) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var obj = ref Ꮡobj.DerefOrNull();
     ref var decl = ref Ꮡdecl.DerefOrNull();
@@ -1036,7 +1036,7 @@ private static readonly @string cannotUseATypeParameterˢ2ᵇᴍChecker = "canno
     }
 }
 
-[GoMethodBody("declStmt")] internal static void declStmtᴍ(ж<Checker> Ꮡcheck, ast.Decl d) {
+internal static void declStmt⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Decl d) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var pkg = check.pkg;

@@ -66,10 +66,13 @@ using static go.encoding.csv_package;
 
 namespace go.encoding;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.unicode;
 using static csv_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("csv")]
 public static partial class csv_package
@@ -112,29 +115,29 @@ public static partial class csv_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(csv_package.ParseError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class csvᴛParseError;
-[GoMethodHost(typeof(csv_package.Reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class csvᴛReader;
-[GoMethodHost(typeof(csv_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class csvᴛWriter;
+[GoMethodHost(typeof(csv_package.ParseError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class csvᴛParseError;
+[GoMethodHost(typeof(csv_package.Reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class csvᴛReader;
+[GoMethodHost(typeof(csv_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class csvᴛWriter;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class csvᴛParseError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref ParseError e) => csv_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref ParseError e) => csv_package.Unwrapᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref ParseError e) => csv_package.Error⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Unwrap(this ref ParseError e) => csv_package.Unwrap⁔(ref e);
 }
 partial class csvᴛReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string> record, error err) Read(this ref Reader r) => csv_package.Readᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint line, nint column) FieldPos(this ref Reader r, nint field) => csv_package.FieldPosᴍ(ref r, field);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 InputOffset(this ref Reader r) => csv_package.InputOffsetᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<slice<@string>> records, error err) ReadAll(this ref Reader r) => csv_package.ReadAllᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) readLine(this ref Reader r) => csv_package.readLineᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<@string>, error) readRecord(this ref Reader r, slice<@string> dst) => csv_package.readRecordᴍ(ref r, dst);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string> record, error err) Read(this ref Reader r) => csv_package.Read⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint line, nint column) FieldPos(this ref Reader r, nint field) => csv_package.FieldPos⁔(ref r, field);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 InputOffset(this ref Reader r) => csv_package.InputOffset⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<slice<@string>> records, error err) ReadAll(this ref Reader r) => csv_package.ReadAll⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) readLine(this ref Reader r) => csv_package.readLine⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<@string>, error) readRecord(this ref Reader r, slice<@string> dst) => csv_package.readRecord⁔(ref r, dst);
 }
 partial class csvᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Write(this ref Writer w, slice<@string> record) => csv_package.Writeᴍ(ref w, record);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Flush(this ref Writer w) => csv_package.Flushᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Error(this ref Writer w) => csv_package.Errorᴍ(ref w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error WriteAll(this ref Writer w, slice<slice<@string>> records) => csv_package.WriteAllᴍ(ref w, records);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool fieldNeedsQuotes(this ref Writer w, @string field) => csv_package.fieldNeedsQuotesᴍ(ref w, field);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Write(this ref Writer w, slice<@string> record) => csv_package.Write⁔(ref w, record);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Flush(this ref Writer w) => csv_package.Flush⁔(ref w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Error(this ref Writer w) => csv_package.Error⁔(ref w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error WriteAll(this ref Writer w, slice<slice<@string>> records) => csv_package.WriteAll⁔(ref w, records);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool fieldNeedsQuotes(this ref Writer w, @string field) => csv_package.fieldNeedsQuotes⁔(ref w, field);
 }
 // </GlyphForwarders>

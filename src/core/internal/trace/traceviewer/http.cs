@@ -271,7 +271,7 @@ private static readonly ViewType ViewThreadᵇ = "thread"u8;
 
 } partial class traceviewer_package {
 
-[GoMethodBody("URL")] internal static @string URLᴍ(View v, nint rangeIdx) {
+internal static @string URL⁔(/*this*/ View v, nint rangeIdx) {
     if (rangeIdx < 0) {
         return fmt.Sprintf("/trace?view=%s"u8, v.Type);
     }
@@ -290,7 +290,7 @@ partial struct Range {
 
 } partial class traceviewer_package {
 
-[GoMethodBody("URL")] internal static @string URLᴍ(Range r, ViewType viewType) {
+internal static @string URL⁔(/*this*/ Range r, ViewType viewType) {
     return fmt.Sprintf("/trace?view=%s&start=%d&end=%d"u8, viewType, r.Start, r.End);
 }
 

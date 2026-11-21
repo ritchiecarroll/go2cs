@@ -60,10 +60,13 @@ using static go.@internal.types.errors_package;
 
 namespace go.@internal.types;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go;
 using static errors_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("errors")]
 public static partial class errors_package
@@ -96,11 +99,11 @@ public static partial class errors_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(errors_package.Code)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class errorsᴛCode;
+[GoMethodHost(typeof(errors_package.Code)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class errorsᴛCode;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class errorsᴛCode {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Code i) => errors_package.Stringᴍ(i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Code i) => errors_package.String⁔(i);
 }
 // </GlyphForwarders>

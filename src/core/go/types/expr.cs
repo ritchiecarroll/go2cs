@@ -73,7 +73,7 @@ internal static opPredicates unaryOpPredicates;
 
 } partial class types_package {
 
-[GoMethodBody("op")] internal static bool opᴍ(ж<Checker> Ꮡcheck, opPredicates m, ж<operand> Ꮡx, token.Token op) {
+internal static bool op⁔(/*this*/ ж<Checker> Ꮡcheck, opPredicates m, ж<operand> Ꮡx, token.Token op) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     var pred = m[op]; if (pred != nil) {
@@ -141,13 +141,13 @@ internal static array<@string> op2str1 = new golib.SparseArray<@string>{
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cannotUseOutsideOfˢᴍChecker => ref cannotUseOutsideOfˢᵇᴍChecker;
-private static readonly @string cannotUseOutsideOfˢᵇᴍChecker = "cannot use ~ outside of interface or type constraint"u8;
-internal static ref readonly @string cannotUseOutsideOfˢ2ᴍChecker => ref cannotUseOutsideOfˢ2ᵇᴍChecker;
-private static readonly @string cannotUseOutsideOfˢ2ᵇᴍChecker = "cannot use ~ outside of interface or type constraint (use ^ for bitwise complement)"u8;
+internal static ref readonly @string cannotUseOutsideOfˢ⁔Checker => ref cannotUseOutsideOfˢᵇ⁔Checker;
+private static readonly @string cannotUseOutsideOfˢᵇ⁔Checker = "cannot use ~ outside of interface or type constraint"u8;
+internal static ref readonly @string cannotUseOutsideOfˢ2⁔Checker => ref cannotUseOutsideOfˢ2ᵇ⁔Checker;
+private static readonly @string cannotUseOutsideOfˢ2ᵇ⁔Checker = "cannot use ~ outside of interface or type constraint (use ^ for bitwise complement)"u8;
 
 // The unary expression e may be nil. It's passed in for better error messages only.
-[GoMethodBody("unary")] internal static void unaryᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.UnaryExpr> Ꮡe) {
+internal static void unary⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.UnaryExpr> Ꮡe) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
@@ -184,11 +184,11 @@ private static readonly @string cannotUseOutsideOfˢ2ᵇᴍChecker = "cannot use
     case var ᴛ when ᴛ == token.TILDE: {
         // Provide a better error position and message than what check.op below would do.
         if (!allInteger(x.typ)) {
-            Ꮡcheck.error(new ast_UnaryExprжpositioner(Ꮡe), UndefinedOp, cannotUseOutsideOfˢᴍChecker);
+            Ꮡcheck.error(new ast_UnaryExprжpositioner(Ꮡe), UndefinedOp, cannotUseOutsideOfˢ⁔Checker);
             x.mode = invalid;
             return;
         }
-        Ꮡcheck.error(new ast_UnaryExprжpositioner(Ꮡe), UndefinedOp, cannotUseOutsideOfˢ2ᴍChecker);
+        Ꮡcheck.error(new ast_UnaryExprжpositioner(Ꮡe), UndefinedOp, cannotUseOutsideOfˢ2⁔Checker);
         op = token.XOR;
         break;
     }}
@@ -220,7 +220,7 @@ private static readonly @string cannotUseOutsideOfˢ2ᵇᴍChecker = "cannot use
 // chanElem returns the channel element type of x for a receive from x (recv == true)
 // or send to x (recv == false) operation. If the operation is not valid, chanElem
 // reports an error and returns nil.
-[GoMethodBody("chanElem")] internal static Type chanElemᴍ(ж<Checker> Ꮡcheck, positioner pos, ж<operand> Ꮡx, bool recv) {
+internal static Type chanElem⁔(/*this*/ ж<Checker> Ꮡcheck, positioner pos, ж<operand> Ꮡx, bool recv) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     var (u, err) = commonUnder(x.typ, (Type t, Type uΔ1) => {
@@ -281,8 +281,8 @@ internal static bool isComparison(token.Token op) {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string vFoundOldTypeSSNewSˢᴍChecker => ref vFoundOldTypeSSNewSˢᵇᴍChecker;
-private static readonly @string vFoundOldTypeSSNewSˢᵇᴍChecker = "%v: found old type(%s): %s (new: %s)"u8;
+internal static ref readonly @string vFoundOldTypeSSNewSˢ⁔Checker => ref vFoundOldTypeSSNewSˢᵇ⁔Checker;
+private static readonly @string vFoundOldTypeSSNewSˢᵇ⁔Checker = "%v: found old type(%s): %s (new: %s)"u8;
 
 // updateExprType updates the type of x to typ and invokes itself
 // recursively for the operands of x, depending on expression kind.
@@ -293,7 +293,7 @@ private static readonly @string vFoundOldTypeSSNewSˢᵇᴍChecker = "%v: found 
 // Also, if x is a constant, it must be representable as a value of typ,
 // and if x is the (formerly untyped) lhs operand of a non-constant
 // shift, it must be an integer value.
-[GoMethodBody("updateExprType")] internal static void updateExprTypeᴍ(ж<Checker> Ꮡcheck, ast.Expr x, Type typ, bool final) {
+internal static void updateExprType⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr x, Type typ, bool final) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var (old, found) = check.untyped[x, ꟷ];
@@ -322,7 +322,7 @@ private static readonly @string vFoundOldTypeSSNewSˢᵇᴍChecker = "%v: found 
         // The respective sub-expressions got their final types
         // upon assignment or use.
         if (debug) {
-            Ꮡcheck.dump(vFoundOldTypeSSNewSˢᴍChecker, xΔ1.Pos(), xΔ1, old.typ.OrTypedNil(), typ);
+            Ꮡcheck.dump(vFoundOldTypeSSNewSˢ⁔Checker, xΔ1.Pos(), xΔ1, old.typ.OrTypedNil(), typ);
             throw panic("unreachable");
         }
         return;
@@ -420,7 +420,7 @@ private static readonly @string vFoundOldTypeSSNewSˢᵇᴍChecker = "%v: found 
 }
 
 // updateExprVal updates the value of x to val.
-[GoMethodBody("updateExprVal")] internal static void updateExprValᴍ(ref Checker check, ast.Expr x, constant.Value val) {
+internal static void updateExprVal⁔(/*this*/ ref Checker check, ast.Expr x, constant.Value val) {
     var (info, ok) = check.untyped[x, ꟷ]; if (ok) {
         info.val = val;
         check.untyped[x] = info;
@@ -433,7 +433,7 @@ private static readonly @string vFoundOldTypeSSNewSˢᵇᴍChecker = "%v: found 
 //
 // If x is a constant operand, the returned constant.Value will be the
 // representation of x in this context.
-[GoMethodBody("implicitTypeAndValue")] internal static (Type, constant.Value, errors.Code) implicitTypeAndValueᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type target) {
+internal static (Type, constant.Value, errors.Code) implicitTypeAndValue⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type target) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid || isTyped(x.typ) || !isValid(target)) {
@@ -548,7 +548,7 @@ private static readonly @string vFoundOldTypeSSNewSˢᵇᴍChecker = "%v: found 
 }
 
 // If switchCase is true, the operator op is ignored.
-[GoMethodBody("comparison")] internal static void comparisonᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy, token.Token op, bool switchCase) {
+internal static void comparison⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy, token.Token op, bool switchCase) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -685,7 +685,7 @@ Error:
 
 // incomparableCause returns a more specific cause why typ is not comparable.
 // If there is no more specific cause, the result is "".
-[GoMethodBody("incomparableCause")] internal static @string incomparableCauseᴍ(ж<Checker> Ꮡcheck, Type typ) {
+internal static @string incomparableCause⁔(/*this*/ ж<Checker> Ꮡcheck, Type typ) {
     switch (typ.Underlying().type()) {
     case ж<Slice> _:
     case ж<Signature> _:
@@ -697,7 +697,7 @@ Error:
 }
 
 // If e != nil, it must be the shift expression; it may be nil for non-constant shifts.
-[GoMethodBody("shift")] internal static void shiftᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy, ast.Expr e, token.Token op) {
+internal static void shift⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy, ast.Expr e, token.Token op) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -871,7 +871,7 @@ internal static opPredicates binaryOpPredicates;
 
 // If e != nil, it must be the binary expression; it may be nil for non-constant expressions
 // (when invoked for an assignment operation where the binary expression is implicit).
-[GoMethodBody("binary")] internal static void binaryᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e, ast.Expr lhs, ast.Expr rhs, token.Token op, token.Pos opPos) {
+internal static void binary⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ast.Expr e, ast.Expr lhs, ast.Expr rhs, token.Token op, token.Pos opPos) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     ref var y = ref heap(new operand(), out var Ꮡy);
@@ -969,7 +969,7 @@ internal static opPredicates binaryOpPredicates;
 
 // matchTypes attempts to convert any untyped types x and y such that they match.
 // If an error occurs, x.mode is set to invalid.
-[GoMethodBody("matchTypes")] internal static void matchTypesᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy) {
+internal static void matchTypes⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<operand> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -1065,8 +1065,8 @@ internal static ж<target> newTarget(Type typ, @string desc) {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string exprSˢᴍChecker => ref exprSˢᵇᴍChecker;
-private static readonly @string exprSˢᵇᴍChecker = "-- expr %s"u8;
+internal static ref readonly @string exprSˢ⁔Checker => ref exprSˢᵇ⁔Checker;
+private static readonly @string exprSˢᵇ⁔Checker = "-- expr %s"u8;
 
 // rawExpr typechecks expression e and initializes x with the expression
 // value or type. If an error occurred, x.mode is set to invalid.
@@ -1075,13 +1075,13 @@ private static readonly @string exprSˢᵇᴍChecker = "-- expr %s"u8;
 // If hint != nil, it is the type of a composite literal element.
 // If allowGeneric is set, the operand type may be an uninstantiated
 // parameterized type or function value.
-[GoMethodBody("rawExpr")] internal static exprKind rawExprᴍ(ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e, Type hint, bool allowGeneric) {
+internal static exprKind rawExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e, Type hint, bool allowGeneric) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
 
         if (check.conf._Trace) {
-            Ꮡcheck.trace(e.Pos(), exprSˢᴍChecker, e);
+            Ꮡcheck.trace(e.Pos(), exprSˢ⁔Checker, e);
             check.indent++;
             defer(() => {
                 Ꮡcheck.Value.indent--;
@@ -1111,15 +1111,15 @@ private static readonly @string exprSˢᵇᴍChecker = "-- expr %s"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeˢᴍChecker => ref typeˢᵇᴍChecker;
-private static readonly @string typeˢᵇᴍChecker = "type"u8;
-internal static ref readonly @string functionˢᴍChecker => ref functionˢᵇᴍChecker;
-private static readonly @string functionˢᵇᴍChecker = "function"u8;
+internal static ref readonly @string typeˢ⁔Checker => ref typeˢᵇ⁔Checker;
+private static readonly @string typeˢᵇ⁔Checker = "type"u8;
+internal static ref readonly @string functionˢ⁔Checker => ref functionˢᵇ⁔Checker;
+private static readonly @string functionˢᵇ⁔Checker = "function"u8;
 
 // If x is a generic type, or a generic function whose type arguments cannot be inferred
 // from a non-nil target T, nonGeneric reports an error and invalidates x.mode and x.typ.
 // Otherwise it leaves x alone.
-[GoMethodBody("nonGeneric")] internal static void nonGenericᴍ(ж<Checker> Ꮡcheck, ж<target> T, ж<operand> Ꮡx) {
+internal static void nonGeneric⁔(/*this*/ ж<Checker> Ꮡcheck, ж<target> T, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid || x.mode == novalue) {
@@ -1131,7 +1131,7 @@ private static readonly @string functionˢᵇᴍChecker = "function"u8;
     case ж<Named> _: {
         var t = x.typ;
         if (isGeneric(t)) {
-            what = typeˢᴍChecker;
+            what = typeˢ⁔Checker;
         }
         break;
     }
@@ -1141,7 +1141,7 @@ private static readonly @string functionˢᵇᴍChecker = "function"u8;
                 Ꮡcheck.funcInst(T, x.Pos(), Ꮡx, nil, true);
                 return;
             }
-            what = functionˢᴍChecker;
+            what = functionˢ⁔Checker;
         }
         break;
     }}
@@ -1155,7 +1155,7 @@ private static readonly @string functionˢᵇᴍChecker = "function"u8;
 // If x has a pending type (i.e. its declaring object is on the object path), pendingType
 // reports an error and invalidates x.mode and x.typ.
 // Otherwise it leaves x alone.
-[GoMethodBody("pendingType")] internal static void pendingTypeᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
+internal static void pendingType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid || x.mode == novalue) {
@@ -1168,17 +1168,17 @@ private static readonly @string functionˢᵇᴍChecker = "function"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidUseOfˢᴍChecker => ref invalidUseOfˢᵇᴍChecker;
-private static readonly @string invalidUseOfˢᵇᴍChecker = "invalid use of ..."u8;
-internal static ref readonly @string useOfTypeOutsideTypeˢᴍChecker => ref useOfTypeOutsideTypeˢᵇᴍChecker;
-private static readonly @string useOfTypeOutsideTypeˢᵇᴍChecker = "use of .(type) outside type switch"u8;
-internal static ref readonly @string noKeyValueExpectedˢᴍChecker => ref noKeyValueExpectedˢᵇᴍChecker;
-private static readonly @string noKeyValueExpectedˢᵇᴍChecker = "no key:value expected"u8;
+internal static ref readonly @string invalidUseOfˢ⁔Checker => ref invalidUseOfˢᵇ⁔Checker;
+private static readonly @string invalidUseOfˢᵇ⁔Checker = "invalid use of ..."u8;
+internal static ref readonly @string useOfTypeOutsideTypeˢ⁔Checker => ref useOfTypeOutsideTypeˢᵇ⁔Checker;
+private static readonly @string useOfTypeOutsideTypeˢᵇ⁔Checker = "use of .(type) outside type switch"u8;
+internal static ref readonly @string noKeyValueExpectedˢ⁔Checker => ref noKeyValueExpectedˢᵇ⁔Checker;
+private static readonly @string noKeyValueExpectedˢᵇ⁔Checker = "no key:value expected"u8;
 
 // exprInternal contains the core of type checking of expressions.
 // Must only be called by rawExpr.
 // (See rawExpr for an explanation of the parameters.)
-[GoMethodBody("exprInternal")] internal static exprKind exprInternalᴍ(ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx, ast.Expr e, Type hint) {
+internal static exprKind exprInternal⁔(/*this*/ ж<Checker> Ꮡcheck, ж<target> ᏑT, ж<operand> Ꮡx, ast.Expr e, Type hint) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var T = ref ᏑT.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
@@ -1199,7 +1199,7 @@ private static readonly @string noKeyValueExpectedˢᵇᴍChecker = "no key:valu
     }
     case ж<ast.Ellipsis> eΔ1: {
         // ellipses are handled explicitly where they are valid
-        Ꮡcheck.error(new ast_Ellipsisжpositioner(eΔ1), InvalidSyntaxTree, invalidUseOfˢᴍChecker);
+        Ꮡcheck.error(new ast_Ellipsisжpositioner(eΔ1), InvalidSyntaxTree, invalidUseOfˢ⁔Checker);
         goto Error;
         break;
     }
@@ -1265,7 +1265,7 @@ private static readonly @string noKeyValueExpectedˢᵇᴍChecker = "no key:valu
         if (eΔ1.Type == nil) {
             // Don't use InvalidSyntaxTree because this can occur in the AST produced by
             // go/parser.
-            Ꮡcheck.error(new ast_TypeAssertExprжpositioner(eΔ1), BadTypeKeyword, useOfTypeOutsideTypeˢᴍChecker);
+            Ꮡcheck.error(new ast_TypeAssertExprжpositioner(eΔ1), BadTypeKeyword, useOfTypeOutsideTypeˢ⁔Checker);
             goto Error;
         }
         if (isTypeParam(x.typ)) {
@@ -1343,7 +1343,7 @@ private static readonly @string noKeyValueExpectedˢᵇᴍChecker = "no key:valu
     }
     case ж<ast.KeyValueExpr> eΔ1: {
         // key:value expressions are handled in composite literals
-        Ꮡcheck.error(new ast_KeyValueExprжpositioner(eΔ1), InvalidSyntaxTree, noKeyValueExpectedˢᴍChecker);
+        Ꮡcheck.error(new ast_KeyValueExprжpositioner(eΔ1), InvalidSyntaxTree, noKeyValueExpectedˢ⁔Checker);
         goto Error;
         break;
     }
@@ -1435,7 +1435,7 @@ internal static any keyVal(constant.Value x) {
 } partial class types_package {
 
 // typeAssertion checks x.(T). The type of x must be an interface.
-[GoMethodBody("typeAssertion")] internal static void typeAssertionᴍ(ж<Checker> Ꮡcheck, ast.Expr e, ж<operand> Ꮡx, Type T, bool typeSwitch) {
+internal static void typeAssertion⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e, ж<operand> Ꮡx, Type T, bool typeSwitch) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     ref var cause = ref heap(new @string(), out var Ꮡcause);
@@ -1456,14 +1456,14 @@ internal static any keyVal(constant.Value x) {
 // a function call, T is used to infer the type arguments for e.
 // The result must be a single value.
 // If an error occurred, x.mode is set to invalid.
-[GoMethodBody("expr")] internal static void exprᴍ(ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e) {
+internal static void expr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<target> T, ж<operand> x, ast.Expr e) {
     Ꮡcheck.rawExpr(T, x, e, default, false);
     Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(types.Δbuiltin)) | (nuint)(1 << (int)(typexpr))));
     Ꮡcheck.singleValue(x);
 }
 
 // genericExpr is like expr but the result may also be generic.
-[GoMethodBody("genericExpr")] internal static void genericExprᴍ(ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e) {
+internal static void genericExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e) {
     Ꮡcheck.rawExpr(nil, x, e, default, true);
     Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(types.Δbuiltin)) | (nuint)(1 << (int)(typexpr))));
     Ꮡcheck.singleValue(x);
@@ -1474,7 +1474,7 @@ internal static any keyVal(constant.Value x) {
 // expression, the result is a two-element list containing the value
 // of e, and an untyped bool value or an error value, respectively.
 // If an error occurred, list[0] is not valid.
-[GoMethodBody("multiExpr")] internal static (slice<ж<operand>> list, bool commaOk) multiExprᴍ(ж<Checker> Ꮡcheck, ast.Expr e, bool allowCommaOk) {
+internal static (slice<ж<operand>> list, bool commaOk) multiExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr e, bool allowCommaOk) {
     slice<ж<operand>> list = default;
     bool commaOk = default;
 
@@ -1508,7 +1508,7 @@ internal static any keyVal(constant.Value x) {
 // exprWithHint typechecks expression e and initializes x with the expression value;
 // hint is the type of a composite literal element.
 // If an error occurred, x.mode is set to invalid.
-[GoMethodBody("exprWithHint")] internal static void exprWithHintᴍ(ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, Type hint) {
+internal static void exprWithHint⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, Type hint) {
     assert(hint != nil);
     Ꮡcheck.rawExpr(nil, x, e, hint, false);
     Ꮡcheck.exclude(x, (nuint)((nuint)(UntypedInt)(1 << (int)(novalue) | 1 << (int)(types.Δbuiltin)) | (nuint)(1 << (int)(typexpr))));
@@ -1519,25 +1519,25 @@ internal static any keyVal(constant.Value x) {
 // If allowGeneric is set, the operand type may be an uninstantiated parameterized type or function
 // value.
 // If an error occurred, x.mode is set to invalid.
-[GoMethodBody("exprOrType")] internal static void exprOrTypeᴍ(ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, bool allowGeneric) {
+internal static void exprOrType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> x, ast.Expr e, bool allowGeneric) {
     Ꮡcheck.rawExpr(nil, x, e, default, allowGeneric);
     Ꮡcheck.exclude(x, (nuint)1 << (int)(novalue));
     Ꮡcheck.singleValue(x);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sUsedAsValueˢᴍChecker => ref sUsedAsValueˢᵇᴍChecker;
-private static readonly @string sUsedAsValueˢᵇᴍChecker = "%s used as value"u8;
-internal static ref readonly @string sUsedAsValueOrTypeˢᴍChecker => ref sUsedAsValueOrTypeˢᵇᴍChecker;
-private static readonly @string sUsedAsValueOrTypeˢᵇᴍChecker = "%s used as value or type"u8;
-internal static ref readonly @string sMustBeCalledˢᴍChecker => ref sMustBeCalledˢᵇᴍChecker;
-private static readonly @string sMustBeCalledˢᵇᴍChecker = "%s must be called"u8;
-internal static ref readonly @string sIsNotAnExpressionˢᴍChecker => ref sIsNotAnExpressionˢᵇᴍChecker;
-private static readonly @string sIsNotAnExpressionˢᵇᴍChecker = "%s is not an expression"u8;
+internal static ref readonly @string sUsedAsValueˢ⁔Checker => ref sUsedAsValueˢᵇ⁔Checker;
+private static readonly @string sUsedAsValueˢᵇ⁔Checker = "%s used as value"u8;
+internal static ref readonly @string sUsedAsValueOrTypeˢ⁔Checker => ref sUsedAsValueOrTypeˢᵇ⁔Checker;
+private static readonly @string sUsedAsValueOrTypeˢᵇ⁔Checker = "%s used as value or type"u8;
+internal static ref readonly @string sMustBeCalledˢ⁔Checker => ref sMustBeCalledˢᵇ⁔Checker;
+private static readonly @string sMustBeCalledˢᵇ⁔Checker = "%s must be called"u8;
+internal static ref readonly @string sIsNotAnExpressionˢ⁔Checker => ref sIsNotAnExpressionˢᵇ⁔Checker;
+private static readonly @string sIsNotAnExpressionˢᵇ⁔Checker = "%s is not an expression"u8;
 
 // exclude reports an error if x.mode is in modeset and sets x.mode to invalid.
 // The modeset may contain any of 1<<novalue, 1<<builtin, 1<<typexpr.
-[GoMethodBody("exclude")] internal static void excludeᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint modeset) {
+internal static void exclude⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, nuint modeset) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if ((modeset & (((nuint)1).Lsh((uint64)(x.mode)))) != 0) {
@@ -1546,20 +1546,20 @@ private static readonly @string sIsNotAnExpressionˢᵇᴍChecker = "%s is not a
         switch (x.mode) {
         case var ᴛ when ᴛ == novalue: {
             if ((modeset & (nuint)((nuint)1 << (int)(typexpr))) != 0) {
-                msg = sUsedAsValueˢᴍChecker;
+                msg = sUsedAsValueˢ⁔Checker;
             } else {
-                msg = sUsedAsValueOrTypeˢᴍChecker;
+                msg = sUsedAsValueOrTypeˢ⁔Checker;
             }
             code = TooManyValues;
             break;
         }
         case var ᴛ when ᴛ == types.Δbuiltin: {
-            msg = sMustBeCalledˢᴍChecker;
+            msg = sMustBeCalledˢ⁔Checker;
             code = UncalledBuiltin;
             break;
         }
         case var ᴛ when ᴛ == typexpr: {
-            msg = sIsNotAnExpressionˢᴍChecker;
+            msg = sIsNotAnExpressionˢ⁔Checker;
             code = NotAnExpr;
             break;
         }
@@ -1573,7 +1573,7 @@ private static readonly @string sIsNotAnExpressionˢᵇᴍChecker = "%s is not a
 }
 
 // singleValue reports an error if x describes a tuple and sets x.mode to invalid.
-[GoMethodBody("singleValue")] internal static void singleValueᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
+internal static void singleValue⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == value) {

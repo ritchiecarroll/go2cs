@@ -19,7 +19,7 @@ partial struct dirInfo {
 
 } partial class os_package {
 
-[GoMethodBody("close")] internal static void closeᴍ(ref dirInfo d) {
+internal static void close⁔(/*this*/ ref dirInfo d) {
     if (d.dir == 0) {
         return;
     }

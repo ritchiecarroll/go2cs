@@ -72,7 +72,7 @@ using static go.image.gif_package;
 
 namespace go.image;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using image = image_package;
 using Δcolor = go.image.color_package;
 using io = io_package;
@@ -82,7 +82,10 @@ using static gif_package;
 using go.@internal;
 using go.image.color;
 using math;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("gif")]
 public static partial class gif_package
@@ -133,42 +136,42 @@ public static partial class gif_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(gif_package.blockReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gifᴛblockReader;
-[GoMethodHost(typeof(gif_package.blockWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gifᴛblockWriter;
-[GoMethodHost(typeof(gif_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gifᴛdecoder;
-[GoMethodHost(typeof(gif_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gifᴛencoder;
+[GoMethodHost(typeof(gif_package.blockReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gifᴛblockReader;
+[GoMethodHost(typeof(gif_package.blockWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gifᴛblockWriter;
+[GoMethodHost(typeof(gif_package.decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gifᴛdecoder;
+[GoMethodHost(typeof(gif_package.encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gifᴛencoder;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class gifᴛblockReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void fill(this ref blockReader b) => gif_package.fillᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte, error) ReadByte(this ref blockReader b) => gif_package.ReadByteᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref blockReader b, slice<byte> p) => gif_package.Readᴍ(ref b, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error close(this ref blockReader b) => gif_package.closeᴍ(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void fill(this ref blockReader b) => gif_package.fill⁔(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (byte, error) ReadByte(this ref blockReader b) => gif_package.ReadByte⁔(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref blockReader b, slice<byte> p) => gif_package.Read⁔(ref b, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error close(this ref blockReader b) => gif_package.close⁔(ref b);
 }
 partial class gifᴛdecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly, bool keepAllFrames) => gif_package.decodeᴍ(Ꮡd, r, configOnly, keepAllFrames);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readHeaderAndScreenDescriptor(this ref decoder d) => gif_package.readHeaderAndScreenDescriptorᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte fields) => gif_package.readColorTableᴍ(ref d, fields);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readExtension(this ref decoder d) => gif_package.readExtensionᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readGraphicControl(this ref decoder d) => gif_package.readGraphicControlᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFrames) => gif_package.readImageDescriptorᴍ(Ꮡd, keepAllFrames);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<image.Paletted>, error) newImageFromDescriptor(this ref decoder d) => gif_package.newImageFromDescriptorᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) readBlock(this ref decoder d) => gif_package.readBlockᴍ(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error decode(this ж<decoder> Ꮡd, io.Reader r, bool configOnly, bool keepAllFrames) => gif_package.decode⁔(Ꮡd, r, configOnly, keepAllFrames);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readHeaderAndScreenDescriptor(this ref decoder d) => gif_package.readHeaderAndScreenDescriptor⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (Δcolor.Palette, error) readColorTable(this ref decoder d, byte fields) => gif_package.readColorTable⁔(ref d, fields);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readExtension(this ref decoder d) => gif_package.readExtension⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readGraphicControl(this ref decoder d) => gif_package.readGraphicControl⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error readImageDescriptor(this ж<decoder> Ꮡd, bool keepAllFrames) => gif_package.readImageDescriptor⁔(Ꮡd, keepAllFrames);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<image.Paletted>, error) newImageFromDescriptor(this ref decoder d) => gif_package.newImageFromDescriptor⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) readBlock(this ref decoder d) => gif_package.readBlock⁔(ref d);
 }
 partial class gifᴛblockWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setup(this blockWriter b) => gif_package.setupᴍ(b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Flush(this blockWriter b) => gif_package.Flushᴍ(b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteByte(this blockWriter b, byte c) => gif_package.WriteByteᴍ(b, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Write(this blockWriter b, slice<byte> data) => gif_package.Writeᴍ(b, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void close(this blockWriter b) => gif_package.closeᴍ(b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setup(this blockWriter b) => gif_package.setup⁔(b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Flush(this blockWriter b) => gif_package.Flush⁔(b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error WriteByte(this blockWriter b, byte c) => gif_package.WriteByte⁔(b, c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Write(this blockWriter b, slice<byte> data) => gif_package.Write⁔(b, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void close(this blockWriter b) => gif_package.close⁔(b);
 }
 partial class gifᴛencoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void flush(this ref encoder e) => gif_package.flushᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void write(this ref encoder e, slice<byte> p) => gif_package.writeᴍ(ref e, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeByte(this ref encoder e, byte b) => gif_package.writeByteᴍ(ref e, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeHeader(this ref encoder e) => gif_package.writeHeaderᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool colorTablesMatch(this ref encoder e, nint localLen, nint transparentIndex) => gif_package.colorTablesMatchᴍ(ref e, localLen, transparentIndex);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> Ꮡpm, nint delay, byte disposal) => gif_package.writeImageBlockᴍ(Ꮡe, Ꮡpm, delay, disposal);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void flush(this ref encoder e) => gif_package.flush⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void write(this ref encoder e, slice<byte> p) => gif_package.write⁔(ref e, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeByte(this ref encoder e, byte b) => gif_package.writeByte⁔(ref e, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeHeader(this ref encoder e) => gif_package.writeHeader⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool colorTablesMatch(this ref encoder e, nint localLen, nint transparentIndex) => gif_package.colorTablesMatch⁔(ref e, localLen, transparentIndex);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeImageBlock(this ж<encoder> Ꮡe, ж<image.Paletted> Ꮡpm, nint delay, byte disposal) => gif_package.writeImageBlock⁔(Ꮡe, Ꮡpm, delay, disposal);
 }
 // </GlyphForwarders>

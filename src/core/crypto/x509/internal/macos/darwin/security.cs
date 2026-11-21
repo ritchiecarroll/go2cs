@@ -33,7 +33,7 @@ partial struct OSStatus {
 
 } partial class macos_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(OSStatus s) {
+internal static @string Error⁔(/*this*/ OSStatus s) {
     return s.call + " error: "u8 + strconv.Itoa((nint)s.status);
 }
 

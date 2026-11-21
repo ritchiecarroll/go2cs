@@ -95,7 +95,7 @@ public static (ж<Archive>, error) OpenArchive(@string name) {
 // Close closes the Archive.
 // If the Archive was created using NewArchive directly instead of OpenArchive,
 // Close has no effect.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref Archive a) {
+internal static error Close⁔(/*this*/ ref Archive a) {
     error err = default;
     if (a.closer != nil) {
         err = a.closer.Close();
@@ -226,7 +226,7 @@ public static (ж<Archive>, error) NewArchive(io.ReaderAt r) {
 // GetFile returns the XCOFF file defined by member name.
 // FIXME: This doesn't work if an archive has two members with the same
 // name which can occur if an archive has both 32-bits and 64-bits files.
-[GoMethodBody("GetFile")] internal static (ж<File>, error) GetFileᴍ(ref Archive arch, @string name) {
+internal static (ж<File>, error) GetFile⁔(/*this*/ ref Archive arch, @string name) {
     foreach (var (_, mem) in range(arch.Members)) {
         if (mem.Name == name) {
             return NewFile(new io.SectionReaderжReaderAt(mem.sr));

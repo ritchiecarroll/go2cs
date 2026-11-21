@@ -458,7 +458,7 @@ partial struct NTStatus /*num:uint32*/;
 
 } partial class windows_package {
 
-[GoMethodBody("Errno")] internal static syscall.Errno Errnoᴍ(NTStatus s) {
+internal static syscall.Errno Errno⁔(/*this*/ NTStatus s) {
     return rtlNtStatusToDosErrorNoTeb(s);
 }
 
@@ -468,7 +468,7 @@ internal static uint32 langID(uint16 pri, uint16 sub) { return (uint32)sub << 10
 
 } partial class windows_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(NTStatus s) {
+internal static @string Error⁔(/*this*/ NTStatus s) {
     return s.Errno().Error();
 }
 

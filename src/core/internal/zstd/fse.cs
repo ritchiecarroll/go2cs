@@ -19,14 +19,14 @@ partial struct fseEntry {
 } partial class zstd_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fseAccuracyLogTooLargeˢᴍReader => ref fseAccuracyLogTooLargeˢᵇᴍReader;
-private static readonly @string fseAccuracyLogTooLargeˢᵇᴍReader = "FSE accuracy log too large"u8;
-internal static ref readonly @string fseSymbolIndexOverflowˢᴍReader => ref fseSymbolIndexOverflowˢᵇᴍReader;
-private static readonly @string fseSymbolIndexOverflowˢᵇᴍReader = "FSE symbol index overflow"u8;
-internal static ref readonly @string fseSymOverflowˢᴍReader => ref fseSymOverflowˢᵇᴍReader;
-private static readonly @string fseSymOverflowˢᵇᴍReader = "FSE sym overflow"u8;
-internal static ref readonly @string tooManySymbolsInFseTableˢᴍReader => ref tooManySymbolsInFseTableˢᵇᴍReader;
-private static readonly @string tooManySymbolsInFseTableˢᵇᴍReader = "too many symbols in FSE table"u8;
+internal static ref readonly @string fseAccuracyLogTooLargeˢ⁔Reader => ref fseAccuracyLogTooLargeˢᵇ⁔Reader;
+private static readonly @string fseAccuracyLogTooLargeˢᵇ⁔Reader = "FSE accuracy log too large"u8;
+internal static ref readonly @string fseSymbolIndexOverflowˢ⁔Reader => ref fseSymbolIndexOverflowˢᵇ⁔Reader;
+private static readonly @string fseSymbolIndexOverflowˢᵇ⁔Reader = "FSE symbol index overflow"u8;
+internal static ref readonly @string fseSymOverflowˢ⁔Reader => ref fseSymOverflowˢᵇ⁔Reader;
+private static readonly @string fseSymOverflowˢᵇ⁔Reader = "FSE sym overflow"u8;
+internal static ref readonly @string tooManySymbolsInFseTableˢ⁔Reader => ref tooManySymbolsInFseTableˢᵇ⁔Reader;
+private static readonly @string tooManySymbolsInFseTableˢᵇ⁔Reader = "too many symbols in FSE table"u8;
 
 // readFSE reads an FSE table from data starting at off.
 // maxSym is the maximum symbol value.
@@ -34,7 +34,7 @@ private static readonly @string tooManySymbolsInFseTableˢᵇᴍReader = "too ma
 // The FSE is written into table, which must be at least 1<<maxBits in size.
 // This returns the number of bits in the FSE table and the new offset.
 // RFC 4.1.1.
-[GoMethodBody("readFSE")] internal static (nint tableBits, nint roff, error err) readFSEᴍ(ж<Reader> Ꮡr, block data, nint off, nint maxSym, nint maxBits, slice<fseEntry> table) {
+internal static (nint tableBits, nint roff, error err) readFSE⁔(/*this*/ ж<Reader> Ꮡr, block data, nint off, nint maxSym, nint maxBits, slice<fseEntry> table) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var br = Ꮡr.makeBitReader(data, off);
@@ -44,7 +44,7 @@ private static readonly @string tooManySymbolsInFseTableˢᵇᴍReader = "too ma
 
     nint accuracyLog = (nint)br.val(4) + 5;
     if (accuracyLog > maxBits) {
-        return (0, 0, br.makeError(fseAccuracyLogTooLargeˢᴍReader));
+        return (0, 0, br.makeError(fseAccuracyLogTooLargeˢ⁔Reader));
     }
 
     // The number of remaining probabilities, plus 1.
@@ -100,7 +100,7 @@ private static readonly @string tooManySymbolsInFseTableˢᵇᴍReader = "too ma
             zsym += (nint)br.val(2);
 
             if (zsym > maxSym) {
-                return (0, 0, br.makeError(fseSymbolIndexOverflowˢᴍReader));
+                return (0, 0, br.makeError(fseSymbolIndexOverflowˢ⁔Reader));
             }
 
             for (; sym < zsym; sym++) {
@@ -135,7 +135,7 @@ private static readonly @string tooManySymbolsInFseTableˢᵇᴍReader = "too ma
             remaining--;
         }
         if (sym >= 256) {
-            return (0, 0, br.makeError(fseSymOverflowˢᴍReader));
+            return (0, 0, br.makeError(fseSymOverflowˢ⁔Reader));
         }
         norm[(uint8)sym] = (int16)count;
         sym++;
@@ -149,7 +149,7 @@ private static readonly @string tooManySymbolsInFseTableˢᵇᴍReader = "too ma
     }
 
     if (remaining != 1) {
-        return (0, 0, br.makeError(tooManySymbolsInFseTableˢᴍReader));
+        return (0, 0, br.makeError(tooManySymbolsInFseTableˢ⁔Reader));
     }
 
     for (; sym <= maxSym; sym++) {
@@ -166,15 +166,15 @@ private static readonly @string tooManySymbolsInFseTableˢᵇᴍReader = "too ma
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fseCountErrorˢᴍReader => ref fseCountErrorˢᵇᴍReader;
-private static readonly @string fseCountErrorˢᵇᴍReader = "FSE count error"u8;
-internal static ref readonly @string fseStateErrorˢᴍReader => ref fseStateErrorˢᵇᴍReader;
-private static readonly @string fseStateErrorˢᵇᴍReader = "FSE state error"u8;
+internal static ref readonly @string fseCountErrorˢ⁔Reader => ref fseCountErrorˢᵇ⁔Reader;
+private static readonly @string fseCountErrorˢᵇ⁔Reader = "FSE count error"u8;
+internal static ref readonly @string fseStateErrorˢ⁔Reader => ref fseStateErrorˢᵇ⁔Reader;
+private static readonly @string fseStateErrorˢᵇ⁔Reader = "FSE state error"u8;
 
 // buildFSE builds an FSE decoding table from a list of probabilities.
 // The probabilities are in norm. next is scratch space. The number of bits
 // in the table is tableBits.
-[GoMethodBody("buildFSE")] internal static error buildFSEᴍ(ref Reader r, nint off, slice<int16> norm, slice<fseEntry> table, nint tableBits) {
+internal static error buildFSE⁔(/*this*/ ref Reader r, nint off, slice<int16> norm, slice<fseEntry> table, nint tableBits) {
     nint tableSize = ((nint)1).Lsh((int64)(tableBits));
     nint highThreshold = tableSize - 1;
 
@@ -203,7 +203,7 @@ private static readonly @string fseStateErrorˢᵇᴍReader = "FSE state error"u
         }
     }
     if (pos != 0) {
-        return r.makeError(off, fseCountErrorˢᴍReader);
+        return r.makeError(off, fseCountErrorˢ⁔Reader);
     }
 
     for (nint i = 0; i < tableSize; i++) {
@@ -212,7 +212,7 @@ private static readonly @string fseStateErrorˢᵇᴍReader = "FSE state error"u
         next[sym]++;
 
         if (nextState == 0) {
-            return r.makeError(off, fseStateErrorˢᴍReader);
+            return r.makeError(off, fseStateErrorˢ⁔Reader);
         }
 
         nint highBit = 15 - bits.LeadingZeros16(nextState);
@@ -271,11 +271,11 @@ internal static UntypedInt literalLengthOffset => 16;
 } partial class zstd_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fseBaselineSymbolˢᴍReader => ref fseBaselineSymbolˢᵇᴍReader;
-private static readonly @string fseBaselineSymbolˢᵇᴍReader = "FSE baseline symbol overflow"u8;
+internal static ref readonly @string fseBaselineSymbolˢ⁔Reader => ref fseBaselineSymbolˢᵇ⁔Reader;
+private static readonly @string fseBaselineSymbolˢᵇ⁔Reader = "FSE baseline symbol overflow"u8;
 
 // makeLiteralBaselineFSE converts the literal length fseTable to baselineTable.
-[GoMethodBody("makeLiteralBaselineFSE")] internal static error makeLiteralBaselineFSEᴍ(ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
+internal static error makeLiteralBaselineFSE⁔(/*this*/ ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
     foreach (var (i, e) in range(fseTable)) {
         var be = new fseBaselineEntry(
             bits: e.bits,
@@ -286,7 +286,7 @@ private static readonly @string fseBaselineSymbolˢᵇᴍReader = "FSE baseline 
             be.basebits = 0;
         } else {
             if (e.sym > 35) {
-                return r.makeError(off, fseBaselineSymbolˢᴍReader);
+                return r.makeError(off, fseBaselineSymbolˢ⁔Reader);
             }
             var idx = (uint8)(e.sym - (uint8)literalLengthOffset);
             var basebits = literalLengthBase[idx];
@@ -299,18 +299,18 @@ private static readonly @string fseBaselineSymbolˢᵇᴍReader = "FSE baseline 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fseOffsetSymbolOverflowˢᴍReader => ref fseOffsetSymbolOverflowˢᵇᴍReader;
-private static readonly @string fseOffsetSymbolOverflowˢᵇᴍReader = "FSE offset symbol overflow"u8;
+internal static ref readonly @string fseOffsetSymbolOverflowˢ⁔Reader => ref fseOffsetSymbolOverflowˢᵇ⁔Reader;
+private static readonly @string fseOffsetSymbolOverflowˢᵇ⁔Reader = "FSE offset symbol overflow"u8;
 
 // makeOffsetBaselineFSE converts the offset length fseTable to baselineTable.
-[GoMethodBody("makeOffsetBaselineFSE")] internal static error makeOffsetBaselineFSEᴍ(ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
+internal static error makeOffsetBaselineFSE⁔(/*this*/ ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
     foreach (var (i, e) in range(fseTable)) {
         var be = new fseBaselineEntry(
             bits: e.bits,
             @base: e.@base
         );
         if (e.sym > 31) {
-            return r.makeError(off, fseOffsetSymbolOverflowˢᴍReader);
+            return r.makeError(off, fseOffsetSymbolOverflowˢ⁔Reader);
         }
 
         // The simple way to write this is
@@ -375,7 +375,7 @@ internal static UntypedInt matchLengthOffset => 32;
 } partial class zstd_package {
 
 // makeMatchBaselineFSE converts the match length fseTable to baselineTable.
-[GoMethodBody("makeMatchBaselineFSE")] internal static error makeMatchBaselineFSEᴍ(ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
+internal static error makeMatchBaselineFSE⁔(/*this*/ ref Reader r, nint off, slice<fseEntry> fseTable, slice<fseBaselineEntry> baselineTable) {
     foreach (var (i, e) in range(fseTable)) {
         var be = new fseBaselineEntry(
             bits: e.bits,
@@ -386,7 +386,7 @@ internal static UntypedInt matchLengthOffset => 32;
             be.basebits = 0;
         } else {
             if (e.sym > 52) {
-                return r.makeError(off, fseBaselineSymbolˢᴍReader);
+                return r.makeError(off, fseBaselineSymbolˢ⁔Reader);
             }
             var idx = (uint8)(e.sym - (uint8)matchLengthOffset);
             var basebits = matchLengthBase[idx];

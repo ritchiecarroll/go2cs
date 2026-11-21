@@ -173,7 +173,7 @@ partial struct YCbCr {
 
 } partial class color_package {
 
-[GoMethodBody("RGBA")] internal static (uint32, uint32, uint32, uint32) RGBAᴍ(YCbCr c) {
+internal static (uint32, uint32, uint32, uint32) RGBA⁔(/*this*/ YCbCr c) {
     // This code is a copy of the YCbCrToRGB function above, except that it
     // returns values in the range [0, 0xffff] instead of [0, 0xff]. There is a
     // subtle difference between doing this and having YCbCr satisfy the Color
@@ -253,7 +253,7 @@ partial struct NYCbCrA {
 
 } partial class color_package {
 
-[GoMethodBody("RGBA")] internal static (uint32, uint32, uint32, uint32) RGBAᴍ(NYCbCrA c) {
+internal static (uint32, uint32, uint32, uint32) RGBA⁔(/*this*/ NYCbCrA c) {
     // The first part of this method is the same as YCbCr.RGBA.
     var yy1 = (int32)c.Y * 0x10101;
     var cb1 = (int32)c.Cb - 128;
@@ -363,7 +363,7 @@ partial struct CMYK {
 
 } partial class color_package {
 
-[GoMethodBody("RGBA")] internal static (uint32, uint32, uint32, uint32) RGBAᴍ(CMYK c) {
+internal static (uint32, uint32, uint32, uint32) RGBA⁔(/*this*/ CMYK c) {
     // This code is a copy of the CMYKToRGB function above, except that it
     // returns values in the range [0, 0xffff] instead of [0, 0xff].
 

@@ -11,7 +11,7 @@ partial class routebsd_package {
 } partial class routebsd_package {
 
 // MTU returns the interface MTU.
-[GoMethodBody("MTU")] internal static nint MTUᴍ(ref InterfaceMessage m) {
+internal static nint MTU⁔(/*this*/ ref InterfaceMessage m) {
     return (nint)nativeEndian.Uint32(m.raw.slice(m.extOff + 8, m.extOff + 12));
 }
 

@@ -25,7 +25,7 @@ internal static (@string, tagOptions) parseTag(@string tag) {
 // Contains reports whether a comma-separated list of options
 // contains a particular substr flag. substr must be surrounded by a
 // string boundary or commas.
-[GoMethodBody("Contains")] internal static bool Containsᴍ(tagOptions o, @string optionName) {
+internal static bool Contains⁔(/*this*/ tagOptions o, @string optionName) {
     if (len(o) == 0) {
         return false;
     }

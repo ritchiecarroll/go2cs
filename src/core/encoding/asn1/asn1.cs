@@ -46,7 +46,7 @@ partial struct StructuralError {
 
 } partial class asn1_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(StructuralError e) { return "asn1: structure error: "u8 + e.Msg; }
+internal static @string Error⁔(/*this*/ StructuralError e) { return "asn1: structure error: "u8 + e.Msg; }
 
 } partial class asn1_package {
 
@@ -57,7 +57,7 @@ partial struct SyntaxError {
 
 } partial class asn1_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(SyntaxError e) { return "asn1: syntax error: "u8 + e.Msg; }
+internal static @string Error⁔(/*this*/ SyntaxError e) { return "asn1: syntax error: "u8 + e.Msg; }
 
 } partial class asn1_package {
 
@@ -189,7 +189,7 @@ partial struct BitString {
 
 // At returns the bit at the given index. If the index is out of range it
 // returns 0.
-[GoMethodBody("At")] internal static nint Atᴍ(BitString b, nint i) {
+internal static nint At⁔(/*this*/ BitString b, nint i) {
     if (i < 0 || i >= b.BitLength) {
         return 0;
     }
@@ -200,7 +200,7 @@ partial struct BitString {
 
 // RightAlign returns a slice where the padding bits are at the beginning. The
 // slice may share memory with the BitString.
-[GoMethodBody("RightAlign")] internal static slice<byte> RightAlignᴍ(BitString b) {
+internal static slice<byte> RightAlign⁔(/*this*/ BitString b) {
     nuint shift = (nuint)(8 - (b.BitLength % 8));
     if (shift == 8 || len(b.Bytes) == 0) {
         return b.Bytes;
@@ -255,11 +255,11 @@ partial struct ObjectIdentifier /*[]nint*/;
 } partial class asn1_package {
 
 // Equal reports whether oi and other represent the same identifier.
-[GoMethodBody("Equal")] internal static bool Equalᴍ(ObjectIdentifier oi, ObjectIdentifier other) {
+internal static bool Equal⁔(/*this*/ ObjectIdentifier oi, ObjectIdentifier other) {
     return slices.Equal<ObjectIdentifier, nint>(oi, other);
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ObjectIdentifier oi) {
+internal static @string String⁔(/*this*/ ObjectIdentifier oi) {
     ref var s = ref heap(new strings.Builder(), out var Ꮡs);
     Ꮡs.Grow(32);
 
@@ -1279,12 +1279,12 @@ partial struct invalidUnmarshalError {
 } partial class asn1_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string asn1UnmarshalRecipientˢᴍinvalidUnmarshalError => ref asn1UnmarshalRecipientˢᵇᴍinvalidUnmarshalError;
-private static readonly @string asn1UnmarshalRecipientˢᵇᴍinvalidUnmarshalError = "asn1: Unmarshal recipient value is nil"u8;
+internal static ref readonly @string asn1UnmarshalRecipientˢ⁔invalidUnmarshalError => ref asn1UnmarshalRecipientˢᵇ⁔invalidUnmarshalError;
+private static readonly @string asn1UnmarshalRecipientˢᵇ⁔invalidUnmarshalError = "asn1: Unmarshal recipient value is nil"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref invalidUnmarshalError e) {
+internal static @string Error⁔(/*this*/ ref invalidUnmarshalError e) {
     if (e.Type == nil) {
-        return asn1UnmarshalRecipientˢᴍinvalidUnmarshalError;
+        return asn1UnmarshalRecipientˢ⁔invalidUnmarshalError;
     }
 
     if (e.Type.Kind() != reflect.Pointer) {

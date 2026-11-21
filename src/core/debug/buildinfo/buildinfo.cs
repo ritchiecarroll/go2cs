@@ -475,7 +475,7 @@ partial struct elfExe {
 
 } partial class buildinfo_package {
 
-[GoMethodBody("DataReader")] internal static (io.ReaderAt, error) DataReaderᴍ(ref elfExe x, uint64 addr) {
+internal static (io.ReaderAt, error) DataReader⁔(/*this*/ ref elfExe x, uint64 addr) {
     foreach (var (_, prog) in range(x.f.Progs)) {
         if (prog.Vaddr <= addr && addr <= prog.Vaddr + prog.Filesz - 1) {
             var remaining = prog.Vaddr + prog.Filesz - addr;
@@ -485,7 +485,7 @@ partial struct elfExe {
     return (default, errUnrecognizedFormat);
 }
 
-[GoMethodBody("DataStart")] internal static (uint64, uint64) DataStartᴍ(ref elfExe x) {
+internal static (uint64, uint64) DataStart⁔(/*this*/ ref elfExe x) {
     foreach (var (_, s) in range(x.f.Sections)) {
         if (s.Name == ".go.buildinfo"u8) {
             return (s.Addr, s.Size);
@@ -508,7 +508,7 @@ partial struct peExe {
 
 } partial class buildinfo_package {
 
-[GoMethodBody("imageBase")] internal static uint64 imageBaseᴍ(ref peExe x) {
+internal static uint64 imageBase⁔(/*this*/ ref peExe x) {
     switch (x.f.OptionalHeader.type()) {
     case ж<pe.OptionalHeader32> oh: {
         return (uint64)oh.ImageBase;
@@ -519,7 +519,7 @@ partial struct peExe {
     return 0;
 }
 
-[GoMethodBody("DataReader")] internal static (io.ReaderAt, error) DataReaderᴍ(ref peExe x, uint64 addr) {
+internal static (io.ReaderAt, error) DataReader⁔(/*this*/ ref peExe x, uint64 addr) {
     addr -= x.imageBase();
     foreach (var (_, sect) in range(x.f.Sections)) {
         if ((uint64)sect.VirtualAddress <= addr && addr <= (uint64)(sect.VirtualAddress + sect.Size - 1)) {
@@ -530,7 +530,7 @@ partial struct peExe {
     return (default, errUnrecognizedFormat);
 }
 
-[GoMethodBody("DataStart")] internal static (uint64, uint64) DataStartᴍ(ref peExe x) {
+internal static (uint64, uint64) DataStart⁔(/*this*/ ref peExe x) {
     // Assume data is first writable section.
     UntypedInt IMAGE_SCN_CNT_CODE = 0x00000020;
     UntypedInt IMAGE_SCN_CNT_INITIALIZED_DATA = 0x00000040;
@@ -558,7 +558,7 @@ partial struct machoExe {
 
 } partial class buildinfo_package {
 
-[GoMethodBody("DataReader")] internal static (io.ReaderAt, error) DataReaderᴍ(ref machoExe x, uint64 addr) {
+internal static (io.ReaderAt, error) DataReader⁔(/*this*/ ref machoExe x, uint64 addr) {
     foreach (var (_, load) in range(x.f.Loads)) {
         var (seg, ok) = load._<ж<macho.Segment>>(ᐧ);
         if (!ok) {
@@ -575,7 +575,7 @@ partial struct machoExe {
     return (default, errUnrecognizedFormat);
 }
 
-[GoMethodBody("DataStart")] internal static (uint64, uint64) DataStartᴍ(ref machoExe x) {
+internal static (uint64, uint64) DataStart⁔(/*this*/ ref machoExe x) {
     // Look for section named "__go_buildinfo".
     foreach (var (_, sec) in range(x.f.Sections)) {
         if (sec.Name == "__go_buildinfo"u8) {
@@ -603,20 +603,20 @@ partial struct xcoffExe {
 } partial class buildinfo_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string addressNotMappedˢᴍxcoffExe => ref addressNotMappedˢᵇᴍxcoffExe;
-private static readonly @string addressNotMappedˢᵇᴍxcoffExe = "address not mapped"u8;
+internal static ref readonly @string addressNotMappedˢ⁔xcoffExe => ref addressNotMappedˢᵇ⁔xcoffExe;
+private static readonly @string addressNotMappedˢᵇ⁔xcoffExe = "address not mapped"u8;
 
-[GoMethodBody("DataReader")] internal static (io.ReaderAt, error) DataReaderᴍ(ref xcoffExe x, uint64 addr) {
+internal static (io.ReaderAt, error) DataReader⁔(/*this*/ ref xcoffExe x, uint64 addr) {
     foreach (var (_, sect) in range(x.f.Sections)) {
         if (sect.VirtualAddress <= addr && addr <= sect.VirtualAddress + sect.Size - 1) {
             var remaining = sect.VirtualAddress + sect.Size - addr;
             return (new io.SectionReaderжReaderAt(io.NewSectionReader(new xcoff_SectionжReaderAt(sect), (int64)(addr - sect.VirtualAddress), (int64)remaining)), default);
         }
     }
-    return (default, errors.New(addressNotMappedˢᴍxcoffExe));
+    return (default, errors.New(addressNotMappedˢ⁔xcoffExe));
 }
 
-[GoMethodBody("DataStart")] internal static (uint64, uint64) DataStartᴍ(ref xcoffExe x) {
+internal static (uint64, uint64) DataStart⁔(/*this*/ ref xcoffExe x) {
     var s = x.f.SectionByType(xcoff.STYP_DATA); if (s != nil) {
         return (s.VirtualAddress, s.Size);
     }
@@ -633,28 +633,28 @@ partial struct plan9objExe {
 } partial class buildinfo_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string dataˢᴍplan9objExe => ref dataˢᵇᴍplan9objExe;
-private static readonly @string dataˢᵇᴍplan9objExe = "data"u8;
+internal static ref readonly @string dataˢ⁔plan9objExe => ref dataˢᵇ⁔plan9objExe;
+private static readonly @string dataˢᵇ⁔plan9objExe = "data"u8;
 
-[GoMethodBody("DataStart")] internal static (uint64, uint64) DataStartᴍ(ref plan9objExe x) {
-    var s = x.f.Section(dataˢᴍplan9objExe); if (s != nil) {
+internal static (uint64, uint64) DataStart⁔(/*this*/ ref plan9objExe x) {
+    var s = x.f.Section(dataˢ⁔plan9objExe); if (s != nil) {
         return ((uint64)s.Offset, (uint64)s.Size);
     }
     return (0, 0);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string addressNotMappedˢᴍplan9objExe => ref addressNotMappedˢᵇᴍplan9objExe;
-private static readonly @string addressNotMappedˢᵇᴍplan9objExe = "address not mapped"u8;
+internal static ref readonly @string addressNotMappedˢ⁔plan9objExe => ref addressNotMappedˢᵇ⁔plan9objExe;
+private static readonly @string addressNotMappedˢᵇ⁔plan9objExe = "address not mapped"u8;
 
-[GoMethodBody("DataReader")] internal static (io.ReaderAt, error) DataReaderᴍ(ref plan9objExe x, uint64 addr) {
+internal static (io.ReaderAt, error) DataReader⁔(/*this*/ ref plan9objExe x, uint64 addr) {
     foreach (var (_, sect) in range(x.f.Sections)) {
         if ((uint64)sect.Offset <= addr && addr <= (uint64)(sect.Offset + sect.Size - 1)) {
             var remaining = (uint64)(sect.Offset + sect.Size) - addr;
             return (new io.SectionReaderжReaderAt(io.NewSectionReader(new plan9obj_SectionжReaderAt(sect), (int64)(addr - (uint64)sect.Offset), (int64)remaining)), default);
         }
     }
-    return (default, errors.New(addressNotMappedˢᴍplan9objExe));
+    return (default, errors.New(addressNotMappedˢ⁔plan9objExe));
 }
 
 }

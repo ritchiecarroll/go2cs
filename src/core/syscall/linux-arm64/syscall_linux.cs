@@ -449,38 +449,38 @@ internal static UntypedInt shift => 8;
 
 } partial class syscall_package {
 
-[GoMethodBody("Exited")] internal static bool Exitedᴍ(WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == exited; }
+internal static bool Exited⁔(/*this*/ WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == exited; }
 
-[GoMethodBody("Signaled")] internal static bool Signaledᴍ(WaitStatus w) { return (WaitStatus)(w & (uint32)mask) != stopped && (WaitStatus)(w & (uint32)mask) != exited; }
+internal static bool Signaled⁔(/*this*/ WaitStatus w) { return (WaitStatus)(w & (uint32)mask) != stopped && (WaitStatus)(w & (uint32)mask) != exited; }
 
-[GoMethodBody("Stopped")] internal static bool Stoppedᴍ(WaitStatus w) { return (WaitStatus)(w & 0xFF) == stopped; }
+internal static bool Stopped⁔(/*this*/ WaitStatus w) { return (WaitStatus)(w & 0xFF) == stopped; }
 
-[GoMethodBody("Continued")] internal static bool Continuedᴍ(WaitStatus w) { return w == 0xFFFF; }
+internal static bool Continued⁔(/*this*/ WaitStatus w) { return w == 0xFFFF; }
 
-[GoMethodBody("CoreDump")] internal static bool CoreDumpᴍ(WaitStatus w) { return w.Signaled() && (WaitStatus)(w & (uint32)core) != 0; }
+internal static bool CoreDump⁔(/*this*/ WaitStatus w) { return w.Signaled() && (WaitStatus)(w & (uint32)core) != 0; }
 
-[GoMethodBody("ExitStatus")] internal static nint ExitStatusᴍ(WaitStatus w) {
+internal static nint ExitStatus⁔(/*this*/ WaitStatus w) {
     if (!w.Exited()) {
         return -1;
     }
     return (nint)(w >> (int)(shift)) & 0xFF;
 }
 
-[GoMethodBody("Signal")] internal static Signal Signalᴍ(WaitStatus w) {
+internal static Signal Signal⁔(/*this*/ WaitStatus w) {
     if (!w.Signaled()) {
         return -1;
     }
     return (Signal)(nint)((WaitStatus)(w & (uint32)mask));
 }
 
-[GoMethodBody("StopSignal")] internal static Signal StopSignalᴍ(WaitStatus w) {
+internal static Signal StopSignal⁔(/*this*/ WaitStatus w) {
     if (!w.Stopped()) {
         return -1;
     }
     return (Signal)(((Signal)(nint)((w >> (int)(shift)))) & 0xFF);
 }
 
-[GoMethodBody("TrapCause")] internal static nint TrapCauseᴍ(WaitStatus w) {
+internal static nint TrapCause⁔(/*this*/ WaitStatus w) {
     if (w.StopSignal() != SIGTRAP) {
         return -1;
     }
@@ -517,7 +517,7 @@ public static error /*err*/ Mkfifo(@string path, uint32 mode) {
 
 } partial class syscall_package {
 
-[GoMethodBody("sockaddr")] internal static (@unsafe.Pointer, _Socklen, error) sockaddrᴍ(ж<SockaddrUnix> Ꮡsa) {
+internal static (@unsafe.Pointer, _Socklen, error) sockaddr⁔(/*this*/ ж<SockaddrUnix> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     @string name = sa.Name;
@@ -567,7 +567,7 @@ partial struct SockaddrLinklayer {
 
 } partial class syscall_package {
 
-[GoMethodBody("sockaddr")] internal static (@unsafe.Pointer, _Socklen, error) sockaddrᴍ(ж<SockaddrLinklayer> Ꮡsa) {
+internal static (@unsafe.Pointer, _Socklen, error) sockaddr⁔(/*this*/ ж<SockaddrLinklayer> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     if (sa.Ifindex < 0 || sa.Ifindex > 0x7fffffff) {
@@ -595,7 +595,7 @@ partial struct SockaddrNetlink {
 
 } partial class syscall_package {
 
-[GoMethodBody("sockaddr")] internal static (@unsafe.Pointer, _Socklen, error) sockaddrᴍ(ж<SockaddrNetlink> Ꮡsa) {
+internal static (@unsafe.Pointer, _Socklen, error) sockaddr⁔(/*this*/ ж<SockaddrNetlink> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     sa.raw.Family = AF_NETLINK;

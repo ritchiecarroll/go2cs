@@ -61,9 +61,12 @@ using static go.@internal.platform_package;
 
 namespace go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static platform_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("platform")]
 public static partial class platform_package
@@ -96,11 +99,11 @@ public static partial class platform_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(platform_package.OSArch)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class platformᴛOSArch;
+[GoMethodHost(typeof(platform_package.OSArch)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class platformᴛOSArch;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class platformᴛOSArch {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this OSArch p) => platform_package.Stringᴍ(p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this OSArch p) => platform_package.String⁔(p);
 }
 // </GlyphForwarders>

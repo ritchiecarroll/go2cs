@@ -137,32 +137,32 @@ partial struct name {
 
 } partial class reflectlite_package {
 
-[GoMethodBody("data")] internal static ж<byte> dataᴍ(name n, nint off, @string whySafe) {
+internal static ж<byte> data⁔(/*this*/ name n, nint off, @string whySafe) {
     return @unsafe.Pointer.To<byte>(add(@unsafe.Pointer.FromPinnedBox(n.bytes), (uintptr)off, whySafe));
 }
 
-[GoMethodBody("isExported")] internal static bool isExportedᴍ(name n) {
+internal static bool isExported⁔(/*this*/ name n) {
     return (byte)((n.bytes.Value) & ((byte)(1 << 0))) != 0;
 }
 
-[GoMethodBody("hasTag")] internal static bool hasTagᴍ(name n) {
+internal static bool hasTag⁔(/*this*/ name n) {
     return (byte)((n.bytes.Value) & ((byte)(1 << 1))) != 0;
 }
 
-[GoMethodBody("embedded")] internal static bool embeddedᴍ(name n) {
+internal static bool embedded⁔(/*this*/ name n) {
     return (byte)((n.bytes.Value) & ((byte)(1 << 3))) != 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string readVarintˢᴍname => ref readVarintˢᵇᴍname;
-private static readonly @string readVarintˢᵇᴍname = "read varint"u8;
+internal static ref readonly @string readVarintˢ⁔name => ref readVarintˢᵇ⁔name;
+private static readonly @string readVarintˢᵇ⁔name = "read varint"u8;
 
 // readVarint parses a varint as encoded by encoding/binary.
 // It returns the number of encoded bytes and the encoded value.
-[GoMethodBody("readVarint")] internal static (nint, nint) readVarintᴍ(name n, nint off) {
+internal static (nint, nint) readVarint⁔(/*this*/ name n, nint off) {
     nint v = 0;
     for (nint i = 0; ; i++) {
-        var x = n.data(off + i, readVarintˢᴍname).Value;
+        var x = n.data(off + i, readVarintˢ⁔name).Value;
         v += ((nint)((byte)(x & 0x7f))).Lsh((int64)(7 * i));
         if ((byte)(x & 0x80) == 0) {
             return (i + 1, v);
@@ -171,24 +171,24 @@ private static readonly @string readVarintˢᵇᴍname = "read varint"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nonEmptyStringˢᴍname => ref nonEmptyStringˢᵇᴍname;
-private static readonly @string nonEmptyStringˢᵇᴍname = "non-empty string"u8;
+internal static ref readonly @string nonEmptyStringˢ⁔name => ref nonEmptyStringˢᵇ⁔name;
+private static readonly @string nonEmptyStringˢᵇ⁔name = "non-empty string"u8;
 
-[GoMethodBody("name")] internal static @string nameᴍ(name n) {
+internal static @string name⁔(/*this*/ name n) {
     if (n.bytes == nil) {
         return ""u8;
     }
     var (i, l) = n.readVarint(1);
-    return @unsafe.String(n.data(1 + i, nonEmptyStringˢᴍname), l);
+    return @unsafe.String(n.data(1 + i, nonEmptyStringˢ⁔name), l);
 }
 
-[GoMethodBody("tag")] internal static @string tagᴍ(name n) {
+internal static @string tag⁔(/*this*/ name n) {
     if (!n.hasTag()) {
         return ""u8;
     }
     var (i, l) = n.readVarint(1);
     var (i2, l2) = n.readVarint(1 + i + l);
-    return @unsafe.String(n.data(1 + i + l + i2, nonEmptyStringˢᴍname), l2);
+    return @unsafe.String(n.data(1 + i + l + i2, nonEmptyStringˢ⁔name), l2);
 }
 
 } partial class reflectlite_package {
@@ -238,23 +238,23 @@ internal static partial @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, in
 
 } partial class reflectlite_package {
 
-[GoMethodBody("nameOff")] internal static abi.Name nameOffᴍ(rtype t, nameOff off) {
+internal static abi.Name nameOff⁔(/*this*/ rtype t, nameOff off) {
     return new abi.Name(Bytes: @unsafe.Pointer.To<byte>(resolveNameOff(@unsafe.Pointer.FromPinnedBox(t.Type), (int32)off)));
 }
 
-[GoMethodBody("typeOff")] internal static ж<abi.Type> typeOffᴍ(rtype t, typeOff off) {
+internal static ж<abi.Type> typeOff⁔(/*this*/ rtype t, typeOff off) {
     return @unsafe.Pointer.To<abi.Type>(resolveTypeOff(@unsafe.Pointer.FromPinnedBox(t.Type), (int32)off));
 }
 
-[GoMethodBody("uncommon")] internal static ж<uncommonType> uncommonᴍ(rtype t) {
+internal static ж<uncommonType> uncommon⁔(/*this*/ rtype t) {
     return t.Type.Uncommon();
 }
 
 // go2cs generated this placeholder — func String is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoMethodBody("common")] internal static ж<abi.Type> commonᴍ(rtype t) { return t.Type; }
+internal static ж<abi.Type> common⁔(/*this*/ rtype t) { return t.Type; }
 
-[GoMethodBody("exportedMethods")] internal static slice<abi.Method> exportedMethodsᴍ(rtype t) {
+internal static slice<abi.Method> exportedMethods⁔(/*this*/ rtype t) {
     var ut = t.uncommon();
     if (ut == nil) {
         return default;
@@ -262,7 +262,7 @@ internal static partial @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, in
     return ut.ExportedMethods();
 }
 
-[GoMethodBody("NumMethod")] internal static nint NumMethodᴍ(rtype t) {
+internal static nint NumMethod⁔(/*this*/ rtype t) {
     var tt = t.Type.InterfaceType();
     if (tt != nil) {
         return tt.NumMethod();
@@ -272,7 +272,7 @@ internal static partial @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, in
 
 // go2cs generated this placeholder — func PkgPath is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoMethodBody("Name")] internal static @string Nameᴍ(rtype t) {
+internal static @string Name⁔(/*this*/ rtype t) {
     if (!t.Type.Value.HasName()) {
         return ""u8;
     }
@@ -312,7 +312,7 @@ internal static ж<abi.Type> elem(ж<abi.Type> t) {
 
 // go2cs generated this placeholder — func Elem is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoMethodBody("In")] internal static Type Inᴍ(rtype t, nint i) {
+internal static Type In⁔(/*this*/ rtype t, nint i) {
     var tt = t.Type.FuncType();
     if (tt == nil) {
         throw panic("reflect: In of non-func type");
@@ -320,7 +320,7 @@ internal static ж<abi.Type> elem(ж<abi.Type> t) {
     return toType(tt.InSlice()[i]);
 }
 
-[GoMethodBody("Key")] internal static Type Keyᴍ(rtype t) {
+internal static Type Key⁔(/*this*/ rtype t) {
     var tt = t.Type.MapType();
     if (tt == nil) {
         throw panic("reflect: Key of non-map type");
@@ -328,7 +328,7 @@ internal static ж<abi.Type> elem(ж<abi.Type> t) {
     return toType((~tt).Key);
 }
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(rtype t) {
+internal static nint Len⁔(/*this*/ rtype t) {
     var tt = t.Type.ArrayType();
     if (tt == nil) {
         throw panic("reflect: Len of non-array type");
@@ -336,7 +336,7 @@ internal static ж<abi.Type> elem(ж<abi.Type> t) {
     return (nint)(~tt).Len;
 }
 
-[GoMethodBody("NumField")] internal static nint NumFieldᴍ(rtype t) {
+internal static nint NumField⁔(/*this*/ rtype t) {
     var tt = t.Type.StructType();
     if (tt == nil) {
         throw panic("reflect: NumField of non-struct type");
@@ -344,7 +344,7 @@ internal static ж<abi.Type> elem(ж<abi.Type> t) {
     return len(tt.Fields);
 }
 
-[GoMethodBody("NumIn")] internal static nint NumInᴍ(rtype t) {
+internal static nint NumIn⁔(/*this*/ rtype t) {
     var tt = t.Type.FuncType();
     if (tt == nil) {
         throw panic("reflect: NumIn of non-func type");
@@ -352,7 +352,7 @@ internal static ж<abi.Type> elem(ж<abi.Type> t) {
     return (nint)tt.InCount;
 }
 
-[GoMethodBody("NumOut")] internal static nint NumOutᴍ(rtype t) {
+internal static nint NumOut⁔(/*this*/ rtype t) {
     var tt = t.Type.FuncType();
     if (tt == nil) {
         throw panic("reflect: NumOut of non-func type");
@@ -360,7 +360,7 @@ internal static ж<abi.Type> elem(ж<abi.Type> t) {
     return tt.NumOut();
 }
 
-[GoMethodBody("Out")] internal static Type Outᴍ(rtype t, nint i) {
+internal static Type Out⁔(/*this*/ rtype t, nint i) {
     var tt = t.Type.FuncType();
     if (tt == nil) {
         throw panic("reflect: Out of non-func type");
@@ -391,7 +391,7 @@ public static Type TypeOf(any i) {
 
 // go2cs generated this placeholder — func Implements is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-[GoMethodBody("AssignableTo")] internal static bool AssignableToᴍ(rtype t, Type u) {
+internal static bool AssignableTo⁔(/*this*/ rtype t, Type u) {
     if (u == nil) {
         throw panic("reflect: nil type passed to Type.AssignableTo");
     }
@@ -400,7 +400,7 @@ public static Type TypeOf(any i) {
     return directlyAssignable(uu, tt) || implements(uu, tt);
 }
 
-[GoMethodBody("Comparable")] internal static bool Comparableᴍ(rtype t) {
+internal static bool Comparable⁔(/*this*/ rtype t) {
     return t.Equal != nil;
 }
 

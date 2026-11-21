@@ -164,7 +164,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abi.MapType
 
 } partial class maps_package {
 
-[GoMethodBody("putSlotSmallFast64")] internal static @unsafe.Pointer putSlotSmallFast64ᴍ(ref Map m, ж<abi.MapType> typ, uintptr hash, uint64 key) {
+internal static @unsafe.Pointer putSlotSmallFast64⁔(/*this*/ ref Map m, ж<abi.MapType> typ, uintptr hash, uint64 key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -188,7 +188,7 @@ internal static (@unsafe.Pointer, bool) runtime_mapaccess2_fast64(ж<abi.MapType
     // more efficient than matchEmpty.
     match = g.ctrls().matchEmptyOrDeleted();
     if (match == 0) {
-        fatal(smallMapWithNoEmptySlotˢᴍMap);
+        fatal(smallMapWithNoEmptySlotˢ⁔Map);
     }
 
     var i = match.first();
@@ -350,7 +350,7 @@ break_outer:;
 
 } partial class maps_package {
 
-[GoMethodBody("putSlotSmallFastPtr")] internal static @unsafe.Pointer putSlotSmallFastPtrᴍ(ref Map m, ж<abi.MapType> typ, uintptr hash, @unsafe.Pointer key) {
+internal static @unsafe.Pointer putSlotSmallFastPtr⁔(/*this*/ ref Map m, ж<abi.MapType> typ, uintptr hash, @unsafe.Pointer key) {
     var g = new groupReference(
         data: m.dirPtr
     );
@@ -374,7 +374,7 @@ break_outer:;
     // more efficient than matchEmpty.
     match = g.ctrls().matchEmptyOrDeleted();
     if (match == 0) {
-        fatal(smallMapWithNoEmptySlotˢᴍMap);
+        fatal(smallMapWithNoEmptySlotˢ⁔Map);
     }
 
     var i = match.first();

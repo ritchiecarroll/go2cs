@@ -31,7 +31,7 @@ partial struct Iter {
 } partial class norm_package {
 
 // Init initializes i to iterate over src after normalizing it to Form f.
-[GoMethodBody("Init")] internal static void Initᴍ(ref Iter i, Form f, slice<byte> src) {
+internal static void Init⁔(/*this*/ ref Iter i, Form f, slice<byte> src) {
     i.p = 0;
     if (len(src) == 0) {
         i.setDone();
@@ -47,7 +47,7 @@ partial struct Iter {
 }
 
 // InitString initializes i to iterate over src after normalizing it to Form f.
-[GoMethodBody("InitString")] internal static void InitStringᴍ(ref Iter i, Form f, @string src) {
+internal static void InitString⁔(/*this*/ ref Iter i, Form f, @string src) {
     i.p = 0;
     if (len(src) == 0) {
         i.setDone();
@@ -65,7 +65,7 @@ partial struct Iter {
 // Seek sets the segment to be returned by the next call to Next to start
 // at position p.  It is the responsibility of the caller to set p to the
 // start of a segment.
-[GoMethodBody("Seek")] internal static (int64, error) Seekᴍ(ref Iter i, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ref Iter i, int64 offset, nint whence) {
     int64 abs = default;
     switch (whence) {
     case 0: {
@@ -102,7 +102,7 @@ partial struct Iter {
 // If the underlying is of type []byte, it will simply return a slice.
 // If the underlying is of type string, it will copy the slice to the buffer
 // and return that.
-[GoMethodBody("returnSlice")] internal static slice<byte> returnSliceᴍ(ref Iter i, nint a, nint b) {
+internal static slice<byte> returnSlice⁔(/*this*/ ref Iter i, nint a, nint b) {
     if (i.rb.src.bytes == nil) {
         return i.buf.slice(0, copy(i.buf[..], i.rb.src.str.slice(a, b)));
     }
@@ -110,17 +110,17 @@ partial struct Iter {
 }
 
 // Pos returns the byte position at which the next call to Next will commence processing.
-[GoMethodBody("Pos")] internal static nint Posᴍ(ref Iter i) {
+internal static nint Pos⁔(/*this*/ ref Iter i) {
     return i.p;
 }
 
-[GoMethodBody("setDone")] internal static void setDoneᴍ(ref Iter i) {
+internal static void setDone⁔(/*this*/ ref Iter i) {
     i.next = nextDone;
     i.p = i.rb.nsrc;
 }
 
 // Done returns true if there is no more input to process.
-[GoMethodBody("Done")] internal static bool Doneᴍ(ref Iter i) {
+internal static bool Done⁔(/*this*/ ref Iter i) {
     return i.p >= i.rb.nsrc;
 }
 
@@ -129,7 +129,7 @@ partial struct Iter {
 // to Next will return the same segments.
 // Modifying runes are grouped together with the preceding starter, if such a starter exists.
 // Although not guaranteed, n will typically be the smallest possible n.
-[GoMethodBody("Next")] internal static slice<byte> Nextᴍ(ж<Iter> Ꮡi) {
+internal static slice<byte> Next⁔(/*this*/ ж<Iter> Ꮡi) {
     ref var i = ref Ꮡi.DerefOrNull();
 
     return i.next(Ꮡi);

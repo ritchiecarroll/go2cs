@@ -118,7 +118,7 @@ finish:
 
 // find finds the given interface/type pair in t.
 // Returns nil if the given interface/type pair isn't present.
-[GoMethodBody("find")] internal static ж<itab> findᴍ(ж<itabTableType> Ꮡt, ж<interfacetype> inter, ж<_type> typ) {
+internal static ж<itab> find⁔(/*this*/ ж<itabTableType> Ꮡt, ж<interfacetype> inter, ж<_type> typ) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Implemented using quadratic probing.
@@ -192,7 +192,7 @@ internal static void itabAdd(ж<itab> Ꮡm) {
 
 // add adds the given itab to itab table t.
 // itabLock must be held.
-[GoMethodBody("add")] internal static void addᴍ(ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
+internal static void add⁔(/*this*/ ж<itabTableType> Ꮡt, ж<itab> Ꮡm) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var m = ref Ꮡm.DerefOrNull();
 

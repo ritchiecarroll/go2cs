@@ -17,9 +17,9 @@ partial struct SysFile {
 
 } partial class poll_package {
 
-[GoMethodBody("init")] internal static void initᴍ(ref SysFile s) { }
+internal static void init⁔(/*this*/ ref SysFile s) { }
 
-[GoMethodBody("destroy")] internal static error destroyᴍ(ref SysFile s, nint fd) {
+internal static error destroy⁔(/*this*/ ref SysFile s, nint fd) {
     // We don't use ignoringEINTR here because POSIX does not define
     // whether the descriptor is closed if close returns EINTR.
     // If the descriptor is indeed closed, using a loop would race
@@ -55,7 +55,7 @@ internal static (nint, @string, error) dupCloseOnExecOld(nint fd) {
 } partial class poll_package {
 
 // Fchdir wraps syscall.Fchdir.
-[GoMethodBody("Fchdir")] internal static error Fchdirᴍ(ж<FD> Ꮡfd) {
+internal static error Fchdir⁔(/*this*/ ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -74,7 +74,7 @@ internal static (nint, @string, error) dupCloseOnExecOld(nint fd) {
 // ReadDirent wraps syscall.ReadDirent.
 // We treat this like an ordinary system call rather than a call
 // that tries to fill the buffer.
-[GoMethodBody("ReadDirent")] internal static (nint, error) ReadDirentᴍ(ж<FD> Ꮡfd, slice<byte> buf) {
+internal static (nint, error) ReadDirent⁔(/*this*/ ж<FD> Ꮡfd, slice<byte> buf) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -105,7 +105,7 @@ internal static (nint, @string, error) dupCloseOnExecOld(nint fd) {
 }
 
 // Seek wraps syscall.Seek.
-[GoMethodBody("Seek")] internal static (int64, error) Seekᴍ(ж<FD> Ꮡfd, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ж<FD> Ꮡfd, int64 offset, nint whence) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

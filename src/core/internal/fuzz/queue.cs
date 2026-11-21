@@ -25,11 +25,11 @@ partial struct queue {
 
 } partial class fuzz_package {
 
-[GoMethodBody("cap")] internal static nint capᴍ(ref queue q) {
+internal static nint cap⁔(/*this*/ ref queue q) {
     return len(q.elems);
 }
 
-[GoMethodBody("grow")] internal static void growᴍ(ref queue q) {
+internal static void grow⁔(/*this*/ ref queue q) {
     nint oldCap = q.cap();
     nint newCap = oldCap * 2;
     if (newCap == 0) {
@@ -44,7 +44,7 @@ partial struct queue {
     q.head = 0;
 }
 
-[GoMethodBody("enqueue")] internal static void enqueueᴍ(ref queue q, any e) {
+internal static void enqueue⁔(/*this*/ ref queue q, any e) {
     if (q.len + 1 > q.cap()) {
         q.grow();
     }
@@ -53,7 +53,7 @@ partial struct queue {
     q.len++;
 }
 
-[GoMethodBody("dequeue")] internal static (any, bool) dequeueᴍ(ref queue q) {
+internal static (any, bool) dequeue⁔(/*this*/ ref queue q) {
     if (q.len == 0) {
         return (default, false);
     }
@@ -64,14 +64,14 @@ partial struct queue {
     return (e, true);
 }
 
-[GoMethodBody("peek")] internal static (any, bool) peekᴍ(ref queue q) {
+internal static (any, bool) peek⁔(/*this*/ ref queue q) {
     if (q.len == 0) {
         return (default, false);
     }
     return (q.elems[q.head], true);
 }
 
-[GoMethodBody("clear")] internal static void clearᴍ(ref queue q) {
+internal static void clear⁔(/*this*/ ref queue q) {
     q = new queue();
 }
 

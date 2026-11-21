@@ -33,7 +33,7 @@ public static ж<Expectation> ExpectSuccess() {
 //
 // Conformance means that if failure is true, then err must be non-nil.
 // If err is non-nil, then it must match errorMatcher.
-[GoMethodBody("Check")] internal static error Checkᴍ(ref Expectation e, error err) {
+internal static error Check⁔(/*this*/ ref Expectation e, error err) {
     if (!e.failure && err != nil) {
         return fmt.Errorf("unexpected error while reading the trace: %v"u8, err);
     }

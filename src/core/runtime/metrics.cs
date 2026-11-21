@@ -550,7 +550,7 @@ internal delegate uint64 metricReader();
 
 } partial class runtime_package {
 
-[GoMethodBody("compute")] internal static void computeᴍ(metricReader f, ж<statAggregate> _, ж<metricValue> Ꮡout) {
+internal static void compute⁔(/*this*/ metricReader f, ж<statAggregate> _, ж<metricValue> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     @out.kind = metricKindUint64;
@@ -604,7 +604,7 @@ internal static statDepSet makeStatDepSet(params ꓸꓸꓸstatDep depsʗp) {
 } partial class runtime_package {
 
 // difference returns set difference of s from b as a new set.
-[GoMethodBody("difference")] internal static statDepSet differenceᴍ(statDepSet s, statDepSet b) {
+internal static statDepSet difference⁔(/*this*/ statDepSet s, statDepSet b) {
     s = s.Clone();
     b = b.Clone();
 
@@ -616,7 +616,7 @@ internal static statDepSet makeStatDepSet(params ꓸꓸꓸstatDep depsʗp) {
 }
 
 // union returns the union of the two sets as a new set.
-[GoMethodBody("union")] internal static statDepSet unionᴍ(statDepSet s, statDepSet b) {
+internal static statDepSet union⁔(/*this*/ statDepSet s, statDepSet b) {
     s = s.Clone();
     b = b.Clone();
 
@@ -628,7 +628,7 @@ internal static statDepSet makeStatDepSet(params ꓸꓸꓸstatDep depsʗp) {
 }
 
 // empty returns true if there are no dependencies in the set.
-[GoMethodBody("empty")] internal static bool emptyᴍ(ref statDepSet s) {
+internal static bool empty⁔(/*this*/ ref statDepSet s) {
     foreach (var (_, c) in range(s.Value)) {
         if (c != 0) {
             return false;
@@ -638,7 +638,7 @@ internal static statDepSet makeStatDepSet(params ꓸꓸꓸstatDep depsʗp) {
 }
 
 // has returns true if the set contains a given statDep.
-[GoMethodBody("has")] internal static bool hasᴍ(ref statDepSet s, statDep d) {
+internal static bool has⁔(/*this*/ ref statDepSet s, statDep d) {
     return (s.Value[d / 64] & ((uint64)1 << (int)(d % 64))) != 0;
 }
 
@@ -674,7 +674,7 @@ partial struct heapStatsAggregate {
 } partial class runtime_package {
 
 // compute populates the heapStatsAggregate with values from the runtime.
-[GoMethodBody("compute")] internal static void computeᴍ(ж<heapStatsAggregate> Ꮡa) {
+internal static void compute⁔(/*this*/ ж<heapStatsAggregate> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     Ꮡmemstats.ᏑheapStats.read(Ꮡa.ᏑheapStatsDelta);
@@ -722,7 +722,7 @@ partial struct sysStatsAggregate {
 } partial class runtime_package {
 
 // compute populates the sysStatsAggregate with values from the runtime.
-[GoMethodBody("compute")] internal static void computeᴍ(ж<sysStatsAggregate> Ꮡa) {
+internal static void compute⁔(/*this*/ ж<sysStatsAggregate> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     a.stacksSys = Ꮡmemstats.Ꮡstacks_sys.load();
@@ -754,7 +754,7 @@ partial struct cpuStatsAggregate {
 } partial class runtime_package {
 
 // compute populates the cpuStatsAggregate with values from the runtime.
-[GoMethodBody("compute")] internal static void computeᴍ(ref cpuStatsAggregate a) {
+internal static void compute⁔(/*this*/ ref cpuStatsAggregate a) {
     a.cpuStats = work.cpuStats;
     // TODO(mknyszek): Update the CPU stats again so that we're not
     // just relying on the STW snapshot. The issue here is that currently
@@ -777,7 +777,7 @@ partial struct gcStatsAggregate {
 } partial class runtime_package {
 
 // compute populates the gcStatsAggregate with values from the runtime.
-[GoMethodBody("compute")] internal static void computeᴍ(ref gcStatsAggregate a) {
+internal static void compute⁔(/*this*/ ref gcStatsAggregate a) {
     a.heapScan = ᏑgcController.ᏑheapScan.Load();
     a.stackScan = ᏑgcController.ᏑlastStackScan.Load();
     a.globalsScan = ᏑgcController.ᏑglobalsScan.Load();
@@ -798,7 +798,7 @@ partial struct finalStatsAggregate {
 } partial class runtime_package {
 
 // compute populates the finalStatsAggregate with values from the runtime.
-[GoMethodBody("compute")] internal static void computeᴍ(ref finalStatsAggregate a) {
+internal static void compute⁔(/*this*/ ref finalStatsAggregate a) {
     (a.finalizersQueued, a.finalizersExecuted) = finReadQueueStats();
     (a.cleanupsQueued, a.cleanupsExecuted) = ᏑgcCleanups.readQueueStats();
 }
@@ -848,7 +848,7 @@ partial struct statAggregate {
 
 // ensure populates statistics aggregates determined by deps if they
 // haven't yet been populated.
-[GoMethodBody("ensure")] internal static void ensureᴍ(ж<statAggregate> Ꮡa, ж<statDepSet> deps) {
+internal static void ensure⁔(/*this*/ ж<statAggregate> Ꮡa, ж<statDepSet> deps) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     var missing = deps.difference(a.ensured);
@@ -921,7 +921,7 @@ partial struct metricValue {
 // float64HistOrInit tries to pull out an existing float64Histogram
 // from the value, but if none exists, then it allocates one with
 // the given buckets.
-[GoMethodBody("float64HistOrInit")] internal static ж<metricFloat64Histogram> float64HistOrInitᴍ(ref metricValue v, slice<float64> buckets) {
+internal static ж<metricFloat64Histogram> float64HistOrInit⁔(/*this*/ ref metricValue v, slice<float64> buckets) {
     ж<metricFloat64Histogram> hist = default;
     if (v.kind == metricKindFloat64Histogram && v.pointer != nil) {
         hist = @unsafe.Pointer.To<metricFloat64Histogram>(v.pointer);

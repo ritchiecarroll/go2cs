@@ -101,7 +101,7 @@ partial struct timeHistogram {
 // may run in sensitive locations.
 //
 //go:nosplit
-[GoMethodBody("record")] internal static void recordᴍ(ж<timeHistogram> Ꮡh, int64 duration) {
+internal static void record⁔(/*this*/ ж<timeHistogram> Ꮡh, int64 duration) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     // If the duration is negative, capture that in underflow.
@@ -137,7 +137,7 @@ partial struct timeHistogram {
 }
 
 // write dumps the histogram to the passed metricValue as a float64 histogram.
-[GoMethodBody("write")] internal static void writeᴍ(ж<timeHistogram> Ꮡh, ж<metricValue> Ꮡout) {
+internal static void write⁔(/*this*/ ж<timeHistogram> Ꮡh, ж<metricValue> Ꮡout) {
     ref var h = ref Ꮡh.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 

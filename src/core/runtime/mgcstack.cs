@@ -160,7 +160,7 @@ partial struct stackObject {
 // obj.r = r, but with no write barrier.
 //
 //go:nowritebarrier
-[GoMethodBody("setRecord")] internal static void setRecordᴍ(ж<stackObject> Ꮡobj, ж<stackObjectRecord> r) {
+internal static void setRecord⁔(/*this*/ ж<stackObject> Ꮡobj, ж<stackObjectRecord> r) {
     // Types of stack objects are always in read-only memory, not the heap.
     // So not using a write barrier is ok.
     (Ꮡobj.Ꮡr.Reinterpret<ж<stackObjectRecord>, uintptr>()).Value = (uintptr)r;
@@ -200,16 +200,16 @@ partial struct stackScanState {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string addressNotAStackAddressˢᴍstackScanState => ref addressNotAStackAddressˢᵇᴍstackScanState;
-private static readonly @string addressNotAStackAddressˢᵇᴍstackScanState = "address not a stack address"u8;
+internal static ref readonly @string addressNotAStackAddressˢ⁔stackScanState => ref addressNotAStackAddressˢᵇ⁔stackScanState;
+private static readonly @string addressNotAStackAddressˢᵇ⁔stackScanState = "address not a stack address"u8;
 
 // Add p as a potential pointer to a stack object.
 // p must be a stack address.
-[GoMethodBody("putPtr")] internal static void putPtrᴍ(ж<stackScanState> Ꮡs, uintptr p, bool conservative) {
+internal static void putPtr⁔(/*this*/ ж<stackScanState> Ꮡs, uintptr p, bool conservative) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (p < s.stack.lo || p >= s.stack.hi) {
-        @throw(addressNotAStackAddressˢᴍstackScanState);
+        @throw(addressNotAStackAddressˢ⁔stackScanState);
     }
     var head = Ꮡs.Ꮡbuf;
     if (conservative) {
@@ -242,7 +242,7 @@ private static readonly @string addressNotAStackAddressˢᵇᴍstackScanState = 
 //
 // This prefers non-conservative pointers so we scan stack objects
 // precisely if there are any non-conservative pointers to them.
-[GoMethodBody("getPtr")] internal static (uintptr p, bool conservative) getPtrᴍ(ж<stackScanState> Ꮡs) {
+internal static (uintptr p, bool conservative) getPtr⁔(/*this*/ ж<stackScanState> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     foreach (var (_, head) in range(slice<ж<ж<stackWorkBuf>>>([Ꮡs.Ꮡbuf, Ꮡs.Ꮡcbuf]))) {
@@ -277,11 +277,11 @@ private static readonly @string addressNotAStackAddressˢᵇᴍstackScanState = 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string objectsAddedOutOfOrderOrˢᴍstackScanState => ref objectsAddedOutOfOrderOrˢᵇᴍstackScanState;
-private static readonly @string objectsAddedOutOfOrderOrˢᵇᴍstackScanState = "objects added out of order or overlapping"u8;
+internal static ref readonly @string objectsAddedOutOfOrderOrˢ⁔stackScanState => ref objectsAddedOutOfOrderOrˢᵇ⁔stackScanState;
+private static readonly @string objectsAddedOutOfOrderOrˢᵇ⁔stackScanState = "objects added out of order or overlapping"u8;
 
 // addObject adds a stack object at addr of type typ to the set of stack objects.
-[GoMethodBody("addObject")] internal static void addObjectᴍ(ref stackScanState s, uintptr addr, ж<stackObjectRecord> Ꮡr) {
+internal static void addObject⁔(/*this*/ ref stackScanState s, uintptr addr, ж<stackObjectRecord> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var x = s.tail;
@@ -293,7 +293,7 @@ private static readonly @string objectsAddedOutOfOrderOrˢᵇᴍstackScanState =
         s.tail = x;
     }
     if (x.nobj > 0 && (uint32)(addr - s.stack.lo) < x.obj[x.nobj - 1].off + x.obj[x.nobj - 1].size) {
-        @throw(objectsAddedOutOfOrderOrˢᴍstackScanState);
+        @throw(objectsAddedOutOfOrderOrˢ⁔stackScanState);
     }
     if (x.nobj == len(x.obj)) {
         // full buffer - allocate a new buffer, add to end of linked list
@@ -315,7 +315,7 @@ private static readonly @string objectsAddedOutOfOrderOrˢᵇᴍstackScanState =
 // buildIndex initializes s.root to a binary search tree.
 // It should be called after all addObject calls but before
 // any call of findObject.
-[GoMethodBody("buildIndex")] internal static void buildIndexᴍ(ref stackScanState s) {
+internal static void buildIndex⁔(/*this*/ ref stackScanState s) {
     (s.root, _, _) = binarySearchTree(s.head, 0, s.nobjs);
 }
 
@@ -352,7 +352,7 @@ internal static (ж<stackObject> root, ж<stackObjectBuf> restBuf, nint restIdx)
 
 // findObject returns the stack object containing address a, if any.
 // Must have called buildIndex previously.
-[GoMethodBody("findObject")] internal static ж<stackObject> findObjectᴍ(ref stackScanState s, uintptr a) {
+internal static ж<stackObject> findObject⁔(/*this*/ ref stackScanState s, uintptr a) {
     var off = (uint32)(a - s.stack.lo);
     var obj = s.root;
     for (;;) {

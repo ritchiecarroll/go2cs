@@ -40,8 +40,8 @@ partial struct Error {
 
 } partial class url_package {
 
-[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref Error e) { return e.Err; }
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref Error e) { return fmt.Sprintf("%s %q: %s"u8, e.Op, e.URL, e.Err); }
+internal static error Unwrap⁔(/*this*/ ref Error e) { return e.Err; }
+internal static @string Error⁔(/*this*/ ref Error e) { return fmt.Sprintf("%s %q: %s"u8, e.Op, e.URL, e.Err); }
 
 } partial class url_package {
 
@@ -51,7 +51,7 @@ internal partial interface Timeout_type /*dyn*/ {
 
 } partial class url_package {
 
-[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref Error e) {
+internal static bool Timeout⁔(/*this*/ ref Error e) {
     var (t, ok) = e.Err._<Timeout_type>(ᐧ);
     return ok && t.Timeout();
 }
@@ -64,7 +64,7 @@ internal partial interface Temporary_type /*dyn*/ {
 
 } partial class url_package {
 
-[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref Error e) {
+internal static bool Temporary⁔(/*this*/ ref Error e) {
     var (t, ok) = e.Err._<Temporary_type>(ᐧ);
     return ok && t.Temporary();
 }
@@ -87,7 +87,7 @@ partial struct EscapeError /*@string*/;
 
 } partial class url_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(EscapeError e) {
+internal static @string Error⁔(/*this*/ EscapeError e) {
     return "invalid URL escape "u8 + strconv.Quote((@string)e);
 }
 
@@ -97,7 +97,7 @@ partial struct InvalidHostError /*@string*/;
 
 } partial class url_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(InvalidHostError e) {
+internal static @string Error⁔(/*this*/ InvalidHostError e) {
     return "invalid character "u8 + strconv.Quote((@string)e) + " in host name"u8;
 }
 
@@ -378,7 +378,7 @@ partial struct Userinfo {
 } partial class url_package {
 
 // Username returns the username.
-[GoMethodBody("Username")] internal static @string Usernameᴍ(ж<Userinfo> Ꮡu) {
+internal static @string Username⁔(/*this*/ ж<Userinfo> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     if (Ꮡu == nil) {
@@ -388,7 +388,7 @@ partial struct Userinfo {
 }
 
 // Password returns the password in case it is set, and whether it is set.
-[GoMethodBody("Password")] internal static (@string, bool) Passwordᴍ(ж<Userinfo> Ꮡu) {
+internal static (@string, bool) Password⁔(/*this*/ ж<Userinfo> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     if (Ꮡu == nil) {
@@ -399,7 +399,7 @@ partial struct Userinfo {
 
 // String returns the encoded userinfo information in the standard form
 // of "username[:password]".
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Userinfo> Ꮡu) {
+internal static @string String⁔(/*this*/ ж<Userinfo> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     if (Ꮡu == nil) {
@@ -746,7 +746,7 @@ internal static (@string, error) parseHost(@string scheme, @string host) {
 // See go.dev/issue/67401.
 //
 //go:linkname badSetPath net/url.(*URL).setPath
-[GoMethodBody("setPath")] internal static error setPathᴍ(ref URL u, @string p) {
+internal static error setPath⁔(/*this*/ ref URL u, @string p) {
     var (path, err) = unescape(p, encodePath);
     if (err != nil) {
         return err;
@@ -777,7 +777,7 @@ internal static partial error badSetPath(ж<URL> _Δp0, @string _Δp1);
 // their results.
 // In general, code should call EscapedPath instead of
 // reading u.RawPath directly.
-[GoMethodBody("EscapedPath")] internal static @string EscapedPathᴍ(ref URL u) {
+internal static @string EscapedPath⁔(/*this*/ ref URL u) {
     if (u.RawPath != ""u8 && validEncoded(u.RawPath, encodePath)) {
         var (p, err) = unescape(u.RawPath, encodePath);
         if (err == nil && p == u.Path) {
@@ -828,7 +828,7 @@ internal static bool validEncoded(@string s, encoding mode) {
 } partial class url_package {
 
 // setFragment is like setPath but for Fragment/RawFragment.
-[GoMethodBody("setFragment")] internal static error setFragmentᴍ(ref URL u, @string f) {
+internal static error setFragment⁔(/*this*/ ref URL u, @string f) {
     var (frag, err) = unescape(f, encodeFragment);
     if (err != nil) {
         return err;
@@ -851,7 +851,7 @@ internal static bool validEncoded(@string s, encoding mode) {
 // The [URL.String] method uses EscapedFragment to construct its result.
 // In general, code should call EscapedFragment instead of
 // reading u.RawFragment directly.
-[GoMethodBody("EscapedFragment")] internal static @string EscapedFragmentᴍ(ref URL u) {
+internal static @string EscapedFragment⁔(/*this*/ ref URL u) {
     if (u.RawFragment != ""u8 && validEncoded(u.RawFragment, encodeFragment)) {
         var (f, err) = unescape(u.RawFragment, encodeFragment);
         if (err == nil && f == u.Fragment) {
@@ -903,7 +903,7 @@ internal static bool validOptionalPort(@string port) {
 //     the form host/path does not add its own /.
 //   - if u.RawQuery is empty, ?query is omitted.
 //   - if u.Fragment is empty, #fragment is omitted.
-[GoMethodBody("String")] internal static @string Stringᴍ(ref URL u) {
+internal static @string String⁔(/*this*/ ref URL u) {
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
 
     nint n = len(u.Scheme);
@@ -973,12 +973,12 @@ internal static bool validOptionalPort(@string port) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string xxxxxˢᴍURL => ref xxxxxˢᵇᴍURL;
-private static readonly @string xxxxxˢᵇᴍURL = "xxxxx"u8;
+internal static ref readonly @string xxxxxˢ⁔URL => ref xxxxxˢᵇ⁔URL;
+private static readonly @string xxxxxˢᵇ⁔URL = "xxxxx"u8;
 
 // Redacted is like [URL.String] but replaces any password with "xxxxx".
 // Only the password in u.User is redacted.
-[GoMethodBody("Redacted")] internal static @string Redactedᴍ(ж<URL> Ꮡu) {
+internal static @string Redacted⁔(/*this*/ ж<URL> Ꮡu) {
     ref var u = ref Ꮡu.DerefOrNull();
 
     if (Ꮡu == nil) {
@@ -987,7 +987,7 @@ private static readonly @string xxxxxˢᵇᴍURL = "xxxxx"u8;
 
     var ru = u;
     var (_, has) = ru.User.Password(); if (has) {
-        ru.User = UserPassword(ru.User.Username(), xxxxxˢᴍURL);
+        ru.User = UserPassword(ru.User.Username(), xxxxxˢ⁔URL);
     }
     return ru.String();
 }
@@ -1006,7 +1006,7 @@ partial struct Values /*map[@string, slice<@string>]*/;
 // If there are no values associated with the key, Get returns
 // the empty string. To access multiple values, use the map
 // directly.
-[GoMethodBody("Get")] internal static @string Getᴍ(Values v, @string key) {
+internal static @string Get⁔(/*this*/ Values v, @string key) {
     var vs = v[key];
     if (len(vs) == 0) {
         return ""u8;
@@ -1016,23 +1016,23 @@ partial struct Values /*map[@string, slice<@string>]*/;
 
 // Set sets the key to value. It replaces any existing
 // values.
-[GoMethodBody("Set")] internal static void Setᴍ(Values v, @string key, @string value) {
+internal static void Set⁔(/*this*/ Values v, @string key, @string value) {
     v[key] = [value];
 }
 
 // Add adds the value to key. It appends to any existing
 // values associated with key.
-[GoMethodBody("Add")] internal static void Addᴍ(Values v, @string key, @string value) {
+internal static void Add⁔(/*this*/ Values v, @string key, @string value) {
     v[key] = append(v[key], value);
 }
 
 // Del deletes the values associated with key.
-[GoMethodBody("Del")] internal static void Delᴍ(Values v, @string key) {
+internal static void Del⁔(/*this*/ Values v, @string key) {
     delete(v, key);
 }
 
 // Has checks whether a given key is set.
-[GoMethodBody("Has")] internal static bool Hasᴍ(Values v, @string key) {
+internal static bool Has⁔(/*this*/ Values v, @string key) {
     var (_, ok) = v[key, ꟷ];
     return ok;
 }
@@ -1120,7 +1120,7 @@ internal static error /*err*/ parseQuery(Values m, @string query) {
 
 // Encode encodes the values into “URL encoded” form
 // ("bar=baz&foo=quux") sorted by key.
-[GoMethodBody("Encode")] internal static @string Encodeᴍ(Values v) {
+internal static @string Encode⁔(/*this*/ Values v) {
     if (len(v) == 0) {
         return ""u8;
     }
@@ -1217,14 +1217,14 @@ internal static @string resolvePath(@string @base, @string @ref) {
 
 // IsAbs reports whether the [URL] is absolute.
 // Absolute means that it has a non-empty scheme.
-[GoMethodBody("IsAbs")] internal static bool IsAbsᴍ(ref URL u) {
+internal static bool IsAbs⁔(/*this*/ ref URL u) {
     return u.Scheme != ""u8;
 }
 
 // Parse parses a [URL] in the context of the receiver. The provided URL
 // may be relative or absolute. Parse returns nil, err on parse
 // failure, otherwise its return value is the same as [URL.ResolveReference].
-[GoMethodBody("Parse")] internal static (ж<URL>, error) Parseᴍ(ref URL u, @string @ref) {
+internal static (ж<URL>, error) Parse⁔(/*this*/ ref URL u, @string @ref) {
     var (refURL, err) = url_package.Parse(@ref);
     if (err != nil) {
         return (default, err);
@@ -1238,7 +1238,7 @@ internal static @string resolvePath(@string @base, @string @ref) {
 // [URL] instance, even if the returned URL is identical to either the
 // base or reference. If ref is an absolute URL, then ResolveReference
 // ignores base and returns a copy of ref.
-[GoMethodBody("ResolveReference")] internal static ж<URL> ResolveReferenceᴍ(ref URL u, ж<URL> Ꮡref) {
+internal static ж<URL> ResolveReference⁔(/*this*/ ref URL u, ж<URL> Ꮡref) {
     ref var @ref = ref Ꮡref.DerefOrNull();
 
     ref var url = ref heap<URL>(@ref, out var Ꮡurl);
@@ -1282,14 +1282,14 @@ internal static @string resolvePath(@string @base, @string @ref) {
 // Query parses RawQuery and returns the corresponding values.
 // It silently discards malformed value pairs.
 // To check errors use [ParseQuery].
-[GoMethodBody("Query")] internal static Values Queryᴍ(ref URL u) {
+internal static Values Query⁔(/*this*/ ref URL u) {
     var (v, _) = ParseQuery(u.RawQuery);
     return v;
 }
 
 // RequestURI returns the encoded path?query or opaque?query
 // string that would be used in an HTTP request for u.
-[GoMethodBody("RequestURI")] internal static @string RequestURIᴍ(ref URL u) {
+internal static @string RequestURI⁔(/*this*/ ref URL u) {
     @string result = u.Opaque;
     if (result == ""u8) {
         result = u.EscapedPath();
@@ -1311,7 +1311,7 @@ internal static @string resolvePath(@string @base, @string @ref) {
 //
 // If the result is enclosed in square brackets, as literal IPv6 addresses are,
 // the square brackets are removed from the result.
-[GoMethodBody("Hostname")] internal static @string Hostnameᴍ(ref URL u) {
+internal static @string Hostname⁔(/*this*/ ref URL u) {
     var (host, _) = splitHostPort(u.Host);
     return host;
 }
@@ -1319,7 +1319,7 @@ internal static @string resolvePath(@string @base, @string @ref) {
 // Port returns the port part of u.Host, without the leading colon.
 //
 // If u.Host doesn't contain a valid numeric port, Port returns an empty string.
-[GoMethodBody("Port")] internal static @string Portᴍ(ref URL u) {
+internal static @string Port⁔(/*this*/ ref URL u) {
     var (_, port) = splitHostPort(u.Host);
     return port;
 }
@@ -1351,15 +1351,15 @@ internal static (@string host, @string port) splitHostPort(@string hostPort) {
 
 // Marshaling interface implementations.
 // Would like to implement MarshalText/UnmarshalText but that will change the JSON representation of URLs.
-[GoMethodBody("MarshalBinary")] internal static (slice<byte> text, error err) MarshalBinaryᴍ(ref URL u) {
+internal static (slice<byte> text, error err) MarshalBinary⁔(/*this*/ ref URL u) {
     return u.AppendBinary(default);
 }
 
-[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ref URL u, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref URL u, slice<byte> b) {
     return (append(b, u.String().ꓸꓸꓸ), default);
 }
 
-[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref URL u, slice<byte> text) {
+internal static error UnmarshalBinary⁔(/*this*/ ref URL u, slice<byte> text) {
     var (u1, err) = url_package.Parse((@string)text);
     if (err != nil) {
         return err;
@@ -1372,14 +1372,14 @@ internal static (@string host, @string port) splitHostPort(@string hostPort) {
 // any existing path and the resulting path cleaned of any ./ or ../ elements.
 // Any sequences of multiple / characters will be reduced to a single /.
 // Path elements must already be in escaped form, as produced by [PathEscape].
-[GoMethodBody("JoinPath")] internal static ж<URL> JoinPathᴍ(ref URL u, params ꓸꓸꓸstring elemʗp) {
+internal static ж<URL> JoinPath⁔(/*this*/ ref URL u, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.sslice();
 
     var (url, _) = u.joinPath(elem.ꓸꓸꓸ);
     return url;
 }
 
-[GoMethodBody("joinPath")] internal static (ж<URL>, error) joinPathᴍ(ref URL u, params ꓸꓸꓸstring elemʗp) {
+internal static (ж<URL>, error) joinPath⁔(/*this*/ ref URL u, params ꓸꓸꓸstring elemʗp) {
     var elem = elemʗp.slice();
 
     elem = appendꓸꓸꓸ(slice<@string>([u.EscapedPath()]), elem);

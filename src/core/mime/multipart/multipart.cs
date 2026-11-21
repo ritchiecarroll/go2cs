@@ -75,12 +75,12 @@ partial struct Part {
 } partial class multipart_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nameˢᴍPart => ref nameˢᵇᴍPart;
-private static readonly @string nameˢᵇᴍPart = "name"u8;
+internal static ref readonly @string nameˢ⁔Part => ref nameˢᵇ⁔Part;
+private static readonly @string nameˢᵇ⁔Part = "name"u8;
 
 // FormName returns the name parameter if p has a Content-Disposition
 // of type "form-data".  Otherwise it returns the empty string.
-[GoMethodBody("FormName")] internal static @string FormNameᴍ(ref Part p) {
+internal static @string FormName⁔(/*this*/ ref Part p) {
     // See https://tools.ietf.org/html/rfc2183 section 2 for EBNF
     // of Content-Disposition value format.
     if (p.dispositionParams == nil) {
@@ -89,21 +89,21 @@ private static readonly @string nameˢᵇᴍPart = "name"u8;
     if (p.disposition != "form-data"u8) {
         return ""u8;
     }
-    return p.dispositionParams[nameˢᴍPart];
+    return p.dispositionParams[nameˢ⁔Part];
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string filenameˢᴍPart => ref filenameˢᵇᴍPart;
-private static readonly @string filenameˢᵇᴍPart = "filename"u8;
+internal static ref readonly @string filenameˢ⁔Part => ref filenameˢᵇ⁔Part;
+private static readonly @string filenameˢᵇ⁔Part = "filename"u8;
 
 // FileName returns the filename parameter of the [Part]'s Content-Disposition
 // header. If not empty, the filename is passed through filepath.Base (which is
 // platform dependent) before being returned.
-[GoMethodBody("FileName")] internal static @string FileNameᴍ(ref Part p) {
+internal static @string FileName⁔(/*this*/ ref Part p) {
     if (p.dispositionParams == nil) {
         p.parseContentDisposition();
     }
-    @string filename = p.dispositionParams[filenameˢᴍPart];
+    @string filename = p.dispositionParams[filenameˢ⁔Part];
     if (filename == ""u8) {
         return ""u8;
     }
@@ -113,11 +113,11 @@ private static readonly @string filenameˢᵇᴍPart = "filename"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentDispositionˢᴍPart => ref contentDispositionˢᵇᴍPart;
-private static readonly @string contentDispositionˢᵇᴍPart = "Content-Disposition"u8;
+internal static ref readonly @string contentDispositionˢ⁔Part => ref contentDispositionˢᵇ⁔Part;
+private static readonly @string contentDispositionˢᵇ⁔Part = "Content-Disposition"u8;
 
-[GoMethodBody("parseContentDisposition")] internal static void parseContentDispositionᴍ(ref Part p) {
-    @string v = p.Header.Get(contentDispositionˢᴍPart);
+internal static void parseContentDisposition⁔(/*this*/ ref Part p) {
+    @string v = p.Header.Get(contentDispositionˢ⁔Part);
     error err = default;
     (p.disposition, p.dispositionParams, err) = mime.ParseMediaType(v);
     if (err != nil) {
@@ -156,7 +156,7 @@ partial struct stickyErrorReader {
 
 } partial class multipart_package {
 
-[GoMethodBody("Read")] internal static (nint n, error) Readᴍ(ref stickyErrorReader r, slice<byte> p) {
+internal static (nint n, error) Read⁔(/*this*/ ref stickyErrorReader r, slice<byte> p) {
     nint n = default;
 
     if (r.err != nil) {
@@ -199,7 +199,7 @@ internal static (ж<Part>, error) newPart(ж<Reader> mr, bool rawPart, int64 max
 
 } partial class multipart_package {
 
-[GoMethodBody("populateHeaders")] internal static error populateHeadersᴍ(ref Part p, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
+internal static error populateHeaders⁔(/*this*/ ref Part p, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
     var r = textproto.NewReader(p.mr.bufReader);
     var (header, err) = readMIMEHeader(r, maxMIMEHeaderSize, maxMIMEHeaders);
     if (err == nil) {
@@ -214,7 +214,7 @@ internal static (ж<Part>, error) newPart(ж<Reader> mr, bool rawPart, int64 max
 
 // Read reads the body of a part, after its headers and before the
 // next part (if any) begins.
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref Part p, slice<byte> d) {
+internal static (nint n, error err) Read⁔(/*this*/ ref Part p, slice<byte> d) {
     return p.r.Read(d);
 }
 
@@ -228,7 +228,7 @@ partial struct partReader {
 
 } partial class multipart_package {
 
-[GoMethodBody("Read")] internal static (nint, error) Readᴍ(partReader pr, slice<byte> d) {
+internal static (nint, error) Read⁔(/*this*/ partReader pr, slice<byte> d) {
     var p = pr.p;
     var br = p.mr.bufReader;
 
@@ -367,7 +367,7 @@ internal static nint matchAfterPrefix(slice<byte> buf, slice<byte> prefix, error
 
 } partial class multipart_package {
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<Part> Ꮡp) {
+internal static error Close⁔(/*this*/ ж<Part> Ꮡp) {
     io.Copy(io.Discard, new PartжReader(Ꮡp));
     return default;
 }
@@ -415,7 +415,7 @@ internal static int64 maxMIMEHeaders() {
 // As a special case, if the "Content-Transfer-Encoding" header
 // has a value of "quoted-printable", that header is instead
 // hidden and the body is transparently decoded during Read calls.
-[GoMethodBody("NextPart")] internal static (ж<Part>, error) NextPartᴍ(ж<Reader> Ꮡr) {
+internal static (ж<Part>, error) NextPart⁔(/*this*/ ж<Reader> Ꮡr) {
     return Ꮡr.nextPart(false, maxMIMEHeaderSize, maxMIMEHeaders());
 }
 
@@ -424,11 +424,11 @@ internal static int64 maxMIMEHeaders() {
 //
 // Unlike [Reader.NextPart], it does not have special handling for
 // "Content-Transfer-Encoding: quoted-printable".
-[GoMethodBody("NextRawPart")] internal static (ж<Part>, error) NextRawPartᴍ(ж<Reader> Ꮡr) {
+internal static (ж<Part>, error) NextRawPart⁔(/*this*/ ж<Reader> Ꮡr) {
     return Ꮡr.nextPart(true, maxMIMEHeaderSize, maxMIMEHeaders());
 }
 
-[GoMethodBody("nextPart")] internal static (ж<Part>, error) nextPartᴍ(ж<Reader> Ꮡr, bool rawPart, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
+internal static (ж<Part>, error) nextPart⁔(/*this*/ ж<Reader> Ꮡr, bool rawPart, int64 maxMIMEHeaderSize, int64 maxMIMEHeaders) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (r.currentPart != nil) {
@@ -493,7 +493,7 @@ internal static int64 maxMIMEHeaders() {
 // isFinalBoundary reports whether line is the final boundary line
 // indicating that all parts are over.
 // It matches `^--boundary--[ \t]*(\r\n)?$`
-[GoMethodBody("isFinalBoundary")] internal static bool isFinalBoundaryᴍ(ref Reader r, slice<byte> line) {
+internal static bool isFinalBoundary⁔(/*this*/ ref Reader r, slice<byte> line) {
     if (!bytes.HasPrefix(line, r.dashBoundaryDash)) {
         return false;
     }
@@ -502,7 +502,7 @@ internal static int64 maxMIMEHeaders() {
     return len(rest) == 0 || bytes.Equal(rest, r.nl);
 }
 
-[GoMethodBody("isBoundaryDelimiterLine")] internal static bool /*ret*/ isBoundaryDelimiterLineᴍ(ref Reader r, slice<byte> line) {
+internal static bool /*ret*/ isBoundaryDelimiterLine⁔(/*this*/ ref Reader r, slice<byte> line) {
     // https://tools.ietf.org/html/rfc2046#section-5.1
     //   The boundary delimiter line is then defined as a line
     //   consisting entirely of two hyphen characters ("-",

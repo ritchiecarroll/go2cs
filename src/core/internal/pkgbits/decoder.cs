@@ -59,10 +59,10 @@ partial struct PkgDecoder {
 // PkgPath returns the package path for the package
 //
 // TODO(mdempsky): Remove; unneeded since CL 391014.
-[GoMethodBody("PkgPath")] internal static @string PkgPathᴍ(ref PkgDecoder pr) { return pr.pkgPath; }
+internal static @string PkgPath⁔(/*this*/ ref PkgDecoder pr) { return pr.pkgPath; }
 
 // SyncMarkers reports whether pr uses sync markers.
-[GoMethodBody("SyncMarkers")] internal static bool SyncMarkersᴍ(ref PkgDecoder pr) { return pr.sync; }
+internal static bool SyncMarkers⁔(/*this*/ ref PkgDecoder pr) { return pr.sync; }
 
 } partial class pkgbits_package {
 
@@ -112,7 +112,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 } partial class pkgbits_package {
 
 // NumElems returns the number of elements in section k.
-[GoMethodBody("NumElems")] internal static nint NumElemsᴍ(ref PkgDecoder pr, SectionKind k) {
+internal static nint NumElems⁔(/*this*/ ref PkgDecoder pr, SectionKind k) {
     nint count = (nint)pr.elemEndsEnds[k];
     if (k > 0) {
         count -= (nint)pr.elemEndsEnds[k - 1];
@@ -121,12 +121,12 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 }
 
 // TotalElems returns the total number of elements across all sections.
-[GoMethodBody("TotalElems")] internal static nint TotalElemsᴍ(ref PkgDecoder pr) {
+internal static nint TotalElems⁔(/*this*/ ref PkgDecoder pr) {
     return len(pr.elemEnds);
 }
 
 // Fingerprint returns the package fingerprint.
-[GoMethodBody("Fingerprint")] internal static array<byte> Fingerprintᴍ(ref PkgDecoder pr) {
+internal static array<byte> Fingerprint⁔(/*this*/ ref PkgDecoder pr) {
     array<byte> fp = new(8);
     copy(fp[..], pr.elemData.slice(len(pr.elemData) - 8));
     return fp.Clone();
@@ -134,7 +134,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 
 // AbsIdx returns the absolute index for the given (section, index)
 // pair.
-[GoMethodBody("AbsIdx")] internal static nint AbsIdxᴍ(ref PkgDecoder pr, SectionKind k, RelElemIdx idx) {
+internal static nint AbsIdx⁔(/*this*/ ref PkgDecoder pr, SectionKind k, RelElemIdx idx) {
     nint absIdx = (nint)idx;
     if (k > 0) {
         absIdx += (nint)pr.elemEndsEnds[k - 1];
@@ -147,7 +147,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 
 // DataIdx returns the raw element bitstream for the given (section,
 // index) pair.
-[GoMethodBody("DataIdx")] internal static @string DataIdxᴍ(ref PkgDecoder pr, SectionKind k, RelElemIdx idx) {
+internal static @string DataIdx⁔(/*this*/ ref PkgDecoder pr, SectionKind k, RelElemIdx idx) {
     nint absIdx = pr.AbsIdx(k, idx);
 
     uint32 start = default;
@@ -160,13 +160,13 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 }
 
 // StringIdx returns the string value for the given string index.
-[GoMethodBody("StringIdx")] internal static @string StringIdxᴍ(ref PkgDecoder pr, RelElemIdx idx) {
+internal static @string StringIdx⁔(/*this*/ ref PkgDecoder pr, RelElemIdx idx) {
     return pr.DataIdx(SectionString, idx);
 }
 
 // NewDecoder returns a Decoder for the given (section, index) pair,
 // and decodes the given SyncMarker from the element bitstream.
-[GoMethodBody("NewDecoder")] internal static Decoder NewDecoderᴍ(ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) {
+internal static Decoder NewDecoder⁔(/*this*/ ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) {
     ref var r = ref heap<Decoder>(Ꮡpr.NewDecoderRaw(k, idx), out var Ꮡr);
     Ꮡr.Sync(marker);
     return r;
@@ -176,13 +176,13 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 // and decodes the given SyncMarker from the element bitstream.
 // If possible the Decoder should be RetireDecoder'd when it is no longer
 // needed, this will avoid heap allocations.
-[GoMethodBody("TempDecoder")] internal static Decoder TempDecoderᴍ(ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) {
+internal static Decoder TempDecoder⁔(/*this*/ ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx, SyncMarker marker) {
     ref var r = ref heap<Decoder>(Ꮡpr.TempDecoderRaw(k, idx), out var Ꮡr);
     Ꮡr.Sync(marker);
     return r;
 }
 
-[GoMethodBody("RetireDecoder")] internal static void RetireDecoderᴍ(ref PkgDecoder pr, ж<Decoder> Ꮡd) {
+internal static void RetireDecoder⁔(/*this*/ ref PkgDecoder pr, ж<Decoder> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     pr.scratchRelocEnt = d.Relocs;
@@ -192,7 +192,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
 // NewDecoderRaw returns a Decoder for the given (section, index) pair.
 //
 // Most callers should use NewDecoder instead.
-[GoMethodBody("NewDecoderRaw")] internal static Decoder NewDecoderRawᴍ(ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) {
+internal static Decoder NewDecoderRaw⁔(/*this*/ ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     ref var r = ref heap<Decoder>(new Decoder(
@@ -212,7 +212,7 @@ public static PkgDecoder NewPkgDecoder(@string pkgPath, @string input) {
     return r;
 }
 
-[GoMethodBody("TempDecoderRaw")] internal static Decoder TempDecoderRawᴍ(ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) {
+internal static Decoder TempDecoderRaw⁔(/*this*/ ж<PkgDecoder> Ꮡpr, SectionKind k, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     ref var r = ref heap<Decoder>(new Decoder(
@@ -252,13 +252,13 @@ partial struct Decoder {
 
 } partial class pkgbits_package {
 
-[GoMethodBody("checkErr")] internal static void checkErrᴍ(ref Decoder r, error err) {
+internal static void checkErr⁔(/*this*/ ref Decoder r, error err) {
     if (err != nil) {
         panicf("unexpected decoding error: %w", err);
     }
 }
 
-[GoMethodBody("rawUvarint")] internal static uint64 rawUvarintᴍ(ж<Decoder> Ꮡr) {
+internal static uint64 rawUvarint⁔(/*this*/ ж<Decoder> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var (x, err) = readUvarint(Ꮡr.ᏑData);
@@ -300,7 +300,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 
 } partial class pkgbits_package {
 
-[GoMethodBody("rawVarint")] internal static int64 rawVarintᴍ(ж<Decoder> Ꮡr) {
+internal static int64 rawVarint⁔(/*this*/ ж<Decoder> Ꮡr) {
     var ux = Ꮡr.rawUvarint();
 
     // Zig-zag decode.
@@ -311,7 +311,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
     return x;
 }
 
-[GoMethodBody("rawReloc")] internal static RelElemIdx rawRelocᴍ(ref Decoder r, SectionKind k, nint idx) {
+internal static RelElemIdx rawReloc⁔(/*this*/ ref Decoder r, SectionKind k, nint idx) {
     var e = r.Relocs[idx];
     assert(e.Kind == k);
     return e.Idx;
@@ -321,7 +321,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 // that it matches the expected marker.
 //
 // If EnableSync is false, then Sync is a no-op.
-[GoMethodBody("Sync")] internal static partial void Syncᴍ(ж<Decoder> Ꮡr, SyncMarker mWant) {
+internal static partial void Sync⁔(/*this*/ ж<Decoder> Ꮡr, SyncMarker mWant) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (!r.common.sync) {
@@ -379,7 +379,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 }
 
 // Bool decodes and returns a bool value from the element bitstream.
-[GoMethodBody("Bool")] internal static bool Boolᴍ(ж<Decoder> Ꮡr) {
+internal static bool Bool⁔(/*this*/ ж<Decoder> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Sync(SyncBool);
@@ -390,19 +390,19 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 }
 
 // Int64 decodes and returns an int64 value from the element bitstream.
-[GoMethodBody("Int64")] internal static int64 Int64ᴍ(ж<Decoder> Ꮡr) {
+internal static int64 Int64⁔(/*this*/ ж<Decoder> Ꮡr) {
     Ꮡr.Sync(SyncInt64);
     return Ꮡr.rawVarint();
 }
 
 // Uint64 decodes and returns a uint64 value from the element bitstream.
-[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(ж<Decoder> Ꮡr) {
+internal static uint64 Uint64⁔(/*this*/ ж<Decoder> Ꮡr) {
     Ꮡr.Sync(SyncUint64);
     return Ꮡr.rawUvarint();
 }
 
 // Len decodes and returns a non-negative int value from the element bitstream.
-[GoMethodBody("Len")] internal static nint Lenᴍ(ж<Decoder> Ꮡr) {
+internal static nint Len⁔(/*this*/ ж<Decoder> Ꮡr) {
     var x = Ꮡr.Uint64();
     nint v = (nint)x;
     assert((uint64)v == x);
@@ -410,7 +410,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 }
 
 // Int decodes and returns an int value from the element bitstream.
-[GoMethodBody("Int")] internal static nint Intᴍ(ж<Decoder> Ꮡr) {
+internal static nint Int⁔(/*this*/ ж<Decoder> Ꮡr) {
     var x = Ꮡr.Int64();
     nint v = (nint)x;
     assert((int64)v == x);
@@ -418,7 +418,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 }
 
 // Uint decodes and returns a uint value from the element bitstream.
-[GoMethodBody("Uint")] internal static nuint Uintᴍ(ж<Decoder> Ꮡr) {
+internal static nuint Uint⁔(/*this*/ ж<Decoder> Ꮡr) {
     var x = Ꮡr.Uint64();
     nuint v = (nuint)x;
     assert((uint64)v == x);
@@ -432,14 +432,14 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 // TODO(mdempsky): Ideally this method would have signature "Code[T
 // Code] T" instead, but we don't allow generic methods and the
 // compiler can't depend on generics yet anyway.
-[GoMethodBody("Code")] internal static nint Codeᴍ(ж<Decoder> Ꮡr, SyncMarker mark) {
+internal static nint Code⁔(/*this*/ ж<Decoder> Ꮡr, SyncMarker mark) {
     Ꮡr.Sync(mark);
     return Ꮡr.Len();
 }
 
 // Reloc decodes a relocation of expected section k from the element
 // bitstream and returns an index to the referenced element.
-[GoMethodBody("Reloc")] internal static RelElemIdx Relocᴍ(ж<Decoder> Ꮡr, SectionKind k) {
+internal static RelElemIdx Reloc⁔(/*this*/ ж<Decoder> Ꮡr, SectionKind k) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Sync(SyncUseReloc);
@@ -448,7 +448,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 
 // String decodes and returns a string value from the element
 // bitstream.
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Decoder> Ꮡr) {
+internal static @string String⁔(/*this*/ ж<Decoder> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Sync(SyncString);
@@ -457,7 +457,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 
 // Strings decodes and returns a variable-length slice of strings from
 // the element bitstream.
-[GoMethodBody("Strings")] internal static slice<@string> Stringsᴍ(ж<Decoder> Ꮡr) {
+internal static slice<@string> Strings⁔(/*this*/ ж<Decoder> Ꮡr) {
     var res = new slice<@string>(Ꮡr.Len());
     foreach (var i in range(len(res))) {
         res[i] = Ꮡr.String();
@@ -467,7 +467,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 
 // Value decodes and returns a constant.Value from the element
 // bitstream.
-[GoMethodBody("Value")] internal static constant.Value Valueᴍ(ж<Decoder> Ꮡr) {
+internal static constant.Value Value⁔(/*this*/ ж<Decoder> Ꮡr) {
     Ꮡr.Sync(SyncValue);
     var isComplex = Ꮡr.Bool();
     var val = Ꮡr.scalar();
@@ -477,7 +477,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
     return val;
 }
 
-[GoMethodBody("scalar")] internal static constant.Value scalarᴍ(ж<Decoder> Ꮡr) {
+internal static constant.Value scalar⁔(/*this*/ ж<Decoder> Ꮡr) {
     CodeVal tag = (CodeVal)Ꮡr.Code(SyncVal);
     switch (tag) {
     default: {
@@ -506,7 +506,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
     }}
 }
 
-[GoMethodBody("bigInt")] internal static ж<big.Int> bigIntᴍ(ж<Decoder> Ꮡr) {
+internal static ж<big.Int> bigInt⁔(/*this*/ ж<Decoder> Ꮡr) {
     var v = @new<big.Int>().SetBytes(slice<byte>(Ꮡr.String()));
     if (Ꮡr.Bool()) {
         v.Neg(v);
@@ -514,7 +514,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
     return v;
 }
 
-[GoMethodBody("bigFloat")] internal static ж<big.Float> bigFloatᴍ(ж<Decoder> Ꮡr) {
+internal static ж<big.Float> bigFloat⁔(/*this*/ ж<Decoder> Ꮡr) {
     var v = @new<big.Float>().SetPrec(512);
     assert(v.UnmarshalText(slice<byte>(Ꮡr.String())) == nil);
     return v;
@@ -528,7 +528,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 
 // PeekPkgPath returns the package path for the specified package
 // index.
-[GoMethodBody("PeekPkgPath")] internal static @string PeekPkgPathᴍ(ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
+internal static @string PeekPkgPath⁔(/*this*/ ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     @string path = default;
@@ -545,7 +545,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 
 // PeekObj returns the package path, object name, and CodeObj for the
 // specified object index.
-[GoMethodBody("PeekObj")] internal static (@string, @string, CodeObj) PeekObjᴍ(ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
+internal static (@string, @string, CodeObj) PeekObj⁔(/*this*/ ж<PkgDecoder> Ꮡpr, RelElemIdx idx) {
     ref var pr = ref Ꮡpr.DerefOrNull();
 
     RelElemIdx ridx = default;
@@ -572,6 +572,6 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
 } partial class pkgbits_package {
 
 // Version reports the version of the bitstream.
-[GoMethodBody("Version")] internal static Version Versionᴍ(ref Decoder w) { return w.common.version; }
+internal static Version Version⁔(/*this*/ ref Decoder w) { return w.common.version; }
 
 }

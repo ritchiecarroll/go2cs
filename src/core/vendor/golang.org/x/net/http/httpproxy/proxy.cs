@@ -132,7 +132,7 @@ internal static @string getEnvAny(params ꓸꓸꓸstring namesʗp) {
 //
 // As a special case, if req.URL.Host is "localhost" or a loopback address
 // (with or without a port number), then a nil URL and nil error will be returned.
-[GoMethodBody("ProxyFunc")] internal static Func<ж<url.URL>, (ж<url.URL>, error)> ProxyFuncᴍ(ref Config cfg) {
+internal static Func<ж<url.URL>, (ж<url.URL>, error)> ProxyFunc⁔(/*this*/ ref Config cfg) {
     // Preprocess the Config settings for more efficient evaluation.
     var cfg1 = Ꮡ(new config(
         Config: cfg
@@ -144,10 +144,10 @@ internal static @string getEnvAny(params ꓸꓸꓸstring namesʗp) {
 } partial class httpproxy_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string refusingToUseHttpProxyˢᴍconfig => ref refusingToUseHttpProxyˢᵇᴍconfig;
-private static readonly @string refusingToUseHttpProxyˢᵇᴍconfig = "refusing to use HTTP_PROXY value in CGI environment; see golang.org/s/cgihttpproxy"u8;
+private static ref readonly @string refusingToUseHttpProxyˢ⁔config => ref refusingToUseHttpProxyˢᵇ⁔config;
+private static readonly @string refusingToUseHttpProxyˢᵇ⁔config = "refusing to use HTTP_PROXY value in CGI environment; see golang.org/s/cgihttpproxy"u8;
 
-[GoMethodBody("proxyForURL")] internal static (ж<url.URL>, error) proxyForURLᴍ(ref config cfg, ж<url.URL> ᏑreqURL) {
+internal static (ж<url.URL>, error) proxyForURL⁔(/*this*/ ref config cfg, ж<url.URL> ᏑreqURL) {
     ref var reqURL = ref ᏑreqURL.DerefOrNull();
 
     ж<url.URL> proxy = default;
@@ -156,7 +156,7 @@ private static readonly @string refusingToUseHttpProxyˢᵇᴍconfig = "refusing
     } else if (reqURL.Scheme == "http"u8) {
         proxy = cfg.httpProxy;
         if (proxy != nil && cfg.CGI) {
-            return (default, errors.New(refusingToUseHttpProxyˢᴍconfig));
+            return (default, errors.New(refusingToUseHttpProxyˢ⁔config));
         }
     }
     if (proxy == nil) {
@@ -196,7 +196,7 @@ internal static (ж<url.URL>, error) parseProxy(@string proxy) {
 // useProxy reports whether requests to addr should use a proxy,
 // according to the NO_PROXY or no_proxy environment variable.
 // addr is always a canonicalAddr with a host and port.
-[GoMethodBody("useProxy")] internal static bool useProxyᴍ(ref config cfg, @string addr) {
+internal static bool useProxy⁔(/*this*/ ref config cfg, @string addr) {
     if (len(addr) == 0) {
         return true;
     }
@@ -233,7 +233,7 @@ internal static (ж<url.URL>, error) parseProxy(@string proxy) {
     return true;
 }
 
-[GoMethodBody("init")] internal static void initᴍ(ref config c) {
+internal static void init⁔(/*this*/ ref config c) {
     {
         var (parsed, err) = parseProxy(c.HTTPProxy); if (err == nil) {
             c.httpProxy = parsed;
@@ -377,7 +377,7 @@ partial struct allMatch {
 
 } partial class httpproxy_package {
 
-[GoMethodBody("match")] internal static bool matchᴍ(allMatch a, @string host, @string port, net.IP ip) {
+internal static bool match⁔(/*this*/ allMatch a, @string host, @string port, net.IP ip) {
     return true;
 }
 
@@ -389,7 +389,7 @@ partial struct cidrMatch {
 
 } partial class httpproxy_package {
 
-[GoMethodBody("match")] internal static bool matchᴍ(cidrMatch m, @string host, @string port, net.IP ip) {
+internal static bool match⁔(/*this*/ cidrMatch m, @string host, @string port, net.IP ip) {
     return m.cidr.Contains(ip);
 }
 
@@ -402,7 +402,7 @@ partial struct ipMatch {
 
 } partial class httpproxy_package {
 
-[GoMethodBody("match")] internal static bool matchᴍ(ipMatch m, @string host, @string port, net.IP ip) {
+internal static bool match⁔(/*this*/ ipMatch m, @string host, @string port, net.IP ip) {
     if (m.ip.Equal(ip)) {
         return m.port == ""u8 || m.port == port;
     }
@@ -419,7 +419,7 @@ partial struct domainMatch {
 
 } partial class httpproxy_package {
 
-[GoMethodBody("match")] internal static bool matchᴍ(domainMatch m, @string host, @string port, net.IP ip) {
+internal static bool match⁔(/*this*/ domainMatch m, @string host, @string port, net.IP ip) {
     if (ip != nil) {
         return false;
     }

@@ -53,7 +53,7 @@ partial struct StdSizes {
 
 } partial class types_package {
 
-[GoMethodBody("Alignof")] internal static int64 /*result*/ Alignofᴍ(ж<StdSizes> Ꮡs, Type T) {
+internal static int64 /*result*/ Alignof⁔(/*this*/ ж<StdSizes> Ꮡs, Type T) {
     int64 result = default;
     GoFrame ᒐ = default;
     try {
@@ -150,7 +150,7 @@ internal static bool _IsSyncAtomicAlign64(Type T) {
 
 } partial class types_package {
 
-[GoMethodBody("Offsetsof")] internal static slice<int64> Offsetsofᴍ(ж<StdSizes> Ꮡs, slice<ж<Var>> fields) {
+internal static slice<int64> Offsetsof⁔(/*this*/ ж<StdSizes> Ꮡs, slice<ж<Var>> fields) {
     var offsets = new slice<int64>(len(fields));
     int64 offs = default;
     foreach (var (i, f) in range(fields)) {
@@ -192,7 +192,7 @@ internal static bool _IsSyncAtomicAlign64(Type T) {
 
 } partial class types_package {
 
-[GoMethodBody("Sizeof")] internal static int64 Sizeofᴍ(ж<StdSizes> Ꮡs, Type T) {
+internal static int64 Sizeof⁔(/*this*/ ж<StdSizes> Ꮡs, Type T) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var switchᴛ14 = T.Underlying();
@@ -326,7 +326,7 @@ internal static void initᴛstdSizes() { stdSizes = SizesFor("gc", "amd64"); }
 
 } partial class types_package {
 
-[GoMethodBody("alignof")] internal static int64 alignofᴍ(ref Config conf, Type T) {
+internal static int64 alignof⁔(/*this*/ ref Config conf, Type T) {
     var f = stdSizes.Alignof;
     if (conf.Sizes != nil) {
         f = conf.Sizes.Alignof;
@@ -337,7 +337,7 @@ internal static void initᴛstdSizes() { stdSizes = SizesFor("gc", "amd64"); }
     throw panic("implementation of alignof returned an alignment < 1");
 }
 
-[GoMethodBody("offsetsof")] internal static slice<int64> offsetsofᴍ(ref Config conf, ж<Struct> ᏑT) {
+internal static slice<int64> offsetsof⁔(/*this*/ ref Config conf, ж<Struct> ᏑT) {
     ref var T = ref ᏑT.DerefOrNull();
 
     slice<int64> offsets = default;
@@ -361,7 +361,7 @@ internal static void initᴛstdSizes() { stdSizes = SizesFor("gc", "amd64"); }
 // must be structs (rather than pointers to structs).
 // If the offset is too large (because T is too large),
 // the result is negative.
-[GoMethodBody("offsetof")] internal static int64 offsetofᴍ(ref Config conf, Type T, slice<nint> index) {
+internal static int64 offsetof⁔(/*this*/ ref Config conf, Type T, slice<nint> index) {
     int64 offs = default;
     foreach (var (_, i) in range(index)) {
         var s = T.Underlying()._<ж<Struct>>();
@@ -380,7 +380,7 @@ internal static void initᴛstdSizes() { stdSizes = SizesFor("gc", "amd64"); }
 
 // sizeof returns the size of T.
 // If T is too large, the result is negative.
-[GoMethodBody("sizeof")] internal static int64 @sizeofᴍ(ref Config conf, Type T) {
+internal static int64 @sizeof⁔(/*this*/ ref Config conf, Type T) {
     var f = stdSizes.Sizeof;
     if (conf.Sizes != nil) {
         f = conf.Sizes.Sizeof;

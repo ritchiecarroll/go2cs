@@ -25,7 +25,7 @@ partial class types_package {
 // object was inserted into the scope and already had a parent at that
 // time (see Insert). This can only happen for dot-imported objects
 // whose parent is the scope of the package that exported them.
-[GoMethodBody("LookupParent")] internal static (ж<Scope>, Object) LookupParentᴍ(ж<Scope> Ꮡs, @string name, token.Pos pos) {
+internal static (ж<Scope>, Object) LookupParent⁔(/*this*/ ж<Scope> Ꮡs, @string name, token.Pos pos) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     for (; Ꮡs != nil; Ꮡs = s.parent, s = ref Ꮡs.DerefOrNull()) {
@@ -40,13 +40,13 @@ partial class types_package {
 // The results are guaranteed to be valid only if the type-checked
 // AST has complete position information. The extent is undefined
 // for Universe and package scopes.
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref Scope s) { return s.pos; }
-[GoMethodBody("End")] internal static token.Pos Endᴍ(ref Scope s) { return s.end; }
+internal static token.Pos Pos⁔(/*this*/ ref Scope s) { return s.pos; }
+internal static token.Pos End⁔(/*this*/ ref Scope s) { return s.end; }
 
 // Contains reports whether pos is within the scope's extent.
 // The result is guaranteed to be valid only if the type-checked
 // AST has complete position information.
-[GoMethodBody("Contains")] internal static bool Containsᴍ(ref Scope s, token.Pos pos) {
+internal static bool Contains⁔(/*this*/ ref Scope s, token.Pos pos) {
     return cmpPos(s.pos, pos) <= 0 && cmpPos(pos, s.end) < 0;
 }
 
@@ -55,7 +55,7 @@ partial class types_package {
 // The result is also nil for the Universe scope.
 // The result is guaranteed to be valid only if the type-checked
 // AST has complete position information.
-[GoMethodBody("Innermost")] internal static ж<Scope> Innermostᴍ(ж<Scope> Ꮡs, token.Pos pos) {
+internal static ж<Scope> Innermost⁔(/*this*/ ж<Scope> Ꮡs, token.Pos pos) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     // Package scopes do not have extents since they may be

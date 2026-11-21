@@ -564,7 +564,7 @@ sclose:
 
 } partial class runtime_package {
 
-[GoMethodBody("sortkey")] internal static uintptr sortkeyᴍ(ж<hchan> Ꮡc) {
+internal static uintptr sortkey⁔(/*this*/ ж<hchan> Ꮡc) {
     return (uintptr)Ꮡc;
 }
 
@@ -654,7 +654,7 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
 
 } partial class runtime_package {
 
-[GoMethodBody("dequeueSudoG")] internal static void dequeueSudoGᴍ(ref waitq q, ж<sudog> Ꮡsgp) {
+internal static void dequeueSudoG⁔(/*this*/ ref waitq q, ж<sudog> Ꮡsgp) {
     ref var sgp = ref Ꮡsgp.DerefOrNull();
 
     var x = sgp.prev;

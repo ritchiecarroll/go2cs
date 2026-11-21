@@ -118,21 +118,21 @@ internal static slice<byte> appendBase128BigInt(slice<byte> dst, ж<big.Int> n) 
 } partial class x509_package {
 
 // AppendText implements [encoding.TextAppender]
-[GoMethodBody("AppendText")] internal static (slice<byte>, error) AppendTextᴍ(OID o, slice<byte> b) {
+internal static (slice<byte>, error) AppendText⁔(/*this*/ OID o, slice<byte> b) {
     return (append(b, o.String().ꓸꓸꓸ), default);
 }
 
 // MarshalText implements [encoding.TextMarshaler]
-[GoMethodBody("MarshalText")] internal static (slice<byte>, error) MarshalTextᴍ(OID o) {
+internal static (slice<byte>, error) MarshalText⁔(/*this*/ OID o) {
     return o.AppendText(default);
 }
 
 // UnmarshalText implements [encoding.TextUnmarshaler]
-[GoMethodBody("UnmarshalText")] internal static error UnmarshalTextᴍ(ref OID o, slice<byte> text) {
+internal static error UnmarshalText⁔(/*this*/ ref OID o, slice<byte> text) {
     return o.unmarshalOIDText((@string)text);
 }
 
-[GoMethodBody("unmarshalOIDText")] internal static error unmarshalOIDTextᴍ(ref OID o, @string oid) {
+internal static error unmarshalOIDText⁔(/*this*/ ref OID o, @string oid) {
     // (*big.Int).SetString allows +/- signs, but we don't want
     // to allow them in the string representation of Object Identifier, so
     // reject such encodings.
@@ -191,17 +191,17 @@ internal static slice<byte> appendBase128BigInt(slice<byte> dst, ж<big.Int> n) 
 }
 
 // AppendBinary implements [encoding.BinaryAppender]
-[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(OID o, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ OID o, slice<byte> b) {
     return (appendꓸꓸꓸ(b, o.der), default);
 }
 
 // MarshalBinary implements [encoding.BinaryMarshaler]
-[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(OID o) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ OID o) {
     return o.AppendBinary(default);
 }
 
 // UnmarshalBinary implements [encoding.BinaryUnmarshaler]
-[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref OID o, slice<byte> b) {
+internal static error UnmarshalBinary⁔(/*this*/ ref OID o, slice<byte> b) {
     var (oid, ok) = newOIDFromDER(bytes.Clone(b));
     if (!ok) {
         return errInvalidOID;
@@ -211,7 +211,7 @@ internal static slice<byte> appendBase128BigInt(slice<byte> dst, ж<big.Int> n) 
 }
 
 // Equal returns true when oid and other represents the same Object Identifier.
-[GoMethodBody("Equal")] internal static bool Equalᴍ(OID oid, OID other) {
+internal static bool Equal⁔(/*this*/ OID oid, OID other) {
     // There is only one possible DER encoding of
     // each unique Object Identifier.
     return bytes.Equal(oid.der, other.der);
@@ -261,7 +261,7 @@ internal static (nint ret, nint offset, bool failed) parseBase128Int(slice<byte>
 // EqualASN1OID returns whether an OID equals an asn1.ObjectIdentifier. If
 // asn1.ObjectIdentifier cannot represent the OID specified by oid, because
 // a component of OID requires more than 31 bits, it returns false.
-[GoMethodBody("EqualASN1OID")] internal static bool EqualASN1OIDᴍ(OID oid, asn1.ObjectIdentifier other) {
+internal static bool EqualASN1OID⁔(/*this*/ OID oid, asn1.ObjectIdentifier other) {
     if (len(other) < 2) {
         return false;
     }
@@ -302,7 +302,7 @@ internal static (nint ret, nint offset, bool failed) parseBase128Int(slice<byte>
 }
 
 // String returns the string representation of the Object Identifier.
-[GoMethodBody("String")] internal static @string Stringᴍ(OID oid) {
+internal static @string String⁔(/*this*/ OID oid) {
     ref var b = ref heap(new strings.Builder(), out var Ꮡb);
     Ꮡb.Grow(32);
     UntypedInt valSize = 64; // size in bits of val.
@@ -366,7 +366,7 @@ internal static (nint ret, nint offset, bool failed) parseBase128Int(slice<byte>
     return b.String();
 }
 
-[GoMethodBody("toASN1OID")] internal static (asn1.ObjectIdentifier, bool) toASN1OIDᴍ(OID oid) {
+internal static (asn1.ObjectIdentifier, bool) toASN1OID⁔(/*this*/ OID oid) {
     var @out = new slice<nint>(0, len(oid.der) + 1);
 
     UntypedInt valSize = 31; // amount of usable bits of val for OIDs.

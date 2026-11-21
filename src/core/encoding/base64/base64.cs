@@ -81,7 +81,7 @@ public static ж<Encoding> NewEncoding(@string encoder) {
 // must not be negative, and must be a rune equal or below '\xff'.
 // Padding characters above '\x7f' are encoded as their exact byte value
 // rather than using the UTF-8 representation of the codepoint.
-[GoMethodBody("WithPadding")] internal static ж<Encoding> WithPaddingᴍ(Encoding encʗp, rune padding) {
+internal static ж<Encoding> WithPadding⁔(/*this*/ Encoding encʗp, rune padding) {
     ref var enc = ref heap(encʗp.ΔClone(), out var Ꮡenc);
 
     switch (ᐧ) {
@@ -103,7 +103,7 @@ public static ж<Encoding> NewEncoding(@string encoder) {
 //
 // Note that the input is still malleable, as new line characters
 // (CR and LF) are still ignored.
-[GoMethodBody("Strict")] internal static ж<Encoding> Strictᴍ(Encoding encʗp) {
+internal static ж<Encoding> Strict⁔(/*this*/ Encoding encʗp) {
     ref var enc = ref heap(encʗp.ΔClone(), out var Ꮡenc);
 
     enc.strict = true;
@@ -141,7 +141,7 @@ public static ж<Encoding> RawURLEncoding = URLEncoding.WithPadding(NoPadding);
 // The encoding pads the output to a multiple of 4 bytes,
 // so Encode is not appropriate for use on individual blocks
 // of a large data stream. Use [NewEncoder] instead.
-[GoMethodBody("Encode")] internal static void Encodeᴍ(ref Encoding enc, slice<byte> dst, slice<byte> src) {
+internal static void Encode⁔(/*this*/ ref Encoding enc, slice<byte> dst, slice<byte> src) {
     if (len(src) == 0) {
         return;
     }
@@ -198,7 +198,7 @@ public static ж<Encoding> RawURLEncoding = URLEncoding.WithPadding(NoPadding);
 
 // AppendEncode appends the base64 encoded src to dst
 // and returns the extended buffer.
-[GoMethodBody("AppendEncode")] internal static slice<byte> AppendEncodeᴍ(ref Encoding enc, slice<byte> dst, slice<byte> src) {
+internal static slice<byte> AppendEncode⁔(/*this*/ ref Encoding enc, slice<byte> dst, slice<byte> src) {
     nint n = enc.EncodedLen(len(src));
     dst = slices.Grow<slice<byte>, byte>(dst, n);
     enc.Encode(dst.slice(len(dst)).slice(0, n), src);
@@ -206,7 +206,7 @@ public static ж<Encoding> RawURLEncoding = URLEncoding.WithPadding(NoPadding);
 }
 
 // EncodeToString returns the base64 encoding of src.
-[GoMethodBody("EncodeToString")] internal static @string EncodeToStringᴍ(ref Encoding enc, slice<byte> src) {
+internal static @string EncodeToString⁔(/*this*/ ref Encoding enc, slice<byte> src) {
     var buf = new slice<byte>(enc.EncodedLen(len(src)));
     enc.Encode(buf, src);
     return (@string)buf;
@@ -225,7 +225,7 @@ partial struct encoder {
 
 } partial class base64_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref encoder e, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref encoder e, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -276,7 +276,7 @@ partial struct encoder {
 
 // Close flushes any pending output from the encoder.
 // It is an error to call Write after calling Close.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref encoder e) {
+internal static error Close⁔(/*this*/ ref encoder e) {
     // If there's anything left in the buffer, flush it out
     if (e.err == nil && e.nbuf > 0) {
         e.enc.Encode(e.@out[..], e.buf.slice(0, e.nbuf));
@@ -301,7 +301,7 @@ public static io.WriteCloser NewEncoder(ж<Encoding> enc, io.Writer w) {
 
 // EncodedLen returns the length in bytes of the base64 encoding
 // of an input buffer of length n.
-[GoMethodBody("EncodedLen")] internal static nint EncodedLenᴍ(ref Encoding enc, nint n) {
+internal static nint EncodedLen⁔(/*this*/ ref Encoding enc, nint n) {
     if (enc.padChar == NoPadding) {
         return n / 3 * 4 + (n % 3 * 8 + 5) / 6; // minimum # chars at 6 bits per char
     }
@@ -317,7 +317,7 @@ partial struct CorruptInputError /*num:int64*/;
 /*
  * Decoder
  */
-[GoMethodBody("Error")] internal static @string Errorᴍ(CorruptInputError e) {
+internal static @string Error⁔(/*this*/ CorruptInputError e) {
     return "illegal base64 data at input byte "u8 + strconv.FormatInt((int64)e, 10);
 }
 
@@ -328,7 +328,7 @@ partial struct CorruptInputError /*num:int64*/;
 // source buffer si.
 // It returns the number of bytes read from src, the number of bytes written
 // to dst, and an error, if any.
-[GoMethodBody("decodeQuantum")] internal static (nint nsi, nint n, error err) decodeQuantumᴍ(ref Encoding enc, slice<byte> dst, slice<byte> src, nint si) {
+internal static (nint nsi, nint n, error err) decodeQuantum⁔(/*this*/ ref Encoding enc, slice<byte> dst, slice<byte> src, nint si) {
     error err = default;
 
     // Decode quantum using the base64 alphabet
@@ -436,7 +436,7 @@ partial struct CorruptInputError /*num:int64*/;
 // and returns the extended buffer.
 // If the input is malformed, it returns the partially decoded src and an error.
 // New line characters (\r and \n) are ignored.
-[GoMethodBody("AppendDecode")] internal static (slice<byte>, error) AppendDecodeᴍ(ref Encoding enc, slice<byte> dst, slice<byte> src) {
+internal static (slice<byte>, error) AppendDecode⁔(/*this*/ ref Encoding enc, slice<byte> dst, slice<byte> src) {
     // Compute the output size without padding to avoid over allocating.
     nint n = len(src);
     while (n > 0 && (rune)src[n - 1] == enc.padChar) {
@@ -452,7 +452,7 @@ partial struct CorruptInputError /*num:int64*/;
 // DecodeString returns the bytes represented by the base64 string s.
 // If the input is malformed, it returns the partially decoded data and
 // [CorruptInputError]. New line characters (\r and \n) are ignored.
-[GoMethodBody("DecodeString")] internal static (slice<byte>, error) DecodeStringᴍ(ref Encoding enc, @string s) {
+internal static (slice<byte>, error) DecodeString⁔(/*this*/ ref Encoding enc, @string s) {
     var dbuf = new slice<byte>(enc.DecodedLen(len(s)));
     var (n, err) = enc.Decode(dbuf, slice<byte>(s));
     return (dbuf.slice(0, n), err);
@@ -473,7 +473,7 @@ partial struct decoder {
 
 } partial class base64_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref decoder d, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref decoder d, slice<byte> p) {
     nint n = default;
 
     // Use leftover decoded output from last read.
@@ -549,7 +549,7 @@ partial struct decoder {
 // the decoded data. If src contains invalid base64 data, it will return the
 // number of bytes successfully written and [CorruptInputError].
 // New line characters (\r and \n) are ignored.
-[GoMethodBody("Decode")] internal static (nint n, error err) Decodeᴍ(ref Encoding enc, slice<byte> dst, slice<byte> src) {
+internal static (nint n, error err) Decode⁔(/*this*/ ref Encoding enc, slice<byte> dst, slice<byte> src) {
     nint n = default;
     error err = default;
 
@@ -650,7 +650,7 @@ partial struct newlineFilteringReader {
 
 } partial class base64_package {
 
-[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref newlineFilteringReader r, slice<byte> p) {
+internal static (nint, error) Read⁔(/*this*/ ref newlineFilteringReader r, slice<byte> p) {
     var (n, err) = r.wrapped.Read(p);
     while (n > 0) {
         nint offset = 0;
@@ -682,7 +682,7 @@ public static io.Reader NewDecoder(ж<Encoding> enc, io.Reader r) {
 
 // DecodedLen returns the maximum length in bytes of the decoded data
 // corresponding to n bytes of base64-encoded data.
-[GoMethodBody("DecodedLen")] internal static nint DecodedLenᴍ(ref Encoding enc, nint n) {
+internal static nint DecodedLen⁔(/*this*/ ref Encoding enc, nint n) {
     return decodedLen(n, enc.padChar);
 }
 

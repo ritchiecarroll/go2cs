@@ -22,7 +22,7 @@ partial struct reader {
 
 } partial class rand_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(reader r, slice<byte> b) {
+internal static (nint n, error err) Read⁔(/*this*/ reader r, slice<byte> b) {
     if (Δboring.Enabled) {
         var (_, errΔ1) = Δboring.RandReader.Read(b); if (errΔ1 != nil) {
             throw panic("crypto/rand: boring RandReader failed: " + errΔ1.Error());

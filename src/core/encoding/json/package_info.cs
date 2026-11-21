@@ -89,13 +89,16 @@ using static go.encoding.json_package;
 
 namespace go.encoding;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using reflect = reflect_package;
 using go.encoding;
 using go.unicode;
 using static json_package;
 using io = io_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("json")]
 public static partial class json_package
@@ -175,146 +178,146 @@ public static partial class json_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(json_package.Decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛDecoder;
-[GoMethodHost(typeof(json_package.Delim)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛDelim;
-[GoMethodHost(typeof(json_package.Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛEncoder;
-[GoMethodHost(typeof(json_package.InvalidUTF8Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛInvalidUTF8Error;
-[GoMethodHost(typeof(json_package.InvalidUnmarshalError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛInvalidUnmarshalError;
-[GoMethodHost(typeof(json_package.MarshalerError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛMarshalerError;
-[GoMethodHost(typeof(json_package.Number)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛNumber;
-[GoMethodHost(typeof(json_package.RawMessage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛRawMessage;
-[GoMethodHost(typeof(json_package.SyntaxError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛSyntaxError;
-[GoMethodHost(typeof(json_package.UnmarshalFieldError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛUnmarshalFieldError;
-[GoMethodHost(typeof(json_package.UnmarshalTypeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛUnmarshalTypeError;
-[GoMethodHost(typeof(json_package.UnsupportedTypeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛUnsupportedTypeError;
-[GoMethodHost(typeof(json_package.UnsupportedValueError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛUnsupportedValueError;
-[GoMethodHost(typeof(json_package.arrayEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛarrayEncoder;
-[GoMethodHost(typeof(json_package.condAddrEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛcondAddrEncoder;
-[GoMethodHost(typeof(json_package.decodeState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛdecodeState;
-[GoMethodHost(typeof(json_package.encodeState)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛencodeState;
-[GoMethodHost(typeof(json_package.floatEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛfloatEncoder;
-[GoMethodHost(typeof(json_package.mapEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛmapEncoder;
-[GoMethodHost(typeof(json_package.ptrEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛptrEncoder;
-[GoMethodHost(typeof(json_package.scanner)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛscanner;
-[GoMethodHost(typeof(json_package.sliceEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛsliceEncoder;
-[GoMethodHost(typeof(json_package.structEncoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛstructEncoder;
-[GoMethodHost(typeof(json_package.tagOptions)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class jsonᴛtagOptions;
+[GoMethodHost(typeof(json_package.Decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛDecoder;
+[GoMethodHost(typeof(json_package.Delim)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛDelim;
+[GoMethodHost(typeof(json_package.Encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛEncoder;
+[GoMethodHost(typeof(json_package.InvalidUTF8Error)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛInvalidUTF8Error;
+[GoMethodHost(typeof(json_package.InvalidUnmarshalError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛInvalidUnmarshalError;
+[GoMethodHost(typeof(json_package.MarshalerError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛMarshalerError;
+[GoMethodHost(typeof(json_package.Number)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛNumber;
+[GoMethodHost(typeof(json_package.RawMessage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛRawMessage;
+[GoMethodHost(typeof(json_package.SyntaxError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛSyntaxError;
+[GoMethodHost(typeof(json_package.UnmarshalFieldError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛUnmarshalFieldError;
+[GoMethodHost(typeof(json_package.UnmarshalTypeError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛUnmarshalTypeError;
+[GoMethodHost(typeof(json_package.UnsupportedTypeError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛUnsupportedTypeError;
+[GoMethodHost(typeof(json_package.UnsupportedValueError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛUnsupportedValueError;
+[GoMethodHost(typeof(json_package.arrayEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛarrayEncoder;
+[GoMethodHost(typeof(json_package.condAddrEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛcondAddrEncoder;
+[GoMethodHost(typeof(json_package.decodeState)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛdecodeState;
+[GoMethodHost(typeof(json_package.encodeState)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛencodeState;
+[GoMethodHost(typeof(json_package.floatEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛfloatEncoder;
+[GoMethodHost(typeof(json_package.mapEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛmapEncoder;
+[GoMethodHost(typeof(json_package.ptrEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛptrEncoder;
+[GoMethodHost(typeof(json_package.scanner)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛscanner;
+[GoMethodHost(typeof(json_package.sliceEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛsliceEncoder;
+[GoMethodHost(typeof(json_package.structEncoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛstructEncoder;
+[GoMethodHost(typeof(json_package.tagOptions)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class jsonᴛtagOptions;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class jsonᴛUnmarshalTypeError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref UnmarshalTypeError e) => json_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref UnmarshalTypeError e) => json_package.Error⁔(ref e);
 }
 partial class jsonᴛUnmarshalFieldError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref UnmarshalFieldError e) => json_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref UnmarshalFieldError e) => json_package.Error⁔(ref e);
 }
 partial class jsonᴛInvalidUnmarshalError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref InvalidUnmarshalError e) => json_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref InvalidUnmarshalError e) => json_package.Error⁔(ref e);
 }
 partial class jsonᴛdecodeState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error unmarshal(this ж<decodeState> Ꮡd, any v) => json_package.unmarshalᴍ(Ꮡd, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint readIndex(this ref decodeState d) => json_package.readIndexᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<decodeState> init(this ж<decodeState> Ꮡd, slice<byte> data) => json_package.initᴍ(Ꮡd, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void saveError(this ref decodeState d, error err) => json_package.saveErrorᴍ(ref d, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error addErrorContext(this ref decodeState d, error err) => json_package.addErrorContextᴍ(ref d, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void skip(this ж<decodeState> Ꮡd) => json_package.skipᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void scanNext(this ж<decodeState> Ꮡd) => json_package.scanNextᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void scanWhile(this ж<decodeState> Ꮡd, nint op) => json_package.scanWhileᴍ(Ꮡd, op);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void rescanLiteral(this ж<decodeState> Ꮡd) => json_package.rescanLiteralᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error value(this ж<decodeState> Ꮡd, reflect.Value v) => json_package.valueᴍ(Ꮡd, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any valueQuoted(this ж<decodeState> Ꮡd) => json_package.valueQuotedᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Δarray(this ж<decodeState> Ꮡd, reflect.Value v) => json_package.Δarrayᴍ(Ꮡd, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error @object(this ж<decodeState> Ꮡd, reflect.Value v) => json_package.@objectᴍ(Ꮡd, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (any, error) convertNumber(this ref decodeState d, @string s) => json_package.convertNumberᴍ(ref d, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error literalStore(this ref decodeState d, slice<byte> item, reflect.Value v, bool fromQuoted) => json_package.literalStoreᴍ(ref d, item, v, fromQuoted);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any /*val*/ valueInterface(this ж<decodeState> Ꮡd) => json_package.valueInterfaceᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<any> arrayInterface(this ж<decodeState> Ꮡd) => json_package.arrayInterfaceᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static map<@string, any> objectInterface(this ж<decodeState> Ꮡd) => json_package.objectInterfaceᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any literalInterface(this ж<decodeState> Ꮡd) => json_package.literalInterfaceᴍ(Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error unmarshal(this ж<decodeState> Ꮡd, any v) => json_package.unmarshal⁔(Ꮡd, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint readIndex(this ref decodeState d) => json_package.readIndex⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<decodeState> init(this ж<decodeState> Ꮡd, slice<byte> data) => json_package.init⁔(Ꮡd, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void saveError(this ref decodeState d, error err) => json_package.saveError⁔(ref d, err);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error addErrorContext(this ref decodeState d, error err) => json_package.addErrorContext⁔(ref d, err);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void skip(this ж<decodeState> Ꮡd) => json_package.skip⁔(Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void scanNext(this ж<decodeState> Ꮡd) => json_package.scanNext⁔(Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void scanWhile(this ж<decodeState> Ꮡd, nint op) => json_package.scanWhile⁔(Ꮡd, op);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void rescanLiteral(this ж<decodeState> Ꮡd) => json_package.rescanLiteral⁔(Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error value(this ж<decodeState> Ꮡd, reflect.Value v) => json_package.value⁔(Ꮡd, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any valueQuoted(this ж<decodeState> Ꮡd) => json_package.valueQuoted⁔(Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Δarray(this ж<decodeState> Ꮡd, reflect.Value v) => json_package.Δarray⁔(Ꮡd, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error @object(this ж<decodeState> Ꮡd, reflect.Value v) => json_package.@object⁔(Ꮡd, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (any, error) convertNumber(this ref decodeState d, @string s) => json_package.convertNumber⁔(ref d, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error literalStore(this ref decodeState d, slice<byte> item, reflect.Value v, bool fromQuoted) => json_package.literalStore⁔(ref d, item, v, fromQuoted);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any /*val*/ valueInterface(this ж<decodeState> Ꮡd) => json_package.valueInterface⁔(Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<any> arrayInterface(this ж<decodeState> Ꮡd) => json_package.arrayInterface⁔(Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static map<@string, any> objectInterface(this ж<decodeState> Ꮡd) => json_package.objectInterface⁔(Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any literalInterface(this ж<decodeState> Ꮡd) => json_package.literalInterface⁔(Ꮡd);
 }
 partial class jsonᴛNumber {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Number n) => json_package.Stringᴍ(n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (float64, error) Float64(this Number n) => json_package.Float64ᴍ(n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64, error) Int64(this Number n) => json_package.Int64ᴍ(n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Number n) => json_package.String⁔(n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (float64, error) Float64(this Number n) => json_package.Float64⁔(n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64, error) Int64(this Number n) => json_package.Int64⁔(n);
 }
 partial class jsonᴛUnsupportedTypeError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref UnsupportedTypeError e) => json_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref UnsupportedTypeError e) => json_package.Error⁔(ref e);
 }
 partial class jsonᴛUnsupportedValueError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref UnsupportedValueError e) => json_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref UnsupportedValueError e) => json_package.Error⁔(ref e);
 }
 partial class jsonᴛInvalidUTF8Error {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref InvalidUTF8Error e) => json_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref InvalidUTF8Error e) => json_package.Error⁔(ref e);
 }
 partial class jsonᴛMarshalerError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref MarshalerError e) => json_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref MarshalerError e) => json_package.Unwrapᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref MarshalerError e) => json_package.Error⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Unwrap(this ref MarshalerError e) => json_package.Unwrap⁔(ref e);
 }
 partial class jsonᴛencodeState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ marshal(this ж<encodeState> Ꮡe, any v, encOpts opts) => json_package.marshalᴍ(Ꮡe, v, opts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void error(this ref encodeState e, error err) => json_package.errorᴍ(ref e, err);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reflectValue(this ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.reflectValueᴍ(Ꮡe, v, opts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ marshal(this ж<encodeState> Ꮡe, any v, encOpts opts) => json_package.marshal⁔(Ꮡe, v, opts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void error(this ref encodeState e, error err) => json_package.error⁔(ref e, err);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void reflectValue(this ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.reflectValue⁔(Ꮡe, v, opts);
 }
 partial class jsonᴛfloatEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this floatEncoder bits, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.encodeᴍ(bits, Ꮡe, v, opts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this floatEncoder bits, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.encode⁔(bits, Ꮡe, v, opts);
 }
 partial class jsonᴛstructEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this structEncoder se, ж<encodeState> e, reflect.Value v, encOpts opts) => json_package.encodeᴍ(se, e, v, opts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this structEncoder se, ж<encodeState> e, reflect.Value v, encOpts opts) => json_package.encode⁔(se, e, v, opts);
 }
 partial class jsonᴛmapEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.encodeᴍ(me, Ꮡe, v, opts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this mapEncoder me, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.encode⁔(me, Ꮡe, v, opts);
 }
 partial class jsonᴛsliceEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this sliceEncoder se, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.encodeᴍ(se, Ꮡe, v, opts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this sliceEncoder se, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.encode⁔(se, Ꮡe, v, opts);
 }
 partial class jsonᴛarrayEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this arrayEncoder ae, ж<encodeState> e, reflect.Value v, encOpts opts) => json_package.encodeᴍ(ae, e, v, opts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this arrayEncoder ae, ж<encodeState> e, reflect.Value v, encOpts opts) => json_package.encode⁔(ae, e, v, opts);
 }
 partial class jsonᴛptrEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this ptrEncoder pe, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.encodeᴍ(pe, Ꮡe, v, opts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this ptrEncoder pe, ж<encodeState> Ꮡe, reflect.Value v, encOpts opts) => json_package.encode⁔(pe, Ꮡe, v, opts);
 }
 partial class jsonᴛcondAddrEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void encode(this condAddrEncoder ce, ж<encodeState> e, reflect.Value v, encOpts opts) => json_package.encodeᴍ(ce, e, v, opts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void encode(this condAddrEncoder ce, ж<encodeState> e, reflect.Value v, encOpts opts) => json_package.encode⁔(ce, e, v, opts);
 }
 partial class jsonᴛSyntaxError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref SyntaxError e) => json_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref SyntaxError e) => json_package.Error⁔(ref e);
 }
 partial class jsonᴛscanner {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref scanner s) => json_package.resetᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint eof(this ж<scanner> Ꮡs) => json_package.eofᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint pushParseState(this ref scanner s, byte c, nint newParseState, nint successState) => json_package.pushParseStateᴍ(ref s, c, newParseState, successState);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void popParseState(this ref scanner s) => json_package.popParseStateᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint error(this ref scanner s, byte c, @string context) => json_package.errorᴍ(ref s, c, context);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void reset(this ref scanner s) => json_package.reset⁔(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint eof(this ж<scanner> Ꮡs) => json_package.eof⁔(Ꮡs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint pushParseState(this ref scanner s, byte c, nint newParseState, nint successState) => json_package.pushParseState⁔(ref s, c, newParseState, successState);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void popParseState(this ref scanner s) => json_package.popParseState⁔(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint error(this ref scanner s, byte c, @string context) => json_package.error⁔(ref s, c, context);
 }
 partial class jsonᴛDecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void UseNumber(this ref Decoder dec) => json_package.UseNumberᴍ(ref dec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void DisallowUnknownFields(this ref Decoder dec) => json_package.DisallowUnknownFieldsᴍ(ref dec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Decode(this ж<Decoder> Ꮡdec, any v) => json_package.Decodeᴍ(Ꮡdec, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.Reader Buffered(this ref Decoder dec) => json_package.Bufferedᴍ(ref dec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) readValue(this ж<Decoder> Ꮡdec) => json_package.readValueᴍ(Ꮡdec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error refill(this ref Decoder dec) => json_package.refillᴍ(ref dec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error tokenPrepareForDecode(this ref Decoder dec) => json_package.tokenPrepareForDecodeᴍ(ref dec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool tokenValueAllowed(this ref Decoder dec) => json_package.tokenValueAllowedᴍ(ref dec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void tokenValueEnd(this ref Decoder dec) => json_package.tokenValueEndᴍ(ref dec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Token, error) Token(this ж<Decoder> Ꮡdec) => json_package.Tokenᴍ(Ꮡdec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Token, error) tokenError(this ref Decoder dec, byte c) => json_package.tokenErrorᴍ(ref dec, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool More(this ref Decoder dec) => json_package.Moreᴍ(ref dec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte, error) peek(this ref Decoder dec) => json_package.peekᴍ(ref dec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 InputOffset(this ref Decoder dec) => json_package.InputOffsetᴍ(ref dec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void UseNumber(this ref Decoder dec) => json_package.UseNumber⁔(ref dec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void DisallowUnknownFields(this ref Decoder dec) => json_package.DisallowUnknownFields⁔(ref dec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Decode(this ж<Decoder> Ꮡdec, any v) => json_package.Decode⁔(Ꮡdec, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static io.Reader Buffered(this ref Decoder dec) => json_package.Buffered⁔(ref dec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) readValue(this ж<Decoder> Ꮡdec) => json_package.readValue⁔(Ꮡdec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error refill(this ref Decoder dec) => json_package.refill⁔(ref dec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error tokenPrepareForDecode(this ref Decoder dec) => json_package.tokenPrepareForDecode⁔(ref dec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool tokenValueAllowed(this ref Decoder dec) => json_package.tokenValueAllowed⁔(ref dec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void tokenValueEnd(this ref Decoder dec) => json_package.tokenValueEnd⁔(ref dec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Token, error) Token(this ж<Decoder> Ꮡdec) => json_package.Token⁔(Ꮡdec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (Token, error) tokenError(this ref Decoder dec, byte c) => json_package.tokenError⁔(ref dec, c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool More(this ref Decoder dec) => json_package.More⁔(ref dec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (byte, error) peek(this ref Decoder dec) => json_package.peek⁔(ref dec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 InputOffset(this ref Decoder dec) => json_package.InputOffset⁔(ref dec);
 }
 partial class jsonᴛEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Encode(this ж<Encoder> Ꮡenc, any v) => json_package.Encodeᴍ(Ꮡenc, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetIndent(this ref Encoder enc, @string prefix, @string indent) => json_package.SetIndentᴍ(ref enc, prefix, indent);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetEscapeHTML(this ref Encoder enc, bool on) => json_package.SetEscapeHTMLᴍ(ref enc, on);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Encode(this ж<Encoder> Ꮡenc, any v) => json_package.Encode⁔(Ꮡenc, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetIndent(this ref Encoder enc, @string prefix, @string indent) => json_package.SetIndent⁔(ref enc, prefix, indent);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetEscapeHTML(this ref Encoder enc, bool on) => json_package.SetEscapeHTML⁔(ref enc, on);
 }
 partial class jsonᴛRawMessage {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalJSON(this RawMessage m) => json_package.MarshalJSONᴍ(m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalJSON(this ж<RawMessage> Ꮡm, slice<byte> data) => json_package.UnmarshalJSONᴍ(Ꮡm, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) MarshalJSON(this RawMessage m) => json_package.MarshalJSON⁔(m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnmarshalJSON(this ж<RawMessage> Ꮡm, slice<byte> data) => json_package.UnmarshalJSON⁔(Ꮡm, data);
 }
 partial class jsonᴛDelim {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Delim d) => json_package.Stringᴍ(d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Delim d) => json_package.String⁔(d);
 }
 partial class jsonᴛtagOptions {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Contains(this tagOptions o, @string optionName) => json_package.Containsᴍ(o, optionName);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Contains(this tagOptions o, @string optionName) => json_package.Contains⁔(o, optionName);
 }
 // </GlyphForwarders>

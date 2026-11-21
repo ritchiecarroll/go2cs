@@ -142,11 +142,11 @@ partial struct orderEventList /*[]orderEvent*/;
 
 } partial class tracev1_package {
 
-[GoMethodBody("Less")] internal static bool Lessᴍ(ref orderEventList l, nint i, nint j) {
+internal static bool Less⁔(/*this*/ ref orderEventList l, nint i, nint j) {
     return (l)[i].ev.Ts < (l)[j].ev.Ts;
 }
 
-[GoMethodBody("Push")] internal static void Pushᴍ(ж<orderEventList> Ꮡh, orderEvent x) {
+internal static void Push⁔(/*this*/ ж<orderEventList> Ꮡh, orderEvent x) {
     x = x.ΔClone();
     ref var h = ref Ꮡh.DerefOrNull();
 
@@ -154,7 +154,7 @@ partial struct orderEventList /*[]orderEvent*/;
     heapUp(Ꮡh, len(h) - 1);
 }
 
-[GoMethodBody("Pop")] internal static orderEvent Popᴍ(ж<orderEventList> Ꮡh) {
+internal static orderEvent Pop⁔(/*this*/ ж<orderEventList> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     nint n = len(h) - 1;

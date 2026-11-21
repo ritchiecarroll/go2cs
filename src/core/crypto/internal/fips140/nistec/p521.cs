@@ -37,7 +37,7 @@ public static ж<P521Point> NewP521Point() {
 } partial class nistec_package {
 
 // SetGenerator sets p to the canonical generator and returns p.
-[GoMethodBody("SetGenerator")] internal static ж<P521Point> SetGeneratorᴍ(ж<P521Point> Ꮡp) {
+internal static ж<P521Point> SetGenerator⁔(/*this*/ ж<P521Point> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.x.SetBytes([0x0, 0xc6, 0x85, 0x8e, 0x6, 0xb7, 0x4, 0x4, 0xe9, 0xcd, 0x9e, 0x3e, 0xcb, 0x66, 0x23, 0x95, 0xb4, 0x42, 0x9c, 0x64, 0x81, 0x39, 0x5, 0x3f, 0xb5, 0x21, 0xf8, 0x28, 0xaf, 0x60, 0x6b, 0x4d, 0x3d, 0xba, 0xa1, 0x4b, 0x5e, 0x77, 0xef, 0xe7, 0x59, 0x28, 0xfe, 0x1d, 0xc1, 0x27, 0xa2, 0xff, 0xa8, 0xde, 0x33, 0x48, 0xb3, 0xc1, 0x85, 0x6a, 0x42, 0x9b, 0xf9, 0x7e, 0x7e, 0x31, 0xc2, 0xe5, 0xbd, 0x66]);
@@ -47,7 +47,7 @@ public static ж<P521Point> NewP521Point() {
 }
 
 // Set sets p = q and returns p.
-[GoMethodBody("Set")] internal static ж<P521Point> Setᴍ(ж<P521Point> Ꮡp, ж<P521Point> Ꮡq) {
+internal static ж<P521Point> Set⁔(/*this*/ ж<P521Point> Ꮡp, ж<P521Point> Ꮡq) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var q = ref Ꮡq.DerefOrNull();
 
@@ -58,16 +58,16 @@ public static ж<P521Point> NewP521Point() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidP521CompressedˢᴍP521Point => ref invalidP521CompressedˢᵇᴍP521Point;
-private static readonly @string invalidP521CompressedˢᵇᴍP521Point = "invalid P521 compressed point encoding"u8;
-internal static ref readonly @string invalidP521PointEncodingˢᴍP521Point => ref invalidP521PointEncodingˢᵇᴍP521Point;
-private static readonly @string invalidP521PointEncodingˢᵇᴍP521Point = "invalid P521 point encoding"u8;
+internal static ref readonly @string invalidP521Compressedˢ⁔P521Point => ref invalidP521Compressedˢᵇ⁔P521Point;
+private static readonly @string invalidP521Compressedˢᵇ⁔P521Point = "invalid P521 compressed point encoding"u8;
+internal static ref readonly @string invalidP521PointEncodingˢ⁔P521Point => ref invalidP521PointEncodingˢᵇ⁔P521Point;
+private static readonly @string invalidP521PointEncodingˢᵇ⁔P521Point = "invalid P521 point encoding"u8;
 
 // SetBytes sets p to the compressed, uncompressed, or infinity value encoded in
 // b, as specified in SEC 1, Version 2.0, Section 2.3.4. If the point is not on
 // the curve, it returns nil and an error, and the receiver is unchanged.
 // Otherwise, it returns p.
-[GoMethodBody("SetBytes")] internal static (ж<P521Point>, error) SetBytesᴍ(ж<P521Point> Ꮡp, slice<byte> b) {
+internal static (ж<P521Point>, error) SetBytes⁔(/*this*/ ж<P521Point> Ꮡp, slice<byte> b) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (ᐧ) {
@@ -103,7 +103,7 @@ private static readonly @string invalidP521PointEncodingˢᵇᴍP521Point = "inv
         // y² = x³ - 3x + b
         var y = p521Polynomial(@new<fiat.P521Element>(), x);
         if (!p521Sqrt(y, y)) {
-            return (default, errors.New(invalidP521CompressedˢᴍP521Point));
+            return (default, errors.New(invalidP521Compressedˢ⁔P521Point));
         }
 
         // Select the positive or negative root, as indicated by the least
@@ -119,7 +119,7 @@ private static readonly @string invalidP521PointEncodingˢᵇᴍP521Point = "inv
         return (Ꮡp, default);
     }
     default: {
-        return (default, errors.New(invalidP521PointEncodingˢᴍP521Point));
+        return (default, errors.New(invalidP521PointEncodingˢ⁔P521Point));
     }}
 }
 
@@ -167,14 +167,14 @@ internal static error p521CheckOnCurve(ж<fiat.P521Element> x, ж<fiat.P521Eleme
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
 // infinity is shorter than all other encodings.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref P521Point p) {
+internal static slice<byte> Bytes⁔(/*this*/ ref P521Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(133), out var Ꮡout);
     return p.bytes(Ꮡout);
 }
 
-[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ref P521Point p, /*[133]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes⁔(/*this*/ ref P521Point p, /*[133]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -193,7 +193,7 @@ internal static error p521CheckOnCurve(ж<fiat.P521Element> x, ж<fiat.P521Eleme
 
 // BytesX returns the encoding of the x-coordinate of p, as specified in SEC 1,
 // Version 2.0, Section 2.3.5, or an error if p is the point at infinity.
-[GoMethodBody("BytesX")] internal static (slice<byte>, error) BytesXᴍ(ref P521Point p) {
+internal static (slice<byte>, error) BytesX⁔(/*this*/ ref P521Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(66), out var Ꮡout);
@@ -201,14 +201,14 @@ internal static error p521CheckOnCurve(ж<fiat.P521Element> x, ж<fiat.P521Eleme
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string p521PointIsThePointAtˢᴍP521Point => ref p521PointIsThePointAtˢᵇᴍP521Point;
-private static readonly @string p521PointIsThePointAtˢᵇᴍP521Point = "P521 point is the point at infinity"u8;
+internal static ref readonly @string p521PointIsThePointAtˢ⁔P521Point => ref p521PointIsThePointAtˢᵇ⁔P521Point;
+private static readonly @string p521PointIsThePointAtˢᵇ⁔P521Point = "P521 point is the point at infinity"u8;
 
-[GoMethodBody("bytesX")] internal static (slice<byte>, error) bytesXᴍ(ref P521Point p, /*[66]*/ ж<array<byte>> Ꮡout) {
+internal static (slice<byte>, error) bytesX⁔(/*this*/ ref P521Point p, /*[66]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
-        return (default, errors.New(p521PointIsThePointAtˢᴍP521Point));
+        return (default, errors.New(p521PointIsThePointAtˢ⁔P521Point));
     }
 
     var zinv = @new<fiat.P521Element>().Invert(p.z);
@@ -220,14 +220,14 @@ private static readonly @string p521PointIsThePointAtˢᵇᴍP521Point = "P521 p
 // BytesCompressed returns the compressed or infinity encoding of p, as
 // specified in SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the
 // point at infinity is shorter than all other encodings.
-[GoMethodBody("BytesCompressed")] internal static slice<byte> BytesCompressedᴍ(ref P521Point p) {
+internal static slice<byte> BytesCompressed⁔(/*this*/ ref P521Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(67), out var Ꮡout);
     return p.bytesCompressed(Ꮡout);
 }
 
-[GoMethodBody("bytesCompressed")] internal static slice<byte> bytesCompressedᴍ(ref P521Point p, /*[67]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytesCompressed⁔(/*this*/ ref P521Point p, /*[67]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -247,7 +247,7 @@ private static readonly @string p521PointIsThePointAtˢᵇᴍP521Point = "P521 p
 }
 
 // Add sets q = p1 + p2, and returns q. The points may overlap.
-[GoMethodBody("Add")] internal static ж<P521Point> Addᴍ(ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2) {
+internal static ж<P521Point> Add⁔(/*this*/ ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -306,7 +306,7 @@ private static readonly @string p521PointIsThePointAtˢᵇᴍP521Point = "P521 p
 }
 
 // Double sets q = p + p, and returns q. The points may overlap.
-[GoMethodBody("Double")] internal static ж<P521Point> Doubleᴍ(ж<P521Point> Ꮡq, ж<P521Point> Ꮡp) {
+internal static ж<P521Point> Double⁔(/*this*/ ж<P521Point> Ꮡq, ж<P521Point> Ꮡp) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -355,7 +355,7 @@ private static readonly @string p521PointIsThePointAtˢᵇᴍP521Point = "P521 p
 }
 
 // Select sets q to p1 if cond == 1, and to p2 if cond == 0.
-[GoMethodBody("Select")] internal static ж<P521Point> Selectᴍ(ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2, nint cond) {
+internal static ж<P521Point> Select⁔(/*this*/ ж<P521Point> Ꮡq, ж<P521Point> Ꮡp1, ж<P521Point> Ꮡp2, nint cond) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -377,7 +377,7 @@ partial struct p521Table /*[15]ж<P521Point>*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
-[GoMethodBody("Select")] internal static void Selectᴍ(ref p521Table table, ж<P521Point> p, uint8 n) {
+internal static void Select⁔(/*this*/ ref p521Table table, ж<P521Point> p, uint8 n) {
     if (n >= 16) {
         throw panic("nistec: internal error: p521Table called with out-of-bounds value");
     }
@@ -391,7 +391,7 @@ partial struct p521Table /*[15]ж<P521Point>*/;
 } partial class nistec_package {
 
 // ScalarMult sets p = scalar * q, and returns p.
-[GoMethodBody("ScalarMult")] internal static (ж<P521Point>, error) ScalarMultᴍ(ж<P521Point> Ꮡp, ж<P521Point> q, slice<byte> scalar) {
+internal static (ж<P521Point>, error) ScalarMult⁔(/*this*/ ж<P521Point> Ꮡp, ж<P521Point> q, slice<byte> scalar) {
     // Compute a p521Table for the base point q. The explicit NewP521Point
     // calls get inlined, letting the allocations live on the stack.
     p521Table table = new p521Table(new ж<P521Point>[]{NewP521Point(), NewP521Point(), NewP521Point(),
@@ -446,7 +446,7 @@ internal static ref sync.Once p521GeneratorTableOnce => ref ((StaticBox<sync.Onc
 // generatorTable returns a sequence of p521Tables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four
 // times.
-[GoMethodBody("generatorTable")] internal static ж<array<p521Table>> generatorTableᴍ(ref P521Point p) {
+internal static ж<array<p521Table>> generatorTable⁔(/*this*/ ref P521Point p) {
     Ꮡp521GeneratorTableOnce.Do(() => {
         p521GeneratorTable = Ꮡ(new array<p521Table>(132));
         var @base = NewP521Point().SetGenerator();
@@ -465,16 +465,16 @@ internal static ref sync.Once p521GeneratorTableOnce => ref ((StaticBox<sync.Onc
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidScalarLengthˢᴍP521Point => ref invalidScalarLengthˢᵇᴍP521Point;
-private static readonly @string invalidScalarLengthˢᵇᴍP521Point = "invalid scalar length"u8;
+internal static ref readonly @string invalidScalarLengthˢ⁔P521Point => ref invalidScalarLengthˢᵇ⁔P521Point;
+private static readonly @string invalidScalarLengthˢᵇ⁔P521Point = "invalid scalar length"u8;
 
 // ScalarBaseMult sets p = scalar * B, where B is the canonical generator, and
 // returns p.
-[GoMethodBody("ScalarBaseMult")] internal static (ж<P521Point>, error) ScalarBaseMultᴍ(ж<P521Point> Ꮡp, slice<byte> scalar) {
+internal static (ж<P521Point>, error) ScalarBaseMult⁔(/*this*/ ж<P521Point> Ꮡp, slice<byte> scalar) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (len(scalar) != p521ElementLength) {
-        return (default, errors.New(invalidScalarLengthˢᴍP521Point));
+        return (default, errors.New(invalidScalarLengthˢ⁔P521Point));
     }
     var tables = p.generatorTable();
 

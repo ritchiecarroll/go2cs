@@ -16,7 +16,7 @@ partial class poll_package {
 // Fsync invokes SYS_FCNTL with SYS_FULLFSYNC because
 // on OS X, SYS_FSYNC doesn't fully flush contents to disk.
 // See Issue #26650 as well as the man page for fsync on OS X.
-[GoMethodBody("Fsync")] internal static error Fsyncᴍ(ж<FD> Ꮡfd) {
+internal static error Fsync⁔(/*this*/ ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

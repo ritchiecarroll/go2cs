@@ -85,7 +85,7 @@ partial struct Timer {
 // Before Go 1.23, the only safe way to use Stop was insert an extra
 // <-t.C if Stop returned false to drain a potential stale value.
 // See the [NewTimer] documentation for more details.
-[GoMethodBody("Stop")] internal static bool Stopᴍ(ж<Timer> Ꮡt) {
+internal static bool Stop⁔(/*this*/ ж<Timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!t.initTimer) {
@@ -149,7 +149,7 @@ public static ж<Timer> NewTimer(Duration d) {
 // Before Go 1.23, the only safe way to use Reset was to call [Timer.Stop]
 // and explicitly drain the timer first.
 // See the [NewTimer] documentation for more details.
-[GoMethodBody("Reset")] internal static bool Resetᴍ(ж<Timer> Ꮡt, Duration d) {
+internal static bool Reset⁔(/*this*/ ж<Timer> Ꮡt, Duration d) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!t.initTimer) {

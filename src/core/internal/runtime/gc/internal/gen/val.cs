@@ -45,7 +45,7 @@ internal static ж<kind> voidKind = Ꮡ(new kind(typ: "void", reg: regClassNone)
 
 } partial class gen_package {
 
-[GoMethodBody("kind")] internal static ж<kind> kindᴍ(@void _) { return voidKind; }
+internal static ж<kind> kind⁔(/*this*/ @void _) { return voidKind; }
 
 } partial class gen_package {
 
@@ -63,7 +63,7 @@ internal static ref sync.Map ptrKinds => ref ((StaticBox<sync.Map>)ᏑptrKinds).
 
 } partial class gen_package {
 
-[GoMethodBody("kind")] internal static ж<kind> kindᴍ<T>(Ptr<T> _Δp0)
+internal static ж<kind> kind⁔<T>(/*this*/ Ptr<T> _Δp0)
     where T : Value
 {
     T x = GoZero<T>();
@@ -76,7 +76,7 @@ internal static ref sync.Map ptrKinds => ref ((StaticBox<sync.Map>)ᏑptrKinds).
     return pk._<ж<kind>>();
 }
 
-[GoMethodBody("wrap")] internal static Ptr<T> wrapᴍ<T>(Ptr<T> _, ж<op> x)
+internal static Ptr<T> wrap⁔<T>(/*this*/ Ptr<T> _, ж<op> x)
     where T : Value
 {
     Ptr<T> y = new(nil);
@@ -84,7 +84,7 @@ internal static ref sync.Map ptrKinds => ref ((StaticBox<sync.Map>)ᏑptrKinds).
     return y;
 }
 
-[GoMethodBody("AddConst")] internal static Ptr<T> /*y*/ AddConstᴍ<T>(Ptr<T> x, nint off)
+internal static Ptr<T> /*y*/ AddConst⁔<T>(/*this*/ Ptr<T> x, nint off)
     where T : Value
 {
     Ptr<T> y = new(nil);
@@ -134,7 +134,7 @@ public static Array<T> /*y*/ ConstArray<T>(slice<T> vals, @string name)
 
 } partial class gen_package {
 
-[GoMethodBody("kind")] internal static ж<kind> kindᴍ<T>(Array<T> _)
+internal static ж<kind> kind⁔<T>(/*this*/ Array<T> _)
     where T : Value
 {
     // TODO: Cache this like Ptr.kind.
@@ -150,7 +150,7 @@ partial struct valGP {
 
 } partial class gen_package {
 
-[GoMethodBody("isWord")] internal static void isWordᴍ(valGP _) { }
+internal static void isWord⁔(/*this*/ valGP _) { }
 
 } partial class gen_package {
 
@@ -160,7 +160,7 @@ partial struct valAny {
 
 } partial class gen_package {
 
-[GoMethodBody("initOp")] internal static void initOpᴍ(ref valAny v, ж<op> Ꮡx) {
+internal static void initOp⁔(/*this*/ ref valAny v, ж<op> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (v.op != nil) {
@@ -180,7 +180,7 @@ partial struct valAny {
     }
 }
 
-[GoMethodBody("getOp")] internal static ж<op> getOpᴍ(valAny v) {
+internal static ж<op> getOp⁔(/*this*/ valAny v) {
     return v.op;
 }
 

@@ -65,7 +65,7 @@ private static readonly @string DefaultRemoteAddrᵇ = "1.2.3.4"u8;
 // headers to mutate within a handler. To test the headers that were
 // written after a handler completes, use the [ResponseRecorder.Result] method and see
 // the returned Response value's Header.
-[GoMethodBody("Header")] internal static http.Header Headerᴍ(ref ResponseRecorder rw) {
+internal static http.Header Header⁔(/*this*/ ref ResponseRecorder rw) {
     var m = rw.HeaderMap;
     if (m == nil) {
         m = new http.Header(0);
@@ -75,10 +75,10 @@ private static readonly @string DefaultRemoteAddrᵇ = "1.2.3.4"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentTypeˢᴍResponseRecorder => ref contentTypeˢᵇᴍResponseRecorder;
-private static readonly @string contentTypeˢᵇᴍResponseRecorder = "Content-Type"u8;
-internal static ref readonly @string transferEncodingˢᴍResponseRecorder => ref transferEncodingˢᵇᴍResponseRecorder;
-private static readonly @string transferEncodingˢᵇᴍResponseRecorder = "Transfer-Encoding"u8;
+internal static ref readonly @string contentTypeˢ⁔ResponseRecorder => ref contentTypeˢᵇ⁔ResponseRecorder;
+private static readonly @string contentTypeˢᵇ⁔ResponseRecorder = "Content-Type"u8;
+internal static ref readonly @string transferEncodingˢ⁔ResponseRecorder => ref transferEncodingˢᵇ⁔ResponseRecorder;
+private static readonly @string transferEncodingˢᵇ⁔ResponseRecorder = "Transfer-Encoding"u8;
 
 // writeHeader writes a header if it was not written yet and
 // detects Content-Type if needed.
@@ -87,7 +87,7 @@ private static readonly @string transferEncodingˢᵇᴍResponseRecorder = "Tran
 // We pass both to avoid unnecessarily generate garbage
 // in rw.WriteString which was created for performance reasons.
 // Non-nil bytes win.
-[GoMethodBody("writeHeader")] internal static void writeHeaderᴍ(ref ResponseRecorder rw, slice<byte> b, @string str) {
+internal static void writeHeader⁔(/*this*/ ref ResponseRecorder rw, slice<byte> b, @string str) {
     if (rw.wroteHeader) {
         return;
     }
@@ -97,13 +97,13 @@ private static readonly @string transferEncodingˢᵇᴍResponseRecorder = "Tran
 
     var m = rw.Header();
 
-    var (_, hasType) = m[contentTypeˢᴍResponseRecorder, ꟷ];
-    var hasTE = m.Get(transferEncodingˢᴍResponseRecorder) != ""u8;
+    var (_, hasType) = m[contentTypeˢ⁔ResponseRecorder, ꟷ];
+    var hasTE = m.Get(transferEncodingˢ⁔ResponseRecorder) != ""u8;
     if (!hasType && !hasTE) {
         if (b == nil) {
             b = slice<byte>(str);
         }
-        m.Set(contentTypeˢᴍResponseRecorder, http.DetectContentType(b));
+        m.Set(contentTypeˢ⁔ResponseRecorder, http.DetectContentType(b));
     }
 
     rw.WriteHeader(200);
@@ -111,7 +111,7 @@ private static readonly @string transferEncodingˢᵇᴍResponseRecorder = "Tran
 
 // Write implements http.ResponseWriter. The data in buf is written to
 // rw.Body, if not nil.
-[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ref ResponseRecorder rw, slice<byte> buf) {
+internal static (nint, error) Write⁔(/*this*/ ref ResponseRecorder rw, slice<byte> buf) {
     // Record the write, even if we're going to return an error.
     rw.writeHeader(buf, ""u8);
     if (rw.Body != nil) {
@@ -125,7 +125,7 @@ private static readonly @string transferEncodingˢᵇᴍResponseRecorder = "Tran
 
 // WriteString implements [io.StringWriter]. The data in str is written
 // to rw.Body, if not nil.
-[GoMethodBody("WriteString")] internal static (nint, error) WriteStringᴍ(ref ResponseRecorder rw, @string str) {
+internal static (nint, error) WriteString⁔(/*this*/ ref ResponseRecorder rw, @string str) {
     // Record the write, even if we're going to return an error.
     rw.writeHeader(default, str);
     if (rw.Body != nil) {
@@ -175,7 +175,7 @@ internal static void checkWriteHeaderCode(nint code) {
 } partial class httptest_package {
 
 // WriteHeader implements [http.ResponseWriter].
-[GoMethodBody("WriteHeader")] internal static void WriteHeaderᴍ(ref ResponseRecorder rw, nint code) {
+internal static void WriteHeader⁔(/*this*/ ref ResponseRecorder rw, nint code) {
     if (rw.wroteHeader) {
         return;
     }
@@ -191,7 +191,7 @@ internal static void checkWriteHeaderCode(nint code) {
 
 // Flush implements [http.Flusher]. To test whether Flush was
 // called, see rw.Flushed.
-[GoMethodBody("Flush")] internal static void Flushᴍ(ref ResponseRecorder rw) {
+internal static void Flush⁔(/*this*/ ref ResponseRecorder rw) {
     if (!rw.wroteHeader) {
         rw.WriteHeader(200);
     }
@@ -199,10 +199,10 @@ internal static void checkWriteHeaderCode(nint code) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentLengthˢᴍResponseRecorder => ref contentLengthˢᵇᴍResponseRecorder;
-private static readonly @string contentLengthˢᵇᴍResponseRecorder = "Content-Length"u8;
-internal static ref readonly @string trailerˢᴍResponseRecorder => ref trailerˢᵇᴍResponseRecorder;
-private static readonly @string trailerˢᵇᴍResponseRecorder = "Trailer"u8;
+internal static ref readonly @string contentLengthˢ⁔ResponseRecorder => ref contentLengthˢᵇ⁔ResponseRecorder;
+private static readonly @string contentLengthˢᵇ⁔ResponseRecorder = "Content-Length"u8;
+internal static ref readonly @string trailerˢ⁔ResponseRecorder => ref trailerˢᵇ⁔ResponseRecorder;
+private static readonly @string trailerˢᵇ⁔ResponseRecorder = "Trailer"u8;
 
 // Result returns the response generated by the handler.
 //
@@ -219,7 +219,7 @@ private static readonly @string trailerˢᵇᴍResponseRecorder = "Trailer"u8;
 // guaranteed to not return any error other than [io.EOF].
 //
 // Result must only be called after the handler has finished running.
-[GoMethodBody("Result")] internal static ж<http.Response> Resultᴍ(ref ResponseRecorder rw) {
+internal static ж<http.Response> Result⁔(/*this*/ ref ResponseRecorder rw) {
     if (rw.result != nil) {
         return rw.result;
     }
@@ -243,10 +243,10 @@ private static readonly @string trailerˢᵇᴍResponseRecorder = "Trailer"u8;
     } else {
         res.Body = http.NoBody;
     }
-    res.ContentLength = parseContentLength(res.Header.Get(contentLengthˢᴍResponseRecorder));
+    res.ContentLength = parseContentLength(res.Header.Get(contentLengthˢ⁔ResponseRecorder));
 
     {
-        var (trailers, ok) = rw.snapHeader[trailerˢᴍResponseRecorder, ꟷ]; if (ok) {
+        var (trailers, ok) = rw.snapHeader[trailerˢ⁔ResponseRecorder, ꟷ]; if (ok) {
             res.Trailer = new http.Header(len(trailers));
             foreach (var (_, k) in range(trailers)) {
                 foreach (var iᴛ1 in range<@string>(strings.SplitSeq(k, ",").Invoke)) {

@@ -70,12 +70,15 @@ using static go.net.url_package;
 
 namespace go.net;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using @internal;
 using go.net;
 using ꓸꓸꓸstring = Span<@string>;
 using static url_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("url")]
 public static partial class url_package
@@ -124,58 +127,58 @@ public static partial class url_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(url_package.Error)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class urlᴛError;
-[GoMethodHost(typeof(url_package.EscapeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class urlᴛEscapeError;
-[GoMethodHost(typeof(url_package.InvalidHostError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class urlᴛInvalidHostError;
-[GoMethodHost(typeof(url_package.URL)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class urlᴛURL;
-[GoMethodHost(typeof(url_package.Userinfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class urlᴛUserinfo;
-[GoMethodHost(typeof(url_package.Values)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class urlᴛValues;
+[GoMethodHost(typeof(url_package.Error)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class urlᴛError;
+[GoMethodHost(typeof(url_package.EscapeError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class urlᴛEscapeError;
+[GoMethodHost(typeof(url_package.InvalidHostError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class urlᴛInvalidHostError;
+[GoMethodHost(typeof(url_package.URL)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class urlᴛURL;
+[GoMethodHost(typeof(url_package.Userinfo)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class urlᴛUserinfo;
+[GoMethodHost(typeof(url_package.Values)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class urlᴛValues;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class urlᴛError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this ref Error e) => url_package.Unwrapᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref Error e) => url_package.Errorᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this ref Error e) => url_package.Timeoutᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Temporary(this ref Error e) => url_package.Temporaryᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Unwrap(this ref Error e) => url_package.Unwrap⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref Error e) => url_package.Error⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Timeout(this ref Error e) => url_package.Timeout⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Temporary(this ref Error e) => url_package.Temporary⁔(ref e);
 }
 partial class urlᴛEscapeError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this EscapeError e) => url_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this EscapeError e) => url_package.Error⁔(e);
 }
 partial class urlᴛInvalidHostError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this InvalidHostError e) => url_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this InvalidHostError e) => url_package.Error⁔(e);
 }
 partial class urlᴛUserinfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Username(this ж<Userinfo> Ꮡu) => url_package.Usernameᴍ(Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, bool) Password(this ж<Userinfo> Ꮡu) => url_package.Passwordᴍ(Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Userinfo> Ꮡu) => url_package.Stringᴍ(Ꮡu);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Username(this ж<Userinfo> Ꮡu) => url_package.Username⁔(Ꮡu);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, bool) Password(this ж<Userinfo> Ꮡu) => url_package.Password⁔(Ꮡu);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ж<Userinfo> Ꮡu) => url_package.String⁔(Ꮡu);
 }
 partial class urlᴛURL {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error setPath(this ref URL u, @string p) => url_package.setPathᴍ(ref u, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string EscapedPath(this ref URL u) => url_package.EscapedPathᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error setFragment(this ref URL u, @string f) => url_package.setFragmentᴍ(ref u, f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string EscapedFragment(this ref URL u) => url_package.EscapedFragmentᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ref URL u) => url_package.Stringᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Redacted(this ж<URL> Ꮡu) => url_package.Redactedᴍ(Ꮡu);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsAbs(this ref URL u) => url_package.IsAbsᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<URL>, error) Parse(this ref URL u, @string @ref) => url_package.Parseᴍ(ref u, @ref);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<URL> ResolveReference(this ref URL u, ж<URL> Ꮡref) => url_package.ResolveReferenceᴍ(ref u, Ꮡref);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Values Query(this ref URL u) => url_package.Queryᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string RequestURI(this ref URL u) => url_package.RequestURIᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Hostname(this ref URL u) => url_package.Hostnameᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Port(this ref URL u) => url_package.Portᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> text, error err) MarshalBinary(this ref URL u) => url_package.MarshalBinaryᴍ(ref u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this ref URL u, slice<byte> b) => url_package.AppendBinaryᴍ(ref u, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalBinary(this ref URL u, slice<byte> text) => url_package.UnmarshalBinaryᴍ(ref u, text);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<URL> JoinPath(this ref URL u, params ꓸꓸꓸstring elemʗp) => url_package.JoinPathᴍ(ref u, elemʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<URL>, error) joinPath(this ref URL u, params ꓸꓸꓸstring elemʗp) => url_package.joinPathᴍ(ref u, elemʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error setPath(this ref URL u, @string p) => url_package.setPath⁔(ref u, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string EscapedPath(this ref URL u) => url_package.EscapedPath⁔(ref u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error setFragment(this ref URL u, @string f) => url_package.setFragment⁔(ref u, f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string EscapedFragment(this ref URL u) => url_package.EscapedFragment⁔(ref u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ref URL u) => url_package.String⁔(ref u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Redacted(this ж<URL> Ꮡu) => url_package.Redacted⁔(Ꮡu);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsAbs(this ref URL u) => url_package.IsAbs⁔(ref u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<URL>, error) Parse(this ref URL u, @string @ref) => url_package.Parse⁔(ref u, @ref);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<URL> ResolveReference(this ref URL u, ж<URL> Ꮡref) => url_package.ResolveReference⁔(ref u, Ꮡref);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Values Query(this ref URL u) => url_package.Query⁔(ref u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string RequestURI(this ref URL u) => url_package.RequestURI⁔(ref u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Hostname(this ref URL u) => url_package.Hostname⁔(ref u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Port(this ref URL u) => url_package.Port⁔(ref u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> text, error err) MarshalBinary(this ref URL u) => url_package.MarshalBinary⁔(ref u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this ref URL u, slice<byte> b) => url_package.AppendBinary⁔(ref u, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnmarshalBinary(this ref URL u, slice<byte> text) => url_package.UnmarshalBinary⁔(ref u, text);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<URL> JoinPath(this ref URL u, params ꓸꓸꓸstring elemʗp) => url_package.JoinPath⁔(ref u, elemʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<URL>, error) joinPath(this ref URL u, params ꓸꓸꓸstring elemʗp) => url_package.joinPath⁔(ref u, elemʗp);
 }
 partial class urlᴛValues {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Get(this Values v, @string key) => url_package.Getᴍ(v, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Set(this Values v, @string key, @string value) => url_package.Setᴍ(v, key, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Add(this Values v, @string key, @string value) => url_package.Addᴍ(v, key, value);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Del(this Values v, @string key) => url_package.Delᴍ(v, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Has(this Values v, @string key) => url_package.Hasᴍ(v, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Encode(this Values v) => url_package.Encodeᴍ(v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Get(this Values v, @string key) => url_package.Get⁔(v, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Set(this Values v, @string key, @string value) => url_package.Set⁔(v, key, value);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Add(this Values v, @string key, @string value) => url_package.Add⁔(v, key, value);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Del(this Values v, @string key) => url_package.Del⁔(v, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Has(this Values v, @string key) => url_package.Has⁔(v, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Encode(this Values v) => url_package.Encode⁔(v);
 }
 // </GlyphForwarders>

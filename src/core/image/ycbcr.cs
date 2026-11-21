@@ -22,38 +22,38 @@ public static YCbCrSubsampleRatio YCbCrSubsampleRatio410 => 5;
 } partial class image_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string yCbCrSubsampleRatio444ˢᴍYCbCrSubsampleRatio => ref yCbCrSubsampleRatio444ˢᵇᴍYCbCrSubsampleRatio;
-private static readonly @string yCbCrSubsampleRatio444ˢᵇᴍYCbCrSubsampleRatio = "YCbCrSubsampleRatio444"u8;
-internal static ref readonly @string yCbCrSubsampleRatio422ˢᴍYCbCrSubsampleRatio => ref yCbCrSubsampleRatio422ˢᵇᴍYCbCrSubsampleRatio;
-private static readonly @string yCbCrSubsampleRatio422ˢᵇᴍYCbCrSubsampleRatio = "YCbCrSubsampleRatio422"u8;
-internal static ref readonly @string yCbCrSubsampleRatio420ˢᴍYCbCrSubsampleRatio => ref yCbCrSubsampleRatio420ˢᵇᴍYCbCrSubsampleRatio;
-private static readonly @string yCbCrSubsampleRatio420ˢᵇᴍYCbCrSubsampleRatio = "YCbCrSubsampleRatio420"u8;
-internal static ref readonly @string yCbCrSubsampleRatio440ˢᴍYCbCrSubsampleRatio => ref yCbCrSubsampleRatio440ˢᵇᴍYCbCrSubsampleRatio;
-private static readonly @string yCbCrSubsampleRatio440ˢᵇᴍYCbCrSubsampleRatio = "YCbCrSubsampleRatio440"u8;
-internal static ref readonly @string yCbCrSubsampleRatio411ˢᴍYCbCrSubsampleRatio => ref yCbCrSubsampleRatio411ˢᵇᴍYCbCrSubsampleRatio;
-private static readonly @string yCbCrSubsampleRatio411ˢᵇᴍYCbCrSubsampleRatio = "YCbCrSubsampleRatio411"u8;
-internal static ref readonly @string yCbCrSubsampleRatio410ˢᴍYCbCrSubsampleRatio => ref yCbCrSubsampleRatio410ˢᵇᴍYCbCrSubsampleRatio;
-private static readonly @string yCbCrSubsampleRatio410ˢᵇᴍYCbCrSubsampleRatio = "YCbCrSubsampleRatio410"u8;
+internal static ref readonly @string yCbCrSubsampleRatio444ˢ⁔YCbCrSubsampleRatio => ref yCbCrSubsampleRatio444ˢᵇ⁔YCbCrSubsampleRatio;
+private static readonly @string yCbCrSubsampleRatio444ˢᵇ⁔YCbCrSubsampleRatio = "YCbCrSubsampleRatio444"u8;
+internal static ref readonly @string yCbCrSubsampleRatio422ˢ⁔YCbCrSubsampleRatio => ref yCbCrSubsampleRatio422ˢᵇ⁔YCbCrSubsampleRatio;
+private static readonly @string yCbCrSubsampleRatio422ˢᵇ⁔YCbCrSubsampleRatio = "YCbCrSubsampleRatio422"u8;
+internal static ref readonly @string yCbCrSubsampleRatio420ˢ⁔YCbCrSubsampleRatio => ref yCbCrSubsampleRatio420ˢᵇ⁔YCbCrSubsampleRatio;
+private static readonly @string yCbCrSubsampleRatio420ˢᵇ⁔YCbCrSubsampleRatio = "YCbCrSubsampleRatio420"u8;
+internal static ref readonly @string yCbCrSubsampleRatio440ˢ⁔YCbCrSubsampleRatio => ref yCbCrSubsampleRatio440ˢᵇ⁔YCbCrSubsampleRatio;
+private static readonly @string yCbCrSubsampleRatio440ˢᵇ⁔YCbCrSubsampleRatio = "YCbCrSubsampleRatio440"u8;
+internal static ref readonly @string yCbCrSubsampleRatio411ˢ⁔YCbCrSubsampleRatio => ref yCbCrSubsampleRatio411ˢᵇ⁔YCbCrSubsampleRatio;
+private static readonly @string yCbCrSubsampleRatio411ˢᵇ⁔YCbCrSubsampleRatio = "YCbCrSubsampleRatio411"u8;
+internal static ref readonly @string yCbCrSubsampleRatio410ˢ⁔YCbCrSubsampleRatio => ref yCbCrSubsampleRatio410ˢᵇ⁔YCbCrSubsampleRatio;
+private static readonly @string yCbCrSubsampleRatio410ˢᵇ⁔YCbCrSubsampleRatio = "YCbCrSubsampleRatio410"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(YCbCrSubsampleRatio s) {
+internal static @string String⁔(/*this*/ YCbCrSubsampleRatio s) {
     switch (s) {
     case var ᴛ when ᴛ == YCbCrSubsampleRatio444: {
-        return yCbCrSubsampleRatio444ˢᴍYCbCrSubsampleRatio;
+        return yCbCrSubsampleRatio444ˢ⁔YCbCrSubsampleRatio;
     }
     case var ᴛ when ᴛ == YCbCrSubsampleRatio422: {
-        return yCbCrSubsampleRatio422ˢᴍYCbCrSubsampleRatio;
+        return yCbCrSubsampleRatio422ˢ⁔YCbCrSubsampleRatio;
     }
     case var ᴛ when ᴛ == YCbCrSubsampleRatio420: {
-        return yCbCrSubsampleRatio420ˢᴍYCbCrSubsampleRatio;
+        return yCbCrSubsampleRatio420ˢ⁔YCbCrSubsampleRatio;
     }
     case var ᴛ when ᴛ == YCbCrSubsampleRatio440: {
-        return yCbCrSubsampleRatio440ˢᴍYCbCrSubsampleRatio;
+        return yCbCrSubsampleRatio440ˢ⁔YCbCrSubsampleRatio;
     }
     case var ᴛ when ᴛ == YCbCrSubsampleRatio411: {
-        return yCbCrSubsampleRatio411ˢᴍYCbCrSubsampleRatio;
+        return yCbCrSubsampleRatio411ˢ⁔YCbCrSubsampleRatio;
     }
     case var ᴛ when ᴛ == YCbCrSubsampleRatio410: {
-        return yCbCrSubsampleRatio410ˢᴍYCbCrSubsampleRatio;
+        return yCbCrSubsampleRatio410ˢ⁔YCbCrSubsampleRatio;
     }}
     return "YCbCrSubsampleRatioUnknown";
 }
@@ -84,24 +84,24 @@ partial struct YCbCr {
 
 } partial class image_package {
 
-[GoMethodBody("ColorModel")] internal static color.Model ColorModelᴍ(ref YCbCr p) {
+internal static color.Model ColorModel⁔(/*this*/ ref YCbCr p) {
     return color.YCbCrModel;
 }
 
-[GoMethodBody("Bounds")] internal static Rectangle Boundsᴍ(ref YCbCr p) {
+internal static Rectangle Bounds⁔(/*this*/ ref YCbCr p) {
     return p.Rect;
 }
 
-[GoMethodBody("At")] internal static color.Color Atᴍ(ref YCbCr p, nint x, nint y) {
+internal static color.Color At⁔(/*this*/ ref YCbCr p, nint x, nint y) {
     return p.YCbCrAt(x, y);
 }
 
-[GoMethodBody("RGBA64At")] internal static color.RGBA64 RGBA64Atᴍ(ref YCbCr p, nint x, nint y) {
+internal static color.RGBA64 RGBA64At⁔(/*this*/ ref YCbCr p, nint x, nint y) {
     var (r, g, b, a) = p.YCbCrAt(x, y).RGBA();
     return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
-[GoMethodBody("YCbCrAt")] internal static color.YCbCr YCbCrAtᴍ(ref YCbCr p, nint x, nint y) {
+internal static color.YCbCr YCbCrAt⁔(/*this*/ ref YCbCr p, nint x, nint y) {
     if (!(new Point(x, y).In(p.Rect))) {
         return new color.YCbCr();
     }
@@ -116,13 +116,13 @@ partial struct YCbCr {
 
 // YOffset returns the index of the first element of Y that corresponds to
 // the pixel at (x, y).
-[GoMethodBody("YOffset")] internal static nint YOffsetᴍ(ref YCbCr p, nint x, nint y) {
+internal static nint YOffset⁔(/*this*/ ref YCbCr p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.YStride + (x - p.Rect.Min.X);
 }
 
 // COffset returns the index of the first element of Cb or Cr that corresponds
 // to the pixel at (x, y).
-[GoMethodBody("COffset")] internal static nint COffsetᴍ(ref YCbCr p, nint x, nint y) {
+internal static nint COffset⁔(/*this*/ ref YCbCr p, nint x, nint y) {
     switch (p.SubsampleRatio) {
     case var ᴛ when ᴛ == YCbCrSubsampleRatio422: {
         return (y - p.Rect.Min.Y) * p.CStride + (x / 2 - p.Rect.Min.X / 2);
@@ -145,7 +145,7 @@ partial struct YCbCr {
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-[GoMethodBody("SubImage")] internal static Image SubImageᴍ(ref YCbCr p, Rectangle r) {
+internal static Image SubImage⁔(/*this*/ ref YCbCr p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -168,7 +168,7 @@ partial struct YCbCr {
     )));
 }
 
-[GoMethodBody("Opaque")] internal static bool Opaqueᴍ(ref YCbCr p) {
+internal static bool Opaque⁔(/*this*/ ref YCbCr p) {
     return true;
 }
 
@@ -257,20 +257,20 @@ partial struct NYCbCrA {
 
 } partial class image_package {
 
-[GoMethodBody("ColorModel")] internal static color.Model ColorModelᴍ(ref NYCbCrA p) {
+internal static color.Model ColorModel⁔(/*this*/ ref NYCbCrA p) {
     return color.NYCbCrAModel;
 }
 
-[GoMethodBody("At")] internal static color.Color Atᴍ(ref NYCbCrA p, nint x, nint y) {
+internal static color.Color At⁔(/*this*/ ref NYCbCrA p, nint x, nint y) {
     return p.NYCbCrAAt(x, y);
 }
 
-[GoMethodBody("RGBA64At")] internal static color.RGBA64 RGBA64Atᴍ(ref NYCbCrA p, nint x, nint y) {
+internal static color.RGBA64 RGBA64At⁔(/*this*/ ref NYCbCrA p, nint x, nint y) {
     var (r, g, b, a) = p.NYCbCrAAt(x, y).RGBA();
     return new color.RGBA64((uint16)r, (uint16)g, (uint16)b, (uint16)a);
 }
 
-[GoMethodBody("NYCbCrAAt")] internal static color.NYCbCrA NYCbCrAAtᴍ(ref NYCbCrA p, nint x, nint y) {
+internal static color.NYCbCrA NYCbCrAAt⁔(/*this*/ ref NYCbCrA p, nint x, nint y) {
     if (!(new Point(X: x, Y: y).In(p.Rect))) {
         return new color.NYCbCrA();
     }
@@ -289,13 +289,13 @@ partial struct NYCbCrA {
 
 // AOffset returns the index of the first element of A that corresponds to the
 // pixel at (x, y).
-[GoMethodBody("AOffset")] internal static nint AOffsetᴍ(ref NYCbCrA p, nint x, nint y) {
+internal static nint AOffset⁔(/*this*/ ref NYCbCrA p, nint x, nint y) {
     return (y - p.Rect.Min.Y) * p.AStride + (x - p.Rect.Min.X);
 }
 
 // SubImage returns an image representing the portion of the image p visible
 // through r. The returned value shares pixels with the original image.
-[GoMethodBody("SubImage")] internal static Image SubImageᴍ(ref NYCbCrA p, Rectangle r) {
+internal static Image SubImage⁔(/*this*/ ref NYCbCrA p, Rectangle r) {
     r = r.Intersect(p.Rect);
     // If r1 and r2 are Rectangles, r1.Intersect(r2) is not guaranteed to be inside
     // either r1 or r2 if the intersection is empty. Without explicitly checking for
@@ -326,7 +326,7 @@ partial struct NYCbCrA {
 }
 
 // Opaque scans the entire image and reports whether it is fully opaque.
-[GoMethodBody("Opaque")] internal static bool Opaqueᴍ(ref NYCbCrA p) {
+internal static bool Opaque⁔(/*this*/ ref NYCbCrA p) {
     if (p.Rect.Empty()) {
         return true;
     }

@@ -80,7 +80,7 @@ partial struct ErrNaN {
 
 } partial class big_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ErrNaN err) {
+internal static @string Error⁔(/*this*/ ErrNaN err) {
     return err.msg;
 }
 
@@ -159,7 +159,7 @@ public static Accuracy Above => 1;
 // cannot be represented in prec bits without loss of precision.
 // SetPrec(0) maps all finite values to ±0; infinite values remain unchanged.
 // If prec > [MaxPrec], it is set to [MaxPrec].
-[GoMethodBody("SetPrec")] internal static ж<Float> SetPrecᴍ(ж<Float> Ꮡz, nuint prec) {
+internal static ж<Float> SetPrec⁔(/*this*/ ж<Float> Ꮡz, nuint prec) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     z.acc = Exact; // optimistically assume no rounding is needed
@@ -201,7 +201,7 @@ internal static Accuracy makeAcc(bool above) {
 // SetMode sets z's rounding mode to mode and returns an exact z.
 // z remains unchanged otherwise.
 // z.SetMode(z.Mode()) is a cheap way to set z's accuracy to [Exact].
-[GoMethodBody("SetMode")] internal static ж<Float> SetModeᴍ(ж<Float> Ꮡz, RoundingMode mode) {
+internal static ж<Float> SetMode⁔(/*this*/ ж<Float> Ꮡz, RoundingMode mode) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     z.mode = mode;
@@ -211,14 +211,14 @@ internal static Accuracy makeAcc(bool above) {
 
 // Prec returns the mantissa precision of x in bits.
 // The result may be 0 for |x| == 0 and |x| == Inf.
-[GoMethodBody("Prec")] internal static nuint Precᴍ(ref Float x) {
+internal static nuint Prec⁔(/*this*/ ref Float x) {
     return (nuint)x.prec;
 }
 
 // MinPrec returns the minimum precision required to represent x exactly
 // (i.e., the smallest prec before x.SetPrec(prec) would start rounding x).
 // The result is 0 for |x| == 0 and |x| == Inf.
-[GoMethodBody("MinPrec")] internal static nuint MinPrecᴍ(ref Float x) {
+internal static nuint MinPrec⁔(/*this*/ ref Float x) {
     if (x.form != finite) {
         return 0;
     }
@@ -226,14 +226,14 @@ internal static Accuracy makeAcc(bool above) {
 }
 
 // Mode returns the rounding mode of x.
-[GoMethodBody("Mode")] internal static RoundingMode Modeᴍ(ref Float x) {
+internal static RoundingMode Mode⁔(/*this*/ ref Float x) {
     return x.mode;
 }
 
 // Acc returns the accuracy of x produced by the most recent
 // operation, unless explicitly documented otherwise by that
 // operation.
-[GoMethodBody("Acc")] internal static Accuracy Accᴍ(ref Float x) {
+internal static Accuracy Acc⁔(/*this*/ ref Float x) {
     return x.acc;
 }
 
@@ -241,7 +241,7 @@ internal static Accuracy makeAcc(bool above) {
 //   - -1 if x < 0;
 //   - 0 if x is ±0;
 //   - +1 if x > 0.
-[GoMethodBody("Sign")] internal static nint Signᴍ(ж<Float> Ꮡx) {
+internal static nint Sign⁔(/*this*/ ж<Float> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (debugFloat) {
@@ -271,7 +271,7 @@ internal static Accuracy makeAcc(bool above) {
 //
 // x and mant may be the same in which case x is set to its
 // mantissa value.
-[GoMethodBody("MantExp")] internal static nint /*exp*/ MantExpᴍ(ж<Float> Ꮡx, ж<Float> Ꮡmant) {
+internal static nint /*exp*/ MantExp⁔(/*this*/ ж<Float> Ꮡx, ж<Float> Ꮡmant) {
     nint exp = default;
     ref var x = ref Ꮡx.DerefOrNull();
     ref var mant = ref Ꮡmant.DerefOrNull();
@@ -291,7 +291,7 @@ internal static Accuracy makeAcc(bool above) {
     return exp;
 }
 
-[GoMethodBody("setExpAndRound")] internal static void setExpAndRoundᴍ(ж<Float> Ꮡz, int64 exp, nuint sbit) {
+internal static void setExpAndRound⁔(/*this*/ ж<Float> Ꮡz, int64 exp, nuint sbit) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (exp < MinExp) {
@@ -330,7 +330,7 @@ internal static Accuracy makeAcc(bool above) {
 //
 // z and mant may be the same in which case z's exponent
 // is set to exp.
-[GoMethodBody("SetMantExp")] internal static ж<Float> SetMantExpᴍ(ж<Float> Ꮡz, ж<Float> mant, nint exp) {
+internal static ж<Float> SetMantExp⁔(/*this*/ ж<Float> Ꮡz, ж<Float> mant, nint exp) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (debugFloat) {
@@ -347,18 +347,18 @@ internal static Accuracy makeAcc(bool above) {
 }
 
 // Signbit reports whether x is negative or negative zero.
-[GoMethodBody("Signbit")] internal static bool Signbitᴍ(ref Float x) {
+internal static bool Signbit⁔(/*this*/ ref Float x) {
     return x.neg;
 }
 
 // IsInf reports whether x is +Inf or -Inf.
-[GoMethodBody("IsInf")] internal static bool IsInfᴍ(ref Float x) {
+internal static bool IsInf⁔(/*this*/ ref Float x) {
     return x.form == inf;
 }
 
 // IsInt reports whether x is an integer.
 // ±Inf values are not integers.
-[GoMethodBody("IsInt")] internal static bool IsIntᴍ(ж<Float> Ꮡx) {
+internal static bool IsInt⁔(/*this*/ ж<Float> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (debugFloat) {
@@ -377,7 +377,7 @@ internal static Accuracy makeAcc(bool above) {
 }
 
 // debugging support
-[GoMethodBody("validate")] internal static void validateᴍ(ж<Float> Ꮡx) {
+internal static void validate⁔(/*this*/ ж<Float> Ꮡx) {
     if (!debugFloat) {
         // avoid performance bugs
         throw panic("validate called but debugFloat is not set");
@@ -388,12 +388,12 @@ internal static Accuracy makeAcc(bool above) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nonzeroFiniteNumberWithˢᴍFloat => ref nonzeroFiniteNumberWithˢᵇᴍFloat;
-private static readonly @string nonzeroFiniteNumberWithˢᵇᴍFloat = "nonzero finite number with empty mantissa"u8;
-internal static ref readonly @string zeroPrecisionFiniteˢᴍFloat => ref zeroPrecisionFiniteˢᵇᴍFloat;
-private static readonly @string zeroPrecisionFiniteˢᵇᴍFloat = "zero precision finite number"u8;
+internal static ref readonly @string nonzeroFiniteNumberWithˢ⁔Float => ref nonzeroFiniteNumberWithˢᵇ⁔Float;
+private static readonly @string nonzeroFiniteNumberWithˢᵇ⁔Float = "nonzero finite number with empty mantissa"u8;
+internal static ref readonly @string zeroPrecisionFiniteˢ⁔Float => ref zeroPrecisionFiniteˢᵇ⁔Float;
+private static readonly @string zeroPrecisionFiniteˢᵇ⁔Float = "zero precision finite number"u8;
 
-[GoMethodBody("validate0")] internal static @string validate0ᴍ(ж<Float> Ꮡx) {
+internal static @string validate0⁔(/*this*/ ж<Float> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.form != finite) {
@@ -401,14 +401,14 @@ private static readonly @string zeroPrecisionFiniteˢᵇᴍFloat = "zero precisi
     }
     nint m = len(x.mant);
     if (m == 0) {
-        return nonzeroFiniteNumberWithˢᴍFloat;
+        return nonzeroFiniteNumberWithˢ⁔Float;
     }
     UntypedInt msb = /* 1 << (_W - 1) */ 9223372036854775808;
     if ((Word)(x.mant[m - 1] & (nuint)msb) == 0) {
         return fmt.Sprintf("msb not set in last word %#x of %s"u8, x.mant[m - 1], Ꮡx.Text((byte)'p', 0));
     }
     if (x.prec == 0) {
-        return zeroPrecisionFiniteˢᴍFloat;
+        return zeroPrecisionFiniteˢ⁔Float;
     }
     return ""u8;
 }
@@ -421,7 +421,7 @@ private static readonly @string zeroPrecisionFiniteˢᵇᴍFloat = "zero precisi
 // CAUTION: The rounding modes [ToNegativeInf], [ToPositiveInf] are affected by the
 // sign of z. For correct rounding, the sign of z must be set correctly before
 // calling round.
-[GoMethodBody("round")] internal static void roundᴍ(ж<Float> Ꮡz, nuint sbit) {
+internal static void round⁔(/*this*/ ж<Float> Ꮡz, nuint sbit) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (debugFloat) {
@@ -545,7 +545,7 @@ private static readonly @string zeroPrecisionFiniteˢᵇᴍFloat = "zero precisi
     }
 }
 
-[GoMethodBody("setBits64")] internal static ж<Float> setBits64ᴍ(ж<Float> Ꮡz, bool neg, uint64 x) {
+internal static ж<Float> setBits64⁔(/*this*/ ж<Float> Ꮡz, bool neg, uint64 x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (z.prec == 0) {
@@ -571,14 +571,14 @@ private static readonly @string zeroPrecisionFiniteˢᵇᴍFloat = "zero precisi
 // SetUint64 sets z to the (possibly rounded) value of x and returns z.
 // If z's precision is 0, it is changed to 64 (and rounding will have
 // no effect).
-[GoMethodBody("SetUint64")] internal static ж<Float> SetUint64ᴍ(ж<Float> Ꮡz, uint64 x) {
+internal static ж<Float> SetUint64⁔(/*this*/ ж<Float> Ꮡz, uint64 x) {
     return Ꮡz.setBits64(false, x);
 }
 
 // SetInt64 sets z to the (possibly rounded) value of x and returns z.
 // If z's precision is 0, it is changed to 64 (and rounding will have
 // no effect).
-[GoMethodBody("SetInt64")] internal static ж<Float> SetInt64ᴍ(ж<Float> Ꮡz, int64 x) {
+internal static ж<Float> SetInt64⁔(/*this*/ ж<Float> Ꮡz, int64 x) {
     var u = x;
     if (u < 0) {
         u = -u;
@@ -591,7 +591,7 @@ private static readonly @string zeroPrecisionFiniteˢᵇᴍFloat = "zero precisi
 // SetFloat64 sets z to the (possibly rounded) value of x and returns z.
 // If z's precision is 0, it is changed to 53 (and rounding will have
 // no effect). SetFloat64 panics with [ErrNaN] if x is a NaN.
-[GoMethodBody("SetFloat64")] internal static ж<Float> SetFloat64ᴍ(ж<Float> Ꮡz, float64 x) {
+internal static ж<Float> SetFloat64⁔(/*this*/ ж<Float> Ꮡz, float64 x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     if (z.prec == 0) {
@@ -645,7 +645,7 @@ internal static int64 fnorm(nat m) {
 // SetInt sets z to the (possibly rounded) value of x and returns z.
 // If z's precision is 0, it is changed to the larger of x.BitLen()
 // or 64 (and rounding will have no effect).
-[GoMethodBody("SetInt")] internal static ж<Float> SetIntᴍ(ж<Float> Ꮡz, ж<Int> Ꮡx) {
+internal static ж<Float> SetInt⁔(/*this*/ ж<Float> Ꮡz, ж<Int> Ꮡx) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -672,7 +672,7 @@ internal static int64 fnorm(nat m) {
 // SetRat sets z to the (possibly rounded) value of x and returns z.
 // If z's precision is 0, it is changed to the largest of a.BitLen(),
 // b.BitLen(), or 64; with x = a/b.
-[GoMethodBody("SetRat")] internal static ж<Float> SetRatᴍ(ж<Float> Ꮡz, ж<Rat> Ꮡx) {
+internal static ж<Float> SetRat⁔(/*this*/ ж<Float> Ꮡz, ж<Rat> Ꮡx) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -693,7 +693,7 @@ internal static int64 fnorm(nat m) {
 // set, or +Inf if signbit is not set, and returns z. The
 // precision of z is unchanged and the result is always
 // [Exact].
-[GoMethodBody("SetInf")] internal static ж<Float> SetInfᴍ(ж<Float> Ꮡz, bool signbit) {
+internal static ж<Float> SetInf⁔(/*this*/ ж<Float> Ꮡz, bool signbit) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     z.acc = Exact;
@@ -708,7 +708,7 @@ internal static int64 fnorm(nat m) {
 // Rounding is performed according to z's precision and rounding
 // mode; and z's accuracy reports the result error relative to the
 // exact (not rounded) result.
-[GoMethodBody("Set")] internal static ж<Float> Setᴍ(ж<Float> Ꮡz, ж<Float> Ꮡx) {
+internal static ж<Float> Set⁔(/*this*/ ж<Float> Ꮡz, ж<Float> Ꮡx) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -734,7 +734,7 @@ internal static int64 fnorm(nat m) {
 
 // Copy sets z to x, with the same precision, rounding mode, and accuracy as x.
 // Copy returns z. If x and z are identical, Copy is a no-op.
-[GoMethodBody("Copy")] internal static ж<Float> Copyᴍ(ж<Float> Ꮡz, ж<Float> Ꮡx) {
+internal static ж<Float> Copy⁔(/*this*/ ж<Float> Ꮡz, ж<Float> Ꮡx) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -806,7 +806,7 @@ internal static uint64 msb64(nat x) {
 // if x is an integer and [Below] otherwise.
 // The result is (0, [Above]) for x < 0, and ([math.MaxUint64], [Below])
 // for x > [math.MaxUint64].
-[GoMethodBody("Uint64")] internal static (uint64, Accuracy) Uint64ᴍ(ж<Float> Ꮡx) {
+internal static (uint64, Accuracy) Uint64⁔(/*this*/ ж<Float> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (debugFloat) {
@@ -853,7 +853,7 @@ internal static uint64 msb64(nat x) {
 // an integer, and [Above] (x < 0) or [Below] (x > 0) otherwise.
 // The result is ([math.MinInt64], [Above]) for x < [math.MinInt64],
 // and ([math.MaxInt64], [Below]) for x > [math.MaxInt64].
-[GoMethodBody("Int64")] internal static (int64, Accuracy) Int64ᴍ(ж<Float> Ꮡx) {
+internal static (int64, Accuracy) Int64⁔(/*this*/ ж<Float> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (debugFloat) {
@@ -910,7 +910,7 @@ internal static uint64 msb64(nat x) {
 // is (0, [Below]) or (-0, [Above]), respectively, depending on the sign of x.
 // If x is too large to be represented by a float32 (|x| > [math.MaxFloat32]),
 // the result is (+Inf, [Above]) or (-Inf, [Below]), depending on the sign of x.
-[GoMethodBody("Float32")] internal static (float32, Accuracy) Float32ᴍ(ж<Float> Ꮡx) {
+internal static (float32, Accuracy) Float32⁔(/*this*/ ж<Float> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (debugFloat) {
@@ -1033,7 +1033,7 @@ internal static uint64 msb64(nat x) {
 // is (0, [Below]) or (-0, [Above]), respectively, depending on the sign of x.
 // If x is too large to be represented by a float64 (|x| > [math.MaxFloat64]),
 // the result is (+Inf, [Above]) or (-Inf, [Below]), depending on the sign of x.
-[GoMethodBody("Float64")] internal static (float64, Accuracy) Float64ᴍ(ж<Float> Ꮡx) {
+internal static (float64, Accuracy) Float64⁔(/*this*/ ж<Float> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (debugFloat) {
@@ -1157,7 +1157,7 @@ internal static uint64 msb64(nat x) {
 // for x > 0, and [Above] for x < 0.
 // If a non-nil *[Int] argument z is provided, [Int] stores
 // the result in z instead of allocating a new [Int].
-[GoMethodBody("Int")] internal static (ж<Int>, Accuracy) Intᴍ(ж<Float> Ꮡx, ж<Int> Ꮡz) {
+internal static (ж<Int>, Accuracy) Int⁔(/*this*/ ж<Float> Ꮡx, ж<Int> Ꮡz) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var z = ref Ꮡz.DerefOrNull();
 
@@ -1221,7 +1221,7 @@ internal static uint64 msb64(nat x) {
 // The result is [Exact] if x is not an Inf.
 // If a non-nil *[Rat] argument z is provided, [Rat] stores
 // the result in z instead of allocating a new [Rat].
-[GoMethodBody("Rat")] internal static (ж<Rat>, Accuracy) Ratᴍ(ж<Float> Ꮡx, ж<Rat> Ꮡz) {
+internal static (ж<Rat>, Accuracy) Rat⁔(/*this*/ ж<Float> Ꮡx, ж<Rat> Ꮡz) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var z = ref Ꮡz.DerefOrNull();
 
@@ -1273,7 +1273,7 @@ internal static uint64 msb64(nat x) {
 
 // Abs sets z to the (possibly rounded) value |x| (the absolute value of x)
 // and returns z.
-[GoMethodBody("Abs")] internal static ж<Float> Absᴍ(ж<Float> Ꮡz, ж<Float> x) {
+internal static ж<Float> Abs⁔(/*this*/ ж<Float> Ꮡz, ж<Float> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     Ꮡz.Set(x);
@@ -1283,7 +1283,7 @@ internal static uint64 msb64(nat x) {
 
 // Neg sets z to the (possibly rounded) value of x with its sign negated,
 // and returns z.
-[GoMethodBody("Neg")] internal static ж<Float> Negᴍ(ж<Float> Ꮡz, ж<Float> x) {
+internal static ж<Float> Neg⁔(/*this*/ ж<Float> Ꮡz, ж<Float> x) {
     ref var z = ref Ꮡz.DerefOrNull();
 
     Ꮡz.Set(x);
@@ -1311,7 +1311,7 @@ internal static void validateBinaryOperands(ref Float x, ref Float y) {
 // z = x + y, ignoring signs of x and y for the addition
 // but using the sign of z for rounding the result.
 // x and y must have a non-empty mantissa and valid exponent.
-[GoMethodBody("uadd")] internal static void uaddᴍ(ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
+internal static void uadd⁔(/*this*/ ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -1374,7 +1374,7 @@ internal static void validateBinaryOperands(ref Float x, ref Float y) {
 // z = x - y for |x| > |y|, ignoring signs of x and y for the subtraction
 // but using the sign of z for rounding the result.
 // x and y must have a non-empty mantissa and valid exponent.
-[GoMethodBody("usub")] internal static void usubᴍ(ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
+internal static void usub⁔(/*this*/ ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -1436,7 +1436,7 @@ internal static void validateBinaryOperands(ref Float x, ref Float y) {
 // z = x * y, ignoring signs of x and y for the multiplication
 // but using the sign of z for rounding the result.
 // x and y must have a non-empty mantissa and valid exponent.
-[GoMethodBody("umul")] internal static void umulᴍ(ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
+internal static void umul⁔(/*this*/ ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -1463,7 +1463,7 @@ internal static void validateBinaryOperands(ref Float x, ref Float y) {
 // z = x / y, ignoring signs of x and y for the division
 // but using the sign of z for rounding the result.
 // x and y must have a non-empty mantissa and valid exponent.
-[GoMethodBody("uquo")] internal static void uquoᴍ(ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
+internal static void uquo⁔(/*this*/ ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     GoFrame ᒐ = default;
     try {
         ref var z = ref Ꮡz.DerefOrNull();
@@ -1520,7 +1520,7 @@ internal static void validateBinaryOperands(ref Float x, ref Float y) {
 // ucmp returns -1, 0, or +1, depending on whether
 // |x| < |y|, |x| == |y|, or |x| > |y|.
 // x and y must have a non-empty mantissa and valid exponent.
-[GoMethodBody("ucmp")] internal static nint ucmpᴍ(ж<Float> Ꮡx, ж<Float> Ꮡy) {
+internal static nint ucmp⁔(/*this*/ ж<Float> Ꮡx, ж<Float> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -1588,7 +1588,7 @@ internal static void validateBinaryOperands(ref Float x, ref Float y) {
 // z's accuracy reports the result error relative to the exact (not rounded)
 // result. Add panics with [ErrNaN] if x and y are infinities with opposite
 // signs. The value of z is undefined in that case.
-[GoMethodBody("Add")] internal static ж<Float> Addᴍ(ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
+internal static ж<Float> Add⁔(/*this*/ ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -1666,7 +1666,7 @@ internal static void validateBinaryOperands(ref Float x, ref Float y) {
 // Precision, rounding, and accuracy reporting are as for [Float.Add].
 // Sub panics with [ErrNaN] if x and y are infinities with equal
 // signs. The value of z is undefined in that case.
-[GoMethodBody("Sub")] internal static ж<Float> Subᴍ(ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
+internal static ж<Float> Sub⁔(/*this*/ ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -1737,7 +1737,7 @@ internal static void validateBinaryOperands(ref Float x, ref Float y) {
 // Precision, rounding, and accuracy reporting are as for [Float.Add].
 // Mul panics with [ErrNaN] if one operand is zero and the other
 // operand an infinity. The value of z is undefined in that case.
-[GoMethodBody("Mul")] internal static ж<Float> Mulᴍ(ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
+internal static ж<Float> Mul⁔(/*this*/ ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -1786,7 +1786,7 @@ internal static void validateBinaryOperands(ref Float x, ref Float y) {
 // Precision, rounding, and accuracy reporting are as for [Float.Add].
 // Quo panics with [ErrNaN] if both operands are zero or infinities.
 // The value of z is undefined in that case.
-[GoMethodBody("Quo")] internal static ж<Float> Quoᴍ(ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
+internal static ж<Float> Quo⁔(/*this*/ ж<Float> Ꮡz, ж<Float> Ꮡx, ж<Float> Ꮡy) {
     ref var z = ref Ꮡz.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
@@ -1835,7 +1835,7 @@ internal static void validateBinaryOperands(ref Float x, ref Float y) {
 //   - -1 if x < y;
 //   - 0 if x == y (incl. -0 == 0, -Inf == -Inf, and +Inf == +Inf);
 //   - +1 if x > y.
-[GoMethodBody("Cmp")] internal static nint Cmpᴍ(ж<Float> Ꮡx, ж<Float> Ꮡy) {
+internal static nint Cmp⁔(/*this*/ ж<Float> Ꮡx, ж<Float> Ꮡy) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var y = ref Ꮡy.DerefOrNull();
 
@@ -1874,7 +1874,7 @@ internal static void validateBinaryOperands(ref Float x, ref Float y) {
 //	 0 if x == 0 (signed or unsigned)
 //	+1 if 0 < x < +Inf
 //	+2 if x == +Inf
-[GoMethodBody("ord")] internal static nint ordᴍ(ref Float x) {
+internal static nint ord⁔(/*this*/ ref Float x) {
     nint m = default;
     switch (x.form) {
     case var ᴛ when ᴛ == finite: {

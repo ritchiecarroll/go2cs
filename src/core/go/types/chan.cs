@@ -31,12 +31,12 @@ public static ж<Chan> NewChan(ChanDir dir, Type elem) {
 } partial class types_package {
 
 // Dir returns the direction of channel c.
-[GoMethodBody("Dir")] internal static ChanDir Dirᴍ(ref Chan c) { return c.dir; }
+internal static ChanDir Dir⁔(/*this*/ ref Chan c) { return c.dir; }
 
 // Elem returns the element type of channel c.
-[GoMethodBody("Elem")] internal static Type Elemᴍ(ref Chan c) { return c.elem; }
+internal static Type Elem⁔(/*this*/ ref Chan c) { return c.elem; }
 
-[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Chan> Ꮡc) { return new ChanжType(Ꮡc); }
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Chan> Ꮡc) { return TypeString(new ChanжType(Ꮡc), default); }
+internal static Type Underlying⁔(/*this*/ ж<Chan> Ꮡc) { return new ChanжType(Ꮡc); }
+internal static @string String⁔(/*this*/ ж<Chan> Ꮡc) { return TypeString(new ChanжType(Ꮡc), default); }
 
 }

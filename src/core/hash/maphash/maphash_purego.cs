@@ -196,7 +196,7 @@ internal static void appendT(ж<Hash> Ꮡh, reflect.Value v) {
 
 } partial class maphash_package {
 
-[GoMethodBody("float64")] internal static void float64ᴍ(ref Hash h, float64 f) {
+internal static void float64⁔(/*this*/ ref Hash h, float64 f) {
     if (f == 0D) {
         h.WriteByte(0);
         return;

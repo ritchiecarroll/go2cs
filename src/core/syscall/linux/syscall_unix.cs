@@ -47,7 +47,7 @@ partial struct mmapper {
 
 } partial class syscall_package {
 
-[GoMethodBody("Mmap")] internal static (slice<byte> data, error err) Mmapᴍ(ж<mmapper> Ꮡm, nint fd, int64 offset, nint length, nint prot, nint flags) {
+internal static (slice<byte> data, error err) Mmap⁔(/*this*/ ж<mmapper> Ꮡm, nint fd, int64 offset, nint length, nint prot, nint flags) {
     slice<byte> data = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -79,7 +79,7 @@ partial struct mmapper {
     ᒐdone: return (data, err);
 }
 
-[GoMethodBody("Munmap")] internal static error /*err*/ Munmapᴍ(ж<mmapper> Ꮡm, slice<byte> data) {
+internal static error /*err*/ Munmap⁔(/*this*/ ж<mmapper> Ꮡm, slice<byte> data) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -130,7 +130,7 @@ partial struct Errno /*num:uintptr*/;
 
 } partial class syscall_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(Errno e) {
+internal static @string Error⁔(/*this*/ Errno e) {
     if (0 <= (nint)e && (nint)e < len(errors)) {
         @string s = errors[e];
         if (s != ""u8) {
@@ -140,7 +140,7 @@ partial struct Errno /*num:uintptr*/;
     return "errno "u8 + strconv.Itoa((nint)e);
 }
 
-[GoMethodBody("Is")] internal static bool Isᴍ(Errno e, error target) {
+internal static bool Is⁔(/*this*/ Errno e, error target) {
     switch (target) {
     case var ᴛ when AreEqual(ᴛ, oserror.ErrPermission): {
         return e == EACCES || e == EPERM;
@@ -157,11 +157,11 @@ partial struct Errno /*num:uintptr*/;
     return false;
 }
 
-[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(Errno e) {
+internal static bool Temporary⁔(/*this*/ Errno e) {
     return e == EINTR || e == EMFILE || e == ENFILE || e.Timeout();
 }
 
-[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(Errno e) {
+internal static bool Timeout⁔(/*this*/ Errno e) {
     return e == EAGAIN || e == EWOULDBLOCK || e == ETIMEDOUT;
 }
 
@@ -198,9 +198,9 @@ partial struct Signal /*num:nint*/;
 
 } partial class syscall_package {
 
-[GoMethodBody("Signal")] internal static void Signalᴍ(Signal s) { }
+internal static void Signal⁔(/*this*/ Signal s) { }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Signal s) {
+internal static @string String⁔(/*this*/ Signal s) {
     if (0 <= s && (nint)s < len(signals)) {
         @string str = signals[s];
         if (str != ""u8) {

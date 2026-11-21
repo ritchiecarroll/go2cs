@@ -31,11 +31,11 @@ partial struct PrivateKey {
 
 } partial class ecdh_package {
 
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref PrivateKey priv) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PrivateKey priv) {
     return priv.d;
 }
 
-[GoMethodBody("PublicKey")] internal static ж<PublicKey> PublicKeyᴍ(ж<PrivateKey> Ꮡpriv) {
+internal static ж<PublicKey> PublicKey⁔(/*this*/ ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.Ꮡpub;
 }
 
@@ -48,7 +48,7 @@ partial struct PublicKey {
 
 } partial class ecdh_package {
 
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref PublicKey pub) {
+internal static slice<byte> Bytes⁔(/*this*/ ref PublicKey pub) {
     return pub.q;
 }
 

@@ -40,15 +40,15 @@ partial struct unknownFormat {
 
 } partial class dwarf_package {
 
-[GoMethodBody("version")] internal static nint versionᴍ(unknownFormat u) {
+internal static nint version⁔(/*this*/ unknownFormat u) {
     return 0;
 }
 
-[GoMethodBody("dwarf64")] internal static (bool, bool) dwarf64ᴍ(unknownFormat u) {
+internal static (bool, bool) dwarf64⁔(/*this*/ unknownFormat u) {
     return (false, false);
 }
 
-[GoMethodBody("addrsize")] internal static nint addrsizeᴍ(unknownFormat u) {
+internal static nint addrsize⁔(/*this*/ unknownFormat u) {
     return 0;
 }
 
@@ -63,12 +63,12 @@ internal static buf makeBuf(ж<Data> Ꮡd, dataFormat format, @string name, Offs
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string underflowˢᴍbuf => ref underflowˢᵇᴍbuf;
-private static readonly @string underflowˢᵇᴍbuf = "underflow"u8;
+internal static ref readonly @string underflowˢ⁔buf => ref underflowˢᵇ⁔buf;
+private static readonly @string underflowˢᵇ⁔buf = "underflow"u8;
 
-[GoMethodBody("uint8")] internal static uint8 uint8ᴍ(ref buf b) {
+internal static uint8 uint8⁔(/*this*/ ref buf b) {
     if (len(b.data) < 1) {
-        b.error(underflowˢᴍbuf);
+        b.error(underflowˢ⁔buf);
         return 0;
     }
     var val = b.data[0];
@@ -77,9 +77,9 @@ private static readonly @string underflowˢᵇᴍbuf = "underflow"u8;
     return val;
 }
 
-[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ref buf b, nint n) {
+internal static slice<byte> bytes⁔(/*this*/ ref buf b, nint n) {
     if (n < 0 || len(b.data) < n) {
-        b.error(underflowˢᴍbuf);
+        b.error(underflowˢ⁔buf);
         return default;
     }
     var data = b.data.slice(0, n);
@@ -88,12 +88,12 @@ private static readonly @string underflowˢᵇᴍbuf = "underflow"u8;
     return data;
 }
 
-[GoMethodBody("skip")] internal static void skipᴍ(ref buf b, nint n) { b.bytes(n); }
+internal static void skip⁔(/*this*/ ref buf b, nint n) { b.bytes(n); }
 
-[GoMethodBody("string")] internal static @string @stringᴍ(ref buf b) {
+internal static @string @string⁔(/*this*/ ref buf b) {
     nint i = bytes_package.IndexByte(b.data, 0);
     if (i < 0) {
-        b.error(underflowˢᴍbuf);
+        b.error(underflowˢ⁔buf);
         return ""u8;
     }
 
@@ -103,7 +103,7 @@ private static readonly @string underflowˢᵇᴍbuf = "underflow"u8;
     return s;
 }
 
-[GoMethodBody("uint16")] internal static uint16 uint16ᴍ(ref buf b) {
+internal static uint16 uint16⁔(/*this*/ ref buf b) {
     var a = b.bytes(2);
     if (a == nil) {
         return 0;
@@ -111,7 +111,7 @@ private static readonly @string underflowˢᵇᴍbuf = "underflow"u8;
     return b.order.Uint16(a);
 }
 
-[GoMethodBody("uint24")] internal static uint32 uint24ᴍ(ref buf b) {
+internal static uint32 uint24⁔(/*this*/ ref buf b) {
     var a = b.bytes(3);
     if (a == nil) {
         return 0;
@@ -123,7 +123,7 @@ private static readonly @string underflowˢᵇᴍbuf = "underflow"u8;
     }
 }
 
-[GoMethodBody("uint32")] internal static uint32 uint32ᴍ(ref buf b) {
+internal static uint32 uint32⁔(/*this*/ ref buf b) {
     var a = b.bytes(4);
     if (a == nil) {
         return 0;
@@ -131,7 +131,7 @@ private static readonly @string underflowˢᵇᴍbuf = "underflow"u8;
     return b.order.Uint32(a);
 }
 
-[GoMethodBody("uint64")] internal static uint64 uint64ᴍ(ref buf b) {
+internal static uint64 uint64⁔(/*this*/ ref buf b) {
     var a = b.bytes(8);
     if (a == nil) {
         return 0;
@@ -141,7 +141,7 @@ private static readonly @string underflowˢᵇᴍbuf = "underflow"u8;
 
 // Read a varint, which is 7 bits per byte, little endian.
 // the 0x80 bit means read another byte.
-[GoMethodBody("varint")] internal static (uint64 c, nuint bits) varintᴍ(ref buf b) {
+internal static (uint64 c, nuint bits) varint⁔(/*this*/ ref buf b) {
     uint64 c = default;
     nuint bits = default;
 
@@ -159,13 +159,13 @@ private static readonly @string underflowˢᵇᴍbuf = "underflow"u8;
 }
 
 // Unsigned int is just a varint.
-[GoMethodBody("uint")] internal static uint64 @uintᴍ(ref buf b) {
+internal static uint64 @uint⁔(/*this*/ ref buf b) {
     var (x, _) = b.varint();
     return x;
 }
 
 // Signed int is a sign-extended varint.
-[GoMethodBody("int")] internal static int64 @intᴍ(ref buf b) {
+internal static int64 @int⁔(/*this*/ ref buf b) {
     var (ux, bits) = b.varint();
     var x = (int64)ux;
     if ((x & (((int64)1).Lsh((bits - 1)))) != 0) {
@@ -175,11 +175,11 @@ private static readonly @string underflowˢᵇᴍbuf = "underflow"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownAddressSizeˢᴍbuf => ref unknownAddressSizeˢᵇᴍbuf;
-private static readonly @string unknownAddressSizeˢᵇᴍbuf = "unknown address size"u8;
+internal static ref readonly @string unknownAddressSizeˢ⁔buf => ref unknownAddressSizeˢᵇ⁔buf;
+private static readonly @string unknownAddressSizeˢᵇ⁔buf = "unknown address size"u8;
 
 // Address-sized uint.
-[GoMethodBody("addr")] internal static uint64 addrᴍ(ref buf b) {
+internal static uint64 addr⁔(/*this*/ ref buf b) {
     switch (b.format.addrsize()) {
     case 1: {
         return (uint64)b.uint8();
@@ -193,15 +193,15 @@ private static readonly @string unknownAddressSizeˢᵇᴍbuf = "unknown address
     case 8: {
         return b.uint64();
     }}
-    b.error(unknownAddressSizeˢᴍbuf);
+    b.error(unknownAddressSizeˢ⁔buf);
     return 0;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unitLengthHasReservedˢᴍbuf => ref unitLengthHasReservedˢᵇᴍbuf;
-private static readonly @string unitLengthHasReservedˢᵇᴍbuf = "unit length has reserved value"u8;
+internal static ref readonly @string unitLengthHasReservedˢ⁔buf => ref unitLengthHasReservedˢᵇ⁔buf;
+private static readonly @string unitLengthHasReservedˢᵇ⁔buf = "unit length has reserved value"u8;
 
-[GoMethodBody("unitLength")] internal static (Offset length, bool dwarf64) unitLengthᴍ(ref buf b) {
+internal static (Offset length, bool dwarf64) unitLength⁔(/*this*/ ref buf b) {
     Offset length = default;
     bool dwarf64 = default;
 
@@ -210,12 +210,12 @@ private static readonly @string unitLengthHasReservedˢᵇᴍbuf = "unit length 
         dwarf64 = true;
         length = (Offset)(uint32)b.uint64();
     } else if (length >= 0xfffffff0U) {
-        b.error(unitLengthHasReservedˢᴍbuf);
+        b.error(unitLengthHasReservedˢ⁔buf);
     }
     return (length, dwarf64);
 }
 
-[GoMethodBody("error")] internal static void errorᴍ(ref buf b, @string s) {
+internal static void error⁔(/*this*/ ref buf b, @string s) {
     if (b.err == nil) {
         b.data = default;
         b.err = new DecodeError(b.name, b.off, s);
@@ -232,7 +232,7 @@ partial struct DecodeError {
 
 } partial class dwarf_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(DecodeError e) {
+internal static @string Error⁔(/*this*/ DecodeError e) {
     return "decoding dwarf section "u8 + e.Name + " at offset 0x"u8 + strconv.FormatInt((int64)e.Offset, 16) + ": "u8 + e.Err;
 }
 

@@ -60,7 +60,7 @@ internal static ж<typeError> typeErrorf(@string format, params ꓸꓸꓸany arg
 
 // format formats a type error as a string.
 // check may be nil.
-[GoMethodBody("format")] internal static @string formatᴍ(ref typeError err, ж<Checker> check) {
+internal static @string format⁔(/*this*/ ref typeError err, ж<Checker> check) {
     return check.sprintf(err.format_, err.args.ꓸꓸꓸ);
 }
 

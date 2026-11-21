@@ -30,7 +30,7 @@ public static ж<Tuple> NewTuple(params ꓸꓸꓸжVar xʗp) {
 } partial class types_package {
 
 // Len returns the number variables of tuple t.
-[GoMethodBody("Len")] internal static nint Lenᴍ(ж<Tuple> Ꮡt) {
+internal static nint Len⁔(/*this*/ ж<Tuple> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt != nil) {
@@ -40,9 +40,9 @@ public static ж<Tuple> NewTuple(params ꓸꓸꓸжVar xʗp) {
 }
 
 // At returns the i'th variable of tuple t.
-[GoMethodBody("At")] internal static ж<Var> Atᴍ(ref Tuple t, nint i) { return t.vars[i]; }
+internal static ж<Var> At⁔(/*this*/ ref Tuple t, nint i) { return t.vars[i]; }
 
-[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Tuple> Ꮡt) { return new TupleжType(Ꮡt); }
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Tuple> Ꮡt) { return TypeString(new TupleжType(Ꮡt), default); }
+internal static Type Underlying⁔(/*this*/ ж<Tuple> Ꮡt) { return new TupleжType(Ꮡt); }
+internal static @string String⁔(/*this*/ ж<Tuple> Ꮡt) { return TypeString(new TupleжType(Ꮡt), default); }
 
 }

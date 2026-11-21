@@ -525,14 +525,14 @@ internal static Result _ᴛ1ʗ = ((RowsAffected)0);
 } partial class driver_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string lastInsertIdIsNotˢᴍRowsAffected => ref lastInsertIdIsNotˢᵇᴍRowsAffected;
-private static readonly @string lastInsertIdIsNotˢᵇᴍRowsAffected = "LastInsertId is not supported by this driver"u8;
+internal static ref readonly @string lastInsertIdIsNotˢ⁔RowsAffected => ref lastInsertIdIsNotˢᵇ⁔RowsAffected;
+private static readonly @string lastInsertIdIsNotˢᵇ⁔RowsAffected = "LastInsertId is not supported by this driver"u8;
 
-[GoMethodBody("LastInsertId")] internal static (int64, error) LastInsertIdᴍ(RowsAffected _) {
-    return (0, errors.New(lastInsertIdIsNotˢᴍRowsAffected));
+internal static (int64, error) LastInsertId⁔(/*this*/ RowsAffected _) {
+    return (0, errors.New(lastInsertIdIsNotˢ⁔RowsAffected));
 }
 
-[GoMethodBody("RowsAffected")] internal static (int64, error) RowsAffectedᴍ(RowsAffected v) {
+internal static (int64, error) RowsAffected⁔(/*this*/ RowsAffected v) {
     return ((int64)v, default);
 }
 
@@ -552,19 +552,19 @@ internal static Result _ᴛ2ʗ = new noRows();
 } partial class driver_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noLastInsertIdAvailableˢᴍnoRows => ref noLastInsertIdAvailableˢᵇᴍnoRows;
-private static readonly @string noLastInsertIdAvailableˢᵇᴍnoRows = "no LastInsertId available after DDL statement"u8;
+internal static ref readonly @string noLastInsertIdAvailableˢ⁔noRows => ref noLastInsertIdAvailableˢᵇ⁔noRows;
+private static readonly @string noLastInsertIdAvailableˢᵇ⁔noRows = "no LastInsertId available after DDL statement"u8;
 
-[GoMethodBody("LastInsertId")] internal static (int64, error) LastInsertIdᴍ(noRows _) {
-    return (0, errors.New(noLastInsertIdAvailableˢᴍnoRows));
+internal static (int64, error) LastInsertId⁔(/*this*/ noRows _) {
+    return (0, errors.New(noLastInsertIdAvailableˢ⁔noRows));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noRowsAffectedAvailableˢᴍnoRows => ref noRowsAffectedAvailableˢᵇᴍnoRows;
-private static readonly @string noRowsAffectedAvailableˢᵇᴍnoRows = "no RowsAffected available after DDL statement"u8;
+internal static ref readonly @string noRowsAffectedAvailableˢ⁔noRows => ref noRowsAffectedAvailableˢᵇ⁔noRows;
+private static readonly @string noRowsAffectedAvailableˢᵇ⁔noRows = "no RowsAffected available after DDL statement"u8;
 
-[GoMethodBody("RowsAffected")] internal static (int64, error) RowsAffectedᴍ(noRows _) {
-    return (0, errors.New(noRowsAffectedAvailableˢᴍnoRows));
+internal static (int64, error) RowsAffected⁔(/*this*/ noRows _) {
+    return (0, errors.New(noRowsAffectedAvailableˢ⁔noRows));
 }
 
 }

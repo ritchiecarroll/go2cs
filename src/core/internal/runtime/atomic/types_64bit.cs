@@ -19,7 +19,7 @@ partial class atomic_package {
 // WARNING: Use sparingly and with great care.
 //
 //go:nosplit
-[GoMethodBody("LoadAcquire")] internal static uint64 LoadAcquireᴍ(ж<Uint64> Ꮡu) {
+internal static uint64 LoadAcquire⁔(/*this*/ ж<Uint64> Ꮡu) {
     return LoadAcq64(Ꮡu.Ꮡvalue);
 }
 
@@ -32,7 +32,7 @@ partial class atomic_package {
 // WARNING: Use sparingly and with great care.
 //
 //go:nosplit
-[GoMethodBody("StoreRelease")] internal static void StoreReleaseᴍ(ж<Uint64> Ꮡu, uint64 value) {
+internal static void StoreRelease⁔(/*this*/ ж<Uint64> Ꮡu, uint64 value) {
     StoreRel64(Ꮡu.Ꮡvalue, value);
 }
 

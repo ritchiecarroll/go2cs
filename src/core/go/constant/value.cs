@@ -116,52 +116,52 @@ partial struct complexVal {
 
 } partial class constant_package {
 
-[GoMethodBody("Kind")] internal static Kind Kindᴍ(unknownVal _) { return Unknown; }
+internal static Kind Kind⁔(/*this*/ unknownVal _) { return Unknown; }
 
 } partial class constant_package {
 
-[GoMethodBody("Kind")] internal static Kind Kindᴍ(boolVal _) { return Bool; }
+internal static Kind Kind⁔(/*this*/ boolVal _) { return Bool; }
 
 } partial class constant_package {
 
-[GoMethodBody("Kind")] internal static Kind Kindᴍ(ref stringVal _) { return constant.String; }
+internal static Kind Kind⁔(/*this*/ ref stringVal _) { return constant.String; }
 
 } partial class constant_package {
 
-[GoMethodBody("Kind")] internal static Kind Kindᴍ(int64Val _) { return Int; }
+internal static Kind Kind⁔(/*this*/ int64Val _) { return Int; }
 
 } partial class constant_package {
 
-[GoMethodBody("Kind")] internal static Kind Kindᴍ(intVal _) { return Int; }
+internal static Kind Kind⁔(/*this*/ intVal _) { return Int; }
 
 } partial class constant_package {
 
-[GoMethodBody("Kind")] internal static Kind Kindᴍ(ratVal _) { return Float; }
+internal static Kind Kind⁔(/*this*/ ratVal _) { return Float; }
 
 } partial class constant_package {
 
-[GoMethodBody("Kind")] internal static Kind Kindᴍ(floatVal _) { return Float; }
+internal static Kind Kind⁔(/*this*/ floatVal _) { return Float; }
 
 } partial class constant_package {
 
-[GoMethodBody("Kind")] internal static Kind Kindᴍ(complexVal _) { return Complex; }
+internal static Kind Kind⁔(/*this*/ complexVal _) { return Complex; }
 
 } partial class constant_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownˢᴍunknownVal => ref unknownˢᵇᴍunknownVal;
-private static readonly @string unknownˢᵇᴍunknownVal = "unknown"u8;
+internal static ref readonly @string unknownˢ⁔unknownVal => ref unknownˢᵇ⁔unknownVal;
+private static readonly @string unknownˢᵇ⁔unknownVal = "unknown"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(unknownVal _) { return unknownˢᴍunknownVal; }
+internal static @string String⁔(/*this*/ unknownVal _) { return unknownˢ⁔unknownVal; }
 
 } partial class constant_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(boolVal x) { return strconv.FormatBool((bool)x); }
+internal static @string String⁔(/*this*/ boolVal x) { return strconv.FormatBool((bool)x); }
 
 } partial class constant_package {
 
 // String returns a possibly shortened quoted form of the String value.
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<stringVal> Ꮡx) {
+internal static @string String⁔(/*this*/ ж<stringVal> Ꮡx) {
     UntypedInt maxLen = 72; // a reasonable length
     @string s = strconv.Quote(Ꮡx.@string());
     if (utf8.RuneCountInString(s) > maxLen) {
@@ -183,7 +183,7 @@ private static readonly @string unknownˢᵇᴍunknownVal = "unknown"u8;
 // string, to speed future calls. This lazy construction avoids
 // building different string values for all subpieces of a large
 // concatenation. See golang.org/issue/23348.
-[GoMethodBody("string")] internal static @string @stringᴍ(ж<stringVal> Ꮡx) {
+internal static @string @string⁔(/*this*/ ж<stringVal> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     x.mu.Lock();
@@ -217,7 +217,7 @@ internal static slice<@string> reverse(slice<@string> x) {
 // Because a chain like a + b + c + d + e is actually represented
 // as ((((a + b) + c) + d) + e), the left-side loop avoids deep recursion.
 // x must be locked.
-[GoMethodBody("appendReverse")] internal static slice<@string> appendReverseᴍ(ж<stringVal> Ꮡx, slice<@string> list) {
+internal static slice<@string> appendReverse⁔(/*this*/ ж<stringVal> Ꮡx, slice<@string> list) {
     var y = Ꮡx;
     while (y.r != nil) {
         y.r.Ꮡmu.Lock();
@@ -240,20 +240,20 @@ internal static slice<@string> reverse(slice<@string> x) {
 
 } partial class constant_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(int64Val x) { return strconv.FormatInt((int64)x, 10); }
+internal static @string String⁔(/*this*/ int64Val x) { return strconv.FormatInt((int64)x, 10); }
 
 } partial class constant_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(intVal x) { return x.val.String(); }
+internal static @string String⁔(/*this*/ intVal x) { return x.val.String(); }
 
 } partial class constant_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ratVal x) { return rtof(x).String(); }
+internal static @string String⁔(/*this*/ ratVal x) { return rtof(x).String(); }
 
 } partial class constant_package {
 
 // String returns a decimal approximation of the Float value.
-[GoMethodBody("String")] internal static @string Stringᴍ(floatVal x) {
+internal static @string String⁔(/*this*/ floatVal x) {
     var f = x.val;
 
     // Don't try to convert infinities (will not terminate).
@@ -311,31 +311,31 @@ internal static slice<@string> reverse(slice<@string> x) {
 
 } partial class constant_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(complexVal x) { return fmt.Sprintf("(%s + %si)"u8, x.re, x.im); }
+internal static @string String⁔(/*this*/ complexVal x) { return fmt.Sprintf("(%s + %si)"u8, x.re, x.im); }
 
 } partial class constant_package {
 
-[GoMethodBody("ExactString")] internal static @string ExactStringᴍ(unknownVal x) { return x.String(); }
+internal static @string ExactString⁔(/*this*/ unknownVal x) { return x.String(); }
 
 } partial class constant_package {
 
-[GoMethodBody("ExactString")] internal static @string ExactStringᴍ(boolVal x) { return x.String(); }
+internal static @string ExactString⁔(/*this*/ boolVal x) { return x.String(); }
 
 } partial class constant_package {
 
-[GoMethodBody("ExactString")] internal static @string ExactStringᴍ(ж<stringVal> Ꮡx) { return strconv.Quote(Ꮡx.@string()); }
+internal static @string ExactString⁔(/*this*/ ж<stringVal> Ꮡx) { return strconv.Quote(Ꮡx.@string()); }
 
 } partial class constant_package {
 
-[GoMethodBody("ExactString")] internal static @string ExactStringᴍ(int64Val x) { return x.String(); }
+internal static @string ExactString⁔(/*this*/ int64Val x) { return x.String(); }
 
 } partial class constant_package {
 
-[GoMethodBody("ExactString")] internal static @string ExactStringᴍ(intVal x) { return x.String(); }
+internal static @string ExactString⁔(/*this*/ intVal x) { return x.String(); }
 
 } partial class constant_package {
 
-[GoMethodBody("ExactString")] internal static @string ExactStringᴍ(ratVal x) {
+internal static @string ExactString⁔(/*this*/ ratVal x) {
     var r = x.val;
     if (r.IsInt()) {
         return r.Num().String();
@@ -345,45 +345,45 @@ internal static slice<@string> reverse(slice<@string> x) {
 
 } partial class constant_package {
 
-[GoMethodBody("ExactString")] internal static @string ExactStringᴍ(floatVal x) { return x.val.Text((byte)'p', 0); }
+internal static @string ExactString⁔(/*this*/ floatVal x) { return x.val.Text((byte)'p', 0); }
 
 } partial class constant_package {
 
-[GoMethodBody("ExactString")] internal static @string ExactStringᴍ(complexVal x) {
+internal static @string ExactString⁔(/*this*/ complexVal x) {
     return fmt.Sprintf("(%s + %si)"u8, x.re.ExactString(), x.im.ExactString());
 }
 
 } partial class constant_package {
 
-[GoMethodBody("implementsValue")] internal static void implementsValueᴍ(unknownVal _) { }
+internal static void implementsValue⁔(/*this*/ unknownVal _) { }
 
 } partial class constant_package {
 
-[GoMethodBody("implementsValue")] internal static void implementsValueᴍ(boolVal _) { }
+internal static void implementsValue⁔(/*this*/ boolVal _) { }
 
 } partial class constant_package {
 
-[GoMethodBody("implementsValue")] internal static void implementsValueᴍ(ref stringVal _) { }
+internal static void implementsValue⁔(/*this*/ ref stringVal _) { }
 
 } partial class constant_package {
 
-[GoMethodBody("implementsValue")] internal static void implementsValueᴍ(int64Val _) { }
+internal static void implementsValue⁔(/*this*/ int64Val _) { }
 
 } partial class constant_package {
 
-[GoMethodBody("implementsValue")] internal static void implementsValueᴍ(ratVal _) { }
+internal static void implementsValue⁔(/*this*/ ratVal _) { }
 
 } partial class constant_package {
 
-[GoMethodBody("implementsValue")] internal static void implementsValueᴍ(intVal _) { }
+internal static void implementsValue⁔(/*this*/ intVal _) { }
 
 } partial class constant_package {
 
-[GoMethodBody("implementsValue")] internal static void implementsValueᴍ(floatVal _) { }
+internal static void implementsValue⁔(/*this*/ floatVal _) { }
 
 } partial class constant_package {
 
-[GoMethodBody("implementsValue")] internal static void implementsValueᴍ(complexVal _) { }
+internal static void implementsValue⁔(/*this*/ complexVal _) { }
 
 } partial class constant_package {
 

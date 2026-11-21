@@ -125,19 +125,19 @@ partial struct buffer /*[]byte*/;
 
 } partial class fmt_package {
 
-[GoMethodBody("write")] internal static void writeᴍ(ref buffer b, slice<byte> p) {
+internal static void write⁔(/*this*/ ref buffer b, slice<byte> p) {
     b = appendꓸꓸꓸ(b, p);
 }
 
-[GoMethodBody("writeString")] internal static void writeStringᴍ(ref buffer b, sstring s) {
+internal static void writeString⁔(/*this*/ ref buffer b, sstring s) {
     b = append(b, s.ꓸꓸꓸ);
 }
 
-[GoMethodBody("writeByte")] internal static void writeByteᴍ(ref buffer b, byte c) {
+internal static void writeByte⁔(/*this*/ ref buffer b, byte c) {
     b = append(b, c);
 }
 
-[GoMethodBody("writeRune")] internal static void writeRuneᴍ(ref buffer b, rune r) {
+internal static void writeRune⁔(/*this*/ ref buffer b, rune r) {
     b = utf8.AppendRune(b, r);
 }
 
@@ -184,7 +184,7 @@ internal static ж<pp> newPrinter() {
 } partial class fmt_package {
 
 // free saves used pp structs in ppFree; avoids an allocation per invocation.
-[GoMethodBody("free")] internal static void freeᴍ(ж<pp> Ꮡp) {
+internal static void free⁔(/*this*/ ж<pp> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Proper usage of a sync.Pool requires each entry to have approximately
@@ -209,11 +209,11 @@ internal static ж<pp> newPrinter() {
     ᏑppFree.Put(Ꮡp.OrTypedNil());
 }
 
-[GoMethodBody("Width")] internal static (nint wid, bool ok) Widthᴍ(ref pp p) { return (p.fmt.wid, p.fmt.widPresent); }
+internal static (nint wid, bool ok) Width⁔(/*this*/ ref pp p) { return (p.fmt.wid, p.fmt.widPresent); }
 
-[GoMethodBody("Precision")] internal static (nint prec, bool ok) Precisionᴍ(ref pp p) { return (p.fmt.prec, p.fmt.precPresent); }
+internal static (nint prec, bool ok) Precision⁔(/*this*/ ref pp p) { return (p.fmt.prec, p.fmt.precPresent); }
 
-[GoMethodBody("Flag")] internal static bool Flagᴍ(ref pp p, nint b) {
+internal static bool Flag⁔(/*this*/ ref pp p, nint b) {
     switch (b) {
     case '-': {
         return p.fmt.minus;
@@ -235,14 +235,14 @@ internal static ж<pp> newPrinter() {
 
 // Write implements [io.Writer] so we can call [Fprintf] on a pp (through [State]), for
 // recursive use in custom verbs.
-[GoMethodBody("Write")] internal static (nint ret, error err) Writeᴍ(ref pp p, slice<byte> b) {
+internal static (nint ret, error err) Write⁔(/*this*/ ref pp p, slice<byte> b) {
     p.buf.write(b);
     return (len(b), default);
 }
 
 // WriteString implements [io.StringWriter] so that we can call [io.WriteString]
 // on a pp (through state), for efficiency.
-[GoMethodBody("WriteString")] internal static (nint ret, error err) WriteStringᴍ(ref pp p, @string s) {
+internal static (nint ret, error err) WriteString⁔(/*this*/ ref pp p, @string s) {
     p.buf.writeString(s);
     return (len(s), default);
 }
@@ -439,7 +439,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start
 
 } partial class fmt_package {
 
-[GoMethodBody("unknownType")] internal static void unknownTypeᴍ(ref pp p, reflect.Value v) {
+internal static void unknownType⁔(/*this*/ ref pp p, reflect.Value v) {
     if (!v.IsValid()) {
         p.buf.writeString(nilAngleString);
         return;
@@ -449,7 +449,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start
     p.buf.writeByte((byte)'?');
 }
 
-[GoMethodBody("badVerb")] internal static void badVerbᴍ(ж<pp> Ꮡp, rune verb) {
+internal static void badVerb⁔(/*this*/ ж<pp> Ꮡp, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.erroring = true;
@@ -477,7 +477,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start
     p.erroring = false;
 }
 
-[GoMethodBody("fmtBool")] internal static void fmtBoolᴍ(ж<pp> Ꮡp, bool v, rune verb) {
+internal static void fmtBool⁔(/*this*/ ж<pp> Ꮡp, bool v, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
@@ -493,7 +493,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start
 
 // fmt0x64 formats a uint64 in hexadecimal and prefixes it with 0x or
 // not, as requested, by temporarily setting the sharp flag.
-[GoMethodBody("fmt0x64")] internal static void fmt0x64ᴍ(ref pp p, uint64 v, bool leading0x) {
+internal static void fmt0x64⁔(/*this*/ ref pp p, uint64 v, bool leading0x) {
     var sharp = p.fmt.sharp;
     p.fmt.sharp = leading0x;
     p.fmt.fmtInteger(v, 16, unsigned, 'v', ldigits);
@@ -501,7 +501,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start
 }
 
 // fmtInteger formats a signed or unsigned integer.
-[GoMethodBody("fmtInteger")] internal static void fmtIntegerᴍ(ж<pp> Ꮡp, uint64 v, bool isSigned, rune verb) {
+internal static void fmtInteger⁔(/*this*/ ж<pp> Ꮡp, uint64 v, bool isSigned, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
@@ -553,7 +553,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start
 
 // fmtFloat formats a float. The default precision for each verb
 // is specified as last argument in the call to fmt_float.
-[GoMethodBody("fmtFloat")] internal static void fmtFloatᴍ(ж<pp> Ꮡp, float64 v, nint size, rune verb) {
+internal static void fmtFloat⁔(/*this*/ ж<pp> Ꮡp, float64 v, nint size, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
@@ -582,7 +582,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start
 // fmtComplex formats a complex number v with
 // r = real(v) and j = imag(v) as (r+ji) using
 // fmtFloat for r and j formatting.
-[GoMethodBody("fmtComplex")] internal static void fmtComplexᴍ(ж<pp> Ꮡp, complex128 v, nint size, rune verb) {
+internal static void fmtComplex⁔(/*this*/ ж<pp> Ꮡp, complex128 v, nint size, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Make sure any unsupported verbs are found before the
@@ -605,7 +605,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start
     }}
 }
 
-[GoMethodBody("fmtString")] internal static void fmtStringᴍ(ж<pp> Ꮡp, @string v, rune verb) {
+internal static void fmtString⁔(/*this*/ ж<pp> Ꮡp, @string v, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
@@ -639,7 +639,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start
     }}
 }
 
-[GoMethodBody("fmtBytes")] internal static void fmtBytesᴍ(ж<pp> Ꮡp, slice<byte> v, rune verb, sstring typeString) {
+internal static void fmtBytes⁔(/*this*/ ж<pp> Ꮡp, slice<byte> v, rune verb, sstring typeString) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (verb) {
@@ -692,7 +692,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start
     }}
 }
 
-[GoMethodBody("fmtPointer")] internal static void fmtPointerᴍ(ж<pp> Ꮡp, reflect.Value value, rune verb) {
+internal static void fmtPointer⁔(/*this*/ ж<pp> Ꮡp, reflect.Value value, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     uintptr u = default;
@@ -742,10 +742,10 @@ internal static (nint num, bool isnum, nint newi) parsenum(sstring s, nint start
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string methodˢᴍpp => ref methodˢᵇᴍpp;
-private static readonly @string methodˢᵇᴍpp = " method: "u8;
+internal static ref readonly @string methodˢ⁔pp => ref methodˢᵇ⁔pp;
+private static readonly @string methodˢᵇ⁔pp = " method: "u8;
 
-[GoMethodBody("catchPanic")] internal static void catchPanicᴍ(ж<pp> Ꮡp, any arg, rune verb, @string method) {
+internal static void catchPanic⁔(/*this*/ ж<pp> Ꮡp, any arg, rune verb, @string method) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
@@ -774,7 +774,7 @@ private static readonly @string methodˢᵇᴍpp = " method: "u8;
             p.buf.writeRune(verb);
             p.buf.writeString(panicString);
             p.buf.writeString(method);
-            p.buf.writeString(methodˢᴍpp);
+            p.buf.writeString(methodˢ⁔pp);
             p.panicking = true;
             Ꮡp.printArg(err, 'v');
             p.panicking = false;
@@ -788,16 +788,16 @@ private static readonly @string methodˢᵇᴍpp = " method: "u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string formatˢᴍpp => ref formatˢᵇᴍpp;
-private static readonly @string formatˢᵇᴍpp = "Format"u8;
-internal static ref readonly @string goStringˢᴍpp => ref goStringˢᵇᴍpp;
-private static readonly @string goStringˢᵇᴍpp = "GoString"u8;
-internal static ref readonly @string errorˢᴍpp => ref errorˢᵇᴍpp;
-private static readonly @string errorˢᵇᴍpp = "Error"u8;
-internal static ref readonly @string stringˢᴍpp => ref stringˢᵇᴍpp;
-private static readonly @string stringˢᵇᴍpp = "String"u8;
+internal static ref readonly @string formatˢ⁔pp => ref formatˢᵇ⁔pp;
+private static readonly @string formatˢᵇ⁔pp = "Format"u8;
+internal static ref readonly @string goStringˢ⁔pp => ref goStringˢᵇ⁔pp;
+private static readonly @string goStringˢᵇ⁔pp = "GoString"u8;
+internal static ref readonly @string errorˢ⁔pp => ref errorˢᵇ⁔pp;
+private static readonly @string errorˢᵇ⁔pp = "Error"u8;
+internal static ref readonly @string stringˢ⁔pp => ref stringˢᵇ⁔pp;
+private static readonly @string stringˢᵇ⁔pp = "String"u8;
 
-[GoMethodBody("handleMethods")] internal static bool /*handled*/ handleMethodsᴍ(ж<pp> Ꮡp, rune verb) {
+internal static bool /*handled*/ handleMethods⁔(/*this*/ ж<pp> Ꮡp, rune verb) {
     bool handled = default;
     GoFrame ᒐ = default;
     try {
@@ -821,7 +821,7 @@ private static readonly @string stringˢᵇᴍpp = "String"u8;
         {
             var (formatter, ok) = p.arg._<Formatter>(ᐧ); if (ok) {
                 handled = true;
-                defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, formatˢᴍpp, ref ᒐ, recovers: true);
+                defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, formatˢ⁔pp, ref ᒐ, recovers: true);
                 formatter.Format(new ppжState(Ꮡp), verb);
                 goto ᒐdone;
             }
@@ -832,7 +832,7 @@ private static readonly @string stringˢᵇᴍpp = "String"u8;
             {
                 var (stringer, ok) = p.arg._<GoStringer>(ᐧ); if (ok) {
                     handled = true;
-                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, goStringˢᴍpp, ref ᒐ, recovers: true);
+                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, goStringˢ⁔pp, ref ᒐ, recovers: true);
                     // Print the result of GoString unadorned.
                     p.fmt.fmtS(stringer.GoString());
                     goto ᒐdone;
@@ -851,13 +851,13 @@ private static readonly @string stringˢᵇᴍpp = "String"u8;
                 switch (p.arg.type()) {
                 case {} Δv when Δv._<error>(out var v): {
                     handled = true;
-                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, errorˢᴍpp, ref ᒐ, recovers: true);
+                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, errorˢ⁔pp, ref ᒐ, recovers: true);
                     Ꮡp.fmtString(v.Error(), verb);
                     goto ᒐdone;
                 }
                 case {} Δv when Δv._<Stringer>(out var v): {
                     handled = true;
-                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, stringˢᴍpp, ref ᒐ, recovers: true);
+                    defer(Ꮡp.catchPanic, Ꮡp.Value.arg, verb, stringˢ⁔pp, ref ᒐ, recovers: true);
                     Ꮡp.fmtString(v.String(), verb);
                     goto ᒐdone;
                 }}
@@ -872,10 +872,10 @@ private static readonly @string stringˢᵇᴍpp = "String"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string byteˢᴍpp => ref byteˢᵇᴍpp;
-private static readonly @string byteˢᵇᴍpp = "[]byte"u8;
+internal static ref readonly @string byteˢ⁔pp => ref byteˢᵇ⁔pp;
+private static readonly @string byteˢᵇ⁔pp = "[]byte"u8;
 
-[GoMethodBody("printArg")] internal static void printArgᴍ(ж<pp> Ꮡp, any arg, rune verb) {
+internal static void printArg⁔(/*this*/ ж<pp> Ꮡp, any arg, rune verb) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.arg = arg;
@@ -977,7 +977,7 @@ private static readonly @string byteˢᵇᴍpp = "[]byte"u8;
         break;
     }
     case slice<byte> f: {
-        Ꮡp.fmtBytes(f, verb, byteˢᴍpp);
+        Ꮡp.fmtBytes(f, verb, byteˢ⁔pp);
         break;
     }
     case reflect.Value f: {
@@ -1006,7 +1006,7 @@ private static readonly @string byteˢᵇᴍpp = "[]byte"u8;
 
 // printValue is similar to printArg but starts with a reflect value, not an interface{} value.
 // It does not handle 'p' and 'T' verbs because these should have been already handled by printArg.
-[GoMethodBody("printValue")] internal static void printValueᴍ(ж<pp> Ꮡp, reflect.Value value, rune verb, nint depth) {
+internal static void printValue⁔(/*this*/ ж<pp> Ꮡp, reflect.Value value, rune verb, nint depth) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // Handle values with special methods if not already handled by printArg (depth == 0).
@@ -1272,7 +1272,7 @@ internal static (nint index, nint wid, bool ok) parseArgNumber(sstring format) {
 // argNumber returns the next argument to evaluate, which is either the value of the passed-in
 // argNum or the value of the bracketed integer that begins format[i:]. It also returns
 // the new value of i, that is, the index of the next byte of the format to process.
-[GoMethodBody("argNumber")] internal static (nint newArgNum, nint newi, bool found) argNumberᴍ(ref pp p, nint argNum, sstring format, nint i, nint numArgs) {
+internal static (nint newArgNum, nint newi, bool found) argNumber⁔(/*this*/ ref pp p, nint argNum, sstring format, nint i, nint numArgs) {
     if (len(format) <= i || format[i] != '[') {
         return (argNum, i, false);
     }
@@ -1285,19 +1285,19 @@ internal static (nint index, nint wid, bool ok) parseArgNumber(sstring format) {
     return (argNum, i + wid, ok);
 }
 
-[GoMethodBody("badArgNum")] internal static void badArgNumᴍ(ref pp p, rune verb) {
+internal static void badArgNum⁔(/*this*/ ref pp p, rune verb) {
     p.buf.writeString(percentBangString);
     p.buf.writeRune(verb);
     p.buf.writeString(badIndexString);
 }
 
-[GoMethodBody("missingArg")] internal static void missingArgᴍ(ref pp p, rune verb) {
+internal static void missingArg⁔(/*this*/ ref pp p, rune verb) {
     p.buf.writeString(percentBangString);
     p.buf.writeRune(verb);
     p.buf.writeString(missingString);
 }
 
-[GoMethodBody("doPrintf")] internal static void doPrintfᴍ(ж<pp> Ꮡp, sstring format, slice<any> a) {
+internal static void doPrintf⁔(/*this*/ ж<pp> Ꮡp, sstring format, slice<any> a) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     nint end = len(format);
@@ -1498,7 +1498,7 @@ break_formatLoop:;
     }
 }
 
-[GoMethodBody("doPrint")] internal static void doPrintᴍ(ж<pp> Ꮡp, slice<any> a) {
+internal static void doPrint⁔(/*this*/ ж<pp> Ꮡp, slice<any> a) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var prevString = false;
@@ -1515,7 +1515,7 @@ break_formatLoop:;
 
 // doPrintln is like doPrint but always adds a space between arguments
 // and a newline after the last argument.
-[GoMethodBody("doPrintln")] internal static void doPrintlnᴍ(ж<pp> Ꮡp, slice<any> a) {
+internal static void doPrintln⁔(/*this*/ ж<pp> Ꮡp, slice<any> a) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     foreach (var (argNum, arg) in range(a)) {

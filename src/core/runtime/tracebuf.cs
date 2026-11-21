@@ -44,7 +44,7 @@ partial struct traceWriter {
 // nosplit to allow for safe reentrant tracing from stack growth paths.
 //
 //go:nosplit
-[GoMethodBody("writer")] internal static traceWriter writerᴍ(traceLocker tl) {
+internal static traceWriter writer⁔(/*this*/ traceLocker tl) {
     if (debugTraceReentrancy) {
         // Checks that the invariants of this function are being upheld.
         var gp = getg();
@@ -79,7 +79,7 @@ internal static traceWriter unsafeTraceWriter(uintptr gen, ж<traceBuf> buf) {
 // have any stack growth.
 //
 //go:nosplit
-[GoMethodBody("event")] internal static traceWriter @eventᴍ(traceWriter w, tracev2.EventType ev, params ꓸꓸꓸtraceArg argsʗp) {
+internal static traceWriter @event⁔(/*this*/ traceWriter w, tracev2.EventType ev, params ꓸꓸꓸtraceArg argsʗp) {
     var args = argsʗp.sslice();
 
     // N.B. Everything in this call must be nosplit to maintain
@@ -111,7 +111,7 @@ internal static traceWriter unsafeTraceWriter(uintptr gen, ж<traceBuf> buf) {
 // have any stack growth.
 //
 //go:nosplit
-[GoMethodBody("end")] internal static void endᴍ(traceWriter w) {
+internal static void end⁔(/*this*/ traceWriter w) {
     if (w.mp == nil) {
         // Tolerate a nil mp. It makes code that creates traceWriters directly
         // less error-prone.
@@ -136,7 +136,7 @@ internal static traceWriter unsafeTraceWriter(uintptr gen, ж<traceBuf> buf) {
 // have any stack growth.
 //
 //go:nosplit
-[GoMethodBody("ensure")] internal static (traceWriter, bool) ensureᴍ(traceWriter w, nint maxSize) {
+internal static (traceWriter, bool) ensure⁔(/*this*/ traceWriter w, nint maxSize) {
     var refill = w.traceBuf == nil || !w.available(maxSize);
     if (refill) {
         w = w.refill();
@@ -150,7 +150,7 @@ internal static traceWriter unsafeTraceWriter(uintptr gen, ж<traceBuf> buf) {
 // have any stack growth.
 //
 //go:nosplit
-[GoMethodBody("flush")] internal static traceWriter flushᴍ(traceWriter w) {
+internal static traceWriter flush⁔(/*this*/ traceWriter w) {
     systemstack(() => {
         @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         if (w.traceBuf != nil) {
@@ -163,13 +163,13 @@ internal static traceWriter unsafeTraceWriter(uintptr gen, ж<traceBuf> buf) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string traceBufferˢᴍtraceWriter => ref traceBufferˢᵇᴍtraceWriter;
-private static readonly @string traceBufferˢᵇᴍtraceWriter = "trace buffer"u8;
-internal static ref readonly @string traceOutOfMemoryˢᴍtraceWriter => ref traceOutOfMemoryˢᵇᴍtraceWriter;
-private static readonly @string traceOutOfMemoryˢᵇᴍtraceWriter = "trace: out of memory"u8;
+internal static ref readonly @string traceBufferˢ⁔traceWriter => ref traceBufferˢᵇ⁔traceWriter;
+private static readonly @string traceBufferˢᵇ⁔traceWriter = "trace buffer"u8;
+internal static ref readonly @string traceOutOfMemoryˢ⁔traceWriter => ref traceOutOfMemoryˢᵇ⁔traceWriter;
+private static readonly @string traceOutOfMemoryˢᵇ⁔traceWriter = "trace: out of memory"u8;
 
 // refill puts w.traceBuf on the queue of full buffers and refresh's w's buffer.
-[GoMethodBody("refill")] internal static traceWriter refillᴍ(traceWriter w) {
+internal static traceWriter refill⁔(/*this*/ traceWriter w) {
     systemstack(() => {
         @lock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         if (w.traceBuf != nil) {
@@ -181,9 +181,9 @@ private static readonly @string traceOutOfMemoryˢᵇᴍtraceWriter = "trace: ou
             unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
         } else {
             unlock(Ꮡtrace.of(traceᴛ1.Ꮡlock));
-            w.traceBuf = @unsafe.Pointer.To<traceBuf>(sysAlloc(/* unsafe.Sizeof(traceBuf{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys, traceBufferˢᴍtraceWriter));
+            w.traceBuf = @unsafe.Pointer.To<traceBuf>(sysAlloc(/* unsafe.Sizeof(traceBuf{}) */ (uintptr)65536, Ꮡmemstats.Ꮡother_sys, traceBufferˢ⁔traceWriter));
             if (w.traceBuf == nil) {
-                @throw(traceOutOfMemoryˢᴍtraceWriter);
+                @throw(traceOutOfMemoryˢ⁔traceWriter);
             }
         }
     });
@@ -220,7 +220,7 @@ private static readonly @string traceOutOfMemoryˢᵇᴍtraceWriter = "trace: ou
 
 // expWriter returns a traceWriter that writes into the current M's stream for
 // the given experiment.
-[GoMethodBody("expWriter")] internal static traceWriter expWriterᴍ(traceLocker tl, tracev2.Experiment exp) {
+internal static traceWriter expWriter⁔(/*this*/ traceLocker tl, tracev2.Experiment exp) {
     return new traceWriter(traceLocker: tl, traceBuf: (~tl.mp).trace.buf[tl.gen % 2][exp], exp: exp);
 }
 
@@ -249,7 +249,7 @@ partial struct traceBufQueue {
 } partial class runtime_package {
 
 // push queues buf into queue of buffers.
-[GoMethodBody("push")] internal static void pushᴍ(ref traceBufQueue q, ж<traceBuf> Ꮡbuf) {
+internal static void push⁔(/*this*/ ref traceBufQueue q, ж<traceBuf> Ꮡbuf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     buf.link = default;
@@ -262,7 +262,7 @@ partial struct traceBufQueue {
 }
 
 // pop dequeues from the queue of buffers.
-[GoMethodBody("pop")] internal static ж<traceBuf> popᴍ(ref traceBufQueue q) {
+internal static ж<traceBuf> pop⁔(/*this*/ ref traceBufQueue q) {
     var buf = q.head;
     if (buf == nil) {
         return default;
@@ -275,7 +275,7 @@ partial struct traceBufQueue {
     return buf;
 }
 
-[GoMethodBody("empty")] internal static bool emptyᴍ(ref traceBufQueue q) {
+internal static bool empty⁔(/*this*/ ref traceBufQueue q) {
     return q.head == nil;
 }
 
@@ -306,7 +306,7 @@ partial struct traceBuf {
 // have any stack growth.
 //
 //go:nosplit
-[GoMethodBody("byte")] internal static void @byteᴍ(ref traceBuf buf, byte v) {
+internal static void @byte⁔(/*this*/ ref traceBuf buf, byte v) {
     buf.arr[buf.pos] = v;
     buf.pos++;
 }
@@ -317,7 +317,7 @@ partial struct traceBuf {
 // have any stack growth.
 //
 //go:nosplit
-[GoMethodBody("varint")] internal static void varintᴍ(ref traceBuf buf, uint64 v) {
+internal static void varint⁔(/*this*/ ref traceBuf buf, uint64 v) {
     nint pos = buf.pos;
     var arr = buf.arr.slice(pos, pos + (nint)traceBytesPerNumber);
     foreach (var i in range(len(arr))) {
@@ -340,7 +340,7 @@ partial struct traceBuf {
 // have any stack growth.
 //
 //go:nosplit
-[GoMethodBody("varintReserve")] internal static nint varintReserveᴍ(ref traceBuf buf) {
+internal static nint varintReserve⁔(/*this*/ ref traceBuf buf) {
     nint p = buf.pos;
     buf.pos += traceBytesPerNumber;
     return p;
@@ -352,7 +352,7 @@ partial struct traceBuf {
 // have any stack growth.
 //
 //go:nosplit
-[GoMethodBody("stringData")] internal static void stringDataᴍ(ref traceBuf buf, @string s) {
+internal static void stringData⁔(/*this*/ ref traceBuf buf, @string s) {
     buf.pos += copy(buf.arr.slice(buf.pos), s);
 }
 
@@ -360,13 +360,13 @@ partial struct traceBuf {
 // have any stack growth.
 //
 //go:nosplit
-[GoMethodBody("available")] internal static bool availableᴍ(ref traceBuf buf, nint size) {
+internal static bool available⁔(/*this*/ ref traceBuf buf, nint size) {
     return len(buf.arr) - buf.pos >= size;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string vCouldNotFitInˢᴍtraceBuf => ref vCouldNotFitInˢᵇᴍtraceBuf;
-private static readonly @string vCouldNotFitInˢᵇᴍtraceBuf = "v could not fit in traceBytesPerNumber"u8;
+internal static ref readonly @string vCouldNotFitInˢ⁔traceBuf => ref vCouldNotFitInˢᵇ⁔traceBuf;
+private static readonly @string vCouldNotFitInˢᵇ⁔traceBuf = "v could not fit in traceBytesPerNumber"u8;
 
 // varintAt writes varint v at byte position pos in buf. This always
 // consumes traceBytesPerNumber bytes. This is intended for when the caller
@@ -377,7 +377,7 @@ private static readonly @string vCouldNotFitInˢᵇᴍtraceBuf = "v could not fi
 // have any stack growth.
 //
 //go:nosplit
-[GoMethodBody("varintAt")] internal static void varintAtᴍ(ref traceBuf buf, nint pos, uint64 v) {
+internal static void varintAt⁔(/*this*/ ref traceBuf buf, nint pos, uint64 v) {
     for (nint i = 0; i < traceBytesPerNumber; i++) {
         if (i < (nint)(traceBytesPerNumber - 1)) {
             buf.arr[pos] = (byte)(0x80 | (byte)v);
@@ -388,7 +388,7 @@ private static readonly @string vCouldNotFitInˢᵇᴍtraceBuf = "v could not fi
         pos++;
     }
     if (v != 0) {
-        @throw(vCouldNotFitInˢᴍtraceBuf);
+        @throw(vCouldNotFitInˢ⁔traceBuf);
     }
 }
 

@@ -29,7 +29,7 @@ partial struct Interface {
 } partial class types_package {
 
 // typeSet returns the type set for interface t.
-[GoMethodBody("typeSet")] internal static ж<_TypeSet> typeSetᴍ(ж<Interface> Ꮡt) {
+internal static ж<_TypeSet> typeSet⁔(/*this*/ ж<Interface> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     return computeInterfaceTypeSet(t.check, nopos, Ꮡt);
@@ -87,7 +87,7 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<Type
 } partial class types_package {
 
 // check may be nil
-[GoMethodBody("newInterface")] internal static ж<Interface> newInterfaceᴍ(ж<Checker> Ꮡcheck) {
+internal static ж<Interface> newInterface⁔(/*this*/ ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var typ = Ꮡ(new Interface(check: Ꮡcheck));
@@ -103,48 +103,48 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<Type
 // corresponds to a constraint literal such as ~T or A|B without explicit
 // interface embedding. MarkImplicit should be called before any concurrent use
 // of implicit interfaces.
-[GoMethodBody("MarkImplicit")] internal static void MarkImplicitᴍ(ref Interface t) {
+internal static void MarkImplicit⁔(/*this*/ ref Interface t) {
     t.@implicit = true;
 }
 
 // NumExplicitMethods returns the number of explicitly declared methods of interface t.
-[GoMethodBody("NumExplicitMethods")] internal static nint NumExplicitMethodsᴍ(ref Interface t) { return len(t.methods); }
+internal static nint NumExplicitMethods⁔(/*this*/ ref Interface t) { return len(t.methods); }
 
 // ExplicitMethod returns the i'th explicitly declared method of interface t for 0 <= i < t.NumExplicitMethods().
 // The methods are ordered by their unique [Id].
-[GoMethodBody("ExplicitMethod")] internal static ж<Func> ExplicitMethodᴍ(ref Interface t, nint i) { return t.methods[i]; }
+internal static ж<Func> ExplicitMethod⁔(/*this*/ ref Interface t, nint i) { return t.methods[i]; }
 
 // NumEmbeddeds returns the number of embedded types in interface t.
-[GoMethodBody("NumEmbeddeds")] internal static nint NumEmbeddedsᴍ(ref Interface t) { return len(t.embeddeds); }
+internal static nint NumEmbeddeds⁔(/*this*/ ref Interface t) { return len(t.embeddeds); }
 
 // Embedded returns the i'th embedded defined (*[Named]) type of interface t for 0 <= i < t.NumEmbeddeds().
 // The result is nil if the i'th embedded type is not a defined type.
 //
 // Deprecated: Use [Interface.EmbeddedType] which is not restricted to defined (*[Named]) types.
-[GoMethodBody("Embedded")] internal static ж<Named> Embeddedᴍ(ref Interface t, nint i) { return asNamed(t.embeddeds[i]); }
+internal static ж<Named> Embedded⁔(/*this*/ ref Interface t, nint i) { return asNamed(t.embeddeds[i]); }
 
 // EmbeddedType returns the i'th embedded type of interface t for 0 <= i < t.NumEmbeddeds().
-[GoMethodBody("EmbeddedType")] internal static Type EmbeddedTypeᴍ(ref Interface t, nint i) { return t.embeddeds[i]; }
+internal static Type EmbeddedType⁔(/*this*/ ref Interface t, nint i) { return t.embeddeds[i]; }
 
 // NumMethods returns the total number of methods of interface t.
-[GoMethodBody("NumMethods")] internal static nint NumMethodsᴍ(ж<Interface> Ꮡt) { return Ꮡt.typeSet().NumMethods(); }
+internal static nint NumMethods⁔(/*this*/ ж<Interface> Ꮡt) { return Ꮡt.typeSet().NumMethods(); }
 
 // Method returns the i'th method of interface t for 0 <= i < t.NumMethods().
 // The methods are ordered by their unique Id.
-[GoMethodBody("Method")] internal static ж<Func> Methodᴍ(ж<Interface> Ꮡt, nint i) { return Ꮡt.typeSet().Method(i); }
+internal static ж<Func> Method⁔(/*this*/ ж<Interface> Ꮡt, nint i) { return Ꮡt.typeSet().Method(i); }
 
 // Empty reports whether t is the empty interface.
-[GoMethodBody("Empty")] internal static bool Emptyᴍ(ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsAll(); }
+internal static bool Empty⁔(/*this*/ ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsAll(); }
 
 // IsComparable reports whether each type in interface t's type set is comparable.
-[GoMethodBody("IsComparable")] internal static bool IsComparableᴍ(ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsComparable(default); }
+internal static bool IsComparable⁔(/*this*/ ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsComparable(default); }
 
 // IsMethodSet reports whether the interface t is fully described by its method
 // set.
-[GoMethodBody("IsMethodSet")] internal static bool IsMethodSetᴍ(ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsMethodSet(); }
+internal static bool IsMethodSet⁔(/*this*/ ж<Interface> Ꮡt) { return Ꮡt.typeSet().IsMethodSet(); }
 
 // IsImplicit reports whether the interface t is a wrapper for a type set literal.
-[GoMethodBody("IsImplicit")] internal static bool IsImplicitᴍ(ref Interface t) { return t.@implicit; }
+internal static bool IsImplicit⁔(/*this*/ ref Interface t) { return t.@implicit; }
 
 // Complete computes the interface's type set. It must be called by users of
 // [NewInterfaceType] and [NewInterface] after the interface's embedded types are
@@ -153,7 +153,7 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<Type
 // panic occurs. Complete returns the receiver.
 //
 // Interface types that have been completed are safe for concurrent use.
-[GoMethodBody("Complete")] internal static ж<Interface> Completeᴍ(ж<Interface> Ꮡt) {
+internal static ж<Interface> Complete⁔(/*this*/ ж<Interface> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!t.complete) {
@@ -163,12 +163,12 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<Type
     return Ꮡt;
 }
 
-[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Interface> Ꮡt) { return new InterfaceжType(Ꮡt); }
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Interface> Ꮡt) { return TypeString(new InterfaceжType(Ꮡt), default); }
+internal static Type Underlying⁔(/*this*/ ж<Interface> Ꮡt) { return new InterfaceжType(Ꮡt); }
+internal static @string String⁔(/*this*/ ж<Interface> Ꮡt) { return TypeString(new InterfaceжType(Ꮡt), default); }
 
 // ----------------------------------------------------------------------------
 // Implementation
-[GoMethodBody("cleanup")] internal static void cleanupᴍ(ж<Interface> Ꮡt) {
+internal static void cleanup⁔(/*this*/ ж<Interface> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     Ꮡt.typeSet(); // any interface that escapes type checking must be safe for concurrent use
@@ -179,12 +179,12 @@ public static ж<Interface> NewInterfaceType(slice<ж<Func>> methods, slice<Type
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string methodsMustHaveAUniqueˢᴍChecker => ref methodsMustHaveAUniqueˢᵇᴍChecker;
-private static readonly @string methodsMustHaveAUniqueˢᵇᴍChecker = "methods must have a unique non-blank name"u8;
-internal static ref readonly @string methodsCannotHaveTypeˢᴍChecker => ref methodsCannotHaveTypeˢᵇᴍChecker;
-private static readonly @string methodsCannotHaveTypeˢᵇᴍChecker = "methods cannot have type parameters"u8;
+internal static ref readonly @string methodsMustHaveAUniqueˢ⁔Checker => ref methodsMustHaveAUniqueˢᵇ⁔Checker;
+private static readonly @string methodsMustHaveAUniqueˢᵇ⁔Checker = "methods must have a unique non-blank name"u8;
+internal static ref readonly @string methodsCannotHaveTypeˢ⁔Checker => ref methodsCannotHaveTypeˢᵇ⁔Checker;
+private static readonly @string methodsCannotHaveTypeˢᵇ⁔Checker = "methods cannot have type parameters"u8;
 
-[GoMethodBody("interfaceType")] internal static void interfaceTypeᴍ(ж<Checker> Ꮡcheck, ж<Interface> Ꮡityp, ж<ast.InterfaceType> Ꮡiface, ж<TypeName> Ꮡdef) {
+internal static void interfaceType⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Interface> Ꮡityp, ж<ast.InterfaceType> Ꮡiface, ж<TypeName> Ꮡdef) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var ityp = ref Ꮡityp.DerefOrNull();
     ref var iface = ref Ꮡiface.DerefOrNull();
@@ -208,7 +208,7 @@ private static readonly @string methodsCannotHaveTypeˢᵇᴍChecker = "methods 
         // We have a method with name f.Names[0].
         var name = f.Names[0];
         if (name.Name == "_"u8) {
-            Ꮡcheck.error(new ast_Identжpositioner(name), BlankIfaceMethod, methodsMustHaveAUniqueˢᴍChecker);
+            Ꮡcheck.error(new ast_Identжpositioner(name), BlankIfaceMethod, methodsMustHaveAUniqueˢ⁔Checker);
             continue; // ignore
         }
 
@@ -227,7 +227,7 @@ private static readonly @string methodsCannotHaveTypeˢᵇᴍChecker = "methods 
             var (ftyp, _) = f.Type._<ж<ast.FuncType>>(ᐧ); if (ftyp != nil && ftyp.TypeParams != nil) {
                 at = new ast_FieldListжpositioner(ftyp.TypeParams);
             }
-            Ꮡcheck.error(at, InvalidSyntaxTree, methodsCannotHaveTypeˢᴍChecker);
+            Ꮡcheck.error(at, InvalidSyntaxTree, methodsCannotHaveTypeˢ⁔Checker);
         }
 
         // use named receiver type if available (for better error messages)

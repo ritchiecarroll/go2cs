@@ -36,16 +36,16 @@ partial struct _TypeSet {
 } partial class types_package {
 
 // IsEmpty reports whether s is the empty set.
-[GoMethodBody("IsEmpty")] internal static bool IsEmptyᴍ(ref _TypeSet s) { return s.terms.isEmpty(); }
+internal static bool IsEmpty⁔(/*this*/ ref _TypeSet s) { return s.terms.isEmpty(); }
 
 // IsAll reports whether s is the set of all types (corresponding to the empty interface).
-[GoMethodBody("IsAll")] internal static bool IsAllᴍ(ref _TypeSet s) { return s.IsMethodSet() && len(s.methods) == 0; }
+internal static bool IsAll⁔(/*this*/ ref _TypeSet s) { return s.IsMethodSet() && len(s.methods) == 0; }
 
 // IsMethodSet reports whether the interface t is fully described by its method set.
-[GoMethodBody("IsMethodSet")] internal static bool IsMethodSetᴍ(ref _TypeSet s) { return !s.comparable && s.terms.isAll(); }
+internal static bool IsMethodSet⁔(/*this*/ ref _TypeSet s) { return !s.comparable && s.terms.isAll(); }
 
 // IsComparable reports whether each type in the set is comparable.
-[GoMethodBody("IsComparable")] internal static bool IsComparableᴍ(ref _TypeSet s, map<Type, bool> seen) {
+internal static bool IsComparable⁔(/*this*/ ref _TypeSet s, map<Type, bool> seen) {
     if (s.terms.isAll()) {
         return s.comparable;
     }
@@ -54,22 +54,22 @@ partial struct _TypeSet {
 }
 
 // NumMethods returns the number of methods available.
-[GoMethodBody("NumMethods")] internal static nint NumMethodsᴍ(ref _TypeSet s) { return len(s.methods); }
+internal static nint NumMethods⁔(/*this*/ ref _TypeSet s) { return len(s.methods); }
 
 // Method returns the i'th method of s for 0 <= i < s.NumMethods().
 // The methods are ordered by their unique ID.
-[GoMethodBody("Method")] internal static ж<Func> Methodᴍ(ref _TypeSet s, nint i) { return s.methods[i]; }
+internal static ж<Func> Method⁔(/*this*/ ref _TypeSet s, nint i) { return s.methods[i]; }
 
 // LookupMethod returns the index of and method with matching package and name, or (-1, nil).
-[GoMethodBody("LookupMethod")] internal static (nint, ж<Func>) LookupMethodᴍ(ref _TypeSet s, ж<Package> pkg, @string name, bool foldCase) {
+internal static (nint, ж<Func>) LookupMethod⁔(/*this*/ ref _TypeSet s, ж<Package> pkg, @string name, bool foldCase) {
     return methodIndex(s.methods, pkg, name, foldCase);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string comparableˢᴍ_TypeSet => ref comparableˢᵇᴍ_TypeSet;
-private static readonly @string comparableˢᵇᴍ_TypeSet = "comparable"u8;
+internal static ref readonly @string comparableˢ⁔_TypeSet => ref comparableˢᵇ⁔_TypeSet;
+private static readonly @string comparableˢᵇ⁔_TypeSet = "comparable"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref _TypeSet s) {
+internal static @string String⁔(/*this*/ ref _TypeSet s) {
     switch (ᐧ) {
     case {} when s.IsEmpty(): {
         return "∅";
@@ -84,7 +84,7 @@ private static readonly @string comparableˢᵇᴍ_TypeSet = "comparable"u8;
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
     Ꮡbuf.WriteByte((byte)'{');
     if (s.comparable) {
-        Ꮡbuf.WriteString(comparableˢᴍ_TypeSet);
+        Ꮡbuf.WriteString(comparableˢ⁔_TypeSet);
         if (hasMethods || hasTerms) {
             Ꮡbuf.WriteString("; ");
         }
@@ -109,10 +109,10 @@ private static readonly @string comparableˢᵇᴍ_TypeSet = "comparable"u8;
 // Implementation
 
 // hasTerms reports whether s has specific type terms.
-[GoMethodBody("hasTerms")] internal static bool hasTermsᴍ(ref _TypeSet s) { return !s.terms.isEmpty() && !s.terms.isAll(); }
+internal static bool hasTerms⁔(/*this*/ ref _TypeSet s) { return !s.terms.isEmpty() && !s.terms.isAll(); }
 
 // subsetOf reports whether s1 ⊆ s2.
-[GoMethodBody("subsetOf")] internal static bool subsetOfᴍ(ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {
+internal static bool subsetOf⁔(/*this*/ ref _TypeSet s1, ж<_TypeSet> Ꮡs2) {
     ref var s2 = ref Ꮡs2.DerefOrNull();
 
     return s1.terms.subsetOf(s2.terms);
@@ -121,7 +121,7 @@ private static readonly @string comparableˢᵇᴍ_TypeSet = "comparable"u8;
 // all reports whether f(t, u) is true for each (type/underlying type) pairs in s.
 // If s has no specific terms, all calls f(nil, nil).
 // In any case, all is guaranteed to call f at least once.
-[GoMethodBody("all")] internal static bool allᴍ(ref _TypeSet s, Func<Type, Type, bool> f) {
+internal static bool all⁔(/*this*/ ref _TypeSet s, Func<Type, Type, bool> f) {
     if (!s.hasTerms()) {
         return f(default, default);
     }
@@ -146,7 +146,7 @@ private static readonly @string comparableˢᵇᴍ_TypeSet = "comparable"u8;
 // is calls f with the specific type terms of s and reports whether
 // all calls to f returned true. If there are no specific terms, is
 // returns the result of f(nil).
-[GoMethodBody("is")] internal static bool @isᴍ(ref _TypeSet s, Func<ж<term>, bool> f) {
+internal static bool @is⁔(/*this*/ ref _TypeSet s, Func<ж<term>, bool> f) {
     if (!s.hasTerms()) {
         return f(nil);
     }

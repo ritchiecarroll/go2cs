@@ -84,13 +84,16 @@ using static go.encoding.xml_package;
 
 namespace go.encoding;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using encoding = encoding_package;
 using io = io_package;
 using reflect = reflect_package;
 using static xml_package;
 using go.unicode;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("xml")]
 public static partial class xml_package
@@ -159,125 +162,125 @@ public static partial class xml_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(xml_package.CharData)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛCharData;
-[GoMethodHost(typeof(xml_package.Comment)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛComment;
-[GoMethodHost(typeof(xml_package.Decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛDecoder;
-[GoMethodHost(typeof(xml_package.Directive)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛDirective;
-[GoMethodHost(typeof(xml_package.Encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛEncoder;
-[GoMethodHost(typeof(xml_package.ProcInst)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛProcInst;
-[GoMethodHost(typeof(xml_package.StartElement)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛStartElement;
-[GoMethodHost(typeof(xml_package.SyntaxError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛSyntaxError;
-[GoMethodHost(typeof(xml_package.TagPathError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛTagPathError;
-[GoMethodHost(typeof(xml_package.UnmarshalError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛUnmarshalError;
-[GoMethodHost(typeof(xml_package.UnsupportedTypeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛUnsupportedTypeError;
-[GoMethodHost(typeof(xml_package.fieldInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛfieldInfo;
-[GoMethodHost(typeof(xml_package.parentStack)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛparentStack;
-[GoMethodHost(typeof(xml_package.printer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class xmlᴛprinter;
+[GoMethodHost(typeof(xml_package.CharData)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xmlᴛCharData;
+[GoMethodHost(typeof(xml_package.Comment)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xmlᴛComment;
+[GoMethodHost(typeof(xml_package.Decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xmlᴛDecoder;
+[GoMethodHost(typeof(xml_package.Directive)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xmlᴛDirective;
+[GoMethodHost(typeof(xml_package.Encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xmlᴛEncoder;
+[GoMethodHost(typeof(xml_package.ProcInst)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xmlᴛProcInst;
+[GoMethodHost(typeof(xml_package.StartElement)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xmlᴛStartElement;
+[GoMethodHost(typeof(xml_package.SyntaxError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xmlᴛSyntaxError;
+[GoMethodHost(typeof(xml_package.TagPathError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xmlᴛTagPathError;
+[GoMethodHost(typeof(xml_package.UnmarshalError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xmlᴛUnmarshalError;
+[GoMethodHost(typeof(xml_package.UnsupportedTypeError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xmlᴛUnsupportedTypeError;
+[GoMethodHost(typeof(xml_package.fieldInfo)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xmlᴛfieldInfo;
+[GoMethodHost(typeof(xml_package.parentStack)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xmlᴛparentStack;
+[GoMethodHost(typeof(xml_package.printer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class xmlᴛprinter;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class xmlᴛEncoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Indent(this ref Encoder enc, @string prefix, @string indent) => xml_package.Indentᴍ(ref enc, prefix, indent);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Encode(this ж<Encoder> Ꮡenc, any v) => xml_package.Encodeᴍ(Ꮡenc, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error EncodeElement(this ж<Encoder> Ꮡenc, any v, StartElement startʗp) => xml_package.EncodeElementᴍ(Ꮡenc, v, startʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error EncodeToken(this ж<Encoder> Ꮡenc, Token t) => xml_package.EncodeTokenᴍ(Ꮡenc, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Flush(this ref Encoder enc) => xml_package.Flushᴍ(ref enc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref Encoder enc) => xml_package.Closeᴍ(ref enc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Indent(this ref Encoder enc, @string prefix, @string indent) => xml_package.Indent⁔(ref enc, prefix, indent);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Encode(this ж<Encoder> Ꮡenc, any v) => xml_package.Encode⁔(Ꮡenc, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error EncodeElement(this ж<Encoder> Ꮡenc, any v, StartElement startʗp) => xml_package.EncodeElement⁔(Ꮡenc, v, startʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error EncodeToken(this ж<Encoder> Ꮡenc, Token t) => xml_package.EncodeToken⁔(Ꮡenc, t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Flush(this ref Encoder enc) => xml_package.Flush⁔(ref enc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref Encoder enc) => xml_package.Close⁔(ref enc);
 }
 partial class xmlᴛprinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string createAttrPrefix(this ж<printer> Ꮡp, @string url) => xml_package.createAttrPrefixᴍ(Ꮡp, url);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void deleteAttrPrefix(this ref printer p, @string prefix) => xml_package.deleteAttrPrefixᴍ(ref p, prefix);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void markPrefix(this ref printer p) => xml_package.markPrefixᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void popPrefix(this ref printer p) => xml_package.popPrefixᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error marshalValue(this ж<printer> Ꮡp, reflect.Value val, ж<fieldInfo> Ꮡfinfo, ж<StartElement> ᏑstartTemplate) => xml_package.marshalValueᴍ(Ꮡp, val, Ꮡfinfo, ᏑstartTemplate);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart, Name name, reflect.Value val) => xml_package.marshalAttrᴍ(ref p, Ꮡstart, name, val);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error marshalInterface(this ref printer p, Marshaler val, StartElement start) => xml_package.marshalInterfaceᴍ(ref p, val, start);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error marshalTextInterface(this ж<printer> Ꮡp, encoding.TextMarshaler val, StartElement startʗp) => xml_package.marshalTextInterfaceᴍ(Ꮡp, val, startʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeStart(this ж<printer> Ꮡp, ж<StartElement> Ꮡstart) => xml_package.writeStartᴍ(Ꮡp, Ꮡstart);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeEnd(this ref printer p, Name name) => xml_package.writeEndᴍ(ref p, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, slice<byte>, error) marshalSimple(this ref printer p, reflect.Type typ, reflect.Value val) => xml_package.marshalSimpleᴍ(ref p, typ, val);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo, reflect.Value val) => xml_package.marshalStructᴍ(Ꮡp, Ꮡtinfo, val);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref printer p, slice<byte> b) => xml_package.Writeᴍ(ref p, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref printer p, @string s) => xml_package.WriteStringᴍ(ref p, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error WriteByte(this ref printer p, byte c) => xml_package.WriteByteᴍ(ref p, c);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref printer p) => xml_package.Closeᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error cachedWriteError(this ref printer p) => xml_package.cachedWriteErrorᴍ(ref p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeIndent(this ref printer p, nint depthDelta) => xml_package.writeIndentᴍ(ref p, depthDelta);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string createAttrPrefix(this ж<printer> Ꮡp, @string url) => xml_package.createAttrPrefix⁔(Ꮡp, url);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void deleteAttrPrefix(this ref printer p, @string prefix) => xml_package.deleteAttrPrefix⁔(ref p, prefix);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void markPrefix(this ref printer p) => xml_package.markPrefix⁔(ref p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void popPrefix(this ref printer p) => xml_package.popPrefix⁔(ref p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error marshalValue(this ж<printer> Ꮡp, reflect.Value val, ж<fieldInfo> Ꮡfinfo, ж<StartElement> ᏑstartTemplate) => xml_package.marshalValue⁔(Ꮡp, val, Ꮡfinfo, ᏑstartTemplate);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error marshalAttr(this ref printer p, ж<StartElement> Ꮡstart, Name name, reflect.Value val) => xml_package.marshalAttr⁔(ref p, Ꮡstart, name, val);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error marshalInterface(this ref printer p, Marshaler val, StartElement start) => xml_package.marshalInterface⁔(ref p, val, start);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error marshalTextInterface(this ж<printer> Ꮡp, encoding.TextMarshaler val, StartElement startʗp) => xml_package.marshalTextInterface⁔(Ꮡp, val, startʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeStart(this ж<printer> Ꮡp, ж<StartElement> Ꮡstart) => xml_package.writeStart⁔(Ꮡp, Ꮡstart);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error writeEnd(this ref printer p, Name name) => xml_package.writeEnd⁔(ref p, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, slice<byte>, error) marshalSimple(this ref printer p, reflect.Type typ, reflect.Value val) => xml_package.marshalSimple⁔(ref p, typ, val);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error marshalStruct(this ж<printer> Ꮡp, ж<typeInfo> Ꮡtinfo, reflect.Value val) => xml_package.marshalStruct⁔(Ꮡp, Ꮡtinfo, val);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref printer p, slice<byte> b) => xml_package.Write⁔(ref p, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) WriteString(this ref printer p, @string s) => xml_package.WriteString⁔(ref p, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error WriteByte(this ref printer p, byte c) => xml_package.WriteByte⁔(ref p, c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref printer p) => xml_package.Close⁔(ref p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error cachedWriteError(this ref printer p) => xml_package.cachedWriteError⁔(ref p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeIndent(this ref printer p, nint depthDelta) => xml_package.writeIndent⁔(ref p, depthDelta);
 }
 partial class xmlᴛparentStack {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error trim(this ref parentStack s, slice<@string> parents) => xml_package.trimᴍ(ref s, parents);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error push(this ref parentStack s, slice<@string> parents) => xml_package.pushᴍ(ref s, parents);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error trim(this ref parentStack s, slice<@string> parents) => xml_package.trim⁔(ref s, parents);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error push(this ref parentStack s, slice<@string> parents) => xml_package.push⁔(ref s, parents);
 }
 partial class xmlᴛUnsupportedTypeError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref UnsupportedTypeError e) => xml_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref UnsupportedTypeError e) => xml_package.Error⁔(ref e);
 }
 partial class xmlᴛDecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Decode(this ж<Decoder> Ꮡd, any v) => xml_package.Decodeᴍ(Ꮡd, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error DecodeElement(this ж<Decoder> Ꮡd, any v, ж<StartElement> start) => xml_package.DecodeElementᴍ(Ꮡd, v, start);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error unmarshalInterface(this ж<Decoder> Ꮡd, Unmarshaler val, ж<StartElement> Ꮡstart) => xml_package.unmarshalInterfaceᴍ(Ꮡd, val, Ꮡstart);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error unmarshalTextInterface(this ref Decoder d, encoding.TextUnmarshaler val) => xml_package.unmarshalTextInterfaceᴍ(ref d, val);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error unmarshalAttr(this ref Decoder d, reflect.Value val, Attr attr) => xml_package.unmarshalAttrᴍ(ref d, val, attr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error unmarshal(this ж<Decoder> Ꮡd, reflect.Value val, ж<StartElement> Ꮡstart) => xml_package.unmarshalᴍ(Ꮡd, val, Ꮡstart);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (bool consumed, error err) unmarshalPath(this ж<Decoder> Ꮡd, ж<typeInfo> Ꮡtinfo, reflect.Value sv, slice<@string> parents, ж<StartElement> Ꮡstart) => xml_package.unmarshalPathᴍ(Ꮡd, Ꮡtinfo, sv, parents, Ꮡstart);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Skip(this ref Decoder d) => xml_package.Skipᴍ(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Decode(this ж<Decoder> Ꮡd, any v) => xml_package.Decode⁔(Ꮡd, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error DecodeElement(this ж<Decoder> Ꮡd, any v, ж<StartElement> start) => xml_package.DecodeElement⁔(Ꮡd, v, start);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error unmarshalInterface(this ж<Decoder> Ꮡd, Unmarshaler val, ж<StartElement> Ꮡstart) => xml_package.unmarshalInterface⁔(Ꮡd, val, Ꮡstart);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error unmarshalTextInterface(this ref Decoder d, encoding.TextUnmarshaler val) => xml_package.unmarshalTextInterface⁔(ref d, val);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error unmarshalAttr(this ref Decoder d, reflect.Value val, Attr attr) => xml_package.unmarshalAttr⁔(ref d, val, attr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error unmarshal(this ж<Decoder> Ꮡd, reflect.Value val, ж<StartElement> Ꮡstart) => xml_package.unmarshal⁔(Ꮡd, val, Ꮡstart);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (bool consumed, error err) unmarshalPath(this ж<Decoder> Ꮡd, ж<typeInfo> Ꮡtinfo, reflect.Value sv, slice<@string> parents, ж<StartElement> Ꮡstart) => xml_package.unmarshalPath⁔(Ꮡd, Ꮡtinfo, sv, parents, Ꮡstart);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Skip(this ref Decoder d) => xml_package.Skip⁔(ref d);
 }
 partial class xmlᴛUnmarshalError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnmarshalError e) => xml_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnmarshalError e) => xml_package.Error⁔(e);
 }
 partial class xmlᴛTagPathError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref TagPathError e) => xml_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref TagPathError e) => xml_package.Error⁔(ref e);
 }
 partial class xmlᴛfieldInfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static reflect.Value value(this ref fieldInfo finfo, reflect.Value v, bool shouldInitNilPointers) => xml_package.valueᴍ(ref finfo, v, shouldInitNilPointers);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static reflect.Value value(this ref fieldInfo finfo, reflect.Value v, bool shouldInitNilPointers) => xml_package.value⁔(ref finfo, v, shouldInitNilPointers);
 }
 partial class xmlᴛSyntaxError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref SyntaxError e) => xml_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref SyntaxError e) => xml_package.Error⁔(ref e);
 }
 partial class xmlᴛStartElement {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static StartElement Copy(this StartElement e) => xml_package.Copyᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static EndElement End(this StartElement e) => xml_package.Endᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static StartElement Copy(this StartElement e) => xml_package.Copy⁔(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static EndElement End(this StartElement e) => xml_package.End⁔(e);
 }
 partial class xmlᴛCharData {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static CharData Copy(this CharData c) => xml_package.Copyᴍ(c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static CharData Copy(this CharData c) => xml_package.Copy⁔(c);
 }
 partial class xmlᴛComment {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Comment Copy(this Comment c) => xml_package.Copyᴍ(c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Comment Copy(this Comment c) => xml_package.Copy⁔(c);
 }
 partial class xmlᴛProcInst {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ProcInst Copy(this ProcInst p) => xml_package.Copyᴍ(p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ProcInst Copy(this ProcInst p) => xml_package.Copy⁔(p);
 }
 partial class xmlᴛDirective {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Directive Copy(this Directive d) => xml_package.Copyᴍ(d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Directive Copy(this Directive d) => xml_package.Copy⁔(d);
 }
 partial class xmlᴛDecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Token, error) Token(this ref Decoder d) => xml_package.Tokenᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void translate(this ref Decoder d, ж<Name> Ꮡn, bool isElementName) => xml_package.translateᴍ(ref d, Ꮡn, isElementName);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void switchToReader(this ref Decoder d, io.Reader r) => xml_package.switchToReaderᴍ(ref d, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<stack> push(this ref Decoder d, nint kind) => xml_package.pushᴍ(ref d, kind);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<stack> pop(this ref Decoder d) => xml_package.popᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pushEOF(this ref Decoder d) => xml_package.pushEOFᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool popEOF(this ref Decoder d) => xml_package.popEOFᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pushElement(this ref Decoder d, Name name) => xml_package.pushElementᴍ(ref d, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void pushNs(this ref Decoder d, @string local, @string url, bool ok) => xml_package.pushNsᴍ(ref d, local, url, ok);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error syntaxError(this ref Decoder d, @string msg) => xml_package.syntaxErrorᴍ(ref d, msg);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool popElement(this ref Decoder d, ж<EndElement> Ꮡt) => xml_package.popElementᴍ(ref d, Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Token, bool) autoClose(this ref Decoder d, Token t) => xml_package.autoCloseᴍ(ref d, t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Token, error) RawToken(this ref Decoder d) => xml_package.RawTokenᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Token, error) rawToken(this ref Decoder d) => xml_package.rawTokenᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> attrval(this ref Decoder d) => xml_package.attrvalᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void space(this ref Decoder d) => xml_package.spaceᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte b, bool ok) getc(this ref Decoder d) => xml_package.getcᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 InputOffset(this ref Decoder d) => xml_package.InputOffsetᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint line, nint column) InputPos(this ref Decoder d) => xml_package.InputPosᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint savedOffset(this ref Decoder d) => xml_package.savedOffsetᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte b, bool ok) mustgetc(this ref Decoder d) => xml_package.mustgetcᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void ungetc(this ref Decoder d, byte b) => xml_package.ungetcᴍ(ref d, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> text(this ref Decoder d, nint quote, bool cdata) => xml_package.textᴍ(ref d, quote, cdata);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Name name, bool ok) nsname(this ref Decoder d) => xml_package.nsnameᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string s, bool ok) name(this ref Decoder d) => xml_package.nameᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool /*ok*/ readName(this ref Decoder d) => xml_package.readNameᴍ(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Token, error) Token(this ref Decoder d) => xml_package.Token⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void translate(this ref Decoder d, ж<Name> Ꮡn, bool isElementName) => xml_package.translate⁔(ref d, Ꮡn, isElementName);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void switchToReader(this ref Decoder d, io.Reader r) => xml_package.switchToReader⁔(ref d, r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<stack> push(this ref Decoder d, nint kind) => xml_package.push⁔(ref d, kind);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<stack> pop(this ref Decoder d) => xml_package.pop⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void pushEOF(this ref Decoder d) => xml_package.pushEOF⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool popEOF(this ref Decoder d) => xml_package.popEOF⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void pushElement(this ref Decoder d, Name name) => xml_package.pushElement⁔(ref d, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void pushNs(this ref Decoder d, @string local, @string url, bool ok) => xml_package.pushNs⁔(ref d, local, url, ok);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error syntaxError(this ref Decoder d, @string msg) => xml_package.syntaxError⁔(ref d, msg);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool popElement(this ref Decoder d, ж<EndElement> Ꮡt) => xml_package.popElement⁔(ref d, Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (Token, bool) autoClose(this ref Decoder d, Token t) => xml_package.autoClose⁔(ref d, t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Token, error) RawToken(this ref Decoder d) => xml_package.RawToken⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (Token, error) rawToken(this ref Decoder d) => xml_package.rawToken⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> attrval(this ref Decoder d) => xml_package.attrval⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void space(this ref Decoder d) => xml_package.space⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (byte b, bool ok) getc(this ref Decoder d) => xml_package.getc⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 InputOffset(this ref Decoder d) => xml_package.InputOffset⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint line, nint column) InputPos(this ref Decoder d) => xml_package.InputPos⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint savedOffset(this ref Decoder d) => xml_package.savedOffset⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (byte b, bool ok) mustgetc(this ref Decoder d) => xml_package.mustgetc⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void ungetc(this ref Decoder d, byte b) => xml_package.ungetc⁔(ref d, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> text(this ref Decoder d, nint quote, bool cdata) => xml_package.text⁔(ref d, quote, cdata);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (Name name, bool ok) nsname(this ref Decoder d) => xml_package.nsname⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string s, bool ok) name(this ref Decoder d) => xml_package.name⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool /*ok*/ readName(this ref Decoder d) => xml_package.readName⁔(ref d);
 }
 partial class xmlᴛprinter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void EscapeString(this ref printer p, @string s) => xml_package.EscapeStringᴍ(ref p, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void EscapeString(this ref printer p, @string s) => xml_package.EscapeString⁔(ref p, s);
 }
 // </GlyphForwarders>

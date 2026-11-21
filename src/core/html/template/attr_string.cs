@@ -26,7 +26,7 @@ internal static array<uint8> _attr_index = array<uint8>([0, 8, 18, 32, 41, 48, 5
 
 } partial class template_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(attr i) {
+internal static @string String⁔(/*this*/ attr i) {
     if (i >= ((attr)(uint8)(len(_attr_index) - 1))) {
         return "attr("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }

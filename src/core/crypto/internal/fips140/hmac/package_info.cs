@@ -68,12 +68,15 @@ using static go.crypto.@internal.fips140.hmac_package;
 
 namespace go.crypto.@internal.fips140;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using hash = hash_package;
 using go.crypto.@internal;
 using go.crypto.@internal.fips140;
 using static hmac_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("hmac")]
 public static partial class hmac_package
@@ -114,21 +117,21 @@ public static partial class hmac_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(hmac_package.HMAC)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hmacᴛHMAC;
-[GoMethodHost(typeof(hmac_package.errCloneUnsupported)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class hmacᴛerrCloneUnsupported;
+[GoMethodHost(typeof(hmac_package.HMAC)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hmacᴛHMAC;
+[GoMethodHost(typeof(hmac_package.errCloneUnsupported)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class hmacᴛerrCloneUnsupported;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class hmacᴛHMAC {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Sum(this ref HMAC h, slice<byte> @in) => hmac_package.Sumᴍ(ref h, @in);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ref HMAC h, slice<byte> p) => hmac_package.Writeᴍ(ref h, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Size(this ref HMAC h) => hmac_package.Sizeᴍ(ref h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint BlockSize(this ref HMAC h) => hmac_package.BlockSizeᴍ(ref h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reset(this ref HMAC h) => hmac_package.Resetᴍ(ref h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (hash.Cloner, error) Clone(this ref HMAC h) => hmac_package.Cloneᴍ(ref h);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Sum(this ref HMAC h, slice<byte> @in) => hmac_package.Sum⁔(ref h, @in);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ref HMAC h, slice<byte> p) => hmac_package.Write⁔(ref h, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this ref HMAC h) => hmac_package.Size⁔(ref h);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint BlockSize(this ref HMAC h) => hmac_package.BlockSize⁔(ref h);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reset(this ref HMAC h) => hmac_package.Reset⁔(ref h);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (hash.Cloner, error) Clone(this ref HMAC h) => hmac_package.Clone⁔(ref h);
 }
 partial class hmacᴛerrCloneUnsupported {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this errCloneUnsupported e) => hmac_package.Errorᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Unwrap(this errCloneUnsupported e) => hmac_package.Unwrapᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this errCloneUnsupported e) => hmac_package.Error⁔(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Unwrap(this errCloneUnsupported e) => hmac_package.Unwrap⁔(e);
 }
 // </GlyphForwarders>

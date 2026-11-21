@@ -72,12 +72,15 @@ using static go.unique_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using weak = weak_package;
 using @internal;
 using go.sync;
 using static unique_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("unique")]
 public static partial class unique_package
@@ -121,30 +124,30 @@ public static partial class unique_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(unique_package.Handle<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛHandle;
-[GoMethodHost(typeof(unique_package.canonMap<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛcanonMap;
-[GoMethodHost(typeof(unique_package.entry<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛentry;
-[GoMethodHost(typeof(unique_package.indirect<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛindirect;
-[GoMethodHost(typeof(unique_package.node<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class uniqueᴛnode;
+[GoMethodHost(typeof(unique_package.Handle<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class uniqueᴛHandle;
+[GoMethodHost(typeof(unique_package.canonMap<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class uniqueᴛcanonMap;
+[GoMethodHost(typeof(unique_package.entry<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class uniqueᴛentry;
+[GoMethodHost(typeof(unique_package.indirect<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class uniqueᴛindirect;
+[GoMethodHost(typeof(unique_package.node<>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class uniqueᴛnode;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class uniqueᴛcanonMap {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<T> Load<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) => unique_package.Loadᴍ<T>(Ꮡm, keyʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<T> LoadOrStore<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) => unique_package.LoadOrStoreᴍ<T>(Ꮡm, keyʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<node<T>> expand<T>(this ref canonMap<T> m, ж<entry<T>> ᏑoldEntry, ж<entry<T>> newEntry, uintptr newHash, nuint hashShift, ж<indirect<T>> parent) => unique_package.expandᴍ<T>(ref m, ᏑoldEntry, newEntry, newHash, hashShift, parent);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void cleanup<T>(this ж<canonMap<T>> Ꮡm, uintptr hash, weak.Pointer<T> wp) => unique_package.cleanupᴍ<T>(Ꮡm, hash, wp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<T> Load<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) => unique_package.Load⁔<T>(Ꮡm, keyʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<T> LoadOrStore<T>(this ж<canonMap<T>> Ꮡm, T keyʗp) => unique_package.LoadOrStore⁔<T>(Ꮡm, keyʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<node<T>> expand<T>(this ref canonMap<T> m, ж<entry<T>> ᏑoldEntry, ж<entry<T>> newEntry, uintptr newHash, nuint hashShift, ж<indirect<T>> parent) => unique_package.expand⁔<T>(ref m, ᏑoldEntry, newEntry, newHash, hashShift, parent);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void cleanup<T>(this ж<canonMap<T>> Ꮡm, uintptr hash, weak.Pointer<T> wp) => unique_package.cleanup⁔<T>(Ꮡm, hash, wp);
 }
 partial class uniqueᴛnode {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<entry<T>> entry<T>(this ж<node<T>> Ꮡn) => unique_package.entryᴍ<T>(Ꮡn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<indirect<T>> indirect<T>(this ж<node<T>> Ꮡn) => unique_package.indirectᴍ<T>(Ꮡn);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<entry<T>> entry<T>(this ж<node<T>> Ꮡn) => unique_package.entry⁔<T>(Ꮡn);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<indirect<T>> indirect<T>(this ж<node<T>> Ꮡn) => unique_package.indirect⁔<T>(Ꮡn);
 }
 partial class uniqueᴛindirect {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool empty<T>(this ref indirect<T> i) => unique_package.emptyᴍ<T>(ref i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool empty<T>(this ref indirect<T> i) => unique_package.empty⁔<T>(ref i);
 }
 partial class uniqueᴛentry {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<T>, weak.Pointer<T>) lookup<T>(this ж<entry<T>> Ꮡe, T key) => unique_package.lookupᴍ<T>(Ꮡe, key);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasWeakPointer<T>(this ж<entry<T>> Ꮡe, weak.Pointer<T> wp) => unique_package.hasWeakPointerᴍ<T>(Ꮡe, wp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<entry<T>> prune<T>(this ж<entry<T>> Ꮡe) => unique_package.pruneᴍ<T>(Ꮡe);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<T>, weak.Pointer<T>) lookup<T>(this ж<entry<T>> Ꮡe, T key) => unique_package.lookup⁔<T>(Ꮡe, key);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool hasWeakPointer<T>(this ж<entry<T>> Ꮡe, weak.Pointer<T> wp) => unique_package.hasWeakPointer⁔<T>(Ꮡe, wp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<entry<T>> prune<T>(this ж<entry<T>> Ꮡe) => unique_package.prune⁔<T>(Ꮡe);
 }
 // </GlyphForwarders>

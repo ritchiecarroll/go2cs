@@ -213,7 +213,7 @@ internal static bool goosPrefersCgo() {
 // mustUseGoResolver reports whether a DNS lookup of any sort is
 // required to use the go resolver. The provided Resolver is optional.
 // This will report true if the cgo resolver is not available.
-[GoMethodBody("mustUseGoResolver")] internal static bool mustUseGoResolverᴍ(ref conf c, ж<Resolver> Ꮡr) {
+internal static bool mustUseGoResolver⁔(/*this*/ ref conf c, ж<Resolver> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     if (!cgoAvailable) {
@@ -239,7 +239,7 @@ internal static bool goosPrefersCgo() {
 // addrLookupOrder determines which strategy to use to resolve addresses.
 // The provided Resolver is optional. nil means to not consider its options.
 // It also returns dnsConfig when it was used to determine the lookup order.
-[GoMethodBody("addrLookupOrder")] internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrderᴍ(ж<conf> Ꮡc, ж<Resolver> r, @string addr) {
+internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) addrLookupOrder⁔(/*this*/ ж<conf> Ꮡc, ж<Resolver> r, @string addr) {
     hostLookupOrder ret = default;
     ж<dnsConfig> dnsConf = default;
     GoFrame ᒐ = default;
@@ -261,7 +261,7 @@ internal static bool goosPrefersCgo() {
 // hostLookupOrder determines which strategy to use to resolve hostname.
 // The provided Resolver is optional. nil means to not consider its options.
 // It also returns dnsConfig when it was used to determine the lookup order.
-[GoMethodBody("hostLookupOrder")] internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrderᴍ(ж<conf> Ꮡc, ж<Resolver> r, @string hostname) {
+internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) hostLookupOrder⁔(/*this*/ ж<conf> Ꮡc, ж<Resolver> r, @string hostname) {
     hostLookupOrder ret = default;
     ж<dnsConfig> dnsConf = default;
     GoFrame ᒐ = default;
@@ -281,18 +281,18 @@ internal static bool goosPrefersCgo() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hostsˢᴍconf => ref hostsˢᵇᴍconf;
-private static readonly @string hostsˢᵇᴍconf = "hosts"u8;
-internal static ref readonly @string mdnsˢᴍconf => ref mdnsˢᵇᴍconf;
-private static readonly @string mdnsˢᵇᴍconf = "mdns"u8;
-internal static ref readonly @string localˢᴍconf => ref localˢᵇᴍconf;
-private static readonly @string localˢᵇᴍconf = ".local"u8;
-internal static ref readonly @string etcMdnsAllowˢᴍconf => ref etcMdnsAllowˢᵇᴍconf;
-private static readonly @string etcMdnsAllowˢᵇᴍconf = "/etc/mdns.allow"u8;
-internal static ref readonly @string dnsˢᴍconf => ref dnsˢᵇᴍconf;
-private static readonly @string dnsˢᵇᴍconf = "dns"u8;
+internal static ref readonly @string hostsˢ⁔conf => ref hostsˢᵇ⁔conf;
+private static readonly @string hostsˢᵇ⁔conf = "hosts"u8;
+internal static ref readonly @string mdnsˢ⁔conf => ref mdnsˢᵇ⁔conf;
+private static readonly @string mdnsˢᵇ⁔conf = "mdns"u8;
+internal static ref readonly @string localˢ⁔conf => ref localˢᵇ⁔conf;
+private static readonly @string localˢᵇ⁔conf = ".local"u8;
+internal static ref readonly @string etcMdnsAllowˢ⁔conf => ref etcMdnsAllowˢᵇ⁔conf;
+private static readonly @string etcMdnsAllowˢᵇ⁔conf = "/etc/mdns.allow"u8;
+internal static ref readonly @string dnsˢ⁔conf => ref dnsˢᵇ⁔conf;
+private static readonly @string dnsˢᵇ⁔conf = "dns"u8;
 
-[GoMethodBody("lookupOrder")] internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrderᴍ(ref conf c, ж<Resolver> r, @string hostname) {
+internal static (hostLookupOrder ret, ж<dnsConfig> dnsConf) lookupOrder⁔(/*this*/ ref conf c, ж<Resolver> r, @string hostname) {
     ж<dnsConfig> dnsConf = default;
 
     // fallbackOrder is the order we return if we can't figure it out.
@@ -409,7 +409,7 @@ private static readonly @string dnsˢᵇᴍconf = "dns"u8;
     hostname = stringslite.TrimSuffix(hostname, ".");
 
     var nss = getSystemNSS();
-    var srcs = nss.sources[hostsˢᴍconf];
+    var srcs = nss.sources[hostsˢ⁔conf];
     // If /etc/nsswitch.conf doesn't exist or doesn't specify any
     // sources for "hosts", assume Go's DNS will work fine.
     if (errors.Is(nss.err, fs.ErrNotExist) || (nss.err == nil && len(srcs) == 0)) {
@@ -468,8 +468,8 @@ private static readonly @string dnsˢᵇᴍconf = "dns"u8;
                 continue;
                 break;
             }
-            case {} when hostname != ""u8 && stringslite.HasPrefix(src.source, mdnsˢᴍconf): {
-                if (stringsHasSuffixFold(hostname, localˢᴍconf)) {
+            case {} when hostname != ""u8 && stringslite.HasPrefix(src.source, mdnsˢ⁔conf): {
+                if (stringsHasSuffixFold(hostname, localˢ⁔conf)) {
                     // Per RFC 6762, the ".local" TLD is special. And
                     // because Go's native resolver doesn't do mDNS or
                     // similar local resolution mechanisms, assume that
@@ -483,7 +483,7 @@ private static readonly @string dnsˢᵇᴍconf = "dns"u8;
                 bool haveMDNSAllow = default;
                 switch (c.mdnsTest) {
                 case var ᴛ when ᴛ == mdnsFromSystem: {
-                    var (_, err) = os.Stat(etcMdnsAllowˢᴍconf);
+                    var (_, err) = os.Stat(etcMdnsAllowˢ⁔conf);
                     if (err != nil && !errors.Is(err, fs.ErrNotExist)) {
                         // Let libc figure out what is going on.
                         return (hostLookupCgo, dnsConf);
@@ -527,7 +527,7 @@ private static readonly @string dnsˢᵇᴍconf = "dns"u8;
         if (!hasDNSSource) {
             dnsSource = true;
             if (first == ""u8) {
-                first = dnsˢᴍconf;
+                first = dnsˢ⁔conf;
             }
         }
     }

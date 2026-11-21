@@ -18,7 +18,7 @@ partial class time_package {
 // with the second most popular format only being used 8% of the time.
 // The overwhelming use of RFC 3339 compared to all other formats justifies
 // the addition of logic to optimize formatting and parsing.
-[GoMethodBody("appendFormatRFC3339")] internal static slice<byte> appendFormatRFC3339ᴍ(Time t, slice<byte> b, bool nanos) {
+internal static slice<byte> appendFormatRFC3339⁔(/*this*/ Time t, slice<byte> b, bool nanos) {
     var (_, offset, abs) = t.locabs();
 
     // Format date.
@@ -63,12 +63,12 @@ partial class time_package {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string yearOutsideOfRange09999ˢᴍTime => ref yearOutsideOfRange09999ˢᵇᴍTime;
-private static readonly @string yearOutsideOfRange09999ˢᵇᴍTime = "year outside of range [0,9999]"u8;
-internal static ref readonly @string timezoneHourOutsideOfˢᴍTime => ref timezoneHourOutsideOfˢᵇᴍTime;
-private static readonly @string timezoneHourOutsideOfˢᵇᴍTime = "timezone hour outside of range [0,23]"u8;
+internal static ref readonly @string yearOutsideOfRange09999ˢ⁔Time => ref yearOutsideOfRange09999ˢᵇ⁔Time;
+private static readonly @string yearOutsideOfRange09999ˢᵇ⁔Time = "year outside of range [0,9999]"u8;
+internal static ref readonly @string timezoneHourOutsideOfˢ⁔Time => ref timezoneHourOutsideOfˢᵇ⁔Time;
+private static readonly @string timezoneHourOutsideOfˢᵇ⁔Time = "timezone hour outside of range [0,23]"u8;
 
-[GoMethodBody("appendStrictRFC3339")] internal static (slice<byte>, error) appendStrictRFC3339ᴍ(Time t, slice<byte> b) {
+internal static (slice<byte>, error) appendStrictRFC3339⁔(/*this*/ Time t, slice<byte> b) {
     nint n0 = len(b);
     b = t.appendFormatRFC3339(b, true);
 
@@ -78,12 +78,12 @@ private static readonly @string timezoneHourOutsideOfˢᵇᴍTime = "timezone ho
     byte num2(slice<byte> bΔ1) => (byte)(10 * (bΔ1[0] - '0') + (bΔ1[1] - '0'));
     switch (ᐧ) {
     case {} when b[n0 + len("9999")] != (byte)'-': { // year must be exactly 4 digits wide
-        return (b, errors.New(yearOutsideOfRange09999ˢᴍTime));
+        return (b, errors.New(yearOutsideOfRange09999ˢ⁔Time));
     }
     case {} when b[len(b) - 1] is not (byte)'Z': {
         var c = b[len(b) - len("Z07:00")];
         if (('0' <= c && c <= '9') || num2(b.slice(len(b) - len("07:00"))) >= 24) {
-            return (b, errors.New(timezoneHourOutsideOfˢᴍTime));
+            return (b, errors.New(timezoneHourOutsideOfˢ⁔Time));
         }
         break;
     }}

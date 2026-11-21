@@ -148,7 +148,7 @@ partial struct FileHeader {
 } partial class zip_package {
 
 // FileInfo returns an fs.FileInfo for the [FileHeader].
-[GoMethodBody("FileInfo")] internal static fs.FileInfo FileInfoᴍ(ж<FileHeader> Ꮡh) {
+internal static fs.FileInfo FileInfo⁔(/*this*/ ж<FileHeader> Ꮡh) {
     return new headerFileInfo(Ꮡh);
 }
 
@@ -161,27 +161,27 @@ partial struct headerFileInfo {
 
 } partial class zip_package {
 
-[GoMethodBody("Name")] internal static @string Nameᴍ(headerFileInfo fi) { return path.Base(fi.fh.Name); }
-[GoMethodBody("Size")] internal static int64 Sizeᴍ(headerFileInfo fi) {
+internal static @string Name⁔(/*this*/ headerFileInfo fi) { return path.Base(fi.fh.Name); }
+internal static int64 Size⁔(/*this*/ headerFileInfo fi) {
     if (fi.fh.UncompressedSize64 > 0) {
         return (int64)fi.fh.UncompressedSize64;
     }
     return (int64)fi.fh.UncompressedSize;
 }
-[GoMethodBody("IsDir")] internal static bool IsDirᴍ(headerFileInfo fi) { return fi.Mode().IsDir(); }
-[GoMethodBody("ModTime")] internal static time.Time ModTimeᴍ(headerFileInfo fi) {
+internal static bool IsDir⁔(/*this*/ headerFileInfo fi) { return fi.Mode().IsDir(); }
+internal static time.Time ModTime⁔(/*this*/ headerFileInfo fi) {
     if (fi.fh.Modified.IsZero()) {
         return fi.fh.ModTime();
     }
     return fi.fh.Modified.UTC();
 }
-[GoMethodBody("Mode")] internal static fs.FileMode Modeᴍ(headerFileInfo fi) { return fi.fh.Mode(); }
-[GoMethodBody("Type")] internal static fs.FileMode Typeᴍ(headerFileInfo fi) { return fi.fh.Mode().Type(); }
-[GoMethodBody("Sys")] internal static any Sysᴍ(headerFileInfo fi) { return fi.fh.OrTypedNil(); }
+internal static fs.FileMode Mode⁔(/*this*/ headerFileInfo fi) { return fi.fh.Mode(); }
+internal static fs.FileMode Type⁔(/*this*/ headerFileInfo fi) { return fi.fh.Mode().Type(); }
+internal static any Sys⁔(/*this*/ headerFileInfo fi) { return fi.fh.OrTypedNil(); }
 
-[GoMethodBody("Info")] internal static (fs.FileInfo, error) Infoᴍ(headerFileInfo fi) { return (fi, default); }
+internal static (fs.FileInfo, error) Info⁔(/*this*/ headerFileInfo fi) { return (fi, default); }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(headerFileInfo fi) {
+internal static @string String⁔(/*this*/ headerFileInfo fi) {
     return fs.FormatFileInfo(fi);
 }
 
@@ -271,7 +271,7 @@ internal static (uint16 fDate, uint16 fTime) timeToMsDosTime(time.Time t) {
 // [ModifiedDate] and [ModifiedTime] fields.
 //
 // Deprecated: Use [Modified] instead.
-[GoMethodBody("ModTime")] internal static time.Time ModTimeᴍ(ref FileHeader h) {
+internal static time.Time ModTime⁔(/*this*/ ref FileHeader h) {
     return msDosTimeToTime(h.ModifiedDate, h.ModifiedTime);
 }
 
@@ -279,7 +279,7 @@ internal static (uint16 fDate, uint16 fTime) timeToMsDosTime(time.Time t) {
 // to the given time in UTC.
 //
 // Deprecated: Use [Modified] instead.
-[GoMethodBody("SetModTime")] internal static void SetModTimeᴍ(ref FileHeader h, time.Time t) {
+internal static void SetModTime⁔(/*this*/ ref FileHeader h, time.Time t) {
     t = t.UTC(); // Convert to UTC for compatibility
     h.Modified = t;
     (h.ModifiedDate, h.ModifiedTime) = timeToMsDosTime(t);
@@ -307,7 +307,7 @@ internal static UntypedInt msdosReadOnly => 0x01;
 } partial class zip_package {
 
 // Mode returns the permission and mode bits for the [FileHeader].
-[GoMethodBody("Mode")] internal static fs.FileMode /*mode*/ Modeᴍ(ref FileHeader h) {
+internal static fs.FileMode /*mode*/ Mode⁔(/*this*/ ref FileHeader h) {
     fs.FileMode mode = default;
 
     switch ((h.CreatorVersion >> 8)) {
@@ -326,7 +326,7 @@ internal static UntypedInt msdosReadOnly => 0x01;
 }
 
 // SetMode changes the permission and mode bits for the [FileHeader].
-[GoMethodBody("SetMode")] internal static void SetModeᴍ(ref FileHeader h, fs.FileMode mode) {
+internal static void SetMode⁔(/*this*/ ref FileHeader h, fs.FileMode mode) {
     h.CreatorVersion = (uint16)((uint16)(h.CreatorVersion & 0xff) | (uint16)(creatorUnix << 8));
     h.ExternalAttrs = fileModeToUnixMode(mode) << 16;
 
@@ -340,11 +340,11 @@ internal static UntypedInt msdosReadOnly => 0x01;
 }
 
 // isZip64 reports whether the file size exceeds the 32 bit limit
-[GoMethodBody("isZip64")] internal static bool isZip64ᴍ(ref FileHeader h) {
+internal static bool isZip64⁔(/*this*/ ref FileHeader h) {
     return h.CompressedSize64 >= uint32max || h.UncompressedSize64 >= uint32max;
 }
 
-[GoMethodBody("hasDataDescriptor")] internal static bool hasDataDescriptorᴍ(ref FileHeader h) {
+internal static bool hasDataDescriptor⁔(/*this*/ ref FileHeader h) {
     return (uint16)(h.Flags & 0x8) != 0;
 }
 

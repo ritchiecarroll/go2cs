@@ -41,7 +41,7 @@ public static ж<P256Point> NewP256Point() {
 } partial class nistec_package {
 
 // SetGenerator sets p to the canonical generator and returns p.
-[GoMethodBody("SetGenerator")] internal static ж<P256Point> SetGeneratorᴍ(ж<P256Point> Ꮡp) {
+internal static ж<P256Point> SetGenerator⁔(/*this*/ ж<P256Point> Ꮡp) {
     Ꮡp.Ꮡx.SetBytes([0x6b, 0x17, 0xd1, 0xf2, 0xe1, 0x2c, 0x42, 0x47, 0xf8, 0xbc, 0xe6, 0xe5, 0x63, 0xa4, 0x40, 0xf2, 0x77, 0x3, 0x7d, 0x81, 0x2d, 0xeb, 0x33, 0xa0, 0xf4, 0xa1, 0x39, 0x45, 0xd8, 0x98, 0xc2, 0x96]);
     Ꮡp.Ꮡy.SetBytes([0x4f, 0xe3, 0x42, 0xe2, 0xfe, 0x1a, 0x7f, 0x9b, 0x8e, 0xe7, 0xeb, 0x4a, 0x7c, 0xf, 0x9e, 0x16, 0x2b, 0xce, 0x33, 0x57, 0x6b, 0x31, 0x5e, 0xce, 0xcb, 0xb6, 0x40, 0x68, 0x37, 0xbf, 0x51, 0xf5]);
     Ꮡp.Ꮡz.One();
@@ -49,7 +49,7 @@ public static ж<P256Point> NewP256Point() {
 }
 
 // Set sets p = q and returns p.
-[GoMethodBody("Set")] internal static ж<P256Point> Setᴍ(ж<P256Point> Ꮡp, ж<P256Point> q) {
+internal static ж<P256Point> Set⁔(/*this*/ ж<P256Point> Ꮡp, ж<P256Point> q) {
     Ꮡp.Ꮡx.Set(q.Ꮡx);
     Ꮡp.Ꮡy.Set(q.Ꮡy);
     Ꮡp.Ꮡz.Set(q.Ꮡz);
@@ -65,16 +65,16 @@ internal static UntypedInt p256CompressedLength => /* 1 + p256ElementLength */ 3
 } partial class nistec_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidP256CompressedˢᴍP256Point => ref invalidP256CompressedˢᵇᴍP256Point;
-private static readonly @string invalidP256CompressedˢᵇᴍP256Point = "invalid P256 compressed point encoding"u8;
-internal static ref readonly @string invalidP256PointEncodingˢᴍP256Point => ref invalidP256PointEncodingˢᵇᴍP256Point;
-private static readonly @string invalidP256PointEncodingˢᵇᴍP256Point = "invalid P256 point encoding"u8;
+internal static ref readonly @string invalidP256Compressedˢ⁔P256Point => ref invalidP256Compressedˢᵇ⁔P256Point;
+private static readonly @string invalidP256Compressedˢᵇ⁔P256Point = "invalid P256 compressed point encoding"u8;
+internal static ref readonly @string invalidP256PointEncodingˢ⁔P256Point => ref invalidP256PointEncodingˢᵇ⁔P256Point;
+private static readonly @string invalidP256PointEncodingˢᵇ⁔P256Point = "invalid P256 point encoding"u8;
 
 // SetBytes sets p to the compressed, uncompressed, or infinity value encoded in
 // b, as specified in SEC 1, Version 2.0, Section 2.3.4. If the point is not on
 // the curve, it returns nil and an error, and the receiver is unchanged.
 // Otherwise, it returns p.
-[GoMethodBody("SetBytes")] internal static (ж<P256Point>, error) SetBytesᴍ(ж<P256Point> Ꮡp, slice<byte> b) {
+internal static (ж<P256Point>, error) SetBytes⁔(/*this*/ ж<P256Point> Ꮡp, slice<byte> b) {
     switch (ᐧ) {
     // Point at infinity.
     case {} when len(b) == 1 && b[0] == 0: {
@@ -108,7 +108,7 @@ private static readonly @string invalidP256PointEncodingˢᵇᴍP256Point = "inv
         // y² = x³ - 3x + b
         var y = p256Polynomial(@new<fiat.P256Element>(), x);
         if (!p256Sqrt(y, y)) {
-            return (default, errors.New(invalidP256CompressedˢᴍP256Point));
+            return (default, errors.New(invalidP256Compressedˢ⁔P256Point));
         }
 
         // Select the positive or negative root, as indicated by the least
@@ -124,7 +124,7 @@ private static readonly @string invalidP256PointEncodingˢᵇᴍP256Point = "inv
         return (Ꮡp, default);
     }
     default: {
-        return (default, errors.New(invalidP256PointEncodingˢᴍP256Point));
+        return (default, errors.New(invalidP256PointEncodingˢ⁔P256Point));
     }}
 }
 
@@ -172,14 +172,14 @@ internal static error p256CheckOnCurve(ж<fiat.P256Element> x, ж<fiat.P256Eleme
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
 // infinity is shorter than all other encodings.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ж<P256Point> Ꮡp) {
+internal static slice<byte> Bytes⁔(/*this*/ ж<P256Point> Ꮡp) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(65), out var Ꮡout);
     return Ꮡp.bytes(Ꮡout);
 }
 
-[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ж<P256Point> Ꮡp, /*[65]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes⁔(/*this*/ ж<P256Point> Ꮡp, /*[65]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     // The SEC 1 representation of the point at infinity is a single zero byte,
@@ -200,7 +200,7 @@ internal static error p256CheckOnCurve(ж<fiat.P256Element> x, ж<fiat.P256Eleme
 
 // BytesX returns the encoding of the x-coordinate of p, as specified in SEC 1,
 // Version 2.0, Section 2.3.5, or an error if p is the point at infinity.
-[GoMethodBody("BytesX")] internal static (slice<byte>, error) BytesXᴍ(ж<P256Point> Ꮡp) {
+internal static (slice<byte>, error) BytesX⁔(/*this*/ ж<P256Point> Ꮡp) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(32), out var Ꮡout);
@@ -208,14 +208,14 @@ internal static error p256CheckOnCurve(ж<fiat.P256Element> x, ж<fiat.P256Eleme
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string p256PointIsThePointAtˢᴍP256Point => ref p256PointIsThePointAtˢᵇᴍP256Point;
-private static readonly @string p256PointIsThePointAtˢᵇᴍP256Point = "P256 point is the point at infinity"u8;
+internal static ref readonly @string p256PointIsThePointAtˢ⁔P256Point => ref p256PointIsThePointAtˢᵇ⁔P256Point;
+private static readonly @string p256PointIsThePointAtˢᵇ⁔P256Point = "P256 point is the point at infinity"u8;
 
-[GoMethodBody("bytesX")] internal static (slice<byte>, error) bytesXᴍ(ж<P256Point> Ꮡp, /*[32]*/ ж<array<byte>> Ꮡout) {
+internal static (slice<byte>, error) bytesX⁔(/*this*/ ж<P256Point> Ꮡp, /*[32]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (Ꮡp.Ꮡz.IsZero() == 1) {
-        return (default, errors.New(p256PointIsThePointAtˢᴍP256Point));
+        return (default, errors.New(p256PointIsThePointAtˢ⁔P256Point));
     }
 
     var zinv = @new<fiat.P256Element>().Invert(Ꮡp.Ꮡz);
@@ -227,14 +227,14 @@ private static readonly @string p256PointIsThePointAtˢᵇᴍP256Point = "P256 p
 // BytesCompressed returns the compressed or infinity encoding of p, as
 // specified in SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the
 // point at infinity is shorter than all other encodings.
-[GoMethodBody("BytesCompressed")] internal static slice<byte> BytesCompressedᴍ(ж<P256Point> Ꮡp) {
+internal static slice<byte> BytesCompressed⁔(/*this*/ ж<P256Point> Ꮡp) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(33), out var Ꮡout);
     return Ꮡp.bytesCompressed(Ꮡout);
 }
 
-[GoMethodBody("bytesCompressed")] internal static slice<byte> bytesCompressedᴍ(ж<P256Point> Ꮡp, /*[33]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytesCompressed⁔(/*this*/ ж<P256Point> Ꮡp, /*[33]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (Ꮡp.Ꮡz.IsZero() == 1) {
@@ -254,7 +254,7 @@ private static readonly @string p256PointIsThePointAtˢᵇᴍP256Point = "P256 p
 }
 
 // Add sets q = p1 + p2, and returns q. The points may overlap.
-[GoMethodBody("Add")] internal static ж<P256Point> Addᴍ(ж<P256Point> Ꮡq, ж<P256Point> p1, ж<P256Point> p2) {
+internal static ж<P256Point> Add⁔(/*this*/ ж<P256Point> Ꮡq, ж<P256Point> p1, ж<P256Point> p2) {
     // Complete addition formula for a = -3 from "Complete addition formulas for
     // prime order elliptic curves" (https://eprint.iacr.org/2015/1060), §A.2.
 
@@ -309,7 +309,7 @@ private static readonly @string p256PointIsThePointAtˢᵇᴍP256Point = "P256 p
 }
 
 // Double sets q = p + p, and returns q. The points may overlap.
-[GoMethodBody("Double")] internal static ж<P256Point> Doubleᴍ(ж<P256Point> Ꮡq, ж<P256Point> p) {
+internal static ж<P256Point> Double⁔(/*this*/ ж<P256Point> Ꮡq, ж<P256Point> p) {
     // Complete addition formula for a = -3 from "Complete addition formulas for
     // prime order elliptic curves" (https://eprint.iacr.org/2015/1060), §A.2.
 
@@ -364,7 +364,7 @@ public partial struct p256AffinePoint {
 
 } partial class nistec_package {
 
-[GoMethodBody("Projective")] internal static ж<P256Point> Projectiveᴍ(ref p256AffinePoint p) {
+internal static ж<P256Point> Projective⁔(/*this*/ ref p256AffinePoint p) {
     var pp = Ꮡ(new P256Point(x: p.x.ΔClone(), y: p.y.ΔClone()));
     pp.Ꮡz.One();
     return pp;
@@ -376,7 +376,7 @@ public partial struct p256AffinePoint {
 // p2 can't be the point at infinity as it can't be represented in affine
 // coordinates, instead callers can set p2 to an arbitrary point and set
 // infinity to 1.
-[GoMethodBody("AddAffine")] internal static ж<P256Point> AddAffineᴍ(ж<P256Point> Ꮡq, ж<P256Point> p1, ж<p256AffinePoint> p2, nint infinity) {
+internal static ж<P256Point> AddAffine⁔(/*this*/ ж<P256Point> Ꮡq, ж<P256Point> p1, ж<p256AffinePoint> p2, nint infinity) {
     // Complete mixed addition formula for a = -3 from "Complete addition
     // formulas for prime order elliptic curves"
     // (https://eprint.iacr.org/2015/1060), Algorithm 5.
@@ -425,7 +425,7 @@ public partial struct p256AffinePoint {
 }
 
 // Select sets q to p1 if cond == 1, and to p2 if cond == 0.
-[GoMethodBody("Select")] internal static ж<P256Point> Selectᴍ(ж<P256Point> Ꮡq, ж<P256Point> p1, ж<P256Point> p2, nint cond) {
+internal static ж<P256Point> Select⁔(/*this*/ ж<P256Point> Ꮡq, ж<P256Point> p1, ж<P256Point> p2, nint cond) {
     Ꮡq.Ꮡx.Select(p1.Ꮡx, p2.Ꮡx, cond);
     Ꮡq.Ꮡy.Select(p1.Ꮡy, p2.Ꮡy, cond);
     Ꮡq.Ꮡz.Select(p1.Ꮡz, p2.Ꮡz, cond);
@@ -441,15 +441,15 @@ partial struct p256OrdElement /*[4]uint64*/;
 } partial class nistec_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidScalarLengthˢᴍp256OrdElement => ref invalidScalarLengthˢᵇᴍp256OrdElement;
-private static readonly @string invalidScalarLengthˢᵇᴍp256OrdElement = "invalid scalar length"u8;
+internal static ref readonly @string invalidScalarLengthˢ⁔p256OrdElement => ref invalidScalarLengthˢᵇ⁔p256OrdElement;
+private static readonly @string invalidScalarLengthˢᵇ⁔p256OrdElement = "invalid scalar length"u8;
 
 // SetBytes sets s to the big-endian value of x, reducing it as necessary.
-[GoMethodBody("SetBytes")] internal static (ж<p256OrdElement>, error) SetBytesᴍ(ж<p256OrdElement> Ꮡs, slice<byte> x) {
+internal static (ж<p256OrdElement>, error) SetBytes⁔(/*this*/ ж<p256OrdElement> Ꮡs, slice<byte> x) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (len(x) != 32) {
-        return (ж<p256OrdElement>.NilBoxOfDims(4L), errors.New(invalidScalarLengthˢᴍp256OrdElement));
+        return (ж<p256OrdElement>.NilBoxOfDims(4L), errors.New(invalidScalarLengthˢ⁔p256OrdElement));
     }
 
     s.Value[0] = byteorder.BEUint64(x[24..]);
@@ -473,7 +473,7 @@ private static readonly @string invalidScalarLengthˢᵇᴍp256OrdElement = "inv
     return (Ꮡs, default);
 }
 
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref p256OrdElement s) {
+internal static slice<byte> Bytes⁔(/*this*/ ref p256OrdElement s) {
     array<byte> @out = new(32);
     byteorder.BEPutUint64(@out[24..], s.Value[0]);
     byteorder.BEPutUint64(@out[16..], s.Value[1]);
@@ -484,7 +484,7 @@ private static readonly @string invalidScalarLengthˢᵇᴍp256OrdElement = "inv
 
 // Rsh returns the 64 least significant bits of x >> n. n must be lower
 // than 256. The value of n leaks through timing side-channels.
-[GoMethodBody("Rsh")] internal static uint64 Rshᴍ(ж<p256OrdElement> Ꮡs, nint n) {
+internal static uint64 Rsh⁔(/*this*/ ж<p256OrdElement> Ꮡs, nint n) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     nint i = n / 64;
@@ -508,7 +508,7 @@ partial struct p256Table /*[16]P256Point*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time. n must be in [0, 16]. If n is 0, p is set to the identity point.
-[GoMethodBody("Select")] internal static void Selectᴍ(ref p256Table table, ж<P256Point> p, uint8 n) {
+internal static void Select⁔(/*this*/ ref p256Table table, ж<P256Point> p, uint8 n) {
     if (n > 16) {
         throw panic("nistec: internal error: p256Table called with out-of-bounds value");
     }
@@ -520,7 +520,7 @@ partial struct p256Table /*[16]P256Point*/;
 }
 
 // Compute populates the table to the first 16 multiples of q.
-[GoMethodBody("Compute")] internal static ж<p256Table> Computeᴍ(ж<p256Table> Ꮡtable, ж<P256Point> q) {
+internal static ж<p256Table> Compute⁔(/*this*/ ж<p256Table> Ꮡtable, ж<P256Point> q) {
     ref var table = ref Ꮡtable.DerefOrNull();
 
     Ꮡtable.at<P256Point>(0).Set(q);
@@ -548,7 +548,7 @@ internal static (uint8, nint) boothW5(uint64 @in) {
 // ScalarMult sets r = scalar * q, where scalar is a 32-byte big endian value,
 // and returns r. If scalar is not 32 bytes long, ScalarMult returns an error
 // and the receiver is unchanged.
-[GoMethodBody("ScalarMult")] internal static (ж<P256Point>, error) ScalarMultᴍ(ж<P256Point> Ꮡp, ж<P256Point> q, slice<byte> scalar) {
+internal static (ж<P256Point>, error) ScalarMult⁔(/*this*/ ж<P256Point> Ꮡp, ж<P256Point> q, slice<byte> scalar) {
     var (s, err) = @new<p256OrdElement>().SetBytes(scalar);
     if (err != nil) {
         return (default, err);
@@ -596,7 +596,7 @@ internal static (uint8, nint) boothW5(uint64 @in) {
 }
 
 // Negate sets p to -p, if cond == 1, and to p if cond == 0.
-[GoMethodBody("Negate")] internal static ж<P256Point> Negateᴍ(ж<P256Point> Ꮡp, nint cond) {
+internal static ж<P256Point> Negate⁔(/*this*/ ж<P256Point> Ꮡp, nint cond) {
     var negY = @new<fiat.P256Element>();
     negY.Sub(negY, Ꮡp.Ꮡy);
     Ꮡp.Ꮡy.Select(negY, Ꮡp.Ꮡy, cond);
@@ -614,7 +614,7 @@ partial struct p256AffineTable /*[32]p256AffinePoint*/;
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time. n can be in [0, 32], but (unlike p256Table.Select) if n is 0,
 // p is set to an undefined value.
-[GoMethodBody("Select")] internal static void Selectᴍ(ref p256AffineTable table, ж<p256AffinePoint> p, uint8 n) {
+internal static void Select⁔(/*this*/ ref p256AffineTable table, ж<p256AffinePoint> p, uint8 n) {
     if (n > 32) {
         throw panic("nistec: internal error: p256AffineTable.Select called with out-of-bounds value");
     }
@@ -652,7 +652,7 @@ internal static (uint8, nint) boothW6(uint64 @in) {
 // ScalarBaseMult sets p = scalar * generator, where scalar is a 32-byte big
 // endian value, and returns r. If scalar is not 32 bytes long, ScalarBaseMult
 // returns an error and the receiver is unchanged.
-[GoMethodBody("ScalarBaseMult")] internal static (ж<P256Point>, error) ScalarBaseMultᴍ(ж<P256Point> Ꮡp, slice<byte> scalar) {
+internal static (ж<P256Point>, error) ScalarBaseMult⁔(/*this*/ ж<P256Point> Ꮡp, slice<byte> scalar) {
     // This function works like ScalarMult above, but the table is fixed and
     // "pre-doubled" for each iteration, so instead of doubling we move to the
     // next table at each iteration.
@@ -707,7 +707,7 @@ internal static (uint8, nint) boothW6(uint64 @in) {
 } partial class nistec_package {
 
 // Negate sets p to -p, if cond == 1, and to p if cond == 0.
-[GoMethodBody("Negate")] internal static ж<p256AffinePoint> Negateᴍ(ж<p256AffinePoint> Ꮡp, nint cond) {
+internal static ж<p256AffinePoint> Negate⁔(/*this*/ ж<p256AffinePoint> Ꮡp, nint cond) {
     var negY = @new<fiat.P256Element>();
     negY.Sub(negY, Ꮡp.Ꮡy);
     Ꮡp.Ꮡy.Select(negY, Ꮡp.Ꮡy, cond);

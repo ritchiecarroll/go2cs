@@ -76,13 +76,13 @@ partial struct MAC {
 } partial class poly1305_package {
 
 // Size returns the number of bytes Sum will return.
-[GoMethodBody("Size")] internal static nint Sizeᴍ(ref MAC h) { return TagSize; }
+internal static nint Size⁔(/*this*/ ref MAC h) { return TagSize; }
 
 // Write adds more data to the running message authentication code.
 // It never returns an error.
 //
 // It must not be called after the first call of Sum or Verify.
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<MAC> Ꮡh, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<MAC> Ꮡh, slice<byte> p) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     if (h.finalized) {
@@ -93,7 +93,7 @@ partial struct MAC {
 
 // Sum computes the authenticator of all data written to the
 // message authentication code.
-[GoMethodBody("Sum")] internal static slice<byte> Sumᴍ(ref MAC h, slice<byte> b) {
+internal static slice<byte> Sum⁔(/*this*/ ref MAC h, slice<byte> b) {
     ref var mac = ref heap(new array<byte>(16), out var Ꮡmac);
     h.mac.macGeneric.Sum(Ꮡmac);
     h.finalized = true;
@@ -102,7 +102,7 @@ partial struct MAC {
 
 // Verify returns whether the authenticator of all data written to
 // the message authentication code matches the expected value.
-[GoMethodBody("Verify")] internal static bool Verifyᴍ(ref MAC h, slice<byte> expected) {
+internal static bool Verify⁔(/*this*/ ref MAC h, slice<byte> expected) {
     ref var mac = ref heap(new array<byte>(16), out var Ꮡmac);
     h.mac.macGeneric.Sum(Ꮡmac);
     h.finalized = true;

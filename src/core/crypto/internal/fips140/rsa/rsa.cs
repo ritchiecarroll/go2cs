@@ -22,7 +22,7 @@ partial struct PublicKey {
 
 // Size returns the modulus size in bytes. Raw signatures and ciphertexts
 // for or by this public key will have the same size.
-[GoMethodBody("Size")] internal static nint Sizeᴍ(ref PublicKey pub) {
+internal static nint Size⁔(/*this*/ ref PublicKey pub) {
     return (pub.N.BitLen() + 7) / 8;
 }
 
@@ -49,7 +49,7 @@ partial struct PrivateKey {
 
 } partial class rsa_package {
 
-[GoMethodBody("PublicKey")] internal static ж<PublicKey> PublicKeyᴍ(ж<PrivateKey> Ꮡpriv) {
+internal static ж<PublicKey> PublicKey⁔(/*this*/ ж<PrivateKey> Ꮡpriv) {
     return Ꮡpriv.Ꮡpub;
 }
 
@@ -194,7 +194,7 @@ public static (ж<PrivateKey>, error) NewPrivateKeyWithoutCRT(slice<byte> N, nin
 //
 // P, Q, dP, dQ, and qInv may be nil if the key was created with
 // NewPrivateKeyWithoutCRT.
-[GoMethodBody("Export")] internal static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) Exportᴍ(ref PrivateKey priv) {
+internal static (slice<byte> N, nint e, slice<byte> d, slice<byte> P, slice<byte> Q, slice<byte> dP, slice<byte> dQ, slice<byte> qInv) Export⁔(/*this*/ ref PrivateKey priv) {
     slice<byte> N = default;
     nint e = default;
     slice<byte> d = default;

@@ -82,7 +82,7 @@ internal static error errInvalidUnsafePath = errors.New("http: invalid or unsafe
 
 // Open implements [FileSystem] using [os.Open], opening files for reading rooted
 // and relative to the directory d.
-[GoMethodBody("Open")] internal static (File, error) Openᴍ(Dir d, @string name) {
+internal static (File, error) Open⁔(/*this*/ Dir d, @string name) {
     @string pathΔ1 = path.Clean("/"u8 + name)[1..];
     if (pathΔ1 == ""u8) {
         pathΔ1 = ".";
@@ -140,9 +140,9 @@ partial struct fileInfoDirs /*[]global::go.io.fs_package.FileInfo*/;
 
 } partial class http_package {
 
-[GoMethodBody("len")] internal static nint lenᴍ(fileInfoDirs d) { return builtin.len(d); }
-[GoMethodBody("isDir")] internal static bool isDirᴍ(fileInfoDirs d, nint i) { return d[i].IsDir(); }
-[GoMethodBody("name")] internal static @string nameᴍ(fileInfoDirs d, nint i) { return d[i].Name(); }
+internal static nint len⁔(/*this*/ fileInfoDirs d) { return builtin.len(d); }
+internal static bool isDir⁔(/*this*/ fileInfoDirs d, nint i) { return d[i].IsDir(); }
+internal static @string name⁔(/*this*/ fileInfoDirs d, nint i) { return d[i].Name(); }
 
 } partial class http_package {
 
@@ -150,9 +150,9 @@ partial struct dirEntryDirs /*[]global::go.io.fs_package.DirEntry*/;
 
 } partial class http_package {
 
-[GoMethodBody("len")] internal static nint lenᴍ(dirEntryDirs d) { return builtin.len(d); }
-[GoMethodBody("isDir")] internal static bool isDirᴍ(dirEntryDirs d, nint i) { return d[i].IsDir(); }
-[GoMethodBody("name")] internal static @string nameᴍ(dirEntryDirs d, nint i) { return d[i].Name(); }
+internal static nint len⁔(/*this*/ dirEntryDirs d) { return builtin.len(d); }
+internal static bool isDir⁔(/*this*/ dirEntryDirs d, nint i) { return d[i].IsDir(); }
+internal static @string name⁔(/*this*/ dirEntryDirs d, nint i) { return d[i].Name(); }
 
 } partial class http_package {
 
@@ -1024,7 +1024,7 @@ partial struct ioFile {
 
 } partial class http_package {
 
-[GoMethodBody("Open")] internal static (File, error) Openᴍ(ioFS f, @string name) {
+internal static (File, error) Open⁔(/*this*/ ioFS f, @string name) {
     if (name == "/"u8) {
         name = ".";
     } else {
@@ -1040,9 +1040,9 @@ partial struct ioFile {
 
 } partial class http_package {
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ioFile f) { return f.@file.Close(); }
-[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ioFile f, slice<byte> b) { return f.@file.Read(b); }
-[GoMethodBody("Stat")] internal static (fs.FileInfo, error) Statᴍ(ioFile f) { return f.@file.Stat(); }
+internal static error Close⁔(/*this*/ ioFile f) { return f.@file.Close(); }
+internal static (nint, error) Read⁔(/*this*/ ioFile f, slice<byte> b) { return f.@file.Read(b); }
+internal static (fs.FileInfo, error) Stat⁔(/*this*/ ioFile f) { return f.@file.Stat(); }
 
 } partial class http_package {
 
@@ -1051,7 +1051,7 @@ internal static error errMissingReadDir = errors.New("io.File directory missing 
 
 } partial class http_package {
 
-[GoMethodBody("Seek")] internal static (int64, error) Seekᴍ(ioFile f, int64 offset, nint whence) {
+internal static (int64, error) Seek⁔(/*this*/ ioFile f, int64 offset, nint whence) {
     var (s, ok) = f.@file._<io.Seeker>(ᐧ);
     if (!ok) {
         return (0, errMissingSeek);
@@ -1059,7 +1059,7 @@ internal static error errMissingReadDir = errors.New("io.File directory missing 
     return s.Seek(offset, whence);
 }
 
-[GoMethodBody("ReadDir")] internal static (slice<fs.DirEntry>, error) ReadDirᴍ(ioFile f, nint count) {
+internal static (slice<fs.DirEntry>, error) ReadDir⁔(/*this*/ ioFile f, nint count) {
     var (d, ok) = f.@file._<fs.ReadDirFile>(ᐧ);
     if (!ok) {
         return (default, errMissingReadDir);
@@ -1067,7 +1067,7 @@ internal static error errMissingReadDir = errors.New("io.File directory missing 
     return d.ReadDir(count);
 }
 
-[GoMethodBody("Readdir")] internal static (slice<fs.FileInfo>, error) Readdirᴍ(ioFile f, nint count) {
+internal static (slice<fs.FileInfo>, error) Readdir⁔(/*this*/ ioFile f, nint count) {
     var (d, ok) = f.@file._<fs.ReadDirFile>(ᐧ);
     if (!ok) {
         return (default, errMissingReadDir);
@@ -1134,7 +1134,7 @@ public static Handler FileServerFS(fs.FS root) {
 
 } partial class http_package {
 
-[GoMethodBody("ServeHTTP")] internal static void ServeHTTPᴍ(ref fileHandler f, ResponseWriter w, ж<Request> Ꮡr) {
+internal static void ServeHTTP⁔(/*this*/ ref fileHandler f, ResponseWriter w, ж<Request> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     @string upath = r.URL.Path;
@@ -1154,11 +1154,11 @@ partial struct httpRange {
 
 } partial class http_package {
 
-[GoMethodBody("contentRange")] internal static @string contentRangeᴍ(httpRange r, int64 size) {
+internal static @string contentRange⁔(/*this*/ httpRange r, int64 size) {
     return fmt.Sprintf("bytes %d-%d/%d"u8, r.start, r.start + r.length - 1, size);
 }
 
-[GoMethodBody("mimeHeader")] internal static textproto.MIMEHeader mimeHeaderᴍ(httpRange r, @string contentType, int64 size) {
+internal static textproto.MIMEHeader mimeHeader⁔(/*this*/ httpRange r, @string contentType, int64 size) {
     return new textproto.MIMEHeader(new map<@string, slice<@string>>{
         ["Content-Range"] = slice<@string>([r.contentRange(size)]),
         ["Content-Type"] = [contentType]
@@ -1284,7 +1284,7 @@ partial struct countingWriter /*num:int64*/;
 
 } partial class http_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref countingWriter w, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref countingWriter w, slice<byte> p) {
     w += ((countingWriter)(int64)len(p));
     return (len(p), default);
 }

@@ -72,13 +72,13 @@ partial struct aesCtrWrapper {
 
 } partial class cipher_package {
 
-[GoMethodBody("XORKeyStream")] internal static void XORKeyStreamᴍ(aesCtrWrapper x, slice<byte> dst, slice<byte> src) {
+internal static void XORKeyStream⁔(/*this*/ aesCtrWrapper x, slice<byte> dst, slice<byte> src) {
     x.c.XORKeyStream(dst, src);
 }
 
 } partial class cipher_package {
 
-[GoMethodBody("refill")] internal static void refillᴍ(ref ctr x) {
+internal static void refill⁔(/*this*/ ref ctr x) {
     nint remain = len(x.@out) - x.outUsed;
     copy(x.@out, x.@out.slice(x.outUsed));
     x.@out = x.@out.slice(0, cap(x.@out));
@@ -99,7 +99,7 @@ partial struct aesCtrWrapper {
     x.outUsed = 0;
 }
 
-[GoMethodBody("XORKeyStream")] internal static void XORKeyStreamᴍ(ref ctr x, slice<byte> dst, slice<byte> src) {
+internal static void XORKeyStream⁔(/*this*/ ref ctr x, slice<byte> dst, slice<byte> src) {
     if (len(dst) < len(src)) {
         throw panic("crypto/cipher: output smaller than input");
     }

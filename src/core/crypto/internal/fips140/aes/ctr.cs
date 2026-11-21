@@ -44,7 +44,7 @@ internal static CTR newCTR(ref Block b, slice<byte> iv) {
 
 } partial class aes_package {
 
-[GoMethodBody("XORKeyStream")] internal static void XORKeyStreamᴍ(ж<CTR> Ꮡc, slice<byte> dst, slice<byte> src) {
+internal static void XORKeyStream⁔(/*this*/ ж<CTR> Ꮡc, slice<byte> dst, slice<byte> src) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     Ꮡc.XORKeyStreamAt(dst, src, c.offset);
@@ -78,7 +78,7 @@ public static void RoundToBlock(ж<CTR> Ꮡc) {
 // seeks into the keystream by the given bytes offset from the start (ignoring
 // any XORKetStream calls). This allows for random access into the keystream, up
 // to 16 EiB from the start.
-[GoMethodBody("XORKeyStreamAt")] internal static void XORKeyStreamAtᴍ(ж<CTR> Ꮡc, slice<byte> dst, slice<byte> src, uint64 offset) {
+internal static void XORKeyStreamAt⁔(/*this*/ ж<CTR> Ꮡc, slice<byte> dst, slice<byte> src, uint64 offset) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (len(dst) < len(src)) {

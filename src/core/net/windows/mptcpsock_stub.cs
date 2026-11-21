@@ -11,13 +11,13 @@ partial class net_package {
 
 } partial class net_package {
 
-[GoMethodBody("dialMPTCP")] internal static (ж<TCPConn>, error) dialMPTCPᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
+internal static (ж<TCPConn>, error) dialMPTCP⁔(/*this*/ ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
     return Ꮡsd.dialTCP(ctx, laddr, raddr);
 }
 
 } partial class net_package {
 
-[GoMethodBody("listenMPTCP")] internal static (ж<TCPListener>, error) listenMPTCPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) {
+internal static (ж<TCPListener>, error) listenMPTCP⁔(/*this*/ ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) {
     return Ꮡsl.listenTCP(ctx, laddr);
 }
 

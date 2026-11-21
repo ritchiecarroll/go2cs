@@ -27,7 +27,7 @@ partial struct CommentMap /*map[Node, slice<ж<CommentGroup>>]*/;
 
 } partial class ast_package {
 
-[GoMethodBody("addComment")] internal static void addCommentᴍ(CommentMap cmap, Node n, ж<CommentGroup> c) {
+internal static void addComment⁔(/*this*/ CommentMap cmap, Node n, ж<CommentGroup> c) {
     var list = cmap[n];
     if (len(list) == 0) {
         list = [c];
@@ -80,11 +80,11 @@ partial struct commentListReader {
 
 } partial class ast_package {
 
-[GoMethodBody("eol")] internal static bool eolᴍ(ref commentListReader r) {
+internal static bool eol⁔(/*this*/ ref commentListReader r) {
     return r.index >= len(r.list);
 }
 
-[GoMethodBody("next")] internal static void nextᴍ(ref commentListReader r) {
+internal static void next⁔(/*this*/ ref commentListReader r) {
     if (!r.eol()) {
         r.comment = r.list[r.index];
         r.pos = r.fset.Position(r.comment.Pos());
@@ -103,7 +103,7 @@ partial struct nodeStack /*[]Node*/;
 
 // push pops all nodes that appear lexically before n
 // and then pushes n on the stack.
-[GoMethodBody("push")] internal static void pushᴍ(ref nodeStack s, Node n) {
+internal static void push⁔(/*this*/ ref nodeStack s, Node n) {
     s.pop(n.Pos());
     s = append((s), n);
 }
@@ -111,7 +111,7 @@ partial struct nodeStack /*[]Node*/;
 // pop pops all nodes that appear lexically before pos
 // (i.e., whose lexical extent has ended before or at pos).
 // It returns the last node popped.
-[GoMethodBody("pop")] internal static Node /*top*/ popᴍ(ref nodeStack s, token.Pos pos) {
+internal static Node /*top*/ pop⁔(/*this*/ ref nodeStack s, token.Pos pos) {
     Node top = default;
 
     nint i = len(s);
@@ -249,7 +249,7 @@ public static CommentMap NewCommentMap(ж<token.FileSet> fset, Node node, slice<
 // Update replaces an old node in the comment map with the new node
 // and returns the new node. Comments that were associated with the
 // old node are associated with the new node.
-[GoMethodBody("Update")] internal static Node Updateᴍ(CommentMap cmap, Node old, Node @new) {
+internal static Node Update⁔(/*this*/ CommentMap cmap, Node old, Node @new) {
     var list = cmap[old]; if (len(list) > 0) {
         delete(cmap, old);
         cmap[@new] = appendꓸꓸꓸ(cmap[@new], list);
@@ -260,7 +260,7 @@ public static CommentMap NewCommentMap(ж<token.FileSet> fset, Node node, slice<
 // Filter returns a new comment map consisting of only those
 // entries of cmap for which a corresponding node exists in
 // the AST specified by node.
-[GoMethodBody("Filter")] internal static CommentMap Filterᴍ(CommentMap cmap, Node node) {
+internal static CommentMap Filter⁔(/*this*/ CommentMap cmap, Node node) {
     var umap = new CommentMap(0);
     var cmapʗ1 = cmap;
     var umapʗ1 = umap;
@@ -275,7 +275,7 @@ public static CommentMap NewCommentMap(ж<token.FileSet> fset, Node node, slice<
 
 // Comments returns the list of comment groups in the comment map.
 // The result is sorted in source order.
-[GoMethodBody("Comments")] internal static slice<ж<CommentGroup>> Commentsᴍ(CommentMap cmap) {
+internal static slice<ж<CommentGroup>> Comments⁔(/*this*/ CommentMap cmap) {
     var list = new slice<ж<CommentGroup>>(0, len(cmap));
     foreach (var (_, e) in cmap) {
         list = appendꓸꓸꓸ(list, e);
@@ -328,9 +328,9 @@ break_loop:;
 } partial class ast_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object commentMapˢᴍCommentMap = (@string)"CommentMap {"u8;
+internal static readonly object commentMapˢ⁔CommentMap = (@string)"CommentMap {"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(CommentMap cmap) {
+internal static @string String⁔(/*this*/ CommentMap cmap) {
     var nodesᴷ = new stackAppend<Node>();
 
     // print map entries in sorted order
@@ -347,7 +347,7 @@ internal static readonly object commentMapˢᴍCommentMap = (@string)"CommentMap
     });
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
-    fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), commentMapˢᴍCommentMap);
+    fmt.Fprintln(new strings_BuilderжWriter(Ꮡbuf), commentMapˢ⁔CommentMap);
     foreach (var (_, node) in range(nodes)) {
         var comment = cmap[node];
         // print name of identifiers; print node type for other nodes

@@ -91,7 +91,7 @@ partial struct Handler {
 
 } partial class cgi_package {
 
-[GoMethodBody("stderr")] internal static io.Writer stderrᴍ(ref Handler h) {
+internal static io.Writer stderr⁔(/*this*/ ref Handler h) {
     if (h.Stderr != nil) {
         return h.Stderr;
     }
@@ -133,16 +133,16 @@ internal static slice<@string> /*ret*/ removeLeadingDuplicates(slice<@string> en
 } partial class cgi_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string contentTypeˢ2ᴍHandler => ref contentTypeˢ2ᵇᴍHandler;
-private static readonly @string contentTypeˢ2ᵇᴍHandler = "Content-Type"u8;
-internal static ref readonly @string pathˢᴍHandler => ref pathˢᵇᴍHandler;
-private static readonly @string pathˢᵇᴍHandler = "PATH"u8;
-internal static ref readonly @string binUsrBinUsrUcbUsrBsdUsrˢᴍHandler => ref binUsrBinUsrUcbUsrBsdUsrˢᵇᴍHandler;
-private static readonly @string binUsrBinUsrUcbUsrBsdUsrˢᵇᴍHandler = "/bin:/usr/bin:/usr/ucb:/usr/bsd:/usr/local/bin"u8;
-internal static ref readonly @string locationˢᴍHandler => ref locationˢᵇᴍHandler;
-private static readonly @string locationˢᵇᴍHandler = "Location"u8;
+internal static ref readonly @string contentTypeˢ2⁔Handler => ref contentTypeˢ2ᵇ⁔Handler;
+private static readonly @string contentTypeˢ2ᵇ⁔Handler = "Content-Type"u8;
+internal static ref readonly @string pathˢ⁔Handler => ref pathˢᵇ⁔Handler;
+private static readonly @string pathˢᵇ⁔Handler = "PATH"u8;
+internal static ref readonly @string binUsrBinUsrUcbUsrBsdUsrˢ⁔Handler => ref binUsrBinUsrUcbUsrBsdUsrˢᵇ⁔Handler;
+private static readonly @string binUsrBinUsrUcbUsrBsdUsrˢᵇ⁔Handler = "/bin:/usr/bin:/usr/ucb:/usr/bsd:/usr/local/bin"u8;
+internal static ref readonly @string locationˢ⁔Handler => ref locationˢᵇ⁔Handler;
+private static readonly @string locationˢᵇ⁔Handler = "Location"u8;
 
-[GoMethodBody("ServeHTTP")] internal static void ServeHTTPᴍ(ж<Handler> Ꮡh, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
+internal static void ServeHTTP⁔(/*this*/ ж<Handler> Ꮡh, http.ResponseWriter rw, ж<http.Request> Ꮡreq) {
     GoFrame ᒐ = default;
     try {
         ref var h = ref Ꮡh.DerefOrNull();
@@ -214,13 +214,13 @@ private static readonly @string locationˢᵇᴍHandler = "Location"u8;
         if (req.ContentLength > 0) {
             env = append(env, fmt.Sprintf("CONTENT_LENGTH=%d"u8, req.ContentLength));
         }
-        @string ctype = req.Header.Get(contentTypeˢ2ᴍHandler); if (ctype != ""u8) {
+        @string ctype = req.Header.Get(contentTypeˢ2⁔Handler); if (ctype != ""u8) {
             env = append(env, "CONTENT_TYPE="u8 + ctype);
         }
 
-        @string envPath = os.Getenv(pathˢᴍHandler);
+        @string envPath = os.Getenv(pathˢ⁔Handler);
         if (envPath == ""u8) {
-            envPath = binUsrBinUsrUcbUsrBsdUsrˢᴍHandler;
+            envPath = binUsrBinUsrUcbUsrBsdUsrˢ⁔Handler;
         }
         env = append(env, "PATH="u8 + envPath);
 
@@ -349,7 +349,7 @@ private static readonly @string locationˢᵇᴍHandler = "Location"u8;
             return;
         }
 
-        @string loc = headers.Get(locationˢᴍHandler); if (loc != ""u8) {
+        @string loc = headers.Get(locationˢ⁔Handler); if (loc != ""u8) {
             if (strings.HasPrefix(loc, "/") && h.PathLocationHandler != nil) {
                 h.handleInternalRedirect(rw, Ꮡreq, loc);
                 return;
@@ -359,7 +359,7 @@ private static readonly @string locationˢᵇᴍHandler = "Location"u8;
             }
         }
 
-        if (statusCode == 0 && headers.Get(contentTypeˢ2ᴍHandler) == ""u8) {
+        if (statusCode == 0 && headers.Get(contentTypeˢ2⁔Handler) == ""u8) {
             rw.WriteHeader(http.StatusInternalServerError);
             h.printf("cgi: missing required Content-Type in headers");
             return;
@@ -396,7 +396,7 @@ private static readonly @string locationˢᵇᴍHandler = "Location"u8;
     finally { ᒐ.Run(); }
 }
 
-[GoMethodBody("printf")] internal static void printfᴍ(ref Handler h, @string format, params ꓸꓸꓸany vʗp) {
+internal static void printf⁔(/*this*/ ref Handler h, @string format, params ꓸꓸꓸany vʗp) {
     var v = vʗp.sslice();
 
     if (h.Logger != nil) {
@@ -406,7 +406,7 @@ private static readonly @string locationˢᵇᴍHandler = "Location"u8;
     }
 }
 
-[GoMethodBody("handleInternalRedirect")] internal static void handleInternalRedirectᴍ(ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq, @string path) {
+internal static void handleInternalRedirect⁔(/*this*/ ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq, @string path) {
     ref var req = ref Ꮡreq.DerefOrNull();
 
     var (url, err) = req.URL.Parse(path);

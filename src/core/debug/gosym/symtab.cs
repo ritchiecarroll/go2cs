@@ -35,14 +35,14 @@ partial struct Sym {
 } partial class gosym_package {
 
 // Static reports whether this symbol is static (not visible outside its file).
-[GoMethodBody("Static")] internal static bool Staticᴍ(ref Sym s) { return s.Type >= 'a'; }
+internal static bool Static⁔(/*this*/ ref Sym s) { return s.Type >= 'a'; }
 
 // nameWithoutInst returns s.Name if s.Name has no brackets (does not reference an
 // instantiated type, function, or method). If s.Name contains brackets, then it
 // returns s.Name with all the contents between (and including) the outermost left
 // and right bracket removed. This is useful to ignore any extra slashes or dots
 // inside the brackets from the string searches below, where needed.
-[GoMethodBody("nameWithoutInst")] internal static @string nameWithoutInstᴍ(ref Sym s) {
+internal static @string nameWithoutInst⁔(/*this*/ ref Sym s) {
     nint start = strings.Index(s.Name, "[");
     if (start < 0) {
         return s.Name;
@@ -56,26 +56,26 @@ partial struct Sym {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeˢᴍSym => ref typeˢᵇᴍSym;
-private static readonly @string typeˢᵇᴍSym = "type:"u8;
-internal static ref readonly @string typeˢ2ᴍSym => ref typeˢ2ᵇᴍSym;
-private static readonly @string typeˢ2ᵇᴍSym = "type."u8;
+internal static ref readonly @string typeˢ⁔Sym => ref typeˢᵇ⁔Sym;
+private static readonly @string typeˢᵇ⁔Sym = "type:"u8;
+internal static ref readonly @string typeˢ2⁔Sym => ref typeˢ2ᵇ⁔Sym;
+private static readonly @string typeˢ2ᵇ⁔Sym = "type."u8;
 
 // PackageName returns the package part of the symbol name,
 // or the empty string if there is none.
-[GoMethodBody("PackageName")] internal static @string PackageNameᴍ(ref Sym s) {
+internal static @string PackageName⁔(/*this*/ ref Sym s) {
     @string name = s.nameWithoutInst();
 
     // Since go1.20, a prefix of "type:" and "go:" is a compiler-generated symbol,
     // they do not belong to any package.
     //
     // See cmd/compile/internal/base/link.go:ReservedImports variable.
-    if (s.goVersion >= ver120 && (strings.HasPrefix(name, "go:") || strings.HasPrefix(name, typeˢᴍSym))) {
+    if (s.goVersion >= ver120 && (strings.HasPrefix(name, "go:") || strings.HasPrefix(name, typeˢ⁔Sym))) {
         return ""u8;
     }
 
     // For go1.18 and below, the prefix are "type." and "go." instead.
-    if (s.goVersion <= ver118 && (strings.HasPrefix(name, "go.") || strings.HasPrefix(name, typeˢ2ᴍSym))) {
+    if (s.goVersion <= ver118 && (strings.HasPrefix(name, "go.") || strings.HasPrefix(name, typeˢ2⁔Sym))) {
         return ""u8;
     }
 
@@ -93,7 +93,7 @@ private static readonly @string typeˢ2ᵇᴍSym = "type."u8;
 // ReceiverName returns the receiver type name of this symbol,
 // or the empty string if there is none.  A receiver name is only detected in
 // the case that s.Name is fully-specified with a package name.
-[GoMethodBody("ReceiverName")] internal static @string ReceiverNameᴍ(ref Sym s) {
+internal static @string ReceiverName⁔(/*this*/ ref Sym s) {
     @string name = s.nameWithoutInst();
     // If we find a slash in name, it should precede any bracketed expression
     // that was removed, so pathend will apply correctly to name and s.Name.
@@ -118,7 +118,7 @@ private static readonly @string typeˢ2ᵇᴍSym = "type."u8;
 }
 
 // BaseName returns the symbol name without the package or receiver name.
-[GoMethodBody("BaseName")] internal static @string BaseNameᴍ(ref Sym s) {
+internal static @string BaseName⁔(/*this*/ ref Sym s) {
     @string name = s.nameWithoutInst();
     nint i = strings.LastIndex(name, "."); if (i != -1) {
         if (s.Name != name) {
@@ -574,7 +574,7 @@ break_countloop:;
 
 // PCToFunc returns the function containing the program counter pc,
 // or nil if there is no such function.
-[GoMethodBody("PCToFunc")] internal static ж<Func> PCToFuncᴍ(ref Table t, uint64 pc) {
+internal static ж<Func> PCToFunc⁔(/*this*/ ref Table t, uint64 pc) {
     var funcs = t.Funcs;
     while (len(funcs) > 0) {
         nint m = len(funcs) / 2;
@@ -597,7 +597,7 @@ break_countloop:;
 
 // PCToLine looks up line number information for a program counter.
 // If there is no information, it returns fn == nil.
-[GoMethodBody("PCToLine")] internal static (@string @file, nint line, ж<Func> fn) PCToLineᴍ(ref Table t, uint64 pc) {
+internal static (@string @file, nint line, ж<Func> fn) PCToLine⁔(/*this*/ ref Table t, uint64 pc) {
     @string @file = default;
     nint line = default;
     ж<Func> fn = default;
@@ -617,7 +617,7 @@ break_countloop:;
 // LineToPC looks up the first program counter on the given line in
 // the named file. It returns [UnknownFileError] or [UnknownLineError] if
 // there is an error looking up this line.
-[GoMethodBody("LineToPC")] internal static (uint64 pc, ж<Func> fn, error err) LineToPCᴍ(ref Table t, @string @file, nint line) {
+internal static (uint64 pc, ж<Func> fn, error err) LineToPC⁔(/*this*/ ref Table t, @string @file, nint line) {
     uint64 pc = default;
     ж<Func> fn = default;
     error err = default;
@@ -651,7 +651,7 @@ break_countloop:;
 
 // LookupSym returns the text, data, or bss symbol with the given name,
 // or nil if no such symbol is found.
-[GoMethodBody("LookupSym")] internal static ж<Sym> LookupSymᴍ(ref Table t, @string name) {
+internal static ж<Sym> LookupSym⁔(/*this*/ ref Table t, @string name) {
     // TODO(austin) Maybe make a map
     foreach (var i in range(len(t.Syms))) {
         var s = Ꮡ(t.Syms, i);
@@ -668,7 +668,7 @@ break_countloop:;
 
 // LookupFunc returns the text, data, or bss symbol with the given name,
 // or nil if no such symbol is found.
-[GoMethodBody("LookupFunc")] internal static ж<Func> LookupFuncᴍ(ref Table t, @string name) {
+internal static ж<Func> LookupFunc⁔(/*this*/ ref Table t, @string name) {
     foreach (var i in range(len(t.Funcs))) {
         var f = Ꮡ(t.Funcs, i);
         if (f.Sym.Name == name) {
@@ -679,7 +679,7 @@ break_countloop:;
 }
 
 // SymByAddr returns the text, data, or bss symbol starting at the given address.
-[GoMethodBody("SymByAddr")] internal static ж<Sym> SymByAddrᴍ(ref Table t, uint64 addr) {
+internal static ж<Sym> SymByAddr⁔(/*this*/ ref Table t, uint64 addr) {
     foreach (var i in range(len(t.Syms))) {
         var s = Ꮡ(t.Syms, i);
         switch (s.Type) {
@@ -705,8 +705,8 @@ internal partial struct lineFromAline_stackEnt /*dyn*/ {
 } partial class gosym_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string malformedSymbolTableˢᴍObj => ref malformedSymbolTableˢᵇᴍObj;
-private static readonly @string malformedSymbolTableˢᵇᴍObj = "<malformed symbol table>"u8;
+internal static ref readonly @string malformedSymbolTableˢ⁔Obj => ref malformedSymbolTableˢᵇ⁔Obj;
+private static readonly @string malformedSymbolTableˢᵇ⁔Obj = "<malformed symbol table>"u8;
 
 /*
  * Object files
@@ -717,7 +717,7 @@ private static readonly @string malformedSymbolTableˢᵇᴍObj = "<malformed sy
 // we never quite found all the corner cases.
 //
 // Go 1.2 and later use a simpler format, documented at golang.org/s/go12symtab.
-[GoMethodBody("lineFromAline")] internal static (@string, nint) lineFromAlineᴍ(ref Obj o, nint aline) {
+internal static (@string, nint) lineFromAline⁔(/*this*/ ref Obj o, nint aline) {
     var noPath = Ꮡ(new lineFromAline_stackEnt("", 0, 0, nil));
     var tos = noPath;
 
@@ -737,7 +737,7 @@ pathloop:
         case {} when s.Name == ""u8: {
             // Pop
             if (tos == noPath) {
-                return (malformedSymbolTableˢᴍObj, 0);
+                return (malformedSymbolTableˢ⁔Obj, 0);
             }
             tos.prev.offset += val - tos.start;
             tos = tos.prev;
@@ -758,7 +758,7 @@ break_pathloop:;
     return (tos.path, aline - tos.start - tos.offset + 1);
 }
 
-[GoMethodBody("alineFromLine")] internal static (nint, error) alineFromLineᴍ(ref Obj o, @string path, nint line) {
+internal static (nint, error) alineFromLine⁔(/*this*/ ref Obj o, @string path, nint line) {
     if (line < 1) {
         return (0, new UnknownLineErrorжerror(Ꮡ(new UnknownLineError(path, line))));
     }
@@ -816,7 +816,7 @@ partial struct UnknownFileError /*@string*/;
 
 } partial class gosym_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(UnknownFileError e) { return "unknown file: "u8 + ((@string)e); }
+internal static @string Error⁔(/*this*/ UnknownFileError e) { return "unknown file: "u8 + ((@string)e); }
 
 } partial class gosym_package {
 
@@ -830,7 +830,7 @@ partial struct UnknownLineError {
 
 } partial class gosym_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref UnknownLineError e) {
+internal static @string Error⁔(/*this*/ ref UnknownLineError e) {
     return "no code at "u8 + e.File + ":"u8 + strconv.Itoa(e.Line);
 }
 
@@ -846,7 +846,7 @@ partial struct DecodingError {
 
 } partial class gosym_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref DecodingError e) {
+internal static @string Error⁔(/*this*/ ref DecodingError e) {
     @string msg = e.msg;
     if (e.val != nil) {
         msg += fmt.Sprintf(" '%v'"u8, e.val);

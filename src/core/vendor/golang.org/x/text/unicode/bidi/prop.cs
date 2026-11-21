@@ -30,7 +30,7 @@ internal static ж<bidiTrie> trie = newBidiTrie(0);
 // }
 
 // Class returns the Bidi class for p.
-[GoMethodBody("Class")] internal static Class Classᴍ(Properties p) {
+internal static Class Class⁔(/*this*/ Properties p) {
     Class c = (Class)(nuint)((uint8)(p.entry & 0x0F));
     if (c == Control) {
         c = controlByteToClass[(uint8)(p.last & 0xF)];
@@ -39,14 +39,14 @@ internal static ж<bidiTrie> trie = newBidiTrie(0);
 }
 
 // IsBracket reports whether the rune is a bracket.
-[GoMethodBody("IsBracket")] internal static bool IsBracketᴍ(Properties p) { return (uint8)(p.entry & 0xF0) != 0; }
+internal static bool IsBracket⁔(/*this*/ Properties p) { return (uint8)(p.entry & 0xF0) != 0; }
 
 // IsOpeningBracket reports whether the rune is an opening bracket.
 // IsBracket must return true.
-[GoMethodBody("IsOpeningBracket")] internal static bool IsOpeningBracketᴍ(Properties p) { return (uint8)(p.entry & (uint8)openMask) != 0; }
+internal static bool IsOpeningBracket⁔(/*this*/ Properties p) { return (uint8)(p.entry & (uint8)openMask) != 0; }
 
 // TODO: find a better API and expose.
-[GoMethodBody("reverseBracket")] internal static rune reverseBracketᴍ(Properties p, rune r) {
+internal static rune reverseBracket⁔(/*this*/ Properties p, rune r) {
     return xorMasks[(p.entry >> (int)(xorMaskShift))] ^ r;
 }
 

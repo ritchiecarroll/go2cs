@@ -65,7 +65,7 @@ public static Record NewRecord(time.Time t, Level level, @string msg, uintptr pc
 // Clone returns a copy of the record with no shared state.
 // The original record and the clone can both be modified
 // without interfering with each other.
-[GoMethodBody("Clone")] internal static Record Cloneᴍ(Record r) {
+internal static Record Clone⁔(/*this*/ Record r) {
     r = r.ΔClone();
 
     r.back = slices.Clip<slice<Attr>, Attr>(r.back); // prevent append from mutating shared array
@@ -73,7 +73,7 @@ public static Record NewRecord(time.Time t, Level level, @string msg, uintptr pc
 }
 
 // NumAttrs returns the number of attributes in the [Record].
-[GoMethodBody("NumAttrs")] internal static nint NumAttrsᴍ(Record r) {
+internal static nint NumAttrs⁔(/*this*/ Record r) {
     r = r.ΔClone();
 
     return r.nFront + len(r.back);
@@ -81,7 +81,7 @@ public static Record NewRecord(time.Time t, Level level, @string msg, uintptr pc
 
 // Attrs calls f on each Attr in the [Record].
 // Iteration stops if f returns false.
-[GoMethodBody("Attrs")] internal static void Attrsᴍ(Record r, Func<Attr, bool> f) {
+internal static void Attrs⁔(/*this*/ Record r, Func<Attr, bool> f) {
     r = r.ΔClone();
 
     for (nint i = 0; i < r.nFront; i++) {
@@ -97,14 +97,14 @@ public static Record NewRecord(time.Time t, Level level, @string msg, uintptr pc
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bugˢᴍRecord => ref bugˢᵇᴍRecord;
-private static readonly @string bugˢᵇᴍRecord = "!BUG"u8;
-internal static ref readonly @string addAttrsUnsafelyCalledOnˢᴍRecord => ref addAttrsUnsafelyCalledOnˢᵇᴍRecord;
-private static readonly @string addAttrsUnsafelyCalledOnˢᵇᴍRecord = "AddAttrs unsafely called on copy of Record made without using Record.Clone"u8;
+internal static ref readonly @string bugˢ⁔Record => ref bugˢᵇ⁔Record;
+private static readonly @string bugˢᵇ⁔Record = "!BUG"u8;
+internal static ref readonly @string addAttrsUnsafelyCalledOnˢ⁔Record => ref addAttrsUnsafelyCalledOnˢᵇ⁔Record;
+private static readonly @string addAttrsUnsafelyCalledOnˢᵇ⁔Record = "AddAttrs unsafely called on copy of Record made without using Record.Clone"u8;
 
 // AddAttrs appends the given Attrs to the [Record]'s list of Attrs.
 // It omits empty groups.
-[GoMethodBody("AddAttrs")] internal static void AddAttrsᴍ(ref Record r, params ꓸꓸꓸAttr attrsʗp) {
+internal static void AddAttrs⁔(/*this*/ ref Record r, params ꓸꓸꓸAttr attrsʗp) {
     var attrs = attrsʗp.slice();
 
     nint i = default;
@@ -123,7 +123,7 @@ private static readonly @string addAttrsUnsafelyCalledOnˢᵇᴍRecord = "AddAtt
         if (!end.isEmpty()) {
             // Don't panic; copy and muddle through.
             r.back = slices.Clip<slice<Attr>, Attr>(r.back);
-            r.back = append(r.back, String(bugˢᴍRecord, addAttrsUnsafelyCalledOnˢᴍRecord));
+            r.back = append(r.back, String(bugˢ⁔Record, addAttrsUnsafelyCalledOnˢ⁔Record));
         }
     }
     nint ne = countEmptyGroups(attrs.slice(i));
@@ -138,7 +138,7 @@ private static readonly @string addAttrsUnsafelyCalledOnˢᵇᴍRecord = "AddAtt
 // Add converts the args to Attrs as described in [Logger.Log],
 // then appends the Attrs to the [Record]'s list of Attrs.
 // It omits empty groups.
-[GoMethodBody("Add")] internal static void Addᴍ(ref Record r, params ꓸꓸꓸany argsʗp) {
+internal static void Add⁔(/*this*/ ref Record r, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
     Attr a = default;
@@ -214,33 +214,33 @@ partial struct Source {
 } partial class slog_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string functionˢᴍSource => ref functionˢᵇᴍSource;
-private static readonly @string functionˢᵇᴍSource = "function"u8;
-internal static ref readonly @string fileˢᴍSource => ref fileˢᵇᴍSource;
-private static readonly @string fileˢᵇᴍSource = "file"u8;
-internal static ref readonly @string lineˢᴍSource => ref lineˢᵇᴍSource;
-private static readonly @string lineˢᵇᴍSource = "line"u8;
+internal static ref readonly @string functionˢ⁔Source => ref functionˢᵇ⁔Source;
+private static readonly @string functionˢᵇ⁔Source = "function"u8;
+internal static ref readonly @string fileˢ⁔Source => ref fileˢᵇ⁔Source;
+private static readonly @string fileˢᵇ⁔Source = "file"u8;
+internal static ref readonly @string lineˢ⁔Source => ref lineˢᵇ⁔Source;
+private static readonly @string lineˢᵇ⁔Source = "line"u8;
 
 // group returns the non-zero fields of s as a slice of attrs.
 // It is similar to a LogValue method, but we don't want Source
 // to implement LogValuer because it would be resolved before
 // the ReplaceAttr function was called.
-[GoMethodBody("group")] internal static Value groupᴍ(ref Source s) {
+internal static Value group⁔(/*this*/ ref Source s) {
     slice<Attr> @as = default;
     if (s.Function != ""u8) {
-        @as = append(@as, String(functionˢᴍSource, s.Function));
+        @as = append(@as, String(functionˢ⁔Source, s.Function));
     }
     if (s.File != ""u8) {
-        @as = append(@as, String(fileˢᴍSource, s.File));
+        @as = append(@as, String(fileˢ⁔Source, s.File));
     }
     if (s.Line != 0) {
-        @as = append(@as, Int(lineˢᴍSource, s.Line));
+        @as = append(@as, Int(lineˢ⁔Source, s.Line));
     }
     return GroupValue(@as.ꓸꓸꓸ);
 }
 
 // isEmpty returns whether the Source struct is nil or only contains zero fields.
-[GoMethodBody("isEmpty")] internal static bool isEmptyᴍ(ж<Source> Ꮡs) {
+internal static bool isEmpty⁔(/*this*/ ж<Source> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     return Ꮡs == nil || s == new Source();
@@ -251,7 +251,7 @@ private static readonly @string lineˢᵇᴍSource = "line"u8;
 // Source returns a new Source for the log event using r's PC.
 // If the PC field is zero, meaning the Record was created without the necessary information
 // or the location is unavailable, then nil is returned.
-[GoMethodBody("Source")] internal static ж<Source> Sourceᴍ(Record r) {
+internal static ж<Source> Source⁔(/*this*/ Record r) {
     r = r.ΔClone();
 
     if (r.PC == 0) {

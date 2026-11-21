@@ -37,7 +37,7 @@ public static ж<P384Point> NewP384Point() {
 } partial class nistec_package {
 
 // SetGenerator sets p to the canonical generator and returns p.
-[GoMethodBody("SetGenerator")] internal static ж<P384Point> SetGeneratorᴍ(ж<P384Point> Ꮡp) {
+internal static ж<P384Point> SetGenerator⁔(/*this*/ ж<P384Point> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     p.x.SetBytes([0xaa, 0x87, 0xca, 0x22, 0xbe, 0x8b, 0x5, 0x37, 0x8e, 0xb1, 0xc7, 0x1e, 0xf3, 0x20, 0xad, 0x74, 0x6e, 0x1d, 0x3b, 0x62, 0x8b, 0xa7, 0x9b, 0x98, 0x59, 0xf7, 0x41, 0xe0, 0x82, 0x54, 0x2a, 0x38, 0x55, 0x2, 0xf2, 0x5d, 0xbf, 0x55, 0x29, 0x6c, 0x3a, 0x54, 0x5e, 0x38, 0x72, 0x76, 0xa, 0xb7]);
@@ -47,7 +47,7 @@ public static ж<P384Point> NewP384Point() {
 }
 
 // Set sets p = q and returns p.
-[GoMethodBody("Set")] internal static ж<P384Point> Setᴍ(ж<P384Point> Ꮡp, ж<P384Point> Ꮡq) {
+internal static ж<P384Point> Set⁔(/*this*/ ж<P384Point> Ꮡp, ж<P384Point> Ꮡq) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var q = ref Ꮡq.DerefOrNull();
 
@@ -58,16 +58,16 @@ public static ж<P384Point> NewP384Point() {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidP384CompressedˢᴍP384Point => ref invalidP384CompressedˢᵇᴍP384Point;
-private static readonly @string invalidP384CompressedˢᵇᴍP384Point = "invalid P384 compressed point encoding"u8;
-internal static ref readonly @string invalidP384PointEncodingˢᴍP384Point => ref invalidP384PointEncodingˢᵇᴍP384Point;
-private static readonly @string invalidP384PointEncodingˢᵇᴍP384Point = "invalid P384 point encoding"u8;
+internal static ref readonly @string invalidP384Compressedˢ⁔P384Point => ref invalidP384Compressedˢᵇ⁔P384Point;
+private static readonly @string invalidP384Compressedˢᵇ⁔P384Point = "invalid P384 compressed point encoding"u8;
+internal static ref readonly @string invalidP384PointEncodingˢ⁔P384Point => ref invalidP384PointEncodingˢᵇ⁔P384Point;
+private static readonly @string invalidP384PointEncodingˢᵇ⁔P384Point = "invalid P384 point encoding"u8;
 
 // SetBytes sets p to the compressed, uncompressed, or infinity value encoded in
 // b, as specified in SEC 1, Version 2.0, Section 2.3.4. If the point is not on
 // the curve, it returns nil and an error, and the receiver is unchanged.
 // Otherwise, it returns p.
-[GoMethodBody("SetBytes")] internal static (ж<P384Point>, error) SetBytesᴍ(ж<P384Point> Ꮡp, slice<byte> b) {
+internal static (ж<P384Point>, error) SetBytes⁔(/*this*/ ж<P384Point> Ꮡp, slice<byte> b) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (ᐧ) {
@@ -103,7 +103,7 @@ private static readonly @string invalidP384PointEncodingˢᵇᴍP384Point = "inv
         // y² = x³ - 3x + b
         var y = p384Polynomial(@new<fiat.P384Element>(), x);
         if (!p384Sqrt(y, y)) {
-            return (default, errors.New(invalidP384CompressedˢᴍP384Point));
+            return (default, errors.New(invalidP384Compressedˢ⁔P384Point));
         }
 
         // Select the positive or negative root, as indicated by the least
@@ -119,7 +119,7 @@ private static readonly @string invalidP384PointEncodingˢᵇᴍP384Point = "inv
         return (Ꮡp, default);
     }
     default: {
-        return (default, errors.New(invalidP384PointEncodingˢᴍP384Point));
+        return (default, errors.New(invalidP384PointEncodingˢ⁔P384Point));
     }}
 }
 
@@ -167,14 +167,14 @@ internal static error p384CheckOnCurve(ж<fiat.P384Element> x, ж<fiat.P384Eleme
 // Bytes returns the uncompressed or infinity encoding of p, as specified in
 // SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the point at
 // infinity is shorter than all other encodings.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref P384Point p) {
+internal static slice<byte> Bytes⁔(/*this*/ ref P384Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(97), out var Ꮡout);
     return p.bytes(Ꮡout);
 }
 
-[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ref P384Point p, /*[97]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes⁔(/*this*/ ref P384Point p, /*[97]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -193,7 +193,7 @@ internal static error p384CheckOnCurve(ж<fiat.P384Element> x, ж<fiat.P384Eleme
 
 // BytesX returns the encoding of the x-coordinate of p, as specified in SEC 1,
 // Version 2.0, Section 2.3.5, or an error if p is the point at infinity.
-[GoMethodBody("BytesX")] internal static (slice<byte>, error) BytesXᴍ(ref P384Point p) {
+internal static (slice<byte>, error) BytesX⁔(/*this*/ ref P384Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(48), out var Ꮡout);
@@ -201,14 +201,14 @@ internal static error p384CheckOnCurve(ж<fiat.P384Element> x, ж<fiat.P384Eleme
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string p384PointIsThePointAtˢᴍP384Point => ref p384PointIsThePointAtˢᵇᴍP384Point;
-private static readonly @string p384PointIsThePointAtˢᵇᴍP384Point = "P384 point is the point at infinity"u8;
+internal static ref readonly @string p384PointIsThePointAtˢ⁔P384Point => ref p384PointIsThePointAtˢᵇ⁔P384Point;
+private static readonly @string p384PointIsThePointAtˢᵇ⁔P384Point = "P384 point is the point at infinity"u8;
 
-[GoMethodBody("bytesX")] internal static (slice<byte>, error) bytesXᴍ(ref P384Point p, /*[48]*/ ж<array<byte>> Ꮡout) {
+internal static (slice<byte>, error) bytesX⁔(/*this*/ ref P384Point p, /*[48]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
-        return (default, errors.New(p384PointIsThePointAtˢᴍP384Point));
+        return (default, errors.New(p384PointIsThePointAtˢ⁔P384Point));
     }
 
     var zinv = @new<fiat.P384Element>().Invert(p.z);
@@ -220,14 +220,14 @@ private static readonly @string p384PointIsThePointAtˢᵇᴍP384Point = "P384 p
 // BytesCompressed returns the compressed or infinity encoding of p, as
 // specified in SEC 1, Version 2.0, Section 2.3.3. Note that the encoding of the
 // point at infinity is shorter than all other encodings.
-[GoMethodBody("BytesCompressed")] internal static slice<byte> BytesCompressedᴍ(ref P384Point p) {
+internal static slice<byte> BytesCompressed⁔(/*this*/ ref P384Point p) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(49), out var Ꮡout);
     return p.bytesCompressed(Ꮡout);
 }
 
-[GoMethodBody("bytesCompressed")] internal static slice<byte> bytesCompressedᴍ(ref P384Point p, /*[49]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytesCompressed⁔(/*this*/ ref P384Point p, /*[49]*/ ж<array<byte>> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     if (p.z.IsZero() == 1) {
@@ -247,7 +247,7 @@ private static readonly @string p384PointIsThePointAtˢᵇᴍP384Point = "P384 p
 }
 
 // Add sets q = p1 + p2, and returns q. The points may overlap.
-[GoMethodBody("Add")] internal static ж<P384Point> Addᴍ(ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1, ж<P384Point> Ꮡp2) {
+internal static ж<P384Point> Add⁔(/*this*/ ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1, ж<P384Point> Ꮡp2) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -306,7 +306,7 @@ private static readonly @string p384PointIsThePointAtˢᵇᴍP384Point = "P384 p
 }
 
 // Double sets q = p + p, and returns q. The points may overlap.
-[GoMethodBody("Double")] internal static ж<P384Point> Doubleᴍ(ж<P384Point> Ꮡq, ж<P384Point> Ꮡp) {
+internal static ж<P384Point> Double⁔(/*this*/ ж<P384Point> Ꮡq, ж<P384Point> Ꮡp) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p = ref Ꮡp.DerefOrNull();
 
@@ -355,7 +355,7 @@ private static readonly @string p384PointIsThePointAtˢᵇᴍP384Point = "P384 p
 }
 
 // Select sets q to p1 if cond == 1, and to p2 if cond == 0.
-[GoMethodBody("Select")] internal static ж<P384Point> Selectᴍ(ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1, ж<P384Point> Ꮡp2, nint cond) {
+internal static ж<P384Point> Select⁔(/*this*/ ж<P384Point> Ꮡq, ж<P384Point> Ꮡp1, ж<P384Point> Ꮡp2, nint cond) {
     ref var q = ref Ꮡq.DerefOrNull();
     ref var p1 = ref Ꮡp1.DerefOrNull();
     ref var p2 = ref Ꮡp2.DerefOrNull();
@@ -377,7 +377,7 @@ partial struct p384Table /*[15]ж<P384Point>*/;
 
 // Select selects the n-th multiple of the table base point into p. It works in
 // constant time by iterating over every entry of the table. n must be in [0, 15].
-[GoMethodBody("Select")] internal static void Selectᴍ(ref p384Table table, ж<P384Point> p, uint8 n) {
+internal static void Select⁔(/*this*/ ref p384Table table, ж<P384Point> p, uint8 n) {
     if (n >= 16) {
         throw panic("nistec: internal error: p384Table called with out-of-bounds value");
     }
@@ -391,7 +391,7 @@ partial struct p384Table /*[15]ж<P384Point>*/;
 } partial class nistec_package {
 
 // ScalarMult sets p = scalar * q, and returns p.
-[GoMethodBody("ScalarMult")] internal static (ж<P384Point>, error) ScalarMultᴍ(ж<P384Point> Ꮡp, ж<P384Point> q, slice<byte> scalar) {
+internal static (ж<P384Point>, error) ScalarMult⁔(/*this*/ ж<P384Point> Ꮡp, ж<P384Point> q, slice<byte> scalar) {
     // Compute a p384Table for the base point q. The explicit NewP384Point
     // calls get inlined, letting the allocations live on the stack.
     p384Table table = new p384Table(new ж<P384Point>[]{NewP384Point(), NewP384Point(), NewP384Point(),
@@ -446,7 +446,7 @@ internal static ref sync.Once p384GeneratorTableOnce => ref ((StaticBox<sync.Onc
 // generatorTable returns a sequence of p384Tables. The first table contains
 // multiples of G. Each successive table is the previous table doubled four
 // times.
-[GoMethodBody("generatorTable")] internal static ж<array<p384Table>> generatorTableᴍ(ref P384Point p) {
+internal static ж<array<p384Table>> generatorTable⁔(/*this*/ ref P384Point p) {
     Ꮡp384GeneratorTableOnce.Do(() => {
         p384GeneratorTable = Ꮡ(new array<p384Table>(96));
         var @base = NewP384Point().SetGenerator();
@@ -465,16 +465,16 @@ internal static ref sync.Once p384GeneratorTableOnce => ref ((StaticBox<sync.Onc
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidScalarLengthˢᴍP384Point => ref invalidScalarLengthˢᵇᴍP384Point;
-private static readonly @string invalidScalarLengthˢᵇᴍP384Point = "invalid scalar length"u8;
+internal static ref readonly @string invalidScalarLengthˢ⁔P384Point => ref invalidScalarLengthˢᵇ⁔P384Point;
+private static readonly @string invalidScalarLengthˢᵇ⁔P384Point = "invalid scalar length"u8;
 
 // ScalarBaseMult sets p = scalar * B, where B is the canonical generator, and
 // returns p.
-[GoMethodBody("ScalarBaseMult")] internal static (ж<P384Point>, error) ScalarBaseMultᴍ(ж<P384Point> Ꮡp, slice<byte> scalar) {
+internal static (ж<P384Point>, error) ScalarBaseMult⁔(/*this*/ ж<P384Point> Ꮡp, slice<byte> scalar) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (len(scalar) != p384ElementLength) {
-        return (default, errors.New(invalidScalarLengthˢᴍP384Point));
+        return (default, errors.New(invalidScalarLengthˢ⁔P384Point));
     }
     var tables = p.generatorTable();
 

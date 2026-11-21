@@ -65,9 +65,12 @@ using static go.container.list_package;
 
 namespace go.container;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static list_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("list")]
 public static partial class list_package
@@ -100,35 +103,35 @@ public static partial class list_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(list_package.Element)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class listᴛElement;
-[GoMethodHost(typeof(list_package.List)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class listᴛList;
+[GoMethodHost(typeof(list_package.Element)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class listᴛElement;
+[GoMethodHost(typeof(list_package.List)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class listᴛList;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class listᴛElement {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Next(this ref Element e) => list_package.Nextᴍ(ref e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Prev(this ref Element e) => list_package.Prevᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Next(this ref Element e) => list_package.Next⁔(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Prev(this ref Element e) => list_package.Prev⁔(ref e);
 }
 partial class listᴛList {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<List> Init(this ж<List> Ꮡl) => list_package.Initᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this ref List l) => list_package.Lenᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Front(this ref List l) => list_package.Frontᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> Back(this ref List l) => list_package.Backᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void lazyInit(this ж<List> Ꮡl) => list_package.lazyInitᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Element> insert(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡat) => list_package.insertᴍ(Ꮡl, Ꮡe, Ꮡat);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Element> insertValue(this ж<List> Ꮡl, any v, ж<Element> at) => list_package.insertValueᴍ(Ꮡl, v, at);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void remove(this ref List l, ж<Element> Ꮡe) => list_package.removeᴍ(ref l, Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void move(this ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) => list_package.moveᴍ(ref l, Ꮡe, Ꮡat);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static any Remove(this ж<List> Ꮡl, ж<Element> Ꮡe) => list_package.Removeᴍ(Ꮡl, Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> PushFront(this ж<List> Ꮡl, any v) => list_package.PushFrontᴍ(Ꮡl, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> PushBack(this ж<List> Ꮡl, any v) => list_package.PushBackᴍ(Ꮡl, v);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> InsertBefore(this ж<List> Ꮡl, any v, ж<Element> Ꮡmark) => list_package.InsertBeforeᴍ(Ꮡl, v, Ꮡmark);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Element> InsertAfter(this ж<List> Ꮡl, any v, ж<Element> Ꮡmark) => list_package.InsertAfterᴍ(Ꮡl, v, Ꮡmark);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void MoveToFront(this ж<List> Ꮡl, ж<Element> Ꮡe) => list_package.MoveToFrontᴍ(Ꮡl, Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void MoveToBack(this ж<List> Ꮡl, ж<Element> Ꮡe) => list_package.MoveToBackᴍ(Ꮡl, Ꮡe);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void MoveBefore(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) => list_package.MoveBeforeᴍ(Ꮡl, Ꮡe, Ꮡmark);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void MoveAfter(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) => list_package.MoveAfterᴍ(Ꮡl, Ꮡe, Ꮡmark);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void PushBackList(this ж<List> Ꮡl, ж<List> Ꮡother) => list_package.PushBackListᴍ(Ꮡl, Ꮡother);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void PushFrontList(this ж<List> Ꮡl, ж<List> Ꮡother) => list_package.PushFrontListᴍ(Ꮡl, Ꮡother);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<List> Init(this ж<List> Ꮡl) => list_package.Init⁔(Ꮡl);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this ref List l) => list_package.Len⁔(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Front(this ref List l) => list_package.Front⁔(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> Back(this ref List l) => list_package.Back⁔(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void lazyInit(this ж<List> Ꮡl) => list_package.lazyInit⁔(Ꮡl);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Element> insert(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡat) => list_package.insert⁔(Ꮡl, Ꮡe, Ꮡat);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Element> insertValue(this ж<List> Ꮡl, any v, ж<Element> at) => list_package.insertValue⁔(Ꮡl, v, at);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void remove(this ref List l, ж<Element> Ꮡe) => list_package.remove⁔(ref l, Ꮡe);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void move(this ref List l, ж<Element> Ꮡe, ж<Element> Ꮡat) => list_package.move⁔(ref l, Ꮡe, Ꮡat);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static any Remove(this ж<List> Ꮡl, ж<Element> Ꮡe) => list_package.Remove⁔(Ꮡl, Ꮡe);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> PushFront(this ж<List> Ꮡl, any v) => list_package.PushFront⁔(Ꮡl, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> PushBack(this ж<List> Ꮡl, any v) => list_package.PushBack⁔(Ꮡl, v);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> InsertBefore(this ж<List> Ꮡl, any v, ж<Element> Ꮡmark) => list_package.InsertBefore⁔(Ꮡl, v, Ꮡmark);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Element> InsertAfter(this ж<List> Ꮡl, any v, ж<Element> Ꮡmark) => list_package.InsertAfter⁔(Ꮡl, v, Ꮡmark);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void MoveToFront(this ж<List> Ꮡl, ж<Element> Ꮡe) => list_package.MoveToFront⁔(Ꮡl, Ꮡe);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void MoveToBack(this ж<List> Ꮡl, ж<Element> Ꮡe) => list_package.MoveToBack⁔(Ꮡl, Ꮡe);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void MoveBefore(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) => list_package.MoveBefore⁔(Ꮡl, Ꮡe, Ꮡmark);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void MoveAfter(this ж<List> Ꮡl, ж<Element> Ꮡe, ж<Element> Ꮡmark) => list_package.MoveAfter⁔(Ꮡl, Ꮡe, Ꮡmark);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void PushBackList(this ж<List> Ꮡl, ж<List> Ꮡother) => list_package.PushBackList⁔(Ꮡl, Ꮡother);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void PushFrontList(this ж<List> Ꮡl, ж<List> Ꮡother) => list_package.PushFrontList⁔(Ꮡl, Ꮡother);
 }
 // </GlyphForwarders>

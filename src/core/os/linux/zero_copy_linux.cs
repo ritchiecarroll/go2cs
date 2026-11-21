@@ -19,10 +19,10 @@ internal static ref Func<ж<poll.FD>, ж<poll.FD>, int64, (int64, bool, error)> 
 } partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sendfileˢᴍFile => ref sendfileˢᵇᴍFile;
-private static readonly @string sendfileˢᵇᴍFile = "sendfile"u8;
+internal static ref readonly @string sendfileˢ⁔File => ref sendfileˢᵇ⁔File;
+private static readonly @string sendfileˢᵇ⁔File = "sendfile"u8;
 
-[GoMethodBody("writeTo")] internal static (int64 written, bool handled, error err) writeToᴍ(ж<File> Ꮡf, Δio.Writer w) {
+internal static (int64 written, bool handled, error err) writeTo⁔(/*this*/ ж<File> Ꮡf, Δio.Writer w) {
     int64 written = default;
     bool handled = default;
     ref var err = ref heap<error>(out var Ꮡerr);
@@ -48,10 +48,10 @@ private static readonly @string sendfileˢᵇᴍFile = "sendfile"u8;
         err = rerr;
     }
 
-    return (written, handled, wrapSyscallError(sendfileˢᴍFile, err));
+    return (written, handled, wrapSyscallError(sendfileˢ⁔File, err));
 }
 
-[GoMethodBody("readFrom")] internal static (int64 written, bool handled, error err) readFromᴍ(ж<File> Ꮡf, Δio.Reader r) {
+internal static (int64 written, bool handled, error err) readFrom⁔(/*this*/ ж<File> Ꮡf, Δio.Reader r) {
     int64 written = default;
     bool handled = default;
     error err = default;
@@ -74,10 +74,10 @@ private static readonly @string sendfileˢᵇᴍFile = "sendfile"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string spliceˢᴍFile => ref spliceˢᵇᴍFile;
-private static readonly @string spliceˢᵇᴍFile = "splice"u8;
+internal static ref readonly @string spliceˢ⁔File => ref spliceˢᵇ⁔File;
+private static readonly @string spliceˢᵇ⁔File = "splice"u8;
 
-[GoMethodBody("spliceToFile")] internal static (int64 written, bool handled, error err) spliceToFileᴍ(ж<File> Ꮡf, Δio.Reader r) {
+internal static (int64 written, bool handled, error err) spliceToFile⁔(/*this*/ ж<File> Ꮡf, Δio.Reader r) {
     int64 written = default;
     bool handled = default;
     error err = default;
@@ -106,16 +106,16 @@ private static readonly @string spliceˢᵇᴍFile = "splice"u8;
         lr.N = remain - written;
     }
 
-    return (written, handled, wrapSyscallError(spliceˢᴍFile, err));
+    return (written, handled, wrapSyscallError(spliceˢ⁔File, err));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string readFromˢᴍFile => ref readFromˢᵇᴍFile;
-private static readonly @string readFromˢᵇᴍFile = "ReadFrom"u8;
-internal static ref readonly @string copyFileRangeˢᴍFile => ref copyFileRangeˢᵇᴍFile;
-private static readonly @string copyFileRangeˢᵇᴍFile = "copy_file_range"u8;
+internal static ref readonly @string readFromˢ⁔File => ref readFromˢᵇ⁔File;
+private static readonly @string readFromˢᵇ⁔File = "ReadFrom"u8;
+internal static ref readonly @string copyFileRangeˢ⁔File => ref copyFileRangeˢᵇ⁔File;
+private static readonly @string copyFileRangeˢᵇ⁔File = "copy_file_range"u8;
 
-[GoMethodBody("copyFileRange")] internal static (int64 written, bool handled, error err) copyFileRangeᴍ(ж<File> Ꮡf, Δio.Reader r) {
+internal static (int64 written, bool handled, error err) copyFileRange⁔(/*this*/ ж<File> Ꮡf, Δio.Reader r) {
     int64 written = default;
     bool handled = default;
     error err = default;
@@ -141,7 +141,7 @@ private static readonly @string copyFileRangeˢᵇᴍFile = "copy_file_range"u8;
         return (0, false, default);
     }}
 
-    if (src.checkValid(readFromˢᴍFile) != nil) {
+    if (src.checkValid(readFromˢ⁔File) != nil) {
         // Avoid returning the error as we report handled as false,
         // leave further error handling as the responsibility of the caller.
         return (0, false, default);
@@ -151,7 +151,7 @@ private static readonly @string copyFileRangeˢᵇᴍFile = "copy_file_range"u8;
     if (lr != nil) {
         lr.N -= written;
     }
-    return (written, handled, wrapSyscallError(copyFileRangeˢᴍFile, err));
+    return (written, handled, wrapSyscallError(copyFileRangeˢ⁔File, err));
 }
 
 } partial class os_package {

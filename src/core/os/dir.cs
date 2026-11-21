@@ -44,7 +44,7 @@ internal static readdirMode readdirFileInfo => 2;
 // and a non-nil error.
 //
 // Most clients are better served by the more efficient ReadDir method.
-[GoMethodBody("Readdir")] internal static (slice<FileInfo>, error) Readdirᴍ(ж<File> Ꮡf, nint n) {
+internal static (slice<FileInfo>, error) Readdir⁔(/*this*/ ж<File> Ꮡf, nint n) {
     if (Ꮡf == nil) {
         return (default, ErrInvalid);
     }
@@ -73,7 +73,7 @@ internal static readdirMode readdirFileInfo => 2;
 // nil error. If it encounters an error before the end of the
 // directory, Readdirnames returns the names read until that point and
 // a non-nil error.
-[GoMethodBody("Readdirnames")] internal static (slice<@string> names, error err) Readdirnamesᴍ(ж<File> Ꮡf, nint n) {
+internal static (slice<@string> names, error err) Readdirnames⁔(/*this*/ ж<File> Ꮡf, nint n) {
     slice<@string> names = default;
     error err = default;
 
@@ -100,7 +100,7 @@ internal static readdirMode readdirFileInfo => 2;
 //
 // If n <= 0, ReadDir returns all the DirEntry records remaining in the directory.
 // When it succeeds, it returns a nil error (not io.EOF).
-[GoMethodBody("ReadDir")] internal static (slice<DirEntry>, error) ReadDirᴍ(ж<File> Ꮡf, nint n) {
+internal static (slice<DirEntry>, error) ReadDir⁔(/*this*/ ж<File> Ꮡf, nint n) {
     if (Ꮡf == nil) {
         return (default, ErrInvalid);
     }

@@ -617,7 +617,7 @@ internal static gcTriggerKind gcTriggerCycle => 2;
 // test reports whether the trigger condition is satisfied, meaning
 // that the exit condition for the _GCoff phase has been met. The exit
 // condition should be tested when allocating.
-[GoMethodBody("test")] internal static bool testᴍ(gcTrigger t) {
+internal static bool test⁔(/*this*/ gcTrigger t) {
     if (!memstats.enablegc || Ꮡpanicking.Load() != 0 || gcphase != _GCoff) {
         return false;
     }
@@ -1118,7 +1118,7 @@ top:
 // For goroutines which are semantically runnable, this will eventually return true
 // as the GC marking phase progresses. It returns false for leaked goroutines, or for
 // goroutines which are not yet computed as possibly runnable by the GC.
-[GoMethodBody("isMaybeRunnable")] internal static bool isMaybeRunnableᴍ(ж<g> Ꮡgp) {
+internal static bool isMaybeRunnable⁔(/*this*/ ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // Check whether the goroutine is actually in a waiting state first.

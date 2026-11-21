@@ -24,10 +24,10 @@ internal static UntypedInt classContextSpecific => 0x80;
 } partial class asn1_package {
 
 // Constructed returns t with the constructed class bit set.
-[GoMethodBody("Constructed")] internal static Tag Constructedᴍ(Tag t) { return (Tag)(t | (uint8)classConstructed); }
+internal static Tag Constructed⁔(/*this*/ Tag t) { return (Tag)(t | (uint8)classConstructed); }
 
 // ContextSpecific returns t with the context-specific class bit set.
-[GoMethodBody("ContextSpecific")] internal static Tag ContextSpecificᴍ(Tag t) { return (Tag)(t | (uint8)classContextSpecific); }
+internal static Tag ContextSpecific⁔(/*this*/ Tag t) { return (Tag)(t | (uint8)classContextSpecific); }
 
 } partial class asn1_package {
 

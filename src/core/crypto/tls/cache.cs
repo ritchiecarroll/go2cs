@@ -21,7 +21,7 @@ partial struct weakCertCache {
 
 } partial class tls_package {
 
-[GoMethodBody("newCert")] internal static (ж<Δx509.Certificate>, error) newCertᴍ(ж<weakCertCache> Ꮡwcc, slice<byte> der) {
+internal static (ж<Δx509.Certificate>, error) newCert⁔(/*this*/ ж<weakCertCache> Ꮡwcc, slice<byte> der) {
     {
         var (entry, ok) = Ꮡwcc.of(weakCertCache.ᏑMap).Load((@string)der); if (ok) {
             var v = entry._<weak.Pointer<Δx509.Certificate>>().Value(); if (v != nil) {

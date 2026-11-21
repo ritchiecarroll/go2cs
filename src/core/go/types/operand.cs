@@ -67,7 +67,7 @@ partial struct operand {
 
 // Pos returns the position of the expression corresponding to x.
 // If x is invalid the position is nopos.
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref operand x) {
+internal static token.Pos Pos⁔(/*this*/ ref operand x) {
     // x.expr may not be set if x is invalid
     if (x.expr == nil) {
         return nopos;
@@ -320,12 +320,12 @@ internal static @string compositeKind(Type typ) {
 
 } partial class types_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<operand> Ꮡx) {
+internal static @string String⁔(/*this*/ ж<operand> Ꮡx) {
     return operandString(ref (Ꮡx).DerefOrNull(), default);
 }
 
 // setConst sets x to the untyped constant for literal lit.
-[GoMethodBody("setConst")] internal static void setConstᴍ(ref operand x, token.Token k, @string lit) {
+internal static void setConst⁔(/*this*/ ref operand x, token.Token k, @string lit) {
     BasicKind kind = default;
     switch (k) {
     case var ᴛ when ᴛ == token.INT: {
@@ -365,7 +365,7 @@ internal static @string compositeKind(Type typ) {
 }
 
 // isNil reports whether x is the (untyped) nil value.
-[GoMethodBody("isNil")] internal static bool isNilᴍ(ref operand x) {
+internal static bool isNil⁔(/*this*/ ref operand x) {
     if (isTypes2) {
         return x.mode == nilvalue;
     } else { // go/types
@@ -374,8 +374,8 @@ internal static @string compositeKind(Type typ) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string needTypeAssertionˢᴍoperand => ref needTypeAssertionˢᵇᴍoperand;
-private static readonly @string needTypeAssertionˢᵇᴍoperand = "need type assertion"u8;
+internal static ref readonly @string needTypeAssertionˢ⁔operand => ref needTypeAssertionˢᵇ⁔operand;
+private static readonly @string needTypeAssertionˢᵇ⁔operand = "need type assertion"u8;
 
 // assignableTo reports whether x is assignable to a variable of type T. If the
 // result is false and a non-nil cause is provided, it may be set to a more
@@ -383,7 +383,7 @@ private static readonly @string needTypeAssertionˢᵇᴍoperand = "need type as
 // is only valid if the (first) result is false. The check parameter may be nil
 // if assignableTo is invoked through an exported API call, i.e., when all
 // methods have been type-checked.
-[GoMethodBody("assignableTo")] internal static (bool, errors.Code) assignableToᴍ(ж<operand> Ꮡx, ж<Checker> check, Type T, ж<@string> Ꮡcause) {
+internal static (bool, errors.Code) assignableTo⁔(/*this*/ ж<operand> Ꮡx, ж<Checker> check, Type T, ж<@string> Ꮡcause) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var cause = ref Ꮡcause.DerefOrNull();
 
@@ -458,7 +458,7 @@ private static readonly @string needTypeAssertionˢᵇᴍoperand = "need type as
         if (check.implements(T, V, false, nil)) {
             // T implements V, so give hint about type assertion.
             if (Ꮡcause != nil) {
-                cause = needTypeAssertionˢᴍoperand;
+                cause = needTypeAssertionˢ⁔operand;
             }
             return (false, IncompatibleAssign);
         }

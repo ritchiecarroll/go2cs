@@ -2778,7 +2778,7 @@ internal static UntypedInt maxDecomp => 0x8000;
 // lookup returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-[GoMethodBody("lookup")] internal static (uint16 v, nint sz) lookupᴍ(ref nfcTrie t, slice<byte> s) {
+internal static (uint16 v, nint sz) lookup⁔(/*this*/ ref nfcTrie t, slice<byte> s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -2844,7 +2844,7 @@ internal static UntypedInt maxDecomp => 0x8000;
 
 // lookupUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-[GoMethodBody("lookupUnsafe")] internal static uint16 lookupUnsafeᴍ(ref nfcTrie t, slice<byte> s) {
+internal static uint16 lookupUnsafe⁔(/*this*/ ref nfcTrie t, slice<byte> s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return nfcValues[c0];
@@ -2867,7 +2867,7 @@ internal static UntypedInt maxDecomp => 0x8000;
 // lookupString returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-[GoMethodBody("lookupString")] internal static (uint16 v, nint sz) lookupStringᴍ(ref nfcTrie t, @string s) {
+internal static (uint16 v, nint sz) lookupString⁔(/*this*/ ref nfcTrie t, @string s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -2933,7 +2933,7 @@ internal static UntypedInt maxDecomp => 0x8000;
 
 // lookupStringUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-[GoMethodBody("lookupStringUnsafe")] internal static uint16 lookupStringUnsafeᴍ(ref nfcTrie t, @string s) {
+internal static uint16 lookupStringUnsafe⁔(/*this*/ ref nfcTrie t, @string s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return nfcValues[c0];
@@ -2966,7 +2966,7 @@ internal static ж<nfcTrie> newNfcTrie(nint i) {
 } partial class norm_package {
 
 // lookupValue determines the type of block n and looks up the value for b.
-[GoMethodBody("lookupValue")] internal static uint16 lookupValueᴍ(ref nfcTrie t, uint32 n, byte b) {
+internal static uint16 lookupValue⁔(/*this*/ ref nfcTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     case {} when n is < 46: {
         return (uint16)nfcValues[(n << 6) + (uint32)b];
@@ -4511,7 +4511,7 @@ internal static ж<nfcTrie> newNfcTrie(nint i) {
 // lookup returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-[GoMethodBody("lookup")] internal static (uint16 v, nint sz) lookupᴍ(ref nfkcTrie t, slice<byte> s) {
+internal static (uint16 v, nint sz) lookup⁔(/*this*/ ref nfkcTrie t, slice<byte> s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -4577,7 +4577,7 @@ internal static ж<nfcTrie> newNfcTrie(nint i) {
 
 // lookupUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-[GoMethodBody("lookupUnsafe")] internal static uint16 lookupUnsafeᴍ(ref nfkcTrie t, slice<byte> s) {
+internal static uint16 lookupUnsafe⁔(/*this*/ ref nfkcTrie t, slice<byte> s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return nfkcValues[c0];
@@ -4600,7 +4600,7 @@ internal static ж<nfcTrie> newNfcTrie(nint i) {
 // lookupString returns the trie value for the first UTF-8 encoding in s and
 // the width in bytes of this encoding. The size will be 0 if s does not
 // hold enough bytes to complete the encoding. len(s) must be greater than 0.
-[GoMethodBody("lookupString")] internal static (uint16 v, nint sz) lookupStringᴍ(ref nfkcTrie t, @string s) {
+internal static (uint16 v, nint sz) lookupString⁔(/*this*/ ref nfkcTrie t, @string s) {
     var c0 = s[0];
     switch (ᐧ) {
     case {} when c0 is < 0x80: { // is ASCII
@@ -4666,7 +4666,7 @@ internal static ж<nfcTrie> newNfcTrie(nint i) {
 
 // lookupStringUnsafe returns the trie value for the first UTF-8 encoding in s.
 // s must start with a full and valid UTF-8 encoded rune.
-[GoMethodBody("lookupStringUnsafe")] internal static uint16 lookupStringUnsafeᴍ(ref nfkcTrie t, @string s) {
+internal static uint16 lookupStringUnsafe⁔(/*this*/ ref nfkcTrie t, @string s) {
     var c0 = s[0];
     if (c0 < 0x80) { // is ASCII
         return nfkcValues[c0];
@@ -4699,7 +4699,7 @@ internal static ж<nfkcTrie> newNfkcTrie(nint i) {
 } partial class norm_package {
 
 // lookupValue determines the type of block n and looks up the value for b.
-[GoMethodBody("lookupValue")] internal static uint16 lookupValueᴍ(ref nfkcTrie t, uint32 n, byte b) {
+internal static uint16 lookupValue⁔(/*this*/ ref nfkcTrie t, uint32 n, byte b) {
     switch (ᐧ) {
     case {} when n is < 95: {
         return (uint16)nfkcValues[(n << 6) + (uint32)b];

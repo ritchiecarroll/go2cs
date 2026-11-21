@@ -294,33 +294,33 @@ partial struct handler /*@string*/;
 } partial class pprof_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string xContentTypeOptionsˢᴍhandler => ref xContentTypeOptionsˢᵇᴍhandler;
-private static readonly @string xContentTypeOptionsˢᵇᴍhandler = "X-Content-Type-Options"u8;
-internal static ref readonly @string nosniffˢᴍhandler => ref nosniffˢᵇᴍhandler;
-private static readonly @string nosniffˢᵇᴍhandler = "nosniff"u8;
-internal static ref readonly @string unknownProfileˢᴍhandler => ref unknownProfileˢᵇᴍhandler;
-private static readonly @string unknownProfileˢᵇᴍhandler = "Unknown profile"u8;
-internal static ref readonly @string secondsˢᴍhandler => ref secondsˢᵇᴍhandler;
-private static readonly @string secondsˢᵇᴍhandler = "seconds"u8;
-internal static ref readonly @string debugˢᴍhandler => ref debugˢᵇᴍhandler;
-private static readonly @string debugˢᵇᴍhandler = "debug"u8;
-internal static ref readonly @string contentTypeˢᴍhandler => ref contentTypeˢᵇᴍhandler;
-private static readonly @string contentTypeˢᵇᴍhandler = "Content-Type"u8;
-internal static ref readonly @string textPlainCharsetUtf8ˢᴍhandler => ref textPlainCharsetUtf8ˢᵇᴍhandler;
-private static readonly @string textPlainCharsetUtf8ˢᵇᴍhandler = "text/plain; charset=utf-8"u8;
-internal static ref readonly @string applicationOctetStreamˢᴍhandler => ref applicationOctetStreamˢᵇᴍhandler;
-private static readonly @string applicationOctetStreamˢᵇᴍhandler = "application/octet-stream"u8;
-internal static ref readonly @string contentDispositionˢᴍhandler => ref contentDispositionˢᵇᴍhandler;
-private static readonly @string contentDispositionˢᵇᴍhandler = "Content-Disposition"u8;
+internal static ref readonly @string xContentTypeOptionsˢ⁔handler => ref xContentTypeOptionsˢᵇ⁔handler;
+private static readonly @string xContentTypeOptionsˢᵇ⁔handler = "X-Content-Type-Options"u8;
+internal static ref readonly @string nosniffˢ⁔handler => ref nosniffˢᵇ⁔handler;
+private static readonly @string nosniffˢᵇ⁔handler = "nosniff"u8;
+internal static ref readonly @string unknownProfileˢ⁔handler => ref unknownProfileˢᵇ⁔handler;
+private static readonly @string unknownProfileˢᵇ⁔handler = "Unknown profile"u8;
+internal static ref readonly @string secondsˢ⁔handler => ref secondsˢᵇ⁔handler;
+private static readonly @string secondsˢᵇ⁔handler = "seconds"u8;
+internal static ref readonly @string debugˢ⁔handler => ref debugˢᵇ⁔handler;
+private static readonly @string debugˢᵇ⁔handler = "debug"u8;
+internal static ref readonly @string contentTypeˢ⁔handler => ref contentTypeˢᵇ⁔handler;
+private static readonly @string contentTypeˢᵇ⁔handler = "Content-Type"u8;
+internal static ref readonly @string textPlainCharsetUtf8ˢ⁔handler => ref textPlainCharsetUtf8ˢᵇ⁔handler;
+private static readonly @string textPlainCharsetUtf8ˢᵇ⁔handler = "text/plain; charset=utf-8"u8;
+internal static ref readonly @string applicationOctetStreamˢ⁔handler => ref applicationOctetStreamˢᵇ⁔handler;
+private static readonly @string applicationOctetStreamˢᵇ⁔handler = "application/octet-stream"u8;
+internal static ref readonly @string contentDispositionˢ⁔handler => ref contentDispositionˢᵇ⁔handler;
+private static readonly @string contentDispositionˢᵇ⁔handler = "Content-Disposition"u8;
 
-[GoMethodBody("ServeHTTP")] internal static void ServeHTTPᴍ(handler name, http.ResponseWriter w, ж<http.Request> r) {
-    w.Header().Set(xContentTypeOptionsˢᴍhandler, nosniffˢᴍhandler);
+internal static void ServeHTTP⁔(/*this*/ handler name, http.ResponseWriter w, ж<http.Request> r) {
+    w.Header().Set(xContentTypeOptionsˢ⁔handler, nosniffˢ⁔handler);
     var p = pprof.Lookup((@string)name);
     if (p == nil) {
-        serveError(w, http.StatusNotFound, unknownProfileˢᴍhandler);
+        serveError(w, http.StatusNotFound, unknownProfileˢ⁔handler);
         return;
     }
-    @string sec = r.FormValue(secondsˢᴍhandler); if (sec != ""u8) {
+    @string sec = r.FormValue(secondsˢ⁔handler); if (sec != ""u8) {
         name.serveDeltaProfile(w, r, p, sec);
         return;
     }
@@ -328,54 +328,54 @@ private static readonly @string contentDispositionˢᵇᴍhandler = "Content-Dis
     if (name == "heap"u8 && gc > 0) {
         runtime.GC();
     }
-    var (debug, _) = strconv.Atoi(r.FormValue(debugˢᴍhandler));
+    var (debug, _) = strconv.Atoi(r.FormValue(debugˢ⁔handler));
     if (debug != 0) {
-        w.Header().Set(contentTypeˢᴍhandler, textPlainCharsetUtf8ˢᴍhandler);
+        w.Header().Set(contentTypeˢ⁔handler, textPlainCharsetUtf8ˢ⁔handler);
     } else {
-        w.Header().Set(contentTypeˢᴍhandler, applicationOctetStreamˢᴍhandler);
-        w.Header().Set(contentDispositionˢᴍhandler, fmt.Sprintf(@"attachment; filename=""%s"""u8, name));
+        w.Header().Set(contentTypeˢ⁔handler, applicationOctetStreamˢ⁔handler);
+        w.Header().Set(contentDispositionˢ⁔handler, fmt.Sprintf(@"attachment; filename=""%s"""u8, name));
     }
     p.WriteTo(new http_ResponseWriterᴠWriter(w), debug);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidValueForSecondsˢᴍhandler => ref invalidValueForSecondsˢᵇᴍhandler;
-private static readonly @string invalidValueForSecondsˢᵇᴍhandler = @"invalid value for ""seconds"" - must be a positive integer"u8;
-internal static ref readonly @string secondsParameterIsNotˢᴍhandler => ref secondsParameterIsNotˢᵇᴍhandler;
-private static readonly @string secondsParameterIsNotˢᵇᴍhandler = @"""seconds"" parameter is not supported for this profile type"u8;
-internal static ref readonly @string secondsAndDebugParamsAreˢᴍhandler => ref secondsAndDebugParamsAreˢᵇᴍhandler;
-private static readonly @string secondsAndDebugParamsAreˢᵇᴍhandler = "seconds and debug params are incompatible"u8;
-internal static ref readonly @string failedToCollectProfileˢᴍhandler => ref failedToCollectProfileˢᵇᴍhandler;
-private static readonly @string failedToCollectProfileˢᵇᴍhandler = "failed to collect profile"u8;
-internal static ref readonly @string failedToComputeDeltaˢᴍhandler => ref failedToComputeDeltaˢᵇᴍhandler;
-private static readonly @string failedToComputeDeltaˢᵇᴍhandler = "failed to compute delta"u8;
+internal static ref readonly @string invalidValueForSecondsˢ⁔handler => ref invalidValueForSecondsˢᵇ⁔handler;
+private static readonly @string invalidValueForSecondsˢᵇ⁔handler = @"invalid value for ""seconds"" - must be a positive integer"u8;
+internal static ref readonly @string secondsParameterIsNotˢ⁔handler => ref secondsParameterIsNotˢᵇ⁔handler;
+private static readonly @string secondsParameterIsNotˢᵇ⁔handler = @"""seconds"" parameter is not supported for this profile type"u8;
+internal static ref readonly @string secondsAndDebugParamsAreˢ⁔handler => ref secondsAndDebugParamsAreˢᵇ⁔handler;
+private static readonly @string secondsAndDebugParamsAreˢᵇ⁔handler = "seconds and debug params are incompatible"u8;
+internal static ref readonly @string failedToCollectProfileˢ⁔handler => ref failedToCollectProfileˢᵇ⁔handler;
+private static readonly @string failedToCollectProfileˢᵇ⁔handler = "failed to collect profile"u8;
+internal static ref readonly @string failedToComputeDeltaˢ⁔handler => ref failedToComputeDeltaˢᵇ⁔handler;
+private static readonly @string failedToComputeDeltaˢᵇ⁔handler = "failed to compute delta"u8;
 
-[GoMethodBody("serveDeltaProfile")] internal static void serveDeltaProfileᴍ(handler name, http.ResponseWriter w, ж<http.Request> Ꮡr, ж<pprof.Profile> p, @string secStr) {
+internal static void serveDeltaProfile⁔(/*this*/ handler name, http.ResponseWriter w, ж<http.Request> Ꮡr, ж<pprof.Profile> p, @string secStr) {
     GoFrame ᒐ = default;
     try {
         ref var r = ref Ꮡr.DerefOrNull();
 
         var (sec, err) = strconv.ParseInt(secStr, 10, 64);
         if (err != nil || sec <= 0) {
-            serveError(w, http.StatusBadRequest, invalidValueForSecondsˢᴍhandler);
+            serveError(w, http.StatusBadRequest, invalidValueForSecondsˢ⁔handler);
             return;
         }
         // 'name' should be a key in profileSupportsDelta.
         if (!profileSupportsDelta[name]) {
-            serveError(w, http.StatusBadRequest, secondsParameterIsNotˢᴍhandler);
+            serveError(w, http.StatusBadRequest, secondsParameterIsNotˢ⁔handler);
             return;
         }
 
         configureWriteDeadline(w, Ꮡr, (float64)sec);
 
-        var (debug, _) = strconv.Atoi(Ꮡr.FormValue(debugˢᴍhandler));
+        var (debug, _) = strconv.Atoi(Ꮡr.FormValue(debugˢ⁔handler));
         if (debug != 0) {
-            serveError(w, http.StatusBadRequest, secondsAndDebugParamsAreˢᴍhandler);
+            serveError(w, http.StatusBadRequest, secondsAndDebugParamsAreˢ⁔handler);
             return;
         }
         (var p0, err) = collectProfile(p);
         if (err != nil) {
-            serveError(w, http.StatusInternalServerError, failedToCollectProfileˢᴍhandler);
+            serveError(w, http.StatusInternalServerError, failedToCollectProfileˢ⁔handler);
             return;
         }
 
@@ -401,7 +401,7 @@ private static readonly @string failedToComputeDeltaˢᵇᴍhandler = "failed to
 
         (var p1, err) = collectProfile(p);
         if (err != nil) {
-            serveError(w, http.StatusInternalServerError, failedToCollectProfileˢᴍhandler);
+            serveError(w, http.StatusInternalServerError, failedToCollectProfileˢ⁔handler);
             return;
         }
         var ts = p1.TimeNanos;
@@ -411,15 +411,15 @@ private static readonly @string failedToComputeDeltaˢᵇᴍhandler = "failed to
 
         (p1, err) = profile.Merge([p0, p1]);
         if (err != nil) {
-            serveError(w, http.StatusInternalServerError, failedToComputeDeltaˢᴍhandler);
+            serveError(w, http.StatusInternalServerError, failedToComputeDeltaˢ⁔handler);
             return;
         }
 
         p1.TimeNanos = ts; // set since we don't know what profile.Merge set for TimeNanos.
         p1.DurationNanos = dur;
 
-        w.Header().Set(contentTypeˢᴍhandler, applicationOctetStreamˢᴍhandler);
-        w.Header().Set(contentDispositionˢᴍhandler, fmt.Sprintf(@"attachment; filename=""%s-delta"""u8, name));
+        w.Header().Set(contentTypeˢ⁔handler, applicationOctetStreamˢ⁔handler);
+        w.Header().Set(contentDispositionˢ⁔handler, fmt.Sprintf(@"attachment; filename=""%s-delta"""u8, name));
         p1.Write(new http_ResponseWriterᴠWriter(w));
     }
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }

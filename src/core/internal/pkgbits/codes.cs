@@ -23,8 +23,8 @@ partial struct CodeVal /*num:nint*/;
 
 } partial class pkgbits_package {
 
-[GoMethodBody("Marker")] internal static SyncMarker Markerᴍ(CodeVal c) { return SyncVal; }
-[GoMethodBody("Value")] internal static nint Valueᴍ(CodeVal c) { return (nint)c; }
+internal static SyncMarker Marker⁔(/*this*/ CodeVal c) { return SyncVal; }
+internal static nint Value⁔(/*this*/ CodeVal c) { return (nint)c; }
 
 } partial class pkgbits_package {
 
@@ -42,8 +42,8 @@ partial struct CodeType /*num:nint*/;
 
 } partial class pkgbits_package {
 
-[GoMethodBody("Marker")] internal static SyncMarker Markerᴍ(CodeType c) { return SyncType; }
-[GoMethodBody("Value")] internal static nint Valueᴍ(CodeType c) { return (nint)c; }
+internal static SyncMarker Marker⁔(/*this*/ CodeType c) { return SyncType; }
+internal static nint Value⁔(/*this*/ CodeType c) { return (nint)c; }
 
 } partial class pkgbits_package {
 
@@ -67,8 +67,8 @@ partial struct CodeObj /*num:nint*/;
 
 } partial class pkgbits_package {
 
-[GoMethodBody("Marker")] internal static SyncMarker Markerᴍ(CodeObj c) { return SyncCodeObj; }
-[GoMethodBody("Value")] internal static nint Valueᴍ(CodeObj c) { return (nint)c; }
+internal static SyncMarker Marker⁔(/*this*/ CodeObj c) { return SyncCodeObj; }
+internal static nint Value⁔(/*this*/ CodeObj c) { return (nint)c; }
 
 } partial class pkgbits_package {
 

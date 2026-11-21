@@ -54,7 +54,7 @@ internal static slice<@string> flagNames = [
 
 } partial class net_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Flags f) {
+internal static @string String⁔(/*this*/ Flags f) {
     @string s = ""u8;
     foreach (var (i, name) in range(flagNames)) {
         if ((Flags)(f & ((Flags)((nuint)1 << (int)((nuint)i)))) != 0) {
@@ -74,7 +74,7 @@ internal static slice<@string> flagNames = [
 
 // Addrs returns a list of unicast interface addresses for a specific
 // interface.
-[GoMethodBody("Addrs")] internal static (slice<Addr>, error) Addrsᴍ(ж<Interface> Ꮡifi) {
+internal static (slice<Addr>, error) Addrs⁔(/*this*/ ж<Interface> Ꮡifi) {
     if (Ꮡifi == nil) {
         return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "route", Net: "ip+net", Source: default, Addr: default, Err: errInvalidInterface))));
     }
@@ -87,7 +87,7 @@ internal static slice<@string> flagNames = [
 
 // MulticastAddrs returns a list of multicast, joined group addresses
 // for a specific interface.
-[GoMethodBody("MulticastAddrs")] internal static (slice<Addr>, error) MulticastAddrsᴍ(ж<Interface> Ꮡifi) {
+internal static (slice<Addr>, error) MulticastAddrs⁔(/*this*/ ж<Interface> Ꮡifi) {
     if (Ꮡifi == nil) {
         return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "route", Net: "ip+net", Source: default, Addr: default, Err: errInvalidInterface))));
     }
@@ -204,7 +204,7 @@ internal static ref ipv6ZoneCache zoneCache => ref ((StaticBox<ipv6ZoneCache>)�
 // update refreshes the network interface information if the cache was last
 // updated more than 1 minute ago, or if force is set. It reports whether the
 // cache was updated.
-[GoMethodBody("update")] internal static bool /*updated*/ updateᴍ(ж<ipv6ZoneCache> Ꮡzc, slice<Interface> ift, bool force) {
+internal static bool /*updated*/ update⁔(/*this*/ ж<ipv6ZoneCache> Ꮡzc, slice<Interface> ift, bool force) {
     bool updated = default;
     GoFrame ᒐ = default;
     try {
@@ -240,7 +240,7 @@ internal static ref ipv6ZoneCache zoneCache => ref ((StaticBox<ipv6ZoneCache>)�
     ᒐdone: return updated;
 }
 
-[GoMethodBody("name")] internal static @string nameᴍ(ref ipv6ZoneCache zc, nint index) {
+internal static @string name⁔(/*this*/ ref ipv6ZoneCache zc, nint index) {
     if (index == 0) {
         return ""u8;
     }
@@ -260,7 +260,7 @@ internal static ref ipv6ZoneCache zoneCache => ref ((StaticBox<ipv6ZoneCache>)�
     return name;
 }
 
-[GoMethodBody("index")] internal static nint indexᴍ(ref ipv6ZoneCache zc, @string name) {
+internal static nint index⁔(/*this*/ ref ipv6ZoneCache zc, @string name) {
     if (name == ""u8) {
         return 0;
     }

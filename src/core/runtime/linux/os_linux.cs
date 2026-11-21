@@ -544,7 +544,7 @@ internal static void setSignalstackSP(ж<stackt> s, uintptr sp) {
 } partial class runtime_package {
 
 //go:nosplit
-[GoMethodBody("fixsigcode")] internal static void fixsigcodeᴍ(ref sigctxt c, uint32 sig) {
+internal static void fixsigcode⁔(/*this*/ ref sigctxt c, uint32 sig) {
 }
 
 } partial class runtime_package {
@@ -728,7 +728,7 @@ internal static UntypedInt _SYS_SECCOMP => 1;
 // to kill or tgkill.
 //
 //go:nosplit
-[GoMethodBody("sigFromUser")] internal static bool sigFromUserᴍ(ref sigctxt c) {
+internal static bool sigFromUser⁔(/*this*/ ref sigctxt c) {
     var code = (int32)c.sigcode();
     return code == _SI_USER || code == _SI_TKILL;
 }
@@ -736,7 +736,7 @@ internal static UntypedInt _SYS_SECCOMP => 1;
 // sigFromSeccomp reports whether the signal was sent from seccomp.
 //
 //go:nosplit
-[GoMethodBody("sigFromSeccomp")] internal static bool sigFromSeccompᴍ(ref sigctxt c) {
+internal static bool sigFromSeccomp⁔(/*this*/ ref sigctxt c) {
     var code = (int32)c.sigcode();
     return code == _SYS_SECCOMP;
 }
@@ -831,7 +831,7 @@ internal static (nint major, nint minor, nint patch, bool ok) parseRelease(@stri
 
 // GE checks if the running kernel version
 // is greater than or equal to the provided version.
-[GoMethodBody("GE")] internal static bool GEᴍ(kernelVersion kv, nint x, nint y) {
+internal static bool GE⁔(/*this*/ kernelVersion kv, nint x, nint y) {
     return kv.major > x || (kv.major == x && kv.minor >= y);
 }
 

@@ -102,11 +102,11 @@ public static hash.Hash64 New(ж<Table> tab) { return new digestжHash64(Ꮡ(new
 
 } partial class crc64_package {
 
-[GoMethodBody("Size")] internal static nint Sizeᴍ(ref digest d) { return crc64.Size; }
+internal static nint Size⁔(/*this*/ ref digest d) { return crc64.Size; }
 
-[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref digest d) { return 1; }
+internal static nint BlockSize⁔(/*this*/ ref digest d) { return 1; }
 
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref digest d) { d.crc = 0; }
+internal static void Reset⁔(/*this*/ ref digest d) { d.crc = 0; }
 
 } partial class crc64_package {
 
@@ -116,40 +116,40 @@ internal const nint marshaledSize = /* len(magic) + 8 + 8 */ 20;
 
 } partial class crc64_package {
 
-[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ref digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint64(b, tableSum(d.tab));
     b = byteorder.BEAppendUint64(b, d.crc);
     return (b, default);
 }
 
-[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(ref digest d) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hashCrc64InvalidHashˢᴍdigest => ref hashCrc64InvalidHashˢᵇᴍdigest;
-private static readonly @string hashCrc64InvalidHashˢᵇᴍdigest = "hash/crc64: invalid hash state identifier"u8;
-internal static ref readonly @string hashCrc64InvalidHashˢ2ᴍdigest => ref hashCrc64InvalidHashˢ2ᵇᴍdigest;
-private static readonly @string hashCrc64InvalidHashˢ2ᵇᴍdigest = "hash/crc64: invalid hash state size"u8;
-internal static ref readonly @string hashCrc64TablesDoNotˢᴍdigest => ref hashCrc64TablesDoNotˢᵇᴍdigest;
-private static readonly @string hashCrc64TablesDoNotˢᵇᴍdigest = "hash/crc64: tables do not match"u8;
+internal static ref readonly @string hashCrc64InvalidHashˢ⁔digest => ref hashCrc64InvalidHashˢᵇ⁔digest;
+private static readonly @string hashCrc64InvalidHashˢᵇ⁔digest = "hash/crc64: invalid hash state identifier"u8;
+internal static ref readonly @string hashCrc64InvalidHashˢ2⁔digest => ref hashCrc64InvalidHashˢ2ᵇ⁔digest;
+private static readonly @string hashCrc64InvalidHashˢ2ᵇ⁔digest = "hash/crc64: invalid hash state size"u8;
+internal static ref readonly @string hashCrc64TablesDoNotˢ⁔digest => ref hashCrc64TablesDoNotˢᵇ⁔digest;
+private static readonly @string hashCrc64TablesDoNotˢᵇ⁔digest = "hash/crc64: tables do not match"u8;
 
-[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref digest d, slice<byte> b) {
+internal static error UnmarshalBinary⁔(/*this*/ ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
-        return errors.New(hashCrc64InvalidHashˢᴍdigest);
+        return errors.New(hashCrc64InvalidHashˢ⁔digest);
     }
     if (len(b) != marshaledSize) {
-        return errors.New(hashCrc64InvalidHashˢ2ᴍdigest);
+        return errors.New(hashCrc64InvalidHashˢ2⁔digest);
     }
     if (tableSum(d.tab) != byteorder.BEUint64(b[4..])) {
-        return errors.New(hashCrc64TablesDoNotˢᴍdigest);
+        return errors.New(hashCrc64TablesDoNotˢ⁔digest);
     }
     d.crc = byteorder.BEUint64(b[12..]);
     return default;
 }
 
-[GoMethodBody("Clone")] internal static (hash.Cloner, error) Cloneᴍ(ref digest d) {
+internal static (hash.Cloner, error) Clone⁔(/*this*/ ref digest d) {
     ref var r = ref heap<digest>(d, out var Ꮡr);
     return (new digestжCloner(Ꮡr), default);
 }
@@ -195,14 +195,14 @@ public static uint64 Update(uint64 crc, ж<Table> tab, slice<byte> p) {
 
 } partial class crc64_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref digest d, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref digest d, slice<byte> p) {
     d.crc = update(d.crc, ref (d.tab).DerefOrNull(), p);
     return (len(p), default);
 }
 
-[GoMethodBody("Sum64")] internal static uint64 Sum64ᴍ(ref digest d) { return d.crc; }
+internal static uint64 Sum64⁔(/*this*/ ref digest d) { return d.crc; }
 
-[GoMethodBody("Sum")] internal static slice<byte> Sumᴍ(ref digest d, slice<byte> @in) {
+internal static slice<byte> Sum⁔(/*this*/ ref digest d, slice<byte> @in) {
     var s = d.Sum64();
     return append(@in, (byte)(s >> 56), (byte)(s >> 48), (byte)(s >> 40), (byte)(s >> 32), (byte)(s >> 24), (byte)(s >> 16), (byte)(s >> 8), (byte)s);
 }

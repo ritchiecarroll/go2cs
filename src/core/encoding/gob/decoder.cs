@@ -61,16 +61,16 @@ public static ж<Decoder> NewDecoder(io.Reader r) {
 } partial class gob_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gobDuplicateTypeReceivedˢᴍDecoder => ref gobDuplicateTypeReceivedˢᵇᴍDecoder;
-private static readonly @string gobDuplicateTypeReceivedˢᵇᴍDecoder = "gob: duplicate type received"u8;
+internal static ref readonly @string gobDuplicateTypeReceivedˢ⁔Decoder => ref gobDuplicateTypeReceivedˢᵇ⁔Decoder;
+private static readonly @string gobDuplicateTypeReceivedˢᵇ⁔Decoder = "gob: duplicate type received"u8;
 
 // recvType loads the definition of a type.
-[GoMethodBody("recvType")] internal static void recvTypeᴍ(ж<Decoder> Ꮡdec, typeId id) {
+internal static void recvType⁔(/*this*/ ж<Decoder> Ꮡdec, typeId id) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     // Have we already seen this type? That's an error
     if (id < firstUserId || dec.wireType[id] != nil) {
-        dec.err = errors.New(gobDuplicateTypeReceivedˢᴍDecoder);
+        dec.err = errors.New(gobDuplicateTypeReceivedˢ⁔Decoder);
         return;
     }
 
@@ -92,7 +92,7 @@ internal static error errBadCount = errors.New("invalid message length");
 
 // recvMessage reads the next count-delimited item from the input. It is the converse
 // of Encoder.writeMessage. It returns false on EOF or other error reading the message.
-[GoMethodBody("recvMessage")] internal static bool recvMessageᴍ(ref Decoder dec) {
+internal static bool recvMessage⁔(/*this*/ ref Decoder dec) {
     // Read a count.
     var (nbytes, _, err) = decodeUintReader(dec.r, dec.countBuf);
     if (err != nil) {
@@ -108,7 +108,7 @@ internal static error errBadCount = errors.New("invalid message length");
 }
 
 // readMessage reads the next nbytes bytes from the input.
-[GoMethodBody("readMessage")] internal static void readMessageᴍ(ref Decoder dec, nint nbytes) {
+internal static void readMessage⁔(/*this*/ ref Decoder dec, nint nbytes) {
     if (dec.buf.Len() != 0) {
         // The buffer should always be empty now.
         throw panic("non-empty decoder buffer");
@@ -135,7 +135,7 @@ internal static int64 toInt(uint64 x) {
 
 } partial class gob_package {
 
-[GoMethodBody("nextInt")] internal static int64 nextIntᴍ(ж<Decoder> Ꮡdec) {
+internal static int64 nextInt⁔(/*this*/ ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     var (n, _, err) = decodeUintReader(new decBufferжReader(Ꮡdec.Ꮡbuf), dec.countBuf);
@@ -145,7 +145,7 @@ internal static int64 toInt(uint64 x) {
     return toInt(n);
 }
 
-[GoMethodBody("nextUint")] internal static uint64 nextUintᴍ(ж<Decoder> Ꮡdec) {
+internal static uint64 nextUint⁔(/*this*/ ж<Decoder> Ꮡdec) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     var (n, _, err) = decodeUintReader(new decBufferжReader(Ꮡdec.Ꮡbuf), dec.countBuf);
@@ -156,8 +156,8 @@ internal static int64 toInt(uint64 x) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string extraDataInBufferˢᴍDecoder => ref extraDataInBufferˢᵇᴍDecoder;
-private static readonly @string extraDataInBufferˢᵇᴍDecoder = "extra data in buffer"u8;
+internal static ref readonly @string extraDataInBufferˢ⁔Decoder => ref extraDataInBufferˢᵇ⁔Decoder;
+private static readonly @string extraDataInBufferˢᵇ⁔Decoder = "extra data in buffer"u8;
 
 // decodeTypeSequence parses:
 // TypeSequence
@@ -168,7 +168,7 @@ private static readonly @string extraDataInBufferˢᵇᴍDecoder = "extra data i
 // EOF.  Upon return, the remainder of dec.buf is the value to be
 // decoded. If this is an interface value, it can be ignored by
 // resetting that buffer.
-[GoMethodBody("decodeTypeSequence")] internal static typeId decodeTypeSequenceᴍ(ж<Decoder> Ꮡdec, bool isInterface) {
+internal static typeId decodeTypeSequence⁔(/*this*/ ж<Decoder> Ꮡdec, bool isInterface) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     var firstMessage = true;
@@ -202,7 +202,7 @@ private static readonly @string extraDataInBufferˢᵇᴍDecoder = "extra data i
         // will be absorbed by recvMessage.)
         if (dec.buf.Len() > 0) {
             if (!isInterface) {
-                dec.err = errors.New(extraDataInBufferˢᴍDecoder);
+                dec.err = errors.New(extraDataInBufferˢ⁔Decoder);
                 break;
             }
             Ꮡdec.nextUint();
@@ -213,8 +213,8 @@ private static readonly @string extraDataInBufferˢᵇᴍDecoder = "extra data i
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gobAttemptToDecodeIntoAˢᴍDecoder => ref gobAttemptToDecodeIntoAˢᵇᴍDecoder;
-private static readonly @string gobAttemptToDecodeIntoAˢᵇᴍDecoder = "gob: attempt to decode into a non-pointer"u8;
+internal static ref readonly @string gobAttemptToDecodeIntoAˢ⁔Decoder => ref gobAttemptToDecodeIntoAˢᵇ⁔Decoder;
+private static readonly @string gobAttemptToDecodeIntoAˢᵇ⁔Decoder = "gob: attempt to decode into a non-pointer"u8;
 
 // Decode reads the next value from the input stream and stores
 // it in the data represented by the empty interface value.
@@ -223,7 +223,7 @@ private static readonly @string gobAttemptToDecodeIntoAˢᵇᴍDecoder = "gob: a
 // correct type for the next data item received.
 // If the input is at EOF, Decode returns [io.EOF] and
 // does not modify e.
-[GoMethodBody("Decode")] internal static error Decodeᴍ(ж<Decoder> Ꮡdec, any e) {
+internal static error Decode⁔(/*this*/ ж<Decoder> Ꮡdec, any e) {
     ref var dec = ref Ꮡdec.DerefOrNull();
 
     if (e == nil) {
@@ -233,15 +233,15 @@ private static readonly @string gobAttemptToDecodeIntoAˢᵇᴍDecoder = "gob: a
     // If e represents a value as opposed to a pointer, the answer won't
     // get back to the caller. Make sure it's a pointer.
     if (value.Kind() != reflect.Pointer) {
-        dec.err = errors.New(gobAttemptToDecodeIntoAˢᴍDecoder);
+        dec.err = errors.New(gobAttemptToDecodeIntoAˢ⁔Decoder);
         return dec.err;
     }
     return Ꮡdec.DecodeValue(value);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string gobDecodeValueOfˢᴍDecoder => ref gobDecodeValueOfˢᵇᴍDecoder;
-private static readonly @string gobDecodeValueOfˢᵇᴍDecoder = "gob: DecodeValue of unassignable value"u8;
+internal static ref readonly @string gobDecodeValueOfˢ⁔Decoder => ref gobDecodeValueOfˢᵇ⁔Decoder;
+private static readonly @string gobDecodeValueOfˢᵇ⁔Decoder = "gob: DecodeValue of unassignable value"u8;
 
 // DecodeValue reads the next value from the input stream.
 // If v is the zero reflect.Value (v.Kind() == Invalid), DecodeValue discards the value.
@@ -249,7 +249,7 @@ private static readonly @string gobDecodeValueOfˢᵇᴍDecoder = "gob: DecodeVa
 // a non-nil pointer to data or be an assignable reflect.Value (v.CanSet())
 // If the input is at EOF, DecodeValue returns [io.EOF] and
 // does not modify v.
-[GoMethodBody("DecodeValue")] internal static error DecodeValueᴍ(ж<Decoder> Ꮡdec, reflect.Value v) {
+internal static error DecodeValue⁔(/*this*/ ж<Decoder> Ꮡdec, reflect.Value v) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -259,7 +259,7 @@ private static readonly @string gobDecodeValueOfˢᵇᴍDecoder = "gob: DecodeVa
             if (v.Kind() == reflect.Pointer && !v.IsNil()) {
                 // That's okay, we'll store through the pointer.
             } else if (!v.CanSet()) {
-                return errors.New(gobDecodeValueOfˢᴍDecoder);
+                return errors.New(gobDecodeValueOfˢ⁔Decoder);
             }
         }
         // Make sure we're single-threaded through here.

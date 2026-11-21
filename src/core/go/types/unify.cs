@@ -122,28 +122,28 @@ internal static unifyMode exact => 2;
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string inexactˢᴍunifyMode => ref inexactˢᵇᴍunifyMode;
-private static readonly @string inexactˢᵇᴍunifyMode = "inexact"u8;
-internal static ref readonly @string assignˢᴍunifyMode => ref assignˢᵇᴍunifyMode;
-private static readonly @string assignˢᵇᴍunifyMode = "assign"u8;
-internal static ref readonly @string exactˢᴍunifyMode => ref exactˢᵇᴍunifyMode;
-private static readonly @string exactˢᵇᴍunifyMode = "exact"u8;
-internal static ref readonly @string assignExactˢᴍunifyMode => ref assignExactˢᵇᴍunifyMode;
-private static readonly @string assignExactˢᵇᴍunifyMode = "assign, exact"u8;
+internal static ref readonly @string inexactˢ⁔unifyMode => ref inexactˢᵇ⁔unifyMode;
+private static readonly @string inexactˢᵇ⁔unifyMode = "inexact"u8;
+internal static ref readonly @string assignˢ⁔unifyMode => ref assignˢᵇ⁔unifyMode;
+private static readonly @string assignˢᵇ⁔unifyMode = "assign"u8;
+internal static ref readonly @string exactˢ⁔unifyMode => ref exactˢᵇ⁔unifyMode;
+private static readonly @string exactˢᵇ⁔unifyMode = "exact"u8;
+internal static ref readonly @string assignExactˢ⁔unifyMode => ref assignExactˢᵇ⁔unifyMode;
+private static readonly @string assignExactˢᵇ⁔unifyMode = "assign, exact"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(unifyMode m) {
+internal static @string String⁔(/*this*/ unifyMode m) {
     switch (m) {
     case var ᴛ when ᴛ == (unifyMode)(0): {
-        return inexactˢᴍunifyMode;
+        return inexactˢ⁔unifyMode;
     }
     case var ᴛ when ᴛ == assign: {
-        return assignˢᴍunifyMode;
+        return assignˢ⁔unifyMode;
     }
     case var ᴛ when ᴛ == exact: {
-        return exactˢᴍunifyMode;
+        return exactˢ⁔unifyMode;
     }
     case var ᴛ when ᴛ == (unifyMode)((unifyMode)(assign | exact)): {
-        return assignExactˢᴍunifyMode;
+        return assignExactˢ⁔unifyMode;
     }}
     return fmt.Sprintf("mode %d"u8, m);
 }
@@ -153,11 +153,11 @@ private static readonly @string assignExactˢᵇᴍunifyMode = "assign, exact"u8
 // unify attempts to unify x and y and reports whether it succeeded.
 // As a side-effect, types may be inferred for type parameters.
 // The mode parameter controls how types are compared.
-[GoMethodBody("unify")] internal static bool unifyᴍ(ж<unifier> Ꮡu, Type x, Type y, unifyMode mode) {
+internal static bool unify⁔(/*this*/ ж<unifier> Ꮡu, Type x, Type y, unifyMode mode) {
     return Ꮡu.nify(x, y, mode, nil);
 }
 
-[GoMethodBody("tracef")] internal static void tracefᴍ(ref unifier u, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void tracef⁔(/*this*/ ref unifier u, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     fmt.Println(strings.Repeat(".  ", u.depth) + sprintf(nil, default, true, format, args.ꓸꓸꓸ));
@@ -165,7 +165,7 @@ private static readonly @string assignExactˢᵇᴍunifyMode = "assign, exact"u8
 
 // String returns a string representation of the current mapping
 // from type parameters to types.
-[GoMethodBody("String")] internal static @string Stringᴍ(ref unifier u) {
+internal static @string String⁔(/*this*/ ref unifier u) {
     // sort type parameters for reproducible strings
     var tparams = new typeParamsById(len(u.handles));
     nint i = 0;
@@ -196,16 +196,16 @@ partial struct typeParamsById /*[]ж<TypeParam>*/;
 
 } partial class types_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(typeParamsById s) { return len(s); }
-[GoMethodBody("Less")] internal static bool Lessᴍ(typeParamsById s, nint i, nint j) { return s[i].id < s[j].id; }
-[GoMethodBody("Swap")] internal static void Swapᴍ(typeParamsById s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
+internal static nint Len⁔(/*this*/ typeParamsById s) { return len(s); }
+internal static bool Less⁔(/*this*/ typeParamsById s, nint i, nint j) { return s[i].id < s[j].id; }
+internal static void Swap⁔(/*this*/ typeParamsById s, nint i, nint j) { (s[i], s[j]) = (s[j], s[i]); }
 
 } partial class types_package {
 
 // join unifies the given type parameters x and y.
 // If both type parameters already have a type associated with them
 // and they are not joined, join fails and returns false.
-[GoMethodBody("join")] internal static bool joinᴍ(ref unifier u, ж<TypeParam> x, ж<TypeParam> y) {
+internal static bool join⁔(/*this*/ ref unifier u, ж<TypeParam> x, ж<TypeParam> y) {
     if (traceInference) {
         u.tracef("%s ⇄ %s", x.OrTypedNil(), y.OrTypedNil());
     }
@@ -238,7 +238,7 @@ partial struct typeParamsById /*[]ж<TypeParam>*/;
 
 // asBoundTypeParam returns x.(*TypeParam) if x is a type parameter recorded with u.
 // Otherwise, the result is nil.
-[GoMethodBody("asBoundTypeParam")] internal static ж<TypeParam> asBoundTypeParamᴍ(ref unifier u, Type x) {
+internal static ж<TypeParam> asBoundTypeParam⁔(/*this*/ ref unifier u, Type x) {
     var (xΔ1, _) = Unalias(x)._<ж<TypeParam>>(ᐧ); if (xΔ1 != nil) {
         var (_, found) = u.handles[xΔ1, ꟷ]; if (found) {
             return xΔ1;
@@ -249,7 +249,7 @@ partial struct typeParamsById /*[]ж<TypeParam>*/;
 
 // setHandle sets the handle for type parameter x
 // (and all its joined type parameters) to h.
-[GoMethodBody("setHandle")] internal static void setHandleᴍ(ref unifier u, ж<TypeParam> x, ж<Type> h) {
+internal static void setHandle⁔(/*this*/ ref unifier u, ж<TypeParam> x, ж<Type> h) {
     var hx = u.handles[x];
     assert(hx != nil);
     foreach (var (y, hy) in u.handles) {
@@ -260,13 +260,13 @@ partial struct typeParamsById /*[]ж<TypeParam>*/;
 }
 
 // at returns the (possibly nil) type for type parameter x.
-[GoMethodBody("at")] internal static Type atᴍ(ref unifier u, ж<TypeParam> x) {
+internal static Type at⁔(/*this*/ ref unifier u, ж<TypeParam> x) {
     return u.handles[x].ValueSlot;
 }
 
 // set sets the type t for type parameter x;
 // t must not be nil.
-[GoMethodBody("set")] internal static void setᴍ(ref unifier u, ж<TypeParam> x, Type t) {
+internal static void set⁔(/*this*/ ref unifier u, ж<TypeParam> x, Type t) {
     assert(t != nil);
     if (traceInference) {
         u.tracef("%s ➞ %s", x.OrTypedNil(), t);
@@ -275,7 +275,7 @@ partial struct typeParamsById /*[]ж<TypeParam>*/;
 }
 
 // unknowns returns the number of type parameters for which no type has been set yet.
-[GoMethodBody("unknowns")] internal static nint unknownsᴍ(ref unifier u) {
+internal static nint unknowns⁔(/*this*/ ref unifier u) {
     nint n = 0;
     foreach (var (_, h) in u.handles) {
         if (h.ValueSlot == nil) {
@@ -289,7 +289,7 @@ partial struct typeParamsById /*[]ж<TypeParam>*/;
 // The result is never nil and has the same length as tparams; result types that
 // could not be inferred are nil. Corresponding type parameters and result types
 // have identical indices.
-[GoMethodBody("inferred")] internal static slice<Type> inferredᴍ(ref unifier u, slice<ж<TypeParam>> tparams) {
+internal static slice<Type> inferred⁔(/*this*/ ref unifier u, slice<ж<TypeParam>> tparams) {
     var list = new slice<Type>(len(tparams));
     foreach (var (i, x) in range(tparams)) {
         list[i] = u.at(x);
@@ -316,7 +316,7 @@ internal static ж<Interface> /*i*/ asInterface(Type x) {
 // adapted version of Checker.identical. For changes to that
 // code the corresponding changes should be made here.
 // Must not be called directly from outside the unifier.
-[GoMethodBody("nify")] internal static bool /*result*/ nifyᴍ(ж<unifier> Ꮡu, Type xʗp, Type yʗp, unifyMode mode, ж<ifacePair> Ꮡp) {
+internal static bool /*result*/ nify⁔(/*this*/ ж<unifier> Ꮡu, Type xʗp, Type yʗp, unifyMode mode, ж<ifacePair> Ꮡp) {
     bool result = default;
     GoFrame ᒐ = default;
     try {

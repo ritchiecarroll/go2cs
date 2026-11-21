@@ -12,7 +12,7 @@ internal static UntypedInt bufSize => /* blockSize */ 64;
 
 } partial class chacha20_package {
 
-[GoMethodBody("xorKeyStreamBlocks")] internal static void xorKeyStreamBlocksᴍ(ref Cipher s, slice<byte> dst, slice<byte> src) {
+internal static void xorKeyStreamBlocks⁔(/*this*/ ref Cipher s, slice<byte> dst, slice<byte> src) {
     s.xorKeyStreamBlocksGeneric(dst, src);
 }
 

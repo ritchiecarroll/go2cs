@@ -88,7 +88,7 @@ public static ж<Bubble> Acquire() {
 
 // Release releases the reference to the bubble,
 // allowing it to become idle again.
-[GoMethodBody("Release")] internal static void Releaseᴍ(ж<Bubble> Ꮡb) {
+internal static void Release⁔(/*this*/ ж<Bubble> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (Ꮡb == nil) {
@@ -100,7 +100,7 @@ public static ж<Bubble> Acquire() {
 
 // Run executes f in the bubble.
 // The current goroutine must not be part of a bubble.
-[GoMethodBody("Run")] internal static void Runᴍ(ж<Bubble> Ꮡb, Action f) {
+internal static void Run⁔(/*this*/ ж<Bubble> Ꮡb, Action f) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (Ꮡb == nil) {

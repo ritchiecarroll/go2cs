@@ -22,17 +22,17 @@ public partial struct errNetClosing {
 } partial class poll_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string useOfClosedNetworkˢᴍerrNetClosing => ref useOfClosedNetworkˢᵇᴍerrNetClosing;
-private static readonly @string useOfClosedNetworkˢᵇᴍerrNetClosing = "use of closed network connection"u8;
+internal static ref readonly @string useOfClosedNetworkˢ⁔errNetClosing => ref useOfClosedNetworkˢᵇ⁔errNetClosing;
+private static readonly @string useOfClosedNetworkˢᵇ⁔errNetClosing = "use of closed network connection"u8;
 
 // Error returns the error message for ErrNetClosing.
 // Keep this string consistent because of issue #4373:
 // since historically programs have not been able to detect
 // this error, they look for the string.
-[GoMethodBody("Error")] internal static @string Errorᴍ(errNetClosing e) { return useOfClosedNetworkˢᴍerrNetClosing; }
+internal static @string Error⁔(/*this*/ errNetClosing e) { return useOfClosedNetworkˢ⁔errNetClosing; }
 
-[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(errNetClosing e) { return false; }
-[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(errNetClosing e) { return false; }
+internal static bool Timeout⁔(/*this*/ errNetClosing e) { return false; }
+internal static bool Temporary⁔(/*this*/ errNetClosing e) { return false; }
 
 } partial class poll_package {
 
@@ -68,16 +68,16 @@ partial struct DeadlineExceededError {
 } partial class poll_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string iOTimeoutˢᴍDeadlineExceededError => ref iOTimeoutˢᵇᴍDeadlineExceededError;
-private static readonly @string iOTimeoutˢᵇᴍDeadlineExceededError = "i/o timeout"u8;
+internal static ref readonly @string iOTimeoutˢ⁔DeadlineExceededError => ref iOTimeoutˢᵇ⁔DeadlineExceededError;
+private static readonly @string iOTimeoutˢᵇ⁔DeadlineExceededError = "i/o timeout"u8;
 
 // Implement the net.Error interface.
 // The string is "i/o timeout" because that is what was returned
 // by earlier Go versions. Changing it may break programs that
 // match on error strings.
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref DeadlineExceededError e) { return iOTimeoutˢᴍDeadlineExceededError; }
-[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref DeadlineExceededError e) { return true; }
-[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref DeadlineExceededError e) { return true; }
+internal static @string Error⁔(/*this*/ ref DeadlineExceededError e) { return iOTimeoutˢ⁔DeadlineExceededError; }
+internal static bool Timeout⁔(/*this*/ ref DeadlineExceededError e) { return true; }
+internal static bool Temporary⁔(/*this*/ ref DeadlineExceededError e) { return true; }
 
 } partial class poll_package {
 

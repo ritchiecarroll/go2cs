@@ -67,12 +67,12 @@ public static (ж<TextReader>, error) NewTextReader(io.Reader r) {
 } partial class raw_package {
 
 // Version returns the version of the trace that we're reading.
-[GoMethodBody("Version")] internal static version.Version Versionᴍ(ref TextReader r) {
+internal static version.Version Version⁔(/*this*/ ref TextReader r) {
     return r.v;
 }
 
 // ReadEvent reads and returns the next trace event in the text stream.
-[GoMethodBody("ReadEvent")] internal static (Event, error) ReadEventᴍ(ref TextReader r) {
+internal static (Event, error) ReadEvent⁔(/*this*/ ref TextReader r) {
     var (line, err) = r.nextLine();
     if (err != nil) {
         return (new Event(), err);
@@ -126,7 +126,7 @@ public static (ж<TextReader>, error) NewTextReader(io.Reader r) {
     ), default);
 }
 
-[GoMethodBody("nextLine")] internal static (@string, error) nextLineᴍ(ref TextReader r) {
+internal static (@string, error) nextLine⁔(/*this*/ ref TextReader r) {
     for (;;) {
         if (!r.s.Scan()) {
             var err = r.s.Err(); if (err != nil) {

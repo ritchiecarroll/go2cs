@@ -254,7 +254,7 @@ internal static ref Config defaultConfig => ref ((StaticBox<Config>)ᏑdefaultCo
 } partial class quick_package {
 
 // getRand returns the *rand.Rand to use for a given Config.
-[GoMethodBody("getRand")] internal static ж<rand.Rand> getRandᴍ(ref Config c) {
+internal static ж<rand.Rand> getRand⁔(/*this*/ ref Config c) {
     if (c.Rand == nil) {
         return rand.New(rand.NewSource(time.Now().UnixNano()));
     }
@@ -263,7 +263,7 @@ internal static ref Config defaultConfig => ref ((StaticBox<Config>)ᏑdefaultCo
 
 // getMaxCount returns the maximum number of iterations to run for a given
 // Config.
-[GoMethodBody("getMaxCount")] internal static nint /*maxCount*/ getMaxCountᴍ(ref Config c) {
+internal static nint /*maxCount*/ getMaxCount⁔(/*this*/ ref Config c) {
     nint maxCount = default;
 
     maxCount = c.MaxCount;
@@ -286,7 +286,7 @@ partial struct SetupError /*@string*/;
 
 } partial class quick_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(SetupError s) { return (@string)s; }
+internal static @string Error⁔(/*this*/ SetupError s) { return (@string)s; }
 
 } partial class quick_package {
 
@@ -298,7 +298,7 @@ partial struct CheckError {
 
 } partial class quick_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref CheckError s) {
+internal static @string Error⁔(/*this*/ ref CheckError s) {
     return fmt.Sprintf("#%d: failed on input %s"u8, s.Count, toString(s.In));
 }
 
@@ -313,7 +313,7 @@ partial struct CheckEqualError {
 
 } partial class quick_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref CheckEqualError s) {
+internal static @string Error⁔(/*this*/ ref CheckEqualError s) {
     return fmt.Sprintf("#%d: failed on input %s. Output 1: %s. Output 2: %s"u8, s.Count, toString(s.In), toString(s.Out1), toString(s.Out2));
 }
 

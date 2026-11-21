@@ -10,7 +10,7 @@ partial class syscall_package {
 
 } partial class syscall_package {
 
-[GoMethodBody("toRoutingMessage")] internal static RoutingMessage toRoutingMessageᴍ(ж<anyMessage> Ꮡany, slice<byte> b) {
+internal static RoutingMessage toRoutingMessage⁔(/*this*/ ж<anyMessage> Ꮡany, slice<byte> b) {
     ref var any = ref Ꮡany.DerefOrNull();
 
     switch (any.Type) {
@@ -46,7 +46,7 @@ partial struct InterfaceMulticastAddrMessage {
 
 } partial class syscall_package {
 
-[GoMethodBody("sockaddr")] internal static (slice<Sockaddr>, error) sockaddrᴍ(ref InterfaceMulticastAddrMessage m) {
+internal static (slice<Sockaddr>, error) sockaddr⁔(/*this*/ ref InterfaceMulticastAddrMessage m) {
     array<Sockaddr> sas = new(8); /* RTAX_MAX */
     var b = m.Data[..];
     for (nuint i = (nuint)0; i < RTAX_MAX && len(b) >= minRoutingSockaddrLen; i++) {

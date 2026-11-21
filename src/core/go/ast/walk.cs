@@ -420,7 +420,7 @@ internal delegate bool inspector(Node _);
 
 } partial class ast_package {
 
-[GoMethodBody("Visit")] internal static Visitor Visitᴍ(inspector f, Node node) {
+internal static Visitor Visit⁔(/*this*/ inspector f, Node node) {
     if (f(node)) {
         return new inspectorᴠVisitor(f);
     }

@@ -59,6 +59,10 @@ using static go.crypto.@internal.boring.bcache_package;
 
 namespace go.crypto.@internal.boring;
 
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
+using System.ComponentModel;
+// </PackageInfoUsings>
+
 [GoPackage("bcache")]
 public static partial class bcache_package
 {
@@ -89,5 +93,5 @@ public static partial class bcache_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(bcache_package.Cache<,>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class bcacheᴛCache;
+[GoMethodHost(typeof(bcache_package.Cache<,>)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class bcacheᴛCache;
 // </MethodHolders>

@@ -18,7 +18,7 @@ partial struct BatchCounterAlloc {
 
 } partial class calloc_package {
 
-[GoMethodBody("AllocateCounters")] internal static slice<uint32> AllocateCountersᴍ(ref BatchCounterAlloc ca, nint n) {
+internal static slice<uint32> AllocateCounters⁔(/*this*/ ref BatchCounterAlloc ca, nint n) {
     const nint chunk = 8192;
     if (n > cap(ca.pool)) {
         nint siz = chunk;

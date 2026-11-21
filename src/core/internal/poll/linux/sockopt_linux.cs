@@ -11,7 +11,7 @@ partial class poll_package {
 } partial class poll_package {
 
 // SetsockoptIPMreqn wraps the setsockopt network call with an IPMreqn argument.
-[GoMethodBody("SetsockoptIPMreqn")] internal static error SetsockoptIPMreqnᴍ(ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPMreqn> mreq) {
+internal static error SetsockoptIPMreqn⁔(/*this*/ ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPMreqn> mreq) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

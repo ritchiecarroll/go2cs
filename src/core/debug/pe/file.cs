@@ -62,7 +62,7 @@ public static (ж<File>, error) Open(@string name) {
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref File f) {
+internal static error Close⁔(/*this*/ ref File f) {
     error err = default;
     if (f.closer != nil) {
         err = f.closer.Close();
@@ -188,11 +188,11 @@ partial struct nobitsSectionReader {
 } partial class pe_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedReadFromˢᴍnobitsSectionReader => ref unexpectedReadFromˢᵇᴍnobitsSectionReader;
-private static readonly @string unexpectedReadFromˢᵇᴍnobitsSectionReader = "unexpected read from section with uninitialized data"u8;
+internal static ref readonly @string unexpectedReadFromˢ⁔nobitsSectionReader => ref unexpectedReadFromˢᵇ⁔nobitsSectionReader;
+private static readonly @string unexpectedReadFromˢᵇ⁔nobitsSectionReader = "unexpected read from section with uninitialized data"u8;
 
-[GoMethodBody("ReadAt")] internal static (nint n, error err) ReadAtᴍ(ref nobitsSectionReader _, slice<byte> p, int64 off) {
-    return (0, errors.New(unexpectedReadFromˢᴍnobitsSectionReader));
+internal static (nint n, error err) ReadAt⁔(/*this*/ ref nobitsSectionReader _, slice<byte> p, int64 off) {
+    return (0, errors.New(unexpectedReadFromˢ⁔nobitsSectionReader));
 }
 
 } partial class pe_package {
@@ -215,7 +215,7 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
 
 // Section returns the first section with the given name, or nil if no such
 // section exists.
-[GoMethodBody("Section")] internal static ж<Section> Sectionᴍ(ref File f, @string name) {
+internal static ж<Section> Section⁔(/*this*/ ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
@@ -225,28 +225,28 @@ internal static (@string, bool) getString(slice<byte> section, nint start) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string debugˢᴍFile => ref debugˢᵇᴍFile;
-private static readonly @string debugˢᵇᴍFile = ".debug_"u8;
-internal static ref readonly @string zdebugˢᴍFile => ref zdebugˢᵇᴍFile;
-private static readonly @string zdebugˢᵇᴍFile = ".zdebug_"u8;
-internal static ref readonly @string abbrevˢᴍFile => ref abbrevˢᵇᴍFile;
-private static readonly @string abbrevˢᵇᴍFile = "abbrev"u8;
-internal static ref readonly @string infoˢᴍFile => ref infoˢᵇᴍFile;
-private static readonly @string infoˢᵇᴍFile = "info"u8;
-internal static ref readonly @string lineˢᴍFile => ref lineˢᵇᴍFile;
-private static readonly @string lineˢᵇᴍFile = "line"u8;
-internal static ref readonly @string rangesˢᴍFile => ref rangesˢᵇᴍFile;
-private static readonly @string rangesˢᵇᴍFile = "ranges"u8;
-internal static ref readonly @string strˢᴍFile => ref strˢᵇᴍFile;
-private static readonly @string strˢᵇᴍFile = "str"u8;
+internal static ref readonly @string debugˢ⁔File => ref debugˢᵇ⁔File;
+private static readonly @string debugˢᵇ⁔File = ".debug_"u8;
+internal static ref readonly @string zdebugˢ⁔File => ref zdebugˢᵇ⁔File;
+private static readonly @string zdebugˢᵇ⁔File = ".zdebug_"u8;
+internal static ref readonly @string abbrevˢ⁔File => ref abbrevˢᵇ⁔File;
+private static readonly @string abbrevˢᵇ⁔File = "abbrev"u8;
+internal static ref readonly @string infoˢ⁔File => ref infoˢᵇ⁔File;
+private static readonly @string infoˢᵇ⁔File = "info"u8;
+internal static ref readonly @string lineˢ⁔File => ref lineˢᵇ⁔File;
+private static readonly @string lineˢᵇ⁔File = "line"u8;
+internal static ref readonly @string rangesˢ⁔File => ref rangesˢᵇ⁔File;
+private static readonly @string rangesˢᵇ⁔File = "ranges"u8;
+internal static ref readonly @string strˢ⁔File => ref strˢᵇ⁔File;
+private static readonly @string strˢᵇ⁔File = "str"u8;
 
-[GoMethodBody("DWARF")] internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
+internal static (ж<dwarf.Data>, error) DWARF⁔(/*this*/ ref File f) {
     @string dwarfSuffix(ж<Section> s) {
         switch (ᐧ) {
-        case {} when strings.HasPrefix(s.Name, debugˢᴍFile): {
+        case {} when strings.HasPrefix(s.Name, debugˢ⁔File): {
             return s.Name[7..];
         }
-        case {} when strings.HasPrefix(s.Name, zdebugˢᴍFile): {
+        case {} when strings.HasPrefix(s.Name, zdebugˢ⁔File): {
             return s.Name[8..];
         }
         default: {
@@ -303,7 +303,7 @@ private static readonly @string strˢᵇᴍFile = "str"u8;
         dat[suffix] = b;
     }
 
-    var (d, err) = dwarf.New(dat[abbrevˢᴍFile], default, default, dat[infoˢᴍFile], dat[lineˢᴍFile], default, dat[rangesˢᴍFile], dat[strˢᴍFile]);
+    var (d, err) = dwarf.New(dat[abbrevˢ⁔File], default, default, dat[infoˢ⁔File], dat[lineˢ⁔File], default, dat[rangesˢ⁔File], dat[strˢ⁔File]);
     if (err != nil) {
         return (default, err);
     }
@@ -352,20 +352,20 @@ partial struct ImportDirectory {
 } partial class pe_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string optionalHeaderDataˢᴍFile => ref optionalHeaderDataˢᵇᴍFile;
-private static readonly @string optionalHeaderDataˢᵇᴍFile = "optional header data directory virtual size doesn't fit within data seek"u8;
-internal static ref readonly @string importDirectoryOriginalˢᴍFile => ref importDirectoryOriginalˢᵇᴍFile;
-private static readonly @string importDirectoryOriginalˢᵇᴍFile = "import directory original first thunk doesn't fit within data seek"u8;
-internal static ref readonly @string thunkParsingNeedsAtLeastˢᴍFile => ref thunkParsingNeedsAtLeastˢᵇᴍFile;
-private static readonly @string thunkParsingNeedsAtLeastˢᵇᴍFile = "thunk parsing needs at least 8-bytes"u8;
-internal static ref readonly @string thunkParsingNeedsAtLeastˢ2ᴍFile => ref thunkParsingNeedsAtLeastˢ2ᵇᴍFile;
-private static readonly @string thunkParsingNeedsAtLeastˢ2ᵇᴍFile = "thunk parsing needs at least 5-bytes"u8;
+internal static ref readonly @string optionalHeaderDataˢ⁔File => ref optionalHeaderDataˢᵇ⁔File;
+private static readonly @string optionalHeaderDataˢᵇ⁔File = "optional header data directory virtual size doesn't fit within data seek"u8;
+internal static ref readonly @string importDirectoryOriginalˢ⁔File => ref importDirectoryOriginalˢᵇ⁔File;
+private static readonly @string importDirectoryOriginalˢᵇ⁔File = "import directory original first thunk doesn't fit within data seek"u8;
+internal static ref readonly @string thunkParsingNeedsAtLeastˢ⁔File => ref thunkParsingNeedsAtLeastˢᵇ⁔File;
+private static readonly @string thunkParsingNeedsAtLeastˢᵇ⁔File = "thunk parsing needs at least 8-bytes"u8;
+internal static ref readonly @string thunkParsingNeedsAtLeastˢ2⁔File => ref thunkParsingNeedsAtLeastˢ2ᵇ⁔File;
+private static readonly @string thunkParsingNeedsAtLeastˢ2ᵇ⁔File = "thunk parsing needs at least 5-bytes"u8;
 
 // ImportedSymbols returns the names of all symbols
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
 // It does not return weak symbols.
-[GoMethodBody("ImportedSymbols")] internal static (slice<@string>, error) ImportedSymbolsᴍ(ref File f) {
+internal static (slice<@string>, error) ImportedSymbols⁔(/*this*/ ref File f) {
     if (f.OptionalHeader == nil) {
         return (default, default);
     }
@@ -423,7 +423,7 @@ private static readonly @string thunkParsingNeedsAtLeastˢ2ᵇᴍFile = "thunk p
     // seek to the virtual address specified in the import data directory
     var seek = idd.VirtualAddress - ds.VirtualAddress;
     if (seek >= (uint32)len(d)) {
-        return (default, errors.New(optionalHeaderDataˢᴍFile));
+        return (default, errors.New(optionalHeaderDataˢ⁔File));
     }
     d = d.slice((nint)(seek));
 
@@ -458,13 +458,13 @@ private static readonly @string thunkParsingNeedsAtLeastˢ2ᵇᴍFile = "thunk p
         // seek to OriginalFirstThunk
         var seekΔ1 = dt.OriginalFirstThunk - ds.VirtualAddress;
         if (seekΔ1 >= (uint32)len(d)) {
-            return (default, errors.New(importDirectoryOriginalˢᴍFile));
+            return (default, errors.New(importDirectoryOriginalˢ⁔File));
         }
         d = d.slice((nint)(seekΔ1));
         while (len(d) > 0) {
             if (pe64) { // 64bit
                 if (len(d) < 8) {
-                    return (default, errors.New(thunkParsingNeedsAtLeastˢᴍFile));
+                    return (default, errors.New(thunkParsingNeedsAtLeastˢ⁔File));
                 }
                 var va = binary.LittleEndian.Uint64(d[0..8]);
                 d = d[8..];
@@ -479,7 +479,7 @@ private static readonly @string thunkParsingNeedsAtLeastˢ2ᵇᴍFile = "thunk p
                 }
             } else { // 32bit
                 if (len(d) <= 4) {
-                    return (default, errors.New(thunkParsingNeedsAtLeastˢ2ᴍFile));
+                    return (default, errors.New(thunkParsingNeedsAtLeastˢ2⁔File));
                 }
                 var va = binary.LittleEndian.Uint32(d[0..4]);
                 d = d[4..];
@@ -503,7 +503,7 @@ private static readonly @string thunkParsingNeedsAtLeastˢ2ᵇᴍFile = "thunk p
 // ImportedLibraries returns the names of all libraries
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
-[GoMethodBody("ImportedLibraries")] internal static (slice<@string>, error) ImportedLibrariesᴍ(ref File f) {
+internal static (slice<@string>, error) ImportedLibraries⁔(/*this*/ ref File f) {
     // TODO
     // cgo -dynimport don't use this for windows PE, so just return.
     return (default, default);
@@ -519,11 +519,11 @@ partial struct FormatError {
 } partial class pe_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownErrorˢᴍFormatError => ref unknownErrorˢᵇᴍFormatError;
-private static readonly @string unknownErrorˢᵇᴍFormatError = "unknown error"u8;
+internal static ref readonly @string unknownErrorˢ⁔FormatError => ref unknownErrorˢᵇ⁔FormatError;
+private static readonly @string unknownErrorˢᵇ⁔FormatError = "unknown error"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref FormatError e) {
-    return unknownErrorˢᴍFormatError;
+internal static @string Error⁔(/*this*/ ref FormatError e) {
+    return unknownErrorˢ⁔FormatError;
 }
 
 } partial class pe_package {

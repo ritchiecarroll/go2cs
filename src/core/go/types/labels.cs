@@ -16,19 +16,19 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string labelˢᴍChecker => ref labelˢᵇᴍChecker;
-private static readonly @string labelˢᵇᴍChecker = "label"u8;
-internal static ref readonly @string gotoSJumpsIntoBlockˢᴍChecker => ref gotoSJumpsIntoBlockˢᵇᴍChecker;
-private static readonly @string gotoSJumpsIntoBlockˢᵇᴍChecker = "goto %s jumps into block"u8;
-internal static ref readonly @string labelSNotDeclaredˢᴍChecker => ref labelSNotDeclaredˢᵇᴍChecker;
-private static readonly @string labelSNotDeclaredˢᵇᴍChecker = "label %s not declared"u8;
+internal static ref readonly @string labelˢ⁔Checker => ref labelˢᵇ⁔Checker;
+private static readonly @string labelˢᵇ⁔Checker = "label"u8;
+internal static ref readonly @string gotoSJumpsIntoBlockˢ⁔Checker => ref gotoSJumpsIntoBlockˢᵇ⁔Checker;
+private static readonly @string gotoSJumpsIntoBlockˢᵇ⁔Checker = "goto %s jumps into block"u8;
+internal static ref readonly @string labelSNotDeclaredˢ⁔Checker => ref labelSNotDeclaredˢᵇ⁔Checker;
+private static readonly @string labelSNotDeclaredˢᵇ⁔Checker = "label %s not declared"u8;
 
 // labels checks correct label use in body.
-[GoMethodBody("labels")] internal static void labelsᴍ(ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody) {
+internal static void labels⁔(/*this*/ ж<Checker> Ꮡcheck, ж<ast.BlockStmt> Ꮡbody) {
     ref var body = ref Ꮡbody.DerefOrNull();
 
     // set of all labels in this body
-    var all = NewScope(nil, body.Pos(), body.End(), labelˢᴍChecker);
+    var all = NewScope(nil, body.Pos(), body.End(), labelˢ⁔Checker);
 
     var fwdJumps = Ꮡcheck.blockBranches(all, nil, nil, body.List);
 
@@ -41,11 +41,11 @@ private static readonly @string labelSNotDeclaredˢᵇᴍChecker = "label %s not
         errors.Code code = default;
         @string name = jmp.Label.Name;
         var alt = all.Lookup(name); if (alt != nil) {
-            msg = gotoSJumpsIntoBlockˢᴍChecker;
+            msg = gotoSJumpsIntoBlockˢ⁔Checker;
             code = JumpIntoBlock;
             alt._<ж<Label>>().used = true; // avoid another error
         } else {
-            msg = labelSNotDeclaredˢᴍChecker;
+            msg = labelSNotDeclaredˢ⁔Checker;
             code = UndeclaredLabel;
         }
         Ꮡcheck.errorf(new ast_Identжpositioner(jmp.Label), code, msg, name);
@@ -75,7 +75,7 @@ partial struct block {
 
 // insert records a new label declaration for the current block.
 // The label must not have been declared before in any block.
-[GoMethodBody("insert")] internal static void insertᴍ(ж<block> Ꮡb, ж<ast.LabeledStmt> Ꮡs) {
+internal static void insert⁔(/*this*/ ж<block> Ꮡb, ж<ast.LabeledStmt> Ꮡs) {
     ref var b = ref Ꮡb.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -93,7 +93,7 @@ partial struct block {
 
 // gotoTarget returns the labeled statement in the current
 // or an enclosing block with the given label name, or nil.
-[GoMethodBody("gotoTarget")] internal static ж<ast.LabeledStmt> gotoTargetᴍ(ж<block> Ꮡb, @string name) {
+internal static ж<ast.LabeledStmt> gotoTarget⁔(/*this*/ ж<block> Ꮡb, @string name) {
     for (var s = Ꮡb; s != nil; s = s.parent) {
         var t = s.labels[name]; if (t != nil) {
             return t;
@@ -104,7 +104,7 @@ partial struct block {
 
 // enclosingTarget returns the innermost enclosing labeled
 // statement with the given label name, or nil.
-[GoMethodBody("enclosingTarget")] internal static ж<ast.LabeledStmt> enclosingTargetᴍ(ж<block> Ꮡb, @string name) {
+internal static ж<ast.LabeledStmt> enclosingTarget⁔(/*this*/ ж<block> Ꮡb, @string name) {
     for (var s = Ꮡb; s != nil; s = s.parent) {
         var t = s.lstmt; if (t != nil && t.Label.Name == name) {
             return t;
@@ -118,7 +118,7 @@ partial struct block {
 // blockBranches processes a block's statement list and returns the set of outgoing forward jumps.
 // all is the scope of all declared labels, parent the set of labels declared in the immediately
 // enclosing block, and lstmt is the labeled statement this block is associated with (or nil).
-[GoMethodBody("blockBranches")] internal static slice<ж<ast.BranchStmt>> blockBranchesᴍ(ж<Checker> Ꮡcheck, ж<Scope> all, ж<block> parent, ж<ast.LabeledStmt> lstmt, slice<ast.Stmt> list) {
+internal static slice<ж<ast.BranchStmt>> blockBranches⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Scope> all, ж<block> parent, ж<ast.LabeledStmt> lstmt, slice<ast.Stmt> list) {
     var b = Ꮡ(new block(parent: parent, lstmt: lstmt));
 
     token.Pos varDeclPos = default;

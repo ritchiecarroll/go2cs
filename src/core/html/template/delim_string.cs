@@ -23,7 +23,7 @@ internal static array<uint8> _delim_index = array<uint8>([0, 9, 25, 41, 59]);
 
 } partial class template_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(delim i) {
+internal static @string String⁔(/*this*/ delim i) {
     if (i >= ((delim)(uint8)(len(_delim_index) - 1))) {
         return "delim("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }

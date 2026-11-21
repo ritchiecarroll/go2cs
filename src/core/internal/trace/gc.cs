@@ -340,7 +340,7 @@ internal static totalUtil totalUtilOf(float64 meanUtil, int64 dur) {
 } partial class trace_package {
 
 // mean returns the mean utilization over dur.
-[GoMethodBody("mean")] internal static float64 meanᴍ(totalUtil u, time.Duration dur) {
+internal static float64 mean⁔(/*this*/ totalUtil u, time.Duration dur) {
     return (float64)u / (float64)dur;
 }
 
@@ -437,7 +437,7 @@ internal static mmuSeries newMMUSeries(slice<MutatorUtil> util) {
 
 } partial class trace_package {
 
-[GoMethodBody("bandTime")] internal static (int64 start, int64 end) bandTimeᴍ(ref mmuSeries s, nint i) {
+internal static (int64 start, int64 end) bandTime⁔(/*this*/ ref mmuSeries s, nint i) {
     int64 start = default;
     int64 end = default;
 
@@ -462,23 +462,23 @@ partial struct bandUtilHeap /*[]bandUtil*/;
 
 } partial class trace_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(bandUtilHeap h) {
+internal static nint Len⁔(/*this*/ bandUtilHeap h) {
     return len(h);
 }
 
-[GoMethodBody("Less")] internal static bool Lessᴍ(bandUtilHeap h, nint i, nint j) {
+internal static bool Less⁔(/*this*/ bandUtilHeap h, nint i, nint j) {
     return h[i].utilBound < h[j].utilBound;
 }
 
-[GoMethodBody("Swap")] internal static void Swapᴍ(bandUtilHeap h, nint i, nint j) {
+internal static void Swap⁔(/*this*/ bandUtilHeap h, nint i, nint j) {
     (h[i], h[j]) = (h[j], h[i]);
 }
 
-[GoMethodBody("Push")] internal static void Pushᴍ(ref bandUtilHeap h, any x) {
+internal static void Push⁔(/*this*/ ref bandUtilHeap h, any x) {
     h = append(h, x._<bandUtil>());
 }
 
-[GoMethodBody("Pop")] internal static any Popᴍ(ref bandUtilHeap h) {
+internal static any Pop⁔(/*this*/ ref bandUtilHeap h) {
     var x = (h)[len(h) - 1];
     h = (h).slice(0, len(h) - 1);
     return x;
@@ -497,26 +497,26 @@ partial struct utilHeap /*[]UtilWindow*/;
 
 } partial class trace_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(utilHeap h) {
+internal static nint Len⁔(/*this*/ utilHeap h) {
     return len(h);
 }
 
-[GoMethodBody("Less")] internal static bool Lessᴍ(utilHeap h, nint i, nint j) {
+internal static bool Less⁔(/*this*/ utilHeap h, nint i, nint j) {
     if (h[i].MutatorUtil != h[j].MutatorUtil) {
         return h[i].MutatorUtil > h[j].MutatorUtil;
     }
     return h[i].Time > h[j].Time;
 }
 
-[GoMethodBody("Swap")] internal static void Swapᴍ(utilHeap h, nint i, nint j) {
+internal static void Swap⁔(/*this*/ utilHeap h, nint i, nint j) {
     (h[i], h[j]) = (h[j], h[i]);
 }
 
-[GoMethodBody("Push")] internal static void Pushᴍ(ref utilHeap h, any x) {
+internal static void Push⁔(/*this*/ ref utilHeap h, any x) {
     h = append(h, x._<UtilWindow>());
 }
 
-[GoMethodBody("Pop")] internal static any Popᴍ(ref utilHeap h) {
+internal static any Pop⁔(/*this*/ ref utilHeap h) {
     var x = (h)[len(h) - 1];
     h = (h).slice(0, len(h) - 1);
     return x;
@@ -550,7 +550,7 @@ partial struct accumulator {
 
 // resetTime declares a discontinuity in the windowed mutator
 // utilization function by resetting the current time.
-[GoMethodBody("resetTime")] internal static void resetTimeᴍ(ref accumulator acc) {
+internal static void resetTime⁔(/*this*/ ref accumulator acc) {
     // This only matters for distribution collection, since that's
     // the only thing that depends on the progression of the
     // windowed mutator utilization function.
@@ -562,7 +562,7 @@ partial struct accumulator {
 // of time.
 //
 // It returns true if further calls to addMU would be pointless.
-[GoMethodBody("addMU")] internal static bool addMUᴍ(ж<accumulator> Ꮡacc, int64 timeΔ1, float64 mu, time.Duration window) {
+internal static bool addMU⁔(/*this*/ ж<accumulator> Ꮡacc, int64 timeΔ1, float64 mu, time.Duration window) {
     ref var acc = ref Ꮡacc.DerefOrNull();
 
     if (mu < acc.mmu) {
@@ -640,7 +640,7 @@ keep:;
 // window. This is the minimum utilization for all windows of this
 // duration across the execution. The returned value is in the range
 // [0, 1].
-[GoMethodBody("MMU")] internal static float64 /*mmu*/ MMUᴍ(ref MMUCurve c, time.Duration window) {
+internal static float64 /*mmu*/ MMU⁔(/*this*/ ref MMUCurve c, time.Duration window) {
     ref var acc = ref heap<accumulator>(new accumulator(mmu: 1.0D, bound: 1.0D), out var Ꮡacc);
     c.mmu(window, Ꮡacc);
     return acc.mmu;
@@ -651,7 +651,7 @@ keep:;
 // disjoint (otherwise there would be a huge number of
 // mostly-overlapping windows at the single lowest point). There are
 // no guarantees on which set of disjoint windows this returns.
-[GoMethodBody("Examples")] internal static slice<UtilWindow> /*worst*/ Examplesᴍ(ref MMUCurve c, time.Duration window, nint n) {
+internal static slice<UtilWindow> /*worst*/ Examples⁔(/*this*/ ref MMUCurve c, time.Duration window, nint n) {
     ref var acc = ref heap<accumulator>(new accumulator(mmu: 1.0D, bound: 1.0D, nWorst: n), out var Ꮡacc);
     c.mmu(window, Ꮡacc);
     sort.Sort(sort.Reverse(acc.wHeap));
@@ -668,7 +668,7 @@ keep:;
 // The minimum mutator utilization is the minimum (0th percentile) of
 // this distribution. (However, if only the minimum is desired, it's
 // more efficient to use the MMU method.)
-[GoMethodBody("MUD")] internal static slice<float64> MUDᴍ(ref MMUCurve c, time.Duration window, slice<float64> quantiles) {
+internal static slice<float64> MUD⁔(/*this*/ ref MMUCurve c, time.Duration window, slice<float64> quantiles) {
     if (len(quantiles) == 0) {
         return [];
     }
@@ -737,7 +737,7 @@ keep:;
     return @out;
 }
 
-[GoMethodBody("mmu")] internal static void mmuᴍ(ref MMUCurve c, time.Duration window, ж<accumulator> Ꮡacc) {
+internal static void mmu⁔(/*this*/ ref MMUCurve c, time.Duration window, ж<accumulator> Ꮡacc) {
     ref var acc = ref Ꮡacc.DerefOrNull();
 
     if (window <= 0) {
@@ -778,7 +778,7 @@ keep:;
 
 } partial class trace_package {
 
-[GoMethodBody("mkBandUtil")] internal static slice<bandUtil> mkBandUtilᴍ(ref mmuSeries c, nint series, time.Duration window) {
+internal static slice<bandUtil> mkBandUtil⁔(/*this*/ ref mmuSeries c, nint series, time.Duration window) {
     // For each band, compute the worst-possible total mutator
     // utilization for all windows that start in that band.
 
@@ -847,7 +847,7 @@ keep:;
 
 // bandMMU computes the precise minimum mutator utilization for
 // windows with a left edge in band bandIdx.
-[GoMethodBody("bandMMU")] internal static void bandMMUᴍ(ref mmuSeries c, nint bandIdx, time.Duration window, ж<accumulator> Ꮡacc) {
+internal static void bandMMU⁔(/*this*/ ref mmuSeries c, nint bandIdx, time.Duration window, ж<accumulator> Ꮡacc) {
     ref var acc = ref Ꮡacc.DerefOrNull();
 
     var util = c.util;
@@ -926,7 +926,7 @@ partial struct integrator {
 // advance returns the integral of the utilization function from 0 to
 // time. advance must be called on monotonically increasing values of
 // times.
-[GoMethodBody("advance")] internal static totalUtil advanceᴍ(ref integrator @in, int64 time) {
+internal static totalUtil advance⁔(/*this*/ ref integrator @in, int64 time) {
     var util = @in.u.util;
     nint pos = @in.pos;
     // Advance pos until pos+1 is time's strict successor (making
@@ -965,7 +965,7 @@ partial struct integrator {
 
 // next returns the smallest time t' > time of a change in the
 // utilization function.
-[GoMethodBody("next")] internal static int64 nextᴍ(ref integrator @in, int64 time) {
+internal static int64 next⁔(/*this*/ ref integrator @in, int64 time) {
     foreach (var (_, u) in range(@in.u.util.slice(@in.pos))) {
         if (u.Time > time) {
             return u.Time;

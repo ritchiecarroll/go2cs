@@ -189,7 +189,7 @@ partial struct byPriorityWeight /*[]ж<SRV>*/;
 
 // shuffleByWeight shuffles SRV records by weight using the algorithm
 // described in RFC 2782.
-[GoMethodBody("shuffleByWeight")] internal static void shuffleByWeightᴍ(byPriorityWeight addrs) {
+internal static void shuffleByWeight⁔(/*this*/ byPriorityWeight addrs) {
     nint sum = 0;
     foreach (var (_, addr) in range<ж<SRV>>(addrs)) {
         sum += (nint)addr.Weight;
@@ -212,7 +212,7 @@ partial struct byPriorityWeight /*[]ж<SRV>*/;
 }
 
 // sort reorders SRV records as specified in RFC 2782.
-[GoMethodBody("sort")] internal static void sortᴍ(byPriorityWeight addrs) {
+internal static void sort⁔(/*this*/ byPriorityWeight addrs) {
     slices.SortFunc(addrs, (ж<SRV> a, ж<SRV> b) => {
         nint r = cmp.Compare(a.Priority, b.Priority); if (r != 0) {
             return r;
@@ -243,7 +243,7 @@ partial struct byPref /*[]ж<MX>*/;
 } partial class net_package {
 
 // sort reorders MX records as specified in RFC 5321.
-[GoMethodBody("sort")] internal static void sortᴍ(byPref s) {
+internal static void sort⁔(/*this*/ byPref s) {
     foreach (var i in range(len(s))) {
         nint j = randIntn(i + 1);
         (s[i], s[j]) = (s[j], s[i]);

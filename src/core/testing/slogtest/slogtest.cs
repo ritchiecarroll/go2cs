@@ -383,17 +383,17 @@ partial struct wrapper {
 
 // Go method set entry for the promoted 'Handler.Enabled()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-[GoMethodBody("Enabled")] internal static bool Enabledᴍ(wrapper recvᴛ, context.Context arg1ᴛ, slog.Level arg2ᴛ) => recvᴛ.Handler.Enabled(arg1ᴛ, arg2ᴛ);
+internal static bool Enabled⁔(/*this*/ wrapper recvᴛ, context.Context arg1ᴛ, slog.Level arg2ᴛ) => recvᴛ.Handler.Enabled(arg1ᴛ, arg2ᴛ);
 
 // Go method set entry for the promoted 'Handler.WithAttrs()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-[GoMethodBody("WithAttrs")] internal static slog.Handler WithAttrsᴍ(wrapper recvᴛ, slice<slog.Attr> attrs) => recvᴛ.Handler.WithAttrs(attrs);
+internal static slog.Handler WithAttrs⁔(/*this*/ wrapper recvᴛ, slice<slog.Attr> attrs) => recvᴛ.Handler.WithAttrs(attrs);
 
 // Go method set entry for the promoted 'Handler.WithGroup()' - provided ONLY by the embedded
 // interface field in *wrapper's method set; see the pointer-only satisfaction record.
-[GoMethodBody("WithGroup")] internal static slog.Handler WithGroupᴍ(wrapper recvᴛ, @string name) => recvᴛ.Handler.WithGroup(name);
+internal static slog.Handler WithGroup⁔(/*this*/ wrapper recvᴛ, @string name) => recvᴛ.Handler.WithGroup(name);
 
-[GoMethodBody("Handle")] internal static error Handleᴍ(ref wrapper h, context.Context ctx, slog.Record rʗp) {
+internal static error Handle⁔(/*this*/ ref wrapper h, context.Context ctx, slog.Record rʗp) {
     ref var r = ref heap(rʗp.ΔClone(), out var Ꮡr);
 
     h.mod(Ꮡr);
@@ -416,9 +416,9 @@ partial struct replace {
 
 } partial class slogtest_package {
 
-[GoMethodBody("LogValue")] internal static slog.Value LogValueᴍ(ref replace r) { return slog.AnyValue(r.v); }
+internal static slog.Value LogValue⁔(/*this*/ ref replace r) { return slog.AnyValue(r.v); }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref replace r) {
+internal static @string String⁔(/*this*/ ref replace r) {
     return fmt.Sprintf("<replace(%v)>"u8, r.v);
 }
 

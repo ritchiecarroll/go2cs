@@ -16,7 +16,7 @@ partial class types_package {
 
 // directCycles searches for direct cycles among package level type declarations.
 // See directCycle for details.
-[GoMethodBody("directCycles")] internal static void directCyclesᴍ(ж<Checker> Ꮡcheck) {
+internal static void directCycles⁔(/*this*/ ж<Checker> Ꮡcheck) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     var pathIdx = new map<ж<TypeName>, nint>();
@@ -28,8 +28,8 @@ partial class types_package {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string checkDirectCycleForSˢᴍChecker => ref checkDirectCycleForSˢᵇᴍChecker;
-private static readonly @string checkDirectCycleForSˢᵇᴍChecker = "-- check direct cycle for %s"u8;
+internal static ref readonly @string checkDirectCycleForSˢ⁔Checker => ref checkDirectCycleForSˢᵇ⁔Checker;
+private static readonly @string checkDirectCycleForSˢᵇ⁔Checker = "-- check direct cycle for %s"u8;
 
 // directCycle checks if the declaration of the type given by tname contains a direct cycle.
 // A direct cycle exists if the path from tname's declaration's RHS leads from type name to
@@ -50,14 +50,14 @@ private static readonly @string checkDirectCycleForSˢᵇᴍChecker = "-- check 
 // When directCycle returns, the pathIdx entries for all type names on the path
 // that starts at tname are marked black, regardless of whether there was a cycle.
 // This ensures that a type name is traversed only once.
-[GoMethodBody("directCycle")] internal static void directCycleᴍ(ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtname, map<ж<TypeName>, nint> pathIdx) {
+internal static void directCycle⁔(/*this*/ ж<Checker> Ꮡcheck, ж<TypeName> Ꮡtname, map<ж<TypeName>, nint> pathIdx) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var tname = ref Ꮡtname.DerefOrNull();
     var cycleᴷ = new stackAppend<Object>();
     var pathᴷ = new stackAppend<ж<TypeName>>();
 
     if (debug && check.conf._Trace) {
-        Ꮡcheck.trace(Ꮡtname.of(TypeName.Ꮡobject).Pos(), checkDirectCycleForSˢᴍChecker, Ꮡtname.OrTypedNil());
+        Ꮡcheck.trace(Ꮡtname.of(TypeName.Ꮡobject).Pos(), checkDirectCycleForSˢ⁔Checker, Ꮡtname.OrTypedNil());
     }
 
     slice<ж<TypeName>> path = default;
@@ -125,7 +125,7 @@ private static readonly @string checkDirectCycleForSˢᵇᴍChecker = "-- check 
 // TODO(markfreeman): Can the value cached on Named be used in validType / hasVarSize?
 
 // finiteSize returns whether a type has finite size.
-[GoMethodBody("finiteSize")] internal static bool finiteSizeᴍ(ж<Checker> Ꮡcheck, Type t) {
+internal static bool finiteSize⁔(/*this*/ ж<Checker> Ꮡcheck, Type t) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();

@@ -19,7 +19,7 @@ partial class os_package {
 
 // Stat returns the [FileInfo] structure describing file.
 // If there is an error, it will be of type [*PathError].
-[GoMethodBody("Stat")] internal static (FileInfo, error) Statᴍ(ж<File> Ꮡfile) {
+internal static (FileInfo, error) Stat⁔(/*this*/ ж<File> Ꮡfile) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     if (Ꮡfile == nil) {

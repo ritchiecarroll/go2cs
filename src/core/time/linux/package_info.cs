@@ -81,11 +81,14 @@ using static go.time_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using @internal;
 using static time_package;
 using math;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("time")]
 public static partial class time_package
@@ -146,159 +149,159 @@ public static partial class time_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(time_package.Duration)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛDuration;
-[GoMethodHost(typeof(time_package.Location)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛLocation;
-[GoMethodHost(typeof(time_package.Month)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛMonth;
-[GoMethodHost(typeof(time_package.ParseError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛParseError;
-[GoMethodHost(typeof(time_package.Ticker)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛTicker;
-[GoMethodHost(typeof(time_package.Time)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛTime;
-[GoMethodHost(typeof(time_package.Timer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛTimer;
-[GoMethodHost(typeof(time_package.Weekday)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛWeekday;
-[GoMethodHost(typeof(time_package.absCentury)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛabsCentury;
-[GoMethodHost(typeof(time_package.absDays)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛabsDays;
-[GoMethodHost(typeof(time_package.absMonth)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛabsMonth;
-[GoMethodHost(typeof(time_package.absSeconds)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛabsSeconds;
-[GoMethodHost(typeof(time_package.absYday)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛabsYday;
-[GoMethodHost(typeof(time_package.dataIO)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛdataIO;
-[GoMethodHost(typeof(time_package.fileSizeError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛfileSizeError;
-[GoMethodHost(typeof(time_package.parseDurationError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class timeᴛparseDurationError;
+[GoMethodHost(typeof(time_package.Duration)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛDuration;
+[GoMethodHost(typeof(time_package.Location)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛLocation;
+[GoMethodHost(typeof(time_package.Month)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛMonth;
+[GoMethodHost(typeof(time_package.ParseError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛParseError;
+[GoMethodHost(typeof(time_package.Ticker)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛTicker;
+[GoMethodHost(typeof(time_package.Time)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛTime;
+[GoMethodHost(typeof(time_package.Timer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛTimer;
+[GoMethodHost(typeof(time_package.Weekday)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛWeekday;
+[GoMethodHost(typeof(time_package.absCentury)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛabsCentury;
+[GoMethodHost(typeof(time_package.absDays)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛabsDays;
+[GoMethodHost(typeof(time_package.absMonth)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛabsMonth;
+[GoMethodHost(typeof(time_package.absSeconds)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛabsSeconds;
+[GoMethodHost(typeof(time_package.absYday)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛabsYday;
+[GoMethodHost(typeof(time_package.dataIO)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛdataIO;
+[GoMethodHost(typeof(time_package.fileSizeError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛfileSizeError;
+[GoMethodHost(typeof(time_package.parseDurationError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class timeᴛparseDurationError;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class timeᴛTime {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Time t) => time_package.Stringᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string GoString(this Time t) => time_package.GoStringᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Format(this Time t, @string layout) => time_package.Formatᴍ(t, layout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> AppendFormat(this Time t, slice<byte> b, @string layout) => time_package.AppendFormatᴍ(t, b, layout);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string layout) => time_package.appendFormatᴍ(t, b, layout);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Time t) => time_package.String⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string GoString(this Time t) => time_package.GoString⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Format(this Time t, @string layout) => time_package.Format⁔(t, layout);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> AppendFormat(this Time t, slice<byte> b, @string layout) => time_package.AppendFormat⁔(t, b, layout);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string layout) => time_package.appendFormat⁔(t, b, layout);
 }
 partial class timeᴛParseError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref ParseError e) => time_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref ParseError e) => time_package.Error⁔(ref e);
 }
 partial class timeᴛparseDurationError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref parseDurationError e) => time_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref parseDurationError e) => time_package.Error⁔(ref e);
 }
 partial class timeᴛTime {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> appendFormatRFC3339(this Time t, slice<byte> b, bool nanos) => time_package.appendFormatRFC3339ᴍ(t, b, nanos);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) appendStrictRFC3339(this Time t, slice<byte> b) => time_package.appendStrictRFC3339ᴍ(t, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> appendFormatRFC3339(this Time t, slice<byte> b, bool nanos) => time_package.appendFormatRFC3339⁔(t, b, nanos);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) appendStrictRFC3339(this Time t, slice<byte> b) => time_package.appendStrictRFC3339⁔(t, b);
 }
 partial class timeᴛTimer {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Stop(this ж<Timer> Ꮡt) => time_package.Stopᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Reset(this ж<Timer> Ꮡt, Duration d) => time_package.Resetᴍ(Ꮡt, d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Stop(this ж<Timer> Ꮡt) => time_package.Stop⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Reset(this ж<Timer> Ꮡt, Duration d) => time_package.Reset⁔(Ꮡt, d);
 }
 partial class timeᴛTime {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int32 nsec(this ref Time t) => time_package.nsecᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 sec(this ref Time t) => time_package.secᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 unixSec(this ref Time t) => time_package.unixSecᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addSec(this ref Time t, int64 d) => time_package.addSecᴍ(ref t, d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setLoc(this ref Time t, ж<Location> Ꮡloc) => time_package.setLocᴍ(ref t, Ꮡloc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void stripMono(this ref Time t) => time_package.stripMonoᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setMono(this ref Time t, int64 m) => time_package.setMonoᴍ(ref t, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 mono(this ref Time t) => time_package.monoᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsZero(this Time t) => time_package.IsZeroᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool After(this Time t, Time u) => time_package.Afterᴍ(t, u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Before(this Time t, Time u) => time_package.Beforeᴍ(t, u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Compare(this Time t, Time u) => time_package.Compareᴍ(t, u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this Time t, Time u) => time_package.Equalᴍ(t, u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static absSeconds absSec(this Time t) => time_package.absSecᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string name, nint offset, absSeconds abs) locabs(this Time t) => time_package.locabsᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint year, Month month, nint day) Date(this Time t) => time_package.Dateᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Year(this Time t) => time_package.Yearᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Month Month(this Time t) => time_package.Monthᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Day(this Time t) => time_package.Dayᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Weekday Weekday(this Time t) => time_package.Weekdayᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint year, nint week) ISOWeek(this Time t) => time_package.ISOWeekᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint hour, nint min, nint sec) Clock(this Time t) => time_package.Clockᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Hour(this Time t) => time_package.Hourᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Minute(this Time t) => time_package.Minuteᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Second(this Time t) => time_package.Secondᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Nanosecond(this Time t) => time_package.Nanosecondᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint YearDay(this Time t) => time_package.YearDayᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time Add(this Time t, Duration d) => time_package.Addᴍ(t, d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Duration Sub(this Time t, Time u) => time_package.Subᴍ(t, u);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time AddDate(this Time t, nint years, nint months, nint days) => time_package.AddDateᴍ(t, years, months, days);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time UTC(this Time t) => time_package.UTCᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time Local(this Time t) => time_package.Localᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time In(this Time t, ж<Location> loc) => time_package.Inᴍ(t, loc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Location> Location(this Time t) => time_package.Locationᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string name, nint offset) Zone(this Time t) => time_package.Zoneᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (Time start, Time end) ZoneBounds(this Time t) => time_package.ZoneBoundsᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Unix(this Time t) => time_package.Unixᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 UnixMilli(this Time t) => time_package.UnixMilliᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 UnixMicro(this Time t) => time_package.UnixMicroᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 UnixNano(this Time t) => time_package.UnixNanoᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this Time t, slice<byte> b) => time_package.AppendBinaryᴍ(t, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this Time t) => time_package.MarshalBinaryᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalBinary(this ref Time t, slice<byte> data) => time_package.UnmarshalBinaryᴍ(ref t, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) GobEncode(this Time t) => time_package.GobEncodeᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error GobDecode(this ref Time t, slice<byte> data) => time_package.GobDecodeᴍ(ref t, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalJSON(this Time t) => time_package.MarshalJSONᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalJSON(this ref Time t, slice<byte> data) => time_package.UnmarshalJSONᴍ(ref t, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte>, error) appendTo(this Time t, slice<byte> b, @string errPrefix) => time_package.appendToᴍ(t, b, errPrefix);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendText(this Time t, slice<byte> b) => time_package.AppendTextᴍ(t, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalText(this Time t) => time_package.MarshalTextᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalText(this ref Time t, slice<byte> data) => time_package.UnmarshalTextᴍ(ref t, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool IsDST(this Time t) => time_package.IsDSTᴍ(t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time Truncate(this Time t, Duration d) => time_package.Truncateᴍ(t, d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Time Round(this Time t, Duration d) => time_package.Roundᴍ(t, d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int32 nsec(this ref Time t) => time_package.nsec⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 sec(this ref Time t) => time_package.sec⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 unixSec(this ref Time t) => time_package.unixSec⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void addSec(this ref Time t, int64 d) => time_package.addSec⁔(ref t, d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setLoc(this ref Time t, ж<Location> Ꮡloc) => time_package.setLoc⁔(ref t, Ꮡloc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void stripMono(this ref Time t) => time_package.stripMono⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setMono(this ref Time t, int64 m) => time_package.setMono⁔(ref t, m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 mono(this ref Time t) => time_package.mono⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsZero(this Time t) => time_package.IsZero⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool After(this Time t, Time u) => time_package.After⁔(t, u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Before(this Time t, Time u) => time_package.Before⁔(t, u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Compare(this Time t, Time u) => time_package.Compare⁔(t, u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this Time t, Time u) => time_package.Equal⁔(t, u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static absSeconds absSec(this Time t) => time_package.absSec⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string name, nint offset, absSeconds abs) locabs(this Time t) => time_package.locabs⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint year, Month month, nint day) Date(this Time t) => time_package.Date⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Year(this Time t) => time_package.Year⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Month Month(this Time t) => time_package.Month⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Day(this Time t) => time_package.Day⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Weekday Weekday(this Time t) => time_package.Weekday⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint year, nint week) ISOWeek(this Time t) => time_package.ISOWeek⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint hour, nint min, nint sec) Clock(this Time t) => time_package.Clock⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Hour(this Time t) => time_package.Hour⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Minute(this Time t) => time_package.Minute⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Second(this Time t) => time_package.Second⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Nanosecond(this Time t) => time_package.Nanosecond⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint YearDay(this Time t) => time_package.YearDay⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Time Add(this Time t, Duration d) => time_package.Add⁔(t, d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Duration Sub(this Time t, Time u) => time_package.Sub⁔(t, u);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Time AddDate(this Time t, nint years, nint months, nint days) => time_package.AddDate⁔(t, years, months, days);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Time UTC(this Time t) => time_package.UTC⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Time Local(this Time t) => time_package.Local⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Time In(this Time t, ж<Location> loc) => time_package.In⁔(t, loc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Location> Location(this Time t) => time_package.Location⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string name, nint offset) Zone(this Time t) => time_package.Zone⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (Time start, Time end) ZoneBounds(this Time t) => time_package.ZoneBounds⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Unix(this Time t) => time_package.Unix⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 UnixMilli(this Time t) => time_package.UnixMilli⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 UnixMicro(this Time t) => time_package.UnixMicro⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 UnixNano(this Time t) => time_package.UnixNano⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this Time t, slice<byte> b) => time_package.AppendBinary⁔(t, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this Time t) => time_package.MarshalBinary⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnmarshalBinary(this ref Time t, slice<byte> data) => time_package.UnmarshalBinary⁔(ref t, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) GobEncode(this Time t) => time_package.GobEncode⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error GobDecode(this ref Time t, slice<byte> data) => time_package.GobDecode⁔(ref t, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) MarshalJSON(this Time t) => time_package.MarshalJSON⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnmarshalJSON(this ref Time t, slice<byte> data) => time_package.UnmarshalJSON⁔(ref t, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte>, error) appendTo(this Time t, slice<byte> b, @string errPrefix) => time_package.appendTo⁔(t, b, errPrefix);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) AppendText(this Time t, slice<byte> b) => time_package.AppendText⁔(t, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) MarshalText(this Time t) => time_package.MarshalText⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error UnmarshalText(this ref Time t, slice<byte> data) => time_package.UnmarshalText⁔(ref t, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool IsDST(this Time t) => time_package.IsDST⁔(t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Time Truncate(this Time t, Duration d) => time_package.Truncate⁔(t, d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Time Round(this Time t, Duration d) => time_package.Round⁔(t, d);
 }
 partial class timeᴛMonth {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Month m) => time_package.Stringᴍ(m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Month m) => time_package.String⁔(m);
 }
 partial class timeᴛWeekday {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Weekday d) => time_package.Stringᴍ(d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Weekday d) => time_package.String⁔(d);
 }
 partial class timeᴛabsSeconds {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static absDays days(this absSeconds abs) => time_package.daysᴍ(abs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint hour, nint min, nint sec) clock(this absSeconds abs) => time_package.clockᴍ(abs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static absDays days(this absSeconds abs) => time_package.days⁔(abs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint hour, nint min, nint sec) clock(this absSeconds abs) => time_package.clock⁔(abs);
 }
 partial class timeᴛabsDays {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (absCentury century, absCyear cyear, absYday ayday) split(this absDays days) => time_package.splitᴍ(days);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint year, Month month, nint day) date(this absDays days) => time_package.dateᴍ(days);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint year, nint yday) yearYday(this absDays days) => time_package.yearYdayᴍ(days);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Weekday weekday(this absDays days) => time_package.weekdayᴍ(days);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (absCentury century, absCyear cyear, absYday ayday) split(this absDays days) => time_package.split⁔(days);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint year, Month month, nint day) date(this absDays days) => time_package.date⁔(days);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint year, nint yday) yearYday(this absDays days) => time_package.yearYday⁔(days);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Weekday weekday(this absDays days) => time_package.weekday⁔(days);
 }
 partial class timeᴛabsYday {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (absMonth m, nint mday) split(this absYday ayday) => time_package.splitᴍ(ayday);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static absJanFeb janFeb(this absYday ayday) => time_package.janFebᴍ(ayday);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint yday(this absYday ayday, absJanFeb janFeb, absLeap leap) => time_package.ydayᴍ(ayday, janFeb, leap);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (absMonth m, nint mday) split(this absYday ayday) => time_package.split⁔(ayday);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static absJanFeb janFeb(this absYday ayday) => time_package.janFeb⁔(ayday);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint yday(this absYday ayday, absJanFeb janFeb, absLeap leap) => time_package.yday⁔(ayday, janFeb, leap);
 }
 partial class timeᴛabsMonth {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static Month month(this absMonth m, absJanFeb janFeb) => time_package.monthᴍ(m, janFeb);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static Month month(this absMonth m, absJanFeb janFeb) => time_package.month⁔(m, janFeb);
 }
 partial class timeᴛabsCentury {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static absLeap leap(this absCentury century, absCyear cyear) => time_package.leapᴍ(century, cyear);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint year(this absCentury century, absCyear cyear, absJanFeb janFeb) => time_package.yearᴍ(century, cyear, janFeb);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static absLeap leap(this absCentury century, absCyear cyear) => time_package.leap⁔(century, cyear);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint year(this absCentury century, absCyear cyear, absJanFeb janFeb) => time_package.year⁔(century, cyear, janFeb);
 }
 partial class timeᴛDuration {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Duration d) => time_package.Stringᴍ(d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) => time_package.formatᴍ(d, Ꮡbuf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Nanoseconds(this Duration d) => time_package.Nanosecondsᴍ(d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Microseconds(this Duration d) => time_package.Microsecondsᴍ(d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Milliseconds(this Duration d) => time_package.Millisecondsᴍ(d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 Seconds(this Duration d) => time_package.Secondsᴍ(d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 Minutes(this Duration d) => time_package.Minutesᴍ(d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static float64 Hours(this Duration d) => time_package.Hoursᴍ(d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Duration Truncate(this Duration d, Duration m) => time_package.Truncateᴍ(d, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Duration Round(this Duration d, Duration m) => time_package.Roundᴍ(d, m);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Duration Abs(this Duration d) => time_package.Absᴍ(d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Duration d) => time_package.String⁔(d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint format(this Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) => time_package.format⁔(d, Ꮡbuf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Nanoseconds(this Duration d) => time_package.Nanoseconds⁔(d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Microseconds(this Duration d) => time_package.Microseconds⁔(d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Milliseconds(this Duration d) => time_package.Milliseconds⁔(d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static float64 Seconds(this Duration d) => time_package.Seconds⁔(d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static float64 Minutes(this Duration d) => time_package.Minutes⁔(d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static float64 Hours(this Duration d) => time_package.Hours⁔(d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Duration Truncate(this Duration d, Duration m) => time_package.Truncate⁔(d, m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Duration Round(this Duration d, Duration m) => time_package.Round⁔(d, m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Duration Abs(this Duration d) => time_package.Abs⁔(d);
 }
 partial class timeᴛLocation {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<Location> get(this ж<Location> Ꮡl) => time_package.getᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ж<Location> Ꮡl) => time_package.Stringᴍ(Ꮡl);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string name, nint offset, int64 start, int64 end, bool isDST) lookup(this ж<Location> Ꮡl, int64 sec) => time_package.lookupᴍ(Ꮡl, sec);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint lookupFirstZone(this ref Location l) => time_package.lookupFirstZoneᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool firstZoneUsed(this ref Location l) => time_package.firstZoneUsedᴍ(ref l);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint offset, bool ok) lookupName(this ж<Location> Ꮡl, @string name, int64 unix) => time_package.lookupNameᴍ(Ꮡl, name, unix);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<Location> get(this ж<Location> Ꮡl) => time_package.get⁔(Ꮡl);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this ж<Location> Ꮡl) => time_package.String⁔(Ꮡl);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string name, nint offset, int64 start, int64 end, bool isDST) lookup(this ж<Location> Ꮡl, int64 sec) => time_package.lookup⁔(Ꮡl, sec);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint lookupFirstZone(this ref Location l) => time_package.lookupFirstZone⁔(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool firstZoneUsed(this ref Location l) => time_package.firstZoneUsed⁔(ref l);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint offset, bool ok) lookupName(this ж<Location> Ꮡl, @string name, int64 unix) => time_package.lookupName⁔(Ꮡl, name, unix);
 }
 partial class timeᴛfileSizeError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this fileSizeError f) => time_package.Errorᴍ(f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this fileSizeError f) => time_package.Error⁔(f);
 }
 partial class timeᴛdataIO {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> read(this ref dataIO d, nint n) => time_package.readᴍ(ref d, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint32 n, bool ok) big4(this ref dataIO d) => time_package.big4ᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (uint64 n, bool ok) big8(this ref dataIO d) => time_package.big8ᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (byte n, bool ok) @byte(this ref dataIO d) => time_package.@byteᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> rest(this ref dataIO d) => time_package.restᴍ(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> read(this ref dataIO d, nint n) => time_package.read⁔(ref d, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint32 n, bool ok) big4(this ref dataIO d) => time_package.big4⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (uint64 n, bool ok) big8(this ref dataIO d) => time_package.big8⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (byte n, bool ok) @byte(this ref dataIO d) => time_package.@byte⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> rest(this ref dataIO d) => time_package.rest⁔(ref d);
 }
 // </GlyphForwarders>

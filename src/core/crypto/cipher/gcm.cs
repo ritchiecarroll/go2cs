@@ -123,15 +123,15 @@ partial struct gcmWithRandomNonce {
 
 } partial class cipher_package {
 
-[GoMethodBody("NonceSize")] internal static nint NonceSizeᴍ(gcmWithRandomNonce g) {
+internal static nint NonceSize⁔(/*this*/ gcmWithRandomNonce g) {
     return 0;
 }
 
-[GoMethodBody("Overhead")] internal static nint Overheadᴍ(gcmWithRandomNonce g) {
+internal static nint Overhead⁔(/*this*/ gcmWithRandomNonce g) {
     return gcmStandardNonceSize + gcmTagSize;
 }
 
-[GoMethodBody("Seal")] internal static slice<byte> Sealᴍ(gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> Seal⁔(/*this*/ gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     if (len(nonce) != 0) {
         throw panic("crypto/cipher: non-empty nonce passed to GCMWithRandomNonce");
     }
@@ -178,7 +178,7 @@ partial struct gcmWithRandomNonce {
     return ret;
 }
 
-[GoMethodBody("Open")] internal static (slice<byte>, error) Openᴍ(gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Open⁔(/*this*/ gcmWithRandomNonce g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     if (len(nonce) != 0) {
         throw panic("crypto/cipher: non-empty nonce passed to GCMWithRandomNonce");
     }
@@ -258,15 +258,15 @@ partial struct gcmFallback {
 
 } partial class cipher_package {
 
-[GoMethodBody("NonceSize")] internal static nint NonceSizeᴍ(ref gcmFallback g) {
+internal static nint NonceSize⁔(/*this*/ ref gcmFallback g) {
     return g.nonceSize;
 }
 
-[GoMethodBody("Overhead")] internal static nint Overheadᴍ(ref gcmFallback g) {
+internal static nint Overhead⁔(/*this*/ ref gcmFallback g) {
     return g.tagSize;
 }
 
-[GoMethodBody("Seal")] internal static slice<byte> Sealᴍ(ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
+internal static slice<byte> Seal⁔(/*this*/ ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> additionalData) {
     if (len(nonce) != g.nonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }
@@ -307,7 +307,7 @@ internal static error errOpen = errors.New("cipher: message authentication faile
 
 } partial class cipher_package {
 
-[GoMethodBody("Open")] internal static (slice<byte>, error) Openᴍ(ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
+internal static (slice<byte>, error) Open⁔(/*this*/ ref gcmFallback g, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> additionalData) {
     if (len(nonce) != g.nonceSize) {
         throw panic("crypto/cipher: incorrect nonce length given to GCM");
     }

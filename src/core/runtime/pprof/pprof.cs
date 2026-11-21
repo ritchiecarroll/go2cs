@@ -353,12 +353,12 @@ public static slice<ж<Profile>> Profiles() {
 } partial class pprof_package {
 
 // Name returns this profile's name, which can be passed to [Lookup] to reobtain the profile.
-[GoMethodBody("Name")] internal static @string Nameᴍ(ref Profile p) {
+internal static @string Name⁔(/*this*/ ref Profile p) {
     return p.name;
 }
 
 // Count returns the number of execution stacks currently in the profile.
-[GoMethodBody("Count")] internal static nint Countᴍ(ж<Profile> Ꮡp) {
+internal static nint Count⁔(/*this*/ ж<Profile> Ꮡp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -392,7 +392,7 @@ public static slice<ж<Profile>> Profiles() {
 //
 // Passing skip=0 begins the stack trace at the call to Add inside rpc.NewClient.
 // Passing skip=1 begins the stack trace at the call to NewClient inside mypkg.Run.
-[GoMethodBody("Add")] internal static partial void Addᴍ(ж<Profile> Ꮡp, any value, nint skip) {
+internal static partial void Add⁔(/*this*/ ж<Profile> Ꮡp, any value, nint skip) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -426,7 +426,7 @@ public static slice<ж<Profile>> Profiles() {
 
 // Remove removes the execution stack associated with value from the profile.
 // It is a no-op if the value is not in the profile.
-[GoMethodBody("Remove")] internal static void Removeᴍ(ж<Profile> Ꮡp, any value) {
+internal static void Remove⁔(/*this*/ ж<Profile> Ꮡp, any value) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -455,7 +455,7 @@ public static slice<ж<Profile>> Profiles() {
 // for example, when printing the "goroutine" profile, debug=2 means to
 // print the goroutine stacks in the same form that a Go program uses
 // when dying due to an unrecovered panic.
-[GoMethodBody("WriteTo")] internal static error WriteToᴍ(ж<Profile> Ꮡp, io.Writer w, nint debug) {
+internal static error WriteTo⁔(/*this*/ ж<Profile> Ꮡp, io.Writer w, nint debug) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (p.name == ""u8) {
@@ -485,9 +485,9 @@ partial struct stackProfile /*[]slice<uintptr>*/;
 
 } partial class pprof_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(stackProfile x) { return len(x); }
-[GoMethodBody("Stack")] internal static slice<uintptr> Stackᴍ(stackProfile x, nint i) { return x[i]; }
-[GoMethodBody("Label")] internal static ж<labelMap> Labelᴍ(stackProfile x, nint i) { return default; }
+internal static nint Len⁔(/*this*/ stackProfile x) { return len(x); }
+internal static slice<uintptr> Stack⁔(/*this*/ stackProfile x, nint i) { return x[i]; }
+internal static ж<labelMap> Label⁔(/*this*/ stackProfile x, nint i) { return default; }
 
 } partial class pprof_package {
 
@@ -638,9 +638,9 @@ partial struct keysByCount {
 
 } partial class pprof_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(ref keysByCount x) { return len(x.keys); }
-[GoMethodBody("Swap")] internal static void Swapᴍ(ref keysByCount x, nint i, nint j) { (x.keys[i], x.keys[j]) = (x.keys[j], x.keys[i]); }
-[GoMethodBody("Less")] internal static bool Lessᴍ(ref keysByCount x, nint i, nint j) {
+internal static nint Len⁔(/*this*/ ref keysByCount x) { return len(x.keys); }
+internal static void Swap⁔(/*this*/ ref keysByCount x, nint i, nint j) { (x.keys[i], x.keys[j]) = (x.keys[j], x.keys[i]); }
+internal static bool Less⁔(/*this*/ ref keysByCount x, nint i, nint j) {
     @string ki = x.keys[i];
     @string kj = x.keys[j];
     nint ci = x.count[ki];
@@ -967,9 +967,9 @@ partial struct runtimeProfile {
 
 } partial class pprof_package {
 
-[GoMethodBody("Len")] internal static nint Lenᴍ(ref runtimeProfile p) { return len(p.stk); }
-[GoMethodBody("Stack")] internal static slice<uintptr> Stackᴍ(ref runtimeProfile p, nint i) { return p.stk[i].Stack; }
-[GoMethodBody("Label")] internal static ж<labelMap> Labelᴍ(ref runtimeProfile p, nint i) { return @unsafe.Pointer.To<labelMap>(p.labels[i]); }
+internal static nint Len⁔(/*this*/ ref runtimeProfile p) { return len(p.stk); }
+internal static slice<uintptr> Stack⁔(/*this*/ ref runtimeProfile p, nint i) { return p.stk[i].Stack; }
+internal static ж<labelMap> Label⁔(/*this*/ ref runtimeProfile p, nint i) { return @unsafe.Pointer.To<labelMap>(p.labels[i]); }
 
 } partial class pprof_package {
 

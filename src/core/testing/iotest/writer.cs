@@ -21,7 +21,7 @@ partial struct truncateWriter {
 
 } partial class iotest_package {
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref truncateWriter t, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref truncateWriter t, slice<byte> p) {
     nint n = default;
     error err = default;
 

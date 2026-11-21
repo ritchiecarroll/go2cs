@@ -111,7 +111,7 @@ partial struct Writer {
 // addLine adds a new line.
 // flushed is a hint indicating whether the underlying writer was just flushed.
 // If so, the previous line is not likely to be a good indicator of the new line's cells.
-[GoMethodBody("addLine")] internal static void addLineᴍ(ref Writer b, bool flushed) {
+internal static void addLine⁔(/*this*/ ref Writer b, bool flushed) {
     // Grow slice instead of appending,
     // as that gives us an opportunity
     // to re-use an existing []cell.
@@ -138,7 +138,7 @@ partial struct Writer {
 }
 
 // Reset the current state.
-[GoMethodBody("reset")] internal static void resetᴍ(ref Writer b) {
+internal static void reset⁔(/*this*/ ref Writer b) {
     b.buf = b.buf[..0];
     b.pos = 0;
     b.cell = new cell();
@@ -213,7 +213,7 @@ public const nuint Debug = 32;
 //			(for correct-looking results, tabwidth must correspond
 //			to the tab width in the viewer displaying the result)
 //	flags		formatting control
-[GoMethodBody("Init")] internal static ж<Writer> Initᴍ(ж<Writer> Ꮡb, io.Writer output, nint minwidth, nint tabwidth, nint padding, byte padchar, nuint flags) {
+internal static ж<Writer> Init⁔(/*this*/ ж<Writer> Ꮡb, io.Writer output, nint minwidth, nint tabwidth, nint padding, byte padchar, nuint flags) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     if (minwidth < 0 || tabwidth < 0 || padding < 0) {
@@ -238,7 +238,7 @@ public const nuint Debug = 32;
 }
 
 // debugging support (keep code around)
-[GoMethodBody("dump")] internal static void dumpᴍ(ref Writer b) {
+internal static void dump⁔(/*this*/ ref Writer b) {
     nint pos = 0;
     foreach (var (i, line) in range(b.lines)) {
         print((@string)"(", i, (@string)") ");
@@ -261,7 +261,7 @@ partial struct osError {
 
 } partial class tabwriter_package {
 
-[GoMethodBody("write0")] internal static void write0ᴍ(ref Writer b, slice<byte> buf) {
+internal static void write0⁔(/*this*/ ref Writer b, slice<byte> buf) {
     var (n, err) = b.output.Write(buf);
     if (n != len(buf) && err == nil) {
         err = io.ErrShortWrite;
@@ -271,7 +271,7 @@ partial struct osError {
     }
 }
 
-[GoMethodBody("writeN")] internal static void writeNᴍ(ref Writer b, slice<byte> src, nint n) {
+internal static void writeN⁔(/*this*/ ref Writer b, slice<byte> src, nint n) {
     while (n > len(src)) {
         b.write0(src);
         n -= len(src);
@@ -286,7 +286,7 @@ internal static slice<byte> tabs = slice<byte>("\t\t\t\t\t\t\t\t"u8);
 
 } partial class tabwriter_package {
 
-[GoMethodBody("writePadding")] internal static void writePaddingᴍ(ref Writer b, nint textw, nint cellw, bool useTabs) {
+internal static void writePadding⁔(/*this*/ ref Writer b, nint textw, nint cellw, bool useTabs) {
     if (b.padbytes[0] == '\t' || useTabs) {
         // padding is done with tabs
         if (b.tabwidth == 0) {
@@ -312,7 +312,7 @@ internal static slice<byte> vbar = [(byte)'|'];
 
 } partial class tabwriter_package {
 
-[GoMethodBody("writeLines")] internal static nint /*pos*/ writeLinesᴍ(ref Writer b, nint pos0, nint line0, nint line1) {
+internal static nint /*pos*/ writeLines⁔(/*this*/ ref Writer b, nint pos0, nint line0, nint line1) {
     nint pos = default;
 
     pos = pos0;
@@ -369,7 +369,7 @@ internal static slice<byte> vbar = [(byte)'|'];
 // is the buffer position corresponding to the beginning of line0.
 // Returns the buffer position corresponding to the beginning of
 // line1 and an error, if any.
-[GoMethodBody("format")] internal static nint /*pos*/ formatᴍ(ref Writer b, nint pos0, nint line0, nint line1) {
+internal static nint /*pos*/ format⁔(/*this*/ ref Writer b, nint pos0, nint line0, nint line1) {
     nint pos = default;
 
     pos = pos0;
@@ -430,13 +430,13 @@ internal static slice<byte> vbar = [(byte)'|'];
 }
 
 // Append text to current cell.
-[GoMethodBody("append")] internal static void appendᴍ(ref Writer b, slice<byte> text) {
+internal static void append⁔(/*this*/ ref Writer b, slice<byte> text) {
     b.buf = builtin.appendꓸꓸꓸ(b.buf, text);
     b.cell.size += len(text);
 }
 
 // Update the cell width.
-[GoMethodBody("updateWidth")] internal static void updateWidthᴍ(ref Writer b) {
+internal static void updateWidth⁔(/*this*/ ref Writer b) {
     b.cell.width += utf8.RuneCount(b.buf.slice(b.pos));
     b.pos = len(b.buf);
 }
@@ -454,7 +454,7 @@ public static UntypedInt Escape => /* '\xff' */ 255;
 } partial class tabwriter_package {
 
 // Start escaped mode.
-[GoMethodBody("startEscape")] internal static void startEscapeᴍ(ref Writer b, byte ch) {
+internal static void startEscape⁔(/*this*/ ref Writer b, byte ch) {
     switch (ch) {
     case var ᴛ when ᴛ == Escape: {
         b.endChar = Escape;
@@ -474,7 +474,7 @@ public static UntypedInt Escape => /* '\xff' */ 255;
 // is assumed to be zero for formatting purposes; if it was an HTML entity,
 // its width is assumed to be one. In all other cases, the width is the
 // unicode width of the text.
-[GoMethodBody("endEscape")] internal static void endEscapeᴍ(ref Writer b) {
+internal static void endEscape⁔(/*this*/ ref Writer b) {
     switch (b.endChar) {
     case var ᴛ when ᴛ == Escape: {
         b.updateWidth();
@@ -496,7 +496,7 @@ public static UntypedInt Escape => /* '\xff' */ 255;
 
 // Terminate the current cell by adding it to the list of cells of the
 // current line. Returns the number of cells in that line.
-[GoMethodBody("terminateCell")] internal static nint terminateCellᴍ(ref Writer b, bool htab) {
+internal static nint terminateCell⁔(/*this*/ ref Writer b, bool htab) {
     b.cell.htab = htab;
     var line = Ꮡ(b.lines, len(b.lines) - 1);
     line.ValueSlot = builtin.append(line.ValueSlot, b.cell);
@@ -504,7 +504,7 @@ public static UntypedInt Escape => /* '\xff' */ 255;
     return len(line.ValueSlot);
 }
 
-[GoMethodBody("handlePanic")] internal static void handlePanicᴍ(ж<Writer> Ꮡb, ж<error> Ꮡerr, @string op) {
+internal static void handlePanic⁔(/*this*/ ж<Writer> Ꮡb, ж<error> Ꮡerr, @string op) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
@@ -531,24 +531,24 @@ public static UntypedInt Escape => /* '\xff' */ 255;
 // that any data buffered in the [Writer] is written to output. Any
 // incomplete escape sequence at the end is considered
 // complete for formatting purposes.
-[GoMethodBody("Flush")] internal static error Flushᴍ(ж<Writer> Ꮡb) {
+internal static error Flush⁔(/*this*/ ж<Writer> Ꮡb) {
     return Ꮡb.flush();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string flushˢᴍWriter => ref flushˢᵇᴍWriter;
-private static readonly @string flushˢᵇᴍWriter = "Flush"u8;
+private static ref readonly @string flushˢ⁔Writer => ref flushˢᵇ⁔Writer;
+private static readonly @string flushˢᵇ⁔Writer = "Flush"u8;
 
 // flush is the internal version of Flush, with a named return value which we
 // don't want to expose.
-[GoMethodBody("flush")] internal static error /*err*/ flushᴍ(ж<Writer> Ꮡb) {
+internal static error /*err*/ flush⁔(/*this*/ ж<Writer> Ꮡb) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
         ref var b = ref Ꮡb.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(Ꮡb.handlePanic, Ꮡerr, flushˢᴍWriter, ref ᒐ, recovers: true);
+        defer(Ꮡb.handlePanic, Ꮡerr, flushˢ⁔Writer, ref ᒐ, recovers: true);
         b.flushNoDefers();
         err = default;
     }
@@ -560,7 +560,7 @@ private static readonly @string flushˢᵇᴍWriter = "Flush"u8;
 // flushNoDefers is like flush, but without a deferred handlePanic call. This
 // can be called from other methods which already have their own deferred
 // handlePanic calls, such as Write, and avoid the extra defer work.
-[GoMethodBody("flushNoDefers")] internal static void flushNoDefersᴍ(ref Writer b) {
+internal static void flushNoDefers⁔(/*this*/ ref Writer b) {
     // add current cell if not empty
     if (b.cell.size > 0) {
         if (b.endChar != 0) {
@@ -582,13 +582,13 @@ internal static slice<byte> hbar = slice<byte>("---\n"u8);
 } partial class tabwriter_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string writeˢᴍWriter => ref writeˢᵇᴍWriter;
-private static readonly @string writeˢᵇᴍWriter = "Write"u8;
+private static ref readonly @string writeˢ⁔Writer => ref writeˢᵇ⁔Writer;
+private static readonly @string writeˢᵇ⁔Writer = "Write"u8;
 
 // Write writes buf to the writer b.
 // The only errors returned are ones encountered
 // while writing to the underlying output stream.
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<Writer> Ꮡb, slice<byte> buf) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<Writer> Ꮡb, slice<byte> buf) {
     nint n = default;
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
@@ -596,7 +596,7 @@ private static readonly @string writeˢᵇᴍWriter = "Write"u8;
         ref var b = ref Ꮡb.DerefOrNull();
         ref var err = ref Ꮡerr.ValueSlot;
 
-        defer(Ꮡb.handlePanic, Ꮡerr, writeˢᴍWriter, ref ᒐ, recovers: true);
+        defer(Ꮡb.handlePanic, Ꮡerr, writeˢ⁔Writer, ref ᒐ, recovers: true);
 
         // split text into cells
         n = 0;

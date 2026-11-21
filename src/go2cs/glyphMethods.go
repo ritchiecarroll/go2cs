@@ -23,6 +23,7 @@ package main
 
 import (
 	"fmt"
+	"go/types"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -33,7 +34,10 @@ import (
 )
 
 // GlyphMethodSuffix ends a method body's name in the package class.
-const GlyphMethodSuffix = "ᴍ"
+// U+2054 INVERTED UNDERTIE, connector punctuation (Pc): a C# identifier admits it and a Go identifier cannot spell it
+// (Go's letter is a Unicode L* code point or `_`), so a trailing ⁔ marks a body unambiguously with no escape and no
+// attribute (the owner's steer of 11-21, COORD 20261121T093243Z).
+const GlyphMethodSuffix = "⁔"
 
 // GO2CS_GLYPH_METHODS selects the prototype's scope (on by default so every harness that runs the converter exercises
 // it):
@@ -224,14 +228,47 @@ var glyphUnit struct {
 	aliases   map[string]string // alias name → its using line
 	blocks    []string          // holder blocks of forwarders
 	fallbacks int               // files that kept their forwarders for an alias conflict
+	pkgPath   string            // the package's import path, for the clash report
+	clashes   []string          // package-scope names that a System using would make ambiguous in package_info.cs
 }
 
-func resetGlyphForwarderUnit() {
+func resetGlyphForwarderUnit(pkg *types.Package) {
 	glyphUnit.Lock()
 	defer glyphUnit.Unlock()
 
 	glyphUnit.usings, glyphUnit.aliases, glyphUnit.blocks, glyphUnit.fallbacks = nil, map[string]string{}, nil, 0
+	glyphUnit.pkgPath, glyphUnit.clashes = "", nil
+
+	if pkg == nil {
+		return
+	}
+
+	glyphUnit.pkgPath = pkg.Path()
+
+	// `using static <pkg>_package;` brings the package's nested types and static members into package_info.cs's scope
+	// beside the System namespaces' types, so a package TYPE named like one of them makes any unqualified use of the
+	// name ambiguous (CS0104), and an attribute's short form (`[MethodImpl]`) with it. A non-type member matters only
+	// where package_info.cs spells it in an expression: the two enum names its attribute arguments read.
+	for _, name := range pkg.Scope().Names() {
+		_, isType := pkg.Scope().Lookup(name).(*types.TypeName)
+
+		if glyphSystemTypeNames[name] && (isType || name == "MethodImplOptions" || name == "EditorBrowsableState") {
+			glyphUnit.clashes = append(glyphUnit.clashes, name)
+		}
+	}
 }
+
+// GO2CS_PKGINFO_USINGS selects package_info.cs's spelling of the System attributes it writes (the holders'
+// EditorBrowsable and the forwarders' MethodImpl, StackTraceHidden and DebuggerStepThrough): "0" keeps the global::
+// spelling everywhere (today's form); anything else, blank included, writes `using` directives and short names, and
+// falls back to global:: for a package that declares a clashing name (the owner's steer of 11-21).
+var glyphPackageInfoUsings = os.Getenv("GO2CS_PKGINFO_USINGS") != "0"
+
+const (
+	glyphEditorBrowsableFull  = methodHolderAttributes
+	glyphEditorBrowsableShort = "EditorBrowsable(EditorBrowsableState.Never)"
+	glyphForwarderAttrsShort  = "MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough"
+)
 
 var glyphUsingAlias = regexp.MustCompile(`^using\s+([\p{L}_@][\p{L}\p{N}_]*)\s*=`)
 
@@ -304,16 +341,30 @@ func glyphRegisterForwarders(text string, blocks string) bool {
 	return true
 }
 
-// applyGlyphForwarderSection writes the package's forwarders into package_info.cs: their files' using directives
-// right after the namespace declaration, and the holder blocks at the end. A whole-package conversion rebuilds both.
+// applyGlyphForwarderSection writes the package's forwarders into package_info.cs: the using directives they and the
+// holder declarations read, right after the namespace declaration, and the holder blocks at the end. A whole-package
+// conversion rebuilds both.
 func applyGlyphForwarderSection(lines []string) []string {
 	glyphUnit.Lock()
 	defer glyphUnit.Unlock()
 
 	lines = glyphStripSection(lines, "GlyphForwarderUsings")
+	lines = glyphStripSection(lines, "PackageInfoUsings")
 	lines = glyphStripSection(lines, "GlyphForwarders")
 
-	if len(glyphUnit.blocks) == 0 {
+	hasForwarders := len(glyphUnit.blocks) > 0
+	hasHolders := false
+
+	// A merging write (the -tests flow) can find either spelling already in place, so both count, and the spelling is
+	// re-derived below in both directions.
+	for _, line := range lines {
+		if strings.Contains(line, glyphEditorBrowsableFull) || strings.Contains(line, glyphEditorBrowsableShort) {
+			hasHolders = true
+			break
+		}
+	}
+
+	if !hasForwarders && !hasHolders {
 		return lines
 	}
 
@@ -323,7 +374,7 @@ func applyGlyphForwarderSection(lines []string) []string {
 	// package_info.cs also names as a qualifier is reported, not silently written.
 	forwarders := strings.Join(glyphUnit.blocks, "\n")
 	own := strings.Join(lines, "\n")
-	usings := make([]string, 0, len(glyphUnit.usings))
+	usings := make([]string, 0, len(glyphUnit.usings)+3)
 
 	for _, using := range glyphUnit.usings {
 		if match := glyphUsingAlias.FindStringSubmatch(using); match != nil {
@@ -339,22 +390,58 @@ func applyGlyphForwarderSection(lines []string) []string {
 		usings = append(usings, using)
 	}
 
+	// The System attributes' spelling: `using` directives and short names unless the package declares a name they
+	// would make ambiguous, in which case this package keeps today's global:: spelling.
+	short := glyphPackageInfoUsings && len(glyphUnit.clashes) == 0
+
+	if glyphPackageInfoUsings && !short {
+		fmt.Fprintf(os.Stderr, "glyph: package %s keeps the global:: spelling in package_info.cs: it declares %s\n", glyphUnit.pkgPath, strings.Join(glyphUnit.clashes, ", "))
+	}
+
 	for i, line := range lines {
-		if strings.HasPrefix(strings.TrimSpace(line), "namespace ") && strings.HasSuffix(strings.TrimSpace(line), ";") {
-			section := append([]string{"", "// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)"}, usings...)
-			section = append(section, "// </GlyphForwarderUsings>")
-			lines = append(lines[:i+1], append(section, lines[i+1:]...)...)
-			break
+		if short {
+			lines[i] = strings.ReplaceAll(line, glyphEditorBrowsableFull, glyphEditorBrowsableShort)
+		} else {
+			lines[i] = strings.ReplaceAll(line, glyphEditorBrowsableShort, glyphEditorBrowsableFull)
 		}
+	}
+
+	if short {
+		if hasHolders {
+			usings = append(usings, "using System.ComponentModel;")
+		}
+
+		if hasForwarders {
+			usings = append(usings, "using System.Diagnostics;", "using System.Runtime.CompilerServices;")
+		}
+	}
+
+	if len(usings) > 0 {
+		for i, line := range lines {
+			if strings.HasPrefix(strings.TrimSpace(line), "namespace ") && strings.HasSuffix(strings.TrimSpace(line), ";") {
+				section := append([]string{"", "// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)"}, usings...)
+				section = append(section, "// </PackageInfoUsings>")
+				lines = append(lines[:i+1], append(section, lines[i+1:]...)...)
+				break
+			}
+		}
+	}
+
+	if !hasForwarders {
+		return lines
 	}
 
 	for len(lines) > 0 && strings.TrimSpace(lines[len(lines)-1]) == "" {
 		lines = lines[:len(lines)-1]
 	}
 
-	lines = append(lines, "", "// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)")
+	lines = append(lines, "", "// <GlyphForwarders> (scratch prototype: Go-named forwarders to the "+GlyphMethodSuffix+" bodies in the package class)")
 
 	for _, block := range glyphUnit.blocks {
+		if short {
+			block = strings.ReplaceAll(block, glyphForwarderAttributes, glyphForwarderAttrsShort)
+		}
+
 		lines = append(lines, strings.Split(strings.TrimRight(block, "\n"), "\n")...)
 	}
 
@@ -526,7 +613,8 @@ done:
 
 	whereText = strings.TrimRight(whereText, " ")
 
-	bodyParams := strings.TrimPrefix(params, "this ")
+	// The receiver keeps a visible mark where the extension method's `this` was (the owner's steer of 11-21).
+	bodyParams := "/*this*/ " + strings.TrimPrefix(params, "this ")
 	paramList := glyphSplitTop(params)
 
 	if len(paramList) == 0 {
@@ -570,9 +658,8 @@ done:
 
 	var body strings.Builder
 
-	// The body's stamp (golib GoMethodBodyAttribute): frame naming reads the Go name here, never the spelling.
-	fmt.Fprintf(&body, "[GoMethodBody(%q)] ", strings.TrimPrefix(name, "@"))
-
+	// No stamp: the trailing ⁔, which no Go identifier can spell, is what marks a body (the runtime strips it to name a
+	// frame).
 	for _, attr := range bodyAttrs {
 		body.WriteString(attr)
 		body.WriteString(" ")
@@ -1000,5 +1087,5 @@ func glyphHolderClassName(holder string, packageClass string, receiverType strin
 		return holder
 	}
 
-	return fmt.Sprintf("%sᴛ%sᴍ%s", strings.TrimSuffix(packageClass, PackageSuffix), glyphBareName(glyphReceiverCore(receiverType)), glyphFileTag(fileName))
+	return fmt.Sprintf("%sᴛ%s"+GlyphMethodSuffix+"%s", strings.TrimSuffix(packageClass, PackageSuffix), glyphBareName(glyphReceiverCore(receiverType)), glyphFileTag(fileName))
 }

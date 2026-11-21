@@ -152,7 +152,7 @@ partial struct timeval {
 
 } partial class runtime_package {
 
-[GoMethodBody("set_usec")] internal static void set_usecᴍ(ref timeval tv, int32 x) {
+internal static void set_usec⁔(/*this*/ ref timeval tv, int32 x) {
     tv.tv_usec = x;
 }
 
@@ -171,7 +171,7 @@ partial struct timespec {
 } partial class runtime_package {
 
 //go:nosplit
-[GoMethodBody("setNsec")] internal static void setNsecᴍ(ref timespec ts, int64 ns) {
+internal static void setNsec⁔(/*this*/ ref timespec ts, int64 ns) {
     ts.tv_sec = ns / 1000000000;
     ts.tv_nsec = ns % 1000000000;
 }

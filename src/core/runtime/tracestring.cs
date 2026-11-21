@@ -28,7 +28,7 @@ partial struct traceStringTable {
 } partial class runtime_package {
 
 // put adds a string to the table, emits it, and returns a unique ID for it.
-[GoMethodBody("put")] internal static uint64 putᴍ(ж<traceStringTable> Ꮡt, uintptr gen, @string sʗp) {
+internal static uint64 put⁔(/*this*/ ж<traceStringTable> Ꮡt, uintptr gen, @string sʗp) {
     ref var s = ref heap(sʗp, out var Ꮡs);
 
     // Put the string in the table.
@@ -44,7 +44,7 @@ partial struct traceStringTable {
 }
 
 // emit emits a string and creates an ID for it, but doesn't add it to the table. Returns the ID.
-[GoMethodBody("emit")] internal static uint64 emitᴍ(ж<traceStringTable> Ꮡt, uintptr gen, @string s) {
+internal static uint64 emit⁔(/*this*/ ж<traceStringTable> Ꮡt, uintptr gen, @string s) {
     if (len(s) == 0) {
         return 0; // Empty strings are implicitly assigned ID 0 already.
     }
@@ -61,7 +61,7 @@ partial struct traceStringTable {
 // Must run on the systemstack because it acquires t.lock.
 //
 //go:systemstack
-[GoMethodBody("writeString")] internal static void writeStringᴍ(ж<traceStringTable> Ꮡt, uintptr gen, uint64 id, @string s) {
+internal static void writeString⁔(/*this*/ ж<traceStringTable> Ꮡt, uintptr gen, uint64 id, @string s) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Truncate the string if necessary.
@@ -95,7 +95,7 @@ partial struct traceStringTable {
 //
 // Must be called only once the caller is certain nothing else will be
 // added to this table.
-[GoMethodBody("reset")] internal static void resetᴍ(ж<traceStringTable> Ꮡt, uintptr gen) {
+internal static void reset⁔(/*this*/ ж<traceStringTable> Ꮡt, uintptr gen) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.buf != nil) {

@@ -41,7 +41,7 @@ partial struct option {
 //		The operation returns the zero value for the map type's element.
 //	"missingkey=error"
 //		Execution stops immediately with an error.
-[GoMethodBody("Option")] internal static ж<Template> Optionᴍ(ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) {
+internal static ж<Template> Option⁔(/*this*/ ж<Template> Ꮡt, params ꓸꓸꓸstring optʗp) {
     var opt = optʗp.sslice();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -52,7 +52,7 @@ partial struct option {
     return Ꮡt;
 }
 
-[GoMethodBody("setOption")] internal static void setOptionᴍ(ref Template t, @string opt) {
+internal static void setOption⁔(/*this*/ ref Template t, @string opt) {
     if (opt == ""u8) {
         throw panic("empty option string");
     }

@@ -12,7 +12,7 @@ partial class poll_package {
 } partial class poll_package {
 
 // SetsockoptIPMreq wraps the setsockopt network call with an IPMreq argument.
-[GoMethodBody("SetsockoptIPMreq")] internal static error SetsockoptIPMreqᴍ(ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPMreq> mreq) {
+internal static error SetsockoptIPMreq⁔(/*this*/ ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPMreq> mreq) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -29,7 +29,7 @@ partial class poll_package {
 }
 
 // SetsockoptIPv6Mreq wraps the setsockopt network call with an IPv6Mreq argument.
-[GoMethodBody("SetsockoptIPv6Mreq")] internal static error SetsockoptIPv6Mreqᴍ(ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPv6Mreq> mreq) {
+internal static error SetsockoptIPv6Mreq⁔(/*this*/ ж<FD> Ꮡfd, nint level, nint name, ж<Δsyscall.IPv6Mreq> mreq) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

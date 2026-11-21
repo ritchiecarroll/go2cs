@@ -77,7 +77,7 @@ using static go.testing.fstest_package;
 
 namespace go.testing;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using fs = go.io.fs_package;
 using path = path_package;
 using time = time_package;
@@ -85,7 +85,10 @@ using go.io;
 using static fstest_package;
 using go.testing;
 using ꓸꓸꓸany = Span<any>;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("fstest")]
 public static partial class fstest_package
@@ -134,64 +137,64 @@ public static partial class fstest_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(fstest_package.MapFS)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstestᴛMapFS;
-[GoMethodHost(typeof(fstest_package.fsTester)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstestᴛfsTester;
-[GoMethodHost(typeof(fstest_package.mapDir)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstestᴛmapDir;
-[GoMethodHost(typeof(fstest_package.mapFileInfo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstestᴛmapFileInfo;
-[GoMethodHost(typeof(fstest_package.noSub)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstestᴛnoSub;
-[GoMethodHost(typeof(fstest_package.openMapFile)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class fstestᴛopenMapFile;
+[GoMethodHost(typeof(fstest_package.MapFS)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fstestᴛMapFS;
+[GoMethodHost(typeof(fstest_package.fsTester)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fstestᴛfsTester;
+[GoMethodHost(typeof(fstest_package.mapDir)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fstestᴛmapDir;
+[GoMethodHost(typeof(fstest_package.mapFileInfo)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fstestᴛmapFileInfo;
+[GoMethodHost(typeof(fstest_package.noSub)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fstestᴛnoSub;
+[GoMethodHost(typeof(fstest_package.openMapFile)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class fstestᴛopenMapFile;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class fstestᴛMapFS {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (fs.File, error) Open(this MapFS fsys, @string name) => fstest_package.Openᴍ(fsys, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, bool ok) resolveSymlinks(this MapFS fsys, @string name) => fstest_package.resolveSymlinksᴍ(fsys, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) ReadLink(this MapFS fsys, @string name) => fstest_package.ReadLinkᴍ(fsys, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (fs.FileInfo, error) Lstat(this MapFS fsys, @string name) => fstest_package.Lstatᴍ(fsys, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<mapFileInfo>, error) lstat(this MapFS fsys, @string name) => fstest_package.lstatᴍ(fsys, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) ReadFile(this MapFS fsys, @string name) => fstest_package.ReadFileᴍ(fsys, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (fs.FileInfo, error) Stat(this MapFS fsys, @string name) => fstest_package.Statᴍ(fsys, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<fs.DirEntry>, error) ReadDir(this MapFS fsys, @string name) => fstest_package.ReadDirᴍ(fsys, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) Glob(this MapFS fsys, @string pattern) => fstest_package.Globᴍ(fsys, pattern);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (fs.FS, error) Sub(this MapFS fsys, @string dir) => fstest_package.Subᴍ(fsys, dir);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (fs.File, error) Open(this MapFS fsys, @string name) => fstest_package.Open⁔(fsys, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, bool ok) resolveSymlinks(this MapFS fsys, @string name) => fstest_package.resolveSymlinks⁔(fsys, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) ReadLink(this MapFS fsys, @string name) => fstest_package.ReadLink⁔(fsys, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (fs.FileInfo, error) Lstat(this MapFS fsys, @string name) => fstest_package.Lstat⁔(fsys, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<mapFileInfo>, error) lstat(this MapFS fsys, @string name) => fstest_package.lstat⁔(fsys, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) ReadFile(this MapFS fsys, @string name) => fstest_package.ReadFile⁔(fsys, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (fs.FileInfo, error) Stat(this MapFS fsys, @string name) => fstest_package.Stat⁔(fsys, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<fs.DirEntry>, error) ReadDir(this MapFS fsys, @string name) => fstest_package.ReadDir⁔(fsys, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string>, error) Glob(this MapFS fsys, @string pattern) => fstest_package.Glob⁔(fsys, pattern);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (fs.FS, error) Sub(this MapFS fsys, @string dir) => fstest_package.Sub⁔(fsys, dir);
 }
 partial class fstestᴛnoSub {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Sub(this noSub _) => fstest_package.Subᴍ(_);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Sub(this noSub _) => fstest_package.Sub⁔(_);
 }
 partial class fstestᴛmapFileInfo {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Name(this ref mapFileInfo i) => fstest_package.Nameᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int64 Size(this ref mapFileInfo i) => fstest_package.Sizeᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static fs.FileMode Mode(this ref mapFileInfo i) => fstest_package.Modeᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static fs.FileMode Type(this ref mapFileInfo i) => fstest_package.Typeᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static time.Time ModTime(this ref mapFileInfo i) => fstest_package.ModTimeᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsDir(this ref mapFileInfo i) => fstest_package.IsDirᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static any Sys(this ref mapFileInfo i) => fstest_package.Sysᴍ(ref i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fs.FileInfo, error) Info(this ж<mapFileInfo> Ꮡi) => fstest_package.Infoᴍ(Ꮡi);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this ж<mapFileInfo> Ꮡi) => fstest_package.Stringᴍ(Ꮡi);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Name(this ref mapFileInfo i) => fstest_package.Name⁔(ref i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int64 Size(this ref mapFileInfo i) => fstest_package.Size⁔(ref i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static fs.FileMode Mode(this ref mapFileInfo i) => fstest_package.Mode⁔(ref i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static fs.FileMode Type(this ref mapFileInfo i) => fstest_package.Type⁔(ref i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static time.Time ModTime(this ref mapFileInfo i) => fstest_package.ModTime⁔(ref i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool IsDir(this ref mapFileInfo i) => fstest_package.IsDir⁔(ref i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static any Sys(this ref mapFileInfo i) => fstest_package.Sys⁔(ref i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (fs.FileInfo, error) Info(this ж<mapFileInfo> Ꮡi) => fstest_package.Info⁔(Ꮡi);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string String(this ж<mapFileInfo> Ꮡi) => fstest_package.String⁔(Ꮡi);
 }
 partial class fstestᴛopenMapFile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fs.FileInfo, error) Stat(this ж<openMapFile> Ꮡf) => fstest_package.Statᴍ(Ꮡf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref openMapFile f) => fstest_package.Closeᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref openMapFile f, slice<byte> b) => fstest_package.Readᴍ(ref f, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (int64, error) Seek(this ref openMapFile f, int64 offset, nint whence) => fstest_package.Seekᴍ(ref f, offset, whence);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) ReadAt(this ref openMapFile f, slice<byte> b, int64 offset) => fstest_package.ReadAtᴍ(ref f, b, offset);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (fs.FileInfo, error) Stat(this ж<openMapFile> Ꮡf) => fstest_package.Stat⁔(Ꮡf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref openMapFile f) => fstest_package.Close⁔(ref f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref openMapFile f, slice<byte> b) => fstest_package.Read⁔(ref f, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (int64, error) Seek(this ref openMapFile f, int64 offset, nint whence) => fstest_package.Seek⁔(ref f, offset, whence);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) ReadAt(this ref openMapFile f, slice<byte> b, int64 offset) => fstest_package.ReadAt⁔(ref f, b, offset);
 }
 partial class fstestᴛmapDir {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (fs.FileInfo, error) Stat(this ж<mapDir> Ꮡd) => fstest_package.Statᴍ(Ꮡd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref mapDir d) => fstest_package.Closeᴍ(ref d);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref mapDir d, slice<byte> b) => fstest_package.Readᴍ(ref d, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<fs.DirEntry>, error) ReadDir(this ref mapDir d, nint count) => fstest_package.ReadDirᴍ(ref d, count);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (fs.FileInfo, error) Stat(this ж<mapDir> Ꮡd) => fstest_package.Stat⁔(Ꮡd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref mapDir d) => fstest_package.Close⁔(ref d);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref mapDir d, slice<byte> b) => fstest_package.Read⁔(ref d, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<fs.DirEntry>, error) ReadDir(this ref mapDir d, nint count) => fstest_package.ReadDir⁔(ref d, count);
 }
 partial class fstestᴛfsTester {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void errorf(this ref fsTester t, @string format, params ꓸꓸꓸany argsʗp) => fstest_package.errorfᴍ(ref t, format, argsʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static fs.ReadDirFile openDir(this ref fsTester t, @string dir) => fstest_package.openDirᴍ(ref t, dir);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) => fstest_package.checkDirᴍ(Ꮡt, dir);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEntry> list) => fstest_package.checkGlobᴍ(ref t, dir, list);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry entry) => fstest_package.checkStatᴍ(ref t, path, entry);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkDirList(this ж<fsTester> Ꮡt, @string dir, @string desc, slice<fs.DirEntry> list1, slice<fs.DirEntry> list2) => fstest_package.checkDirListᴍ(Ꮡt, dir, desc, list1, list2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) => fstest_package.checkFileᴍ(Ꮡt, @file);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkFileRead(this ref fsTester t, @string @file, @string desc, slice<byte> data1, slice<byte> data2) => fstest_package.checkFileReadᴍ(ref t, @file, desc, data1, data2);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkOpen(this ж<fsTester> Ꮡt, @string @file) => fstest_package.checkOpenᴍ(Ꮡt, @file);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void checkBadPath(this ref fsTester t, @string @file, @string desc, Func<@string, error> open) => fstest_package.checkBadPathᴍ(ref t, @file, desc, open);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void errorf(this ref fsTester t, @string format, params ꓸꓸꓸany argsʗp) => fstest_package.errorf⁔(ref t, format, argsʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static fs.ReadDirFile openDir(this ref fsTester t, @string dir) => fstest_package.openDir⁔(ref t, dir);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void checkDir(this ж<fsTester> Ꮡt, @string dir) => fstest_package.checkDir⁔(Ꮡt, dir);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void checkGlob(this ref fsTester t, @string dir, slice<fs.DirEntry> list) => fstest_package.checkGlob⁔(ref t, dir, list);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void checkStat(this ref fsTester t, @string path, fs.DirEntry entry) => fstest_package.checkStat⁔(ref t, path, entry);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void checkDirList(this ж<fsTester> Ꮡt, @string dir, @string desc, slice<fs.DirEntry> list1, slice<fs.DirEntry> list2) => fstest_package.checkDirList⁔(Ꮡt, dir, desc, list1, list2);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void checkFile(this ж<fsTester> Ꮡt, @string @file) => fstest_package.checkFile⁔(Ꮡt, @file);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void checkFileRead(this ref fsTester t, @string @file, @string desc, slice<byte> data1, slice<byte> data2) => fstest_package.checkFileRead⁔(ref t, @file, desc, data1, data2);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void checkOpen(this ж<fsTester> Ꮡt, @string @file) => fstest_package.checkOpen⁔(Ꮡt, @file);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void checkBadPath(this ref fsTester t, @string @file, @string desc, Func<@string, error> open) => fstest_package.checkBadPath⁔(ref t, @file, desc, open);
 }
 // </GlyphForwarders>

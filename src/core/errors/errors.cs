@@ -76,7 +76,7 @@ partial struct errorString {
 
 } partial class errors_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref errorString e) {
+internal static @string Error⁔(/*this*/ ref errorString e) {
     return e.s;
 }
 

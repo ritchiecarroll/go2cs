@@ -48,7 +48,7 @@ partial struct Pipe {
 } partial class asmgen_package {
 
 // Pipe creates and returns a new pipe for use in the function f.
-[GoMethodBody("Pipe")] internal static ж<Pipe> Pipeᴍ(ж<Func> Ꮡf) {
+internal static ж<Pipe> Pipe⁔(/*this*/ ж<Func> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     var a = f.Asm;
@@ -67,7 +67,7 @@ partial struct Pipe {
 
 // SetBackward sets the pipe to process the input and output columns in reverse order.
 // This is needed for left shifts, which might otherwise overwrite data they will read later.
-[GoMethodBody("SetBackward")] internal static void SetBackwardᴍ(ref Pipe p) {
+internal static void SetBackward⁔(/*this*/ ref Pipe p) {
     if (p.loaded) {
         p.f.Asm.Fatalf("SetBackward after Start/LoadPtrs");
     }
@@ -78,7 +78,7 @@ partial struct Pipe {
 // meaning the loop counter is also used as an index for accessing the slice data.
 // This clever trick is slower on modern processors, but it is still necessary on 386.
 // On non-386 systems, SetUseIndexCounter is a no-op.
-[GoMethodBody("SetUseIndexCounter")] internal static void SetUseIndexCounterᴍ(ref Pipe p) {
+internal static void SetUseIndexCounter⁔(/*this*/ ref Pipe p) {
     if (p.f.Asm.Arch.memIndex == nil) { // need memIndex (only 386 provides it)
         return;
     }
@@ -87,13 +87,13 @@ partial struct Pipe {
 
 // SetLabel sets the label prefix for the loops emitted by the pipe.
 // The default prefix is "loop".
-[GoMethodBody("SetLabel")] internal static void SetLabelᴍ(ref Pipe p, @string label) {
+internal static void SetLabel⁔(/*this*/ ref Pipe p, @string label) {
     p.label = label;
 }
 
 // SetMaxColumns sets the maximum number of
 // columns processed in a single loop body call.
-[GoMethodBody("SetMaxColumns")] internal static void SetMaxColumnsᴍ(ref Pipe p, nint m) {
+internal static void SetMaxColumns⁔(/*this*/ ref Pipe p, nint m) {
     p.maxColumns = m;
 }
 
@@ -103,7 +103,7 @@ partial struct Pipe {
 // If the hint indicates a single register on the target architecture,
 // then SetHint calls SetMaxColumns(1), since the hinted register
 // can only be used for one value at a time.
-[GoMethodBody("SetHint")] internal static void SetHintᴍ(ref Pipe p, @string name, Hint hint) {
+internal static void SetHint⁔(/*this*/ ref Pipe p, @string name, Hint hint) {
     if (hint == HintMemOK && !p.f.Asm.Arch.memOK) {
         return;
     }
@@ -121,12 +121,12 @@ partial struct Pipe {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runLoopBackwardUsingˢᴍPipe => ref runLoopBackwardUsingˢᵇᴍPipe;
-private static readonly @string runLoopBackwardUsingˢᵇᴍPipe = "run loop backward, using counter as positive index"u8;
-internal static ref readonly @string useCounterAsNegativeˢᴍPipe => ref useCounterAsNegativeˢᵇᴍPipe;
-private static readonly @string useCounterAsNegativeˢᵇᴍPipe = "use counter as negative index"u8;
-internal static ref readonly @string runLoopBackwardˢᴍPipe => ref runLoopBackwardˢᵇᴍPipe;
-private static readonly @string runLoopBackwardˢᵇᴍPipe = "run loop backward"u8;
+internal static ref readonly @string runLoopBackwardUsingˢ⁔Pipe => ref runLoopBackwardUsingˢᵇ⁔Pipe;
+private static readonly @string runLoopBackwardUsingˢᵇ⁔Pipe = "run loop backward, using counter as positive index"u8;
+internal static ref readonly @string useCounterAsNegativeˢ⁔Pipe => ref useCounterAsNegativeˢᵇ⁔Pipe;
+private static readonly @string useCounterAsNegativeˢᵇ⁔Pipe = "use counter as negative index"u8;
+internal static ref readonly @string runLoopBackwardˢ⁔Pipe => ref runLoopBackwardˢᵇ⁔Pipe;
+private static readonly @string runLoopBackwardˢᵇ⁔Pipe = "run loop backward"u8;
 
 // LoadPtrs loads the slice pointer arguments into registers,
 // assuming that the slice length n has already been loaded
@@ -136,7 +136,7 @@ private static readonly @string runLoopBackwardˢᵇᴍPipe = "run loop backward
 // LoadPtrs only needs to be called explicitly when code needs
 // to use LoadN before Start, like when the shift.go generators
 // read an initial word before the loop.
-[GoMethodBody("LoadPtrs")] internal static void LoadPtrsᴍ(ref Pipe p, Reg n) {
+internal static void LoadPtrs⁔(/*this*/ ref Pipe p, Reg n) {
     var a = p.f.Asm;
     if (p.loaded) {
         a.Fatalf("pointers already loaded");
@@ -158,7 +158,7 @@ private static readonly @string runLoopBackwardˢᵇᴍPipe = "run loop backward
         // is AX, we will access the slice with pointer BX using (BX)(AX*WordBytes).
         // The loop is moving backward through the slice, but the counter
         // is also moving backward, so not much to do.
-        a.Comment(runLoopBackwardUsingˢᴍPipe);
+        a.Comment(runLoopBackwardUsingˢ⁔Pipe);
         p.indexCounter = +1;
         p.index = n;
         break;
@@ -171,7 +171,7 @@ private static readonly @string runLoopBackwardˢᵇᴍPipe = "run loop backward
         // to each of the pointers.
         // See comment below about the garbage collector (non-)implications
         // of pointing beyond the slice bounds.
-        a.Comment(useCounterAsNegativeˢᴍPipe);
+        a.Comment(useCounterAsNegativeˢ⁔Pipe);
         p.indexCounter = -1;
         p.index = n;
         foreach (var (_, ptr) in range(p.inPtr)) {
@@ -197,7 +197,7 @@ private static readonly @string runLoopBackwardˢᵇᴍPipe = "run loop backward
         // (The same thing happens by the end of forward loops,
         // but it's less important since once the pointers go off the slice
         // in a forward loop, the loop is over and the slice won't be accessed anymore.)
-        a.Comment(runLoopBackwardˢᴍPipe);
+        a.Comment(runLoopBackwardˢ⁔Pipe);
         foreach (var (_, ptr) in range(p.inPtr)) {
             a.AddWords(n, ptr, ptr);
         }
@@ -215,7 +215,7 @@ private static readonly @string runLoopBackwardˢᵇᴍPipe = "run loop backward
 // LoadN returns the next n columns of input words as a slice of rows.
 // Regs for inputs that have been marked using p.SetMemOK will be direct memory references.
 // Regs for other inputs will be newly allocated registers and must be freed.
-[GoMethodBody("LoadN")] internal static slice<slice<Reg>> LoadNᴍ(ref Pipe p, nint n) {
+internal static slice<slice<Reg>> LoadN⁔(/*this*/ ref Pipe p, nint n) {
     var a = p.f.Asm;
     var regs = new slice<slice<Reg>>(len(p.inPtr));
     foreach (var (i, vᴛ1) in range(p.inPtr)) {
@@ -270,7 +270,7 @@ private static readonly @string runLoopBackwardˢᵇᴍPipe = "run loop backward
 }
 
 // StoreN writes regs (a slice of rows) to the next n columns of output, where n = len(regs[0]).
-[GoMethodBody("StoreN")] internal static void StoreNᴍ(ref Pipe p, slice<slice<Reg>> regs) {
+internal static void StoreN⁔(/*this*/ ref Pipe p, slice<slice<Reg>> regs) {
     p.needWrite = false;
     var a = p.f.Asm;
     if (len(regs) != len(p.outPtr)) {
@@ -316,7 +316,7 @@ private static readonly @string runLoopBackwardˢᵇᴍPipe = "run loop backward
 // advancePtrs advances the pointers by step
 // or handles bookkeeping for an imminent index advance by step
 // that the caller will do.
-[GoMethodBody("advancePtrs")] internal static void advancePtrsᴍ(ref Pipe p, nint step) {
+internal static void advancePtrs⁔(/*this*/ ref Pipe p, nint step) {
     var a = p.f.Asm;
     switch (ᐧ) {
     case {} when a.Arch.loadIncN != nil: {
@@ -347,7 +347,7 @@ private static readonly @string runLoopBackwardˢᵇᴍPipe = "run loop backward
 // DropInput deletes the named input from the pipe,
 // usually because it has been exhausted.
 // (This is not used yet but will be used in a future generator.)
-[GoMethodBody("DropInput")] internal static void DropInputᴍ(ref Pipe p, @string name) {
+internal static void DropInput⁔(/*this*/ ref Pipe p, @string name) {
     nint i = slices.Index(p.f.inputs, name);
     if (i < 0) {
         p.f.Asm.Fatalf("unknown input %s", name);
@@ -381,7 +381,7 @@ private static readonly @string runLoopBackwardˢᵇᴍPipe = "run loop backward
 // Start must be followed by a call to Loop1 or LoopN,
 // but it is permitted to emit other instructions first,
 // for example to set an initial carry flag.
-[GoMethodBody("Start")] internal static void Startᴍ(ref Pipe p, Reg n, params ꓸꓸꓸnint factorsʗp) {
+internal static void Start⁔(/*this*/ ref Pipe p, Reg n, params ꓸꓸꓸnint factorsʗp) {
     var factors = factorsʗp.slice();
 
     var a = p.f.Asm;
@@ -422,12 +422,12 @@ private static readonly @string runLoopBackwardˢᵇᴍPipe = "run loop backward
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string computeUnrolledLoopˢᴍPipe => ref computeUnrolledLoopˢᵇᴍPipe;
-private static readonly @string computeUnrolledLoopˢᵇᴍPipe = "compute unrolled loop lengths"u8;
+internal static ref readonly @string computeUnrolledLoopˢ⁔Pipe => ref computeUnrolledLoopˢᵇ⁔Pipe;
+private static readonly @string computeUnrolledLoopˢᵇ⁔Pipe = "compute unrolled loop lengths"u8;
 
 // Restart prepares to loop over an additional n columns,
 // beyond a previous loop run by p.Start/p.Loop.
-[GoMethodBody("Restart")] internal static void Restartᴍ(ref Pipe p, Reg n, params ꓸꓸꓸnint factorsʗp) {
+internal static void Restart⁔(/*this*/ ref Pipe p, Reg n, params ꓸꓸꓸnint factorsʗp) {
     var factors = factorsʗp.slice();
 
     var a = p.f.Asm;
@@ -444,7 +444,7 @@ private static readonly @string computeUnrolledLoopˢᵇᴍPipe = "compute unrol
     // We compute them all ahead of time in case the computation would smash
     // a carry flag that the loop bodies need preserved.
     if (len(factors) > 1) {
-        a.Comment(computeUnrolledLoopˢᴍPipe);
+        a.Comment(computeUnrolledLoopˢ⁔Pipe);
     }
     switch (ᐧ) {
     default: {
@@ -493,7 +493,7 @@ private static readonly @string computeUnrolledLoopˢᵇᴍPipe = "compute unrol
 }
 
 // Done frees all the registers allocated by the pipe.
-[GoMethodBody("Done")] internal static void Doneᴍ(ref Pipe p) {
+internal static void Done⁔(/*this*/ ref Pipe p) {
     foreach (var (_, ptr) in range(p.inPtr)) {
         p.f.Asm.Free((Reg)ptr);
     }
@@ -525,7 +525,7 @@ private static readonly @string computeUnrolledLoopˢᵇᴍPipe = "compute unrol
 //	end()  // set by p.AtUnrollEnd
 //
 // Any registers allocated during block are freed automatically when block returns.
-[GoMethodBody("Loop")] internal static void Loopᴍ(ref Pipe p, Action<slice<slice<Reg>>, slice<slice<Reg>>> block) {
+internal static void Loop⁔(/*this*/ ref Pipe p, Action<slice<slice<Reg>>, slice<slice<Reg>>> block) {
     if (p.factors == nil) {
         p.f.Asm.Fatalf("Pipe.Start not called");
     }
@@ -541,24 +541,24 @@ private static readonly @string computeUnrolledLoopˢᵇᴍPipe = "compute unrol
 
 // AtUnrollStart sets a function to call at the start of an unrolled sequence.
 // See [Pipe.Loop] for details.
-[GoMethodBody("AtUnrollStart")] internal static void AtUnrollStartᴍ(ref Pipe p, Action start) {
+internal static void AtUnrollStart⁔(/*this*/ ref Pipe p, Action start) {
     p.unrollStart = start;
 }
 
 // AtUnrollEnd sets a function to call at the end of an unrolled sequence.
 // See [Pipe.Loop] for details.
-[GoMethodBody("AtUnrollEnd")] internal static void AtUnrollEndᴍ(ref Pipe p, Action end) {
+internal static void AtUnrollEnd⁔(/*this*/ ref Pipe p, Action end) {
     p.unrollEnd = end;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unrollDXˢᴍPipe => ref unrollDXˢᵇᴍPipe;
-private static readonly @string unrollDXˢᵇᴍPipe = "unroll %dX"u8;
-internal static ref readonly @string unrollDXInBatchesOfDˢᴍPipe => ref unrollDXInBatchesOfDˢᵇᴍPipe;
-private static readonly @string unrollDXInBatchesOfDˢᵇᴍPipe = "unroll %dX in batches of %d"u8;
+internal static ref readonly @string unrollDXˢ⁔Pipe => ref unrollDXˢᵇ⁔Pipe;
+private static readonly @string unrollDXˢᵇ⁔Pipe = "unroll %dX"u8;
+internal static ref readonly @string unrollDXInBatchesOfDˢ⁔Pipe => ref unrollDXInBatchesOfDˢᵇ⁔Pipe;
+private static readonly @string unrollDXInBatchesOfDˢᵇ⁔Pipe = "unroll %dX in batches of %d"u8;
 
 // unroll emits a single unrolled loop for the given factor, iterating n times.
-[GoMethodBody("unroll")] internal static void unrollᴍ(ref Pipe p, Reg n, nint factor, Action<slice<slice<Reg>>, slice<slice<Reg>>> block) {
+internal static void unroll⁔(/*this*/ ref Pipe p, Reg n, nint factor, Action<slice<slice<Reg>>, slice<slice<Reg>>> block) {
     var a = p.f.Asm;
     @string label = fmt.Sprintf("%s%d"u8, p.label, factor);
 
@@ -573,9 +573,9 @@ private static readonly @string unrollDXInBatchesOfDˢᵇᴍPipe = "unroll %dX i
 
     // Unrolled loop body.
     if (factor < p.maxColumns) {
-        a.Comment(unrollDXˢᴍPipe, factor);
+        a.Comment(unrollDXˢ⁔Pipe, factor);
     } else {
-        a.Comment(unrollDXInBatchesOfDˢᴍPipe, factor, p.maxColumns);
+        a.Comment(unrollDXInBatchesOfDˢ⁔Pipe, factor, p.maxColumns);
     }
     if (p.unrollStart != nil) {
         p.unrollStart();

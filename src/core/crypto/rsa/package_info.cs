@@ -75,7 +75,7 @@ using static go.crypto.rsa_package;
 
 namespace go.crypto;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using crypto = crypto_package;
 using rand = go.crypto.@internal.rand_package;
 using io = io_package;
@@ -86,7 +86,10 @@ using static rsa_package;
 using go.@internal;
 using go.crypto;
 using go.crypto.@internal.boring;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("rsa")]
 public static partial class rsa_package
@@ -141,29 +144,29 @@ public static partial class rsa_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(rsa_package.PSSOptions)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPSSOptions;
-[GoMethodHost(typeof(rsa_package.PrivateKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPrivateKey;
-[GoMethodHost(typeof(rsa_package.PublicKey)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class rsaᴛPublicKey;
+[GoMethodHost(typeof(rsa_package.PSSOptions)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rsaᴛPSSOptions;
+[GoMethodHost(typeof(rsa_package.PrivateKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rsaᴛPrivateKey;
+[GoMethodHost(typeof(rsa_package.PublicKey)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class rsaᴛPublicKey;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class rsaᴛPSSOptions {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static crypto.Hash HashFunc(this ref PSSOptions opts) => rsa_package.HashFuncᴍ(ref opts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint saltLength(this ж<PSSOptions> Ꮡopts) => rsa_package.saltLengthᴍ(Ꮡopts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static crypto.Hash HashFunc(this ref PSSOptions opts) => rsa_package.HashFunc⁔(ref opts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint saltLength(this ж<PSSOptions> Ꮡopts) => rsa_package.saltLength⁔(Ꮡopts);
 }
 partial class rsaᴛPublicKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Size(this ref PublicKey pub) => rsa_package.Sizeᴍ(ref pub);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) => rsa_package.Equalᴍ(ref pub, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Size(this ref PublicKey pub) => rsa_package.Size⁔(ref pub);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this ref PublicKey pub, cryptoꓸPublicKey x) => rsa_package.Equal⁔(ref pub, x);
 }
 partial class rsaᴛPrivateKey {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡpriv) => rsa_package.Publicᴍ(Ꮡpriv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) => rsa_package.Equalᴍ(ref priv, x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) => rsa_package.Signᴍ(Ꮡpriv, rand, digest, opts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> plaintext, error err) Decrypt(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> ciphertext, cryptoꓸDecrypterOpts opts) => rsa_package.Decryptᴍ(Ꮡpriv, rand, ciphertext, opts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Validate(this ref PrivateKey priv) => rsa_package.Validateᴍ(ref priv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool precomputedIsConsistent(this ref PrivateKey priv) => rsa_package.precomputedIsConsistentᴍ(ref priv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Precompute(this ref PrivateKey priv) => rsa_package.Precomputeᴍ(ref priv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (PrecomputedValues, error) precompute(this ref PrivateKey priv) => rsa_package.precomputeᴍ(ref priv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (PrecomputedValues, error) precomputeLegacy(this ref PrivateKey priv) => rsa_package.precomputeLegacyᴍ(ref priv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static cryptoꓸPublicKey Public(this ж<PrivateKey> Ꮡpriv) => rsa_package.Public⁔(Ꮡpriv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Equal(this ref PrivateKey priv, cryptoꓸPrivateKey x) => rsa_package.Equal⁔(ref priv, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Sign(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> digest, crypto.SignerOpts opts) => rsa_package.Sign⁔(Ꮡpriv, rand, digest, opts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> plaintext, error err) Decrypt(this ж<PrivateKey> Ꮡpriv, io.Reader rand, slice<byte> ciphertext, cryptoꓸDecrypterOpts opts) => rsa_package.Decrypt⁔(Ꮡpriv, rand, ciphertext, opts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Validate(this ref PrivateKey priv) => rsa_package.Validate⁔(ref priv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool precomputedIsConsistent(this ref PrivateKey priv) => rsa_package.precomputedIsConsistent⁔(ref priv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Precompute(this ref PrivateKey priv) => rsa_package.Precompute⁔(ref priv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrecomputedValues, error) precompute(this ref PrivateKey priv) => rsa_package.precompute⁔(ref priv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (PrecomputedValues, error) precomputeLegacy(this ref PrivateKey priv) => rsa_package.precomputeLegacy⁔(ref priv);
 }
 // </GlyphForwarders>

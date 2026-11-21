@@ -64,11 +64,14 @@ using static go.@internal.runtime.cgroup_package;
 
 namespace go.@internal.runtime;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.@internal.runtime.syscall;
 using static cgroup_package;
 using go.@internal;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("cgroup")]
 public static partial class cgroup_package
@@ -105,20 +108,20 @@ public static partial class cgroup_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(cgroup_package.CPU)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgroupᴛCPU;
-[GoMethodHost(typeof(cgroup_package.lineReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgroupᴛlineReader;
-[GoMethodHost(typeof(cgroup_package.stringError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgroupᴛstringError;
+[GoMethodHost(typeof(cgroup_package.CPU)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cgroupᴛCPU;
+[GoMethodHost(typeof(cgroup_package.lineReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cgroupᴛlineReader;
+[GoMethodHost(typeof(cgroup_package.stringError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cgroupᴛstringError;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class cgroupᴛCPU {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Close(this CPU c) => cgroup_package.Closeᴍ(c);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Close(this CPU c) => cgroup_package.Close⁔(c);
 }
 partial class cgroupᴛstringError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this stringError e) => cgroup_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this stringError e) => cgroup_package.Error⁔(e);
 }
 partial class cgroupᴛlineReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error next(this ref lineReader r) => cgroup_package.nextᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> line(this ref lineReader r) => cgroup_package.lineᴍ(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error next(this ref lineReader r) => cgroup_package.next⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<byte> line(this ref lineReader r) => cgroup_package.line⁔(ref r);
 }
 // </GlyphForwarders>

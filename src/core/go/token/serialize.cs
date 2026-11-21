@@ -27,7 +27,7 @@ partial struct serializedFileSet {
 } partial class token_package {
 
 // Read calls decode to deserialize a file set into s; s must not be nil.
-[GoMethodBody("Read")] internal static error Readᴍ(ж<FileSet> Ꮡs, Func<any, error> decode) {
+internal static error Read⁔(/*this*/ ж<FileSet> Ꮡs, Func<any, error> decode) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     ref var ss = ref heap(new serializedFileSet(), out var Ꮡss);
@@ -53,7 +53,7 @@ partial struct serializedFileSet {
 }
 
 // Write calls encode to serialize the file set s.
-[GoMethodBody("Write")] internal static error Writeᴍ(ж<FileSet> Ꮡs, Func<any, error> encode) {
+internal static error Write⁔(/*this*/ ж<FileSet> Ꮡs, Func<any, error> encode) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     serializedFileSet ss = default;

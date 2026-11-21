@@ -42,15 +42,15 @@ internal static void dumpregs(ж<sigctxt> Ꮡc) {
 
 //go:nosplit
 //go:nowritebarrierrec
-[GoMethodBody("sigpc")] internal static uintptr sigpcᴍ(ref sigctxt c) { return (uintptr)c.rip(); }
+internal static uintptr sigpc⁔(/*this*/ ref sigctxt c) { return (uintptr)c.rip(); }
 
-[GoMethodBody("setsigpc")] internal static void setsigpcᴍ(ref sigctxt c, uint64 x) { c.set_rip(x); }
-[GoMethodBody("sigsp")] internal static uintptr sigspᴍ(ref sigctxt c) { return (uintptr)c.rsp(); }
-[GoMethodBody("siglr")] internal static uintptr siglrᴍ(ref sigctxt c) { return 0; }
-[GoMethodBody("fault")] internal static uintptr faultᴍ(ref sigctxt c) { return (uintptr)c.sigaddr(); }
+internal static void setsigpc⁔(/*this*/ ref sigctxt c, uint64 x) { c.set_rip(x); }
+internal static uintptr sigsp⁔(/*this*/ ref sigctxt c) { return (uintptr)c.rsp(); }
+internal static uintptr siglr⁔(/*this*/ ref sigctxt c) { return 0; }
+internal static uintptr fault⁔(/*this*/ ref sigctxt c) { return (uintptr)c.sigaddr(); }
 
 // preparePanic sets up the stack to look like a call to sigpanic.
-[GoMethodBody("preparePanic")] internal static void preparePanicᴍ(ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
+internal static void preparePanic⁔(/*this*/ ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // Work around Leopard bug that doesn't set FPE_INTDIV.
@@ -83,7 +83,7 @@ internal static void dumpregs(ж<sigctxt> Ꮡc) {
     }
 }
 
-[GoMethodBody("pushCall")] internal static void pushCallᴍ(ref sigctxt c, uintptr targetPC, uintptr resumePC) {
+internal static void pushCall⁔(/*this*/ ref sigctxt c, uintptr targetPC, uintptr resumePC) {
     // Make it look like we called target at resumePC.
     var sp = (uintptr)c.rsp();
     sp -= goarch.PtrSize;

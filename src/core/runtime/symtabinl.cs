@@ -78,7 +78,7 @@ internal static (inlineUnwinder, inlineFrame) newInlineUnwinder(funcInfo f, uint
 
 } partial class runtime_package {
 
-[GoMethodBody("resolveInternal")] internal static inlineFrame resolveInternalᴍ(ref inlineUnwinder u, uintptr pc) {
+internal static inlineFrame resolveInternal⁔(/*this*/ ref inlineUnwinder u, uintptr pc) {
     return new inlineFrame(
         pc: pc,
         // Conveniently, this returns -1 if there's an error, which is the same
@@ -89,14 +89,14 @@ internal static (inlineUnwinder, inlineFrame) newInlineUnwinder(funcInfo f, uint
 
 } partial class runtime_package {
 
-[GoMethodBody("valid")] internal static bool validᴍ(inlineFrame uf) {
+internal static bool valid⁔(/*this*/ inlineFrame uf) {
     return uf.pc != 0;
 }
 
 } partial class runtime_package {
 
 // next returns the frame representing uf's logical caller.
-[GoMethodBody("next")] internal static inlineFrame nextᴍ(ref inlineUnwinder u, inlineFrame uf) {
+internal static inlineFrame next⁔(/*this*/ ref inlineUnwinder u, inlineFrame uf) {
     if (uf.index < 0) {
         uf.pc = 0;
         return uf;
@@ -106,7 +106,7 @@ internal static (inlineUnwinder, inlineFrame) newInlineUnwinder(funcInfo f, uint
 }
 
 // isInlined returns whether uf is an inlined frame.
-[GoMethodBody("isInlined")] internal static bool isInlinedᴍ(ref inlineUnwinder u, inlineFrame uf) {
+internal static bool isInlined⁔(/*this*/ ref inlineUnwinder u, inlineFrame uf) {
     return uf.index >= 0;
 }
 
@@ -121,7 +121,7 @@ internal static (inlineUnwinder, inlineFrame) newInlineUnwinder(funcInfo f, uint
 // See go.dev/issue/67401.
 //
 // The go:linkname is below.
-[GoMethodBody("srcFunc")] internal static srcFunc srcFuncᴍ(ref inlineUnwinder u, inlineFrame uf) {
+internal static srcFunc srcFunc⁔(/*this*/ ref inlineUnwinder u, inlineFrame uf) {
     if (uf.index < 0) {
         return u.f.srcFunc();
     }
@@ -147,7 +147,7 @@ internal static partial srcFunc badSrcFunc(ж<inlineUnwinder> _Δp0, inlineFrame
 // physical function).
 //
 // It returns "?", 0 if something goes wrong.
-[GoMethodBody("fileLine")] internal static (@string @file, nint line) fileLineᴍ(ref inlineUnwinder u, inlineFrame uf) {
+internal static (@string @file, nint line) fileLine⁔(/*this*/ ref inlineUnwinder u, inlineFrame uf) {
     @string @file = default;
 
     (@file, var line32) = funcline1(u.f, uf.pc, false);

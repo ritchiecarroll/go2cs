@@ -147,7 +147,7 @@ internal static ref Δsync.Map errnoErrorCache => ref ((StaticBox<Δsync.Map>)�
 
 } partial class syscall_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(Errno e) {
+internal static @string Error⁔(/*this*/ Errno e) {
     // deal with special go errors
     nint idx = (nint)(e - (Errno)APPLICATION_ERROR);
     if (0 <= idx && idx < len(errors)) {
@@ -171,7 +171,7 @@ internal static ref Δsync.Map errnoErrorCache => ref ((StaticBox<Δsync.Map>)�
     return result;
 }
 
-[GoMethodBody("error")] internal static @string errorᴍ(Errno e) {
+internal static @string error⁔(/*this*/ Errno e) {
     // ask windows for the remaining errors
     uint32 flags = (uint32)((UntypedInt)(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ARGUMENT_ARRAY) | (uint32)FORMAT_MESSAGE_IGNORE_INSERTS);
     var b = new slice<uint16>(300);
@@ -197,7 +197,7 @@ internal static Errno _ERROR_CALL_NOT_IMPLEMENTED => /* Errno(120) */ 120;
 
 } partial class syscall_package {
 
-[GoMethodBody("Is")] internal static bool Isᴍ(Errno e, error target) {
+internal static bool Is⁔(/*this*/ Errno e, error target) {
     switch (target) {
     case var ᴛ when AreEqual(ᴛ, oserror.ErrPermission): {
         return e == ERROR_ACCESS_DENIED || e == EACCES || e == EPERM;
@@ -214,11 +214,11 @@ internal static Errno _ERROR_CALL_NOT_IMPLEMENTED => /* Errno(120) */ 120;
     return false;
 }
 
-[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(Errno e) {
+internal static bool Temporary⁔(/*this*/ Errno e) {
     return e == EINTR || e == EMFILE || e.Timeout();
 }
 
-[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(Errno e) {
+internal static bool Timeout⁔(/*this*/ Errno e) {
     return e == EAGAIN || e == EWOULDBLOCK || e == ETIMEDOUT;
 }
 
@@ -952,7 +952,7 @@ partial struct SockaddrUnix {
 
 } partial class syscall_package {
 
-[GoMethodBody("sockaddr")] internal static (@unsafe.Pointer, int32, error) sockaddrᴍ(ж<SockaddrUnix> Ꮡsa) {
+internal static (@unsafe.Pointer, int32, error) sockaddr⁔(/*this*/ ж<SockaddrUnix> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     @string name = sa.Name;
@@ -1132,23 +1132,23 @@ partial struct WaitStatus {
 
 } partial class syscall_package {
 
-[GoMethodBody("Exited")] internal static bool Exitedᴍ(WaitStatus w) { return true; }
+internal static bool Exited⁔(/*this*/ WaitStatus w) { return true; }
 
-[GoMethodBody("ExitStatus")] internal static nint ExitStatusᴍ(WaitStatus w) { return (nint)w.ExitCode; }
+internal static nint ExitStatus⁔(/*this*/ WaitStatus w) { return (nint)w.ExitCode; }
 
-[GoMethodBody("Signal")] internal static Signal Signalᴍ(WaitStatus w) { return -1; }
+internal static Signal Signal⁔(/*this*/ WaitStatus w) { return -1; }
 
-[GoMethodBody("CoreDump")] internal static bool CoreDumpᴍ(WaitStatus w) { return false; }
+internal static bool CoreDump⁔(/*this*/ WaitStatus w) { return false; }
 
-[GoMethodBody("Stopped")] internal static bool Stoppedᴍ(WaitStatus w) { return false; }
+internal static bool Stopped⁔(/*this*/ WaitStatus w) { return false; }
 
-[GoMethodBody("Continued")] internal static bool Continuedᴍ(WaitStatus w) { return false; }
+internal static bool Continued⁔(/*this*/ WaitStatus w) { return false; }
 
-[GoMethodBody("StopSignal")] internal static Signal StopSignalᴍ(WaitStatus w) { return -1; }
+internal static Signal StopSignal⁔(/*this*/ WaitStatus w) { return -1; }
 
-[GoMethodBody("Signaled")] internal static bool Signaledᴍ(WaitStatus w) { return false; }
+internal static bool Signaled⁔(/*this*/ WaitStatus w) { return false; }
 
-[GoMethodBody("TrapCause")] internal static nint TrapCauseᴍ(WaitStatus w) { return -1; }
+internal static nint TrapCause⁔(/*this*/ WaitStatus w) { return -1; }
 
 } partial class syscall_package {
 
@@ -1351,9 +1351,9 @@ partial struct Signal /*num:nint*/;
 
 } partial class syscall_package {
 
-[GoMethodBody("Signal")] internal static void Signalᴍ(Signal s) { }
+internal static void Signal⁔(/*this*/ Signal s) { }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Signal s) {
+internal static @string String⁔(/*this*/ Signal s) {
     if (0 <= s && (nint)s < len(signals)) {
         @string str = signals[s];
         if (str != ""u8) {
@@ -1509,13 +1509,13 @@ internal static (ж<procThreadAttributeListContainer>, error) newProcThreadAttri
 } partial class syscall_package {
 
 // Update modifies the ProcThreadAttributeList using UpdateProcThreadAttribute.
-[GoMethodBody("update")] internal static error updateᴍ(ref procThreadAttributeListContainer al, uintptr attribute, @unsafe.Pointer value, uintptr size) {
+internal static error update⁔(/*this*/ ref procThreadAttributeListContainer al, uintptr attribute, @unsafe.Pointer value, uintptr size) {
     al.pointers = append(al.pointers, value);
     return updateProcThreadAttribute(al.data, 0, attribute, value, size, nil, nil);
 }
 
 // Delete frees ProcThreadAttributeList's resources.
-[GoMethodBody("delete")] internal static void deleteᴍ(ref procThreadAttributeListContainer al) {
+internal static void delete⁔(/*this*/ ref procThreadAttributeListContainer al) {
     deleteProcThreadAttributeList(al.data);
     LocalFree((Handle)(uintptr)al.data);
     al.data = default;
@@ -1523,7 +1523,7 @@ internal static (ж<procThreadAttributeListContainer>, error) newProcThreadAttri
 }
 
 // List returns the actual ProcThreadAttributeList to be passed to StartupInfoEx.
-[GoMethodBody("list")] internal static ж<_PROC_THREAD_ATTRIBUTE_LIST> listᴍ(ref procThreadAttributeListContainer al) {
+internal static ж<_PROC_THREAD_ATTRIBUTE_LIST> list⁔(/*this*/ ref procThreadAttributeListContainer al) {
     return al.data;
 }
 

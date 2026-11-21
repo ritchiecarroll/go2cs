@@ -63,9 +63,12 @@ using static go.net.http.internal_package;
 
 namespace go.net.http;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static internal_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("internal")]
 public static partial class internal_package
@@ -104,18 +107,18 @@ public static partial class internal_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(internal_package.chunkedReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class internalᴛchunkedReader;
-[GoMethodHost(typeof(internal_package.chunkedWriter)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class internalᴛchunkedWriter;
+[GoMethodHost(typeof(internal_package.chunkedReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class internalᴛchunkedReader;
+[GoMethodHost(typeof(internal_package.chunkedWriter)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class internalᴛchunkedWriter;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class internalᴛchunkedReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void beginChunk(this ref chunkedReader cr) => internal_package.beginChunkᴍ(ref cr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool chunkHeaderAvailable(this ref chunkedReader cr) => internal_package.chunkHeaderAvailableᴍ(ref cr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref chunkedReader cr, slice<uint8> b) => internal_package.Readᴍ(ref cr, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void beginChunk(this ref chunkedReader cr) => internal_package.beginChunk⁔(ref cr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool chunkHeaderAvailable(this ref chunkedReader cr) => internal_package.chunkHeaderAvailable⁔(ref cr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref chunkedReader cr, slice<uint8> b) => internal_package.Read⁔(ref cr, b);
 }
 partial class internalᴛchunkedWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref chunkedWriter cw, slice<byte> data) => internal_package.Writeᴍ(ref cw, data);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref chunkedWriter cw) => internal_package.Closeᴍ(ref cw);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref chunkedWriter cw, slice<byte> data) => internal_package.Write⁔(ref cw, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref chunkedWriter cw) => internal_package.Close⁔(ref cw);
 }
 // </GlyphForwarders>

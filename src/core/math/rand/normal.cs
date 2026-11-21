@@ -33,7 +33,7 @@ internal static uint32 absInt32(int32 i) {
 // adjust the output using:
 //
 //	sample = NormFloat64() * desiredStdDev + desiredMean
-[GoMethodBody("NormFloat64")] internal static float64 NormFloat64ᴍ(ref Rand r) {
+internal static float64 NormFloat64⁔(/*this*/ ref Rand r) {
     for (;;) {
         var j = (int32)r.Uint32(); // Possibly negative
         var i = j & 0x7F;

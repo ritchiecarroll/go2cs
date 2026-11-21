@@ -54,7 +54,7 @@ partial struct LoadBytes /*[]byte*/;
 
 } partial class macho_package {
 
-[GoMethodBody("Raw")] internal static slice<byte> Rawᴍ(LoadBytes b) { return b; }
+internal static slice<byte> Raw⁔(/*this*/ LoadBytes b) { return b; }
 
 } partial class macho_package {
 
@@ -90,12 +90,12 @@ partial struct Segment {
 } partial class macho_package {
 
 // Data reads and returns the contents of the segment.
-[GoMethodBody("Data")] internal static (slice<byte>, error) Dataᴍ(ref Segment s) {
+internal static (slice<byte>, error) Data⁔(/*this*/ ref Segment s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), s.Filesz, 0);
 }
 
 // Open returns a new ReadSeeker reading the segment.
-[GoMethodBody("Open")] internal static io.ReadSeeker Openᴍ(ref Segment s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
+internal static io.ReadSeeker Open⁔(/*this*/ ref Segment s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 } partial class macho_package {
 
@@ -141,12 +141,12 @@ partial struct Section {
 } partial class macho_package {
 
 // Data reads and returns the contents of the Mach-O section.
-[GoMethodBody("Data")] internal static (slice<byte>, error) Dataᴍ(ref Section s) {
+internal static (slice<byte>, error) Data⁔(/*this*/ ref Section s) {
     return saferio.ReadDataAt(new io.SectionReaderжReaderAt(s.sr), s.Size, 0);
 }
 
 // Open returns a new ReadSeeker reading the Mach-O section.
-[GoMethodBody("Open")] internal static io.ReadSeeker Openᴍ(ref Section s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
+internal static io.ReadSeeker Open⁔(/*this*/ ref Section s) { return new io.SectionReaderжReadSeeker(io.NewSectionReader(new io.SectionReaderжReaderAt(s.sr), 0, 9223372036854775807L)); }
 
 } partial class macho_package {
 
@@ -202,7 +202,7 @@ partial struct FormatError {
 
 } partial class macho_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref FormatError e) {
+internal static @string Error⁔(/*this*/ ref FormatError e) {
     @string msg = e.msg;
     if (e.val != nil) {
         msg += fmt.Sprintf(" '%v'"u8, e.val);
@@ -233,7 +233,7 @@ public static (ж<File>, error) Open(@string name) {
 // Close closes the [File].
 // If the [File] was created using [NewFile] directly instead of [Open],
 // Close has no effect.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref File f) {
+internal static error Close⁔(/*this*/ ref File f) {
     error err = default;
     if (f.closer != nil) {
         err = f.closer.Close();
@@ -503,7 +503,7 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
 
 } partial class macho_package {
 
-[GoMethodBody("parseSymtab")] internal static (ж<Symtab>, error) parseSymtabᴍ(ref File f, slice<byte> symdat, slice<byte> strtab, slice<byte> cmddat, ж<SymtabCmd> Ꮡhdr, int64 offset) {
+internal static (ж<Symtab>, error) parseSymtab⁔(/*this*/ ref File f, slice<byte> symdat, slice<byte> strtab, slice<byte> cmddat, ж<SymtabCmd> Ꮡhdr, int64 offset) {
     ref var hdr = ref Ꮡhdr.DerefOrNull();
 
     var bo = f.ByteOrder;
@@ -561,7 +561,7 @@ partial struct relocInfo {
 
 } partial class macho_package {
 
-[GoMethodBody("pushSection")] internal static error pushSectionᴍ(ref File f, ж<Section> Ꮡsh, io.ReaderAt r) {
+internal static error pushSection⁔(/*this*/ ref File f, ж<Section> Ꮡsh, io.ReaderAt r) {
     ref var sh = ref Ꮡsh.DerefOrNull();
 
     f.Sections = append(f.Sections, Ꮡsh);
@@ -637,7 +637,7 @@ internal static @string cstring(slice<byte> b) {
 } partial class macho_package {
 
 // Segment returns the first Segment with the given name, or nil if no such segment exists.
-[GoMethodBody("Segment")] internal static ж<Segment> Segmentᴍ(ref File f, @string name) {
+internal static ж<Segment> Segment⁔(/*this*/ ref File f, @string name) {
     foreach (var (_, l) in range(f.Loads)) {
         var (s, ok) = l._<ж<Segment>>(ᐧ); if (ok && s.Name == name) {
             return s;
@@ -648,7 +648,7 @@ internal static @string cstring(slice<byte> b) {
 
 // Section returns the first section with the given name, or nil if no such
 // section exists.
-[GoMethodBody("Section")] internal static ж<Section> Sectionᴍ(ref File f, @string name) {
+internal static ж<Section> Section⁔(/*this*/ ref File f, @string name) {
     foreach (var (_, s) in range(f.Sections)) {
         if (s.Name == name) {
             return s;
@@ -658,32 +658,32 @@ internal static @string cstring(slice<byte> b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string debugˢᴍFile => ref debugˢᵇᴍFile;
-private static readonly @string debugˢᵇᴍFile = "__debug_"u8;
-internal static ref readonly @string zdebugˢᴍFile => ref zdebugˢᵇᴍFile;
-private static readonly @string zdebugˢᵇᴍFile = "__zdebug_"u8;
-internal static ref readonly @string abbrevˢᴍFile => ref abbrevˢᵇᴍFile;
-private static readonly @string abbrevˢᵇᴍFile = "abbrev"u8;
-internal static ref readonly @string infoˢᴍFile => ref infoˢᵇᴍFile;
-private static readonly @string infoˢᵇᴍFile = "info"u8;
-internal static ref readonly @string lineˢᴍFile => ref lineˢᵇᴍFile;
-private static readonly @string lineˢᵇᴍFile = "line"u8;
-internal static ref readonly @string rangesˢᴍFile => ref rangesˢᵇᴍFile;
-private static readonly @string rangesˢᵇᴍFile = "ranges"u8;
-internal static ref readonly @string strˢᴍFile => ref strˢᵇᴍFile;
-private static readonly @string strˢᵇᴍFile = "str"u8;
+internal static ref readonly @string debugˢ⁔File => ref debugˢᵇ⁔File;
+private static readonly @string debugˢᵇ⁔File = "__debug_"u8;
+internal static ref readonly @string zdebugˢ⁔File => ref zdebugˢᵇ⁔File;
+private static readonly @string zdebugˢᵇ⁔File = "__zdebug_"u8;
+internal static ref readonly @string abbrevˢ⁔File => ref abbrevˢᵇ⁔File;
+private static readonly @string abbrevˢᵇ⁔File = "abbrev"u8;
+internal static ref readonly @string infoˢ⁔File => ref infoˢᵇ⁔File;
+private static readonly @string infoˢᵇ⁔File = "info"u8;
+internal static ref readonly @string lineˢ⁔File => ref lineˢᵇ⁔File;
+private static readonly @string lineˢᵇ⁔File = "line"u8;
+internal static ref readonly @string rangesˢ⁔File => ref rangesˢᵇ⁔File;
+private static readonly @string rangesˢᵇ⁔File = "ranges"u8;
+internal static ref readonly @string strˢ⁔File => ref strˢᵇ⁔File;
+private static readonly @string strˢᵇ⁔File = "str"u8;
 
 // DWARF returns the DWARF debug information for the Mach-O file.
-[GoMethodBody("DWARF")] internal static (ж<dwarf.Data>, error) DWARFᴍ(ref File f) {
+internal static (ж<dwarf.Data>, error) DWARF⁔(/*this*/ ref File f) {
     @string dwarfSuffix(ж<Section> s) {
         @string sectname = s.Name;
         nint pfx = default;
         switch (ᐧ) {
-        case {} when strings.HasPrefix(sectname, debugˢᴍFile): {
+        case {} when strings.HasPrefix(sectname, debugˢ⁔File): {
             pfx = 8;
             break;
         }
-        case {} when strings.HasPrefix(sectname, zdebugˢᴍFile): {
+        case {} when strings.HasPrefix(sectname, zdebugˢ⁔File): {
             pfx = 9;
             break;
         }
@@ -751,7 +751,7 @@ private static readonly @string strˢᵇᴍFile = "str"u8;
         dat[suffix] = b;
     }
 
-    var (d, err) = dwarf.New(dat[abbrevˢᴍFile], default, default, dat[infoˢᴍFile], dat[lineˢᴍFile], default, dat[rangesˢᴍFile], dat[strˢᴍFile]);
+    var (d, err) = dwarf.New(dat[abbrevˢ⁔File], default, default, dat[infoˢ⁔File], dat[lineˢ⁔File], default, dat[rangesˢ⁔File], dat[strˢ⁔File]);
     if (err != nil) {
         return (default, err);
     }
@@ -788,7 +788,7 @@ private static readonly @string strˢᵇᴍFile = "str"u8;
 // ImportedSymbols returns the names of all symbols
 // referred to by the binary f that are expected to be
 // satisfied by other libraries at dynamic load time.
-[GoMethodBody("ImportedSymbols")] internal static (slice<@string>, error) ImportedSymbolsᴍ(ref File f) {
+internal static (slice<@string>, error) ImportedSymbols⁔(/*this*/ ref File f) {
     if (f.Symtab == nil) {
         return (default, new FormatErrorжerror(Ꮡ(new FormatError(0, "missing symbol table", default))));
     }
@@ -817,7 +817,7 @@ private static readonly @string strˢᵇᴍFile = "str"u8;
 // ImportedLibraries returns the paths of all libraries
 // referred to by the binary f that are expected to be
 // linked with the binary at dynamic link time.
-[GoMethodBody("ImportedLibraries")] internal static (slice<@string>, error) ImportedLibrariesᴍ(ref File f) {
+internal static (slice<@string>, error) ImportedLibraries⁔(/*this*/ ref File f) {
     var allᴷ = new stackAppend<@string>(moves: true);
 
     slice<@string> all = default;

@@ -18,7 +18,7 @@ partial struct gcSizes {
 
 } partial class types_package {
 
-[GoMethodBody("Alignof")] internal static int64 /*result*/ Alignofᴍ(ж<gcSizes> Ꮡs, Type T) {
+internal static int64 /*result*/ Alignof⁔(/*this*/ ж<gcSizes> Ꮡs, Type T) {
     int64 result = default;
     GoFrame ᒐ = default;
     try {
@@ -102,7 +102,7 @@ partial struct gcSizes {
     ᒐdone: return result;
 }
 
-[GoMethodBody("Offsetsof")] internal static slice<int64> Offsetsofᴍ(ж<gcSizes> Ꮡs, slice<ж<Var>> fields) {
+internal static slice<int64> Offsetsof⁔(/*this*/ ж<gcSizes> Ꮡs, slice<ж<Var>> fields) {
     var offsets = new slice<int64>(len(fields));
     int64 offs = default;
     foreach (var (i, f) in range(fields)) {
@@ -124,7 +124,7 @@ partial struct gcSizes {
     return offsets;
 }
 
-[GoMethodBody("Sizeof")] internal static int64 Sizeofᴍ(ж<gcSizes> Ꮡs, Type T) {
+internal static int64 Sizeof⁔(/*this*/ ж<gcSizes> Ꮡs, Type T) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var switchᴛ8 = T.Underlying();

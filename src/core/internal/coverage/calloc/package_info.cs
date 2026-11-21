@@ -60,9 +60,12 @@ using static go.@internal.coverage.calloc_package;
 
 namespace go.@internal.coverage;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static calloc_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("calloc")]
 public static partial class calloc_package
@@ -94,11 +97,11 @@ public static partial class calloc_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(calloc_package.BatchCounterAlloc)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class callocᴛBatchCounterAlloc;
+[GoMethodHost(typeof(calloc_package.BatchCounterAlloc)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class callocᴛBatchCounterAlloc;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class callocᴛBatchCounterAlloc {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<uint32> AllocateCounters(this ref BatchCounterAlloc ca, nint n) => calloc_package.AllocateCountersᴍ(ref ca, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<uint32> AllocateCounters(this ref BatchCounterAlloc ca, nint n) => calloc_package.AllocateCounters⁔(ref ca, n);
 }
 // </GlyphForwarders>

@@ -60,9 +60,12 @@ using static go.@internal.profilerecord_package;
 
 namespace go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static profilerecord_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("profilerecord")]
 public static partial class profilerecord_package
@@ -96,12 +99,12 @@ public static partial class profilerecord_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(profilerecord_package.MemProfileRecord)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class profilerecordᴛMemProfileRecord;
+[GoMethodHost(typeof(profilerecord_package.MemProfileRecord)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class profilerecordᴛMemProfileRecord;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class profilerecordᴛMemProfileRecord {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 InUseBytes(this ref MemProfileRecord r) => profilerecord_package.InUseBytesᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 InUseObjects(this ref MemProfileRecord r) => profilerecord_package.InUseObjectsᴍ(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 InUseBytes(this ref MemProfileRecord r) => profilerecord_package.InUseBytes⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 InUseObjects(this ref MemProfileRecord r) => profilerecord_package.InUseObjects⁔(ref r);
 }
 // </GlyphForwarders>

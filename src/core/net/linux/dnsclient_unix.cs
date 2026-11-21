@@ -183,7 +183,7 @@ internal static (dnsmessage.Parser, dnsmessage.Header, error) dnsStreamRoundTrip
 } partial class net_package {
 
 // exchange sends a query on the connection and hopes for a response.
-[GoMethodBody("exchange")] internal static (dnsmessage.Parser, dnsmessage.Header, error) exchangeᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string server, dnsmessage.Question q, time.Duration timeout, bool useTCP, bool ad) {
+internal static (dnsmessage.Parser, dnsmessage.Header, error) exchange⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string server, dnsmessage.Question q, time.Duration timeout, bool useTCP, bool ad) {
     GoFrame ᒐ = default;
     try {
         q = q.ΔClone();
@@ -327,7 +327,7 @@ internal static (dnsmessage.RCode, bool) extractExtendedRCode(dnsmessage.Parser 
 
 // Do a lookup for a single name, which must be rooted
 // (otherwise answer will not find the answers).
-[GoMethodBody("tryOneName")] internal static (dnsmessage.Parser, @string, error) tryOneNameᴍ(ж<Resolver> Ꮡr, context.Context ctx, ж<dnsConfig> Ꮡcfg, @string name, dnsmessage.Type qtype) {
+internal static (dnsmessage.Parser, @string, error) tryOneName⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, ж<dnsConfig> Ꮡcfg, @string name, dnsmessage.Type qtype) {
     ref var cfg = ref Ꮡcfg.DerefOrNull();
 
     error lastErr = default;
@@ -414,16 +414,16 @@ internal static ж<dnsConfig> getSystemDNSConfig() {
 } partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string etcResolvConfˢᴍresolverConfig => ref etcResolvConfˢᵇᴍresolverConfig;
-private static readonly @string etcResolvConfˢᵇᴍresolverConfig = "/etc/resolv.conf"u8;
+internal static ref readonly @string etcResolvConfˢ⁔resolverConfig => ref etcResolvConfˢᵇ⁔resolverConfig;
+private static readonly @string etcResolvConfˢᵇ⁔resolverConfig = "/etc/resolv.conf"u8;
 
 // init initializes conf and is only called via conf.initOnce.
-[GoMethodBody("init")] internal static void initᴍ(ж<resolverConfig> Ꮡconf) {
+internal static void init⁔(/*this*/ ж<resolverConfig> Ꮡconf) {
     ref var conf = ref Ꮡconf.DerefOrNull();
 
     // Set dnsConfig and lastChecked so we don't parse
     // resolv.conf twice the first time.
-    Ꮡconf.ᏑdnsConfig.Store(dnsReadConfig(etcResolvConfˢᴍresolverConfig));
+    Ꮡconf.ᏑdnsConfig.Store(dnsReadConfig(etcResolvConfˢ⁔resolverConfig));
     conf.lastChecked = time.Now();
 
     // Prepare ch so that only one update of resolverConfig may
@@ -434,7 +434,7 @@ private static readonly @string etcResolvConfˢᵇᴍresolverConfig = "/etc/reso
 // tryUpdate tries to update conf with the named resolv.conf file.
 // The name variable only exists for testing. It is otherwise always
 // "/etc/resolv.conf".
-[GoMethodBody("tryUpdate")] internal static void tryUpdateᴍ(ж<resolverConfig> Ꮡconf, @string name) {
+internal static void tryUpdate⁔(/*this*/ ж<resolverConfig> Ꮡconf, @string name) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -486,7 +486,7 @@ private static readonly @string etcResolvConfˢᵇᴍresolverConfig = "/etc/reso
     finally { if (ᒐd1) Ꮡconf.DerefOrNull().releaseSema(); ᒐ.Run(); }
 }
 
-[GoMethodBody("tryAcquireSema")] internal static bool tryAcquireSemaᴍ(ref resolverConfig conf) {
+internal static bool tryAcquireSema⁔(/*this*/ ref resolverConfig conf) {
     var selᴛ8 = conf.ch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
     switch (trySelect(selᴛ8)) {
     case 0: {
@@ -497,13 +497,13 @@ private static readonly @string etcResolvConfˢᵇᴍresolverConfig = "/etc/reso
     }}
 }
 
-[GoMethodBody("releaseSema")] internal static void releaseSemaᴍ(ref resolverConfig conf) {
+internal static void releaseSema⁔(/*this*/ ref resolverConfig conf) {
     ᐸꟷ(conf.ch);
 }
 
 } partial class net_package {
 
-[GoMethodBody("lookup")] internal static (dnsmessage.Parser, @string, error) lookupᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string name, dnsmessage.Type qtype, ж<dnsConfig> Ꮡconf) {
+internal static (dnsmessage.Parser, @string, error) lookup⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string name, dnsmessage.Type qtype, ж<dnsConfig> Ꮡconf) {
     ref var conf = ref Ꮡconf.DerefOrNull();
 
     if (!isDomainName(name)) {
@@ -566,7 +566,7 @@ internal static bool avoidDNS(@string name) {
 } partial class net_package {
 
 // nameList returns a list of names for sequential DNS queries.
-[GoMethodBody("nameList")] internal static slice<@string> nameListᴍ(ref dnsConfig conf, @string name) {
+internal static slice<@string> nameList⁔(/*this*/ ref dnsConfig conf, @string name) {
     // Check name length (see isDomainName).
     nint l = len(name);
     var rooted = l > 0 && name[l - 1] == '.';
@@ -630,7 +630,7 @@ internal static map<hostLookupOrder, @string> lookupOrderName = new map<hostLook
 
 } partial class net_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(hostLookupOrder o) {
+internal static @string String⁔(/*this*/ hostLookupOrder o) {
     var (s, ok) = lookupOrderName[o, ꟷ]; if (ok) {
         return s;
     }
@@ -639,7 +639,7 @@ internal static map<hostLookupOrder, @string> lookupOrderName = new map<hostLook
 
 } partial class net_package {
 
-[GoMethodBody("goLookupHostOrder")] internal static (slice<@string> addrs, error err) goLookupHostOrderᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string name, hostLookupOrder order, ж<dnsConfig> conf) {
+internal static (slice<@string> addrs, error err) goLookupHostOrder⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string name, hostLookupOrder order, ж<dnsConfig> conf) {
     slice<@string> addrs = default;
     error err = default;
 
@@ -691,7 +691,7 @@ internal static (slice<IPAddr> addrs, @string canonical) goLookupIPFiles(@string
 
 // goLookupIP is the native Go implementation of LookupIP.
 // The libc versions are in cgo_*.go.
-[GoMethodBody("goLookupIP")] internal static (slice<IPAddr> addrs, error err) goLookupIPᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host, hostLookupOrder order, ж<dnsConfig> conf) {
+internal static (slice<IPAddr> addrs, error err) goLookupIP⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host, hostLookupOrder order, ж<dnsConfig> conf) {
     slice<IPAddr> addrs = default;
     error err = default;
 
@@ -709,7 +709,7 @@ internal partial struct goLookupIPCNAMEOrder_result /*dyn*/ {
 
 } partial class net_package {
 
-[GoMethodBody("goLookupIPCNAMEOrder")] internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookupIPCNAMEOrderᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string network, @string name, hostLookupOrder order, ж<dnsConfig> Ꮡconf) {
+internal static (slice<IPAddr> addrs, dnsmessage.Name cname, error err) goLookupIPCNAMEOrder⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string network, @string name, hostLookupOrder order, ж<dnsConfig> Ꮡconf) {
     slice<IPAddr> addrs = default;
     dnsmessage.Name cname = new();
     ref var conf = ref Ꮡconf.DerefOrNull();
@@ -940,17 +940,17 @@ break_loop:;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cnameˢᴍResolver => ref cnameˢᵇᴍResolver;
-private static readonly @string cnameˢᵇᴍResolver = "CNAME"u8;
+internal static ref readonly @string cnameˢ⁔Resolver => ref cnameˢᵇ⁔Resolver;
+private static readonly @string cnameˢᵇ⁔Resolver = "CNAME"u8;
 
 // goLookupCNAME is the native Go (non-cgo) implementation of LookupCNAME.
-[GoMethodBody("goLookupCNAME")] internal static (@string, error) goLookupCNAMEᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string host, hostLookupOrder order, ж<dnsConfig> conf) {
-    var (_, cname, err) = Ꮡr.goLookupIPCNAMEOrder(ctx, cnameˢᴍResolver, host, order, conf);
+internal static (@string, error) goLookupCNAME⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string host, hostLookupOrder order, ж<dnsConfig> conf) {
+    var (_, cname, err) = Ꮡr.goLookupIPCNAMEOrder(ctx, cnameˢ⁔Resolver, host, order, conf);
     return (cname.String(), err);
 }
 
 // goLookupPTR is the native Go implementation of LookupAddr.
-[GoMethodBody("goLookupPTR")] internal static (slice<@string>, error) goLookupPTRᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string addr, hostLookupOrder order, ж<dnsConfig> conf) {
+internal static (slice<@string>, error) goLookupPTR⁔(/*this*/ ж<Resolver> Ꮡr, context.Context ctx, @string addr, hostLookupOrder order, ж<dnsConfig> conf) {
     var ptrsᴷ = new stackAppend<@string>(moves: true);
 
     if (order == hostLookupFiles || order == hostLookupFilesDNS) {

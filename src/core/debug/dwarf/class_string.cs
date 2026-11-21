@@ -39,7 +39,7 @@ private static readonly @string _Class_nameᵇ = "ClassUnknownClassAddressClassB
 
 } partial class dwarf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Class i) {
+internal static @string String⁔(/*this*/ Class i) {
     if (i < 0 || i >= ((Class)(len(_Class_index) - 1))) {
         return "Class("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }

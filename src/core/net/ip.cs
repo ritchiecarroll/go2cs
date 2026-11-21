@@ -125,12 +125,12 @@ public static ref IP IPv6linklocalallrouters => ref ((StaticBox<IP>)ᏑIPv6linkl
 
 // IsUnspecified reports whether ip is an unspecified address, either
 // the IPv4 address "0.0.0.0" or the IPv6 address "::".
-[GoMethodBody("IsUnspecified")] internal static bool IsUnspecifiedᴍ(IP ip) {
+internal static bool IsUnspecified⁔(/*this*/ IP ip) {
     return ip.Equal(IPv4zero) || ip.Equal(IPv6unspecified);
 }
 
 // IsLoopback reports whether ip is a loopback address.
-[GoMethodBody("IsLoopback")] internal static bool IsLoopbackᴍ(IP ip) {
+internal static bool IsLoopback⁔(/*this*/ IP ip) {
     var ip4 = ip.To4(); if (ip4 != nil) {
         return ip4[0] == 127;
     }
@@ -139,7 +139,7 @@ public static ref IP IPv6linklocalallrouters => ref ((StaticBox<IP>)ᏑIPv6linkl
 
 // IsPrivate reports whether ip is a private address, according to
 // RFC 1918 (IPv4 addresses) and RFC 4193 (IPv6 addresses).
-[GoMethodBody("IsPrivate")] internal static bool IsPrivateᴍ(IP ip) {
+internal static bool IsPrivate⁔(/*this*/ IP ip) {
     var ip4 = ip.To4(); if (ip4 != nil) {
         // Following RFC 1918, Section 3. Private Address Space which says:
         //   The Internet Assigned Numbers Authority (IANA) has reserved the
@@ -155,7 +155,7 @@ public static ref IP IPv6linklocalallrouters => ref ((StaticBox<IP>)ᏑIPv6linkl
 }
 
 // IsMulticast reports whether ip is a multicast address.
-[GoMethodBody("IsMulticast")] internal static bool IsMulticastᴍ(IP ip) {
+internal static bool IsMulticast⁔(/*this*/ IP ip) {
     var ip4 = ip.To4(); if (ip4 != nil) {
         return (byte)(ip4[0] & 0xf0) == 0xe0;
     }
@@ -164,13 +164,13 @@ public static ref IP IPv6linklocalallrouters => ref ((StaticBox<IP>)ᏑIPv6linkl
 
 // IsInterfaceLocalMulticast reports whether ip is
 // an interface-local multicast address.
-[GoMethodBody("IsInterfaceLocalMulticast")] internal static bool IsInterfaceLocalMulticastᴍ(IP ip) {
+internal static bool IsInterfaceLocalMulticast⁔(/*this*/ IP ip) {
     return len(ip) == IPv6len && ip[0] == 0xff && (byte)(ip[1] & 0x0f) == 0x01;
 }
 
 // IsLinkLocalMulticast reports whether ip is a link-local
 // multicast address.
-[GoMethodBody("IsLinkLocalMulticast")] internal static bool IsLinkLocalMulticastᴍ(IP ip) {
+internal static bool IsLinkLocalMulticast⁔(/*this*/ IP ip) {
     var ip4 = ip.To4(); if (ip4 != nil) {
         return ip4[0] == 224 && ip4[1] == 0 && ip4[2] == 0;
     }
@@ -179,7 +179,7 @@ public static ref IP IPv6linklocalallrouters => ref ((StaticBox<IP>)ᏑIPv6linkl
 
 // IsLinkLocalUnicast reports whether ip is a link-local
 // unicast address.
-[GoMethodBody("IsLinkLocalUnicast")] internal static bool IsLinkLocalUnicastᴍ(IP ip) {
+internal static bool IsLinkLocalUnicast⁔(/*this*/ IP ip) {
     var ip4 = ip.To4(); if (ip4 != nil) {
         return ip4[0] == 169 && ip4[1] == 254;
     }
@@ -194,7 +194,7 @@ public static ref IP IPv6linklocalallrouters => ref ((StaticBox<IP>)ᏑIPv6linkl
 // the exception of IPv4 directed broadcast addresses.
 // It returns true even if ip is in IPv4 private address space or
 // local IPv6 unicast address space.
-[GoMethodBody("IsGlobalUnicast")] internal static bool IsGlobalUnicastᴍ(IP ip) {
+internal static bool IsGlobalUnicast⁔(/*this*/ IP ip) {
     return (len(ip) == IPv4len || len(ip) == IPv6len) && !ip.Equal(IPv4bcast) && !ip.IsUnspecified() && !ip.IsLoopback() && !ip.IsMulticast() && !ip.IsLinkLocalUnicast();
 }
 
@@ -214,7 +214,7 @@ internal static bool isZeros(IP p) {
 
 // To4 converts the IPv4 address ip to a 4-byte representation.
 // If ip is not an IPv4 address, To4 returns nil.
-[GoMethodBody("To4")] internal static IP To4ᴍ(IP ip) {
+internal static IP To4⁔(/*this*/ IP ip) {
     if (len(ip) == IPv4len) {
         return ip;
     }
@@ -226,7 +226,7 @@ internal static bool isZeros(IP p) {
 
 // To16 converts the IP address ip to a 16-byte representation.
 // If ip is not an IP address (it is the wrong length), To16 returns nil.
-[GoMethodBody("To16")] internal static IP To16ᴍ(IP ip) {
+internal static IP To16⁔(/*this*/ IP ip) {
     if (len(ip) == IPv4len) {
         return IPv4(ip[0], ip[1], ip[2], ip[3]);
     }
@@ -248,7 +248,7 @@ internal static IPMask classCMask = IPv4Mask(0xff, 0xff, 0xff, 0);
 // DefaultMask returns the default IP mask for the IP address ip.
 // Only IPv4 addresses have default masks; DefaultMask returns
 // nil if ip is not a valid IPv4 address.
-[GoMethodBody("DefaultMask")] internal static IPMask DefaultMaskᴍ(IP ip) {
+internal static IPMask DefaultMask⁔(/*this*/ IP ip) {
     ip = ip.To4(); if (ip == nil) {
         return default;
     }
@@ -278,7 +278,7 @@ internal static bool allFF(slice<byte> b) {
 } partial class net_package {
 
 // Mask returns the result of masking the IP address ip with mask.
-[GoMethodBody("Mask")] internal static IP Maskᴍ(IP ip, IPMask mask) {
+internal static IP Mask⁔(/*this*/ IP ip, IPMask mask) {
     if (len(mask) == IPv6len && len(ip) == IPv4len && allFF(mask[..12])) {
         mask = mask[12..];
     }
@@ -297,8 +297,8 @@ internal static bool allFF(slice<byte> b) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢᴍIP => ref nilˢᵇᴍIP;
-private static readonly @string nilˢᵇᴍIP = "<nil>"u8;
+internal static ref readonly @string nilˢ⁔IP => ref nilˢᵇ⁔IP;
+private static readonly @string nilˢᵇ⁔IP = "<nil>"u8;
 
 // String returns the string form of the IP address ip.
 // It returns one of 4 forms:
@@ -306,9 +306,9 @@ private static readonly @string nilˢᵇᴍIP = "<nil>"u8;
 //   - dotted decimal ("192.0.2.1"), if ip is an IPv4 or IP4-mapped IPv6 address
 //   - IPv6 conforming to RFC 5952 ("2001:db8::1"), if ip is a valid IPv6 address
 //   - the hexadecimal form of ip, without punctuation, if no other cases apply
-[GoMethodBody("String")] internal static @string Stringᴍ(IP ip) {
+internal static @string String⁔(/*this*/ IP ip) {
     if (len(ip) == 0) {
-        return nilˢᴍIP;
+        return nilˢ⁔IP;
     }
 
     if (len(ip) != IPv4len && len(ip) != IPv6len) {
@@ -354,7 +354,7 @@ internal static @string ipEmptyString(IP ip) {
 
 // appendTo appends the string representation of ip to b and returns the expanded b
 // If len(ip) != IPv4len or IPv6len, it appends nothing.
-[GoMethodBody("appendTo")] internal static slice<byte> appendToᴍ(IP ip, slice<byte> b) {
+internal static slice<byte> appendTo⁔(/*this*/ IP ip, slice<byte> b) {
     // If IPv4, use dotted notation.
     var p4 = ip.To4(); if (len(p4) == IPv4len) {
         ip = p4;
@@ -366,7 +366,7 @@ internal static @string ipEmptyString(IP ip) {
 // AppendText implements the [encoding.TextAppender] interface.
 // The encoding is the same as returned by [IP.String], with one exception:
 // When len(ip) is zero, it appends nothing.
-[GoMethodBody("AppendText")] internal static (slice<byte>, error) AppendTextᴍ(IP ip, slice<byte> b) {
+internal static (slice<byte>, error) AppendText⁔(/*this*/ IP ip, slice<byte> b) {
     if (len(ip) == 0) {
         return (b, default);
     }
@@ -380,7 +380,7 @@ internal static @string ipEmptyString(IP ip) {
 // MarshalText implements the [encoding.TextMarshaler] interface.
 // The encoding is the same as returned by [IP.String], with one exception:
 // When len(ip) is zero, it returns an empty slice.
-[GoMethodBody("MarshalText")] internal static (slice<byte>, error) MarshalTextᴍ(IP ip) {
+internal static (slice<byte>, error) MarshalText⁔(/*this*/ IP ip) {
     // 24 is satisfied with all IPv4 addresses and short IPv6 addresses
     var (b, err) = ip.AppendText(new slice<byte>(0, 24));
     if (err != nil) {
@@ -391,7 +391,7 @@ internal static @string ipEmptyString(IP ip) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 // The IP address is expected in a form accepted by [ParseIP].
-[GoMethodBody("UnmarshalText")] internal static error UnmarshalTextᴍ(ref IP ip, slice<byte> text) {
+internal static error UnmarshalText⁔(/*this*/ ref IP ip, slice<byte> text) {
     if (len(text) == 0) {
         ip = default;
         return default;
@@ -408,7 +408,7 @@ internal static @string ipEmptyString(IP ip) {
 // Equal reports whether ip and x are the same IP address.
 // An IPv4 address and that same address in IPv6 form are
 // considered to be equal.
-[GoMethodBody("Equal")] internal static bool Equalᴍ(IP ip, IP x) {
+internal static bool Equal⁔(/*this*/ IP ip, IP x) {
     if (len(ip) == len(x)) {
         return bytealg.Equal(ip, x);
     }
@@ -421,7 +421,7 @@ internal static @string ipEmptyString(IP ip) {
     return false;
 }
 
-[GoMethodBody("matchAddrFamily")] internal static bool matchAddrFamilyᴍ(IP ip, IP x) {
+internal static bool matchAddrFamily⁔(/*this*/ IP ip, IP x) {
     return ip.To4() != nil && x.To4() != nil || ip.To16() != nil && ip.To4() == nil && x.To16() != nil && x.To4() == nil;
 }
 
@@ -464,7 +464,7 @@ internal static nint simpleMaskLength(IPMask mask) {
 // Size returns the number of leading ones and total bits in the mask.
 // If the mask is not in the canonical form--ones followed by zeros--then
 // Size returns 0, 0.
-[GoMethodBody("Size")] internal static (nint ones, nint bits) Sizeᴍ(IPMask m) {
+internal static (nint ones, nint bits) Size⁔(/*this*/ IPMask m) {
     nint ones = default;
     nint bits = default;
 
@@ -476,13 +476,13 @@ internal static nint simpleMaskLength(IPMask mask) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢᴍIPMask => ref nilˢᵇᴍIPMask;
-private static readonly @string nilˢᵇᴍIPMask = "<nil>"u8;
+internal static ref readonly @string nilˢ⁔IPMask => ref nilˢᵇ⁔IPMask;
+private static readonly @string nilˢᵇ⁔IPMask = "<nil>"u8;
 
 // String returns the hexadecimal form of m, with no punctuation.
-[GoMethodBody("String")] internal static @string Stringᴍ(IPMask m) {
+internal static @string String⁔(/*this*/ IPMask m) {
     if (len(m) == 0) {
-        return nilˢᴍIPMask;
+        return nilˢ⁔IPMask;
     }
     return hexString(m);
 }
@@ -522,7 +522,7 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ref IPNet n) {
 } partial class net_package {
 
 // Contains reports whether the network includes ip.
-[GoMethodBody("Contains")] internal static bool Containsᴍ(ж<IPNet> Ꮡn, IP ip) {
+internal static bool Contains⁔(/*this*/ ж<IPNet> Ꮡn, IP ip) {
     var (nn, m) = networkNumberAndMask(ref (Ꮡn).DerefOrNull());
     var x = ip.To4(); if (x != nil) {
         ip = x;
@@ -540,15 +540,15 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ref IPNet n) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string ipNetˢᴍIPNet => ref ipNetˢᵇᴍIPNet;
-private static readonly @string ipNetˢᵇᴍIPNet = "ip+net"u8;
+internal static ref readonly @string ipNetˢ⁔IPNet => ref ipNetˢᵇ⁔IPNet;
+private static readonly @string ipNetˢᵇ⁔IPNet = "ip+net"u8;
 
 // Network returns the address's network name, "ip+net".
-[GoMethodBody("Network")] internal static @string Networkᴍ(ref IPNet n) { return ipNetˢᴍIPNet; }
+internal static @string Network⁔(/*this*/ ref IPNet n) { return ipNetˢ⁔IPNet; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢᴍIPNet => ref nilˢᵇᴍIPNet;
-private static readonly @string nilˢᵇᴍIPNet = "<nil>"u8;
+internal static ref readonly @string nilˢ⁔IPNet => ref nilˢᵇ⁔IPNet;
+private static readonly @string nilˢᵇ⁔IPNet = "<nil>"u8;
 
 // String returns the CIDR notation of n like "192.0.2.0/24"
 // or "2001:db8::/48" as defined in RFC 4632 and RFC 4291.
@@ -556,13 +556,13 @@ private static readonly @string nilˢᵇᴍIPNet = "<nil>"u8;
 // string which consists of an IP address, followed by a slash
 // character and a mask expressed as hexadecimal form with no
 // punctuation like "198.51.100.0/c000ff00".
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<IPNet> Ꮡn) {
+internal static @string String⁔(/*this*/ ж<IPNet> Ꮡn) {
     if (Ꮡn == nil) {
-        return nilˢᴍIPNet;
+        return nilˢ⁔IPNet;
     }
     var (nn, m) = networkNumberAndMask(ref (Ꮡn).DerefOrNull());
     if (nn == nil || m == nil) {
-        return nilˢᴍIPNet;
+        return nilˢ⁔IPNet;
     }
     nint l = simpleMaskLength(m);
     if (l == -1) {

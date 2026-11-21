@@ -29,23 +29,23 @@ partial struct batch {
 
 } partial class trace_package {
 
-[GoMethodBody("isStringsBatch")] internal static bool isStringsBatchᴍ(ref batch b) {
+internal static bool isStringsBatch⁔(/*this*/ ref batch b) {
     return b.exp == tracev2.NoExperiment && len(b.data) > 0 && ((tracev2.EventType)b.data[0]) == tracev2.EvStrings;
 }
 
-[GoMethodBody("isStacksBatch")] internal static bool isStacksBatchᴍ(ref batch b) {
+internal static bool isStacksBatch⁔(/*this*/ ref batch b) {
     return b.exp == tracev2.NoExperiment && len(b.data) > 0 && ((tracev2.EventType)b.data[0]) == tracev2.EvStacks;
 }
 
-[GoMethodBody("isCPUSamplesBatch")] internal static bool isCPUSamplesBatchᴍ(ref batch b) {
+internal static bool isCPUSamplesBatch⁔(/*this*/ ref batch b) {
     return b.exp == tracev2.NoExperiment && len(b.data) > 0 && ((tracev2.EventType)b.data[0]) == tracev2.EvCPUSamples;
 }
 
-[GoMethodBody("isSyncBatch")] internal static bool isSyncBatchᴍ(ref batch b, version.Version ver) {
+internal static bool isSyncBatch⁔(/*this*/ ref batch b, version.Version ver) {
     return (b.exp == tracev2.NoExperiment && len(b.data) > 0) && ((((tracev2.EventType)b.data[0]) == tracev2.EvFrequency && ver < version.Go125) || (((tracev2.EventType)b.data[0]) == tracev2.EvSync && ver >= version.Go125));
 }
 
-[GoMethodBody("isEndOfGeneration")] internal static bool isEndOfGenerationᴍ(ref batch b) {
+internal static bool isEndOfGeneration⁔(/*this*/ ref batch b) {
     return b.exp == tracev2.NoExperiment && len(b.data) > 0 && ((tracev2.EventType)b.data[0]) == tracev2.EvEndOfGeneration;
 }
 

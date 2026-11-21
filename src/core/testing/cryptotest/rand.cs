@@ -77,7 +77,7 @@ partial struct lockedReader {
 
 } partial class cryptotest_package {
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ж<lockedReader> Ꮡlr, slice<byte> b) {
+internal static (nint n, error err) Read⁔(/*this*/ ж<lockedReader> Ꮡlr, slice<byte> b) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;

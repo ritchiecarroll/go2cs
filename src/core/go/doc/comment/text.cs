@@ -27,7 +27,7 @@ partial struct textPrinter {
 
 // Text returns a textual formatting of the [Doc].
 // See the [Printer] documentation for ways to customize the text output.
-[GoMethodBody("Text")] internal static slice<byte> Textᴍ(ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
+internal static slice<byte> Text⁔(/*this*/ ж<Printer> Ꮡp, ж<Doc> Ꮡd) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var d = ref Ꮡd.DerefOrNull();
 
@@ -92,11 +92,11 @@ internal static void writeNL(ж<bytes.Buffer> Ꮡout) {
 } partial class comment_package {
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string fourSpaceᶜ2ᴍtextPrinter => ref fourSpaceᶜ2ᵇᴍtextPrinter;
-private static readonly @string fourSpaceᶜ2ᵇᴍtextPrinter = "    "u8;
+internal static ref readonly @string fourSpaceᶜ2⁔textPrinter => ref fourSpaceᶜ2ᵇ⁔textPrinter;
+private static readonly @string fourSpaceᶜ2ᵇ⁔textPrinter = "    "u8;
 
 // block prints the block x to out.
-[GoMethodBody("block")] internal static void blockᴍ(ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) {
+internal static void block⁔(/*this*/ ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, Block x) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -146,7 +146,7 @@ private static readonly @string fourSpaceᶜ2ᵇᴍtextPrinter = "    "u8;
                 @out.WriteString(". ");
             }
             foreach (var (iΔ1, blk) in range(item.Content)) {
-                @string fourSpace = fourSpaceᶜ2ᴍtextPrinter;
+                @string fourSpace = fourSpaceᶜ2⁔textPrinter;
                 if (iΔ1 > 0) {
                     writeNL(Ꮡout);
                     @out.WriteString(p.prefix);
@@ -160,7 +160,7 @@ private static readonly @string fourSpaceᶜ2ᵇᴍtextPrinter = "    "u8;
 }
 
 // text prints the text sequence x to out.
-[GoMethodBody("text")] internal static void textᴍ(ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) {
+internal static void text⁔(/*this*/ ж<textPrinter> Ꮡp, ж<bytes.Buffer> Ꮡout, @string indent, slice<Text> x) {
     ref var p = ref Ꮡp.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -192,7 +192,7 @@ private static readonly @string fourSpaceᶜ2ᵇᴍtextPrinter = "    "u8;
 // oneLongLine prints the text sequence x to out as one long line,
 // without worrying about line wrapping.
 // Explicit links have the [ ] dropped to improve readability.
-[GoMethodBody("oneLongLine")] internal static void oneLongLineᴍ(ref textPrinter p, ж<strings.Builder> @out, slice<Text> x) {
+internal static void oneLongLine⁔(/*this*/ ref textPrinter p, ж<strings.Builder> @out, slice<Text> x) {
     foreach (var (_, t) in range(x)) {
         switch (t.type()) {
         case Plain tΔ1: {

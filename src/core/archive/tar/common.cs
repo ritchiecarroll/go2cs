@@ -47,17 +47,17 @@ partial struct headerError /*[]@string*/;
 } partial class tar_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string andˢᴍheaderError => ref andˢᵇᴍheaderError;
-private static readonly @string andˢᵇᴍheaderError = "; and "u8;
+internal static ref readonly @string andˢ⁔headerError => ref andˢᵇ⁔headerError;
+private static readonly @string andˢᵇ⁔headerError = "; and "u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-internal static ref readonly @string prefixᶜᴍheaderError => ref prefixᶜᵇᴍheaderError;
-private static readonly @string prefixᶜᵇᴍheaderError = "archive/tar: cannot encode header"u8;
+internal static ref readonly @string prefixᶜ⁔headerError => ref prefixᶜᵇ⁔headerError;
+private static readonly @string prefixᶜᵇ⁔headerError = "archive/tar: cannot encode header"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(headerError he) {
+internal static @string Error⁔(/*this*/ headerError he) {
     var ssᴷ = new stackAppend<@string>();
 
-    @string prefix = prefixᶜᴍheaderError;
+    @string prefix = prefixᶜ⁔headerError;
     slice<@string> ss = default;
     foreach (var (_, s) in range<@string>(he)) {
         if (s != ""u8) {
@@ -67,7 +67,7 @@ private static readonly @string prefixᶜᵇᴍheaderError = "archive/tar: canno
     if (len(ss) == 0) {
         return prefix;
     }
-    return fmt.Sprintf("%s: %v"u8, prefix, strings.Join(ss, andˢᴍheaderError));
+    return fmt.Sprintf("%s: %v"u8, prefix, strings.Join(ss, andˢ⁔headerError));
 }
 
 } partial class tar_package {
@@ -244,7 +244,7 @@ partial struct sparseEntry {
 
 } partial class tar_package {
 
-[GoMethodBody("endOffset")] internal static int64 endOffsetᴍ(sparseEntry s) { return s.Offset + s.Length; }
+internal static int64 endOffset⁔(/*this*/ sparseEntry s) { return s.Offset + s.Length; }
 
 } partial class tar_package {
 
@@ -371,38 +371,38 @@ partial interface fileState {
 } partial class tar_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nameˢᴍHeader => ref nameˢᵇᴍHeader;
-private static readonly @string nameˢᵇᴍHeader = "Name"u8;
-internal static ref readonly @string linknameˢᴍHeader => ref linknameˢᵇᴍHeader;
-private static readonly @string linknameˢᵇᴍHeader = "Linkname"u8;
-internal static ref readonly @string unameˢᴍHeader => ref unameˢᵇᴍHeader;
-private static readonly @string unameˢᵇᴍHeader = "Uname"u8;
-internal static ref readonly @string gnameˢᴍHeader => ref gnameˢᵇᴍHeader;
-private static readonly @string gnameˢᵇᴍHeader = "Gname"u8;
-internal static ref readonly @string modeˢᴍHeader => ref modeˢᵇᴍHeader;
-private static readonly @string modeˢᵇᴍHeader = "Mode"u8;
-internal static ref readonly @string uidˢᴍHeader => ref uidˢᵇᴍHeader;
-private static readonly @string uidˢᵇᴍHeader = "Uid"u8;
-internal static ref readonly @string gidˢᴍHeader => ref gidˢᵇᴍHeader;
-private static readonly @string gidˢᵇᴍHeader = "Gid"u8;
-internal static ref readonly @string sizeˢᴍHeader => ref sizeˢᵇᴍHeader;
-private static readonly @string sizeˢᵇᴍHeader = "Size"u8;
-internal static ref readonly @string devmajorˢᴍHeader => ref devmajorˢᵇᴍHeader;
-private static readonly @string devmajorˢᵇᴍHeader = "Devmajor"u8;
-internal static ref readonly @string devminorˢᴍHeader => ref devminorˢᵇᴍHeader;
-private static readonly @string devminorˢᵇᴍHeader = "Devminor"u8;
-internal static ref readonly @string modTimeˢᴍHeader => ref modTimeˢᵇᴍHeader;
-private static readonly @string modTimeˢᵇᴍHeader = "ModTime"u8;
-internal static ref readonly @string accessTimeˢᴍHeader => ref accessTimeˢᵇᴍHeader;
-private static readonly @string accessTimeˢᵇᴍHeader = "AccessTime"u8;
-internal static ref readonly @string changeTimeˢᴍHeader => ref changeTimeˢᵇᴍHeader;
-private static readonly @string changeTimeˢᵇᴍHeader = "ChangeTime"u8;
-internal static ref readonly @string onlyPaxSupportsˢᴍHeader => ref onlyPaxSupportsˢᵇᴍHeader;
-private static readonly @string onlyPaxSupportsˢᵇᴍHeader = "only PAX supports TypeXGlobalHeader"u8;
-internal static ref readonly @string onlyPaxSupportsXattrsˢᴍHeader => ref onlyPaxSupportsXattrsˢᵇᴍHeader;
-private static readonly @string onlyPaxSupportsXattrsˢᵇᴍHeader = "only PAX supports Xattrs"u8;
-internal static ref readonly @string onlyPaxSupportsˢ2ᴍHeader => ref onlyPaxSupportsˢ2ᵇᴍHeader;
-private static readonly @string onlyPaxSupportsˢ2ᵇᴍHeader = "only PAX supports PAXRecords"u8;
+internal static ref readonly @string nameˢ⁔Header => ref nameˢᵇ⁔Header;
+private static readonly @string nameˢᵇ⁔Header = "Name"u8;
+internal static ref readonly @string linknameˢ⁔Header => ref linknameˢᵇ⁔Header;
+private static readonly @string linknameˢᵇ⁔Header = "Linkname"u8;
+internal static ref readonly @string unameˢ⁔Header => ref unameˢᵇ⁔Header;
+private static readonly @string unameˢᵇ⁔Header = "Uname"u8;
+internal static ref readonly @string gnameˢ⁔Header => ref gnameˢᵇ⁔Header;
+private static readonly @string gnameˢᵇ⁔Header = "Gname"u8;
+internal static ref readonly @string modeˢ⁔Header => ref modeˢᵇ⁔Header;
+private static readonly @string modeˢᵇ⁔Header = "Mode"u8;
+internal static ref readonly @string uidˢ⁔Header => ref uidˢᵇ⁔Header;
+private static readonly @string uidˢᵇ⁔Header = "Uid"u8;
+internal static ref readonly @string gidˢ⁔Header => ref gidˢᵇ⁔Header;
+private static readonly @string gidˢᵇ⁔Header = "Gid"u8;
+internal static ref readonly @string sizeˢ⁔Header => ref sizeˢᵇ⁔Header;
+private static readonly @string sizeˢᵇ⁔Header = "Size"u8;
+internal static ref readonly @string devmajorˢ⁔Header => ref devmajorˢᵇ⁔Header;
+private static readonly @string devmajorˢᵇ⁔Header = "Devmajor"u8;
+internal static ref readonly @string devminorˢ⁔Header => ref devminorˢᵇ⁔Header;
+private static readonly @string devminorˢᵇ⁔Header = "Devminor"u8;
+internal static ref readonly @string modTimeˢ⁔Header => ref modTimeˢᵇ⁔Header;
+private static readonly @string modTimeˢᵇ⁔Header = "ModTime"u8;
+internal static ref readonly @string accessTimeˢ⁔Header => ref accessTimeˢᵇ⁔Header;
+private static readonly @string accessTimeˢᵇ⁔Header = "AccessTime"u8;
+internal static ref readonly @string changeTimeˢ⁔Header => ref changeTimeˢᵇ⁔Header;
+private static readonly @string changeTimeˢᵇ⁔Header = "ChangeTime"u8;
+internal static ref readonly @string onlyPaxSupportsˢ⁔Header => ref onlyPaxSupportsˢᵇ⁔Header;
+private static readonly @string onlyPaxSupportsˢᵇ⁔Header = "only PAX supports TypeXGlobalHeader"u8;
+internal static ref readonly @string onlyPaxSupportsXattrsˢ⁔Header => ref onlyPaxSupportsXattrsˢᵇ⁔Header;
+private static readonly @string onlyPaxSupportsXattrsˢᵇ⁔Header = "only PAX supports Xattrs"u8;
+internal static ref readonly @string onlyPaxSupportsˢ2⁔Header => ref onlyPaxSupportsˢ2ᵇ⁔Header;
+private static readonly @string onlyPaxSupportsˢ2ᵇ⁔Header = "only PAX supports PAXRecords"u8;
 
 // allowedFormats determines which formats can be used.
 // The value returned is the logical OR of multiple possible formats.
@@ -412,7 +412,7 @@ private static readonly @string onlyPaxSupportsˢ2ᵇᴍHeader = "only PAX suppo
 // As a by-product of checking the fields, this function returns paxHdrs, which
 // contain all fields that could not be directly encoded.
 // A value receiver ensures that this method does not mutate the source Header.
-[GoMethodBody("allowedFormats")] internal static (Format format, map<@string, @string> paxHdrs, error err) allowedFormatsᴍ(Header h) {
+internal static (Format format, map<@string, @string> paxHdrs, error err) allowedFormats⁔(/*this*/ Header h) {
     Format format = default;
     map<@string, @string> paxHdrs = default;
     error err = default;
@@ -512,19 +512,19 @@ private static readonly @string onlyPaxSupportsˢ2ᵇᴍHeader = "only PAX suppo
     var v7 = Ꮡblk.toV7();
     var ustar = Ꮡblk.toUSTAR();
     var gnu = Ꮡblk.toGNU();
-    verifyString(h.Name, len(v7.name()), nameˢᴍHeader, paxPath);
-    verifyString(h.Linkname, len(v7.linkName()), linknameˢᴍHeader, paxLinkpath);
-    verifyString(h.Uname, len(ustar.userName()), unameˢᴍHeader, paxUname);
-    verifyString(h.Gname, len(ustar.groupName()), gnameˢᴍHeader, paxGname);
-    verifyNumeric(h.Mode, len(v7.mode()), modeˢᴍHeader, paxNone);
-    verifyNumeric((int64)h.Uid, len(v7.uid()), uidˢᴍHeader, paxUid);
-    verifyNumeric((int64)h.Gid, len(v7.gid()), gidˢᴍHeader, paxGid);
-    verifyNumeric(h.Size, len(v7.size()), sizeˢᴍHeader, paxSize);
-    verifyNumeric(h.Devmajor, len(ustar.devMajor()), devmajorˢᴍHeader, paxNone);
-    verifyNumeric(h.Devminor, len(ustar.devMinor()), devminorˢᴍHeader, paxNone);
-    verifyTime(h.ModTime, len(v7.modTime()), modTimeˢᴍHeader, paxMtime);
-    verifyTime(h.AccessTime, len(gnu.accessTime()), accessTimeˢᴍHeader, paxAtime);
-    verifyTime(h.ChangeTime, len(gnu.changeTime()), changeTimeˢᴍHeader, paxCtime);
+    verifyString(h.Name, len(v7.name()), nameˢ⁔Header, paxPath);
+    verifyString(h.Linkname, len(v7.linkName()), linknameˢ⁔Header, paxLinkpath);
+    verifyString(h.Uname, len(ustar.userName()), unameˢ⁔Header, paxUname);
+    verifyString(h.Gname, len(ustar.groupName()), gnameˢ⁔Header, paxGname);
+    verifyNumeric(h.Mode, len(v7.mode()), modeˢ⁔Header, paxNone);
+    verifyNumeric((int64)h.Uid, len(v7.uid()), uidˢ⁔Header, paxUid);
+    verifyNumeric((int64)h.Gid, len(v7.gid()), gidˢ⁔Header, paxGid);
+    verifyNumeric(h.Size, len(v7.size()), sizeˢ⁔Header, paxSize);
+    verifyNumeric(h.Devmajor, len(ustar.devMajor()), devmajorˢ⁔Header, paxNone);
+    verifyNumeric(h.Devminor, len(ustar.devMinor()), devminorˢ⁔Header, paxNone);
+    verifyTime(h.ModTime, len(v7.modTime()), modTimeˢ⁔Header, paxMtime);
+    verifyTime(h.AccessTime, len(gnu.accessTime()), accessTimeˢ⁔Header, paxAtime);
+    verifyTime(h.ChangeTime, len(gnu.changeTime()), changeTimeˢ⁔Header, paxCtime);
 
     // Check for header-only types.
     @string whyOnlyPAX = default;
@@ -545,7 +545,7 @@ private static readonly @string onlyPaxSupportsˢ2ᵇᴍHeader = "only PAX suppo
         if (!reflect.DeepEqual(h, h2)) {
             return (FormatUnknown, default, new headerError(new @string[]{"only PAXRecords should be set for TypeXGlobalHeader"}.slice()));
         }
-        whyOnlyPAX = onlyPaxSupportsˢᴍHeader;
+        whyOnlyPAX = onlyPaxSupportsˢ⁔Header;
         format.mayOnlyBe(FormatPAX);
         break;
     }}
@@ -558,7 +558,7 @@ private static readonly @string onlyPaxSupportsˢ2ᵇᴍHeader = "only PAX suppo
         foreach (var (k, v) in h.Xattrs) {
             paxHdrs[paxSchilyXattr + k] = v;
         }
-        whyOnlyPAX = onlyPaxSupportsXattrsˢᴍHeader;
+        whyOnlyPAX = onlyPaxSupportsXattrsˢ⁔Header;
         format.mayOnlyBe(FormatPAX);
     }
     if (len(h.PAXRecords) > 0) {
@@ -578,7 +578,7 @@ private static readonly @string onlyPaxSupportsˢ2ᵇᴍHeader = "only PAX suppo
                 break;
             }}
         }
-        whyOnlyPAX = onlyPaxSupportsˢ2ᴍHeader;
+        whyOnlyPAX = onlyPaxSupportsˢ2⁔Header;
         format.mayOnlyBe(FormatPAX);
     }
     foreach (var (k, v) in paxHdrs) {
@@ -640,7 +640,7 @@ private static readonly @string onlyPaxSupportsˢ2ᵇᴍHeader = "only PAX suppo
 }
 
 // FileInfo returns an fs.FileInfo for the Header.
-[GoMethodBody("FileInfo")] internal static fs.FileInfo FileInfoᴍ(ж<Header> Ꮡh) {
+internal static fs.FileInfo FileInfo⁔(/*this*/ ж<Header> Ꮡh) {
     return new headerFileInfo(Ꮡh);
 }
 
@@ -653,13 +653,13 @@ partial struct headerFileInfo {
 
 } partial class tar_package {
 
-[GoMethodBody("Size")] internal static int64 Sizeᴍ(headerFileInfo fi) { return fi.h.Size; }
-[GoMethodBody("IsDir")] internal static bool IsDirᴍ(headerFileInfo fi) { return fi.Mode().IsDir(); }
-[GoMethodBody("ModTime")] internal static time.Time ModTimeᴍ(headerFileInfo fi) { return fi.h.ModTime; }
-[GoMethodBody("Sys")] internal static any Sysᴍ(headerFileInfo fi) { return fi.h.OrTypedNil(); }
+internal static int64 Size⁔(/*this*/ headerFileInfo fi) { return fi.h.Size; }
+internal static bool IsDir⁔(/*this*/ headerFileInfo fi) { return fi.Mode().IsDir(); }
+internal static time.Time ModTime⁔(/*this*/ headerFileInfo fi) { return fi.h.ModTime; }
+internal static any Sys⁔(/*this*/ headerFileInfo fi) { return fi.h.OrTypedNil(); }
 
 // Name returns the base name of the file.
-[GoMethodBody("Name")] internal static @string Nameᴍ(headerFileInfo fi) {
+internal static @string Name⁔(/*this*/ headerFileInfo fi) {
     if (fi.IsDir()) {
         return path.Base(path.Clean(fi.h.Name));
     }
@@ -667,7 +667,7 @@ partial struct headerFileInfo {
 }
 
 // Mode returns the permission and mode bits for the headerFileInfo.
-[GoMethodBody("Mode")] internal static fs.FileMode /*mode*/ Modeᴍ(headerFileInfo fi) {
+internal static fs.FileMode /*mode*/ Mode⁔(/*this*/ headerFileInfo fi) {
     fs.FileMode mode = default;
 
     // Set file permission bits.
@@ -739,7 +739,7 @@ partial struct headerFileInfo {
     return mode;
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(headerFileInfo fi) {
+internal static @string String⁔(/*this*/ headerFileInfo fi) {
     return fs.FormatFileInfo(fi);
 }
 

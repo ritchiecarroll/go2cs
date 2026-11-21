@@ -96,7 +96,7 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
 // coverage data for the package with the specified import path.
 // Note that it's OK to call SetPackage more than once with the
 // same import path; counter data values will be accumulated.
-[GoMethodBody("SetPackage")] internal static void SetPackageᴍ(ref Formatter fm, @string importpath) {
+internal static void SetPackage⁔(/*this*/ ref Formatter fm, @string importpath) {
     if (importpath == fm.pkg) {
         return;
     }
@@ -114,7 +114,7 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
 // AddUnit passes info on a single coverable unit (file, funcname,
 // literal flag, range of lines, and counter value) to the formatter.
 // Counter values will be accumulated where appropriate.
-[GoMethodBody("AddUnit")] internal static void AddUnitᴍ(ref Formatter fm, @string @file, @string fname, bool isfnlit, coverage.CoverableUnit unit, uint32 count) {
+internal static void AddUnit⁔(/*this*/ ref Formatter fm, @string @file, @string fname, bool isfnlit, coverage.CoverableUnit unit, uint32 count) {
     if (fm.p == nil) {
         throw panic("AddUnit invoked before SetPackage");
     }
@@ -145,7 +145,7 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
 // source position information (e.g. file and line). Note that we don't
 // include function name as part of the sorting criteria, the thinking
 // being that is better to provide things in the original source order.
-[GoMethodBody("sortUnits")] internal static void sortUnitsᴍ(ж<pstate> Ꮡp, slice<extcu> units) {
+internal static void sortUnits⁔(/*this*/ ж<pstate> Ꮡp, slice<extcu> units) {
     slices.SortFunc(units, (extcu ui, extcu uj) => {
         @string ifile = Ꮡp.Value.funcs[ui.fnfid].@file;
         @string jfile = Ꮡp.Value.funcs[uj.fnfid].@file;
@@ -188,7 +188,7 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
 // importpath, source file, and line number before emitting (this sorting
 // is not explicitly mandated by the format, but seems like a good idea
 // for repeatable/deterministic dumps).
-[GoMethodBody("EmitTextual")] internal static error EmitTextualᴍ(ref Formatter fm, slice<@string> pkgs, io.Writer w) {
+internal static error EmitTextual⁔(/*this*/ ref Formatter fm, slice<@string> pkgs, io.Writer w) {
     var pkgsᴷ = new stackAppend<@string>();
     var unitsᴷ = new stackAppend<extcu>();
 
@@ -233,7 +233,7 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
 // EmitPercent writes out a "percentage covered" string to the writer
 // 'w', selecting the set of packages in 'pkgs' and suffixing the
 // printed string with 'inpkgs'.
-[GoMethodBody("EmitPercent")] internal static error EmitPercentᴍ(ref Formatter fm, io.Writer w, slice<@string> pkgs, @string inpkgs, bool noteEmpty, bool aggregate) {
+internal static error EmitPercent⁔(/*this*/ ref Formatter fm, io.Writer w, slice<@string> pkgs, @string inpkgs, bool noteEmpty, bool aggregate) {
     var pkgsᴷ = new stackAppend<@string>();
 
     if (len(pkgs) == 0) {
@@ -298,8 +298,8 @@ public static ж<Formatter> NewFormatter(coverage.CounterMode cm) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static readonly object totalˢᴍFormatter = (@string)"total"u8;
-private static readonly object statementsˢᴍFormatter = (@string)"(statements)"u8;
+private static readonly object totalˢ⁔Formatter = (@string)"total"u8;
+private static readonly object statementsˢ⁔Formatter = (@string)"(statements)"u8;
 
 // EmitFuncs writes out a function-level summary to the writer 'w'. A
 // note on handling function literals: although we collect coverage
@@ -308,7 +308,7 @@ private static readonly object statementsˢᴍFormatter = (@string)"(statements)
 // to name them (this is also consistent with the legacy cmd/cover
 // implementation). We do want to include their counts in the overall
 // summary however.
-[GoMethodBody("EmitFuncs")] internal static error EmitFuncsᴍ(ж<Formatter> Ꮡfm, io.Writer w) {
+internal static error EmitFuncs⁔(/*this*/ ж<Formatter> Ꮡfm, io.Writer w) {
     GoFrame ᒐ = default;
     try {
         ref var fm = ref Ꮡfm.DerefOrNull();
@@ -402,7 +402,7 @@ private static readonly object statementsˢᴍFormatter = (@string)"(statements)
         }
         {
             var (_, err) = fmt.Fprintf(new tabwriter_WriterжWriter(tabber), "%s\t%s\t%.1f%%\n"u8,
-                totalˢᴍFormatter, statementsˢᴍFormatter, perc(covStmts, allStmts)); if (err != nil) {
+                totalˢ⁔Formatter, statementsˢ⁔Formatter, perc(covStmts, allStmts)); if (err != nil) {
                 return err;
             }
         }

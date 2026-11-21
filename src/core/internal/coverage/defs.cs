@@ -210,37 +210,37 @@ public static CounterMode CtrModeTestMain => 5; // testmain pseudo-mode
 } partial class coverage_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string setˢᴍCounterMode => ref setˢᵇᴍCounterMode;
-private static readonly @string setˢᵇᴍCounterMode = "set"u8;
-private static ref readonly @string countˢᴍCounterMode => ref countˢᵇᴍCounterMode;
-private static readonly @string countˢᵇᴍCounterMode = "count"u8;
-private static ref readonly @string atomicˢᴍCounterMode => ref atomicˢᵇᴍCounterMode;
-private static readonly @string atomicˢᵇᴍCounterMode = "atomic"u8;
-private static ref readonly @string regonlyˢᴍCounterMode => ref regonlyˢᵇᴍCounterMode;
-private static readonly @string regonlyˢᵇᴍCounterMode = "regonly"u8;
-private static ref readonly @string testmainˢᴍCounterMode => ref testmainˢᵇᴍCounterMode;
-private static readonly @string testmainˢᵇᴍCounterMode = "testmain"u8;
-private static ref readonly @string invalidˢᴍCounterMode => ref invalidˢᵇᴍCounterMode;
-private static readonly @string invalidˢᵇᴍCounterMode = "<invalid>"u8;
+private static ref readonly @string setˢ⁔CounterMode => ref setˢᵇ⁔CounterMode;
+private static readonly @string setˢᵇ⁔CounterMode = "set"u8;
+private static ref readonly @string countˢ⁔CounterMode => ref countˢᵇ⁔CounterMode;
+private static readonly @string countˢᵇ⁔CounterMode = "count"u8;
+private static ref readonly @string atomicˢ⁔CounterMode => ref atomicˢᵇ⁔CounterMode;
+private static readonly @string atomicˢᵇ⁔CounterMode = "atomic"u8;
+private static ref readonly @string regonlyˢ⁔CounterMode => ref regonlyˢᵇ⁔CounterMode;
+private static readonly @string regonlyˢᵇ⁔CounterMode = "regonly"u8;
+private static ref readonly @string testmainˢ⁔CounterMode => ref testmainˢᵇ⁔CounterMode;
+private static readonly @string testmainˢᵇ⁔CounterMode = "testmain"u8;
+private static ref readonly @string invalidˢ⁔CounterMode => ref invalidˢᵇ⁔CounterMode;
+private static readonly @string invalidˢᵇ⁔CounterMode = "<invalid>"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(CounterMode cm) {
+internal static @string String⁔(/*this*/ CounterMode cm) {
     switch (cm) {
     case var ᴛ when ᴛ == CtrModeSet: {
-        return setˢᴍCounterMode;
+        return setˢ⁔CounterMode;
     }
     case var ᴛ when ᴛ == CtrModeCount: {
-        return countˢᴍCounterMode;
+        return countˢ⁔CounterMode;
     }
     case var ᴛ when ᴛ == CtrModeAtomic: {
-        return atomicˢᴍCounterMode;
+        return atomicˢ⁔CounterMode;
     }
     case var ᴛ when ᴛ == CtrModeRegOnly: {
-        return regonlyˢᴍCounterMode;
+        return regonlyˢ⁔CounterMode;
     }
     case var ᴛ when ᴛ == CtrModeTestMain: {
-        return testmainˢᴍCounterMode;
+        return testmainˢ⁔CounterMode;
     }}
-    return invalidˢᴍCounterMode;
+    return invalidˢ⁔CounterMode;
 }
 
 } partial class coverage_package {
@@ -286,22 +286,22 @@ public static CounterGranularity CtrGranularityPerFunc => 2;
 } partial class coverage_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string perblockˢᴍCounterGranularity => ref perblockˢᵇᴍCounterGranularity;
-private static readonly @string perblockˢᵇᴍCounterGranularity = "perblock"u8;
-private static ref readonly @string perfuncˢᴍCounterGranularity => ref perfuncˢᵇᴍCounterGranularity;
-private static readonly @string perfuncˢᵇᴍCounterGranularity = "perfunc"u8;
-private static ref readonly @string invalidˢᴍCounterGranularity => ref invalidˢᵇᴍCounterGranularity;
-private static readonly @string invalidˢᵇᴍCounterGranularity = "<invalid>"u8;
+private static ref readonly @string perblockˢ⁔CounterGranularity => ref perblockˢᵇ⁔CounterGranularity;
+private static readonly @string perblockˢᵇ⁔CounterGranularity = "perblock"u8;
+private static ref readonly @string perfuncˢ⁔CounterGranularity => ref perfuncˢᵇ⁔CounterGranularity;
+private static readonly @string perfuncˢᵇ⁔CounterGranularity = "perfunc"u8;
+private static ref readonly @string invalidˢ⁔CounterGranularity => ref invalidˢᵇ⁔CounterGranularity;
+private static readonly @string invalidˢᵇ⁔CounterGranularity = "<invalid>"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(CounterGranularity cm) {
+internal static @string String⁔(/*this*/ CounterGranularity cm) {
     switch (cm) {
     case var ᴛ when ᴛ == CtrGranularityPerBlock: {
-        return perblockˢᴍCounterGranularity;
+        return perblockˢ⁔CounterGranularity;
     }
     case var ᴛ when ᴛ == CtrGranularityPerFunc: {
-        return perfuncˢᴍCounterGranularity;
+        return perfuncˢ⁔CounterGranularity;
     }}
-    return invalidˢᴍCounterGranularity;
+    return invalidˢ⁔CounterGranularity;
 }
 
 } partial class coverage_package {

@@ -72,33 +72,33 @@ public partial struct littleEndian {
 } partial class binary_package {
 
 // Uint16 returns the uint16 representation of b[0:2].
-[GoMethodBody("Uint16")] internal static uint16 Uint16ᴍ(littleEndian _Δp0, slice<byte> b) {
+internal static uint16 Uint16⁔(/*this*/ littleEndian _Δp0, slice<byte> b) {
     _ = b[1]; // bounds check hint to compiler; see golang.org/issue/14808
     return (uint16)((uint16)b[0] | (uint16)((uint16)b[1] << 8));
 }
 
 // PutUint16 stores v into b[0:2].
-[GoMethodBody("PutUint16")] internal static void PutUint16ᴍ(littleEndian _Δp0, slice<byte> b, uint16 v) {
+internal static void PutUint16⁔(/*this*/ littleEndian _Δp0, slice<byte> b, uint16 v) {
     _ = b[1]; // early bounds check to guarantee safety of writes below
     b[0] = (byte)v;
     b[1] = (byte)(v >> 8);
 }
 
 // AppendUint16 appends the bytes of v to b and returns the appended slice.
-[GoMethodBody("AppendUint16")] internal static slice<byte> AppendUint16ᴍ(littleEndian _, slice<byte> b, uint16 v) {
+internal static slice<byte> AppendUint16⁔(/*this*/ littleEndian _, slice<byte> b, uint16 v) {
     return append(b,
         (byte)v,
         (byte)(v >> 8));
 }
 
 // Uint32 returns the uint32 representation of b[0:4].
-[GoMethodBody("Uint32")] internal static uint32 Uint32ᴍ(littleEndian _Δp0, slice<byte> b) {
+internal static uint32 Uint32⁔(/*this*/ littleEndian _Δp0, slice<byte> b) {
     _ = b[3]; // bounds check hint to compiler; see golang.org/issue/14808
     return (uint32)b[0] | (uint32)b[1] << 8 | (uint32)b[2] << 16 | (uint32)b[3] << 24;
 }
 
 // PutUint32 stores v into b[0:4].
-[GoMethodBody("PutUint32")] internal static void PutUint32ᴍ(littleEndian _Δp0, slice<byte> b, uint32 v) {
+internal static void PutUint32⁔(/*this*/ littleEndian _Δp0, slice<byte> b, uint32 v) {
     _ = b[3]; // early bounds check to guarantee safety of writes below
     b[0] = (byte)v;
     b[1] = (byte)(v >> 8);
@@ -107,7 +107,7 @@ public partial struct littleEndian {
 }
 
 // AppendUint32 appends the bytes of v to b and returns the appended slice.
-[GoMethodBody("AppendUint32")] internal static slice<byte> AppendUint32ᴍ(littleEndian _, slice<byte> b, uint32 v) {
+internal static slice<byte> AppendUint32⁔(/*this*/ littleEndian _, slice<byte> b, uint32 v) {
     return append(b,
         (byte)v,
         (byte)(v >> 8),
@@ -116,13 +116,13 @@ public partial struct littleEndian {
 }
 
 // Uint64 returns the uint64 representation of b[0:8].
-[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(littleEndian _Δp0, slice<byte> b) {
+internal static uint64 Uint64⁔(/*this*/ littleEndian _Δp0, slice<byte> b) {
     _ = b[7]; // bounds check hint to compiler; see golang.org/issue/14808
     return (uint64)b[0] | (uint64)b[1] << 8 | (uint64)b[2] << 16 | (uint64)b[3] << 24 | (uint64)b[4] << 32 | (uint64)b[5] << 40 | (uint64)b[6] << 48 | (uint64)b[7] << 56;
 }
 
 // PutUint64 stores v into b[0:8].
-[GoMethodBody("PutUint64")] internal static void PutUint64ᴍ(littleEndian _Δp0, slice<byte> b, uint64 v) {
+internal static void PutUint64⁔(/*this*/ littleEndian _Δp0, slice<byte> b, uint64 v) {
     _ = b[7]; // early bounds check to guarantee safety of writes below
     b[0] = (byte)v;
     b[1] = (byte)(v >> 8);
@@ -135,7 +135,7 @@ public partial struct littleEndian {
 }
 
 // AppendUint64 appends the bytes of v to b and returns the appended slice.
-[GoMethodBody("AppendUint64")] internal static slice<byte> AppendUint64ᴍ(littleEndian _, slice<byte> b, uint64 v) {
+internal static slice<byte> AppendUint64⁔(/*this*/ littleEndian _, slice<byte> b, uint64 v) {
     return append(b,
         (byte)v,
         (byte)(v >> 8),
@@ -148,16 +148,16 @@ public partial struct littleEndian {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string littleEndianˢᴍlittleEndian => ref littleEndianˢᵇᴍlittleEndian;
-private static readonly @string littleEndianˢᵇᴍlittleEndian = "LittleEndian"u8;
+internal static ref readonly @string littleEndianˢ⁔littleEndian => ref littleEndianˢᵇ⁔littleEndian;
+private static readonly @string littleEndianˢᵇ⁔littleEndian = "LittleEndian"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(littleEndian _) { return littleEndianˢᴍlittleEndian; }
+internal static @string String⁔(/*this*/ littleEndian _) { return littleEndianˢ⁔littleEndian; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string binaryLittleEndianˢᴍlittleEndian => ref binaryLittleEndianˢᵇᴍlittleEndian;
-private static readonly @string binaryLittleEndianˢᵇᴍlittleEndian = "binary.LittleEndian"u8;
+internal static ref readonly @string binaryLittleEndianˢ⁔littleEndian => ref binaryLittleEndianˢᵇ⁔littleEndian;
+private static readonly @string binaryLittleEndianˢᵇ⁔littleEndian = "binary.LittleEndian"u8;
 
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(littleEndian _) { return binaryLittleEndianˢᴍlittleEndian; }
+internal static @string GoString⁔(/*this*/ littleEndian _) { return binaryLittleEndianˢ⁔littleEndian; }
 
 } partial class binary_package {
 
@@ -167,33 +167,33 @@ public partial struct bigEndian {
 } partial class binary_package {
 
 // Uint16 returns the uint16 representation of b[0:2].
-[GoMethodBody("Uint16")] internal static uint16 Uint16ᴍ(bigEndian _Δp0, slice<byte> b) {
+internal static uint16 Uint16⁔(/*this*/ bigEndian _Δp0, slice<byte> b) {
     _ = b[1]; // bounds check hint to compiler; see golang.org/issue/14808
     return (uint16)((uint16)b[1] | (uint16)((uint16)b[0] << 8));
 }
 
 // PutUint16 stores v into b[0:2].
-[GoMethodBody("PutUint16")] internal static void PutUint16ᴍ(bigEndian _Δp0, slice<byte> b, uint16 v) {
+internal static void PutUint16⁔(/*this*/ bigEndian _Δp0, slice<byte> b, uint16 v) {
     _ = b[1]; // early bounds check to guarantee safety of writes below
     b[0] = (byte)(v >> 8);
     b[1] = (byte)v;
 }
 
 // AppendUint16 appends the bytes of v to b and returns the appended slice.
-[GoMethodBody("AppendUint16")] internal static slice<byte> AppendUint16ᴍ(bigEndian _, slice<byte> b, uint16 v) {
+internal static slice<byte> AppendUint16⁔(/*this*/ bigEndian _, slice<byte> b, uint16 v) {
     return append(b,
         (byte)(v >> 8),
         (byte)v);
 }
 
 // Uint32 returns the uint32 representation of b[0:4].
-[GoMethodBody("Uint32")] internal static uint32 Uint32ᴍ(bigEndian _Δp0, slice<byte> b) {
+internal static uint32 Uint32⁔(/*this*/ bigEndian _Δp0, slice<byte> b) {
     _ = b[3]; // bounds check hint to compiler; see golang.org/issue/14808
     return (uint32)b[3] | (uint32)b[2] << 8 | (uint32)b[1] << 16 | (uint32)b[0] << 24;
 }
 
 // PutUint32 stores v into b[0:4].
-[GoMethodBody("PutUint32")] internal static void PutUint32ᴍ(bigEndian _Δp0, slice<byte> b, uint32 v) {
+internal static void PutUint32⁔(/*this*/ bigEndian _Δp0, slice<byte> b, uint32 v) {
     _ = b[3]; // early bounds check to guarantee safety of writes below
     b[0] = (byte)(v >> 24);
     b[1] = (byte)(v >> 16);
@@ -202,7 +202,7 @@ public partial struct bigEndian {
 }
 
 // AppendUint32 appends the bytes of v to b and returns the appended slice.
-[GoMethodBody("AppendUint32")] internal static slice<byte> AppendUint32ᴍ(bigEndian _, slice<byte> b, uint32 v) {
+internal static slice<byte> AppendUint32⁔(/*this*/ bigEndian _, slice<byte> b, uint32 v) {
     return append(b,
         (byte)(v >> 24),
         (byte)(v >> 16),
@@ -211,13 +211,13 @@ public partial struct bigEndian {
 }
 
 // Uint64 returns the uint64 representation of b[0:8].
-[GoMethodBody("Uint64")] internal static uint64 Uint64ᴍ(bigEndian _Δp0, slice<byte> b) {
+internal static uint64 Uint64⁔(/*this*/ bigEndian _Δp0, slice<byte> b) {
     _ = b[7]; // bounds check hint to compiler; see golang.org/issue/14808
     return (uint64)b[7] | (uint64)b[6] << 8 | (uint64)b[5] << 16 | (uint64)b[4] << 24 | (uint64)b[3] << 32 | (uint64)b[2] << 40 | (uint64)b[1] << 48 | (uint64)b[0] << 56;
 }
 
 // PutUint64 stores v into b[0:8].
-[GoMethodBody("PutUint64")] internal static void PutUint64ᴍ(bigEndian _Δp0, slice<byte> b, uint64 v) {
+internal static void PutUint64⁔(/*this*/ bigEndian _Δp0, slice<byte> b, uint64 v) {
     _ = b[7]; // early bounds check to guarantee safety of writes below
     b[0] = (byte)(v >> 56);
     b[1] = (byte)(v >> 48);
@@ -230,7 +230,7 @@ public partial struct bigEndian {
 }
 
 // AppendUint64 appends the bytes of v to b and returns the appended slice.
-[GoMethodBody("AppendUint64")] internal static slice<byte> AppendUint64ᴍ(bigEndian _, slice<byte> b, uint64 v) {
+internal static slice<byte> AppendUint64⁔(/*this*/ bigEndian _, slice<byte> b, uint64 v) {
     return append(b,
         (byte)(v >> 56),
         (byte)(v >> 48),
@@ -243,30 +243,30 @@ public partial struct bigEndian {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string bigEndianˢᴍbigEndian => ref bigEndianˢᵇᴍbigEndian;
-private static readonly @string bigEndianˢᵇᴍbigEndian = "BigEndian"u8;
+internal static ref readonly @string bigEndianˢ⁔bigEndian => ref bigEndianˢᵇ⁔bigEndian;
+private static readonly @string bigEndianˢᵇ⁔bigEndian = "BigEndian"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(bigEndian _) { return bigEndianˢᴍbigEndian; }
+internal static @string String⁔(/*this*/ bigEndian _) { return bigEndianˢ⁔bigEndian; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string binaryBigEndianˢᴍbigEndian => ref binaryBigEndianˢᵇᴍbigEndian;
-private static readonly @string binaryBigEndianˢᵇᴍbigEndian = "binary.BigEndian"u8;
+internal static ref readonly @string binaryBigEndianˢ⁔bigEndian => ref binaryBigEndianˢᵇ⁔bigEndian;
+private static readonly @string binaryBigEndianˢᵇ⁔bigEndian = "binary.BigEndian"u8;
 
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(bigEndian _) { return binaryBigEndianˢᴍbigEndian; }
+internal static @string GoString⁔(/*this*/ bigEndian _) { return binaryBigEndianˢ⁔bigEndian; }
 
 } partial class binary_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nativeEndianˢᴍnativeEndian => ref nativeEndianˢᵇᴍnativeEndian;
-private static readonly @string nativeEndianˢᵇᴍnativeEndian = "NativeEndian"u8;
+internal static ref readonly @string nativeEndianˢ⁔nativeEndian => ref nativeEndianˢᵇ⁔nativeEndian;
+private static readonly @string nativeEndianˢᵇ⁔nativeEndian = "NativeEndian"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(nativeEndian _) { return nativeEndianˢᴍnativeEndian; }
+internal static @string String⁔(/*this*/ nativeEndian _) { return nativeEndianˢ⁔nativeEndian; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string binaryNativeEndianˢᴍnativeEndian => ref binaryNativeEndianˢᵇᴍnativeEndian;
-private static readonly @string binaryNativeEndianˢᵇᴍnativeEndian = "binary.NativeEndian"u8;
+internal static ref readonly @string binaryNativeEndianˢ⁔nativeEndian => ref binaryNativeEndianˢᵇ⁔nativeEndian;
+private static readonly @string binaryNativeEndianˢᵇ⁔nativeEndian = "binary.NativeEndian"u8;
 
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(nativeEndian _) { return binaryNativeEndianˢᴍnativeEndian; }
+internal static @string GoString⁔(/*this*/ nativeEndian _) { return binaryNativeEndianˢ⁔nativeEndian; }
 
 } partial class binary_package {
 
@@ -961,7 +961,7 @@ partial struct encoder /*coder*/;
 
 } partial class binary_package {
 
-[GoMethodBody("bool")] internal static bool @boolᴍ(ref decoder d) {
+internal static bool @bool⁔(/*this*/ ref decoder d) {
     var x = d.buf[d.offset];
     d.offset++;
     return x != 0;
@@ -969,7 +969,7 @@ partial struct encoder /*coder*/;
 
 } partial class binary_package {
 
-[GoMethodBody("bool")] internal static void @boolᴍ(ref encoder e, bool x) {
+internal static void @bool⁔(/*this*/ ref encoder e, bool x) {
     if (x) {
         e.buf[e.offset] = 1;
     } else {
@@ -980,7 +980,7 @@ partial struct encoder /*coder*/;
 
 } partial class binary_package {
 
-[GoMethodBody("uint8")] internal static uint8 uint8ᴍ(ref decoder d) {
+internal static uint8 uint8⁔(/*this*/ ref decoder d) {
     var x = d.buf[d.offset];
     d.offset++;
     return x;
@@ -988,14 +988,14 @@ partial struct encoder /*coder*/;
 
 } partial class binary_package {
 
-[GoMethodBody("uint8")] internal static void uint8ᴍ(ref encoder e, uint8 x) {
+internal static void uint8⁔(/*this*/ ref encoder e, uint8 x) {
     e.buf[e.offset] = x;
     e.offset++;
 }
 
 } partial class binary_package {
 
-[GoMethodBody("uint16")] internal static uint16 uint16ᴍ(ref decoder d) {
+internal static uint16 uint16⁔(/*this*/ ref decoder d) {
     var x = d.order.Uint16(d.buf.slice(d.offset, d.offset + 2));
     d.offset += 2;
     return x;
@@ -1003,14 +1003,14 @@ partial struct encoder /*coder*/;
 
 } partial class binary_package {
 
-[GoMethodBody("uint16")] internal static void uint16ᴍ(ref encoder e, uint16 x) {
+internal static void uint16⁔(/*this*/ ref encoder e, uint16 x) {
     e.order.PutUint16(e.buf.slice(e.offset, e.offset + 2), x);
     e.offset += 2;
 }
 
 } partial class binary_package {
 
-[GoMethodBody("uint32")] internal static uint32 uint32ᴍ(ref decoder d) {
+internal static uint32 uint32⁔(/*this*/ ref decoder d) {
     var x = d.order.Uint32(d.buf.slice(d.offset, d.offset + 4));
     d.offset += 4;
     return x;
@@ -1018,14 +1018,14 @@ partial struct encoder /*coder*/;
 
 } partial class binary_package {
 
-[GoMethodBody("uint32")] internal static void uint32ᴍ(ref encoder e, uint32 x) {
+internal static void uint32⁔(/*this*/ ref encoder e, uint32 x) {
     e.order.PutUint32(e.buf.slice(e.offset, e.offset + 4), x);
     e.offset += 4;
 }
 
 } partial class binary_package {
 
-[GoMethodBody("uint64")] internal static uint64 uint64ᴍ(ref decoder d) {
+internal static uint64 uint64⁔(/*this*/ ref decoder d) {
     var x = d.order.Uint64(d.buf.slice(d.offset, d.offset + 8));
     d.offset += 8;
     return x;
@@ -1033,46 +1033,46 @@ partial struct encoder /*coder*/;
 
 } partial class binary_package {
 
-[GoMethodBody("uint64")] internal static void uint64ᴍ(ref encoder e, uint64 x) {
+internal static void uint64⁔(/*this*/ ref encoder e, uint64 x) {
     e.order.PutUint64(e.buf.slice(e.offset, e.offset + 8), x);
     e.offset += 8;
 }
 
 } partial class binary_package {
 
-[GoMethodBody("int8")] internal static int8 int8ᴍ(ref decoder d) { return (int8)d.uint8(); }
+internal static int8 int8⁔(/*this*/ ref decoder d) { return (int8)d.uint8(); }
 
 } partial class binary_package {
 
-[GoMethodBody("int8")] internal static void int8ᴍ(ref encoder e, int8 x) { e.uint8((uint8)x); }
+internal static void int8⁔(/*this*/ ref encoder e, int8 x) { e.uint8((uint8)x); }
 
 } partial class binary_package {
 
-[GoMethodBody("int16")] internal static int16 int16ᴍ(ref decoder d) { return (int16)d.uint16(); }
+internal static int16 int16⁔(/*this*/ ref decoder d) { return (int16)d.uint16(); }
 
 } partial class binary_package {
 
-[GoMethodBody("int16")] internal static void int16ᴍ(ref encoder e, int16 x) { e.uint16((uint16)x); }
+internal static void int16⁔(/*this*/ ref encoder e, int16 x) { e.uint16((uint16)x); }
 
 } partial class binary_package {
 
-[GoMethodBody("int32")] internal static int32 int32ᴍ(ref decoder d) { return (int32)d.uint32(); }
+internal static int32 int32⁔(/*this*/ ref decoder d) { return (int32)d.uint32(); }
 
 } partial class binary_package {
 
-[GoMethodBody("int32")] internal static void int32ᴍ(ref encoder e, int32 x) { e.uint32((uint32)x); }
+internal static void int32⁔(/*this*/ ref encoder e, int32 x) { e.uint32((uint32)x); }
 
 } partial class binary_package {
 
-[GoMethodBody("int64")] internal static int64 int64ᴍ(ref decoder d) { return (int64)d.uint64(); }
+internal static int64 int64⁔(/*this*/ ref decoder d) { return (int64)d.uint64(); }
 
 } partial class binary_package {
 
-[GoMethodBody("int64")] internal static void int64ᴍ(ref encoder e, int64 x) { e.uint64((uint64)x); }
+internal static void int64⁔(/*this*/ ref encoder e, int64 x) { e.uint64((uint64)x); }
 
 } partial class binary_package {
 
-[GoMethodBody("value")] internal static void valueᴍ(ref decoder d, reflect.Value v) {
+internal static void value⁔(/*this*/ ref decoder d, reflect.Value v) {
     switch (v.Kind()) {
     case var ᴛ when ᴛ == reflect.Array: {
         nint l = v.Len();
@@ -1165,7 +1165,7 @@ partial struct encoder /*coder*/;
 
 } partial class binary_package {
 
-[GoMethodBody("value")] internal static void valueᴍ(ref encoder e, reflect.Value v) {
+internal static void value⁔(/*this*/ ref encoder e, reflect.Value v) {
     switch (v.Kind()) {
     case var ᴛ when ᴛ == reflect.Array: {
         nint l = v.Len();
@@ -1254,13 +1254,13 @@ partial struct encoder /*coder*/;
 
 } partial class binary_package {
 
-[GoMethodBody("skip")] internal static void skipᴍ(ref decoder d, reflect.Value v) {
+internal static void skip⁔(/*this*/ ref decoder d, reflect.Value v) {
     d.offset += dataSize(v);
 }
 
 } partial class binary_package {
 
-[GoMethodBody("skip")] internal static void skipᴍ(ref encoder e, reflect.Value v) {
+internal static void skip⁔(/*this*/ ref encoder e, reflect.Value v) {
     nint n = dataSize(v);
     clear(e.buf.slice(e.offset, e.offset + n));
     e.offset += n;

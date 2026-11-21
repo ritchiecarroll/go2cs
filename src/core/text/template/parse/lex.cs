@@ -24,13 +24,13 @@ partial struct item {
 } partial class parse_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string eofˢᴍitem => ref eofˢᵇᴍitem;
-private static readonly @string eofˢᵇᴍitem = "EOF"u8;
+internal static ref readonly @string eofˢ⁔item => ref eofˢᵇ⁔item;
+private static readonly @string eofˢᵇ⁔item = "EOF"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(item i) {
+internal static @string String⁔(/*this*/ item i) {
     switch (ᐧ) {
     case {} when i.typ == itemEOF: {
-        return eofˢᴍitem;
+        return eofˢ⁔item;
     }
     case {} when i.typ == itemError: {
         return i.val;
@@ -146,7 +146,7 @@ partial struct lexOptions {
 } partial class parse_package {
 
 // next returns the next rune in the input.
-[GoMethodBody("next")] internal static rune nextᴍ(ref lexer l) {
+internal static rune next⁔(/*this*/ ref lexer l) {
     if ((nint)l.pos >= len(l.input)) {
         l.atEOF = true;
         return eof;
@@ -160,14 +160,14 @@ partial struct lexOptions {
 }
 
 // peek returns but does not consume the next rune in the input.
-[GoMethodBody("peek")] internal static rune peekᴍ(ref lexer l) {
+internal static rune peek⁔(/*this*/ ref lexer l) {
     var r = l.next();
     l.backup();
     return r;
 }
 
 // backup steps back one rune.
-[GoMethodBody("backup")] internal static void backupᴍ(ref lexer l) {
+internal static void backup⁔(/*this*/ ref lexer l) {
     if (!l.atEOF && l.pos > 0) {
         var (r, w) = utf8.DecodeLastRuneInString(l.input.slice(0, l.pos));
         l.pos -= ((Pos)w);
@@ -180,7 +180,7 @@ partial struct lexOptions {
 
 // thisItem returns the item at the current input point with the specified type
 // and advances the input.
-[GoMethodBody("thisItem")] internal static item thisItemᴍ(ref lexer l, itemType t) {
+internal static item thisItem⁔(/*this*/ ref lexer l, itemType t) {
     var i = new item(t, l.start, l.input.slice(l.start, l.pos), l.startLine);
     l.start = l.pos;
     l.startLine = l.line;
@@ -188,12 +188,12 @@ partial struct lexOptions {
 }
 
 // emit passes the trailing text as an item back to the parser.
-[GoMethodBody("emit")] internal static stateFn emitᴍ(ref lexer l, itemType t) {
+internal static stateFn emit⁔(/*this*/ ref lexer l, itemType t) {
     return l.emitItem(l.thisItem(t));
 }
 
 // emitItem passes the specified item to the parser.
-[GoMethodBody("emitItem")] internal static stateFn emitItemᴍ(ref lexer l, item i) {
+internal static stateFn emitItem⁔(/*this*/ ref lexer l, item i) {
     l.item = i;
     return default;
 }
@@ -201,14 +201,14 @@ partial struct lexOptions {
 // ignore skips over the pending input before this point.
 // It tracks newlines in the ignored text, so use it only
 // for text that is skipped without calling l.next.
-[GoMethodBody("ignore")] internal static void ignoreᴍ(ref lexer l) {
+internal static void ignore⁔(/*this*/ ref lexer l) {
     l.line += strings.Count(l.input.slice(l.start, l.pos), "\n");
     l.start = l.pos;
     l.startLine = l.line;
 }
 
 // accept consumes the next rune if it's from the valid set.
-[GoMethodBody("accept")] internal static bool acceptᴍ(ref lexer l, @string valid) {
+internal static bool accept⁔(/*this*/ ref lexer l, @string valid) {
     if (strings.ContainsRune(valid, l.next())) {
         return true;
     }
@@ -217,7 +217,7 @@ partial struct lexOptions {
 }
 
 // acceptRun consumes a run of runes from the valid set.
-[GoMethodBody("acceptRun")] internal static void acceptRunᴍ(ref lexer l, @string valid) {
+internal static void acceptRun⁔(/*this*/ ref lexer l, @string valid) {
     while (strings.ContainsRune(valid, l.next())) {
     }
     l.backup();
@@ -225,7 +225,7 @@ partial struct lexOptions {
 
 // errorf returns an error token and terminates the scan by passing
 // back a nil pointer that will be the next state, terminating l.nextItem.
-[GoMethodBody("errorf")] internal static stateFn errorfᴍ(ref lexer l, @string format, params ꓸꓸꓸany argsʗp) {
+internal static stateFn errorf⁔(/*this*/ ref lexer l, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     l.item = new item(itemError, l.start, fmt.Sprintf(format, args.ꓸꓸꓸ), l.startLine);
@@ -237,7 +237,7 @@ partial struct lexOptions {
 
 // nextItem returns the next item from the input.
 // Called by the parser, not in the lexing goroutine.
-[GoMethodBody("nextItem")] internal static item nextItemᴍ(ж<lexer> Ꮡl) {
+internal static item nextItem⁔(/*this*/ ж<lexer> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     l.item = new item(itemEOF, l.pos, "EOF", l.startLine);
@@ -326,7 +326,7 @@ internal static Pos rightTrimLength(@string s) {
 } partial class parse_package {
 
 // atRightDelim reports whether the lexer is at a right delimiter, possibly preceded by a trim marker.
-[GoMethodBody("atRightDelim")] internal static (bool delim, bool trimSpaces) atRightDelimᴍ(ref lexer l) {
+internal static (bool delim, bool trimSpaces) atRightDelim⁔(/*this*/ ref lexer l) {
     if (hasRightTrimMarker(l.input.slice(l.pos)) && strings.HasPrefix(l.input.slice(l.pos + trimMarkerLen), l.rightDelim)) { // With trim marker.
         return (true, true);
     }
@@ -615,7 +615,7 @@ internal static stateFn lexFieldOrVariable(ж<lexer> Ꮡl, itemType typ) {
 // appear after an identifier. Breaks .X.Y into two pieces. Also catches cases
 // like "$x+2" not being acceptable without a space, in case we decide one
 // day to implement arithmetic.
-[GoMethodBody("atTerminator")] internal static bool atTerminatorᴍ(ref lexer l) {
+internal static bool atTerminator⁔(/*this*/ ref lexer l) {
     var r = l.peek();
     if (isSpace(r)) {
         return true;
@@ -680,7 +680,7 @@ internal static stateFn lexNumber(ж<lexer> Ꮡl) {
 
 } partial class parse_package {
 
-[GoMethodBody("scanNumber")] internal static bool scanNumberᴍ(ref lexer l) {
+internal static bool scanNumber⁔(/*this*/ ref lexer l) {
     // Optional leading sign.
     l.accept("+-");
     // Is it hex?

@@ -152,7 +152,7 @@ func resetPackageState(pkg *packages.Package) {
 	packageImportForces = hashset.HashSet[string]{}
 	packageImportInits = map[string]string{}
 	packageMethodHolders = map[string]string{}
-	resetGlyphForwarderUnit()
+	resetGlyphForwarderUnit(pkg.Types)
 	packageRefLoweringResult = nil
 	packageHandOwnedTypes = map[*types.TypeName]bool{}
 	packageHandOwnedVars = map[*types.Var]bool{}

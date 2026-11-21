@@ -257,7 +257,7 @@ public static SignatureAlgorithm PureEd25519 => 16;
 
 } partial class x509_package {
 
-[GoMethodBody("isRSAPSS")] internal static bool isRSAPSSᴍ(SignatureAlgorithm algo) {
+internal static bool isRSAPSS⁔(/*this*/ SignatureAlgorithm algo) {
     foreach (var (_, details) in range(signatureAlgorithmDetails)) {
         if (details.algo == algo) {
             return details.isRSAPSS;
@@ -266,7 +266,7 @@ public static SignatureAlgorithm PureEd25519 => 16;
     return false;
 }
 
-[GoMethodBody("hashFunc")] internal static crypto.Hash hashFuncᴍ(SignatureAlgorithm algo) {
+internal static crypto.Hash hashFunc⁔(/*this*/ SignatureAlgorithm algo) {
     foreach (var (_, details) in range(signatureAlgorithmDetails)) {
         if (details.algo == algo) {
             return details.hash;
@@ -275,7 +275,7 @@ public static SignatureAlgorithm PureEd25519 => 16;
     return (crypto.Hash)0;
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(SignatureAlgorithm algo) {
+internal static @string String⁔(/*this*/ SignatureAlgorithm algo) {
     foreach (var (_, details) in range(signatureAlgorithmDetails)) {
         if (details.algo == algo) {
             return details.name;
@@ -303,7 +303,7 @@ internal static array<@string> publicKeyAlgoName = new golib.SparseArray<@string
 
 } partial class x509_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(PublicKeyAlgorithm algo) {
+internal static @string String⁔(/*this*/ PublicKeyAlgorithm algo) {
     if (0 < algo && (nint)algo < len(publicKeyAlgoName)) {
         return publicKeyAlgoName[algo];
     }
@@ -726,7 +726,7 @@ internal static (asn1.ObjectIdentifier oid, bool ok) oidFromExtKeyUsage(ExtKeyUs
 } partial class x509_package {
 
 // OID returns the ASN.1 object identifier of the EKU.
-[GoMethodBody("OID")] internal static OID OIDᴍ(ExtKeyUsage eku) {
+internal static OID OID⁔(/*this*/ ExtKeyUsage eku) {
     var (asn1OID, ok) = oidFromExtKeyUsage(eku);
     if (!ok) {
         throw panic("x509: internal error: known ExtKeyUsage has no OID");
@@ -919,7 +919,7 @@ partial struct InsecureAlgorithmError /*num:nint*/;
 
 } partial class x509_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(InsecureAlgorithmError e) {
+internal static @string Error⁔(/*this*/ InsecureAlgorithmError e) {
     return fmt.Sprintf("x509: cannot verify signature: insecure algorithm %v"u8, (SignatureAlgorithm)(nint)e);
 }
 
@@ -934,16 +934,16 @@ partial struct ConstraintViolationError {
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509InvalidSignatureˢᴍConstraintViolationError => ref x509InvalidSignatureˢᵇᴍConstraintViolationError;
-private static readonly @string x509InvalidSignatureˢᵇᴍConstraintViolationError = "x509: invalid signature: parent certificate cannot sign this kind of certificate"u8;
+internal static ref readonly @string x509InvalidSignatureˢ⁔ConstraintViolationError => ref x509InvalidSignatureˢᵇ⁔ConstraintViolationError;
+private static readonly @string x509InvalidSignatureˢᵇ⁔ConstraintViolationError = "x509: invalid signature: parent certificate cannot sign this kind of certificate"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ConstraintViolationError _) {
-    return x509InvalidSignatureˢᴍConstraintViolationError;
+internal static @string Error⁔(/*this*/ ConstraintViolationError _) {
+    return x509InvalidSignatureˢ⁔ConstraintViolationError;
 }
 
 } partial class x509_package {
 
-[GoMethodBody("Equal")] internal static bool Equalᴍ(ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) {
+internal static bool Equal⁔(/*this*/ ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) {
     ref var c = ref Ꮡc.DerefOrNull();
     ref var other = ref Ꮡother.DerefOrNull();
 
@@ -953,7 +953,7 @@ private static readonly @string x509InvalidSignatureˢᵇᴍConstraintViolationE
     return bytes.Equal(c.Raw, other.Raw);
 }
 
-[GoMethodBody("hasSANExtension")] internal static bool hasSANExtensionᴍ(ref Certificate c) {
+internal static bool hasSANExtension⁔(/*this*/ ref Certificate c) {
     return oidInExtensions(oidExtensionSubjectAltName, c.Extensions);
 }
 
@@ -961,7 +961,7 @@ private static readonly @string x509InvalidSignatureˢᵇᴍConstraintViolationE
 //
 // This is a low-level API that performs very limited checks, and not a full
 // path verifier. Most users should use [Certificate.Verify] instead.
-[GoMethodBody("CheckSignatureFrom")] internal static error CheckSignatureFromᴍ(ref Certificate c, ж<Certificate> Ꮡparent) {
+internal static error CheckSignatureFrom⁔(/*this*/ ref Certificate c, ж<Certificate> Ꮡparent) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     // RFC 5280, 4.2.1.9:
@@ -991,15 +991,15 @@ private static readonly @string x509InvalidSignatureˢᵇᴍConstraintViolationE
 //
 // [MD5WithRSA] signatures are rejected, while [SHA1WithRSA] and [ECDSAWithSHA1]
 // signatures are currently accepted.
-[GoMethodBody("CheckSignature")] internal static error CheckSignatureᴍ(ref Certificate c, SignatureAlgorithm algo, slice<byte> signed, slice<byte> signature) {
+internal static error CheckSignature⁔(/*this*/ ref Certificate c, SignatureAlgorithm algo, slice<byte> signed, slice<byte> signature) {
     return checkSignature(algo, signed, signature, c.PublicKey, true);
 }
 
-[GoMethodBody("hasNameConstraints")] internal static bool hasNameConstraintsᴍ(ref Certificate c) {
+internal static bool hasNameConstraints⁔(/*this*/ ref Certificate c) {
     return oidInExtensions(oidExtensionNameConstraints, c.Extensions);
 }
 
-[GoMethodBody("getSANExtension")] internal static slice<byte> getSANExtensionᴍ(ref Certificate c) {
+internal static slice<byte> getSANExtension⁔(/*this*/ ref Certificate c) {
     foreach (var (_, e) in range(c.Extensions)) {
         if (e.Id.Equal(oidExtensionSubjectAltName)) {
             return e.Value;
@@ -1099,7 +1099,7 @@ internal static error /*err*/ checkSignature(SignatureAlgorithm algo, slice<byte
 // CheckCRLSignature checks that the signature in crl is from c.
 //
 // Deprecated: Use [RevocationList.CheckSignatureFrom] instead.
-[GoMethodBody("CheckCRLSignature")] internal static error CheckCRLSignatureᴍ(ref Certificate c, ж<pkix.CertificateList> Ꮡcrl) {
+internal static error CheckCRLSignature⁔(/*this*/ ref Certificate c, ж<pkix.CertificateList> Ꮡcrl) {
     ref var crl = ref Ꮡcrl.DerefOrNull();
 
     SignatureAlgorithm algo = getSignatureAlgorithmFromAI(crl.SignatureAlgorithm);
@@ -1114,11 +1114,11 @@ partial struct UnhandledCriticalExtension {
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509UnhandledCriticalˢᴍUnhandledCriticalExtension => ref x509UnhandledCriticalˢᵇᴍUnhandledCriticalExtension;
-private static readonly @string x509UnhandledCriticalˢᵇᴍUnhandledCriticalExtension = "x509: unhandled critical extension"u8;
+internal static ref readonly @string x509UnhandledCriticalˢ⁔UnhandledCriticalExtension => ref x509UnhandledCriticalˢᵇ⁔UnhandledCriticalExtension;
+private static readonly @string x509UnhandledCriticalˢᵇ⁔UnhandledCriticalExtension = "x509: unhandled critical extension"u8;
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(UnhandledCriticalExtension h) {
-    return x509UnhandledCriticalˢᴍUnhandledCriticalExtension;
+internal static @string Error⁔(/*this*/ UnhandledCriticalExtension h) {
+    return x509UnhandledCriticalˢ⁔UnhandledCriticalExtension;
 }
 
 } partial class x509_package {
@@ -1968,20 +1968,20 @@ public static (ж<pkix.CertificateList>, error) ParseDERCRL(slice<byte> derBytes
 } partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string x509CertificatePrivateˢᴍCertificate => ref x509CertificatePrivateˢᵇᴍCertificate;
-private static readonly @string x509CertificatePrivateˢᵇᴍCertificate = "x509: certificate private key does not implement crypto.Signer"u8;
+internal static ref readonly @string x509CertificatePrivateˢ⁔Certificate => ref x509CertificatePrivateˢᵇ⁔Certificate;
+private static readonly @string x509CertificatePrivateˢᵇ⁔Certificate = "x509: certificate private key does not implement crypto.Signer"u8;
 
 // CreateCRL returns a DER encoded CRL, signed by this Certificate, that
 // contains the given list of revoked certificates.
 //
 // Deprecated: this method does not generate an RFC 5280 conformant X.509 v2 CRL.
 // To generate a standards compliant CRL, use [CreateRevocationList] instead.
-[GoMethodBody("CreateCRL")] internal static (slice<byte> crlBytes, error err) CreateCRLᴍ(ref Certificate c, io.Reader rand, any priv, slice<pkix.RevokedCertificate> revokedCerts, time.Time now, time.Time expiry) {
+internal static (slice<byte> crlBytes, error err) CreateCRL⁔(/*this*/ ref Certificate c, io.Reader rand, any priv, slice<pkix.RevokedCertificate> revokedCerts, time.Time now, time.Time expiry) {
     error err = default;
 
     var (key, ok) = priv._<crypto.Signer>(ᐧ);
     if (!ok) {
-        return (default, errors.New(x509CertificatePrivateˢᴍCertificate));
+        return (default, errors.New(x509CertificatePrivateˢ⁔Certificate));
     }
 
     (var signatureAlgorithm, var algorithmIdentifier, err) = signingParamsForKey(key, 0);
@@ -2421,7 +2421,7 @@ internal static (ж<CertificateRequest>, error) parseCertificateRequest(ref cert
 } partial class x509_package {
 
 // CheckSignature reports whether the signature on c is valid.
-[GoMethodBody("CheckSignature")] internal static error CheckSignatureᴍ(ref CertificateRequest c) {
+internal static error CheckSignature⁔(/*this*/ ref CertificateRequest c) {
     return checkSignature(c.SignatureAlgorithm, c.RawTBSCertificateRequest, c.Signature, c.PublicKey, true);
 }
 
@@ -2731,7 +2731,7 @@ public static (slice<byte>, error) CreateRevocationList(io.Reader rand, ж<Revoc
 
 // CheckSignatureFrom verifies that the signature on rl is a valid signature
 // from issuer.
-[GoMethodBody("CheckSignatureFrom")] internal static error CheckSignatureFromᴍ(ref RevocationList rl, ж<Certificate> Ꮡparent) {
+internal static error CheckSignatureFrom⁔(/*this*/ ref RevocationList rl, ж<Certificate> Ꮡparent) {
     ref var parent = ref Ꮡparent.DerefOrNull();
 
     if (parent.Version == 3 && !parent.BasicConstraintsValid || parent.BasicConstraintsValid && !parent.IsCA) {

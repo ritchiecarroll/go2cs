@@ -175,12 +175,12 @@ internal static UntypedInt nsecShift => 30;
 // to make them cheaper to call.
 
 // nsec returns the time's nanoseconds.
-[GoMethodBody("nsec")] internal static int32 nsecᴍ(ref Time t) {
+internal static int32 nsec⁔(/*this*/ ref Time t) {
     return (int32)(t.wall & (uint64)nsecMask);
 }
 
 // sec returns the time's seconds since Jan 1 year 1.
-[GoMethodBody("sec")] internal static int64 secᴍ(ref Time t) {
+internal static int64 sec⁔(/*this*/ ref Time t) {
     if ((t.wall & (uint64)hasMonotonic) != 0) {
         return wallToInternal + (int64)((t.wall << 1) >> (int)(nsecShift + 1));
     }
@@ -188,10 +188,10 @@ internal static UntypedInt nsecShift => 30;
 }
 
 // unixSec returns the time's seconds since Jan 1 1970 (Unix time).
-[GoMethodBody("unixSec")] internal static int64 unixSecᴍ(ref Time t) { return t.sec() + internalToUnix; }
+internal static int64 unixSec⁔(/*this*/ ref Time t) { return t.sec() + internalToUnix; }
 
 // addSec adds d seconds to the time.
-[GoMethodBody("addSec")] internal static void addSecᴍ(ref Time t, int64 d) {
+internal static void addSec⁔(/*this*/ ref Time t, int64 d) {
     if ((t.wall & (uint64)hasMonotonic) != 0) {
         var sec = (int64)((t.wall << 1) >> (int)(nsecShift + 1));
         var dsec = sec + d;
@@ -216,7 +216,7 @@ internal static UntypedInt nsecShift => 30;
 }
 
 // setLoc sets the location associated with the time.
-[GoMethodBody("setLoc")] internal static void setLocᴍ(ref Time t, ж<Location> Ꮡloc) {
+internal static void setLoc⁔(/*this*/ ref Time t, ж<Location> Ꮡloc) {
     ref var loc = ref Ꮡloc.DerefOrNull();
 
     if (Ꮡloc == ᏑutcLoc) {
@@ -227,7 +227,7 @@ internal static UntypedInt nsecShift => 30;
 }
 
 // stripMono strips the monotonic clock reading in t.
-[GoMethodBody("stripMono")] internal static void stripMonoᴍ(ref Time t) {
+internal static void stripMono⁔(/*this*/ ref Time t) {
     if ((t.wall & (uint64)hasMonotonic) != 0) {
         t.ext = t.sec();
         t.wall &= (uint64)(nsecMask);
@@ -238,7 +238,7 @@ internal static UntypedInt nsecShift => 30;
 // If t cannot hold a monotonic clock reading,
 // because its wall time is too large,
 // setMono is a no-op.
-[GoMethodBody("setMono")] internal static void setMonoᴍ(ref Time t, int64 m) {
+internal static void setMono⁔(/*this*/ ref Time t, int64 m) {
     if ((t.wall & (uint64)hasMonotonic) == 0) {
         var sec = t.ext;
         if (sec < minWall || maxWall < sec) {
@@ -254,7 +254,7 @@ internal static UntypedInt nsecShift => 30;
 // This function is used only for testing,
 // so it's OK that technically 0 is a valid
 // monotonic clock reading as well.
-[GoMethodBody("mono")] internal static int64 monoᴍ(ref Time t) {
+internal static int64 mono⁔(/*this*/ ref Time t) {
     if ((t.wall & (uint64)hasMonotonic) == 0) {
         return 0;
     }
@@ -263,7 +263,7 @@ internal static UntypedInt nsecShift => 30;
 
 // IsZero reports whether t represents the zero time instant,
 // January 1, year 1, 00:00:00 UTC.
-[GoMethodBody("IsZero")] internal static bool IsZeroᴍ(Time t) {
+internal static bool IsZero⁔(/*this*/ Time t) {
     // If hasMonotonic is set in t.wall, then the time can't be before 1885, so it can't be the year 1.
     // If hasMonotonic is zero, then all the bits in wall other than the nanoseconds field should be 0.
     // So if there are no nanoseconds then t.wall == 0, and if there are no seconds then t.ext == 0.
@@ -272,7 +272,7 @@ internal static UntypedInt nsecShift => 30;
 }
 
 // After reports whether the time instant t is after u.
-[GoMethodBody("After")] internal static bool Afterᴍ(Time t, Time u) {
+internal static bool After⁔(/*this*/ Time t, Time u) {
     if ((t.wall & u.wall & (uint64)hasMonotonic) != 0) {
         return t.ext > u.ext;
     }
@@ -282,7 +282,7 @@ internal static UntypedInt nsecShift => 30;
 }
 
 // Before reports whether the time instant t is before u.
-[GoMethodBody("Before")] internal static bool Beforeᴍ(Time t, Time u) {
+internal static bool Before⁔(/*this*/ Time t, Time u) {
     if ((t.wall & u.wall & (uint64)hasMonotonic) != 0) {
         return t.ext < u.ext;
     }
@@ -293,7 +293,7 @@ internal static UntypedInt nsecShift => 30;
 
 // Compare compares the time instant t with u. If t is before u, it returns -1;
 // if t is after u, it returns +1; if they're the same, it returns 0.
-[GoMethodBody("Compare")] internal static nint Compareᴍ(Time t, Time u) {
+internal static nint Compare⁔(/*this*/ Time t, Time u) {
     int64 tc = default;
     int64 uc = default;
     if ((t.wall & u.wall & (uint64)hasMonotonic) != 0) {
@@ -319,7 +319,7 @@ internal static UntypedInt nsecShift => 30;
 // For example, 6:00 +0200 and 4:00 UTC are Equal.
 // See the documentation on the Time type for the pitfalls of using == with
 // Time values; most code should use Equal instead.
-[GoMethodBody("Equal")] internal static bool Equalᴍ(Time t, Time u) {
+internal static bool Equal⁔(/*this*/ Time t, Time u) {
     if ((t.wall & u.wall & (uint64)hasMonotonic) != 0) {
         return t.ext == u.ext;
     }
@@ -347,7 +347,7 @@ public static Month December => 12;
 } partial class time_package {
 
 // String returns the English name of the month ("January", "February", ...).
-[GoMethodBody("String")] internal static @string Stringᴍ(Month m) {
+internal static @string String⁔(/*this*/ Month m) {
     if (January <= m && m <= December) {
         return longMonthNames[m - 1];
     }
@@ -372,7 +372,7 @@ public static Weekday Saturday => 6;
 } partial class time_package {
 
 // String returns the English name of the day ("Sunday", "Monday", ...).
-[GoMethodBody("String")] internal static @string Stringᴍ(Weekday d) {
+internal static @string String⁔(/*this*/ Weekday d) {
     if (Sunday <= d && d <= Saturday) {
         return longDayNames[d];
     }
@@ -647,14 +647,14 @@ internal static absDays dateToAbsDays(int64 year, Month month, nint day) {
 } partial class time_package {
 
 // days converts absolute seconds to absolute days.
-[GoMethodBody("days")] internal static absDays daysᴍ(absSeconds abs) {
+internal static absDays days⁔(/*this*/ absSeconds abs) {
     return (absDays)(uint64)(abs / (uint64)secondsPerDay);
 }
 
 } partial class time_package {
 
 // split splits days into century, cyear, ayday.
-[GoMethodBody("split")] internal static (absCentury century, absCyear cyear, absYday ayday) splitᴍ(absDays days) {
+internal static (absCentury century, absCyear cyear, absYday ayday) split⁔(/*this*/ absDays days) {
     absCentury century = default;
     absCyear cyear = default;
     absYday ayday = default;
@@ -698,7 +698,7 @@ internal static absDays dateToAbsDays(int64 year, Month month, nint day) {
 } partial class time_package {
 
 // split splits ayday into absolute month and standard (1-based) day-in-month.
-[GoMethodBody("split")] internal static (absMonth m, nint mday) splitᴍ(absYday ayday) {
+internal static (absMonth m, nint mday) split⁔(/*this*/ absYday ayday) {
     // See “Computations on Times” comment above.
     //
     // For yday in the range [0,366],
@@ -718,7 +718,7 @@ internal static absDays dateToAbsDays(int64 year, Month month, nint day) {
 }
 
 // janFeb returns 1 if the March 1-based ayday is in January or February, 0 otherwise.
-[GoMethodBody("janFeb")] internal static absJanFeb janFebᴍ(absYday ayday) {
+internal static absJanFeb janFeb⁔(/*this*/ absYday ayday) {
     // See “Computations on Times” comment above.
     absJanFeb jf = (absJanFeb)0;
     if (ayday >= marchThruDecember) {
@@ -730,7 +730,7 @@ internal static absDays dateToAbsDays(int64 year, Month month, nint day) {
 } partial class time_package {
 
 // month returns the standard Month for (m, janFeb)
-[GoMethodBody("month")] internal static Month monthᴍ(absMonth m, absJanFeb janFeb) {
+internal static Month month⁔(/*this*/ absMonth m, absJanFeb janFeb) {
     // See “Computations on Times” comment above.
     return ((Month)(nint)m) - ((Month)(nint)janFeb) * 12;
 }
@@ -738,7 +738,7 @@ internal static absDays dateToAbsDays(int64 year, Month month, nint day) {
 } partial class time_package {
 
 // leap returns 1 if (century, cyear) is a leap year, 0 otherwise.
-[GoMethodBody("leap")] internal static absLeap leapᴍ(absCentury century, absCyear cyear) {
+internal static absLeap leap⁔(/*this*/ absCentury century, absCyear cyear) {
     // See “Computations on Times” comment above.
     nint y4ok = 0;
     if (cyear % 4 == 0) {
@@ -756,7 +756,7 @@ internal static absDays dateToAbsDays(int64 year, Month month, nint day) {
 }
 
 // year returns the standard year for (century, cyear, janFeb).
-[GoMethodBody("year")] internal static nint yearᴍ(absCentury century, absCyear cyear, absJanFeb janFeb) {
+internal static nint year⁔(/*this*/ absCentury century, absCyear cyear, absJanFeb janFeb) {
     // See “Computations on Times” comment above.
     return (nint)((uint64)century * 100 - (uint64)absoluteYears) + (nint)cyear + (nint)janFeb;
 }
@@ -764,7 +764,7 @@ internal static absDays dateToAbsDays(int64 year, Month month, nint day) {
 } partial class time_package {
 
 // yday returns the standard 1-based yday for (ayday, janFeb, leap).
-[GoMethodBody("yday")] internal static nint ydayᴍ(absYday ayday, absJanFeb janFeb, absLeap leap) {
+internal static nint yday⁔(/*this*/ absYday ayday, absJanFeb janFeb, absLeap leap) {
     // See “Computations on Times” comment above.
     return (nint)ayday + (1 + 31 + 28) + ((nint)leap & ~(nint)janFeb) - 365 * (nint)janFeb;
 }
@@ -772,7 +772,7 @@ internal static absDays dateToAbsDays(int64 year, Month month, nint day) {
 } partial class time_package {
 
 // date converts days into standard year, month, day.
-[GoMethodBody("date")] internal static (nint year, Month month, nint day) dateᴍ(absDays days) {
+internal static (nint year, Month month, nint day) date⁔(/*this*/ absDays days) {
     nint year = default;
     Month month = default;
     nint day = default;
@@ -786,7 +786,7 @@ internal static absDays dateToAbsDays(int64 year, Month month, nint day) {
 }
 
 // yearYday converts days into the standard year and 1-based yday.
-[GoMethodBody("yearYday")] internal static (nint year, nint yday) yearYdayᴍ(absDays days) {
+internal static (nint year, nint yday) yearYday⁔(/*this*/ absDays days) {
     nint year = default;
     nint yday = default;
 
@@ -803,7 +803,7 @@ internal static absDays dateToAbsDays(int64 year, Month month, nint day) {
 // It is called when computing a presentation property like Month or Hour.
 // We'd rather call it abs, but there are linknames to abs that make that problematic.
 // See timeAbs below.
-[GoMethodBody("absSec")] internal static absSeconds absSecᴍ(Time t) {
+internal static absSeconds absSec⁔(/*this*/ Time t) {
     var l = t.loc;
     // Avoid function calls when possible.
     if (l == nil || l == ᏑlocalLoc) {
@@ -822,12 +822,12 @@ internal static absDays dateToAbsDays(int64 year, Month month, nint day) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string utcˢᴍTime => ref utcˢᵇᴍTime;
-private static readonly @string utcˢᵇᴍTime = "UTC"u8;
+internal static ref readonly @string utcˢ⁔Time => ref utcˢᵇ⁔Time;
+private static readonly @string utcˢᵇ⁔Time = "UTC"u8;
 
 // locabs is a combination of the Zone and abs methods,
 // extracting both return values from a single zone lookup.
-[GoMethodBody("locabs")] internal static (@string name, nint offset, absSeconds abs) locabsᴍ(Time t) {
+internal static (@string name, nint offset, absSeconds abs) locabs⁔(/*this*/ Time t) {
     @string name = default;
     nint offset = default;
     absSeconds abs = default;
@@ -847,47 +847,47 @@ private static readonly @string utcˢᵇᴍTime = "UTC"u8;
         }
         sec += (int64)offset;
     } else {
-        name = utcˢᴍTime;
+        name = utcˢ⁔Time;
     }
     abs = (absSeconds)(uint64)(sec + (9223372028741760000L));
     return (name, offset, abs);
 }
 
 // Date returns the year, month, and day in which t occurs.
-[GoMethodBody("Date")] internal static (nint year, Month month, nint day) Dateᴍ(Time t) {
+internal static (nint year, Month month, nint day) Date⁔(/*this*/ Time t) {
     return t.absSec().days().date();
 }
 
 // Year returns the year in which t occurs.
-[GoMethodBody("Year")] internal static nint Yearᴍ(Time t) {
+internal static nint Year⁔(/*this*/ Time t) {
     var (century, cyear, ayday) = t.absSec().days().split();
     absJanFeb janFeb = ayday.janFeb();
     return century.year(cyear, janFeb);
 }
 
 // Month returns the month of the year specified by t.
-[GoMethodBody("Month")] internal static Month Monthᴍ(Time t) {
+internal static Month Month⁔(/*this*/ Time t) {
     var (_, _, ayday) = t.absSec().days().split();
     var (amonth, _) = ayday.split();
     return amonth.month(ayday.janFeb());
 }
 
 // Day returns the day of the month specified by t.
-[GoMethodBody("Day")] internal static nint Dayᴍ(Time t) {
+internal static nint Day⁔(/*this*/ Time t) {
     var (_, _, ayday) = t.absSec().days().split();
     var (_, day) = ayday.split();
     return day;
 }
 
 // Weekday returns the day of the week specified by t.
-[GoMethodBody("Weekday")] internal static Weekday Weekdayᴍ(Time t) {
+internal static Weekday Weekday⁔(/*this*/ Time t) {
     return t.absSec().days().weekday();
 }
 
 } partial class time_package {
 
 // weekday returns the day of the week specified by days.
-[GoMethodBody("weekday")] internal static Weekday weekdayᴍ(absDays days) {
+internal static Weekday weekday⁔(/*this*/ absDays days) {
     // March 1 of the absolute year, like March 1 of 2000, was a Wednesday.
     return (Weekday)(nint)(((uint64)days + (uint64)Wednesday) % 7);
 }
@@ -898,7 +898,7 @@ private static readonly @string utcˢᵇᴍTime = "UTC"u8;
 // Week ranges from 1 to 53. Jan 01 to Jan 03 of year n might belong to
 // week 52 or 53 of year n-1, and Dec 29 to Dec 31 might belong to week 1
 // of year n+1.
-[GoMethodBody("ISOWeek")] internal static (nint year, nint week) ISOWeekᴍ(Time t) {
+internal static (nint year, nint week) ISOWeek⁔(/*this*/ Time t) {
     nint year = default;
 
     // According to the rule that the first calendar week of a calendar year is
@@ -918,14 +918,14 @@ private static readonly @string utcˢᵇᴍTime = "UTC"u8;
 }
 
 // Clock returns the hour, minute, and second within the day specified by t.
-[GoMethodBody("Clock")] internal static (nint hour, nint min, nint sec) Clockᴍ(Time t) {
+internal static (nint hour, nint min, nint sec) Clock⁔(/*this*/ Time t) {
     return t.absSec().clock();
 }
 
 } partial class time_package {
 
 // clock returns the hour, minute, and second within the day specified by abs.
-[GoMethodBody("clock")] internal static (nint hour, nint min, nint sec) clockᴍ(absSeconds abs) {
+internal static (nint hour, nint min, nint sec) clock⁔(/*this*/ absSeconds abs) {
     nint hour = default;
     nint min = default;
     nint sec = default;
@@ -941,29 +941,29 @@ private static readonly @string utcˢᵇᴍTime = "UTC"u8;
 } partial class time_package {
 
 // Hour returns the hour within the day specified by t, in the range [0, 23].
-[GoMethodBody("Hour")] internal static nint Hourᴍ(Time t) {
+internal static nint Hour⁔(/*this*/ Time t) {
     return (nint)(t.absSec() % (uint64)secondsPerDay) / (nint)secondsPerHour;
 }
 
 // Minute returns the minute offset within the hour specified by t, in the range [0, 59].
-[GoMethodBody("Minute")] internal static nint Minuteᴍ(Time t) {
+internal static nint Minute⁔(/*this*/ Time t) {
     return (nint)(t.absSec() % (uint64)secondsPerHour) / (nint)secondsPerMinute;
 }
 
 // Second returns the second offset within the minute specified by t, in the range [0, 59].
-[GoMethodBody("Second")] internal static nint Secondᴍ(Time t) {
+internal static nint Second⁔(/*this*/ Time t) {
     return (nint)(t.absSec() % (uint64)secondsPerMinute);
 }
 
 // Nanosecond returns the nanosecond offset within the second specified by t,
 // in the range [0, 999999999].
-[GoMethodBody("Nanosecond")] internal static nint Nanosecondᴍ(Time t) {
+internal static nint Nanosecond⁔(/*this*/ Time t) {
     return (nint)t.nsec();
 }
 
 // YearDay returns the day of the year specified by t, in the range [1,365] for non-leap years,
 // and [1,366] in leap years.
-[GoMethodBody("YearDay")] internal static nint YearDayᴍ(Time t) {
+internal static nint YearDay⁔(/*this*/ Time t) {
     var (_, yday) = t.absSec().days().yearYday();
     return yday;
 }
@@ -1003,7 +1003,7 @@ public static Duration Hour => /* 60 * Minute */ 3600000000000;
 // Leading zero units are omitted. As a special case, durations less than one
 // second format use a smaller unit (milli-, micro-, or nanoseconds) to ensure
 // that the leading digit is non-zero. The zero duration formats as 0s.
-[GoMethodBody("String")] internal static @string Stringᴍ(Duration d) {
+internal static @string String⁔(/*this*/ Duration d) {
     // This is inlinable to take advantage of "function outlining".
     // Thus, the caller can decide whether a string must be heap allocated.
     ref var arr = ref heap(new array<byte>(32), out var Ꮡarr);
@@ -1013,7 +1013,7 @@ public static Duration Hour => /* 60 * Minute */ 3600000000000;
 
 // format formats the representation of d into the end of buf and
 // returns the offset of the first character.
-[GoMethodBody("format")] internal static nint formatᴍ(Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
+internal static nint format⁔(/*this*/ Duration d, /*[32]*/ ж<array<byte>> Ꮡbuf) {
     ref var buf = ref Ꮡbuf.DerefOrNull();
 
     // Largest time is 2540400h10m10.000000000s
@@ -1140,13 +1140,13 @@ internal static nint fmtInt(slice<byte> buf, uint64 v) {
 } partial class time_package {
 
 // Nanoseconds returns the duration as an integer nanosecond count.
-[GoMethodBody("Nanoseconds")] internal static int64 Nanosecondsᴍ(Duration d) { return (int64)d; }
+internal static int64 Nanoseconds⁔(/*this*/ Duration d) { return (int64)d; }
 
 // Microseconds returns the duration as an integer microsecond count.
-[GoMethodBody("Microseconds")] internal static int64 Microsecondsᴍ(Duration d) { return (int64)d / 1000; }
+internal static int64 Microseconds⁔(/*this*/ Duration d) { return (int64)d / 1000; }
 
 // Milliseconds returns the duration as an integer millisecond count.
-[GoMethodBody("Milliseconds")] internal static int64 Millisecondsᴍ(Duration d) { return (int64)d / 1000000; }
+internal static int64 Milliseconds⁔(/*this*/ Duration d) { return (int64)d / 1000000; }
 
 // These methods return float64 because the dominant
 // use case is for printing a floating point number like 1.5s, and
@@ -1158,21 +1158,21 @@ internal static nint fmtInt(slice<byte> buf, uint64 v) {
 // differently.
 
 // Seconds returns the duration as a floating point number of seconds.
-[GoMethodBody("Seconds")] internal static float64 Secondsᴍ(Duration d) {
+internal static float64 Seconds⁔(/*this*/ Duration d) {
     var sec = d / Second;
     var nsec = d % Second;
     return (float64)sec + (float64)nsec / 1e9D;
 }
 
 // Minutes returns the duration as a floating point number of minutes.
-[GoMethodBody("Minutes")] internal static float64 Minutesᴍ(Duration d) {
+internal static float64 Minutes⁔(/*this*/ Duration d) {
     var min = d / Minute;
     var nsec = d % Minute;
     return (float64)min + (float64)nsec / (60D * 1e9D);
 }
 
 // Hours returns the duration as a floating point number of hours.
-[GoMethodBody("Hours")] internal static float64 Hoursᴍ(Duration d) {
+internal static float64 Hours⁔(/*this*/ Duration d) {
     var hour = d / Hour;
     var nsec = d % Hour;
     return (float64)hour + (float64)nsec / (60D * 60D * 1e9D);
@@ -1180,7 +1180,7 @@ internal static nint fmtInt(slice<byte> buf, uint64 v) {
 
 // Truncate returns the result of rounding d toward zero to a multiple of m.
 // If m <= 0, Truncate returns d unchanged.
-[GoMethodBody("Truncate")] internal static Duration Truncateᴍ(Duration d, Duration m) {
+internal static Duration Truncate⁔(/*this*/ Duration d, Duration m) {
     if (m <= 0) {
         return d;
     }
@@ -1203,7 +1203,7 @@ internal static bool lessThanHalf(Duration x, Duration y) {
 // value that can be stored in a [Duration],
 // Round returns the maximum (or minimum) duration.
 // If m <= 0, Round returns d unchanged.
-[GoMethodBody("Round")] internal static Duration Roundᴍ(Duration d, Duration m) {
+internal static Duration Round⁔(/*this*/ Duration d, Duration m) {
     if (m <= 0) {
         return d;
     }
@@ -1232,7 +1232,7 @@ internal static bool lessThanHalf(Duration x, Duration y) {
 // Abs returns the absolute value of d.
 // As a special case, Duration([math.MinInt64]) is converted to Duration([math.MaxInt64]),
 // reducing its magnitude by 1 nanosecond.
-[GoMethodBody("Abs")] internal static Duration Absᴍ(Duration d) {
+internal static Duration Abs⁔(/*this*/ Duration d) {
     switch (ᐧ) {
     case {} when d >= 0: {
         return d;
@@ -1248,7 +1248,7 @@ internal static bool lessThanHalf(Duration x, Duration y) {
 } partial class time_package {
 
 // Add returns the time t+d.
-[GoMethodBody("Add")] internal static Time Addᴍ(Time t, Duration d) {
+internal static Time Add⁔(/*this*/ Time t, Duration d) {
     var dsec = (int64)(d / 1000000000);
     var nsec = t.nsec() + (int32)(d % 1000000000);
     if (nsec >= 1000000000) {
@@ -1276,7 +1276,7 @@ internal static bool lessThanHalf(Duration x, Duration y) {
 // value that can be stored in a [Duration], the maximum (or minimum) duration
 // will be returned.
 // To compute t-d for a duration d, use t.Add(-d).
-[GoMethodBody("Sub")] internal static Duration Subᴍ(Time t, Time u) {
+internal static Duration Sub⁔(/*this*/ Time t, Time u) {
     if ((t.wall & u.wall & (uint64)hasMonotonic) != 0) {
         return subMono(t.ext, u.ext);
     }
@@ -1346,7 +1346,7 @@ public static Duration Until(Time t) {
 // AddDate normalizes its result in the same way that Date does,
 // so, for example, adding one month to October 31 yields
 // December 1, the normalized form for November 31.
-[GoMethodBody("AddDate")] internal static Time AddDateᴍ(Time t, nint years, nint months, nint days) {
+internal static Time AddDate⁔(/*this*/ Time t, nint years, nint months, nint days) {
     var (year, month, day) = t.Date();
     var (hour, min, sec) = t.Clock();
     return time.Date(year + years, month + ((Month)months), day + days, hour, min, sec, (nint)t.nsec(), t.Location());
@@ -1456,13 +1456,13 @@ internal static Time unixTime(int64 sec, int32 nsec) {
 } partial class time_package {
 
 // UTC returns t with the location set to UTC.
-[GoMethodBody("UTC")] internal static Time UTCᴍ(Time t) {
+internal static Time UTC⁔(/*this*/ Time t) {
     t.setLoc(ᏑutcLoc);
     return t;
 }
 
 // Local returns t with the location set to local time.
-[GoMethodBody("Local")] internal static Time Localᴍ(Time t) {
+internal static Time Local⁔(/*this*/ Time t) {
     t.setLoc(time.Local);
     return t;
 }
@@ -1472,7 +1472,7 @@ internal static Time unixTime(int64 sec, int32 nsec) {
 // purposes.
 //
 // In panics if loc is nil.
-[GoMethodBody("In")] internal static Time Inᴍ(Time t, ж<Location> loc) {
+internal static Time In⁔(/*this*/ Time t, ж<Location> loc) {
     if (loc == nil) {
         throw panic("time: missing Location in call to Time.In");
     }
@@ -1481,7 +1481,7 @@ internal static Time unixTime(int64 sec, int32 nsec) {
 }
 
 // Location returns the time zone information associated with t.
-[GoMethodBody("Location")] internal static ж<Location> Locationᴍ(Time t) {
+internal static ж<Location> Location⁔(/*this*/ Time t) {
     var l = t.loc;
     if (l == nil) {
         l = time.UTC;
@@ -1491,7 +1491,7 @@ internal static Time unixTime(int64 sec, int32 nsec) {
 
 // Zone computes the time zone in effect at time t, returning the abbreviated
 // name of the zone (such as "CET") and its offset in seconds east of UTC.
-[GoMethodBody("Zone")] internal static (@string name, nint offset) Zoneᴍ(Time t) {
+internal static (@string name, nint offset) Zone⁔(/*this*/ Time t) {
     @string name = default;
     nint offset = default;
 
@@ -1504,7 +1504,7 @@ internal static Time unixTime(int64 sec, int32 nsec) {
 // If the zone begins at the beginning of time, start will be returned as a zero Time.
 // If the zone goes on forever, end will be returned as a zero Time.
 // The Location of the returned times will be the same as t.
-[GoMethodBody("ZoneBounds")] internal static (Time start, Time end) ZoneBoundsᴍ(Time t) {
+internal static (Time start, Time end) ZoneBounds⁔(/*this*/ Time t) {
     Time start = default;
     Time end = default;
 
@@ -1526,7 +1526,7 @@ internal static Time unixTime(int64 sec, int32 nsec) {
 // Unix-like operating systems often record time as a 32-bit
 // count of seconds, but since the method here returns a 64-bit
 // value it is valid for billions of years into the past or future.
-[GoMethodBody("Unix")] internal static int64 Unixᴍ(Time t) {
+internal static int64 Unix⁔(/*this*/ Time t) {
     return t.unixSec();
 }
 
@@ -1535,7 +1535,7 @@ internal static Time unixTime(int64 sec, int32 nsec) {
 // milliseconds cannot be represented by an int64 (a date more than 292 million
 // years before or after 1970). The result does not depend on the
 // location associated with t.
-[GoMethodBody("UnixMilli")] internal static int64 UnixMilliᴍ(Time t) {
+internal static int64 UnixMilli⁔(/*this*/ Time t) {
     return t.unixSec() * 1000 + (int64)t.nsec() / 1000000;
 }
 
@@ -1544,7 +1544,7 @@ internal static Time unixTime(int64 sec, int32 nsec) {
 // microseconds cannot be represented by an int64 (a date before year -290307 or
 // after year 294246). The result does not depend on the location associated
 // with t.
-[GoMethodBody("UnixMicro")] internal static int64 UnixMicroᴍ(Time t) {
+internal static int64 UnixMicro⁔(/*this*/ Time t) {
     return t.unixSec() * 1000000 + (int64)t.nsec() / 1000;
 }
 
@@ -1554,7 +1554,7 @@ internal static Time unixTime(int64 sec, int32 nsec) {
 // 1678 or after 2262). Note that this means the result of calling UnixNano
 // on the zero Time is undefined. The result does not depend on the
 // location associated with t.
-[GoMethodBody("UnixNano")] internal static int64 UnixNanoᴍ(Time t) {
+internal static int64 UnixNano⁔(/*this*/ Time t) {
     return (t.unixSec()) * 1000000000 + (int64)t.nsec();
 }
 
@@ -1566,11 +1566,11 @@ internal const byte timeBinaryVersionV2 = 2;                // For LMT only
 } partial class time_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string timeMarshalBinaryˢᴍTime => ref timeMarshalBinaryˢᵇᴍTime;
-private static readonly @string timeMarshalBinaryˢᵇᴍTime = "Time.MarshalBinary: unexpected zone offset"u8;
+internal static ref readonly @string timeMarshalBinaryˢ⁔Time => ref timeMarshalBinaryˢᵇ⁔Time;
+private static readonly @string timeMarshalBinaryˢᵇ⁔Time = "Time.MarshalBinary: unexpected zone offset"u8;
 
 // AppendBinary implements the [encoding.BinaryAppender] interface.
-[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(Time t, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ Time t, slice<byte> b) {
     int16 offsetMin = default; // minutes east of UTC. -1 is UTC.
     int8 offsetSec = default;
     var version = timeBinaryVersionV1;
@@ -1586,7 +1586,7 @@ private static readonly @string timeMarshalBinaryˢᵇᴍTime = "Time.MarshalBin
 
         offset /= 60;
         if (offset < -32768 || offset == -1 || offset > 32767) {
-            return (b, errors.New(timeMarshalBinaryˢᴍTime));
+            return (b, errors.New(timeMarshalBinaryˢ⁔Time));
         }
         offsetMin = (int16)offset;
     }
@@ -1616,7 +1616,7 @@ private static readonly @string timeMarshalBinaryˢᵇᴍTime = "Time.MarshalBin
 }
 
 // MarshalBinary implements the [encoding.BinaryMarshaler] interface.
-[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(Time t) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ Time t) {
     var (b, err) = t.AppendBinary(new slice<byte>(0, 16));
     if (err != nil) {
         return (default, err);
@@ -1625,23 +1625,23 @@ private static readonly @string timeMarshalBinaryˢᵇᴍTime = "Time.MarshalBin
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string timeUnmarshalBinaryNoˢᴍTime => ref timeUnmarshalBinaryNoˢᵇᴍTime;
-private static readonly @string timeUnmarshalBinaryNoˢᵇᴍTime = "Time.UnmarshalBinary: no data"u8;
-internal static ref readonly @string timeUnmarshalBinaryˢᴍTime => ref timeUnmarshalBinaryˢᵇᴍTime;
-private static readonly @string timeUnmarshalBinaryˢᵇᴍTime = "Time.UnmarshalBinary: unsupported version"u8;
-internal static ref readonly @string timeUnmarshalBinaryˢ2ᴍTime => ref timeUnmarshalBinaryˢ2ᵇᴍTime;
-private static readonly @string timeUnmarshalBinaryˢ2ᵇᴍTime = "Time.UnmarshalBinary: invalid length"u8;
+internal static ref readonly @string timeUnmarshalBinaryNoˢ⁔Time => ref timeUnmarshalBinaryNoˢᵇ⁔Time;
+private static readonly @string timeUnmarshalBinaryNoˢᵇ⁔Time = "Time.UnmarshalBinary: no data"u8;
+internal static ref readonly @string timeUnmarshalBinaryˢ⁔Time => ref timeUnmarshalBinaryˢᵇ⁔Time;
+private static readonly @string timeUnmarshalBinaryˢᵇ⁔Time = "Time.UnmarshalBinary: unsupported version"u8;
+internal static ref readonly @string timeUnmarshalBinaryˢ2⁔Time => ref timeUnmarshalBinaryˢ2ᵇ⁔Time;
+private static readonly @string timeUnmarshalBinaryˢ2ᵇ⁔Time = "Time.UnmarshalBinary: invalid length"u8;
 
 // UnmarshalBinary implements the [encoding.BinaryUnmarshaler] interface.
-[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref Time t, slice<byte> data) {
+internal static error UnmarshalBinary⁔(/*this*/ ref Time t, slice<byte> data) {
     var buf = data;
     if (len(buf) == 0) {
-        return errors.New(timeUnmarshalBinaryNoˢᴍTime);
+        return errors.New(timeUnmarshalBinaryNoˢ⁔Time);
     }
 
     var version = buf[0];
     if (version != timeBinaryVersionV1 && version != timeBinaryVersionV2) {
-        return errors.New(timeUnmarshalBinaryˢᴍTime);
+        return errors.New(timeUnmarshalBinaryˢ⁔Time);
     }
 
     nint wantLen = 1 + /*sec*/ 8 + /*nsec*/ 4 + /*zone offset*/ 2;
@@ -1650,7 +1650,7 @@ private static readonly @string timeUnmarshalBinaryˢ2ᵇᴍTime = "Time.Unmarsh
         wantLen++;
     }
     if (len(buf) != wantLen) {
-        return errors.New(timeUnmarshalBinaryˢ2ᴍTime);
+        return errors.New(timeUnmarshalBinaryˢ2⁔Time);
     }
 
     buf = buf[1..];
@@ -1685,12 +1685,12 @@ private static readonly @string timeUnmarshalBinaryˢ2ᵇᴍTime = "Time.Unmarsh
 // UnmarshalBinary, UnmarshalText.
 
 // GobEncode implements the gob.GobEncoder interface.
-[GoMethodBody("GobEncode")] internal static (slice<byte>, error) GobEncodeᴍ(Time t) {
+internal static (slice<byte>, error) GobEncode⁔(/*this*/ Time t) {
     return t.MarshalBinary();
 }
 
 // GobDecode implements the gob.GobDecoder interface.
-[GoMethodBody("GobDecode")] internal static error GobDecodeᴍ(ref Time t, slice<byte> data) {
+internal static error GobDecode⁔(/*this*/ ref Time t, slice<byte> data) {
     return t.UnmarshalBinary(data);
 }
 
@@ -1698,7 +1698,7 @@ private static readonly @string timeUnmarshalBinaryˢ2ᵇᴍTime = "Time.Unmarsh
 // The time is a quoted string in the RFC 3339 format with sub-second precision.
 // If the timestamp cannot be represented as valid RFC 3339
 // (e.g., the year is out of range), then an error is reported.
-[GoMethodBody("MarshalJSON")] internal static (slice<byte>, error) MarshalJSONᴍ(Time t) {
+internal static (slice<byte>, error) MarshalJSON⁔(/*this*/ Time t) {
     var b = new slice<byte>(0, len(RFC3339Nano) + len(@""""""));
     b = append(b, (byte)'"');
     (b, var err) = t.appendStrictRFC3339(b);
@@ -1710,18 +1710,18 @@ private static readonly @string timeUnmarshalBinaryˢ2ᵇᴍTime = "Time.Unmarsh
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string timeUnmarshalJSONInputIsˢᴍTime => ref timeUnmarshalJSONInputIsˢᵇᴍTime;
-private static readonly @string timeUnmarshalJSONInputIsˢᵇᴍTime = "Time.UnmarshalJSON: input is not a JSON string"u8;
+internal static ref readonly @string timeUnmarshalJSONInputIsˢ⁔Time => ref timeUnmarshalJSONInputIsˢᵇ⁔Time;
+private static readonly @string timeUnmarshalJSONInputIsˢᵇ⁔Time = "Time.UnmarshalJSON: input is not a JSON string"u8;
 
 // UnmarshalJSON implements the [encoding/json.Unmarshaler] interface.
 // The time must be a quoted string in the RFC 3339 format.
-[GoMethodBody("UnmarshalJSON")] internal static error UnmarshalJSONᴍ(ref Time t, slice<byte> data) {
+internal static error UnmarshalJSON⁔(/*this*/ ref Time t, slice<byte> data) {
     if (((sstring)data) == "null"u8) {
         return default;
     }
     // TODO(https://go.dev/issue/47353): Properly unescape a JSON string.
     if (len(data) < 2 || data[0] != '"' || data[len(data) - 1] != '"') {
-        return errors.New(timeUnmarshalJSONInputIsˢᴍTime);
+        return errors.New(timeUnmarshalJSONInputIsˢ⁔Time);
     }
     data = data.slice(len(@""""), len(data) - len(@""""));
     error err = default;
@@ -1729,7 +1729,7 @@ private static readonly @string timeUnmarshalJSONInputIsˢᵇᴍTime = "Time.Unm
     return err;
 }
 
-[GoMethodBody("appendTo")] internal static (slice<byte>, error) appendToᴍ(Time t, slice<byte> b, @string errPrefix) {
+internal static (slice<byte>, error) appendTo⁔(/*this*/ Time t, slice<byte> b, @string errPrefix) {
     (b, var err) = t.appendStrictRFC3339(b);
     if (err != nil) {
         return (default, errors.New(errPrefix + err.Error()));
@@ -1738,32 +1738,32 @@ private static readonly @string timeUnmarshalJSONInputIsˢᵇᴍTime = "Time.Unm
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string timeAppendTextˢᴍTime => ref timeAppendTextˢᵇᴍTime;
-private static readonly @string timeAppendTextˢᵇᴍTime = "Time.AppendText: "u8;
+internal static ref readonly @string timeAppendTextˢ⁔Time => ref timeAppendTextˢᵇ⁔Time;
+private static readonly @string timeAppendTextˢᵇ⁔Time = "Time.AppendText: "u8;
 
 // AppendText implements the [encoding.TextAppender] interface.
 // The time is formatted in RFC 3339 format with sub-second precision.
 // If the timestamp cannot be represented as valid RFC 3339
 // (e.g., the year is out of range), then an error is returned.
-[GoMethodBody("AppendText")] internal static (slice<byte>, error) AppendTextᴍ(Time t, slice<byte> b) {
-    return t.appendTo(b, timeAppendTextˢᴍTime);
+internal static (slice<byte>, error) AppendText⁔(/*this*/ Time t, slice<byte> b) {
+    return t.appendTo(b, timeAppendTextˢ⁔Time);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string timeMarshalTextˢᴍTime => ref timeMarshalTextˢᵇᴍTime;
-private static readonly @string timeMarshalTextˢᵇᴍTime = "Time.MarshalText: "u8;
+internal static ref readonly @string timeMarshalTextˢ⁔Time => ref timeMarshalTextˢᵇ⁔Time;
+private static readonly @string timeMarshalTextˢᵇ⁔Time = "Time.MarshalText: "u8;
 
 // MarshalText implements the [encoding.TextMarshaler] interface. The output
 // matches that of calling the [Time.AppendText] method.
 //
 // See [Time.AppendText] for more information.
-[GoMethodBody("MarshalText")] internal static (slice<byte>, error) MarshalTextᴍ(Time t) {
-    return t.appendTo(new slice<byte>(0, len(RFC3339Nano)), timeMarshalTextˢᴍTime);
+internal static (slice<byte>, error) MarshalText⁔(/*this*/ Time t) {
+    return t.appendTo(new slice<byte>(0, len(RFC3339Nano)), timeMarshalTextˢ⁔Time);
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 // The time must be in the RFC 3339 format.
-[GoMethodBody("UnmarshalText")] internal static error UnmarshalTextᴍ(ref Time t, slice<byte> data) {
+internal static error UnmarshalText⁔(/*this*/ ref Time t, slice<byte> data) {
     error err = default;
     (t, err) = parseStrictRFC3339(data);
     return err;
@@ -1804,7 +1804,7 @@ public static Time UnixMicro(int64 usec) {
 } partial class time_package {
 
 // IsDST reports whether the time in the configured location is in Daylight Savings Time.
-[GoMethodBody("IsDST")] internal static bool IsDSTᴍ(Time t) {
+internal static bool IsDST⁔(/*this*/ Time t) {
     var (_, _, _, _, isDST) = t.loc.lookup(t.Unix());
     return isDST;
 }
@@ -1907,7 +1907,7 @@ public static Time Date(nint year, Month month, nint day, nint hour, nint min, n
 // zero time; it does not operate on the presentation form of the
 // time. Thus, Truncate(Hour) may return a time with a non-zero
 // minute, depending on the time's Location.
-[GoMethodBody("Truncate")] internal static Time Truncateᴍ(Time t, Duration d) {
+internal static Time Truncate⁔(/*this*/ Time t, Duration d) {
     t.stripMono();
     if (d <= 0) {
         return t;
@@ -1924,7 +1924,7 @@ public static Time Date(nint year, Month month, nint day, nint hour, nint min, n
 // zero time; it does not operate on the presentation form of the
 // time. Thus, Round(Hour) may return a time with a non-zero
 // minute, depending on the time's Location.
-[GoMethodBody("Round")] internal static Time Roundᴍ(Time t, Duration d) {
+internal static Time Round⁔(/*this*/ Time t, Duration d) {
     t.stripMono();
     if (d <= 0) {
         return t;

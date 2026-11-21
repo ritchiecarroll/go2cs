@@ -20,38 +20,38 @@ partial struct Point {
 } partial class image_package {
 
 // String returns a string representation of p like "(3,4)".
-[GoMethodBody("String")] internal static @string Stringᴍ(Point p) {
+internal static @string String⁔(/*this*/ Point p) {
     return "("u8 + strconv.Itoa(p.X) + ","u8 + strconv.Itoa(p.Y) + ")"u8;
 }
 
 // Add returns the vector p+q.
-[GoMethodBody("Add")] internal static Point Addᴍ(Point p, Point q) {
+internal static Point Add⁔(/*this*/ Point p, Point q) {
     return new Point(p.X + q.X, p.Y + q.Y);
 }
 
 // Sub returns the vector p-q.
-[GoMethodBody("Sub")] internal static Point Subᴍ(Point p, Point q) {
+internal static Point Sub⁔(/*this*/ Point p, Point q) {
     return new Point(p.X - q.X, p.Y - q.Y);
 }
 
 // Mul returns the vector p*k.
-[GoMethodBody("Mul")] internal static Point Mulᴍ(Point p, nint k) {
+internal static Point Mul⁔(/*this*/ Point p, nint k) {
     return new Point(p.X * k, p.Y * k);
 }
 
 // Div returns the vector p/k.
-[GoMethodBody("Div")] internal static Point Divᴍ(Point p, nint k) {
+internal static Point Div⁔(/*this*/ Point p, nint k) {
     return new Point(quo(p.X, k), quo(p.Y, k));
 }
 
 // In reports whether p is in r.
-[GoMethodBody("In")] internal static bool Inᴍ(Point p, Rectangle r) {
+internal static bool In⁔(/*this*/ Point p, Rectangle r) {
     return r.Min.X <= p.X && p.X < r.Max.X && r.Min.Y <= p.Y && p.Y < r.Max.Y;
 }
 
 // Mod returns the point q in r such that p.X-q.X is a multiple of r's width
 // and p.Y-q.Y is a multiple of r's height.
-[GoMethodBody("Mod")] internal static Point Modᴍ(Point p, Rectangle r) {
+internal static Point Mod⁔(/*this*/ Point p, Rectangle r) {
     nint w = r.Dx();
     nint h = r.Dy();
     p = p.Sub(r.Min);
@@ -67,7 +67,7 @@ partial struct Point {
 }
 
 // Eq reports whether p and q are equal.
-[GoMethodBody("Eq")] internal static bool Eqᴍ(Point p, Point q) {
+internal static bool Eq⁔(/*this*/ Point p, Point q) {
     return p == q;
 }
 
@@ -99,22 +99,22 @@ partial struct Rectangle {
 } partial class image_package {
 
 // String returns a string representation of r like "(3,4)-(6,5)".
-[GoMethodBody("String")] internal static @string Stringᴍ(Rectangle r) {
+internal static @string String⁔(/*this*/ Rectangle r) {
     return r.Min.String() + "-"u8 + r.Max.String();
 }
 
 // Dx returns r's width.
-[GoMethodBody("Dx")] internal static nint Dxᴍ(Rectangle r) {
+internal static nint Dx⁔(/*this*/ Rectangle r) {
     return r.Max.X - r.Min.X;
 }
 
 // Dy returns r's height.
-[GoMethodBody("Dy")] internal static nint Dyᴍ(Rectangle r) {
+internal static nint Dy⁔(/*this*/ Rectangle r) {
     return r.Max.Y - r.Min.Y;
 }
 
 // Size returns r's width and height.
-[GoMethodBody("Size")] internal static Point Sizeᴍ(Rectangle r) {
+internal static Point Size⁔(/*this*/ Rectangle r) {
     return new Point(
         r.Max.X - r.Min.X,
         r.Max.Y - r.Min.Y
@@ -122,7 +122,7 @@ partial struct Rectangle {
 }
 
 // Add returns the rectangle r translated by p.
-[GoMethodBody("Add")] internal static Rectangle Addᴍ(Rectangle r, Point p) {
+internal static Rectangle Add⁔(/*this*/ Rectangle r, Point p) {
     return new Rectangle(
         new Point(r.Min.X + p.X, r.Min.Y + p.Y),
         new Point(r.Max.X + p.X, r.Max.Y + p.Y)
@@ -130,7 +130,7 @@ partial struct Rectangle {
 }
 
 // Sub returns the rectangle r translated by -p.
-[GoMethodBody("Sub")] internal static Rectangle Subᴍ(Rectangle r, Point p) {
+internal static Rectangle Sub⁔(/*this*/ Rectangle r, Point p) {
     return new Rectangle(
         new Point(r.Min.X - p.X, r.Min.Y - p.Y),
         new Point(r.Max.X - p.X, r.Max.Y - p.Y)
@@ -140,7 +140,7 @@ partial struct Rectangle {
 // Inset returns the rectangle r inset by n, which may be negative. If either
 // of r's dimensions is less than 2*n then an empty rectangle near the center
 // of r will be returned.
-[GoMethodBody("Inset")] internal static Rectangle Insetᴍ(Rectangle r, nint n) {
+internal static Rectangle Inset⁔(/*this*/ Rectangle r, nint n) {
     if (r.Dx() < 2 * n) {
         r.Min.X = (r.Min.X + r.Max.X) / 2;
         r.Max.X = r.Min.X;
@@ -160,7 +160,7 @@ partial struct Rectangle {
 
 // Intersect returns the largest rectangle contained by both r and s. If the
 // two rectangles do not overlap then the zero rectangle will be returned.
-[GoMethodBody("Intersect")] internal static Rectangle Intersectᴍ(Rectangle r, Rectangle s) {
+internal static Rectangle Intersect⁔(/*this*/ Rectangle r, Rectangle s) {
     if (r.Min.X < s.Min.X) {
         r.Min.X = s.Min.X;
     }
@@ -184,7 +184,7 @@ partial struct Rectangle {
 }
 
 // Union returns the smallest rectangle that contains both r and s.
-[GoMethodBody("Union")] internal static Rectangle Unionᴍ(Rectangle r, Rectangle s) {
+internal static Rectangle Union⁔(/*this*/ Rectangle r, Rectangle s) {
     if (r.Empty()) {
         return s;
     }
@@ -207,23 +207,23 @@ partial struct Rectangle {
 }
 
 // Empty reports whether the rectangle contains no points.
-[GoMethodBody("Empty")] internal static bool Emptyᴍ(Rectangle r) {
+internal static bool Empty⁔(/*this*/ Rectangle r) {
     return r.Min.X >= r.Max.X || r.Min.Y >= r.Max.Y;
 }
 
 // Eq reports whether r and s contain the same set of points. All empty
 // rectangles are considered equal.
-[GoMethodBody("Eq")] internal static bool Eqᴍ(Rectangle r, Rectangle s) {
+internal static bool Eq⁔(/*this*/ Rectangle r, Rectangle s) {
     return r == s || r.Empty() && s.Empty();
 }
 
 // Overlaps reports whether r and s have a non-empty intersection.
-[GoMethodBody("Overlaps")] internal static bool Overlapsᴍ(Rectangle r, Rectangle s) {
+internal static bool Overlaps⁔(/*this*/ Rectangle r, Rectangle s) {
     return !r.Empty() && !s.Empty() && r.Min.X < s.Max.X && s.Min.X < r.Max.X && r.Min.Y < s.Max.Y && s.Min.Y < r.Max.Y;
 }
 
 // In reports whether every point in r is in s.
-[GoMethodBody("In")] internal static bool Inᴍ(Rectangle r, Rectangle s) {
+internal static bool In⁔(/*this*/ Rectangle r, Rectangle s) {
     if (r.Empty()) {
         return true;
     }
@@ -234,7 +234,7 @@ partial struct Rectangle {
 
 // Canon returns the canonical version of r. The returned rectangle has minimum
 // and maximum coordinates swapped if necessary so that it is well-formed.
-[GoMethodBody("Canon")] internal static Rectangle Canonᴍ(Rectangle r) {
+internal static Rectangle Canon⁔(/*this*/ Rectangle r) {
     if (r.Max.X < r.Min.X) {
         (r.Min.X, r.Max.X) = (r.Max.X, r.Min.X);
     }
@@ -245,7 +245,7 @@ partial struct Rectangle {
 }
 
 // At implements the [Image] interface.
-[GoMethodBody("At")] internal static color.Color Atᴍ(Rectangle r, nint x, nint y) {
+internal static color.Color At⁔(/*this*/ Rectangle r, nint x, nint y) {
     if ((new Point(x, y)).In(r)) {
         return color.Opaque;
     }
@@ -253,7 +253,7 @@ partial struct Rectangle {
 }
 
 // RGBA64At implements the [RGBA64Image] interface.
-[GoMethodBody("RGBA64At")] internal static color.RGBA64 RGBA64Atᴍ(Rectangle r, nint x, nint y) {
+internal static color.RGBA64 RGBA64At⁔(/*this*/ Rectangle r, nint x, nint y) {
     if ((new Point(x, y)).In(r)) {
         return new color.RGBA64(0xffff, 0xffff, 0xffff, 0xffff);
     }
@@ -261,12 +261,12 @@ partial struct Rectangle {
 }
 
 // Bounds implements the [Image] interface.
-[GoMethodBody("Bounds")] internal static Rectangle Boundsᴍ(Rectangle r) {
+internal static Rectangle Bounds⁔(/*this*/ Rectangle r) {
     return r;
 }
 
 // ColorModel implements the [Image] interface.
-[GoMethodBody("ColorModel")] internal static color.Model ColorModelᴍ(Rectangle r) {
+internal static color.Model ColorModel⁔(/*this*/ Rectangle r) {
     return color.Alpha16Model;
 }
 

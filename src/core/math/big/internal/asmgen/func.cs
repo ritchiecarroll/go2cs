@@ -27,14 +27,14 @@ partial struct Func {
 } partial class asmgen_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string funcˢᴍAsm => ref funcˢᵇᴍAsm;
-private static readonly @string funcˢᵇᴍAsm = "func "u8;
+internal static ref readonly @string funcˢ⁔Asm => ref funcˢᵇ⁔Asm;
+private static readonly @string funcˢᵇ⁔Asm = "func "u8;
 
 // Func starts a new function in the assembly output.
-[GoMethodBody("Func")] internal static ж<Func> Funcᴍ(ж<Asm> Ꮡa, @string decl) {
+internal static ж<Func> Func⁔(/*this*/ ж<Asm> Ꮡa, @string decl) {
     ref var a = ref Ꮡa.DerefOrNull();
 
-    var (d, ok) = strings.CutPrefix(decl, funcˢᴍAsm);
+    var (d, ok) = strings.CutPrefix(decl, funcˢ⁔Asm);
     if (!ok) {
         Ꮡa.Fatalf("func decl does not begin with 'func '");
     }
@@ -113,12 +113,12 @@ private static readonly @string funcˢᵇᴍAsm = "func "u8;
 
 // Arg allocates a new register, copies the named argument (or result) into it,
 // and returns that register.
-[GoMethodBody("Arg")] internal static Reg Argᴍ(ref Func f, @string name) {
+internal static Reg Arg⁔(/*this*/ ref Func f, @string name) {
     return f.ArgHint(name, HintNone);
 }
 
 // ArgHint is like Arg but uses a register allocation hint.
-[GoMethodBody("ArgHint")] internal static Reg ArgHintᴍ(ref Func f, @string name, Hint hint) {
+internal static Reg ArgHint⁔(/*this*/ ref Func f, @string name, Hint hint) {
     var (off, ok) = f.args[name, ꟷ];
     if (!ok) {
         f.Asm.Fatalf("unknown argument %s", name);
@@ -133,12 +133,12 @@ private static readonly @string funcˢᵇᴍAsm = "func "u8;
 }
 
 // ArgPtr is like Arg but returns a RegPtr.
-[GoMethodBody("ArgPtr")] internal static RegPtr ArgPtrᴍ(ref Func f, @string name) {
+internal static RegPtr ArgPtr⁔(/*this*/ ref Func f, @string name) {
     return (RegPtr)f.Arg(name);
 }
 
 // StoreArg stores src into the named argument (or result).
-[GoMethodBody("StoreArg")] internal static void StoreArgᴍ(ref Func f, Reg src, @string name) {
+internal static void StoreArg⁔(/*this*/ ref Func f, Reg src, @string name) {
     var (off, ok) = f.args[name, ꟷ];
     if (!ok) {
         f.Asm.Fatalf("unknown argument %s", name);

@@ -25,7 +25,7 @@ partial class types_package {
 // type. context describes the context in which the assignment takes place.
 // Use T == nil to indicate assignment to an untyped blank identifier.
 // If the assignment check fails, x.mode is set to invalid.
-[GoMethodBody("assignment")] internal static void assignmentᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T, @string context) {
+internal static void assignment⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, Type T, @string context) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -138,10 +138,10 @@ partial class types_package {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string constantDeclarationˢᴍChecker => ref constantDeclarationˢᵇᴍChecker;
-private static readonly @string constantDeclarationˢᵇᴍChecker = "constant declaration"u8;
+internal static ref readonly @string constantDeclarationˢ⁔Checker => ref constantDeclarationˢᵇ⁔Checker;
+private static readonly @string constantDeclarationˢᵇ⁔Checker = "constant declaration"u8;
 
-[GoMethodBody("initConst")] internal static void initConstᴍ(ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<operand> Ꮡx) {
+internal static void initConst⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Const> Ꮡlhs, ж<operand> Ꮡx) {
     ref var lhs = ref Ꮡlhs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -167,7 +167,7 @@ private static readonly @string constantDeclarationˢᵇᴍChecker = "constant d
         lhs.typ = x.typ;
     }
 
-    Ꮡcheck.assignment(Ꮡx, lhs.typ, constantDeclarationˢᴍChecker);
+    Ꮡcheck.assignment(Ꮡx, lhs.typ, constantDeclarationˢ⁔Checker);
     if (x.mode == invalid) {
         return;
     }
@@ -179,7 +179,7 @@ private static readonly @string constantDeclarationˢᵇᴍChecker = "constant d
 // If lhs doesn't have a type yet, it is given the type of x,
 // or Typ[Invalid] in case of an error.
 // If the initialization check fails, x.mode is set to invalid.
-[GoMethodBody("initVar")] internal static void initVarᴍ(ж<Checker> Ꮡcheck, ж<Var> Ꮡlhs, ж<operand> Ꮡx, @string context) {
+internal static void initVar⁔(/*this*/ ж<Checker> Ꮡcheck, ж<Var> Ꮡlhs, ж<operand> Ꮡx, @string context) {
     ref var lhs = ref Ꮡlhs.DerefOrNull();
     ref var x = ref Ꮡx.DerefOrNull();
 
@@ -214,7 +214,7 @@ private static readonly @string constantDeclarationˢᵇᴍChecker = "constant d
 // lhsVar takes care of not counting a lhs identifier as a "use" of
 // that identifier. The result is nil if it is the blank identifier,
 // and Typ[Invalid] if it is an invalid lhs expression.
-[GoMethodBody("lhsVar")] internal static Type lhsVarᴍ(ж<Checker> Ꮡcheck, ast.Expr lhs) {
+internal static Type lhsVar⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr lhs) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // Determine if the lhs is a (possibly parenthesized) identifier.
@@ -281,13 +281,13 @@ private static readonly @string constantDeclarationˢᵇᴍChecker = "constant d
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string assignmentToIdentifierˢᴍChecker => ref assignmentToIdentifierˢᵇᴍChecker;
-private static readonly @string assignmentToIdentifierˢᵇᴍChecker = "assignment to _ identifier"u8;
+internal static ref readonly @string assignmentToIdentifierˢ⁔Checker => ref assignmentToIdentifierˢᵇ⁔Checker;
+private static readonly @string assignmentToIdentifierˢᵇ⁔Checker = "assignment to _ identifier"u8;
 
 // assignVar checks the assignment lhs = rhs (if x == nil), or lhs = x (if x != nil).
 // If x != nil, it must be the evaluation of rhs (and rhs will be ignored).
 // If the assignment check fails and x != nil, x.mode is set to invalid.
-[GoMethodBody("assignVar")] internal static void assignVarᴍ(ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr rhs, ж<operand> Ꮡx, @string context) {
+internal static void assignVar⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr lhs, ast.Expr rhs, ж<operand> Ꮡx, @string context) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     var T = Ꮡcheck.lhsVar(lhs); // nil if lhs is _
@@ -313,7 +313,7 @@ private static readonly @string assignmentToIdentifierˢᵇᴍChecker = "assignm
     }
 
     if (T == nil && context == "assignment"u8) {
-        context = assignmentToIdentifierˢᴍChecker;
+        context = assignmentToIdentifierˢ⁔Checker;
     }
     Ꮡcheck.assignment(Ꮡx, T, context);
 }
@@ -347,12 +347,12 @@ internal static slice<Type> /*res*/ varTypes(slice<ж<Var>> list) {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unknownTypeˢᴍChecker => ref unknownTypeˢᵇᴍChecker;
-private static readonly @string unknownTypeˢᵇᴍChecker = "unknown type"u8;
-internal static ref readonly @string numberˢᴍChecker => ref numberˢᵇᴍChecker;
-private static readonly @string numberˢᵇᴍChecker = "number"u8;
-internal static ref readonly @string untypedˢᴍChecker => ref untypedˢᵇᴍChecker;
-private static readonly @string untypedˢᵇᴍChecker = "untyped "u8;
+internal static ref readonly @string unknownTypeˢ⁔Checker => ref unknownTypeˢᵇ⁔Checker;
+private static readonly @string unknownTypeˢᵇ⁔Checker = "unknown type"u8;
+internal static ref readonly @string numberˢ⁔Checker => ref numberˢᵇ⁔Checker;
+private static readonly @string numberˢᵇ⁔Checker = "number"u8;
+internal static ref readonly @string untypedˢ⁔Checker => ref untypedˢᵇ⁔Checker;
+private static readonly @string untypedˢᵇ⁔Checker = "untyped "u8;
 
 // typesSummary returns a string of the form "(t1, t2, ...)" where the
 // ti's are user-friendly string representations for the given types.
@@ -361,7 +361,7 @@ private static readonly @string untypedˢᵇᴍChecker = "untyped "u8;
 // If hasDots is set, the last argument string is of the form "T..."
 // where T is the last type.
 // Only one of variadic and hasDots may be set.
-[GoMethodBody("typesSummary")] internal static @string typesSummaryᴍ(ж<Checker> Ꮡcheck, slice<Type> list, bool variadic, bool hasDots) {
+internal static @string typesSummary⁔(/*this*/ ж<Checker> Ꮡcheck, slice<Type> list, bool variadic, bool hasDots) {
     var resᴷ = new stackAppend<@string>();
 
     assert(!(variadic && hasDots));
@@ -373,7 +373,7 @@ private static readonly @string untypedˢᵇᴍChecker = "untyped "u8;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && (!isValid(t))) { matchᴛ1 = true;
-            s = unknownTypeˢᴍChecker;
+            s = unknownTypeˢ⁔Checker;
         }
         else if (isUntyped(t)) { // => *Basic
             if (isNumeric(t)) {
@@ -381,11 +381,11 @@ private static readonly @string untypedˢᵇᴍChecker = "untyped "u8;
                 // "have number, want float64" is better than
                 // "have untyped int, want float64" or
                 // "have int, want float64".
-                s = numberˢᴍChecker;
+                s = numberˢ⁔Checker;
             } else {
                 // If we don't have a number, omit the "untyped" qualifier
                 // for compactness.
-                s = strings.ReplaceAll(t._<ж<Basic>>().name, untypedˢᴍChecker, ""u8);
+                s = strings.ReplaceAll(t._<ж<Basic>>().name, untypedˢ⁔Checker, ""u8);
             }
         }
         else if (!matchᴛ1) { /* default: */
@@ -424,14 +424,14 @@ internal static @string measure(nint x, @string unit) {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string variableˢᴍChecker => ref variableˢᵇᴍChecker;
-private static readonly @string variableˢᵇᴍChecker = "variable"u8;
-internal static ref readonly @string valueˢᴍChecker => ref valueˢᵇᴍChecker;
-private static readonly @string valueˢᵇᴍChecker = "value"u8;
+internal static ref readonly @string variableˢ⁔Checker => ref variableˢᵇ⁔Checker;
+private static readonly @string variableˢᵇ⁔Checker = "variable"u8;
+internal static ref readonly @string valueˢ⁔Checker => ref valueˢᵇ⁔Checker;
+private static readonly @string valueˢᵇ⁔Checker = "value"u8;
 
-[GoMethodBody("assignError")] internal static void assignErrorᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> rhs, nint l, nint r) {
-    @string vars = measure(l, variableˢᴍChecker);
-    @string vals = measure(r, valueˢᴍChecker);
+internal static void assignError⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ast.Expr> rhs, nint l, nint r) {
+    @string vars = measure(l, variableˢ⁔Checker);
+    @string vals = measure(r, valueˢ⁔Checker);
     var rhs0 = rhs[0];
 
     if (len(rhs) == 1) {
@@ -444,18 +444,18 @@ private static readonly @string valueˢᵇᴍChecker = "value"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string notEnoughˢᴍChecker => ref notEnoughˢᵇᴍChecker;
-private static readonly @string notEnoughˢᵇᴍChecker = "not enough"u8;
-internal static ref readonly @string tooManyˢᴍChecker => ref tooManyˢᵇᴍChecker;
-private static readonly @string tooManyˢᵇᴍChecker = "too many"u8;
+internal static ref readonly @string notEnoughˢ⁔Checker => ref notEnoughˢᵇ⁔Checker;
+private static readonly @string notEnoughˢᵇ⁔Checker = "not enough"u8;
+internal static ref readonly @string tooManyˢ⁔Checker => ref tooManyˢᵇ⁔Checker;
+private static readonly @string tooManyˢᵇ⁔Checker = "too many"u8;
 
-[GoMethodBody("returnError")] internal static void returnErrorᴍ(ж<Checker> Ꮡcheck, positioner at, slice<ж<Var>> lhs, slice<ж<operand>> rhs) {
+internal static void returnError⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, slice<ж<Var>> lhs, slice<ж<operand>> rhs) {
     nint l = len(lhs);
     nint r = len(rhs);
-    @string qualifier = notEnoughˢᴍChecker;
+    @string qualifier = notEnoughˢ⁔Checker;
     if (r > l) {
         at = new operandжpositioner(rhs[l]); // report at first extra value
-        qualifier = tooManyˢᴍChecker;
+        qualifier = tooManyˢ⁔Checker;
     } else if (r > 0) {
         at = new operandжpositioner(rhs[r - 1]); // report at last value
     }
@@ -467,23 +467,23 @@ private static readonly @string tooManyˢᵇᴍChecker = "too many"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string assignmentˢᴍChecker => ref assignmentˢᵇᴍChecker;
-private static readonly @string assignmentˢᵇᴍChecker = "assignment"u8;
-internal static ref readonly @string returnStatementˢᴍChecker => ref returnStatementˢᵇᴍChecker;
-private static readonly @string returnStatementˢᵇᴍChecker = "return statement"u8;
-internal static ref readonly @string resultVariableˢᴍChecker => ref resultVariableˢᵇᴍChecker;
-private static readonly @string resultVariableˢᵇᴍChecker = "result variable"u8;
+internal static ref readonly @string assignmentˢ⁔Checker => ref assignmentˢᵇ⁔Checker;
+private static readonly @string assignmentˢᵇ⁔Checker = "assignment"u8;
+internal static ref readonly @string returnStatementˢ⁔Checker => ref returnStatementˢᵇ⁔Checker;
+private static readonly @string returnStatementˢᵇ⁔Checker = "return statement"u8;
+internal static ref readonly @string resultVariableˢ⁔Checker => ref resultVariableˢᵇ⁔Checker;
+private static readonly @string resultVariableˢᵇ⁔Checker = "result variable"u8;
 
 // initVars type-checks assignments of initialization expressions orig_rhs
 // to variables lhs.
 // If returnStmt is non-nil, initVars type-checks the implicit assignment
 // of result expressions orig_rhs to function result parameters lhs.
-[GoMethodBody("initVars")] internal static void initVarsᴍ(ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, slice<ast.Expr> orig_rhs, ast.Stmt returnStmt) {
+internal static void initVars⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ж<Var>> lhs, slice<ast.Expr> orig_rhs, ast.Stmt returnStmt) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
-    @string context = assignmentˢᴍChecker;
+    @string context = assignmentˢ⁔Checker;
     if (returnStmt != nil) {
-        context = returnStatementˢᴍChecker;
+        context = returnStatementˢ⁔Checker;
     }
 
     nint l = len(lhs);
@@ -503,7 +503,7 @@ private static readonly @string resultVariableˢᵇᴍChecker = "result variable
         foreach (var (i, lhsΔ1) in range(lhs)) {
             @string desc = lhsΔ1.name;
             if (returnStmt != nil && desc == ""u8) {
-                desc = resultVariableˢᴍChecker;
+                desc = resultVariableˢ⁔Checker;
             }
             Ꮡcheck.expr(newTarget(lhsΔ1.typ, desc), Ꮡx, orig_rhs[i]);
             Ꮡcheck.initVar(lhsΔ1, Ꮡx, context);
@@ -565,7 +565,7 @@ private static readonly @string resultVariableˢᵇᴍChecker = "result variable
 }
 
 // assignVars type-checks assignments of expressions orig_rhs to variables lhs.
-[GoMethodBody("assignVars")] internal static void assignVarsᴍ(ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, slice<ast.Expr> orig_rhs) {
+internal static void assignVars⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ast.Expr> lhs, slice<ast.Expr> orig_rhs) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     nint l = len(lhs);
@@ -582,7 +582,7 @@ private static readonly @string resultVariableˢᵇᴍChecker = "result variable
     // each value can be assigned to its corresponding variable.
     if (l == r && !isCall) {
         foreach (var (i, lhsΔ1) in range(lhs)) {
-            Ꮡcheck.assignVar(lhsΔ1, orig_rhs[i], nil, assignmentˢᴍChecker);
+            Ꮡcheck.assignVar(lhsΔ1, orig_rhs[i], nil, assignmentˢ⁔Checker);
         }
         return;
     }
@@ -603,7 +603,7 @@ private static readonly @string resultVariableˢᵇᴍChecker = "result variable
     r = len(rhs);
     if (l == r) {
         foreach (var (i, lhsΔ2) in range(lhs)) {
-            Ꮡcheck.assignVar(lhsΔ2, default, rhs[i], assignmentˢᴍChecker);
+            Ꮡcheck.assignVar(lhsΔ2, default, rhs[i], assignmentˢ⁔Checker);
         }
         // Only record comma-ok expression if both assignments succeeded
         // (go.dev/issue/59371).
@@ -622,7 +622,7 @@ private static readonly @string resultVariableˢᵇᴍChecker = "result variable
     // orig_rhs[0] was already evaluated
 }
 
-[GoMethodBody("shortVarDecl")] internal static void shortVarDeclᴍ(ж<Checker> Ꮡcheck, positioner pos, slice<ast.Expr> lhs, slice<ast.Expr> rhs) {
+internal static void shortVarDecl⁔(/*this*/ ж<Checker> Ꮡcheck, positioner pos, slice<ast.Expr> lhs, slice<ast.Expr> rhs) {
     ref var check = ref Ꮡcheck.DerefOrNull();
     var newVarsᴷ = new stackAppend<ж<Var>>();
 

@@ -25,47 +25,47 @@ partial struct Regexp {
 
 } partial class lazyregexp_package {
 
-[GoMethodBody("re")] internal static ж<regexp.Regexp> reᴍ(ж<Regexp> Ꮡr) {
+internal static ж<regexp.Regexp> re⁔(/*this*/ ж<Regexp> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     Ꮡr.Ꮡonce.Do(Ꮡr.build);
     return r.rx;
 }
 
-[GoMethodBody("build")] internal static void buildᴍ(ref Regexp r) {
+internal static void build⁔(/*this*/ ref Regexp r) {
     r.rx = regexp.MustCompile(r.str);
     r.str = ""u8;
 }
 
-[GoMethodBody("FindSubmatch")] internal static slice<slice<byte>> FindSubmatchᴍ(ж<Regexp> Ꮡr, slice<byte> s) {
+internal static slice<slice<byte>> FindSubmatch⁔(/*this*/ ж<Regexp> Ꮡr, slice<byte> s) {
     return Ꮡr.re().FindSubmatch(s);
 }
 
-[GoMethodBody("FindStringSubmatch")] internal static slice<@string> FindStringSubmatchᴍ(ж<Regexp> Ꮡr, @string s) {
+internal static slice<@string> FindStringSubmatch⁔(/*this*/ ж<Regexp> Ꮡr, @string s) {
     return Ꮡr.re().FindStringSubmatch(s);
 }
 
-[GoMethodBody("FindStringSubmatchIndex")] internal static slice<nint> FindStringSubmatchIndexᴍ(ж<Regexp> Ꮡr, @string s) {
+internal static slice<nint> FindStringSubmatchIndex⁔(/*this*/ ж<Regexp> Ꮡr, @string s) {
     return Ꮡr.re().FindStringSubmatchIndex(s);
 }
 
-[GoMethodBody("ReplaceAllString")] internal static @string ReplaceAllStringᴍ(ж<Regexp> Ꮡr, @string src, @string repl) {
+internal static @string ReplaceAllString⁔(/*this*/ ж<Regexp> Ꮡr, @string src, @string repl) {
     return Ꮡr.re().ReplaceAllString(src, repl);
 }
 
-[GoMethodBody("FindString")] internal static @string FindStringᴍ(ж<Regexp> Ꮡr, @string s) {
+internal static @string FindString⁔(/*this*/ ж<Regexp> Ꮡr, @string s) {
     return Ꮡr.re().FindString(s);
 }
 
-[GoMethodBody("FindAllString")] internal static slice<@string> FindAllStringᴍ(ж<Regexp> Ꮡr, @string s, nint n) {
+internal static slice<@string> FindAllString⁔(/*this*/ ж<Regexp> Ꮡr, @string s, nint n) {
     return Ꮡr.re().FindAllString(s, n);
 }
 
-[GoMethodBody("MatchString")] internal static bool MatchStringᴍ(ж<Regexp> Ꮡr, @string s) {
+internal static bool MatchString⁔(/*this*/ ж<Regexp> Ꮡr, @string s) {
     return Ꮡr.re().MatchString(s);
 }
 
-[GoMethodBody("SubexpNames")] internal static slice<@string> SubexpNamesᴍ(ж<Regexp> Ꮡr) {
+internal static slice<@string> SubexpNames⁔(/*this*/ ж<Regexp> Ꮡr) {
     return Ꮡr.re().SubexpNames();
 }
 

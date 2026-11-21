@@ -114,15 +114,15 @@ partial struct hybridKEM {
 
 } partial class hpke_package {
 
-[GoMethodBody("ID")] internal static uint16 IDᴍ(ref hybridKEM kem) {
+internal static uint16 ID⁔(/*this*/ ref hybridKEM kem) {
     return kem.id;
 }
 
-[GoMethodBody("encSize")] internal static nint encSizeᴍ(ref hybridKEM kem) {
+internal static nint encSize⁔(/*this*/ ref hybridKEM kem) {
     return kem.pqCiphertextSize + kem.curvePointSize;
 }
 
-[GoMethodBody("sharedSecret")] internal static slice<byte> sharedSecretᴍ(ref hybridKEM kem, slice<byte> ssPQ, slice<byte> ssT, slice<byte> ctT, slice<byte> ekT) {
+internal static slice<byte> sharedSecret⁔(/*this*/ ref hybridKEM kem, slice<byte> ssPQ, slice<byte> ssT, slice<byte> ctT, slice<byte> ekT) {
     var h = sha3.New256();
     h.Write(ssPQ);
     h.Write(ssT);
@@ -191,14 +191,14 @@ public static (PublicKey, error) NewHybridPublicKey(crypto.Encapsulator pq, ж<e
 } partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidPublicKeySizeˢᴍhybridKEM => ref invalidPublicKeySizeˢᵇᴍhybridKEM;
-private static readonly @string invalidPublicKeySizeˢᵇᴍhybridKEM = "invalid public key size"u8;
+internal static ref readonly @string invalidPublicKeySizeˢ⁔hybridKEM => ref invalidPublicKeySizeˢᵇ⁔hybridKEM;
+private static readonly @string invalidPublicKeySizeˢᵇ⁔hybridKEM = "invalid public key size"u8;
 
-[GoMethodBody("NewPublicKey")] internal static (PublicKey, error) NewPublicKeyᴍ(ж<hybridKEM> Ꮡkem, slice<byte> data) {
+internal static (PublicKey, error) NewPublicKey⁔(/*this*/ ж<hybridKEM> Ꮡkem, slice<byte> data) {
     ref var kem = ref Ꮡkem.DerefOrNull();
 
     if (len(data) != kem.pqEncapsKeySize + kem.curvePointSize) {
-        return (default, errors.New(invalidPublicKeySizeˢᴍhybridKEM));
+        return (default, errors.New(invalidPublicKeySizeˢ⁔hybridKEM));
     }
     ref var err = ref heap<error>(out var Ꮡerr);
     (var pq, err) = kem.pqNewPublicKey(data.slice(0, kem.pqEncapsKeySize));
@@ -218,11 +218,11 @@ private static readonly @string invalidPublicKeySizeˢᵇᴍhybridKEM = "invalid
 
 } partial class hpke_package {
 
-[GoMethodBody("KEM")] internal static KEM KEMᴍ(ref hybridPublicKey pk) {
+internal static KEM KEM⁔(/*this*/ ref hybridPublicKey pk) {
     return new hybridKEMжKEM(pk.kem);
 }
 
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref hybridPublicKey pk) {
+internal static slice<byte> Bytes⁔(/*this*/ ref hybridPublicKey pk) {
     return appendꓸꓸꓸ(pk.pq.Bytes(), pk.t.Bytes());
 }
 
@@ -232,7 +232,7 @@ internal static Func<(slice<byte>, slice<byte>)> testingOnlyEncapsulate;
 
 } partial class hpke_package {
 
-[GoMethodBody("encap")] internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encapᴍ(ж<hybridPublicKey> Ꮡpk) {
+internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encap⁔(/*this*/ ж<hybridPublicKey> Ꮡpk) {
     error err = default;
     ref var pk = ref Ꮡpk.DerefOrNull();
 
@@ -295,21 +295,21 @@ public static (PrivateKey, error) NewHybridPrivateKey(crypto.Decapsulator pq, ec
 
 } partial class hpke_package {
 
-[GoMethodBody("GenerateKey")] internal static (PrivateKey, error) GenerateKeyᴍ(ж<hybridKEM> Ꮡkem) {
+internal static (PrivateKey, error) GenerateKey⁔(/*this*/ ж<hybridKEM> Ꮡkem) {
     var seed = new slice<byte>(32);
     drbg.Read(seed);
     return Ꮡkem.NewPrivateKey(seed);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hpkeInvalidHybridKemˢᴍhybridKEM => ref hpkeInvalidHybridKemˢᵇᴍhybridKEM;
-private static readonly @string hpkeInvalidHybridKemˢᵇᴍhybridKEM = "hpke: invalid hybrid KEM secret length"u8;
+internal static ref readonly @string hpkeInvalidHybridKemˢ⁔hybridKEM => ref hpkeInvalidHybridKemˢᵇ⁔hybridKEM;
+private static readonly @string hpkeInvalidHybridKemˢᵇ⁔hybridKEM = "hpke: invalid hybrid KEM secret length"u8;
 
-[GoMethodBody("NewPrivateKey")] internal static (PrivateKey, error) NewPrivateKeyᴍ(ж<hybridKEM> Ꮡkem, slice<byte> priv) {
+internal static (PrivateKey, error) NewPrivateKey⁔(/*this*/ ж<hybridKEM> Ꮡkem, slice<byte> priv) {
     ref var kem = ref Ꮡkem.DerefOrNull();
 
     if (len(priv) != 32) {
-        return (default, errors.New(hpkeInvalidHybridKemˢᴍhybridKEM));
+        return (default, errors.New(hpkeInvalidHybridKemˢ⁔hybridKEM));
     }
 
     var s = sha3.NewSHAKE256();
@@ -369,14 +369,14 @@ internal static (PrivateKey, error) newHybridPrivateKey(crypto.Decapsulator pq, 
 } partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string deriveKeyPairˢᴍhybridKEM => ref deriveKeyPairˢᵇᴍhybridKEM;
-private static readonly @string deriveKeyPairˢᵇᴍhybridKEM = "DeriveKeyPair"u8;
+internal static ref readonly @string deriveKeyPairˢ⁔hybridKEM => ref deriveKeyPairˢᵇ⁔hybridKEM;
+private static readonly @string deriveKeyPairˢᵇ⁔hybridKEM = "DeriveKeyPair"u8;
 
-[GoMethodBody("DeriveKeyPair")] internal static (PrivateKey, error) DeriveKeyPairᴍ(ж<hybridKEM> Ꮡkem, slice<byte> ikm) {
+internal static (PrivateKey, error) DeriveKeyPair⁔(/*this*/ ж<hybridKEM> Ꮡkem, slice<byte> ikm) {
     ref var kem = ref Ꮡkem.DerefOrNull();
 
     var suiteID = byteorder.BEAppendUint16(slice<byte>("KEM"u8), kem.id);
-    var (dk, err) = SHAKE256().labeledDerive(suiteID, ikm, deriveKeyPairˢᴍhybridKEM, default, 32);
+    var (dk, err) = SHAKE256().labeledDerive(suiteID, ikm, deriveKeyPairˢ⁔hybridKEM, default, 32);
     if (err != nil) {
         return (default, err);
     }
@@ -385,22 +385,22 @@ private static readonly @string deriveKeyPairˢᵇᴍhybridKEM = "DeriveKeyPair"
 
 } partial class hpke_package {
 
-[GoMethodBody("KEM")] internal static KEM KEMᴍ(ref hybridPrivateKey k) {
+internal static KEM KEM⁔(/*this*/ ref hybridPrivateKey k) {
     return new hybridKEMжKEM(k.kem);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string privateKeySeedNotˢᴍhybridPrivateKey => ref privateKeySeedNotˢᵇᴍhybridPrivateKey;
-private static readonly @string privateKeySeedNotˢᵇᴍhybridPrivateKey = "private key seed not available"u8;
+internal static ref readonly @string privateKeySeedNotˢ⁔hybridPrivateKey => ref privateKeySeedNotˢᵇ⁔hybridPrivateKey;
+private static readonly @string privateKeySeedNotˢᵇ⁔hybridPrivateKey = "private key seed not available"u8;
 
-[GoMethodBody("Bytes")] internal static (slice<byte>, error) Bytesᴍ(ref hybridPrivateKey k) {
+internal static (slice<byte>, error) Bytes⁔(/*this*/ ref hybridPrivateKey k) {
     if (k.seed == nil) {
-        return (default, errors.New(privateKeySeedNotˢᴍhybridPrivateKey));
+        return (default, errors.New(privateKeySeedNotˢ⁔hybridPrivateKey));
     }
     return (k.seed, default);
 }
 
-[GoMethodBody("PublicKey")] internal static PublicKey PublicKeyᴍ(ref hybridPrivateKey k) {
+internal static PublicKey PublicKey⁔(/*this*/ ref hybridPrivateKey k) {
     return new hybridPublicKeyжPublicKey(Ꮡ(new hybridPublicKey(
         kem: k.kem,
         t: k.t.PublicKey(),
@@ -409,14 +409,14 @@ private static readonly @string privateKeySeedNotˢᵇᴍhybridPrivateKey = "pri
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidEncapsulatedKeyˢᴍhybridPrivateKey => ref invalidEncapsulatedKeyˢᵇᴍhybridPrivateKey;
-private static readonly @string invalidEncapsulatedKeyˢᵇᴍhybridPrivateKey = "invalid encapsulated key size"u8;
+internal static ref readonly @string invalidEncapsulatedKeyˢ⁔hybridPrivateKey => ref invalidEncapsulatedKeyˢᵇ⁔hybridPrivateKey;
+private static readonly @string invalidEncapsulatedKeyˢᵇ⁔hybridPrivateKey = "invalid encapsulated key size"u8;
 
-[GoMethodBody("decap")] internal static (slice<byte>, error) decapᴍ(ж<hybridPrivateKey> Ꮡk, slice<byte> enc) {
+internal static (slice<byte>, error) decap⁔(/*this*/ ж<hybridPrivateKey> Ꮡk, slice<byte> enc) {
     ref var k = ref Ꮡk.DerefOrNull();
 
     if (len(enc) != k.kem.pqCiphertextSize + k.kem.curvePointSize) {
-        return (default, errors.New(invalidEncapsulatedKeyˢᴍhybridPrivateKey));
+        return (default, errors.New(invalidEncapsulatedKeyˢ⁔hybridPrivateKey));
     }
     var (ctPQ, ctT) = (enc.slice(0, k.kem.pqCiphertextSize), enc.slice(k.kem.pqCiphertextSize));
     ref var err = ref heap<error>(out var Ꮡerr);
@@ -499,11 +499,11 @@ partial struct mlkemKEM {
 
 } partial class hpke_package {
 
-[GoMethodBody("ID")] internal static uint16 IDᴍ(ref mlkemKEM kem) {
+internal static uint16 ID⁔(/*this*/ ref mlkemKEM kem) {
     return kem.id;
 }
 
-[GoMethodBody("encSize")] internal static nint encSizeᴍ(ref mlkemKEM kem) {
+internal static nint encSize⁔(/*this*/ ref mlkemKEM kem) {
     return kem.ciphertextSize;
 }
 
@@ -544,7 +544,7 @@ public static (PublicKey, error) NewMLKEMPublicKey(crypto.Encapsulator pub) {
 
 } partial class hpke_package {
 
-[GoMethodBody("NewPublicKey")] internal static (PublicKey, error) NewPublicKeyᴍ(ref mlkemKEM kem, slice<byte> data) {
+internal static (PublicKey, error) NewPublicKey⁔(/*this*/ ref mlkemKEM kem, slice<byte> data) {
     var (pq, err) = kem.newPublicKey(data);
     if (err != nil) {
         return (default, err);
@@ -554,15 +554,15 @@ public static (PublicKey, error) NewMLKEMPublicKey(crypto.Encapsulator pub) {
 
 } partial class hpke_package {
 
-[GoMethodBody("KEM")] internal static KEM KEMᴍ(ref mlkemPublicKey pk) {
+internal static KEM KEM⁔(/*this*/ ref mlkemPublicKey pk) {
     return new mlkemKEMжKEM(pk.kem);
 }
 
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ref mlkemPublicKey pk) {
+internal static slice<byte> Bytes⁔(/*this*/ ref mlkemPublicKey pk) {
     return pk.pq.Bytes();
 }
 
-[GoMethodBody("encap")] internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encapᴍ(ref mlkemPublicKey pk) {
+internal static (slice<byte> sharedSecret, slice<byte> encapPub, error err) encap⁔(/*this*/ ref mlkemPublicKey pk) {
     var (ss, ct) = pk.pq.Encapsulate();
     if (testingOnlyEncapsulate != nil) {
         (ss, ct) = testingOnlyEncapsulate();
@@ -603,7 +603,7 @@ public static (PrivateKey, error) NewMLKEMPrivateKey(crypto.Decapsulator priv) {
 
 } partial class hpke_package {
 
-[GoMethodBody("GenerateKey")] internal static (PrivateKey, error) GenerateKeyᴍ(ref mlkemKEM kem) {
+internal static (PrivateKey, error) GenerateKey⁔(/*this*/ ref mlkemKEM kem) {
     var (pq, err) = kem.generateKey();
     if (err != nil) {
         return (default, err);
@@ -611,7 +611,7 @@ public static (PrivateKey, error) NewMLKEMPrivateKey(crypto.Decapsulator priv) {
     return NewMLKEMPrivateKey(pq);
 }
 
-[GoMethodBody("NewPrivateKey")] internal static (PrivateKey, error) NewPrivateKeyᴍ(ref mlkemKEM kem, slice<byte> priv) {
+internal static (PrivateKey, error) NewPrivateKey⁔(/*this*/ ref mlkemKEM kem, slice<byte> priv) {
     var (pq, err) = kem.newPrivateKey(priv);
     if (err != nil) {
         return (default, err);
@@ -620,12 +620,12 @@ public static (PrivateKey, error) NewMLKEMPrivateKey(crypto.Decapsulator priv) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string deriveKeyPairˢᴍmlkemKEM => ref deriveKeyPairˢᵇᴍmlkemKEM;
-private static readonly @string deriveKeyPairˢᵇᴍmlkemKEM = "DeriveKeyPair"u8;
+internal static ref readonly @string deriveKeyPairˢ⁔mlkemKEM => ref deriveKeyPairˢᵇ⁔mlkemKEM;
+private static readonly @string deriveKeyPairˢᵇ⁔mlkemKEM = "DeriveKeyPair"u8;
 
-[GoMethodBody("DeriveKeyPair")] internal static (PrivateKey, error) DeriveKeyPairᴍ(ref mlkemKEM kem, slice<byte> ikm) {
+internal static (PrivateKey, error) DeriveKeyPair⁔(/*this*/ ref mlkemKEM kem, slice<byte> ikm) {
     var suiteID = byteorder.BEAppendUint16(slice<byte>("KEM"u8), kem.id);
-    var (dk, err) = SHAKE256().labeledDerive(suiteID, ikm, deriveKeyPairˢᴍmlkemKEM, default, 64);
+    var (dk, err) = SHAKE256().labeledDerive(suiteID, ikm, deriveKeyPairˢ⁔mlkemKEM, default, 64);
     if (err != nil) {
         return (default, err);
     }
@@ -634,7 +634,7 @@ private static readonly @string deriveKeyPairˢᵇᴍmlkemKEM = "DeriveKeyPair"u
 
 } partial class hpke_package {
 
-[GoMethodBody("KEM")] internal static KEM KEMᴍ(ref mlkemPrivateKey k) {
+internal static KEM KEM⁔(/*this*/ ref mlkemPrivateKey k) {
     return new mlkemKEMжKEM(k.kem);
 }
 
@@ -647,25 +647,25 @@ internal partial interface Bytes_type /*dyn*/ {
 } partial class hpke_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string privateKeySeedNotˢᴍmlkemPrivateKey => ref privateKeySeedNotˢᵇᴍmlkemPrivateKey;
-private static readonly @string privateKeySeedNotˢᵇᴍmlkemPrivateKey = "private key seed not available"u8;
+internal static ref readonly @string privateKeySeedNotˢ⁔mlkemPrivateKey => ref privateKeySeedNotˢᵇ⁔mlkemPrivateKey;
+private static readonly @string privateKeySeedNotˢᵇ⁔mlkemPrivateKey = "private key seed not available"u8;
 
-[GoMethodBody("Bytes")] internal static (slice<byte>, error) Bytesᴍ(ref mlkemPrivateKey k) {
+internal static (slice<byte>, error) Bytes⁔(/*this*/ ref mlkemPrivateKey k) {
     var (pq, ok) = k.pq._<Bytes_type>(ᐧ);
     if (!ok) {
-        return (default, errors.New(privateKeySeedNotˢᴍmlkemPrivateKey));
+        return (default, errors.New(privateKeySeedNotˢ⁔mlkemPrivateKey));
     }
     return (pq.Bytes(), default);
 }
 
-[GoMethodBody("PublicKey")] internal static PublicKey PublicKeyᴍ(ref mlkemPrivateKey k) {
+internal static PublicKey PublicKey⁔(/*this*/ ref mlkemPrivateKey k) {
     return new mlkemPublicKeyжPublicKey(Ꮡ(new mlkemPublicKey(
         kem: k.kem,
         pq: k.pq.Encapsulator()
     )));
 }
 
-[GoMethodBody("decap")] internal static (slice<byte>, error) decapᴍ(ref mlkemPrivateKey k, slice<byte> enc) {
+internal static (slice<byte>, error) decap⁔(/*this*/ ref mlkemPrivateKey k, slice<byte> enc) {
     return k.pq.Decapsulate(enc);
 }
 

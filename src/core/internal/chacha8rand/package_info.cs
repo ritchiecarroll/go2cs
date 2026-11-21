@@ -66,10 +66,13 @@ using static go.@internal.chacha8rand_package;
 
 namespace go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go.@internal;
 using static chacha8rand_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("chacha8rand")]
 public static partial class chacha8rand_package
@@ -102,19 +105,19 @@ public static partial class chacha8rand_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(chacha8rand_package.State)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class chacha8randᴛState;
-[GoMethodHost(typeof(chacha8rand_package.errUnmarshalChaCha8)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class chacha8randᴛerrUnmarshalChaCha8;
+[GoMethodHost(typeof(chacha8rand_package.State)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class chacha8randᴛState;
+[GoMethodHost(typeof(chacha8rand_package.errUnmarshalChaCha8)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class chacha8randᴛerrUnmarshalChaCha8;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class chacha8randᴛState {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (uint64, bool) Next(this ref State s) => chacha8rand_package.Nextᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Init(this ж<State> Ꮡs, /*[32]*/ array<byte> seed) => chacha8rand_package.Initᴍ(Ꮡs, seed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Init64(this ж<State> Ꮡs, /*[4]*/ array<uint64> seed) => chacha8rand_package.Init64ᴍ(Ꮡs, seed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Refill(this ж<State> Ꮡs) => chacha8rand_package.Refillᴍ(Ꮡs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Reseed(this ж<State> Ꮡs) => chacha8rand_package.Reseedᴍ(Ꮡs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint64, bool) Next(this ref State s) => chacha8rand_package.Next⁔(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Init(this ж<State> Ꮡs, /*[32]*/ array<byte> seed) => chacha8rand_package.Init⁔(Ꮡs, seed);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Init64(this ж<State> Ꮡs, /*[4]*/ array<uint64> seed) => chacha8rand_package.Init64⁔(Ꮡs, seed);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Refill(this ж<State> Ꮡs) => chacha8rand_package.Refill⁔(Ꮡs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Reseed(this ж<State> Ꮡs) => chacha8rand_package.Reseed⁔(Ꮡs);
 }
 partial class chacha8randᴛerrUnmarshalChaCha8 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string Error(this ref errUnmarshalChaCha8 _) => chacha8rand_package.Errorᴍ(ref _);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string Error(this ref errUnmarshalChaCha8 _) => chacha8rand_package.Error⁔(ref _);
 }
 // </GlyphForwarders>

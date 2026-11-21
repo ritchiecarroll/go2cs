@@ -104,13 +104,13 @@ internal static bool quoteValue(@string value) {
 } partial class debug_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string modˢᴍBuildInfo => ref modˢᵇᴍBuildInfo;
-private static readonly @string modˢᵇᴍBuildInfo = "mod"u8;
-private static ref readonly @string depˢᴍBuildInfo => ref depˢᵇᴍBuildInfo;
-private static readonly @string depˢᵇᴍBuildInfo = "dep"u8;
+private static ref readonly @string modˢ⁔BuildInfo => ref modˢᵇ⁔BuildInfo;
+private static readonly @string modˢᵇ⁔BuildInfo = "mod"u8;
+private static ref readonly @string depˢ⁔BuildInfo => ref depˢᵇ⁔BuildInfo;
+private static readonly @string depˢᵇ⁔BuildInfo = "dep"u8;
 
 // String returns a string representation of a [BuildInfo].
-[GoMethodBody("String")] internal static @string Stringᴍ(ref BuildInfo bi) {
+internal static @string String⁔(/*this*/ ref BuildInfo bi) {
     var buf = @new<strings.Builder>();
     if (bi.GoVersion != ""u8) {
         fmt.Fprintf(new strings_BuilderжWriter(buf), "go\t%s\n"u8, bi.GoVersion);
@@ -136,10 +136,10 @@ private static readonly @string depˢᵇᴍBuildInfo = "dep"u8;
         bufʗ1.WriteByte((byte)'\n');
     };
     if (bi.Main != (new Module())) {
-        formatMod(modˢᴍBuildInfo, bi.Main);
+        formatMod(modˢ⁔BuildInfo, bi.Main);
     }
     foreach (var (_, dep) in range(bi.Deps)) {
-        formatMod(depˢᴍBuildInfo, dep.Value);
+        formatMod(depˢ⁔BuildInfo, dep.Value);
     }
     foreach (var (_, s) in range(bi.Settings)) {
         @string key = s.Key;

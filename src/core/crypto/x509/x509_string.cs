@@ -42,7 +42,7 @@ internal static array<uint8> _KeyUsage_index_0 = array<uint8>([0, 16, 33]);
 
 } partial class x509_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(KeyUsage i) {
+internal static @string String⁔(/*this*/ KeyUsage i) {
     switch (ᐧ) {
     case {} when 1 <= i && i <= 2: {
         i -= 1;
@@ -103,7 +103,7 @@ internal static array<uint8> _ExtKeyUsage_index = array<uint8>([0, 19, 29, 39, 5
 
 } partial class x509_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ExtKeyUsage i) {
+internal static @string String⁔(/*this*/ ExtKeyUsage i) {
     nint idx = (nint)i - 0;
     if (i < 0 || idx >= len(_ExtKeyUsage_index) - 1) {
         return "ExtKeyUsage("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;

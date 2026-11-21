@@ -73,10 +73,13 @@ using static go.sort_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static sort_package;
 using math;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("sort")]
 public static partial class sort_package
@@ -118,45 +121,45 @@ public static partial class sort_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(sort_package.Float64Slice)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛFloat64Slice;
-[GoMethodHost(typeof(sort_package.IntSlice)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛIntSlice;
-[GoMethodHost(typeof(sort_package.StringSlice)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛStringSlice;
-[GoMethodHost(typeof(sort_package.reverse)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛreverse;
-[GoMethodHost(typeof(sort_package.xorshift)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class sortᴛxorshift;
+[GoMethodHost(typeof(sort_package.Float64Slice)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class sortᴛFloat64Slice;
+[GoMethodHost(typeof(sort_package.IntSlice)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class sortᴛIntSlice;
+[GoMethodHost(typeof(sort_package.StringSlice)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class sortᴛStringSlice;
+[GoMethodHost(typeof(sort_package.reverse)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class sortᴛreverse;
+[GoMethodHost(typeof(sort_package.xorshift)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class sortᴛxorshift;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class sortᴛIntSlice {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Search(this IntSlice p, nint x) => sort_package.Searchᴍ(p, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Search(this IntSlice p, nint x) => sort_package.Search⁔(p, x);
 }
 partial class sortᴛFloat64Slice {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Search(this Float64Slice p, float64 x) => sort_package.Searchᴍ(p, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Search(this Float64Slice p, float64 x) => sort_package.Search⁔(p, x);
 }
 partial class sortᴛStringSlice {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Search(this StringSlice p, @string x) => sort_package.Searchᴍ(p, x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Search(this StringSlice p, @string x) => sort_package.Search⁔(p, x);
 }
 partial class sortᴛxorshift {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 Next(this ref xorshift r) => sort_package.Nextᴍ(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 Next(this ref xorshift r) => sort_package.Next⁔(ref r);
 }
 partial class sortᴛreverse {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool Less(this reverse r, nint i, nint j) => sort_package.Lessᴍ(r, i, j);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool Less(this reverse r, nint i, nint j) => sort_package.Less⁔(r, i, j);
 }
 partial class sortᴛIntSlice {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this IntSlice x) => sort_package.Lenᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Less(this IntSlice x, nint i, nint j) => sort_package.Lessᴍ(x, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Swap(this IntSlice x, nint i, nint j) => sort_package.Swapᴍ(x, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Sort(this IntSlice x) => sort_package.Sortᴍ(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this IntSlice x) => sort_package.Len⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Less(this IntSlice x, nint i, nint j) => sort_package.Less⁔(x, i, j);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Swap(this IntSlice x, nint i, nint j) => sort_package.Swap⁔(x, i, j);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Sort(this IntSlice x) => sort_package.Sort⁔(x);
 }
 partial class sortᴛFloat64Slice {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this Float64Slice x) => sort_package.Lenᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Less(this Float64Slice x, nint i, nint j) => sort_package.Lessᴍ(x, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Swap(this Float64Slice x, nint i, nint j) => sort_package.Swapᴍ(x, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Sort(this Float64Slice x) => sort_package.Sortᴍ(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this Float64Slice x) => sort_package.Len⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Less(this Float64Slice x, nint i, nint j) => sort_package.Less⁔(x, i, j);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Swap(this Float64Slice x, nint i, nint j) => sort_package.Swap⁔(x, i, j);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Sort(this Float64Slice x) => sort_package.Sort⁔(x);
 }
 partial class sortᴛStringSlice {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Len(this StringSlice x) => sort_package.Lenᴍ(x);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Less(this StringSlice x, nint i, nint j) => sort_package.Lessᴍ(x, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Swap(this StringSlice x, nint i, nint j) => sort_package.Swapᴍ(x, i, j);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Sort(this StringSlice x) => sort_package.Sortᴍ(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint Len(this StringSlice x) => sort_package.Len⁔(x);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Less(this StringSlice x, nint i, nint j) => sort_package.Less⁔(x, i, j);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Swap(this StringSlice x, nint i, nint j) => sort_package.Swap⁔(x, i, j);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Sort(this StringSlice x) => sort_package.Sort⁔(x);
 }
 // </GlyphForwarders>

@@ -71,14 +71,17 @@ using static go.go.@internal.gcimporter_package;
 
 namespace go.go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using token = global::go.go.token_package;
 using pkgbits = global::go.@internal.pkgbits_package;
 using global::go.@internal;
 using global::go.go;
 using static gcimporter_package;
 using types = global::go.go.types_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("gcimporter")]
 public static partial class gcimporter_package
@@ -128,47 +131,47 @@ public static partial class gcimporter_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(gcimporter_package.fakeFileSet)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcimporterᴛfakeFileSet;
-[GoMethodHost(typeof(gcimporter_package.pkgReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcimporterᴛpkgReader;
-[GoMethodHost(typeof(gcimporter_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gcimporterᴛreader;
+[GoMethodHost(typeof(gcimporter_package.fakeFileSet)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gcimporterᴛfakeFileSet;
+[GoMethodHost(typeof(gcimporter_package.pkgReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gcimporterᴛpkgReader;
+[GoMethodHost(typeof(gcimporter_package.reader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gcimporterᴛreader;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class gcimporterᴛfakeFileSet {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Pos pos(this ref fakeFileSet s, @string @file, nint line, nint column) => gcimporter_package.posᴍ(ref s, @file, line, column);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void setLines(this ref fakeFileSet s) => gcimporter_package.setLinesᴍ(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static token.Pos pos(this ref fakeFileSet s, @string @file, nint line, nint column) => gcimporter_package.pos⁔(ref s, @file, line, column);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void setLines(this ref fakeFileSet s) => gcimporter_package.setLines⁔(ref s);
 }
 partial class gcimporterᴛpkgReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void later(this ref pkgReader pr, Action fn) => gcimporter_package.laterᴍ(ref pr, fn);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<reader> newReader(this ж<pkgReader> Ꮡpr, pkgbits.SectionKind k, pkgbits.Index idx, pkgbits.SyncMarker marker) => gcimporter_package.newReaderᴍ(Ꮡpr, k, idx, marker);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<reader> tempReader(this ж<pkgReader> Ꮡpr, pkgbits.SectionKind k, pkgbits.Index idx, pkgbits.SyncMarker marker) => gcimporter_package.tempReaderᴍ(Ꮡpr, k, idx, marker);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void retireReader(this ref pkgReader pr, ж<reader> r) => gcimporter_package.retireReaderᴍ(ref pr, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string posBaseIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) => gcimporter_package.posBaseIdxᴍ(Ꮡpr, idx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Package> pkgIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) => gcimporter_package.pkgIdxᴍ(Ꮡpr, idx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type typIdx(this ж<pkgReader> Ꮡpr, typeInfo info, ж<readerDict> Ꮡdict) => gcimporter_package.typIdxᴍ(Ꮡpr, info, Ꮡdict);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) => gcimporter_package.objIdxᴍ(Ꮡpr, idx);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<readerDict> objDictIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) => gcimporter_package.objDictIdxᴍ(Ꮡpr, idx);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void later(this ref pkgReader pr, Action fn) => gcimporter_package.later⁔(ref pr, fn);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<reader> newReader(this ж<pkgReader> Ꮡpr, pkgbits.SectionKind k, pkgbits.Index idx, pkgbits.SyncMarker marker) => gcimporter_package.newReader⁔(Ꮡpr, k, idx, marker);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<reader> tempReader(this ж<pkgReader> Ꮡpr, pkgbits.SectionKind k, pkgbits.Index idx, pkgbits.SyncMarker marker) => gcimporter_package.tempReader⁔(Ꮡpr, k, idx, marker);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void retireReader(this ref pkgReader pr, ж<reader> r) => gcimporter_package.retireReader⁔(ref pr, r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string posBaseIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) => gcimporter_package.posBaseIdx⁔(Ꮡpr, idx);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Package> pkgIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) => gcimporter_package.pkgIdx⁔(Ꮡpr, idx);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static types.Type typIdx(this ж<pkgReader> Ꮡpr, typeInfo info, ж<readerDict> Ꮡdict) => gcimporter_package.typIdx⁔(Ꮡpr, info, Ꮡdict);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<types.Package>, @string) objIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) => gcimporter_package.objIdx⁔(Ꮡpr, idx);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<readerDict> objDictIdx(this ж<pkgReader> Ꮡpr, pkgbits.Index idx) => gcimporter_package.objDictIdx⁔(Ꮡpr, idx);
 }
 partial class gcimporterᴛreader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static token.Pos pos(this ж<reader> Ꮡr) => gcimporter_package.posᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string posBase(this ж<reader> Ꮡr) => gcimporter_package.posBaseᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Package> pkg(this ж<reader> Ꮡr) => gcimporter_package.pkgᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Package> doPkg(this ж<reader> Ꮡr) => gcimporter_package.doPkgᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type typ(this ж<reader> Ꮡr) => gcimporter_package.typᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static typeInfo typInfo(this ж<reader> Ꮡr) => gcimporter_package.typInfoᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static types.Type /*res*/ doTyp(this ж<reader> Ꮡr) => gcimporter_package.doTypᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Struct> structType(this ж<reader> Ꮡr) => gcimporter_package.structTypeᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Union> unionType(this ж<reader> Ꮡr) => gcimporter_package.unionTypeᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Interface> interfaceType(this ж<reader> Ꮡr) => gcimporter_package.interfaceTypeᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Signature> signature(this ж<reader> Ꮡr, ж<types.Var> recv, slice<ж<types.TypeParam>> rtparams, slice<ж<types.TypeParam>> tparams) => gcimporter_package.signatureᴍ(Ꮡr, recv, rtparams, tparams);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Tuple> @params(this ж<reader> Ꮡr, types.VarKind kind) => gcimporter_package.@paramsᴍ(Ꮡr, kind);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Var> param(this ж<reader> Ꮡr, types.VarKind kind) => gcimporter_package.paramᴍ(Ꮡr, kind);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (types.Object, slice<types.Type>) obj(this ж<reader> Ꮡr) => gcimporter_package.objᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ж<types.TypeParam>> typeParamNames(this ж<reader> Ꮡr) => gcimporter_package.typeParamNamesᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<types.Func> method(this ж<reader> Ꮡr) => gcimporter_package.methodᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package>, @string) qualifiedIdent(this ж<reader> Ꮡr) => gcimporter_package.qualifiedIdentᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package>, @string) localIdent(this ж<reader> Ꮡr) => gcimporter_package.localIdentᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package>, @string) selector(this ж<reader> Ꮡr) => gcimporter_package.selectorᴍ(Ꮡr);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<types.Package>, @string) ident(this ж<reader> Ꮡr, pkgbits.SyncMarker marker) => gcimporter_package.identᴍ(Ꮡr, marker);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static token.Pos pos(this ж<reader> Ꮡr) => gcimporter_package.pos⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string posBase(this ж<reader> Ꮡr) => gcimporter_package.posBase⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Package> pkg(this ж<reader> Ꮡr) => gcimporter_package.pkg⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Package> doPkg(this ж<reader> Ꮡr) => gcimporter_package.doPkg⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static types.Type typ(this ж<reader> Ꮡr) => gcimporter_package.typ⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static typeInfo typInfo(this ж<reader> Ꮡr) => gcimporter_package.typInfo⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static types.Type /*res*/ doTyp(this ж<reader> Ꮡr) => gcimporter_package.doTyp⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Struct> structType(this ж<reader> Ꮡr) => gcimporter_package.structType⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Union> unionType(this ж<reader> Ꮡr) => gcimporter_package.unionType⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Interface> interfaceType(this ж<reader> Ꮡr) => gcimporter_package.interfaceType⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Signature> signature(this ж<reader> Ꮡr, ж<types.Var> recv, slice<ж<types.TypeParam>> rtparams, slice<ж<types.TypeParam>> tparams) => gcimporter_package.signature⁔(Ꮡr, recv, rtparams, tparams);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Tuple> @params(this ж<reader> Ꮡr, types.VarKind kind) => gcimporter_package.@params⁔(Ꮡr, kind);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Var> param(this ж<reader> Ꮡr, types.VarKind kind) => gcimporter_package.param⁔(Ꮡr, kind);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (types.Object, slice<types.Type>) obj(this ж<reader> Ꮡr) => gcimporter_package.obj⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<ж<types.TypeParam>> typeParamNames(this ж<reader> Ꮡr) => gcimporter_package.typeParamNames⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<types.Func> method(this ж<reader> Ꮡr) => gcimporter_package.method⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<types.Package>, @string) qualifiedIdent(this ж<reader> Ꮡr) => gcimporter_package.qualifiedIdent⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<types.Package>, @string) localIdent(this ж<reader> Ꮡr) => gcimporter_package.localIdent⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<types.Package>, @string) selector(this ж<reader> Ꮡr) => gcimporter_package.selector⁔(Ꮡr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (ж<types.Package>, @string) ident(this ж<reader> Ꮡr, pkgbits.SyncMarker marker) => gcimporter_package.ident⁔(Ꮡr, marker);
 }
 // </GlyphForwarders>

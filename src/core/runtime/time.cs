@@ -122,7 +122,7 @@ partial struct timer {
 // Any code that allocates a timer must call t.init before using it.
 // The arg and f can be set during init, or they can be nil in init
 // and set by a future call to t.modify.
-[GoMethodBody("init")] internal static void initᴍ(ж<timer> Ꮡt, Action<any, uintptr, int64> f, any arg) {
+internal static void init⁔(/*this*/ ж<timer> Ꮡt, Action<any, uintptr, int64> f, any arg) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     lockInit(ref nonnil(ref t).mu, lockRankTimer);
@@ -166,7 +166,7 @@ partial struct timerWhen {
 } partial class runtime_package {
 
 // less reports whether tw is less than other.
-[GoMethodBody("less")] internal static bool lessᴍ(timerWhen tw, timerWhen other) {
+internal static bool less⁔(/*this*/ timerWhen tw, timerWhen other) {
     switch (ᐧ) {
     case {} when tw.when < other.when: {
         return true;
@@ -184,11 +184,11 @@ partial struct timerWhen {
 
 } partial class runtime_package {
 
-[GoMethodBody("lock")] internal static void @lockᴍ(ж<timers> Ꮡts) {
+internal static void @lock⁔(/*this*/ ж<timers> Ꮡts) {
     runtime.@lock(Ꮡts.Ꮡmu);
 }
 
-[GoMethodBody("unlock")] internal static void unlockᴍ(ж<timers> Ꮡts) {
+internal static void unlock⁔(/*this*/ ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     // Update atomic copy of len(ts.heap).
@@ -231,13 +231,13 @@ internal const bool timerDebug = false;
 
 } partial class runtime_package {
 
-[GoMethodBody("trace")] internal static void traceᴍ(ж<timer> Ꮡt, @string op) {
+internal static void trace⁔(/*this*/ ж<timer> Ꮡt, @string op) {
     if (timerDebug) {
         Ꮡt.trace1(op);
     }
 }
 
-[GoMethodBody("trace1")] internal static void trace1ᴍ(ж<timer> Ꮡt, @string op) {
+internal static void trace1⁔(/*this*/ ж<timer> Ꮡt, @string op) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!timerDebug) {
@@ -257,7 +257,7 @@ internal const bool timerDebug = false;
 
 } partial class runtime_package {
 
-[GoMethodBody("trace")] internal static void traceᴍ(ж<timers> Ꮡts, @string op) {
+internal static void trace⁔(/*this*/ ж<timers> Ꮡts, @string op) {
     if (timerDebug) {
         println((@string)"TS", Ꮡts.OrTypedNil(), op);
     }
@@ -266,24 +266,24 @@ internal const bool timerDebug = false;
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string lockˢᴍtimer => ref lockˢᵇᴍtimer;
-private static readonly @string lockˢᵇᴍtimer = "lock"u8;
+internal static ref readonly @string lockˢ⁔timer => ref lockˢᵇ⁔timer;
+private static readonly @string lockˢᵇ⁔timer = "lock"u8;
 
 // lock locks the timer, allowing reading or writing any of the timer fields.
-[GoMethodBody("lock")] internal static void @lockᴍ(ж<timer> Ꮡt) {
+internal static void @lock⁔(/*this*/ ж<timer> Ꮡt) {
     runtime.@lock(Ꮡt.Ꮡmu);
-    Ꮡt.trace(lockˢᴍtimer);
+    Ꮡt.trace(lockˢ⁔timer);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unlockˢᴍtimer => ref unlockˢᵇᴍtimer;
-private static readonly @string unlockˢᵇᴍtimer = "unlock"u8;
+internal static ref readonly @string unlockˢ⁔timer => ref unlockˢᵇ⁔timer;
+private static readonly @string unlockˢᵇ⁔timer = "unlock"u8;
 
 // unlock updates t.astate and unlocks the timer.
-[GoMethodBody("unlock")] internal static void unlockᴍ(ж<timer> Ꮡt) {
+internal static void unlock⁔(/*this*/ ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
-    Ꮡt.trace(unlockˢᴍtimer);
+    Ꮡt.trace(unlockˢ⁔timer);
     // Let heap fast paths know whether heap[i].when is accurate.
     // Also let maybeRunChan know whether channel is in heap.
     Ꮡt.Ꮡastate.Store(t.state);
@@ -292,7 +292,7 @@ private static readonly @string unlockˢᵇᴍtimer = "unlock"u8;
 
 // hchan returns the channel in t.arg.
 // t must be a timer with a channel.
-[GoMethodBody("hchan")] internal static ж<hchan> hchanᴍ(ж<timer> Ꮡt) {
+internal static ж<hchan> hchan⁔(/*this*/ ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (!t.isChan) {
@@ -305,8 +305,8 @@ private static readonly @string unlockˢᵇᴍtimer = "unlock"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string updateHeapˢᴍtimer => ref updateHeapˢᵇᴍtimer;
-private static readonly @string updateHeapˢᵇᴍtimer = "updateHeap"u8;
+internal static ref readonly @string updateHeapˢ⁔timer => ref updateHeapˢᵇ⁔timer;
+private static readonly @string updateHeapˢᵇ⁔timer = "updateHeap"u8;
 
 // updateHeap updates t as directed by t.state, updating t.state
 // and returning a bool indicating whether the state (and ts.heap[0].when) changed.
@@ -315,11 +315,11 @@ private static readonly @string updateHeapˢᵇᴍtimer = "updateHeap"u8;
 // takes care of moving t within the timers heap to preserve the heap invariants.
 // If ts == nil, then t must not be in a heap (or is in a heap that is
 // temporarily not maintaining its invariant, such as during timers.adjust).
-[GoMethodBody("updateHeap")] internal static bool /*updated*/ updateHeapᴍ(ж<timer> Ꮡt) {
+internal static bool /*updated*/ updateHeap⁔(/*this*/ ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     assertWorldStoppedOrLockHeld(ref nonnil(ref t).mu);
-    Ꮡt.trace(updateHeapˢᴍtimer);
+    Ꮡt.trace(updateHeapˢ⁔timer);
     var ts = t.ts;
     if (ts == nil || Ꮡt != ts.heap[0].timer) {
         badTimer();
@@ -501,15 +501,15 @@ internal static void goroutineReady(any arg, uintptr _Δp1, int64 _Δp2) {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tsSetInTimerˢᴍtimers => ref tsSetInTimerˢᵇᴍtimers;
-private static readonly @string tsSetInTimerˢᵇᴍtimers = "ts set in timer"u8;
+internal static ref readonly @string tsSetInTimerˢ⁔timers => ref tsSetInTimerˢᵇ⁔timers;
+private static readonly @string tsSetInTimerˢᵇ⁔timers = "ts set in timer"u8;
 
 // addHeap adds t to the timers heap.
 // The caller must hold ts.lock or the world must be stopped.
 // The caller must also have checked that t belongs in the heap.
 // Callers that are not sure can call t.maybeAdd instead,
 // but note that maybeAdd has different locking requirements.
-[GoMethodBody("addHeap")] internal static void addHeapᴍ(ж<timers> Ꮡts, ж<timer> Ꮡt) {
+internal static void addHeap⁔(/*this*/ ж<timers> Ꮡts, ж<timer> Ꮡt) {
     ref var ts = ref Ꮡts.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -521,7 +521,7 @@ private static readonly @string tsSetInTimerˢᵇᴍtimers = "ts set in timer"u8
     }
 
     if (t.ts != nil) {
-        @throw(tsSetInTimerˢᴍtimers);
+        @throw(tsSetInTimerˢ⁔timers);
     }
     t.ts = Ꮡts;
     ts.heap = append(ts.heap, new timerWhen(Ꮡt, t.when));
@@ -538,7 +538,7 @@ private static readonly @string tsSetInTimerˢᵇᴍtimers = "ts set in timer"u8
 // are running timers in async mode. If the timer needs to be run,
 // maybeRunAsync will unlock and re-lock it.
 // The timer is always locked on return.
-[GoMethodBody("maybeRunAsync")] internal static void maybeRunAsyncᴍ(ж<timer> Ꮡt) {
+internal static void maybeRunAsync⁔(/*this*/ ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     assertLockHeld(Ꮡt.Ꮡmu);
@@ -562,14 +562,14 @@ private static readonly @string tsSetInTimerˢᵇᴍtimers = "ts set in timer"u8
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string stopˢᴍtimer => ref stopˢᵇᴍtimer;
-private static readonly @string stopˢᵇᴍtimer = "stop"u8;
+internal static ref readonly @string stopˢ⁔timer => ref stopˢᵇ⁔timer;
+private static readonly @string stopˢᵇ⁔timer = "stop"u8;
 
 // stop stops the timer t. It may be on some other P, so we can't
 // actually remove it from the timers heap. We can only mark it as stopped.
 // It will be removed in due course by the P whose heap it is on.
 // Reports whether the timer was stopped before it was run.
-[GoMethodBody("stop")] internal static bool stopᴍ(ж<timer> Ꮡt) {
+internal static bool stop⁔(/*this*/ ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var async = Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan).Load() != 0;
@@ -578,7 +578,7 @@ private static readonly @string stopˢᵇᴍtimer = "stop"u8;
     }
 
     Ꮡt.@lock();
-    Ꮡt.trace(stopˢᴍtimer);
+    Ꮡt.trace(stopˢ⁔timer);
     if (async) {
         Ꮡt.maybeRunAsync();
     }
@@ -620,18 +620,18 @@ private static readonly @string stopˢᵇᴍtimer = "stop"u8;
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string wrongTimersˢᴍtimers => ref wrongTimersˢᵇᴍtimers;
-private static readonly @string wrongTimersˢᵇᴍtimers = "wrong timers"u8;
+internal static ref readonly @string wrongTimersˢ⁔timers => ref wrongTimersˢᵇ⁔timers;
+private static readonly @string wrongTimersˢᵇ⁔timers = "wrong timers"u8;
 
 // deleteMin removes timer 0 from ts.
 // ts must be locked.
-[GoMethodBody("deleteMin")] internal static void deleteMinᴍ(ж<timers> Ꮡts) {
+internal static void deleteMin⁔(/*this*/ ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     assertLockHeld(Ꮡts.Ꮡmu);
     var t = ts.heap[0].timer;
     if (t.ts != Ꮡts) {
-        @throw(wrongTimersˢᴍtimers);
+        @throw(wrongTimersˢ⁔timers);
     }
     t.ts = default;
     nint last = len(ts.heap) - 1;
@@ -653,27 +653,27 @@ private static readonly @string wrongTimersˢᵇᴍtimers = "wrong timers"u8;
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string timerWhenMustBePositiveˢᴍtimer => ref timerWhenMustBePositiveˢᵇᴍtimer;
-private static readonly @string timerWhenMustBePositiveˢᵇᴍtimer = "timer when must be positive"u8;
-internal static ref readonly @string timerPeriodMustBeNonˢᴍtimer => ref timerPeriodMustBeNonˢᵇᴍtimer;
-private static readonly @string timerPeriodMustBeNonˢᵇᴍtimer = "timer period must be non-negative"u8;
-internal static ref readonly @string modifyˢᴍtimer => ref modifyˢᵇᴍtimer;
-private static readonly @string modifyˢᵇᴍtimer = "modify"u8;
-internal static ref readonly @string fakeTimerExecutingWithNoˢᴍtimer => ref fakeTimerExecutingWithNoˢᵇᴍtimer;
-private static readonly @string fakeTimerExecutingWithNoˢᵇᴍtimer = "fake timer executing with no bubble"u8;
+internal static ref readonly @string timerWhenMustBePositiveˢ⁔timer => ref timerWhenMustBePositiveˢᵇ⁔timer;
+private static readonly @string timerWhenMustBePositiveˢᵇ⁔timer = "timer when must be positive"u8;
+internal static ref readonly @string timerPeriodMustBeNonˢ⁔timer => ref timerPeriodMustBeNonˢᵇ⁔timer;
+private static readonly @string timerPeriodMustBeNonˢᵇ⁔timer = "timer period must be non-negative"u8;
+internal static ref readonly @string modifyˢ⁔timer => ref modifyˢᵇ⁔timer;
+private static readonly @string modifyˢᵇ⁔timer = "modify"u8;
+internal static ref readonly @string fakeTimerExecutingWithNoˢ⁔timer => ref fakeTimerExecutingWithNoˢᵇ⁔timer;
+private static readonly @string fakeTimerExecutingWithNoˢᵇ⁔timer = "fake timer executing with no bubble"u8;
 
 // modify modifies an existing timer.
 // This is called by the netpoll code or time.Ticker.Reset or time.Timer.Reset.
 // Reports whether the timer was modified before it was run.
 // If f == nil, then t.f, t.arg, and t.seq are not modified.
-[GoMethodBody("modify")] internal static bool modifyᴍ(ж<timer> Ꮡt, int64 when, int64 period, Action<any, uintptr, int64> f, any arg, uintptr seq) {
+internal static bool modify⁔(/*this*/ ж<timer> Ꮡt, int64 when, int64 period, Action<any, uintptr, int64> f, any arg, uintptr seq) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (when <= 0) {
-        @throw(timerWhenMustBePositiveˢᴍtimer);
+        @throw(timerWhenMustBePositiveˢ⁔timer);
     }
     if (period < 0) {
-        @throw(timerPeriodMustBeNonˢᴍtimer);
+        @throw(timerPeriodMustBeNonˢ⁔timer);
     }
     var async = Ꮡdebug.of(debugᴛ1.Ꮡasynctimerchan).Load() != 0;
 
@@ -685,7 +685,7 @@ private static readonly @string fakeTimerExecutingWithNoˢᵇᴍtimer = "fake ti
     if (async) {
         Ꮡt.maybeRunAsync();
     }
-    Ꮡt.trace(modifyˢᴍtimer);
+    Ꮡt.trace(modifyˢ⁔timer);
     var oldPeriod = t.period;
     t.period = period;
     if (f != nil) {
@@ -731,7 +731,7 @@ private static readonly @string fakeTimerExecutingWithNoˢᵇᴍtimer = "fake ti
         // safe to run in the current goroutine.
         var bubble = getg().Value.bubble;
         if (bubble == nil) {
-            @throw(fakeTimerExecutingWithNoˢᴍtimer);
+            @throw(fakeTimerExecutingWithNoˢ⁔timer);
         }
         if ((uint8)(t.state & timerHeaped) == 0 && when <= bubble.now) {
             var bubbleʗ1 = bubble;
@@ -778,31 +778,31 @@ private static readonly @string fakeTimerExecutingWithNoˢᵇᴍtimer = "fake ti
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string needsAddˢᴍtimer => ref needsAddˢᵇᴍtimer;
-private static readonly @string needsAddˢᵇᴍtimer = "needsAdd+"u8;
-internal static ref readonly @string needsAddˢ2ᴍtimer => ref needsAddˢ2ᵇᴍtimer;
-private static readonly @string needsAddˢ2ᵇᴍtimer = "needsAdd-"u8;
+internal static ref readonly @string needsAddˢ⁔timer => ref needsAddˢᵇ⁔timer;
+private static readonly @string needsAddˢᵇ⁔timer = "needsAdd+"u8;
+internal static ref readonly @string needsAddˢ2⁔timer => ref needsAddˢ2ᵇ⁔timer;
+private static readonly @string needsAddˢ2ᵇ⁔timer = "needsAdd-"u8;
 
 // needsAdd reports whether t needs to be added to a timers heap.
 // t must be locked.
-[GoMethodBody("needsAdd")] internal static bool needsAddᴍ(ж<timer> Ꮡt) {
+internal static bool needsAdd⁔(/*this*/ ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     assertLockHeld(Ꮡt.Ꮡmu);
     var need = (uint8)(t.state & timerHeaped) == 0 && t.when > 0 && (!t.isChan || t.blocked > 0);
     if (need) {
-        Ꮡt.trace(needsAddˢᴍtimer);
+        Ꮡt.trace(needsAddˢ⁔timer);
     } else {
-        Ꮡt.trace(needsAddˢ2ᴍtimer);
+        Ꮡt.trace(needsAddˢ2⁔timer);
     }
     return need;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidTimerFakeTimeButˢᴍtimer => ref invalidTimerFakeTimeButˢᵇᴍtimer;
-private static readonly @string invalidTimerFakeTimeButˢᵇᴍtimer = "invalid timer: fake time but no syncgroup"u8;
-internal static ref readonly @string maybeAddˢᴍtimer => ref maybeAddˢᵇᴍtimer;
-private static readonly @string maybeAddˢᵇᴍtimer = "maybeAdd"u8;
+internal static ref readonly @string invalidTimerFakeTimeButˢ⁔timer => ref invalidTimerFakeTimeButˢᵇ⁔timer;
+private static readonly @string invalidTimerFakeTimeButˢᵇ⁔timer = "invalid timer: fake time but no syncgroup"u8;
+internal static ref readonly @string maybeAddˢ⁔timer => ref maybeAddˢᵇ⁔timer;
+private static readonly @string maybeAddˢᵇ⁔timer = "maybeAdd"u8;
 
 // maybeAdd adds t to the local timers heap if it needs to be in a heap.
 // The caller must not hold t's lock nor any timers heap lock.
@@ -822,7 +822,7 @@ private static readonly @string maybeAddˢᵇᴍtimer = "maybeAdd"u8;
 // Concurrent calls to time.Timer.Reset or blockTimerChan
 // may result in concurrent calls to t.maybeAdd,
 // so we cannot assume that t is not in a heap on entry to t.maybeAdd.
-[GoMethodBody("maybeAdd")] internal static void maybeAddᴍ(ж<timer> Ꮡt) {
+internal static void maybeAdd⁔(/*this*/ ж<timer> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     // Note: Not holding any locks on entry to t.maybeAdd,
@@ -839,7 +839,7 @@ private static readonly @string maybeAddˢᵇᴍtimer = "maybeAdd"u8;
     if (t.isFake) {
         var bubble = getg().Value.bubble;
         if (bubble == nil) {
-            @throw(invalidTimerFakeTimeButˢᴍtimer);
+            @throw(invalidTimerFakeTimeButˢ⁔timer);
         }
         ts = bubble.Ꮡtimers;
     } else {
@@ -848,7 +848,7 @@ private static readonly @string maybeAddˢᵇᴍtimer = "maybeAdd"u8;
     ts.@lock();
     ts.cleanHead();
     Ꮡt.@lock();
-    Ꮡt.trace(maybeAddˢᴍtimer);
+    Ꮡt.trace(maybeAddˢ⁔timer);
     var when = (int64)0;
     var wake = false;
     if (Ꮡt.needsAdd()) {
@@ -875,26 +875,26 @@ private static readonly @string maybeAddˢᵇᴍtimer = "maybeAdd"u8;
 // reset resets the time when a timer should fire.
 // If used for an inactive timer, the timer will become active.
 // Reports whether the timer was active and was stopped.
-[GoMethodBody("reset")] internal static bool resetᴍ(ж<timer> Ꮡt, int64 when, int64 period) {
+internal static bool reset⁔(/*this*/ ж<timer> Ꮡt, int64 when, int64 period) {
     return Ꮡt.modify(when, period, default, default, 0);
 }
 
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cleanHeadˢᴍtimers => ref cleanHeadˢᵇᴍtimers;
-private static readonly @string cleanHeadˢᵇᴍtimers = "cleanHead"u8;
-internal static ref readonly @string badTsˢᴍtimers => ref badTsˢᵇᴍtimers;
-private static readonly @string badTsˢᵇᴍtimers = "bad ts"u8;
+internal static ref readonly @string cleanHeadˢ⁔timers => ref cleanHeadˢᵇ⁔timers;
+private static readonly @string cleanHeadˢᵇ⁔timers = "cleanHead"u8;
+internal static ref readonly @string badTsˢ⁔timers => ref badTsˢᵇ⁔timers;
+private static readonly @string badTsˢᵇ⁔timers = "bad ts"u8;
 
 // cleanHead cleans up the head of the timer queue. This speeds up
 // programs that create and delete timers; leaving them in the heap
 // slows down heap operations.
 // The caller must have locked ts.
-[GoMethodBody("cleanHead")] internal static void cleanHeadᴍ(ж<timers> Ꮡts) {
+internal static void cleanHead⁔(/*this*/ ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
-    Ꮡts.trace(cleanHeadˢᴍtimers);
+    Ꮡts.trace(cleanHeadˢ⁔timers);
     assertLockHeld(Ꮡts.Ꮡmu);
     var gp = getg();
     for (;;) {
@@ -930,7 +930,7 @@ private static readonly @string badTsˢᵇᴍtimers = "bad ts"u8;
 
         var t = ts.heap[0].timer;
         if (t.ts != Ꮡts) {
-            @throw(badTsˢᴍtimers);
+            @throw(badTsˢ⁔timers);
         }
 
         if ((uint8)(t.Ꮡastate.Load() & ((uint8)(timerModified | timerZombie))) == 0) {
@@ -949,19 +949,19 @@ private static readonly @string badTsˢᵇᴍtimers = "bad ts"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string takeˢᴍtimers => ref takeˢᵇᴍtimers;
-private static readonly @string takeˢᵇᴍtimers = "take"u8;
+internal static ref readonly @string takeˢ⁔timers => ref takeˢᵇ⁔timers;
+private static readonly @string takeˢᵇ⁔timers = "take"u8;
 
 // take moves any timers from src into ts
 // and then clears the timer state from src,
 // because src is being destroyed.
 // The caller must not have locked either timers.
 // For now this is only called when the world is stopped.
-[GoMethodBody("take")] internal static void takeᴍ(ж<timers> Ꮡts, ж<timers> Ꮡsrc) {
+internal static void take⁔(/*this*/ ж<timers> Ꮡts, ж<timers> Ꮡsrc) {
     ref var ts = ref Ꮡts.DerefOrNull();
     ref var src = ref Ꮡsrc.DerefOrNull();
 
-    Ꮡts.trace(takeˢᴍtimers);
+    Ꮡts.trace(takeˢ⁔timers);
     assertWorldStopped();
     if (len(src.heap) > 0) {
         // The world is stopped, so we ignore the locking of ts and src here.
@@ -987,18 +987,18 @@ private static readonly @string takeˢᵇᴍtimers = "take"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string adjustˢᴍtimers => ref adjustˢᵇᴍtimers;
-private static readonly @string adjustˢᵇᴍtimers = "adjust"u8;
+internal static ref readonly @string adjustˢ⁔timers => ref adjustˢᵇ⁔timers;
+private static readonly @string adjustˢᵇ⁔timers = "adjust"u8;
 
 // adjust looks through the timers in ts.heap for
 // any timers that have been modified to run earlier, and puts them in
 // the correct place in the heap. While looking for those timers,
 // it also moves timers that have been modified to run later,
 // and removes deleted timers. The caller must have locked ts.
-[GoMethodBody("adjust")] internal static void adjustᴍ(ж<timers> Ꮡts, int64 now, bool force) {
+internal static void adjust⁔(/*this*/ ж<timers> Ꮡts, int64 now, bool force) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
-    Ꮡts.trace(adjustˢᴍtimers);
+    Ꮡts.trace(adjustˢ⁔timers);
     assertLockHeld(Ꮡts.Ꮡmu);
     // If we haven't yet reached the time of the earliest modified
     // timer, don't do anything. This speeds up programs that adjust
@@ -1073,7 +1073,7 @@ private static readonly @string adjustˢᵇᴍtimers = "adjust"u8;
         var tw = Ꮡ(ts.heap, i);
         var t = tw.timer;
         if (t.ts != Ꮡts) {
-            @throw(badTsˢᴍtimers);
+            @throw(badTsˢ⁔timers);
         }
 
         if ((uint8)(t.Ꮡastate.Load() & ((uint8)(timerModified | timerZombie))) == 0) {
@@ -1124,7 +1124,7 @@ private static readonly @string adjustˢᵇᴍtimers = "adjust"u8;
 // any write barriers.
 //
 //go:nowritebarrierrec
-[GoMethodBody("wakeTime")] internal static int64 wakeTimeᴍ(ж<timers> Ꮡts) {
+internal static int64 wakeTime⁔(/*this*/ ж<timers> Ꮡts) {
     // Note that the order of these two loads matters:
     // adjust updates minWhen to make it safe to clear minNextWhen.
     // We read minWhen after reading minNextWhen so that
@@ -1139,8 +1139,8 @@ private static readonly @string adjustˢᵇᴍtimers = "adjust"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string checkˢᴍtimers => ref checkˢᵇᴍtimers;
-private static readonly @string checkˢᵇᴍtimers = "check"u8;
+internal static ref readonly @string checkˢ⁔timers => ref checkˢᵇ⁔timers;
+private static readonly @string checkˢᵇ⁔timers = "check"u8;
 
 // check runs any timers in ts that are ready.
 // If now is not 0 it is the current time.
@@ -1152,12 +1152,12 @@ private static readonly @string checkˢᵇᴍtimers = "check"u8;
 // We pass now in and out to avoid extra calls of nanotime.
 //
 //go:yeswritebarrierrec
-[GoMethodBody("check")] internal static (int64 rnow, int64 pollUntil, bool ran) checkᴍ(ж<timers> Ꮡts, int64 now, ж<synctestBubble> bubble) {
+internal static (int64 rnow, int64 pollUntil, bool ran) check⁔(/*this*/ ж<timers> Ꮡts, int64 now, ж<synctestBubble> bubble) {
     int64 pollUntil = default;
     bool ran = default;
     ref var ts = ref Ꮡts.DerefOrNull();
 
-    Ꮡts.trace(checkˢᴍtimers);
+    Ꮡts.trace(checkˢ⁔timers);
     // If it's not yet time for the first timer, or the first adjusted
     // timer, then there is nothing to do.
     var next = Ꮡts.wakeTime();
@@ -1214,8 +1214,8 @@ private static readonly @string checkˢᵇᴍtimers = "check"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string runˢᴍtimers => ref runˢᵇᴍtimers;
-private static readonly @string runˢᵇᴍtimers = "run"u8;
+internal static ref readonly @string runˢ⁔timers => ref runˢᵇ⁔timers;
+private static readonly @string runˢᵇ⁔timers = "run"u8;
 
 // run examines the first timer in ts. If it is ready based on now,
 // it runs the timer and removes or updates it.
@@ -1225,10 +1225,10 @@ private static readonly @string runˢᵇᴍtimers = "run"u8;
 // If a timer is run, this will temporarily unlock ts.
 //
 //go:systemstack
-[GoMethodBody("run")] internal static int64 runᴍ(ж<timers> Ꮡts, int64 now, ж<synctestBubble> bubble) {
+internal static int64 run⁔(/*this*/ ж<timers> Ꮡts, int64 now, ж<synctestBubble> bubble) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
-    Ꮡts.trace(runˢᴍtimers);
+    Ꮡts.trace(runˢ⁔timers);
     assertLockHeld(Ꮡts.Ꮡmu);
 Redo:
     if (len(ts.heap) == 0) {
@@ -1237,7 +1237,7 @@ Redo:
     var tw = ts.heap[0];
     var t = tw.timer;
     if (t.ts != Ꮡts) {
-        @throw(badTsˢᴍtimers);
+        @throw(badTsˢ⁔timers);
     }
 
     if ((uint8)(t.Ꮡastate.Load() & ((uint8)(timerModified | timerZombie))) == 0 && tw.when > now) {
@@ -1269,16 +1269,16 @@ Redo:
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unlockAndRunˢᴍtimer => ref unlockAndRunˢᵇᴍtimer;
-private static readonly @string unlockAndRunˢᵇᴍtimer = "unlockAndRun"u8;
-internal static ref readonly @string tooManyConcurrentTimerˢᴍtimer => ref tooManyConcurrentTimerˢᵇᴍtimer;
-private static readonly @string tooManyConcurrentTimerˢᵇᴍtimer = "too many concurrent timer firings"u8;
-internal static ref readonly @string unexpectedRacectxˢᴍtimer => ref unexpectedRacectxˢᵇᴍtimer;
-private static readonly @string unexpectedRacectxˢᵇᴍtimer = "unexpected racectx"u8;
-internal static ref readonly @string unexpectedSyncgroupSetˢᴍtimer => ref unexpectedSyncgroupSetˢᵇᴍtimer;
-private static readonly @string unexpectedSyncgroupSetˢᵇᴍtimer = "unexpected syncgroup set"u8;
-internal static ref readonly @string mismatchedIsSendingˢᴍtimer => ref mismatchedIsSendingˢᵇᴍtimer;
-private static readonly @string mismatchedIsSendingˢᵇᴍtimer = "mismatched isSending updates"u8;
+internal static ref readonly @string unlockAndRunˢ⁔timer => ref unlockAndRunˢᵇ⁔timer;
+private static readonly @string unlockAndRunˢᵇ⁔timer = "unlockAndRun"u8;
+internal static ref readonly @string tooManyConcurrentTimerˢ⁔timer => ref tooManyConcurrentTimerˢᵇ⁔timer;
+private static readonly @string tooManyConcurrentTimerˢᵇ⁔timer = "too many concurrent timer firings"u8;
+internal static ref readonly @string unexpectedRacectxˢ⁔timer => ref unexpectedRacectxˢᵇ⁔timer;
+private static readonly @string unexpectedRacectxˢᵇ⁔timer = "unexpected racectx"u8;
+internal static ref readonly @string unexpectedSyncgroupSetˢ⁔timer => ref unexpectedSyncgroupSetˢᵇ⁔timer;
+private static readonly @string unexpectedSyncgroupSetˢᵇ⁔timer = "unexpected syncgroup set"u8;
+internal static ref readonly @string mismatchedIsSendingˢ⁔timer => ref mismatchedIsSendingˢᵇ⁔timer;
+private static readonly @string mismatchedIsSendingˢᵇ⁔timer = "mismatched isSending updates"u8;
 
 // unlockAndRun unlocks and runs the timer t (which must be locked).
 // If t is in a timer set (t.ts != nil), the caller must also have locked the timer set,
@@ -1286,11 +1286,11 @@ private static readonly @string mismatchedIsSendingˢᵇᴍtimer = "mismatched i
 // unlockAndRun returns with t unlocked and t.ts (re-)locked.
 //
 //go:systemstack
-[GoMethodBody("unlockAndRun")] internal static void unlockAndRunᴍ(ж<timer> Ꮡt, int64 now, ж<synctestBubble> Ꮡbubble) {
+internal static void unlockAndRun⁔(/*this*/ ж<timer> Ꮡt, int64 now, ж<synctestBubble> Ꮡbubble) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var bubble = ref Ꮡbubble.DerefOrNull();
 
-    Ꮡt.trace(unlockAndRunˢᴍtimer);
+    Ꮡt.trace(unlockAndRunˢ⁔timer);
     assertLockHeld(Ꮡt.Ꮡmu);
     if (t.ts != nil) {
         assertLockHeld(t.ts.Ꮡmu);
@@ -1345,7 +1345,7 @@ private static readonly @string mismatchedIsSendingˢᵇᴍtimer = "mismatched i
     if (!async && t.isChan && t.period == 0) {
         // Tell Stop/Reset that we are sending a value.
         if (Ꮡt.ᏑisSending.Add(1) < 0) {
-            @throw(tooManyConcurrentTimerˢᴍtimer);
+            @throw(tooManyConcurrentTimerˢ⁔timer);
         }
     }
 
@@ -1355,7 +1355,7 @@ private static readonly @string mismatchedIsSendingˢᵇᴍtimer = "mismatched i
         // Temporarily use the current P's racectx for g0.
         var gp = getg();
         if ((~gp).racectx != 0) {
-            @throw(unexpectedRacectxˢᴍtimer);
+            @throw(unexpectedRacectxˢ⁔timer);
         }
         if (Ꮡbubble == nil) {
             gp.Value.racectx = (~(~gp).m).p.ptr().Value.timers.raceCtx;
@@ -1372,7 +1372,7 @@ private static readonly @string mismatchedIsSendingˢᵇᴍtimer = "mismatched i
         // Temporarily use the timer's synctest group for the G running this timer.
         var gp = getg();
         if ((~gp).bubble != nil) {
-            @throw(unexpectedSyncgroupSetˢᴍtimer);
+            @throw(unexpectedSyncgroupSetˢ⁔timer);
         }
         gp.Value.bubble = Ꮡbubble;
         Ꮡbubble.changegstatus(gp, _Gdead, _Grunning);
@@ -1404,7 +1404,7 @@ private static readonly @string mismatchedIsSendingˢᵇᴍtimer = "mismatched i
             // based on seq, so no need to keep telling
             // stop/modify that we are sending.
             if (Ꮡt.ᏑisSending.Add(-1) < 0) {
-                @throw(mismatchedIsSendingˢᴍtimer);
+                @throw(mismatchedIsSendingˢ⁔timer);
             }
         }
 
@@ -1444,15 +1444,15 @@ private static readonly @string mismatchedIsSendingˢᵇᴍtimer = "mismatched i
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badTimerHeapˢᴍtimers => ref badTimerHeapˢᵇᴍtimers;
-private static readonly @string badTimerHeapˢᵇᴍtimers = "bad timer heap"u8;
-internal static ref readonly @string badTimerHeapLenˢᴍtimers => ref badTimerHeapLenˢᵇᴍtimers;
-private static readonly @string badTimerHeapLenˢᵇᴍtimers = "bad timer heap len"u8;
+internal static ref readonly @string badTimerHeapˢ⁔timers => ref badTimerHeapˢᵇ⁔timers;
+private static readonly @string badTimerHeapˢᵇ⁔timers = "bad timer heap"u8;
+internal static ref readonly @string badTimerHeapLenˢ⁔timers => ref badTimerHeapLenˢᵇ⁔timers;
+private static readonly @string badTimerHeapLenˢᵇ⁔timers = "bad timer heap len"u8;
 
 // verifyTimerHeap verifies that the timers is in a valid state.
 // This is only for debugging, and is only called if verifyTimers is true.
 // The caller must have locked ts.
-[GoMethodBody("verify")] internal static void verifyᴍ(ж<timers> Ꮡts) {
+internal static void verify⁔(/*this*/ ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     assertLockHeld(Ꮡts.Ꮡmu);
@@ -1466,18 +1466,18 @@ private static readonly @string badTimerHeapLenˢᵇᴍtimers = "bad timer heap 
         nint p = (nint)((nuint)(i - 1) / (nuint)timerHeapN);
         if (tw.less(ts.heap[p])) {
             print((@string)"bad timer heap at ", i, (@string)": ", p, (@string)": ", ts.heap[p].when, (@string)", ", i, (@string)": ", tw.when, (@string)"\n");
-            @throw(badTimerHeapˢᴍtimers);
+            @throw(badTimerHeapˢ⁔timers);
         }
     }
     nint n = (nint)Ꮡts.Ꮡlen.Load(); if (len(ts.heap) != n) {
         println((@string)"timer heap len", len(ts.heap), (@string)"!= atomic len", n);
-        @throw(badTimerHeapLenˢᴍtimers);
+        @throw(badTimerHeapLenˢ⁔timers);
     }
 }
 
 // updateMinWhenHeap sets ts.minWhenHeap to ts.heap[0].when.
 // The caller must have locked ts or the world must be stopped.
-[GoMethodBody("updateMinWhenHeap")] internal static void updateMinWhenHeapᴍ(ж<timers> Ꮡts) {
+internal static void updateMinWhenHeap⁔(/*this*/ ж<timers> Ꮡts) {
     ref var ts = ref Ꮡts.DerefOrNull();
 
     assertWorldStoppedOrLockHeld(ref nonnil(ref ts).mu);
@@ -1490,7 +1490,7 @@ private static readonly @string badTimerHeapLenˢᵇᴍtimers = "bad timer heap 
 
 // updateMinWhenModified updates ts.minWhenModified to be <= when.
 // ts need not be (and usually is not) locked.
-[GoMethodBody("updateMinWhenModified")] internal static void updateMinWhenModifiedᴍ(ж<timers> Ꮡts, int64 when) {
+internal static void updateMinWhenModified⁔(/*this*/ ж<timers> Ꮡts, int64 when) {
     for (;;) {
         var old = Ꮡts.ᏑminWhenModified.Load();
         if (old != 0 && old < when) {
@@ -1542,7 +1542,7 @@ internal static UntypedInt timerHeapN => 4;
 
 // siftUp puts the timer at position i in the right place
 // in the heap by moving it up toward the top of the heap.
-[GoMethodBody("siftUp")] internal static void siftUpᴍ(ref timers ts, nint i) {
+internal static void siftUp⁔(/*this*/ ref timers ts, nint i) {
     var heap = ts.heap;
     if (i >= len(heap)) {
         badTimer();
@@ -1566,7 +1566,7 @@ internal static UntypedInt timerHeapN => 4;
 
 // siftDown puts the timer at position i in the right place
 // in the heap by moving it down toward the bottom of the heap.
-[GoMethodBody("siftDown")] internal static void siftDownᴍ(ref timers ts, nint i) {
+internal static void siftDown⁔(/*this*/ ref timers ts, nint i) {
     var heap = ts.heap;
     nint n = len(heap);
     if (i >= n) {
@@ -1605,7 +1605,7 @@ internal static UntypedInt timerHeapN => 4;
 
 // initHeap reestablishes the heap order in the slice ts.heap.
 // It takes O(n) time for n=len(ts.heap), not the O(n log n) of n repeated add operations.
-[GoMethodBody("initHeap")] internal static void initHeapᴍ(ref timers ts) {
+internal static void initHeap⁔(/*this*/ ref timers ts) {
     // Last possible element that needs sifting down is parent of last element;
     // last element is len(t)-1; parent of last element is (len(t)-1-1)/timerHeapN.
     if (len(ts.heap) <= 1) {
@@ -1633,25 +1633,25 @@ internal static void badTimer() {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string synctestTimerAccessedˢᴍtimer => ref synctestTimerAccessedˢᵇᴍtimer;
-private static readonly @string synctestTimerAccessedˢᵇᴍtimer = "synctest timer accessed from outside bubble"u8;
-internal static ref readonly @string maybeRunChanˢᴍtimer => ref maybeRunChanˢᵇᴍtimer;
-private static readonly @string maybeRunChanˢᵇᴍtimer = "maybeRunChan-"u8;
-internal static ref readonly @string maybeRunChanˢ2ᴍtimer => ref maybeRunChanˢ2ᵇᴍtimer;
-private static readonly @string maybeRunChanˢ2ᵇᴍtimer = "maybeRunChan+"u8;
+internal static ref readonly @string synctestTimerAccessedˢ⁔timer => ref synctestTimerAccessedˢᵇ⁔timer;
+private static readonly @string synctestTimerAccessedˢᵇ⁔timer = "synctest timer accessed from outside bubble"u8;
+internal static ref readonly @string maybeRunChanˢ⁔timer => ref maybeRunChanˢᵇ⁔timer;
+private static readonly @string maybeRunChanˢᵇ⁔timer = "maybeRunChan-"u8;
+internal static ref readonly @string maybeRunChanˢ2⁔timer => ref maybeRunChanˢ2ᵇ⁔timer;
+private static readonly @string maybeRunChanˢ2ᵇ⁔timer = "maybeRunChan+"u8;
 
 // Timer channels.
 
 // maybeRunChan checks whether the timer needs to run
 // to send a value to its associated channel. If so, it does.
 // The timer must not be locked.
-[GoMethodBody("maybeRunChan")] internal static void maybeRunChanᴍ(ж<timer> Ꮡt, ж<hchan> Ꮡc) {
+internal static void maybeRunChan⁔(/*this*/ ж<timer> Ꮡt, ж<hchan> Ꮡc) {
     ref var t = ref Ꮡt.DerefOrNull();
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (t.isFake && (~getg()).bubble != c.bubble) {
         // This should have been checked by the caller, but check just in case.
-        fatal(synctestTimerAccessedˢᴍtimer);
+        fatal(synctestTimerAccessedˢ⁔timer);
     }
     if ((uint8)(Ꮡt.Ꮡastate.Load() & timerHeaped) != 0) {
         // If the timer is in the heap, the ordinary timer code
@@ -1665,12 +1665,12 @@ private static readonly @string maybeRunChanˢ2ᵇᴍtimer = "maybeRunChan+"u8;
         now = getg().Value.bubble.now;
     }
     if ((uint8)(t.state & timerHeaped) != 0 || t.when == 0 || t.when > now) {
-        Ꮡt.trace(maybeRunChanˢᴍtimer);
+        Ꮡt.trace(maybeRunChanˢ⁔timer);
         // Timer in the heap, or not running at all, or not triggered.
         Ꮡt.unlock();
         return;
     }
-    Ꮡt.trace(maybeRunChanˢ2ᴍtimer);
+    Ꮡt.trace(maybeRunChanˢ2⁔timer);
     systemstack(() => {
         Ꮡt.unlockAndRun(now, Ꮡc.Value.bubble);
     });

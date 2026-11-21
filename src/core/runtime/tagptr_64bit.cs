@@ -74,7 +74,7 @@ internal static taggedPointer taggedPointerPack(@unsafe.Pointer ptr, uintptr tag
 } partial class runtime_package {
 
 // Pointer returns the pointer from a taggedPointer.
-[GoMethodBody("pointer")] internal static @unsafe.Pointer pointerᴍ(taggedPointer tp) {
+internal static @unsafe.Pointer pointer⁔(/*this*/ taggedPointer tp) {
     if (GOARCH == "amd64"u8) {
         // amd64 systems can place the stack above the VA hole, so we need to sign extend
         // val before unpacking.
@@ -87,7 +87,7 @@ internal static taggedPointer taggedPointerPack(@unsafe.Pointer ptr, uintptr tag
 }
 
 // Tag returns the tag from a taggedPointer.
-[GoMethodBody("tag")] internal static uintptr tagᴍ(taggedPointer tp) {
+internal static uintptr tag⁔(/*this*/ taggedPointer tp) {
     return (uintptr)((taggedPointer)(tp & (uint64)((1 << (int)(tagBits)) - 1)));
 }
 

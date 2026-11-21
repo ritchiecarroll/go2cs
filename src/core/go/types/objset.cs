@@ -24,7 +24,7 @@ partial struct objset /*map[@string, Object]*/; // initialized lazily
 // If s already contains an alternative object alt with
 // the same name, insert leaves s unchanged and returns alt.
 // Otherwise it inserts obj and returns nil.
-[GoMethodBody("insert")] internal static Object insertᴍ(ref objset s, Object obj) {
+internal static Object insert⁔(/*this*/ ref objset s, Object obj) {
     @string id = obj.Id();
     var alt = (s)[id]; if (alt != nil) {
         return alt;

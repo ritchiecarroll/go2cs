@@ -158,7 +158,7 @@ partial struct traceStackTable {
 
 // put returns a unique id for the stack trace pcs and caches it in the table,
 // if it sees the trace for the first time.
-[GoMethodBody("put")] internal static uint64 putᴍ(ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
+internal static uint64 put⁔(/*this*/ ж<traceStackTable> Ꮡt, slice<uintptr> pcs) {
     // Even though put will handle this for us, taking the address of pcs forces a bounds check
     // that will fail if len(pcs) == 0.
     if (len(pcs) == 0) {
@@ -171,7 +171,7 @@ partial struct traceStackTable {
 // dump writes all previously cached stacks to trace buffers,
 // releases all memory and resets state. It must only be called once the caller
 // can guarantee that there are no more writers to the table.
-[GoMethodBody("dump")] internal static void dumpᴍ(ж<traceStackTable> Ꮡt, uintptr gen) {
+internal static void dump⁔(/*this*/ ж<traceStackTable> Ꮡt, uintptr gen) {
     var stackBuf = new slice<uintptr>(tracev2.MaxFramesPerStack);
     var w = unsafeTraceWriter(gen, nil);
     var root = @unsafe.Pointer.To<traceMapNode>(Ꮡt.Ꮡtab.Ꮡroot.Load()); if (root != nil) {

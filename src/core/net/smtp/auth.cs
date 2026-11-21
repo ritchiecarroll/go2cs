@@ -62,14 +62,14 @@ internal static bool isLocalhost(@string name) {
 } partial class smtp_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unencryptedConnectionˢᴍplainAuth => ref unencryptedConnectionˢᵇᴍplainAuth;
-private static readonly @string unencryptedConnectionˢᵇᴍplainAuth = "unencrypted connection"u8;
-internal static ref readonly @string wrongHostNameˢᴍplainAuth => ref wrongHostNameˢᵇᴍplainAuth;
-private static readonly @string wrongHostNameˢᵇᴍplainAuth = "wrong host name"u8;
-internal static ref readonly @string plainˢᴍplainAuth => ref plainˢᵇᴍplainAuth;
-private static readonly @string plainˢᵇᴍplainAuth = "PLAIN"u8;
+internal static ref readonly @string unencryptedConnectionˢ⁔plainAuth => ref unencryptedConnectionˢᵇ⁔plainAuth;
+private static readonly @string unencryptedConnectionˢᵇ⁔plainAuth = "unencrypted connection"u8;
+internal static ref readonly @string wrongHostNameˢ⁔plainAuth => ref wrongHostNameˢᵇ⁔plainAuth;
+private static readonly @string wrongHostNameˢᵇ⁔plainAuth = "wrong host name"u8;
+internal static ref readonly @string plainˢ⁔plainAuth => ref plainˢᵇ⁔plainAuth;
+private static readonly @string plainˢᵇ⁔plainAuth = "PLAIN"u8;
 
-[GoMethodBody("Start")] internal static (@string, slice<byte>, error) Startᴍ(ref plainAuth a, ж<ServerInfo> Ꮡserver) {
+internal static (@string, slice<byte>, error) Start⁔(/*this*/ ref plainAuth a, ж<ServerInfo> Ꮡserver) {
     ref var server = ref Ꮡserver.DerefOrNull();
 
     // Must have TLS, or else localhost server.
@@ -78,23 +78,23 @@ private static readonly @string plainˢᵇᴍplainAuth = "PLAIN"u8;
     // That might just be the attacker saying
     // "it's ok, you can trust me with your password."
     if (!server.TLS && !isLocalhost(server.Name)) {
-        return ("", default, errors.New(unencryptedConnectionˢᴍplainAuth));
+        return ("", default, errors.New(unencryptedConnectionˢ⁔plainAuth));
     }
     if (server.Name != a.host) {
-        return ("", default, errors.New(wrongHostNameˢᴍplainAuth));
+        return ("", default, errors.New(wrongHostNameˢ⁔plainAuth));
     }
     var resp = slice<byte>(a.identity + "\x00" + a.username + "\x00" + a.password);
-    return (plainˢᴍplainAuth, resp, default);
+    return (plainˢ⁔plainAuth, resp, default);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string unexpectedServerˢᴍplainAuth => ref unexpectedServerˢᵇᴍplainAuth;
-private static readonly @string unexpectedServerˢᵇᴍplainAuth = "unexpected server challenge"u8;
+internal static ref readonly @string unexpectedServerˢ⁔plainAuth => ref unexpectedServerˢᵇ⁔plainAuth;
+private static readonly @string unexpectedServerˢᵇ⁔plainAuth = "unexpected server challenge"u8;
 
-[GoMethodBody("Next")] internal static (slice<byte>, error) Nextᴍ(ref plainAuth a, slice<byte> fromServer, bool more) {
+internal static (slice<byte>, error) Next⁔(/*this*/ ref plainAuth a, slice<byte> fromServer, bool more) {
     if (more) {
         // We've already sent everything.
-        return (default, errors.New(unexpectedServerˢᴍplainAuth));
+        return (default, errors.New(unexpectedServerˢ⁔plainAuth));
     }
     return (default, default);
 }
@@ -116,14 +116,14 @@ public static Auth CRAMMD5Auth(@string username, @string secret) {
 } partial class smtp_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cramMd5ˢᴍcramMD5Auth => ref cramMd5ˢᵇᴍcramMD5Auth;
-private static readonly @string cramMd5ˢᵇᴍcramMD5Auth = "CRAM-MD5"u8;
+internal static ref readonly @string cramMd5ˢ⁔cramMD5Auth => ref cramMd5ˢᵇ⁔cramMD5Auth;
+private static readonly @string cramMd5ˢᵇ⁔cramMD5Auth = "CRAM-MD5"u8;
 
-[GoMethodBody("Start")] internal static (@string, slice<byte>, error) Startᴍ(ref cramMD5Auth a, ж<ServerInfo> server) {
-    return (cramMd5ˢᴍcramMD5Auth, default, default);
+internal static (@string, slice<byte>, error) Start⁔(/*this*/ ref cramMD5Auth a, ж<ServerInfo> server) {
+    return (cramMd5ˢ⁔cramMD5Auth, default, default);
 }
 
-[GoMethodBody("Next")] internal static (slice<byte>, error) Nextᴍ(ref cramMD5Auth a, slice<byte> fromServer, bool more) {
+internal static (slice<byte>, error) Next⁔(/*this*/ ref cramMD5Auth a, slice<byte> fromServer, bool more) {
     if (more) {
         var d = hmac.New(md5.New, slice<byte>(a.secret));
         d.Write(fromServer);

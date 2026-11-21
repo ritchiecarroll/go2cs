@@ -14,14 +14,14 @@ partial class runtime_package {
 // to kill.
 //
 //go:nosplit
-[GoMethodBody("sigFromUser")] internal static bool sigFromUserᴍ(ref sigctxt c) {
+internal static bool sigFromUser⁔(/*this*/ ref sigctxt c) {
     return c.sigcode() == _SI_USER;
 }
 
 // sigFromSeccomp reports whether the signal was sent from seccomp.
 //
 //go:nosplit
-[GoMethodBody("sigFromSeccomp")] internal static bool sigFromSeccompᴍ(ref sigctxt c) {
+internal static bool sigFromSeccomp⁔(/*this*/ ref sigctxt c) {
     return false;
 }
 

@@ -12,7 +12,7 @@ partial class os_package {
 
 } partial class os_package {
 
-[GoMethodBody("lstatat")] internal static (FileInfo, error) lstatatᴍ(ж<File> Ꮡf, @string name) {
+internal static (FileInfo, error) lstatat⁔(/*this*/ ж<File> Ꮡf, @string name) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (stathook != nil) {

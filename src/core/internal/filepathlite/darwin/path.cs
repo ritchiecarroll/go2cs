@@ -35,14 +35,14 @@ partial struct lazybuf {
 
 } partial class filepathlite_package {
 
-[GoMethodBody("index")] internal static byte indexᴍ(ref lazybuf b, nint i) {
+internal static byte index⁔(/*this*/ ref lazybuf b, nint i) {
     if (b.buf != nil) {
         return b.buf[i];
     }
     return b.path[i];
 }
 
-[GoMethodBody("append")] internal static void appendᴍ(ref lazybuf b, byte c) {
+internal static void append⁔(/*this*/ ref lazybuf b, byte c) {
     if (b.buf == nil) {
         if (b.w < len(b.path) && b.path[b.w] == c) {
             b.w++;
@@ -55,14 +55,14 @@ partial struct lazybuf {
     b.w++;
 }
 
-[GoMethodBody("prepend")] internal static void prependᴍ(ref lazybuf b, params ꓸꓸꓸbyte prefixʗp) {
+internal static void prepend⁔(/*this*/ ref lazybuf b, params ꓸꓸꓸbyte prefixʗp) {
     var prefix = prefixʗp.sslice();
 
     b.buf = slices.Insert(b.buf, 0, prefix.ꓸꓸꓸ);
     b.w += len(prefix);
 }
 
-[GoMethodBody("string")] internal static @string @stringᴍ(ref lazybuf b) {
+internal static @string @string⁔(/*this*/ ref lazybuf b) {
     if (b.buf == nil) {
         return b.volAndPath.slice(0, b.volLen + b.w);
     }

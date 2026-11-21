@@ -323,7 +323,7 @@ partial struct ConnectionState {
 // in Go 1.22 due to security issues (see the Security Considerations sections
 // of RFC 5705 and RFC 7627), but can be re-enabled with the GODEBUG setting
 // tlsunsafeekm=1.
-[GoMethodBody("ExportKeyingMaterial")] internal static (slice<byte>, error) ExportKeyingMaterialᴍ(ref ConnectionState cs, @string label, slice<byte> context, nint length) {
+internal static (slice<byte>, error) ExportKeyingMaterial⁔(/*this*/ ref ConnectionState cs, @string label, slice<byte> context, nint length) {
     return cs.ekm(label, context, length);
 }
 
@@ -471,7 +471,7 @@ partial struct ClientHelloInfo {
 // Context returns the context of the handshake that is in progress.
 // This context is a child of the context passed to HandshakeContext,
 // if any, and is canceled when the handshake concludes.
-[GoMethodBody("Context")] internal static context.Context Contextᴍ(ref ClientHelloInfo c) {
+internal static context.Context Context⁔(/*this*/ ref ClientHelloInfo c) {
     return c.ctx;
 }
 
@@ -500,7 +500,7 @@ partial struct CertificateRequestInfo {
 // Context returns the context of the handshake that is in progress.
 // This context is a child of the context passed to HandshakeContext,
 // if any, and is canceled when the handshake concludes.
-[GoMethodBody("Context")] internal static context.Context Contextᴍ(ref CertificateRequestInfo c) {
+internal static context.Context Context⁔(/*this*/ ref CertificateRequestInfo c) {
     return c.ctx;
 }
 
@@ -910,7 +910,7 @@ partial struct ticketKey {
 // ticketKeyFromBytes converts from the external representation of a session
 // ticket key to a ticketKey. Externally, session ticket keys are 32 random
 // bytes and this function expands that into sufficient name and key material.
-[GoMethodBody("ticketKeyFromBytes")] internal static ticketKey /*key*/ ticketKeyFromBytesᴍ(ref Config c, /*[32]*/ array<byte> b) {
+internal static ticketKey /*key*/ ticketKeyFromBytes⁔(/*this*/ ref Config c, /*[32]*/ array<byte> b) {
     ticketKey key = new();
     b = b.Clone();
 
@@ -942,7 +942,7 @@ internal static time.Duration maxSessionTicketLifetime => /* 7 * 24 * time.Hour 
 // including connections that were originally established on the parent Config.
 // If that is not intended, use [Config.VerifyConnection] instead, or set
 // [Config.SessionTicketsDisabled].
-[GoMethodBody("Clone")] internal static ж<Config> Cloneᴍ(ж<Config> Ꮡc) {
+internal static ж<Config> Clone⁔(/*this*/ ж<Config> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1004,7 +1004,7 @@ internal static slice<byte> deprecatedSessionTicketKey = slice<byte>("DEPRECATED
 
 // initLegacySessionTicketKeyRLocked ensures the legacy SessionTicketKey field is
 // randomized if empty, and that sessionTicketKeys is populated from it otherwise.
-[GoMethodBody("initLegacySessionTicketKeyRLocked")] internal static void initLegacySessionTicketKeyRLockedᴍ(ж<Config> Ꮡc) {
+internal static void initLegacySessionTicketKeyRLocked⁔(/*this*/ ж<Config> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     bool ᒐd2 = false;
@@ -1048,7 +1048,7 @@ internal static slice<byte> deprecatedSessionTicketKey = slice<byte>("DEPRECATED
 // encrypting tickets (ie. the first ticketKey in c.sessionTicketKeys)
 // is not fresh, then a new session ticket key will be
 // created and prepended to c.sessionTicketKeys.
-[GoMethodBody("ticketKeys")] internal static slice<ticketKey> ticketKeysᴍ(ж<Config> Ꮡc, ж<Config> ᏑconfigForClient) {
+internal static slice<ticketKey> ticketKeys⁔(/*this*/ ж<Config> Ꮡc, ж<Config> ᏑconfigForClient) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     bool ᒐd2 = false;
@@ -1130,7 +1130,7 @@ internal static slice<byte> deprecatedSessionTicketKey = slice<byte>("DEPRECATED
 // all have the same session ticket keys. If the session ticket keys leaks,
 // previously recorded and future TLS connections using those keys might be
 // compromised.
-[GoMethodBody("SetSessionTicketKeys")] internal static void SetSessionTicketKeysᴍ(ж<Config> Ꮡc, slice<array<byte>> keys) {
+internal static void SetSessionTicketKeys⁔(/*this*/ ж<Config> Ꮡc, slice<array<byte>> keys) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (len(keys) == 0) {
@@ -1149,7 +1149,7 @@ internal static slice<byte> deprecatedSessionTicketKey = slice<byte>("DEPRECATED
     Ꮡc.Ꮡmutex.Unlock();
 }
 
-[GoMethodBody("rand")] internal static io.Reader randᴍ(ref Config c) {
+internal static io.Reader rand⁔(/*this*/ ref Config c) {
     var r = c.Rand;
     if (r == nil) {
         return go.crypto.rand_package.Reader;
@@ -1157,7 +1157,7 @@ internal static slice<byte> deprecatedSessionTicketKey = slice<byte>("DEPRECATED
     return r;
 }
 
-[GoMethodBody("time")] internal static time.Time timeᴍ(ref Config c) {
+internal static time.Time time⁔(/*this*/ ref Config c) {
     var t = c.Time;
     if (t == nil) {
         t = time_package.Now;
@@ -1165,7 +1165,7 @@ internal static slice<byte> deprecatedSessionTicketKey = slice<byte>("DEPRECATED
     return t();
 }
 
-[GoMethodBody("cipherSuites")] internal static slice<uint16> cipherSuitesᴍ(ж<Config> Ꮡc, bool aesGCMPreferred) {
+internal static slice<uint16> cipherSuites⁔(/*this*/ ж<Config> Ꮡc, bool aesGCMPreferred) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     slice<uint16> cipherSuites = default;
@@ -1183,7 +1183,7 @@ internal static slice<byte> deprecatedSessionTicketKey = slice<byte>("DEPRECATED
 
 // supportedCipherSuites returns the supported TLS 1.0–1.2 cipher suites in an
 // undefined order. For preference ordering, use [Config.cipherSuites].
-[GoMethodBody("supportedCipherSuites")] internal static slice<uint16> supportedCipherSuitesᴍ(ж<Config> Ꮡc) {
+internal static slice<uint16> supportedCipherSuites⁔(/*this*/ ж<Config> Ꮡc) {
     return Ꮡc.cipherSuites(false);
 }
 
@@ -1207,7 +1207,7 @@ internal static ж<godebug.Setting> tls10server = godebug.New("tls10server");
 
 // supportedVersions returns the list of supported TLS versions, sorted from
 // highest to lowest (and hence also in preference order).
-[GoMethodBody("supportedVersions")] internal static slice<uint16> supportedVersionsᴍ(ж<Config> Ꮡc, bool isClient) {
+internal static slice<uint16> supportedVersions⁔(/*this*/ ж<Config> Ꮡc, bool isClient) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var versions = new slice<uint16>(0, len(Δtls.supportedVersions));
@@ -1234,7 +1234,7 @@ internal static ж<godebug.Setting> tls10server = godebug.New("tls10server");
     return versions;
 }
 
-[GoMethodBody("maxSupportedVersion")] internal static uint16 maxSupportedVersionᴍ(ж<Config> Ꮡc, bool isClient) {
+internal static uint16 maxSupportedVersion⁔(/*this*/ ж<Config> Ꮡc, bool isClient) {
     var supportedVersions = Ꮡc.supportedVersions(isClient);
     if (len(supportedVersions) == 0) {
         return 0;
@@ -1260,7 +1260,7 @@ internal static slice<uint16> supportedVersionsFromMax(uint16 maxVersion) {
 
 } partial class tls_package {
 
-[GoMethodBody("curvePreferences")] internal static slice<CurveID> curvePreferencesᴍ(ж<Config> Ꮡc, uint16 version) {
+internal static slice<CurveID> curvePreferences⁔(/*this*/ ж<Config> Ꮡc, uint16 version) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var curvePreferences = defaultCurvePreferences();
@@ -1276,13 +1276,13 @@ internal static slice<uint16> supportedVersionsFromMax(uint16 maxVersion) {
     return curvePreferences;
 }
 
-[GoMethodBody("supportsCurve")] internal static bool supportsCurveᴍ(ж<Config> Ꮡc, uint16 version, CurveID curve) {
+internal static bool supportsCurve⁔(/*this*/ ж<Config> Ꮡc, uint16 version, CurveID curve) {
     return slices.Contains(Ꮡc.curvePreferences(version), curve);
 }
 
 // mutualVersion returns the protocol version to use given the advertised
 // versions of the peer. The highest supported version is preferred.
-[GoMethodBody("mutualVersion")] internal static (uint16, bool) mutualVersionᴍ(ж<Config> Ꮡc, bool isClient, slice<uint16> peerVersions) {
+internal static (uint16, bool) mutualVersion⁔(/*this*/ ж<Config> Ꮡc, bool isClient, slice<uint16> peerVersions) {
     var supportedVersions = Ꮡc.supportedVersions(isClient);
     foreach (var (_, v) in range(supportedVersions)) {
         if (slices.Contains(peerVersions, v)) {
@@ -1309,7 +1309,7 @@ public static error errNoCertificates = errors.New("tls: no certificates configu
 
 // getCertificate returns the best certificate for the given ClientHelloInfo,
 // defaulting to the first element of c.Certificates.
-[GoMethodBody("getCertificate")] internal static (ж<Certificate>, error) getCertificateᴍ(ref Config c, ж<ClientHelloInfo> ᏑclientHello) {
+internal static (ж<Certificate>, error) getCertificate⁔(/*this*/ ref Config c, ж<ClientHelloInfo> ᏑclientHello) {
     ref var clientHello = ref ᏑclientHello.DerefOrNull();
 
     if (c.GetCertificate != nil && (len(c.Certificates) == 0 || len(clientHello.ServerName) > 0)) {
@@ -1361,16 +1361,16 @@ public static error errNoCertificates = errors.New("tls: no certificates configu
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noMutuallySupportedˢᴍClientHelloInfo => ref noMutuallySupportedˢᵇᴍClientHelloInfo;
-private static readonly @string noMutuallySupportedˢᵇᴍClientHelloInfo = "no mutually supported protocol versions"u8;
-internal static ref readonly @string clientDoesnTSupportEcdheˢᴍClientHelloInfo => ref clientDoesnTSupportEcdheˢᵇᴍClientHelloInfo;
-private static readonly @string clientDoesnTSupportEcdheˢᵇᴍClientHelloInfo = "client doesn't support ECDHE, can only use legacy RSA key exchange"u8;
-internal static ref readonly @string clientDoesnTSupportˢᴍClientHelloInfo => ref clientDoesnTSupportˢᵇᴍClientHelloInfo;
-private static readonly @string clientDoesnTSupportˢᵇᴍClientHelloInfo = "client doesn't support certificate curve"u8;
-internal static ref readonly @string connectionDoesnTSupportˢᴍClientHelloInfo => ref connectionDoesnTSupportˢᵇᴍClientHelloInfo;
-private static readonly @string connectionDoesnTSupportˢᵇᴍClientHelloInfo = "connection doesn't support Ed25519"u8;
-internal static ref readonly @string clientDoesnTSupportAnyˢᴍClientHelloInfo => ref clientDoesnTSupportAnyˢᵇᴍClientHelloInfo;
-private static readonly @string clientDoesnTSupportAnyˢᵇᴍClientHelloInfo = "client doesn't support any cipher suites compatible with the certificate"u8;
+internal static ref readonly @string noMutuallySupportedˢ⁔ClientHelloInfo => ref noMutuallySupportedˢᵇ⁔ClientHelloInfo;
+private static readonly @string noMutuallySupportedˢᵇ⁔ClientHelloInfo = "no mutually supported protocol versions"u8;
+internal static ref readonly @string clientDoesnTSupportEcdheˢ⁔ClientHelloInfo => ref clientDoesnTSupportEcdheˢᵇ⁔ClientHelloInfo;
+private static readonly @string clientDoesnTSupportEcdheˢᵇ⁔ClientHelloInfo = "client doesn't support ECDHE, can only use legacy RSA key exchange"u8;
+internal static ref readonly @string clientDoesnTSupportˢ⁔ClientHelloInfo => ref clientDoesnTSupportˢᵇ⁔ClientHelloInfo;
+private static readonly @string clientDoesnTSupportˢᵇ⁔ClientHelloInfo = "client doesn't support certificate curve"u8;
+internal static ref readonly @string connectionDoesnTSupportˢ⁔ClientHelloInfo => ref connectionDoesnTSupportˢᵇ⁔ClientHelloInfo;
+private static readonly @string connectionDoesnTSupportˢᵇ⁔ClientHelloInfo = "connection doesn't support Ed25519"u8;
+internal static ref readonly @string clientDoesnTSupportAnyˢ⁔ClientHelloInfo => ref clientDoesnTSupportAnyˢᵇ⁔ClientHelloInfo;
+private static readonly @string clientDoesnTSupportAnyˢᵇ⁔ClientHelloInfo = "client doesn't support any cipher suites compatible with the certificate"u8;
 
 // SupportsCertificate returns nil if the provided certificate is supported by
 // the client that sent the ClientHello. Otherwise, it returns an error
@@ -1383,7 +1383,7 @@ private static readonly @string clientDoesnTSupportAnyˢᵇᴍClientHelloInfo = 
 //
 // This function will call x509.ParseCertificate unless c.Leaf is set, which can
 // incur a significant performance cost.
-[GoMethodBody("SupportsCertificate")] internal static error SupportsCertificateᴍ(ж<ClientHelloInfo> Ꮡchi, ж<Certificate> Ꮡc) {
+internal static error SupportsCertificate⁔(/*this*/ ж<ClientHelloInfo> Ꮡchi, ж<Certificate> Ꮡc) {
     ref var chi = ref Ꮡchi.DerefOrNull();
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -1398,7 +1398,7 @@ private static readonly @string clientDoesnTSupportAnyˢᵇᴍClientHelloInfo = 
     }
     var (vers, ok) = config.mutualVersion(roleServer, chi.SupportedVersions);
     if (!ok) {
-        return errors.New(noMutuallySupportedˢᴍClientHelloInfo);
+        return errors.New(noMutuallySupportedˢ⁔ClientHelloInfo);
     }
 
     // If the client specified the name they are trying to connect to, the
@@ -1471,7 +1471,7 @@ private static readonly @string clientDoesnTSupportAnyˢᵇᴍClientHelloInfo = 
         return err;
     }
     if (!ecdheSupported) {
-        return supportsRSAFallback(errors.New(clientDoesnTSupportEcdheˢᴍClientHelloInfo));
+        return supportsRSAFallback(errors.New(clientDoesnTSupportEcdheˢ⁔ClientHelloInfo));
     }
 
     bool ecdsaCipherSuite = default;
@@ -1505,14 +1505,14 @@ private static readonly @string clientDoesnTSupportAnyˢᵇᴍClientHelloInfo = 
                     }
                 }
                 if (!curveOk) {
-                    return errors.New(clientDoesnTSupportˢᴍClientHelloInfo);
+                    return errors.New(clientDoesnTSupportˢ⁔ClientHelloInfo);
                 }
                 ecdsaCipherSuite = true;
                 break;
             }
             case ed25519.PublicKey pub: {
                 if (vers < VersionTLS12 || len(chi.SignatureSchemes) == 0) {
-                    return errors.New(connectionDoesnTSupportˢᴍClientHelloInfo);
+                    return errors.New(connectionDoesnTSupportˢ⁔ClientHelloInfo);
                 }
                 ecdsaCipherSuite = true;
                 break;
@@ -1551,7 +1551,7 @@ private static readonly @string clientDoesnTSupportAnyˢᵇᴍClientHelloInfo = 
         return true;
     });
     if (cipherSuite == nil) {
-        return supportsRSAFallback(errors.New(clientDoesnTSupportAnyˢᴍClientHelloInfo));
+        return supportsRSAFallback(errors.New(clientDoesnTSupportAnyˢ⁔ClientHelloInfo));
     }
 
     return default;
@@ -1560,13 +1560,13 @@ private static readonly @string clientDoesnTSupportAnyˢᵇᴍClientHelloInfo = 
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string chainIsNotSignedByAnˢᴍCertificateRequestInfo => ref chainIsNotSignedByAnˢᵇᴍCertificateRequestInfo;
-private static readonly @string chainIsNotSignedByAnˢᵇᴍCertificateRequestInfo = "chain is not signed by an acceptable CA"u8;
+internal static ref readonly @string chainIsNotSignedByAnˢ⁔CertificateRequestInfo => ref chainIsNotSignedByAnˢᵇ⁔CertificateRequestInfo;
+private static readonly @string chainIsNotSignedByAnˢᵇ⁔CertificateRequestInfo = "chain is not signed by an acceptable CA"u8;
 
 // SupportsCertificate returns nil if the provided certificate is supported by
 // the server that sent the CertificateRequest. Otherwise, it returns an error
 // describing the reason for the incompatibility.
-[GoMethodBody("SupportsCertificate")] internal static error SupportsCertificateᴍ(ref CertificateRequestInfo cri, ж<Certificate> Ꮡc) {
+internal static error SupportsCertificate⁔(/*this*/ ref CertificateRequestInfo cri, ж<Certificate> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
@@ -1596,7 +1596,7 @@ private static readonly @string chainIsNotSignedByAnˢᵇᴍCertificateRequestIn
             }
         }
     }
-    return errors.New(chainIsNotSignedByAnˢᴍCertificateRequestInfo);
+    return errors.New(chainIsNotSignedByAnˢ⁔CertificateRequestInfo);
 }
 
 } partial class tls_package {
@@ -1608,7 +1608,7 @@ private static readonly @string chainIsNotSignedByAnˢᵇᴍCertificateRequestIn
 // Deprecated: NameToCertificate only allows associating a single certificate
 // with a given name. Leave that field nil to let the library select the first
 // compatible chain from Certificates.
-[GoMethodBody("BuildNameToCertificate")] internal static void BuildNameToCertificateᴍ(ref Config c) {
+internal static void BuildNameToCertificate⁔(/*this*/ ref Config c) {
     c.NameToCertificate = new map<@string, ж<Certificate>>();
     foreach (var i in range(len(c.Certificates))) {
         var cert = Ꮡ(c.Certificates, i);
@@ -1642,7 +1642,7 @@ private static readonly @string keyLogLabelServerTrafficᵇ = "SERVER_TRAFFIC_SE
 
 } partial class tls_package {
 
-[GoMethodBody("writeKeyLog")] internal static error writeKeyLogᴍ(ref Config c, @string label, slice<byte> clientRandom, slice<byte> secret) {
+internal static error writeKeyLog⁔(/*this*/ ref Config c, @string label, slice<byte> clientRandom, slice<byte> secret) {
     if (c.KeyLogWriter == nil) {
         return default;
     }
@@ -1695,7 +1695,7 @@ partial struct Certificate {
 
 // leaf returns the parsed leaf certificate, either from c.Leaf or by parsing
 // the corresponding c.Certificate[0].
-[GoMethodBody("leaf")] internal static (ж<Δx509.Certificate>, error) leafᴍ(ref Certificate c) {
+internal static (ж<Δx509.Certificate>, error) leaf⁔(/*this*/ ref Certificate c) {
     if (c.Leaf != nil) {
         return (c.Leaf, default);
     }
@@ -1752,7 +1752,7 @@ public static ClientSessionCache NewLRUClientSessionCache(nint capacity) {
 
 // Put adds the provided (sessionKey, cs) pair to the cache. If cs is nil, the entry
 // corresponding to sessionKey is removed from the cache instead.
-[GoMethodBody("Put")] internal static void Putᴍ(ж<lruSessionCache> Ꮡc, @string sessionKey, ж<ClientSessionState> cs) {
+internal static void Put⁔(/*this*/ ж<lruSessionCache> Ꮡc, @string sessionKey, ж<ClientSessionState> cs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1793,7 +1793,7 @@ public static ClientSessionCache NewLRUClientSessionCache(nint capacity) {
 
 // Get returns the [ClientSessionState] value associated with a given key. It
 // returns (nil, false) if no value is found.
-[GoMethodBody("Get")] internal static (ж<ClientSessionState>, bool) Getᴍ(ж<lruSessionCache> Ꮡc, @string sessionKey) {
+internal static (ж<ClientSessionState>, bool) Get⁔(/*this*/ ж<lruSessionCache> Ꮡc, @string sessionKey) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1892,11 +1892,11 @@ partial struct CertificateVerificationError {
 
 } partial class tls_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref CertificateVerificationError e) {
+internal static @string Error⁔(/*this*/ ref CertificateVerificationError e) {
     return fmt.Sprintf("tls: failed to verify certificate: %s"u8, e.Err);
 }
 
-[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref CertificateVerificationError e) {
+internal static error Unwrap⁔(/*this*/ ref CertificateVerificationError e) {
     return e.Err;
 }
 

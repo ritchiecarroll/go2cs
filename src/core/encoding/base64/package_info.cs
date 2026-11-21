@@ -68,10 +68,13 @@ using static go.encoding.base64_package;
 
 namespace go.encoding;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using @internal;
 using static base64_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("base64")]
 public static partial class base64_package
@@ -110,38 +113,38 @@ public static partial class base64_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(base64_package.CorruptInputError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛCorruptInputError;
-[GoMethodHost(typeof(base64_package.Encoding)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛEncoding;
-[GoMethodHost(typeof(base64_package.decoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛdecoder;
-[GoMethodHost(typeof(base64_package.encoder)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛencoder;
-[GoMethodHost(typeof(base64_package.newlineFilteringReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class base64ᴛnewlineFilteringReader;
+[GoMethodHost(typeof(base64_package.CorruptInputError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base64ᴛCorruptInputError;
+[GoMethodHost(typeof(base64_package.Encoding)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base64ᴛEncoding;
+[GoMethodHost(typeof(base64_package.decoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base64ᴛdecoder;
+[GoMethodHost(typeof(base64_package.encoder)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base64ᴛencoder;
+[GoMethodHost(typeof(base64_package.newlineFilteringReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class base64ᴛnewlineFilteringReader;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class base64ᴛEncoding {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) => base64_package.WithPaddingᴍ(encʗp, padding);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Encoding> Strict(this Encoding encʗp) => base64_package.Strictᴍ(encʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base64_package.Encodeᴍ(ref enc, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> AppendEncode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base64_package.AppendEncodeᴍ(ref enc, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string EncodeToString(this ref Encoding enc, slice<byte> src) => base64_package.EncodeToStringᴍ(ref enc, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint EncodedLen(this ref Encoding enc, nint n) => base64_package.EncodedLenᴍ(ref enc, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding enc, slice<byte> dst, slice<byte> src, nint si) => base64_package.decodeQuantumᴍ(ref enc, dst, src, si);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendDecode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base64_package.AppendDecodeᴍ(ref enc, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) DecodeString(this ref Encoding enc, @string s) => base64_package.DecodeStringᴍ(ref enc, s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base64_package.Decodeᴍ(ref enc, dst, src);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint DecodedLen(this ref Encoding enc, nint n) => base64_package.DecodedLenᴍ(ref enc, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Encoding> WithPadding(this Encoding encʗp, rune padding) => base64_package.WithPadding⁔(encʗp, padding);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Encoding> Strict(this Encoding encʗp) => base64_package.Strict⁔(encʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Encode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base64_package.Encode⁔(ref enc, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> AppendEncode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base64_package.AppendEncode⁔(ref enc, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string EncodeToString(this ref Encoding enc, slice<byte> src) => base64_package.EncodeToString⁔(ref enc, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint EncodedLen(this ref Encoding enc, nint n) => base64_package.EncodedLen⁔(ref enc, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint nsi, nint n, error err) decodeQuantum(this ref Encoding enc, slice<byte> dst, slice<byte> src, nint si) => base64_package.decodeQuantum⁔(ref enc, dst, src, si);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) AppendDecode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base64_package.AppendDecode⁔(ref enc, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) DecodeString(this ref Encoding enc, @string s) => base64_package.DecodeString⁔(ref enc, s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Decode(this ref Encoding enc, slice<byte> dst, slice<byte> src) => base64_package.Decode⁔(ref enc, dst, src);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint DecodedLen(this ref Encoding enc, nint n) => base64_package.DecodedLen⁔(ref enc, n);
 }
 partial class base64ᴛencoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) => base64_package.Writeᴍ(ref e, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error Close(this ref encoder e) => base64_package.Closeᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref encoder e, slice<byte> p) => base64_package.Write⁔(ref e, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error Close(this ref encoder e) => base64_package.Close⁔(ref e);
 }
 partial class base64ᴛCorruptInputError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this CorruptInputError e) => base64_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this CorruptInputError e) => base64_package.Error⁔(e);
 }
 partial class base64ᴛdecoder {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) => base64_package.Readᴍ(ref d, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this ref decoder d, slice<byte> p) => base64_package.Read⁔(ref d, p);
 }
 partial class base64ᴛnewlineFilteringReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte> p) => base64_package.Readᴍ(ref r, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) Read(this ref newlineFilteringReader r, slice<byte> p) => base64_package.Read⁔(ref r, p);
 }
 // </GlyphForwarders>

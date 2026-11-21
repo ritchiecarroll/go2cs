@@ -76,7 +76,7 @@ using static go.net.http.cgi_package;
 
 namespace go.net.http;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using io = io_package;
 using http = go.net.http_package;
 using path = path_package;
@@ -87,7 +87,10 @@ using go.os;
 using go.path;
 using vendor.golang.org.x.net.http;
 using ꓸꓸꓸany = Span<any>;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("cgi")]
 public static partial class cgi_package
@@ -143,26 +146,26 @@ public static partial class cgi_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(cgi_package.Handler)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgiᴛHandler;
-[GoMethodHost(typeof(cgi_package.neverEnding)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgiᴛneverEnding;
-[GoMethodHost(typeof(cgi_package.response)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cgiᴛresponse;
+[GoMethodHost(typeof(cgi_package.Handler)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cgiᴛHandler;
+[GoMethodHost(typeof(cgi_package.neverEnding)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cgiᴛneverEnding;
+[GoMethodHost(typeof(cgi_package.response)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class cgiᴛresponse;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class cgiᴛneverEnding {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) => cgi_package.Readᴍ(b, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Read(this neverEnding b, slice<byte> p) => cgi_package.Read⁔(b, p);
 }
 partial class cgiᴛresponse {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void Flush(this ref response r) => cgi_package.Flushᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static http.Header Header(this ref response r) => cgi_package.Headerᴍ(ref r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) Write(this ref response r, slice<byte> p) => cgi_package.Writeᴍ(ref r, p);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void WriteHeader(this ref response r, nint code) => cgi_package.WriteHeaderᴍ(ref r, code);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeCGIHeader(this ref response r, slice<byte> p) => cgi_package.writeCGIHeaderᴍ(ref r, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void Flush(this ref response r) => cgi_package.Flush⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static http.Header Header(this ref response r) => cgi_package.Header⁔(ref r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) Write(this ref response r, slice<byte> p) => cgi_package.Write⁔(ref r, p);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void WriteHeader(this ref response r, nint code) => cgi_package.WriteHeader⁔(ref r, code);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeCGIHeader(this ref response r, slice<byte> p) => cgi_package.writeCGIHeader⁔(ref r, p);
 }
 partial class cgiᴛHandler {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static io.Writer stderr(this ref Handler h) => cgi_package.stderrᴍ(ref h);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<http.Request> Ꮡreq) => cgi_package.ServeHTTPᴍ(Ꮡh, rw, Ꮡreq);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void printf(this ref Handler h, @string format, params ꓸꓸꓸany vʗp) => cgi_package.printfᴍ(ref h, format, vʗp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handleInternalRedirect(this ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq, @string path) => cgi_package.handleInternalRedirectᴍ(ref h, rw, Ꮡreq, path);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static io.Writer stderr(this ref Handler h) => cgi_package.stderr⁔(ref h);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void ServeHTTP(this ж<Handler> Ꮡh, http.ResponseWriter rw, ж<http.Request> Ꮡreq) => cgi_package.ServeHTTP⁔(Ꮡh, rw, Ꮡreq);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void printf(this ref Handler h, @string format, params ꓸꓸꓸany vʗp) => cgi_package.printf⁔(ref h, format, vʗp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void handleInternalRedirect(this ref Handler h, http.ResponseWriter rw, ж<http.Request> Ꮡreq, @string path) => cgi_package.handleInternalRedirect⁔(ref h, rw, Ꮡreq, path);
 }
 // </GlyphForwarders>

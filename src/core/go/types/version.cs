@@ -27,13 +27,13 @@ internal static goVersion asGoVersion(@string v) {
 } partial class types_package {
 
 // isValid reports whether v is a valid Go version.
-[GoMethodBody("isValid")] internal static bool isValidᴍ(goVersion v) {
+internal static bool isValid⁔(/*this*/ goVersion v) {
     return v != ""u8;
 }
 
 // cmp returns -1, 0, or +1 depending on whether x < y, x == y, or x > y,
 // interpreted as Go versions.
-[GoMethodBody("cmp")] internal static nint cmpᴍ(goVersion x, goVersion y) {
+internal static nint cmp⁔(/*this*/ goVersion x, goVersion y) {
     return version.Compare((@string)x, (@string)y);
 }
 
@@ -59,13 +59,13 @@ internal static goVersion go_current = asGoVersion(fmt.Sprintf("go1.%d"u8, (nint
 // allowVersion reports whether the current effective Go version
 // (which may vary from one file to another) is allowed to use the
 // feature version (want).
-[GoMethodBody("allowVersion")] internal static bool allowVersionᴍ(ref Checker check, goVersion want) {
+internal static bool allowVersion⁔(/*this*/ ref Checker check, goVersion want) {
     return !check.version.isValid() || check.version.cmp(want) >= 0;
 }
 
 // verifyVersionf is like allowVersion but also accepts a format string and arguments
 // which are used to report a version error if allowVersion returns false.
-[GoMethodBody("verifyVersionf")] internal static bool verifyVersionfᴍ(ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
+internal static bool verifyVersionf⁔(/*this*/ ж<Checker> Ꮡcheck, positioner at, goVersion v, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
     ref var check = ref Ꮡcheck.DerefOrNull();
 

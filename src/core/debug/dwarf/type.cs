@@ -31,9 +31,9 @@ partial struct CommonType {
 
 } partial class dwarf_package {
 
-[GoMethodBody("Common")] internal static ж<CommonType> Commonᴍ(ж<CommonType> Ꮡc) { return Ꮡc; }
+internal static ж<CommonType> Common⁔(/*this*/ ж<CommonType> Ꮡc) { return Ꮡc; }
 
-[GoMethodBody("Size")] internal static int64 Sizeᴍ(ref CommonType c) { return c.ByteSize; }
+internal static int64 Size⁔(/*this*/ ref CommonType c) { return c.ByteSize; }
 
 } partial class dwarf_package {
 
@@ -52,9 +52,9 @@ partial struct BasicType {
 
 } partial class dwarf_package {
 
-[GoMethodBody("Basic")] internal static ж<BasicType> Basicᴍ(ж<BasicType> Ꮡb) { return Ꮡb; }
+internal static ж<BasicType> Basic⁔(/*this*/ ж<BasicType> Ꮡb) { return Ꮡb; }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref BasicType t) {
+internal static @string String⁔(/*this*/ ref BasicType t) {
     if (t.Name != ""u8) {
         return t.Name;
     }
@@ -119,9 +119,9 @@ partial struct QualType {
 
 } partial class dwarf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref QualType t) { return t.Qual + " "u8 + t.Type.String(); }
+internal static @string String⁔(/*this*/ ref QualType t) { return t.Qual + " "u8 + t.Type.String(); }
 
-[GoMethodBody("Size")] internal static int64 Sizeᴍ(ref QualType t) { return t.Type.Size(); }
+internal static int64 Size⁔(/*this*/ ref QualType t) { return t.Type.Size(); }
 
 } partial class dwarf_package {
 
@@ -135,11 +135,11 @@ partial struct ArrayType {
 
 } partial class dwarf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref ArrayType t) {
+internal static @string String⁔(/*this*/ ref ArrayType t) {
     return "["u8 + strconv.FormatInt(t.Count, 10) + "]"u8 + t.Type.String();
 }
 
-[GoMethodBody("Size")] internal static int64 Sizeᴍ(ref ArrayType t) {
+internal static int64 Size⁔(/*this*/ ref ArrayType t) {
     if (t.Count == -1) {
         return 0;
     }
@@ -156,10 +156,10 @@ partial struct VoidType {
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string voidˢᴍVoidType => ref voidˢᵇᴍVoidType;
-private static readonly @string voidˢᵇᴍVoidType = "void"u8;
+internal static ref readonly @string voidˢ⁔VoidType => ref voidˢᵇ⁔VoidType;
+private static readonly @string voidˢᵇ⁔VoidType = "void"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref VoidType t) { return voidˢᴍVoidType; }
+internal static @string String⁔(/*this*/ ref VoidType t) { return voidˢ⁔VoidType; }
 
 } partial class dwarf_package {
 
@@ -171,7 +171,7 @@ partial struct PtrType {
 
 } partial class dwarf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref PtrType t) { return "*"u8 + t.Type.String(); }
+internal static @string String⁔(/*this*/ ref PtrType t) { return "*"u8 + t.Type.String(); }
 
 } partial class dwarf_package {
 
@@ -269,7 +269,7 @@ partial struct StructField {
 
 } partial class dwarf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref StructType t) {
+internal static @string String⁔(/*this*/ ref StructType t) {
     if (t.StructName != ""u8) {
         return t.Kind + " "u8 + t.StructName;
     }
@@ -278,7 +278,7 @@ partial struct StructField {
 
 } partial class dwarf_package {
 
-[GoMethodBody("bitOffset")] internal static int64 bitOffsetᴍ(ref StructField f) {
+internal static int64 bitOffset⁔(/*this*/ ref StructField f) {
     if (f.BitOffset != 0) {
         return f.BitOffset;
     }
@@ -287,7 +287,7 @@ partial struct StructField {
 
 } partial class dwarf_package {
 
-[GoMethodBody("Defn")] internal static @string Defnᴍ(ref StructType t) {
+internal static @string Defn⁔(/*this*/ ref StructType t) {
     @string s = t.Kind;
     if (t.StructName != ""u8) {
         s += " "u8 + t.StructName;
@@ -332,11 +332,11 @@ partial struct EnumValue {
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string enumˢᴍEnumType => ref enumˢᵇᴍEnumType;
-private static readonly @string enumˢᵇᴍEnumType = "enum"u8;
+internal static ref readonly @string enumˢ⁔EnumType => ref enumˢᵇ⁔EnumType;
+private static readonly @string enumˢᵇ⁔EnumType = "enum"u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref EnumType t) {
-    @string s = enumˢᴍEnumType;
+internal static @string String⁔(/*this*/ ref EnumType t) {
+    @string s = enumˢ⁔EnumType;
     if (t.EnumName != ""u8) {
         s += " "u8 + t.EnumName;
     }
@@ -363,11 +363,11 @@ partial struct FuncType {
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string funcˢᴍFuncType => ref funcˢᵇᴍFuncType;
-private static readonly @string funcˢᵇᴍFuncType = "func("u8;
+internal static ref readonly @string funcˢ⁔FuncType => ref funcˢᵇ⁔FuncType;
+private static readonly @string funcˢᵇ⁔FuncType = "func("u8;
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref FuncType t) {
-    @string s = funcˢᴍFuncType;
+internal static @string String⁔(/*this*/ ref FuncType t) {
+    @string s = funcˢ⁔FuncType;
     foreach (var (i, tΔ1) in range(t.ParamType)) {
         if (i > 0) {
             s += ", "u8;
@@ -390,7 +390,7 @@ partial struct DotDotDotType {
 
 } partial class dwarf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref DotDotDotType t) { return "..."; }
+internal static @string String⁔(/*this*/ ref DotDotDotType t) { return "..."; }
 
 } partial class dwarf_package {
 
@@ -402,9 +402,9 @@ partial struct TypedefType {
 
 } partial class dwarf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref TypedefType t) { return t.Name; }
+internal static @string String⁔(/*this*/ ref TypedefType t) { return t.Name; }
 
-[GoMethodBody("Size")] internal static int64 Sizeᴍ(ref TypedefType t) { return t.Type.Size(); }
+internal static int64 Size⁔(/*this*/ ref TypedefType t) { return t.Type.Size(); }
 
 } partial class dwarf_package {
 
@@ -417,7 +417,7 @@ partial struct UnsupportedType {
 
 } partial class dwarf_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ref UnsupportedType t) {
+internal static @string String⁔(/*this*/ ref UnsupportedType t) {
     if (t.Name != ""u8) {
         return t.Name;
     }
@@ -441,10 +441,10 @@ partial interface typeReader {
 } partial class dwarf_package {
 
 // Type reads the type at off in the DWARF “info” section.
-[GoMethodBody("Type")] internal static (Type, error) Typeᴍ(ж<Data> Ꮡd, Offset off) {
+internal static (Type, error) Type⁔(/*this*/ ж<Data> Ꮡd, Offset off) {
     ref var d = ref Ꮡd.DerefOrNull();
 
-    return Ꮡd.readType(infoˢᴍData, new ReaderжtypeReader(Ꮡd.Reader()), off, d.typeCache, nil);
+    return Ꮡd.readType(infoˢ⁔Data, new ReaderжtypeReader(Ꮡd.Reader()), off, d.typeCache, nil);
 }
 
 } partial class dwarf_package {
@@ -456,7 +456,7 @@ partial struct typeFixer {
 
 } partial class dwarf_package {
 
-[GoMethodBody("recordArrayType")] internal static void recordArrayTypeᴍ(ref typeFixer tf, ж<Type> Ꮡt) {
+internal static void recordArrayType⁔(/*this*/ ref typeFixer tf, ж<Type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (Ꮡt == nil) {
@@ -468,7 +468,7 @@ partial struct typeFixer {
     }
 }
 
-[GoMethodBody("apply")] internal static void applyᴍ(ref typeFixer tf) {
+internal static void apply⁔(/*this*/ ref typeFixer tf) {
     foreach (var (_, t) in range(tf.typedefs)) {
         t.of(TypedefType.ᏑCommonType).Common().ByteSize = t.Type.Size();
     }
@@ -486,30 +486,30 @@ internal partial interface readType_type /*dyn*/ {
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string complexFloatˢᴍData => ref complexFloatˢᵇᴍData;
-private static readonly @string complexFloatˢᵇᴍData = "complex float"u8;
-internal static ref readonly @string complexDoubleˢᴍData => ref complexDoubleˢᵇᴍData;
-private static readonly @string complexDoubleˢᵇᴍData = "complex double"u8;
-internal static ref readonly @string classˢᴍData => ref classˢᵇᴍData;
-private static readonly @string classˢᵇᴍData = "class"u8;
-internal static ref readonly @string structˢᴍData => ref structˢᵇᴍData;
-private static readonly @string structˢᵇᴍData = "struct"u8;
-internal static ref readonly @string unionˢᴍData => ref unionˢᵇᴍData;
-private static readonly @string unionˢᵇᴍData = "union"u8;
-internal static ref readonly @string locationˢᴍData => ref locationˢᵇᴍData;
-private static readonly @string locationˢᵇᴍData = "location"u8;
-internal static ref readonly @string constˢᴍData => ref constˢᵇᴍData;
-private static readonly @string constˢᵇᴍData = "const"u8;
-internal static ref readonly @string restrictˢᴍData => ref restrictˢᵇᴍData;
-private static readonly @string restrictˢᵇᴍData = "restrict"u8;
-internal static ref readonly @string volatileˢᴍData => ref volatileˢᵇᴍData;
-private static readonly @string volatileˢᵇᴍData = "volatile"u8;
+internal static ref readonly @string complexFloatˢ⁔Data => ref complexFloatˢᵇ⁔Data;
+private static readonly @string complexFloatˢᵇ⁔Data = "complex float"u8;
+internal static ref readonly @string complexDoubleˢ⁔Data => ref complexDoubleˢᵇ⁔Data;
+private static readonly @string complexDoubleˢᵇ⁔Data = "complex double"u8;
+internal static ref readonly @string classˢ⁔Data => ref classˢᵇ⁔Data;
+private static readonly @string classˢᵇ⁔Data = "class"u8;
+internal static ref readonly @string structˢ⁔Data => ref structˢᵇ⁔Data;
+private static readonly @string structˢᵇ⁔Data = "struct"u8;
+internal static ref readonly @string unionˢ⁔Data => ref unionˢᵇ⁔Data;
+private static readonly @string unionˢᵇ⁔Data = "union"u8;
+internal static ref readonly @string locationˢ⁔Data => ref locationˢᵇ⁔Data;
+private static readonly @string locationˢᵇ⁔Data = "location"u8;
+internal static ref readonly @string constˢ⁔Data => ref constˢᵇ⁔Data;
+private static readonly @string constˢᵇ⁔Data = "const"u8;
+internal static ref readonly @string restrictˢ⁔Data => ref restrictˢᵇ⁔Data;
+private static readonly @string restrictˢᵇ⁔Data = "restrict"u8;
+internal static ref readonly @string volatileˢ⁔Data => ref volatileˢᵇ⁔Data;
+private static readonly @string volatileˢᵇ⁔Data = "volatile"u8;
 
 // readType reads a type from r at off of name. It adds types to the
 // type cache, appends new typedef types to typedefs, and computes the
 // sizes of types. Callers should pass nil for typedefs; this is used
 // for internal recursion.
-[GoMethodBody("readType")] internal static (Type, error) readTypeᴍ(ж<Data> Ꮡd, @string name, typeReader r, Offset off, map<Offset, Type> typeCache, ж<typeFixer> Ꮡfixups) {
+internal static (Type, error) readType⁔(/*this*/ ж<Data> Ꮡd, @string name, typeReader r, Offset off, map<Offset, Type> typeCache, ж<typeFixer> Ꮡfixups) {
     GoFrame ᒐ = default;
     try {
         ref var fixups = ref Ꮡfixups.DerefOrNull();
@@ -712,11 +712,11 @@ private static readonly @string volatileˢᵇᴍData = "volatile"u8;
                     var (byteSize, _) = e.Val(AttrByteSize)._<int64>(ᐧ);
                     switch (byteSize) {
                     case 8: {
-                        nameΔ2 = complexFloatˢᴍData;
+                        nameΔ2 = complexFloatˢ⁔Data;
                         break;
                     }
                     case 16: {
-                        nameΔ2 = complexDoubleˢᴍData;
+                        nameΔ2 = complexDoubleˢ⁔Data;
                         break;
                     }}
                 }
@@ -777,15 +777,15 @@ private static readonly @string volatileˢᵇᴍData = "volatile"u8;
             typeCache[off] = new StructTypeжType(t);
             switch (e.Tag) {
             case var ᴛ2 when ᴛ2 == TagClassType: {
-                t.Kind = classˢᴍData;
+                t.Kind = classˢ⁔Data;
                 break;
             }
             case var ᴛ2 when ᴛ2 == TagStructType: {
-                t.Kind = structˢᴍData;
+                t.Kind = structˢ⁔Data;
                 break;
             }
             case var ᴛ2 when ᴛ2 == TagUnionType: {
-                t.Kind = unionˢᴍData;
+                t.Kind = unionˢ⁔Data;
                 break;
             }}
             (t.StructName, _) = e.Val(AttrName)._<@string>(ᐧ);
@@ -806,7 +806,7 @@ private static readonly @string volatileˢᵇᴍData = "volatile"u8;
                 case slice<byte> loc: {
                     // TODO: Should have original compilation
                     // unit here, not unknownFormat.
-                    var b = makeBuf(Ꮡd, new unknownFormat(), locationˢᴍData, 0, loc);
+                    var b = makeBuf(Ꮡd, new unknownFormat(), locationˢ⁔Data, 0, loc);
                     if (b.uint8() != opPlusUconst) {
                         err = new DecodeError(name, kid.Offset, "unexpected opcode");
                         goto Error;
@@ -866,15 +866,15 @@ private static readonly @string volatileˢᵇᴍData = "volatile"u8;
             }
             switch (e.Tag) {
             case var ᴛ2 when ᴛ2 == TagConstType: {
-                t.Qual = constˢᴍData;
+                t.Qual = constˢ⁔Data;
                 break;
             }
             case var ᴛ2 when ᴛ2 == TagRestrictType: {
-                t.Qual = restrictˢᴍData;
+                t.Qual = restrictˢ⁔Data;
                 break;
             }
             case var ᴛ2 when ᴛ2 == TagVolatileType: {
-                t.Qual = volatileˢᴍData;
+                t.Qual = volatileˢ⁔Data;
                 break;
             }}
             break;

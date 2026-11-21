@@ -72,11 +72,14 @@ using static go.debug.gosym_package;
 
 namespace go.debug;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using @internal;
 using encoding;
 using static gosym_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("gosym")]
 public static partial class gosym_package
@@ -128,86 +131,86 @@ public static partial class gosym_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(gosym_package.DecodingError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛDecodingError;
-[GoMethodHost(typeof(gosym_package.LineTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛLineTable;
-[GoMethodHost(typeof(gosym_package.Obj)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛObj;
-[GoMethodHost(typeof(gosym_package.Sym)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛSym;
-[GoMethodHost(typeof(gosym_package.Table)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛTable;
-[GoMethodHost(typeof(gosym_package.UnknownFileError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛUnknownFileError;
-[GoMethodHost(typeof(gosym_package.UnknownLineError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛUnknownLineError;
-[GoMethodHost(typeof(gosym_package.funcData)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛfuncData;
-[GoMethodHost(typeof(gosym_package.funcTab)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gosymᴛfuncTab;
+[GoMethodHost(typeof(gosym_package.DecodingError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gosymᴛDecodingError;
+[GoMethodHost(typeof(gosym_package.LineTable)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gosymᴛLineTable;
+[GoMethodHost(typeof(gosym_package.Obj)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gosymᴛObj;
+[GoMethodHost(typeof(gosym_package.Sym)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gosymᴛSym;
+[GoMethodHost(typeof(gosym_package.Table)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gosymᴛTable;
+[GoMethodHost(typeof(gosym_package.UnknownFileError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gosymᴛUnknownFileError;
+[GoMethodHost(typeof(gosym_package.UnknownLineError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gosymᴛUnknownLineError;
+[GoMethodHost(typeof(gosym_package.funcData)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gosymᴛfuncData;
+[GoMethodHost(typeof(gosym_package.funcTab)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gosymᴛfuncTab;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class gosymᴛLineTable {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte> b, uint64 pc, nint line) parse(this ref LineTable t, uint64 targetPC, nint targetLine) => gosym_package.parseᴍ(ref t, targetPC, targetLine);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<LineTable> Δslice(this ref LineTable t, uint64 pc) => gosym_package.Δsliceᴍ(ref t, pc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint PCToLine(this ж<LineTable> Ꮡt, uint64 pc) => gosym_package.PCToLineᴍ(Ꮡt, pc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint64 LineToPC(this ж<LineTable> Ꮡt, nint line, uint64 maxpc) => gosym_package.LineToPCᴍ(Ꮡt, line, maxpc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isGo12(this ж<LineTable> Ꮡt) => gosym_package.isGo12ᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 uintptr(this ref LineTable t, slice<byte> b) => gosym_package.uintptrᴍ(ref t, b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void parsePclnTab(this ж<LineTable> Ꮡt) => gosym_package.parsePclnTabᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<Func> go12Funcs(this ж<LineTable> Ꮡt) => gosym_package.go12Funcsᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static funcData findFunc(this ж<LineTable> Ꮡt, uint64 pc) => gosym_package.findFuncᴍ(Ꮡt, pc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 readvarint(this ref LineTable t, ж<slice<byte>> Ꮡpp) => gosym_package.readvarintᴍ(ref t, Ꮡpp);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string funcName(this ref LineTable t, uint32 off) => gosym_package.funcNameᴍ(ref t, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string stringFrom(this ref LineTable t, slice<byte> arr, uint32 off) => gosym_package.stringFromᴍ(ref t, arr, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ref LineTable t, uint32 off) => gosym_package.@stringᴍ(ref t, off);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint functabFieldSize(this ref LineTable t) => gosym_package.functabFieldSizeᴍ(ref t);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static funcTab funcTab(this ж<LineTable> Ꮡt) => gosym_package.funcTabᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static funcData funcData(this ж<LineTable> Ꮡt, uint32 i) => gosym_package.funcDataᴍ(Ꮡt, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool step(this ref LineTable t, ж<slice<byte>> p, ж<uint64> Ꮡpc, ж<int32> Ꮡval, bool first) => gosym_package.stepᴍ(ref t, p, Ꮡpc, Ꮡval, first);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static int32 pcvalue(this ref LineTable t, uint32 off, uint64 entry, uint64 targetpc) => gosym_package.pcvalueᴍ(ref t, off, entry, targetpc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 findFileLine(this ref LineTable t, uint64 entry, uint32 filetab, uint32 linetab, int32 filenum, int32 line, slice<byte> cutab) => gosym_package.findFileLineᴍ(ref t, entry, filetab, linetab, filenum, line, cutab);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*line*/ go12PCToLine(this ж<LineTable> Ꮡt, uint64 pc) => gosym_package.go12PCToLineᴍ(Ꮡt, pc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string /*file*/ go12PCToFile(this ж<LineTable> Ꮡt, uint64 pc) => gosym_package.go12PCToFileᴍ(Ꮡt, pc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 /*pc*/ go12LineToPC(this ж<LineTable> Ꮡt, @string @file, nint line) => gosym_package.go12LineToPCᴍ(Ꮡt, @file, line);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void initFileMap(this ж<LineTable> Ꮡt) => gosym_package.initFileMapᴍ(Ꮡt);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void go12MapFiles(this ж<LineTable> Ꮡt, map<@string, ж<Obj>> m, ж<Obj> obj) => gosym_package.go12MapFilesᴍ(Ꮡt, m, obj);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte> b, uint64 pc, nint line) parse(this ref LineTable t, uint64 targetPC, nint targetLine) => gosym_package.parse⁔(ref t, targetPC, targetLine);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static ж<LineTable> Δslice(this ref LineTable t, uint64 pc) => gosym_package.Δslice⁔(ref t, pc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint PCToLine(this ж<LineTable> Ꮡt, uint64 pc) => gosym_package.PCToLine⁔(Ꮡt, pc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static uint64 LineToPC(this ж<LineTable> Ꮡt, nint line, uint64 maxpc) => gosym_package.LineToPC⁔(Ꮡt, line, maxpc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isGo12(this ж<LineTable> Ꮡt) => gosym_package.isGo12⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 uintptr(this ref LineTable t, slice<byte> b) => gosym_package.uintptr⁔(ref t, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void parsePclnTab(this ж<LineTable> Ꮡt) => gosym_package.parsePclnTab⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static slice<Func> go12Funcs(this ж<LineTable> Ꮡt) => gosym_package.go12Funcs⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static funcData findFunc(this ж<LineTable> Ꮡt, uint64 pc) => gosym_package.findFunc⁔(Ꮡt, pc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 readvarint(this ref LineTable t, ж<slice<byte>> Ꮡpp) => gosym_package.readvarint⁔(ref t, Ꮡpp);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string funcName(this ref LineTable t, uint32 off) => gosym_package.funcName⁔(ref t, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string stringFrom(this ref LineTable t, slice<byte> arr, uint32 off) => gosym_package.stringFrom⁔(ref t, arr, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string @string(this ref LineTable t, uint32 off) => gosym_package.@string⁔(ref t, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint functabFieldSize(this ref LineTable t) => gosym_package.functabFieldSize⁔(ref t);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static funcTab funcTab(this ж<LineTable> Ꮡt) => gosym_package.funcTab⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static funcData funcData(this ж<LineTable> Ꮡt, uint32 i) => gosym_package.funcData⁔(Ꮡt, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool step(this ref LineTable t, ж<slice<byte>> p, ж<uint64> Ꮡpc, ж<int32> Ꮡval, bool first) => gosym_package.step⁔(ref t, p, Ꮡpc, Ꮡval, first);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static int32 pcvalue(this ref LineTable t, uint32 off, uint64 entry, uint64 targetpc) => gosym_package.pcvalue⁔(ref t, off, entry, targetpc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 findFileLine(this ref LineTable t, uint64 entry, uint32 filetab, uint32 linetab, int32 filenum, int32 line, slice<byte> cutab) => gosym_package.findFileLine⁔(ref t, entry, filetab, linetab, filenum, line, cutab);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint /*line*/ go12PCToLine(this ж<LineTable> Ꮡt, uint64 pc) => gosym_package.go12PCToLine⁔(Ꮡt, pc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string /*file*/ go12PCToFile(this ж<LineTable> Ꮡt, uint64 pc) => gosym_package.go12PCToFile⁔(Ꮡt, pc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 /*pc*/ go12LineToPC(this ж<LineTable> Ꮡt, @string @file, nint line) => gosym_package.go12LineToPC⁔(Ꮡt, @file, line);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void initFileMap(this ж<LineTable> Ꮡt) => gosym_package.initFileMap⁔(Ꮡt);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void go12MapFiles(this ж<LineTable> Ꮡt, map<@string, ж<Obj>> m, ж<Obj> obj) => gosym_package.go12MapFiles⁔(Ꮡt, m, obj);
 }
 partial class gosymᴛfuncTab {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint Count(this funcTab f) => gosym_package.Countᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 pc(this funcTab f, nint i) => gosym_package.pcᴍ(f, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 funcOff(this funcTab f, nint i) => gosym_package.funcOffᴍ(f, i);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 @uint(this funcTab f, slice<byte> b) => gosym_package.@uintᴍ(f, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint Count(this funcTab f) => gosym_package.Count⁔(f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 pc(this funcTab f, nint i) => gosym_package.pc⁔(f, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 funcOff(this funcTab f, nint i) => gosym_package.funcOff⁔(f, i);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 @uint(this funcTab f, slice<byte> b) => gosym_package.@uint⁔(f, b);
 }
 partial class gosymᴛfuncData {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool IsZero(this funcData f) => gosym_package.IsZeroᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 entryPC(this ref funcData f) => gosym_package.entryPCᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 nameOff(this funcData f) => gosym_package.nameOffᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 deferreturn(this funcData f) => gosym_package.deferreturnᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 pcfile(this funcData f) => gosym_package.pcfileᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 pcln(this funcData f) => gosym_package.pclnᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 cuOffset(this funcData f) => gosym_package.cuOffsetᴍ(f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 field(this funcData f, uint32 n) => gosym_package.fieldᴍ(f, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool IsZero(this funcData f) => gosym_package.IsZero⁔(f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint64 entryPC(this ref funcData f) => gosym_package.entryPC⁔(ref f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 nameOff(this funcData f) => gosym_package.nameOff⁔(f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 deferreturn(this funcData f) => gosym_package.deferreturn⁔(f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 pcfile(this funcData f) => gosym_package.pcfile⁔(f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 pcln(this funcData f) => gosym_package.pcln⁔(f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 cuOffset(this funcData f) => gosym_package.cuOffset⁔(f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static uint32 field(this funcData f, uint32 n) => gosym_package.field⁔(f, n);
 }
 partial class gosymᴛSym {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Static(this ref Sym s) => gosym_package.Staticᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string nameWithoutInst(this ref Sym s) => gosym_package.nameWithoutInstᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string PackageName(this ref Sym s) => gosym_package.PackageNameᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string ReceiverName(this ref Sym s) => gosym_package.ReceiverNameᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string BaseName(this ref Sym s) => gosym_package.BaseNameᴍ(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Static(this ref Sym s) => gosym_package.Static⁔(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @string nameWithoutInst(this ref Sym s) => gosym_package.nameWithoutInst⁔(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string PackageName(this ref Sym s) => gosym_package.PackageName⁔(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string ReceiverName(this ref Sym s) => gosym_package.ReceiverName⁔(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string BaseName(this ref Sym s) => gosym_package.BaseName⁔(ref s);
 }
 partial class gosymᴛTable {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Func> PCToFunc(this ref Table t, uint64 pc) => gosym_package.PCToFuncᴍ(ref t, pc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string @file, nint line, ж<Func> fn) PCToLine(this ref Table t, uint64 pc) => gosym_package.PCToLineᴍ(ref t, pc);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @string @file, nint line) => gosym_package.LineToPCᴍ(ref t, @file, line);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Sym> LookupSym(this ref Table t, @string name) => gosym_package.LookupSymᴍ(ref t, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Func> LookupFunc(this ref Table t, @string name) => gosym_package.LookupFuncᴍ(ref t, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Sym> SymByAddr(this ref Table t, uint64 addr) => gosym_package.SymByAddrᴍ(ref t, addr);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Func> PCToFunc(this ref Table t, uint64 pc) => gosym_package.PCToFunc⁔(ref t, pc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string @file, nint line, ж<Func> fn) PCToLine(this ref Table t, uint64 pc) => gosym_package.PCToLine⁔(ref t, pc);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (uint64 pc, ж<Func> fn, error err) LineToPC(this ref Table t, @string @file, nint line) => gosym_package.LineToPC⁔(ref t, @file, line);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Sym> LookupSym(this ref Table t, @string name) => gosym_package.LookupSym⁔(ref t, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Func> LookupFunc(this ref Table t, @string name) => gosym_package.LookupFunc⁔(ref t, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Sym> SymByAddr(this ref Table t, uint64 addr) => gosym_package.SymByAddr⁔(ref t, addr);
 }
 partial class gosymᴛObj {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, nint) lineFromAline(this ref Obj o, nint aline) => gosym_package.lineFromAlineᴍ(ref o, aline);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) alineFromLine(this ref Obj o, @string path, nint line) => gosym_package.alineFromLineᴍ(ref o, path, line);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, nint) lineFromAline(this ref Obj o, nint aline) => gosym_package.lineFromAline⁔(ref o, aline);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint, error) alineFromLine(this ref Obj o, @string path, nint line) => gosym_package.alineFromLine⁔(ref o, path, line);
 }
 partial class gosymᴛUnknownFileError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownFileError e) => gosym_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnknownFileError e) => gosym_package.Error⁔(e);
 }
 partial class gosymᴛUnknownLineError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref UnknownLineError e) => gosym_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref UnknownLineError e) => gosym_package.Error⁔(ref e);
 }
 partial class gosymᴛDecodingError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref DecodingError e) => gosym_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref DecodingError e) => gosym_package.Error⁔(ref e);
 }
 // </GlyphForwarders>

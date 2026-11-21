@@ -65,20 +65,20 @@ internal static UntypedInt gcmStandardNonceSize => 12;
 
 } partial class gcm_package {
 
-[GoMethodBody("NonceSize")] internal static nint NonceSizeᴍ(ref GCM g) {
+internal static nint NonceSize⁔(/*this*/ ref GCM g) {
     return g.nonceSize;
 }
 
-[GoMethodBody("Overhead")] internal static nint Overheadᴍ(ref GCM g) {
+internal static nint Overhead⁔(/*this*/ ref GCM g) {
     return g.tagSize;
 }
 
-[GoMethodBody("Seal")] internal static slice<byte> Sealᴍ(ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
+internal static slice<byte> Seal⁔(/*this*/ ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
     fips140.RecordNonApproved();
     return Ꮡg.sealAfterIndicator(dst, nonce, plaintext, data);
 }
 
-[GoMethodBody("sealAfterIndicator")] internal static slice<byte> sealAfterIndicatorᴍ(ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
+internal static slice<byte> sealAfterIndicator⁔(/*this*/ ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> plaintext, slice<byte> data) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     if (len(nonce) != g.nonceSize) {
@@ -109,7 +109,7 @@ internal static error errOpen = errors.New("cipher: message authentication faile
 
 } partial class gcm_package {
 
-[GoMethodBody("Open")] internal static (slice<byte>, error) Openᴍ(ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
+internal static (slice<byte>, error) Open⁔(/*this*/ ж<GCM> Ꮡg, slice<byte> dst, slice<byte> nonce, slice<byte> ciphertext, slice<byte> data) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     if (len(nonce) != g.nonceSize) {

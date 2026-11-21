@@ -16,7 +16,7 @@ partial struct protobuf {
 
 } partial class pprof_package {
 
-[GoMethodBody("varint")] internal static void varintᴍ(ref protobuf b, uint64 x) {
+internal static void varint⁔(/*this*/ ref protobuf b, uint64 x) {
     while (x >= 128) {
         b.data = append(b.data, (byte)((byte)x | 0x80));
         x >>= 7;
@@ -24,18 +24,18 @@ partial struct protobuf {
     b.data = append(b.data, (byte)x);
 }
 
-[GoMethodBody("length")] internal static void lengthᴍ(ref protobuf b, nint tag, nint len) {
+internal static void length⁔(/*this*/ ref protobuf b, nint tag, nint len) {
     b.varint((uint64)tag << 3 | 2);
     b.varint((uint64)len);
 }
 
-[GoMethodBody("uint64")] internal static void uint64ᴍ(ref protobuf b, nint tag, uint64 x) {
+internal static void uint64⁔(/*this*/ ref protobuf b, nint tag, uint64 x) {
     // append varint to b.data
     b.varint((uint64)tag << 3 | 0);
     b.varint(x);
 }
 
-[GoMethodBody("uint64s")] internal static void uint64sᴍ(ref protobuf b, nint tag, slice<uint64> x) {
+internal static void uint64s⁔(/*this*/ ref protobuf b, nint tag, slice<uint64> x) {
     if (len(x) > 2) {
         // Use packed encoding
         nint n1 = len(b.data);
@@ -55,26 +55,26 @@ partial struct protobuf {
     }
 }
 
-[GoMethodBody("uint64Opt")] internal static void uint64Optᴍ(ref protobuf b, nint tag, uint64 x) {
+internal static void uint64Opt⁔(/*this*/ ref protobuf b, nint tag, uint64 x) {
     if (x == 0) {
         return;
     }
     b.uint64(tag, x);
 }
 
-[GoMethodBody("int64")] internal static void int64ᴍ(ref protobuf b, nint tag, int64 x) {
+internal static void int64⁔(/*this*/ ref protobuf b, nint tag, int64 x) {
     var u = (uint64)x;
     b.uint64(tag, u);
 }
 
-[GoMethodBody("int64Opt")] internal static void int64Optᴍ(ref protobuf b, nint tag, int64 x) {
+internal static void int64Opt⁔(/*this*/ ref protobuf b, nint tag, int64 x) {
     if (x == 0) {
         return;
     }
     b.int64(tag, x);
 }
 
-[GoMethodBody("int64s")] internal static void int64sᴍ(ref protobuf b, nint tag, slice<int64> x) {
+internal static void int64s⁔(/*this*/ ref protobuf b, nint tag, slice<int64> x) {
     if (len(x) > 2) {
         // Use packed encoding
         nint n1 = len(b.data);
@@ -94,25 +94,25 @@ partial struct protobuf {
     }
 }
 
-[GoMethodBody("string")] internal static void @stringᴍ(ref protobuf b, nint tag, @string x) {
+internal static void @string⁔(/*this*/ ref protobuf b, nint tag, @string x) {
     b.length(tag, len(x));
     b.data = append(b.data, x.ꓸꓸꓸ);
 }
 
-[GoMethodBody("strings")] internal static void stringsᴍ(ref protobuf b, nint tag, slice<@string> x) {
+internal static void strings⁔(/*this*/ ref protobuf b, nint tag, slice<@string> x) {
     foreach (var (_, s) in range(x)) {
         b.@string(tag, s);
     }
 }
 
-[GoMethodBody("stringOpt")] internal static void stringOptᴍ(ref protobuf b, nint tag, @string x) {
+internal static void stringOpt⁔(/*this*/ ref protobuf b, nint tag, @string x) {
     if (x == ""u8) {
         return;
     }
     b.@string(tag, x);
 }
 
-[GoMethodBody("bool")] internal static void @boolᴍ(ref protobuf b, nint tag, bool x) {
+internal static void @bool⁔(/*this*/ ref protobuf b, nint tag, bool x) {
     if (x) {
         b.uint64(tag, 1);
     } else {
@@ -120,7 +120,7 @@ partial struct protobuf {
     }
 }
 
-[GoMethodBody("boolOpt")] internal static void boolOptᴍ(ref protobuf b, nint tag, bool x) {
+internal static void boolOpt⁔(/*this*/ ref protobuf b, nint tag, bool x) {
     if (!x) {
         return;
     }
@@ -133,12 +133,12 @@ partial struct msgOffset /*num:nint*/;
 
 } partial class pprof_package {
 
-[GoMethodBody("startMessage")] internal static msgOffset startMessageᴍ(ref protobuf b) {
+internal static msgOffset startMessage⁔(/*this*/ ref protobuf b) {
     b.nest++;
     return (msgOffset)len(b.data);
 }
 
-[GoMethodBody("endMessage")] internal static void endMessageᴍ(ref protobuf b, nint tag, msgOffset start) {
+internal static void endMessage⁔(/*this*/ ref protobuf b, nint tag, msgOffset start) {
     nint n1 = (nint)start;
     nint n2 = len(b.data);
     b.length(tag, n2 - n1);

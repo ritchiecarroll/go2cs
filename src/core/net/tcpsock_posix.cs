@@ -26,7 +26,7 @@ internal static Addr sockaddrToTCP(syscall.Sockaddr sa) {
 
 } partial class net_package {
 
-[GoMethodBody("family")] internal static nint familyᴍ(ж<TCPAddr> Ꮡa) {
+internal static nint family⁔(/*this*/ ж<TCPAddr> Ꮡa) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil || len(a.IP) <= IPv4len) {
@@ -38,7 +38,7 @@ internal static Addr sockaddrToTCP(syscall.Sockaddr sa) {
     return syscall.AF_INET6;
 }
 
-[GoMethodBody("sockaddr")] internal static (syscall.Sockaddr, error) sockaddrᴍ(ж<TCPAddr> Ꮡa, nint family) {
+internal static (syscall.Sockaddr, error) sockaddr⁔(/*this*/ ж<TCPAddr> Ꮡa, nint family) {
     ref var a = ref Ꮡa.DerefOrNull();
 
     if (Ꮡa == nil) {
@@ -47,13 +47,13 @@ internal static Addr sockaddrToTCP(syscall.Sockaddr sa) {
     return ipToSockaddr(family, a.IP, a.Port, a.Zone);
 }
 
-[GoMethodBody("toLocal")] internal static sockaddr toLocalᴍ(ref TCPAddr a, @string net) {
+internal static sockaddr toLocal⁔(/*this*/ ref TCPAddr a, @string net) {
     return new TCPAddrжsockaddr(Ꮡ(new TCPAddr(loopbackIP(net), a.Port, a.Zone)));
 }
 
 } partial class net_package {
 
-[GoMethodBody("readFrom")] internal static (int64, error) readFromᴍ(ж<TCPConn> Ꮡc, Δio.Reader r) {
+internal static (int64, error) readFrom⁔(/*this*/ ж<TCPConn> Ꮡc, Δio.Reader r) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
@@ -69,7 +69,7 @@ internal static Addr sockaddrToTCP(syscall.Sockaddr sa) {
     return genericReadFrom(Ꮡc, r);
 }
 
-[GoMethodBody("writeTo")] internal static (int64, error) writeToᴍ(ж<TCPConn> Ꮡc, Δio.Writer w) {
+internal static (int64, error) writeTo⁔(/*this*/ ж<TCPConn> Ꮡc, Δio.Writer w) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (n, err, handled) = spliceTo(w, c.fd); if (handled) {
@@ -80,7 +80,7 @@ internal static Addr sockaddrToTCP(syscall.Sockaddr sa) {
 
 } partial class net_package {
 
-[GoMethodBody("dialTCP")] internal static (ж<TCPConn>, error) dialTCPᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
+internal static (ж<TCPConn>, error) dialTCP⁔(/*this*/ ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
     ref var sd = ref Ꮡsd.DerefOrNull();
 
     {
@@ -96,11 +96,11 @@ internal static Addr sockaddrToTCP(syscall.Sockaddr sa) {
     return Ꮡsd.doDialTCP(ctx, laddr, raddr);
 }
 
-[GoMethodBody("doDialTCP")] internal static (ж<TCPConn>, error) doDialTCPᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
+internal static (ж<TCPConn>, error) doDialTCP⁔(/*this*/ ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> laddr, ж<TCPAddr> raddr) {
     return Ꮡsd.doDialTCPProto(ctx, laddr, raddr, 0);
 }
 
-[GoMethodBody("doDialTCPProto")] internal static (ж<TCPConn>, error) doDialTCPProtoᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> raddr, nint proto) {
+internal static (ж<TCPConn>, error) doDialTCPProto⁔(/*this*/ ж<sysDialer> Ꮡsd, context.Context ctx, ж<TCPAddr> Ꮡladdr, ж<TCPAddr> raddr, nint proto) {
     ref var sd = ref Ꮡsd.DerefOrNull();
     ref var laddr = ref Ꮡladdr.DerefOrNull();
 
@@ -108,7 +108,7 @@ internal static Addr sockaddrToTCP(syscall.Sockaddr sa) {
     if (ctrlCtxFn == nil && sd.Dialer.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsd.Value.Dialer.Control(network, address, c);
     }
-    var (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжsockaddr(Ꮡladdr), new TCPAddrжsockaddr(raddr), syscall.SOCK_STREAM, proto, dialˢᴍsysDialer, ctrlCtxFn);
+    var (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжsockaddr(Ꮡladdr), new TCPAddrжsockaddr(raddr), syscall.SOCK_STREAM, proto, dialˢ⁔sysDialer, ctrlCtxFn);
 
     // TCP has a rarely used mechanism called a 'simultaneous connection' in
     // which Dial("tcp", addr1, addr2) run on the machine at addr1 can
@@ -138,7 +138,7 @@ internal static Addr sockaddrToTCP(syscall.Sockaddr sa) {
         if (err == nil) {
             fd.Close();
         }
-        (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжsockaddr(Ꮡladdr), new TCPAddrжsockaddr(raddr), syscall.SOCK_STREAM, proto, dialˢᴍsysDialer, ctrlCtxFn);
+        (fd, err) = internetSocket(ctx, sd.network, new TCPAddrжsockaddr(Ꮡladdr), new TCPAddrжsockaddr(raddr), syscall.SOCK_STREAM, proto, dialˢ⁔sysDialer, ctrlCtxFn);
     }
 
     if (err != nil) {
@@ -183,13 +183,13 @@ internal static bool spuriousENOTAVAIL(error err) {
 
 } partial class net_package {
 
-[GoMethodBody("ok")] internal static bool okᴍ(ж<TCPListener> Ꮡln) {
+internal static bool ok⁔(/*this*/ ж<TCPListener> Ꮡln) {
     ref var ln = ref Ꮡln.DerefOrNull();
 
     return Ꮡln != nil && ln.fd != nil;
 }
 
-[GoMethodBody("accept")] internal static (ж<TCPConn>, error) acceptᴍ(ref TCPListener ln) {
+internal static (ж<TCPConn>, error) accept⁔(/*this*/ ref TCPListener ln) {
     var (fd, err) = ln.fd.accept();
     if (err != nil) {
         return (default, err);
@@ -197,11 +197,11 @@ internal static bool spuriousENOTAVAIL(error err) {
     return (newTCPConn(fd, ln.lc.KeepAlive, ln.lc.KeepAliveConfig, testPreHookSetKeepAlive, testHookSetKeepAlive), default);
 }
 
-[GoMethodBody("close")] internal static error closeᴍ(ref TCPListener ln) {
+internal static error close⁔(/*this*/ ref TCPListener ln) {
     return ln.fd.Close();
 }
 
-[GoMethodBody("file")] internal static (ж<os.File>, error) @fileᴍ(ref TCPListener ln) {
+internal static (ж<os.File>, error) @file⁔(/*this*/ ref TCPListener ln) {
     var (f, err) = ln.fd.dup();
     if (err != nil) {
         return (default, err);
@@ -211,18 +211,18 @@ internal static bool spuriousENOTAVAIL(error err) {
 
 } partial class net_package {
 
-[GoMethodBody("listenTCP")] internal static (ж<TCPListener>, error) listenTCPᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) {
+internal static (ж<TCPListener>, error) listenTCP⁔(/*this*/ ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr) {
     return Ꮡsl.listenTCPProto(ctx, laddr, 0);
 }
 
-[GoMethodBody("listenTCPProto")] internal static (ж<TCPListener>, error) listenTCPProtoᴍ(ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr, nint proto) {
+internal static (ж<TCPListener>, error) listenTCPProto⁔(/*this*/ ж<sysListener> Ꮡsl, context.Context ctx, ж<TCPAddr> laddr, nint proto) {
     ref var sl = ref Ꮡsl.DerefOrNull();
 
     Func<context.Context, @string, @string, syscall.RawConn, error> ctrlCtxFn = default;
     if (sl.ListenConfig.Control != nil) {
         ctrlCtxFn = (context.Context ctxΔ1, @string network, @string address, syscall.RawConn c) => Ꮡsl.Value.ListenConfig.Control(network, address, c);
     }
-    var (fd, err) = internetSocket(ctx, sl.network, new TCPAddrжsockaddr(laddr), default, syscall.SOCK_STREAM, proto, listenˢᴍsysListener, ctrlCtxFn);
+    var (fd, err) = internetSocket(ctx, sl.network, new TCPAddrжsockaddr(laddr), default, syscall.SOCK_STREAM, proto, listenˢ⁔sysListener, ctrlCtxFn);
     if (err != nil) {
         return (default, err);
     }

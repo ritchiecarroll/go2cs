@@ -104,7 +104,7 @@ partial struct environment {
 // object was inserted into the scope and already had a parent at that
 // time (see Scope.Insert). This can only happen for dot-imported objects
 // whose parent is the scope of the package that exported them.
-[GoMethodBody("lookupScope")] internal static (ж<Scope>, Object) lookupScopeᴍ(ref environment env, @string name) {
+internal static (ж<Scope>, Object) lookupScope⁔(/*this*/ ref environment env, @string name) {
     for (var s = env.scope; s != nil; s = s.parent) {
         var obj = s.Lookup(name); if (obj != nil && (!env.exprPos.IsValid() || cmpPos(obj.scopePos(), env.exprPos) <= 0)) {
             return (s, obj);
@@ -114,7 +114,7 @@ partial struct environment {
 }
 
 // lookup is like lookupScope but it only returns the object (or nil).
-[GoMethodBody("lookup")] internal static Object lookupᴍ(ref environment env, @string name) {
+internal static Object lookup⁔(/*this*/ ref environment env, @string name) {
     var (_, obj) = env.lookupScope(name);
     return obj;
 }
@@ -148,7 +148,7 @@ partial struct action {
 
 // If debug is set, describef sets a printf-formatted description for action a.
 // Otherwise, it is a no-op.
-[GoMethodBody("describef")] internal static void describefᴍ(ref action a, positioner pos, @string format, params ꓸꓸꓸany argsʗp) {
+internal static void describef⁔(/*this*/ ref action a, positioner pos, @string format, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
     if (debug) {
@@ -222,7 +222,7 @@ partial struct Checker {
 } partial class types_package {
 
 // addDeclDep adds the dependency edge (check.decl -> to) if check.decl exists
-[GoMethodBody("addDeclDep")] internal static void addDeclDepᴍ(ref Checker check, Object to) {
+internal static void addDeclDep⁔(/*this*/ ref Checker check, Object to) {
     var from = check.decl;
     if (from == nil) {
         return; // not in a package-level init expression
@@ -239,7 +239,7 @@ partial struct Checker {
 // brokenAlias records that alias doesn't have a determined type yet.
 // It also sets alias.typ to Typ[Invalid].
 // Not used if check.conf._EnableAlias is set.
-[GoMethodBody("brokenAlias")] internal static void brokenAliasᴍ(ref Checker check, ж<TypeName> Ꮡalias) {
+internal static void brokenAlias⁔(/*this*/ ref Checker check, ж<TypeName> Ꮡalias) {
     ref var alias = ref Ꮡalias.DerefOrNull();
 
     assert(!check.conf._EnableAlias);
@@ -251,7 +251,7 @@ partial struct Checker {
 }
 
 // validAlias records that alias has the valid type typ (possibly Typ[Invalid]).
-[GoMethodBody("validAlias")] internal static void validAliasᴍ(ref Checker check, ж<TypeName> Ꮡalias, Type typ) {
+internal static void validAlias⁔(/*this*/ ref Checker check, ж<TypeName> Ꮡalias, Type typ) {
     ref var alias = ref Ꮡalias.DerefOrNull();
 
     assert(!check.conf._EnableAlias);
@@ -260,12 +260,12 @@ partial struct Checker {
 }
 
 // isBrokenAlias reports whether alias doesn't have a determined type yet.
-[GoMethodBody("isBrokenAlias")] internal static bool isBrokenAliasᴍ(ref Checker check, ж<TypeName> alias) {
+internal static bool isBrokenAlias⁔(/*this*/ ref Checker check, ж<TypeName> alias) {
     assert(!check.conf._EnableAlias);
     return check.brokenAliases[alias];
 }
 
-[GoMethodBody("rememberUntyped")] internal static void rememberUntypedᴍ(ref Checker check, ast.Expr e, bool lhs, operandMode mode, ж<Basic> typ, constant.Value val) {
+internal static void rememberUntyped⁔(/*this*/ ref Checker check, ast.Expr e, bool lhs, operandMode mode, ж<Basic> typ, constant.Value val) {
     var m = check.untyped;
     if (m == nil) {
         m = new map<ast.Expr, exprInfo>();
@@ -280,14 +280,14 @@ partial struct Checker {
 // (so that f still sees the scope before any new declarations).
 // later returns the pushed action so one can provide a description
 // via action.describef for debugging, if desired.
-[GoMethodBody("later")] internal static ж<action> laterᴍ(ref Checker check, Action f) {
+internal static ж<action> later⁔(/*this*/ ref Checker check, Action f) {
     nint i = len(check.delayed);
     check.delayed = append(check.delayed, new action(version: check.version, f: f));
     return Ꮡ(check.delayed, i);
 }
 
 // push pushes obj onto the object path and records its index in the path index map.
-[GoMethodBody("push")] internal static void pushᴍ(ref Checker check, Object obj) {
+internal static void push⁔(/*this*/ ref Checker check, Object obj) {
     if (check.objPathIdx == nil) {
         check.objPathIdx = new map<Object, nint>();
     }
@@ -296,7 +296,7 @@ partial struct Checker {
 }
 
 // pop pops an object from the object path and removes it from the path index map.
-[GoMethodBody("pop")] internal static void popᴍ(ref Checker check) {
+internal static void pop⁔(/*this*/ ref Checker check) {
     nint i = len(check.objPath) - 1;
     var obj = check.objPath[i];
     check.objPath[i] = default; // help the garbage collector
@@ -314,7 +314,7 @@ partial interface cleaner {
 
 // needsCleanup records objects/types that implement the cleanup method
 // which will be called at the end of type-checking.
-[GoMethodBody("needsCleanup")] internal static void needsCleanupᴍ(ref Checker check, cleaner c) {
+internal static void needsCleanup⁔(/*this*/ ref Checker check, cleaner c) {
     check.cleaners = append(check.cleaners, c);
 }
 
@@ -361,12 +361,12 @@ public static ж<Checker> NewChecker(ж<Config> Ꮡconf, ж<token.FileSet> fset,
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidPackageNameˢᴍChecker => ref invalidPackageNameˢᵇᴍChecker;
-private static readonly @string invalidPackageNameˢᵇᴍChecker = "invalid package name _"u8;
+internal static ref readonly @string invalidPackageNameˢ⁔Checker => ref invalidPackageNameˢᵇ⁔Checker;
+private static readonly @string invalidPackageNameˢᵇ⁔Checker = "invalid package name _"u8;
 
 // initFiles initializes the files-specific portion of checker.
 // The provided files must all belong to the same package.
-[GoMethodBody("initFiles")] internal static void initFilesᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) {
+internal static void initFiles⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // start with a clean slate (check.Files may be called multiple times)
@@ -401,7 +401,7 @@ private static readonly @string invalidPackageNameˢᵇᴍChecker = "invalid pac
             if (name != "_"u8) {
                 pkg.name = name;
             } else {
-                Ꮡcheck.error(new ast_Identжpositioner(@file.Name), BlankPkgName, invalidPackageNameˢᴍChecker);
+                Ꮡcheck.error(new ast_Identжpositioner(@file.Name), BlankPkgName, invalidPackageNameˢ⁔Checker);
             }
             fallthrough = true;
         }
@@ -473,12 +473,12 @@ internal static goVersion versionMax(goVersion a, goVersion b) {
 } partial class types_package {
 
 // pushPos pushes pos onto the pos stack.
-[GoMethodBody("pushPos")] internal static void pushPosᴍ(ref Checker check, positioner pos) {
+internal static void pushPos⁔(/*this*/ ref Checker check, positioner pos) {
     check.posStack = append(check.posStack, pos);
 }
 
 // popPos pops from the pos stack.
-[GoMethodBody("popPos")] internal static void popPosᴍ(ref Checker check) {
+internal static void popPos⁔(/*this*/ ref Checker check) {
     check.posStack = check.posStack.slice(0, len(check.posStack) - 1);
 }
 
@@ -491,9 +491,9 @@ partial struct bailout {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static readonly object theFollowingPanicˢᴍChecker = (@string)"The following panic happened checking types near:"u8;
+internal static readonly object theFollowingPanicˢ⁔Checker = (@string)"The following panic happened checking types near:"u8;
 
-[GoMethodBody("handleBailout")] internal static void handleBailoutᴍ(ж<Checker> Ꮡcheck, ж<error> Ꮡerr) {
+internal static void handleBailout⁔(/*this*/ ж<Checker> Ꮡcheck, ж<error> Ꮡerr) {
     GoFrame ᒐ = default;
     try {
         var calledByDefer = GoFrame.TakeDeferredCall(); // Go: is this call the deferred one?
@@ -518,7 +518,7 @@ internal static readonly object theFollowingPanicˢᴍChecker = (@string)"The fo
                     }
                 }
 
-                fmt.Fprintln(new os.FileжWriter(os.Stderr), theFollowingPanicˢᴍChecker);
+                fmt.Fprintln(new os.FileжWriter(os.Stderr), theFollowingPanicˢ⁔Checker);
                 if (len(check.posStack) <= 10) {
                     doPrint(check.posStack);
                 } else {
@@ -539,7 +539,7 @@ internal static readonly object theFollowingPanicˢᴍChecker = (@string)"The fo
 }
 
 // Files checks the provided files as part of the checker's package.
-[GoMethodBody("Files")] internal static error /*err*/ Filesᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) {
+internal static error /*err*/ Files⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) {
     heap<error>(out var Ꮡerr);
     GoFrame ᒐ = default;
     try {
@@ -566,32 +566,32 @@ internal static readonly object theFollowingPanicˢᴍChecker = (@string)"The fo
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string initFilesˢᴍChecker => ref initFilesˢᵇᴍChecker;
-private static readonly @string initFilesˢᵇᴍChecker = "== initFiles =="u8;
-internal static ref readonly @string collectObjectsˢᴍChecker => ref collectObjectsˢᵇᴍChecker;
-private static readonly @string collectObjectsˢᵇᴍChecker = "== collectObjects =="u8;
-internal static ref readonly @string sortObjectsˢᴍChecker => ref sortObjectsˢᵇᴍChecker;
-private static readonly @string sortObjectsˢᵇᴍChecker = "== sortObjects =="u8;
-internal static ref readonly @string directCyclesˢᴍChecker => ref directCyclesˢᵇᴍChecker;
-private static readonly @string directCyclesˢᵇᴍChecker = "== directCycles =="u8;
-internal static ref readonly @string packageObjectsˢᴍChecker => ref packageObjectsˢᵇᴍChecker;
-private static readonly @string packageObjectsˢᵇᴍChecker = "== packageObjects =="u8;
-internal static ref readonly @string processDelayedˢᴍChecker => ref processDelayedˢᵇᴍChecker;
-private static readonly @string processDelayedˢᵇᴍChecker = "== processDelayed =="u8;
-internal static ref readonly @string cleanupˢᴍChecker => ref cleanupˢᵇᴍChecker;
-private static readonly @string cleanupˢᵇᴍChecker = "== cleanup =="u8;
-internal static ref readonly @string initOrderˢᴍChecker => ref initOrderˢᵇᴍChecker;
-private static readonly @string initOrderˢᵇᴍChecker = "== initOrder =="u8;
-internal static ref readonly @string unusedImportsˢᴍChecker => ref unusedImportsˢᵇᴍChecker;
-private static readonly @string unusedImportsˢᵇᴍChecker = "== unusedImports =="u8;
-internal static ref readonly @string recordUntypedˢᴍChecker => ref recordUntypedˢᵇᴍChecker;
-private static readonly @string recordUntypedˢᵇᴍChecker = "== recordUntyped =="u8;
+internal static ref readonly @string initFilesˢ⁔Checker => ref initFilesˢᵇ⁔Checker;
+private static readonly @string initFilesˢᵇ⁔Checker = "== initFiles =="u8;
+internal static ref readonly @string collectObjectsˢ⁔Checker => ref collectObjectsˢᵇ⁔Checker;
+private static readonly @string collectObjectsˢᵇ⁔Checker = "== collectObjects =="u8;
+internal static ref readonly @string sortObjectsˢ⁔Checker => ref sortObjectsˢᵇ⁔Checker;
+private static readonly @string sortObjectsˢᵇ⁔Checker = "== sortObjects =="u8;
+internal static ref readonly @string directCyclesˢ⁔Checker => ref directCyclesˢᵇ⁔Checker;
+private static readonly @string directCyclesˢᵇ⁔Checker = "== directCycles =="u8;
+internal static ref readonly @string packageObjectsˢ⁔Checker => ref packageObjectsˢᵇ⁔Checker;
+private static readonly @string packageObjectsˢᵇ⁔Checker = "== packageObjects =="u8;
+internal static ref readonly @string processDelayedˢ⁔Checker => ref processDelayedˢᵇ⁔Checker;
+private static readonly @string processDelayedˢᵇ⁔Checker = "== processDelayed =="u8;
+internal static ref readonly @string cleanupˢ⁔Checker => ref cleanupˢᵇ⁔Checker;
+private static readonly @string cleanupˢᵇ⁔Checker = "== cleanup =="u8;
+internal static ref readonly @string initOrderˢ⁔Checker => ref initOrderˢᵇ⁔Checker;
+private static readonly @string initOrderˢᵇ⁔Checker = "== initOrder =="u8;
+internal static ref readonly @string unusedImportsˢ⁔Checker => ref unusedImportsˢᵇ⁔Checker;
+private static readonly @string unusedImportsˢᵇ⁔Checker = "== unusedImports =="u8;
+internal static ref readonly @string recordUntypedˢ⁔Checker => ref recordUntypedˢᵇ⁔Checker;
+private static readonly @string recordUntypedˢᵇ⁔Checker = "== recordUntyped =="u8;
 
 // checkFiles type-checks the specified files. Errors are reported as
 // a side effect, not by returning early, to ensure that well-formed
 // syntax is properly type annotated even in a package containing
 // errors.
-[GoMethodBody("checkFiles")] internal static void checkFilesᴍ(ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) {
+internal static void checkFiles⁔(/*this*/ ж<Checker> Ꮡcheck, slice<ж<ast.File>> files) {
     GoFrame ᒐ = default;
     try {
         ref var check = ref Ꮡcheck.DerefOrNull();
@@ -617,36 +617,36 @@ private static readonly @string recordUntypedˢᵇᴍChecker = "== recordUntyped
             }
         }
 
-        print(initFilesˢᴍChecker);
+        print(initFilesˢ⁔Checker);
         Ꮡcheck.initFiles(files);
 
-        print(collectObjectsˢᴍChecker);
+        print(collectObjectsˢ⁔Checker);
         Ꮡcheck.collectObjects();
 
-        print(sortObjectsˢᴍChecker);
+        print(sortObjectsˢ⁔Checker);
         check.sortObjects();
 
-        print(directCyclesˢᴍChecker);
+        print(directCyclesˢ⁔Checker);
         Ꮡcheck.directCycles();
 
-        print(packageObjectsˢᴍChecker);
+        print(packageObjectsˢ⁔Checker);
         Ꮡcheck.packageObjects();
 
-        print(processDelayedˢᴍChecker);
+        print(processDelayedˢ⁔Checker);
         Ꮡcheck.processDelayed(0); // incl. all functions
 
-        print(cleanupˢᴍChecker);
+        print(cleanupˢ⁔Checker);
         check.cleanup();
 
-        print(initOrderˢᴍChecker);
+        print(initOrderˢ⁔Checker);
         Ꮡcheck.initOrder();
 
         if (!check.conf.DisableUnusedImportCheck) {
-            print(unusedImportsˢᴍChecker);
+            print(unusedImportsˢ⁔Checker);
             Ꮡcheck.unusedImports();
         }
 
-        print(recordUntypedˢᴍChecker);
+        print(recordUntypedˢ⁔Checker);
         Ꮡcheck.recordUntyped();
 
         if (check.firstErr == nil) {
@@ -676,11 +676,11 @@ private static readonly @string recordUntypedˢᵇᴍChecker = "== recordUntyped
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string delayedPˢᴍChecker => ref delayedPˢᵇᴍChecker;
-private static readonly @string delayedPˢᵇᴍChecker = "-- delayed %p"u8;
+internal static ref readonly @string delayedPˢ⁔Checker => ref delayedPˢᵇ⁔Checker;
+private static readonly @string delayedPˢᵇ⁔Checker = "-- delayed %p"u8;
 
 // processDelayed processes all delayed actions pushed after top.
-[GoMethodBody("processDelayed")] internal static void processDelayedᴍ(ж<Checker> Ꮡcheck, nint top) {
+internal static void processDelayed⁔(/*this*/ ж<Checker> Ꮡcheck, nint top) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // If each delayed action pushes a new action, the
@@ -696,7 +696,7 @@ private static readonly @string delayedPˢᵇᴍChecker = "-- delayed %p"u8;
             if (a.desc != nil) {
                 Ꮡcheck.trace(a.desc.pos.Pos(), "-- "u8 + a.desc.format, a.desc.args.ꓸꓸꓸ);
             } else {
-                Ꮡcheck.trace(nopos, delayedPˢᴍChecker, (a.f).OrTypedNilFunc());
+                Ꮡcheck.trace(nopos, delayedPˢ⁔Checker, (a.f).OrTypedNilFunc());
             }
         }
         check.version = a.version; // reestablish the effective Go version captured earlier
@@ -712,7 +712,7 @@ private static readonly @string delayedPˢᵇᴍChecker = "-- delayed %p"u8;
 }
 
 // cleanup runs cleanup for all collected cleaners.
-[GoMethodBody("cleanup")] internal static void cleanupᴍ(ref Checker check) {
+internal static void cleanup⁔(/*this*/ ref Checker check) {
     // Don't use a range clause since Named.cleanup may add more cleaners.
     for (nint i = 0; i < len(check.cleaners); i++) {
         check.cleaners[i].cleanup();
@@ -722,13 +722,13 @@ private static readonly @string delayedPˢᵇᴍChecker = "-- delayed %p"u8;
 
 // go/types doesn't support recording of types directly in the AST.
 // dummy function to match types2 code.
-[GoMethodBody("recordTypeAndValueInSyntax")] internal static void recordTypeAndValueInSyntaxᴍ(ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val) {
+internal static void recordTypeAndValueInSyntax⁔(/*this*/ ref Checker check, ast.Expr x, operandMode mode, Type typ, constant.Value val) {
     // nothing to do
 }
 
 // go/types doesn't support recording of types directly in the AST.
 // dummy function to match types2 code.
-[GoMethodBody("recordCommaOkTypesInSyntax")] internal static void recordCommaOkTypesInSyntaxᴍ(ref Checker check, ast.Expr x, Type t0, Type t1) {
+internal static void recordCommaOkTypesInSyntax⁔(/*this*/ ref Checker check, ast.Expr x, Type t0, Type t1) {
     // nothing to do
 }
 

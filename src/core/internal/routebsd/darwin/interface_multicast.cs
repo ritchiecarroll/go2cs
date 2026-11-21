@@ -10,7 +10,7 @@ partial class routebsd_package {
 
 } partial class routebsd_package {
 
-[GoMethodBody("parseInterfaceMulticastAddrMessage")] internal static (Message, error) parseInterfaceMulticastAddrMessageᴍ(ref wireFormat w, slice<byte> b) {
+internal static (Message, error) parseInterfaceMulticastAddrMessage⁔(/*this*/ ref wireFormat w, slice<byte> b) {
     if (len(b) < w.bodyOff) {
         return (default, errMessageTooShort);
     }

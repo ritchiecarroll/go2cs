@@ -337,12 +337,12 @@ partial struct cond {
 // a given change, omitting the identifying information.
 // MarkerOnly returns true when bisect is using the printed reports
 // only for an intermediate search step, not for showing to users.
-[GoMethodBody("MarkerOnly")] internal static bool MarkerOnlyᴍ(ref Matcher m) {
+internal static bool MarkerOnly⁔(/*this*/ ref Matcher m) {
     return !m.verbose;
 }
 
 // ShouldEnable reports whether the change with the given id should be enabled.
-[GoMethodBody("ShouldEnable")] internal static bool ShouldEnableᴍ(ж<Matcher> Ꮡm, uint64 id) {
+internal static bool ShouldEnable⁔(/*this*/ ж<Matcher> Ꮡm, uint64 id) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (Ꮡm == nil) {
@@ -352,7 +352,7 @@ partial struct cond {
 }
 
 // ShouldPrint reports whether to print identifying information about the change with the given id.
-[GoMethodBody("ShouldPrint")] internal static bool ShouldPrintᴍ(ж<Matcher> Ꮡm, uint64 id) {
+internal static bool ShouldPrint⁔(/*this*/ ж<Matcher> Ꮡm, uint64 id) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     if (Ꮡm == nil || m.quiet) {
@@ -362,7 +362,7 @@ partial struct cond {
 }
 
 // matchResult returns the result from the first condition that matches id.
-[GoMethodBody("matchResult")] internal static bool matchResultᴍ(ref Matcher m, uint64 id) {
+internal static bool matchResult⁔(/*this*/ ref Matcher m, uint64 id) {
     for (nint i = len(m.list) - 1; i >= 0; i--) {
         var c = Ꮡ(m.list, i);
         if ((id & c.mask) == c.bits) {
@@ -374,7 +374,7 @@ partial struct cond {
 
 // FileLine reports whether the change identified by file and line should be enabled.
 // If the change should be printed, FileLine prints a one-line report to w.
-[GoMethodBody("FileLine")] internal static bool FileLineᴍ(ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
+internal static bool FileLine⁔(/*this*/ ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
     if (Ꮡm == nil) {
         return true;
     }
@@ -383,7 +383,7 @@ partial struct cond {
 
 // fileLine does the real work for FileLine.
 // This lets FileLine's body handle m == nil and potentially be inlined.
-[GoMethodBody("fileLine")] internal static bool fileLineᴍ(ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
+internal static bool fileLine⁔(/*this*/ ж<Matcher> Ꮡm, Writer w, @string @file, nint line) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var h = Hash(@file, line);
@@ -435,7 +435,7 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint 
 // MatchStack assigns the current call stack a change ID.
 // If the stack should be printed, MatchStack prints it.
 // Then MatchStack reports whether a change at the current call stack should be enabled.
-[GoMethodBody("Stack")] internal static partial bool Stackᴍ(ж<Matcher> Ꮡm, Writer w) {
+internal static partial bool Stack⁔(/*this*/ ж<Matcher> Ꮡm, Writer w) {
     if (Ꮡm == nil) {
         return true;
     }
@@ -444,7 +444,7 @@ internal static slice<byte> appendFileLine(slice<byte> dst, @string @file, nint 
 
 // stack does the real work for Stack.
 // This lets stack's body handle m == nil and potentially be inlined.
-[GoMethodBody("stack")] internal static partial bool stackᴍ(ж<Matcher> Ꮡm, Writer w) {
+internal static partial bool stack⁔(/*this*/ ж<Matcher> Ꮡm, Writer w) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     UntypedInt maxStack = 16;
@@ -774,7 +774,7 @@ partial struct parseError {
 
 } partial class bisect_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref parseError e) { return e.text; }
+internal static @string Error⁔(/*this*/ ref parseError e) { return e.text; }
 
 } partial class bisect_package {
 
@@ -835,7 +835,7 @@ partial struct dedup {
 
 // seen records that h has now been seen and reports whether it was seen before.
 // When seen returns false, the caller is expected to print a report for h.
-[GoMethodBody("seen")] internal static bool seenᴍ(ж<dedup> Ꮡd, uint64 h) {
+internal static bool seen⁔(/*this*/ ж<dedup> Ꮡd, uint64 h) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     d.mu.Lock();
@@ -852,7 +852,7 @@ partial struct dedup {
 // Each cache entry is N-way set-associative: h can appear in any of the slots.
 // If h does not appear in any of them, then it is inserted into a random slot,
 // overwriting whatever was there before.
-[GoMethodBody("seenLossy")] internal static bool seenLossyᴍ(ref dedup d, uint64 h) {
+internal static bool seenLossy⁔(/*this*/ ref dedup d, uint64 h) {
     var cache = Ꮡ(d.recent, (nuint)h % (nuint)len(d.recent));
     for (nint i = 0; i < 4; i++) {
         if (atomic.LoadUint64(cache.at<uint64>(i)) == h) {

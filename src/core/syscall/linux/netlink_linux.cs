@@ -30,7 +30,7 @@ partial struct NetlinkRouteRequest {
 
 } partial class syscall_package {
 
-[GoMethodBody("toWireFormat")] internal static slice<byte> toWireFormatᴍ(ref NetlinkRouteRequest rr) {
+internal static slice<byte> toWireFormat⁔(/*this*/ ref NetlinkRouteRequest rr) {
     var b = new slice<byte>((nint)(rr.Header.Len));
     (Ꮡ(b[0..4], 0).Reinterpret<byte, uint32>()).Value = rr.Header.Len;
     (Ꮡ(b[4..6], 0).Reinterpret<byte, uint16>()).Value = rr.Header.Type;

@@ -70,9 +70,12 @@ using static go.unicode_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static unicode_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("unicode")]
 public static partial class unicode_package
@@ -110,13 +113,13 @@ public static partial class unicode_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(unicode_package.SpecialCase)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class unicodeᴛSpecialCase;
+[GoMethodHost(typeof(unicode_package.SpecialCase)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class unicodeᴛSpecialCase;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class unicodeᴛSpecialCase {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static rune ToUpper(this SpecialCase special, rune r) => unicode_package.ToUpperᴍ(special, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static rune ToTitle(this SpecialCase special, rune r) => unicode_package.ToTitleᴍ(special, r);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static rune ToLower(this SpecialCase special, rune r) => unicode_package.ToLowerᴍ(special, r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static rune ToUpper(this SpecialCase special, rune r) => unicode_package.ToUpper⁔(special, r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static rune ToTitle(this SpecialCase special, rune r) => unicode_package.ToTitle⁔(special, r);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static rune ToLower(this SpecialCase special, rune r) => unicode_package.ToLower⁔(special, r);
 }
 // </GlyphForwarders>

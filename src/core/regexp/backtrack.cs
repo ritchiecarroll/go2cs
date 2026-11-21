@@ -80,7 +80,7 @@ internal static bool shouldBacktrack(ref syntax.Prog prog) {
 // reset resets the state of the backtracker.
 // end is the end position in the input.
 // ncap is the number of captures.
-[GoMethodBody("reset")] internal static void resetᴍ(ref bitState b, ж<syntax.Prog> Ꮡprog, nint end, nint ncap) {
+internal static void reset⁔(/*this*/ ref bitState b, ж<syntax.Prog> Ꮡprog, nint end, nint ncap) {
     ref var prog = ref Ꮡprog.DerefOrNull();
 
     b.end = end;
@@ -120,7 +120,7 @@ internal static bool shouldBacktrack(ref syntax.Prog prog) {
 
 // shouldVisit reports whether the combination of (pc, pos) has not
 // been visited yet.
-[GoMethodBody("shouldVisit")] internal static bool shouldVisitᴍ(ref bitState b, uint32 pc, nint pos) {
+internal static bool shouldVisit⁔(/*this*/ ref bitState b, uint32 pc, nint pos) {
     nuint n = (nuint)((nint)pc * (b.end + 1) + pos);
     if ((b.visited[n / (nuint)visitedBits] & ((uint32)1 << (int)(n & (nuint)(visitedBits - 1)))) != 0) {
         return false;
@@ -131,7 +131,7 @@ internal static bool shouldBacktrack(ref syntax.Prog prog) {
 
 // push pushes (pc, pos, arg) onto the job stack if it should be
 // visited.
-[GoMethodBody("push")] internal static void pushᴍ(ref bitState b, ж<Regexp> Ꮡre, uint32 pc, nint pos, bool arg) {
+internal static void push⁔(/*this*/ ref bitState b, ж<Regexp> Ꮡre, uint32 pc, nint pos, bool arg) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     // Only check shouldVisit when arg is false.
@@ -144,7 +144,7 @@ internal static bool shouldBacktrack(ref syntax.Prog prog) {
 } partial class regexp_package {
 
 // tryBacktrack runs a backtracking search starting at pos.
-[GoMethodBody("tryBacktrack")] internal static bool tryBacktrackᴍ(ж<Regexp> Ꮡre, ж<bitState> Ꮡb, input i, uint32 pc, nint pos) {
+internal static bool tryBacktrack⁔(/*this*/ ж<Regexp> Ꮡre, ж<bitState> Ꮡb, input i, uint32 pc, nint pos) {
     ref var re = ref Ꮡre.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();
 
@@ -328,7 +328,7 @@ Skip:
 }
 
 // backtrack runs a backtracking search of prog on the input starting at pos.
-[GoMethodBody("backtrack")] internal static slice<nint> backtrackᴍ(ж<Regexp> Ꮡre, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
+internal static slice<nint> backtrack⁔(/*this*/ ж<Regexp> Ꮡre, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     var startCond = re.cond;

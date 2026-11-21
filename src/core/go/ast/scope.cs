@@ -34,7 +34,7 @@ public static ж<Scope> NewScope(ж<Scope> outer) {
 // Lookup returns the object with the given name if it is
 // found in scope s, otherwise it returns nil. Outer scopes
 // are ignored.
-[GoMethodBody("Lookup")] internal static ж<Object> Lookupᴍ(ref Scope s, @string name) {
+internal static ж<Object> Lookup⁔(/*this*/ ref Scope s, @string name) {
     return s.Objects[name];
 }
 
@@ -42,7 +42,7 @@ public static ж<Scope> NewScope(ж<Scope> outer) {
 // If the scope already contains an object alt with the same name,
 // Insert leaves the scope unchanged and returns alt. Otherwise
 // it inserts obj and returns nil.
-[GoMethodBody("Insert")] internal static ж<Object> /*alt*/ Insertᴍ(ref Scope s, ж<Object> Ꮡobj) {
+internal static ж<Object> /*alt*/ Insert⁔(/*this*/ ref Scope s, ж<Object> Ꮡobj) {
     ж<Object> alt = default;
     ref var obj = ref Ꮡobj.DerefOrNull();
 
@@ -53,7 +53,7 @@ public static ж<Scope> NewScope(ж<Scope> outer) {
 }
 
 // Debugging support
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Scope> Ꮡs) {
+internal static @string String⁔(/*this*/ ж<Scope> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     ref var buf = ref heap(new strings.Builder(), out var Ꮡbuf);
@@ -112,7 +112,7 @@ public static ж<Object> NewObj(ObjKind kind, @string name) {
 // Pos computes the source position of the declaration of an object name.
 // The result may be an invalid position if it cannot be computed
 // (obj.Decl may be nil or not correct).
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref Object obj) {
+internal static token.Pos Pos⁔(/*this*/ ref Object obj) {
     @string name = obj.Name;
     switch (obj.Decl.type()) {
     case ж<Field> d: {
@@ -196,6 +196,6 @@ public static ObjKind Lbl => 6;            // label
 
 } partial class ast_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ObjKind kind) { return objKindStrings[kind]; }
+internal static @string String⁔(/*this*/ ObjKind kind) { return objKindStrings[kind]; }
 
 }

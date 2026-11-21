@@ -60,11 +60,14 @@ using static go.text.tabwriter_package;
 
 namespace go.text;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using io = io_package;
 using unicode;
 using static tabwriter_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("tabwriter")]
 public static partial class tabwriter_package
@@ -101,29 +104,29 @@ public static partial class tabwriter_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(tabwriter_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class tabwriterᴛWriter;
+[GoMethodHost(typeof(tabwriter_package.Writer)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class tabwriterᴛWriter;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class tabwriterᴛWriter {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addLine(this ref Writer b, bool flushed) => tabwriter_package.addLineᴍ(ref b, flushed);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void reset(this ref Writer b) => tabwriter_package.resetᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwidth, nint tabwidth, nint padding, byte padchar, nuint flags) => tabwriter_package.Initᴍ(Ꮡb, output, minwidth, tabwidth, padding, padchar, flags);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void dump(this ref Writer b) => tabwriter_package.dumpᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void write0(this ref Writer b, slice<byte> buf) => tabwriter_package.write0ᴍ(ref b, buf);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writeN(this ref Writer b, slice<byte> src, nint n) => tabwriter_package.writeNᴍ(ref b, src, n);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void writePadding(this ref Writer b, nint textw, nint cellw, bool useTabs) => tabwriter_package.writePaddingᴍ(ref b, textw, cellw, useTabs);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0, nint line1) => tabwriter_package.writeLinesᴍ(ref b, pos0, line0, line1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint /*pos*/ format(this ref Writer b, nint pos0, nint line0, nint line1) => tabwriter_package.formatᴍ(ref b, pos0, line0, line1);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void append(this ref Writer b, slice<byte> text) => tabwriter_package.appendᴍ(ref b, text);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void updateWidth(this ref Writer b) => tabwriter_package.updateWidthᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void startEscape(this ref Writer b, byte ch) => tabwriter_package.startEscapeᴍ(ref b, ch);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void endEscape(this ref Writer b) => tabwriter_package.endEscapeᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint terminateCell(this ref Writer b, bool htab) => tabwriter_package.terminateCellᴍ(ref b, htab);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void handlePanic(this ж<Writer> Ꮡb, ж<error> Ꮡerr, @string op) => tabwriter_package.handlePanicᴍ(Ꮡb, Ꮡerr, op);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Flush(this ж<Writer> Ꮡb) => tabwriter_package.Flushᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ flush(this ж<Writer> Ꮡb) => tabwriter_package.flushᴍ(Ꮡb);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void flushNoDefers(this ref Writer b) => tabwriter_package.flushNoDefersᴍ(ref b);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) => tabwriter_package.Writeᴍ(Ꮡb, buf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void addLine(this ref Writer b, bool flushed) => tabwriter_package.addLine⁔(ref b, flushed);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void reset(this ref Writer b) => tabwriter_package.reset⁔(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Writer> Init(this ж<Writer> Ꮡb, io.Writer output, nint minwidth, nint tabwidth, nint padding, byte padchar, nuint flags) => tabwriter_package.Init⁔(Ꮡb, output, minwidth, tabwidth, padding, padchar, flags);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void dump(this ref Writer b) => tabwriter_package.dump⁔(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void write0(this ref Writer b, slice<byte> buf) => tabwriter_package.write0⁔(ref b, buf);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writeN(this ref Writer b, slice<byte> src, nint n) => tabwriter_package.writeN⁔(ref b, src, n);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void writePadding(this ref Writer b, nint textw, nint cellw, bool useTabs) => tabwriter_package.writePadding⁔(ref b, textw, cellw, useTabs);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint /*pos*/ writeLines(this ref Writer b, nint pos0, nint line0, nint line1) => tabwriter_package.writeLines⁔(ref b, pos0, line0, line1);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint /*pos*/ format(this ref Writer b, nint pos0, nint line0, nint line1) => tabwriter_package.format⁔(ref b, pos0, line0, line1);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void append(this ref Writer b, slice<byte> text) => tabwriter_package.append⁔(ref b, text);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void updateWidth(this ref Writer b) => tabwriter_package.updateWidth⁔(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void startEscape(this ref Writer b, byte ch) => tabwriter_package.startEscape⁔(ref b, ch);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void endEscape(this ref Writer b) => tabwriter_package.endEscape⁔(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static nint terminateCell(this ref Writer b, bool htab) => tabwriter_package.terminateCell⁔(ref b, htab);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void handlePanic(this ж<Writer> Ꮡb, ж<error> Ꮡerr, @string op) => tabwriter_package.handlePanic⁔(Ꮡb, Ꮡerr, op);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Flush(this ж<Writer> Ꮡb) => tabwriter_package.Flush⁔(Ꮡb);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ flush(this ж<Writer> Ꮡb) => tabwriter_package.flush⁔(Ꮡb);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void flushNoDefers(this ref Writer b) => tabwriter_package.flushNoDefers⁔(ref b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (nint n, error err) Write(this ж<Writer> Ꮡb, slice<byte> buf) => tabwriter_package.Write⁔(Ꮡb, buf);
 }
 // </GlyphForwarders>

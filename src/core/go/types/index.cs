@@ -18,13 +18,13 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mapIndexˢᴍChecker => ref mapIndexˢᵇᴍChecker;
-private static readonly @string mapIndexˢᵇᴍChecker = "map index"u8;
+internal static ref readonly @string mapIndexˢ⁔Checker => ref mapIndexˢᵇ⁔Checker;
+private static readonly @string mapIndexˢᵇ⁔Checker = "map index"u8;
 
 // If e is a valid function instantiation, indexExpr returns true.
 // In that case x represents the uninstantiated function value and
 // it is the caller's responsibility to instantiate the function.
-[GoMethodBody("indexExpr")] internal static bool /*isFuncInst*/ indexExprᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<indexedExpr> Ꮡe) {
+internal static bool /*isFuncInst*/ indexExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<indexedExpr> Ꮡe) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -110,7 +110,7 @@ private static readonly @string mapIndexˢᵇᴍChecker = "map index"u8;
         }
         ref var key = ref heap(new operand(), out var Ꮡkey);
         Ꮡcheck.expr(nil, Ꮡkey, indexΔ1);
-        Ꮡcheck.assignment(Ꮡkey, typ.key, mapIndexˢᴍChecker);
+        Ꮡcheck.assignment(Ꮡkey, typ.key, mapIndexˢ⁔Checker);
         // ok to continue even if indexing failed - map element type is known
         x.mode = mapindex;
         x.typ = typ.elem;
@@ -195,7 +195,7 @@ private static readonly @string mapIndexˢᵇᴍChecker = "map index"u8;
                 }
                 ref var k = ref heap(new operand(), out var Ꮡk);
                 Ꮡcheck.expr(nil, Ꮡk, indexΔ2);
-                Ꮡcheck.assignment(Ꮡk, key, mapIndexˢᴍChecker);
+                Ꮡcheck.assignment(Ꮡk, key, mapIndexˢ⁔Checker);
                 // ok to continue even if indexing failed - map element type is known
                 x.mode = mapindex;
                 x.typ = elem;
@@ -237,10 +237,10 @@ private static readonly @string mapIndexˢᵇᴍChecker = "map index"u8;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string and3rdIndexRequiredIn3ˢᴍChecker => ref and3rdIndexRequiredIn3ˢᵇᴍChecker;
-private static readonly @string and3rdIndexRequiredIn3ˢᵇᴍChecker = "2nd and 3rd index required in 3-index slice"u8;
+internal static ref readonly @string and3rdIndexRequiredIn3ˢ⁔Checker => ref and3rdIndexRequiredIn3ˢᵇ⁔Checker;
+private static readonly @string and3rdIndexRequiredIn3ˢᵇ⁔Checker = "2nd and 3rd index required in 3-index slice"u8;
 
-[GoMethodBody("sliceExpr")] internal static void sliceExprᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.SliceExpr> Ꮡe) {
+internal static void sliceExpr⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, ж<ast.SliceExpr> Ꮡe) {
     ref var x = ref Ꮡx.DerefOrNull();
     ref var e = ref Ꮡe.DerefOrNull();
 
@@ -358,7 +358,7 @@ private static readonly @string and3rdIndexRequiredIn3ˢᵇᴍChecker = "2nd and
 
     // spec: "Only the first index may be omitted; it defaults to 0."
     if (e.Slice3 && (e.High == nil || e.Max == nil)) {
-        Ꮡcheck.error(inNode(new ast.SliceExprжNode(Ꮡe), e.Rbrack), InvalidSyntaxTree, and3rdIndexRequiredIn3ˢᴍChecker);
+        Ꮡcheck.error(inNode(new ast.SliceExprжNode(Ꮡe), e.Rbrack), InvalidSyntaxTree, and3rdIndexRequiredIn3ˢ⁔Checker);
         x.mode = invalid;
         return;
     }
@@ -418,7 +418,7 @@ break_L:;
 // singleIndex returns the (single) index from the index expression e.
 // If the index is missing, or if there are multiple indices, an error
 // is reported and the result is nil.
-[GoMethodBody("singleIndex")] internal static ast.Expr singleIndexᴍ(ж<Checker> Ꮡcheck, ж<indexedExpr> Ꮡexpr) {
+internal static ast.Expr singleIndex⁔(/*this*/ ж<Checker> Ꮡcheck, ж<indexedExpr> Ꮡexpr) {
     ref var expr = ref Ꮡexpr.DerefOrNull();
 
     if (len(expr.indices) == 0) {
@@ -433,14 +433,14 @@ break_L:;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string indexˢᴍChecker => ref indexˢᵇᴍChecker;
-private static readonly @string indexˢᵇᴍChecker = "index"u8;
+internal static ref readonly @string indexˢ⁔Checker => ref indexˢᵇ⁔Checker;
+private static readonly @string indexˢᵇ⁔Checker = "index"u8;
 
 // index checks an index expression for validity.
 // If max >= 0, it is the upper bound for index.
 // If the result typ is != Typ[Invalid], index is valid and typ is its (possibly named) integer type.
 // If the result val >= 0, index is valid and val is its constant int value.
-[GoMethodBody("index")] internal static (Type typ, int64 val) indexᴍ(ж<Checker> Ꮡcheck, ast.Expr index, int64 max) {
+internal static (Type typ, int64 val) index⁔(/*this*/ ж<Checker> Ꮡcheck, ast.Expr index, int64 max) {
     Type typ = default;
     int64 val = default;
 
@@ -449,7 +449,7 @@ private static readonly @string indexˢᵇᴍChecker = "index"u8;
 
     ref var x = ref heap(new operand(), out var Ꮡx);
     Ꮡcheck.expr(nil, Ꮡx, index);
-    if (!Ꮡcheck.isValidIndex(Ꮡx, InvalidIndex, indexˢᴍChecker, false)) {
+    if (!Ꮡcheck.isValidIndex(Ꮡx, InvalidIndex, indexˢ⁔Checker, false)) {
         return (typ, val);
     }
 
@@ -472,7 +472,7 @@ private static readonly @string indexˢᵇᴍChecker = "index"u8;
     return (x.typ, v);
 }
 
-[GoMethodBody("isValidIndex")] internal static bool isValidIndexᴍ(ж<Checker> Ꮡcheck, ж<operand> Ꮡx, errors.Code code, @string what, bool allowNegative) {
+internal static bool isValidIndex⁔(/*this*/ ж<Checker> Ꮡcheck, ж<operand> Ꮡx, errors.Code code, @string what, bool allowNegative) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     if (x.mode == invalid) {
@@ -529,7 +529,7 @@ partial struct indexedExpr {
 
 } partial class types_package {
 
-[GoMethodBody("Pos")] internal static token.Pos Posᴍ(ref indexedExpr x) {
+internal static token.Pos Pos⁔(/*this*/ ref indexedExpr x) {
     return x.orig.Pos();
 }
 

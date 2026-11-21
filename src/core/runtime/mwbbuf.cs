@@ -74,11 +74,11 @@ internal static UntypedInt wbMaxEntriesPerCall => 8;
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badWriteBarrierBufferˢᴍwbBuf => ref badWriteBarrierBufferˢᵇᴍwbBuf;
-private static readonly @string badWriteBarrierBufferˢᵇᴍwbBuf = "bad write barrier buffer bounds"u8;
+internal static ref readonly @string badWriteBarrierBufferˢ⁔wbBuf => ref badWriteBarrierBufferˢᵇ⁔wbBuf;
+private static readonly @string badWriteBarrierBufferˢᵇ⁔wbBuf = "bad write barrier buffer bounds"u8;
 
 // reset empties b by resetting its next and end pointers.
-[GoMethodBody("reset")] internal static void resetᴍ(ref wbBuf b) {
+internal static void reset⁔(/*this*/ ref wbBuf b) {
     var start = (uintptr)@unsafe.Pointer.FromBox(Ꮡ(b.buf, 0));
     b.next = start;
     if (testSmallBuf) {
@@ -91,7 +91,7 @@ private static readonly @string badWriteBarrierBufferˢᵇᴍwbBuf = "bad write 
     }
 
     if ((b.end - b.next) % /* unsafe.Sizeof(b.buf[0]) */ (uintptr)8 != 0) {
-        @throw(badWriteBarrierBufferˢᴍwbBuf);
+        @throw(badWriteBarrierBufferˢ⁔wbBuf);
     }
 }
 
@@ -100,12 +100,12 @@ private static readonly @string badWriteBarrierBufferˢᵇᴍwbBuf = "bad write 
 // This must be nosplit because it's called by wbBufFlush.
 //
 //go:nosplit
-[GoMethodBody("discard")] internal static void discardᴍ(ref wbBuf b) {
+internal static void discard⁔(/*this*/ ref wbBuf b) {
     b.next = (uintptr)@unsafe.Pointer.FromBox(Ꮡ(b.buf, 0));
 }
 
 // empty reports whether b contains no pointers.
-[GoMethodBody("empty")] internal static bool emptyᴍ(ref wbBuf b) {
+internal static bool empty⁔(/*this*/ ref wbBuf b) {
     return b.next == (uintptr)@unsafe.Pointer.FromBox(Ꮡ(b.buf, 0));
 }
 
@@ -131,7 +131,7 @@ private static readonly @string badWriteBarrierBufferˢᵇᴍwbBuf = "bad write 
 //
 //go:nowritebarrierrec
 //go:nosplit
-[GoMethodBody("get1")] internal static ж<array<uintptr>> get1ᴍ(ref wbBuf b) {
+internal static ж<array<uintptr>> get1⁔(/*this*/ ref wbBuf b) {
     if (b.next + (uintptr)goarch.PtrSize > b.end) {
         wbBufFlush();
     }
@@ -142,7 +142,7 @@ private static readonly @string badWriteBarrierBufferˢᵇᴍwbBuf = "bad write 
 
 //go:nowritebarrierrec
 //go:nosplit
-[GoMethodBody("get2")] internal static ж<array<uintptr>> get2ᴍ(ref wbBuf b) {
+internal static ж<array<uintptr>> get2⁔(/*this*/ ref wbBuf b) {
     if (b.next + (uintptr)(2 * goarch.PtrSize) > b.end) {
         wbBufFlush();
     }

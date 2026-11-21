@@ -24,7 +24,7 @@ partial struct Error {
 } partial class scanner_package {
 
 // Error implements the error interface.
-[GoMethodBody("Error")] internal static @string Errorᴍ(Error e) {
+internal static @string Error⁔(/*this*/ Error e) {
     if (e.Pos.Filename != ""u8 || e.Pos.IsValid()) {
         // don't print "<unknown position>"
         // TODO(gri) reconsider the semantics of Position.IsValid
@@ -42,18 +42,18 @@ partial struct ErrorList /*[]ж<Error>*/;
 } partial class scanner_package {
 
 // Add adds an [Error] with given position and error message to an [ErrorList].
-[GoMethodBody("Add")] internal static void Addᴍ(ref ErrorList p, token.Position pos, @string msg) {
+internal static void Add⁔(/*this*/ ref ErrorList p, token.Position pos, @string msg) {
     p = append(p, Ꮡ(new Error(pos, msg)));
 }
 
 // Reset resets an [ErrorList] to no errors.
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref ErrorList p) { p = (p)[0..0]; }
+internal static void Reset⁔(/*this*/ ref ErrorList p) { p = (p)[0..0]; }
 
 // [ErrorList] implements the sort Interface.
-[GoMethodBody("Len")] internal static nint Lenᴍ(ErrorList p) { return len(p); }
-[GoMethodBody("Swap")] internal static void Swapᴍ(ErrorList p, nint i, nint j) { (p[i], p[j]) = (p[j], p[i]); }
+internal static nint Len⁔(/*this*/ ErrorList p) { return len(p); }
+internal static void Swap⁔(/*this*/ ErrorList p, nint i, nint j) { (p[i], p[j]) = (p[j], p[i]); }
 
-[GoMethodBody("Less")] internal static bool Lessᴍ(ErrorList p, nint i, nint j) {
+internal static bool Less⁔(/*this*/ ErrorList p, nint i, nint j) {
     var e = p[i].ᏑPos;
     var f = p[j].ᏑPos;
     // Note that it is not sufficient to simply compare file offsets because
@@ -74,12 +74,12 @@ partial struct ErrorList /*[]ж<Error>*/;
 // Sort sorts an [ErrorList]. *[Error] entries are sorted by position,
 // other errors are sorted by error message, and before any *[Error]
 // entry.
-[GoMethodBody("Sort")] internal static void Sortᴍ(ErrorList p) {
+internal static void Sort⁔(/*this*/ ErrorList p) {
     sort.Sort(p);
 }
 
 // RemoveMultiples sorts an [ErrorList] and removes all but the first error per line.
-[GoMethodBody("RemoveMultiples")] internal static void RemoveMultiplesᴍ(ж<ErrorList> Ꮡp) {
+internal static void RemoveMultiples⁔(/*this*/ ж<ErrorList> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     sort.Sort(new ErrorListжInterface(Ꮡp));
@@ -96,14 +96,14 @@ partial struct ErrorList /*[]ж<Error>*/;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string noErrorsˢᴍErrorList => ref noErrorsˢᵇᴍErrorList;
-private static readonly @string noErrorsˢᵇᴍErrorList = "no errors"u8;
+internal static ref readonly @string noErrorsˢ⁔ErrorList => ref noErrorsˢᵇ⁔ErrorList;
+private static readonly @string noErrorsˢᵇ⁔ErrorList = "no errors"u8;
 
 // An [ErrorList] implements the error interface.
-[GoMethodBody("Error")] internal static @string Errorᴍ(ErrorList p) {
+internal static @string Error⁔(/*this*/ ErrorList p) {
     switch (len(p)) {
     case 0: {
-        return noErrorsˢᴍErrorList;
+        return noErrorsˢ⁔ErrorList;
     }
     case 1: {
         return p[0].Error();
@@ -113,7 +113,7 @@ private static readonly @string noErrorsˢᵇᴍErrorList = "no errors"u8;
 
 // Err returns an error equivalent to this error list.
 // If the list is empty, Err returns nil.
-[GoMethodBody("Err")] internal static error Errᴍ(ErrorList p) {
+internal static error Err⁔(/*this*/ ErrorList p) {
     if (len(p) == 0) {
         return default;
     }

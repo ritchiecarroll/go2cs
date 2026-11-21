@@ -64,13 +64,16 @@ using static go.@internal.goroot_package;
 
 namespace go.@internal;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using go;
 using go.os;
 using io;
 using path;
 using static goroot_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("goroot")]
 public static partial class goroot_package
@@ -107,12 +110,12 @@ public static partial class goroot_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(goroot_package.gccgoDirs)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class gorootᴛgccgoDirs;
+[GoMethodHost(typeof(goroot_package.gccgoDirs)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class gorootᴛgccgoDirs;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class gorootᴛgccgoDirs {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void init(this ref gccgoDirs gd) => goroot_package.initᴍ(ref gd);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) => goroot_package.isStandardᴍ(Ꮡgd, path);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static void init(this ref gccgoDirs gd) => goroot_package.init⁔(ref gd);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static bool isStandard(this ж<gccgoDirs> Ꮡgd, @string path) => goroot_package.isStandard⁔(Ꮡgd, path);
 }
 // </GlyphForwarders>

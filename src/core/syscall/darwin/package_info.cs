@@ -247,11 +247,14 @@ using static go.syscall_package;
 
 namespace go;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using @unsafe = unsafe_package;
 using static syscall_package;
 using @internal;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("syscall")]
 public static partial class syscall_package
@@ -365,91 +368,91 @@ public static partial class syscall_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(syscall_package.Cmsghdr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛCmsghdr;
-[GoMethodHost(typeof(syscall_package.Errno)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛErrno;
-[GoMethodHost(typeof(syscall_package.InterfaceAddrMessage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛInterfaceAddrMessage;
-[GoMethodHost(typeof(syscall_package.InterfaceMessage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛInterfaceMessage;
-[GoMethodHost(typeof(syscall_package.InterfaceMulticastAddrMessage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛInterfaceMulticastAddrMessage;
-[GoMethodHost(typeof(syscall_package.Iovec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛIovec;
-[GoMethodHost(typeof(syscall_package.Msghdr)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛMsghdr;
-[GoMethodHost(typeof(syscall_package.RouteMessage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛRouteMessage;
-[GoMethodHost(typeof(syscall_package.Signal)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSignal;
-[GoMethodHost(typeof(syscall_package.SockaddrDatalink)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrDatalink;
-[GoMethodHost(typeof(syscall_package.SockaddrInet4)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet4;
-[GoMethodHost(typeof(syscall_package.SockaddrInet6)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet6;
-[GoMethodHost(typeof(syscall_package.SockaddrUnix)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrUnix;
-[GoMethodHost(typeof(syscall_package.Timespec)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛTimespec;
-[GoMethodHost(typeof(syscall_package.Timeval)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛTimeval;
-[GoMethodHost(typeof(syscall_package.WaitStatus)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛWaitStatus;
-[GoMethodHost(typeof(syscall_package.anyMessage)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛanyMessage;
-[GoMethodHost(typeof(syscall_package.mmapper)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syscallᴛmmapper;
+[GoMethodHost(typeof(syscall_package.Cmsghdr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛCmsghdr;
+[GoMethodHost(typeof(syscall_package.Errno)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛErrno;
+[GoMethodHost(typeof(syscall_package.InterfaceAddrMessage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛInterfaceAddrMessage;
+[GoMethodHost(typeof(syscall_package.InterfaceMessage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛInterfaceMessage;
+[GoMethodHost(typeof(syscall_package.InterfaceMulticastAddrMessage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛInterfaceMulticastAddrMessage;
+[GoMethodHost(typeof(syscall_package.Iovec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛIovec;
+[GoMethodHost(typeof(syscall_package.Msghdr)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛMsghdr;
+[GoMethodHost(typeof(syscall_package.RouteMessage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛRouteMessage;
+[GoMethodHost(typeof(syscall_package.Signal)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSignal;
+[GoMethodHost(typeof(syscall_package.SockaddrDatalink)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrDatalink;
+[GoMethodHost(typeof(syscall_package.SockaddrInet4)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet4;
+[GoMethodHost(typeof(syscall_package.SockaddrInet6)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrInet6;
+[GoMethodHost(typeof(syscall_package.SockaddrUnix)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛSockaddrUnix;
+[GoMethodHost(typeof(syscall_package.Timespec)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛTimespec;
+[GoMethodHost(typeof(syscall_package.Timeval)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛTimeval;
+[GoMethodHost(typeof(syscall_package.WaitStatus)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛWaitStatus;
+[GoMethodHost(typeof(syscall_package.anyMessage)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛanyMessage;
+[GoMethodHost(typeof(syscall_package.mmapper)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class syscallᴛmmapper;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class syscallᴛRouteMessage {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<Sockaddr>, error) sockaddr(this ref RouteMessage m) => syscall_package.sockaddrᴍ(ref m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<Sockaddr>, error) sockaddr(this ref RouteMessage m) => syscall_package.sockaddr⁔(ref m);
 }
 partial class syscallᴛInterfaceMessage {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMessage m) => syscall_package.sockaddrᴍ(ref m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMessage m) => syscall_package.sockaddr⁔(ref m);
 }
 partial class syscallᴛInterfaceAddrMessage {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceAddrMessage m) => syscall_package.sockaddrᴍ(ref m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceAddrMessage m) => syscall_package.sockaddr⁔(ref m);
 }
 partial class syscallᴛanyMessage {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static RoutingMessage toRoutingMessage(this ж<anyMessage> Ꮡany, slice<byte> b) => syscall_package.toRoutingMessageᴍ(Ꮡany, b);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static RoutingMessage toRoutingMessage(this ж<anyMessage> Ꮡany, slice<byte> b) => syscall_package.toRoutingMessage⁔(Ꮡany, b);
 }
 partial class syscallᴛInterfaceMulticastAddrMessage {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMulticastAddrMessage m) => syscall_package.sockaddrᴍ(ref m);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<Sockaddr>, error) sockaddr(this ref InterfaceMulticastAddrMessage m) => syscall_package.sockaddr⁔(ref m);
 }
 partial class syscallᴛCmsghdr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @unsafe.Pointer data(this ж<Cmsghdr> Ꮡh, uintptr offset) => syscall_package.dataᴍ(Ꮡh, offset);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static @unsafe.Pointer data(this ж<Cmsghdr> Ꮡh, uintptr offset) => syscall_package.data⁔(Ꮡh, offset);
 }
 partial class syscallᴛTimespec {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64 sec, int64 nsec) Unix(this ref Timespec ts) => syscall_package.Unixᴍ(ref ts);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Nano(this ref Timespec ts) => syscall_package.Nanoᴍ(ref ts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 sec, int64 nsec) Unix(this ref Timespec ts) => syscall_package.Unix⁔(ref ts);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Nano(this ref Timespec ts) => syscall_package.Nano⁔(ref ts);
 }
 partial class syscallᴛTimeval {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (int64 sec, int64 nsec) Unix(this ref Timeval tv) => syscall_package.Unixᴍ(ref tv);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static int64 Nano(this ref Timeval tv) => syscall_package.Nanoᴍ(ref tv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (int64 sec, int64 nsec) Unix(this ref Timeval tv) => syscall_package.Unix⁔(ref tv);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static int64 Nano(this ref Timeval tv) => syscall_package.Nano⁔(ref tv);
 }
 partial class syscallᴛWaitStatus {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Exited(this WaitStatus w) => syscall_package.Exitedᴍ(w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint ExitStatus(this WaitStatus w) => syscall_package.ExitStatusᴍ(w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Signaled(this WaitStatus w) => syscall_package.Signaledᴍ(w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Signal Signal(this WaitStatus w) => syscall_package.Signalᴍ(w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool CoreDump(this WaitStatus w) => syscall_package.CoreDumpᴍ(w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Stopped(this WaitStatus w) => syscall_package.Stoppedᴍ(w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Continued(this WaitStatus w) => syscall_package.Continuedᴍ(w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static Signal StopSignal(this WaitStatus w) => syscall_package.StopSignalᴍ(w);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint TrapCause(this WaitStatus w) => syscall_package.TrapCauseᴍ(w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Exited(this WaitStatus w) => syscall_package.Exited⁔(w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint ExitStatus(this WaitStatus w) => syscall_package.ExitStatus⁔(w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Signaled(this WaitStatus w) => syscall_package.Signaled⁔(w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Signal Signal(this WaitStatus w) => syscall_package.Signal⁔(w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool CoreDump(this WaitStatus w) => syscall_package.CoreDump⁔(w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Stopped(this WaitStatus w) => syscall_package.Stopped⁔(w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Continued(this WaitStatus w) => syscall_package.Continued⁔(w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static Signal StopSignal(this WaitStatus w) => syscall_package.StopSignal⁔(w);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static nint TrapCause(this WaitStatus w) => syscall_package.TrapCause⁔(w);
 }
 partial class syscallᴛSockaddrUnix {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix> Ꮡsa) => syscall_package.sockaddrᴍ(Ꮡsa);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix> Ꮡsa) => syscall_package.sockaddr⁔(Ꮡsa);
 }
 partial class syscallᴛSockaddrDatalink {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrDatalink> Ꮡsa) => syscall_package.sockaddrᴍ(Ꮡsa);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrDatalink> Ꮡsa) => syscall_package.sockaddr⁔(Ꮡsa);
 }
 partial class syscallᴛIovec {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetLen(this ref Iovec iov, nint length) => syscall_package.SetLenᴍ(ref iov, length);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetLen(this ref Iovec iov, nint length) => syscall_package.SetLen⁔(ref iov, length);
 }
 partial class syscallᴛMsghdr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetControllen(this ref Msghdr msghdr, nint length) => syscall_package.SetControllenᴍ(ref msghdr, length);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetControllen(this ref Msghdr msghdr, nint length) => syscall_package.SetControllen⁔(ref msghdr, length);
 }
 partial class syscallᴛCmsghdr {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetLen(this ref Cmsghdr cmsg, nint length) => syscall_package.SetLenᴍ(ref cmsg, length);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void SetLen(this ref Cmsghdr cmsg, nint length) => syscall_package.SetLen⁔(ref cmsg, length);
 }
 partial class syscallᴛmmapper {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<byte> data, error err) Mmap(this ж<mmapper> Ꮡm, nint fd, int64 offset, nint length, nint prot, nint flags) => syscall_package.Mmapᴍ(Ꮡm, fd, offset, length, prot, flags);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) => syscall_package.Munmapᴍ(Ꮡm, data);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (slice<byte> data, error err) Mmap(this ж<mmapper> Ꮡm, nint fd, int64 offset, nint length, nint prot, nint flags) => syscall_package.Mmap⁔(Ꮡm, fd, offset, length, prot, flags);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static error /*err*/ Munmap(this ж<mmapper> Ꮡm, slice<byte> data) => syscall_package.Munmap⁔(Ꮡm, data);
 }
 partial class syscallᴛErrno {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this Errno e) => syscall_package.Errorᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Is(this Errno e, error target) => syscall_package.Isᴍ(e, target);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Temporary(this Errno e) => syscall_package.Temporaryᴍ(e);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Timeout(this Errno e) => syscall_package.Timeoutᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this Errno e) => syscall_package.Error⁔(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Is(this Errno e, error target) => syscall_package.Is⁔(e, target);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Temporary(this Errno e) => syscall_package.Temporary⁔(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static bool Timeout(this Errno e) => syscall_package.Timeout⁔(e);
 }
 partial class syscallᴛSignal {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void Signal(this Signal s) => syscall_package.Signalᴍ(s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this Signal s) => syscall_package.Stringᴍ(s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static void Signal(this Signal s) => syscall_package.Signal⁔(s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string String(this Signal s) => syscall_package.String⁔(s);
 }
 // </GlyphForwarders>

@@ -28,7 +28,7 @@ internal static patchList makePatchList(uint32 n) {
 
 } partial class syntax_package {
 
-[GoMethodBody("patch")] internal static void patchᴍ(patchList l, ж<Prog> Ꮡp, uint32 val) {
+internal static void patch⁔(/*this*/ patchList l, ж<Prog> Ꮡp, uint32 val) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     var head = l.head;
@@ -44,7 +44,7 @@ internal static patchList makePatchList(uint32 n) {
     }
 }
 
-[GoMethodBody("append")] internal static patchList appendᴍ(patchList l1, ж<Prog> Ꮡp, patchList l2) {
+internal static patchList append⁔(/*this*/ patchList l1, ж<Prog> Ꮡp, patchList l2) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (l1.head == 0) {
@@ -89,7 +89,7 @@ public static (ж<Prog>, error) Compile(ж<Regexp> re) {
 
 } partial class syntax_package {
 
-[GoMethodBody("init")] internal static void initᴍ(ref compiler c) {
+internal static void init⁔(/*this*/ ref compiler c) {
     c.p = @new<Prog>();
     c.p.NumCap = 2; // implicit ( and ) for whole match $0
     c.inst(InstFail);
@@ -102,7 +102,7 @@ internal static slice<rune> anyRune = [0, unicode.MaxRune];
 
 } partial class syntax_package {
 
-[GoMethodBody("compile")] internal static frag compileᴍ(ref compiler c, ж<Regexp> Ꮡre) {
+internal static frag compile⁔(/*this*/ ref compiler c, ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     switch (re.Op) {
@@ -193,24 +193,24 @@ internal static slice<rune> anyRune = [0, unicode.MaxRune];
     throw panic("regexp: unhandled case in compile");
 }
 
-[GoMethodBody("inst")] internal static frag instᴍ(ref compiler c, InstOp op) {
+internal static frag inst⁔(/*this*/ ref compiler c, InstOp op) {
     // TODO: impose length limit
     var f = new frag(i: (uint32)len(c.p.Inst), nullable: true);
     c.p.Inst = append(c.p.Inst, new Inst(Op: op));
     return f;
 }
 
-[GoMethodBody("nop")] internal static frag nopᴍ(ref compiler c) {
+internal static frag nop⁔(/*this*/ ref compiler c) {
     var f = c.inst(InstNop);
     f.@out = makePatchList(f.i << 1);
     return f;
 }
 
-[GoMethodBody("fail")] internal static frag failᴍ(ref compiler c) {
+internal static frag fail⁔(/*this*/ ref compiler c) {
     return new frag();
 }
 
-[GoMethodBody("cap")] internal static frag capᴍ(ref compiler c, uint32 arg) {
+internal static frag cap⁔(/*this*/ ref compiler c, uint32 arg) {
     var f = c.inst(InstCapture);
     f.@out = makePatchList(f.i << 1);
     c.p.Inst[f.i].Arg = arg;
@@ -221,7 +221,7 @@ internal static slice<rune> anyRune = [0, unicode.MaxRune];
     return f;
 }
 
-[GoMethodBody("cat")] internal static frag catᴍ(ref compiler c, frag f1, frag f2) {
+internal static frag cat⁔(/*this*/ ref compiler c, frag f1, frag f2) {
     // concat of failure is failure
     if (f1.i == 0 || f2.i == 0) {
         return new frag();
@@ -233,7 +233,7 @@ internal static slice<rune> anyRune = [0, unicode.MaxRune];
     return new frag(f1.i, f2.@out, f1.nullable && f2.nullable);
 }
 
-[GoMethodBody("alt")] internal static frag altᴍ(ref compiler c, frag f1, frag f2) {
+internal static frag alt⁔(/*this*/ ref compiler c, frag f1, frag f2) {
     // alt of failure is other
     if (f1.i == 0) {
         return f2;
@@ -251,7 +251,7 @@ internal static slice<rune> anyRune = [0, unicode.MaxRune];
     return f;
 }
 
-[GoMethodBody("quest")] internal static frag questᴍ(ref compiler c, frag f1, bool nongreedy) {
+internal static frag quest⁔(/*this*/ ref compiler c, frag f1, bool nongreedy) {
     var f = c.inst(InstAlt);
     var i = Ꮡ(c.p.Inst, f.i);
     if (nongreedy) {
@@ -270,7 +270,7 @@ internal static slice<rune> anyRune = [0, unicode.MaxRune];
 // For star, it can be used directly when f1 can't match an empty string.
 // (When f1 can match an empty string, f1* must be implemented as (f1+)?
 // to get the priority match order correct.)
-[GoMethodBody("loop")] internal static frag loopᴍ(ref compiler c, frag f1, bool nongreedy) {
+internal static frag loop⁔(/*this*/ ref compiler c, frag f1, bool nongreedy) {
     var f = c.inst(InstAlt);
     var i = Ꮡ(c.p.Inst, f.i);
     if (nongreedy) {
@@ -284,7 +284,7 @@ internal static slice<rune> anyRune = [0, unicode.MaxRune];
     return f;
 }
 
-[GoMethodBody("star")] internal static frag starᴍ(ref compiler c, frag f1, bool nongreedy) {
+internal static frag star⁔(/*this*/ ref compiler c, frag f1, bool nongreedy) {
     if (f1.nullable) {
         // Use (f1+)? to get priority match order correct.
         // See golang.org/issue/46123.
@@ -293,18 +293,18 @@ internal static slice<rune> anyRune = [0, unicode.MaxRune];
     return c.loop(f1, nongreedy);
 }
 
-[GoMethodBody("plus")] internal static frag plusᴍ(ref compiler c, frag f1, bool nongreedy) {
+internal static frag plus⁔(/*this*/ ref compiler c, frag f1, bool nongreedy) {
     return new frag(f1.i, c.loop(f1, nongreedy).@out, f1.nullable);
 }
 
-[GoMethodBody("empty")] internal static frag emptyᴍ(ref compiler c, EmptyOp op) {
+internal static frag empty⁔(/*this*/ ref compiler c, EmptyOp op) {
     var f = c.inst(InstEmptyWidth);
     c.p.Inst[f.i].Arg = (uint32)op;
     f.@out = makePatchList(f.i << 1);
     return f;
 }
 
-[GoMethodBody("rune")] internal static frag runeᴍ(ref compiler c, slice<rune> r, Flags flags) {
+internal static frag rune⁔(/*this*/ ref compiler c, slice<rune> r, Flags flags) {
     var f = c.inst(InstRune);
     f.nullable = false;
     var i = Ꮡ(c.p.Inst, f.i);

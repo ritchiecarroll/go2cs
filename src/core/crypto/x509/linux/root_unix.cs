@@ -28,7 +28,7 @@ private static readonly @string certDirEnvᵇ = "SSL_CERT_DIR"u8;
 
 } partial class x509_package {
 
-[GoMethodBody("systemVerify")] internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerifyᴍ(ref Certificate c, ж<VerifyOptions> opts) {
+internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify⁔(/*this*/ ref Certificate c, ж<VerifyOptions> opts) {
     return (default, default);
 }
 

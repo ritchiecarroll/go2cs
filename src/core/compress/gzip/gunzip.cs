@@ -102,7 +102,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 // Reset discards the [Reader] z's state and makes it equivalent to the
 // result of its original state from [NewReader], but reading from r instead.
 // This permits reusing a [Reader] rather than allocating a new one.
-[GoMethodBody("Reset")] internal static error Resetᴍ(ref Reader z, io.Reader r) {
+internal static error Reset⁔(/*this*/ ref Reader z, io.Reader r) {
     z.AssignFrom(new Reader(
         decompressor: z.decompressor,
         multistream: true
@@ -132,7 +132,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 // in order to be left positioned just after the gzip stream.
 // To start the next stream, call z.Reset(r) followed by z.Multistream(false).
 // If there is no next stream, z.Reset(r) will return [io.EOF].
-[GoMethodBody("Multistream")] internal static void Multistreamᴍ(ref Reader z, bool ok) {
+internal static void Multistream⁔(/*this*/ ref Reader z, bool ok) {
     z.multistream = ok;
 }
 
@@ -140,7 +140,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 // It treats the bytes read as being encoded as ISO 8859-1 (Latin-1) and
 // will output a string encoded using UTF-8.
 // This method always updates z.digest with the data read.
-[GoMethodBody("readString")] internal static (@string, error) readStringᴍ(ref Reader z) {
+internal static (@string, error) readString⁔(/*this*/ ref Reader z) {
     var sᴷ = new stackAppend<rune>();
 
     error err = default;
@@ -175,7 +175,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 
 // readHeader reads the GZIP header according to section 2.3.1.
 // This method does not set z.err.
-[GoMethodBody("readHeader")] internal static (Header hdr, error err) readHeaderᴍ(ref Reader z) {
+internal static (Header hdr, error err) readHeader⁔(/*this*/ ref Reader z) {
     Header hdr = default;
     error err = default;
 
@@ -250,7 +250,7 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 }
 
 // Read implements [io.Reader], reading uncompressed bytes from its underlying reader.
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref Reader z, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ref Reader z, slice<byte> p) {
     nint n = default;
 
     if (z.err != nil) {
@@ -296,6 +296,6 @@ public static (ж<Reader>, error) NewReader(io.Reader r) {
 // Close closes the [Reader]. It does not close the underlying reader.
 // In order for the GZIP checksum to be verified, the reader must be
 // fully consumed until the [io.EOF].
-[GoMethodBody("Close")] internal static error Closeᴍ(ref Reader z) { return z.decompressor.Close(); }
+internal static error Close⁔(/*this*/ ref Reader z) { return z.decompressor.Close(); }
 
 }

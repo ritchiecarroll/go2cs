@@ -33,7 +33,7 @@ partial struct baseEvent {
 
 // extra returns a slice representing extra available space in args
 // that the parser can use to pass data up into Event.
-[GoMethodBody("extra")] internal static slice<uint64> extraᴍ(ref baseEvent e, version.Version v) {
+internal static slice<uint64> extra⁔(/*this*/ ref baseEvent e, version.Version v) {
     switch (v) {
     case var ᴛ when ᴛ == version.Go122: {
         return e.args.slice(len(tracev2.Specs()[e.typ].Args) - 1);
@@ -64,7 +64,7 @@ partial struct evTable {
 
 // addExtraString adds an extra string to the evTable and returns
 // a unique ID for the string in the table.
-[GoMethodBody("addExtraString")] internal static extraStringID addExtraStringᴍ(ref evTable t, @string s) {
+internal static extraStringID addExtraString⁔(/*this*/ ref evTable t, @string s) {
     if (s == ""u8) {
         return 0;
     }
@@ -83,7 +83,7 @@ partial struct evTable {
 
 // getExtraString returns the extra string for the provided ID.
 // The ID must have been produced by addExtraString for this evTable.
-[GoMethodBody("getExtraString")] internal static @string getExtraStringᴍ(ref evTable t, extraStringID id) {
+internal static @string getExtraString⁔(/*this*/ ref evTable t, extraStringID id) {
     if (id == 0) {
         return ""u8;
     }
@@ -108,7 +108,7 @@ partial struct dataTable<EI, E>
 // Returns an error if a mapping for id already exists, regardless
 // of whether or not s is the same in content. This should be used
 // for validation during parsing.
-[GoMethodBody("insert")] internal static error insertᴍ<EI, E>(ref dataTable<EI, E> d, EI id, E data)
+internal static error insert⁔<EI, E>(/*this*/ ref dataTable<EI, E> d, EI id, E data)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     if (d.sparse == nil) {
@@ -122,7 +122,7 @@ partial struct dataTable<EI, E>
 }
 
 // append adds a new element to the data table and returns its ID.
-[GoMethodBody("append")] internal static EI appendᴍ<EI, E>(ref dataTable<EI, E> d, E data)
+internal static EI append⁔<EI, E>(/*this*/ ref dataTable<EI, E> d, E data)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     if (d.sparse == nil) {
@@ -136,7 +136,7 @@ partial struct dataTable<EI, E>
 // compactify attempts to compact sparse into dense.
 //
 // This is intended to be called only once after insertions are done.
-[GoMethodBody("compactify")] internal static void compactifyᴍ<EI, E>(ref dataTable<EI, E> d)
+internal static void compactify⁔<EI, E>(/*this*/ ref dataTable<EI, E> d)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     if (d.sparse == nil || len(d.dense) != 0) {
@@ -177,7 +177,7 @@ partial struct dataTable<EI, E>
 
 // get returns the E for id or false if it doesn't
 // exist. This should be used for validation during parsing.
-[GoMethodBody("get")] internal static (E, bool) getᴍ<EI, E>(ref dataTable<EI, E> d, EI id)
+internal static (E, bool) get⁔<EI, E>(/*this*/ ref dataTable<EI, E> d, EI id)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     if (AreEqual(id, ConvertToType<EI>(0))) {
@@ -196,7 +196,7 @@ partial struct dataTable<EI, E>
 }
 
 // forEach iterates over all ID/value pairs in the data table.
-[GoMethodBody("forEach")] internal static bool forEachᴍ<EI, E>(ref dataTable<EI, E> d, Func<EI, E, bool> yield)
+internal static bool forEach⁔<EI, E>(/*this*/ ref dataTable<EI, E> d, Func<EI, E, bool> yield)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     foreach (var (id, value) in range(d.dense)) {
@@ -221,7 +221,7 @@ partial struct dataTable<EI, E>
 // mustGet returns the E for id or panics if it fails.
 //
 // This should only be used if id has already been validated.
-[GoMethodBody("mustGet")] internal static E mustGetᴍ<EI, E>(ref dataTable<EI, E> d, EI id)
+internal static E mustGet⁔<EI, E>(/*this*/ ref dataTable<EI, E> d, EI id)
     where EI : /* ~uint64 */ IAdditionOperators<EI, EI, EI>, ISubtractionOperators<EI, EI, EI>, IMultiplyOperators<EI, EI, EI>, IDivisionOperators<EI, EI, EI>, IIncrementOperators<EI>, IDecrementOperators<EI>, IUnaryNegationOperators<EI, EI>, IModulusOperators<EI, EI, EI>, IBitwiseOperators<EI, EI, EI>, IShiftOperators<EI, int, EI>, IEqualityOperators<EI, EI, bool>, IComparisonOperators<EI, EI, bool>, new()
 {
     var (data, ok) = d.get(id);
@@ -239,7 +239,7 @@ partial struct frequency /*num:float64*/;
 } partial class trace_package {
 
 // mul multiplies an unprocessed to produce a time in nanoseconds.
-[GoMethodBody("mul")] internal static Time mulᴍ(frequency f, timestamp t) {
+internal static Time mul⁔(/*this*/ frequency f, timestamp t) {
     return (Time)(int64)((float64)t * (float64)f);
 }
 
@@ -268,7 +268,7 @@ partial struct cpuSample {
 //
 // We don't just store it as an Event in generation to minimize
 // the amount of pointer data floating around.
-[GoMethodBody("asEvent")] internal static Event asEventᴍ(cpuSample s, ж<evTable> table) {
+internal static Event asEvent⁔(/*this*/ cpuSample s, ж<evTable> table) {
     // TODO(mknyszek): This is go122-specific, but shouldn't be.
     // Generalize this in the future.
     var e = new Event(
@@ -292,7 +292,7 @@ partial struct stack {
 
 } partial class trace_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(stack s) {
+internal static @string String⁔(/*this*/ stack s) {
     ref var sb = ref heap(new strings.Builder(), out var Ꮡsb);
     foreach (var (_, frame) in range(s.pcs)) {
         fmt.Fprintf(new strings_BuilderжWriter(Ꮡsb), "\t%#v\n"u8, frame);

@@ -121,39 +121,39 @@ partial struct Conn {
 // export the struct field too.
 
 // LocalAddr returns the local network address.
-[GoMethodBody("LocalAddr")] internal static net.Addr LocalAddrᴍ(ref Conn c) {
+internal static net.Addr LocalAddr⁔(/*this*/ ref Conn c) {
     return c.conn.LocalAddr();
 }
 
 // RemoteAddr returns the remote network address.
-[GoMethodBody("RemoteAddr")] internal static net.Addr RemoteAddrᴍ(ref Conn c) {
+internal static net.Addr RemoteAddr⁔(/*this*/ ref Conn c) {
     return c.conn.RemoteAddr();
 }
 
 // SetDeadline sets the read and write deadlines associated with the connection.
 // A zero value for t means [Conn.Read] and [Conn.Write] will not time out.
 // After a Write has timed out, the TLS state is corrupt and all future writes will return the same error.
-[GoMethodBody("SetDeadline")] internal static error SetDeadlineᴍ(ref Conn c, time.Time t) {
+internal static error SetDeadline⁔(/*this*/ ref Conn c, time.Time t) {
     return c.conn.SetDeadline(t);
 }
 
 // SetReadDeadline sets the read deadline on the underlying connection.
 // A zero value for t means [Conn.Read] will not time out.
-[GoMethodBody("SetReadDeadline")] internal static error SetReadDeadlineᴍ(ref Conn c, time.Time t) {
+internal static error SetReadDeadline⁔(/*this*/ ref Conn c, time.Time t) {
     return c.conn.SetReadDeadline(t);
 }
 
 // SetWriteDeadline sets the write deadline on the underlying connection.
 // A zero value for t means [Conn.Write] will not time out.
 // After a [Conn.Write] has timed out, the TLS state is corrupt and all future writes will return the same error.
-[GoMethodBody("SetWriteDeadline")] internal static error SetWriteDeadlineᴍ(ref Conn c, time.Time t) {
+internal static error SetWriteDeadline⁔(/*this*/ ref Conn c, time.Time t) {
     return c.conn.SetWriteDeadline(t);
 }
 
 // NetConn returns the underlying connection that is wrapped by c.
 // Note that writing to or reading from this connection directly will corrupt the
 // TLS session.
-[GoMethodBody("NetConn")] internal static net.Conn NetConnᴍ(ref Conn c) {
+internal static net.Conn NetConn⁔(/*this*/ ref Conn c) {
     return c.conn;
 }
 
@@ -181,14 +181,14 @@ partial struct permanentError {
 
 } partial class tls_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref permanentError e) { return e.err.Error(); }
-[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref permanentError e) { return new net_Errorᴠerror(e.err); }
-[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref permanentError e) { return e.err.Timeout(); }
-[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref permanentError e) { return false; }
+internal static @string Error⁔(/*this*/ ref permanentError e) { return e.err.Error(); }
+internal static error Unwrap⁔(/*this*/ ref permanentError e) { return new net_Errorᴠerror(e.err); }
+internal static bool Timeout⁔(/*this*/ ref permanentError e) { return e.err.Timeout(); }
+internal static bool Temporary⁔(/*this*/ ref permanentError e) { return false; }
 
 } partial class tls_package {
 
-[GoMethodBody("setErrorLocked")] internal static error setErrorLockedᴍ(ref halfConn hc, error err) {
+internal static error setErrorLocked⁔(/*this*/ ref halfConn hc, error err) {
     var (e, ok) = err._<net.Error>(ᐧ); if (ok) {
         hc.err = new permanentErrorжerror(Ꮡ(new permanentError(err: e)));
     } else {
@@ -199,7 +199,7 @@ partial struct permanentError {
 
 // prepareCipherSpec sets the encryption and MAC states
 // that a subsequent changeCipherSpec will use.
-[GoMethodBody("prepareCipherSpec")] internal static void prepareCipherSpecᴍ(ref halfConn hc, uint16 version, any cipher, hash.Hash mac) {
+internal static void prepareCipherSpec⁔(/*this*/ ref halfConn hc, uint16 version, any cipher, hash.Hash mac) {
     hc.version = version;
     hc.nextCipher = cipher;
     hc.nextMac = mac;
@@ -207,7 +207,7 @@ partial struct permanentError {
 
 // changeCipherSpec changes the encryption and MAC states
 // to the ones previously passed to prepareCipherSpec.
-[GoMethodBody("changeCipherSpec")] internal static error changeCipherSpecᴍ(ref halfConn hc) {
+internal static error changeCipherSpec⁔(/*this*/ ref halfConn hc) {
     if (hc.nextCipher == nil || hc.version == VersionTLS13) {
         return alertInternalError;
     }
@@ -222,7 +222,7 @@ partial struct permanentError {
 // setTrafficSecret sets the traffic secret for the given encryption level. setTrafficSecret
 // should not be called directly, but rather through the Conn setWriteTrafficSecret and
 // setReadTrafficSecret wrapper methods.
-[GoMethodBody("setTrafficSecret")] internal static void setTrafficSecretᴍ(ref halfConn hc, ж<cipherSuiteTLS13> Ꮡsuite, QUICEncryptionLevel level, slice<byte> secret) {
+internal static void setTrafficSecret⁔(/*this*/ ref halfConn hc, ж<cipherSuiteTLS13> Ꮡsuite, QUICEncryptionLevel level, slice<byte> secret) {
     ref var suite = ref Ꮡsuite.DerefOrNull();
 
     hc.trafficSecret = secret;
@@ -233,7 +233,7 @@ partial struct permanentError {
 }
 
 // incSeq increments the sequence number.
-[GoMethodBody("incSeq")] internal static void incSeqᴍ(ref halfConn hc) {
+internal static void incSeq⁔(/*this*/ ref halfConn hc) {
     for (nint i = 7; i >= 0; i--) {
         hc.seq[i]++;
         if (hc.seq[i] != 0) {
@@ -250,7 +250,7 @@ partial struct permanentError {
 // explicitNonceLen returns the number of bytes of explicit nonce or IV included
 // in each record. Explicit nonces are present only in CBC modes after TLS 1.0
 // and in certain AEAD modes in TLS 1.2.
-[GoMethodBody("explicitNonceLen")] internal static nint explicitNonceLenᴍ(ref halfConn hc) {
+internal static nint explicitNonceLen⁔(/*this*/ ref halfConn hc) {
     if (hc.cipher == nil) {
         return 0;
     }
@@ -346,7 +346,7 @@ partial interface cbcMode :
 
 // decrypt authenticates and decrypts the record if protection is active at
 // this stage. The returned plaintext might overlap with the input.
-[GoMethodBody("decrypt")] internal static (slice<byte>, recordType, error) decryptᴍ(ref halfConn hc, slice<byte> record) {
+internal static (slice<byte>, recordType, error) decrypt⁔(/*this*/ ref halfConn hc, slice<byte> record) {
     slice<byte> plaintext = default;
     var typ = (recordType)record[0];
     var payload = record[(int)(recordHeaderLen)..];
@@ -501,7 +501,7 @@ internal static (slice<byte> head, slice<byte> tail) sliceForAppend(slice<byte> 
 
 // encrypt encrypts payload, adding the appropriate nonce and/or MAC, and
 // appends it to record, which must already contain the record header.
-[GoMethodBody("encrypt")] internal static (slice<byte>, error) encryptᴍ(ref halfConn hc, slice<byte> record, slice<byte> payload, io.Reader rand) {
+internal static (slice<byte>, error) encrypt⁔(/*this*/ ref halfConn hc, slice<byte> record, slice<byte> payload, io.Reader rand) {
     if (hc.cipher == nil) {
         return (appendꓸꓸꓸ(record, payload), default);
     }
@@ -612,7 +612,7 @@ partial struct RecordHeaderError {
 
 } partial class tls_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(RecordHeaderError e) {
+internal static @string Error⁔(/*this*/ RecordHeaderError e) {
     e = e.ΔClone();
 
     return "tls: "u8 + e.Msg;
@@ -620,7 +620,7 @@ partial struct RecordHeaderError {
 
 } partial class tls_package {
 
-[GoMethodBody("newRecordHeaderError")] internal static RecordHeaderError /*err*/ newRecordHeaderErrorᴍ(ref Conn c, net.Conn conn, @string msg) {
+internal static RecordHeaderError /*err*/ newRecordHeaderError⁔(/*this*/ ref Conn c, net.Conn conn, @string msg) {
     RecordHeaderError err = new();
 
     err.Msg = msg;
@@ -629,23 +629,23 @@ partial struct RecordHeaderError {
     return err.ΔClone();
 }
 
-[GoMethodBody("readRecord")] internal static error readRecordᴍ(ж<Conn> Ꮡc) {
+internal static error readRecord⁔(/*this*/ ж<Conn> Ꮡc) {
     return Ꮡc.readRecordOrCCS(false);
 }
 
-[GoMethodBody("readChangeCipherSpec")] internal static error readChangeCipherSpecᴍ(ж<Conn> Ꮡc) {
+internal static error readChangeCipherSpec⁔(/*this*/ ж<Conn> Ꮡc) {
     return Ꮡc.readRecordOrCCS(true);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsInternalErrorˢᴍConn => ref tlsInternalErrorˢᵇᴍConn;
-private static readonly @string tlsInternalErrorˢᵇᴍConn = "tls: internal error: attempted to read record with pending application data"u8;
-internal static ref readonly @string tlsInternalErrorˢ2ᴍConn => ref tlsInternalErrorˢ2ᵇᴍConn;
-private static readonly @string tlsInternalErrorˢ2ᵇᴍConn = "tls: internal error: attempted to read record with QUIC transport"u8;
-internal static ref readonly @string unsupportedSSLv2ˢᴍConn => ref unsupportedSSLv2ˢᵇᴍConn;
-private static readonly @string unsupportedSSLv2ˢᵇᴍConn = "unsupported SSLv2 handshake received"u8;
-internal static ref readonly @string firstRecordDoesNotLookˢᴍConn => ref firstRecordDoesNotLookˢᵇᴍConn;
-private static readonly @string firstRecordDoesNotLookˢᵇᴍConn = "first record does not look like a TLS handshake"u8;
+internal static ref readonly @string tlsInternalErrorˢ⁔Conn => ref tlsInternalErrorˢᵇ⁔Conn;
+private static readonly @string tlsInternalErrorˢᵇ⁔Conn = "tls: internal error: attempted to read record with pending application data"u8;
+internal static ref readonly @string tlsInternalErrorˢ2⁔Conn => ref tlsInternalErrorˢ2ᵇ⁔Conn;
+private static readonly @string tlsInternalErrorˢ2ᵇ⁔Conn = "tls: internal error: attempted to read record with QUIC transport"u8;
+internal static ref readonly @string unsupportedSSLv2ˢ⁔Conn => ref unsupportedSSLv2ˢᵇ⁔Conn;
+private static readonly @string unsupportedSSLv2ˢᵇ⁔Conn = "unsupported SSLv2 handshake received"u8;
+internal static ref readonly @string firstRecordDoesNotLookˢ⁔Conn => ref firstRecordDoesNotLookˢᵇ⁔Conn;
+private static readonly @string firstRecordDoesNotLookˢᵇ⁔Conn = "first record does not look like a TLS handshake"u8;
 
 // readRecordOrCCS reads one or more TLS records from the connection and
 // updates the record layer state. Some invariants:
@@ -661,7 +661,7 @@ private static readonly @string firstRecordDoesNotLookˢᵇᴍConn = "first reco
 //   - c.hand grows
 //   - c.input is set
 //   - an error is returned
-[GoMethodBody("readRecordOrCCS")] internal static error readRecordOrCCSᴍ(ж<Conn> Ꮡc, bool expectChangeCipherSpec) {
+internal static error readRecordOrCCS⁔(/*this*/ ж<Conn> Ꮡc, bool expectChangeCipherSpec) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.@in.err != nil) {
@@ -671,12 +671,12 @@ private static readonly @string firstRecordDoesNotLookˢᵇᴍConn = "first reco
 
     // This function modifies c.rawInput, which owns the c.input memory.
     if (c.input.Len() != 0) {
-        return c.@in.setErrorLocked(errors.New(tlsInternalErrorˢᴍConn));
+        return c.@in.setErrorLocked(errors.New(tlsInternalErrorˢ⁔Conn));
     }
     c.input.Reset(default);
 
     if (c.quic != nil) {
-        return c.@in.setErrorLocked(errors.New(tlsInternalErrorˢ2ᴍConn));
+        return c.@in.setErrorLocked(errors.New(tlsInternalErrorˢ2⁔Conn));
     }
 
     // Read header, payload.
@@ -701,7 +701,7 @@ private static readonly @string firstRecordDoesNotLookˢᵇᴍConn = "first reco
     // an SSLv2 client.
     if (!handshakeComplete && typ == 0x80) {
         Ꮡc.sendAlert(alertProtocolVersion);
-        return c.@in.setErrorLocked(c.newRecordHeaderError(default, unsupportedSSLv2ˢᴍConn));
+        return c.@in.setErrorLocked(c.newRecordHeaderError(default, unsupportedSSLv2ˢ⁔Conn));
     }
 
     var vers = (uint16)((uint16)((uint16)hdr[1] << 8) | (uint16)hdr[2]);
@@ -723,7 +723,7 @@ private static readonly @string firstRecordDoesNotLookˢᵇᴍConn = "first reco
         // The current max version is 3.3 so if the version is >= 16.0,
         // it's probably not real.
         if ((typ != recordTypeAlert && typ != recordTypeHandshake) || vers >= 0x1000) {
-            return c.@in.setErrorLocked(c.newRecordHeaderError(c.conn, firstRecordDoesNotLookˢᴍConn));
+            return c.@in.setErrorLocked(c.newRecordHeaderError(c.conn, firstRecordDoesNotLookˢ⁔Conn));
         }
     }
     if (c.vers == VersionTLS13 && n > maxCiphertextTLS13 || n > maxCiphertext) {
@@ -853,18 +853,18 @@ private static readonly @string firstRecordDoesNotLookˢᵇᴍConn = "first reco
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsTooManyIgnoredRecordsˢᴍConn => ref tlsTooManyIgnoredRecordsˢᵇᴍConn;
-private static readonly @string tlsTooManyIgnoredRecordsˢᵇᴍConn = "tls: too many ignored records"u8;
+internal static ref readonly @string tlsTooManyIgnoredRecordsˢ⁔Conn => ref tlsTooManyIgnoredRecordsˢᵇ⁔Conn;
+private static readonly @string tlsTooManyIgnoredRecordsˢᵇ⁔Conn = "tls: too many ignored records"u8;
 
 // retryReadRecord recurs into readRecordOrCCS to drop a non-advancing record, like
 // a warning alert, empty application_data, or a change_cipher_spec in TLS 1.3.
-[GoMethodBody("retryReadRecord")] internal static error retryReadRecordᴍ(ж<Conn> Ꮡc, bool expectChangeCipherSpec) {
+internal static error retryReadRecord⁔(/*this*/ ж<Conn> Ꮡc, bool expectChangeCipherSpec) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     c.retryCount++;
     if (c.retryCount > maxUselessRecords) {
         Ꮡc.sendAlert(alertUnexpectedMessage);
-        return c.@in.setErrorLocked(errors.New(tlsTooManyIgnoredRecordsˢᴍConn));
+        return c.@in.setErrorLocked(errors.New(tlsTooManyIgnoredRecordsˢ⁔Conn));
     }
     return Ꮡc.readRecordOrCCS(expectChangeCipherSpec);
 }
@@ -881,7 +881,7 @@ partial struct atLeastReader {
 
 } partial class tls_package {
 
-[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ref atLeastReader r, slice<byte> p) {
+internal static (nint, error) Read⁔(/*this*/ ref atLeastReader r, slice<byte> p) {
     if (r.N <= 0) {
         return (0, io.EOF);
     }
@@ -900,7 +900,7 @@ partial struct atLeastReader {
 
 // readFromUntil reads from r into c.rawInput until c.rawInput contains
 // at least n bytes or else returns an error.
-[GoMethodBody("readFromUntil")] internal static error readFromUntilᴍ(ref Conn c, io.Reader r, nint n) {
+internal static error readFromUntil⁔(/*this*/ ref Conn c, io.Reader r, nint n) {
     if (c.rawInput.Len() >= n) {
         return default;
     }
@@ -914,7 +914,7 @@ partial struct atLeastReader {
 }
 
 // sendAlertLocked sends a TLS alert message.
-[GoMethodBody("sendAlertLocked")] internal static error sendAlertLockedᴍ(ж<Conn> Ꮡc, alert err) {
+internal static error sendAlertLocked⁔(/*this*/ ж<Conn> Ꮡc, alert err) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.quic != nil) {
@@ -942,7 +942,7 @@ partial struct atLeastReader {
 }
 
 // sendAlert sends a TLS alert message.
-[GoMethodBody("sendAlert")] internal static error sendAlertᴍ(ж<Conn> Ꮡc, alert err) {
+internal static error sendAlert⁔(/*this*/ ж<Conn> Ꮡc, alert err) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -986,7 +986,7 @@ internal static UntypedInt recordSizeBoostThreshold => /* 128 * 1024 */ 131072;
 //
 // In the interests of simplicity and determinism, this code does not attempt
 // to reset the record size once the connection is idle, however.
-[GoMethodBody("maxPayloadSizeForWrite")] internal static nint maxPayloadSizeForWriteᴍ(ref Conn c, recordType typ) {
+internal static nint maxPayloadSizeForWrite⁔(/*this*/ ref Conn c, recordType typ) {
     if (c.config.DynamicRecordSizingDisabled || typ != recordTypeApplicationData) {
         return maxPlaintext;
     }
@@ -1041,7 +1041,7 @@ internal static UntypedInt recordSizeBoostThreshold => /* 128 * 1024 */ 131072;
     return n;
 }
 
-[GoMethodBody("write")] internal static (nint, error) writeᴍ(ref Conn c, slice<byte> data) {
+internal static (nint, error) write⁔(/*this*/ ref Conn c, slice<byte> data) {
     if (c.buffering) {
         c.sendBuf = appendꓸꓸꓸ(c.sendBuf, data);
         return (len(data), default);
@@ -1052,7 +1052,7 @@ internal static UntypedInt recordSizeBoostThreshold => /* 128 * 1024 */ 131072;
     return (n, err);
 }
 
-[GoMethodBody("flush")] internal static (nint, error) flushᴍ(ref Conn c) {
+internal static (nint, error) flush⁔(/*this*/ ref Conn c) {
     if (len(c.sendBuf) == 0) {
         return (0, default);
     }
@@ -1075,19 +1075,19 @@ internal static ref sync.Pool outBufPool => ref ((StaticBox<sync.Pool>)ᏑoutBuf
 } partial class tls_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsInternalErrorSendingˢᴍConn => ref tlsInternalErrorSendingˢᵇᴍConn;
-private static readonly @string tlsInternalErrorSendingˢᵇᴍConn = "tls: internal error: sending non-handshake message to QUIC transport"u8;
+internal static ref readonly @string tlsInternalErrorSendingˢ⁔Conn => ref tlsInternalErrorSendingˢᵇ⁔Conn;
+private static readonly @string tlsInternalErrorSendingˢᵇ⁔Conn = "tls: internal error: sending non-handshake message to QUIC transport"u8;
 
 // writeRecordLocked writes a TLS record with the given type and payload to the
 // connection and updates the record layer state.
-[GoMethodBody("writeRecordLocked")] internal static (nint, error) writeRecordLockedᴍ(ж<Conn> Ꮡc, recordType typ, slice<byte> data) {
+internal static (nint, error) writeRecordLocked⁔(/*this*/ ж<Conn> Ꮡc, recordType typ, slice<byte> data) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
 
         if (c.quic != nil) {
             if (typ != recordTypeHandshake) {
-                return (0, errors.New(tlsInternalErrorSendingˢᴍConn));
+                return (0, errors.New(tlsInternalErrorSendingˢ⁔Conn));
             }
             c.quicWriteCryptoData(c.@out.level, data);
             if (!c.buffering) {
@@ -1162,7 +1162,7 @@ private static readonly @string tlsInternalErrorSendingˢᵇᴍConn = "tls: inte
 // writeHandshakeRecord writes a handshake message to the connection and updates
 // the record layer state. If transcript is non-nil the marshaled message is
 // written to it.
-[GoMethodBody("writeHandshakeRecord")] internal static (nint, error) writeHandshakeRecordᴍ(ж<Conn> Ꮡc, handshakeMessage msg, transcriptHash transcript) {
+internal static (nint, error) writeHandshakeRecord⁔(/*this*/ ж<Conn> Ꮡc, handshakeMessage msg, transcriptHash transcript) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1185,7 +1185,7 @@ private static readonly @string tlsInternalErrorSendingˢᵇᴍConn = "tls: inte
 
 // writeChangeCipherRecord writes a ChangeCipherSpec message to the connection and
 // updates the record layer state.
-[GoMethodBody("writeChangeCipherRecord")] internal static error writeChangeCipherRecordᴍ(ж<Conn> Ꮡc) {
+internal static error writeChangeCipherRecord⁔(/*this*/ ж<Conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1199,7 +1199,7 @@ private static readonly @string tlsInternalErrorSendingˢᵇᴍConn = "tls: inte
 }
 
 // readHandshakeBytes reads handshake data until c.hand contains at least n bytes.
-[GoMethodBody("readHandshakeBytes")] internal static error readHandshakeBytesᴍ(ж<Conn> Ꮡc, nint n) {
+internal static error readHandshakeBytes⁔(/*this*/ ж<Conn> Ꮡc, nint n) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.quic != nil) {
@@ -1216,7 +1216,7 @@ private static readonly @string tlsInternalErrorSendingˢᵇᴍConn = "tls: inte
 // readHandshake reads the next handshake message from
 // the record layer. If transcript is non-nil, the message
 // is written to the passed transcriptHash.
-[GoMethodBody("readHandshake")] internal static (any, error) readHandshakeᴍ(ж<Conn> Ꮡc, transcriptHash transcript) {
+internal static (any, error) readHandshake⁔(/*this*/ ж<Conn> Ꮡc, transcriptHash transcript) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     {
@@ -1251,7 +1251,7 @@ private static readonly @string tlsInternalErrorSendingˢᵇᴍConn = "tls: inte
     return Ꮡc.unmarshalHandshakeMessage(data, transcript);
 }
 
-[GoMethodBody("unmarshalHandshakeMessage")] internal static (handshakeMessage, error) unmarshalHandshakeMessageᴍ(ж<Conn> Ꮡc, slice<byte> data, transcriptHash transcript) {
+internal static (handshakeMessage, error) unmarshalHandshakeMessage⁔(/*this*/ ж<Conn> Ꮡc, slice<byte> data, transcriptHash transcript) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     handshakeMessage m = default;
@@ -1364,7 +1364,7 @@ internal static error errShutdown = errors.New("tls: protocol is shutdown");
 // must be set for both [Conn.Read] and Write before Write is called when the handshake
 // has not yet completed. See [Conn.SetDeadline], [Conn.SetReadDeadline], and
 // [Conn.SetWriteDeadline].
-[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ж<Conn> Ꮡc, slice<byte> b) {
+internal static (nint, error) Write⁔(/*this*/ ж<Conn> Ꮡc, slice<byte> b) {
     GoFrame ᒐ = default;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
@@ -1428,20 +1428,20 @@ internal static error errShutdown = errors.New("tls: protocol is shutdown");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsInternalErrorˢ3ᴍConn => ref tlsInternalErrorˢ3ᵇᴍConn;
-private static readonly @string tlsInternalErrorˢ3ᵇᴍConn = "tls: internal error: unexpected renegotiation"u8;
-internal static ref readonly @string tlsUnknownRenegotiationˢᴍConn => ref tlsUnknownRenegotiationˢᵇᴍConn;
-private static readonly @string tlsUnknownRenegotiationˢᵇᴍConn = "tls: unknown Renegotiation value"u8;
+internal static ref readonly @string tlsInternalErrorˢ3⁔Conn => ref tlsInternalErrorˢ3ᵇ⁔Conn;
+private static readonly @string tlsInternalErrorˢ3ᵇ⁔Conn = "tls: internal error: unexpected renegotiation"u8;
+internal static ref readonly @string tlsUnknownRenegotiationˢ⁔Conn => ref tlsUnknownRenegotiationˢᵇ⁔Conn;
+private static readonly @string tlsUnknownRenegotiationˢᵇ⁔Conn = "tls: unknown Renegotiation value"u8;
 
 // handleRenegotiation processes a HelloRequest handshake message.
-[GoMethodBody("handleRenegotiation")] internal static error handleRenegotiationᴍ(ж<Conn> Ꮡc) {
+internal static error handleRenegotiation⁔(/*this*/ ж<Conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
         ref var c = ref Ꮡc.DerefOrNull();
 
         if (c.vers == VersionTLS13) {
-            return errors.New(tlsInternalErrorˢ3ᴍConn);
+            return errors.New(tlsInternalErrorˢ3⁔Conn);
         }
 
         var (msg, err) = Ꮡc.readHandshake(default);
@@ -1475,7 +1475,7 @@ private static readonly @string tlsUnknownRenegotiationˢᵇᴍConn = "tls: unkn
         }
         default: {
             Ꮡc.sendAlert(alertInternalError);
-            return errors.New(tlsUnknownRenegotiationˢᴍConn);
+            return errors.New(tlsUnknownRenegotiationˢ⁔Conn);
         }}
 
         c.handshakeMutex.Lock();
@@ -1492,12 +1492,12 @@ private static readonly @string tlsUnknownRenegotiationˢᵇᴍConn = "tls: unkn
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsTooManyNonAdvancingˢᴍConn => ref tlsTooManyNonAdvancingˢᵇᴍConn;
-private static readonly @string tlsTooManyNonAdvancingˢᵇᴍConn = "tls: too many non-advancing records"u8;
+internal static ref readonly @string tlsTooManyNonAdvancingˢ⁔Conn => ref tlsTooManyNonAdvancingˢᵇ⁔Conn;
+private static readonly @string tlsTooManyNonAdvancingˢᵇ⁔Conn = "tls: too many non-advancing records"u8;
 
 // handlePostHandshakeMessage processes a handshake message arrived after the
 // handshake is complete. Up to TLS 1.2, it indicates the start of a renegotiation.
-[GoMethodBody("handlePostHandshakeMessage")] internal static error handlePostHandshakeMessageᴍ(ж<Conn> Ꮡc) {
+internal static error handlePostHandshakeMessage⁔(/*this*/ ж<Conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (c.vers != VersionTLS13) {
@@ -1511,7 +1511,7 @@ private static readonly @string tlsTooManyNonAdvancingˢᵇᴍConn = "tls: too m
     c.retryCount++;
     if (c.retryCount > maxUselessRecords) {
         Ꮡc.sendAlert(alertUnexpectedMessage);
-        return c.@in.setErrorLocked(errors.New(tlsTooManyNonAdvancingˢᴍConn));
+        return c.@in.setErrorLocked(errors.New(tlsTooManyNonAdvancingˢ⁔Conn));
     }
 
     switch (msg.type()) {
@@ -1530,10 +1530,10 @@ private static readonly @string tlsTooManyNonAdvancingˢᵇᴍConn = "tls: too m
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsReceivedUnexpectedKeyˢᴍConn => ref tlsReceivedUnexpectedKeyˢᵇᴍConn;
-private static readonly @string tlsReceivedUnexpectedKeyˢᵇᴍConn = "tls: received unexpected key update message"u8;
+internal static ref readonly @string tlsReceivedUnexpectedKeyˢ⁔Conn => ref tlsReceivedUnexpectedKeyˢᵇ⁔Conn;
+private static readonly @string tlsReceivedUnexpectedKeyˢᵇ⁔Conn = "tls: received unexpected key update message"u8;
 
-[GoMethodBody("handleKeyUpdate")] internal static error handleKeyUpdateᴍ(ж<Conn> Ꮡc, ж<keyUpdateMsg> ᏑkeyUpdate) {
+internal static error handleKeyUpdate⁔(/*this*/ ж<Conn> Ꮡc, ж<keyUpdateMsg> ᏑkeyUpdate) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1542,7 +1542,7 @@ private static readonly @string tlsReceivedUnexpectedKeyˢᵇᴍConn = "tls: rec
 
         if (c.quic != nil) {
             Ꮡc.sendAlert(alertUnexpectedMessage);
-            return c.@in.setErrorLocked(errors.New(tlsReceivedUnexpectedKeyˢᴍConn));
+            return c.@in.setErrorLocked(errors.New(tlsReceivedUnexpectedKeyˢ⁔Conn));
         }
 
         var cipherSuite = cipherSuiteTLS13ByID(c.cipherSuite);
@@ -1589,7 +1589,7 @@ private static readonly @string tlsReceivedUnexpectedKeyˢᵇᴍConn = "tls: rec
 // must be set for both Read and [Conn.Write] before Read is called when the handshake
 // has not yet completed. See [Conn.SetDeadline], [Conn.SetReadDeadline], and
 // [Conn.SetWriteDeadline].
-[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ж<Conn> Ꮡc, slice<byte> b) {
+internal static (nint, error) Read⁔(/*this*/ ж<Conn> Ꮡc, slice<byte> b) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1644,7 +1644,7 @@ private static readonly @string tlsReceivedUnexpectedKeyˢᵇᴍConn = "tls: rec
 }
 
 // Close closes the connection.
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<Conn> Ꮡc) {
+internal static error Close⁔(/*this*/ ж<Conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Interlock with Conn.Write above.
@@ -1692,7 +1692,7 @@ internal static error errEarlyCloseWrite = errors.New("tls: CloseWrite called be
 // CloseWrite shuts down the writing side of the connection. It should only be
 // called once the handshake has completed and does not call CloseWrite on the
 // underlying connection. Most callers should just use [Conn.Close].
-[GoMethodBody("CloseWrite")] internal static error CloseWriteᴍ(ж<Conn> Ꮡc) {
+internal static error CloseWrite⁔(/*this*/ ж<Conn> Ꮡc) {
     if (!Ꮡc.ᏑisHandshakeComplete.Load()) {
         return errEarlyCloseWrite;
     }
@@ -1700,7 +1700,7 @@ internal static error errEarlyCloseWrite = errors.New("tls: CloseWrite called be
     return Ꮡc.closeNotify();
 }
 
-[GoMethodBody("closeNotify")] internal static error closeNotifyᴍ(ж<Conn> Ꮡc) {
+internal static error closeNotify⁔(/*this*/ ж<Conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1736,7 +1736,7 @@ internal static error errEarlyCloseWrite = errors.New("tls: CloseWrite called be
 // in certificates sent by either the TLS server or client is limited to 8192
 // bits. This limit can be overridden by setting tlsmaxrsasize in the GODEBUG
 // environment variable (e.g. GODEBUG=tlsmaxrsasize=4096).
-[GoMethodBody("Handshake")] internal static error Handshakeᴍ(ж<Conn> Ꮡc) {
+internal static error Handshake⁔(/*this*/ ж<Conn> Ꮡc) {
     return Ꮡc.HandshakeContext(context.Background());
 }
 
@@ -1750,17 +1750,17 @@ internal static error errEarlyCloseWrite = errors.New("tls: CloseWrite called be
 //
 // Most uses of this package need not call HandshakeContext explicitly: the
 // first [Conn.Read] or [Conn.Write] will call it automatically.
-[GoMethodBody("HandshakeContext")] internal static error HandshakeContextᴍ(ж<Conn> Ꮡc, context.Context ctx) {
+internal static error HandshakeContext⁔(/*this*/ ж<Conn> Ꮡc, context.Context ctx) {
     // Delegate to unexported method for named return
     // without confusing documented signature.
     return Ꮡc.handshakeContext(ctx);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsInternalErrorˢ4ᴍConn => ref tlsInternalErrorˢ4ᵇᴍConn;
-private static readonly @string tlsInternalErrorˢ4ᵇᴍConn = "tls: internal error: handshake should have had a result"u8;
+internal static ref readonly @string tlsInternalErrorˢ4⁔Conn => ref tlsInternalErrorˢ4ᵇ⁔Conn;
+private static readonly @string tlsInternalErrorˢ4ᵇ⁔Conn = "tls: internal error: handshake should have had a result"u8;
 
-[GoMethodBody("handshakeContext")] internal static error /*ret*/ handshakeContextᴍ(ж<Conn> Ꮡc, context.Context ctx) {
+internal static error /*ret*/ handshakeContext⁔(/*this*/ ж<Conn> Ꮡc, context.Context ctx) {
     error ret = default;
     GoFrame ᒐ = default;
     try {
@@ -1822,7 +1822,7 @@ private static readonly @string tlsInternalErrorˢ4ᵇᴍConn = "tls: internal e
         }
 
         if (c.handshakeErr == nil && !Ꮡc.ᏑisHandshakeComplete.Load()) {
-            c.handshakeErr = errors.New(tlsInternalErrorˢ4ᴍConn);
+            c.handshakeErr = errors.New(tlsInternalErrorˢ4⁔Conn);
         }
         if (c.handshakeErr != nil && Ꮡc.ᏑisHandshakeComplete.Load()) {
             throw panic("tls: internal error: handshake returned an error but is marked successful");
@@ -1862,7 +1862,7 @@ private static readonly @string tlsInternalErrorˢ4ᵇᴍConn = "tls: internal e
 }
 
 // ConnectionState returns basic TLS details about the connection.
-[GoMethodBody("ConnectionState")] internal static ConnectionState ConnectionStateᴍ(ж<Conn> Ꮡc) {
+internal static ConnectionState ConnectionState⁔(/*this*/ ж<Conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1882,7 +1882,7 @@ internal static ж<godebug.Setting> tlsunsafeekm = godebug.New("tlsunsafeekm");
 
 } partial class tls_package {
 
-[GoMethodBody("connectionStateLocked")] internal static ConnectionState connectionStateLockedᴍ(ж<Conn> Ꮡc) {
+internal static ConnectionState connectionStateLocked⁔(/*this*/ ж<Conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     ConnectionState state = default;
@@ -1926,7 +1926,7 @@ internal static ж<godebug.Setting> tlsunsafeekm = godebug.New("tlsunsafeekm");
 
 // OCSPResponse returns the stapled OCSP response from the TLS server, if
 // any. (Only valid for client connections.)
-[GoMethodBody("OCSPResponse")] internal static slice<byte> OCSPResponseᴍ(ж<Conn> Ꮡc) {
+internal static slice<byte> OCSPResponse⁔(/*this*/ ж<Conn> Ꮡc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1942,17 +1942,17 @@ internal static ж<godebug.Setting> tlsunsafeekm = godebug.New("tlsunsafeekm");
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsVerifyHostnameCalledˢᴍConn => ref tlsVerifyHostnameCalledˢᵇᴍConn;
-private static readonly @string tlsVerifyHostnameCalledˢᵇᴍConn = "tls: VerifyHostname called on TLS server connection"u8;
-internal static ref readonly @string tlsHandshakeHasNotYetˢᴍConn => ref tlsHandshakeHasNotYetˢᵇᴍConn;
-private static readonly @string tlsHandshakeHasNotYetˢᵇᴍConn = "tls: handshake has not yet been performed"u8;
-internal static ref readonly @string tlsHandshakeDidNotVerifyˢᴍConn => ref tlsHandshakeDidNotVerifyˢᵇᴍConn;
-private static readonly @string tlsHandshakeDidNotVerifyˢᵇᴍConn = "tls: handshake did not verify certificate chain"u8;
+internal static ref readonly @string tlsVerifyHostnameCalledˢ⁔Conn => ref tlsVerifyHostnameCalledˢᵇ⁔Conn;
+private static readonly @string tlsVerifyHostnameCalledˢᵇ⁔Conn = "tls: VerifyHostname called on TLS server connection"u8;
+internal static ref readonly @string tlsHandshakeHasNotYetˢ⁔Conn => ref tlsHandshakeHasNotYetˢᵇ⁔Conn;
+private static readonly @string tlsHandshakeHasNotYetˢᵇ⁔Conn = "tls: handshake has not yet been performed"u8;
+internal static ref readonly @string tlsHandshakeDidNotVerifyˢ⁔Conn => ref tlsHandshakeDidNotVerifyˢᵇ⁔Conn;
+private static readonly @string tlsHandshakeDidNotVerifyˢᵇ⁔Conn = "tls: handshake did not verify certificate chain"u8;
 
 // VerifyHostname checks that the peer certificate chain is valid for
 // connecting to host. If so, it returns nil; if not, it returns an error
 // describing the problem.
-[GoMethodBody("VerifyHostname")] internal static error VerifyHostnameᴍ(ж<Conn> Ꮡc, @string host) {
+internal static error VerifyHostname⁔(/*this*/ ж<Conn> Ꮡc, @string host) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1961,13 +1961,13 @@ private static readonly @string tlsHandshakeDidNotVerifyˢᵇᴍConn = "tls: han
         c.handshakeMutex.Lock();
         ᒐd1 = true;
         if (!c.isClient) {
-            return errors.New(tlsVerifyHostnameCalledˢᴍConn);
+            return errors.New(tlsVerifyHostnameCalledˢ⁔Conn);
         }
         if (!Ꮡc.ᏑisHandshakeComplete.Load()) {
-            return errors.New(tlsHandshakeHasNotYetˢᴍConn);
+            return errors.New(tlsHandshakeHasNotYetˢ⁔Conn);
         }
         if (len(c.verifiedChains) == 0) {
-            return errors.New(tlsHandshakeDidNotVerifyˢᴍConn);
+            return errors.New(tlsHandshakeDidNotVerifyˢ⁔Conn);
         }
         return c.peerCertificates[0].VerifyHostname(host);
     }
@@ -1976,13 +1976,13 @@ private static readonly @string tlsHandshakeDidNotVerifyˢᵇᴍConn = "tls: han
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string tlsHandshakeBufferNotˢᴍConn => ref tlsHandshakeBufferNotˢᵇᴍConn;
-private static readonly @string tlsHandshakeBufferNotˢᵇᴍConn = "tls: handshake buffer not empty before setting read traffic secret"u8;
+internal static ref readonly @string tlsHandshakeBufferNotˢ⁔Conn => ref tlsHandshakeBufferNotˢᵇ⁔Conn;
+private static readonly @string tlsHandshakeBufferNotˢᵇ⁔Conn = "tls: handshake buffer not empty before setting read traffic secret"u8;
 
 // setReadTrafficSecret sets the read traffic secret for the given encryption level. If
 // being called at the same time as setWriteTrafficSecret, the caller must ensure the call
 // to setWriteTrafficSecret happens first so any alerts are sent at the write level.
-[GoMethodBody("setReadTrafficSecret")] internal static error setReadTrafficSecretᴍ(ж<Conn> Ꮡc, ж<cipherSuiteTLS13> suite, QUICEncryptionLevel level, slice<byte> secret, bool locked) {
+internal static error setReadTrafficSecret⁔(/*this*/ ж<Conn> Ꮡc, ж<cipherSuiteTLS13> suite, QUICEncryptionLevel level, slice<byte> secret, bool locked) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     // Ensure that there are no buffered handshake messages before changing the
@@ -1994,7 +1994,7 @@ private static readonly @string tlsHandshakeBufferNotˢᵇᴍConn = "tls: handsh
         } else {
             Ꮡc.sendAlert(alertUnexpectedMessage);
         }
-        return errors.New(tlsHandshakeBufferNotˢᴍConn);
+        return errors.New(tlsHandshakeBufferNotˢ⁔Conn);
     }
     c.@in.setTrafficSecret(suite, level, secret);
     return default;
@@ -2003,7 +2003,7 @@ private static readonly @string tlsHandshakeBufferNotˢᵇᴍConn = "tls: handsh
 // setWriteTrafficSecret sets the write traffic secret for the given encryption level. If
 // being called at the same time as setReadTrafficSecret, the caller must ensure the call
 // to setWriteTrafficSecret happens first so any alerts are sent at the write level.
-[GoMethodBody("setWriteTrafficSecret")] internal static void setWriteTrafficSecretᴍ(ref Conn c, ж<cipherSuiteTLS13> suite, QUICEncryptionLevel level, slice<byte> secret) {
+internal static void setWriteTrafficSecret⁔(/*this*/ ref Conn c, ж<cipherSuiteTLS13> suite, QUICEncryptionLevel level, slice<byte> secret) {
     c.@out.setTrafficSecret(suite, level, secret);
 }
 

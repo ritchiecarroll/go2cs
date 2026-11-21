@@ -70,7 +70,7 @@ partial struct @file {
 } partial class os_package {
 
 // fd is the Unix implementation of Fd.
-[GoMethodBody("fd")] internal static uintptr fdᴍ(ж<File> Ꮡf) {
+internal static uintptr fd⁔(/*this*/ ж<File> Ꮡf) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (Ꮡf == nil) {
@@ -317,7 +317,7 @@ internal static (ж<File>, error) openDirNolog(@string name) {
 
 } partial class os_package {
 
-[GoMethodBody("close")] internal static error closeᴍ(ж<@file> Ꮡfile) {
+internal static error close⁔(/*this*/ ж<@file> Ꮡfile) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     if (Ꮡfile == nil) {
@@ -345,7 +345,7 @@ internal static (ж<File>, error) openDirNolog(@string name) {
 // according to whence: 0 means relative to the origin of the file, 1 means
 // relative to the current offset, and 2 means relative to the end.
 // It returns the new offset and an error, if any.
-[GoMethodBody("seek")] internal static (int64 ret, error err) seekᴍ(ж<File> Ꮡf, int64 offset, nint whence) {
+internal static (int64 ret, error err) seek⁔(/*this*/ ж<File> Ꮡf, int64 offset, nint whence) {
     int64 ret = default;
     error err = default;
 
@@ -475,18 +475,18 @@ partial struct unixDirent {
 
 } partial class os_package {
 
-[GoMethodBody("Name")] internal static @string Nameᴍ(ref unixDirent d) { return d.name; }
-[GoMethodBody("IsDir")] internal static bool IsDirᴍ(ref unixDirent d) { return d.typ.IsDir(); }
-[GoMethodBody("Type")] internal static FileMode Typeᴍ(ref unixDirent d) { return d.typ; }
+internal static @string Name⁔(/*this*/ ref unixDirent d) { return d.name; }
+internal static bool IsDir⁔(/*this*/ ref unixDirent d) { return d.typ.IsDir(); }
+internal static FileMode Type⁔(/*this*/ ref unixDirent d) { return d.typ; }
 
-[GoMethodBody("Info")] internal static (FileInfo, error) Infoᴍ(ref unixDirent d) {
+internal static (FileInfo, error) Info⁔(/*this*/ ref unixDirent d) {
     if (d.info != nil) {
         return (d.info, default);
     }
     return Lstat(d.parent + "/"u8 + d.name);
 }
 
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<unixDirent> Ꮡd) {
+internal static @string String⁔(/*this*/ ж<unixDirent> Ꮡd) {
     return fs.FormatDirEntry(new unixDirentжDirEntry(Ꮡd));
 }
 

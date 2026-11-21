@@ -15,7 +15,7 @@ partial struct stringError /*@string*/;
 
 } partial class cgroup_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(stringError e) {
+internal static @string Error⁔(/*this*/ stringError e) {
     return (@string)e;
 }
 
@@ -82,7 +82,7 @@ internal static ж<lineReader> newLineReader(nint fd, slice<byte> scratch, Func<
 // the line.
 //
 // Returns errEOF when there are no more lines.
-[GoMethodBody("next")] internal static error nextᴍ(ref lineReader r) {
+internal static error next⁔(/*this*/ ref lineReader r) {
     // Three cases:
     //
     // 1. First call, no data read.
@@ -172,7 +172,7 @@ internal static ж<lineReader> newLineReader(nint fd, slice<byte> scratch, Func<
 // Preconditions: [r.next] is called prior to the first call to line.
 //
 // Postconditions: The caller must not keep a reference to the returned slice.
-[GoMethodBody("line")] internal static slice<byte> lineᴍ(ref lineReader r) {
+internal static slice<byte> line⁔(/*this*/ ref lineReader r) {
     if (r.newline < 0) {
         // Incomplete line
         return r.scratch.slice(0, r.n);

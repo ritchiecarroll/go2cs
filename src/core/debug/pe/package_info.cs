@@ -76,7 +76,7 @@ using static go.debug.pe_package;
 
 namespace go.debug;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using dwarf = go.debug.dwarf_package;
 using io = io_package;
 using compress;
@@ -84,7 +84,10 @@ using encoding;
 using go.debug;
 using static pe_package;
 using @internal;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("pe")]
 public static partial class pe_package
@@ -142,40 +145,40 @@ public static partial class pe_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(pe_package.COFFSymbol)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class peᴛCOFFSymbol;
-[GoMethodHost(typeof(pe_package.File)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class peᴛFile;
-[GoMethodHost(typeof(pe_package.FormatError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class peᴛFormatError;
-[GoMethodHost(typeof(pe_package.Section)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class peᴛSection;
-[GoMethodHost(typeof(pe_package.SectionHeader32)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class peᴛSectionHeader32;
-[GoMethodHost(typeof(pe_package.StringTable)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class peᴛStringTable;
-[GoMethodHost(typeof(pe_package.nobitsSectionReader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class peᴛnobitsSectionReader;
+[GoMethodHost(typeof(pe_package.COFFSymbol)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class peᴛCOFFSymbol;
+[GoMethodHost(typeof(pe_package.File)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class peᴛFile;
+[GoMethodHost(typeof(pe_package.FormatError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class peᴛFormatError;
+[GoMethodHost(typeof(pe_package.Section)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class peᴛSection;
+[GoMethodHost(typeof(pe_package.SectionHeader32)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class peᴛSectionHeader32;
+[GoMethodHost(typeof(pe_package.StringTable)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class peᴛStringTable;
+[GoMethodHost(typeof(pe_package.nobitsSectionReader)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class peᴛnobitsSectionReader;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class peᴛFile {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ref File f) => pe_package.Closeᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Section> Section(this ref File f, @string name) => pe_package.Sectionᴍ(ref f, name);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (ж<dwarf.Data>, error) DWARF(this ref File f) => pe_package.DWARFᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) ImportedSymbols(this ref File f) => pe_package.ImportedSymbolsᴍ(ref f);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) ImportedLibraries(this ref File f) => pe_package.ImportedLibrariesᴍ(ref f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static error Close(this ref File f) => pe_package.Close⁔(ref f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<Section> Section(this ref File f, @string name) => pe_package.Section⁔(ref f, name);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (ж<dwarf.Data>, error) DWARF(this ref File f) => pe_package.DWARF⁔(ref f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string>, error) ImportedSymbols(this ref File f) => pe_package.ImportedSymbols⁔(ref f);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string>, error) ImportedLibraries(this ref File f) => pe_package.ImportedLibraries⁔(ref f);
 }
 partial class peᴛnobitsSectionReader {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) => pe_package.ReadAtᴍ(ref _, p, off);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (nint n, error err) ReadAt(this ref nobitsSectionReader _, slice<byte> p, int64 off) => pe_package.ReadAt⁔(ref _, p, off);
 }
 partial class peᴛFormatError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ref FormatError e) => pe_package.Errorᴍ(ref e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this ref FormatError e) => pe_package.Error⁔(ref e);
 }
 partial class peᴛSectionHeader32 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, error) fullName(this ref SectionHeader32 sh, StringTable st) => pe_package.fullNameᴍ(ref sh, st);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] internal static (@string, error) fullName(this ref SectionHeader32 sh, StringTable st) => pe_package.fullName⁔(ref sh, st);
 }
 partial class peᴛSection {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) Data(this ref Section s) => pe_package.Dataᴍ(ref s);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static io.ReadSeeker Open(this ref Section s) => pe_package.Openᴍ(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte>, error) Data(this ref Section s) => pe_package.Data⁔(ref s);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static io.ReadSeeker Open(this ref Section s) => pe_package.Open⁔(ref s);
 }
 partial class peᴛStringTable {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) String(this StringTable st, uint32 start) => pe_package.Stringᴍ(st, start);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) String(this StringTable st, uint32 start) => pe_package.String⁔(st, start);
 }
 partial class peᴛCOFFSymbol {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (@string, error) FullName(this ref COFFSymbol sym, StringTable st) => pe_package.FullNameᴍ(ref sym, st);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (@string, error) FullName(this ref COFFSymbol sym, StringTable st) => pe_package.FullName⁔(ref sym, st);
 }
 // </GlyphForwarders>

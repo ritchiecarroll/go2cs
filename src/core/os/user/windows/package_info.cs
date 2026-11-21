@@ -69,9 +69,12 @@ using static go.os.user_package;
 
 namespace go.os;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using static user_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("user")]
 public static partial class user_package
@@ -117,27 +120,27 @@ public static partial class user_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(user_package.UnknownGroupError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupError;
-[GoMethodHost(typeof(user_package.UnknownGroupIdError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupIdError;
-[GoMethodHost(typeof(user_package.UnknownUserError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownUserError;
-[GoMethodHost(typeof(user_package.UnknownUserIdError)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUnknownUserIdError;
-[GoMethodHost(typeof(user_package.User)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class userᴛUser;
+[GoMethodHost(typeof(user_package.UnknownGroupError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupError;
+[GoMethodHost(typeof(user_package.UnknownGroupIdError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUnknownGroupIdError;
+[GoMethodHost(typeof(user_package.UnknownUserError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUnknownUserError;
+[GoMethodHost(typeof(user_package.UnknownUserIdError)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUnknownUserIdError;
+[GoMethodHost(typeof(user_package.User)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class userᴛUser;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class userᴛUser {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<@string>, error) GroupIds(this ж<User> Ꮡu) => user_package.GroupIdsᴍ(Ꮡu);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<@string>, error) GroupIds(this ж<User> Ꮡu) => user_package.GroupIds⁔(Ꮡu);
 }
 partial class userᴛUnknownUserIdError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownUserIdError e) => user_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnknownUserIdError e) => user_package.Error⁔(e);
 }
 partial class userᴛUnknownUserError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownUserError e) => user_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnknownUserError e) => user_package.Error⁔(e);
 }
 partial class userᴛUnknownGroupIdError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownGroupIdError e) => user_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnknownGroupIdError e) => user_package.Error⁔(e);
 }
 partial class userᴛUnknownGroupError {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownGroupError e) => user_package.Errorᴍ(e);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static @string Error(this UnknownGroupError e) => user_package.Error⁔(e);
 }
 // </GlyphForwarders>

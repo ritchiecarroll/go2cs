@@ -27,7 +27,7 @@ internal static UntypedInt p224ElementLen => 28;
 } partial class fiat_package {
 
 // One sets e = 1, and returns e.
-[GoMethodBody("One")] internal static ж<P224Element> Oneᴍ(ж<P224Element> Ꮡe) {
+internal static ж<P224Element> One⁔(/*this*/ ж<P224Element> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     p224SetOne(ref nonnil(ref e).x);
@@ -35,21 +35,21 @@ internal static UntypedInt p224ElementLen => 28;
 }
 
 // Equal returns 1 if e == t, and zero otherwise.
-[GoMethodBody("Equal")] internal static nint Equalᴍ(ж<P224Element> Ꮡe, ж<P224Element> t) {
+internal static nint Equal⁔(/*this*/ ж<P224Element> Ꮡe, ж<P224Element> t) {
     var eBytes = Ꮡe.Bytes();
     var tBytes = t.Bytes();
     return subtle.ConstantTimeCompare(eBytes, tBytes);
 }
 
 // IsZero returns 1 if e == 0, and zero otherwise.
-[GoMethodBody("IsZero")] internal static nint IsZeroᴍ(ж<P224Element> Ꮡe) {
+internal static nint IsZero⁔(/*this*/ ж<P224Element> Ꮡe) {
     var zero = new slice<byte>(p224ElementLen);
     var eBytes = Ꮡe.Bytes();
     return subtle.ConstantTimeCompare(eBytes, zero);
 }
 
 // Set sets e = t, and returns e.
-[GoMethodBody("Set")] internal static ж<P224Element> Setᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt) {
+internal static ж<P224Element> Set⁔(/*this*/ ж<P224Element> Ꮡe, ж<P224Element> Ꮡt) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -58,14 +58,14 @@ internal static UntypedInt p224ElementLen => 28;
 }
 
 // Bytes returns the 28-byte big-endian encoding of e.
-[GoMethodBody("Bytes")] internal static slice<byte> Bytesᴍ(ж<P224Element> Ꮡe) {
+internal static slice<byte> Bytes⁔(/*this*/ ж<P224Element> Ꮡe) {
     // This function is outlined to make the allocations inline in the caller
     // rather than happen on the heap.
     ref var @out = ref heap(new array<byte>(28), out var Ꮡout);
     return Ꮡe.bytes(Ꮡout);
 }
 
-[GoMethodBody("bytes")] internal static slice<byte> bytesᴍ(ж<P224Element> Ꮡe, /*[28]*/ ж<array<byte>> Ꮡout) {
+internal static slice<byte> bytes⁔(/*this*/ ж<P224Element> Ꮡe, /*[28]*/ ж<array<byte>> Ꮡout) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var @out = ref Ꮡout.DerefOrNull();
 
@@ -78,17 +78,17 @@ internal static UntypedInt p224ElementLen => 28;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string invalidP224ElementˢᴍP224Element => ref invalidP224ElementˢᵇᴍP224Element;
-private static readonly @string invalidP224ElementˢᵇᴍP224Element = "invalid P224Element encoding"u8;
+private static ref readonly @string invalidP224Elementˢ⁔P224Element => ref invalidP224Elementˢᵇ⁔P224Element;
+private static readonly @string invalidP224Elementˢᵇ⁔P224Element = "invalid P224Element encoding"u8;
 
 // SetBytes sets e = v, where v is a big-endian 28-byte encoding, and returns e.
 // If v is not 28 bytes or it encodes a value higher than 2^224 - 2^96 + 1,
 // SetBytes returns nil and an error, and e is unchanged.
-[GoMethodBody("SetBytes")] internal static (ж<P224Element>, error) SetBytesᴍ(ж<P224Element> Ꮡe, slice<byte> v) {
+internal static (ж<P224Element>, error) SetBytes⁔(/*this*/ ж<P224Element> Ꮡe, slice<byte> v) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (len(v) != p224ElementLen) {
-        return (default, errors.New(invalidP224ElementˢᴍP224Element));
+        return (default, errors.New(invalidP224Elementˢ⁔P224Element));
     }
 
     // Check for non-canonical encodings (p + k, 2p + k, etc.) by comparing to
@@ -96,7 +96,7 @@ private static readonly @string invalidP224ElementˢᵇᴍP224Element = "invalid
     slice<byte> minusOneEncoding = @new<P224Element>().Sub(
         @new<P224Element>(), @new<P224Element>().One()).Bytes();
     if (subtle.ConstantTimeLessOrEqBytes(v, minusOneEncoding) == 0) {
-        return (default, errors.New(invalidP224ElementˢᴍP224Element));
+        return (default, errors.New(invalidP224Elementˢ⁔P224Element));
     }
 
     ref var @in = ref heap(new array<byte>(28), out var Ꮡin);
@@ -110,7 +110,7 @@ private static readonly @string invalidP224ElementˢᵇᴍP224Element = "invalid
 }
 
 // Add sets e = t1 + t2, and returns e.
-[GoMethodBody("Add")] internal static ж<P224Element> Addᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
+internal static ж<P224Element> Add⁔(/*this*/ ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -120,7 +120,7 @@ private static readonly @string invalidP224ElementˢᵇᴍP224Element = "invalid
 }
 
 // Sub sets e = t1 - t2, and returns e.
-[GoMethodBody("Sub")] internal static ж<P224Element> Subᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
+internal static ж<P224Element> Sub⁔(/*this*/ ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -130,7 +130,7 @@ private static readonly @string invalidP224ElementˢᵇᴍP224Element = "invalid
 }
 
 // Mul sets e = t1 * t2, and returns e.
-[GoMethodBody("Mul")] internal static ж<P224Element> Mulᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
+internal static ж<P224Element> Mul⁔(/*this*/ ж<P224Element> Ꮡe, ж<P224Element> Ꮡt1, ж<P224Element> Ꮡt2) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t1 = ref Ꮡt1.DerefOrNull();
     ref var t2 = ref Ꮡt2.DerefOrNull();
@@ -140,7 +140,7 @@ private static readonly @string invalidP224ElementˢᵇᴍP224Element = "invalid
 }
 
 // Square sets e = t * t, and returns e.
-[GoMethodBody("Square")] internal static ж<P224Element> Squareᴍ(ж<P224Element> Ꮡe, ж<P224Element> Ꮡt) {
+internal static ж<P224Element> Square⁔(/*this*/ ж<P224Element> Ꮡe, ж<P224Element> Ꮡt) {
     ref var e = ref Ꮡe.DerefOrNull();
     ref var t = ref Ꮡt.DerefOrNull();
 
@@ -149,7 +149,7 @@ private static readonly @string invalidP224ElementˢᵇᴍP224Element = "invalid
 }
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
-[GoMethodBody("Select")] internal static ж<P224Element> Selectᴍ(ж<P224Element> Ꮡv, ж<P224Element> Ꮡa, ж<P224Element> Ꮡb, nint cond) {
+internal static ж<P224Element> Select⁔(/*this*/ ж<P224Element> Ꮡv, ж<P224Element> Ꮡa, ж<P224Element> Ꮡb, nint cond) {
     ref var v = ref Ꮡv.DerefOrNull();
     ref var a = ref Ꮡa.DerefOrNull();
     ref var b = ref Ꮡb.DerefOrNull();

@@ -25,7 +25,7 @@ internal static array<uint8> _Kind_index = array<uint8>([0, 7, 11, 17, 20, 25, 3
 
 } partial class constant_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(Kind i) {
+internal static @string String⁔(/*this*/ Kind i) {
     if (i < 0 || i >= ((Kind)(len(_Kind_index) - 1))) {
         return "Kind("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }

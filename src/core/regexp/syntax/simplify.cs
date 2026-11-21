@@ -16,7 +16,7 @@ partial class syntax_package {
 // may have been duplicated or removed. For example, the simplified form
 // for /(x){1,2}/ is /(x)(x)?/ but both parentheses capture as $1.
 // The returned regexp may share structure with or be the original.
-[GoMethodBody("Simplify")] internal static ж<Regexp> Simplifyᴍ(ж<Regexp> Ꮡre) {
+internal static ж<Regexp> Simplify⁔(/*this*/ ж<Regexp> Ꮡre) {
     ref var re = ref Ꮡre.DerefOrNull();
 
     if (Ꮡre == nil) {

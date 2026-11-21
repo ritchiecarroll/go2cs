@@ -18,15 +18,15 @@ partial struct TypeParamList {
 
 // Len returns the number of type parameters in the list.
 // It is safe to call on a nil receiver.
-[GoMethodBody("Len")] internal static nint Lenᴍ(ж<TypeParamList> Ꮡl) { return len(Ꮡl.list()); }
+internal static nint Len⁔(/*this*/ ж<TypeParamList> Ꮡl) { return len(Ꮡl.list()); }
 
 // At returns the i'th type parameter in the list.
-[GoMethodBody("At")] internal static ж<TypeParam> Atᴍ(ref TypeParamList l, nint i) { return l.tparams[i]; }
+internal static ж<TypeParam> At⁔(/*this*/ ref TypeParamList l, nint i) { return l.tparams[i]; }
 
 // list is for internal use where we expect a []*TypeParam.
 // TODO(rfindley): list should probably be eliminated: we can pass around a
 // TypeParamList instead.
-[GoMethodBody("list")] internal static slice<ж<TypeParam>> listᴍ(ж<TypeParamList> Ꮡl) {
+internal static slice<ж<TypeParam>> list⁔(/*this*/ ж<TypeParamList> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (Ꮡl == nil) {
@@ -54,15 +54,15 @@ internal static ж<TypeList> newTypeList(slice<Type> list) {
 
 // Len returns the number of types in the list.
 // It is safe to call on a nil receiver.
-[GoMethodBody("Len")] internal static nint Lenᴍ(ж<TypeList> Ꮡl) { return len(Ꮡl.list()); }
+internal static nint Len⁔(/*this*/ ж<TypeList> Ꮡl) { return len(Ꮡl.list()); }
 
 // At returns the i'th type in the list.
-[GoMethodBody("At")] internal static Type Atᴍ(ref TypeList l, nint i) { return l.types[i]; }
+internal static Type At⁔(/*this*/ ref TypeList l, nint i) { return l.types[i]; }
 
 // list is for internal use where we expect a []Type.
 // TODO(rfindley): list should probably be eliminated: we can pass around a
 // TypeList instead.
-[GoMethodBody("list")] internal static slice<Type> listᴍ(ж<TypeList> Ꮡl) {
+internal static slice<Type> list⁔(/*this*/ ж<TypeList> Ꮡl) {
     ref var l = ref Ꮡl.DerefOrNull();
 
     if (Ꮡl == nil) {

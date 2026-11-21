@@ -47,10 +47,10 @@ partial struct pooledFlateWriter {
 } partial class zip_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string writeAfterCloseˢᴍpooledFlateWriter => ref writeAfterCloseˢᵇᴍpooledFlateWriter;
-private static readonly @string writeAfterCloseˢᵇᴍpooledFlateWriter = "Write after Close"u8;
+internal static ref readonly @string writeAfterCloseˢ⁔pooledFlateWriter => ref writeAfterCloseˢᵇ⁔pooledFlateWriter;
+private static readonly @string writeAfterCloseˢᵇ⁔pooledFlateWriter = "Write after Close"u8;
 
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ж<pooledFlateWriter> Ꮡw, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ж<pooledFlateWriter> Ꮡw, slice<byte> p) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -60,7 +60,7 @@ private static readonly @string writeAfterCloseˢᵇᴍpooledFlateWriter = "Writ
         w.mu.Lock();
         defer(Ꮡw.Ꮡmu.Unlock, ref ᒐ);
         if (w.fw == nil) {
-            (n, err) = (0, errors.New(writeAfterCloseˢᴍpooledFlateWriter)); goto ᒐdone;
+            (n, err) = (0, errors.New(writeAfterCloseˢ⁔pooledFlateWriter)); goto ᒐdone;
         }
         (n, err) = w.fw.Write(p);
     }
@@ -69,7 +69,7 @@ private static readonly @string writeAfterCloseˢᵇᴍpooledFlateWriter = "Writ
     ᒐdone: return (n, err);
 }
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<pooledFlateWriter> Ꮡw) {
+internal static error Close⁔(/*this*/ ж<pooledFlateWriter> Ꮡw) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -112,10 +112,10 @@ partial struct pooledFlateReader {
 } partial class zip_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string readAfterCloseˢᴍpooledFlateReader => ref readAfterCloseˢᵇᴍpooledFlateReader;
-private static readonly @string readAfterCloseˢᵇᴍpooledFlateReader = "Read after Close"u8;
+internal static ref readonly @string readAfterCloseˢ⁔pooledFlateReader => ref readAfterCloseˢᵇ⁔pooledFlateReader;
+private static readonly @string readAfterCloseˢᵇ⁔pooledFlateReader = "Read after Close"u8;
 
-[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ж<pooledFlateReader> Ꮡr, slice<byte> p) {
+internal static (nint n, error err) Read⁔(/*this*/ ж<pooledFlateReader> Ꮡr, slice<byte> p) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -125,7 +125,7 @@ private static readonly @string readAfterCloseˢᵇᴍpooledFlateReader = "Read 
         r.mu.Lock();
         defer(Ꮡr.Ꮡmu.Unlock, ref ᒐ);
         if (r.fr == nil) {
-            (n, err) = (0, errors.New(readAfterCloseˢᴍpooledFlateReader)); goto ᒐdone;
+            (n, err) = (0, errors.New(readAfterCloseˢ⁔pooledFlateReader)); goto ᒐdone;
         }
         (n, err) = r.fr.Read(p);
     }
@@ -134,7 +134,7 @@ private static readonly @string readAfterCloseˢᵇᴍpooledFlateReader = "Read 
     ᒐdone: return (n, err);
 }
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<pooledFlateReader> Ꮡr) {
+internal static error Close⁔(/*this*/ ж<pooledFlateReader> Ꮡr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

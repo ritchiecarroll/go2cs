@@ -597,24 +597,24 @@ partial struct sysMemStat /*num:uint64*/;
 // Must be nosplit as it is called in runtime initialization, e.g. newosproc0.
 //
 //go:nosplit
-[GoMethodBody("load")] internal static uint64 loadᴍ(ж<sysMemStat> Ꮡs) {
+internal static uint64 load⁔(/*this*/ ж<sysMemStat> Ꮡs) {
     return atomic.Load64(Ꮡs.Reinterpret<sysMemStat, uint64>());
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sysMemStatOverflowˢᴍsysMemStat => ref sysMemStatOverflowˢᵇᴍsysMemStat;
-private static readonly @string sysMemStatOverflowˢᵇᴍsysMemStat = "sysMemStat overflow"u8;
+internal static ref readonly @string sysMemStatOverflowˢ⁔sysMemStat => ref sysMemStatOverflowˢᵇ⁔sysMemStat;
+private static readonly @string sysMemStatOverflowˢᵇ⁔sysMemStat = "sysMemStat overflow"u8;
 
 // add atomically adds the sysMemStat by n.
 //
 // Must be nosplit as it is called in runtime initialization, e.g. newosproc0.
 //
 //go:nosplit
-[GoMethodBody("add")] internal static void addᴍ(ж<sysMemStat> Ꮡs, int64 n) {
+internal static void add⁔(/*this*/ ж<sysMemStat> Ꮡs, int64 n) {
     var val = atomic.Xadd64(Ꮡs.Reinterpret<sysMemStat, uint64>(), n);
     if ((n > 0 && (int64)val < n) || (n < 0 && (int64)val + n < n)) {
         print((@string)"runtime: val=", val, (@string)" n=", n, (@string)"\n");
-        @throw(sysMemStatOverflowˢᴍsysMemStat);
+        @throw(sysMemStatOverflowˢ⁔sysMemStat);
     }
 }
 
@@ -650,7 +650,7 @@ partial struct heapStatsDelta {
 // fields may be unaligned and fail on 32-bit platforms.
 
 // merge adds in the deltas from b into a.
-[GoMethodBody("merge")] internal static void mergeᴍ(ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) {
+internal static void merge⁔(/*this*/ ref heapStatsDelta a, ж<heapStatsDelta> Ꮡb) {
     ref var b = ref Ꮡb.DerefOrNull();
 
     a.committed += b.committed;
@@ -718,8 +718,8 @@ partial struct consistentHeapStats {
 } partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string badSequenceNumberˢᴍconsistentHeapStats => ref badSequenceNumberˢᵇᴍconsistentHeapStats;
-private static readonly @string badSequenceNumberˢᵇᴍconsistentHeapStats = "bad sequence number"u8;
+internal static ref readonly @string badSequenceNumberˢ⁔consistentHeapStats => ref badSequenceNumberˢᵇ⁔consistentHeapStats;
+private static readonly @string badSequenceNumberˢᵇ⁔consistentHeapStats = "bad sequence number"u8;
 
 // acquire returns a heapStatsDelta to be updated. In effect,
 // it acquires the shard for writing. release must be called
@@ -738,7 +738,7 @@ private static readonly @string badSequenceNumberˢᵇᴍconsistentHeapStats = "
 // function.
 //
 //go:nosplit
-[GoMethodBody("acquire")] internal static ж<heapStatsDelta> acquireᴍ(ж<consistentHeapStats> Ꮡm) {
+internal static ж<heapStatsDelta> acquire⁔(/*this*/ ж<consistentHeapStats> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
@@ -746,7 +746,7 @@ private static readonly @string badSequenceNumberˢᵇᴍconsistentHeapStats = "
         if (seq % 2 == 0) {
             // Should have been incremented to odd.
             print((@string)"runtime: seq=", seq, (@string)"\n");
-            @throw(badSequenceNumberˢᴍconsistentHeapStats);
+            @throw(badSequenceNumberˢ⁔consistentHeapStats);
         }
     } else {
         @lock(Ꮡm.ᏑnoPLock);
@@ -769,7 +769,7 @@ private static readonly @string badSequenceNumberˢᵇᴍconsistentHeapStats = "
 // before this operation has completed.
 //
 //go:nosplit
-[GoMethodBody("release")] internal static void releaseᴍ(ж<consistentHeapStats> Ꮡm) {
+internal static void release⁔(/*this*/ ж<consistentHeapStats> Ꮡm) {
     ref var m = ref Ꮡm.DerefOrNull();
 
     var pp = (~(~getg()).m).p.ptr(); if (pp != nil) {
@@ -777,7 +777,7 @@ private static readonly @string badSequenceNumberˢᵇᴍconsistentHeapStats = "
         if (seq % 2 != 0) {
             // Should have been incremented to even.
             print((@string)"runtime: seq=", seq, (@string)"\n");
-            @throw(badSequenceNumberˢᴍconsistentHeapStats);
+            @throw(badSequenceNumberˢ⁔consistentHeapStats);
         }
     } else {
         unlock(Ꮡm.ᏑnoPLock);
@@ -788,7 +788,7 @@ private static readonly @string badSequenceNumberˢᵇᴍconsistentHeapStats = "
 //
 // Unsafe because it does so without any synchronization. The
 // world must be stopped.
-[GoMethodBody("unsafeRead")] internal static void unsafeReadᴍ(ref consistentHeapStats m, ж<heapStatsDelta> Ꮡout) {
+internal static void unsafeRead⁔(/*this*/ ref consistentHeapStats m, ж<heapStatsDelta> Ꮡout) {
     ref var @out = ref Ꮡout.DerefOrNull();
 
     assertWorldStopped();
@@ -802,7 +802,7 @@ private static readonly @string badSequenceNumberˢᵇᴍconsistentHeapStats = "
 //
 // Unsafe because the world must be stopped and values should
 // be donated elsewhere before clearing.
-[GoMethodBody("unsafeClear")] internal static void unsafeClearᴍ(ref consistentHeapStats m) {
+internal static void unsafeClear⁔(/*this*/ ref consistentHeapStats m) {
     assertWorldStopped();
 
     clear(m.stats[..]);
@@ -836,7 +836,7 @@ partial struct cpuStats {
 // the actual time spent paused, for orthogonality. maxProcs should be GOMAXPROCS,
 // not work.stwprocs, since this number must be comparable to a total time computed
 // from GOMAXPROCS.
-[GoMethodBody("accumulateGCPauseTime")] internal static void accumulateGCPauseTimeᴍ(ref cpuStats s, int64 dt, int32 maxProcs) {
+internal static void accumulateGCPauseTime⁔(/*this*/ ref cpuStats s, int64 dt, int32 maxProcs) {
     var cpu = dt * (int64)maxProcs;
     s.GCPauseTime += cpu;
     s.GCTotalTime += cpu;
@@ -847,7 +847,7 @@ partial struct cpuStats {
 //
 // gcMarkPhase indicates that we're in the mark phase and that certain counter
 // values should be used.
-[GoMethodBody("accumulate")] internal static void accumulateᴍ(ref cpuStats s, int64 now, bool gcMarkPhase) {
+internal static void accumulate⁔(/*this*/ ref cpuStats s, int64 now, bool gcMarkPhase) {
     // N.B. Mark termination and sweep termination pauses are
     // accumulated in work.cpuStats at the end of their respective pauses.
     int64 markAssistCpu = default;

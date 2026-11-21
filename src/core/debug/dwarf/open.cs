@@ -122,7 +122,7 @@ public static (ж<Data>, error) New(slice<byte> abbrev, slice<byte> aranges, sli
 // typical object with DWARF version 4 debug info will have multiple
 // .debug_types sections. The name is used for error reporting only,
 // and serves to distinguish one .debug_types section from another.
-[GoMethodBody("AddTypes")] internal static error AddTypesᴍ(ж<Data> Ꮡd, @string name, slice<byte> types) {
+internal static error AddTypes⁔(/*this*/ ж<Data> Ꮡd, @string name, slice<byte> types) {
     return Ꮡd.parseTypes(name, types);
 }
 
@@ -130,7 +130,7 @@ public static (ж<Data>, error) New(slice<byte> abbrev, slice<byte> aranges, sli
 // DWARF section name such as ".debug_addr", ".debug_str_offsets", and
 // so forth. This approach is used for new DWARF sections added in
 // DWARF 5 and later.
-[GoMethodBody("AddSection")] internal static error AddSectionᴍ(ref Data d, @string name, slice<byte> contents) {
+internal static error AddSection⁔(/*this*/ ref Data d, @string name, slice<byte> contents) {
     error err = default;
     switch (ᐧ) {
     case {} when name == ".debug_addr"u8: {

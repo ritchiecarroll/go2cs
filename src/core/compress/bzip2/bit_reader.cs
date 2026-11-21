@@ -35,7 +35,7 @@ internal static bitReader newBitReader(io.Reader r) {
 // ReadBits64 reads the given number of bits and returns them in the
 // least-significant part of a uint64. In the event of an error, it returns 0
 // and the error can be obtained by calling bitReader.Err().
-[GoMethodBody("ReadBits64")] internal static uint64 /*n*/ ReadBits64ᴍ(ref bitReader br, nuint bits) {
+internal static uint64 /*n*/ ReadBits64⁔(/*this*/ ref bitReader br, nuint bits) {
     uint64 n = default;
 
     while (bits > br.bits) {
@@ -71,17 +71,17 @@ internal static bitReader newBitReader(io.Reader r) {
     return n;
 }
 
-[GoMethodBody("ReadBits")] internal static nint /*n*/ ReadBitsᴍ(ref bitReader br, nuint bits) {
+internal static nint /*n*/ ReadBits⁔(/*this*/ ref bitReader br, nuint bits) {
     var n64 = br.ReadBits64(bits);
     return (nint)n64;
 }
 
-[GoMethodBody("ReadBit")] internal static bool ReadBitᴍ(ref bitReader br) {
+internal static bool ReadBit⁔(/*this*/ ref bitReader br) {
     nint n = br.ReadBits(1);
     return n != 0;
 }
 
-[GoMethodBody("Err")] internal static error Errᴍ(ref bitReader br) {
+internal static error Err⁔(/*this*/ ref bitReader br) {
     return br.err;
 }
 

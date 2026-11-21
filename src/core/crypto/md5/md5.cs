@@ -51,7 +51,7 @@ partial struct digest {
 
 } partial class md5_package {
 
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref digest d) {
+internal static void Reset⁔(/*this*/ ref digest d) {
     d.s[0] = init0;
     d.s[1] = init1;
     d.s[2] = init2;
@@ -68,11 +68,11 @@ internal const nint marshaledSize = /* len(magic) + 4*4 + BlockSize + 8 */ 92;
 
 } partial class md5_package {
 
-[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(ref digest d) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
-[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ref digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, d.s[0]);
     b = byteorder.BEAppendUint32(b, d.s[1]);
@@ -85,17 +85,17 @@ internal const nint marshaledSize = /* len(magic) + 4*4 + BlockSize + 8 */ 92;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cryptoMd5InvalidHashˢᴍdigest => ref cryptoMd5InvalidHashˢᵇᴍdigest;
-private static readonly @string cryptoMd5InvalidHashˢᵇᴍdigest = "crypto/md5: invalid hash state identifier"u8;
-internal static ref readonly @string cryptoMd5InvalidHashˢ2ᴍdigest => ref cryptoMd5InvalidHashˢ2ᵇᴍdigest;
-private static readonly @string cryptoMd5InvalidHashˢ2ᵇᴍdigest = "crypto/md5: invalid hash state size"u8;
+internal static ref readonly @string cryptoMd5InvalidHashˢ⁔digest => ref cryptoMd5InvalidHashˢᵇ⁔digest;
+private static readonly @string cryptoMd5InvalidHashˢᵇ⁔digest = "crypto/md5: invalid hash state identifier"u8;
+internal static ref readonly @string cryptoMd5InvalidHashˢ2⁔digest => ref cryptoMd5InvalidHashˢ2ᵇ⁔digest;
+private static readonly @string cryptoMd5InvalidHashˢ2ᵇ⁔digest = "crypto/md5: invalid hash state size"u8;
 
-[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref digest d, slice<byte> b) {
+internal static error UnmarshalBinary⁔(/*this*/ ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
-        return errors.New(cryptoMd5InvalidHashˢᴍdigest);
+        return errors.New(cryptoMd5InvalidHashˢ⁔digest);
     }
     if (len(b) != marshaledSize) {
-        return errors.New(cryptoMd5InvalidHashˢ2ᴍdigest);
+        return errors.New(cryptoMd5InvalidHashˢ2⁔digest);
     }
     b = b[(int)(len(magic))..];
     (b, d.s[0]) = consumeUint32(b);
@@ -120,7 +120,7 @@ internal static (slice<byte>, uint32) consumeUint32(slice<byte> b) {
 
 } partial class md5_package {
 
-[GoMethodBody("Clone")] internal static (hash.Cloner, error) Cloneᴍ(ref digest d) {
+internal static (hash.Cloner, error) Clone⁔(/*this*/ ref digest d) {
     ref var r = ref heap<digest>(d.ΔClone(), out var Ꮡr);
     return (new digestжCloner(Ꮡr), default);
 }
@@ -139,21 +139,21 @@ public static hash.Hash New() {
 
 } partial class md5_package {
 
-[GoMethodBody("Size")] internal static nint Sizeᴍ(ref digest d) { return md5.Size; }
+internal static nint Size⁔(/*this*/ ref digest d) { return md5.Size; }
 
-[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref digest d) { return md5.BlockSize; }
+internal static nint BlockSize⁔(/*this*/ ref digest d) { return md5.BlockSize; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cryptoMd5UseOfMd5IsNotˢᴍdigest => ref cryptoMd5UseOfMd5IsNotˢᵇᴍdigest;
-private static readonly @string cryptoMd5UseOfMd5IsNotˢᵇᴍdigest = "crypto/md5: use of MD5 is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string cryptoMd5UseOfMd5IsNotˢ⁔digest => ref cryptoMd5UseOfMd5IsNotˢᵇ⁔digest;
+private static readonly @string cryptoMd5UseOfMd5IsNotˢᵇ⁔digest = "crypto/md5: use of MD5 is not allowed in FIPS 140-only mode"u8;
 
-[GoMethodBody("Write")] internal static (nint nn, error err) Writeᴍ(ж<digest> Ꮡd, slice<byte> p) {
+internal static (nint nn, error err) Write⁔(/*this*/ ж<digest> Ꮡd, slice<byte> p) {
     nint nn = default;
     error err = default;
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (fips140only.Enforced()) {
-        return (0, errors.New(cryptoMd5UseOfMd5IsNotˢᴍdigest));
+        return (0, errors.New(cryptoMd5UseOfMd5IsNotˢ⁔digest));
     }
     // Note that we currently call block or blockGeneric
     // directly (guarded using haveAsm) because this allows
@@ -193,14 +193,14 @@ private static readonly @string cryptoMd5UseOfMd5IsNotˢᵇᴍdigest = "crypto/m
     return (nn, err);
 }
 
-[GoMethodBody("Sum")] internal static slice<byte> Sumᴍ(ref digest d, slice<byte> @in) {
+internal static slice<byte> Sum⁔(/*this*/ ref digest d, slice<byte> @in) {
     // Make a copy of d so that caller can keep writing and summing.
     ref var d0 = ref heap<digest>(d.ΔClone(), out var Ꮡd0);
     var hash = Ꮡd0.checkSum();
     return appendꓸꓸꓸ(@in, hash[..]);
 }
 
-[GoMethodBody("checkSum")] internal static array<byte> checkSumᴍ(ж<digest> Ꮡd) {
+internal static array<byte> checkSum⁔(/*this*/ ж<digest> Ꮡd) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     if (fips140only.Enforced()) {

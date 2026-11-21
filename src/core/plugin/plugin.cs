@@ -126,7 +126,7 @@ public static (ж<Plugin>, error) Open(@string path) {
 // A symbol is any exported variable or function.
 // It reports an error if the symbol is not found.
 // It is safe for concurrent use by multiple goroutines.
-[GoMethodBody("Lookup")] internal static (Symbol, error) Lookupᴍ(ж<Plugin> Ꮡp, @string symName) {
+internal static (Symbol, error) Lookup⁔(/*this*/ ж<Plugin> Ꮡp, @string symName) {
     return lookup(ref (Ꮡp).DerefOrNull(), symName);
 }
 

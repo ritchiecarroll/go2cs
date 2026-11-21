@@ -14,7 +14,7 @@ partial class poll_package {
 
 // eofError returns io.EOF when fd is available for reading end of
 // file.
-[GoMethodBody("eofError")] internal static error eofErrorᴍ(ref FD fd, nint n, error err) {
+internal static error eofError⁔(/*this*/ ref FD fd, nint n, error err) {
     if (n == 0 && err == nil && fd.ZeroReadIsEOF) {
         return io.EOF;
     }
@@ -22,7 +22,7 @@ partial class poll_package {
 }
 
 // Shutdown wraps syscall.Shutdown.
-[GoMethodBody("Shutdown")] internal static error Shutdownᴍ(ж<FD> Ꮡfd, nint how) {
+internal static error Shutdown⁔(/*this*/ ж<FD> Ꮡfd, nint how) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -39,7 +39,7 @@ partial class poll_package {
 }
 
 // Fchown wraps syscall.Fchown.
-[GoMethodBody("Fchown")] internal static error Fchownᴍ(ж<FD> Ꮡfd, nint uid, nint gid) {
+internal static error Fchown⁔(/*this*/ ж<FD> Ꮡfd, nint uid, nint gid) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -54,7 +54,7 @@ partial class poll_package {
 }
 
 // Ftruncate wraps syscall.Ftruncate.
-[GoMethodBody("Ftruncate")] internal static error Ftruncateᴍ(ж<FD> Ꮡfd, int64 size) {
+internal static error Ftruncate⁔(/*this*/ ж<FD> Ꮡfd, int64 size) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -70,7 +70,7 @@ partial class poll_package {
 
 // RawControl invokes the user-defined function f for a non-IO
 // operation.
-[GoMethodBody("RawControl")] internal static error RawControlᴍ(ж<FD> Ꮡfd, Action<uintptr> f) {
+internal static error RawControl⁔(/*this*/ ж<FD> Ꮡfd, Action<uintptr> f) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

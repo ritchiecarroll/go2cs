@@ -11,7 +11,7 @@ partial class poll_package {
 } partial class poll_package {
 
 // WSAIoctl wraps the WSAIoctl network call.
-[GoMethodBody("WSAIoctl")] internal static error WSAIoctlᴍ(ж<FD> Ꮡfd, uint32 iocc, ж<byte> inbuf, uint32 cbif, ж<byte> outbuf, uint32 cbob, ж<uint32> cbbr, ж<Δsyscall.Overlapped> overlapped, uintptr completionRoutine) {
+internal static error WSAIoctl⁔(/*this*/ ж<FD> Ꮡfd, uint32 iocc, ж<byte> inbuf, uint32 cbif, ж<byte> outbuf, uint32 cbob, ж<uint32> cbbr, ж<Δsyscall.Overlapped> overlapped, uintptr completionRoutine) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

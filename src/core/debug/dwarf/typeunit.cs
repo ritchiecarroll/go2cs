@@ -25,13 +25,13 @@ partial struct typeUnit {
 } partial class dwarf_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string typeUnitLengthOverflowˢᴍData => ref typeUnitLengthOverflowˢᵇᴍData;
-private static readonly @string typeUnitLengthOverflowˢᵇᴍData = "type unit length overflow"u8;
-internal static ref readonly @string typeUnitTypeOffsetˢᴍData => ref typeUnitTypeOffsetˢᵇᴍData;
-private static readonly @string typeUnitTypeOffsetˢᵇᴍData = "type unit type offset overflow"u8;
+internal static ref readonly @string typeUnitLengthOverflowˢ⁔Data => ref typeUnitLengthOverflowˢᵇ⁔Data;
+private static readonly @string typeUnitLengthOverflowˢᵇ⁔Data = "type unit length overflow"u8;
+internal static ref readonly @string typeUnitTypeOffsetˢ⁔Data => ref typeUnitTypeOffsetˢᵇ⁔Data;
+private static readonly @string typeUnitTypeOffsetˢᵇ⁔Data = "type unit type offset overflow"u8;
 
 // Parse a .debug_types section.
-[GoMethodBody("parseTypes")] internal static error parseTypesᴍ(ж<Data> Ꮡd, @string name, slice<byte> types) {
+internal static error parseTypes⁔(/*this*/ ж<Data> Ꮡd, @string name, slice<byte> types) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var b = makeBuf(Ꮡd, new unknownFormat(), name, 0, types);
@@ -39,7 +39,7 @@ private static readonly @string typeUnitTypeOffsetˢᵇᴍData = "type unit type
         var @base = b.off;
         var (n, dwarf64) = b.unitLength();
         if (n != ((Offset)(uint32)n)) {
-            b.error(typeUnitLengthOverflowˢᴍData);
+            b.error(typeUnitLengthOverflowˢ⁔Data);
             return b.err;
         }
         var hdroff = b.off;
@@ -67,7 +67,7 @@ private static readonly @string typeUnitTypeOffsetˢᵇᴍData = "type unit type
         } else {
             var to64 = b.uint64();
             if (to64 != (uint64)(uint32)to64) {
-                b.error(typeUnitTypeOffsetˢᴍData);
+                b.error(typeUnitTypeOffsetˢ⁔Data);
                 return b.err;
             }
             toff = (uint32)to64;
@@ -95,7 +95,7 @@ private static readonly @string typeUnitTypeOffsetˢᵇᴍData = "type unit type
 }
 
 // Return the type for a type signature.
-[GoMethodBody("sigToType")] internal static (Type, error) sigToTypeᴍ(ж<Data> Ꮡd, uint64 sig) {
+internal static (Type, error) sigToType⁔(/*this*/ ж<Data> Ꮡd, uint64 sig) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     var tu = d.typeSigs[sig];
@@ -130,7 +130,7 @@ partial struct typeUnitReader {
 } partial class dwarf_package {
 
 // Seek to a new position in the type unit.
-[GoMethodBody("Seek")] internal static void Seekᴍ(ref typeUnitReader tur, Offset off) {
+internal static void Seek⁔(/*this*/ ref typeUnitReader tur, Offset off) {
     tur.err = default;
     var doff = off - tur.tu.off;
     if (doff < 0 || doff >= ((Offset)(uint32)len(tur.tu.data))) {
@@ -141,12 +141,12 @@ partial struct typeUnitReader {
 }
 
 // AddressSize returns the size in bytes of addresses in the current type unit.
-[GoMethodBody("AddressSize")] internal static nint AddressSizeᴍ(ref typeUnitReader tur) {
+internal static nint AddressSize⁔(/*this*/ ref typeUnitReader tur) {
     return tur.tu.unit.asize;
 }
 
 // Next reads the next [Entry] from the type unit.
-[GoMethodBody("Next")] internal static (ж<Entry>, error) Nextᴍ(ж<typeUnitReader> Ꮡtur) {
+internal static (ж<Entry>, error) Next⁔(/*this*/ ж<typeUnitReader> Ꮡtur) {
     ref var tur = ref Ꮡtur.DerefOrNull();
 
     if (tur.err != nil) {
@@ -164,7 +164,7 @@ partial struct typeUnitReader {
 }
 
 // clone returns a new reader for the type unit.
-[GoMethodBody("clone")] internal static typeReader cloneᴍ(ref typeUnitReader tur) {
+internal static typeReader clone⁔(/*this*/ ref typeUnitReader tur) {
     return new typeUnitReaderжtypeReader(Ꮡ(new typeUnitReader(
         d: tur.d,
         tu: tur.tu,
@@ -173,7 +173,7 @@ partial struct typeUnitReader {
 }
 
 // offset returns the current offset.
-[GoMethodBody("offset")] internal static Offset offsetᴍ(ref typeUnitReader tur) {
+internal static Offset offset⁔(/*this*/ ref typeUnitReader tur) {
     return tur.b.off;
 }
 

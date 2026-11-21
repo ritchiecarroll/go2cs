@@ -24,8 +24,8 @@ partial struct MemProfileRecord {
 
 } partial class profilerecord_package {
 
-[GoMethodBody("InUseBytes")] internal static int64 InUseBytesᴍ(ref MemProfileRecord r) { return r.AllocBytes - r.FreeBytes; }
-[GoMethodBody("InUseObjects")] internal static int64 InUseObjectsᴍ(ref MemProfileRecord r) { return r.AllocObjects - r.FreeObjects; }
+internal static int64 InUseBytes⁔(/*this*/ ref MemProfileRecord r) { return r.AllocBytes - r.FreeBytes; }
+internal static int64 InUseObjects⁔(/*this*/ ref MemProfileRecord r) { return r.AllocObjects - r.FreeObjects; }
 
 } partial class profilerecord_package {
 

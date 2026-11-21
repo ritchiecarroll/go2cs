@@ -52,7 +52,7 @@ partial struct PublicKey /*[]byte*/;
 // PrivateKey, as the latter embeds the former and will expose its methods.
 
 // Equal reports whether pub and x have the same value.
-[GoMethodBody("Equal")] internal static bool Equalᴍ(PublicKey pub, cryptoꓸPublicKey x) {
+internal static bool Equal⁔(/*this*/ PublicKey pub, cryptoꓸPublicKey x) {
     var (xx, ok) = x._<PublicKey>(ᐧ);
     if (!ok) {
         return false;
@@ -68,14 +68,14 @@ partial struct PrivateKey /*[]byte*/;
 } partial class ed25519_package {
 
 // Public returns the [PublicKey] corresponding to priv.
-[GoMethodBody("Public")] internal static cryptoꓸPublicKey Publicᴍ(PrivateKey priv) {
+internal static cryptoꓸPublicKey Public⁔(/*this*/ PrivateKey priv) {
     var publicKey = new slice<byte>(PublicKeySize);
     copy(publicKey, priv[32..]);
     return (PublicKey)publicKey;
 }
 
 // Equal reports whether priv and x have the same value.
-[GoMethodBody("Equal")] internal static bool Equalᴍ(PrivateKey priv, cryptoꓸPrivateKey x) {
+internal static bool Equal⁔(/*this*/ PrivateKey priv, cryptoꓸPrivateKey x) {
     var (xx, ok) = x._<PrivateKey>(ᐧ);
     if (!ok) {
         return false;
@@ -86,7 +86,7 @@ partial struct PrivateKey /*[]byte*/;
 // Seed returns the private key seed corresponding to priv. It is provided for
 // interoperability with RFC 8032. RFC 8032's private keys correspond to seeds
 // in this package.
-[GoMethodBody("Seed")] internal static slice<byte> Seedᴍ(PrivateKey priv) {
+internal static slice<byte> Seed⁔(/*this*/ PrivateKey priv) {
     return appendꓸꓸꓸ(new slice<byte>(0, SeedSize), priv[..(int)(SeedSize)]);
 }
 
@@ -100,10 +100,10 @@ internal static ref fips140cache.Cache<byte, ed25519.PrivateKey> privateKeyCache
 } partial class ed25519_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string cryptoEd25519UseOfˢᴍPrivateKey => ref cryptoEd25519UseOfˢᵇᴍPrivateKey;
-private static readonly @string cryptoEd25519UseOfˢᵇᴍPrivateKey = "crypto/ed25519: use of Ed25519ctx is not allowed in FIPS 140-only mode"u8;
-internal static ref readonly @string ed25519ExpectedOptsˢᴍPrivateKey => ref ed25519ExpectedOptsˢᵇᴍPrivateKey;
-private static readonly @string ed25519ExpectedOptsˢᵇᴍPrivateKey = "ed25519: expected opts.HashFunc() zero (unhashed message, for standard Ed25519) or SHA-512 (for Ed25519ph)"u8;
+internal static ref readonly @string cryptoEd25519UseOfˢ⁔PrivateKey => ref cryptoEd25519UseOfˢᵇ⁔PrivateKey;
+private static readonly @string cryptoEd25519UseOfˢᵇ⁔PrivateKey = "crypto/ed25519: use of Ed25519ctx is not allowed in FIPS 140-only mode"u8;
+internal static ref readonly @string ed25519ExpectedOptsˢ⁔PrivateKey => ref ed25519ExpectedOptsˢᵇ⁔PrivateKey;
+private static readonly @string ed25519ExpectedOptsˢᵇ⁔PrivateKey = "ed25519: expected opts.HashFunc() zero (unhashed message, for standard Ed25519) or SHA-512 (for Ed25519ph)"u8;
 
 // Sign signs the given message with priv. rand is ignored and can be nil.
 //
@@ -114,7 +114,7 @@ private static readonly @string ed25519ExpectedOptsˢᵇᴍPrivateKey = "ed25519
 //
 // A value of type [Options] can be used as opts, or crypto.Hash(0) or
 // crypto.SHA512 directly to select plain Ed25519 or Ed25519ph, respectively.
-[GoMethodBody("Sign")] internal static (slice<byte> signature, error err) Signᴍ(PrivateKey priv, io.Reader rand, slice<byte> message, crypto.SignerOpts opts) {
+internal static (slice<byte> signature, error err) Sign⁔(/*this*/ PrivateKey priv, io.Reader rand, slice<byte> message, crypto.SignerOpts opts) {
     error err = default;
 
     var privʗ1 = priv;
@@ -135,7 +135,7 @@ private static readonly @string ed25519ExpectedOptsˢᵇᴍPrivateKey = "ed25519
     }
     case {} when hash == ((crypto.Hash)0) && context != ""u8: { // Ed25519ctx
         if (fips140only.Enforced()) {
-            return (default, errors.New(cryptoEd25519UseOfˢᴍPrivateKey));
+            return (default, errors.New(cryptoEd25519UseOfˢ⁔PrivateKey));
         }
         return ed25519.SignCtx(k, message, context);
     }
@@ -143,7 +143,7 @@ private static readonly @string ed25519ExpectedOptsˢᵇᴍPrivateKey = "ed25519
         return (ed25519.Sign(k, message), default);
     }
     default: {
-        return (default, errors.New(ed25519ExpectedOptsˢᴍPrivateKey));
+        return (default, errors.New(ed25519ExpectedOptsˢ⁔PrivateKey));
     }}
 }
 
@@ -162,7 +162,7 @@ partial struct Options {
 } partial class ed25519_package {
 
 // HashFunc returns o.Hash.
-[GoMethodBody("HashFunc")] internal static crypto.Hash HashFuncᴍ(ref Options o) { return o.Hash; }
+internal static crypto.Hash HashFunc⁔(/*this*/ ref Options o) { return o.Hash; }
 
 } partial class ed25519_package {
 

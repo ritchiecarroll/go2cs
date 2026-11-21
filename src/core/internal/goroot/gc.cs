@@ -62,51 +62,51 @@ internal static ref gccgoDirs gccgoSearch => ref ((StaticBox<gccgoDirs>)Ꮡgccgo
 } partial class goroot_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-private static ref readonly @string gccgoˢᴍgccgoDirs => ref gccgoˢᵇᴍgccgoDirs;
-private static readonly @string gccgoˢᵇᴍgccgoDirs = "GCCGO"u8;
-private static ref readonly @string gccgoˢ2ᴍgccgoDirs => ref gccgoˢ2ᵇᴍgccgoDirs;
-private static readonly @string gccgoˢ2ᵇᴍgccgoDirs = "gccgo"u8;
-private static ref readonly @string printSearchDirsˢᴍgccgoDirs => ref printSearchDirsˢᵇᴍgccgoDirs;
-private static readonly @string printSearchDirsˢᵇᴍgccgoDirs = "-print-search-dirs"u8;
-private static ref readonly @string dumpversionˢᴍgccgoDirs => ref dumpversionˢᵇᴍgccgoDirs;
-private static readonly @string dumpversionˢᵇᴍgccgoDirs = "-dumpversion"u8;
-private static ref readonly @string dumpmachineˢᴍgccgoDirs => ref dumpmachineˢᵇᴍgccgoDirs;
-private static readonly @string dumpmachineˢᵇᴍgccgoDirs = "-dumpmachine"u8;
+private static ref readonly @string gccgoˢ⁔gccgoDirs => ref gccgoˢᵇ⁔gccgoDirs;
+private static readonly @string gccgoˢᵇ⁔gccgoDirs = "GCCGO"u8;
+private static ref readonly @string gccgoˢ2⁔gccgoDirs => ref gccgoˢ2ᵇ⁔gccgoDirs;
+private static readonly @string gccgoˢ2ᵇ⁔gccgoDirs = "gccgo"u8;
+private static ref readonly @string printSearchDirsˢ⁔gccgoDirs => ref printSearchDirsˢᵇ⁔gccgoDirs;
+private static readonly @string printSearchDirsˢᵇ⁔gccgoDirs = "-print-search-dirs"u8;
+private static ref readonly @string dumpversionˢ⁔gccgoDirs => ref dumpversionˢᵇ⁔gccgoDirs;
+private static readonly @string dumpversionˢᵇ⁔gccgoDirs = "-dumpversion"u8;
+private static ref readonly @string dumpmachineˢ⁔gccgoDirs => ref dumpmachineˢᵇ⁔gccgoDirs;
+private static readonly @string dumpmachineˢᵇ⁔gccgoDirs = "-dumpmachine"u8;
 
 // Hoisted Go string constant (single allocation; Go keeps it in RODATA)
-private static ref readonly @string prefixᶜᴍgccgoDirs => ref prefixᶜᵇᴍgccgoDirs;
-private static readonly @string prefixᶜᵇᴍgccgoDirs = "libraries: ="u8;
+private static ref readonly @string prefixᶜ⁔gccgoDirs => ref prefixᶜᵇ⁔gccgoDirs;
+private static readonly @string prefixᶜᵇ⁔gccgoDirs = "libraries: ="u8;
 
 // init finds the gccgo search directories. If this fails it leaves dirs == nil.
-[GoMethodBody("init")] internal static void initᴍ(ref gccgoDirs gd) {
+internal static void init⁔(/*this*/ ref gccgoDirs gd) {
     var lastDirsᴷ = new stackAppend<@string>();
 
-    @string gccgo = os.Getenv(gccgoˢᴍgccgoDirs);
+    @string gccgo = os.Getenv(gccgoˢ⁔gccgoDirs);
     if (gccgo == ""u8) {
-        gccgo = gccgoˢ2ᴍgccgoDirs;
+        gccgo = gccgoˢ2⁔gccgoDirs;
     }
     var (bin, err) = exec.LookPath(gccgo);
     if (err != nil) {
         return;
     }
 
-    (var allDirs, err) = exec.Command(bin, printSearchDirsˢᴍgccgoDirs).Output();
+    (var allDirs, err) = exec.Command(bin, printSearchDirsˢ⁔gccgoDirs).Output();
     if (err != nil) {
         return;
     }
-    (var versionB, err) = exec.Command(bin, dumpversionˢᴍgccgoDirs).Output();
+    (var versionB, err) = exec.Command(bin, dumpversionˢ⁔gccgoDirs).Output();
     if (err != nil) {
         return;
     }
     @string version = strings.TrimSpace((@string)versionB);
-    (var machineB, err) = exec.Command(bin, dumpmachineˢᴍgccgoDirs).Output();
+    (var machineB, err) = exec.Command(bin, dumpmachineˢ⁔gccgoDirs).Output();
     if (err != nil) {
         return;
     }
     @string machine = strings.TrimSpace((@string)machineB);
 
     var dirsEntries = strings.Split((@string)allDirs, "\n");
-    @string prefix = prefixᶜᴍgccgoDirs;
+    @string prefix = prefixᶜ⁔gccgoDirs;
     slice<@string> dirs = default;
     foreach (var (_, dirEntry) in range(dirsEntries)) {
         var (after, ok) = strings.CutPrefix(dirEntry, prefix); if (ok) {
@@ -140,7 +140,7 @@ private static readonly @string prefixᶜᵇᴍgccgoDirs = "libraries: ="u8;
 }
 
 // isStandard reports whether path is a standard library for gccgo.
-[GoMethodBody("isStandard")] internal static bool isStandardᴍ(ж<gccgoDirs> Ꮡgd, @string path) {
+internal static bool isStandard⁔(/*this*/ ж<gccgoDirs> Ꮡgd, @string path) {
     ref var gd = ref Ꮡgd.DerefOrNull();
 
     // Quick check: if the first path component has a '.', it's not

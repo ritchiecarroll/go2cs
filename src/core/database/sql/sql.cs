@@ -161,49 +161,49 @@ public static IsolationLevel LevelLinearizable => 7;
 } partial class sql_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string defaultˢᴍIsolationLevel => ref defaultˢᵇᴍIsolationLevel;
-private static readonly @string defaultˢᵇᴍIsolationLevel = "Default"u8;
-internal static ref readonly @string readUncommittedˢᴍIsolationLevel => ref readUncommittedˢᵇᴍIsolationLevel;
-private static readonly @string readUncommittedˢᵇᴍIsolationLevel = "Read Uncommitted"u8;
-internal static ref readonly @string readCommittedˢᴍIsolationLevel => ref readCommittedˢᵇᴍIsolationLevel;
-private static readonly @string readCommittedˢᵇᴍIsolationLevel = "Read Committed"u8;
-internal static ref readonly @string writeCommittedˢᴍIsolationLevel => ref writeCommittedˢᵇᴍIsolationLevel;
-private static readonly @string writeCommittedˢᵇᴍIsolationLevel = "Write Committed"u8;
-internal static ref readonly @string repeatableReadˢᴍIsolationLevel => ref repeatableReadˢᵇᴍIsolationLevel;
-private static readonly @string repeatableReadˢᵇᴍIsolationLevel = "Repeatable Read"u8;
-internal static ref readonly @string snapshotˢᴍIsolationLevel => ref snapshotˢᵇᴍIsolationLevel;
-private static readonly @string snapshotˢᵇᴍIsolationLevel = "Snapshot"u8;
-internal static ref readonly @string serializableˢᴍIsolationLevel => ref serializableˢᵇᴍIsolationLevel;
-private static readonly @string serializableˢᵇᴍIsolationLevel = "Serializable"u8;
-internal static ref readonly @string linearizableˢᴍIsolationLevel => ref linearizableˢᵇᴍIsolationLevel;
-private static readonly @string linearizableˢᵇᴍIsolationLevel = "Linearizable"u8;
+internal static ref readonly @string defaultˢ⁔IsolationLevel => ref defaultˢᵇ⁔IsolationLevel;
+private static readonly @string defaultˢᵇ⁔IsolationLevel = "Default"u8;
+internal static ref readonly @string readUncommittedˢ⁔IsolationLevel => ref readUncommittedˢᵇ⁔IsolationLevel;
+private static readonly @string readUncommittedˢᵇ⁔IsolationLevel = "Read Uncommitted"u8;
+internal static ref readonly @string readCommittedˢ⁔IsolationLevel => ref readCommittedˢᵇ⁔IsolationLevel;
+private static readonly @string readCommittedˢᵇ⁔IsolationLevel = "Read Committed"u8;
+internal static ref readonly @string writeCommittedˢ⁔IsolationLevel => ref writeCommittedˢᵇ⁔IsolationLevel;
+private static readonly @string writeCommittedˢᵇ⁔IsolationLevel = "Write Committed"u8;
+internal static ref readonly @string repeatableReadˢ⁔IsolationLevel => ref repeatableReadˢᵇ⁔IsolationLevel;
+private static readonly @string repeatableReadˢᵇ⁔IsolationLevel = "Repeatable Read"u8;
+internal static ref readonly @string snapshotˢ⁔IsolationLevel => ref snapshotˢᵇ⁔IsolationLevel;
+private static readonly @string snapshotˢᵇ⁔IsolationLevel = "Snapshot"u8;
+internal static ref readonly @string serializableˢ⁔IsolationLevel => ref serializableˢᵇ⁔IsolationLevel;
+private static readonly @string serializableˢᵇ⁔IsolationLevel = "Serializable"u8;
+internal static ref readonly @string linearizableˢ⁔IsolationLevel => ref linearizableˢᵇ⁔IsolationLevel;
+private static readonly @string linearizableˢᵇ⁔IsolationLevel = "Linearizable"u8;
 
 // String returns the name of the transaction isolation level.
-[GoMethodBody("String")] internal static @string Stringᴍ(IsolationLevel i) {
+internal static @string String⁔(/*this*/ IsolationLevel i) {
     switch (i) {
     case var ᴛ when ᴛ == LevelDefault: {
-        return defaultˢᴍIsolationLevel;
+        return defaultˢ⁔IsolationLevel;
     }
     case var ᴛ when ᴛ == LevelReadUncommitted: {
-        return readUncommittedˢᴍIsolationLevel;
+        return readUncommittedˢ⁔IsolationLevel;
     }
     case var ᴛ when ᴛ == LevelReadCommitted: {
-        return readCommittedˢᴍIsolationLevel;
+        return readCommittedˢ⁔IsolationLevel;
     }
     case var ᴛ when ᴛ == LevelWriteCommitted: {
-        return writeCommittedˢᴍIsolationLevel;
+        return writeCommittedˢ⁔IsolationLevel;
     }
     case var ᴛ when ᴛ == LevelRepeatableRead: {
-        return repeatableReadˢᴍIsolationLevel;
+        return repeatableReadˢ⁔IsolationLevel;
     }
     case var ᴛ when ᴛ == LevelSnapshot: {
-        return snapshotˢᴍIsolationLevel;
+        return snapshotˢ⁔IsolationLevel;
     }
     case var ᴛ when ᴛ == LevelSerializable: {
-        return serializableˢᴍIsolationLevel;
+        return serializableˢ⁔IsolationLevel;
     }
     case var ᴛ when ᴛ == LevelLinearizable: {
-        return linearizableˢᴍIsolationLevel;
+        return linearizableˢ⁔IsolationLevel;
     }
     default: {
         return "IsolationLevel("u8 + strconv.Itoa((nint)i) + ")"u8;
@@ -247,7 +247,7 @@ partial struct NullString {
 } partial class sql_package {
 
 // Scan implements the [Scanner] interface.
-[GoMethodBody("Scan")] internal static error Scanᴍ(ж<NullString> Ꮡns, any value) {
+internal static error Scan⁔(/*this*/ ж<NullString> Ꮡns, any value) {
     ref var ns = ref Ꮡns.DerefOrNull();
 
     if (value == nil) {
@@ -259,7 +259,7 @@ partial struct NullString {
 }
 
 // Value implements the [driver.Valuer] interface.
-[GoMethodBody("Value")] internal static (driverꓸValue, error) Valueᴍ(NullString ns) {
+internal static (driverꓸValue, error) Value⁔(/*this*/ NullString ns) {
     if (!ns.Valid) {
         return (default, default);
     }
@@ -279,7 +279,7 @@ partial struct NullInt64 {
 } partial class sql_package {
 
 // Scan implements the [Scanner] interface.
-[GoMethodBody("Scan")] internal static error Scanᴍ(ж<NullInt64> Ꮡn, any value) {
+internal static error Scan⁔(/*this*/ ж<NullInt64> Ꮡn, any value) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (value == nil) {
@@ -291,7 +291,7 @@ partial struct NullInt64 {
 }
 
 // Value implements the [driver.Valuer] interface.
-[GoMethodBody("Value")] internal static (driverꓸValue, error) Valueᴍ(NullInt64 n) {
+internal static (driverꓸValue, error) Value⁔(/*this*/ NullInt64 n) {
     if (!n.Valid) {
         return (default, default);
     }
@@ -311,7 +311,7 @@ partial struct NullInt32 {
 } partial class sql_package {
 
 // Scan implements the [Scanner] interface.
-[GoMethodBody("Scan")] internal static error Scanᴍ(ж<NullInt32> Ꮡn, any value) {
+internal static error Scan⁔(/*this*/ ж<NullInt32> Ꮡn, any value) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (value == nil) {
@@ -323,7 +323,7 @@ partial struct NullInt32 {
 }
 
 // Value implements the [driver.Valuer] interface.
-[GoMethodBody("Value")] internal static (driverꓸValue, error) Valueᴍ(NullInt32 n) {
+internal static (driverꓸValue, error) Value⁔(/*this*/ NullInt32 n) {
     if (!n.Valid) {
         return (default, default);
     }
@@ -343,7 +343,7 @@ partial struct NullInt16 {
 } partial class sql_package {
 
 // Scan implements the [Scanner] interface.
-[GoMethodBody("Scan")] internal static error Scanᴍ(ж<NullInt16> Ꮡn, any value) {
+internal static error Scan⁔(/*this*/ ж<NullInt16> Ꮡn, any value) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (value == nil) {
@@ -356,7 +356,7 @@ partial struct NullInt16 {
 }
 
 // Value implements the [driver.Valuer] interface.
-[GoMethodBody("Value")] internal static (driverꓸValue, error) Valueᴍ(NullInt16 n) {
+internal static (driverꓸValue, error) Value⁔(/*this*/ NullInt16 n) {
     if (!n.Valid) {
         return (default, default);
     }
@@ -376,7 +376,7 @@ partial struct NullByte {
 } partial class sql_package {
 
 // Scan implements the [Scanner] interface.
-[GoMethodBody("Scan")] internal static error Scanᴍ(ж<NullByte> Ꮡn, any value) {
+internal static error Scan⁔(/*this*/ ж<NullByte> Ꮡn, any value) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (value == nil) {
@@ -389,7 +389,7 @@ partial struct NullByte {
 }
 
 // Value implements the [driver.Valuer] interface.
-[GoMethodBody("Value")] internal static (driverꓸValue, error) Valueᴍ(NullByte n) {
+internal static (driverꓸValue, error) Value⁔(/*this*/ NullByte n) {
     if (!n.Valid) {
         return (default, default);
     }
@@ -409,7 +409,7 @@ partial struct NullFloat64 {
 } partial class sql_package {
 
 // Scan implements the [Scanner] interface.
-[GoMethodBody("Scan")] internal static error Scanᴍ(ж<NullFloat64> Ꮡn, any value) {
+internal static error Scan⁔(/*this*/ ж<NullFloat64> Ꮡn, any value) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (value == nil) {
@@ -421,7 +421,7 @@ partial struct NullFloat64 {
 }
 
 // Value implements the [driver.Valuer] interface.
-[GoMethodBody("Value")] internal static (driverꓸValue, error) Valueᴍ(NullFloat64 n) {
+internal static (driverꓸValue, error) Value⁔(/*this*/ NullFloat64 n) {
     if (!n.Valid) {
         return (default, default);
     }
@@ -441,7 +441,7 @@ partial struct NullBool {
 } partial class sql_package {
 
 // Scan implements the [Scanner] interface.
-[GoMethodBody("Scan")] internal static error Scanᴍ(ж<NullBool> Ꮡn, any value) {
+internal static error Scan⁔(/*this*/ ж<NullBool> Ꮡn, any value) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (value == nil) {
@@ -453,7 +453,7 @@ partial struct NullBool {
 }
 
 // Value implements the [driver.Valuer] interface.
-[GoMethodBody("Value")] internal static (driverꓸValue, error) Valueᴍ(NullBool n) {
+internal static (driverꓸValue, error) Value⁔(/*this*/ NullBool n) {
     if (!n.Valid) {
         return (default, default);
     }
@@ -473,7 +473,7 @@ partial struct NullTime {
 } partial class sql_package {
 
 // Scan implements the [Scanner] interface.
-[GoMethodBody("Scan")] internal static error Scanᴍ(ж<NullTime> Ꮡn, any value) {
+internal static error Scan⁔(/*this*/ ж<NullTime> Ꮡn, any value) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (value == nil) {
@@ -485,7 +485,7 @@ partial struct NullTime {
 }
 
 // Value implements the [driver.Valuer] interface.
-[GoMethodBody("Value")] internal static (driverꓸValue, error) Valueᴍ(NullTime n) {
+internal static (driverꓸValue, error) Value⁔(/*this*/ NullTime n) {
     if (!n.Valid) {
         return (default, default);
     }
@@ -515,7 +515,7 @@ partial struct Null<T> {
 
 } partial class sql_package {
 
-[GoMethodBody("Scan")] internal static error Scanᴍ<T>(ж<Null<T>> Ꮡn, any value) {
+internal static error Scan⁔<T>(/*this*/ ж<Null<T>> Ꮡn, any value) {
     ref var n = ref Ꮡn.DerefOrNull();
 
     if (value == nil) {
@@ -526,7 +526,7 @@ partial struct Null<T> {
     return convertAssign(Ꮡn.ᏑV, value);
 }
 
-[GoMethodBody("Value")] internal static (driverꓸValue, error) Valueᴍ<T>(Null<T> n) {
+internal static (driverꓸValue, error) Value⁔<T>(/*this*/ Null<T> n) {
     if (!n.Valid) {
         return (default, default);
     }
@@ -669,13 +669,13 @@ partial struct driverConn {
 
 } partial class sql_package {
 
-[GoMethodBody("releaseConn")] internal static void releaseConnᴍ(ж<driverConn> Ꮡdc, error err) {
+internal static void releaseConn⁔(/*this*/ ж<driverConn> Ꮡdc, error err) {
     ref var dc = ref Ꮡdc.DerefOrNull();
 
     dc.db.putConn(Ꮡdc, err, true);
 }
 
-[GoMethodBody("removeOpenStmt")] internal static void removeOpenStmtᴍ(ж<driverConn> Ꮡdc, ж<driverStmt> ds) {
+internal static void removeOpenStmt⁔(/*this*/ ж<driverConn> Ꮡdc, ж<driverStmt> ds) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -689,7 +689,7 @@ partial struct driverConn {
     finally { if (ᒐd1) Ꮡdc.of(driverConn.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("expired")] internal static bool expiredᴍ(ref driverConn dc, time.Duration timeout) {
+internal static bool expired⁔(/*this*/ ref driverConn dc, time.Duration timeout) {
     if (timeout <= 0) {
         return false;
     }
@@ -698,7 +698,7 @@ partial struct driverConn {
 
 // resetSession checks if the driver connection needs the
 // session to be reset and if required, resets it.
-[GoMethodBody("resetSession")] internal static error resetSessionᴍ(ж<driverConn> Ꮡdc, context.Context ctx) {
+internal static error resetSession⁔(/*this*/ ж<driverConn> Ꮡdc, context.Context ctx) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -721,7 +721,7 @@ partial struct driverConn {
 
 // validateConnection checks if the connection is valid and can
 // still be used. It also marks the session for reset if required.
-[GoMethodBody("validateConnection")] internal static bool validateConnectionᴍ(ж<driverConn> Ꮡdc, bool needsReset) {
+internal static bool validateConnection⁔(/*this*/ ж<driverConn> Ꮡdc, bool needsReset) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -744,7 +744,7 @@ partial struct driverConn {
 
 // prepareLocked prepares the query on dc. When cg == nil the dc must keep track of
 // the prepared statements in a pool.
-[GoMethodBody("prepareLocked")] internal static (ж<driverStmt>, error) prepareLockedᴍ(ж<driverConn> Ꮡdc, context.Context ctx, stmtConnGrabber cg, @string query) {
+internal static (ж<driverStmt>, error) prepareLocked⁔(/*this*/ ж<driverConn> Ꮡdc, context.Context ctx, stmtConnGrabber cg, @string query) {
     ref var dc = ref Ꮡdc.DerefOrNull();
 
     var (si, err) = ctxDriverPrepare(ctx, dc.ci, query);
@@ -770,11 +770,11 @@ partial struct driverConn {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sqlDuplicateDriverConnˢᴍdriverConn => ref sqlDuplicateDriverConnˢᵇᴍdriverConn;
-private static readonly @string sqlDuplicateDriverConnˢᵇᴍdriverConn = "sql: duplicate driverConn close"u8;
+internal static ref readonly @string sqlDuplicateDriverConnˢ⁔driverConn => ref sqlDuplicateDriverConnˢᵇ⁔driverConn;
+private static readonly @string sqlDuplicateDriverConnˢᵇ⁔driverConn = "sql: duplicate driverConn close"u8;
 
 // the dc.db's Mutex is held.
-[GoMethodBody("closeDBLocked")] internal static Func<error> closeDBLockedᴍ(ж<driverConn> Ꮡdc) {
+internal static Func<error> closeDBLocked⁔(/*this*/ ж<driverConn> Ꮡdc) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -783,7 +783,7 @@ private static readonly @string sqlDuplicateDriverConnˢᵇᴍdriverConn = "sql:
         Ꮡdc.of(driverConn.ᏑMutex).Lock();
         ᒐd1 = true;
         if (dc.closed) {
-            return () => errors.New(sqlDuplicateDriverConnˢᴍdriverConn);
+            return () => errors.New(sqlDuplicateDriverConnˢ⁔driverConn);
         }
         dc.closed = true;
         return dc.db.removeDepLocked(new driverConnжfinalCloser(Ꮡdc), Ꮡdc.OrTypedNil());
@@ -792,13 +792,13 @@ private static readonly @string sqlDuplicateDriverConnˢᵇᴍdriverConn = "sql:
     finally { if (ᒐd1) Ꮡdc.of(driverConn.ᏑMutex).Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<driverConn> Ꮡdc) {
+internal static error Close⁔(/*this*/ ж<driverConn> Ꮡdc) {
     ref var dc = ref Ꮡdc.DerefOrNull();
 
     Ꮡdc.of(driverConn.ᏑMutex).Lock();
     if (dc.closed) {
         Ꮡdc.of(driverConn.ᏑMutex).Unlock();
-        return errors.New(sqlDuplicateDriverConnˢᴍdriverConn);
+        return errors.New(sqlDuplicateDriverConnˢ⁔driverConn);
     }
     dc.closed = true;
     Ꮡdc.of(driverConn.ᏑMutex).Unlock(); // not defer; removeDep finalClose calls may need to lock
@@ -811,7 +811,7 @@ private static readonly @string sqlDuplicateDriverConnˢᵇᴍdriverConn = "sql:
     return fn();
 }
 
-[GoMethodBody("finalClose")] internal static error finalCloseᴍ(ж<driverConn> Ꮡdc) {
+internal static error finalClose⁔(/*this*/ ж<driverConn> Ꮡdc) {
     ref var dc = ref Ꮡdc.DerefOrNull();
 
     ref var err = ref heap<error>(out var Ꮡerr);
@@ -860,7 +860,7 @@ partial struct driverStmt {
 
 // Close ensures driver.Stmt is only closed once and always returns the same
 // result.
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<driverStmt> Ꮡds) {
+internal static error Close⁔(/*this*/ ж<driverStmt> Ꮡds) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -896,7 +896,7 @@ partial interface finalCloser {
 
 // addDep notes that x now depends on dep, and x's finalClose won't be
 // called until all of x's dependencies are removed with removeDep.
-[GoMethodBody("addDep")] internal static void addDepᴍ(ж<DB> Ꮡdb, finalCloser x, any dep) {
+internal static void addDep⁔(/*this*/ ж<DB> Ꮡdb, finalCloser x, any dep) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -910,7 +910,7 @@ partial interface finalCloser {
     finally { if (ᒐd1) Ꮡdb.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("addDepLocked")] internal static void addDepLockedᴍ(ref DB db, finalCloser x, any dep) {
+internal static void addDepLocked⁔(/*this*/ ref DB db, finalCloser x, any dep) {
     if (db.dep == nil) {
         db.dep = new map<finalCloser, depSet>();
     }
@@ -926,7 +926,7 @@ partial interface finalCloser {
 // If x still has dependencies, nil is returned.
 // If x no longer has any dependencies, its finalClose method will be
 // called and its error value will be returned.
-[GoMethodBody("removeDep")] internal static error removeDepᴍ(ж<DB> Ꮡdb, finalCloser x, any dep) {
+internal static error removeDep⁔(/*this*/ ж<DB> Ꮡdb, finalCloser x, any dep) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     db.mu.Lock();
@@ -935,7 +935,7 @@ partial interface finalCloser {
     return fn();
 }
 
-[GoMethodBody("removeDepLocked")] internal static Func<error> removeDepLockedᴍ(ref DB db, finalCloser x, any dep) {
+internal static Func<error> removeDepLocked⁔(/*this*/ ref DB db, finalCloser x, any dep) {
     var (xdep, ok) = db.dep[x, ꟷ];
     if (!ok) {
         throw panic(fmt.Sprintf("unpaired removeDep: no deps for %T"u8, x));
@@ -977,11 +977,11 @@ partial struct dsnConnector {
 
 } partial class sql_package {
 
-[GoMethodBody("Connect")] internal static (driver.Conn, error) Connectᴍ(dsnConnector t, context.Context _) {
+internal static (driver.Conn, error) Connect⁔(/*this*/ dsnConnector t, context.Context _) {
     return t.driver.Open(t.dsn);
 }
 
-[GoMethodBody("Driver")] internal static driver.Driver Driverᴍ(dsnConnector t) {
+internal static driver.Driver Driver⁔(/*this*/ dsnConnector t) {
     return t.driver;
 }
 
@@ -1056,7 +1056,7 @@ public static (ж<DB>, error) Open(@string driverName, @string dataSourceName) {
 
 } partial class sql_package {
 
-[GoMethodBody("pingDC")] internal static error pingDCᴍ(ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release) {
+internal static error pingDC⁔(/*this*/ ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release) {
     ref var dc = ref Ꮡdc.DerefOrNull();
 
     ref var err = ref heap<error>(out var Ꮡerr);
@@ -1074,7 +1074,7 @@ public static (ж<DB>, error) Open(@string driverName, @string dataSourceName) {
 
 // PingContext verifies a connection to the database is still alive,
 // establishing a connection if necessary.
-[GoMethodBody("PingContext")] internal static error PingContextᴍ(ж<DB> Ꮡdb, context.Context ctx) {
+internal static error PingContext⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     ref var dc = ref heap<ж<driverConn>>(out var Ꮡdc);
@@ -1097,7 +1097,7 @@ public static (ж<DB>, error) Open(@string driverName, @string dataSourceName) {
 //
 // Ping uses [context.Background] internally; to specify the context, use
 // [DB.PingContext].
-[GoMethodBody("Ping")] internal static error Pingᴍ(ж<DB> Ꮡdb) {
+internal static error Ping⁔(/*this*/ ж<DB> Ꮡdb) {
     return Ꮡdb.PingContext(context.Background());
 }
 
@@ -1107,7 +1107,7 @@ public static (ж<DB>, error) Open(@string driverName, @string dataSourceName) {
 //
 // It is rare to Close a [DB], as the [DB] handle is meant to be
 // long-lived and shared between many goroutines.
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<DB> Ꮡdb) {
+internal static error Close⁔(/*this*/ ж<DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
     var fnsᴷ = new stackAppend<Func<error>>();
 
@@ -1150,7 +1150,7 @@ internal static UntypedInt defaultMaxIdleConns => 2;
 
 } partial class sql_package {
 
-[GoMethodBody("maxIdleConnsLocked")] internal static nint maxIdleConnsLockedᴍ(ref DB db) {
+internal static nint maxIdleConnsLocked⁔(/*this*/ ref DB db) {
     nint n = db.maxIdleCount;
     switch (ᐧ) {
     case {} when n is 0: {
@@ -1165,7 +1165,7 @@ internal static UntypedInt defaultMaxIdleConns => 2;
     }}
 }
 
-[GoMethodBody("shortestIdleTimeLocked")] internal static time.Duration shortestIdleTimeLockedᴍ(ref DB db) {
+internal static time.Duration shortestIdleTimeLocked⁔(/*this*/ ref DB db) {
     if (db.maxIdleTime <= 0) {
         return db.maxLifetime;
     }
@@ -1185,7 +1185,7 @@ internal static UntypedInt defaultMaxIdleConns => 2;
 //
 // The default max idle connections is currently 2. This may change in
 // a future release.
-[GoMethodBody("SetMaxIdleConns")] internal static void SetMaxIdleConnsᴍ(ж<DB> Ꮡdb, nint n) {
+internal static void SetMaxIdleConns⁔(/*this*/ ж<DB> Ꮡdb, nint n) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     db.mu.Lock();
@@ -1221,7 +1221,7 @@ internal static UntypedInt defaultMaxIdleConns => 2;
 //
 // If n <= 0, then there is no limit on the number of open connections.
 // The default is 0 (unlimited).
-[GoMethodBody("SetMaxOpenConns")] internal static void SetMaxOpenConnsᴍ(ж<DB> Ꮡdb, nint n) {
+internal static void SetMaxOpenConns⁔(/*this*/ ж<DB> Ꮡdb, nint n) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     db.mu.Lock();
@@ -1241,7 +1241,7 @@ internal static UntypedInt defaultMaxIdleConns => 2;
 // Expired connections may be closed lazily before reuse.
 //
 // If d <= 0, connections are not closed due to a connection's age.
-[GoMethodBody("SetConnMaxLifetime")] internal static void SetConnMaxLifetimeᴍ(ж<DB> Ꮡdb, time.Duration d) {
+internal static void SetConnMaxLifetime⁔(/*this*/ ж<DB> Ꮡdb, time.Duration d) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     if (d < 0) {
@@ -1269,7 +1269,7 @@ internal static UntypedInt defaultMaxIdleConns => 2;
 // Expired connections may be closed lazily before reuse.
 //
 // If d <= 0, connections are not closed due to a connection's idle time.
-[GoMethodBody("SetConnMaxIdleTime")] internal static void SetConnMaxIdleTimeᴍ(ж<DB> Ꮡdb, time.Duration d) {
+internal static void SetConnMaxIdleTime⁔(/*this*/ ж<DB> Ꮡdb, time.Duration d) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1300,7 +1300,7 @@ internal static UntypedInt defaultMaxIdleConns => 2;
 }
 
 // startCleanerLocked starts connectionCleaner if needed.
-[GoMethodBody("startCleanerLocked")] internal static partial void startCleanerLockedᴍ(ж<DB> Ꮡdb) {
+internal static partial void startCleanerLocked⁔(/*this*/ ж<DB> Ꮡdb) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     if ((db.maxLifetime > 0 || db.maxIdleTime > 0) && db.numOpen > 0 && db.cleanerCh == nil) {
@@ -1309,7 +1309,7 @@ internal static UntypedInt defaultMaxIdleConns => 2;
     }
 }
 
-[GoMethodBody("connectionCleaner")] internal static void connectionCleanerᴍ(ж<DB> Ꮡdb, time.Duration d) {
+internal static void connectionCleaner⁔(/*this*/ ж<DB> Ꮡdb, time.Duration d) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     time.Duration minInterval = /* time.Second */ 1000000000;
@@ -1366,7 +1366,7 @@ internal static UntypedInt defaultMaxIdleConns => 2;
 // connectionCleanerRunLocked removes connections that should be closed from
 // freeConn and returns them along side an updated duration to the next check
 // if a quicker check is required to ensure connections are checked appropriately.
-[GoMethodBody("connectionCleanerRunLocked")] internal static (time.Duration, slice<ж<driverConn>>) connectionCleanerRunLockedᴍ(ref DB db, time.Duration d) {
+internal static (time.Duration, slice<ж<driverConn>>) connectionCleanerRunLocked⁔(/*this*/ ref DB db, time.Duration d) {
     int64 idleClosing = default;
     slice<ж<driverConn>> closing = default;
     if (db.maxIdleTime > 0) {
@@ -1442,7 +1442,7 @@ partial struct DBStats {
 } partial class sql_package {
 
 // Stats returns database statistics.
-[GoMethodBody("Stats")] internal static DBStats Statsᴍ(ж<DB> Ꮡdb) {
+internal static DBStats Stats⁔(/*this*/ ж<DB> Ꮡdb) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1475,7 +1475,7 @@ partial struct DBStats {
 // Assumes db.mu is locked.
 // If there are connRequests and the connection limit hasn't been reached,
 // then tell the connectionOpener to open new connections.
-[GoMethodBody("maybeOpenNewConnections")] internal static void maybeOpenNewConnectionsᴍ(ref DB db) {
+internal static void maybeOpenNewConnections⁔(/*this*/ ref DB db) {
     nint numRequests = db.connRequests.Len();
     if (db.maxOpen > 0) {
         nint numCanOpen = db.maxOpen - db.numOpen;
@@ -1494,7 +1494,7 @@ partial struct DBStats {
 }
 
 // Runs in a separate goroutine, opens new connections when requested.
-[GoMethodBody("connectionOpener")] internal static void connectionOpenerᴍ(ж<DB> Ꮡdb, context.Context ctx) {
+internal static void connectionOpener⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     for (;;) {
@@ -1512,7 +1512,7 @@ partial struct DBStats {
 }
 
 // Open one new connection
-[GoMethodBody("openNewConnection")] internal static void openNewConnectionᴍ(ж<DB> Ꮡdb, context.Context ctx) {
+internal static void openNewConnection⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1569,7 +1569,7 @@ internal static error errDBClosed = errors.New("sql: database is closed");
 } partial class sql_package {
 
 // conn returns a newly-opened or cached *driverConn.
-[GoMethodBody("conn")] internal static (ж<driverConn>, error) connᴍ(ж<DB> Ꮡdb, context.Context ctx, connReuseStrategy strategy) {
+internal static (ж<driverConn>, error) conn⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx, connReuseStrategy strategy) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     db.mu.Lock();
@@ -1728,7 +1728,7 @@ internal static Action<ж<DB>, ж<driverConn>> putConnHook;
 // noteUnusedDriverStatement notes that ds is no longer used and should
 // be closed whenever possible (when c is next not in use), unless c is
 // already closed.
-[GoMethodBody("noteUnusedDriverStatement")] internal static void noteUnusedDriverStatementᴍ(ж<DB> Ꮡdb, ж<driverConn> Ꮡc, ж<driverStmt> ds) {
+internal static void noteUnusedDriverStatement⁔(/*this*/ ж<DB> Ꮡdb, ж<driverConn> Ꮡc, ж<driverStmt> ds) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -1764,7 +1764,7 @@ internal const bool debugGetPut = false;
 
 // putConn adds a connection to the db's free pool.
 // err is optionally the last error that occurred on this connection.
-[GoMethodBody("putConn")] internal static void putConnᴍ(ж<DB> Ꮡdb, ж<driverConn> Ꮡdc, error err, bool resetSession) {
+internal static void putConn⁔(/*this*/ ж<DB> Ꮡdb, ж<driverConn> Ꮡdc, error err, bool resetSession) {
     ref var db = ref Ꮡdb.DerefOrNull();
     ref var dc = ref Ꮡdc.DerefOrNull();
 
@@ -1828,7 +1828,7 @@ internal const bool debugGetPut = false;
 // If err == nil, then dc must not equal nil.
 // If a connRequest was fulfilled or the *driverConn was placed in the
 // freeConn list, then true is returned, otherwise false is returned.
-[GoMethodBody("putConnDBLocked")] internal static bool putConnDBLockedᴍ(ж<DB> Ꮡdb, ж<driverConn> Ꮡdc, error err) {
+internal static bool putConnDBLocked⁔(/*this*/ ж<DB> Ꮡdb, ж<driverConn> Ꮡdc, error err) {
     ref var db = ref Ꮡdb.DerefOrNull();
     ref var dc = ref Ꮡdc.DerefOrNull();
 
@@ -1867,7 +1867,7 @@ internal static UntypedInt maxBadConnRetries => 2;
 
 } partial class sql_package {
 
-[GoMethodBody("retry")] internal static error retryᴍ(ref DB db, Func<connReuseStrategy, error> fn) {
+internal static error retry⁔(/*this*/ ref DB db, Func<connReuseStrategy, error> fn) {
     for (var i = (int64)0; i < maxBadConnRetries; i++) {
         var err = fn(cachedOrNewConn);
         // retry if err is driver.ErrBadConn
@@ -1887,7 +1887,7 @@ internal static UntypedInt maxBadConnRetries => 2;
 //
 // The provided context is used for the preparation of the statement, not for the
 // execution of the statement.
-[GoMethodBody("PrepareContext")] internal static (ж<Stmt>, error) PrepareContextᴍ(ж<DB> Ꮡdb, context.Context ctx, @string query) {
+internal static (ж<Stmt>, error) PrepareContext⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx, @string query) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     ref var stmt = ref heap<ж<Stmt>>(out var Ꮡstmt);
@@ -1909,11 +1909,11 @@ internal static UntypedInt maxBadConnRetries => 2;
 //
 // Prepare uses [context.Background] internally; to specify the context, use
 // [DB.PrepareContext].
-[GoMethodBody("Prepare")] internal static (ж<Stmt>, error) Prepareᴍ(ж<DB> Ꮡdb, @string query) {
+internal static (ж<Stmt>, error) Prepare⁔(/*this*/ ж<DB> Ꮡdb, @string query) {
     return Ꮡdb.PrepareContext(context.Background(), query);
 }
 
-[GoMethodBody("prepare")] internal static (ж<Stmt>, error) prepareᴍ(ж<DB> Ꮡdb, context.Context ctx, @string query, connReuseStrategy strategy) {
+internal static (ж<Stmt>, error) prepare⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx, @string query, connReuseStrategy strategy) {
     // TODO: check if db.driver supports an optional
     // driver.Preparer interface and call that instead, if so,
     // otherwise we make a prepared statement that's bound
@@ -1930,7 +1930,7 @@ internal static UntypedInt maxBadConnRetries => 2;
 // prepareDC prepares a query on the driverConn and calls release before
 // returning. When cg == nil it implies that a connection pool is used, and
 // when cg != nil only a single driver connection is used.
-[GoMethodBody("prepareDC")] internal static (ж<Stmt>, error) prepareDCᴍ(ж<DB> Ꮡdb, context.Context ctx, ж<driverConn> dc, Action<error> release, stmtConnGrabber cg, @string query) {
+internal static (ж<Stmt>, error) prepareDC⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx, ж<driverConn> dc, Action<error> release, stmtConnGrabber cg, @string query) {
     GoFrame ᒐ = default;
     try {
         ref var ds = ref heap<ж<driverStmt>>(out var Ꮡds);
@@ -1967,7 +1967,7 @@ internal static UntypedInt maxBadConnRetries => 2;
 
 // ExecContext executes a query without returning any rows.
 // The args are for any placeholder parameters in the query.
-[GoMethodBody("ExecContext")] internal static (Result, error) ExecContextᴍ(ж<DB> Ꮡdb, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+internal static (Result, error) ExecContext⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
     ref var db = ref Ꮡdb.DerefOrNull();
 
@@ -1988,13 +1988,13 @@ internal static UntypedInt maxBadConnRetries => 2;
 //
 // Exec uses [context.Background] internally; to specify the context, use
 // [DB.ExecContext].
-[GoMethodBody("Exec")] internal static (Result, error) Execᴍ(ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
+internal static (Result, error) Exec⁔(/*this*/ ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     return Ꮡdb.ExecContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
-[GoMethodBody("exec")] internal static (Result, error) execᴍ(ж<DB> Ꮡdb, context.Context ctx, @string query, slice<any> args, connReuseStrategy strategy) {
+internal static (Result, error) exec⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx, @string query, slice<any> args, connReuseStrategy strategy) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     var (dc, err) = Ꮡdb.conn(ctx, strategy);
@@ -2004,7 +2004,7 @@ internal static UntypedInt maxBadConnRetries => 2;
     return db.execDC(ctx, dc, dc.releaseConn, query, args);
 }
 
-[GoMethodBody("execDC")] internal static (Result res, error err) execDCᴍ(ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release, @string query, slice<any> args) {
+internal static (Result res, error err) execDC⁔(/*this*/ ref DB db, context.Context ctx, ж<driverConn> Ꮡdc, Action<error> release, @string query, slice<any> args) {
     Result res = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -2059,7 +2059,7 @@ internal static UntypedInt maxBadConnRetries => 2;
 
 // QueryContext executes a query that returns rows, typically a SELECT.
 // The args are for any placeholder parameters in the query.
-[GoMethodBody("QueryContext")] internal static (ж<Rows>, error) QueryContextᴍ(ж<DB> Ꮡdb, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
     ref var db = ref Ꮡdb.DerefOrNull();
 
@@ -2080,13 +2080,13 @@ internal static UntypedInt maxBadConnRetries => 2;
 //
 // Query uses [context.Background] internally; to specify the context, use
 // [DB.QueryContext].
-[GoMethodBody("Query")] internal static (ж<Rows>, error) Queryᴍ(ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
+internal static (ж<Rows>, error) Query⁔(/*this*/ ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     return Ꮡdb.QueryContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
-[GoMethodBody("query")] internal static (ж<Rows>, error) queryᴍ(ж<DB> Ꮡdb, context.Context ctx, @string query, slice<any> args, connReuseStrategy strategy) {
+internal static (ж<Rows>, error) query⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx, @string query, slice<any> args, connReuseStrategy strategy) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     var (dc, err) = Ꮡdb.conn(ctx, strategy);
@@ -2101,7 +2101,7 @@ internal static UntypedInt maxBadConnRetries => 2;
 // The connection gets released by the releaseConn function.
 // The ctx context is from a query method and the txctx context is from an
 // optional transaction context.
-[GoMethodBody("queryDC")] internal static (ж<Rows>, error) queryDCᴍ(ref DB db, context.Context ctx, context.Context txctx, ж<driverConn> Ꮡdc, Action<error> releaseConn, @string query, slice<any> args) {
+internal static (ж<Rows>, error) queryDC⁔(/*this*/ ref DB db, context.Context ctx, context.Context txctx, ж<driverConn> Ꮡdc, Action<error> releaseConn, @string query, slice<any> args) {
     ref var dc = ref Ꮡdc.DerefOrNull();
 
     var (queryerCtx, ok) = dc.ci._<driver.QueryerContext>(ᐧ);
@@ -2176,7 +2176,7 @@ internal static UntypedInt maxBadConnRetries => 2;
 // If the query selects no rows, the [*Row.Scan] will return [ErrNoRows].
 // Otherwise, [*Row.Scan] scans the first selected row and discards
 // the rest.
-[GoMethodBody("QueryRowContext")] internal static ж<Row> QueryRowContextᴍ(ж<DB> Ꮡdb, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+internal static ж<Row> QueryRowContext⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var (rows, err) = Ꮡdb.QueryContext(ctx, query, args.ꓸꓸꓸ);
@@ -2192,7 +2192,7 @@ internal static UntypedInt maxBadConnRetries => 2;
 //
 // QueryRow uses [context.Background] internally; to specify the context, use
 // [DB.QueryRowContext].
-[GoMethodBody("QueryRow")] internal static ж<Row> QueryRowᴍ(ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
+internal static ж<Row> QueryRow⁔(/*this*/ ж<DB> Ꮡdb, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     return Ꮡdb.QueryRowContext(context.Background(), query, args.ꓸꓸꓸ);
@@ -2208,7 +2208,7 @@ internal static UntypedInt maxBadConnRetries => 2;
 // The provided [TxOptions] is optional and may be nil if defaults should be used.
 // If a non-default isolation level is used that the driver doesn't support,
 // an error will be returned.
-[GoMethodBody("BeginTx")] internal static (ж<Tx>, error) BeginTxᴍ(ж<DB> Ꮡdb, context.Context ctx, ж<TxOptions> opts) {
+internal static (ж<Tx>, error) BeginTx⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx, ж<TxOptions> opts) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     ref var tx = ref heap<ж<Tx>>(out var Ꮡtx);
@@ -2227,11 +2227,11 @@ internal static UntypedInt maxBadConnRetries => 2;
 //
 // Begin uses [context.Background] internally; to specify the context, use
 // [DB.BeginTx].
-[GoMethodBody("Begin")] internal static (ж<Tx>, error) Beginᴍ(ж<DB> Ꮡdb) {
+internal static (ж<Tx>, error) Begin⁔(/*this*/ ж<DB> Ꮡdb) {
     return Ꮡdb.BeginTx(context.Background(), nil);
 }
 
-[GoMethodBody("begin")] internal static (ж<Tx> tx, error err) beginᴍ(ж<DB> Ꮡdb, context.Context ctx, ж<TxOptions> opts, connReuseStrategy strategy) {
+internal static (ж<Tx> tx, error err) begin⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx, ж<TxOptions> opts, connReuseStrategy strategy) {
     error err = default;
 
     (var dc, err) = Ꮡdb.conn(ctx, strategy);
@@ -2242,7 +2242,7 @@ internal static UntypedInt maxBadConnRetries => 2;
 }
 
 // beginDC starts a transaction. The provided dc must be valid and ready to use.
-[GoMethodBody("beginDC")] internal static partial (ж<Tx> tx, error err) beginDCᴍ(ж<DB> Ꮡdb, context.Context ctxʗp, ж<driverConn> dc, Action<error> release, ж<TxOptions> opts) {
+internal static partial (ж<Tx> tx, error err) beginDC⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctxʗp, ж<driverConn> dc, Action<error> release, ж<TxOptions> opts) {
     ж<Tx> tx = default;
     error err = default;
     ref var ctx = ref heap(ctxʗp, out var Ꮡctx);
@@ -2277,7 +2277,7 @@ internal static UntypedInt maxBadConnRetries => 2;
 }
 
 // Driver returns the database's underlying driver.
-[GoMethodBody("Driver")] internal static driver.Driver Driverᴍ(ref DB db) {
+internal static driver.Driver Driver⁔(/*this*/ ref DB db) {
     return db.connector.Driver();
 }
 
@@ -2296,7 +2296,7 @@ public static error ErrConnDone = errors.New("sql: connection is already closed"
 //
 // Every Conn must be returned to the database pool after use by
 // calling [Conn.Close].
-[GoMethodBody("Conn")] internal static (ж<Conn>, error) Connᴍ(ж<DB> Ꮡdb, context.Context ctx) {
+internal static (ж<Conn>, error) Conn⁔(/*this*/ ж<DB> Ꮡdb, context.Context ctx) {
     ref var db = ref Ꮡdb.DerefOrNull();
 
     ref var dc = ref heap<ж<driverConn>>(out var Ꮡdc);
@@ -2353,7 +2353,7 @@ partial struct Conn {
 
 // grabConn takes a context to implement stmtConnGrabber
 // but the context is not used.
-[GoMethodBody("grabConn")] internal static (ж<driverConn>, Action<error>, error) grabConnᴍ(ж<Conn> Ꮡc, context.Context _) {
+internal static (ж<driverConn>, Action<error>, error) grabConn⁔(/*this*/ ж<Conn> Ꮡc, context.Context _) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (Ꮡc.Ꮡdone.Load()) {
@@ -2367,7 +2367,7 @@ partial struct Conn {
 }
 
 // PingContext verifies the connection to the database is still alive.
-[GoMethodBody("PingContext")] internal static error PingContextᴍ(ж<Conn> Ꮡc, context.Context ctx) {
+internal static error PingContext⁔(/*this*/ ж<Conn> Ꮡc, context.Context ctx) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (dc, release, err) = Ꮡc.grabConn(ctx);
@@ -2379,7 +2379,7 @@ partial struct Conn {
 
 // ExecContext executes a query without returning any rows.
 // The args are for any placeholder parameters in the query.
-[GoMethodBody("ExecContext")] internal static (Result, error) ExecContextᴍ(ж<Conn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+internal static (Result, error) ExecContext⁔(/*this*/ ж<Conn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -2392,7 +2392,7 @@ partial struct Conn {
 
 // QueryContext executes a query that returns rows, typically a SELECT.
 // The args are for any placeholder parameters in the query.
-[GoMethodBody("QueryContext")] internal static (ж<Rows>, error) QueryContextᴍ(ж<Conn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<Conn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
     ref var c = ref Ꮡc.DerefOrNull();
 
@@ -2409,7 +2409,7 @@ partial struct Conn {
 // If the query selects no rows, the [*Row.Scan] will return [ErrNoRows].
 // Otherwise, the [*Row.Scan] scans the first selected row and discards
 // the rest.
-[GoMethodBody("QueryRowContext")] internal static ж<Row> QueryRowContextᴍ(ж<Conn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+internal static ж<Row> QueryRowContext⁔(/*this*/ ж<Conn> Ꮡc, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var (rows, err) = Ꮡc.QueryContext(ctx, query, args.ꓸꓸꓸ);
@@ -2424,7 +2424,7 @@ partial struct Conn {
 //
 // The provided context is used for the preparation of the statement, not for the
 // execution of the statement.
-[GoMethodBody("PrepareContext")] internal static (ж<Stmt>, error) PrepareContextᴍ(ж<Conn> Ꮡc, context.Context ctx, @string query) {
+internal static (ж<Stmt>, error) PrepareContext⁔(/*this*/ ж<Conn> Ꮡc, context.Context ctx, @string query) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (dc, release, err) = Ꮡc.grabConn(ctx);
@@ -2439,7 +2439,7 @@ partial struct Conn {
 //
 // Once f returns and err is not [driver.ErrBadConn], the [Conn] will continue to be usable
 // until [Conn.Close] is called.
-[GoMethodBody("Raw")] internal static error /*err*/ Rawᴍ(ж<Conn> Ꮡc, Func<any, error> f) {
+internal static error /*err*/ Raw⁔(/*this*/ ж<Conn> Ꮡc, Func<any, error> f) {
     error err = default;
     GoFrame ᒐ = default;
     try {
@@ -2484,7 +2484,7 @@ partial struct Conn {
 // The provided [TxOptions] is optional and may be nil if defaults should be used.
 // If a non-default isolation level is used that the driver doesn't support,
 // an error will be returned.
-[GoMethodBody("BeginTx")] internal static (ж<Tx>, error) BeginTxᴍ(ж<Conn> Ꮡc, context.Context ctx, ж<TxOptions> opts) {
+internal static (ж<Tx>, error) BeginTx⁔(/*this*/ ж<Conn> Ꮡc, context.Context ctx, ж<TxOptions> opts) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     var (dc, release, err) = Ꮡc.grabConn(ctx);
@@ -2496,18 +2496,18 @@ partial struct Conn {
 
 // closemuRUnlockCondReleaseConn read unlocks closemu
 // as the sql operation is done with the dc.
-[GoMethodBody("closemuRUnlockCondReleaseConn")] internal static void closemuRUnlockCondReleaseConnᴍ(ж<Conn> Ꮡc, error err) {
+internal static void closemuRUnlockCondReleaseConn⁔(/*this*/ ж<Conn> Ꮡc, error err) {
     Ꮡc.Ꮡclosemu.RUnlock();
     if (errors.Is(err, driver.ErrBadConn)) {
         Ꮡc.close(err);
     }
 }
 
-[GoMethodBody("txCtx")] internal static context.Context txCtxᴍ(ref Conn c) {
+internal static context.Context txCtx⁔(/*this*/ ref Conn c) {
     return default;
 }
 
-[GoMethodBody("close")] internal static error closeᴍ(ж<Conn> Ꮡc, error err) {
+internal static error close⁔(/*this*/ ж<Conn> Ꮡc, error err) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -2536,7 +2536,7 @@ partial struct Conn {
 // Close is safe to call concurrently with other operations and will
 // block until all other operations finish. It may be useful to first
 // cancel any used context and then call close directly after.
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<Conn> Ꮡc) {
+internal static error Close⁔(/*this*/ ж<Conn> Ꮡc) {
     return Ꮡc.close(default);
 }
 
@@ -2591,7 +2591,7 @@ partial struct Tx {
 
 // awaitDone blocks until the context in Tx is canceled and rolls back
 // the transaction if it's not already done.
-[GoMethodBody("awaitDone")] internal static void awaitDoneᴍ(ж<Tx> Ꮡtx) {
+internal static void awaitDone⁔(/*this*/ ж<Tx> Ꮡtx) {
     ref var tx = ref Ꮡtx.DerefOrNull();
 
     // Wait for either the transaction to be committed or rolled
@@ -2608,7 +2608,7 @@ partial struct Tx {
     Ꮡtx.rollback(discardConnection);
 }
 
-[GoMethodBody("isDone")] internal static bool isDoneᴍ(ж<Tx> Ꮡtx) {
+internal static bool isDone⁔(/*this*/ ж<Tx> Ꮡtx) {
     return Ꮡtx.Ꮡdone.Load();
 }
 
@@ -2623,7 +2623,7 @@ public static error ErrTxDone = errors.New("sql: transaction has already been co
 // close returns the connection to the pool and
 // must only be called by Tx.rollback or Tx.Commit while
 // tx is already canceled and won't be executed concurrently.
-[GoMethodBody("close")] internal static void closeᴍ(ref Tx tx, error err) {
+internal static void close⁔(/*this*/ ref Tx tx, error err) {
     tx.releaseConn(err);
     tx.dc = default;
     tx.txi = default;
@@ -2637,7 +2637,7 @@ internal static Action hookTxGrabConn;
 
 } partial class sql_package {
 
-[GoMethodBody("grabConn")] internal static (ж<driverConn>, Action<error>, error) grabConnᴍ(ж<Tx> Ꮡtx, context.Context ctx) {
+internal static (ж<driverConn>, Action<error>, error) grabConn⁔(/*this*/ ж<Tx> Ꮡtx, context.Context ctx) {
     ref var tx = ref Ꮡtx.DerefOrNull();
 
     var selᴛ18 = ctx.Done();
@@ -2662,7 +2662,7 @@ internal static Action hookTxGrabConn;
     return (tx.dc, Ꮡtx.closemuRUnlockRelease, default);
 }
 
-[GoMethodBody("txCtx")] internal static context.Context txCtxᴍ(ref Tx tx) {
+internal static context.Context txCtx⁔(/*this*/ ref Tx tx) {
     return tx.ctx;
 }
 
@@ -2670,12 +2670,12 @@ internal static Action hookTxGrabConn;
 // [DB.ExecContext] and [DB.QueryContext]. Unlocking in the releaseConn keeps
 // the driver conn from being returned to the connection pool until
 // the Rows has been closed.
-[GoMethodBody("closemuRUnlockRelease")] internal static void closemuRUnlockReleaseᴍ(ж<Tx> Ꮡtx, error _) {
+internal static void closemuRUnlockRelease⁔(/*this*/ ж<Tx> Ꮡtx, error _) {
     Ꮡtx.Ꮡclosemu.RUnlock();
 }
 
 // Closes all Stmts prepared for this transaction.
-[GoMethodBody("closePrepared")] internal static void closePreparedᴍ(ж<Tx> Ꮡtx) {
+internal static void closePrepared⁔(/*this*/ ж<Tx> Ꮡtx) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -2692,7 +2692,7 @@ internal static Action hookTxGrabConn;
 }
 
 // Commit commits the transaction.
-[GoMethodBody("Commit")] internal static error Commitᴍ(ж<Tx> Ꮡtx) {
+internal static error Commit⁔(/*this*/ ж<Tx> Ꮡtx) {
     ref var tx = ref Ꮡtx.DerefOrNull();
 
     // Check context first to avoid transaction leak.
@@ -2740,7 +2740,7 @@ internal static Action rollbackHook;
 
 // rollback aborts the transaction and optionally forces the pool to discard
 // the connection.
-[GoMethodBody("rollback")] internal static error rollbackᴍ(ж<Tx> Ꮡtx, bool discardConn) {
+internal static error rollback⁔(/*this*/ ж<Tx> Ꮡtx, bool discardConn) {
     ref var tx = ref Ꮡtx.DerefOrNull();
 
     if (!Ꮡtx.Ꮡdone.CompareAndSwap(false, true)) {
@@ -2774,7 +2774,7 @@ internal static Action rollbackHook;
 }
 
 // Rollback aborts the transaction.
-[GoMethodBody("Rollback")] internal static error Rollbackᴍ(ж<Tx> Ꮡtx) {
+internal static error Rollback⁔(/*this*/ ж<Tx> Ꮡtx) {
     return Ꮡtx.rollback(false);
 }
 
@@ -2788,7 +2788,7 @@ internal static Action rollbackHook;
 // The provided context will be used for the preparation of the context, not
 // for the execution of the returned statement. The returned statement
 // will run in the transaction context.
-[GoMethodBody("PrepareContext")] internal static (ж<Stmt>, error) PrepareContextᴍ(ж<Tx> Ꮡtx, context.Context ctx, @string query) {
+internal static (ж<Stmt>, error) PrepareContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Context ctx, @string query) {
     ref var tx = ref Ꮡtx.DerefOrNull();
 
     var (dc, release, err) = Ꮡtx.grabConn(ctx);
@@ -2815,13 +2815,13 @@ internal static Action rollbackHook;
 //
 // Prepare uses [context.Background] internally; to specify the context, use
 // [Tx.PrepareContext].
-[GoMethodBody("Prepare")] internal static (ж<Stmt>, error) Prepareᴍ(ж<Tx> Ꮡtx, @string query) {
+internal static (ж<Stmt>, error) Prepare⁔(/*this*/ ж<Tx> Ꮡtx, @string query) {
     return Ꮡtx.PrepareContext(context.Background(), query);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sqlTxStmtStatementFromˢᴍTx => ref sqlTxStmtStatementFromˢᵇᴍTx;
-private static readonly @string sqlTxStmtStatementFromˢᵇᴍTx = "sql: Tx.Stmt: statement from different database used"u8;
+internal static ref readonly @string sqlTxStmtStatementFromˢ⁔Tx => ref sqlTxStmtStatementFromˢᵇ⁔Tx;
+private static readonly @string sqlTxStmtStatementFromˢᵇ⁔Tx = "sql: Tx.Stmt: statement from different database used"u8;
 
 // StmtContext returns a transaction-specific prepared statement from
 // an existing statement.
@@ -2839,7 +2839,7 @@ private static readonly @string sqlTxStmtStatementFromˢᵇᴍTx = "sql: Tx.Stmt
 //
 // The returned statement operates within the transaction and will be closed
 // when the transaction has been committed or rolled back.
-[GoMethodBody("StmtContext")] internal static ж<Stmt> StmtContextᴍ(ж<Tx> Ꮡtx, context.Context ctx, ж<Stmt> Ꮡstmt) {
+internal static ж<Stmt> StmtContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Context ctx, ж<Stmt> Ꮡstmt) {
     GoFrame ᒐ = default;
     try {
         ref var tx = ref Ꮡtx.DerefOrNull();
@@ -2854,7 +2854,7 @@ private static readonly @string sqlTxStmtStatementFromˢᵇᴍTx = "sql: Tx.Stmt
         defer(releaseʗ1, (error)(default), ref ᒐ);
 
         if (tx.db != stmt.db) {
-            return Ꮡ(new Stmt(stickyErr: errors.New(sqlTxStmtStatementFromˢᴍTx)));
+            return Ꮡ(new Stmt(stickyErr: errors.New(sqlTxStmtStatementFromˢ⁔Tx)));
         }
         ref var si = ref heap<driver.Stmt>(out var Ꮡsi);
         ж<Stmt> parentStmt = default;
@@ -2939,13 +2939,13 @@ private static readonly @string sqlTxStmtStatementFromˢᵇᴍTx = "sql: Tx.Stmt
 //
 // Stmt uses [context.Background] internally; to specify the context, use
 // [Tx.StmtContext].
-[GoMethodBody("Stmt")] internal static ж<Stmt> Stmtᴍ(ж<Tx> Ꮡtx, ж<Stmt> stmt) {
+internal static ж<Stmt> Stmt⁔(/*this*/ ж<Tx> Ꮡtx, ж<Stmt> stmt) {
     return Ꮡtx.StmtContext(context.Background(), stmt);
 }
 
 // ExecContext executes a query that doesn't return rows.
 // For example: an INSERT and UPDATE.
-[GoMethodBody("ExecContext")] internal static (Result, error) ExecContextᴍ(ж<Tx> Ꮡtx, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+internal static (Result, error) ExecContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
     ref var tx = ref Ꮡtx.DerefOrNull();
 
@@ -2961,14 +2961,14 @@ private static readonly @string sqlTxStmtStatementFromˢᵇᴍTx = "sql: Tx.Stmt
 //
 // Exec uses [context.Background] internally; to specify the context, use
 // [Tx.ExecContext].
-[GoMethodBody("Exec")] internal static (Result, error) Execᴍ(ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
+internal static (Result, error) Exec⁔(/*this*/ ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     return Ꮡtx.ExecContext(context.Background(), query, args.ꓸꓸꓸ);
 }
 
 // QueryContext executes a query that returns rows, typically a SELECT.
-[GoMethodBody("QueryContext")] internal static (ж<Rows>, error) QueryContextᴍ(ж<Tx> Ꮡtx, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
     ref var tx = ref Ꮡtx.DerefOrNull();
 
@@ -2984,7 +2984,7 @@ private static readonly @string sqlTxStmtStatementFromˢᵇᴍTx = "sql: Tx.Stmt
 //
 // Query uses [context.Background] internally; to specify the context, use
 // [Tx.QueryContext].
-[GoMethodBody("Query")] internal static (ж<Rows>, error) Queryᴍ(ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
+internal static (ж<Rows>, error) Query⁔(/*this*/ ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     return Ꮡtx.QueryContext(context.Background(), query, args.ꓸꓸꓸ);
@@ -2996,7 +2996,7 @@ private static readonly @string sqlTxStmtStatementFromˢᵇᴍTx = "sql: Tx.Stmt
 // If the query selects no rows, the [*Row.Scan] will return [ErrNoRows].
 // Otherwise, the [*Row.Scan] scans the first selected row and discards
 // the rest.
-[GoMethodBody("QueryRowContext")] internal static ж<Row> QueryRowContextᴍ(ж<Tx> Ꮡtx, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
+internal static ж<Row> QueryRowContext⁔(/*this*/ ж<Tx> Ꮡtx, context.Context ctx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var (rows, err) = Ꮡtx.QueryContext(ctx, query, args.ꓸꓸꓸ);
@@ -3012,7 +3012,7 @@ private static readonly @string sqlTxStmtStatementFromˢᵇᴍTx = "sql: Tx.Stmt
 //
 // QueryRow uses [context.Background] internally; to specify the context, use
 // [Tx.QueryRowContext].
-[GoMethodBody("QueryRow")] internal static ж<Row> QueryRowᴍ(ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
+internal static ж<Row> QueryRow⁔(/*this*/ ж<Tx> Ꮡtx, @string query, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     return Ꮡtx.QueryRowContext(context.Background(), query, args.ꓸꓸꓸ);
@@ -3086,7 +3086,7 @@ partial struct Stmt {
 
 // ExecContext executes a prepared statement with the given arguments and
 // returns a [Result] summarizing the effect of the statement.
-[GoMethodBody("ExecContext")] internal static (Result, error) ExecContextᴍ(ж<Stmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
+internal static (Result, error) ExecContext⁔(/*this*/ ж<Stmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3120,7 +3120,7 @@ partial struct Stmt {
 //
 // Exec uses [context.Background] internally; to specify the context, use
 // [Stmt.ExecContext].
-[GoMethodBody("Exec")] internal static (Result, error) Execᴍ(ж<Stmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
+internal static (Result, error) Exec⁔(/*this*/ ж<Stmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     return Ꮡs.ExecContext(context.Background(), args.ꓸꓸꓸ);
@@ -3158,7 +3158,7 @@ internal static (Result, error) resultFromStatement(context.Context ctx, driver.
 //
 // To avoid lock contention on DB.mu, we do it only when
 // s.db.numClosed - s.lastNum is large enough.
-[GoMethodBody("removeClosedStmtLocked")] internal static void removeClosedStmtLockedᴍ(ref Stmt s) {
+internal static void removeClosedStmtLocked⁔(/*this*/ ref Stmt s) {
     nint t = len(s.css) / 2 + 1;
     if (t > 10) {
         t = 10;
@@ -3183,13 +3183,13 @@ internal static (Result, error) resultFromStatement(context.Context ctx, driver.
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sqlStatementIsClosedˢᴍStmt => ref sqlStatementIsClosedˢᵇᴍStmt;
-private static readonly @string sqlStatementIsClosedˢᵇᴍStmt = "sql: statement is closed"u8;
+internal static ref readonly @string sqlStatementIsClosedˢ⁔Stmt => ref sqlStatementIsClosedˢᵇ⁔Stmt;
+private static readonly @string sqlStatementIsClosedˢᵇ⁔Stmt = "sql: statement is closed"u8;
 
 // connStmt returns a free driver connection on which to execute the
 // statement, a function to call to release the connection, and a
 // statement bound to that connection.
-[GoMethodBody("connStmt")] internal static (ж<driverConn> dc, Action<error> releaseConn, ж<driverStmt> ds, error err) connStmtᴍ(ж<Stmt> Ꮡs, context.Context ctx, connReuseStrategy strategy) {
+internal static (ж<driverConn> dc, Action<error> releaseConn, ж<driverStmt> ds, error err) connStmt⁔(/*this*/ ж<Stmt> Ꮡs, context.Context ctx, connReuseStrategy strategy) {
     ж<driverConn> dc = default;
     Action<error> releaseConn = default;
     ж<driverStmt> ds = default;
@@ -3202,7 +3202,7 @@ private static readonly @string sqlStatementIsClosedˢᵇᴍStmt = "sql: stateme
     s.mu.Lock();
     if (s.closed) {
         s.mu.Unlock();
-        err = errors.New(sqlStatementIsClosedˢᴍStmt);
+        err = errors.New(sqlStatementIsClosedˢ⁔Stmt);
         return (dc, releaseConn, ds, err);
     }
 
@@ -3248,7 +3248,7 @@ private static readonly @string sqlStatementIsClosedˢᵇᴍStmt = "sql: stateme
 
 // prepareOnConnLocked prepares the query in Stmt s on dc and adds it to the list of
 // open connStmt on the statement. It assumes the caller is holding the lock on dc.
-[GoMethodBody("prepareOnConnLocked")] internal static (ж<driverStmt>, error) prepareOnConnLockedᴍ(ж<Stmt> Ꮡs, context.Context ctx, ж<driverConn> dc) {
+internal static (ж<driverStmt>, error) prepareOnConnLocked⁔(/*this*/ ж<Stmt> Ꮡs, context.Context ctx, ж<driverConn> dc) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var (si, err) = dc.prepareLocked(ctx, s.cg, s.query);
@@ -3264,7 +3264,7 @@ private static readonly @string sqlStatementIsClosedˢᵇᴍStmt = "sql: stateme
 
 // QueryContext executes a prepared query statement with the given arguments
 // and returns the query results as a [*Rows].
-[GoMethodBody("QueryContext")] internal static (ж<Rows>, error) QueryContextᴍ(ж<Stmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
+internal static (ж<Rows>, error) QueryContext⁔(/*this*/ ж<Stmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3327,7 +3327,7 @@ private static readonly @string sqlStatementIsClosedˢᵇᴍStmt = "sql: stateme
 //
 // Query uses [context.Background] internally; to specify the context, use
 // [Stmt.QueryContext].
-[GoMethodBody("Query")] internal static (ж<Rows>, error) Queryᴍ(ж<Stmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
+internal static (ж<Rows>, error) Query⁔(/*this*/ ж<Stmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     return Ꮡs.QueryContext(context.Background(), args.ꓸꓸꓸ);
@@ -3361,7 +3361,7 @@ internal static (driver.Rows, error) rowsiFromStatement(context.Context ctx, dri
 // If the query selects no rows, the [*Row.Scan] will return [ErrNoRows].
 // Otherwise, the [*Row.Scan] scans the first selected row and discards
 // the rest.
-[GoMethodBody("QueryRowContext")] internal static ж<Row> QueryRowContextᴍ(ж<Stmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
+internal static ж<Row> QueryRowContext⁔(/*this*/ ж<Stmt> Ꮡs, context.Context ctx, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     var (rows, err) = Ꮡs.QueryContext(ctx, args.ꓸꓸꓸ);
@@ -3385,14 +3385,14 @@ internal static (driver.Rows, error) rowsiFromStatement(context.Context ctx, dri
 //
 // QueryRow uses [context.Background] internally; to specify the context, use
 // [Stmt.QueryRowContext].
-[GoMethodBody("QueryRow")] internal static ж<Row> QueryRowᴍ(ж<Stmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
+internal static ж<Row> QueryRow⁔(/*this*/ ж<Stmt> Ꮡs, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.sslice();
 
     return Ꮡs.QueryRowContext(context.Background(), args.ꓸꓸꓸ);
 }
 
 // Close closes the statement.
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<Stmt> Ꮡs) {
+internal static error Close⁔(/*this*/ ж<Stmt> Ꮡs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3430,7 +3430,7 @@ internal static (driver.Rows, error) rowsiFromStatement(context.Context ctx, dri
     finally { if (ᒐd1) Ꮡs.Ꮡclosemu.Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("finalClose")] internal static error finalCloseᴍ(ж<Stmt> Ꮡs) {
+internal static error finalClose⁔(/*this*/ ж<Stmt> Ꮡs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3498,7 +3498,7 @@ partial struct Rows {
 
 // lasterrOrErrLocked returns either lasterr or the provided err.
 // rs.closemu must be read-locked.
-[GoMethodBody("lasterrOrErrLocked")] internal static error lasterrOrErrLockedᴍ(ref Rows rs, error err) {
+internal static error lasterrOrErrLocked⁔(/*this*/ ref Rows rs, error err) {
     if (rs.lasterr != nil && !AreEqual(rs.lasterr, io.EOF)) {
         return rs.lasterr;
     }
@@ -3513,7 +3513,7 @@ internal static bool bypassRowsAwaitDone = false;
 
 } partial class sql_package {
 
-[GoMethodBody("initContextClose")] internal static partial void initContextCloseᴍ(ж<Rows> Ꮡrs, context.Context ctx, context.Context txctx) {
+internal static partial void initContextClose⁔(/*this*/ ж<Rows> Ꮡrs, context.Context ctx, context.Context txctx) {
     ref var rs = ref Ꮡrs.DerefOrNull();
 
     if (ctx.Done() == nil && (txctx == nil || txctx.Done() == nil)) {
@@ -3532,7 +3532,7 @@ internal static bool bypassRowsAwaitDone = false;
 // If the query was issued in a transaction, the transaction's context
 // is also provided in txctx, to ensure Rows is closed if the Tx is closed.
 // The closectx is closed by an explicit call to rs.Close.
-[GoMethodBody("awaitDone")] internal static void awaitDoneᴍ(ж<Rows> Ꮡrs, context.Context ctx, context.Context txctx, context.Context closectx) {
+internal static void awaitDone⁔(/*this*/ ж<Rows> Ꮡrs, context.Context ctx, context.Context txctx, context.Context closectx) {
     /*<-*/channel<EmptyStruct> txctxDone = /*<-*/channel<EmptyStruct>.RecvOnly;
     if (txctx != nil) {
         txctxDone = txctx.Done();
@@ -3565,7 +3565,7 @@ internal static bool bypassRowsAwaitDone = false;
 // the two cases.
 //
 // Every call to [Rows.Scan], even the first one, must be preceded by a call to [Rows.Next].
-[GoMethodBody("Next")] internal static bool Nextᴍ(ж<Rows> Ꮡrs) {
+internal static bool Next⁔(/*this*/ ж<Rows> Ꮡrs) {
     ref var rs = ref Ꮡrs.DerefOrNull();
 
     // If the user's calling Next, they're done with their previous row's Scan
@@ -3591,7 +3591,7 @@ internal static bool bypassRowsAwaitDone = false;
     return ok;
 }
 
-[GoMethodBody("nextLocked")] internal static (bool doClose, bool ok) nextLockedᴍ(ж<Rows> Ꮡrs) {
+internal static (bool doClose, bool ok) nextLocked⁔(/*this*/ ж<Rows> Ꮡrs) {
     bool doClose = default;
     bool ok = default;
     GoFrame ᒐ = default;
@@ -3644,7 +3644,7 @@ internal static bool bypassRowsAwaitDone = false;
 // After calling NextResultSet, the [Rows.Next] method should always be called before
 // scanning. If there are further result sets they may not have rows in the result
 // set.
-[GoMethodBody("NextResultSet")] internal static bool NextResultSetᴍ(ж<Rows> Ꮡrs) {
+internal static bool NextResultSet⁔(/*this*/ ж<Rows> Ꮡrs) {
     GoFrame ᒐ = default;
     try {
         ref var rs = ref Ꮡrs.DerefOrNull();
@@ -3692,7 +3692,7 @@ internal static bool bypassRowsAwaitDone = false;
 
 // Err returns the error, if any, that was encountered during iteration.
 // Err may be called after an explicit or implicit [Rows.Close].
-[GoMethodBody("Err")] internal static error Errᴍ(ж<Rows> Ꮡrs) {
+internal static error Err⁔(/*this*/ ж<Rows> Ꮡrs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -3722,7 +3722,7 @@ internal static bool bypassRowsAwaitDone = false;
 // Usage:
 //
 //	rawBytes = rows.setrawbuf(append(rows.rawbuf(), value...))
-[GoMethodBody("rawbuf")] internal static slice<byte> rawbufᴍ(ж<Rows> Ꮡrs) {
+internal static slice<byte> rawbuf⁔(/*this*/ ж<Rows> Ꮡrs) {
     ref var rs = ref Ꮡrs.DerefOrNull();
 
     if (Ꮡrs == nil) {
@@ -3734,7 +3734,7 @@ internal static bool bypassRowsAwaitDone = false;
 
 // setrawbuf updates the RawBytes buffer with the result of appending a new value to it.
 // It returns the new value.
-[GoMethodBody("setrawbuf")] internal static RawBytes setrawbufᴍ(ж<Rows> Ꮡrs, slice<byte> b) {
+internal static RawBytes setrawbuf⁔(/*this*/ ж<Rows> Ꮡrs, slice<byte> b) {
     ref var rs = ref Ꮡrs.DerefOrNull();
 
     if (Ꮡrs == nil) {
@@ -3755,7 +3755,7 @@ internal static error errNoRows = errors.New("sql: no Rows available");
 
 // Columns returns the column names.
 // Columns returns an error if the rows are closed.
-[GoMethodBody("Columns")] internal static (slice<@string>, error) Columnsᴍ(ж<Rows> Ꮡrs) {
+internal static (slice<@string>, error) Columns⁔(/*this*/ ж<Rows> Ꮡrs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     bool ᒐd2 = false;
@@ -3781,7 +3781,7 @@ internal static error errNoRows = errors.New("sql: no Rows available");
 
 // ColumnTypes returns column information such as column type, length,
 // and nullable. Some information may not be available from some drivers.
-[GoMethodBody("ColumnTypes")] internal static (slice<ж<ColumnType>>, error) ColumnTypesᴍ(ж<Rows> Ꮡrs) {
+internal static (slice<ж<ColumnType>>, error) ColumnTypes⁔(/*this*/ ж<Rows> Ꮡrs) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     bool ᒐd2 = false;
@@ -3824,7 +3824,7 @@ partial struct ColumnType {
 } partial class sql_package {
 
 // Name returns the name or alias of the column.
-[GoMethodBody("Name")] internal static @string Nameᴍ(ref ColumnType ci) {
+internal static @string Name⁔(/*this*/ ref ColumnType ci) {
     return ci.name;
 }
 
@@ -3833,26 +3833,26 @@ partial struct ColumnType {
 // be [math.MaxInt64] (any database limits will still apply).
 // If the column type is not variable length, such as an int, or if not supported
 // by the driver ok is false.
-[GoMethodBody("Length")] internal static (int64 length, bool ok) Lengthᴍ(ref ColumnType ci) {
+internal static (int64 length, bool ok) Length⁔(/*this*/ ref ColumnType ci) {
     return (ci.length, ci.hasLength);
 }
 
 // DecimalSize returns the scale and precision of a decimal type.
 // If not applicable or if not supported ok is false.
-[GoMethodBody("DecimalSize")] internal static (int64 precision, int64 scale, bool ok) DecimalSizeᴍ(ref ColumnType ci) {
+internal static (int64 precision, int64 scale, bool ok) DecimalSize⁔(/*this*/ ref ColumnType ci) {
     return (ci.precision, ci.scale, ci.hasPrecisionScale);
 }
 
 // ScanType returns a Go type suitable for scanning into using [Rows.Scan].
 // If a driver does not support this property ScanType will return
 // the type of an empty interface.
-[GoMethodBody("ScanType")] internal static reflect.Type ScanTypeᴍ(ref ColumnType ci) {
+internal static reflect.Type ScanType⁔(/*this*/ ref ColumnType ci) {
     return ci.scanType;
 }
 
 // Nullable reports whether the column may be null.
 // If a driver does not support this property ok will be false.
-[GoMethodBody("Nullable")] internal static (bool nullable, bool ok) Nullableᴍ(ref ColumnType ci) {
+internal static (bool nullable, bool ok) Nullable⁔(/*this*/ ref ColumnType ci) {
     return (ci.nullable, ci.hasNullable);
 }
 
@@ -3862,7 +3862,7 @@ partial struct ColumnType {
 // are not included.
 // Common type names include "VARCHAR", "TEXT", "NVARCHAR", "DECIMAL", "BOOL",
 // "INT", and "BIGINT".
-[GoMethodBody("DatabaseTypeName")] internal static @string DatabaseTypeNameᴍ(ref ColumnType ci) {
+internal static @string DatabaseTypeName⁔(/*this*/ ref ColumnType ci) {
     return ci.databaseType;
 }
 
@@ -3971,7 +3971,7 @@ internal static slice<ж<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows 
 //
 // If any of the first arguments implementing [Scanner] returns an error,
 // that error will be wrapped in the returned error.
-[GoMethodBody("Scan")] internal static error Scanᴍ(ж<Rows> Ꮡrs, params ꓸꓸꓸany destʗp) {
+internal static error Scan⁔(/*this*/ ж<Rows> Ꮡrs, params ꓸꓸꓸany destʗp) {
     var dest = destʗp.slice();
     ref var rs = ref Ꮡrs.DerefOrNull();
 
@@ -3993,10 +3993,10 @@ internal static slice<ж<ColumnType>> rowsColumnInfoSetupConnLocked(driver.Rows 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sqlScanCalledWithoutˢᴍRows => ref sqlScanCalledWithoutˢᵇᴍRows;
-private static readonly @string sqlScanCalledWithoutˢᵇᴍRows = "sql: Scan called without calling Next"u8;
+internal static ref readonly @string sqlScanCalledWithoutˢ⁔Rows => ref sqlScanCalledWithoutˢᵇ⁔Rows;
+private static readonly @string sqlScanCalledWithoutˢᵇ⁔Rows = "sql: Scan called without calling Next"u8;
 
-[GoMethodBody("scanLocked")] internal static error scanLockedᴍ(ж<Rows> Ꮡrs, params ꓸꓸꓸany destʗp) {
+internal static error scanLocked⁔(/*this*/ ж<Rows> Ꮡrs, params ꓸꓸꓸany destʗp) {
     var dest = destʗp.sslice();
     ref var rs = ref Ꮡrs.DerefOrNull();
 
@@ -4008,7 +4008,7 @@ private static readonly @string sqlScanCalledWithoutˢᵇᴍRows = "sql: Scan ca
     }
 
     if (rs.lastcols == nil) {
-        return errors.New(sqlScanCalledWithoutˢᴍRows);
+        return errors.New(sqlScanCalledWithoutˢ⁔Rows);
     }
     if (len(dest) != len(rs.lastcols)) {
         return fmt.Errorf("sql: expected %d destination arguments in Scan, not %d"u8, len(rs.lastcols), len(dest));
@@ -4025,7 +4025,7 @@ private static readonly @string sqlScanCalledWithoutˢᵇᴍRows = "sql: Scan ca
 
 // closemuRUnlockIfHeldByScan releases any closemu.RLock held open by a previous
 // call to Scan with *RawBytes.
-[GoMethodBody("closemuRUnlockIfHeldByScan")] internal static void closemuRUnlockIfHeldByScanᴍ(ж<Rows> Ꮡrs) {
+internal static void closemuRUnlockIfHeldByScan⁔(/*this*/ ж<Rows> Ꮡrs) {
     ref var rs = ref Ꮡrs.DerefOrNull();
 
     if (rs.closemuScanHold) {
@@ -4055,7 +4055,7 @@ internal static Func<Action<ж<Rows>, ж<error>>> rowsCloseHook = () => default;
 // and returns false and there are no further result sets,
 // the [Rows] are closed automatically and it will suffice to check the
 // result of [Rows.Err]. Close is idempotent and does not affect the result of [Rows.Err].
-[GoMethodBody("Close")] internal static error Closeᴍ(ж<Rows> Ꮡrs) {
+internal static error Close⁔(/*this*/ ж<Rows> Ꮡrs) {
     // If the user's calling Close, they're done with their previous row's Scan
     // results (any RawBytes memory), so we can release the read lock that would
     // be preventing awaitDone from calling the unexported close before we do so.
@@ -4064,7 +4064,7 @@ internal static Func<Action<ж<Rows>, ж<error>>> rowsCloseHook = () => default;
     return Ꮡrs.close(default);
 }
 
-[GoMethodBody("close")] internal static error closeᴍ(ж<Rows> Ꮡrs, error errʗp) {
+internal static error close⁔(/*this*/ ж<Rows> Ꮡrs, error errʗp) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4117,15 +4117,15 @@ partial struct Row {
 } partial class sql_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sqlRawBytesIsnTAllowedOnˢᴍRow => ref sqlRawBytesIsnTAllowedOnˢᵇᴍRow;
-private static readonly @string sqlRawBytesIsnTAllowedOnˢᵇᴍRow = "sql: RawBytes isn't allowed on Row.Scan"u8;
+internal static ref readonly @string sqlRawBytesIsnTAllowedOnˢ⁔Row => ref sqlRawBytesIsnTAllowedOnˢᵇ⁔Row;
+private static readonly @string sqlRawBytesIsnTAllowedOnˢᵇ⁔Row = "sql: RawBytes isn't allowed on Row.Scan"u8;
 
 // Scan copies the columns from the matched row into the values
 // pointed at by dest. See the documentation on [Rows.Scan] for details.
 // If more than one row matches the query,
 // Scan uses the first row and discards the rest. If no row matches
 // the query, Scan returns [ErrNoRows].
-[GoMethodBody("Scan")] internal static error Scanᴍ(ж<Row> Ꮡr, params ꓸꓸꓸany destʗp) {
+internal static error Scan⁔(/*this*/ ж<Row> Ꮡr, params ꓸꓸꓸany destʗp) {
     GoFrame ᒐ = default;
     try {
         var dest = destʗp.slice();
@@ -4150,7 +4150,7 @@ private static readonly @string sqlRawBytesIsnTAllowedOnˢᵇᴍRow = "sql: RawB
         // don't care.
         defer(ᴛ0 => ᴛ0.Close(), Ꮡr.Value.rows, ref ᒐ);
         if (scanArgsContainRawBytes(dest)) {
-            return errors.New(sqlRawBytesIsnTAllowedOnˢᴍRow);
+            return errors.New(sqlRawBytesIsnTAllowedOnˢ⁔Row);
         }
 
         if (!r.rows.Next()) {
@@ -4174,7 +4174,7 @@ private static readonly @string sqlRawBytesIsnTAllowedOnˢᵇᴍRow = "sql: RawB
 // query errors without calling [Row.Scan].
 // Err returns the error, if any, that was encountered while running the query.
 // If this error is not nil, this error will also be returned from [Row.Scan].
-[GoMethodBody("Err")] internal static error Errᴍ(ref Row r) {
+internal static error Err⁔(/*this*/ ref Row r) {
     return r.err;
 }
 
@@ -4201,7 +4201,7 @@ partial struct driverResult {
 
 } partial class sql_package {
 
-[GoMethodBody("LastInsertId")] internal static (int64, error) LastInsertIdᴍ(driverResult dr) {
+internal static (int64, error) LastInsertId⁔(/*this*/ driverResult dr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4213,7 +4213,7 @@ partial struct driverResult {
     finally { if (ᒐd1) dr.Locker.Unlock(); ᒐ.Run(); }
 }
 
-[GoMethodBody("RowsAffected")] internal static (int64, error) RowsAffectedᴍ(driverResult dr) {
+internal static (int64, error) RowsAffected⁔(/*this*/ driverResult dr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -4271,7 +4271,7 @@ partial struct connRequestAndIndex {
 
 // CloseAndRemoveAll closes all channels in the set
 // and clears the set.
-[GoMethodBody("CloseAndRemoveAll")] internal static void CloseAndRemoveAllᴍ(ref connRequestSet s) {
+internal static void CloseAndRemoveAll⁔(/*this*/ ref connRequestSet s) {
     foreach (var (_, v) in range(s.s)) {
         v.curIdx.Value = -1;
         close(v.req);
@@ -4280,7 +4280,7 @@ partial struct connRequestAndIndex {
 }
 
 // Len returns the length of the set.
-[GoMethodBody("Len")] internal static nint Lenᴍ(ref connRequestSet s) { return len(s.s); }
+internal static nint Len⁔(/*this*/ ref connRequestSet s) { return len(s.s); }
 
 } partial class sql_package {
 
@@ -4295,7 +4295,7 @@ partial struct connRequestDelHandle {
 // Add adds v to the set of waiting requests.
 // The returned connRequestDelHandle can be used to remove the item from
 // the set.
-[GoMethodBody("Add")] internal static connRequestDelHandle Addᴍ(ref connRequestSet s, channel<connRequest> v) {
+internal static connRequestDelHandle Add⁔(/*this*/ ref connRequestSet s, channel<connRequest> v) {
     ref var idx = ref heap<nint>(len(s.s), out var Ꮡidx);
     // TODO(bradfitz): for simplicity, this always allocates a new int-sized
     // allocation to store the index. But generally the set will be small and
@@ -4314,7 +4314,7 @@ partial struct connRequestDelHandle {
 //
 // It reports whether the element was deleted. (It can return false if a caller
 // of TakeRandom took it meanwhile, or upon the second call to Delete)
-[GoMethodBody("Delete")] internal static bool Deleteᴍ(ref connRequestSet s, connRequestDelHandle h) {
+internal static bool Delete⁔(/*this*/ ref connRequestSet s, connRequestDelHandle h) {
     nint idx = h.idx.Value;
     if (idx < 0) {
         return false;
@@ -4323,7 +4323,7 @@ partial struct connRequestDelHandle {
     return true;
 }
 
-[GoMethodBody("deleteIndex")] internal static void deleteIndexᴍ(ref connRequestSet s, nint idx) {
+internal static void deleteIndex⁔(/*this*/ ref connRequestSet s, nint idx) {
     // Mark item as deleted.
     (s.s[idx].curIdx).Value = -1;
     // Copy last element, updating its position
@@ -4341,7 +4341,7 @@ partial struct connRequestDelHandle {
 // TakeRandom returns and removes a random element from s
 // and reports whether there was one to take. (It returns ok=false
 // if the set is empty.)
-[GoMethodBody("TakeRandom")] internal static (channel<connRequest> v, bool ok) TakeRandomᴍ(ref connRequestSet s) {
+internal static (channel<connRequest> v, bool ok) TakeRandom⁔(/*this*/ ref connRequestSet s) {
     if (len(s.s) == 0) {
         return (default, false);
     }

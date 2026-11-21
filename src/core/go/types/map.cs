@@ -22,12 +22,12 @@ public static ж<Map> NewMap(Type key, Type elem) {
 } partial class types_package {
 
 // Key returns the key type of map m.
-[GoMethodBody("Key")] internal static Type Keyᴍ(ref Map m) { return m.key; }
+internal static Type Key⁔(/*this*/ ref Map m) { return m.key; }
 
 // Elem returns the element type of map m.
-[GoMethodBody("Elem")] internal static Type Elemᴍ(ref Map m) { return m.elem; }
+internal static Type Elem⁔(/*this*/ ref Map m) { return m.elem; }
 
-[GoMethodBody("Underlying")] internal static Type Underlyingᴍ(ж<Map> Ꮡt) { return new MapжType(Ꮡt); }
-[GoMethodBody("String")] internal static @string Stringᴍ(ж<Map> Ꮡt) { return TypeString(new MapжType(Ꮡt), default); }
+internal static Type Underlying⁔(/*this*/ ж<Map> Ꮡt) { return new MapжType(Ꮡt); }
+internal static @string String⁔(/*this*/ ж<Map> Ꮡt) { return TypeString(new MapжType(Ꮡt), default); }
 
 }

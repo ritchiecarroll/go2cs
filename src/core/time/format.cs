@@ -568,8 +568,8 @@ internal static slice<byte> appendNano(slice<byte> b, nint nanosec, nint std) {
 } partial class time_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string mstˢᴍTime => ref mstˢᵇᴍTime;
-private static readonly @string mstˢᵇᴍTime = "2006-01-02 15:04:05.999999999 -0700 MST"u8;
+internal static ref readonly @string mstˢ⁔Time => ref mstˢᵇ⁔Time;
+private static readonly @string mstˢᵇ⁔Time = "2006-01-02 15:04:05.999999999 -0700 MST"u8;
 
 // String returns the time formatted using the format string
 //
@@ -582,10 +582,10 @@ private static readonly @string mstˢᵇᴍTime = "2006-01-02 15:04:05.999999999
 // The returned string is meant for debugging; for a stable serialized
 // representation, use t.MarshalText, t.MarshalBinary, or t.Format
 // with an explicit format string.
-[GoMethodBody("String")] internal static @string Stringᴍ(Time t) {
+internal static @string String⁔(/*this*/ Time t) {
     var bufᴷ = new stackAppend<byte>();
 
-    @string s = t.Format(mstˢᴍTime);
+    @string s = t.Format(mstˢ⁔Time);
 
     // Format monotonic clock reading as m=±ddd.nnnnnnnnn.
     if ((t.wall & (uint64)hasMonotonic) != 0) {
@@ -617,7 +617,7 @@ private static readonly @string mstˢᵇᴍTime = "2006-01-02 15:04:05.999999999
 
 // GoString implements [fmt.GoStringer] and formats t to be printed in Go source
 // code.
-[GoMethodBody("GoString")] internal static @string GoStringᴍ(Time t) {
+internal static @string GoString⁔(/*this*/ Time t) {
     var bufᴷ = new stackAppend<byte>();
 
     var abs = t.absSec();
@@ -687,7 +687,7 @@ private static readonly @string mstˢᵇᴍTime = "2006-01-02 15:04:05.999999999
 //
 // The executable example for [Time.Format] demonstrates the working
 // of the layout string in detail and is a good reference.
-[GoMethodBody("Format")] internal static @string Formatᴍ(Time t, @string layout) {
+internal static @string Format⁔(/*this*/ Time t, @string layout) {
     UntypedInt bufSize = 64;
     slice<byte> b = default;
     nint max = len(layout) + 10;
@@ -703,7 +703,7 @@ private static readonly @string mstˢᵇᴍTime = "2006-01-02 15:04:05.999999999
 
 // AppendFormat is like [Time.Format] but appends the textual
 // representation to b and returns the extended buffer.
-[GoMethodBody("AppendFormat")] internal static slice<byte> AppendFormatᴍ(Time t, slice<byte> b, @string layout) {
+internal static slice<byte> AppendFormat⁔(/*this*/ Time t, slice<byte> b, @string layout) {
     // Optimize for RFC3339 as it accounts for over half of all representations.
     switch (ᐧ) {
     case {} when layout == RFC3339: {
@@ -717,7 +717,7 @@ private static readonly @string mstˢᵇᴍTime = "2006-01-02 15:04:05.999999999
     }}
 }
 
-[GoMethodBody("appendFormat")] internal static slice<byte> appendFormatᴍ(Time t, slice<byte> b, @string layout) {
+internal static slice<byte> appendFormat⁔(/*this*/ Time t, slice<byte> b, @string layout) {
     var (name, offset, abs) = t.locabs();
     var days = abs.days();
 
@@ -1003,7 +1003,7 @@ internal static @string quote(@string s) {
 } partial class time_package {
 
 // Error returns the string representation of a ParseError.
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref ParseError e) {
+internal static @string Error⁔(/*this*/ ref ParseError e) {
     if (e.Message == ""u8) {
         return "parsing time "u8 + quote(e.Value) + " as "u8 + quote(e.Layout) + ": cannot parse "u8 + quote(e.ValueElem) + " as "u8 + quote(e.LayoutElem);
     }
@@ -1820,7 +1820,7 @@ partial struct parseDurationError {
 
 } partial class time_package {
 
-[GoMethodBody("Error")] internal static @string Errorᴍ(ref parseDurationError e) {
+internal static @string Error⁔(/*this*/ ref parseDurationError e) {
     return "time: "u8 + e.message + " "u8 + quote(e.value);
 }
 

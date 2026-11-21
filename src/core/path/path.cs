@@ -30,14 +30,14 @@ partial struct lazybuf {
 
 } partial class path_package {
 
-[GoMethodBody("index")] internal static byte indexᴍ(ref lazybuf b, nint i) {
+internal static byte index⁔(/*this*/ ref lazybuf b, nint i) {
     if (b.buf != nil) {
         return b.buf[i];
     }
     return b.s[i];
 }
 
-[GoMethodBody("append")] internal static void appendᴍ(ref lazybuf b, byte c) {
+internal static void append⁔(/*this*/ ref lazybuf b, byte c) {
     if (b.buf == nil) {
         if (b.w < len(b.s) && b.s[b.w] == c) {
             b.w++;
@@ -50,7 +50,7 @@ partial struct lazybuf {
     b.w++;
 }
 
-[GoMethodBody("string")] internal static @string @stringᴍ(ref lazybuf b) {
+internal static @string @string⁔(/*this*/ ref lazybuf b) {
     if (b.buf == nil) {
         return b.s.slice(0, b.w);
     }

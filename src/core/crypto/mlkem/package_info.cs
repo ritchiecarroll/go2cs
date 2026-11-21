@@ -64,11 +64,14 @@ using static go.crypto.mlkem_package;
 
 namespace go.crypto;
 
-// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+// <PackageInfoUsings> (scratch prototype: the using directives this file's holders and forwarders read)
 using crypto = crypto_package;
 using go.crypto.@internal.fips140;
 using static mlkem_package;
-// </GlyphForwarderUsings>
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+// </PackageInfoUsings>
 
 [GoPackage("mlkem")]
 public static partial class mlkem_package
@@ -105,31 +108,31 @@ public static partial class mlkem_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(mlkem_package.DecapsulationKey1024)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mlkemᴛDecapsulationKey1024;
-[GoMethodHost(typeof(mlkem_package.DecapsulationKey768)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mlkemᴛDecapsulationKey768;
-[GoMethodHost(typeof(mlkem_package.EncapsulationKey1024)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mlkemᴛEncapsulationKey1024;
-[GoMethodHost(typeof(mlkem_package.EncapsulationKey768)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mlkemᴛEncapsulationKey768;
+[GoMethodHost(typeof(mlkem_package.DecapsulationKey1024)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mlkemᴛDecapsulationKey1024;
+[GoMethodHost(typeof(mlkem_package.DecapsulationKey768)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mlkemᴛDecapsulationKey768;
+[GoMethodHost(typeof(mlkem_package.EncapsulationKey1024)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mlkemᴛEncapsulationKey1024;
+[GoMethodHost(typeof(mlkem_package.EncapsulationKey768)), EditorBrowsable(EditorBrowsableState.Never)] public static partial class mlkemᴛEncapsulationKey768;
 // </MethodHolders>
 
-// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ⁔ bodies in the package class)
 partial class mlkemᴛDecapsulationKey768 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref DecapsulationKey768 dk) => mlkem_package.Bytesᴍ(ref dk);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> sharedKey, error err) Decapsulate(this ref DecapsulationKey768 dk, slice<byte> ciphertext) => mlkem_package.Decapsulateᴍ(ref dk, ciphertext);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<EncapsulationKey768> EncapsulationKey(this ref DecapsulationKey768 dk) => mlkem_package.EncapsulationKeyᴍ(ref dk);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static crypto.Encapsulator Encapsulator(this ref DecapsulationKey768 dk) => mlkem_package.Encapsulatorᴍ(ref dk);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref DecapsulationKey768 dk) => mlkem_package.Bytes⁔(ref dk);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> sharedKey, error err) Decapsulate(this ref DecapsulationKey768 dk, slice<byte> ciphertext) => mlkem_package.Decapsulate⁔(ref dk, ciphertext);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<EncapsulationKey768> EncapsulationKey(this ref DecapsulationKey768 dk) => mlkem_package.EncapsulationKey⁔(ref dk);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static crypto.Encapsulator Encapsulator(this ref DecapsulationKey768 dk) => mlkem_package.Encapsulator⁔(ref dk);
 }
 partial class mlkemᴛEncapsulationKey768 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref EncapsulationKey768 ek) => mlkem_package.Bytesᴍ(ref ek);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this ref EncapsulationKey768 ek) => mlkem_package.Encapsulateᴍ(ref ek);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref EncapsulationKey768 ek) => mlkem_package.Bytes⁔(ref ek);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this ref EncapsulationKey768 ek) => mlkem_package.Encapsulate⁔(ref ek);
 }
 partial class mlkemᴛDecapsulationKey1024 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref DecapsulationKey1024 dk) => mlkem_package.Bytesᴍ(ref dk);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> sharedKey, error err) Decapsulate(this ref DecapsulationKey1024 dk, slice<byte> ciphertext) => mlkem_package.Decapsulateᴍ(ref dk, ciphertext);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<EncapsulationKey1024> EncapsulationKey(this ref DecapsulationKey1024 dk) => mlkem_package.EncapsulationKeyᴍ(ref dk);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static crypto.Encapsulator Encapsulator(this ref DecapsulationKey1024 dk) => mlkem_package.Encapsulatorᴍ(ref dk);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref DecapsulationKey1024 dk) => mlkem_package.Bytes⁔(ref dk);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> sharedKey, error err) Decapsulate(this ref DecapsulationKey1024 dk, slice<byte> ciphertext) => mlkem_package.Decapsulate⁔(ref dk, ciphertext);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static ж<EncapsulationKey1024> EncapsulationKey(this ref DecapsulationKey1024 dk) => mlkem_package.EncapsulationKey⁔(ref dk);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static crypto.Encapsulator Encapsulator(this ref DecapsulationKey1024 dk) => mlkem_package.Encapsulator⁔(ref dk);
 }
 partial class mlkemᴛEncapsulationKey1024 {
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<byte> Bytes(this ref EncapsulationKey1024 ek) => mlkem_package.Bytesᴍ(ref ek);
-[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this ref EncapsulationKey1024 ek) => mlkem_package.Encapsulateᴍ(ref ek);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static slice<byte> Bytes(this ref EncapsulationKey1024 ek) => mlkem_package.Bytes⁔(ref ek);
+[MethodImpl(MethodImplOptions.AggressiveInlining), StackTraceHidden, DebuggerStepThrough] public static (slice<byte> sharedKey, slice<byte> ciphertext) Encapsulate(this ref EncapsulationKey1024 ek) => mlkem_package.Encapsulate⁔(ref ek);
 }
 // </GlyphForwarders>

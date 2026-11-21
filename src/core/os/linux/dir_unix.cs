@@ -40,7 +40,7 @@ internal static ref Δsync.Pool dirBufPool => ref ((StaticBox<Δsync.Pool>)Ꮡdi
 
 } partial class os_package {
 
-[GoMethodBody("close")] internal static void closeᴍ(ref dirInfo d) {
+internal static void close⁔(/*this*/ ref dirInfo d) {
     if (d.buf != nil) {
         ᏑdirBufPool.Put(d.buf.OrTypedNil());
         d.buf = default;
@@ -49,7 +49,7 @@ internal static ref Δsync.Pool dirBufPool => ref ((StaticBox<Δsync.Pool>)Ꮡdi
 
 } partial class os_package {
 
-[GoMethodBody("readdir")] internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> infos, error err) readdirᴍ(ж<File> Ꮡf, nint n, readdirMode mode) {
+internal static (slice<@string> names, slice<DirEntry> dirents, slice<FileInfo> infos, error err) readdir⁔(/*this*/ ж<File> Ꮡf, nint n, readdirMode mode) {
     slice<@string> names = default;
     slice<DirEntry> dirents = default;
     slice<FileInfo> infos = default;

@@ -90,26 +90,26 @@ internal static ж<aead> aes256GCM = Ꮡ(new aead(
 
 } partial class hpke_package {
 
-[GoMethodBody("ID")] internal static uint16 IDᴍ(ref aead a) {
+internal static uint16 ID⁔(/*this*/ ref aead a) {
     return a.id;
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidKeySizeˢᴍaead => ref invalidKeySizeˢᵇᴍaead;
-private static readonly @string invalidKeySizeˢᵇᴍaead = "invalid key size"u8;
+internal static ref readonly @string invalidKeySizeˢ⁔aead => ref invalidKeySizeˢᵇ⁔aead;
+private static readonly @string invalidKeySizeˢᵇ⁔aead = "invalid key size"u8;
 
-[GoMethodBody("aead")] internal static (cipher.AEAD, error) aeadᴍ(ref aead a, slice<byte> key) {
+internal static (cipher.AEAD, error) aead⁔(/*this*/ ref aead a, slice<byte> key) {
     if (len(key) != a.nK) {
-        return (default, errors.New(invalidKeySizeˢᴍaead));
+        return (default, errors.New(invalidKeySizeˢ⁔aead));
     }
     return a.@new(key);
 }
 
-[GoMethodBody("keySize")] internal static nint keySizeᴍ(ref aead a) {
+internal static nint keySize⁔(/*this*/ ref aead a) {
     return a.nK;
 }
 
-[GoMethodBody("nonceSize")] internal static nint nonceSizeᴍ(ref aead a) {
+internal static nint nonceSize⁔(/*this*/ ref aead a) {
     return a.nN;
 }
 
@@ -120,19 +120,19 @@ partial struct exportOnlyAEAD {
 
 } partial class hpke_package {
 
-[GoMethodBody("ID")] internal static uint16 IDᴍ(exportOnlyAEAD _) {
+internal static uint16 ID⁔(/*this*/ exportOnlyAEAD _) {
     return 0xFFFF;
 }
 
-[GoMethodBody("aead")] internal static (cipher.AEAD, error) aeadᴍ(exportOnlyAEAD _, slice<byte> key) {
+internal static (cipher.AEAD, error) aead⁔(/*this*/ exportOnlyAEAD _, slice<byte> key) {
     return (default, default);
 }
 
-[GoMethodBody("keySize")] internal static nint keySizeᴍ(exportOnlyAEAD _) {
+internal static nint keySize⁔(/*this*/ exportOnlyAEAD _) {
     return 0;
 }
 
-[GoMethodBody("nonceSize")] internal static nint nonceSizeᴍ(exportOnlyAEAD _) {
+internal static nint nonceSize⁔(/*this*/ exportOnlyAEAD _) {
     return 0;
 }
 

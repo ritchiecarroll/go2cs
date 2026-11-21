@@ -50,7 +50,7 @@ private static readonly @string _state_nameᵇ = "stateTextstateTagstateAttrName
 
 } partial class template_package {
 
-[GoMethodBody("String")] internal static @string Stringᴍ(state i) {
+internal static @string String⁔(/*this*/ state i) {
     if (i >= ((state)(uint8)(len(_state_index) - 1))) {
         return "state("u8 + strconv.FormatInt((int64)i, 10) + ")"u8;
     }

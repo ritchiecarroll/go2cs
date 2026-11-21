@@ -42,7 +42,7 @@ partial struct RDNSequence /*[]RelativeDistinguishedNameSET*/;
 
 // String returns a string representation of the sequence r,
 // roughly following the RFC 2253 Distinguished Names syntax.
-[GoMethodBody("String")] internal static @string Stringᴍ(RDNSequence r) {
+internal static @string String⁔(/*this*/ RDNSequence r) {
     var escapedᴷ = new stackAppend<rune>();
 
     @string s = ""u8;
@@ -153,7 +153,7 @@ partial struct Name {
 // FillFromRDNSequence populates n from the provided [RDNSequence].
 // Multi-entry RDNs are flattened, all entries are added to the
 // relevant n fields, and the grouping is not preserved.
-[GoMethodBody("FillFromRDNSequence")] internal static void FillFromRDNSequenceᴍ(ref Name n, ж<RDNSequence> Ꮡrdns) {
+internal static void FillFromRDNSequence⁔(/*this*/ ref Name n, ж<RDNSequence> Ꮡrdns) {
     ref var rdns = ref Ꮡrdns.DerefOrNull();
 
     foreach (var (_, rdn) in range<RelativeDistinguishedNameSET>(rdns)) {
@@ -230,7 +230,7 @@ internal static slice<nint> oidPostalCode = [2, 5, 4, 17];
 // and returns the new value. The relativeDistinguishedNameSET contains an
 // attributeTypeAndValue for each of the given values. See RFC 5280, A.1, and
 // search for AttributeTypeAndValue.
-[GoMethodBody("appendRDNs")] internal static RDNSequence appendRDNsᴍ(Name n, RDNSequence @in, slice<@string> values, asn1.ObjectIdentifier oid) {
+internal static RDNSequence appendRDNs⁔(/*this*/ Name n, RDNSequence @in, slice<@string> values, asn1.ObjectIdentifier oid) {
     if (len(values) == 0 || oidInAttributeTypeAndValue(oid, n.ExtraNames)) {
         return @in;
     }
@@ -256,7 +256,7 @@ internal static slice<nint> oidPostalCode = [2, 5, 4, 17];
 //   - PostalCode
 //
 // Each ExtraNames entry is encoded as an individual RDN.
-[GoMethodBody("ToRDNSequence")] internal static RDNSequence /*ret*/ ToRDNSequenceᴍ(Name n) {
+internal static RDNSequence /*ret*/ ToRDNSequence⁔(/*this*/ Name n) {
     RDNSequence ret = default;
 
     ret = n.appendRDNs(ret, n.Country, oidCountry);
@@ -281,7 +281,7 @@ internal static slice<nint> oidPostalCode = [2, 5, 4, 17];
 
 // String returns the string form of n, roughly following
 // the RFC 2253 Distinguished Names syntax.
-[GoMethodBody("String")] internal static @string Stringᴍ(Name n) {
+internal static @string String⁔(/*this*/ Name n) {
     var rdnsᴷ = new stackAppend<RelativeDistinguishedNameSET>();
 
     RDNSequence rdns = default;
@@ -334,7 +334,7 @@ partial struct CertificateList {
 } partial class pkix_package {
 
 // HasExpired reports whether certList should have been updated by now.
-[GoMethodBody("HasExpired")] internal static bool HasExpiredᴍ(ref CertificateList certList, time.Time now) {
+internal static bool HasExpired⁔(/*this*/ ref CertificateList certList, time.Time now) {
     return !now.Before(certList.TBSCertList.NextUpdate);
 }
 

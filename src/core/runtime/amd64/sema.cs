@@ -60,7 +60,7 @@ partial struct semTable /*[251]semTableᴛ1*/;
 
 } partial class runtime_package {
 
-[GoMethodBody("rootFor")] internal static ж<semaRoot> rootForᴍ(ref semTable t, ж<uint32> addr) {
+internal static ж<semaRoot> rootFor⁔(/*this*/ ref semTable t, ж<uint32> addr) {
     return Ꮡ(t.Value, ((uintptr)addr >> 3) % (uintptr)semTabSize).of(semTableᴛ1.Ꮡroot);
 }
 
@@ -173,7 +173,7 @@ internal static bool cansemacquire(ж<uint32> addr) {
 } partial class runtime_package {
 
 // queue adds s to the blocked goroutines in semaRoot.
-[GoMethodBody("queue")] internal static void queueᴍ(ж<semaRoot> Ꮡroot, ж<uint32> addr, ж<sudog> Ꮡs, bool lifo) {
+internal static void queue⁔(/*this*/ ж<semaRoot> Ꮡroot, ж<uint32> addr, ж<sudog> Ꮡs, bool lifo) {
     ref var root = ref Ꮡroot.DerefOrNull();
     ref var s = ref Ꮡs.DerefOrNull();
 
@@ -277,7 +277,7 @@ internal static bool cansemacquire(ж<uint32> addr) {
 // If there are additional entries in the wait list, dequeue
 // returns tailtime set to the last entry's acquiretime.
 // Otherwise tailtime is found.acquiretime.
-[GoMethodBody("dequeue")] internal static (ж<sudog> found, int64 now, int64 tailtime) dequeueᴍ(ж<semaRoot> Ꮡroot, ж<uint32> addr) {
+internal static (ж<sudog> found, int64 now, int64 tailtime) dequeue⁔(/*this*/ ж<semaRoot> Ꮡroot, ж<uint32> addr) {
     int64 now = default;
     int64 tailtime = default;
     ref var root = ref Ꮡroot.DerefOrNull();
@@ -365,12 +365,12 @@ Found:
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string semaRootRotateLeftˢᴍsemaRoot => ref semaRootRotateLeftˢᵇᴍsemaRoot;
-private static readonly @string semaRootRotateLeftˢᵇᴍsemaRoot = "semaRoot rotateLeft"u8;
+internal static ref readonly @string semaRootRotateLeftˢ⁔semaRoot => ref semaRootRotateLeftˢᵇ⁔semaRoot;
+private static readonly @string semaRootRotateLeftˢᵇ⁔semaRoot = "semaRoot rotateLeft"u8;
 
 // rotateLeft rotates the tree rooted at node x.
 // turning (x a (y b c)) into (y (x a b) c).
-[GoMethodBody("rotateLeft")] internal static void rotateLeftᴍ(ref semaRoot root, ж<sudog> Ꮡx) {
+internal static void rotateLeft⁔(/*this*/ ref semaRoot root, ж<sudog> Ꮡx) {
     ref var x = ref Ꮡx.DerefOrNull();
 
     // p -> (x a (y b c))
@@ -392,19 +392,19 @@ private static readonly @string semaRootRotateLeftˢᵇᴍsemaRoot = "semaRoot r
         p.Value.prev = y;
     } else {
         if ((~p).next != Ꮡx) {
-            @throw(semaRootRotateLeftˢᴍsemaRoot);
+            @throw(semaRootRotateLeftˢ⁔semaRoot);
         }
         p.Value.next = y;
     }
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string semaRootRotateRightˢᴍsemaRoot => ref semaRootRotateRightˢᵇᴍsemaRoot;
-private static readonly @string semaRootRotateRightˢᵇᴍsemaRoot = "semaRoot rotateRight"u8;
+internal static ref readonly @string semaRootRotateRightˢ⁔semaRoot => ref semaRootRotateRightˢᵇ⁔semaRoot;
+private static readonly @string semaRootRotateRightˢᵇ⁔semaRoot = "semaRoot rotateRight"u8;
 
 // rotateRight rotates the tree rooted at node y.
 // turning (y (x a b) c) into (x a (y b c)).
-[GoMethodBody("rotateRight")] internal static void rotateRightᴍ(ref semaRoot root, ж<sudog> Ꮡy) {
+internal static void rotateRight⁔(/*this*/ ref semaRoot root, ж<sudog> Ꮡy) {
     ref var y = ref Ꮡy.DerefOrNull();
 
     // p -> (y (x a b) c)
@@ -426,7 +426,7 @@ private static readonly @string semaRootRotateRightˢᵇᴍsemaRoot = "semaRoot 
         p.Value.prev = x;
     } else {
         if ((~p).next != Ꮡy) {
-            @throw(semaRootRotateRightˢᴍsemaRoot);
+            @throw(semaRootRotateRightˢ⁔semaRoot);
         }
         p.Value.next = x;
     }

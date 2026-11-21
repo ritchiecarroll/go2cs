@@ -38,7 +38,7 @@ partial struct digest /*num:uint32*/;
 
 } partial class adler32_package {
 
-[GoMethodBody("Reset")] internal static void Resetᴍ(ref digest d) { d = 1; }
+internal static void Reset⁔(/*this*/ ref digest d) { d = 1; }
 
 } partial class adler32_package {
 
@@ -55,9 +55,9 @@ public static hash.Hash32 New() {
 
 } partial class adler32_package {
 
-[GoMethodBody("Size")] internal static nint Sizeᴍ(ref digest d) { return adler32.Size; }
+internal static nint Size⁔(/*this*/ ref digest d) { return adler32.Size; }
 
-[GoMethodBody("BlockSize")] internal static nint BlockSizeᴍ(ref digest d) { return 4; }
+internal static nint BlockSize⁔(/*this*/ ref digest d) { return 4; }
 
 } partial class adler32_package {
 
@@ -67,34 +67,34 @@ internal const nint marshaledSize = /* len(magic) + 4 */ 8;
 
 } partial class adler32_package {
 
-[GoMethodBody("AppendBinary")] internal static (slice<byte>, error) AppendBinaryᴍ(ref digest d, slice<byte> b) {
+internal static (slice<byte>, error) AppendBinary⁔(/*this*/ ref digest d, slice<byte> b) {
     b = append(b, magic.ꓸꓸꓸ);
     b = byteorder.BEAppendUint32(b, (uint32)(d));
     return (b, default);
 }
 
-[GoMethodBody("MarshalBinary")] internal static (slice<byte>, error) MarshalBinaryᴍ(ref digest d) {
+internal static (slice<byte>, error) MarshalBinary⁔(/*this*/ ref digest d) {
     return d.AppendBinary(new slice<byte>(0, marshaledSize));
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string hashAdler32InvalidHashˢᴍdigest => ref hashAdler32InvalidHashˢᵇᴍdigest;
-private static readonly @string hashAdler32InvalidHashˢᵇᴍdigest = "hash/adler32: invalid hash state identifier"u8;
-internal static ref readonly @string hashAdler32InvalidHashˢ2ᴍdigest => ref hashAdler32InvalidHashˢ2ᵇᴍdigest;
-private static readonly @string hashAdler32InvalidHashˢ2ᵇᴍdigest = "hash/adler32: invalid hash state size"u8;
+internal static ref readonly @string hashAdler32InvalidHashˢ⁔digest => ref hashAdler32InvalidHashˢᵇ⁔digest;
+private static readonly @string hashAdler32InvalidHashˢᵇ⁔digest = "hash/adler32: invalid hash state identifier"u8;
+internal static ref readonly @string hashAdler32InvalidHashˢ2⁔digest => ref hashAdler32InvalidHashˢ2ᵇ⁔digest;
+private static readonly @string hashAdler32InvalidHashˢ2ᵇ⁔digest = "hash/adler32: invalid hash state size"u8;
 
-[GoMethodBody("UnmarshalBinary")] internal static error UnmarshalBinaryᴍ(ref digest d, slice<byte> b) {
+internal static error UnmarshalBinary⁔(/*this*/ ref digest d, slice<byte> b) {
     if (len(b) < len(magic) || ((sstring)(b[..(int)(len(magic))])) != magic) {
-        return errors.New(hashAdler32InvalidHashˢᴍdigest);
+        return errors.New(hashAdler32InvalidHashˢ⁔digest);
     }
     if (len(b) != marshaledSize) {
-        return errors.New(hashAdler32InvalidHashˢ2ᴍdigest);
+        return errors.New(hashAdler32InvalidHashˢ2⁔digest);
     }
     d = (digest)byteorder.BEUint32(b[(int)(len(magic))..]);
     return default;
 }
 
-[GoMethodBody("Clone")] internal static (hash.Cloner, error) Cloneᴍ(ref digest d) {
+internal static (hash.Cloner, error) Clone⁔(/*this*/ ref digest d) {
     ref var r = ref heap<digest>(d, out var Ꮡr);
     return (new digestжCloner(Ꮡr), default);
 }
@@ -133,14 +133,14 @@ internal static digest update(digest d, slice<byte> p) {
 
 } partial class adler32_package {
 
-[GoMethodBody("Write")] internal static (nint nn, error err) Writeᴍ(ref digest d, slice<byte> p) {
+internal static (nint nn, error err) Write⁔(/*this*/ ref digest d, slice<byte> p) {
     d = update(d, p);
     return (len(p), default);
 }
 
-[GoMethodBody("Sum32")] internal static uint32 Sum32ᴍ(ref digest d) { return (uint32)(d); }
+internal static uint32 Sum32⁔(/*this*/ ref digest d) { return (uint32)(d); }
 
-[GoMethodBody("Sum")] internal static slice<byte> Sumᴍ(ref digest d, slice<byte> @in) {
+internal static slice<byte> Sum⁔(/*this*/ ref digest d, slice<byte> @in) {
     var s = (uint32)(d);
     return append(@in, (byte)(s >> 24), (byte)(s >> 16), (byte)(s >> 8), (byte)s);
 }

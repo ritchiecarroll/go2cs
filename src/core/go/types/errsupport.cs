@@ -13,17 +13,17 @@ partial class types_package {
 } partial class types_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string objectˢᴍChecker => ref objectˢᵇᴍChecker;
-private static readonly @string objectˢᵇᴍChecker = "object"u8;
-internal static ref readonly @string fieldˢᴍChecker => ref fieldˢᵇᴍChecker;
-private static readonly @string fieldˢᵇᴍChecker = "field"u8;
-internal static ref readonly @string methodˢᴍChecker => ref methodˢᵇᴍChecker;
-private static readonly @string methodˢᵇᴍChecker = "method"u8;
+internal static ref readonly @string objectˢ⁔Checker => ref objectˢᵇ⁔Checker;
+private static readonly @string objectˢᵇ⁔Checker = "object"u8;
+internal static ref readonly @string fieldˢ⁔Checker => ref fieldˢᵇ⁔Checker;
+private static readonly @string fieldˢᵇ⁔Checker = "field"u8;
+internal static ref readonly @string methodˢ⁔Checker => ref methodˢᵇ⁔Checker;
+private static readonly @string methodˢᵇ⁔Checker = "method"u8;
 
 // lookupError returns a case-specific error when a lookup of selector sel in the
 // given type fails but an object with alternative spelling (case folding) is found.
 // If structLit is set, the error message is specifically for struct literal fields.
-[GoMethodBody("lookupError")] internal static @string lookupErrorᴍ(ж<Checker> Ꮡcheck, Type typ, @string sel, Object obj, bool structLit) {
+internal static @string lookupError⁔(/*this*/ ж<Checker> Ꮡcheck, Type typ, @string sel, Object obj, bool structLit) {
     ref var check = ref Ꮡcheck.DerefOrNull();
 
     // Provide more detail if there is an unexported object, or one with different capitalization.
@@ -96,14 +96,14 @@ private static readonly @string methodˢᵇᴍChecker = "method"u8;
             return Ꮡcheck.sprintf("cannot refer to unexported field %s in struct literal of type %s", alt, typ);
         }}
     } else {
-        @string what = objectˢᴍChecker;
+        @string what = objectˢ⁔Checker;
         switch (obj.type()) {
         case ж<Var>: {
-            what = fieldˢᴍChecker;
+            what = fieldˢ⁔Checker;
             break;
         }
         case ж<Func>: {
-            what = methodˢᴍChecker;
+            what = methodˢ⁔Checker;
             break;
         }}
         switch (e) {

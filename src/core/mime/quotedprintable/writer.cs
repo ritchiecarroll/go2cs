@@ -31,7 +31,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 // Write encodes p using quoted-printable encoding and writes it to the
 // underlying [io.Writer]. It limits line length to 76 characters. The encoded
 // bytes are not necessarily flushed until the [Writer] is closed.
-[GoMethodBody("Write")] internal static (nint n, error err) Writeᴍ(ref Writer w, slice<byte> p) {
+internal static (nint n, error err) Write⁔(/*this*/ ref Writer w, slice<byte> p) {
     nint n = default;
 
     foreach (var (i, b) in range(p)) {
@@ -72,7 +72,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 
 // Close closes the [Writer], flushing any unwritten data to the underlying
 // [io.Writer], but does not close the underlying io.Writer.
-[GoMethodBody("Close")] internal static error Closeᴍ(ref Writer w) {
+internal static error Close⁔(/*this*/ ref Writer w) {
     var err = w.checkLastByte(); if (err != nil) {
         return err;
     }
@@ -81,7 +81,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
 }
 
 // write limits text encoded in quoted-printable to 76 characters per line.
-[GoMethodBody("write")] internal static error writeᴍ(ref Writer w, slice<byte> p) {
+internal static error write⁔(/*this*/ ref Writer w, slice<byte> p) {
     foreach (var (_, b) in range(p)) {
         if (b == '\n' || b == '\r') {
             // If the previous byte was \r, the CRLF has already been inserted.
@@ -121,7 +121,7 @@ public static ж<Writer> NewWriter(io.Writer w) {
     return default;
 }
 
-[GoMethodBody("encode")] internal static error encodeᴍ(ref Writer w, byte b) {
+internal static error encode⁔(/*this*/ ref Writer w, byte b) {
     if ((nint)(lineMaxLen - 1) - w.i < 3) {
         var err = w.insertSoftLineBreak(); if (err != nil) {
             return err;
@@ -144,7 +144,7 @@ private static readonly @string upperhexᵇ = "0123456789ABCDEF"u8;
 } partial class quotedprintable_package {
 
 // checkLastByte encodes the last buffered byte if it is a space or a tab.
-[GoMethodBody("checkLastByte")] internal static error checkLastByteᴍ(ref Writer w) {
+internal static error checkLastByte⁔(/*this*/ ref Writer w) {
     if (w.i == 0) {
         return default;
     }
@@ -160,14 +160,14 @@ private static readonly @string upperhexᵇ = "0123456789ABCDEF"u8;
     return default;
 }
 
-[GoMethodBody("insertSoftLineBreak")] internal static error insertSoftLineBreakᴍ(ref Writer w) {
+internal static error insertSoftLineBreak⁔(/*this*/ ref Writer w) {
     w.line[w.i] = (byte)'=';
     w.i++;
 
     return w.insertCRLF();
 }
 
-[GoMethodBody("insertCRLF")] internal static error insertCRLFᴍ(ref Writer w) {
+internal static error insertCRLF⁔(/*this*/ ref Writer w) {
     w.line[w.i] = (byte)'\r';
     w.line[w.i + 1] = (byte)'\n';
     w.i += 2;
@@ -175,7 +175,7 @@ private static readonly @string upperhexᵇ = "0123456789ABCDEF"u8;
     return w.flush();
 }
 
-[GoMethodBody("flush")] internal static error flushᴍ(ref Writer w) {
+internal static error flush⁔(/*this*/ ref Writer w) {
     var (_, err) = w.w.Write(w.line.slice(0, w.i)); if (err != nil) {
         return err;
     }
