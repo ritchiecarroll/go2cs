@@ -252,16 +252,40 @@ public class TwinStampTests
                 output = output.ReplaceSyntaxTree(tree, CSharpSyntaxTree.ParseText(editTwins(tree.ToString()), options, tree.FilePath));
         }
 
+        Built? built = Load(output, out string errors);
+        Assert.IsNotNull(built, errors);
+        return built;
+    }
+
+    // Emits a compilation with its portable PDB and loads it; null (with the errors) where it does not emit.
+    private static Built? Load(Compilation output, out string errors, byte[]? library = null)
+    {
         // A PDB needs each source's encoding, which an in-memory text and a generator's output do not carry.
         foreach (SyntaxTree tree in output.SyntaxTrees.Where(tree => tree.Encoding is null).ToArray())
-            output = output.ReplaceSyntaxTree(tree, CSharpSyntaxTree.ParseText(Microsoft.CodeAnalysis.Text.SourceText.From(tree.ToString(), System.Text.Encoding.UTF8), options, tree.FilePath));
+            output = output.ReplaceSyntaxTree(tree, CSharpSyntaxTree.ParseText(Microsoft.CodeAnalysis.Text.SourceText.From(tree.ToString(), System.Text.Encoding.UTF8), (CSharpParseOptions)tree.Options, tree.FilePath));
 
         using MemoryStream image = new();
         using MemoryStream pdb = new();
         EmitResult emitted = output.Emit(image, pdb, options: new EmitOptions(debugInformationFormat: DebugInformationFormat.PortablePdb));
-        Assert.IsTrue(emitted.Success, string.Join("\n", emitted.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)));
+        errors = string.Join("\n", emitted.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
 
-        return new Built(image.ToArray(), pdb.ToArray());
+        return emitted.Success ? new Built(image.ToArray(), pdb.ToArray(), library) : null;
+    }
+
+    /// <summary>
+    /// Holds every twin a test compilation generated to the oracle: GenTests' twin suites call it on each compilation they
+    /// build, so the stamp is checked against the compiler on every twin shape they write. A compilation that does not emit
+    /// (an arm that expects an error) is that arm's to judge, and is skipped.
+    /// </summary>
+    internal static void AssertStampsHold(Compilation output, byte[]? library = null)
+    {
+        using Built? built = Load(output, out _, library);
+
+        if (built is null)
+            return;
+
+        string[] problems = Oracle(built);
+        Assert.AreEqual(0, problems.Length, "a [GoTwinOf] stamp disagrees with the compiler:\n" + string.Join("\n", problems));
     }
 
     private sealed class Built : IDisposable
@@ -270,8 +294,12 @@ public class TwinStampTests
         private readonly MetadataReaderProvider m_pdb;
         private readonly Assembly m_assembly;
 
-        public Built(byte[] image, byte[] pdb)
+        public Built(byte[] image, byte[] pdb, byte[]? library = null)
         {
+            // An in-memory library the compilation references (TwinBoxTests' cross-assembly arms) loads first.
+            if (library is not null)
+                m_context.LoadFromStream(new MemoryStream(library));
+
             m_context.Resolving += (context, name) => name.Name == "golib" ? context.LoadFromAssemblyPath(typeof(golib::go.IGoEquatable).Assembly.Location) : null;
             m_assembly = m_context.LoadFromStream(new MemoryStream(image));
             m_pdb = MetadataReaderProvider.FromPortablePdbStream(new MemoryStream(pdb));

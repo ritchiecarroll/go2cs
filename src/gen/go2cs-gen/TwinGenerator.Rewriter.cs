@@ -41,6 +41,118 @@ public sealed partial class TwinGenerator
 
         public int Awaits, GoTwinned, Unrederivable, Literals, IfaceAwaits, Spills, RefBlocked;
 
+        // 7d (DATA-mn-origin-table.md): the line of each await the current state machine writes, in the order written,
+        // which is source order and the compiler's state numbering (TwinStampTests holds every stamp to the compiler). The
+        // method's own list is the twin's [GoTwinOf] stamp; an async literal swaps in a list of its own while its body is
+        // visited and carries that list in its own stamp.
+        private List<int> m_sites = [];
+
+        public IReadOnlyList<int> Sites => m_sites;
+
+        // The line the compiler's sequence point for this await starts on: its statement's, or the clause of a
+        // for statement or the expression body it sits in. A parked frame's line is read from it, as from the PDB before.
+        private static int SequenceLine(SyntaxNode node)
+        {
+            SyntaxNode at = node;
+
+            for (SyntaxNode? current = node; current is not null; current = current.Parent)
+            {
+                if (current.Parent is ForStatementSyntax loop && (current == loop.Condition || loop.Incrementors.Contains(current) ||
+                        loop.Declaration == current || loop.Initializers.Contains(current)))
+                {
+                    at = current;
+                    break;
+                }
+
+                if (current.Parent is ForEachStatementSyntax each && current == each.Expression)
+                {
+                    at = current;
+                    break;
+                }
+
+                if (current.Parent is DoStatementSyntax doLoop && current == doLoop.Condition)
+                {
+                    return doLoop.WhileKeyword.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+                }
+
+                // A case guard (`case X when cond:`, or a switch expression arm's `when`) is a sequence point of its own.
+                if (current.Parent is WhenClauseSyntax)
+                {
+                    at = current.Parent;
+                    break;
+                }
+
+                if (current.Parent is ArrowExpressionClauseSyntax or LambdaExpressionSyntax && current is ExpressionSyntax)
+                {
+                    at = current;
+                    break;
+                }
+
+                if (current is StatementSyntax and not BlockSyntax)
+                {
+                    at = current;
+                    break;
+                }
+            }
+
+            return at.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+        }
+
+        private void NoteSite(SyntaxNode original) => m_sites.Add(SequenceLine(original));
+
+        // The [GoTwinOf] stamp of the function this twin is generated from, with the given await lines.
+        public string Stamp(IReadOnlyList<int> sites) => m_method is IMethodSymbol origin ? StampFor(origin, sites) : "";
+
+        internal static string StampFor(IMethodSymbol origin, IReadOnlyList<int> sites)
+        {
+            INamedTypeSymbol host = origin.ContainingType;
+            string hostText = (host.IsGenericType ? host.ConstructUnboundGenericType() : host).ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+            return "[global::go.golib.GoTwinOf(typeof(" + hostText + "), \"" + origin.Name + "\", new global::System.Type[] { " +
+                   string.Join(", ", origin.Parameters.Select(parameter => StampType(parameter.Type))) + " }, new int[] { " +
+                   string.Join(", ", sites) + " })]";
+        }
+
+        // A parameter's type as the stamp writes it: null where it is or holds a type parameter (an attribute cannot name
+        // one), a generic type as its open definition, anything else as itself.
+        private static string StampType(ITypeSymbol type) => type switch
+        {
+            ITypeParameterSymbol => "null",
+            INamedTypeSymbol { IsGenericType: true } generic => "typeof(" + generic.ConstructUnboundGenericType().ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) + ")",
+            IArrayTypeSymbol or IPointerTypeSymbol when MentionsTypeParameter(type) => "null",
+            IFunctionPointerTypeSymbol => "null",
+            _ => "typeof(" + type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) + ")"
+        };
+
+        private static bool MentionsTypeParameter(ITypeSymbol type) => type switch
+        {
+            ITypeParameterSymbol => true,
+            IArrayTypeSymbol array => MentionsTypeParameter(array.ElementType),
+            IPointerTypeSymbol pointer => MentionsTypeParameter(pointer.PointedAtType),
+            _ => false
+        };
+
+        // An async literal's twin, stamped with its own await lines (and the enclosing function as its origin).
+        private ExpressionSyntax StampLiteral(ExpressionSyntax twin, IReadOnlyList<int> sites)
+        {
+            if (m_method is not IMethodSymbol origin)
+                return twin;
+
+            AttributeListSyntax stamp = ParseAttributeList(StampFor(origin, sites)).WithTrailingTrivia(Space);
+
+            return twin switch
+            {
+                ParenthesizedLambdaExpressionSyntax parenthesized => parenthesized.WithAttributeLists(SingletonList(stamp)),
+                SimpleLambdaExpressionSyntax simple => ParenthesizedLambdaExpression(simple.AsyncKeyword, ParameterList(SingletonSeparatedList(simple.Parameter)),
+                        simple.ArrowToken, simple.Block, simple.ExpressionBody)
+                    .WithAttributeLists(SingletonList(stamp)),
+                _ => twin
+            };
+        }
+
+        private static AttributeListSyntax ParseAttributeList(string text) =>
+            ((CompilationUnitSyntax)ParseCompilationUnit(text + " class ᴛstamp { }")).Members[0].AttributeLists[0];
+
         // N3's D3 core: the method's own func-value parameters whose pair test is HOISTED to the twin's entry (never
         // reassigned), the awaits that pair tests added (they never make a literal can-park), and the method itself.
         public readonly List<string> HoistedPairs = [];
@@ -114,6 +226,7 @@ public sealed partial class TwinGenerator
                     string temp = "ᴛtwin" + ++m_temps;
 
                     m_spilled.Add(node);
+                    NoteSite(node);
                     m_spills.Add(ParseStatement("var " + temp + " = " + test + " ? await " + twin + " : " + plain + ";"));
                     Spills++;
 
@@ -188,6 +301,7 @@ public sealed partial class TwinGenerator
             }
 
             ExpressionSyntax awaited = AwaitExpression(Token(SyntaxKind.AwaitKeyword).WithTrailingTrivia(Space), call);
+            NoteSite(node);
 
             if (site.Interface)
                 IfaceAwaits++;
@@ -462,18 +576,22 @@ public sealed partial class TwinGenerator
 
             List<List<string>> scopes = m_scopes;
             int awaits = m_awaits;
+            List<int> sites = m_sites;
             m_scopes = [];
+            m_sites = [];
 
             CSharpSyntaxNode body = (CSharpSyntaxNode)Visit(lambda.Body)!;
+            List<int> literalSites = m_sites;
 
             m_scopes = scopes;
             m_awaits = awaits;
+            m_sites = sites;
 
             LinePosition start = lambda.SyntaxTree.GetLineSpan(lambda.Span).StartLinePosition;
             string directive = "\r\n#line " + (start.Line + 1) + " \"" + lambda.SyntaxTree.FilePath + "\"\r\n" + new string(' ', start.Character);
 
-            ExpressionSyntax twin = lambda.WithBody(body).WithoutTrivia()
-                .WithModifiers(lambda.Modifiers.Add(Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(Space)))
+            ExpressionSyntax twin = StampLiteral(lambda.WithBody(body).WithoutTrivia()
+                    .WithModifiers(lambda.Modifiers.Add(Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(Space))), literalSites)
                 .WithLeadingTrivia(ParseLeadingTrivia(directive));
 
             GoTwinned++;
@@ -562,6 +680,7 @@ public sealed partial class TwinGenerator
                 site is { Active: true, Delegate: true, Go: GoKind.None } && PairShape(call) is { } shape)
             {
                 (string test, string twin, string plain) = BuildPairCall(call, shape);
+                NoteSite(call);
                 return ParseStatement("if (" + test + ") await " + twin + "; else " + plain + ";").WithTriviaFrom(node);
             }
 
@@ -666,16 +785,20 @@ public sealed partial class TwinGenerator
             List<List<string>> scopes = m_scopes;
             int awaits = m_awaits, pairAwaits = m_pairAwaits, totalAwaits = Awaits, temps = m_temps, tests = m_run.PairTests;
             List<string> hoisted = [.. HoistedPairs];
+            List<int> sites = m_sites;
             m_scopes = [];
             m_awaits = 0;
             m_pairAwaits = 0;
+            m_sites = [];
 
             CSharpSyntaxNode body = (CSharpSyntaxNode)Visit(node.Body)!;
             bool parks = m_awaits - m_pairAwaits > 0;
+            List<int> literalSites = m_sites;
 
             m_scopes = scopes;
             m_awaits = awaits;
             m_pairAwaits = pairAwaits;
+            m_sites = sites;
 
             if (!parks)
             {
@@ -697,8 +820,8 @@ public sealed partial class TwinGenerator
             LinePosition start = node.SyntaxTree.GetLineSpan(node.Span).StartLinePosition;
             string directive = "\r\n#line " + (start.Line + 1) + " \"" + node.SyntaxTree.FilePath + "\"\r\n" + new string(' ', start.Character);
 
-            ExpressionSyntax twin = node.WithBody(body).WithoutTrivia()
-                .WithModifiers(node.Modifiers.Add(Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(Space)))
+            ExpressionSyntax twin = StampLiteral(node.WithBody(body).WithoutTrivia()
+                    .WithModifiers(node.Modifiers.Add(Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(Space))), literalSites)
                 .WithLeadingTrivia(ParseLeadingTrivia(directive));
 
             // C3 (COORD's approval, 2026-11-15): a literal with an EXPLICIT return type (`(uint32, error) () => {…}`)
