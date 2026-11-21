@@ -1063,11 +1063,12 @@ func processTestConversion(inputPath, outputPath string, options Options) (err e
 	// The package's OWN package_info.cs — written moments ago by the production half of this same
 	// run — supplies the fourth edge's gate: the VALUE-form `[assembly: GoImplement<T, I>]` records
 	// go2cs-gen realizes as base lists on the production types the test half binds members on.
-	referenceImports = append(referenceImports, declarationClosureImports(
+	referenceImports = append(referenceImports, declarationClosureImportsFrom(
 		[]*packages.Package{production, internal, external}, compileExcluded,
 		append([]string{production.PkgPath}, referenceImports...),
 		packageImplementBases(platformPackageInfoPath(outputPath, options.targetPlatform)),
-		foreignImplementBasesResolver(options))...)
+		foreignImplementBasesResolver(options),
+		testRecordInterfaces(testInfoPath, []*packages.Package{production, internal, external}))...)
 
 	testProjectName := projectFileBaseName(projectName) + ".tests.csproj"
 	if err := writeTestProject(filepath.Join(outputPath, testProjectName), projectName, projectNamespace, production.PkgPath, model, productionFiles, outputFiles, fixtures, referenceImports, options); err != nil {
@@ -5738,6 +5739,16 @@ func referenceScanTargets(line string) []string {
 // new and needs no separate visit: an interface implements its base's bases too, so those candidates
 // are found directly. Output is a sorted set, so the map-ordered walk stays deterministic.
 func declarationClosureImports(roots []*packages.Package, compileExcluded map[string]bool, referenced []string, recordedBases map[string][]string, foreignBases func(importPath string) map[string][]string) []string {
+	return declarationClosureImportsFrom(roots, compileExcluded, referenced, recordedBases, foreignBases, nil)
+}
+
+// declarationClosureImportsFrom is declarationClosureImports with one more seed set: recordInterfaces, the interfaces
+// the test project's own conversion records name (testRecordInterfaces). A record binds its interface although no
+// test file spells it -- logtarm's `check.Equal(t, …)` records `GoImplement<testing_package.T, check_package.TestingT>`
+// from the argument conversion alone -- so the interface-base walk has to start from it too. go2cs emits gotest.tools'
+// `assert.TestingT` as `TestingT : Δassert.LogT`, a structural base Go's interface does not declare, and binding the
+// record needed internal/assert (CS0012 `assert_package.LogT`, the TS session's tsgo scanner and ast suites).
+func declarationClosureImportsFrom(roots []*packages.Package, compileExcluded map[string]bool, referenced []string, recordedBases map[string][]string, foreignBases func(importPath string) map[string][]string, recordInterfaces []*types.Named) []string {
 	found := hashset.HashSet[string]{}
 	seen := hashset.NewHashSet(referenced)
 	visited := map[*types.Named]bool{}
@@ -5898,11 +5909,25 @@ func declarationClosureImports(roots []*packages.Package, compileExcluded map[st
 		}
 	}
 
+	for _, named := range recordInterfaces {
+		enqueue(named)
+	}
+
+	// The names the compiled test sources select as methods on a concrete receiver (a call or a method value), for the
+	// cross-package candidate edge below.
+	calledMethods := map[string][]*types.Signature{}
+
 	for _, root := range roots {
 		seeds := referencedTypeSeeds(root, compileExcluded)
 
 		for _, named := range seeds.named {
 			enqueue(named)
+		}
+
+		for _, method := range seeds.methodCalls {
+			if signature, ok := method.Type().(*types.Signature); ok {
+				calledMethods[method.Name()] = append(calledMethods[method.Name()], signature)
+			}
 		}
 
 		for _, named := range seeds.constructed {
@@ -6050,13 +6075,68 @@ func declarationClosureImports(roots []*packages.Package, compileExcluded map[st
 		}
 	}
 
-	for len(queue) > 0 {
-		named := queue[0]
-		queue = queue[1:]
+	// The CROSS-PACKAGE CANDIDATE edge. The overload edge above weighs the called method's own package only, and only
+	// parameter types; but every converted method is a C# extension, so `tx.Commit()` makes C# gather the visible
+	// extensions named Commit from every referenced assembly, and it binds the whole signature of each one it weighs,
+	// even one that cannot apply. t2b's `tx.Commit()` on a *sql.Tx failed `CS0012 … 'driver_package.Conn'` from its
+	// lib's `Commit(this ref Backup)` returning `(driver.Conn, error)`, and sqlite's root suite failed
+	// `… 'big_package.ΔInt'` from modernc.org/mathutil's `Next(this ref FCBig)`. The candidate's receiver form does not
+	// spare it: TestTestsProjectsBuildWithTheirCandidateReferences measured CS0012 from a `this ж<T>` candidate under
+	// a ж receiver and under a value receiver, and from a VALUE-receiver method (`this T`, which go2cs-gen also gives a
+	// `this ж<T>` twin) under a ж receiver.
+	//
+	// So the candidate set is every same-named method a visible package declares, at an arity the call accepts (COORD
+	// rulings 20261117T145209Z and 20261117T172451Z). C# weighs fewer: it searches namespace scopes innermost first and
+	// stops at the first that holds an applicable candidate, which is why registry's banked windows suite builds with
+	// no io/fs reference beside os's `Stat(this ж<File>)` (its own `Key.Stat` is in its namespace; os's is in the outer
+	// `go`). This set over-approximates that search, never under. A visible package is one this project references,
+	// or one an edge has added, to a fixpoint; a ROOT package is visible whole, unexported members included, since it
+	// compiles here or grants InternalsVisibleTo.
+	typesByPath := rootTypesByPath(roots)
 
-		for _, base := range interfaceBaseCandidates(named) {
-			reach(base)
-			enqueue(base)
+	//
+	// The candidate scan and the interface-base walk feed each other, so they run as ONE loop to a fixpoint: drain the
+	// base walk, scan every visible package not yet scanned, and repeat until neither adds anything. A package only the
+	// base walk reaches is visible like any other (TestDeclarationClosureImportsScansPackagesTheBaseWalkReaches), and a
+	// candidate's signature can name an interface whose bases need walking.
+	scanned := hashset.HashSet[string]{}
+
+	for {
+		for len(queue) > 0 {
+			named := queue[0]
+			queue = queue[1:]
+
+			for _, base := range interfaceBaseCandidates(named) {
+				reach(base)
+				enqueue(base)
+			}
+		}
+
+		var pending []string
+
+		if len(calledMethods) > 0 {
+			for _, path := range seen.Keys() {
+				if !scanned.Contains(path) && typesByPath[path] != nil {
+					pending = append(pending, path)
+				}
+			}
+		}
+
+		if len(pending) == 0 {
+			break
+		}
+
+		sort.Strings(pending)
+
+		for _, path := range pending {
+			scanned.Add(path)
+
+			for _, candidate := range sameNameCandidates(typesByPath[path], rootPaths.Contains(path), calledMethods) {
+				for _, mentioned := range namedTypesIn(candidate.Type()) {
+					reach(mentioned)
+					enqueue(mentioned)
+				}
+			}
 		}
 	}
 
@@ -6064,6 +6144,218 @@ func declarationClosureImports(roots []*packages.Package, compileExcluded map[st
 	sort.Strings(result)
 
 	return result
+}
+
+// rootTypesByPath indexes, by import path, the type-checked package of every package the roots reach through
+// go/packages' import graph. A root's types.Package does not list its imports for this load, so the graph is walked
+// instead.
+func rootTypesByPath(roots []*packages.Package) map[string]*types.Package {
+	typesByPath := map[string]*types.Package{}
+	visited := map[*packages.Package]bool{}
+
+	var walk func(pkg *packages.Package)
+
+	walk = func(pkg *packages.Package) {
+		if pkg == nil || visited[pkg] {
+			return
+		}
+
+		visited[pkg] = true
+
+		if pkg.Types != nil && typesByPath[pkg.Types.Path()] == nil {
+			typesByPath[pkg.Types.Path()] = pkg.Types
+		}
+
+		for _, imported := range pkg.Imports {
+			walk(imported)
+		}
+	}
+
+	for _, root := range roots {
+		walk(root)
+	}
+
+	return typesByPath
+}
+
+// testRecordInterfaces returns the interfaces the test project's conversion records name as their SECOND argument
+// (`[assembly: GoImplement<T, I>]`, `[assembly: GoImplicitConv<T, I>]`), resolved against the packages the roots
+// reach. These are the declarationClosureImportsFrom seeds no test file spells: a record exists because a value was
+// CONVERTED to the interface (logtarm's `check.Equal(t, …)` passes a *testing.T as check.TestingT), and binding the
+// record binds the interface's emitted declaration, base list included. A name the roots do not reach, or that is not
+// an interface, contributes nothing.
+func testRecordInterfaces(testInfoFile string, roots []*packages.Package) []*types.Named {
+	lines, err := readPackageInfoLines(testInfoFile)
+
+	if err != nil {
+		return nil
+	}
+
+	typesByPath := rootTypesByPath(roots)
+
+	paths := make([]string, 0, len(typesByPath))
+
+	for path := range typesByPath {
+		paths = append(paths, path)
+	}
+
+	sort.Strings(paths)
+
+	var result []*types.Named
+
+	seen := map[*types.Named]bool{}
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		isRecord := false
+
+		for _, prefix := range conversionRecordPrefixes {
+			if strings.HasPrefix(line, prefix) {
+				isRecord = true
+				break
+			}
+		}
+
+		open, end := strings.Index(line, "<"), strings.LastIndex(line, ">")
+
+		if !isRecord || open < 0 || end < open {
+			continue
+		}
+
+		// The second top-level argument of the generic list.
+		depth, start, argument := 0, -1, ""
+
+		for i, r := range line[open+1 : end] {
+			switch r {
+			case '<':
+				depth++
+			case '>':
+				depth--
+			case ',':
+				if depth == 0 && start < 0 {
+					start = i + 1
+				}
+			}
+		}
+
+		if start < 0 {
+			continue
+		}
+
+		argument = strings.TrimSpace(line[open+1+start : end])
+
+		match := packageQualifierPattern.FindStringSubmatchIndex(argument)
+
+		if match == nil || match[0] != 0 && !strings.HasPrefix(argument, "global::") {
+			continue
+		}
+
+		qualifier := argument[match[2]:match[3]]
+		name := strings.TrimPrefix(strings.TrimPrefix(argument[match[1]:], "."), "Δ")
+
+		// A generic instantiation (`Checker<nint>`) seeds its declaration: the converter emits a generic interface's
+		// bases from the declared type (getStructuralInterfaceBases), so the walk looks up the same one.
+		if open := strings.IndexByte(name, '<'); open >= 0 {
+			name = name[:open]
+		}
+
+		if name == "" || strings.Contains(name, ".") {
+			continue
+		}
+
+		for _, path := range paths {
+			if !qualifierTargetNamesPackage(qualifier, path) {
+				continue
+			}
+
+			typeName, isTypeName := typesByPath[path].Scope().Lookup(name).(*types.TypeName)
+
+			if !isTypeName {
+				continue
+			}
+
+			if named, isNamed := typeName.Type().(*types.Named); isNamed && types.IsInterface(named) && !seen[named] {
+				seen[named] = true
+				result = append(result, named)
+			}
+
+			break
+		}
+	}
+
+	return result
+}
+
+// sameNameCandidates returns the methods of pkg's non-interface named types, value and pointer receivers alike (the
+// method set of *T), whose names a test source calls at an arity they accept (arityAccepts): the extension-method
+// candidates declarationClosureImports' cross-package edge binds. Promoted methods count, since go2cs-gen writes a
+// forwarder for each; exported types and methods only, unless the package is a root (all), which compiles here or
+// grants InternalsVisibleTo. `testing` contributes none, for closureWalkable's reason.
+func sameNameCandidates(pkg *types.Package, root bool, called map[string][]*types.Signature) []*types.Func {
+	if pkg == nil || pkg.Path() == "testing" {
+		return nil
+	}
+
+	var result []*types.Func
+
+	scope := pkg.Scope()
+
+	for _, name := range scope.Names() {
+		typeName, isTypeName := scope.Lookup(name).(*types.TypeName)
+
+		if !isTypeName || typeName.IsAlias() || !typeName.Exported() && !root {
+			continue
+		}
+
+		named, isNamed := typeName.Type().(*types.Named)
+
+		if !isNamed || types.IsInterface(named) {
+			continue
+		}
+
+		methods := types.NewMethodSet(types.NewPointer(named))
+
+		for i := range methods.Len() {
+			method, isFunc := methods.At(i).Obj().(*types.Func)
+
+			if !isFunc || len(called[method.Name()]) == 0 || !method.Exported() && !root {
+				continue
+			}
+
+			signature, isSignature := method.Type().(*types.Signature)
+
+			if !isSignature || signature.Recv() == nil {
+				continue
+			}
+
+			for _, call := range called[method.Name()] {
+				if arityAccepts(call, signature) {
+					result = append(result, method)
+					break
+				}
+			}
+		}
+	}
+
+	return result
+}
+
+// arityAccepts reports whether a candidate of the given signature competes with a call of called's arity: the same
+// parameter count, or a variadic on either side that can span the difference. A same-named method of another arity
+// compiles clean beside the call (measured; TestDeclarationClosureImportsSurfacesOverloadCandidateEdges), so it binds
+// nothing.
+func arityAccepts(called, candidate *types.Signature) bool {
+	arity, count := called.Params().Len(), candidate.Params().Len()
+
+	if candidate.Variadic() && arity >= count-1 {
+		return true
+	}
+
+	if called.Variadic() && count >= arity-1 {
+		return true
+	}
+
+	return count == arity
 }
 
 // overloadCandidates returns the OTHER methods a call of method competes with in C#: every method of
@@ -6077,20 +6369,7 @@ func overloadCandidates(method *types.Func) []*types.Func {
 		return nil
 	}
 
-	arity := signature.Params().Len()
-	accepts := func(candidate *types.Signature) bool {
-		count := candidate.Params().Len()
-
-		if candidate.Variadic() && arity >= count-1 {
-			return true
-		}
-
-		if signature.Variadic() && count >= arity-1 {
-			return true
-		}
-
-		return count == arity
-	}
+	accepts := func(candidate *types.Signature) bool { return arityAccepts(signature, candidate) }
 
 	var result []*types.Func
 
@@ -6241,8 +6520,10 @@ type typeSeeds struct {
 	constructed      []*types.Named
 	constructedEmpty []*types.Named
 	memberBases      []*types.Named
-	// methodCalls carries the concrete methods a compiled test source CALLS through a selector; the
-	// overload-candidate edge reads their same-named siblings (see declarationClosureImports).
+	// methodCalls carries the concrete methods a compiled test source selects through a selector, a
+	// call or a method VALUE (`f := tx.Commit`, which converts a method group and weighs the same
+	// candidates); the overload-candidate and cross-package candidate edges read their same-named
+	// siblings (see declarationClosureImports).
 	methodCalls []*types.Func
 	// memberBound carries the types a compiled test source binds a member on through a form that
 	// spells no selector — a builtin call, a range, an index/slice. It feeds ONLY the
