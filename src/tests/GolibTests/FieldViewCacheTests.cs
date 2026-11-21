@@ -34,6 +34,7 @@ public class FieldViewCacheTests
         public leaf L;
         public nint pad;
         internal static ref leaf ᏑL(ref inner i) => ref i.L;
+        internal static ref nint Ꮡpad(ref inner i) => ref i.pad;
     }
 
     private struct outer
@@ -358,6 +359,127 @@ public class FieldViewCacheTests
             for (int i = 1; i < callers; i++)
                 Assert.IsTrue(ReferenceEquals(seen[0], seen[i]), $"round {round}: caller {i} saw a different view — the compare-exchange publish lost a race");
         }
+    }
+
+    // A view slot holds null, the box's FIRST view itself, or a ViewEntry list once a second field is asked (ж.Views.cs
+    // publishView). The next three rows pin those states on every kind of box that holds views: the slotted box, the
+    // slotless box (the weak table), an element box, and a view (a chain's inner hop).
+    private static ref object? SlotOf<T>(ж<T> box)
+    {
+        switch (box)
+        {
+            case SlottedStandardBox<T> slotted:
+                return ref slotted.m_views;
+            case ElemRefBox<T> element:
+                return ref element.m_views;
+            case FieldRefBox<T> view:
+                return ref view.m_views;
+        }
+
+        Assert.IsTrue(GoBoxTables.Views.TryGetValue(box, out ViewTable? table), "a slotless box keeps its views in the weak table");
+        return ref table!.Head;
+    }
+
+    private static int ListLength(object? head)
+    {
+        int length = 0;
+
+        for (ViewEntry? e = head as ViewEntry; e is not null; e = e.Next)
+            length++;
+
+        return length;
+    }
+
+    [TestMethod]
+    public void TheFirstViewIsFoundAgainAfterASecondFieldTurnsTheSlotIntoAList()
+    {
+        // The second field moves the first view into a list as its tail, under the first view's own token. Asking the
+        // first field again must find it there: a tail stored under the wrong token mints a second view of one field,
+        // and `&x.f == &x.f` no longer holds. Two arms: fields of different element types (the tail's token read through
+        // IFirstFieldView) and of one element type (read by exact type).
+        FieldViewCache.Disabled = false;
+
+        foreach (ж<outer> box in new ж<outer>[] { new SlottedStandardBox<outer>(new outer()), new StandardBox<outer>(new outer()), new ElemRefBox<outer>(new array<outer>(2), 1) })
+        {
+            string kind = box.GetType().Name;
+            ж<inner> i1 = box.of(outer.ᏑI);
+            ж<leaf> k1 = box.of(outer.ᏑK);
+            Assert.IsTrue(ReferenceEquals(i1, box.of(outer.ᏑI)), $"{kind}: I, K, then I again is the first I's view");
+            Assert.IsTrue(ReferenceEquals(k1, box.of(outer.ᏑK)), $"{kind}: and K again is K's");
+            Assert.IsTrue(ReferenceEquals(i1, box.of(new FieldRefFunc<outer, inner>(outer.ᏑI))), $"{kind}: and so is another delegate for I (the full lookup)");
+        }
+
+        foreach (ж<pair> box in new ж<pair>[] { new SlottedStandardBox<pair>(new pair()), new StandardBox<pair>(new pair()), new ElemRefBox<pair>(new array<pair>(2), 1) })
+        {
+            string kind = box.GetType().Name;
+            ж<inner> a1 = box.of(pair.ᏑA);
+            ж<inner> b1 = box.of(pair.ᏑB);
+            Assert.IsFalse(ReferenceEquals(a1, b1), $"{kind}: precondition: two fields, two views");
+            Assert.IsTrue(ReferenceEquals(a1, box.of(pair.ᏑA)), $"{kind}: A, B, then A again is the first A's view");
+            Assert.IsTrue(ReferenceEquals(b1, box.of(pair.ᏑB)), $"{kind}: and B again is B's");
+            Assert.IsTrue(ReferenceEquals(a1, box.of(new FieldRefFunc<pair, inner>(pair.ᏑA))), $"{kind}: and so is another delegate for A (the full lookup)");
+        }
+    }
+
+    [TestMethod]
+    public void ConcurrentFirstCallsForTwoFieldsOnOneBoxGiveOneViewPerField()
+    {
+        // Half the callers ask I and half ask K, on a fresh box, so the race covers both the empty slot and the
+        // one-view-to-list transition: every caller of one field must see one view, and the slot ends holding exactly
+        // two entries, one per field.
+        FieldViewCache.Disabled = false;
+        const int callers = 16;
+
+        for (int round = 0; round < 50; round++)
+        {
+            ж<outer> box = new SlottedStandardBox<outer>(new outer());
+            object?[] seen = new object?[callers];
+            using Barrier gate = new(callers);
+
+            Parallel.For(0, callers, new ParallelOptions { MaxDegreeOfParallelism = callers }, i =>
+            {
+                gate.SignalAndWait();
+                seen[i] = i % 2 == 0 ? box.of(outer.ᏑI) : box.of(outer.ᏑK);
+            });
+
+            for (int i = 2; i < callers; i++)
+                Assert.IsTrue(ReferenceEquals(seen[i % 2], seen[i]), $"round {round}: caller {i} saw a different view of its field");
+
+            Assert.IsTrue(ReferenceEquals(seen[0], box.of(outer.ᏑI)), $"round {round}: I's view is the one the slot keeps");
+            Assert.IsTrue(ReferenceEquals(seen[1], box.of(outer.ᏑK)), $"round {round}: K's view is the one the slot keeps");
+            Assert.AreEqual(2, ListLength(SlotOf(box)), $"round {round}: the slot holds one entry per field");
+        }
+    }
+
+    [TestMethod]
+    public void AfterOneFieldTheSlotHoldsTheViewItselfAndAfterTwoAListOfBoth()
+    {
+        // The allocation the slot form exists for: a box asked one field pays no list node. A second field makes a
+        // two-entry list whose tail is the first view, the same object.
+        FieldViewCache.Disabled = false;
+        ж<outer> root = new SlottedStandardBox<outer>(new outer());
+        ж<inner> hop = root.of(outer.ᏑI);
+
+        foreach (ж<outer> box in new ж<outer>[] { new SlottedStandardBox<outer>(new outer()), new StandardBox<outer>(new outer()), new ElemRefBox<outer>(new array<outer>(2), 1) })
+        {
+            string kind = box.GetType().Name;
+            ж<inner> first = box.of(outer.ᏑI);
+            Assert.IsTrue(ReferenceEquals(first, SlotOf(box)), $"{kind}: after one field the slot holds the view itself, not a ViewEntry");
+
+            ж<leaf> second = box.of(outer.ᏑK);
+            ViewEntry? list = SlotOf(box) as ViewEntry;
+            Assert.IsNotNull(list, $"{kind}: a second field turns the slot into a list");
+            Assert.AreEqual(2, ListLength(list), $"{kind}: of two entries");
+            Assert.IsTrue(ReferenceEquals(second, list.View), $"{kind}: the newest view at the head");
+            Assert.IsTrue(ReferenceEquals(first, list.Next!.View), $"{kind}: and the first view, the same object, as its tail");
+        }
+
+        // a view's own slot: a chain's inner hop
+        ж<leaf> leafView = hop.of(inner.ᏑL);
+        Assert.IsTrue(ReferenceEquals(leafView, SlotOf(hop)), "a view's slot holds its first view itself");
+        hop.of(inner.Ꮡpad);
+        Assert.AreEqual(2, ListLength(SlotOf(hop)), "and a list of two after a second field");
+        Assert.IsTrue(ReferenceEquals(leafView, hop.of(inner.ᏑL)), "and still finds the first");
     }
 
     // Bytes allocated by ONE mint, read on this thread with the counter's own primitive; the box is
