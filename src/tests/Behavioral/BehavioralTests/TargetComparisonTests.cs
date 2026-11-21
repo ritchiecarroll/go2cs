@@ -97,6 +97,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAnonInterfaceVarWitness() => CheckTarget("AnonInterfaceVarWitness");
 
     [TestMethod]
+    public void CheckAnonLiftOnePerType() => CheckTarget("AnonLiftOnePerType");
+
+    [TestMethod]
     public void CheckAnonStructAliasForwardFile() => CheckTarget("AnonStructAliasForwardFile");
 
     [TestMethod]

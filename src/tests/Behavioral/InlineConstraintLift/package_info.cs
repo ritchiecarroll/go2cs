@@ -28,7 +28,7 @@ using static go.main_package;
 
 // <ExportedTypeAliases>
 [assembly: GoDynamicTypeLift("696e746572666163657b4e616d65282920737472696e673b20546167282920696e747d", "Label_T")]
-[assembly: GoDynamicTypeLift("696e746572666163657b4e616d65282920737472696e677d", "Box_T")]
+[assembly: GoDynamicTypeLift("696e746572666163657b4e616d65282920737472696e677d", "Show_T")]
 [assembly: GoDynamicTypeLift("696e746572666163657b546167282920696e747d", "Both_C")]
 [assembly: GoInlineConstraintLift("Min", 0, "Min_T")]
 [assembly: GoInlineConstraintLift("Ord", 0, "Ord_T")]
@@ -43,14 +43,12 @@ using static go.main_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<age, Min_T<age>>]
 [assembly: GoImplement<age, Ord_T<age>>]
-[assembly: GoImplement<namer, Box_T>]
 [assembly: GoImplement<namer, Show_T>]
 [assembly: GoImplement<node, Ord_T<node>>(ConstraintProxy = true)]
 [assembly: GoImplement<tagged, Both_C>]
-[assembly: GoImplement<tagged, Box_T>]
 [assembly: GoImplement<tagged, Label_T>]
+[assembly: GoImplement<tagged, Show_T>]
 [assembly: GoImplement<tagged, nameI>]
-[assembly: GoImplement<tagged, pair_T>]
 [assembly: GoImplement<wrap<@string>, Lesser<wrap<@string>>>]
 [assembly: GoImplement<wrap<@string>, Ord_T<wrap<@string>>>]
 [assembly: GoImplement<wrap<nint>, Ord_T<wrap<nint>>>]
@@ -67,7 +65,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("main.go", "main.cs", "AAoW7oLWkJaQ5qgADAyQlKKCgpQADAyQAAsQkNbC6qKClKaCgoKUgoKClIKCmIKCgpaC")]
+[assembly: GoPositionMap("main.go", "main.cs", "AAoW7oLWkJaQ5qgACAyQlKKCgpQACAyQAAsQkNbC6qKClKaCgoKUgoKClIKCmIKCgpaC")]
 [assembly: GoPositionMap("ord.go", "ord.cs", "AA4SkPzYoOg=")]
 // </GoSourcePositionMaps>
 
@@ -85,7 +83,6 @@ public static partial class main_package
 
     // <TypeAccessibility>
     internal partial interface nameI {}
-    internal partial interface pair_T {}
     internal partial struct age {}
     internal partial struct namer {}
     internal partial struct node {}
@@ -94,7 +91,6 @@ public static partial class main_package
     internal partial struct tagged {}
     internal partial struct wrap<E> {}
     public partial interface Both_C {}
-    public partial interface Box_T {}
     public partial interface Label_T {}
     public partial interface Lesser<T> {}
     public partial interface Min_T<T> {}

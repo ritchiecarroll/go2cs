@@ -104,6 +104,7 @@ func resetPackageState(pkg *packages.Package) {
 	cgoPseudoPackageTypeAccess = hashset.HashSet[string]{}
 	globalTempVarCount = make(map[string]int)
 	packageDynamicTypeNames = make(map[string]string)
+	packagePublicLiftNames = make(map[string]bool)
 	importedDynamicTypeNames = make(map[string]map[string]string)
 	importedPublicLiftNames = make(map[string]map[string]bool)
 	importedValueCloneLiftNames = make(map[string]map[string]bool)
