@@ -46,7 +46,19 @@ public unsafe class CgoPointerFieldTests
         public static ref @unsafe.Pointer UnnamedData(ref Entry s) => ref s.Data;
     }
 
+    // Go layout of a C struct { int family; int *ip; }: family at 0, ip at 8; size 16.
+    public struct IntEntry
+    {
+        public int Family;
+        public ж<int> Ip;
+
+        public static ref int ᏑFamily(ref IntEntry s) => ref s.Family;
+        public static ref ж<int> ᏑIp(ref IntEntry s) => ref s.Ip;
+    }
+
     private const nuint NextOffset = 8;
+
+    private const nuint DataOffset = 16;
 
     private static nuint Zeroed(nuint bytes = 24) => (nuint)NativeMemory.AllocZeroed(bytes);
 
@@ -165,6 +177,69 @@ public unsafe class CgoPointerFieldTests
             NativeMemory.Free((void*)target);
             GC.KeepAlive(blob);
             GC.KeepAlive(other);
+        }
+    }
+
+    // P3's SHOULD 1 on 1a: an element of a native-backed slice that keeps no anchor is C memory alone (ж.ElemRefBox.cs,
+    // 3.1's C2), so a store of its address is a C pointer stored into C memory. Go:
+    // s := unsafe.Slice((*C.int)(C.malloc(16)), 4); e.ip = &s[1].
+    [TestMethod]
+    public void AFieldOverCMemoryStoresAnElementOfCMemoryByItsAddress()
+    {
+        nuint memory = Zeroed(16);
+        nuint array = Zeroed(16);
+
+        try
+        {
+            slice<int> s = @unsafe.Slice(new NativeBox<int>(array), 4);
+            ж<int> element = new ElemRefBox<int>(s, 1);
+            Assert.IsTrue(GoPointerWords.IsCMemoryAlone(element), "the shape under test: an element of C memory alone");
+
+            ж<IntEntry> entry = new NativeBox<IntEntry>(memory);
+            entry.cgoPointerField(IntEntry.ᏑIp, element);
+            Assert.AreEqual(array + 4, *(nuint*)(memory + 8), "the store wrote the element's address");
+
+            *(int*)(array + 4) = 5;
+            Assert.AreEqual(5, entry.cgoPointerField(IntEntry.ᏑIp).Value, "and the field reads it back as C memory");
+        }
+        finally
+        {
+            NativeMemory.Free((void*)memory);
+            NativeMemory.Free((void*)array);
+        }
+    }
+
+    // P3's SHOULD 2 on 1a: M3's `void *` half. An unsafe.Pointer field of a C struct laid over pinned Go memory, through
+    // cgoWordField and the word doors: a C word round-trips as a number, and a Go pointer is stored and read back as its
+    // box (18.9's limitations: the field does both, through the word doors).
+    [TestMethod]
+    public void AnUnsafePointerFieldOverPinnedGoMemoryRoundTripsACWordAndAGoPointer()
+    {
+        slice<byte> blob = new(24);
+        nuint target = Zeroed();
+        ж<uintptr> storage = new StandardBox<uintptr>(0);
+
+        try
+        {
+            ж<Entry> entry = @unsafe.Pointer.To<Entry>(@unsafe.Pointer.FromPinnedBox(Ꮡ(blob, 0)));
+            Assert.AreEqual(GoPointerWords.SlotKind.GoMemory, GoPointerWords.Classify(entry.cgoWordField(Entry.ᏑData)), "the receiver under test");
+
+            @unsafe.Pointer.StoreWord(entry.cgoWordField(Entry.ᏑData), new @unsafe.Pointer((uintptr)target));
+            @unsafe.Pointer loaded = @unsafe.Pointer.LoadWord(entry.cgoWordField(Entry.ᏑData));
+            Assert.AreEqual(target, (nuint)(uintptr)loaded, "a C word round-trips");
+            Assert.IsNull(loaded.RetainedSource, "as a number");
+
+            ж<uintptr> word = @unsafe.Pointer.To<uintptr>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡ(blob, 0)), (uintptr)DataOffset));
+            Assert.AreEqual(target, (nuint)word.Value, "at the field's Go offset in the Go buffer");
+
+            @unsafe.Pointer.StoreWord(entry.cgoWordField(Entry.ᏑData), @unsafe.Pointer.FromBox(storage));
+            Assert.AreSame(storage, @unsafe.Pointer.LoadWord(entry.cgoWordField(Entry.ᏑData)).Referent, "a Go pointer is stored and read back as its box");
+        }
+        finally
+        {
+            NativeMemory.Free((void*)target);
+            GC.KeepAlive(blob);
+            GC.KeepAlive(storage);
         }
     }
 

@@ -2432,6 +2432,35 @@ FOUR lines. This text's first version said three, and M2's member is the fourth.
 
 — H (2026-11-21)
 
+**Record 2026-11-21: P3's seat read of 1a (CLEAR), and the SHOULDs folded before seating.** P3 read `01ecb22bb9` (COORD
+inbox `20261121T210538Z-P3.md`): CLEAR, with the three MUSTs met. COORD ruled the three SHOULDs and two NITs in, as one
+commit, before seating.
+- SHOULD 1. The store admitted a C pointer only as a `NativeBox<U>`. An element of a native-backed slice that keeps no
+  anchor is C memory alone too (`IsCMemoryAlone`, ж.ElemRefBox.cs), so `e.ip = &s[1]` over
+  `unsafe.Slice((*C.int)(C.malloc(16)), 4)` was refused as a Go pointer. The store now tests `IsCMemoryAlone` on the
+  value and writes the box's native identity.
+  - Row: `AFieldOverCMemoryStoresAnElementOfCMemoryByItsAddress`.
+  - Red at the pre-fix golib (filtered CgoPointerFieldTests, Release: 1 failed of 9, with "storing a Go pointer into C
+    memory is refused"), and green with the fix (9 of 9). Both were predicted before the run.
+- SHOULD 2. M3's `void *` half now has a row: `AnUnsafePointerFieldOverPinnedGoMemoryRoundTripsACWordAndAGoPointer`.
+  Through `cgoWordField` and the word doors, a C word round-trips as a number at the field's Go offset, and a Go pointer
+  is stored and read back as its box.
+  - It is a coverage row of behaviour this section already states. It is green at both arms, and no fold code changes
+    it.
+- SHOULD 3. M1's off-route gate was made to fail once, by safety-floor item 13.
+  - The arm: the `cgoRouteActive` test at cgoDeclarations.go:303 dropped, uncommitted, and one unfiltered CNR at
+    `01ecb22bb9`. The prediction was posted to COORD before the run.
+  - The reading: rc 1, "CHANGED converter output", naming exactly one file,
+    `src/tests/Behavioral/CgoPseudoPackageTypes/package_info.cs`. In it, `_Ctype_struct_point` gains
+    `[global::go.golib.GoCgoStruct]` beside `[GoValueClone("name")]`. NOT MEASURED was 0. MET as predicted.
+  - Restored, and byte-identical (sha256 of cgoDeclarations.go equal before and after), with a clean tree.
+- NIT 4. FieldAccessGenerator.cs names the header-shaped-plus-marked pair in a comment. It is not reached today.
+- NIT 5. The read's mint carries a comment: each read is a fresh box, `==` compares by address, and a ReferenceEquals
+  site would tell two reads apart. The `**C.T` load (1c) mints the same way.
+- Re-cite: NIT 4's three comment lines move FieldAccessGenerator.cs by +3 below :357. ConversionStrategies.md:11576's
+  `:361` becomes `:364`, and `:668-684#f10245` becomes `:671-687#f10245`. The span is byte-identical, so its
+  fingerprint holds.
+
 ### 18.10 Record 2026-11-21: the resolver's walk takes the field's ADDRESS (18.2 item 5 and 18.4 finding 1 corrected; no rewrite)
 
 18.2 item 5 and 18.4 finding 1 say getaddrinfo's walk reads "through the field, not its address". The source says

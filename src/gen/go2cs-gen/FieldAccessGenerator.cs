@@ -355,6 +355,9 @@ public class FieldAccessGenerator : ISourceGenerator
             // shared one, which only the accessor reaches.
             if (!declared.Contains(name))
             {
+                // A marked struct that is also header-shaped (an unsafe.Pointer field, then nint fields) would take the cgo
+                // property on its pointer field and the header GET/SET on the others. cmd/cgo declares no nint field, so the
+                // pair is not reached today.
                 string? cgoProperty = cgo && !field.IsReadOnly ? CgoPointerProperty(field, fieldType, name, receiver, $"{typeName}.{accessor}") : null;
 
                 properties.Add(cgoProperty ?? (header
