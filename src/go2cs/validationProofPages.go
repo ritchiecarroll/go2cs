@@ -31,6 +31,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -141,6 +142,38 @@ func proofBuildTagsText(tags []string) string {
 	}
 
 	return "`-tags " + strings.Join(tags, ",") + "`"
+}
+
+// proofBuildTagsSentence completes a third-party page's "Both sides were built with …" sentence. When the oracle ran
+// the conversion's own tags (oracle nil) it is proofBuildTagsText of them. Otherwise it names what both sides shared
+// and what the conversion took beside it: every row but math/big's own drops math_big_pure_go from Go's side
+// (oracleBuildFlags), so the sentence must not claim Go ran with it.
+func proofBuildTagsSentence(conversion []string, recorded *[]string) string {
+	if recorded == nil {
+		return proofBuildTagsText(conversion)
+	}
+
+	oracle := *recorded
+
+	var extra []string
+
+	for _, tag := range conversion {
+		if !slices.Contains(oracle, tag) {
+			extra = append(extra, tag)
+		}
+	}
+
+	sentence := proofBuildTagsText(oracle)
+
+	if len(extra) > 0 {
+		sentence += "; the conversion also takes `" + strings.Join(extra, ",") + "`"
+
+		if len(extra) == 1 && extra[0] == mathBigPureGoTag {
+			sentence += ", which selects math/big's pure-Go arithmetic over its assembly"
+		}
+	}
+
+	return sentence
 }
 
 // validationProofDotID maps a package import path to its page name — "/" becomes "." so the pages
@@ -368,7 +401,7 @@ func renderValidationProofPage(provenance proofPageProvenance, comparison testCo
 	}
 
 	if provenance.convertedPath != "" {
-		fmt.Fprintf(&page, "\nBoth sides were built with %s.\n", proofBuildTagsText(provenance.buildTags))
+		fmt.Fprintf(&page, "\nBoth sides were built with %s.\n", proofBuildTagsSentence(provenance.buildTags, comparison.Environment.OracleBuildTags))
 
 		// A module COPY read under a version -module-version claimed, not one a module-cache directory resolved
 		// (moduleVersionClaimed): said on the page, so the row cannot be banked unnoticed.
