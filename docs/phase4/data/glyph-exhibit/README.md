@@ -5,9 +5,13 @@ This is SCRATCH material from the global ᴍ cost test (COORD 20261120T202904Z, 
 Each variant folder holds the same converted C#, spelled with that variant's suffix, so the files can be opened side by side in Visual Studio or VS Code:
 - `strings/builder.cs`: strings.Builder. Its method bodies sit in `strings_package` as `internal static <Name><glyph>(…)`, stamped `[GoMethodBody("<Name>")]`.
 - `strings/package_info.Builder.cs`: an excerpt of strings' package_info.cs holding the converter-written, Go-named forwarders in the holder `stringsᴛBuilder`.
-- `vertex/`: the Tour's Vertex (`Abs`, `Scale`) as a LIBRARY package, under the final form. Package main keeps P1's plain form and uses the suffix only on a rare real name clash (owner ruling 11-21).
+- `vertex/vertex.cs` and `vertex/package_info.cs`: the Tour's Vertex (`Abs`, `Scale`) converted as a LIBRARY package (`package vertex`, Go source in `go/vertex.go`). Both files are whole, exactly as emitted.
+  - This is the final form for libraries.
+  - Package main keeps P1's plain form, with methods as plain-named extension methods in `main_package`. It uses the suffix form only for a rare real name clash (owner ruling 11-21). So the Tour's own `package main` Vertex reads exactly as `master/vertex/vertex.cs` does today.
 
-`master/` holds today's form for comparison. `U+1D0D-small-capital-m/builder-exhibit.png` is the rendered side-by-side of the current choice: Go | master | ᴍ form, plus the forwarders.
+`master/` holds today's form for comparison, and `go/` holds the Go originals (`builder.go` from Go 1.26.11, and `vertex.go`).
+
+One artifact of the prototype shows in every `builder.cs` and `vertex.cs`. Where master switches from the package class into the type's holder (`} partial class vertexᴛVertex {`), the prototype re-opens the package class instead (`} partial class vertex_package {`). That is a redundant close-and-reopen which a real cut would fold away. `U+1D0D-small-capital-m/builder-exhibit.png` is the rendered side-by-side of the current choice: Go | master | ᴍ form, plus the forwarders.
 
 The text is identical across variants, byte for byte, except for the suffix. It was generated from the prototype's emission at the scratch tip (f0d12f49fc, base master f604d2ae89).
 
