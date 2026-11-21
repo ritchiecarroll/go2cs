@@ -59,7 +59,7 @@ using static go.main_package;
 // or has none - golib, the BCL and hand-written conversions - and reports its own C# position.
 
 // <GoSourcePositionMaps>
-[assembly: GoPositionMap("MultiPointerEmbedPromotion.go", "MultiPointerEmbedPromotion.cs", "AA9CooKClIKCpoKCAAsSgoKmgoKmggALFoKClAAZPoKCgpiUgoKUgpaWmIKCloKUgoKCmIKC")]
+[assembly: GoPositionMap("MultiPointerEmbedPromotion.go", "MultiPointerEmbedPromotion.cs", "AAxCooKClIKCpoKCAAcSgoKmgoKmggAHFoKClAAXPoKCgpiUgoKUgpaWmIKCloKUgoKCmIKC")]
 // </GoSourcePositionMaps>
 
 namespace go;
@@ -103,7 +103,4 @@ public static partial class main_package
 // in Go's declaration order.
 
 // <MethodHolders>
-[GoMethodHost(typeof(main_package.duplex)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛduplex;
-[GoMethodHost(typeof(main_package.reader)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛreader;
-[GoMethodHost(typeof(main_package.writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class mainᴛwriter;
 // </MethodHolders>

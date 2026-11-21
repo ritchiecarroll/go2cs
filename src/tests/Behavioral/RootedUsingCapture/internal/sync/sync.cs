@@ -25,4 +25,4 @@ public static Gauge NewGauge(nint v) { return new Gauge(v); }
 
 public static nint Value(this Gauge g) { return g.v; }
 
-} // end syncᴛGauge
+}

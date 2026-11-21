@@ -18,4 +18,4 @@ public static void Retarget(this ref Finder f, @string target) {
     f.Name = target;
 }
 
-} // end targetlibᴛFinder
+}

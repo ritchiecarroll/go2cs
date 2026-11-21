@@ -2,7 +2,6 @@ namespace go;
 
 using fmt = fmt_package;
 using Δio = io_package;
-using static main_package;
 
 partial class main_package {
 
@@ -17,8 +16,6 @@ partial struct src {
     internal nint pos;
 }
 
-} partial class mainᴛsrc {
-
 internal static (nint, error) Read(this ref src s, slice<byte> p) {
     if (s.pos >= len(s.data)) {
         return (0, Δio.EOF);
@@ -31,8 +28,6 @@ internal static (nint, error) Read(this ref src s, slice<byte> p) {
 internal static nint Remaining(this ref src s) {
     return len(s.data) - s.pos;
 }
-
-} partial class main_package {
 
 internal static @string viaForeign(Δio.Reader r) {
     var buf = new slice<byte>(4);

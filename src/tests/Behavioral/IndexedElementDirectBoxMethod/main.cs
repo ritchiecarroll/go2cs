@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,16 +8,12 @@ partial struct counter {
     internal nint n;
 }
 
-} partial class mainᴛcounter {
-
 internal static void inc(this ж<counter> Ꮡc) {
     var p = Ꮡc.Ꮡn;
     p.Value++;
 }
 
 internal static nint get(this ref counter c) { return c.n; }
-
-} partial class main_package {
 
 partial struct holder {
     internal array<counter> arr = new(3);
@@ -29,7 +24,7 @@ internal static void bump(ж<holder> h, nint i) {
 }
 
 internal static void main() {
-    var h = Ꮡ(new holder(arr: new counter[]{new(), new(), new()}.array()));
+    var h = Ꮡ(new holder(arr: array<counter>([new(), new(), new()])));
     bump(h, 0);
     bump(h, 0);
     bump(h, 1);

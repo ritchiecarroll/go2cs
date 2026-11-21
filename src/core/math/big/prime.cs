@@ -345,4 +345,4 @@ internal static bool probablyPrimeLucas(this nat n, ж<stack> stk) {
     return false;
 }
 
-} // end bigᴛnat
+}

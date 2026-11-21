@@ -91,4 +91,4 @@ internal static uintptr tag(this taggedPointer tp) {
     return (uintptr)((taggedPointer)(tp & (uint64)((1 << (int)(tagBits)) - 1)));
 }
 
-} // end runtimeᴛtaggedPointer
+}

@@ -115,4 +115,4 @@ internal static bool isViramaModifier(this info c) {
     return (info)(c & ((info)((uint16)attributesMask | (uint16)catSmallMask))) == viramaModifier;
 }
 
-} // end idnaᴛinfo
+}

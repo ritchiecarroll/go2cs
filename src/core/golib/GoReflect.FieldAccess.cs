@@ -120,8 +120,9 @@ public static partial class GoReflect
     /// The NEGATIVE answer is the load-bearing one, and it names a real Go shape rather than a
     /// misuse. <see cref="KindOf"/> classifies every managed REFERENCE it does not otherwise
     /// recognize as <c>Pointer</c> — the reflection bridge's descent rule: an opaque handle a
-    /// hand-owned shim holds in place of Go's own representation (<c>sync.RWMutex</c>'s
-    /// <c>RWState</c>; <c>sync.Mutex</c>'s gate was one until it took Go's layout) is one pointer word wide
+    /// hand-owned shim holds in place of Go's own representation (<c>sync.WaitGroup</c>'s
+    /// <c>WaitGroupState</c>; <c>sync.Mutex</c>'s gate and <c>sync.RWMutex</c>'s <c>RWState</c> were two until
+    /// each took Go's layout) is one pointer word wide
     /// and is never looked inside. That rule has a VALUE-side twin, and this is where it is
     /// asked: such a handle has no pointee, because whatever it refers to has no Go
     /// representation at all — so "one word, do not descend into it" is also "no slot, do not

@@ -15,7 +15,7 @@ internal static Kind get() { return (@string)"x"; }
 internal static void main() {
     var vals = new map<@string, Kind>{["a"] = (@string)"x", ["b"] = (@string)"y"};
     var s = slice<Kind>([(@string)"x", (@string)"y"]);
-    var a = new Kind[]{(@string)"x", (@string)"y"}.array();
+    var a = array<Kind>([(@string)"x", (@string)"y"]);
     ref var k = ref heap(new Kind(), out var Ꮡk);
     k = (@string)"xy";
 

@@ -79,4 +79,4 @@ internal static void setOption(this ref Template t, @string opt) {
     throw panic("unrecognized option: " + opt);
 }
 
-} // end templateᴛTemplate
+}

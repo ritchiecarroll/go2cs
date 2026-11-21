@@ -87,4 +87,4 @@ public static @string Synopsis(this ж<Package> Ꮡp, @string text) {
     return strings.TrimSpace((@string)pr.Text(d));
 }
 
-} // end docᴛPackage
+}

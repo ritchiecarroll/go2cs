@@ -642,4 +642,4 @@ internal static void emitConst(this ref File f, @string name, any data) {
     fmt.Fprintf(f.w, "\n"u8);
 }
 
-} // end genᴛFile
+}

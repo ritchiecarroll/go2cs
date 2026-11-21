@@ -499,4 +499,4 @@ public static (ж<Package>, error) Check(this ж<Config> Ꮡconf, @string path, 
     return (pkg, NewChecker(Ꮡconf, fset, pkg, info).Files(files));
 }
 
-} // end typesᴛConfig
+}

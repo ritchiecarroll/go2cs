@@ -6,7 +6,7 @@ namespace go;
 
 partial class runtime_package {
 
-[GoLazy] partial class lazyᴛsigtable { internal static readonly ж<array<sigTabT>> Ꮡsigtable = new StaticBox<array<sigTabT>>(new sigTabT[]{
+[GoLazy] partial class lazyᴛsigtable { internal static readonly ж<array<sigTabT>> Ꮡsigtable = new StaticBox<array<sigTabT>>(array<sigTabT>([
     /* 0 */
     new(0, "SIGNONE: no trap"),
     /* 1 */
@@ -137,7 +137,7 @@ partial class runtime_package {
     new(_SigNotify, "signal 63"),
     /* 64 */
     new(_SigNotify, "signal 64")
-}.array()); }
+])); }
 internal static ref array<sigTabT> sigtable => ref ((StaticBox<array<sigTabT>>)Ꮡsigtable).ValueSlot;
 
 } // end runtime_package

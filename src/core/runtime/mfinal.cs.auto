@@ -260,7 +260,7 @@ internal static void runFinalizers() {
                 switch ((~f).fint.Kind()) {
                 case var ᴛ when ᴛ == abi.Pointer: {
                     // direct use of pointer
-                    (@unsafe.Pointer.To<@unsafe.Pointer>(r)).Value = f.Value.arg;
+                    @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(r), (~f).arg);
                     break;
                 }
                 case var ᴛ when ᴛ == abi.Interface: {

@@ -382,10 +382,10 @@ public static error UtimesNano(@string path, slice<Timespec> ts) {
     }
     // Not as efficient as it could be because Timespec and
     // Timeval have different types in the different OSes
-    ref var tv = ref heap<array<Timeval>>(new Timeval[]{
+    ref var tv = ref heap<array<Timeval>>(array<Timeval>([
         NsecToTimeval(TimespecToNsec(ts[0])),
         NsecToTimeval(TimespecToNsec(ts[1]))
-    }.array(), out var Ꮡtv);
+    ]), out var Ꮡtv);
     return utimes(path, array<Timeval>.AliasPointer(Ꮡtv.at<Timeval>(0), 2));
 }
 

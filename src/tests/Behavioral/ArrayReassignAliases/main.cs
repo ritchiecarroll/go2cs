@@ -15,20 +15,20 @@ internal static void set(ref array<nint> p) { p[0] = 50; }
 internal static void main() {
     array<nint> a = new(4);
     var s = a[..];
-    a.Assign(new nint[]{1, 2, 3, 4}.array());
+    a.Assign(array<nint>([1, 2, 3, 4]));
     fmt.Println("slice reads:", s[0]);
     s[1] = 20;
     fmt.Println("slice writes:", a[1]);
 
     ref var b = ref heap(new array<nint>(4), out var Ꮡb);
     var p = Ꮡb.at<nint>(0);
-    b.Assign(new nint[]{1, 2, 3, 4}.array());
+    b.Assign(array<nint>([1, 2, 3, 4]));
     p.Value = 30;
     fmt.Println("element pointer:", b[0], p.Value);
 
     ref var c = ref heap(new array<nint>(4), out var Ꮡc);
     var q = Ꮡc;
-    c.Assign(new nint[]{1, 2, 3, 4}.array());
+    c.Assign(array<nint>([1, 2, 3, 4]));
     q.Value[0] = 40;
     fmt.Println("array pointer:", c[0]);
     set(ref c);
@@ -44,19 +44,19 @@ internal static void main() {
 
     holder h = new();
     var u = h.arr[..];
-    h.arr.Assign(new nint[]{1, 2, 3, 4}.array());
+    h.arr.Assign(array<nint>([1, 2, 3, 4]));
     u[0] = 70;
     fmt.Println("field:", h.arr[0]);
 
     var v = pkg[..];
-    pkg.Assign(new nint[]{1, 2, 3, 4}.array());
+    pkg.Assign(array<nint>([1, 2, 3, 4]));
     v[0] = 80;
     fmt.Println("package:", pkg[0]);
 
     ref var e = ref heap(new array<nint>(4), out var Ꮡe);
     var w = e[..];
     var r = Ꮡe;
-    r.Assign(new nint[]{1, 2, 3, 4}.array());
+    r.Assign(array<nint>([1, 2, 3, 4]));
     w[0] = 90;
     fmt.Println("through a pointer:", e[0]);
 }

@@ -41,4 +41,4 @@ internal static (int64 n, error err) writeBuffers(this ж<netFD> Ꮡfd, ж<Buffe
     return (n, wrapSyscallError(writevˢ, err));
 }
 
-} // end netᴛnetFD
+}

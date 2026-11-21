@@ -447,4 +447,4 @@ public static uint64 RoundedInteger(this ж<@decimal> Ꮡa) {
     return n;
 }
 
-} // end strconvᴛdecimal
+}

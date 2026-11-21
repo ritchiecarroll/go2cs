@@ -17,4 +17,4 @@ partial struct Other {
 public static (nint, error) Read(this ref Other _, slice<byte> p) { return (0, io.EOF); }
 public static (nint, error) Write(this ref Other _, slice<byte> p) { return (len(p), default); }
 
-} // end midᴛOther
+}

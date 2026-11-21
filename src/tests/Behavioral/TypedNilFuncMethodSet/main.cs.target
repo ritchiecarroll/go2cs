@@ -1,17 +1,12 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
 public delegate nint Fn();
 
-} partial class mainᴛFn {
-
 public static @string String(this Fn fn) { return "String(fn)"; }
-
-} partial class main_package {
 
 partial interface Getter {
     nint Get();
@@ -19,11 +14,7 @@ partial interface Getter {
 
 public delegate nint G();
 
-} partial class mainᴛG {
-
 public static nint Get(this G g) { return 7; }
-
-} partial class main_package {
 
 partial interface Both :
     fmt.Stringer
@@ -36,7 +27,7 @@ internal static void main() {
 
     fmt.Printf("%v\n"u8, (fn).OrTypedNilFunc());
     fmt.Println((fn).OrTypedNilFunc());
-    fmt.Printf("%v\n"u8, new Fn[]{fn}.array());
+    fmt.Printf("%v\n"u8, array<Fn>([fn]));
     fmt.Printf("%s|%T\n"u8, (fn).OrTypedNilFunc(), (fn).OrTypedNilFunc());
 
     any x = (fn).OrTypedNilFunc();

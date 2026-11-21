@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -9,8 +8,6 @@ partial struct Tally {
     internal nint total;
     internal @string log;
 }
-
-} partial class mainᴛTally {
 
 public static void Add(this ж<Tally> Ꮡt, nint n) {
     GoFrame ᒐ = default;
@@ -25,8 +22,6 @@ public static void Add(this ж<Tally> Ꮡt, nint n) {
     catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
     finally { ᒐ.Run(); }
 }
-
-} partial class main_package {
 
 internal static (nint, nint, @string) closureRead(Tally tʗp, nint n) {
     ref var t = ref heap(tʗp, out var Ꮡt);

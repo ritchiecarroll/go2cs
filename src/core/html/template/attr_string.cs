@@ -22,7 +22,7 @@ internal static void _ᴛ1() {
 internal static ref readonly @string _attr_name => ref _attr_nameᵇ;
 private static readonly @string _attr_nameᵇ = "attrNoneattrScriptattrScriptTypeattrStyleattrURLattrSrcsetattrMetaContent"u8;
 
-internal static array<uint8> _attr_index = new uint8[]{0, 8, 18, 32, 41, 48, 58, 73}.array();
+internal static array<uint8> _attr_index = array<uint8>([0, 8, 18, 32, 41, 48, 58, 73]);
 
 } partial class templateᴛattr {
 
@@ -33,4 +33,4 @@ internal static @string String(this attr i) {
     return _attr_name.slice(_attr_index[i], _attr_index[i + 1]);
 }
 
-} // end templateᴛattr
+}

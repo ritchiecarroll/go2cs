@@ -25,7 +25,7 @@ func typedNilErr() error {
 	fmt.Println("typed nil pointer in error != nil:", err != nil)
 	fmt.Println("nil == typed nil pointer in error:", nil == err)
 ```
-<!-- source: src/tests/Behavioral/NilCompareShapes/main.cs.target:18-21, 65-67 -->
+<!-- source: src/tests/Behavioral/NilCompareShapes/main.cs.target:13-16, 60-62 -->
 ```csharp
 internal static error typedNilErr() {
     ж<myErr> p = default;
@@ -512,7 +512,7 @@ func assignDescriber(h *holder, s *Setting) {
     h.d = s
 }
 ```
-<!-- source: src/tests/Behavioral/PointerInterfaceStructField/main.cs.target:30-32 -->
+<!-- source: src/tests/Behavioral/PointerInterfaceStructField/main.cs.target:25-27 -->
 ```csharp
 internal static void assignDescriber(ref holder h, ж<Setting> s) {
     h.d = new SettingжDescriber(s);

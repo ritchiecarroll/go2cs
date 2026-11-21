@@ -3,7 +3,6 @@ namespace go;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using ꓸꓸꓸany = Span<any>;
-using static main_package;
 
 partial class main_package {
 
@@ -11,32 +10,22 @@ partial struct Plain {
     internal nint v;
 }
 
-} partial class mainᴛPlain {
-
 public static nint Get(this Plain p) { return p.v; }
 public static @string Describe(this Plain p, @string prefix) { return fmt.Sprint(prefix, p.v); }
 public static void Set(this ref Plain p, nint v) { p.v = v; }
-
-} partial class main_package {
 
 partial struct Box<T> {
     internal T v;
 }
 
-} partial class mainᴛBox {
-
 public static T Get<T>(this Box<T> b) { return b.v; }
 public static @string Describe<T>(this Box<T> b, @string prefix) { return fmt.Sprint(prefix, (b.v).OrTypedNilOf()); }
 public static void Set<T>(this ref Box<T> b, T v) { b.v = v; }
-
-} partial class main_package {
 
 partial struct Pair<K, V> {
     internal K k;
     internal V v;
 }
-
-} partial class mainᴛPair {
 
 public static K Key<K, V>(this Pair<K, V> p) { return p.k; }
 public static @string String<K, V>(this Pair<K, V> p) { return fmt.Sprintf("%v=%v"u8, (p.k).OrTypedNilOf(), (p.v).OrTypedNilOf()); }
@@ -48,8 +37,6 @@ public static V /*old*/ Swap<K, V>(this ref Pair<K, V> p, V v) {
     return old;
 }
 
-} partial class main_package {
-
 partial struct age /*num:nint*/;
 
 partial struct Ord2<T>
@@ -58,20 +45,14 @@ partial struct Ord2<T>
     internal T a, b;
 }
 
-} partial class mainᴛOrd2 {
-
 public static bool Less<T>(this Ord2<T> o)
     where T : /* ~int */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IIncrementOperators<T>, IDecrementOperators<T>, IUnaryNegationOperators<T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 { return o.a < o.b; }
-
-} partial class main_package {
 
 partial struct Cell<T> {
     public T V;
     public bool Valid;
 }
-
-} partial class mainᴛCell {
 
 public static (any, error) Value<T>(this Cell<T> c) {
     if (!c.Valid) {
@@ -79,8 +60,6 @@ public static (any, error) Value<T>(this Cell<T> c) {
     }
     return ((c.V).OrTypedNilOf(), default);
 }
-
-} partial class main_package {
 
 partial interface valuer {
     (any, error) Value();
@@ -176,12 +155,12 @@ internal static void probe(@string name, any value, any pointer, map<@string, sl
 }
 
 [GoLazy] partial class lazyᴛgoSets { internal static map<@string, array<slice<@string>>> goSets = new map<@string, array<slice<@string>>>{
-    ["Plain"] = new slice<@string>[]{["Describe", "Get"], ["Describe", "Get", "Set"]}.array(),
-    ["Box[int]"] = new slice<@string>[]{["Describe", "Get"], ["Describe", "Get", "Set"]}.array(),
-    ["Box[string]"] = new slice<@string>[]{["Describe", "Get"], ["Describe", "Get", "Set"]}.array(),
-    ["Box[[]int]"] = new slice<@string>[]{["Describe", "Get"], ["Describe", "Get", "Set"]}.array(),
-    ["Pair[string,int]"] = new slice<@string>[]{["Key", "String"], ["Key", "String", "Swap"]}.array(),
-    ["Ord2[age]"] = new slice<@string>[]{["Less"], ["Less"]}.array()
+    ["Plain"] = array<slice<@string>>([["Describe", "Get"], ["Describe", "Get", "Set"]]),
+    ["Box[int]"] = array<slice<@string>>([["Describe", "Get"], ["Describe", "Get", "Set"]]),
+    ["Box[string]"] = array<slice<@string>>([["Describe", "Get"], ["Describe", "Get", "Set"]]),
+    ["Box[[]int]"] = array<slice<@string>>([["Describe", "Get"], ["Describe", "Get", "Set"]]),
+    ["Pair[string,int]"] = array<slice<@string>>([["Key", "String"], ["Key", "String", "Swap"]]),
+    ["Ord2[age]"] = array<slice<@string>>([["Less"], ["Less"]])
 }; }
 
 internal static void main() {

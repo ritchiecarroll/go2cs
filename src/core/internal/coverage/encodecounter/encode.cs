@@ -338,4 +338,4 @@ internal static error writeFooter(this ref CoverageDataWriter cfw) {
     return default;
 }
 
-} // end encodecounterᴛCoverageDataWriter
+}

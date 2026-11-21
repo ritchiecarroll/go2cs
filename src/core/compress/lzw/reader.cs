@@ -320,4 +320,4 @@ internal static void init(this ref Reader r, io.Reader src, Order order, nint li
     r.last = decoderInvalidCode;
 }
 
-} // end lzwᴛReader
+}

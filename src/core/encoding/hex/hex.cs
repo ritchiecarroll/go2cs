@@ -365,4 +365,4 @@ internal static error /*err*/ Close(this ref dumper h) {
     return err;
 }
 
-} // end hexᴛdumper
+}

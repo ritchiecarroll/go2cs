@@ -1385,3 +1385,902 @@ then restored byte-identical (same sha256), and the edit was never committed.
     is the `.4` item, cut separately off master.
 
 — H (2026-11-14)
+
+## 18. Amendment 2026-11-15: increment 3.2, the plan (posted before code; the .5 train)
+
+**Where Phase 3 stands on master `0c1d295ea8`.**
+- 3.0 landed in batch 292, and 3.1 in batch 305 (with its re-gate in 306).
+- 3.3's red, the realloc shape (a `copy` into a view of C memory that Go then reads), is covered by P5's view doors,
+  which landed in batch 308: `View`, `CopyInto` and `CopyFrom`, whose V3 arm is a native window over C memory
+  (`src/core/unsafe/unsafe.cs`; GolibTests `CopyIntoNativeMemoryCopiesTheSourcesLength` and the native-view arms). Its
+  same-element reslice is V1. 3.3 is therefore closed by that seat, not by this plan.
+- 3.4 (`net` and the harness) needs 3.2's pinned class.
+- **So the next increment is 3.2.**
+
+**What 3.2 admits** (sections 4 and 6 as ruled, with section 13's M1 to M5):
+1. **Reading C memory.** Section 6's four shapes, each READ as a red before any change: a scalar field of a native
+   struct with pointer fields; a pointer field's address loaded through; C memory reinterpreted as a Go struct; and
+   an element of a native-backed slice reinterpreted as a C struct pointer and passed back, which must classify as C
+   memory. A new box kind or a go2cs-gen change is stop line S-B (a design posted first).
+2. **The PINNED class.** An element of a Go slice or array, or a reinterpretation of one or of a whole Go value,
+   classified ON THE BOX (M2) and never on a number (M3). The wrapper pins the whole backing for the call and hands C
+   the element's address. A pointee that holds Go pointers is refused with cgo's own panic.
+3. **The out-parameter** (`&db`, `char **`), ruled shape (i): a stack word, copied in and copied back by the
+   pointer-member rules.
+4. **The no-copy case under GC pressure:** C writes the pinned memory while another thread forces compacting
+   collections, and Go reads C's write.
+5. The converter lowers cmd/cgo's `_cgoIndex` and `_cgoSlice` check closures to the direct call, as it does the
+   address and variable forms.
+
+**The pin path, with pin-extent rows 2 and 3 folded in** (BOARD, 2026-11-15: concurrent pins collapse at the runtime's
+GC handle table and at finalizable registration, not in the index). A call-scoped pin takes NEITHER:
+- The wrapper pins with a C# `fixed` over the backing's data reference. The door returns the backing and the byte
+  offset, and the wrapper takes `fixed (byte* p = &MemoryMarshal.GetArrayDataReference(backing))` around the call.
+  That is a pinned local the GC already honours across a P/Invoke.
+- No `GCHandle`, no `PinnedBuffer`, no finalizer, and no index entry: the pin's extent is the call, and the box
+  classified the argument.
+- In the row-3 probe, `fixed` was the arm that did not collapse: 1 ns per op at 1 and at 4 threads, with throughput 2x.
+- The long-lived box pins (`m_pin`, the address-take contract) keep `PinnedBuffer`. Their cure (pooled or long-lived
+  handles, no per-pin finalizer) touches `ж<T>`'s lifetime contract corpus-wide. It is NOT in 3.2; it stays the
+  rows 2+3 BOARD direction, and a design of its own when it is taken.
+
+**Pin-extent row 1 (the 3.2 precondition).** It assumed "from 3.2 a hit IS a crossing". In this plan it is not: 3.2
+admits Go memory only when the BOX classifies it, and a NUMBER that the index finds inside a pin is still refused.
+So the side list stays on refusal paths, and the precondition does not bind 3.2. If the ruling is that a number
+inside a pin should cross, row 1 binds first, and this plan changes before code.
+
+**Predictions** (scored as worded, at the cut's tip):
+- **I-1 corpus footprint, 0 files on all four targets.** The change is behind `-cgo` plus golib's `GoCgoArgs`, and the
+  standard library converts with `CGO_ENABLED=0`. The two-seeded comparison, seeded so the hand-owns stay.
+- **I-2 the flip set is exactly the BOX-carried refusals.** Every arm that asserts a box-classified element or
+  whole-value pointer refused with "increment 3.2" turns to the crossing. Every arm that asserts a NUMBER refused stays
+  refused. The uses: GolibTests 15 (Phase3 8, Derived 4, Review2 2, PinExtents 1) and `cgoPhase3_test.go` 26. Each
+  is classified box or number, by reading, before code, and the predicted flip set is posted as a list.
+- **I-3 section 6's four reds.** I do not predict which pass today; they are READ first, as the plan says.
+- **I-4 the pinned arm under pressure.** C's write is read by Go in every one of N rounds, with an unpinned twin shown
+  to move (Inconclusive otherwise).
+- **I-5 gates**, all unfiltered: GolibTests Release and Debug, GenTests, `go test ./...`, CNR, the footprint, and hosted
+  cgo-e2e, converter-cgo and golib-tests on three OSes.
+
+**Stop lines.**
+- S-B: a new box kind or a go2cs-gen change.
+- Any NUMBER that crosses into Go memory.
+- A `fixed` that cannot reach a backing (a reference-bearing pointee, which is refused instead).
+- Any corpus line moved.
+
+— H (2026-11-15)
+
+### 18.1 Record 2026-11-15: section 6's four reds READ, and the I-2 flip list (before code)
+
+COORD approved 18 for the .5 train. Rulings: numbers stay REFUSED in 3.2, so pin-extent row 1 does not bind it; a
+call-scoped `fixed` is the pin; `m_pin` stays out.
+
+**Section 6, read end to end** (`testdata/cgo/p3`: arms `s6field`, `s6next`, `s6reinterp` and `s6slice`; new probe.c
+functions `go2cs_probe_list`, `_list_release` and `_address`). Each is asserted as Go prints it. H has no C compiler,
+so the hosted cgo-e2e legs are the instrument: linux 43765795991, windows 43765805154, darwin 43765814200, at `0ae7d5c230`.
+
+| arm | shape | Go | go2cs today, all three OSes |
+|---|---|---|---|
+| `s6field` | a scalar field of a C struct that also holds pointer fields | `2` | `2`: ALREADY GREEN |
+| `s6next` | the address of a pointer field, loaded through | `10 b` | **RED**: `panic: runtime error: invalid memory address or nil pointer dereference` |
+| `s6reinterp` | C memory reinterpreted as a Go struct of scalars | `2 8080 2130706433` | the same: ALREADY GREEN |
+| `s6slice` | an element of a slice over C memory, reinterpreted as a C struct pointer and handed back to C | `true` | `true`: ALREADY GREEN, classified as C memory |
+
+- Three of the four already pass, and stay as guards.
+- The one red is a POINTER FIELD of a C struct read from C memory, whose value reads nil. Its root is not yet READ.
+  If the cure needs a new box kind or a go2cs-gen change, that is stop line S-B, and a design is posted first.
+- **The void run, recorded as void and not a red.** The first dispatch (`0de78b7bee`; 43765347265 / 43765356418 /
+  43765365459) never built the probe library: `probe.c` already defines `struct go2cs_probe_node`, and H had read
+  only its function lines. Lesson: read the WHOLE C file before adding to it.
+
+**I-2, the flip list.** Each hand-over form of the arms that assert the "increment 3.2" refusal was classified by the
+door's own branch (a scratch probe calling `GoCgoArgs.GoMemory` on every form, never committed), then corrected by
+reading for the one thing the probe could not see, the ROOT storage (M2). The probe checked only the carried box's
+own element type, so it scored a view over a reference-bearing struct as crossing.
+- **Crosses in 3.2 (FLIP), 18 GolibTests hand-overs.**
+  - `AVoidPointerIntoGoMemoryIsRefusedBeforeTheCallInEveryFormItArrivesIn`: the retaining and pinning mints of a
+    scalar (2 of its 9 forms).
+  - `APointerOverManagedStorageNeverCrossesAVoidPointer`: the pinning and retaining mints of a wider view pinned over
+    an element, a view aliasing a struct, a native box with a retained source, a native box over a pinned managed
+    buffer, `unsafe.StringData` and `unsafe.SliceData` (12 of its 36).
+  - `ACallResultCastToANumberCarriesNothingAndIsRefusedByItsPinExtent`: the kept `unsafe.Add` result (1 of 2).
+  - `AnElementOfAnArrayFieldOfAViewOverGoMemoryIsStillRefusedAtTheVoidDoor`: both mints (2 of 2).
+  - `AHelpersPointerIsNilOrCMemoryAndGoMemoryIsRefusedNamingTheHelper`: the typed helper over a Go box (1).
+- **Refused with cgo's own panic** (the storage holds Go references or is an order token): the bare mint of a box that
+  holds references; the three mints of a view over a reference-bearing struct; the three mints of a native box that
+  aliases an order token; and both token numbers.
+- **Stays refused as a NUMBER** (unchanged outcome, new text): every number held in a variable, every bare mint (it
+  carries no box), the one-expression round trip, the two forms of `AVoidPointerToAViewReinterpretedOverGoMemoryIsRefused`,
+  all 14 of `ANumberBuiltByArithmeticOverAGoPointerIsRefusedForEveryKindOfPin`, the three of
+  `ANumberStaysRefusedWhileAnyPointerThatPinsItsStorageIsAlive`, and the pin-extent arms' numbers.
+  - Also the pinning and retaining mints of a pointer REBUILT from a Go array's number. Their native box has no
+    source, so 3.2 has no storage to fix and refuses them as numbers.
+- **The end-to-end arms** (`cgoP3Arms`; the converter mints `unsafe.Pointer(&x)` as `FromPinnedBox`, so the arms
+  whose pointer is written in the call carry their box). **22 flip to Go's output:**
+  - `goinnerdefer`, `goinnergo`, `govoid`;
+  - `gobytes`, `gostring`;
+  - `goviewfield`, `goviewfieldarray`, `goviewagain`, `goviewelem`, `goviewelemstring`;
+  - `goslice`, `goslicedata`;
+  - `goadd`, `goaddlocal`, `goaddvar`, `goaddfunc`, `goaddtyped`;
+  - `goviewfieldfunc`, `goviewfieldvar`;
+  - `goviewnamestring`, `goviewnameadd`, `goviewnameslice`.
+  - **2 stay refused as numbers:** `govoidnumber`, and `govoidexpr`. `govoidexpr` is Go-valid: a one-expression
+    round trip that the converter emits as a number. By the ruling it reopens only with a consumer's census, and a
+    converter fold of the identity round trip would keep the box at a corpus cost not yet measured.
+  - The three write-through arms of the typed door (`goaddfill`, `gofieldtyped`, `goviewnamedata`) flip too, as the
+    pinned class for a typed pointer.
+
+**COORD's notes on the reds.**
+- (a) A C callback that re-enters a cgo call while the `fixed` is held cannot arise in 3.2. `//export` (Phase 5) and a
+  C function used as a value (Phase 2) are both refused by name. The arm is named for Phase 5.
+- (b) The pressure arm forces compaction MID-CALL: a slow C fill, another thread calling
+  `GC.Collect(2, Forced, true, compacting: true)`, and an unpinned twin shown to move (Inconclusive otherwise). It lives
+  in GolibTests' CgoProbeTests around the 3.2 wrapper, because converted `runtime.GC()` is a plain `GC.Collect()` that
+  does not guarantee compaction.
+
+— H (2026-11-15)
+
+### 18.2 Amendment 2026-11-15: s6next rooted, and the design for a pointer field of C memory (S-B; posted before code)
+
+**The root, read on the hosted legs** (cgo-e2e at `27a41b889c`: linux 43769940571, windows 43769950200, darwin
+43769959680 on amd64 and arm64, identical everywhere).
+- Every read of a POINTER field of a C struct in C memory fails: `l.next == nil` (`s6nextnil`), `l.next.family`
+  (`s6nextdirect`) and `C.GoString(l.name)` (`s6name`). Each is refused by name: "cannot read native memory as
+  `_Ctype_struct_go2cs_probe_entry`: its CLR layout is not its Go layout (field next / name is a managed reference
+  where Go stores the value inline)".
+- go2cs-gen's accessor for a field is `public ref TF f { get => ref ʗp.field(T.Ꮡf); }`, and `ж<T>.field` sends a native
+  receiver to `NativeBox<T>.FieldRef`. That reads a SCALAR field at its Go offset (`s6field` is green), and refuses a
+  field whose C# type is a managed reference: a C pointer field is `ж<U>` in C#, where C stores an address word.
+- `s6next`'s own route (`&l.next`, then a load) does not reach that refusal. It makes a native box whose pointee type is
+  itself a reference, over C memory, and its read takes the C word as a managed reference. That is memory-unsafe. Its
+  floor is a separate .4 seat (`claude/h-nativebox-ref-floor`), which refuses such a box by name.
+
+**The design (.5, part of 3.2; a review follows, since it touches the gen accessor).**
+1. **Which fields.**
+   - Covered: a field of a C struct or union that cmd/cgo declares (`_Ctype_struct_*`, `_Ctype_union_*`), whose Go
+     type is a pointer (`*T`, `*C.char`) or `unsafe.Pointer`.
+   - The converter marks such a type with a new `[GoCgoStruct]` attribute, and only under `-cgo`, so the corpus moves
+     0 lines.
+   - The generator reads the marker, never the `_Ctype_` spelling.
+2. **The accessor.** For those fields go2cs-gen emits a GET/SET property in place of the `ref` property, as it already
+   does for header-shaped structs. The getter calls `ʗp.cgoPointerField(T.Ꮡf)`, and the setter calls
+   `ʗp.cgoPointerField(T.Ꮡf, value)`. A `ref` to such a field then does not compile, by design, as for headers: a ref
+   into C memory has no managed slot to name.
+3. **The read** (golib, `ж<T>.cgoPointerField<U>`).
+   - A MANAGED receiver (a C struct value Go allocated: `var n C.struct_x`, `new(C.struct_x)`) reads the slot, as
+     today.
+   - A NATIVE receiver reads the address WORD at the field's Go offset (`FieldRefBox.GoFieldOffsetOf`, the offset
+     `s6field` already reads).
+     - A 0 word is nil.
+     - Any other word mints `new NativeBox<U>(word)`, which is C memory and keeps nothing, as `PointerMemberBack` mints a
+       pointer C returned. For `unsafe.Pointer`, it mints the number pointer.
+4. **The write.** Go stores an address into C memory here.
+   - A MANAGED receiver stores into the slot, as today.
+   - A NATIVE receiver:
+     - nil writes 0;
+     - a pointer to C memory alone (a genuinely native root, the void door's test) writes its address;
+     - a pointer into Go memory is REFUSED by name. Go's rule is that C memory must not hold a Go pointer
+       (cgocheck=2's "write of unpinned Go pointer into non-Go memory"), and go2cs refuses it in every mode, since a
+       managed address stored where the collector does not look is the corruption the floor exists to stop.
+5. **The address of such a field** (`&l.next`) over a native receiver needs a box whose value is the word: a NEW BOX
+   KIND (S-B), `NativePointerFieldBox<U> : ж<ж<U>>`, whose `Value` get and set are 3 and 4.
+   - Proposed for 3.2 too, because `s6next` is its arm and `getaddrinfo`'s walk `for p := res; p != nil; p = p.ai_next`
+     reads through the field, not its address.
+   - Until it lands, the floor refuses `&l.next` by name.
+6. **Not changed:** a scalar field (already read at its Go offset), a struct or array field (`FieldRef` as today), and
+   any type cmd/cgo did not declare. modernc's libc types are plain Go types, so they are outside the marker.
+
+**Predictions** (scored as worded, at the cut):
+- D-1 corpus footprint 0 files on four targets: the marker is emitted only under `-cgo`.
+- D-2 the end-to-end arms `s6next`, `s6nextnil`, `s6nextdirect` and `s6name` print what Go prints on three OSes;
+  `s6field`, `s6reinterp` and `s6slice` stay green.
+- D-3 GenTests gain the GET/SET shape for a marked struct's pointer field and keep the `ref` shape for every other
+  field. A `ref` to a marked pointer field fails to compile, asserted by a compile arm.
+- D-4 a new write arm: a C pointer stored into a C struct's pointer field reads back in C, and a Go pointer stored
+  there is refused by name.
+
+**Stop lines.**
+- Any unmarked type's accessor changes (the corpus moves).
+- A converter `ref` to a marked pointer field that the converter emits today. The GenTests compile arm and the e2e
+  build find it, and it is posted before any workaround.
+- The new box kind reaching any type outside the marker.
+
+— H (2026-11-15)
+
+### 18.3 Amendment 2026-11-16: 18.2 after the reference floor, and (B) word semantics for `unsafe.Pointer` (posted for review before code)
+
+**What changed under 18.2.** The reference floor (`claude/h-nativebox-ref-floor`, seated in batch 311 at `3ce394cbc0`)
+now refuses, by name, every whole-value read or write of a reference-type pointee through a native box: "a managed
+reference where Go stores words".
+- `s6next`'s `&l.next` route reads a refusal instead of a garbage reference. 18.2 item 5's "until it lands" is now true.
+- The floor makes one exemption, ruled (C)-narrowed: `unsafe.Pointer` over MANAGED storage (the box retains its source
+  or carries a pin). Two places in the converted runtime need it: `map.go`'s indirect key and `atomic_pointer.go`'s
+  atomicwb, both seen live in the behavioral program `UnsafePointerReinterpret`.
+- The exemption keeps a hazard, recorded as a `.5` BOARD row (2026-11-16): golib's `unsafe.Pointer` is a CLR class, so
+  the exempt write puts a managed reference into a slot the storage types as a word. The collector does not trace that
+  slot, so the reference can go stale or be collected.
+- (B), below, is that row's cure. When it lands, the exemption is deleted and the floor refuses `unsafe.Pointer`
+  regardless of the box's source.
+
+**Why (B) is not a golib-only change.** `NativeBox<T>.Value` is a `ref T` over the address, and a store goes through
+`DerefOrNull`'s `ref`. Converting between a word and a CLR object cannot sit behind a `ref`:
+- a read can return a ref to a shadow;
+- a write through that ref lands in the shadow, and nothing tells the box to write the word back.
+So the load and the store must be CALLS at the emitted site.
+
+**The population, read at master `2c1ce10b25`.**
+- `To<unsafe.Pointer>`, the `(*unsafe.Pointer)(p)` reinterpret, appears at 89 sites in 15 converted files: the
+  internal/runtime/maps group (7 files), reflect and reflectlite `value.cs`, runtime `atomic_pointer.cs`,
+  `cgocheck.cs`, `type.cs`, and `cgocall.cs` on three OSes.
+- `ж<unsafe.Pointer>` appears 40 times in 20 files, including hand-owned `sync/atomic/doc_impl.cs` and
+  `internal/runtime/atomic/atomic_impl.cs`. Their `LoadPointer` / `StorePointer` / `SwapPointer` /
+  `CompareAndSwapPointer` doors take a `*unsafe.Pointer` and are the same class.
+- LIVE, measured by the dereference census at 311:
+  - GolibTests (C1): 3 rows, all controls;
+  - behavioral (C2): 2 rows, both `UnsafePointerReinterpret`;
+  - the 13-package C3 set before the floor: 0.
+  The cure's corpus footprint is therefore wide (every load and store through a `*unsafe.Pointer`), while its live
+  population is narrow.
+
+**The design.**
+- **W1, the load:** `*p` where `p`'s static type is `*unsafe.Pointer` emits `@unsafe.Pointer.LoadWord(p)` instead of
+  `p.Value`.
+  - Over a box that holds a CLR `Pointer` slot (a `StandardBox<Pointer>`, a field or element box over one) it returns
+    the slot: today's semantics, no conversion.
+  - Over a `NativeBox<Pointer>` it reads the address WORD. 0 is nil. A number that resolves to Go storage (the exact
+    registry, then the pin-extent index) returns a `Pointer` that carries that storage's box, as `FromHeaderData`
+    carries an element box. Any other number returns the number pointer, which is C memory and keeps nothing.
+- **W2, the store:** `*p = v` emits `@unsafe.Pointer.StoreWord(p, v)`.
+  - Over a CLR `Pointer` slot it stores the slot, as today.
+  - Over a `NativeBox<Pointer>` it writes `v`'s NUMBER. Then:
+    - (a) the destination is C memory (no retained source, no pin) and `v` names Go memory: REFUSED by name, as 18.2
+      item 4 refuses a Go pointer stored into a C struct field;
+    - (b) the destination is managed storage and `v` names Go memory: the store also records a KEEP-ALIVE edge from the
+      destination's root storage to `v`'s pin. A `ConditionalWeakTable` keyed by the root object maps the slot's
+      offset to the pin, so the stored number stays valid (pinned and alive) as long as the destination storage lives.
+      Overwriting the slot through W2 releases the old edge;
+    - (c) `v` is nil or C memory: the number is written and no edge is recorded.
+- **W3, the atomic doors:** the hand-owned `sync/atomic` and `internal/runtime/atomic` pointer doors take the same
+  dispatch: W1 for Load, W2 for Store, and W1 then W2 under the existing atomic for Swap and CompareAndSwap, whose
+  compare is on the WORD.
+- **W4, the floor:** with W1 and W2 in place, delete the exemption (`s_isUnsafePointer && (retained || pin)`). A
+  `.Value` read of a `NativeBox<Pointer>` is then reached only by code W1 and W2 did not rewrite, and it is refused by
+  name, like every other reference.
+
+**Faithfulness.** In Go an `unsafe.Pointer` IS a word, and storage typed as pointer-bearing is traced by the collector.
+W2(b)'s edge is the stand-in for that tracing: a Go pointer stored into managed word storage keeps its object alive and
+in place.
+- A `uintptr` store does NOT take the edge, by Go's own rule: a `uintptr` keeps nothing alive.
+- A number written by arithmetic through a `ж<uintptr>` stays a number, exactly as in Go.
+
+**Predictions (scored as worded at the cut; the corpus is measured with the two-seeded diff on four targets).**
+- B-1: the corpus footprint is confined to load and store sites through a `*unsafe.Pointer`: the 15 `To<unsafe.Pointer>`
+  files plus the deref sites over `*unsafe.Pointer` parameters and fields. No other line moves. The count is predicted
+  from a seeded emission before the cut, not from this grep.
+- B-2: C1 and C2 read 0 B2a `kind=UnsafePointer` rows after W4, because every live row moves to W1/W2, which do not
+  dereference a `ref`.
+- B-3: `UnsafePointerReinterpret`'s output is unchanged.
+- B-4: a new pressure arm. A Go pointer is stored through W2 into managed word storage, every other reference to the
+  object is dropped, and forced compacting collections with finalizers run. The pointer then reads back through W1
+  and names the same bytes. Today's exempt path is the red arm, and it can read a moved or collected object.
+- B-5: a refusal arm, a Go pointer stored through W2 into C memory, is refused by name.
+
+**Stop lines.**
+- A W1/W2 site outside a `*unsafe.Pointer` load or store.
+- A changed outcome in any validated row.
+- A keep-alive edge reached from a `uintptr` store.
+- The floor's exemption deleted before B-2 reads 0.
+
+**Open for the review.**
+- (i) Is W2(b)'s edge table keyed right? A root storage object can hold many slots, so it is keyed by root plus offset.
+  Each edge is one pin, so the cost is bounded by the number of live stored pointers.
+- (ii) W1 for a number that resolves to Go storage RE-CARRIES a box. Should it instead return the number pointer and
+  let the void door refuse it later, as 3.2 does for numbers?
+- (iii) Does W3's CompareAndSwap on the word match Go when two different `Pointer` objects carry the same number?
+  Go compares words, so yes by construction; the arm pins it.
+- (iv) Sequencing: W1–W3 and W4 as one cut, or W4 as its own seat after B-2 is read at a batch.
+
+— H (2026-11-16)
+
+### 18.4 Revision 2026-11-17: P3's review of 18.2 + 18.3 answered (before code)
+
+P3 reviewed `b8bc349f28`: APPROVE WITH CHANGES, all before code (mailbox, COORD inbox `20261116T214842Z-P3.md`).
+COORD accepted the five MUST-FIX findings as worded, took should-fix 6 and 7, ruled nit 8 a pair of named deviations,
+and adopted P3's answers to 18.3's questions (i)-(iv). This block REPLACES the parts of 18.2 and 18.3 it names. Where
+it is silent, they stand. Each finding is answered by its number.
+
+**1. The address of a C struct's pointer field (18.2 item 5): REFUSED in 3.2, and the new box kind is WITHDRAWN.**
+- `ж<T>.Value` is an abstract `ref T` (ж.cs:126). So `NativePointerFieldBox<U> : ж<ж<U>>` could only hand out a ref
+  to a shadow: `pp := &l.next; *pp = other` would write the shadow while C memory kept the old word, silently.
+- `&l.next` over a native receiver stays refused by name. It reaches the reference floor (seated at `3ce394cbc0`):
+  "a managed reference where Go stores words". The reads 3.2 needs go through the field accessor (18.2 items 2-4),
+  not the field's address: `l.next == nil`, `l.next.family`, `C.GoString(l.name)`, and getaddrinfo's walk
+  `p = p.ai_next`.
+- `s6next`, the arm that takes the address, becomes a REFUSAL arm: its expected output is the floor's panic text,
+  asserted by name. `s6nextnil`, `s6nextdirect` and `s6name` carry the read.
+- A later increment may route `**C.T` loads and stores through W1/W2-style calls, with its own write arm. It is out
+  of 3.2.
+- Stop line S-B still applies to 3.2: the go2cs-gen GET/SET accessor is a gen change, so it is reviewed. The new
+  box kind has left the design.
+
+**2. The word and its edge change in one ordered protocol (W2, W3).** Each slot has an edge SET, not one edge.
+- **Store** `StoreWord(p, v)` over managed word storage:
+  - (a) add the edge for `v` to the slot's set;
+  - (b) exchange the word (`Interlocked.Exchange` in the atomic doors; a plain store in W2, as Go's plain store is);
+  - (c) remove the edge whose number equals the DISPLACED word.
+  P3's race, two `atomic.StorePointer` calls of `a` and `b`, ends with the word `b` and the set `{b}`: whichever
+  exchange runs second displaces the first, and removes the first's edge.
+- **CompareAndSwap:** add the edge for `new`, then CAS the word. On success, remove the displaced word's edge. On
+  failure, remove the edge it added.
+- **Swap** is Store that also returns the displaced word, read through W1 before its edge is removed.
+- No step drops a live edge before the word stops naming it. The window between (a) and (c) can hold one extra edge,
+  which keeps an object alive briefly. It never leaves one unkept.
+
+**3. The edge holds the referent BOX, not a pin (W2(b)).**
+- A reference-bearing pointee has no pin: its number is an order token, and the token registry's entries are weak
+  (ж.PointerTokens.cs, LIFETIME). An edge that held "v's pin" would hold nothing for it.
+- So the edge is (the number written, the referent BOX). Holding the box keeps the object alive. For a value-type
+  backing it also keeps the box's own pin-only hold, which is what made the number.
+- **B-4 gains a reference-bearing arm.** An indirect map key that holds a `string` is stored through W2, every other
+  reference is dropped, forced compacting collections with finalizers run, and W1 reads the slot. It returns the
+  same box, and the key reads back intact.
+
+**4. W1 never resolves by number over managed storage (W1; replaces 18.3's "resolves to Go storage" branch).**
+- Over a `NativeBox<Pointer>` whose storage is MANAGED, W1 answers through the slot's own edge only, and only when the
+  edge's number equals the word. Otherwise it answers the NUMBER POINTER, as 3.2 does for every number.
+  - P3's scenario fails closed: a copied word with no edge, whose old root died and whose address now holds another
+    pinned object, reads as a number. It is never that object's box.
+- Over C memory (no retained source and no pin), W1 answers nil for 0 and the number pointer otherwise, through 3.2's
+  number rule (finding 6).
+- **The memmove-class doors transfer edges.** A copy of managed word storage moves the edges whose offsets fall in the
+  copied range to the destination backing, at the shifted offset, in the copy's own direction.
+  - The doors, read at master `2c1ce10b25`: the hand-owned `runtime.memmove` (`memmove_impl.cs`). Converted
+    `typedmemmove` and its `reflect_` / `reflectlite_` / `maps_` wrappers (`mbarrier.cs`) reach it.
+    `internal/runtime/maps`' own `typedmemmove` is refused today (`runtime_impl.cs`).
+  - The cut re-reads this list at its own tree. A copy door found that is not on it is a stop line.
+- `copy` over a `[]uintptr` or `[]byte` carries no edge, by Go's rule: a `uintptr` keeps nothing alive.
+
+**5. W1-W3 and W4 are ONE cut.** B-2 is read on the cut's tree TWICE:
+- with W1-W3 in and the exemption still present: C1 and C2 must read 0 `kind=UnsafePointer` B2a rows. Any row is a
+  site W1/W2 did not rewrite (a generic `*p` with `T = unsafe.Pointer`, a ref-lowered `ref unsafe.Pointer`
+  parameter, a hand-owned door). It is a stop line, named before W4;
+- then W4 deletes the exemption, and C1, C2 and every gate run after it.
+The 18.3 stop line "W4 before B-2 reads 0" is now satisfied inside the cut.
+
+**6. A pointer minted from a C struct's field goes through 3.2's number rule (18.2 item 3).**
+- A non-zero word read from a C struct's pointer field mints `NativeBox<U>` ONLY when the number is C memory. A number
+  inside a live pin, or one the exact registry knows (Go memory), is REFUSED by name, as the void door refuses it. If
+  C kept a Go pointer past an unpin, Go would otherwise read and write memory that has moved.
+- New arm: a C struct whose pointer field holds the address of a pinned Go array. Reading the field is refused by name.
+
+**7. D-5: go2cs-gen's own output is measured (18.2's predictions).**
+- D-5: the generated field-access source of a NON-cgo package set is byte-identical before and after. The set is the
+  GolibTests and GenTests projects and the behavioral corpus's generated files.
+- D-1 measures the converted corpus; D-5 measures what the generator emits from it.
+
+**8. Two named deviations (nit).**
+- (a) Unions are out: cmd/cgo declares a C union as a byte array, so it has no field accessor to cover. 18.2 item 1's
+  `_Ctype_union_*` is withdrawn.
+- (b) Go allows a Go pointer pinned by `runtime.Pinner` to be stored into C memory. go2cs refuses every Go pointer
+  stored into C memory (18.2 item 4, W2(a)), pinned or not. This is a NAMED DEVIATION until a Pinner-aware store is
+  designed.
+
+**18.3's questions, as adopted.**
+- (i) An edge is keyed by the pinned backing OBJECT plus the byte offset from the destination ADDRESS, never by the
+  box's retained-source chain, so two views of one slot meet one edge set.
+  - A stale edge after a non-W2 overwrite (a raw `uintptr` store) is a bounded leak: one box per slot, until the
+    backing dies or a W2 to that slot displaces it.
+- (ii) No re-carry by number (finding 4).
+- (iii) CAS compares the word OR the referent identity. The word matches when it is the same number. An object
+  released and pinned again can show a second number, so CAS also succeeds when the slot's edge for the current word
+  names the same referent object as the expected value's.
+- (iv) One cut (finding 5).
+
+**OPEN, answered: is the edge's pin a strong GC handle? YES, and it cannot make a cycle.**
+- A golib pin is `GCHandle.Alloc(..., GCHandleType.Pinned)` (PinnedBuffer.cs:48, :54), a STRONG handle that roots its
+  object regardless of any other reference.
+- But .NET pins only blittable objects (PinnedBuffer.PinOnly's remarks: `GCHandle` "pins only blittable objects and
+  throws ArgumentException for anything else"). A blittable array holds no references, so what a pin roots cannot
+  reach the destination's root, and no cycle runs through a pin.
+- Everything else the edge holds lives in a `ConditionalWeakTable` keyed by the destination backing, which is an
+  ephemeron. The value (the box) is kept only while the key lives, and a reference from the value back to the key does
+  not keep the key alive. A reference-bearing pointee that reaches its own root is therefore collectible.
+- **B-4 gains the cycle arm anyway, so the claim is measured, not argued:**
+  - (c1) a reference-bearing pointee that references the destination's root is stored through W2; every outside
+    reference is dropped; forced collections with finalizers run; a `WeakReference` to the root reads dead;
+  - (c2) a value-type pointee is stored through W2; its root is dropped and collected; the pointee's pin leaves the
+    pin-extent index (`EntriesOver == 0`, the diagnostic as cured at `0a51ac2399`).
+
+**Predictions, revised.** These replace 18.2's D-2 for `s6next` and 18.3's B-2 and B-4.
+- D-2: `s6nextnil`, `s6nextdirect` and `s6name` print what Go prints on three OSes. `s6next` prints the floor's
+  refusal by name. `s6field`, `s6reinterp` and `s6slice` stay green.
+- D-5: as in finding 7.
+- B-2: 0 `kind=UnsafePointer` B2a rows in C1 and C2 on the cut's tree BEFORE W4, and again after it.
+- B-4: the compaction arm, now four arms: value-type, reference-bearing (finding 3), and the two cycle arms c1 and c2.
+  Today's exempt path is the red for the first two.
+- B-6, new: the race arm for finding 2. Two threads repeat `atomic.StorePointer(&slot, a)` and `(&slot, b)` N times,
+  then compacting collections run. The slot's word and its single remaining edge name the same object, and W1 reads
+  it intact. On today's tree the arm is run before the cure. A stale or collected read there is the red; a clean
+  run there is reported as such and is not counted as evidence for the design.
+- B-7, new: the copy arm for finding 4. A word copied through `runtime.memmove` reads back through W1 at the
+  destination as the same box. A word copied through `copy` over `[]uintptr` reads as a number pointer.
+
+**Stop lines, added.**
+- A W1 answer by number over managed storage.
+- An edge removed before the word stops naming it.
+- A copy door outside finding 4's list.
+- A `kind=UnsafePointer` B2a row on the cut's tree before W4.
+
+— H (2026-11-17)
+
+### 18.5 Revision 2026-11-17: P3's re-review of 18.4 answered (before code)
+
+P3 re-read 18.4 at `0e0f69717d`: APPROVE WITH CHANGES, before code (COORD inbox `20261117T221645Z-P3.md`).
+- CLEAR: findings 1, 3, 5, 6, 7 and 8, and questions (i), (ii) and (iv).
+- COORD accepted the re-review's findings below as worded.
+This block REPLACES the parts of 18.4 it names, and the rest of 18.4 stands. The numbers here are the RE-REVIEW's.
+
+**1. A counted bag per slot, not a set (replaces 18.4 finding 2's "edge SET").**
+- With a set, a store of the word the slot already holds empties it. Word `a`, set `{a}`; `StoreWord(p, a)` adds `a`
+  (already there), displaces `a`, removes `a`, and leaves word `a` with set `{}`. CAS(a, a) does the same. With two
+  threads, T1 storing `a` and T2 storing `b` over word `a` can also end at word `a` with set `{}`.
+- Each slot therefore holds a BAG of entries `(number, referent) -> count`:
+  - adding increments the matching entry's count;
+  - removing decrements exactly ONE count of one entry with the displaced number, preferring an entry whose referent
+    is not the value the same operation just stored;
+  - an entry at count 0 is dropped.
+- INVARIANT: the entry for the slot's current word never reaches count 0. Every operation adds before it exchanges,
+  and removes exactly what its own exchange displaced.
+- ARM B-8, new and single-threaded, so it does not depend on timing: store the same pointer twice, then the same
+  through CAS(a, a); drop every outside reference; run forced compacting collections with finalizers; W1 reads the
+  same box both times.
+
+**2. A W1 miss re-reads the word before it answers a number (replaces 18.4 finding 4's "otherwise it answers the
+NUMBER POINTER").**
+- A reader can load word `a` while a writer runs (a)-(c) for `b` and removes `a`'s entry. If the reader then looks up
+  `a` and answers a number pointer, that pointer may name an object nothing keeps.
+- Over managed storage, W1 now:
+  1. reads the word `w`;
+  2. looks up `w` in the slot's bag; on a hit, answers that referent;
+  3. on a miss, re-reads the word. If it differs from `w`, it starts again at 1. Only an UNCHANGED word with no entry
+     is a number, and it answers the number pointer.
+- So W1 answers the old value or the new one, each with its entry, as Go's load does. The loop ends when no store
+  intervenes between a read and its re-read.
+- B-6 gains a THIRD thread that loops `atomic.LoadPointer(&slot)` during the store race. Every result is box `a` or
+  box `b` by identity, never a number.
+
+**3. The no-cycle argument was wrong for value-type pointees. Edges hold NO pin (replaces 18.4's "OPEN, answered").**
+- 18.4 argued that a pin roots only a blittable object, which holds no references. That is true and not enough: the
+  blittable backing can be the `ConditionalWeakTable` KEY, and the table's value reached the pin. So the pin roots the
+  key, and the key is never collected.
+  - SELF: a slot stores the address of its own backing `K` (a list sentinel, `n.next = n`): `CWT[K]` -> box -> pin on
+    `K`.
+  - MUTUAL: a slot in `A` names `B`, and a slot in `B` names `A`. Each pin roots the other's key.
+- **The fix generalizes P3's (a) from self edges to every edge. NO edge holds a pin, directly or through a box.** An
+  entry holds the REFERENT, by its kind:
+  - a value-type referent: its root BACKING object plus the byte offset. W1 mints a fresh box over (backing, offset) on
+    every hit, so no box, and no box's pin-only hold, lives in the table;
+  - a reference-bearing referent (no pin exists; 18.4 finding 3): the referent BOX, as 18.4 has it.
+- Everything an entry holds is then an ordinary strong reference inside the ephemeron, and no `GCHandle` is reachable
+  from the table. The self and mutual cycles above are ephemeron cycles, which are collectible.
+- **What this costs, stated as a NAMED DEVIATION.** Nothing keeps a value-type referent PINNED once its own pointers
+  are gone, so it can move, and the word W2 wrote can go stale as an address.
+  - W1 is unaffected: it resolves by the entry, matched on the word that was WRITTEN, not on where the object is now.
+  - A program that reads the slot as a `uintptr` (not through W1) and converts that number back to a pointer can name
+    a moved object. Go's unsafe rules forbid exactly that conversion of a stored `uintptr`, so a valid Go program
+    never reaches it.
+  - The visible difference is narrower: `uintptr` of W1's answer (a fresh mint at the object's current address) can
+    differ from the word in the slot. Go's collector does not move objects, so in Go the two are always equal. This is
+    a NAMED DEVIATION. CAS is unaffected, because it compares the word OR the referent (question (iii)).
+- **ARMS c3 and c4 (B-4 now has six arms).**
+  - c3, self: a value-type slot stores its own backing's address.
+  - c4, mutual: two value-type backings each store the other's address.
+  - Each drops every outside reference, runs forced compacting collections with finalizers, and then reads a
+    `WeakReference` to each backing as dead and `EntriesOver == 0` over each.
+- **COORD's (c) stands as written.** If c3 or c4 cannot go green at the cut, the cut STOPS and posts it, and COORD rules
+  a named leak with a BOARD row before any code ships it. With no pin in the table, both are predicted green.
+
+**4. memmove COPIES entries; it does not move them (replaces 18.4 finding 4's "moves the edges").**
+- memmove leaves the source words in place, so the source's entries stay. For the copied range, the door:
+  - drops the destination slots' existing entries, as an overwrite;
+  - then adds, for each destination slot, one count of the source slot's entry for the word now copied there.
+- B-7 gains two reads of the SOURCE slot through W1: one after the copy, and one after the destination backing has
+  been dropped and collected. Both read the same box.
+
+**5. The door list, corrected at master `2c1ce10b25` (replaces 18.4 finding 4's list). All line cites below were read
+there.**
+- **Copy doors:** the hand-owned `runtime.memmove` (`memmove_impl.cs`). The entry transfer sits ABOVE its dispatch,
+  with byte offsets for both arms, because memmove tries the ELEMENT arm before the address arm (`:53`, `:77`, the
+  raw `Buffer.MemoryCopy` at `:98`).
+  - Converted `typedmemmove` and its `maps_` wrapper (`mbarrier.cs`) reach it, and so do the other runtime callers:
+    slice, chan, string, select, stack and iface.
+- **Not a copy today:**
+  - `reflectlite`'s `typedmemmove` has an EMPTY body (`internal/reflectlite/value_impl.cs:18`);
+  - `reflect`'s is a bodyless partial whose stub throws (`reflect/value.cs:2562`);
+  - `internal/runtime/maps`' own `typedmemmove` refuses (`runtime_impl.cs`).
+  Any of these becomes a door on the day it gets a body.
+- **Clear doors, NEW:** `memclrNoHeapPointers` (`memmove_impl.cs:161`), and `typedmemclr` with `reflect_typedmemclr`
+  and `reflect_typedmemclrpartial` (`mbarrier.cs:376`, `:397`, `:407`). A clear DROPS the entries in its range.
+  Without that, a deleted indirect map key would stay referenced for the table's life.
+- **The raw-copy grep, re-run at master** for `Buffer.MemoryCopy` / `Unsafe.CopyBlock` / `Marshal.Copy` in
+  hand-owned `*_impl.cs`. Four files hit:
+  - `memmove_impl.cs`, the door above;
+  - three that copy byte buffers to and from native memory and never Go word storage: `cpu_darwin_impl.cs:47-54`
+    (a sysctl name and its output), `signal_posix_impl.cs:205-206` (a sigaction), and `exec_libc2_impl.cs:560`
+    (exec arguments). They are read and excluded.
+  The cut re-runs the grep at its own tree, and a new hit on Go word storage is a stop line (P3's caveat).
+
+**6. (iii)'s identity branch (nit).** When the observed word `w` differs from the expected number but the slot's entry
+for `w` names the expected value's referent, the CAS is ONE interlocked `CompareExchange(slot, new, w)`, with the
+OBSERVED word as the comparand. If it fails, because the word moved on, the CAS re-reads and re-evaluates. It answers
+false only when a fresh read neither equals the expected number nor names its referent.
+
+**Predictions, added and revised.**
+- B-4: six arms: value-type, reference-bearing, and the cycle arms c1, c2, c3 and c4. c3 and c4 are predicted green
+  (finding 3). If either reds, the cut stops.
+- B-6: two writers and one reader; every load is box `a` or box `b` by identity.
+- B-7: the destination reads the box; the SOURCE reads the box after the copy and again after the destination is
+  collected; a `copy` over `[]uintptr` reads as a number.
+- B-8, new: the single-threaded double-store and CAS(a, a) arm (finding 1).
+- B-9, new: a clear arm. An indirect key is stored, its range is cleared through `memclrNoHeapPointers`, and a
+  `WeakReference` to the key's object reads dead after collection.
+
+**Stop lines, added.**
+- A slot whose current word has no entry, at any check.
+- A W1 number answer while the word moved between its read and re-read.
+- A `GCHandle` reachable from the entry table.
+- c3 or c4 red: stop, post, and wait for COORD's ruling (finding 3).
+- A raw copy over Go word storage outside the doors in finding 5.
+
+— H (2026-11-17)
+
+### 18.6 Revision 2026-11-17: P3's re-review of 18.5 answered, and COORD's ruling on the pin (before code)
+
+P3 re-read 18.5 at `51315b3568` together with H's addendum on the unpinned number (COORD inbox `20261117T222939Z-P3.md`):
+APPROVE WITH CHANGES, before code.
+- CLEAR: findings 2, 4, 5 and 6, and arms B-8 and B-9.
+- NOT SOUND: 18.5 finding 3's generalization (no entry pins anything). COORD ruled on it.
+This block REPLACES the parts of 18.5 it names, and the rest of 18.5 stands. The numbers here are COORD's ruling's.
+
+**1. The pin is kept while the word is published (REPLACES 18.5 finding 3's "NO edge holds a pin").**
+- An unpinned value-type referent makes the word in the slot a stale number, which fails three ways:
+  - C can read it (finding 3 below);
+  - 3.2's number rule calls a number Go memory only inside a LIVE pin or the exact registry, so a stale word is taken
+    for C memory and dereferenced RAW, where under a pin it was refused by name;
+  - the address is REUSED, so one number can name two objects. CAS(slot, y, new) would match `x`'s stale word; one bag
+    could hold `(A, x)` and `(A, y)`; memequal and memhash would read `x` and `y` as one key.
+- The entry for a VALUE-TYPE referent is therefore 18.4's: (the number, the referent BOX), and the box keeps its own
+  pin-only hold, so the number stays the referent's while the word is published. A reference-bearing referent is held
+  as its box, which has no pin (18.4 finding 3, unchanged). One number then names one live object, and 18.5's
+  `uintptr` deviation is WITHDRAWN.
+- **NO SELF EXEMPTION (COORD ruling (B), 2026-11-17, folded in before P3's read).** A self entry, whose referent
+  backing IS the destination backing, is pinned like every other value-type entry.
+  - An unpinned self backing `K` could move, and its own word would then name `K`'s OLD address `A`. A later object
+    pinned at `A` would reopen the reuse hole for that word: CAS, memequal and memhash over it would read `A` as the
+    other object.
+  - Pinned, the self case is a BOUNDED LEAK of the same kind as c4 (finding 2), and "one number names one live object"
+    holds with NO exception.
+  - The shape is rare: it lives only in managed WORD storage written through W2, never in `container/list`'s
+    `root.next = &root`, which is a CLR reference field and outside the table.
+  - The CAS identity rule (18.5 finding 6, extended: when the bag holds an entry for the current word, CAS succeeds
+    only if that entry names the same referent as `old`) is KEPT as defence in depth. With every published referent
+    pinned it is redundant for uniqueness, and it is consulted only when the numbers differ, so it costs nothing on the
+    matching path.
+- Stop line: a published word whose value-type referent holds no pin. There is no exception.
+
+**2. c3 and c4 (B-4): ONE NAMED LEAK covering both cycles, ruled before code.**
+- c3, SELF: a value-type backing stores its own address through W2. It is a KNOWN-LIMIT arm: the backing reads ALIVE
+  after the drop and the forced collections, and DEAD after its word is overwritten through W2, which measures the
+  bound.
+- **c4, the MUTUAL value-type cycle:**
+  - Two Go backings each store the other's address through W2, with value-type referents. Each entry's pin roots the
+    other's key, and neither backing is collected.
+  - It is BOUNDED: it lasts until either word is overwritten through W2 or cleared, and that releases the cycle.
+  - c4 stays a measured KNOWN-LIMIT arm that reads both backings ALIVE after the drop and the collections, so the
+    leak's shape is pinned down. A run that reads them dead is NEWS, posted, not a pass.
+  - A second step of c4 overwrites one word through W2, collects, and reads both dead, which measures the bound.
+  - The BOARD row is written with this revision and covers BOTH cycles. The NAMED DEVIATION reads: "a self or mutual
+    value-type cycle through W2-stored words is retained until a word in the cycle is overwritten or cleared".
+
+**3. The cgo argument door refuses a crossed range that holds any entry (MUST-FIX, new).**
+- The table is exactly cgocheck's information. Go panics "argument of cgo function has Go pointer to unpinned Go
+  pointer" when Go memory handed to C holds a Go pointer. So 3.2's void door, before its call-scoped `fixed`, looks up
+  the backing it would hand C. Any live entry in that backing is refused BY NAME with that text.
+- **Read at master, per P3's caveat.** `GoCgoArgs.VoidPointer` (`GoCgoArgs.cs:122`) refuses ALL Go memory today, and
+  3.2 is what opens it, so no check for word storage exists to reuse. The message does exist:
+  `GoCgoArgs.PointerMember` (`GoCgoArgs.cs:88`) raises exactly that text for a typed struct member, and the new check
+  reuses it.
+- The whole backing is checked, not only the crossed bytes, because cgo lets C touch the whole object.
+- A pointee pinned by `runtime.Pinner` is refused too, under deviation 8(b).
+- Arm: a pinned buffer holding a W2-stored Go pointer is handed to a C function, and the refusal text is asserted. A
+  cgo door that bypasses the check is a stop line.
+
+**4. P3's conditional finding on the unpinned form: MOOT**, because the unpinned form is not kept (1).
+
+**5. The re-read's ABA hole (should-fix; REPLACES 18.5 finding 2's miss rule).**
+- A reader loads `a`; a writer stores `b` and removes `a`'s entry; the lookup misses; a writer stores `a` again; the
+  re-read sees `a` "unchanged" and answers a NUMBER while `a`'s entry exists.
+- FIX: a miss is CONFIRMED under the bag's lock. Holding the lock, W1 re-reads the word and looks up again.
+  - The word equals what it looked up, with no entry: a number, and exact, because every add and remove of that bag
+    happens under the same lock.
+  - The word differs: start again.
+  - A hit: answer that referent.
+- The lock-free path stays for hits, which are the common case.
+
+**6. The door list (nit).** `reflect_typedmemmove` and `reflectlite_typedmemmove` (`mbarrier.cs:219`, `:238`) also
+reach `runtime.memmove` if called, and are listed beside `maps_typedmemmove` as covered. This is distinct from the
+`reflect` and `reflectlite` packages' OWN `typedmemmove`, which 18.5 names as not a copy today.
+
+**Predictions, revised.**
+- B-4: c1 and c2, then c3 (self) and c4 (mutual) as known-limit arms: alive after the drop, and dead after a W2
+  overwrite.
+- B-10, new: the cgo door refuses a backing that holds an entry, with cgocheck's text (finding 3).
+- B-11, new: the ABA arm (finding 5), driven deterministically through a test seam between the lookup and the
+  re-read, so it does not rely on timing.
+- Withdrawn: 18.5's uintptr deviation and its census.
+
+**Stop lines, revised.**
+- A published value-type word without a pin. There is no exception.
+- A W1 number answered without the bag lock.
+- A cgo door that hands C a backing holding an entry.
+- c3 or c4 read dead without an overwrite (news, posted).
+
+— H (2026-11-17)
+
+### 18.7 Revision 2026-11-17: P3's re-review of 18.6 answered (text only, before code)
+
+P3 re-read 18.6 at `ede548ea41` (COORD inbox `20261118T000620Z-P3.md`): APPROVE WITH CHANGES, TEXT ONLY.
+- CLEAR: the pin, ruling (B), the one named leak for c3 and c4, the bag-lock miss, the door nit and the BOARD row.
+- COORD accepted the three findings below as worded.
+This block AMENDS the parts of 18.6 it names, and the rest of 18.6 stands. The numbers here are the re-review's.
+Every code cite below was read at master `b2eaf5290a`.
+
+**1. Every number W2 writes and W3 compares is taken through the PINNING projection (MUST-FIX; amends 18.6
+finding 1's "the box keeps its own pin-only hold" and 18.3's "W2 writes `v`'s NUMBER").**
+- The hole is real. The converter mints `unsafe.Pointer(p)` as `FromBox` (`convCallExpr.go:1128`). Over a managed box
+  that is the TRANSIENT address of the box's value slot, read under a `fixed` that has already ended
+  (`unsafe/unsafe.cs:550`). The box rides along as the referent, and nothing pins it. If W2 wrote that carried number,
+  the word would be stale after the first compaction, and the entry would hold an unpinned box. 18.3 to 18.6 did not
+  say which number W2 writes, so P3 could not tell. They say it now.
+- **The rule.** W2 writes, and W3 compares, `BaseOf(v)` (`unsafe/unsafe.cs:1114`, design 10.1), never `v`'s carried
+  number. `BaseOf` already exists and is what `unsafe.Add` derives from (`Pointer.Moved`, `:1138`):
+  - for a pointer that names a managed box by address (`NamesAManagedSourceByAddress`, `:1102`: a `FromBox`,
+    `FromBoxObject` or `FromPinnedBox` mint), it asks the box's own number NOW, through
+    `IGoReflectBox.NativeArgumentAddress`, which is the box-to-`uintptr` operator (`ж.cs:1379`). That operator:
+    - for a reference-free pointee, PINS the storage (`EnsureStableAddress`, `ж.cs:1455`, a pin-only hold for the
+      box's lifetime), registers the address, and answers it;
+    - for a reference-bearing pointee (`PointerStorage.None`, `ж.cs:1446`), registers and answers the box's ORDER
+      TOKEN;
+  - it uses the carried number as it is when the box is already pinned there (every `FromPinnedBox` mint), and for every
+    other pointer: a native alias, the zerobase, a token, and a derived pointer, which `Moved` already built from
+    `BaseOf`.
+- **The check after the projection.** The word must be 0, a native alias, the zerobase address, a tagged token, or an
+  address the referent box `IsPinnedAt`. The one kind that is none of these is `PointerStorage.Unpinnable`
+  (`ж.cs:78`, an interior reference with no pinnable slot). For it the operator answers a transient address with no
+  pin. W2 REFUSES that store by name: "unsafe.Pointer store: the stored pointer's storage can be neither pinned nor
+  tokened". No silent store remains.
+- **CAS.** W3 projects `old` the same way before it compares. Two `FromBox` mints of different boxes can carry
+  coinciding transient addresses (`unsafe.cs:368`). Their projections cannot coincide: two live pinned objects never
+  share an address, and two live boxes never share a token (`AllocationBase`, `ж.cs:710`: the id is unique below
+  its 2^29 wrap). One cost is named: projecting an `old` that was never stored pins its box for that box's
+  life, as any `uintptr(unsafe.Pointer(p))` conversion does today.
+- **Can the number rule tell an order token from an address? YES, by the tag.** `IsTaggedToken`
+  (`ж.PointerTokens.cs:424`, with `TagBit` and `TagMask` at `:255-256`) reads bit 63 set and bit 47 clear. No
+  canonical x86-64 user address has that shape, so W1 takes a tagged word as a token (resolved through the registry,
+  or held by its entry) and never dereferences it raw. The 3.2 doors already rely on the same predicate
+  (`GoCgoArgs.cs:272`, `:292`).
+  - The predicate states its own limit: it is x86-64's rule, and ARM64 owes its own derivation. 18.7 adds two readers
+    of the predicate, W1 and W2, and no new assumption. B-12's arm64 legs measure it on the hosted arm64 runners.
+- **ARM B-12, new.**
+  - `x := new(struct{a, b int})` is stored through W2 as `*(*unsafe.Pointer)(slot) = unsafe.Pointer(x)`. Every other
+    reference to `x` is dropped, and forced compacting collections run.
+  - W1 reads the same box, and `x.a` is intact. The word in the slot is an address `x`'s box `IsPinnedAt`.
+  - Then `CompareAndSwap(slot, unsafe.Pointer(y), z)`, with a second such box `y`, FAILS and leaves the word unchanged.
+  - A third leg stores a reference-bearing `new(struct{s string})`: the word is a tagged token.
+  - A fourth leg stores an `Unpinnable` pointer and asserts the refusal text.
+- **STOP LINE:** a W2 word equal to a `FromBox` transient address that its box is not pinned at.
+
+**2. Every GoCgoArgs door that hands over a Go backing's bytes, with its decision (SHOULD-FIX; extends 18.6 finding
+3).** The lookup is the one 18.6 finding 3 defines: the destination bag table's entries over the backing.
+- **`VoidPointer`** (`GoCgoArgs.cs:122`): the whole backing is looked up, and any entry is refused with cgocheck's text
+  (18.6 finding 3, unchanged).
+- **`HelperVoidPointer`** (`:137`, `C.GoBytes`) and **`HelperPointer`** (`:152`, `C.GoString`, `C.GoStringN`): the
+  same lookup and the same text, as P3 worded it.
+  - Named for the confirm read: these helpers run in Go, and cgocheck does not apply to them, so Go itself accepts a
+    Go backing that holds a Go pointer here. The refusal is therefore STRICTER than Go. It is a NAMED DEVIATION that
+    fails closed. P3's confirm read may drop it to "no lookup: the bytes are copied as numbers, and Go keeps nothing
+    alive by them".
+- **`StructPointer`** (`:42`, the mirror copy). `PointerMember` (`:88`) refuses typed pointer members, but a by-value
+  array field or `uintptr` field copies its words RAW. The SOURCE backing is looked up over the copied range, and any
+  entry there is refused with cgocheck's text. The copy-back after the call is an overwrite of that range: it drops the
+  range's entries, as a clear door does (18.5 finding 5). Because the call was refused otherwise, that set is empty
+  unless another thread stored into the range during the call.
+- **`CopyBytes`** (`:190`, `C.CBytes`) copies the words into C-owned memory, where no entry follows. A source range
+  holding an entry is REFUSED, with W2(a)'s text, consistent with W2(a): no Go pointer is stored into C memory.
+  `CopyString` (`:182`, `C.CString`) takes the same lookup over the string's bytes.
+- **Callbacks** (Go exports called from C) are Phase 5 and OUT of 3.2. A Go export reachable from C in 3.2's tree is a
+  stop line.
+- **B-10** gains one arm per door: `VoidPointer`; `HelperVoidPointer`; `HelperPointer`; `StructPointer` with an array
+  field and with a `uintptr` field; `CopyBytes`; and `CopyString`. Each stores a Go pointer through W2 into the
+  backing, crosses the door, and asserts the refusal text.
+
+**3. The c3 and c4 procedure (SHOULD-FIX; amends 18.6 finding 2 and the BOARD row's "Measured by").**
+- **One test, three arms, one loop.** c2 (no cycle), c3 (self) and c4 (mutual) run in the same test method:
+  - **c2 is the CONTROL** that the loop collects. Its backing must read dead within the cap.
+  - If c2 does not read dead, the test FAILS as an instrument failure. That run says nothing about c3 or c4.
+- **The loop.** One round is `GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting:
+  true)` followed by `GC.WaitForPendingFinalizers()`.
+  - The cap is **10 rounds**, the same for both steps.
+  - Each step runs all 10 rounds and records the round in which each backing first read dead, so the cap's margin is
+    posted.
+  - c4 needs several rounds by construction:
+    1. the overwrite drops `A`'s entry;
+    2. a finalizer frees `B`'s pin, and `B` dies;
+    3. `B`'s table value, which holds `A`'s box, is released;
+    4. that box's finalizer frees `A`'s pin, and `A` dies.
+- **Step one (the leak).** The test keeps ONLY a `WeakReference` to each backing. Every store runs inside a
+  `[MethodImpl(MethodImplOptions.NoInlining)]` helper, so no local in the test frame roots a backing, under Debug
+  lifetimes too. After the 10 rounds, c3's and c4's backings read ALIVE, and c2's reads dead.
+- **Step two (the bound) reaches the slot through the `WeakReference`'s target, which is alive BECAUSE of the leak.**
+  - A `NoInlining` helper calls `TryGetTarget`; a false there is news, posted, and not a pass.
+  - The helper overwrites one word of the cycle through W2 with nil and returns nothing, so the strong reference dies
+    with its frame.
+  - After 10 more rounds, every backing in the cycle reads DEAD.
+
+**Predictions, revised.**
+- B-4 runs as finding 3's single test: c2 dead in step one; c3 and c4 alive after step one and dead after step two, all
+  within 10 rounds.
+- B-10 is seven arms (finding 2).
+- B-12 is new (finding 1). Before the cure, a W2 that wrote the carried number would fail its `IsPinnedAt` leg.
+
+**Stop lines, added.**
+- A W2 or W3 number not taken through `BaseOf`.
+- An `Unpinnable` store accepted silently.
+- A GoCgoArgs door that hands over a backing's bytes without the lookup, other than a helper door that P3's confirm
+  read releases.
+- c2 not dead within the cap.
+
+— H (2026-11-17)
+
+### 18.8 Record 2026-11-20: seat S-B1 as built, the rulings it carries, and its first battery
+
+S-B1 is the golib and converter half of 18.3 to 18.7. Its seat runs on branch `claude/h-cgo-32`, on master `a98c5175be`.
+S-B2 comes after it, on hosted legs: the pinned class, `[GoCgoStruct]` with the gen accessor (D-1 to D-5), and the
+B-10 door lookups.
+
+**As built.**
+- **The doors.** `unsafe.Pointer.LoadWord`, `StoreWord`, `SwapWord` and `CompareAndSwapWord` decide by the slot
+  (`GoPointerWords.Classify`):
+  - a CLR `Pointer` slot takes `.Value`;
+  - a word of Go memory takes the per-slot bag table (`golib/GoPointerWords.cs`);
+  - a word of C memory refuses a Go pointer: W2(a) refuses the store, and W1 refuses a Go address read out of C memory;
+  - an unheld word refuses by name.
+- **The number.** Every word W2 writes and W3 compares is the projection, `ProjectWord` over `BaseOf`, with 18.7
+  finding 1's post-check. Ruling (B)'s guard refuses a number that is both `IsPinnedAt` and `IsTaggedToken`.
+- **W3** runs through the doors in the hand-owned atomics: `sync/atomic/doc_impl.cs` (Swap, CompareAndSwap, Load and
+  Store over `unsafe.Pointer`) and `internal/runtime/atomic/atomic_impl.cs` (`storePointer`, `casPointerLatched`).
+- **The memmove and clear doors.** `runtime/memmove_impl.cs` copies the entries over the moved range
+  (`GoPointerWords.CopyEntries`) and drops them over a cleared range (`ClearEntries`). Both are free while no table
+  exists.
+- **W4.** `NativeBox<T>` refuses a reference read for `unsafe.Pointer` too: the floor's exemption is deleted.
+- **The converter.** `src/go2cs/unsafePointerWordDoor.go` emits `*p` and `*p = v`, for `p` exactly a
+  `*unsafe.Pointer`, as the load and store doors. One hand-owned site takes the door by hand: `runtime/mfinal.cs`'s
+  single store.
+- **Found during the cure.** `Pointer.StoreThrough` and `LoadThrough`, the bare-Pointer atomic primitives, reached a
+  word of Go memory too. They gain the word route (`WordSlotForThrough`): a slot that holds a `uintptr` whose
+  reinterpret classifies as Go memory goes through `StoreWord` / `LoadWord`.
+- **Untouched by design.**
+  - `runtime/profbuf_impl.cs` (hand-owned) reads `*tagPtr` through a `ж<unsafe.Pointer>` that names a CLR `Pointer`
+    slot, the sampler's labels, never a word. `.Value` is that slot's value, so the read keeps its form.
+  - The hand-owned `runtime/mcleanup.cs` replaces the Go body whose `*(*unsafe.Pointer)(unsafe.Pointer(&arg))` reads
+    reach the door. Only its review sibling, `mcleanup.cs.auto`, carries them, and the narrowing below returns those
+    to master's text.
+
+**Ruling (B): the arm64 derivation (owed by 18.7 finding 1).**
+- `IsTaggedToken` reads bit 63 set and bit 47 clear. A word reads as a token only with bit 63 set.
+- On linux/arm64 and darwin/arm64, a user address has bit 63 clear unless top-byte tagging is in use.
+  - Linux enables tagged addresses per process: the tagged address ABI, `PR_SET_TAGGED_ADDR_CTRL`, which MTE builds
+    on.
+  - darwin's pointer authentication signs pointers only in arm64e processes.
+  - The .NET runtime enables neither, and an arm64 (not arm64e) process is what it ships.
+  - So no address the GC heap, a pin or the native allocator hands out reads as a token, and no token (bit 63 set)
+    is a user address.
+- **The named residual.** A C library built for MTE or HWASan could hand back a top-byte-tagged pointer. No 3.2
+  library is one. The B-12 arm64 legs (S-B2, hosted runners) measure the rule there. Until they do, the arm64 claim
+  is derived, not read.
+
+**One lock per storage object.**
+- A load holds the storage's lock while it reads the word and looks it up. A store holds it while it adds, exchanges
+  and removes.
+- There is no lock-free hit path. A load first reads the word without the lock only to learn whether a table exists,
+  then re-reads it under the lock before any lookup.
+- So 18.6 finding 5's ABA window, a number answered while its entry is being removed, is designed out rather than
+  narrowed.
+
+**P3's confirm items, folded at the cut.**
+- **(i)** B-12's CAS arm carries the positive control: a CAS whose `old` is the stored pointer SUCCEEDS. So the
+  failing CAS fails on the projection, not on a CAS that cannot succeed.
+- **(ii)** In `GoPointerWords.CompareAndSwap`, when the word is a token and an entry exists for it, the swap requires
+  `ReferenceEquals` between `old`'s referent and the entry's. A token number match alone does not swap.
+- **(iii)** `StructPointer`'s copy-back after the call overwrites the copied range, so a store from another thread
+  during the call is lost. That is the same as Go's outcome. In Go, C writes the struct in place, and a Go store
+  racing the C call on the same memory is a data race: Go defines no winner, and a lost Go store is one outcome it
+  permits.
+- **(A)** The helper doors take no lookup (S-B2).
+
+**The named leak, in its general form (BOARD row widened 2026-11-20).**
+- The form: a published word whose referent reaches the box that pins the destination's storage. The destination's
+  own BaseOf pin roots the table key, so the slot is retained until a word of the cycle is overwritten through a store
+  or cleared.
+- Instances, all measured in `UnsafePointerWordTests.B4_…`, with the c2 control dead within the cap:
+  - c3, a self word;
+  - c4, a mutual pair;
+  - c1, a referent that holds the destination's box. COORD ruled c1 inside the leak, and that ruling widened the row.
+
+**B-1, the footprint prediction, kept visible.**
+- Predicted: 82 lines in 14 files per target. Measured: 18 to 19 files and about 91 code lines.
+- MECHANISM HELD, SPECIFICS MISSED. The census behind the prediction was blind to three forms:
+  - the `Ꮡ(..)` temp box of the reinterpret carrying arm;
+  - its func-word form, `Ꮡ(OfFunc(f))`;
+  - a package variable declared in another file (`cgo_yield`).
+- The narrowing below takes the first two out of the footprint again. The third stays on the door by rule.
+
+**The first battery, at `88d891e84d`: RED, scored as worded.**
+- **Scores, all unfiltered:**
+  - GolibTests Release and Debug: empty failed sets.
+  - GenTests: all pass.
+  - B-2: 0 `kind=UnsafePointer` rows in C1 and C2.
+  - B-3: C2 executed, with 0 output failures.
+  - MISSED: go test (2 packages FAIL), CNR (1 golden), repoguard, and one C1 test (census on).
+- **Four missed sites, posted before any fix:**
+  - **M1** — `NativeBoxDereferenceCensusControlTests` read `.Value` over a native `unsafe.Pointer` box, the most-likely
+    red, in a census-gated test.
+  - **M2** — the door rewrote the carrying arm's temp boxes in `unsafePointerWordRead_test.go` and the
+    `UnsafePointerWordRead` golden.
+  - **M3** — the door file had no AGPL header and was missing from the projitems.
+  - **M4** — 20 provenance notes and one docs sample moved, and `FromWord`'s mint row was missing.
+- **Attribution.** Each red test was run FILTERED at master `a98c5175be` on H: every one passes there.
+- **COORD's ruling on M2: NARROW the door.**
+  - The door skips (a) the carrying arm's fresh `Ꮡ(<rvalue>)` box at any level, and (b) `&x` through the identity
+    round trip, where `x` is a local or a parameter.
+  - Over those slots the doors take `.Value` anyway, so the call bought no behavior and cost the Go-like shape.
+  - A predicate mistake fails loud, as a W4 refusal by name.
+  - The door test is red both ways (the predicate forced false, then true), and its text is in `pointers.md`.
+- **The fixes.**
+  - M1 asserts the refusal by name, with the B2a counter unmoved: the control that makes B-2's zero a reading.
+  - M3 adds the header and registers both files.
+  - M4 re-cites the notes and adds the `FromWord` row: the loaded word's number is the stored projection, never
+    `FromBox`'s transient.
+- **The re-predicted footprint.**
+  - Exactly 5 door lines leave each target, each reverting 1:1 to master's text: `debugcall.cs` 1, `tracetype.cs` 1,
+    `mcleanup.cs.auto` 2, and the per-OS `cgocall.cs` 1.
+  - No map line moves.
+  - The committed footprint goes from 27 files +115 -117 to 24 files +108 -110.
+
+**Recorded for the BOARD after READY, not fixed in this cut.** `*(*unsafe.Pointer)(unsafe.Pointer(&f)) = ..` over a
+func variable stores into a fresh box, so the write is lost. The sites are `debugcall.cs` (dispatchF) and
+`cgocall.cs` (`cgocallbackg1`'s cb). The narrowing keeps master's form there exactly, and `funcWordOperations` does
+not take the shape.
+
+**Amended 2026-11-20 (later): P3's review of `780e8c97e0`, APPROVE WITH CHANGES, and the changes.**
+- **MUST.** The doors' managed arm read `p.Value`, which throws a nil dereference on a standard box whose held
+  `unsafe.Pointer` is null, Go's nil. Every `*unsafe.Pointer` parameter load and store changed this way, because the
+  alias the door replaced (`DerefOrNull`) read `ValueSlot`.
+  - Red first: `UnsafePointerWordTests.W1W2_AManagedSlotHoldingNilLoadsNilAndTakesAStore`, and the Go scenario as the
+    behavioral project `UnsafePointerWordNilSlot` (exported `Set`/`Get`, whose parameters keep the box; unexported
+    ones ref-lower and never reach the door). Red at `780e8c97e0`: a `PanicException` from `StandardBox.Value` through
+    `LoadWord`, and the program's exit 2 against Go's 0.
+  - Cure: after `RequireSlot`'s structural nil test, both arms take `ValueSlot`. `NativeBox`'s `Value` and `ValueSlot`
+    both go through `ValueAddress`, so W4's floor is unchanged.
+  - A master defect closed on the way: master emitted `pp.Value = v` for `pp := new(unsafe.Pointer); *pp = v`, which
+    throws the same way. The cut emits the store door, now nil-safe.
+- **SHOULD 2.** Shape (a) asks `pointerReinterpretManagedSource` itself, so the predicate cannot drift from the
+  carrying arm.
+- **NIT 3.** Shape (b) applies only when no star was stripped: `**&x` reads the slot out of `x`. The door test's
+  `nativeStarredLocal` arm fires by name with the guard forced off.
+- **NIT 4.** The door's header names the one silent case, master's: a store through shape (a) (the BOARD's (ff) row).
+- **NIT 5.** `FromWord`'s mint row names the third no-referent case: a word of Go memory with no entry.
+- **Found while applying the MUST, ruled by COORD.** Shape (b)'s narrowed STORE kept master's `(Ꮡl).Value = v`, which
+  panics when `l` holds nil, where Go stores. A store through (b) now emits `(Ꮡl).ValueSlot = v`, the converter's own
+  convention for a held reference (`pp.ValueSlot = Ꮡx`). Loads through (b) already read `~Ꮡl`, which is `ValueSlot`.
+  Shape (a)'s store keeps its emission: that is the lost write, not this. Corpus sites: none.

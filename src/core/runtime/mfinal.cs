@@ -330,7 +330,7 @@ internal static void runFinalizers() {
                 }
                 var exprᴛ1 = (~f).fint.Kind();
                 if (exprᴛ1 == abi.Pointer) {
-                    (@unsafe.Pointer.To<@unsafe.Pointer>(r)).Value = f.Value.arg;
+                    @unsafe.Pointer.StoreWord(@unsafe.Pointer.To<@unsafe.Pointer>(r), f.Value.arg);
                 }
                 else if (exprᴛ1 == abi.Interface) {
                     var ityp = @unsafe.Pointer.To<interfacetype>(new @unsafe.Pointer((~f).fint));

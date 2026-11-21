@@ -1218,4 +1218,4 @@ public static Node Copy(this ref TemplateNode t) {
     return new TemplateNodeжNode(t.tr.newTemplate(t.Pos, t.Line, t.Name, t.Pipe.CopyPipe()));
 }
 
-} // end parseᴛTemplateNode
+}

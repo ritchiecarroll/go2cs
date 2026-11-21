@@ -5,7 +5,6 @@ using xml = encoding.xml_package;
 using fmt = fmt_package;
 using reflect = reflect_package;
 using encoding;
-using static main_package;
 
 partial class main_package {
 
@@ -13,22 +12,14 @@ partial struct E {
     public nint Code;
 }
 
-} partial class mainᴛE {
-
 public static @string Error(this E _) { return "e"; }
 public static @string GoString(this E _) { return "E!"; }
-
-} partial class main_package {
 
 partial struct S {
     public nint N;
 }
 
-} partial class mainᴛS {
-
 public static @string String(this S _) { return "s"; }
-
-} partial class main_package {
 
 partial struct w {
     /*embed*/ internal error error;

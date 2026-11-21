@@ -27,4 +27,4 @@ public static error WSAIoctl(this ж<FD> Ꮡfd, uint32 iocc, ж<byte> inbuf, uin
     finally { if (ᒐd1) Ꮡfd.decref(); ᒐ.Run(); }
 }
 
-} // end pollᴛFD
+}

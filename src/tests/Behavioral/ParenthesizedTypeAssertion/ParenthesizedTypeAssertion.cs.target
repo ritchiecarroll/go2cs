@@ -1,7 +1,6 @@
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -15,11 +14,7 @@ partial struct named {
     internal @string name;
 }
 
-} partial class mainᴛnamed {
-
 internal static @string String(this named n) { return "named "u8 + n.name; }
-
-} partial class main_package {
 
 internal static @string classify(any x) {
     switch (x.type()) {

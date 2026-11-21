@@ -90,4 +90,4 @@ public static error UnmarshalJSON(this ж<Int> Ꮡz, slice<byte> text) {
     return Ꮡz.UnmarshalText(text);
 }
 
-} // end bigᴛInt
+}

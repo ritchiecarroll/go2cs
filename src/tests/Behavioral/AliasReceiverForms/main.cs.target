@@ -5,7 +5,6 @@ global using ListAlias = go.main_package.List;
 namespace go;
 
 using fmt = fmt_package;
-using static main_package;
 
 partial class main_package {
 
@@ -18,8 +17,6 @@ partial struct Node {
 partial struct List /*[]nint*/;
 
 internal static slice<ж<Node>> registry;
-
-} partial class mainᴛNode {
 
 public static (nint, bool) Mode(this ж<AttrNode> Ꮡn, nint def) {
     ref var n = ref Ꮡn.DerefOrNull();
@@ -41,8 +38,6 @@ public static (nint, bool) ModeNamed(this ж<Node> Ꮡnode, nint def) {
 
 public static ж<Node> Self(this ж<AttrNode> Ꮡn) { return Ꮡn; }
 
-} partial class main_package {
-
 internal static @string describe(ж<Node> Ꮡn) {
     ref var n = ref Ꮡn.DerefOrNull();
 
@@ -51,8 +46,6 @@ internal static @string describe(ж<Node> Ꮡn) {
     }
     return n.name;
 }
-
-} partial class mainᴛNode {
 
 public static @string Describe(this ж<AttrNode> Ꮡn) { return describe(Ꮡn); }
 
@@ -88,8 +81,6 @@ public static bool IsNil(this ж<Chain> Ꮡn) { return Ꮡn == nil; }
 
 public static nint Kind(this AttrNode n) { return n.kind; }
 
-} partial class mainᴛList {
-
 public static void Push(this ref ListAlias l, nint v) { l = append(l, v); }
 
 public static nint Len(this ж<ListAlias> Ꮡl) {
@@ -100,8 +91,6 @@ public static nint Len(this ж<ListAlias> Ꮡl) {
     }
     return len(l);
 }
-
-} partial class mainᴛNode {
 
 public static @string /*s*/ Deferred(this ж<AttrNode> Ꮡn) {
     @string s = default;
@@ -129,8 +118,6 @@ public static @string String(this ж<AttrNode> Ꮡn) {
     }
     return "Node("u8 + n.name + ")"u8;
 }
-
-} partial class main_package {
 
 internal static void @try(@string label, Action fn) {
     GoFrame ᒐ = default;

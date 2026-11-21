@@ -4,12 +4,9 @@ using fmt = fmt_package;
 using runtime = runtime_package;
 using strings = strings_package;
 using @unsafe = unsafe_package;
-using FieldOffsetAttribute = global::System.Runtime.InteropServices.FieldOffsetAttribute;
-using LayoutKind = global::System.Runtime.InteropServices.LayoutKind;
-using StructLayoutAttribute = global::System.Runtime.InteropServices.StructLayoutAttribute;
+using System.Runtime.InteropServices;
 using go.arrays;
 using go.golib;
-using static main_package;
 
 partial class main_package {
 
@@ -31,11 +28,7 @@ partial struct @base {
     internal nint n;
 }
 
-} partial class mainᴛbase {
-
 internal static nint Len(this ref @base b) { return b.n; }
-
-} partial class main_package {
 
 partial struct sized {
     /*embed*/ internal @base @base;

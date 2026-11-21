@@ -24,4 +24,4 @@ internal static slice<byte> sum(this ref Digest d, slice<byte> b) {
     return d.sumGeneric(b);
 }
 
-} // end sha3ᴛDigest
+}

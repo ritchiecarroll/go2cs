@@ -540,4 +540,4 @@ internal static void compose(this ref reorderBuffer rb) {
     rb.nrune = k;
 }
 
-} // end normᴛreorderBuffer
+}

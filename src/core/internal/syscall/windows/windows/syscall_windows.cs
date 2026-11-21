@@ -230,7 +230,7 @@ internal static uintptr socket_error => /* uintptr(^uint32(0)) */ unchecked((uin
     Data1: 0xa441e712U,
     Data2: 0x754f,
     Data3: 0x43ca,
-    Data4: new byte[]{0x84, 0xa7, 0x0d, 0xee, 0x44, 0xcf, 0x60, 0x6d}.array()
+    Data4: array<byte>([0x84, 0xa7, 0x0d, 0xee, 0x44, 0xcf, 0x60, 0x6d])
 )); }
 public static ref syscall.GUID WSAID_WSASENDMSG => ref ((StaticBox<syscall.GUID>)ᏑWSAID_WSASENDMSG).ValueSlot;
 
@@ -238,7 +238,7 @@ public static ref syscall.GUID WSAID_WSASENDMSG => ref ((StaticBox<syscall.GUID>
     Data1: 0xf689d7c8U,
     Data2: 0x6f1f,
     Data3: 0x436b,
-    Data4: new byte[]{0x8a, 0x53, 0xe5, 0x4f, 0xe3, 0x51, 0xc3, 0x22}.array()
+    Data4: array<byte>([0x8a, 0x53, 0xe5, 0x4f, 0xe3, 0x51, 0xc3, 0x22])
 )); }
 public static ref syscall.GUID WSAID_WSARECVMSG => ref ((StaticBox<syscall.GUID>)ᏑWSAID_WSARECVMSG).ValueSlot;
 

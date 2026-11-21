@@ -18,4 +18,4 @@ internal static (slice<byte>, error) open(this ref chacha20poly1305 c, slice<byt
     return c.openGeneric(dst, nonce, ciphertext, additionalData);
 }
 
-} // end chacha20poly1305ᴛchacha20poly1305
+}
