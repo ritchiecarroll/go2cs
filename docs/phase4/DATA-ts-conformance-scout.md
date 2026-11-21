@@ -299,3 +299,49 @@ in 188 s). A pooled object that keeps references is therefore never dropped whil
 emit contexts keep every node graph they built. Gen-2 cadence is not enough (4.10): a busy pooled object survives
 each cleanup through the victim cache. Per-GC cadence is. The element boxes and field views are retained only
 because their slabs are; this is not a `ж.Views` or `ElemRefBox` policy defect. The fix is routed by COORD.
+
+## 9. Amendment 2026-11-21: the fix arm (claude/p5-pool-cleanup-per-gc)
+
+The seat's runtime change (sync.Pool aged at every CLR collection from a fresh gen-0 finalizer sentinel; commit
+efa75d1c8c, local at the time of these runs) applied as a scratch change to the TS tree's runtime, the test host
+republished by hand. Same instrument as above: by-hand publish + P5 diff, not the `-tests` compare, TSC_REPO_ROOT
+harness step, linux/amd64 Release. The startup hook ran in log-only mode (no cleanup by the hook).
+
+### 9.1 Slice, `-test.count=8`
+rc 0, 338 s, 8 of 8 repetitions pass, 0 fails.
+
+| arm | rep 2 | last rep | growth after rep 2 | peak RSS | s per rep (2 to last) |
+|:--|:--|:--|:--|:--|:--|
+| no cleanup (4.12) | 455-529 MB | 1,526-1,568 MB | ~150-175 MB/rep | 3.61 GB | 35.3 |
+| per-GC hook, count=6 (8.3) | 405-513 MB | 442-594 MB | ~20 MB/rep | 1.62 GB | 35.8 |
+| the fix | 391-432 MB | 479-593 MB | ~23 MB/rep (means 414 → 550) | 1.72 GB | 38.4 |
+
+Gen-2 survivors are `PromotedBytes` at each gen-2 collection, grouped by the repetition in flight. One run per
+arm, so the per-rep times are not a controlled time measurement. The residual slope is about the semaphore
+table's share (4.9).
+
+Predictions (021139Z), scored as worded: 0 fails MET; "350-650 MB at every rep" upper bound MET (max 593), lower
+bound MISSED in rep 1 (279 and 303 MB at 20-26 s, before the first rep finished); "rep 8 within 120 MB of rep 2"
+MISSED (+136 on means); falsifier (any rep over 800 MB, or over 30 MB/rep) did not fire; time within 10% of the
+hook arm MET (+7%).
+
+### 9.2 Full TestLocal, all 15,164 configurations
+Same command as 4.5 (`-test.run '^TestLocal$'`, default parallelism, 85-minute timeout). rc 0, 2,644 s.
+
+| | converted, with the fix | native |
+|:--|:--|:--|
+| configurations | 15,164: 13,444 pass, 1,720 skip | 15,164: 13,444 pass, 1,720 skip |
+| baseline subtests | 119,720: 119,712 pass, 8 skip | 119,720: 119,712 pass, 8 skip |
+| verdict differences | 0 at both levels | |
+| OutOfMemoryException | 0 | |
+
+Against 4.5: that run timed out at 5,156 s with 11,739 configurations finished, 8 of them failing on
+OutOfMemoryException. Host RSS in the second half of this run was 6.5-8.6 GB with peaks to 10.9 GB (VmHWM); it
+was not sampled for the first 1,465 s (the sampler read the timeout wrapper's PID), so the peak is the process
+high-water mark, not a sampled curve.
+
+Prediction (021139Z), scored as worded: finishes MET; 0 differences MET; no OOM MET; peak RSS under 7.5 GB
+MISSED (10.9 GB).
+
+Not measured here: the same runs through the `-tests` pipeline, and the converted run's wall time against native
+(85 s, parallel) beyond the totals above.
