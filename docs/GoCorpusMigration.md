@@ -1678,8 +1678,8 @@ Its want: exactly the step-5 delete set (prefixed `core/`), plus whatever the ru
 is adopted from `<stage>/h5/src` verbatim, and only after that ruling: the generator lists every `.csproj` on disk,
 so while the residue stands it lists the residue.
 
-Exception: a flat file the emitter moved to per-GOOS folders is `git rm`'d by name once all three targets carry their
-copy (close lesson 3).
+Exception: a flat file the emitter moved to per-GOOS folders is `git rm`'d by name once every flavour the corpus carries
+has its copy (close lesson 3). <!-- 2026-11-20 (board tt): was "all three"; the corpus carries four flavours since linux/arm64 (corpus-reconvert §2). -->
 *(Edited in place 2026-10-01, §7 lesson 51: an exception to this step's STOP. The close met it first, and only by
 derivation.)*
 <!-- The overlay rule is this section's bullet above ("Overlay .cs, .csproj and README.md, excluding *.cs.auto"); a straight copy:
@@ -3795,7 +3795,7 @@ leads:** where a brief and this block disagree, the brief stops and quotes both.
    R-B16.)*
    - the converter suite;
    - CNR, with CHANGED empty, or classified by §4 with zero T5;
-   - the stdlib on all three flavours by H7 as amended;
+   - the stdlib on every flavour the corpus carries (today four), by H7 as amended; <!-- 2026-11-20 (board tt): was "all three"; the corpus carries four flavours since linux/arm64 (corpus-reconvert §2). -->
    - GolibTests and the full behavioral suite, each EQUAL by name to step 3's control;
    - `go2cs.slnx`, which is owed after the golib/runtime API changes this hop made, built with
      `-p:go2csPath=<repo>/src/` whenever the configuration is not Debug (R-B16, below);
@@ -3888,7 +3888,8 @@ term. The figures belong to the close STAMP that reads them, not to this block.
    (`Stale copies removed`, `platformEmit.go:259-295`). The overlay cannot carry a deletion (H5's
    overlay amendment, step 3). Without the removal, the committed flat copy survives beside the new
    per-GOOS copies and declares everything twice. So `git rm` it by name in the overlay commit, and
-   only when the overlay adds its per-GOOS copy for ALL THREE targets. Any other absent-in-stage file
+   only when the overlay adds its per-GOOS copy for EVERY flavour the corpus carries (today four:
+   windows/amd64, linux/amd64, darwin/amd64, linux/arm64). <!-- 2026-11-20 (board tt): was "all three"; the corpus carries four flavours since linux/arm64 (corpus-reconvert §2). --> Any other absent-in-stage file
    stops the seat. The instance predicted at this hop is `src/core/os/exec.cs`, from batch 3's
    measured footprint that was never committed (ledger 2026-09-22 02:36).
 
@@ -5189,8 +5190,10 @@ healthy run look hung — and, in the other direction, what lets a hung one look
 
 #### Close – H12
 
-75. **At the campaign-tip fold (§7 lesson 25's second fold), rehearse the close's two-seeded, three-target `-stdlib`
-    regen and its post-regen gates from per-run copies:**
+75. **At the campaign-tip fold (§7 lesson 25's second fold), rehearse the close's two-seeded `-stdlib` regen on every
+    flavour the corpus carries (today four: windows/amd64, linux/amd64, darwin/amd64, linux/arm64) and its post-regen
+    gates from per-run copies:** <!-- 2026-11-20 (board tt, COORD 152556Z): was "two-seeded, three-target"; a regen
+    measured on three flavours missed linux/arm64 (P2 152207Z; corpus-reconvert §2 holds the incident). -->
     - `go test ./... -count=1`, repoguard included;
     - `dotnet build src/go2cs.slnx -c Release -p:go2csPath=<repo>/src/` (the close's B9(f));
     - the README-badge check and the csproj diff.
