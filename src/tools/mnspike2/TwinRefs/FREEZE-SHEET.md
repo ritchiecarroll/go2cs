@@ -144,3 +144,10 @@ Settled. COORD accepted A5 with four rulings on this sheet (2026-11-12), and the
   reason. This settles the second OPEN under "Landing requirements". The opt-in proposed here is the build's own:
   the diagnostic has a go2cs-gen code of its own, so `WarningsAsErrors` (or an .editorconfig severity) turns it into
   an error, with no new property to learn. Its code is minted with the fallback's implementation.
+
+## Landing requirement met: the generated origin table (dated block, 2026-11-21, H, M:N item 7d)
+
+The first landing requirement above (the twin origin and the await map as a generated table, not reflection) is the
+[GoTwinOf] stamp. The design, the readings and what is owed are in docs/phase4/DATA-mn-origin-table.md, on branch
+claude/h-mn-origin-table. Its ctor is frozen in PublicSurface.golib.txt [mn-frozen]. The Native AOT reading of A4's
+program is owed before landing.
