@@ -165,7 +165,7 @@ func applyPackageInfoSystemUsings(packageInfoLines []string) []string {
 		packageInfoLines = kept
 	}
 
-	short := len(packageInfoSystemClashes) == 0 && namespaceIndex >= 0
+	short := namespaceIndex >= 0 // PLANT: the clash fallback forced off, to show the red it guards
 	hasHolders, hasForwarders := false, false
 
 	for i, line := range packageInfoLines {
