@@ -232,6 +232,13 @@ func namedArray() {
 	fmt.Println("named   :", a[0], f[2])
 }
 
+func namedResultIndex() (a [8]uint64) {
+	p := &a
+	defer func() { a[0] = 0xBBBB }()
+	p[1] = 202
+	return
+}
+
 func main() {
 	variable()
 	literal()
@@ -255,4 +262,6 @@ func main() {
 	nested()
 	pointerStruct()
 	namedArray()
+	r := namedResultIndex()
+	fmt.Println("res idx :", r[0], r[1], len(r))
 }

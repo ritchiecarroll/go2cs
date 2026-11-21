@@ -238,6 +238,23 @@ internal static void namedArray() {
     fmt.Println("named   :", a[0], f.ElementRef(2));
 }
 
+internal static array<uint64> /*a*/ namedResultIndex() {
+    heap(new array<uint64>(8), out var Ꮡa);
+    GoFrame ᒐ = default;
+    try {
+        ref var a = ref Ꮡa.Value;
+
+        var p = Ꮡa;
+        defer(() => {
+            Ꮡa.Value[0] = 0xBBBB;
+        }, ref ᒐ);
+        p.Value[1] = 202;
+    }
+    catch (Exception ᒐex) when (GoFrame.IsPanic(ᒐex, out PanicException? ᒐp)) { GoFrame.Capture(ᒐp); }
+    finally { ᒐ.Run(); }
+    return Ꮡa.Value;
+}
+
 internal static void main() {
     variable();
     literal();
@@ -261,6 +278,8 @@ internal static void main() {
     nested();
     pointerStruct();
     namedArray();
+    var r = namedResultIndex();
+    fmt.Println("res idx :", r[0], r[1], len(r));
 }
 
 } // end main_package

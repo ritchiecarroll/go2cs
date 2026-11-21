@@ -985,7 +985,15 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 								// wrapper re-aliases the value name inside (namedResultAliases),
 								// and the final post-defer return reads through the box (see the
 								// namedReturnDeferMode close-out below).
-								v.writeString(resultDeclTarget, "%sheap<%s>(out var %s%s);", v.indent(v.indentLevel+1), v.getCSharpTypeName(param.Type()), AddressPrefix, v.boxBaseName(ident))
+								// An unnamed array result takes its storage here, as convertToHeapTypeDecl's array branch
+								// gives a local: `heap<array<T>>(out …)` boxes `default(array<T>)`, which has no backing,
+								// so every index through the result panicked with length 0 and a window cut over it
+								// (door C) threw at the cut. A named array type materializes its own backing.
+								if arrayType, isArray := param.Type().(*types.Array); isArray {
+									v.writeString(resultDeclTarget, "%sheap(new array<%s>(%s), out var %s%s);", v.indent(v.indentLevel+1), v.getCSharpTypeName(arrayType.Elem()), v.arrayZeroValueArgs(fmt.Sprint(arrayType.Len()), arrayType), AddressPrefix, v.boxBaseName(ident))
+								} else {
+									v.writeString(resultDeclTarget, "%sheap<%s>(out var %s%s);", v.indent(v.indentLevel+1), v.getCSharpTypeName(param.Type()), AddressPrefix, v.boxBaseName(ident))
+								}
 								v.writeString(namedResultAliases, "%s%sref var %s = ref %s%s%s;", v.newline, v.indent(v.indentLevel+1), paramName, AddressPrefix, v.boxBaseName(ident), namedResultBoxAccessor(param.Type()))
 							} else {
 								v.writeString(resultDeclTarget, "%s%s", v.indent(v.indentLevel+1), v.convertToHeapTypeDecl(ident, true))
