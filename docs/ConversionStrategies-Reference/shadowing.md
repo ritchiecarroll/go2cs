@@ -516,7 +516,7 @@ under both of its names); an external test package's file also counts the names 
 class it reads through `using static` as well. A merging write (`-tests`) respells every holder and forwarder line in
 whichever direction the decision takes, so a file is never left with both spellings.
 
-<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:93-96 -->
+<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:94-97 -->
 ```csharp
 // <MethodHolders>
 [GoMethodHost(typeof(clashlib_package.MethodImpl)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class clashlibᴛMethodImpl;
@@ -524,7 +524,7 @@ whichever direction the decision takes, so a file is never left with both spelli
 // </MethodHolders>
 ```
 
-<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:102-106 -->
+<!-- source: src/tests/Behavioral/PackageInfoUsingsClash/clashlib/package_info.cs:103-107 -->
 ```csharp
 // <MethodForwarders>
 partial class clashlibᴛMethodImpl {

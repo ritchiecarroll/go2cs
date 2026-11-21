@@ -1283,7 +1283,7 @@ func forwarderAliasDirectives(packageInfoLines []string, mergeExisting bool) ([]
 
 // insertForwarderAliasDirectives writes, right after package_info.cs's namespace declaration, the directives its
 // forwarders read their signatures through, as each converted file declares its own after its namespace: the file's
-// `using static <pkg>_package;` lines, repeated, then the aliases the forwarders name. A forwarder repeats its body's
+// `using static <pkg>_package;` lines and import aliases, repeated, then the aliases the forwarders name. A forwarder repeats its body's
 // spelling (`this ref Buffer b`), which in the package class finds the package's nested type first; at the
 // compilation unit's level the project's global `using System;` makes that name ambiguous (CS0104), and a
 // declaration's own usings are searched before the enclosing levels'. An alias's referent resolves there as in the
@@ -1303,6 +1303,15 @@ func insertForwarderAliasDirectives(packageInfoLines []string, aliasLines []stri
 		}
 	}
 
+	// The compilation unit's import aliases (`using io = go.io_package;`): inside the namespace a qualifier finds a
+	// namespace of its name first (`go.io`, which io/fs makes), so `io.Writer` reads the package class only through an
+	// alias the declaration itself carries, as each converted file's does.
+	for _, line := range packageInfoLines[:namespaceIndex] {
+		if forwarderImportAlias.MatchString(line) {
+			inserted = append(inserted, line)
+		}
+	}
+
 	inserted = append(inserted, aliasLines...)
 
 	return append(packageInfoLines[:namespaceIndex+1:namespaceIndex+1], append(inserted, packageInfoLines[namespaceIndex+1:]...)...)
@@ -1318,6 +1327,8 @@ func packageInfoNamespaceLine(packageInfoLines []string) int {
 
 	return -1
 }
+
+var forwarderImportAlias = regexp.MustCompile(`^using [\p{L}\p{N}_@]+ = [^;]+;$`)
 
 var forwarderAliasDirective = regexp.MustCompile(`^using (` + EllipsisOperator + `[\p{L}\p{N}_]*) = (.+);$`)
 

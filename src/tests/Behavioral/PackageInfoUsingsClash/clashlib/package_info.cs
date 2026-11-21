@@ -57,6 +57,7 @@ using static go.PackageInfoUsingsClash.clashlib_package;
 namespace go.PackageInfoUsingsClash;
 
 using static go.PackageInfoUsingsClash.clashlib_package;
+using fmt = go.fmt_package;
 
 [GoPackage("clashlib")]
 public static partial class clashlib_package

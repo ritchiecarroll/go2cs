@@ -1299,7 +1299,10 @@ func TestGenericHolderIsNamedByTheTypeWhateverItsConstraint(t *testing.T) {
 
 const forwarderNamespaceScopeSource = `package buf
 
-import "unsafe"
+import (
+	"io"
+	"unsafe"
+)
 
 type Buffer struct{ n int }
 
@@ -1319,6 +1322,8 @@ func (b *Buffer) At(p unsafe.Pointer) unsafe.Pointer { return unsafe.Add(p, b.n)
 type slice struct{ lo, hi int }
 
 func (b Buffer) Span(data []byte) slice { return slice{hi: len(data) + b.n} }
+
+func (b Buffer) WriteTo(w io.Writer) (int64, error) { return 0, nil }
 `
 
 // A forwarder repeats its body's spelling (`this Buffer b`), which in the package class finds the package's nested
@@ -1328,7 +1333,10 @@ func (b Buffer) Span(data []byte) slice { return slice{hi: len(data) + b.n} }
 // own usings are searched first. The aliases the forwarders name follow it: a variadic parameter's `ꓸꓸꓸT`, whose
 // referent resolves there as in the body's file. unsafe.Pointer is spelled through a file alias package_info.cs
 // does not declare, so a forwarder names its package class, as an assembly attribute does (`unsafe_package.Pointer`).
-// The receiver keeps the bare spelling the generators read a method set by.
+// The receiver keeps the bare spelling the generators read a method set by. An imported package's alias is repeated
+// there too: inside the namespace a qualifier such as `io` finds the namespace `go.io` first (io/fs makes one), so
+// `io.Writer` reads the package class only through an alias the declaration itself carries, as each converted file's
+// does.
 func TestAForwarderNamesItsPackagesTypesAndVariadicAliasesForNamespaceScope(t *testing.T) {
 	emitted := convertMethodHolderFixture(t, map[string]string{"buf.go": forwarderNamespaceScopeSource})
 
@@ -1338,7 +1346,8 @@ func TestAForwarderNamesItsPackagesTypesAndVariadicAliasesForNamespaceScope(t *t
 	}, nil)
 
 	requireEmitted(t, "package_info.cs", emitted["package_info.cs"], []string{
-		"namespace go.example.com.app;\n\nusing static go.example.com.app.buf_package;\nusing ꓸꓸꓸType = Span<buf_package.Type>;\nusing ꓸꓸꓸany = Span<any>;\n\n",
+		"namespace go.example.com.app;\n\nusing static go.example.com.app.buf_package;\nusing io = go.io_package;\nusing ꓸꓸꓸType = Span<buf_package.Type>;\nusing ꓸꓸꓸany = Span<any>;\n\n",
+		"public static (int64, error) WriteTo(this Buffer b, io.Writer w) => buf_package.WriteTo⁔(b, w);\n",
 		"public static Buffer Grow(this Buffer b, Type t) => buf_package.Grow⁔(b, t);\n",
 		"public static nint Add(this ref Buffer b, params ꓸꓸꓸany xsʗp) => buf_package.Add⁔(ref b, xsʗp);\n",
 		"public static nint Many(this Buffer b, params ꓸꓸꓸType tsʗp) => buf_package.Many⁔(b, tsʗp);\n",
