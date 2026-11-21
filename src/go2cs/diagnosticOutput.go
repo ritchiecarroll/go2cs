@@ -177,6 +177,11 @@ const (
 	// diagnosticAsmStubUnforwarded: a WARNING. A bodyless function of a module outside GOROOT that nothing forwards
 	// converts to a stub that throws when called; the conversion names each one (asmForwardBodies.go).
 	diagnosticAsmStubUnforwarded = "GO2CS2012"
+
+	// diagnosticDeferredMarkerUnresolved: a deferred-marker pass (deferredMarkerOperations.go) could not leave a written
+	// file free of markers: the file cannot be read or written back, a marker has no closing sentinel, or a marker's
+	// payload does not decode. A refusal: the file would not compile, and the run used to exit 0 over it.
+	diagnosticDeferredMarkerUnresolved = "GO2CS2014"
 )
 
 // diagnosticPositionPattern splits "file:line[:col]". The file part is matched lazily up to the LAST
