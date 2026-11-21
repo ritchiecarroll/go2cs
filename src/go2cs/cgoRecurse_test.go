@@ -81,6 +81,13 @@ func requireHostCC(t *testing.T) {
 func convertCgoRecurse(t *testing.T, files map[string]string, args ...string) (string, string, error) {
 	t.Helper()
 
+	return convertCgoRecurseEnv(t, files, nil, args...)
+}
+
+// convertCgoRecurseEnv is convertCgoRecurse with extra environment settings, last so they win.
+func convertCgoRecurseEnv(t *testing.T, files map[string]string, extraEnv []string, args ...string) (string, string, error) {
+	t.Helper()
+
 	treeSrc, err := filepath.Abs("..")
 
 	if err != nil {
@@ -100,7 +107,7 @@ func convertCgoRecurse(t *testing.T, files map[string]string, args ...string) (s
 
 	output := t.TempDir()
 	cmd := exec.Command(driverBinary(t), append(append([]string{}, args...), "-go2cspath", treeSrc, dir, output)...)
-	cmd.Env = append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED=")
+	cmd.Env = append(append(os.Environ(), "GOWORK=off", "GOFLAGS=", "CGO_ENABLED="), extraEnv...)
 	combined, err := cmd.CombinedOutput()
 
 	return string(combined), output, err
@@ -384,4 +391,67 @@ func TestARecurseCgoConversionConvertsATagSplitPairsCgoOnFile(t *testing.T) {
 	if cs := sources.String(); !strings.Contains(cs, "built with cgo on") || strings.Contains(cs, "built with cgo off") {
 		t.Errorf("pair does not convert exactly its cgo-on file:\n%s", cs)
 	}
+}
+
+// INC 2a (C2 e167eb023): -cgo for a target other than the host's. The library capture links a probe with the C compiler,
+// so a cross-target conversion needs that target's compiler, named explicitly in the environment (CC). Without one it is
+// R3, refused by name; the host's own target is unchanged.
+func cgoRecurseOtherTarget() string {
+	if runtime.GOOS+"/"+runtime.GOARCH == "windows/amd64" {
+		return "linux/amd64"
+	}
+
+	return "windows/amd64"
+}
+
+func TestARecurseCgoConversionForAnotherTargetWithoutANamedCCIsRefused(t *testing.T) {
+	requireHostCC(t)
+	target := cgoRecurseOtherTarget()
+
+	combined, _, err := convertCgoRecurseEnv(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "main.go": cgoRecurseMain}, []string{"CC="},
+		"-recurse=nuget", "-cgo=true", "-platforms", target)
+
+	if err == nil {
+		t.Fatalf("a -cgo conversion for %s with no C compiler named for it converted:\n%s", target, combined)
+	}
+
+	for _, want := range []string{"R3", target, "CC"} {
+		if !strings.Contains(combined, want) {
+			t.Errorf("the refusal does not name %q:\n%s", want, combined)
+		}
+	}
+}
+
+// X1, the cross-target conversion with a named C compiler. HOSTED: GO2CS_CGO_CROSS_TARGET names the target and
+// GO2CS_CGO_CROSS_CC its compiler (the converter-cgo stage's pinned zig, `zig cc -target <triple>`); without both the row
+// is NOT MEASURED.
+func TestARecurseCgoConversionForAnotherTargetWithANamedCCBindsThatTarget(t *testing.T) {
+	target, cc := os.Getenv("GO2CS_CGO_CROSS_TARGET"), os.Getenv("GO2CS_CGO_CROSS_CC")
+
+	if target == "" || cc == "" {
+		t.Skip("GO2CS_CGO_CROSS_TARGET and GO2CS_CGO_CROSS_CC name no cross target and compiler here: NOT MEASURED")
+	}
+
+	combined, output, err := convertCgoRecurseEnv(t, map[string]string{"cptr/cptr.go": cgoRecurseCptr, "main.go": cgoRecurseMain}, []string{"CC=" + cc},
+		"-recurse=nuget", "-cgo=true", "-platforms", target)
+
+	if err != nil {
+		t.Fatalf("the cross-target conversion for %s failed: %v\n%s", target, err, combined)
+	}
+
+	sources := strings.Builder{}
+
+	for _, text := range cgoRecurseWritten(t, output, "cptr", ".cs") {
+		sources.WriteString(text)
+	}
+
+	cs := sources.String()
+
+	for _, want := range []string{`EntryPoint = "malloc")]`, `GoCgoLibraries.Register(`, `"` + target + `"`} {
+		if !strings.Contains(cs, want) {
+			t.Errorf("cptr's %s emission lacks %q:\n%s", target, want, cs)
+		}
+	}
+
+	t.Logf("READING %s via %q: %d bytes of cptr C#", target, cc, len(cs))
 }
