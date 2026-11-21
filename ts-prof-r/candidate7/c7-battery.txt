@@ -1,0 +1,10 @@
+tag=c7-A-r1 rc=0 wall_ms=82523 cpu_ms=197500 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=48369.1 bind_ms=22360.2 check_ms=9567.5 work_ms=80496.6
+tag=c7-B-r1 rc=0 wall_ms=95518 cpu_ms=191438 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=49130.2 bind_ms=21013.9 check_ms=11646.2 work_ms=81998.5
+tag=c7-C-r1 rc=0 wall_ms=88742 cpu_ms=194734 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=47639.5 bind_ms=22117.7 check_ms=11533.3 work_ms=81474.1
+tag=c7-C-r2 rc=0 wall_ms=79075 cpu_ms=192844 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=46380.5 bind_ms=20976.0 check_ms=10230.5 work_ms=77731.2
+tag=c7-B-r2 rc=0 wall_ms=80456 cpu_ms=185984 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=47550.8 bind_ms=21374.8 check_ms=9675.3 work_ms=78743.8
+tag=c7-A-r2 rc=0 wall_ms=82957 cpu_ms=191422 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=49257.5 bind_ms=21473.6 check_ms=9964.8 work_ms=80890.3
+tag=c7-A-r3 rc=0 wall_ms=82419 cpu_ms=194266 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=49621.4 bind_ms=21064.8 check_ms=9577.1 work_ms=80455.3
+tag=c7-B-r3 rc=0 wall_ms=81551 cpu_ms=187969 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=48456.9 bind_ms=20899.8 check_ms=10331.2 work_ms=79831.1
+tag=c7-C-r3 rc=0 wall_ms=80033 cpu_ms=195953 stdout_sha16=3EB1134A0D5BFF02 inputs=101 repeat= TOTAL parse_ms=46935.5 bind_ms=22486.2 check_ms=9043.7 work_ms=78612.9
+C7-DONE

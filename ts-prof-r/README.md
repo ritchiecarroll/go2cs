@@ -144,3 +144,44 @@ of the conformance runner:
 - **GC mode** cannot be the 10x: server against workstation is 99.4 against 158.6 s (1.6x, round 1, cut 8).
 - **Parallelism** is not the axis inside checkdemo (single-threaded on both sides). Its effect on the runner is P5's arm 2.
 - **OS** is not measured here; it is P5's arm 1 (linux).
+
+## Candidate 7: warm-up as a deployment setting (2026-11-21)
+
+- **Predictions:** P3's, posted before any build (COORD inbox 2026-11-20 23:5xZ).
+- **Today's reading A WAS a build**, `dotnet build -c Release`, not a publish.
+- **The arms**, all on the item-0 phase-timed copy:
+  - A: that build (golib, stdlib and compiler all JIT);
+  - B: `dotnet publish -c Release -r win-x64`, the template's default and the runner's R2R line. That is self-contained
+    and trimmed, golib and stdlib ReadyToRun (golib.dll 1.28 -> 3.39 MB), the compiler IL (checker.dll unchanged at
+    5.29 MB);
+  - C: B + `-p:GoReadyToRunUserCode=true` (checker.dll 12.74 MB, ReadyToRun);
+  - D: not run. DATA-ts-aot-b4 records that checkdemo does not build under Native AOT.
+- The publish carries runtime 10.0.11, the build's shared runtime. Server GC with DATAS off on all three.
+- Runner launch, 101 inputs, 3 rounds (A B C, C B A, A B C). Stdout identical in every run.
+- Files: `candidate7/` (battery log, per-file stderr, `c7-analysis.txt`).
+
+**Medians of 3:**
+
+| arm | first-10 check, ms/file | last-50 check, ms/file | file 1: parse / bind / check, ms | total check | work |
+|---|---|---|---|---|---|
+| A | 75.6 | 8.6 | 3,534 / 840 / 1,195 | 9,577 | 80,497 |
+| B | 74.2 | 10.5 | 3,494 / 852 / 1,230 | 10,331 | 79,831 |
+| C | **42.3** | 7.9 | 3,153 / 793 / **652** | 10,230 | 78,613 |
+
+**P3's predictions, scored as worded:**
+1. B against A, "first-10 check falls by under 20%": MET (-1.9%). "Parse and bind of the first program fall more": MISSED.
+   File 1's parse fell 1.1% and its bind ROSE 1.4%; precompiling golib and the standard library buys nothing visible here.
+2. C against A:
+   - "first-10 check from about 75 ms to 25 ms or less": MISSED (42.3 ms, -44%);
+   - "aggregate check ratio from 18.4x to 8x or less": MISSED (C's total check 10,230 ms is still 18.2x native's 561);
+   - "total work down 4 to 8 s": MISSED (-1.9 s, 2.3%, within the rounds' spread: A 80.5 / 80.9 / 80.5 s, C 81.5 /
+     77.7 / 78.6 s).
+3. C against A at the last 50, "within 10% either way": MET (7.9 against 8.6 ms, -8%).
+
+**Falsifier:** it does NOT fire. C's first-10 check is 42.3 ms, under 50, and its last-50 check is not slower.
+
+**Also seen, not predicted:**
+- B's steady-state check is 22% SLOWER than A's (10.5 against 8.6 ms per file).
+- C's first-10 BIND is slower than A's (338 against 214 ms per file).
+
+Both are NAMED and not rooted. A plausible reading is ReadyToRun code running before it is re-jitted at tier 1.

@@ -1,0 +1,3 @@
+A: first10 check 75.6 ms/file, last50 check 8.6 ms/file, first10 parse 451.2, first10 bind 213.8; totals parse 49258 bind 21474 check 9577 work 80497 ms;  rounds: 76.1/8.4/80497; 75.6/8.6/80890; 74.8/9.6/80455
+B: first10 check 74.2 ms/file, last50 check 10.5 ms/file, first10 parse 445.3, first10 bind 220.2; totals parse 48457 bind 21014 check 10331 work 79831 ms;  rounds: 73.1/10.5/81998; 74.2/10.4/78744; 75.1/11.0/79831
+C: first10 check 42.3 ms/file, last50 check 7.9 ms/file, first10 parse 456.0, first10 bind 337.7; totals parse 46936 bind 22118 check 10230 work 78613 ms;  rounds: 42.3/9.8/81474; 40.9/7.4/77731; 43.0/7.9/78613
