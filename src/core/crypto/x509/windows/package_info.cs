@@ -125,6 +125,26 @@ using static go.crypto.x509_package;
 
 namespace go.crypto;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using encoding;
+using go.crypto;
+using static x509_package;
+using net = net_package;
+using go.net;
+using asn1 = encoding.asn1_package;
+using go.math;
+using io = io_package;
+using crypto = crypto_package;
+using pkix = go.crypto.x509.pkix_package;
+using iter = iter_package;
+using time = time_package;
+using go.crypto.x509;
+using go.unicode;
+using go.@internal;
+using vendor.golang.org.x.crypto;
+using vendor.golang.org.x.crypto.cryptobyte;
+// </GlyphForwarderUsings>
+
 [GoPackage("x509")]
 public static partial class x509_package
 {
@@ -289,3 +309,133 @@ public static partial class x509_package
 [GoMethodHost(typeof(x509_package.rfc1423Algo)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛrfc1423Algo;
 [GoMethodHost(typeof(x509_package.rfc2821Mailbox)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class x509ᴛrfc2821Mailbox;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class x509ᴛCertPool {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static nint len(this ж<CertPool> Ꮡs) => x509_package.lenᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<Certificate>, Func<slice<ж<Certificate>>, error>, error) cert(this ref CertPool s, nint n) => x509_package.certᴍ(ref s, n);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<CertPool> Clone(this ref CertPool s) => x509_package.Cloneᴍ(ref s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<potentialParent> findPotentialParents(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) => x509_package.findPotentialParentsᴍ(Ꮡs, Ꮡcert);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool contains(this ж<CertPool> Ꮡs, ж<Certificate> Ꮡcert) => x509_package.containsᴍ(Ꮡs, Ꮡcert);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddCert(this ref CertPool s, ж<Certificate> Ꮡcert) => x509_package.AddCertᴍ(ref s, Ꮡcert);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addCertFunc(this ref CertPool s, sum224 rawSum224, @string rawSubject, Func<(ж<Certificate>, error)> getCert, Func<slice<ж<Certificate>>, error> constraint) => x509_package.addCertFuncᴍ(ref s, rawSum224, rawSubject, getCert, constraint);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool /*ok*/ AppendCertsFromPEM(this ref CertPool s, slice<byte> pemCerts) => x509_package.AppendCertsFromPEMᴍ(ref s, pemCerts);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static slice<slice<byte>> Subjects(this ж<CertPool> Ꮡs) => x509_package.Subjectsᴍ(Ꮡs);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ж<CertPool> Ꮡs, ж<CertPool> Ꮡother) => x509_package.Equalᴍ(Ꮡs, Ꮡother);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void AddCertWithConstraint(this ref CertPool s, ж<Certificate> Ꮡcert, Func<slice<ж<Certificate>>, error> constraint) => x509_package.AddCertWithConstraintᴍ(ref s, Ꮡcert, constraint);
+}
+partial class x509ᴛnameConstraintsSet {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void sortAndPrune<T, V>(this ref nameConstraintsSet<T, V> nc, Func<T, T, nint> cmp, Func<T, T, bool> subset) where V : /* net.IP | string */ new() => x509_package.sortAndPruneᴍ<T, V>(ref nc, cmp, subset);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (T lowerBound, bool exactMatch) search<T, V>(this ref nameConstraintsSet<T, V> nc, V s, Func<T, V, nint> cmp, Func<T, V, bool> match) where V : /* net.IP | string */ new() => x509_package.searchᴍ<T, V>(ref nc, s, cmp, match);
+}
+partial class x509ᴛipConstraints {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (ж<net.IPNet>, bool) query(this ref ipConstraints ipc, net.IP ip) => x509_package.queryᴍ(ref ipc, ip);
+}
+partial class x509ᴛdnsConstraints {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, bool) query(this ref dnsConstraints dnc, @string s) => x509_package.queryᴍ(ref dnc, s);
+}
+partial class x509ᴛemailConstraints {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (@string, bool) query(this ref emailConstraints ec, rfc2821Mailbox s) => x509_package.queryᴍ(ref ec, s);
+}
+partial class x509ᴛchainConstraints {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error check(this ref chainConstraints cc, slice<@string> dns, slice<parsedURI> uris, slice<rfc2821Mailbox> emails, slice<net.IP> ips) => x509_package.checkᴍ(ref cc, dns, uris, emails, ips);
+}
+partial class x509ᴛparsedURI {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this parsedURI u) => x509_package.Stringᴍ(u);
+}
+partial class x509ᴛOID {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendText(this OID o, slice<byte> b) => x509_package.AppendTextᴍ(o, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalText(this OID o) => x509_package.MarshalTextᴍ(o);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalText(this ref OID o, slice<byte> text) => x509_package.UnmarshalTextᴍ(ref o, text);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error unmarshalOIDText(this ref OID o, @string oid) => x509_package.unmarshalOIDTextᴍ(ref o, oid);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) AppendBinary(this OID o, slice<byte> b) => x509_package.AppendBinaryᴍ(o, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte>, error) MarshalBinary(this OID o) => x509_package.MarshalBinaryᴍ(o);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error UnmarshalBinary(this ref OID o, slice<byte> b) => x509_package.UnmarshalBinaryᴍ(ref o, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this OID oid, OID other) => x509_package.Equalᴍ(oid, other);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool EqualASN1OID(this OID oid, asn1.ObjectIdentifier other) => x509_package.EqualASN1OIDᴍ(oid, other);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this OID oid) => x509_package.Stringᴍ(oid);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (asn1.ObjectIdentifier, bool) toASN1OID(this OID oid) => x509_package.toASN1OIDᴍ(oid);
+}
+partial class x509ᴛrfc1423Algo {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> deriveKey(this rfc1423Algo c, slice<byte> password, slice<byte> salt) => x509_package.deriveKeyᴍ(c, password, salt);
+}
+partial class x509ᴛCertificate {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ж<Certificate> Ꮡc, ж<VerifyOptions> Ꮡopts) => x509_package.systemVerifyᴍ(Ꮡc, Ꮡopts);
+}
+partial class x509ᴛCertificateInvalidError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this CertificateInvalidError e) => x509_package.Errorᴍ(e);
+}
+partial class x509ᴛHostnameError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this HostnameError h) => x509_package.Errorᴍ(h);
+}
+partial class x509ᴛUnknownAuthorityError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnknownAuthorityError e) => x509_package.Errorᴍ(e);
+}
+partial class x509ᴛSystemRootsError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this SystemRootsError se) => x509_package.Errorᴍ(se);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Unwrap(this SystemRootsError se) => x509_package.Unwrapᴍ(se);
+}
+partial class x509ᴛrfc2821Mailbox {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string String(this rfc2821Mailbox s) => x509_package.Stringᴍ(s);
+}
+partial class x509ᴛCertificate {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error isValid(this ж<Certificate> Ꮡc, nint certType, slice<ж<Certificate>> currentChain, ж<VerifyOptions> Ꮡopts) => x509_package.isValidᴍ(Ꮡc, certType, currentChain, Ꮡopts);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<slice<ж<Certificate>>>, error) Verify(this ж<Certificate> Ꮡc, VerifyOptions optsʗp) => x509_package.Verifyᴍ(Ꮡc, optsʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (slice<slice<ж<Certificate>>> chains, error err) buildChains(this ж<Certificate> Ꮡc, slice<ж<Certificate>> currentChain, ж<nint> sigChecks, ж<VerifyOptions> Ꮡopts) => x509_package.buildChainsᴍ(Ꮡc, currentChain, sigChecks, Ꮡopts);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error VerifyHostname(this ж<Certificate> Ꮡc, @string h) => x509_package.VerifyHostnameᴍ(Ꮡc, h);
+}
+partial class x509ᴛpolicyGraph {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void insert(this ref policyGraph pg, ж<policyGraphNode> Ꮡn) => x509_package.insertᴍ(ref pg, Ꮡn);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ж<policyGraphNode>> parentsWithExpected(this ref policyGraph pg, OID expected) => x509_package.parentsWithExpectedᴍ(ref pg, expected);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<policyGraphNode> parentWithAnyPolicy(this ref policyGraph pg) => x509_package.parentWithAnyPolicyᴍ(ref pg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static iter.Seq<ж<policyGraphNode>> parents(this ref policyGraph pg) => x509_package.parentsᴍ(ref pg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static map<@string, ж<policyGraphNode>> leaves(this ref policyGraph pg) => x509_package.leavesᴍ(ref pg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static ж<policyGraphNode> leafWithPolicy(this ref policyGraph pg, OID policy) => x509_package.leafWithPolicyᴍ(ref pg, policy);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void deleteLeaf(this ref policyGraph pg, OID policy) => x509_package.deleteLeafᴍ(ref pg, policy);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<ж<policyGraphNode>> validPolicyNodes(this ref policyGraph pg) => x509_package.validPolicyNodesᴍ(ref pg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void prune(this ref policyGraph pg) => x509_package.pruneᴍ(ref pg);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void incrDepth(this ref policyGraph pg) => x509_package.incrDepthᴍ(ref pg);
+}
+partial class x509ᴛSignatureAlgorithm {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool isRSAPSS(this SignatureAlgorithm algo) => x509_package.isRSAPSSᴍ(algo);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static crypto.Hash hashFunc(this SignatureAlgorithm algo) => x509_package.hashFuncᴍ(algo);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this SignatureAlgorithm algo) => x509_package.Stringᴍ(algo);
+}
+partial class x509ᴛPublicKeyAlgorithm {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this PublicKeyAlgorithm algo) => x509_package.Stringᴍ(algo);
+}
+partial class x509ᴛExtKeyUsage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static OID OID(this ExtKeyUsage eku) => x509_package.OIDᴍ(eku);
+}
+partial class x509ᴛInsecureAlgorithmError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this InsecureAlgorithmError e) => x509_package.Errorᴍ(e);
+}
+partial class x509ᴛConstraintViolationError {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this ConstraintViolationError _) => x509_package.Errorᴍ(_);
+}
+partial class x509ᴛCertificate {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static bool Equal(this ж<Certificate> Ꮡc, ж<Certificate> Ꮡother) => x509_package.Equalᴍ(Ꮡc, Ꮡother);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasSANExtension(this ref Certificate c) => x509_package.hasSANExtensionᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CheckSignatureFrom(this ref Certificate c, ж<Certificate> Ꮡparent) => x509_package.CheckSignatureFromᴍ(ref c, Ꮡparent);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CheckSignature(this ref Certificate c, SignatureAlgorithm algo, slice<byte> signed, slice<byte> signature) => x509_package.CheckSignatureᴍ(ref c, algo, signed, signature);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static bool hasNameConstraints(this ref Certificate c) => x509_package.hasNameConstraintsᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static slice<byte> getSANExtension(this ref Certificate c) => x509_package.getSANExtensionᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CheckCRLSignature(this ref Certificate c, ж<pkix.CertificateList> Ꮡcrl) => x509_package.CheckCRLSignatureᴍ(ref c, Ꮡcrl);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (slice<byte> crlBytes, error err) CreateCRL(this ref Certificate c, io.Reader rand, any priv, slice<pkix.RevokedCertificate> revokedCerts, time.Time now, time.Time expiry) => x509_package.CreateCRLᴍ(ref c, rand, priv, revokedCerts, now, expiry);
+}
+partial class x509ᴛUnhandledCriticalExtension {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this UnhandledCriticalExtension h) => x509_package.Errorᴍ(h);
+}
+partial class x509ᴛCertificateRequest {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CheckSignature(this ref CertificateRequest c) => x509_package.CheckSignatureᴍ(ref c);
+}
+partial class x509ᴛRevocationList {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error CheckSignatureFrom(this ref RevocationList rl, ж<Certificate> Ꮡparent) => x509_package.CheckSignatureFromᴍ(ref rl, Ꮡparent);
+}
+partial class x509ᴛKeyUsage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this KeyUsage i) => x509_package.Stringᴍ(i);
+}
+partial class x509ᴛExtKeyUsage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string String(this ExtKeyUsage i) => x509_package.Stringᴍ(i);
+}
+// </GlyphForwarders>

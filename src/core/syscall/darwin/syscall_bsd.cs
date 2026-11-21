@@ -99,20 +99,20 @@ internal static UntypedInt shift => 8;
 internal static UntypedInt exited => 0;
 internal static UntypedInt stopped => 0x7F;
 
-} partial class syscallᴛWaitStatus {
+} partial class syscall_package {
 
-public static bool Exited(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == exited; }
+[GoMethodBody("Exited")] internal static bool Exitedᴍ(WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == exited; }
 
-public static nint ExitStatus(this WaitStatus w) {
+[GoMethodBody("ExitStatus")] internal static nint ExitStatusᴍ(WaitStatus w) {
     if ((WaitStatus)(w & (uint32)mask) != exited) {
         return -1;
     }
     return (nint)(w >> (int)(shift));
 }
 
-public static bool Signaled(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) != stopped && (WaitStatus)(w & (uint32)mask) != 0; }
+[GoMethodBody("Signaled")] internal static bool Signaledᴍ(WaitStatus w) { return (WaitStatus)(w & (uint32)mask) != stopped && (WaitStatus)(w & (uint32)mask) != 0; }
 
-public static Signal Signal(this WaitStatus w) {
+[GoMethodBody("Signal")] internal static Signal Signalᴍ(WaitStatus w) {
     Signal sig = (Signal)(nint)((WaitStatus)(w & (uint32)mask));
     if (sig == stopped || sig == 0) {
         return -1;
@@ -120,20 +120,20 @@ public static Signal Signal(this WaitStatus w) {
     return sig;
 }
 
-public static bool CoreDump(this WaitStatus w) { return w.Signaled() && (WaitStatus)(w & (uint32)core) != 0; }
+[GoMethodBody("CoreDump")] internal static bool CoreDumpᴍ(WaitStatus w) { return w.Signaled() && (WaitStatus)(w & (uint32)core) != 0; }
 
-public static bool Stopped(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == stopped && ((Signal)(nint)((w >> (int)(shift)))) != SIGSTOP; }
+[GoMethodBody("Stopped")] internal static bool Stoppedᴍ(WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == stopped && ((Signal)(nint)((w >> (int)(shift)))) != SIGSTOP; }
 
-public static bool Continued(this WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == stopped && ((Signal)(nint)((w >> (int)(shift)))) == SIGSTOP; }
+[GoMethodBody("Continued")] internal static bool Continuedᴍ(WaitStatus w) { return (WaitStatus)(w & (uint32)mask) == stopped && ((Signal)(nint)((w >> (int)(shift)))) == SIGSTOP; }
 
-public static Signal StopSignal(this WaitStatus w) {
+[GoMethodBody("StopSignal")] internal static Signal StopSignalᴍ(WaitStatus w) {
     if (!w.Stopped()) {
         return -1;
     }
     return (Signal)(((Signal)(nint)((w >> (int)(shift)))) & 0xFF);
 }
 
-public static nint TrapCause(this WaitStatus w) { return -1; }
+[GoMethodBody("TrapCause")] internal static nint TrapCauseᴍ(WaitStatus w) { return -1; }
 
 } partial class syscall_package {
 
@@ -151,7 +151,7 @@ public static (nint wpid, error err) Wait4(nint pid, ж<WaitStatus> Ꮡwstatus, 
     return (wpid, err);
 }
 
-} partial class syscallᴛSockaddrInet4 {
+} partial class syscall_package {
 
 //sys	accept(s int, rsa *RawSockaddrAny, addrlen *_Socklen) (fd int, err error)
 //sys	bind(s int, addr unsafe.Pointer, addrlen _Socklen) (err error)
@@ -164,13 +164,13 @@ public static (nint wpid, error err) Wait4(nint pid, ж<WaitStatus> Ꮡwstatus, 
 //sys	Shutdown(s int, how int) (err error)
 // go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class syscallᴛSockaddrInet6 {
+} partial class syscall_package {
 
 // go2cs generated this placeholder — func sockaddr is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class syscallᴛSockaddrUnix {
+} partial class syscall_package {
 
-internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix> Ꮡsa) {
+[GoMethodBody("sockaddr")] internal static (@unsafe.Pointer, _Socklen, error) sockaddrᴍ(ж<SockaddrUnix> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     @string name = sa.Name;
@@ -186,9 +186,9 @@ internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrUnix
     return (@unsafe.Pointer.FromPinnedBox(Ꮡsa.Ꮡraw), (_Socklen)(uint32)sa.raw.Len, default);
 }
 
-} partial class syscallᴛSockaddrDatalink {
+} partial class syscall_package {
 
-internal static (@unsafe.Pointer, _Socklen, error) sockaddr(this ж<SockaddrDatalink> Ꮡsa) {
+[GoMethodBody("sockaddr")] internal static (@unsafe.Pointer, _Socklen, error) sockaddrᴍ(ж<SockaddrDatalink> Ꮡsa) {
     ref var sa = ref Ꮡsa.DerefOrNull();
 
     if (sa.Index == 0) {

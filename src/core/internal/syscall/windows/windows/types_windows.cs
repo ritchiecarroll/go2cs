@@ -109,10 +109,10 @@ partial struct OBJECT_ATTRIBUTES {
     public ж<SECURITY_QUALITY_OF_SERVICE> SecurityQoS;
 }
 
-} partial class windowsᴛOBJECT_ATTRIBUTES {
+} partial class windows_package {
 
 // init sets o's RootDirectory, ObjectName, and Length.
-internal static error init(this ref OBJECT_ATTRIBUTES o, syscall.Handle root, @string name) {
+[GoMethodBody("init")] internal static error initᴍ(ref OBJECT_ATTRIBUTES o, syscall.Handle root, @string name) {
     if (name == "."u8) {
         name = ""u8;
     }

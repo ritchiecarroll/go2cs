@@ -19,12 +19,12 @@ partial struct fileStat {
     internal syscall.Stat_t sys;
 }
 
-} partial class osᴛfileStat {
+} partial class os_package {
 
-internal static int64 Size(this ref fileStat fs) { return fs.size; }
-internal static FileMode Mode(this ref fileStat fs) { return fs.mode; }
-internal static time.Time ModTime(this ref fileStat fs) { return fs.modTime; }
-internal static any Sys(this ж<fileStat> Ꮡfs) { return Ꮡfs.Ꮡsys; }
+[GoMethodBody("Size")] internal static int64 Sizeᴍ(ref fileStat fs) { return fs.size; }
+[GoMethodBody("Mode")] internal static FileMode Modeᴍ(ref fileStat fs) { return fs.mode; }
+[GoMethodBody("ModTime")] internal static time.Time ModTimeᴍ(ref fileStat fs) { return fs.modTime; }
+[GoMethodBody("Sys")] internal static any Sysᴍ(ж<fileStat> Ꮡfs) { return Ꮡfs.Ꮡsys; }
 
 } partial class os_package {
 

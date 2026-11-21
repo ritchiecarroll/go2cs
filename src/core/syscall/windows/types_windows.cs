@@ -333,9 +333,9 @@ partial struct Timeval {
     public int32 Usec;
 }
 
-} partial class syscallᴛTimeval {
+} partial class syscall_package {
 
-public static int64 Nanoseconds(this ref Timeval tv) {
+[GoMethodBody("Nanoseconds")] internal static int64 Nanosecondsᴍ(ref Timeval tv) {
     return ((int64)tv.Sec * 1000000 + (int64)tv.Usec) * 1000;
 }
 
@@ -375,11 +375,11 @@ partial struct Filetime {
     public uint32 HighDateTime;
 }
 
-} partial class syscallᴛFiletime {
+} partial class syscall_package {
 
 // Nanoseconds returns Filetime ft in nanoseconds
 // since Epoch (00:00:00 UTC, January 1, 1970).
-public static int64 Nanoseconds(this ref Filetime ft) {
+[GoMethodBody("Nanoseconds")] internal static int64 Nanosecondsᴍ(ref Filetime ft) {
     // 100-nanosecond intervals since January 1, 1601
     var nsec = ((int64)ft.HighDateTime << 32) + (int64)ft.LowDateTime;
     // change starting time to the Epoch (00:00:00 UTC, January 1, 1970)

@@ -15,61 +15,61 @@ partial struct sigctxt {
     internal @unsafe.Pointer ctxt;
 }
 
-} partial class runtimeᴛsigctxt {
+} partial class runtime_package {
 
 //go:nosplit
 //go:nowritebarrierrec
-internal static ж<sigcontext> regs(this ref sigctxt c) { return @unsafe.Pointer.To<ucontext>(c.ctxt).Ꮡuc_mcontext; }
+[GoMethodBody("regs")] internal static ж<sigcontext> regsᴍ(ref sigctxt c) { return @unsafe.Pointer.To<ucontext>(c.ctxt).Ꮡuc_mcontext; }
 
-internal static uint64 r0(this ref sigctxt c) { return c.regs().regs[0]; }
-internal static uint64 r1(this ref sigctxt c) { return c.regs().regs[1]; }
-internal static uint64 r2(this ref sigctxt c) { return c.regs().regs[2]; }
-internal static uint64 r3(this ref sigctxt c) { return c.regs().regs[3]; }
-internal static uint64 r4(this ref sigctxt c) { return c.regs().regs[4]; }
-internal static uint64 r5(this ref sigctxt c) { return c.regs().regs[5]; }
-internal static uint64 r6(this ref sigctxt c) { return c.regs().regs[6]; }
-internal static uint64 r7(this ref sigctxt c) { return c.regs().regs[7]; }
-internal static uint64 r8(this ref sigctxt c) { return c.regs().regs[8]; }
-internal static uint64 r9(this ref sigctxt c) { return c.regs().regs[9]; }
-internal static uint64 r10(this ref sigctxt c) { return c.regs().regs[10]; }
-internal static uint64 r11(this ref sigctxt c) { return c.regs().regs[11]; }
-internal static uint64 r12(this ref sigctxt c) { return c.regs().regs[12]; }
-internal static uint64 r13(this ref sigctxt c) { return c.regs().regs[13]; }
-internal static uint64 r14(this ref sigctxt c) { return c.regs().regs[14]; }
-internal static uint64 r15(this ref sigctxt c) { return c.regs().regs[15]; }
-internal static uint64 r16(this ref sigctxt c) { return c.regs().regs[16]; }
-internal static uint64 r17(this ref sigctxt c) { return c.regs().regs[17]; }
-internal static uint64 r18(this ref sigctxt c) { return c.regs().regs[18]; }
-internal static uint64 r19(this ref sigctxt c) { return c.regs().regs[19]; }
-internal static uint64 r20(this ref sigctxt c) { return c.regs().regs[20]; }
-internal static uint64 r21(this ref sigctxt c) { return c.regs().regs[21]; }
-internal static uint64 r22(this ref sigctxt c) { return c.regs().regs[22]; }
-internal static uint64 r23(this ref sigctxt c) { return c.regs().regs[23]; }
-internal static uint64 r24(this ref sigctxt c) { return c.regs().regs[24]; }
-internal static uint64 r25(this ref sigctxt c) { return c.regs().regs[25]; }
-internal static uint64 r26(this ref sigctxt c) { return c.regs().regs[26]; }
-internal static uint64 r27(this ref sigctxt c) { return c.regs().regs[27]; }
-internal static uint64 r28(this ref sigctxt c) { return c.regs().regs[28]; }
-internal static uint64 r29(this ref sigctxt c) { return c.regs().regs[29]; }
-internal static uint64 lr(this ref sigctxt c) { return c.regs().regs[30]; }
-internal static uint64 sp(this ref sigctxt c) { return c.regs().sp; }
+[GoMethodBody("r0")] internal static uint64 r0ᴍ(ref sigctxt c) { return c.regs().regs[0]; }
+[GoMethodBody("r1")] internal static uint64 r1ᴍ(ref sigctxt c) { return c.regs().regs[1]; }
+[GoMethodBody("r2")] internal static uint64 r2ᴍ(ref sigctxt c) { return c.regs().regs[2]; }
+[GoMethodBody("r3")] internal static uint64 r3ᴍ(ref sigctxt c) { return c.regs().regs[3]; }
+[GoMethodBody("r4")] internal static uint64 r4ᴍ(ref sigctxt c) { return c.regs().regs[4]; }
+[GoMethodBody("r5")] internal static uint64 r5ᴍ(ref sigctxt c) { return c.regs().regs[5]; }
+[GoMethodBody("r6")] internal static uint64 r6ᴍ(ref sigctxt c) { return c.regs().regs[6]; }
+[GoMethodBody("r7")] internal static uint64 r7ᴍ(ref sigctxt c) { return c.regs().regs[7]; }
+[GoMethodBody("r8")] internal static uint64 r8ᴍ(ref sigctxt c) { return c.regs().regs[8]; }
+[GoMethodBody("r9")] internal static uint64 r9ᴍ(ref sigctxt c) { return c.regs().regs[9]; }
+[GoMethodBody("r10")] internal static uint64 r10ᴍ(ref sigctxt c) { return c.regs().regs[10]; }
+[GoMethodBody("r11")] internal static uint64 r11ᴍ(ref sigctxt c) { return c.regs().regs[11]; }
+[GoMethodBody("r12")] internal static uint64 r12ᴍ(ref sigctxt c) { return c.regs().regs[12]; }
+[GoMethodBody("r13")] internal static uint64 r13ᴍ(ref sigctxt c) { return c.regs().regs[13]; }
+[GoMethodBody("r14")] internal static uint64 r14ᴍ(ref sigctxt c) { return c.regs().regs[14]; }
+[GoMethodBody("r15")] internal static uint64 r15ᴍ(ref sigctxt c) { return c.regs().regs[15]; }
+[GoMethodBody("r16")] internal static uint64 r16ᴍ(ref sigctxt c) { return c.regs().regs[16]; }
+[GoMethodBody("r17")] internal static uint64 r17ᴍ(ref sigctxt c) { return c.regs().regs[17]; }
+[GoMethodBody("r18")] internal static uint64 r18ᴍ(ref sigctxt c) { return c.regs().regs[18]; }
+[GoMethodBody("r19")] internal static uint64 r19ᴍ(ref sigctxt c) { return c.regs().regs[19]; }
+[GoMethodBody("r20")] internal static uint64 r20ᴍ(ref sigctxt c) { return c.regs().regs[20]; }
+[GoMethodBody("r21")] internal static uint64 r21ᴍ(ref sigctxt c) { return c.regs().regs[21]; }
+[GoMethodBody("r22")] internal static uint64 r22ᴍ(ref sigctxt c) { return c.regs().regs[22]; }
+[GoMethodBody("r23")] internal static uint64 r23ᴍ(ref sigctxt c) { return c.regs().regs[23]; }
+[GoMethodBody("r24")] internal static uint64 r24ᴍ(ref sigctxt c) { return c.regs().regs[24]; }
+[GoMethodBody("r25")] internal static uint64 r25ᴍ(ref sigctxt c) { return c.regs().regs[25]; }
+[GoMethodBody("r26")] internal static uint64 r26ᴍ(ref sigctxt c) { return c.regs().regs[26]; }
+[GoMethodBody("r27")] internal static uint64 r27ᴍ(ref sigctxt c) { return c.regs().regs[27]; }
+[GoMethodBody("r28")] internal static uint64 r28ᴍ(ref sigctxt c) { return c.regs().regs[28]; }
+[GoMethodBody("r29")] internal static uint64 r29ᴍ(ref sigctxt c) { return c.regs().regs[29]; }
+[GoMethodBody("lr")] internal static uint64 lrᴍ(ref sigctxt c) { return c.regs().regs[30]; }
+[GoMethodBody("sp")] internal static uint64 spᴍ(ref sigctxt c) { return c.regs().sp; }
 
 //go:nosplit
 //go:nowritebarrierrec
-internal static uint64 pc(this ref sigctxt c) { return c.regs().pc; }
+[GoMethodBody("pc")] internal static uint64 pcᴍ(ref sigctxt c) { return c.regs().pc; }
 
-internal static uint64 pstate(this ref sigctxt c) { return c.regs().pstate; }
-internal static uintptr fault(this ref sigctxt c) { return (uintptr)c.regs().fault_address; }
+[GoMethodBody("pstate")] internal static uint64 pstateᴍ(ref sigctxt c) { return c.regs().pstate; }
+[GoMethodBody("fault")] internal static uintptr faultᴍ(ref sigctxt c) { return (uintptr)c.regs().fault_address; }
 
-internal static uint64 sigcode(this ref sigctxt c) { return (uint64)c.info.si_code; }
-internal static uint64 sigaddr(this ref sigctxt c) { return c.info.si_addr; }
+[GoMethodBody("sigcode")] internal static uint64 sigcodeᴍ(ref sigctxt c) { return (uint64)c.info.si_code; }
+[GoMethodBody("sigaddr")] internal static uint64 sigaddrᴍ(ref sigctxt c) { return c.info.si_addr; }
 
-internal static void set_pc(this ref sigctxt c, uint64 x) { c.regs().pc = x; }
-internal static void set_sp(this ref sigctxt c, uint64 x) { c.regs().sp = x; }
-internal static void set_lr(this ref sigctxt c, uint64 x) { c.regs().regs[30] = x; }
-internal static void set_r28(this ref sigctxt c, uint64 x) { c.regs().regs[28] = x; }
+[GoMethodBody("set_pc")] internal static void set_pcᴍ(ref sigctxt c, uint64 x) { c.regs().pc = x; }
+[GoMethodBody("set_sp")] internal static void set_spᴍ(ref sigctxt c, uint64 x) { c.regs().sp = x; }
+[GoMethodBody("set_lr")] internal static void set_lrᴍ(ref sigctxt c, uint64 x) { c.regs().regs[30] = x; }
+[GoMethodBody("set_r28")] internal static void set_r28ᴍ(ref sigctxt c, uint64 x) { c.regs().regs[28] = x; }
 
-internal static void set_sigaddr(this ref sigctxt c, uint64 x) {
+[GoMethodBody("set_sigaddr")] internal static void set_sigaddrᴍ(ref sigctxt c, uint64 x) {
     (@unsafe.Pointer.To<uintptr>(add(@unsafe.Pointer.FromPinnedBox(c.info), 2 * goarch.PtrSize))).Value = (uintptr)x;
 }
 

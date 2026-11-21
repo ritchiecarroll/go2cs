@@ -70,7 +70,7 @@ partial struct finalizer {
     internal ж<ptrtype> ot;       // type of ptr to object (may be a heap pointer)
 }
 
-internal static array<byte> finalizer1 = new byte[]{
+internal static array<byte> finalizer1 = array<byte>([
     // Each Finalizer is 5 words, ptr ptr INT ptr ptr (INT = uintptr here)
     // Each byte describes 8 words.
     // Need 8 Finalizers described by 5 bytes before pattern repeats:
@@ -96,7 +96,7 @@ internal static array<byte> finalizer1 = new byte[]{
     (byte)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << 0 | 0 << 1) | 1 << 2) | 1 << 3) | 1 << 4) | 1 << 5) | 0 << 6) | 1 << 7),
     (byte)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(1 << 0 | 1 << 1) | 1 << 2) | 0 << 3) | 1 << 4) | 1 << 5) | 1 << 6) | 1 << 7),
     (byte)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)((UntypedInt)(0 << 0 | 1 << 1) | 1 << 2) | 1 << 3) | 1 << 4) | 0 << 5) | 1 << 6) | 1 << 7)
-}.array();
+]);
 
 // lockRankMayQueueFinalizer records the lock ranking effects of a
 // function that may call queuefinalizer.

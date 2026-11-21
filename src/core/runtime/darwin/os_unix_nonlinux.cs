@@ -8,20 +8,20 @@ using static runtime_package;
 
 partial class runtime_package {
 
-} partial class runtimeᴛsigctxt {
+} partial class runtime_package {
 
 // sigFromUser reports whether the signal was sent because of a call
 // to kill.
 //
 //go:nosplit
-internal static bool sigFromUser(this ref sigctxt c) {
+[GoMethodBody("sigFromUser")] internal static bool sigFromUserᴍ(ref sigctxt c) {
     return c.sigcode() == _SI_USER;
 }
 
 // sigFromSeccomp reports whether the signal was sent from seccomp.
 //
 //go:nosplit
-internal static bool sigFromSeccomp(this ref sigctxt c) {
+[GoMethodBody("sigFromSeccomp")] internal static bool sigFromSeccompᴍ(ref sigctxt c) {
     return false;
 }
 

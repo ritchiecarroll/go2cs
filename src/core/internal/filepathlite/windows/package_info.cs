@@ -61,6 +61,13 @@ using static go.@internal.filepathlite_package;
 
 namespace go.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using go.@internal;
+using io;
+using ꓸꓸꓸbyte = Span<byte>;
+using static filepathlite_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("filepathlite")]
 public static partial class filepathlite_package
 {
@@ -100,3 +107,12 @@ public static partial class filepathlite_package
 // <MethodHolders>
 [GoMethodHost(typeof(filepathlite_package.lazybuf)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class filepathliteᴛlazybuf;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class filepathliteᴛlazybuf {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static byte index(this ref lazybuf b, nint i) => filepathlite_package.indexᴍ(ref b, i);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void append(this ref lazybuf b, byte c) => filepathlite_package.appendᴍ(ref b, c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void prepend(this ref lazybuf b, params ꓸꓸꓸbyte prefixʗp) => filepathlite_package.prependᴍ(ref b, prefixʗp);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static @string @string(this ref lazybuf b) => filepathlite_package.@stringᴍ(ref b);
+}
+// </GlyphForwarders>

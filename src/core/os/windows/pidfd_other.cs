@@ -21,13 +21,13 @@ internal static (uintptr, error) pidfdFind(nint _) {
     return (0, syscall.ENOSYS);
 }
 
-} partial class osᴛProcess {
+} partial class os_package {
 
-internal static (ж<ProcessState>, error) pidfdWait(this ref Process _) {
+[GoMethodBody("pidfdWait")] internal static (ж<ProcessState>, error) pidfdWaitᴍ(ref Process _) {
     throw panic("unreachable");
 }
 
-internal static error pidfdSendSignal(this ref Process _Δp0, syscall.Signal _Δp1) {
+[GoMethodBody("pidfdSendSignal")] internal static error pidfdSendSignalᴍ(ref Process _Δp0, syscall.Signal _Δp1) {
     throw panic("unreachable");
 }
 

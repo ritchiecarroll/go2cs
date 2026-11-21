@@ -172,23 +172,23 @@ partial struct Resolver {
     internal singleflight.Group lookupGroup;
 }
 
-} partial class netᴛResolver {
+} partial class net_package {
 
 // TODO(bradfitz): optional interface impl override hook
 // TODO(bradfitz): Timeout time.Duration?
-internal static bool preferGo(this ж<Resolver> Ꮡr) {
+[GoMethodBody("preferGo")] internal static bool preferGoᴍ(ж<Resolver> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     return Ꮡr != nil && r.PreferGo;
 }
 
-internal static bool strictErrors(this ж<Resolver> Ꮡr) {
+[GoMethodBody("strictErrors")] internal static bool strictErrorsᴍ(ж<Resolver> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     return Ꮡr != nil && r.StrictErrors;
 }
 
-internal static ж<singleflight.Group> getLookupGroup(this ж<Resolver> Ꮡr) {
+[GoMethodBody("getLookupGroup")] internal static ж<singleflight.Group> getLookupGroupᴍ(ж<Resolver> Ꮡr) {
     if (Ꮡr == nil) {
         return DefaultResolver.ᏑlookupGroup;
     }
@@ -206,11 +206,11 @@ public static (slice<@string> addrs, error err) LookupHost(@string host) {
     return DefaultResolver.LookupHost(context.Background(), host);
 }
 
-} partial class netᴛResolver {
+} partial class net_package {
 
 // LookupHost looks up the given host using the local resolver.
 // It returns a slice of that host's addresses.
-public static (slice<@string> addrs, error err) LookupHost(this ж<Resolver> Ꮡr, context.Context ctx, @string host) {
+[GoMethodBody("LookupHost")] internal static (slice<@string> addrs, error err) LookupHostᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string host) {
     // Make sure that no matter what we do later, host=="" is rejected.
     if (host == ""u8) {
         return (default, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), host, ""u8)));
@@ -237,11 +237,11 @@ public static (slice<IP>, error) LookupIP(@string host) {
     return (ips, default);
 }
 
-} partial class netᴛResolver {
+} partial class net_package {
 
 // LookupIPAddr looks up host using the local resolver.
 // It returns a slice of that host's IPv4 and IPv6 addresses.
-public static (slice<IPAddr>, error) LookupIPAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string host) {
+[GoMethodBody("LookupIPAddr")] internal static (slice<IPAddr>, error) LookupIPAddrᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string host) {
     return Ꮡr.lookupIPAddr(ctx, "ip", host);
 }
 
@@ -249,7 +249,7 @@ public static (slice<IPAddr>, error) LookupIPAddr(this ж<Resolver> Ꮡr, contex
 // It returns a slice of that host's IP addresses of the type specified by
 // network.
 // network must be one of "ip", "ip4" or "ip6".
-public static (slice<IP>, error) LookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
+[GoMethodBody("LookupIP")] internal static (slice<IP>, error) LookupIPᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
     var (afnet, _, err) = parseNetwork(ctx, network, false);
     if (err != nil) {
         return (default, err);
@@ -281,7 +281,7 @@ public static (slice<IP>, error) LookupIP(this ж<Resolver> Ꮡr, context.Contex
 // It returns a slice of that host's IP addresses of the type specified by
 // network.
 // The network must be one of "ip", "ip4" or "ip6".
-public static (slice<netip.Addr>, error) LookupNetIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
+[GoMethodBody("LookupNetIP")] internal static (slice<netip.Addr>, error) LookupNetIPᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
     // TODO(bradfitz): make this efficient, making the internal net package
     // type throughout be netip.Addr and only converting to the net.IP slice
     // version at the edge. But for now (2021-10-20), this is a wrapper around
@@ -308,28 +308,28 @@ partial struct onlyValuesCtx {
     internal context.Context lookupValues;
 }
 
-} partial class netᴛonlyValuesCtx {
+} partial class net_package {
 
 // Go method set entry for the promoted 'Context.Deadline()' - provided ONLY by the embedded
 // interface field in *onlyValuesCtx's method set; see the pointer-only satisfaction record.
-internal static (time.Time, bool) Deadline(this onlyValuesCtx recvᴛ) => recvᴛ.Context.Deadline();
+[GoMethodBody("Deadline")] internal static (time.Time, bool) Deadlineᴍ(onlyValuesCtx recvᴛ) => recvᴛ.Context.Deadline();
 
 // Go method set entry for the promoted 'Context.Done()' - provided ONLY by the embedded
 // interface field in *onlyValuesCtx's method set; see the pointer-only satisfaction record.
-internal static /*<-*/channel<EmptyStruct> Done(this onlyValuesCtx recvᴛ) => recvᴛ.Context.Done();
+[GoMethodBody("Done")] internal static /*<-*/channel<EmptyStruct> Doneᴍ(onlyValuesCtx recvᴛ) => recvᴛ.Context.Done();
 
 // Go method set entry for the promoted 'Context.Err()' - provided ONLY by the embedded
 // interface field in *onlyValuesCtx's method set; see the pointer-only satisfaction record.
-internal static error Err(this onlyValuesCtx recvᴛ) => recvᴛ.Context.Err();
+[GoMethodBody("Err")] internal static error Errᴍ(onlyValuesCtx recvᴛ) => recvᴛ.Context.Err();
 
 } partial class net_package {
 
 internal static context.Context _ᴛ1ʗ = new onlyValuesCtxжContext(((ж<onlyValuesCtx>)nil));
 
-} partial class netᴛonlyValuesCtx {
+} partial class net_package {
 
 // Value performs a lookup if the original context hasn't expired.
-internal static any Value(this ref onlyValuesCtx ovc, any key) {
+[GoMethodBody("Value")] internal static any Valueᴍ(ref onlyValuesCtx ovc, any key) {
     var selᴛ13 = ovc.lookupValues.Done();
     switch (trySelect(ᐸꟷ(selᴛ13, ꓸꓸꓸ))) {
     case 0 when selᴛ13.ꟷᐳ(out _): {
@@ -350,11 +350,11 @@ internal static context.Context withUnexpiredValuesPreserved(context.Context loo
     return new onlyValuesCtxжContext(Ꮡ(new onlyValuesCtx(Context: context.Background(), lookupValues: lookupCtx)));
 }
 
-} partial class netᴛResolver {
+} partial class net_package {
 
 // lookupIPAddr looks up host using the local resolver and particular network.
 // It returns a slice of that host's IPv4 and IPv6 addresses.
-internal static partial (slice<IPAddr>, error) lookupIPAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
+[GoMethodBody("lookupIPAddr")] internal static partial (slice<IPAddr>, error) lookupIPAddrᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
     // Make sure that no matter what we do later, host=="" is rejected.
     if (host == ""u8) {
         return (default, new DNSErrorжerror(newDNSError(new notFoundErrorжerror(errNoSuchHost), host, ""u8)));
@@ -475,12 +475,12 @@ public static (nint port, error err) LookupPort(@string network, @string service
     return DefaultResolver.LookupPort(context.Background(), network, service);
 }
 
-} partial class netᴛResolver {
+} partial class net_package {
 
 // LookupPort looks up the port for the given network and service.
 //
 // The network must be one of "tcp", "tcp4", "tcp6", "udp", "udp4", "udp6" or "ip".
-public static (nint port, error err) LookupPort(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string service) {
+[GoMethodBody("LookupPort")] internal static (nint port, error err) LookupPortᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string network, @string service) {
     nint port = default;
     error err = default;
 
@@ -530,7 +530,7 @@ public static (@string cname, error err) LookupCNAME(@string host) {
     return DefaultResolver.LookupCNAME(context.Background(), host);
 }
 
-} partial class netᴛResolver {
+} partial class net_package {
 
 // LookupCNAME returns the canonical name for the given host.
 // Callers that do not care about the canonical name can call
@@ -545,7 +545,7 @@ public static (@string cname, error err) LookupCNAME(@string host) {
 //
 // The returned canonical name is validated to be a properly
 // formatted presentation-format domain name.
-public static (@string, error) LookupCNAME(this ж<Resolver> Ꮡr, context.Context ctx, @string host) {
+[GoMethodBody("LookupCNAME")] internal static (@string, error) LookupCNAMEᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string host) {
     var (cname, err) = Ꮡr.lookupCNAME(ctx, host);
     if (err != nil) {
         return ("", err);
@@ -576,7 +576,7 @@ public static (@string cname, slice<ж<SRV>> addrs, error err) LookupSRV(@string
     return DefaultResolver.LookupSRV(context.Background(), service, proto, name);
 }
 
-} partial class netᴛResolver {
+} partial class net_package {
 
 // LookupSRV tries to resolve an [SRV] query of the given service,
 // protocol, and domain name. The proto is "tcp" or "udp".
@@ -592,7 +592,7 @@ public static (@string cname, slice<ж<SRV>> addrs, error err) LookupSRV(@string
 // formatted presentation-format domain names. If the response contains
 // invalid names, those records are filtered out and an error
 // will be returned alongside the remaining results, if any.
-public static (@string, slice<ж<SRV>>, error) LookupSRV(this ж<Resolver> Ꮡr, context.Context ctx, @string service, @string proto, @string name) {
+[GoMethodBody("LookupSRV")] internal static (@string, slice<ж<SRV>>, error) LookupSRVᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string service, @string proto, @string name) {
     var (cname, addrs, err) = Ꮡr.lookupSRV(ctx, service, proto, name);
     if (err != nil) {
         return ("", default, err);
@@ -631,7 +631,7 @@ public static (slice<ж<MX>>, error) LookupMX(@string name) {
     return DefaultResolver.LookupMX(context.Background(), name);
 }
 
-} partial class netᴛResolver {
+} partial class net_package {
 
 // LookupMX returns the DNS MX records for the given domain name sorted by preference.
 //
@@ -639,7 +639,7 @@ public static (slice<ж<MX>>, error) LookupMX(@string name) {
 // formatted presentation-format domain names, or numeric IP addresses.
 // If the response contains invalid names, those records are filtered out
 // and an error will be returned alongside the remaining results, if any.
-public static (slice<ж<MX>>, error) LookupMX(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+[GoMethodBody("LookupMX")] internal static (slice<ж<MX>>, error) LookupMXᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     var (records, err) = Ꮡr.lookupMX(ctx, name);
     if (err != nil) {
         return (default, err);
@@ -680,7 +680,7 @@ public static (slice<ж<NS>>, error) LookupNS(@string name) {
     return DefaultResolver.LookupNS(context.Background(), name);
 }
 
-} partial class netᴛResolver {
+} partial class net_package {
 
 // LookupNS returns the DNS NS records for the given domain name.
 //
@@ -688,7 +688,7 @@ public static (slice<ж<NS>>, error) LookupNS(@string name) {
 // formatted presentation-format domain names. If the response contains
 // invalid names, those records are filtered out and an error
 // will be returned alongside the remaining results, if any.
-public static (slice<ж<NS>>, error) LookupNS(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+[GoMethodBody("LookupNS")] internal static (slice<ж<NS>>, error) LookupNSᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     var (records, err) = Ꮡr.lookupNS(ctx, name);
     if (err != nil) {
         return (default, err);
@@ -722,13 +722,13 @@ public static (slice<@string>, error) LookupTXT(@string name) {
     return DefaultResolver.lookupTXT(context.Background(), name);
 }
 
-} partial class netᴛResolver {
+} partial class net_package {
 
 // LookupTXT returns the DNS TXT records for the given domain name.
 //
 // If a DNS TXT record holds multiple strings, they are concatenated as a
 // single string.
-public static (slice<@string>, error) LookupTXT(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+[GoMethodBody("LookupTXT")] internal static (slice<@string>, error) LookupTXTᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     return Ꮡr.lookupTXT(ctx, name);
 }
 
@@ -750,7 +750,7 @@ public static (slice<@string> names, error err) LookupAddr(@string addr) {
     return DefaultResolver.LookupAddr(context.Background(), addr);
 }
 
-} partial class netᴛResolver {
+} partial class net_package {
 
 // LookupAddr performs a reverse lookup for the given address, returning a list
 // of names mapping to that address.
@@ -758,7 +758,7 @@ public static (slice<@string> names, error err) LookupAddr(@string addr) {
 // The returned names are validated to be properly formatted presentation-format
 // domain names. If the response contains invalid names, those records are filtered
 // out and an error will be returned alongside the remaining results, if any.
-public static (slice<@string>, error) LookupAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string addr) {
+[GoMethodBody("LookupAddr")] internal static (slice<@string>, error) LookupAddrᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string addr) {
     var (names, err) = Ꮡr.lookupAddr(ctx, addr);
     if (err != nil) {
         return (default, err);
@@ -782,12 +782,12 @@ public static (slice<@string>, error) LookupAddr(this ж<Resolver> Ꮡr, context
 // results which have had the malformed records filtered out.
 internal static @string errMalformedDNSRecordsDetail = "DNS response contained records which contain invalid names";
 
-} partial class netᴛResolver {
+} partial class net_package {
 
 // dial makes a new connection to the provided server (which must be
 // an IP address) with the provided network type, using either r.Dial
 // (if both r and r.Dial are non-nil) or else Dialer.DialContext.
-internal static (Conn, error) dial(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string server) {
+[GoMethodBody("dial")] internal static (Conn, error) dialᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string network, @string server) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     // Calling Dial here is scary -- we have to be sure not to
@@ -818,7 +818,7 @@ internal static (Conn, error) dial(this ж<Resolver> Ꮡr, context.Context ctx, 
 // is also returned on success.
 //
 // The records are sorted by weight.
-internal static (@string target, slice<ж<SRV>> srvs, error err) goLookupSRV(this ж<Resolver> Ꮡr, context.Context ctx, @string service, @string proto, @string name) {
+[GoMethodBody("goLookupSRV")] internal static (@string target, slice<ж<SRV>> srvs, error err) goLookupSRVᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string service, @string proto, @string name) {
     @string target = default;
     slice<ж<SRV>> srvs = default;
     error err = default;
@@ -874,7 +874,7 @@ internal static (@string target, slice<ж<SRV>> srvs, error err) goLookupSRV(thi
 }
 
 // goLookupMX returns the MX records for name.
-internal static (slice<ж<MX>>, error) goLookupMX(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+[GoMethodBody("goLookupMX")] internal static (slice<ж<MX>>, error) goLookupMXᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, var err) = Ꮡr.lookup(ctx, name, dnsmessage.TypeMX, nil);
     if (err != nil) {
@@ -918,7 +918,7 @@ internal static (slice<ж<MX>>, error) goLookupMX(this ж<Resolver> Ꮡr, contex
 }
 
 // goLookupNS returns the NS records for name.
-internal static (slice<ж<NS>>, error) goLookupNS(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+[GoMethodBody("goLookupNS")] internal static (slice<ж<NS>>, error) goLookupNSᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     var nssᴷ = new stackAppend<ж<NS>>(moves: true);
 
     ref var server = ref heap<@string>(out var Ꮡserver);
@@ -964,7 +964,7 @@ internal static (slice<ж<NS>>, error) goLookupNS(this ж<Resolver> Ꮡr, contex
 }
 
 // goLookupTXT returns the TXT records from name.
-internal static (slice<@string>, error) goLookupTXT(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+[GoMethodBody("goLookupTXT")] internal static (slice<@string>, error) goLookupTXTᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     ref var server = ref heap<@string>(out var Ꮡserver);
     (var p, server, var err) = Ꮡr.lookup(ctx, name, dnsmessage.TypeTXT, nil);
     if (err != nil) {

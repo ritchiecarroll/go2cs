@@ -11,10 +11,10 @@ using static net_package;
 
 partial class net_package {
 
-} partial class netᴛTCPConn {
+} partial class net_package {
 
 // SetKeepAliveConfig configures keep-alive messages sent by the operating system.
-public static error SetKeepAliveConfig(this ж<TCPConn> Ꮡc, KeepAliveConfig config) {
+[GoMethodBody("SetKeepAliveConfig")] internal static error SetKeepAliveConfigᴍ(ж<TCPConn> Ꮡc, KeepAliveConfig config) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.of(TCPConn.Ꮡconn).ok()) {

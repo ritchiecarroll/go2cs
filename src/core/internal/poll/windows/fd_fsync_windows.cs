@@ -8,10 +8,10 @@ using static poll_package;
 
 partial class poll_package {
 
-} partial class pollᴛFD {
+} partial class poll_package {
 
 // Fsync wraps syscall.Fsync.
-public static error Fsync(this ж<FD> Ꮡfd) {
+[GoMethodBody("Fsync")] internal static error Fsyncᴍ(ж<FD> Ꮡfd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

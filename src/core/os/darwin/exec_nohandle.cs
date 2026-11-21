@@ -8,9 +8,9 @@ using static os_package;
 
 partial class os_package {
 
-} partial class osᴛprocessHandle {
+} partial class os_package {
 
-internal static void closeHandle(this ref processHandle ph) {
+[GoMethodBody("closeHandle")] internal static void closeHandleᴍ(ref processHandle ph) {
     throw panic("internal error: unexpected call to closeHandle");
 }
 

@@ -39,21 +39,21 @@ internal static ж<nssConf> getSystemNSS() {
     return conf;
 }
 
-} partial class netᴛnsswitchConfig {
+} partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string etcNsswitchConfˢ => ref etcNsswitchConfˢᵇ;
-private static readonly @string etcNsswitchConfˢᵇ = "/etc/nsswitch.conf"u8;
+internal static ref readonly @string etcNsswitchConfˢᴍnsswitchConfig => ref etcNsswitchConfˢᵇᴍnsswitchConfig;
+private static readonly @string etcNsswitchConfˢᵇᴍnsswitchConfig = "/etc/nsswitch.conf"u8;
 
 // init initializes conf and is only called via conf.initOnce.
-internal static void init(this ref nsswitchConfig conf) {
-    conf.nssConf = parseNSSConfFile(etcNsswitchConfˢ);
+[GoMethodBody("init")] internal static void initᴍ(ref nsswitchConfig conf) {
+    conf.nssConf = parseNSSConfFile(etcNsswitchConfˢᴍnsswitchConfig);
     conf.lastChecked = time.Now();
     conf.ch = new channel<EmptyStruct>(1);
 }
 
 // tryUpdate tries to update conf.
-internal static void tryUpdate(this ж<nsswitchConfig> Ꮡconf) {
+[GoMethodBody("tryUpdate")] internal static void tryUpdateᴍ(ж<nsswitchConfig> Ꮡconf) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -90,11 +90,11 @@ internal static void tryUpdate(this ж<nsswitchConfig> Ꮡconf) {
     finally { if (ᒐd1) Ꮡconf.DerefOrNull().releaseSema(); ᒐ.Run(); }
 }
 
-internal static void acquireSema(this ref nsswitchConfig conf) {
+[GoMethodBody("acquireSema")] internal static void acquireSemaᴍ(ref nsswitchConfig conf) {
     conf.ch.ᐸꟷ(new EmptyStruct());
 }
 
-internal static bool tryAcquireSema(this ref nsswitchConfig conf) {
+[GoMethodBody("tryAcquireSema")] internal static bool tryAcquireSemaᴍ(ref nsswitchConfig conf) {
     var selᴛ18 = conf.ch.ᐸꟷ(new EmptyStruct(), ꓸꓸꓸ);
     switch (trySelect(selᴛ18)) {
     case 0: {
@@ -105,7 +105,7 @@ internal static bool tryAcquireSema(this ref nsswitchConfig conf) {
     }}
 }
 
-internal static void releaseSema(this ref nsswitchConfig conf) {
+[GoMethodBody("releaseSema")] internal static void releaseSemaᴍ(ref nsswitchConfig conf) {
     ᐸꟷ(conf.ch);
 }
 
@@ -123,11 +123,11 @@ partial struct nssSource {
     internal slice<nssCriterion> criteria;
 }
 
-} partial class netᴛnssSource {
+} partial class net_package {
 
 // standardCriteria reports all specified criteria have the default
 // status actions.
-internal static bool standardCriteria(this nssSource s) {
+[GoMethodBody("standardCriteria")] internal static bool standardCriteriaᴍ(nssSource s) {
     foreach (var (i, crit) in range(s.criteria)) {
         if (!crit.standardStatusAction(i == len(s.criteria) - 1)) {
             return false;
@@ -146,18 +146,18 @@ partial struct nssCriterion {
     internal @string action; // e.g. "return", "continue" (lowercase)
 }
 
-} partial class netᴛnssCriterion {
+} partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string returnˢ => ref returnˢᵇ;
-private static readonly @string returnˢᵇ = "return"u8;
-internal static ref readonly @string continueˢ => ref continueˢᵇ;
-private static readonly @string continueˢᵇ = "continue"u8;
+internal static ref readonly @string returnˢᴍnssCriterion => ref returnˢᵇᴍnssCriterion;
+private static readonly @string returnˢᵇᴍnssCriterion = "return"u8;
+internal static ref readonly @string continueˢᴍnssCriterion => ref continueˢᵇᴍnssCriterion;
+private static readonly @string continueˢᵇᴍnssCriterion = "continue"u8;
 
 // standardStatusAction reports whether c is equivalent to not
 // specifying the criterion at all. last is whether this criteria is the
 // last in the list.
-internal static bool standardStatusAction(this nssCriterion c, bool last) {
+[GoMethodBody("standardStatusAction")] internal static bool standardStatusActionᴍ(nssCriterion c, bool last) {
     if (c.negate) {
         return false;
     }
@@ -165,11 +165,11 @@ internal static bool standardStatusAction(this nssCriterion c, bool last) {
     var exprᴛ1 = c.status;
     switch (ᐧ) {
     case {} when exprᴛ1 == "success"u8: {
-        def = returnˢ;
+        def = returnˢᴍnssCriterion;
         break;
     }
     case {} when exprᴛ1 == "notfound"u8 || exprᴛ1 == "unavail"u8 || exprᴛ1 == "tryagain"u8: {
-        def = continueˢ;
+        def = continueˢᴍnssCriterion;
         break;
     }
     default: {

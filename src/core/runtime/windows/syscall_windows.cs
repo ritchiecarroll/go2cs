@@ -65,9 +65,9 @@ partial struct abiPart {
     internal uintptr len;
 }
 
-} partial class runtimeᴛabiPart {
+} partial class runtime_package {
 
-internal static bool tryMerge(this ref abiPart a, abiPart b) {
+[GoMethodBody("tryMerge")] internal static bool tryMergeᴍ(ref abiPart a, abiPart b) {
     if (a.kind != abiPartStack || b.kind != abiPartStack) {
         return false;
     }
@@ -96,9 +96,9 @@ partial struct abiDesc {
     internal uintptr retOffset;
 }
 
-} partial class runtimeᴛabiDesc {
+} partial class runtime_package {
 
-internal static void assignArg(this ref abiDesc p, ж<_type> Ꮡt) {
+[GoMethodBody("assignArg")] internal static void assignArgᴍ(ref abiDesc p, ж<_type> Ꮡt) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     if (t.Size_ > goarch.PtrSize) {
@@ -178,7 +178,7 @@ internal static void assignArg(this ref abiDesc p, ж<_type> Ꮡt) {
 // Assumes t.size <= goarch.PtrSize and t.size != 0.
 //
 // Returns whether the assignment succeeded.
-internal static bool tryRegAssignArg(this ref abiDesc p, ж<_type> Ꮡt, uintptr offset) {
+[GoMethodBody("tryRegAssignArg")] internal static bool tryRegAssignArgᴍ(ref abiDesc p, ж<_type> Ꮡt, uintptr offset) {
     ref var t = ref Ꮡt.DerefOrNull();
 
     var k = t.Kind();
@@ -221,7 +221,7 @@ internal static bool tryRegAssignArg(this ref abiDesc p, ж<_type> Ꮡt, uintptr
 // value in the C ABI space.
 //
 // Returns whether the assignment was successful.
-internal static bool assignReg(this ref abiDesc p, uintptr size, uintptr offset) {
+[GoMethodBody("assignReg")] internal static bool assignRegᴍ(ref abiDesc p, uintptr size, uintptr offset) {
     if (p.dstRegisters >= intArgRegs) {
         return false;
     }

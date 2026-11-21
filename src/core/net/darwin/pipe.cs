@@ -22,7 +22,7 @@ internal static pipeDeadline makePipeDeadline() {
     return new pipeDeadline(cancel: new channel<EmptyStruct>(0));
 }
 
-} partial class netᴛpipeDeadline {
+} partial class net_package {
 
 // set sets the point in time when the deadline will time out.
 // A timeout event is signaled by closing the channel returned by waiter.
@@ -30,7 +30,7 @@ internal static pipeDeadline makePipeDeadline() {
 // t value in the future.
 //
 // A zero value for t prevents timeout.
-internal static void set(this ж<pipeDeadline> Ꮡd, time.Time t) {
+[GoMethodBody("set")] internal static void setᴍ(ж<pipeDeadline> Ꮡd, time.Time t) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -76,7 +76,7 @@ internal static void set(this ж<pipeDeadline> Ꮡd, time.Time t) {
 }
 
 // wait returns a channel that is closed when the deadline is exceeded.
-internal static channel<EmptyStruct> wait(this ж<pipeDeadline> Ꮡd) {
+[GoMethodBody("wait")] internal static channel<EmptyStruct> waitᴍ(ж<pipeDeadline> Ꮡd) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -106,14 +106,14 @@ internal static bool isClosedChan(/*<-*/channel<EmptyStruct> c) {
 partial struct pipeAddr {
 }
 
-} partial class netᴛpipeAddr {
+} partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string pipeˢ => ref pipeˢᵇ;
-private static readonly @string pipeˢᵇ = "pipe"u8;
+internal static ref readonly @string pipeˢᴍpipeAddr => ref pipeˢᵇᴍpipeAddr;
+private static readonly @string pipeˢᵇᴍpipeAddr = "pipe"u8;
 
-internal static @string Network(this pipeAddr _) { return pipeˢ; }
-internal static @string String(this pipeAddr _) { return pipeˢ; }
+[GoMethodBody("Network")] internal static @string Networkᴍ(pipeAddr _) { return pipeˢᴍpipeAddr; }
+[GoMethodBody("String")] internal static @string Stringᴍ(pipeAddr _) { return pipeˢᴍpipeAddr; }
 
 } partial class net_package {
 
@@ -164,12 +164,12 @@ public static (Conn, Conn) Pipe() {
     return (new pipeжConn(p1), new pipeжConn(p2));
 }
 
-} partial class netᴛpipe {
+} partial class net_package {
 
-internal static Addr LocalAddr(this ref pipe _) { return new pipeAddr(); }
-internal static Addr RemoteAddr(this ref pipe _) { return new pipeAddr(); }
+[GoMethodBody("LocalAddr")] internal static Addr LocalAddrᴍ(ref pipe _) { return new pipeAddr(); }
+[GoMethodBody("RemoteAddr")] internal static Addr RemoteAddrᴍ(ref pipe _) { return new pipeAddr(); }
 
-internal static (nint, error) Read(this ж<pipe> Ꮡp, slice<byte> b) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ж<pipe> Ꮡp, slice<byte> b) {
     var (n, err) = Ꮡp.read(b);
     if (err != nil && !AreEqual(err, Δio.EOF) && !AreEqual(err, Δio.ErrClosedPipe)) {
         err = new OpErrorжerror(Ꮡ(new OpError(Op: "read", Net: "pipe", Err: err)));
@@ -177,7 +177,7 @@ internal static (nint, error) Read(this ж<pipe> Ꮡp, slice<byte> b) {
     return (n, err);
 }
 
-internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
+[GoMethodBody("read")] internal static (nint n, error err) readᴍ(ж<pipe> Ꮡp, slice<byte> b) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     switch (ᐧ) {
@@ -213,7 +213,7 @@ internal static (nint n, error err) read(this ж<pipe> Ꮡp, slice<byte> b) {
     return default;
 }
 
-internal static (nint, error) Write(this ж<pipe> Ꮡp, slice<byte> b) {
+[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ж<pipe> Ꮡp, slice<byte> b) {
     var (n, err) = Ꮡp.write(b);
     if (err != nil && !AreEqual(err, Δio.ErrClosedPipe)) {
         err = new OpErrorжerror(Ꮡ(new OpError(Op: "write", Net: "pipe", Err: err)));
@@ -221,7 +221,7 @@ internal static (nint, error) Write(this ж<pipe> Ꮡp, slice<byte> b) {
     return (n, err);
 }
 
-internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
+[GoMethodBody("write")] internal static (nint n, error err) writeᴍ(ж<pipe> Ꮡp, slice<byte> b) {
     nint n = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -270,7 +270,7 @@ internal static (nint n, error err) write(this ж<pipe> Ꮡp, slice<byte> b) {
     ᒐdone: return (n, err);
 }
 
-internal static error SetDeadline(this ж<pipe> Ꮡp, time.Time t) {
+[GoMethodBody("SetDeadline")] internal static error SetDeadlineᴍ(ж<pipe> Ꮡp, time.Time t) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (isClosedChan(p.localDone.AsRecvOnly()) || isClosedChan(p.remoteDone)) {
@@ -281,7 +281,7 @@ internal static error SetDeadline(this ж<pipe> Ꮡp, time.Time t) {
     return default;
 }
 
-internal static error SetReadDeadline(this ж<pipe> Ꮡp, time.Time t) {
+[GoMethodBody("SetReadDeadline")] internal static error SetReadDeadlineᴍ(ж<pipe> Ꮡp, time.Time t) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (isClosedChan(p.localDone.AsRecvOnly()) || isClosedChan(p.remoteDone)) {
@@ -291,7 +291,7 @@ internal static error SetReadDeadline(this ж<pipe> Ꮡp, time.Time t) {
     return default;
 }
 
-internal static error SetWriteDeadline(this ж<pipe> Ꮡp, time.Time t) {
+[GoMethodBody("SetWriteDeadline")] internal static error SetWriteDeadlineᴍ(ж<pipe> Ꮡp, time.Time t) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (isClosedChan(p.localDone.AsRecvOnly()) || isClosedChan(p.remoteDone)) {
@@ -301,7 +301,7 @@ internal static error SetWriteDeadline(this ж<pipe> Ꮡp, time.Time t) {
     return default;
 }
 
-internal static error Close(this ж<pipe> Ꮡp) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<pipe> Ꮡp) {
     Ꮡp.Ꮡonce.Do(() => {
         close(Ꮡp.Value.localDone);
     });

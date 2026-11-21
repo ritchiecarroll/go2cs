@@ -6,7 +6,7 @@ namespace go;
 
 using goarch = @internal.goarch_package;
 using tracev2 = @internal.trace.tracev2_package;
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 using @internal;
 using @internal.trace;
 

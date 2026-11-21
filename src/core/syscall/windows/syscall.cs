@@ -80,31 +80,31 @@ public static (ж<byte>, error) BytePtrFromString(@string s) {
 // See mksyscall.pl.
 internal static uintptr _zero;
 
-} partial class syscallᴛTimespec {
+} partial class syscall_package {
 
 // Unix returns the time stored in ts as seconds plus nanoseconds.
-public static (int64 sec, int64 nsec) Unix(this ref Timespec ts) {
+[GoMethodBody("Unix")] internal static (int64 sec, int64 nsec) Unixᴍ(ref Timespec ts) {
     return ((int64)ts.Sec, (int64)ts.Nsec);
 }
 
-} partial class syscallᴛTimeval {
+} partial class syscall_package {
 
 // Unix returns the time stored in tv as seconds plus nanoseconds.
-public static (int64 sec, int64 nsec) Unix(this ref Timeval tv) {
+[GoMethodBody("Unix")] internal static (int64 sec, int64 nsec) Unixᴍ(ref Timeval tv) {
     return ((int64)tv.Sec, (int64)tv.Usec * 1000);
 }
 
-} partial class syscallᴛTimespec {
+} partial class syscall_package {
 
 // Nano returns the time stored in ts as nanoseconds.
-public static int64 Nano(this ref Timespec ts) {
+[GoMethodBody("Nano")] internal static int64 Nanoᴍ(ref Timespec ts) {
     return (int64)ts.Sec * 1000000000 + (int64)ts.Nsec;
 }
 
-} partial class syscallᴛTimeval {
+} partial class syscall_package {
 
 // Nano returns the time stored in tv as nanoseconds.
-public static int64 Nano(this ref Timeval tv) {
+[GoMethodBody("Nano")] internal static int64 Nanoᴍ(ref Timeval tv) {
     return (int64)tv.Sec * 1000000000 + (int64)tv.Usec * 1000;
 }
 

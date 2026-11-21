@@ -34,21 +34,21 @@ public static void SetKevent(ж<Kevent_t> Ꮡk, nint fd, nint mode, nint flags) 
     k.Flags = (uint16)flags;
 }
 
-} partial class syscallᴛIovec {
+} partial class syscall_package {
 
-public static void SetLen(this ref Iovec iov, nint length) {
+[GoMethodBody("SetLen")] internal static void SetLenᴍ(ref Iovec iov, nint length) {
     iov.Len = (uint64)length;
 }
 
-} partial class syscallᴛMsghdr {
+} partial class syscall_package {
 
-public static void SetControllen(this ref Msghdr msghdr, nint length) {
+[GoMethodBody("SetControllen")] internal static void SetControllenᴍ(ref Msghdr msghdr, nint length) {
     msghdr.Controllen = (uint32)length;
 }
 
-} partial class syscallᴛCmsghdr {
+} partial class syscall_package {
 
-public static void SetLen(this ref Cmsghdr cmsg, nint length) {
+[GoMethodBody("SetLen")] internal static void SetLenᴍ(ref Cmsghdr cmsg, nint length) {
     cmsg.Len = (uint32)length;
 }
 

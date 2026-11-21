@@ -11,10 +11,10 @@ using static poll_package;
 
 partial class poll_package {
 
-} partial class pollᴛFD {
+} partial class poll_package {
 
 // Writev wraps the writev system call.
-public static (int64, error) Writev(this ж<FD> Ꮡfd, ж<slice<slice<byte>>> Ꮡv) {
+[GoMethodBody("Writev")] internal static (int64, error) Writevᴍ(ж<FD> Ꮡfd, ж<slice<slice<byte>>> Ꮡv) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

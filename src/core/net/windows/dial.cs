@@ -50,9 +50,9 @@ internal static mptcpStatusDial mptcpUseDefaultDial => /* iota */ 0;
 internal static mptcpStatusDial mptcpEnabledDial => 1;
 internal static mptcpStatusDial mptcpDisabledDial => 2;
 
-} partial class netᴛmptcpStatusDial {
+} partial class net_package {
 
-internal static bool get(this ref mptcpStatusDial m) {
+[GoMethodBody("get")] internal static bool getᴍ(ref mptcpStatusDial m) {
     switch (m) {
     case var ᴛ when ᴛ == mptcpEnabledDial: {
         return true;
@@ -71,7 +71,7 @@ internal static bool get(this ref mptcpStatusDial m) {
     return defaultMPTCPEnabledDial;
 }
 
-internal static void set(this ref mptcpStatusDial m, bool use) {
+[GoMethodBody("set")] internal static void setᴍ(ref mptcpStatusDial m, bool use) {
     if (use) {
         m = mptcpEnabledDial;
     } else {
@@ -90,9 +90,9 @@ internal static mptcpStatusListen mptcpUseDefaultListen => /* iota */ 0;
 internal static mptcpStatusListen mptcpEnabledListen => 1;
 internal static mptcpStatusListen mptcpDisabledListen => 2;
 
-} partial class netᴛmptcpStatusListen {
+} partial class net_package {
 
-internal static bool get(this ref mptcpStatusListen m) {
+[GoMethodBody("get")] internal static bool getᴍ(ref mptcpStatusListen m) {
     switch (m) {
     case var ᴛ when ᴛ == mptcpEnabledListen: {
         return true;
@@ -112,7 +112,7 @@ internal static bool get(this ref mptcpStatusListen m) {
     return defaultMPTCPEnabledListen;
 }
 
-internal static void set(this ref mptcpStatusListen m, bool use) {
+[GoMethodBody("set")] internal static void setᴍ(ref mptcpStatusListen m, bool use) {
     if (use) {
         m = mptcpEnabledListen;
     } else {
@@ -225,9 +225,9 @@ partial struct Dialer {
     internal mptcpStatusDial mptcpStatus;
 }
 
-} partial class netᴛDialer {
+} partial class net_package {
 
-internal static bool dualStack(this ref Dialer d) { return d.FallbackDelay >= 0; }
+[GoMethodBody("dualStack")] internal static bool dualStackᴍ(ref Dialer d) { return d.FallbackDelay >= 0; }
 
 } partial class net_package {
 
@@ -241,7 +241,7 @@ internal static time.Time minNonzeroTime(time.Time a, time.Time b) {
     return b;
 }
 
-} partial class netᴛDialer {
+} partial class net_package {
 
 // deadline returns the earliest of:
 //   - now+Timeout
@@ -249,7 +249,7 @@ internal static time.Time minNonzeroTime(time.Time a, time.Time b) {
 //   - the context's deadline
 //
 // Or zero, if none of Timeout, Deadline, or context's deadline is set.
-internal static time.Time /*earliest*/ deadline(this ref Dialer d, context.Context ctx, time.Time now) {
+[GoMethodBody("deadline")] internal static time.Time /*earliest*/ deadlineᴍ(ref Dialer d, context.Context ctx, time.Time now) {
     time.Time earliest = default;
 
     if (d.Timeout != 0) { // including negative, for historical reasons
@@ -261,7 +261,7 @@ internal static time.Time /*earliest*/ deadline(this ref Dialer d, context.Conte
     return minNonzeroTime(earliest, d.Deadline);
 }
 
-internal static ж<Resolver> resolver(this ref Dialer d) {
+[GoMethodBody("resolver")] internal static ж<Resolver> resolverᴍ(ref Dialer d) {
     if (d.Resolver != nil) {
         return d.Resolver;
     }
@@ -294,9 +294,9 @@ internal static (time.Time, error) partialDeadline(time.Time now, time.Time dead
     return (now.Add(timeout), default);
 }
 
-} partial class netᴛDialer {
+} partial class net_package {
 
-internal static time.Duration fallbackDelay(this ref Dialer d) {
+[GoMethodBody("fallbackDelay")] internal static time.Duration fallbackDelayᴍ(ref Dialer d) {
     if (d.FallbackDelay > 0) {
         return d.FallbackDelay;
     } else {
@@ -349,12 +349,12 @@ internal static (@string afnet, nint proto, error err) parseNetwork(context.Cont
     return ("", 0, ((UnknownNetworkError)network));
 }
 
-} partial class netᴛResolver {
+} partial class net_package {
 
 // resolveAddrList resolves addr using hint and returns a list of
 // addresses. The result contains at least one address when error is
 // nil.
-internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, context.Context ctx, @string op, @string network, @string addr, Addr hint) {
+[GoMethodBody("resolveAddrList")] internal static (addrList, error) resolveAddrListᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string op, @string network, @string addr, Addr hint) {
     var (afnet, _, err) = parseNetwork(ctx, network, true);
     if (err != nil) {
         return (default, err);
@@ -431,13 +431,13 @@ internal static (addrList, error) resolveAddrList(this ж<Resolver> Ꮡr, contex
     return (naddrs, default);
 }
 
-} partial class netᴛDialer {
+} partial class net_package {
 
 // MultipathTCP reports whether MPTCP will be used.
 //
 // This method doesn't check if MPTCP is supported by the operating
 // system or not.
-public static bool MultipathTCP(this ref Dialer d) {
+[GoMethodBody("MultipathTCP")] internal static bool MultipathTCPᴍ(ref Dialer d) {
     return d.mptcpStatus.get();
 }
 
@@ -447,7 +447,7 @@ public static bool MultipathTCP(this ref Dialer d) {
 //
 // If MPTCP is not available on the host or not supported by the server,
 // the Dial methods will fall back to TCP.
-public static void SetMultipathTCP(this ref Dialer d, bool use) {
+[GoMethodBody("SetMultipathTCP")] internal static void SetMultipathTCPᴍ(ref Dialer d, bool use) {
     d.mptcpStatus.set(use);
 }
 
@@ -528,7 +528,7 @@ partial struct sysDialer {
     internal Func<context.Context, @string, ж<TCPAddr>, ж<TCPAddr>, (ж<TCPConn>, error)> testHookDialTCP;
 }
 
-} partial class netᴛDialer {
+} partial class net_package {
 
 // Dial connects to the address on the named network.
 //
@@ -537,13 +537,13 @@ partial struct sysDialer {
 //
 // Dial uses [context.Background] internally; to specify the context, use
 // [Dialer.DialContext].
-public static (Conn, error) Dial(this ж<Dialer> Ꮡd, @string network, @string address) {
+[GoMethodBody("Dial")] internal static (Conn, error) Dialᴍ(ж<Dialer> Ꮡd, @string network, @string address) {
     return Ꮡd.DialContext(context.Background(), network, address);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string dialˢ => ref dialˢᵇ;
-private static readonly @string dialˢᵇ = "dial"u8;
+internal static ref readonly @string dialˢᴍDialer => ref dialˢᵇᴍDialer;
+private static readonly @string dialˢᵇᴍDialer = "dial"u8;
 
 // DialContext connects to the address on the named network using
 // the provided context.
@@ -563,7 +563,7 @@ private static readonly @string dialˢᵇ = "dial"u8;
 //
 // See func [Dial] for a description of the network and address
 // parameters.
-public static (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ctx, @string network, @string address) {
+[GoMethodBody("DialContext")] internal static (Conn, error) DialContextᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, @string address) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -581,7 +581,7 @@ public static (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ct
             resolveCtx = context.WithValue(resolveCtx, new nettrace.TraceKey(), Ꮡshadow);
         }
 
-        var (addrs, err) = d.resolver().resolveAddrList(resolveCtx, dialˢ, network, address, d.LocalAddr);
+        var (addrs, err) = d.resolver().resolveAddrList(resolveCtx, dialˢᴍDialer, network, address, d.LocalAddr);
         if (err != nil) {
             return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "dial", Net: network, Source: default, Addr: default, Err: err))));
         }
@@ -606,7 +606,7 @@ public static (Conn, error) DialContext(this ж<Dialer> Ꮡd, context.Context ct
     finally { ᒐ.Run(); }
 }
 
-internal static partial (context.Context, Action) dialCtx(this ref Dialer d, context.Context ctx) {
+[GoMethodBody("dialCtx")] internal static partial (context.Context, Action) dialCtxᴍ(ref Dialer d, context.Context ctx) {
     if (ctx == nil) {
         throw panic("nil context");
     }
@@ -662,7 +662,7 @@ internal static partial (context.Context, Action) dialCtx(this ref Dialer d, con
 // connection.
 //
 // The network must be a TCP network name; see func Dial for details.
-public static (ж<TCPConn>, error) DialTCP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
+[GoMethodBody("DialTCP")] internal static (ж<TCPConn>, error) DialTCPᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -692,7 +692,7 @@ public static (ж<TCPConn>, error) DialTCP(this ж<Dialer> Ꮡd, context.Context
 // connection.
 //
 // The network must be a UDP network name; see func Dial for details.
-public static (ж<UDPConn>, error) DialUDP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
+[GoMethodBody("DialUDP")] internal static (ж<UDPConn>, error) DialUDPᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.AddrPort laddr, netip.AddrPort raddr) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -722,7 +722,7 @@ public static (ж<UDPConn>, error) DialUDP(this ж<Dialer> Ꮡd, context.Context
 // connection.
 //
 // The network must be an IP network name; see func Dial for details.
-public static (ж<IPConn>, error) DialIP(this ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.Addr laddr, netip.Addr raddr) {
+[GoMethodBody("DialIP")] internal static (ж<IPConn>, error) DialIPᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, netip.Addr laddr, netip.Addr raddr) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -752,7 +752,7 @@ public static (ж<IPConn>, error) DialIP(this ж<Dialer> Ꮡd, context.Context c
 // connection.
 //
 // The network must be a Unix network name; see func Dial for details.
-public static (ж<UnixConn>, error) DialUnix(this ж<Dialer> Ꮡd, context.Context ctx, @string network, ж<UnixAddr> laddr, ж<UnixAddr> raddr) {
+[GoMethodBody("DialUnix")] internal static (ж<UnixConn>, error) DialUnixᴍ(ж<Dialer> Ꮡd, context.Context ctx, @string network, ж<UnixAddr> laddr, ж<UnixAddr> raddr) {
     GoFrame ᒐ = default;
     try {
         ref var d = ref Ꮡd.DerefOrNull();
@@ -775,13 +775,13 @@ internal partial struct dialParallel_dialResult /*dyn*/ {
     internal bool done;
 }
 
-} partial class netᴛsysDialer {
+} partial class net_package {
 
 // dialParallel races two copies of dialSerial, giving the first a
 // head start. It returns the first established connection and
 // closes the others. Otherwise it returns an error from the first
 // primary address.
-internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, context.Context ctx, addrList primaries, addrList fallbacks) {
+[GoMethodBody("dialParallel")] internal static partial (Conn, error) dialParallelᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, addrList primaries, addrList fallbacks) {
     GoFrame ᒐ = default;
     try {
         if (len(fallbacks) == 0) {
@@ -872,7 +872,7 @@ internal static partial (Conn, error) dialParallel(this ж<sysDialer> Ꮡsd, con
 
 // dialSerial connects to a list of addresses in sequence, returning
 // either the first successful connection, or the first error.
-internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Context ctx, addrList ras) {
+[GoMethodBody("dialSerial")] internal static (Conn, error) dialSerialᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, addrList ras) {
     GoFrame ᒐ = default;
     try {
         ref var sd = ref Ꮡsd.DerefOrNull();
@@ -929,7 +929,7 @@ internal static (Conn, error) dialSerial(this ж<sysDialer> Ꮡsd, context.Conte
 
 // dialSingle attempts to establish and returns a single connection to
 // the destination address.
-internal static (Conn c, error err) dialSingle(this ж<sysDialer> Ꮡsd, context.Context ctx, Addr ra) {
+[GoMethodBody("dialSingle")] internal static (Conn c, error err) dialSingleᴍ(ж<sysDialer> Ꮡsd, context.Context ctx, Addr ra) {
     Conn c = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -1031,13 +1031,13 @@ partial struct ListenConfig {
     internal mptcpStatusListen mptcpStatus;
 }
 
-} partial class netᴛListenConfig {
+} partial class net_package {
 
 // MultipathTCP reports whether MPTCP will be used.
 //
 // This method doesn't check if MPTCP is supported by the operating
 // system or not.
-public static bool MultipathTCP(this ref ListenConfig lc) {
+[GoMethodBody("MultipathTCP")] internal static bool MultipathTCPᴍ(ref ListenConfig lc) {
     return lc.mptcpStatus.get();
 }
 
@@ -1047,13 +1047,13 @@ public static bool MultipathTCP(this ref ListenConfig lc) {
 //
 // If MPTCP is not available on the host or not supported by the client,
 // the Listen method will fall back to TCP.
-public static void SetMultipathTCP(this ref ListenConfig lc, bool use) {
+[GoMethodBody("SetMultipathTCP")] internal static void SetMultipathTCPᴍ(ref ListenConfig lc, bool use) {
     lc.mptcpStatus.set(use);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string listenˢ => ref listenˢᵇ;
-private static readonly @string listenˢᵇ = "listen"u8;
+internal static ref readonly @string listenˢᴍListenConfig => ref listenˢᵇᴍListenConfig;
+private static readonly @string listenˢᵇᴍListenConfig = "listen"u8;
 
 // Listen announces on the local network address.
 //
@@ -1062,8 +1062,8 @@ private static readonly @string listenˢᵇ = "listen"u8;
 //
 // The ctx argument is used while resolving the address on which to listen;
 // it does not affect the returned Listener.
-public static (Listener, error) Listen(this ref ListenConfig lc, context.Context ctx, @string network, @string address) {
-    var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢ, network, address, default);
+[GoMethodBody("Listen")] internal static (Listener, error) Listenᴍ(ref ListenConfig lc, context.Context ctx, @string network, @string address) {
+    var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢᴍListenConfig, network, address, default);
     if (err != nil) {
         return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen", Net: network, Source: default, Addr: default, Err: err))));
     }
@@ -1107,8 +1107,8 @@ public static (Listener, error) Listen(this ref ListenConfig lc, context.Context
 //
 // The ctx argument is used while resolving the address on which to listen;
 // it does not affect the returned PacketConn.
-public static (PacketConn, error) ListenPacket(this ref ListenConfig lc, context.Context ctx, @string network, @string address) {
-    var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢ, network, address, default);
+[GoMethodBody("ListenPacket")] internal static (PacketConn, error) ListenPacketᴍ(ref ListenConfig lc, context.Context ctx, @string network, @string address) {
+    var (addrs, err) = DefaultResolver.resolveAddrList(ctx, listenˢᴍListenConfig, network, address, default);
     if (err != nil) {
         return (default, new OpErrorжerror(Ꮡ(new OpError(Op: "listen", Net: network, Source: default, Addr: default, Err: err))));
     }

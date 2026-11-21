@@ -32,14 +32,14 @@ internal const bool cgoAvailable = true;
 // by convention.
 partial struct addrinfoErrno /*num:nint*/;
 
-} partial class netᴛaddrinfoErrno {
+} partial class net_package {
 
-internal static @string Error(this addrinfoErrno eai) { return _C_gai_strerror((_C_int)eai); }
-internal static bool Temporary(this addrinfoErrno eai) { return eai == _C_EAI_AGAIN; }
-internal static bool Timeout(this addrinfoErrno eai) { return false; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(addrinfoErrno eai) { return _C_gai_strerror((_C_int)eai); }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(addrinfoErrno eai) { return eai == _C_EAI_AGAIN; }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(addrinfoErrno eai) { return false; }
 
 // isAddrinfoErrno is just for testing purposes.
-internal static void isAddrinfoErrno(this addrinfoErrno eai) { }
+[GoMethodBody("isAddrinfoErrno")] internal static void isAddrinfoErrnoᴍ(addrinfoErrno eai) { }
 
 } partial class net_package {
 

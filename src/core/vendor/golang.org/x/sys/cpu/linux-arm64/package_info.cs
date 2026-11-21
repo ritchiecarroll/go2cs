@@ -80,6 +80,10 @@ using static go.vendor.golang.org.x.sys.cpu_package;
 
 namespace go.vendor.golang.org.x.sys;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using static cpu_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("cpu", ImportPath = "vendor/golang.org/x/sys/cpu")]
 public static partial class cpu_package
 {
@@ -132,3 +136,14 @@ public static partial class cpu_package
 [GoMethodHost(typeof(cpu_package.bigEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cpuᴛbigEndian;
 [GoMethodHost(typeof(cpu_package.littleEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class cpuᴛlittleEndian;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class cpuᴛlittleEndian {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 Uint32(this littleEndian _Δp0, slice<byte> b) => cpu_package.Uint32ᴍ(_Δp0, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 Uint64(this littleEndian _Δp0, slice<byte> b) => cpu_package.Uint64ᴍ(_Δp0, b);
+}
+partial class cpuᴛbigEndian {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 Uint32(this bigEndian _Δp0, slice<byte> b) => cpu_package.Uint32ᴍ(_Δp0, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 Uint64(this bigEndian _Δp0, slice<byte> b) => cpu_package.Uint64ᴍ(_Δp0, b);
+}
+// </GlyphForwarders>

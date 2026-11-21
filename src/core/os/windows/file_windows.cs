@@ -36,10 +36,10 @@ partial struct @file {
     internal bool appendMode;                 // whether file is opened for appending
 }
 
-} partial class osᴛFile {
+} partial class os_package {
 
 // fd is the Windows implementation of Fd.
-internal static uintptr fd(this ж<File> Ꮡfile) {
+[GoMethodBody("fd")] internal static uintptr fdᴍ(ж<File> Ꮡfile) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     if (Ꮡfile == nil) {
@@ -201,9 +201,9 @@ internal static (ж<File>, error) openDirNolog(@string name) {
     return openFileNolog(name, (nint)(O_RDONLY | (nint)windows.O_DIRECTORY), 0);
 }
 
-} partial class osᴛfile {
+} partial class os_package {
 
-internal static error close(this ж<@file> Ꮡfile) {
+[GoMethodBody("close")] internal static error closeᴍ(ж<@file> Ꮡfile) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     if (Ꮡfile == nil) {
@@ -225,13 +225,13 @@ internal static error close(this ж<@file> Ꮡfile) {
     return err;
 }
 
-} partial class osᴛFile {
+} partial class os_package {
 
 // seek sets the offset for the next Read or Write on file to offset, interpreted
 // according to whence: 0 means relative to the origin of the file, 1 means
 // relative to the current offset, and 2 means relative to the end.
 // It returns the new offset and an error, if any.
-internal static (int64 ret, error err) seek(this ж<File> Ꮡf, int64 offset, nint whence) {
+[GoMethodBody("seek")] internal static (int64 ret, error err) seekᴍ(ж<File> Ꮡf, int64 offset, nint whence) {
     int64 ret = default;
     error err = default;
 

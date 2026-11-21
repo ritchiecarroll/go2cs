@@ -81,13 +81,13 @@ internal static (ж<Process> p, error err) startProcess(@string name, slice<@str
     return (newHandleProcess(pid, h), default);
 }
 
-} partial class osᴛProcess {
+} partial class os_package {
 
-internal static error kill(this ж<Process> Ꮡp) {
+[GoMethodBody("kill")] internal static error killᴍ(ж<Process> Ꮡp) {
     return Ꮡp.Signal(os.Kill);
 }
 
-internal static error withHandle(this ж<Process> Ꮡp, Action<uintptr> f) {
+[GoMethodBody("withHandle")] internal static error withHandleᴍ(ж<Process> Ꮡp, Action<uintptr> f) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -122,40 +122,40 @@ partial struct ProcessState {
     internal ж<syscall.Rusage> rusage;
 }
 
-} partial class osᴛProcessState {
+} partial class os_package {
 
 // Pid returns the process id of the exited process.
-public static nint Pid(this ref ProcessState p) {
+[GoMethodBody("Pid")] internal static nint Pidᴍ(ref ProcessState p) {
     return p.pid;
 }
 
-internal static bool exited(this ref ProcessState p) {
+[GoMethodBody("exited")] internal static bool exitedᴍ(ref ProcessState p) {
     return p.status.Exited();
 }
 
-internal static bool success(this ref ProcessState p) {
+[GoMethodBody("success")] internal static bool successᴍ(ref ProcessState p) {
     return p.status.ExitStatus() == 0;
 }
 
-internal static any sys(this ref ProcessState p) {
+[GoMethodBody("sys")] internal static any sysᴍ(ref ProcessState p) {
     return p.status;
 }
 
-internal static any sysUsage(this ref ProcessState p) {
+[GoMethodBody("sysUsage")] internal static any sysUsageᴍ(ref ProcessState p) {
     return p.rusage.OrTypedNil();
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
-internal static ref readonly @string continuedˢ => ref continuedˢᵇ;
-private static readonly @string continuedˢᵇ = "continued"u8;
+internal static ref readonly @string nilˢᴍProcessState => ref nilˢᵇᴍProcessState;
+private static readonly @string nilˢᵇᴍProcessState = "<nil>"u8;
+internal static ref readonly @string continuedˢᴍProcessState => ref continuedˢᵇᴍProcessState;
+private static readonly @string continuedˢᵇᴍProcessState = "continued"u8;
 
-public static @string String(this ж<ProcessState> Ꮡp) {
+[GoMethodBody("String")] internal static @string Stringᴍ(ж<ProcessState> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     if (Ꮡp == nil) {
-        return nilˢ;
+        return nilˢᴍProcessState;
     }
     var status = p.Sys()._<syscall.WaitStatus>();
     @string res = ""u8;
@@ -181,7 +181,7 @@ public static @string String(this ж<ProcessState> Ꮡp) {
         break;
     }
     case {} when status.Continued(): {
-        res = continuedˢ;
+        res = continuedˢᴍProcessState;
         break;
     }}
     if (status.CoreDump()) {
@@ -192,7 +192,7 @@ public static @string String(this ж<ProcessState> Ꮡp) {
 
 // ExitCode returns the exit code of the exited process, or -1
 // if the process hasn't exited or was terminated by a signal.
-public static nint ExitCode(this ж<ProcessState> Ꮡp) {
+[GoMethodBody("ExitCode")] internal static nint ExitCodeᴍ(ж<ProcessState> Ꮡp) {
     ref var p = ref Ꮡp.DerefOrNull();
 
     // return -1 if the process hasn't started.

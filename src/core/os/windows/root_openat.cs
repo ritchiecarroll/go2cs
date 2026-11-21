@@ -28,9 +28,9 @@ partial struct root {
     internal bool closed; // set when closed
 }
 
-} partial class osᴛroot {
+} partial class os_package {
 
-internal static error Close(this ж<root> Ꮡr) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<root> Ꮡr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -49,7 +49,7 @@ internal static error Close(this ж<root> Ꮡr) {
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static error incref(this ж<root> Ꮡr) {
+[GoMethodBody("incref")] internal static error increfᴍ(ж<root> Ꮡr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -67,7 +67,7 @@ internal static error incref(this ж<root> Ꮡr) {
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static void decref(this ж<root> Ꮡr) {
+[GoMethodBody("decref")] internal static void decrefᴍ(ж<root> Ꮡr) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -87,7 +87,7 @@ internal static void decref(this ж<root> Ꮡr) {
     finally { if (ᒐd1) Ꮡr.DerefOrNull().mu.Unlock(); ᒐ.Run(); }
 }
 
-internal static @string Name(this ref root r) {
+[GoMethodBody("Name")] internal static @string Nameᴍ(ref root r) {
     return r.name;
 }
 
@@ -549,8 +549,8 @@ internal static (FileMode, error) modeAt(sysfdType parent, @string name) {
 // and the target of that symlink.
 partial struct errSymlink /*@string*/;
 
-} partial class osᴛerrSymlink {
+} partial class os_package {
 
-internal static @string Error(this errSymlink _) { throw panic("errSymlink is not user-visible"); }
+[GoMethodBody("Error")] internal static @string Errorᴍ(errSymlink _) { throw panic("errSymlink is not user-visible"); }
 
 }

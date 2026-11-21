@@ -104,7 +104,7 @@ using os = os_package;
 using Δsync = sync_package;
 using syscall = syscall_package;
 using time = time_package;
-/* blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards) */ // for linkname
+/* import _ "unsafe" (nothing to initialize) */ // for linkname
 using @internal;
 using static net_package;
 
@@ -181,9 +181,9 @@ partial struct conn {
     internal ж<netFD> fd;
 }
 
-} partial class netᴛconn {
+} partial class net_package {
 
-internal static bool ok(this ж<conn> Ꮡc) {
+[GoMethodBody("ok")] internal static bool okᴍ(ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     return Ꮡc != nil && c.fd != nil;
@@ -192,7 +192,7 @@ internal static bool ok(this ж<conn> Ꮡc) {
 // Implementation of the Conn interface.
 
 // Read implements the Conn Read method.
-internal static (nint, error) Read(this ж<conn> Ꮡc, slice<byte> b) {
+[GoMethodBody("Read")] internal static (nint, error) Readᴍ(ж<conn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -206,7 +206,7 @@ internal static (nint, error) Read(this ж<conn> Ꮡc, slice<byte> b) {
 }
 
 // Write implements the Conn Write method.
-internal static (nint, error) Write(this ж<conn> Ꮡc, slice<byte> b) {
+[GoMethodBody("Write")] internal static (nint, error) Writeᴍ(ж<conn> Ꮡc, slice<byte> b) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -220,7 +220,7 @@ internal static (nint, error) Write(this ж<conn> Ꮡc, slice<byte> b) {
 }
 
 // Close closes the connection.
-internal static error Close(this ж<conn> Ꮡc) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -236,7 +236,7 @@ internal static error Close(this ж<conn> Ꮡc) {
 // LocalAddr returns the local network address.
 // The Addr returned is shared by all invocations of LocalAddr, so
 // do not modify it.
-internal static Addr LocalAddr(this ж<conn> Ꮡc) {
+[GoMethodBody("LocalAddr")] internal static Addr LocalAddrᴍ(ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -248,7 +248,7 @@ internal static Addr LocalAddr(this ж<conn> Ꮡc) {
 // RemoteAddr returns the remote network address.
 // The Addr returned is shared by all invocations of RemoteAddr, so
 // do not modify it.
-internal static Addr RemoteAddr(this ж<conn> Ꮡc) {
+[GoMethodBody("RemoteAddr")] internal static Addr RemoteAddrᴍ(ж<conn> Ꮡc) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -258,7 +258,7 @@ internal static Addr RemoteAddr(this ж<conn> Ꮡc) {
 }
 
 // SetDeadline implements the Conn SetDeadline method.
-internal static error SetDeadline(this ж<conn> Ꮡc, time.Time t) {
+[GoMethodBody("SetDeadline")] internal static error SetDeadlineᴍ(ж<conn> Ꮡc, time.Time t) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -271,7 +271,7 @@ internal static error SetDeadline(this ж<conn> Ꮡc, time.Time t) {
 }
 
 // SetReadDeadline implements the Conn SetReadDeadline method.
-internal static error SetReadDeadline(this ж<conn> Ꮡc, time.Time t) {
+[GoMethodBody("SetReadDeadline")] internal static error SetReadDeadlineᴍ(ж<conn> Ꮡc, time.Time t) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -284,7 +284,7 @@ internal static error SetReadDeadline(this ж<conn> Ꮡc, time.Time t) {
 }
 
 // SetWriteDeadline implements the Conn SetWriteDeadline method.
-internal static error SetWriteDeadline(this ж<conn> Ꮡc, time.Time t) {
+[GoMethodBody("SetWriteDeadline")] internal static error SetWriteDeadlineᴍ(ж<conn> Ꮡc, time.Time t) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -298,7 +298,7 @@ internal static error SetWriteDeadline(this ж<conn> Ꮡc, time.Time t) {
 
 // SetReadBuffer sets the size of the operating system's
 // receive buffer associated with the connection.
-internal static error SetReadBuffer(this ж<conn> Ꮡc, nint bytes) {
+[GoMethodBody("SetReadBuffer")] internal static error SetReadBufferᴍ(ж<conn> Ꮡc, nint bytes) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -312,7 +312,7 @@ internal static error SetReadBuffer(this ж<conn> Ꮡc, nint bytes) {
 
 // SetWriteBuffer sets the size of the operating system's
 // transmit buffer associated with the connection.
-internal static error SetWriteBuffer(this ж<conn> Ꮡc, nint bytes) {
+[GoMethodBody("SetWriteBuffer")] internal static error SetWriteBufferᴍ(ж<conn> Ꮡc, nint bytes) {
     ref var c = ref Ꮡc.DerefOrNull();
 
     if (!Ꮡc.ok()) {
@@ -334,7 +334,7 @@ internal static error SetWriteBuffer(this ж<conn> Ꮡc, nint bytes) {
 //
 // On Windows, the returned os.File's file descriptor is not usable
 // on other processes.
-internal static (ж<os.File> f, error err) File(this ref conn c) {
+[GoMethodBody("File")] internal static (ж<os.File> f, error err) Fileᴍ(ref conn c) {
     ж<os.File> f = default;
     error err = default;
 
@@ -476,15 +476,15 @@ public static error ErrWriteToConnected = errors.New("use of WriteTo with pre-co
 partial struct canceledError {
 }
 
-} partial class netᴛcanceledError {
+} partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string operationWasCanceledˢ => ref operationWasCanceledˢᵇ;
-private static readonly @string operationWasCanceledˢᵇ = "operation was canceled"u8;
+internal static ref readonly @string operationWasCanceledˢᴍcanceledError => ref operationWasCanceledˢᵇᴍcanceledError;
+private static readonly @string operationWasCanceledˢᵇᴍcanceledError = "operation was canceled"u8;
 
-internal static @string Error(this canceledError _) { return operationWasCanceledˢ; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(canceledError _) { return operationWasCanceledˢᴍcanceledError; }
 
-internal static bool Is(this canceledError _, error err) { return AreEqual(err, context.Canceled); }
+[GoMethodBody("Is")] internal static bool Isᴍ(canceledError _, error err) { return AreEqual(err, context.Canceled); }
 
 } partial class net_package {
 
@@ -529,19 +529,19 @@ partial struct OpError {
     public error Err;
 }
 
-} partial class netᴛOpError {
+} partial class net_package {
 
-public static error Unwrap(this ref OpError e) { return e.Err; }
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref OpError e) { return e.Err; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍOpError => ref nilˢᵇᴍOpError;
+private static readonly @string nilˢᵇᴍOpError = "<nil>"u8;
 
-public static @string Error(this ж<OpError> Ꮡe) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ж<OpError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (Ꮡe == nil) {
-        return nilˢ;
+        return nilˢᴍOpError;
     }
     @string s = e.Op;
     if (e.Net != ""u8) {
@@ -577,9 +577,9 @@ partial interface timeout {
     bool Timeout();
 }
 
-} partial class netᴛOpError {
+} partial class net_package {
 
-public static bool Timeout(this ref OpError e) {
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref OpError e) {
     var (ne, okΔ1) = e.Err._<ж<os.SyscallError>>(ᐧ); if (okΔ1) {
         var (tΔ1, okΔ2) = ne.Err._<timeout>(ᐧ);
         return okΔ2 && tΔ1.Timeout();
@@ -594,9 +594,9 @@ partial interface temporary {
     bool Temporary();
 }
 
-} partial class netᴛOpError {
+} partial class net_package {
 
-public static bool Temporary(this ref OpError e) {
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref OpError e) {
     // Treat ECONNRESET and ECONNABORTED as temporary errors when
     // they come from calling accept. See issue 6163.
     if (e.Op == "accept"u8 && isConnError(e.Err)) {
@@ -622,12 +622,12 @@ partial struct ParseError {
     public @string Text;
 }
 
-} partial class netᴛParseError {
+} partial class net_package {
 
-public static @string Error(this ref ParseError e) { return "invalid "u8 + e.Type + ": "u8 + e.Text; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref ParseError e) { return "invalid "u8 + e.Type + ": "u8 + e.Text; }
 
-public static bool Timeout(this ref ParseError e) { return false; }
-public static bool Temporary(this ref ParseError e) { return false; }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref ParseError e) { return false; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref ParseError e) { return false; }
 
 } partial class net_package {
 
@@ -636,17 +636,17 @@ partial struct AddrError {
     public @string Addr;
 }
 
-} partial class netᴛAddrError {
+} partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍAddrError => ref nilˢᵇᴍAddrError;
+private static readonly @string nilˢᵇᴍAddrError = "<nil>"u8;
 
-public static @string Error(this ж<AddrError> Ꮡe) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ж<AddrError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (Ꮡe == nil) {
-        return nilˢ;
+        return nilˢᴍAddrError;
     }
     @string s = e.Err;
     if (e.Addr != ""u8) {
@@ -655,28 +655,28 @@ public static @string Error(this ж<AddrError> Ꮡe) {
     return s;
 }
 
-public static bool Timeout(this ref AddrError e) { return false; }
-public static bool Temporary(this ref AddrError e) { return false; }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref AddrError e) { return false; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref AddrError e) { return false; }
 
 } partial class net_package {
 
 partial struct UnknownNetworkError /*@string*/;
 
-} partial class netᴛUnknownNetworkError {
+} partial class net_package {
 
-public static @string Error(this UnknownNetworkError e) { return "unknown network "u8 + ((@string)e); }
-public static bool Timeout(this UnknownNetworkError e) { return false; }
-public static bool Temporary(this UnknownNetworkError e) { return false; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(UnknownNetworkError e) { return "unknown network "u8 + ((@string)e); }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(UnknownNetworkError e) { return false; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(UnknownNetworkError e) { return false; }
 
 } partial class net_package {
 
 partial struct InvalidAddrError /*@string*/;
 
-} partial class netᴛInvalidAddrError {
+} partial class net_package {
 
-public static @string Error(this InvalidAddrError e) { return (@string)e; }
-public static bool Timeout(this InvalidAddrError e) { return false; }
-public static bool Temporary(this InvalidAddrError e) { return false; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(InvalidAddrError e) { return (@string)e; }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(InvalidAddrError e) { return false; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(InvalidAddrError e) { return false; }
 
 } partial class net_package {
 
@@ -696,17 +696,17 @@ internal static error errTimeout = new timeoutErrorжerror(Ꮡ(new timeoutError(
 partial struct timeoutError {
 }
 
-} partial class netᴛtimeoutError {
+} partial class net_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string iOTimeoutˢ => ref iOTimeoutˢᵇ;
-private static readonly @string iOTimeoutˢᵇ = "i/o timeout"u8;
+internal static ref readonly @string iOTimeoutˢᴍtimeoutError => ref iOTimeoutˢᵇᴍtimeoutError;
+private static readonly @string iOTimeoutˢᵇᴍtimeoutError = "i/o timeout"u8;
 
-internal static @string Error(this ref timeoutError e) { return iOTimeoutˢ; }
-internal static bool Timeout(this ref timeoutError e) { return true; }
-internal static bool Temporary(this ref timeoutError e) { return true; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref timeoutError e) { return iOTimeoutˢᴍtimeoutError; }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref timeoutError e) { return true; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref timeoutError e) { return true; }
 
-internal static bool Is(this ref timeoutError e, error err) {
+[GoMethodBody("Is")] internal static bool Isᴍ(ref timeoutError e, error err) {
     return AreEqual(err, context.DeadlineExceeded);
 }
 
@@ -718,12 +718,12 @@ partial struct DNSConfigError {
     public error Err;
 }
 
-} partial class netᴛDNSConfigError {
+} partial class net_package {
 
-public static error Unwrap(this ref DNSConfigError e) { return e.Err; }
-public static @string Error(this ref DNSConfigError e) { return "error reading DNS config: "u8 + e.Err.Error(); }
-public static bool Timeout(this ref DNSConfigError e) { return false; }
-public static bool Temporary(this ref DNSConfigError e) { return false; }
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref DNSConfigError e) { return e.Err; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref DNSConfigError e) { return "error reading DNS config: "u8 + e.Err.Error(); }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref DNSConfigError e) { return false; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref DNSConfigError e) { return false; }
 
 } partial class net_package {
 
@@ -737,9 +737,9 @@ partial struct notFoundError {
     internal @string s;
 }
 
-} partial class netᴛnotFoundError {
+} partial class net_package {
 
-internal static @string Error(this ref notFoundError e) { return e.s; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref notFoundError e) { return e.s; }
 
 } partial class net_package {
 
@@ -749,11 +749,11 @@ partial struct temporaryError {
     internal @string s;
 }
 
-} partial class netᴛtemporaryError {
+} partial class net_package {
 
-internal static @string Error(this ref temporaryError e) { return e.s; }
-internal static bool Temporary(this ref temporaryError e) { return true; }
-internal static bool Timeout(this ref temporaryError e) { return false; }
+[GoMethodBody("Error")] internal static @string Errorᴍ(ref temporaryError e) { return e.s; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref temporaryError e) { return true; }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref temporaryError e) { return false; }
 
 } partial class net_package {
 
@@ -802,20 +802,20 @@ internal static ж<DNSError> newDNSError(error err, @string name, @string server
     ));
 }
 
-} partial class netᴛDNSError {
+} partial class net_package {
 
 // Unwrap returns e.UnwrapErr.
-public static error Unwrap(this ref DNSError e) { return e.UnwrapErr; }
+[GoMethodBody("Unwrap")] internal static error Unwrapᴍ(ref DNSError e) { return e.UnwrapErr; }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nilˢ => ref nilˢᵇ;
-private static readonly @string nilˢᵇ = "<nil>"u8;
+internal static ref readonly @string nilˢᴍDNSError => ref nilˢᵇᴍDNSError;
+private static readonly @string nilˢᵇᴍDNSError = "<nil>"u8;
 
-public static @string Error(this ж<DNSError> Ꮡe) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(ж<DNSError> Ꮡe) {
     ref var e = ref Ꮡe.DerefOrNull();
 
     if (Ꮡe == nil) {
-        return nilˢ;
+        return nilˢᴍDNSError;
     }
     @string s = "lookup "u8 + e.Name;
     if (e.Server != ""u8) {
@@ -828,12 +828,12 @@ public static @string Error(this ж<DNSError> Ꮡe) {
 // Timeout reports whether the DNS lookup is known to have timed out.
 // This is not always known; a DNS lookup may fail due to a timeout
 // and return a [DNSError] for which Timeout returns false.
-public static bool Timeout(this ref DNSError e) { return e.IsTimeout; }
+[GoMethodBody("Timeout")] internal static bool Timeoutᴍ(ref DNSError e) { return e.IsTimeout; }
 
 // Temporary reports whether the DNS error is known to be temporary.
 // This is not always known; a DNS lookup may fail due to a temporary
 // error and return a [DNSError] for which Temporary returns false.
-public static bool Temporary(this ref DNSError e) { return e.IsTimeout || e.IsTemporary; }
+[GoMethodBody("Temporary")] internal static bool Temporaryᴍ(ref DNSError e) { return e.IsTimeout || e.IsTemporary; }
 
 } partial class net_package {
 
@@ -853,11 +853,11 @@ public static error ErrClosed = errClosed;
 partial struct noReadFrom {
 }
 
-} partial class netᴛnoReadFrom {
+} partial class net_package {
 
 // ReadFrom hides another ReadFrom method.
 // It should never be called.
-internal static (int64, error) ReadFrom(this noReadFrom _Δp0, Δio.Reader _Δp1) {
+[GoMethodBody("ReadFrom")] internal static (int64, error) ReadFromᴍ(noReadFrom _Δp0, Δio.Reader _Δp1) {
     throw panic("can't happen");
 }
 
@@ -883,11 +883,11 @@ internal static (int64 n, error err) genericReadFrom(ж<TCPConn> c, Δio.Reader 
 partial struct noWriteTo {
 }
 
-} partial class netᴛnoWriteTo {
+} partial class net_package {
 
 // WriteTo hides another WriteTo method.
 // It should never be called.
-internal static (int64, error) WriteTo(this noWriteTo _Δp0, Δio.Writer _Δp1) {
+[GoMethodBody("WriteTo")] internal static (int64, error) WriteToᴍ(noWriteTo _Δp0, Δio.Writer _Δp1) {
     throw panic("can't happen");
 }
 
@@ -955,7 +955,7 @@ partial struct Buffers /*[]slice<byte>*/;
 internal static Δio.WriterTo _ᴛ2ʗ = new BuffersжWriterTo(((ж<Buffers>)nil));
 internal static Δio.Reader _ᴛ3ʗ = new BuffersжReader(((ж<Buffers>)nil));
 
-} partial class netᴛBuffers {
+} partial class net_package {
 
 // WriteTo writes contents of the buffers to w.
 //
@@ -963,7 +963,7 @@ internal static Δio.Reader _ᴛ3ʗ = new BuffersжReader(((ж<Buffers>)nil));
 //
 // WriteTo modifies the slice v as well as v[i] for 0 <= i < len(v),
 // but does not modify v[i][j] for any i, j.
-public static (int64 n, error err) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w) {
+[GoMethodBody("WriteTo")] internal static (int64 n, error err) WriteToᴍ(ж<Buffers> Ꮡv, Δio.Writer w) {
     int64 n = default;
     ref var v = ref Ꮡv.DerefOrNull();
 
@@ -988,7 +988,7 @@ public static (int64 n, error err) WriteTo(this ж<Buffers> Ꮡv, Δio.Writer w)
 //
 // Read modifies the slice v as well as v[i] for 0 <= i < len(v),
 // but does not modify v[i][j] for any i, j.
-public static (nint n, error err) Read(this ref Buffers v, slice<byte> p) {
+[GoMethodBody("Read")] internal static (nint n, error err) Readᴍ(ref Buffers v, slice<byte> p) {
     nint n = default;
     error err = default;
 
@@ -1004,7 +1004,7 @@ public static (nint n, error err) Read(this ref Buffers v, slice<byte> p) {
     return (n, err);
 }
 
-internal static void consume(this ref Buffers v, int64 n) {
+[GoMethodBody("consume")] internal static void consumeᴍ(ref Buffers v, int64 n) {
     while (len(v) > 0) {
         var ln0 = (int64)len((v)[0]);
         if (ln0 > n) {

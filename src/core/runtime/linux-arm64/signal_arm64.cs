@@ -53,18 +53,18 @@ internal static void dumpregs(ж<sigctxt> Ꮡc) {
     print((@string)"fault   ", (hex)(uint64)c.fault(), (@string)"\n");
 }
 
-} partial class runtimeᴛsigctxt {
+} partial class runtime_package {
 
 //go:nosplit
 //go:nowritebarrierrec
-internal static uintptr sigpc(this ref sigctxt c) { return (uintptr)c.pc(); }
+[GoMethodBody("sigpc")] internal static uintptr sigpcᴍ(ref sigctxt c) { return (uintptr)c.pc(); }
 
-internal static void setsigpc(this ref sigctxt c, uint64 x) { c.set_pc(x); }
-internal static uintptr sigsp(this ref sigctxt c) { return (uintptr)c.sp(); }
-internal static uintptr siglr(this ref sigctxt c) { return (uintptr)c.lr(); }
+[GoMethodBody("setsigpc")] internal static void setsigpcᴍ(ref sigctxt c, uint64 x) { c.set_pc(x); }
+[GoMethodBody("sigsp")] internal static uintptr sigspᴍ(ref sigctxt c) { return (uintptr)c.sp(); }
+[GoMethodBody("siglr")] internal static uintptr siglrᴍ(ref sigctxt c) { return (uintptr)c.lr(); }
 
 // preparePanic sets up the stack to look like a call to sigpanic.
-internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
+[GoMethodBody("preparePanic")] internal static void preparePanicᴍ(ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     ref var gp = ref Ꮡgp.DerefOrNull();
 
     // We arrange lr, and pc to pretend the panicking
@@ -95,7 +95,7 @@ internal static void preparePanic(this ref sigctxt c, uint32 sig, ж<g> Ꮡgp) {
     c.set_pc((uint64)abi.FuncPCABIInternal(sigpanic));
 }
 
-internal static void pushCall(this ref sigctxt c, uintptr targetPC, uintptr resumePC) {
+[GoMethodBody("pushCall")] internal static void pushCallᴍ(ref sigctxt c, uintptr targetPC, uintptr resumePC) {
     // Push the LR to stack, as we'll clobber it in order to
     // push the call. The function being pushed is responsible
     // for restoring the LR and setting the SP back.

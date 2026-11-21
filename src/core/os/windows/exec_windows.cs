@@ -14,21 +14,21 @@ using static os_package;
 
 partial class os_package {
 
-} partial class osᴛProcess {
+} partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string waitForSingleObjectˢ => ref waitForSingleObjectˢᵇ;
-private static readonly @string waitForSingleObjectˢᵇ = "WaitForSingleObject"u8;
-internal static ref readonly @string osUnexpectedResultFromˢ => ref osUnexpectedResultFromˢᵇ;
-private static readonly @string osUnexpectedResultFromˢᵇ = "os: unexpected result from WaitForSingleObject"u8;
-internal static ref readonly @string getExitCodeProcessˢ => ref getExitCodeProcessˢᵇ;
-private static readonly @string getExitCodeProcessˢᵇ = "GetExitCodeProcess"u8;
-internal static ref readonly @string getProcessTimesˢ => ref getProcessTimesˢᵇ;
-private static readonly @string getProcessTimesˢᵇ = "GetProcessTimes"u8;
+internal static ref readonly @string waitForSingleObjectˢᴍProcess => ref waitForSingleObjectˢᵇᴍProcess;
+private static readonly @string waitForSingleObjectˢᵇᴍProcess = "WaitForSingleObject"u8;
+internal static ref readonly @string osUnexpectedResultFromˢᴍProcess => ref osUnexpectedResultFromˢᵇᴍProcess;
+private static readonly @string osUnexpectedResultFromˢᵇᴍProcess = "os: unexpected result from WaitForSingleObject"u8;
+internal static ref readonly @string getExitCodeProcessˢᴍProcess => ref getExitCodeProcessˢᵇᴍProcess;
+private static readonly @string getExitCodeProcessˢᵇᴍProcess = "GetExitCodeProcess"u8;
+internal static ref readonly @string getProcessTimesˢᴍProcess => ref getProcessTimesˢᵇᴍProcess;
+private static readonly @string getProcessTimesˢᵇᴍProcess = "GetProcessTimes"u8;
 
 // Note that Process.handle is never nil because Windows always requires
 // a handle. A manually-created Process literal is not valid.
-internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
+[GoMethodBody("wait")] internal static (ж<ProcessState> ps, error err) waitᴍ(ж<Process> Ꮡp) {
     ж<ProcessState> ps = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -52,20 +52,20 @@ internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
             break;
         }
         case var ᴛ when ᴛ == syscall.WAIT_FAILED: {
-            (ps, err) = (default, NewSyscallError(waitForSingleObjectˢ, e)); goto ᒐdone;
+            (ps, err) = (default, NewSyscallError(waitForSingleObjectˢᴍProcess, e)); goto ᒐdone;
         }
         default: {
-            (ps, err) = (default, errors.New(osUnexpectedResultFromˢ)); goto ᒐdone;
+            (ps, err) = (default, errors.New(osUnexpectedResultFromˢᴍProcess)); goto ᒐdone;
         }}
         ref var ec = ref heap(new uint32(), out var Ꮡec);
         e = syscall.GetExitCodeProcess((syscall.Handle)handle, Ꮡec);
         if (e != nil) {
-            (ps, err) = (default, NewSyscallError(getExitCodeProcessˢ, e)); goto ᒐdone;
+            (ps, err) = (default, NewSyscallError(getExitCodeProcessˢᴍProcess, e)); goto ᒐdone;
         }
         ref var u = ref heap(new syscall.Rusage(), out var Ꮡu);
         e = syscall.GetProcessTimes((syscall.Handle)handle, Ꮡu.ᏑCreationTime, Ꮡu.ᏑExitTime, Ꮡu.ᏑKernelTime, Ꮡu.ᏑUserTime);
         if (e != nil) {
-            (ps, err) = (default, NewSyscallError(getProcessTimesˢ, e)); goto ᒐdone;
+            (ps, err) = (default, NewSyscallError(getProcessTimesˢᴍProcess, e)); goto ᒐdone;
         }
 
         // For compatibility we use statusReleased here rather
@@ -80,12 +80,12 @@ internal static (ж<ProcessState> ps, error err) wait(this ж<Process> Ꮡp) {
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string duplicateHandleˢ => ref duplicateHandleˢᵇ;
-private static readonly @string duplicateHandleˢᵇ = "DuplicateHandle"u8;
-internal static ref readonly @string terminateProcessˢ => ref terminateProcessˢᵇ;
-private static readonly @string terminateProcessˢᵇ = "TerminateProcess"u8;
+internal static ref readonly @string duplicateHandleˢᴍProcess => ref duplicateHandleˢᵇᴍProcess;
+private static readonly @string duplicateHandleˢᵇᴍProcess = "DuplicateHandle"u8;
+internal static ref readonly @string terminateProcessˢᴍProcess => ref terminateProcessˢᵇᴍProcess;
+private static readonly @string terminateProcessˢᵇᴍProcess = "TerminateProcess"u8;
 
-internal static error signal(this ж<Process> Ꮡp, Signal sig) {
+[GoMethodBody("signal")] internal static error signalᴍ(ж<Process> Ꮡp, Signal sig) {
     GoFrame ᒐ = default;
     try {
         var (handle, status) = Ꮡp.handleTransientAcquire();
@@ -102,12 +102,12 @@ internal static error signal(this ж<Process> Ꮡp, Signal sig) {
             ref var terminationHandle = ref heap(new syscall.Handle(), out var ᏑterminationHandle);
             var e = syscall.DuplicateHandle(~((syscall.Handle)((syscall.Handle)0)), (syscall.Handle)handle, ~((syscall.Handle)((syscall.Handle)0)), ᏑterminationHandle, syscall.PROCESS_TERMINATE, false, 0);
             if (e != nil) {
-                return NewSyscallError(duplicateHandleˢ, e);
+                return NewSyscallError(duplicateHandleˢᴍProcess, e);
             }
             runtime.KeepAlive(Ꮡp.OrTypedNil());
             defer(syscall.CloseHandle, terminationHandle, ref ᒐ);
             e = syscall.TerminateProcess(terminationHandle, 1);
-            return NewSyscallError(terminateProcessˢ, e);
+            return NewSyscallError(terminateProcessˢᴍProcess, e);
         }
         // TODO(rsc): Handle Interrupt too?
         return ((syscall.Errno)syscall.EWINDOWS);
@@ -116,9 +116,9 @@ internal static error signal(this ж<Process> Ꮡp, Signal sig) {
     finally { ᒐ.Run(); }
 }
 
-} partial class osᴛprocessHandle {
+} partial class os_package {
 
-internal static void closeHandle(this ref processHandle ph) {
+[GoMethodBody("closeHandle")] internal static void closeHandleᴍ(ref processHandle ph) {
     syscall.CloseHandle((syscall.Handle)ph.handle);
 }
 
@@ -228,13 +228,13 @@ internal static time.Duration ftToDuration(ж<syscall.Filetime> Ꮡft) {
     return ((time.Duration)(n * 100)) * time.Nanosecond;
 }
 
-} partial class osᴛProcessState {
+} partial class os_package {
 
-internal static time.Duration userTime(this ref ProcessState p) {
+[GoMethodBody("userTime")] internal static time.Duration userTimeᴍ(ref ProcessState p) {
     return ftToDuration(p.rusage.ᏑUserTime);
 }
 
-internal static time.Duration systemTime(this ref ProcessState p) {
+[GoMethodBody("systemTime")] internal static time.Duration systemTimeᴍ(ref ProcessState p) {
     return ftToDuration(p.rusage.ᏑKernelTime);
 }
 

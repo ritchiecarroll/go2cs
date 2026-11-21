@@ -10,9 +10,9 @@ using static routebsd_package;
 
 partial class routebsd_package {
 
-} partial class routebsdᴛwireFormat {
+} partial class routebsd_package {
 
-internal static (Message, error) parseInterfaceMessage(this ref wireFormat w, slice<byte> b) {
+[GoMethodBody("parseInterfaceMessage")] internal static (Message, error) parseInterfaceMessageᴍ(ref wireFormat w, slice<byte> b) {
     if (len(b) < w.bodyOff) {
         return (default, errMessageTooShort);
     }
@@ -53,7 +53,7 @@ internal static (Message, error) parseInterfaceMessage(this ref wireFormat w, sl
     return (new InterfaceMessageжMessage(m), default);
 }
 
-internal static (Message, error) parseInterfaceAddrMessage(this ref wireFormat w, slice<byte> b) {
+[GoMethodBody("parseInterfaceAddrMessage")] internal static (Message, error) parseInterfaceAddrMessageᴍ(ref wireFormat w, slice<byte> b) {
     if (len(b) < w.bodyOff) {
         return (default, errMessageTooShort);
     }

@@ -11,9 +11,9 @@ using static poll_package;
 
 partial class poll_package {
 
-} partial class pollᴛFD {
+} partial class poll_package {
 
-public static error Fstatat(this ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t> s, nint flags) {
+[GoMethodBody("Fstatat")] internal static error Fstatatᴍ(ж<FD> Ꮡfd, @string name, ж<Δsyscall.Stat_t> s, nint flags) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {

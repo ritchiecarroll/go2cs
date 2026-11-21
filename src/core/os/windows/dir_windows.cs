@@ -47,9 +47,9 @@ internal static UntypedInt dirBufSize => /* 64 * 1024 */ 65536; // 64kB
 )); }
 internal static ref Δsync.Pool dirBufPool => ref ((StaticBox<Δsync.Pool>)ᏑdirBufPool).ValueSlot;
 
-} partial class osᴛdirInfo {
+} partial class os_package {
 
-internal static void close(this ref dirInfo d) {
+[GoMethodBody("close")] internal static void closeᴍ(ref dirInfo d) {
     d.h = 0;
     if (d.buf != nil) {
         ᏑdirBufPool.Put(d.buf.OrTypedNil());
@@ -65,9 +65,9 @@ internal static void close(this ref dirInfo d) {
 internal static readonly ж<bool> ᏑallowReadDirFileID = new StaticBox<bool>(true);
 internal static ref bool allowReadDirFileID => ref ((StaticBox<bool>)ᏑallowReadDirFileID).ValueSlot;
 
-} partial class osᴛdirInfo {
+} partial class os_package {
 
-internal static void init(this ж<dirInfo> Ꮡd, syscall.Handle h) {
+[GoMethodBody("init")] internal static void initᴍ(ж<dirInfo> Ꮡd, syscall.Handle h) {
     ref var d = ref Ꮡd.DerefOrNull();
 
     d.h = h;
@@ -103,7 +103,7 @@ internal static void init(this ж<dirInfo> Ꮡd, syscall.Handle h) {
     }
 }
 
-} partial class osᴛFile {
+} partial class os_package {
 
 // go2cs generated this placeholder — func readdir is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -113,14 +113,14 @@ partial struct dirEntry {
     internal ж<fileStat> fs;
 }
 
-} partial class osᴛdirEntry {
+} partial class os_package {
 
-internal static @string Name(this dirEntry de) { return de.fs.Name(); }
-internal static bool IsDir(this dirEntry de) { return de.fs.IsDir(); }
-internal static FileMode Type(this dirEntry de) { return de.fs.Mode().Type(); }
-internal static (FileInfo, error) Info(this dirEntry de) { return (new fileStatжFileInfo(de.fs), default); }
+[GoMethodBody("Name")] internal static @string Nameᴍ(dirEntry de) { return de.fs.Name(); }
+[GoMethodBody("IsDir")] internal static bool IsDirᴍ(dirEntry de) { return de.fs.IsDir(); }
+[GoMethodBody("Type")] internal static FileMode Typeᴍ(dirEntry de) { return de.fs.Mode().Type(); }
+[GoMethodBody("Info")] internal static (FileInfo, error) Infoᴍ(dirEntry de) { return (new fileStatжFileInfo(de.fs), default); }
 
-internal static @string String(this dirEntry de) {
+[GoMethodBody("String")] internal static @string Stringᴍ(dirEntry de) {
     return fs.FormatDirEntry(de);
 }
 

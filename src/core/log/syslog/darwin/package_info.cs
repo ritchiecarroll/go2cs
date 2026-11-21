@@ -68,6 +68,10 @@ using static go.log.syslog_package;
 
 namespace go.log;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using static syslog_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("syslog")]
 public static partial class syslog_package
 {
@@ -112,3 +116,25 @@ public static partial class syslog_package
 [GoMethodHost(typeof(syslog_package.Writer)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syslogᴛWriter;
 [GoMethodHost(typeof(syslog_package.netConn)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class syslogᴛnetConn;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class syslogᴛWriter {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error /*err*/ connect(this ref Writer w) => syslog_package.connectᴍ(ref w);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static (nint, error) Write(this ж<Writer> Ꮡw, slice<byte> b) => syslog_package.Writeᴍ(Ꮡw, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Close(this ж<Writer> Ꮡw) => syslog_package.Closeᴍ(Ꮡw);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Emerg(this ж<Writer> Ꮡw, @string m) => syslog_package.Emergᴍ(Ꮡw, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Alert(this ж<Writer> Ꮡw, @string m) => syslog_package.Alertᴍ(Ꮡw, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Crit(this ж<Writer> Ꮡw, @string m) => syslog_package.Critᴍ(Ꮡw, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Err(this ж<Writer> Ꮡw, @string m) => syslog_package.Errᴍ(Ꮡw, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Warning(this ж<Writer> Ꮡw, @string m) => syslog_package.Warningᴍ(Ꮡw, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Notice(this ж<Writer> Ꮡw, @string m) => syslog_package.Noticeᴍ(Ꮡw, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Info(this ж<Writer> Ꮡw, @string m) => syslog_package.Infoᴍ(Ꮡw, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static error Debug(this ж<Writer> Ꮡw, @string m) => syslog_package.Debugᴍ(Ꮡw, m);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) writeAndRetry(this ж<Writer> Ꮡw, Priority p, @string s) => syslog_package.writeAndRetryᴍ(Ꮡw, p, s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (nint, error) write(this ref Writer w, Priority p, @string msg) => syslog_package.writeᴍ(ref w, p, msg);
+}
+partial class syslogᴛnetConn {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error writeString(this ref netConn n, Priority p, @string hostname, @string tag, @string msg, @string nl) => syslog_package.writeStringᴍ(ref n, p, hostname, tag, msg, nl);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error close(this ref netConn n) => syslog_package.closeᴍ(ref n);
+}
+// </GlyphForwarders>

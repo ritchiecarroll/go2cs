@@ -41,17 +41,17 @@ partial struct InterfaceMulticastAddrMessage {
     internal slice<byte> raw; // raw message
 }
 
-} partial class routebsdᴛInterfaceMessage {
+} partial class routebsd_package {
 
 // Implement the Message interface.
-internal static void message(this InterfaceMessage _) { }
+[GoMethodBody("message")] internal static void messageᴍ(InterfaceMessage _) { }
 
-} partial class routebsdᴛInterfaceAddrMessage {
+} partial class routebsd_package {
 
-internal static void message(this InterfaceAddrMessage _) { }
+[GoMethodBody("message")] internal static void messageᴍ(InterfaceAddrMessage _) { }
 
-} partial class routebsdᴛInterfaceMulticastAddrMessage {
+} partial class routebsd_package {
 
-internal static void message(this InterfaceMulticastAddrMessage _) { }
+[GoMethodBody("message")] internal static void messageᴍ(InterfaceMulticastAddrMessage _) { }
 
 }

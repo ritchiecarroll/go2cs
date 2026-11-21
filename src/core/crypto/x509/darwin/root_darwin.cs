@@ -12,15 +12,15 @@ using static x509_package;
 
 partial class x509_package {
 
-} partial class x509ᴛCertificate {
+} partial class x509_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidLeafCertificateˢ => ref invalidLeafCertificateˢᵇ;
-private static readonly @string invalidLeafCertificateˢᵇ = "invalid leaf certificate"u8;
-internal static ref readonly @string x509MacosCertificateˢ => ref x509MacosCertificateˢᵇ;
-private static readonly @string x509MacosCertificateˢᵇ = "x509: macos certificate verification internal error"u8;
+internal static ref readonly @string invalidLeafCertificateˢᴍCertificate => ref invalidLeafCertificateˢᵇᴍCertificate;
+private static readonly @string invalidLeafCertificateˢᵇᴍCertificate = "invalid leaf certificate"u8;
+internal static ref readonly @string x509MacosCertificateˢᴍCertificate => ref x509MacosCertificateˢᵇᴍCertificate;
+private static readonly @string x509MacosCertificateˢᵇᴍCertificate = "x509: macos certificate verification internal error"u8;
 
-internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ж<Certificate> Ꮡc, ж<VerifyOptions> Ꮡopts) {
+[GoMethodBody("systemVerify")] internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerifyᴍ(ж<Certificate> Ꮡc, ж<VerifyOptions> Ꮡopts) {
     slice<slice<ж<Certificate>>> chains = default;
     error err = default;
     GoFrame ᒐ = default;
@@ -32,7 +32,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
         defer(macos.ReleaseCFArray, certs, ref ᒐ);
         (var leaf, err) = macos.SecCertificateCreateWithData(c.Raw);
         if (err != nil) {
-            (chains, err) = (default, errors.New(invalidLeafCertificateˢ)); goto ᒐdone;
+            (chains, err) = (default, errors.New(invalidLeafCertificateˢᴍCertificate)); goto ᒐdone;
         }
         macos.CFArrayAppendValue(certs, leaf);
         if (opts.Intermediates != nil) {
@@ -109,7 +109,7 @@ internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(t
 
         if (len(chain[0]) == 0) {
             // This should _never_ happen, but to be safe
-            (chains, err) = (default, errors.New(x509MacosCertificateˢ)); goto ᒐdone;
+            (chains, err) = (default, errors.New(x509MacosCertificateˢᴍCertificate)); goto ᒐdone;
         }
 
         if (containsDistrustedSPKIHash(chain[0])) {

@@ -230,11 +230,11 @@ internal static (slice<ж<Certificate>> chain, error err) verifyChain(ж<Certifi
     return (chain, default);
 }
 
-} partial class x509ᴛCertificate {
+} partial class x509_package {
 
 // systemVerify is like Verify, except that it uses CryptoAPI calls
 // to build certificate chains and verify them.
-internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerify(this ж<Certificate> Ꮡc, ж<VerifyOptions> Ꮡopts) {
+[GoMethodBody("systemVerify")] internal static (slice<slice<ж<Certificate>>> chains, error err) systemVerifyᴍ(ж<Certificate> Ꮡc, ж<VerifyOptions> Ꮡopts) {
     slice<slice<ж<Certificate>>> chains = default;
     error err = default;
     GoFrame ᒐ = default;

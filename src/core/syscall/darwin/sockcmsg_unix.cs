@@ -23,9 +23,9 @@ public static nint CmsgSpace(nint datalen) {
     return cmsgAlignOf(SizeofCmsghdr) + cmsgAlignOf(datalen);
 }
 
-} partial class syscallᴛCmsghdr {
+} partial class syscall_package {
 
-internal static @unsafe.Pointer data(this ж<Cmsghdr> Ꮡh, uintptr offset) {
+[GoMethodBody("data")] internal static @unsafe.Pointer dataᴍ(ж<Cmsghdr> Ꮡh, uintptr offset) {
     return @unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡh), (uintptr)cmsgAlignOf(SizeofCmsghdr) + offset);
 }
 

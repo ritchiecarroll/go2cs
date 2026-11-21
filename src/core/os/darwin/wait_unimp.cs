@@ -10,7 +10,7 @@ using static os_package;
 
 partial class os_package {
 
-} partial class osᴛProcess {
+} partial class os_package {
 
 // blockUntilWaitable attempts to block until a call to p.Wait will
 // succeed immediately, and reports whether it has done so.
@@ -19,7 +19,7 @@ partial class os_package {
 // or where we have not implemented it yet. Note that this is racy:
 // a call to Process.Signal can in an extremely unlikely case send a
 // signal to the wrong process, see issue #13987.
-internal static (bool, error) blockUntilWaitable(this ref Process p) {
+[GoMethodBody("blockUntilWaitable")] internal static (bool, error) blockUntilWaitableᴍ(ref Process p) {
     return (false, default);
 }
 

@@ -456,9 +456,9 @@ public static UntypedInt PIPE_READMODE_MESSAGE => 0x00000002;
 // other native functions.
 partial struct NTStatus /*num:uint32*/;
 
-} partial class windowsᴛNTStatus {
+} partial class windows_package {
 
-public static syscall.Errno Errno(this NTStatus s) {
+[GoMethodBody("Errno")] internal static syscall.Errno Errnoᴍ(NTStatus s) {
     return rtlNtStatusToDosErrorNoTeb(s);
 }
 
@@ -466,9 +466,9 @@ public static syscall.Errno Errno(this NTStatus s) {
 
 internal static uint32 langID(uint16 pri, uint16 sub) { return (uint32)sub << 10 | (uint32)pri; }
 
-} partial class windowsᴛNTStatus {
+} partial class windows_package {
 
-public static @string Error(this NTStatus s) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(NTStatus s) {
     return s.Errno().Error();
 }
 

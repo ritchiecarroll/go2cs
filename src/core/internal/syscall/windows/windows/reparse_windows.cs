@@ -59,10 +59,10 @@ partial struct SymbolicLinkReparseBuffer {
     public array<uint16> PathBuffer = new(1);
 }
 
-} partial class windowsᴛSymbolicLinkReparseBuffer {
+} partial class windows_package {
 
 // Path returns path stored in rb.
-public static @string Path(this ref SymbolicLinkReparseBuffer rb) {
+[GoMethodBody("Path")] internal static @string Pathᴍ(ref SymbolicLinkReparseBuffer rb) {
     var n1 = (uint16)(rb.SubstituteNameOffset / 2);
     var n2 = (uint16)((uint16)(rb.SubstituteNameOffset + rb.SubstituteNameLength) / 2);
     return syscall.UTF16ToString(array<uint16>.AliasPointer(Ꮡ(rb.PathBuffer, 0), 65535).slice(n1, n2, n2));
@@ -87,10 +87,10 @@ partial struct MountPointReparseBuffer {
     public array<uint16> PathBuffer = new(1);
 }
 
-} partial class windowsᴛMountPointReparseBuffer {
+} partial class windows_package {
 
 // Path returns path stored in rb.
-public static @string Path(this ref MountPointReparseBuffer rb) {
+[GoMethodBody("Path")] internal static @string Pathᴍ(ref MountPointReparseBuffer rb) {
     var n1 = (uint16)(rb.SubstituteNameOffset / 2);
     var n2 = (uint16)((uint16)(rb.SubstituteNameOffset + rb.SubstituteNameLength) / 2);
     return syscall.UTF16ToString(array<uint16>.AliasPointer(Ꮡ(rb.PathBuffer, 0), 65535).slice(n1, n2, n2));

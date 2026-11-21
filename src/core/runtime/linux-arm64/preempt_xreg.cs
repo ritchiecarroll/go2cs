@@ -138,9 +138,9 @@ internal static void xRegRestore(ж<g> Ꮡgp) {
     gp.xRegs.state = default;
 }
 
-} partial class runtimeᴛxRegPerP {
+} partial class runtime_package {
 
-internal static void free(this ref xRegPerP xRegs) {
+[GoMethodBody("free")] internal static void freeᴍ(ref xRegPerP xRegs) {
     if (xRegs.cache != nil) {
         @lock(ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡlock));
         ᏑxRegAlloc.of(xRegAllocᴛ1.Ꮡalloc).free(@unsafe.Pointer.FromPinnedBox(xRegs.cache));

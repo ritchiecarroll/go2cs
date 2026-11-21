@@ -84,6 +84,12 @@ using static go.@internal.routebsd_package;
 
 namespace go.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using net;
+using static routebsd_package;
+using go.@internal;
+// </GlyphForwarderUsings>
+
 [GoPackage("routebsd")]
 public static partial class routebsd_package
 {
@@ -137,3 +143,41 @@ public static partial class routebsd_package
 [GoMethodHost(typeof(routebsd_package.binaryLittleEndian)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛbinaryLittleEndian;
 [GoMethodHost(typeof(routebsd_package.wireFormat)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class routebsdᴛwireFormat;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class routebsdᴛLinkAddr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Family(this ref LinkAddr a) => routebsd_package.Familyᴍ(ref a);
+}
+partial class routebsdᴛInetAddr {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint Family(this ref InetAddr a) => routebsd_package.Familyᴍ(ref a);
+}
+partial class routebsdᴛbinaryLittleEndian {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 Uint16(this binaryLittleEndian _, slice<byte> b) => routebsd_package.Uint16ᴍ(_, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 Uint32(this binaryLittleEndian _, slice<byte> b) => routebsd_package.Uint32ᴍ(_, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 Uint64(this binaryLittleEndian _, slice<byte> b) => routebsd_package.Uint64ᴍ(_, b);
+}
+partial class routebsdᴛbinaryBigEndian {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint16 Uint16(this binaryBigEndian _, slice<byte> b) => routebsd_package.Uint16ᴍ(_, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint32 Uint32(this binaryBigEndian _, slice<byte> b) => routebsd_package.Uint32ᴍ(_, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static uint64 Uint64(this binaryBigEndian _, slice<byte> b) => routebsd_package.Uint64ᴍ(_, b);
+}
+partial class routebsdᴛInterfaceMessage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void message(this InterfaceMessage _) => routebsd_package.messageᴍ(_);
+}
+partial class routebsdᴛInterfaceAddrMessage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void message(this InterfaceAddrMessage _) => routebsd_package.messageᴍ(_);
+}
+partial class routebsdᴛInterfaceMulticastAddrMessage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void message(this InterfaceMulticastAddrMessage _) => routebsd_package.messageᴍ(_);
+}
+partial class routebsdᴛwireFormat {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Message, error) parseInterfaceMessage(this ref wireFormat w, slice<byte> b) => routebsd_package.parseInterfaceMessageᴍ(ref w, b);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Message, error) parseInterfaceAddrMessage(this ref wireFormat w, slice<byte> b) => routebsd_package.parseInterfaceAddrMessageᴍ(ref w, b);
+}
+partial class routebsdᴛwireFormat {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static (Message, error) parseInterfaceMulticastAddrMessage(this ref wireFormat w, slice<byte> b) => routebsd_package.parseInterfaceMulticastAddrMessageᴍ(ref w, b);
+}
+partial class routebsdᴛInterfaceMessage {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static nint MTU(this ref InterfaceMessage m) => routebsd_package.MTUᴍ(ref m);
+}
+// </GlyphForwarders>

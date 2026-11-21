@@ -96,6 +96,11 @@ using static go.crypto.x509.@internal.macos_package;
 
 namespace go.crypto.x509.@internal;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using go.@internal;
+using static macos_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("macos")]
 public static partial class macos_package
 {
@@ -136,3 +141,9 @@ public static partial class macos_package
 // <MethodHolders>
 [GoMethodHost(typeof(macos_package.OSStatus)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class macosᴛOSStatus;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class macosᴛOSStatus {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this OSStatus s) => macos_package.Errorᴍ(s);
+}
+// </GlyphForwarders>

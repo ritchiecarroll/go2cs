@@ -25,10 +25,10 @@ partial struct LinkAddr {
     public slice<byte> Addr; // link-layer address when attached
 }
 
-} partial class routebsdᴛLinkAddr {
+} partial class routebsd_package {
 
 // Family implements the Family method of Addr interface.
-public static nint Family(this ref LinkAddr a) { return syscall.AF_LINK; }
+[GoMethodBody("Family")] internal static nint Familyᴍ(ref LinkAddr a) { return syscall.AF_LINK; }
 
 } partial class routebsd_package {
 
@@ -97,9 +97,9 @@ partial struct InetAddr {
     public netip.Addr IP;
 }
 
-} partial class routebsdᴛInetAddr {
+} partial class routebsd_package {
 
-public static nint Family(this ref InetAddr a) {
+[GoMethodBody("Family")] internal static nint Familyᴍ(ref InetAddr a) {
     if (a.IP.Is4()) {
         return syscall.AF_INET;
     } else {

@@ -12,18 +12,18 @@ using static os_package;
 
 partial class os_package {
 
-} partial class osᴛFile {
+} partial class os_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string fstatatˢ => ref fstatatˢᵇ;
-private static readonly @string fstatatˢᵇ = "fstatat"u8;
+internal static ref readonly @string fstatatˢᴍFile => ref fstatatˢᵇᴍFile;
+private static readonly @string fstatatˢᵇᴍFile = "fstatat"u8;
 
-internal static (FileInfo, error) lstatatNolog(this ж<File> Ꮡf, @string name) {
+[GoMethodBody("lstatatNolog")] internal static (FileInfo, error) lstatatNologᴍ(ж<File> Ꮡf, @string name) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     ref var fs = ref heap(new fileStat(), out var Ꮡfs);
     var err = Ꮡf.of(File.Ꮡpfd).Fstatat(name, Ꮡfs.Ꮡsys, unix.AT_SYMLINK_NOFOLLOW); if (err != nil) {
-        return (default, f.wrapErr(fstatatˢ, err));
+        return (default, f.wrapErr(fstatatˢᴍFile, err));
     }
     fillFileStatFromSys(Ꮡfs, name);
     return (new fileStatжFileInfo(Ꮡfs), default);

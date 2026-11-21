@@ -58,9 +58,9 @@ internal static (nint, error) lookupProtocol(context.Context _, @string name) {
     return lookupProtocolMap(name);
 }
 
-} partial class netᴛResolver {
+} partial class net_package {
 
-internal static (slice<@string> addrs, error err) lookupHost(this ж<Resolver> Ꮡr, context.Context ctx, @string host) {
+[GoMethodBody("lookupHost")] internal static (slice<@string> addrs, error err) lookupHostᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string host) {
     var (order, conf) = systemConf().hostLookupOrder(Ꮡr, host);
     if (order == hostLookupCgo) {
         return cgoLookupHost(ctx, host);
@@ -68,7 +68,7 @@ internal static (slice<@string> addrs, error err) lookupHost(this ж<Resolver> �
     return Ꮡr.goLookupHostOrder(ctx, host, order, conf);
 }
 
-internal static (slice<IPAddr> addrs, error err) lookupIP(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
+[GoMethodBody("lookupIP")] internal static (slice<IPAddr> addrs, error err) lookupIPᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string network, @string host) {
     error err = default;
 
     var (order, conf) = systemConf().hostLookupOrder(Ꮡr, host);
@@ -79,7 +79,7 @@ internal static (slice<IPAddr> addrs, error err) lookupIP(this ж<Resolver> Ꮡr
     return (ips, err);
 }
 
-internal static (nint, error) lookupPort(this ж<Resolver> Ꮡr, context.Context ctx, @string network, @string service) {
+[GoMethodBody("lookupPort")] internal static (nint, error) lookupPortᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string network, @string service) {
     // Port lookup is not a DNS operation.
     // Prefer the cgo resolver if possible.
     if (!systemConf().mustUseGoResolver(Ꮡr)) {
@@ -96,7 +96,7 @@ internal static (nint, error) lookupPort(this ж<Resolver> Ꮡr, context.Context
     return goLookupPort(network, service);
 }
 
-internal static (@string, error) lookupCNAME(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+[GoMethodBody("lookupCNAME")] internal static (@string, error) lookupCNAMEᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     var (order, conf) = systemConf().hostLookupOrder(Ꮡr, name);
     if (order == hostLookupCgo) {
         var (cname, err) = cgoLookupCNAME(ctx, name); if (err == nil) {
@@ -106,23 +106,23 @@ internal static (@string, error) lookupCNAME(this ж<Resolver> Ꮡr, context.Con
     return Ꮡr.goLookupCNAME(ctx, name, order, conf);
 }
 
-internal static (@string, slice<ж<SRV>>, error) lookupSRV(this ж<Resolver> Ꮡr, context.Context ctx, @string service, @string proto, @string name) {
+[GoMethodBody("lookupSRV")] internal static (@string, slice<ж<SRV>>, error) lookupSRVᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string service, @string proto, @string name) {
     return Ꮡr.goLookupSRV(ctx, service, proto, name);
 }
 
-internal static (slice<ж<MX>>, error) lookupMX(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+[GoMethodBody("lookupMX")] internal static (slice<ж<MX>>, error) lookupMXᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     return Ꮡr.goLookupMX(ctx, name);
 }
 
-internal static (slice<ж<NS>>, error) lookupNS(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+[GoMethodBody("lookupNS")] internal static (slice<ж<NS>>, error) lookupNSᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     return Ꮡr.goLookupNS(ctx, name);
 }
 
-internal static (slice<@string>, error) lookupTXT(this ж<Resolver> Ꮡr, context.Context ctx, @string name) {
+[GoMethodBody("lookupTXT")] internal static (slice<@string>, error) lookupTXTᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string name) {
     return Ꮡr.goLookupTXT(ctx, name);
 }
 
-internal static (slice<@string>, error) lookupAddr(this ж<Resolver> Ꮡr, context.Context ctx, @string addr) {
+[GoMethodBody("lookupAddr")] internal static (slice<@string>, error) lookupAddrᴍ(ж<Resolver> Ꮡr, context.Context ctx, @string addr) {
     var (order, conf) = systemConf().addrLookupOrder(Ꮡr, addr);
     if (order == hostLookupCgo) {
         return cgoLookupPTR(ctx, addr);

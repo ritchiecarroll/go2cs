@@ -57,10 +57,10 @@ public static fs.FileMode ModeType => /* fs.ModeType */ 2401763328;
 
 public static fs.FileMode ModePerm => /* fs.ModePerm */ 511; // Unix permission bits, 0o777
 
-} partial class osᴛfileStat {
+} partial class os_package {
 
-internal static @string Name(this ref fileStat fs) { return fs.name; }
-internal static bool IsDir(this ref fileStat fs) { return fs.Mode().IsDir(); }
+[GoMethodBody("Name")] internal static @string Nameᴍ(ref fileStat fs) { return fs.name; }
+[GoMethodBody("IsDir")] internal static bool IsDirᴍ(ref fileStat fs) { return fs.Mode().IsDir(); }
 
 } partial class os_package {
 

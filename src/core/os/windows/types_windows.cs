@@ -152,19 +152,19 @@ internal static ж<fileStat> newFileStatFromWin32finddata(ref syscall.Win32findd
     return fs;
 }
 
-} partial class osᴛfileStat {
+} partial class os_package {
 
 // isReparseTagNameSurrogate determines whether a tag's associated
 // reparse point is a surrogate for another named entity (for example, a mounted folder).
 //
 // See https://learn.microsoft.com/en-us/windows/win32/api/winnt/nf-winnt-isreparsetagnamesurrogate
 // and https://learn.microsoft.com/en-us/windows/win32/fileio/reparse-point-tags.
-internal static bool isReparseTagNameSurrogate(this ref fileStat fs) {
+[GoMethodBody("isReparseTagNameSurrogate")] internal static bool isReparseTagNameSurrogateᴍ(ref fileStat fs) {
     // True for IO_REPARSE_TAG_SYMLINK and IO_REPARSE_TAG_MOUNT_POINT.
     return (fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_REPARSE_POINT) != 0 && (fs.ReparseTag & 0x20000000) != 0;
 }
 
-internal static int64 Size(this ref fileStat fs) {
+[GoMethodBody("Size")] internal static int64 Sizeᴍ(ref fileStat fs) {
     return ((int64)fs.FileSizeHigh << 32) + (int64)fs.FileSizeLow;
 }
 
@@ -172,9 +172,9 @@ internal static int64 Size(this ref fileStat fs) {
 
 internal static ж<godebug.Setting> winsymlink = godebug.New("winsymlink");
 
-} partial class osᴛfileStat {
+} partial class os_package {
 
-internal static FileMode Mode(this ref fileStat fs) {
+[GoMethodBody("Mode")] internal static FileMode Modeᴍ(ref fileStat fs) {
     var m = fs.mode();
     if (winsymlink.Value() == "0"u8) {
         var old = fs.modePreGo1_23();
@@ -186,7 +186,7 @@ internal static FileMode Mode(this ref fileStat fs) {
     return m;
 }
 
-internal static FileMode /*m*/ mode(this ref fileStat fs) {
+[GoMethodBody("mode")] internal static FileMode /*m*/ modeᴍ(ref fileStat fs) {
     FileMode m = default;
 
     if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
@@ -258,7 +258,7 @@ internal static FileMode /*m*/ mode(this ref fileStat fs) {
 // logic for determining the file mode.
 // The logic is subtle and not well-documented, so it is better to keep it
 // separate from the new logic.
-internal static FileMode /*m*/ modePreGo1_23(this ref fileStat fs) {
+[GoMethodBody("modePreGo1_23")] internal static FileMode /*m*/ modePreGo1_23ᴍ(ref fileStat fs) {
     FileMode m = default;
 
     if ((fs.FileAttributes & (uint32)syscall.FILE_ATTRIBUTE_READONLY) != 0) {
@@ -296,12 +296,12 @@ internal static FileMode /*m*/ modePreGo1_23(this ref fileStat fs) {
     return m;
 }
 
-internal static time.Time ModTime(this ref fileStat fs) {
+[GoMethodBody("ModTime")] internal static time.Time ModTimeᴍ(ref fileStat fs) {
     return time.Unix(0, fs.LastWriteTime.Nanoseconds());
 }
 
 // Sys returns syscall.Win32FileAttributeData for file fs.
-internal static any Sys(this ref fileStat fs) {
+[GoMethodBody("Sys")] internal static any Sysᴍ(ref fileStat fs) {
     return Ꮡ(new syscall.Win32FileAttributeData(
         FileAttributes: fs.FileAttributes,
         CreationTime: fs.CreationTime,
@@ -312,7 +312,7 @@ internal static any Sys(this ref fileStat fs) {
     ));
 }
 
-internal static error loadFileId(this ж<fileStat> Ꮡfs) {
+[GoMethodBody("loadFileId")] internal static error loadFileIdᴍ(ж<fileStat> Ꮡfs) {
     GoFrame ᒐ = default;
     try {
         ref var fs = ref Ꮡfs.DerefOrNull();
@@ -372,7 +372,7 @@ internal static error loadFileId(this ж<fileStat> Ꮡfs) {
 
 // saveInfoFromPath saves full path of the file to be used by os.SameFile later,
 // and set name from path.
-internal static error saveInfoFromPath(this ref fileStat fs, @string path) {
+[GoMethodBody("saveInfoFromPath")] internal static error saveInfoFromPathᴍ(ref fileStat fs, @string path) {
     fs.path = path;
     if (!filepathlite.IsAbs(fs.path)) {
         error err = default;

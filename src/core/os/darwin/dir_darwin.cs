@@ -17,9 +17,9 @@ partial struct dirInfo {
     internal uintptr dir; // Pointer to DIR structure from dirent.h
 }
 
-} partial class osᴛdirInfo {
+} partial class os_package {
 
-internal static void close(this ref dirInfo d) {
+[GoMethodBody("close")] internal static void closeᴍ(ref dirInfo d) {
     if (d.dir == 0) {
         return;
     }
@@ -27,7 +27,7 @@ internal static void close(this ref dirInfo d) {
     d.dir = 0;
 }
 
-} partial class osᴛFile {
+} partial class os_package {
 
 // go2cs generated this placeholder — func readdir is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

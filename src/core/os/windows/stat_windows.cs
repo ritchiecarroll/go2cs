@@ -15,11 +15,11 @@ using static os_package;
 
 partial class os_package {
 
-} partial class osᴛFile {
+} partial class os_package {
 
 // Stat returns the [FileInfo] structure describing file.
 // If there is an error, it will be of type [*PathError].
-public static (FileInfo, error) Stat(this ж<File> Ꮡfile) {
+[GoMethodBody("Stat")] internal static (FileInfo, error) Statᴍ(ж<File> Ꮡfile) {
     ref var @file = ref Ꮡfile.DerefOrNull();
 
     if (Ꮡfile == nil) {

@@ -61,6 +61,11 @@ using static go.@internal.runtime.syscall.windows_package;
 
 namespace go.@internal.runtime.syscall;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using go.@internal;
+using static windows_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("windows")]
 public static partial class windows_package
 {
@@ -105,3 +110,19 @@ public static partial class windows_package
 [GoMethodHost(typeof(windows_package.Context)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class windowsᴛContext;
 [GoMethodHost(typeof(windows_package.DISPATCHER_CONTEXT)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class windowsᴛDISPATCHER_CONTEXT;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class windowsᴛContext {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uintptr PC(this ref Context c) => windows_package.PCᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uintptr SP(this ref Context c) => windows_package.SPᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uintptr LR(this ref Context c) => windows_package.LRᴍ(ref c);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetLR(this ref Context c, uintptr x) => windows_package.SetLRᴍ(ref c, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetPC(this ref Context c, uintptr x) => windows_package.SetPCᴍ(ref c, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetSP(this ref Context c, uintptr x) => windows_package.SetSPᴍ(ref c, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void SetFP(this ref Context c, uintptr x) => windows_package.SetFPᴍ(ref c, x);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static void PushCall(this ref Context c, uintptr targetPC, uintptr resumePC) => windows_package.PushCallᴍ(ref c, targetPC, resumePC);
+}
+partial class windowsᴛDISPATCHER_CONTEXT {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static ж<Context> Ctx(this ref DISPATCHER_CONTEXT c) => windows_package.Ctxᴍ(ref c);
+}
+// </GlyphForwarders>

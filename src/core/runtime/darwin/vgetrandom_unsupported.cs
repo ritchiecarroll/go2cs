@@ -4,7 +4,7 @@
 //go:build !(linux && (amd64 || arm64 || arm64be || ppc64 || ppc64le || loong64 || s390x))
 namespace go;
 
-// blank import: unsafe_package (side effects only; no using emitted — a `using _` alias hijacks C# discards)
+// import _ "unsafe" (nothing to initialize)
 
 partial class runtime_package {
 

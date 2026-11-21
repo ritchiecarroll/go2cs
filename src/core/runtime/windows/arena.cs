@@ -214,7 +214,7 @@ partial struct userArena {
 
 // go2cs generated this placeholder — func newUserArena is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
-} partial class runtimeᴛuserArena {
+} partial class runtime_package {
 
 // go2cs generated this placeholder — func new is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 
@@ -226,7 +226,7 @@ partial struct userArena {
 // in a new chunk. If cap is negative, the type will be taken literally, otherwise
 // it will be considered as an element type for a slice backing store with capacity
 // cap.
-internal static @unsafe.Pointer alloc(this ref userArena a, ж<_type> typ, nint cap) {
+[GoMethodBody("alloc")] internal static @unsafe.Pointer allocᴍ(ref userArena a, ж<_type> typ, nint cap) {
     var s = a.active;
     @unsafe.Pointer x = default;
     for (;;) {
@@ -240,14 +240,14 @@ internal static @unsafe.Pointer alloc(this ref userArena a, ж<_type> typ, nint 
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string wastedTooMuchMemoryInAnˢ => ref wastedTooMuchMemoryInAnˢᵇ;
-private static readonly @string wastedTooMuchMemoryInAnˢᵇ = "wasted too much memory in an arena chunk"u8;
-internal static ref readonly @string outOfMemoryˢ => ref outOfMemoryˢᵇ;
-private static readonly @string outOfMemoryˢᵇ = "out of memory"u8;
+internal static ref readonly @string wastedTooMuchMemoryInAnˢᴍuserArena => ref wastedTooMuchMemoryInAnˢᵇᴍuserArena;
+private static readonly @string wastedTooMuchMemoryInAnˢᵇᴍuserArena = "wasted too much memory in an arena chunk"u8;
+internal static ref readonly @string outOfMemoryˢᴍuserArena => ref outOfMemoryˢᵇᴍuserArena;
+private static readonly @string outOfMemoryˢᵇᴍuserArena = "out of memory"u8;
 
 // refill inserts the current arena chunk onto the full list and obtains a new
 // one, either from the partial list or allocating a new one, both from mheap.
-internal static ж<mspan> refill(this ref userArena a) {
+[GoMethodBody("refill")] internal static ж<mspan> refillᴍ(ref userArena a) {
     // If there's an active chunk, assume it's full.
     var s = a.active;
     if (s != nil) {
@@ -256,7 +256,7 @@ internal static ж<mspan> refill(this ref userArena a) {
             // in a chunk because the allocation that failed may still leave
             // some free space available. However, that amount of free space
             // should never exceed the maximum allocation size.
-            @throw(wastedTooMuchMemoryInAnˢ);
+            @throw(wastedTooMuchMemoryInAnˢᴍuserArena);
         }
         s.next = a.fullList;
         a.fullList = s;
@@ -281,7 +281,7 @@ internal static ж<mspan> refill(this ref userArena a) {
         // Allocate a new one.
         (x, s) = newUserArenaChunk();
         if (s == nil) {
-            @throw(outOfMemoryˢ);
+            @throw(outOfMemoryˢᴍuserArena);
         }
     }
     a.refs = append(a.refs, x);
@@ -313,23 +313,23 @@ partial struct userArenaStateᴛ1 /*dyn*/ {
 internal static readonly ж<userArenaStateᴛ1> ᏑuserArenaState = new StaticBox<userArenaStateᴛ1>(new userArenaStateᴛ1());
 internal static ref userArenaStateᴛ1 userArenaState => ref ((StaticBox<userArenaStateᴛ1>)ᏑuserArenaState).ValueSlot;
 
-} partial class runtimeᴛmspan {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string outOfMemoryˢ => ref outOfMemoryˢᵇ;
-private static readonly @string outOfMemoryˢᵇ = "out of memory"u8;
-internal static ref readonly @string mallocDeadlockˢ => ref mallocDeadlockˢᵇ;
-private static readonly @string mallocDeadlockˢᵇ = "malloc deadlock"u8;
-internal static ref readonly @string mallocDuringSignalˢ => ref mallocDuringSignalˢᵇ;
-private static readonly @string mallocDuringSignalˢᵇ = "malloc during signal"u8;
-internal static ref readonly @string arenaChunkNeedsZeroingˢ => ref arenaChunkNeedsZeroingˢᵇ;
-private static readonly @string arenaChunkNeedsZeroingˢᵇ = "arena chunk needs zeroing, but should already be zeroed"u8;
-internal static ref readonly @string mallocgcCalledWithoutAPˢ => ref mallocgcCalledWithoutAPˢᵇ;
-private static readonly @string mallocgcCalledWithoutAPˢᵇ = "mallocgc called without a P or outside bootstrapping"u8;
+internal static ref readonly @string outOfMemoryˢᴍmspan => ref outOfMemoryˢᵇᴍmspan;
+private static readonly @string outOfMemoryˢᵇᴍmspan = "out of memory"u8;
+internal static ref readonly @string mallocDeadlockˢᴍmspan => ref mallocDeadlockˢᵇᴍmspan;
+private static readonly @string mallocDeadlockˢᵇᴍmspan = "malloc deadlock"u8;
+internal static ref readonly @string mallocDuringSignalˢᴍmspan => ref mallocDuringSignalˢᵇᴍmspan;
+private static readonly @string mallocDuringSignalˢᵇᴍmspan = "malloc during signal"u8;
+internal static ref readonly @string arenaChunkNeedsZeroingˢᴍmspan => ref arenaChunkNeedsZeroingˢᵇᴍmspan;
+private static readonly @string arenaChunkNeedsZeroingˢᵇᴍmspan = "arena chunk needs zeroing, but should already be zeroed"u8;
+internal static ref readonly @string mallocgcCalledWithoutAPˢᴍmspan => ref mallocgcCalledWithoutAPˢᵇᴍmspan;
+private static readonly @string mallocgcCalledWithoutAPˢᵇᴍmspan = "mallocgc called without a P or outside bootstrapping"u8;
 
 // userArenaNextFree reserves space in the user arena for an item of the specified
 // type. If cap is not -1, this is for an array of cap elements of type t.
-internal static @unsafe.Pointer userArenaNextFree(this ж<mspan> Ꮡs, ж<_type> Ꮡtyp, nint cap) {
+[GoMethodBody("userArenaNextFree")] internal static @unsafe.Pointer userArenaNextFreeᴍ(ж<mspan> Ꮡs, ж<_type> Ꮡtyp, nint cap) {
     ref var s = ref Ꮡs.DerefOrNull();
     ref var typ = ref Ꮡtyp.DerefOrNull();
 
@@ -337,7 +337,7 @@ internal static @unsafe.Pointer userArenaNextFree(this ж<mspan> Ꮡs, ж<_type>
     if (cap > 0) {
         if (size > ~(uintptr)0 / (uintptr)cap) {
             // Overflow.
-            @throw(outOfMemoryˢ);
+            @throw(outOfMemoryˢᴍmspan);
         }
         size *= (uintptr)cap;
     }
@@ -358,10 +358,10 @@ internal static @unsafe.Pointer userArenaNextFree(this ж<mspan> Ꮡs, ж<_type>
     // Act like we're allocating.
     var mp = acquirem();
     if ((~mp).mallocing != 0) {
-        @throw(mallocDeadlockˢ);
+        @throw(mallocDeadlockˢᴍmspan);
     }
     if ((~mp).gsignal == getg()) {
-        @throw(mallocDuringSignalˢ);
+        @throw(mallocDuringSignalˢᴍmspan);
     }
     mp.Value.mallocing = 1;
 
@@ -385,7 +385,7 @@ internal static @unsafe.Pointer userArenaNextFree(this ж<mspan> Ꮡs, ж<_type>
         return default;
     }
     if (s.needzero != 0) {
-        @throw(arenaChunkNeedsZeroingˢ);
+        @throw(arenaChunkNeedsZeroingˢᴍmspan);
     }
     // Set up heap bitmap and do extra accounting.
     if (typ.Pointers()) {
@@ -396,7 +396,7 @@ internal static @unsafe.Pointer userArenaNextFree(this ж<mspan> Ꮡs, ж<_type>
         }
         var c = getMCache(ref (mp).DerefOrNull());
         if (c == nil) {
-            @throw(mallocgcCalledWithoutAPˢ);
+            @throw(mallocgcCalledWithoutAPˢᴍmspan);
         }
         if (cap > 0) {
             c.scanAlloc += size - (typ.Size_ - typ.PtrBytes);
@@ -494,9 +494,9 @@ partial struct writeUserArenaHeapBits {
     internal uintptr low;    // number of low-order bits to not overwrite
 }
 
-} partial class runtimeᴛmspan {
+} partial class runtime_package {
 
-internal static writeUserArenaHeapBits /*h*/ writeUserArenaHeapBits(this ref mspan s, uintptr addr) {
+[GoMethodBody("writeUserArenaHeapBits")] internal static writeUserArenaHeapBits /*h*/ writeUserArenaHeapBitsᴍ(ref mspan s, uintptr addr) {
     writeUserArenaHeapBits h = default;
 
     var offset = addr - s.@base();
@@ -516,11 +516,11 @@ internal static writeUserArenaHeapBits /*h*/ writeUserArenaHeapBits(this ref msp
     return h;
 }
 
-} partial class runtimeᴛwriteUserArenaHeapBits {
+} partial class runtime_package {
 
 // write appends the pointerness of the next valid pointer slots
 // using the low valid bits of bits. 1=pointer, 0=scalar.
-internal static writeUserArenaHeapBits write(this writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr bits, uintptr valid) {
+[GoMethodBody("write")] internal static writeUserArenaHeapBits writeᴍ(writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr bits, uintptr valid) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (h.valid + valid <= ptrBits) {
@@ -553,7 +553,7 @@ internal static writeUserArenaHeapBits write(this writeUserArenaHeapBits h, ж<m
 }
 
 // Add padding of size bytes.
-internal static writeUserArenaHeapBits pad(this writeUserArenaHeapBits h, ж<mspan> s, uintptr size) {
+[GoMethodBody("pad")] internal static writeUserArenaHeapBits padᴍ(writeUserArenaHeapBits h, ж<mspan> s, uintptr size) {
     if (size == 0) {
         return h;
     }
@@ -567,7 +567,7 @@ internal static writeUserArenaHeapBits pad(this writeUserArenaHeapBits h, ж<msp
 
 // Flush the bits that have been written, and add zeros as needed
 // to cover the full object [addr, addr+size).
-internal static void flush(this writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr addr, uintptr size) {
+[GoMethodBody("flush")] internal static void flushᴍ(writeUserArenaHeapBits h, ж<mspan> Ꮡs, uintptr addr, uintptr size) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     var offset = addr - s.@base();
@@ -756,7 +756,7 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
     return (x, span);
 }
 
-} partial class runtimeᴛmspan {
+} partial class runtime_package {
 
 // isUnusedUserArenaChunk indicates that the arena chunk has been set to fault
 // and doesn't contain any scannable memory anymore. However, it might still be
@@ -768,29 +768,29 @@ internal static (@unsafe.Pointer, ж<mspan>) newUserArenaChunk() {
 // This is really only meant to be used by accounting tests in the runtime to
 // distinguish when a span shouldn't be counted (since mSpanInUse might not be
 // enough).
-internal static bool isUnusedUserArenaChunk(this ref mspan s) {
+[GoMethodBody("isUnusedUserArenaChunk")] internal static bool isUnusedUserArenaChunkᴍ(ref mspan s) {
     return s.isUserArenaChunk && s.spanclass == makeSpanClass(0, true);
 }
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string invalidSpanInHeapArenaˢ => ref invalidSpanInHeapArenaˢᵇ;
-private static readonly @string invalidSpanInHeapArenaˢᵇ = "invalid span in heapArena for user arena"u8;
-internal static ref readonly @string spanOnUserArenaFaultListˢ => ref spanOnUserArenaFaultListˢᵇ;
-private static readonly @string spanOnUserArenaFaultListˢᵇ = "span on userArena.faultList has invalid size"u8;
+internal static ref readonly @string invalidSpanInHeapArenaˢᴍmspan => ref invalidSpanInHeapArenaˢᵇᴍmspan;
+private static readonly @string invalidSpanInHeapArenaˢᵇᴍmspan = "invalid span in heapArena for user arena"u8;
+internal static ref readonly @string spanOnUserArenaFaultListˢᴍmspan => ref spanOnUserArenaFaultListˢᵇᴍmspan;
+private static readonly @string spanOnUserArenaFaultListˢᵇᴍmspan = "span on userArena.faultList has invalid size"u8;
 
 // setUserArenaChunkToFault sets the address space for the user arena chunk to fault
 // and releases any underlying memory resources.
 //
 // Must be in a non-preemptible state to ensure the consistency of statistics
 // exported to MemStats.
-internal static void setUserArenaChunkToFault(this ж<mspan> Ꮡs) {
+[GoMethodBody("setUserArenaChunkToFault")] internal static void setUserArenaChunkToFaultᴍ(ж<mspan> Ꮡs) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (!s.isUserArenaChunk) {
-        @throw(invalidSpanInHeapArenaˢ);
+        @throw(invalidSpanInHeapArenaˢᴍmspan);
     }
     if (s.npages * (uintptr)pageSize != userArenaChunkBytes) {
-        @throw(spanOnUserArenaFaultListˢ);
+        @throw(spanOnUserArenaFaultListˢᴍmspan);
     }
 
     // Update the span class to be noscan. What we want to happen is that
@@ -928,13 +928,13 @@ internal static void freeUserArenaChunk(ж<mspan> Ꮡs, @unsafe.Pointer x) {
     releasem(ref (mp).DerefOrNull());
 }
 
-} partial class runtimeᴛmheap {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sysAllocSizeIsNotˢ => ref sysAllocSizeIsNotˢᵇ;
-private static readonly @string sysAllocSizeIsNotˢᵇ = "sysAlloc size is not divisible by userArenaChunkBytes"u8;
-internal static ref readonly @string userArenaChunkˢ => ref userArenaChunkˢᵇ;
-private static readonly @string userArenaChunkˢᵇ = "user arena chunk"u8;
+internal static ref readonly @string sysAllocSizeIsNotˢᴍmheap => ref sysAllocSizeIsNotˢᵇᴍmheap;
+private static readonly @string sysAllocSizeIsNotˢᵇᴍmheap = "sysAlloc size is not divisible by userArenaChunkBytes"u8;
+internal static ref readonly @string userArenaChunkˢᴍmheap => ref userArenaChunkˢᵇᴍmheap;
+private static readonly @string userArenaChunkˢᵇᴍmheap = "user arena chunk"u8;
 
 // allocUserArenaChunk attempts to reuse a free user arena chunk represented
 // as a span.
@@ -945,7 +945,7 @@ private static readonly @string userArenaChunkˢᵇ = "user arena chunk"u8;
 // Acquires the heap lock. Must run on the system stack for that reason.
 //
 //go:systemstack
-internal static ж<mspan> allocUserArenaChunk(this ж<mheap> Ꮡh) {
+[GoMethodBody("allocUserArenaChunk")] internal static ж<mspan> allocUserArenaChunkᴍ(ж<mheap> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     ж<mspan> s = default;
@@ -968,7 +968,7 @@ internal static ж<mspan> allocUserArenaChunk(this ж<mheap> Ꮡh) {
         }
         var (v, size) = Ꮡh.sysAlloc(userArenaChunkBytes, hintList, Ꮡmheap_.ᏑuserArenaArenas);
         if (size % userArenaChunkBytes != 0) {
-            @throw(sysAllocSizeIsNotˢ);
+            @throw(sysAllocSizeIsNotˢᴍmheap);
         }
         if (size > userArenaChunkBytes) {
             // We got more than we asked for. This can happen if
@@ -999,7 +999,7 @@ internal static ж<mspan> allocUserArenaChunk(this ж<mheap> Ꮡh) {
     //
     // Unlike (*mheap).grow, just map in everything that we
     // asked for. We're likely going to use it all.
-    sysMap((@unsafe.Pointer)@base, userArenaChunkBytes, ᏑgcController.ᏑheapReleased, userArenaChunkˢ);
+    sysMap((@unsafe.Pointer)@base, userArenaChunkBytes, ᏑgcController.ᏑheapReleased, userArenaChunkˢᴍmheap);
     sysUsed((@unsafe.Pointer)@base, userArenaChunkBytes, userArenaChunkBytes);
 
     // Model the user arena as a heap span for a large object.

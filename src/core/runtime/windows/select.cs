@@ -562,9 +562,9 @@ sclose:
     throw panic(((plainError)(@string)sendOnClosedChannelˢ));
 }
 
-} partial class runtimeᴛhchan {
+} partial class runtime_package {
 
-internal static uintptr sortkey(this ж<hchan> Ꮡc) {
+[GoMethodBody("sortkey")] internal static uintptr sortkeyᴍ(ж<hchan> Ꮡc) {
     return (uintptr)Ꮡc;
 }
 
@@ -652,9 +652,9 @@ internal static (nint, bool) reflect_rselect(slice<runtimeSelect> cases) {
     return (chosen, recvOK);
 }
 
-} partial class runtimeᴛwaitq {
+} partial class runtime_package {
 
-internal static void dequeueSudoG(this ref waitq q, ж<sudog> Ꮡsgp) {
+[GoMethodBody("dequeueSudoG")] internal static void dequeueSudoGᴍ(ref waitq q, ж<sudog> Ꮡsgp) {
     ref var sgp = ref Ꮡsgp.DerefOrNull();
 
     var x = sgp.prev;

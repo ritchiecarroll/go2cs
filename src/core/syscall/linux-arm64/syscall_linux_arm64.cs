@@ -135,27 +135,27 @@ internal static error /*err*/ utimes(@string path, /*[2]*/ ж<array<Timeval>> �
     return utimensat(_AT_FDCWD, path, array<Timespec>.AliasPointer(Ꮡ(ts, 0), 2), 0);
 }
 
-} partial class syscallᴛPtraceRegs {
+} partial class syscall_package {
 
-public static uint64 PC(this ref PtraceRegs r) { return r.Pc; }
+[GoMethodBody("PC")] internal static uint64 PCᴍ(ref PtraceRegs r) { return r.Pc; }
 
-public static void SetPC(this ref PtraceRegs r, uint64 pc) { r.Pc = pc; }
+[GoMethodBody("SetPC")] internal static void SetPCᴍ(ref PtraceRegs r, uint64 pc) { r.Pc = pc; }
 
-} partial class syscallᴛIovec {
+} partial class syscall_package {
 
-public static void SetLen(this ref Iovec iov, nint length) {
+[GoMethodBody("SetLen")] internal static void SetLenᴍ(ref Iovec iov, nint length) {
     iov.Len = (uint64)length;
 }
 
-} partial class syscallᴛMsghdr {
+} partial class syscall_package {
 
-public static void SetControllen(this ref Msghdr msghdr, nint length) {
+[GoMethodBody("SetControllen")] internal static void SetControllenᴍ(ref Msghdr msghdr, nint length) {
     msghdr.Controllen = (uint64)length;
 }
 
-} partial class syscallᴛCmsghdr {
+} partial class syscall_package {
 
-public static void SetLen(this ref Cmsghdr cmsg, nint length) {
+[GoMethodBody("SetLen")] internal static void SetLenᴍ(ref Cmsghdr cmsg, nint length) {
     cmsg.Len = (uint64)length;
 }
 

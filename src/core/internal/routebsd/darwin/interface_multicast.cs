@@ -8,9 +8,9 @@ using static routebsd_package;
 
 partial class routebsd_package {
 
-} partial class routebsdᴛwireFormat {
+} partial class routebsd_package {
 
-internal static (Message, error) parseInterfaceMulticastAddrMessage(this ref wireFormat w, slice<byte> b) {
+[GoMethodBody("parseInterfaceMulticastAddrMessage")] internal static (Message, error) parseInterfaceMulticastAddrMessageᴍ(ref wireFormat w, slice<byte> b) {
     if (len(b) < w.bodyOff) {
         return (default, errMessageTooShort);
     }

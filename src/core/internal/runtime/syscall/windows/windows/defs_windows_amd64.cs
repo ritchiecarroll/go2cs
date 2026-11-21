@@ -66,20 +66,20 @@ partial struct Context {
     public uint64 LastExceptionFromRip;
 }
 
-} partial class windowsᴛContext {
+} partial class windows_package {
 
-public static uintptr PC(this ref Context c) { return (uintptr)c.Rip; }
-public static uintptr SP(this ref Context c) { return (uintptr)c.Rsp; }
+[GoMethodBody("PC")] internal static uintptr PCᴍ(ref Context c) { return (uintptr)c.Rip; }
+[GoMethodBody("SP")] internal static uintptr SPᴍ(ref Context c) { return (uintptr)c.Rsp; }
 
 // AMD64 does not have link register, so this returns 0.
-public static uintptr LR(this ref Context c) { return 0; }
-public static void SetLR(this ref Context c, uintptr x) { }
+[GoMethodBody("LR")] internal static uintptr LRᴍ(ref Context c) { return 0; }
+[GoMethodBody("SetLR")] internal static void SetLRᴍ(ref Context c, uintptr x) { }
 
-public static void SetPC(this ref Context c, uintptr x) { c.Rip = (uint64)x; }
-public static void SetSP(this ref Context c, uintptr x) { c.Rsp = (uint64)x; }
-public static void SetFP(this ref Context c, uintptr x) { c.Rbp = (uint64)x; }
+[GoMethodBody("SetPC")] internal static void SetPCᴍ(ref Context c, uintptr x) { c.Rip = (uint64)x; }
+[GoMethodBody("SetSP")] internal static void SetSPᴍ(ref Context c, uintptr x) { c.Rsp = (uint64)x; }
+[GoMethodBody("SetFP")] internal static void SetFPᴍ(ref Context c, uintptr x) { c.Rbp = (uint64)x; }
 
-public static void PushCall(this ref Context c, uintptr targetPC, uintptr resumePC) {
+[GoMethodBody("PushCall")] internal static void PushCallᴍ(ref Context c, uintptr targetPC, uintptr resumePC) {
     var sp = c.SP() - (uintptr)goarch.StackAlign;
     (@unsafe.Pointer.To<uintptr>((@unsafe.Pointer)sp)).Value = resumePC;
     c.SetSP(sp);
@@ -99,9 +99,9 @@ partial struct DISPATCHER_CONTEXT {
     public uintptr HandlerData;
 }
 
-} partial class windowsᴛDISPATCHER_CONTEXT {
+} partial class windows_package {
 
-public static ж<Context> Ctx(this ref DISPATCHER_CONTEXT c) {
+[GoMethodBody("Ctx")] internal static ж<Context> Ctxᴍ(ref DISPATCHER_CONTEXT c) {
     return c.Context;
 }
 

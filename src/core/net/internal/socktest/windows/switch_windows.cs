@@ -11,9 +11,9 @@ partial class socktest_package {
 // Sockets maps a socket descriptor to the status of socket.
 partial struct Sockets /*map[syscall.Handle, Status]*/;
 
-} partial class socktestᴛSwitch {
+} partial class socktest_package {
 
-internal static ж<Status> sockso(this ж<Switch> Ꮡsw, syscall.Handle s) {
+[GoMethodBody("sockso")] internal static ж<Status> socksoᴍ(ж<Switch> Ꮡsw, syscall.Handle s) {
     GoFrame ᒐ = default;
     bool ᒐd1 = false;
     try {
@@ -34,7 +34,7 @@ internal static ж<Status> sockso(this ж<Switch> Ꮡsw, syscall.Handle s) {
 
 // addLocked returns a new Status without locking.
 // sw.smu must be held before call.
-internal static ж<Status> addLocked(this ж<Switch> Ꮡsw, syscall.Handle s, nint family, nint sotype, nint proto) {
+[GoMethodBody("addLocked")] internal static ж<Status> addLockedᴍ(ж<Switch> Ꮡsw, syscall.Handle s, nint family, nint sotype, nint proto) {
     ref var sw = ref Ꮡsw.DerefOrNull();
 
     Ꮡsw.Ꮡonce.Do(Ꮡsw.init);

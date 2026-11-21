@@ -669,13 +669,13 @@ partial struct bitvector {
     internal ж<uint8> bytedata;
 }
 
-} partial class runtimeᴛbitvector {
+} partial class runtime_package {
 
 // ptrbit returns the i'th bit in bv.
 // ptrbit is less efficient than iterating directly over bitvector bits,
 // and should only be used in non-performance-critical code.
 // See adjustpointers for an example of a high-efficiency walk of a bitvector.
-internal static uint8 ptrbit(this ref bitvector bv, uintptr i) {
+[GoMethodBody("ptrbit")] internal static uint8 ptrbitᴍ(ref bitvector bv, uintptr i) {
     var b = (addb(bv.bytedata, i / 8)).Value;
     return (uint8)((byte)((b >> (int)(i % 8)) & 1));
 }
@@ -1420,12 +1420,12 @@ partial struct stackObjectRecord {
     internal uint32 gcdataoff; // offset to gcdata from moduledata.rodata
 }
 
-} partial class runtimeᴛstackObjectRecord {
+} partial class runtime_package {
 
 // gcdata returns the number of bytes that contain pointers, and
 // a ptr/nonptr bitmask covering those bytes.
 // Note that this bitmask might be larger than internal/abi.MaxPtrmaskBytes.
-internal static (uintptr, ж<byte>) gcdata(this ж<stackObjectRecord> Ꮡr) {
+[GoMethodBody("gcdata")] internal static (uintptr, ж<byte>) gcdataᴍ(ж<stackObjectRecord> Ꮡr) {
     ref var r = ref Ꮡr.DerefOrNull();
 
     var ptr = (uintptr)Ꮡr;

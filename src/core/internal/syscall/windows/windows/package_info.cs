@@ -79,6 +79,13 @@ using static go.@internal.syscall.windows_package;
 
 namespace go.@internal.syscall;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using syscall = syscall_package;
+using static windows_package;
+using go;
+using go.@internal.runtime.syscall;
+// </GlyphForwarderUsings>
+
 [GoPackage("windows")]
 public static partial class windows_package
 {
@@ -183,3 +190,22 @@ public static partial class windows_package
 [GoMethodHost(typeof(windows_package.TOKEN_GROUPS)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class windowsᴛTOKEN_GROUPS;
 [GoMethodHost(typeof(windows_package.TOKEN_MANDATORY_LABEL)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class windowsᴛTOKEN_MANDATORY_LABEL;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class windowsᴛSymbolicLinkReparseBuffer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Path(this ref SymbolicLinkReparseBuffer rb) => windows_package.Pathᴍ(ref rb);
+}
+partial class windowsᴛMountPointReparseBuffer {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Path(this ref MountPointReparseBuffer rb) => windows_package.Pathᴍ(ref rb);
+}
+partial class windowsᴛTOKEN_MANDATORY_LABEL {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static uint32 Size(this ref TOKEN_MANDATORY_LABEL tml) => windows_package.Sizeᴍ(ref tml);
+}
+partial class windowsᴛNTStatus {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static syscall.Errno Errno(this NTStatus s) => windows_package.Errnoᴍ(s);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] public static @string Error(this NTStatus s) => windows_package.Errorᴍ(s);
+}
+partial class windowsᴛOBJECT_ATTRIBUTES {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static error init(this ref OBJECT_ATTRIBUTES o, syscall.Handle root, @string name) => windows_package.initᴍ(ref o, root, name);
+}
+// </GlyphForwarders>

@@ -61,10 +61,10 @@ public static Key LOCAL_MACHINE => /* Key(syscall.HKEY_LOCAL_MACHINE) */ uncheck
 public static Key USERS => /* Key(syscall.HKEY_USERS) */ unchecked((Key)(syscall.Handle)2147483651);
 public static Key CURRENT_CONFIG => /* Key(syscall.HKEY_CURRENT_CONFIG) */ unchecked((Key)(syscall.Handle)2147483653);
 
-} partial class registryᴛKey {
+} partial class registry_package {
 
 // Close closes open key k.
-public static error Close(this Key k) {
+[GoMethodBody("Close")] internal static error Closeᴍ(Key k) {
     return syscall.RegCloseKey((syscall.Handle)k);
 }
 
@@ -88,10 +88,10 @@ public static (Key, error) OpenKey(Key k, @string path, uint32 access) {
     return ((Key)subkey, default);
 }
 
-} partial class registryᴛKey {
+} partial class registry_package {
 
 // ReadSubKeyNames returns the names of subkeys of key k.
-public static (slice<@string>, error) ReadSubKeyNames(this Key k) {
+[GoMethodBody("ReadSubKeyNames")] internal static (slice<@string>, error) ReadSubKeyNamesᴍ(Key k) {
     GoFrame ᒐ = default;
     try {
         // RegEnumKeyEx must be called repeatedly and to completion.
@@ -176,10 +176,10 @@ partial struct KeyInfo {
     internal syscall.Filetime lastWriteTime;
 }
 
-} partial class registryᴛKey {
+} partial class registry_package {
 
 // Stat retrieves information about the open key k.
-public static (ж<KeyInfo>, error) Stat(this Key k) {
+[GoMethodBody("Stat")] internal static (ж<KeyInfo>, error) Statᴍ(Key k) {
     ref var ki = ref heap(new KeyInfo(), out var Ꮡki);
     var err = syscall.RegQueryInfoKey((syscall.Handle)k, nil, nil, nil,
         Ꮡki.ᏑSubKeyCount, Ꮡki.ᏑMaxSubKeyLen, nil, Ꮡki.ᏑValueCount,

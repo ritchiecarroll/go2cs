@@ -27,12 +27,12 @@ partial struct ticksType {
     internal atomic.Int64 val;
 }
 
-} partial class runtimeᴛticksType {
+} partial class runtime_package {
 
 // init initializes ticks to maximize the chance that we have a good ticksPerSecond reference.
 //
 // Must not run concurrently with ticksPerSecond.
-internal static void init(this ref ticksType t) {
+[GoMethodBody("init")] internal static void initᴍ(ref ticksType t) {
     @lock(Ꮡticks.Ꮡlock);
     t.startTime = nanotime();
     t.startTicks = cputicks();
@@ -171,9 +171,9 @@ partial struct godebugInc {
     internal atomic.Pointer<Action> inc;
 }
 
-} partial class runtimeᴛgodebugInc {
+} partial class runtime_package {
 
-internal static void IncNonDefault(this ж<godebugInc> Ꮡg) {
+[GoMethodBody("IncNonDefault")] internal static void IncNonDefaultᴍ(ж<godebugInc> Ꮡg) {
     ref var g = ref Ꮡg.DerefOrNull();
 
     var inc = Ꮡg.Ꮡinc.Load();

@@ -64,6 +64,12 @@ using static go.@internal.runtime.gc.scan_package;
 
 namespace go.@internal.runtime.gc;
 
+// <GlyphForwarderUsings> (scratch prototype: the using directives the forwarders' signatures read)
+using go.@internal;
+using go.@internal.runtime;
+using static scan_package;
+// </GlyphForwarderUsings>
+
 [GoPackage("scan")]
 public static partial class scan_package
 {
@@ -98,3 +104,10 @@ public static partial class scan_package
 // <MethodHolders>
 [GoMethodHost(typeof(scan_package.unsafeBuf<>)), global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)] public static partial class scanᴛunsafeBuf;
 // </MethodHolders>
+
+// <GlyphForwarders> (scratch prototype: Go-named forwarders to the ᴍ bodies in the package class)
+partial class scanᴛunsafeBuf {
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void addIf<T>(this ref unsafeBuf<T> b, T val, bool pred) => scan_package.addIfᴍ<T>(ref b, val, pred);
+[global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining), global::System.Diagnostics.StackTraceHidden, global::System.Diagnostics.DebuggerStepThrough] internal static void check<T>(this unsafeBuf<T> b, nint cap) => scan_package.checkᴍ<T>(b, cap);
+}
+// </GlyphForwarders>

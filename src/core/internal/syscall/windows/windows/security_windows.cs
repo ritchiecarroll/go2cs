@@ -65,9 +65,9 @@ partial struct TOKEN_MANDATORY_LABEL {
     public SID_AND_ATTRIBUTES Label;
 }
 
-} partial class windowsᴛTOKEN_MANDATORY_LABEL {
+} partial class windows_package {
 
-public static uint32 Size(this ref TOKEN_MANDATORY_LABEL tml) {
+[GoMethodBody("Size")] internal static uint32 Sizeᴍ(ref TOKEN_MANDATORY_LABEL tml) {
     return (uint32)/* unsafe.Sizeof(TOKEN_MANDATORY_LABEL{}) */ (uintptr)16 + syscall.GetLengthSid(tml.Label.Sid);
 }
 
@@ -176,7 +176,7 @@ partial struct TOKEN_GROUPS {
     public array<SID_AND_ATTRIBUTES> Groups = new(1);
 }
 
-} partial class windowsᴛTOKEN_GROUPS {
+} partial class windows_package {
 
 // go2cs generated this placeholder — func AllGroups is hand-converted with managed semantics in the package's *_impl.cs ([module: GoManualConversion])
 

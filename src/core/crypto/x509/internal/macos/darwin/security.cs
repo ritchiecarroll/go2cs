@@ -31,9 +31,9 @@ partial struct OSStatus {
     internal int32 status;
 }
 
-} partial class macosᴛOSStatus {
+} partial class macos_package {
 
-public static @string Error(this OSStatus s) {
+[GoMethodBody("Error")] internal static @string Errorᴍ(OSStatus s) {
     return s.call + " error: "u8 + strconv.Itoa((nint)s.status);
 }
 

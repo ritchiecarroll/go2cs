@@ -72,11 +72,11 @@ internal static (ж<sharedMem> mem, error err) sharedMemMapFile(ж<os.File> f, n
     ᒐdone: return (mem, Ꮡerr.ValueSlot);
 }
 
-} partial class fuzzᴛsharedMem {
+} partial class fuzz_package {
 
 // Close unmaps the shared memory and closes the temporary file. If this
 // sharedMem was created with sharedMemTempFile, Close also removes the file.
-internal static error Close(this ref sharedMem m) {
+[GoMethodBody("Close")] internal static error Closeᴍ(ref sharedMem m) {
     var errsᴷ = new stackAppend<error>();
 
     // Attempt all operations, even if we get an error for an earlier operation.

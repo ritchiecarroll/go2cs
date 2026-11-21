@@ -100,10 +100,10 @@ partial struct timespec {
     internal int64 tv_nsec;
 }
 
-} partial class runtimeᴛtimespec {
+} partial class runtime_package {
 
 //go:nosplit
-internal static void setNsec(this ref timespec ts, int64 ns) {
+[GoMethodBody("setNsec")] internal static void setNsecᴍ(ref timespec ts, int64 ns) {
     ts.tv_sec = ns / 1000000000;
     ts.tv_nsec = ns % 1000000000;
 }
@@ -115,9 +115,9 @@ partial struct timeval {
     internal int64 tv_usec;
 }
 
-} partial class runtimeᴛtimeval {
+} partial class runtime_package {
 
-internal static void set_usec(this ref timeval tv, int32 x) {
+[GoMethodBody("set_usec")] internal static void set_usecᴍ(ref timeval tv, int32 x) {
     tv.tv_usec = (int64)x;
 }
 

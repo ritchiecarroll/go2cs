@@ -8,10 +8,10 @@ using static routebsd_package;
 
 partial class routebsd_package {
 
-} partial class routebsdᴛInterfaceMessage {
+} partial class routebsd_package {
 
 // MTU returns the interface MTU.
-public static nint MTU(this ref InterfaceMessage m) {
+[GoMethodBody("MTU")] internal static nint MTUᴍ(ref InterfaceMessage m) {
     return (nint)nativeEndian.Uint32(m.raw.slice(m.extOff + 8, m.extOff + 12));
 }
 

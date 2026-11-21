@@ -764,37 +764,37 @@ internal static void mallocinit() {
     ᏑgcController.ᏑmemoryLimit.Store(Δmath.MaxInt64);
 }
 
-} partial class runtimeᴛmheap {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string heapˢ => ref heapˢᵇ;
-private static readonly @string heapˢᵇ = "heap"u8;
-internal static ref readonly @string heapReservationˢ => ref heapReservationˢᵇ;
-private static readonly @string heapReservationˢᵇ = "heap reservation"u8;
-internal static ref readonly @string tooManyAddressSpaceˢ => ref tooManyAddressSpaceˢᵇ;
-private static readonly @string tooManyAddressSpaceˢᵇ = "too many address space collisions for -race mode"u8;
-internal static ref readonly @string regionExceedsUintptrˢ => ref regionExceedsUintptrˢᵇ;
-private static readonly @string regionExceedsUintptrˢᵇ = "region exceeds uintptr range"u8;
-internal static ref readonly @string baseOutsideUsableAddressˢ => ref baseOutsideUsableAddressˢᵇ;
-private static readonly @string baseOutsideUsableAddressˢᵇ = "base outside usable address space"u8;
-internal static ref readonly @string endOutsideUsableAddressˢ => ref endOutsideUsableAddressˢᵇ;
-private static readonly @string endOutsideUsableAddressˢᵇ = "end outside usable address space"u8;
-internal static ref readonly @string memoryReservationExceedsˢ => ref memoryReservationExceedsˢᵇ;
-private static readonly @string memoryReservationExceedsˢᵇ = "memory reservation exceeds address space limit"u8;
-internal static ref readonly @string misroundedAllocationInˢ => ref misroundedAllocationInˢᵇ;
-private static readonly @string misroundedAllocationInˢᵇ = "misrounded allocation in sysAlloc"u8;
-internal static ref readonly @string heapIndexˢ => ref heapIndexˢᵇ;
-private static readonly @string heapIndexˢᵇ = "heap index"u8;
-internal static ref readonly @string outOfMemoryAllocatingˢ => ref outOfMemoryAllocatingˢᵇ;
-private static readonly @string outOfMemoryAllocatingˢᵇ = "out of memory allocating heap arena map"u8;
-internal static ref readonly @string arenaAlreadyInitializedˢ => ref arenaAlreadyInitializedˢᵇ;
-private static readonly @string arenaAlreadyInitializedˢᵇ = "arena already initialized"u8;
-internal static ref readonly @string heapMetadataˢ => ref heapMetadataˢᵇ;
-private static readonly @string heapMetadataˢᵇ = "heap metadata"u8;
-internal static ref readonly @string outOfMemoryAllocatingˢ2 => ref outOfMemoryAllocatingˢ2ᵇ;
-private static readonly @string outOfMemoryAllocatingˢ2ᵇ = "out of memory allocating heap arena metadata"u8;
-internal static ref readonly @string outOfMemoryAllocatingˢ3 => ref outOfMemoryAllocatingˢ3ᵇ;
-private static readonly @string outOfMemoryAllocatingˢ3ᵇ = "out of memory allocating allArenas"u8;
+internal static ref readonly @string heapˢᴍmheap => ref heapˢᵇᴍmheap;
+private static readonly @string heapˢᵇᴍmheap = "heap"u8;
+internal static ref readonly @string heapReservationˢᴍmheap => ref heapReservationˢᵇᴍmheap;
+private static readonly @string heapReservationˢᵇᴍmheap = "heap reservation"u8;
+internal static ref readonly @string tooManyAddressSpaceˢᴍmheap => ref tooManyAddressSpaceˢᵇᴍmheap;
+private static readonly @string tooManyAddressSpaceˢᵇᴍmheap = "too many address space collisions for -race mode"u8;
+internal static ref readonly @string regionExceedsUintptrˢᴍmheap => ref regionExceedsUintptrˢᵇᴍmheap;
+private static readonly @string regionExceedsUintptrˢᵇᴍmheap = "region exceeds uintptr range"u8;
+internal static ref readonly @string baseOutsideUsableAddressˢᴍmheap => ref baseOutsideUsableAddressˢᵇᴍmheap;
+private static readonly @string baseOutsideUsableAddressˢᵇᴍmheap = "base outside usable address space"u8;
+internal static ref readonly @string endOutsideUsableAddressˢᴍmheap => ref endOutsideUsableAddressˢᵇᴍmheap;
+private static readonly @string endOutsideUsableAddressˢᵇᴍmheap = "end outside usable address space"u8;
+internal static ref readonly @string memoryReservationExceedsˢᴍmheap => ref memoryReservationExceedsˢᵇᴍmheap;
+private static readonly @string memoryReservationExceedsˢᵇᴍmheap = "memory reservation exceeds address space limit"u8;
+internal static ref readonly @string misroundedAllocationInˢᴍmheap => ref misroundedAllocationInˢᵇᴍmheap;
+private static readonly @string misroundedAllocationInˢᵇᴍmheap = "misrounded allocation in sysAlloc"u8;
+internal static ref readonly @string heapIndexˢᴍmheap => ref heapIndexˢᵇᴍmheap;
+private static readonly @string heapIndexˢᵇᴍmheap = "heap index"u8;
+internal static ref readonly @string outOfMemoryAllocatingˢᴍmheap => ref outOfMemoryAllocatingˢᵇᴍmheap;
+private static readonly @string outOfMemoryAllocatingˢᵇᴍmheap = "out of memory allocating heap arena map"u8;
+internal static ref readonly @string arenaAlreadyInitializedˢᴍmheap => ref arenaAlreadyInitializedˢᵇᴍmheap;
+private static readonly @string arenaAlreadyInitializedˢᵇᴍmheap = "arena already initialized"u8;
+internal static ref readonly @string heapMetadataˢᴍmheap => ref heapMetadataˢᵇᴍmheap;
+private static readonly @string heapMetadataˢᵇᴍmheap = "heap metadata"u8;
+internal static ref readonly @string outOfMemoryAllocatingˢ2ᴍmheap => ref outOfMemoryAllocatingˢ2ᵇᴍmheap;
+private static readonly @string outOfMemoryAllocatingˢ2ᵇᴍmheap = "out of memory allocating heap arena metadata"u8;
+internal static ref readonly @string outOfMemoryAllocatingˢ3ᴍmheap => ref outOfMemoryAllocatingˢ3ᵇᴍmheap;
+private static readonly @string outOfMemoryAllocatingˢ3ᵇᴍmheap = "out of memory allocating allArenas"u8;
 
 // sysAlloc allocates heap arena space for at least n bytes. The
 // returned pointer is always heapArenaBytes-aligned and backed by
@@ -811,7 +811,7 @@ private static readonly @string outOfMemoryAllocatingˢ3ᵇ = "out of memory all
 // arenaList is the list the arena should be added to.
 //
 // h must be locked.
-internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, uintptr n, ж<ж<arenaHint>> ᏑhintList, ж<slice<arenaIdx>> ᏑarenaList) {
+[GoMethodBody("sysAlloc")] internal static (@unsafe.Pointer v, uintptr size) sysAllocᴍ(ж<mheap> Ꮡh, uintptr n, ж<ж<arenaHint>> ᏑhintList, ж<slice<arenaIdx>> ᏑarenaList) {
     @unsafe.Pointer v = default;
     uintptr size = default;
     ref var h = ref Ꮡh.DerefOrNull();
@@ -828,7 +828,7 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
         //
         // Only do this if we're using the regular heap arena hints.
         // This behavior is only for the heap.
-        v = h.arena.alloc(n, heapArenaBytes, ᏑgcController.ᏑheapReleased, heapˢ);
+        v = h.arena.alloc(n, heapArenaBytes, ᏑgcController.ᏑheapReleased, heapˢᴍmheap);
         if (v != nil) {
             size = n;
             goto mapped;
@@ -849,7 +849,7 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
             // Outside addressable heap. Can't use.
             v = default;
         } else {
-            v = sysReserve((@unsafe.Pointer)p, n, heapReservationˢ);
+            v = sysReserve((@unsafe.Pointer)p, n, heapReservationˢᴍmheap);
         }
         if (p == (uintptr)v) {
             // Success. Update the hint.
@@ -879,13 +879,13 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
             // [0x00c000000000, 0x00e000000000), but we
             // just ran out of hints in this region. Give
             // a nice failure.
-            @throw(tooManyAddressSpaceˢ);
+            @throw(tooManyAddressSpaceˢᴍmheap);
         }
 
         // All of the hints failed, so we'll take any
         // (sufficiently aligned) address the kernel will give
         // us.
-        (v, size) = sysReserveAligned(nil, n, heapArenaBytes, heapˢ);
+        (v, size) = sysReserveAligned(nil, n, heapArenaBytes, heapˢᴍmheap);
         if (v == nil) {
             return (default, 0);
         }
@@ -904,22 +904,22 @@ internal static (@unsafe.Pointer v, uintptr size) sysAlloc(this ж<mheap> Ꮡh, 
         @string bad = default;
         var p = (uintptr)v;
         if (p + size < p) {
-            bad = regionExceedsUintptrˢ;
+            bad = regionExceedsUintptrˢᴍmheap;
         } else if (arenaIndex(p) >= (nuint)((arenaIdx)((nuint)1 << (int)(arenaBits)))) {
-            bad = baseOutsideUsableAddressˢ;
+            bad = baseOutsideUsableAddressˢᴍmheap;
         } else if (arenaIndex(p + size - 1) >= (nuint)((arenaIdx)((nuint)1 << (int)(arenaBits)))) {
-            bad = endOutsideUsableAddressˢ;
+            bad = endOutsideUsableAddressˢᴍmheap;
         }
         if (bad != ""u8) {
             // This should be impossible on most architectures,
             // but it would be really confusing to debug.
             print((@string)"runtime: memory allocated by OS [", (hex)(uint64)p, (@string)", ", (hex)(uint64)(p + size), (@string)") not in usable address space: ", bad, (@string)"\n");
-            @throw(memoryReservationExceedsˢ);
+            @throw(memoryReservationExceedsˢᴍmheap);
         }
     }
 
     if ((uintptr)((uintptr)v & (uintptr)(heapArenaBytes - 1)) != 0) {
-        @throw(misroundedAllocationInˢ);
+        @throw(misroundedAllocationInˢᴍmheap);
     }
 
 mapped:
@@ -940,9 +940,9 @@ mapped:
             // is paged in is too expensive. Trying to account for the whole region means
             // that it will appear like an enormous memory overhead in statistics, even though
             // it is not.
-            l2 = @unsafe.Pointer.To<array<ж<heapArena>>>(sysAllocOS(/* unsafe.Sizeof(*l2) */ (uintptr)33554432, heapIndexˢ));
+            l2 = @unsafe.Pointer.To<array<ж<heapArena>>>(sysAllocOS(/* unsafe.Sizeof(*l2) */ (uintptr)33554432, heapIndexˢᴍmheap));
             if (l2 == nil) {
-                @throw(outOfMemoryAllocatingˢ);
+                @throw(outOfMemoryAllocatingˢᴍmheap);
             }
             if (h.arenasHugePages) {
                 sysHugePage(@unsafe.Pointer.FromPinnedBox(l2), /* unsafe.Sizeof(*l2) */ (uintptr)33554432);
@@ -953,14 +953,14 @@ mapped:
         }
 
         if (l2.Value[ri.l2()] != nil) {
-            @throw(arenaAlreadyInitializedˢ);
+            @throw(arenaAlreadyInitializedˢᴍmheap);
         }
         ж<heapArena> r = default;
-        r = @unsafe.Pointer.To<heapArena>(h.heapArenaAlloc.alloc(/* unsafe.Sizeof(*r) */ (uintptr)69648, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys, heapMetadataˢ));
+        r = @unsafe.Pointer.To<heapArena>(h.heapArenaAlloc.alloc(/* unsafe.Sizeof(*r) */ (uintptr)69648, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys, heapMetadataˢᴍmheap));
         if (r == nil) {
             r = @unsafe.Pointer.To<heapArena>(persistentalloc(/* unsafe.Sizeof(*r) */ (uintptr)69648, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
             if (r == nil) {
-                @throw(outOfMemoryAllocatingˢ2);
+                @throw(outOfMemoryAllocatingˢ2ᴍmheap);
             }
         }
 
@@ -972,7 +972,7 @@ mapped:
             }
             var newArray = @unsafe.Pointer.To<notInHeap>(persistentalloc(sizeΔ1, goarch.PtrSize, Ꮡmemstats.ᏑgcMiscSys));
             if (newArray == nil) {
-                @throw(outOfMemoryAllocatingˢ3);
+                @throw(outOfMemoryAllocatingˢ3ᴍmheap);
             }
             var oldSlice = (arenaList);
             (ᏑarenaList.nilcheck().Reinterpret<slice<arenaIdx>, notInHeapSlice>()).Value = new notInHeapSlice(newArray, len((arenaList)), (nint)(sizeΔ1 / (uintptr)goarch.PtrSize));
@@ -1013,7 +1013,7 @@ mapped:
 // Must be called on the system stack because it acquires the heap lock.
 //
 //go:systemstack
-internal static void enableMetadataHugePages(this ж<mheap> Ꮡh) {
+[GoMethodBody("enableMetadataHugePages")] internal static void enableMetadataHugePagesᴍ(ж<mheap> Ꮡh) {
     ref var h = ref Ꮡh.DerefOrNull();
 
     // Enable huge pages for page structure.
@@ -1069,15 +1069,15 @@ internal static gclinkptr nextFreeFast(ж<mspan> Ꮡs) {
     return 0;
 }
 
-} partial class runtimeᴛmcache {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string sAllocCountSNelemsˢ => ref sAllocCountSNelemsˢᵇ;
-private static readonly @string sAllocCountSNelemsˢᵇ = "s.allocCount != s.nelems && freeIndex == s.nelems"u8;
-internal static ref readonly @string freeIndexIsNotValidˢ => ref freeIndexIsNotValidˢᵇ;
-private static readonly @string freeIndexIsNotValidˢᵇ = "freeIndex is not valid"u8;
-internal static ref readonly @string sAllocCountSNelemsˢ2 => ref sAllocCountSNelemsˢ2ᵇ;
-private static readonly @string sAllocCountSNelemsˢ2ᵇ = "s.allocCount > s.nelems"u8;
+internal static ref readonly @string sAllocCountSNelemsˢᴍmcache => ref sAllocCountSNelemsˢᵇᴍmcache;
+private static readonly @string sAllocCountSNelemsˢᵇᴍmcache = "s.allocCount != s.nelems && freeIndex == s.nelems"u8;
+internal static ref readonly @string freeIndexIsNotValidˢᴍmcache => ref freeIndexIsNotValidˢᵇᴍmcache;
+private static readonly @string freeIndexIsNotValidˢᵇᴍmcache = "freeIndex is not valid"u8;
+internal static ref readonly @string sAllocCountSNelemsˢ2ᴍmcache => ref sAllocCountSNelemsˢ2ᵇᴍmcache;
+private static readonly @string sAllocCountSNelemsˢ2ᵇᴍmcache = "s.allocCount > s.nelems"u8;
 
 // nextFree returns the next free object from the cached span if one is available.
 // Otherwise it refills the cache with a span with an available object and
@@ -1088,7 +1088,7 @@ private static readonly @string sAllocCountSNelemsˢ2ᵇ = "s.allocCount > s.nel
 //
 // Must run in a non-preemptible context since otherwise the owner of
 // c could change.
-internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFree(this ref mcache c, spanClass spc) {
+[GoMethodBody("nextFree")] internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFreeᴍ(ref mcache c, spanClass spc) {
     gclinkptr v = default;
     ж<mspan> s = default;
     bool checkGCTrigger = default;
@@ -1100,7 +1100,7 @@ internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFree(this re
         // The span is full.
         if (s.allocCount != s.nelems) {
             println((@string)"runtime: s.allocCount=", s.allocCount, (@string)"s.nelems=", s.nelems);
-            @throw(sAllocCountSNelemsˢ);
+            @throw(sAllocCountSNelemsˢᴍmcache);
         }
         c.refill(spc);
         checkGCTrigger = true;
@@ -1110,14 +1110,14 @@ internal static (gclinkptr v, ж<mspan> s, bool checkGCTrigger) nextFree(this re
     }
 
     if (freeIndex >= s.nelems) {
-        @throw(freeIndexIsNotValidˢ);
+        @throw(freeIndexIsNotValidˢᴍmcache);
     }
 
     v = (gclinkptr)((uintptr)freeIndex * s.elemsize + s.@base());
     s.allocCount++;
     if (s.allocCount > s.nelems) {
         println((@string)"s.allocCount=", s.allocCount, (@string)"s.nelems=", s.nelems);
-        @throw(sAllocCountSNelemsˢ2);
+        @throw(sAllocCountSNelemsˢ2ᴍmcache);
     }
     return (v, s, checkGCTrigger);
 }
@@ -2193,15 +2193,15 @@ internal static bool freegc(@unsafe.Pointer ptr, uintptr size, bool noscan) {
     return true;
 }
 
-} partial class runtimeᴛmcache {
+} partial class runtime_package {
 
 // Hoisted @string literals (single allocation; Go keeps these in RODATA)
-internal static ref readonly @string nextReusableNoScanNilˢ => ref nextReusableNoScanNilˢᵇ;
-private static readonly @string nextReusableNoScanNilˢᵇ = "nextReusableNoScan: nil span for pointer in reusable object free list"u8;
+internal static ref readonly @string nextReusableNoScanNilˢᴍmcache => ref nextReusableNoScanNilˢᵇᴍmcache;
+private static readonly @string nextReusableNoScanNilˢᵇᴍmcache = "nextReusableNoScan: nil span for pointer in reusable object free list"u8;
 
 // nextReusableNoScan returns the next reusable object for a noscan span,
 // or 0 if no reusable object is found.
-internal static (gclinkptr, ж<mspan>) nextReusableNoScan(this ref mcache c, ж<mspan> Ꮡs, spanClass spc) {
+[GoMethodBody("nextReusableNoScan")] internal static (gclinkptr, ж<mspan>) nextReusableNoScanᴍ(ref mcache c, ж<mspan> Ꮡs, spanClass spc) {
     ref var s = ref Ꮡs.DerefOrNull();
 
     if (!runtimeFreegcEnabled) {
@@ -2237,7 +2237,7 @@ internal static (gclinkptr, ж<mspan>) nextReusableNoScan(this ref mcache c, ж<
     var span = spanOf((uintptr)v);
     if (span == nil) {
         // TODO(thepudds): construct a test that triggers this throw.
-        @throw(nextReusableNoScanNilˢ);
+        @throw(nextReusableNoScanNilˢᴍmcache);
     }
 
     return (v, span);
@@ -2541,9 +2541,9 @@ partial struct linearAlloc {
     internal bool mapMemory; // transition memory from Reserved to Ready if true
 }
 
-} partial class runtimeᴛlinearAlloc {
+} partial class runtime_package {
 
-internal static void init(this ref linearAlloc l, uintptr @base, uintptr size, bool mapMemory) {
+[GoMethodBody("init")] internal static void initᴍ(ref linearAlloc l, uintptr @base, uintptr size, bool mapMemory) {
     if (@base + size < @base) {
         // Chop off the last byte. The runtime isn't prepared
         // to deal with situations where the bounds could overflow.
@@ -2556,7 +2556,7 @@ internal static void init(this ref linearAlloc l, uintptr @base, uintptr size, b
     l.mapMemory = mapMemory;
 }
 
-internal static @unsafe.Pointer alloc(this ref linearAlloc l, uintptr size, uintptr align, ж<sysMemStat> sysStat, @string vmaName) {
+[GoMethodBody("alloc")] internal static @unsafe.Pointer allocᴍ(ref linearAlloc l, uintptr size, uintptr align, ж<sysMemStat> sysStat, @string vmaName) {
     var p = alignUp(l.next, align);
     if (p + size > l.end) {
         return default;
@@ -2588,9 +2588,9 @@ partial struct notInHeap {
     internal sys.NotInHeap _;
 }
 
-} partial class runtimeᴛnotInHeap {
+} partial class runtime_package {
 
-internal static ж<notInHeap> add(this ж<notInHeap> Ꮡp, uintptr bytes) {
+[GoMethodBody("add")] internal static ж<notInHeap> addᴍ(ж<notInHeap> Ꮡp, uintptr bytes) {
     return @unsafe.Pointer.To<notInHeap>(@unsafe.Add(@unsafe.Pointer.FromPinnedBox(Ꮡp), bytes));
 }
 

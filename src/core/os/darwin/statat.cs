@@ -10,9 +10,9 @@ using static os_package;
 
 partial class os_package {
 
-} partial class osᴛFile {
+} partial class os_package {
 
-internal static (FileInfo, error) lstatat(this ж<File> Ꮡf, @string name) {
+[GoMethodBody("lstatat")] internal static (FileInfo, error) lstatatᴍ(ж<File> Ꮡf, @string name) {
     ref var f = ref Ꮡf.DerefOrNull();
 
     if (stathook != nil) {
