@@ -1200,6 +1200,7 @@
     <Project Path="tests/Behavioral/SharedEmbeddedInterfaceMember/SharedEmbeddedInterfaceMember.csproj" />
     <Project Path="tests/Behavioral/ShiftNegativeWideConst/ShiftNegativeWideConst.csproj" />
     <Project Path="tests/Behavioral/ShiftPrecedenceUnsigned/ShiftPrecedenceUnsigned.csproj" />
+    <Project Path="tests/Behavioral/ShapeWitnessSamePackage/ShapeWitnessSamePackage.csproj" />
     <Project Path="tests/Behavioral/ShellCacheMutation/ShellCacheMutation.csproj" />
     <Project Path="tests/Behavioral/ShellCacheNilFunc/ShellCacheNilFunc.csproj" />
     <Project Path="tests/Behavioral/ShellCacheReassertEquality/ShellCacheReassertEquality.csproj" />

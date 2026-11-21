@@ -1151,7 +1151,7 @@ func (v *Visitor) convCompositeLitAs(compositeLit *ast.CompositeLit, elidedType 
 	// and rendered the box `ж<P224Point>`, which mismatches the pointer adapter that wraps
 	// `ж<nistCurve<P224PointжnistPoint>>` (CS0311/type mismatch). Re-render from the RESOLVED type,
 	// whose getAliasQualifiedTypeName substitutes the proxy. Gated to the proxy case, so no churn elsewhere.
-	if named, ok := types.Unalias(exprType).(*types.Named); ok && v.namedHasConstraintProxy(named) {
+	if named, ok := types.Unalias(exprType).(*types.Named); ok && v.namedRendersResolved(named) {
 		typeRender = convertToCSTypeName(v.getAliasQualifiedTypeName(named, false))
 	}
 

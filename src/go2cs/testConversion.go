@@ -3042,6 +3042,14 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	// A test file's instantiation is refused as a production one is (constraintProxyForwarding.go), or under
 	// -warn GO2CS2002 downgraded as one is. The sites are recorded AFTER resetPackageState below, which would
 	// otherwise clear them.
+	//
+	// The test variant's shape-witness selection goes first, as production's does (conversionDriver.go), so the proxy
+	// refusals below decline its witnessed positions; resetPackageState clears it, and it is installed again after.
+	if refusal := prepareShapeWitness(pkg); refusal != nil {
+		refusal.report()
+		return nil, nil, refusal
+	}
+
 	downgraded := refuseUnforwardableConstraintProxies(pkg)
 
 	if downgraded != nil && !options.warnCodes[diagnosticProxyRefused] {
@@ -3065,6 +3073,7 @@ func convertTestVariant(pkg *packages.Package, testEntries []FileEntry, outputPa
 	}
 
 	resetPackageState(pkg)
+	installShapeWitnessSelection(pkg)
 
 	if downgraded != nil {
 		recordDowngradedRefusals(diagnosticProxyRefused, downgraded.sites)

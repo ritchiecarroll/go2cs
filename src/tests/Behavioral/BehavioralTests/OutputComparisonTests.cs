@@ -2429,6 +2429,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckShadowedVarMethodCallLHS() => CheckTarget("ShadowedVarMethodCallLHS");
 
     [TestMethod]
+    public void CheckShapeWitnessSamePackage() => CheckTarget("ShapeWitnessSamePackage");
+
+    [TestMethod]
     public void CheckSharedEmbeddedInterfaceMember() => CheckTarget("SharedEmbeddedInterfaceMember");
 
     [TestMethod]

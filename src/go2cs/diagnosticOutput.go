@@ -177,6 +177,10 @@ const (
 	// diagnosticAsmStubUnforwarded: a WARNING. A bodyless function of a module outside GOROOT that nothing forwards
 	// converts to a stub that throws when called; the conversion names each one (asmForwardBodies.go).
 	diagnosticAsmStubUnforwarded = "GO2CS2012"
+	// diagnosticShapeWitnessRefused: a site the narrow shape witness selects that its current stage cannot place -- a
+	// pair needing another package's witness, an instantiation of another package's witness declaration, a method value
+	// through a witnessed type parameter, or a witnessed value converted to an interface (shapeWitness.go).
+	diagnosticShapeWitnessRefused = "GO2CS2013"
 
 	// diagnosticDeferredMarkerUnresolved: a deferred-marker pass (deferredMarkerOperations.go) could not leave a written
 	// file free of markers: the file cannot be read or written back, a marker has no closing sentinel, or a marker's

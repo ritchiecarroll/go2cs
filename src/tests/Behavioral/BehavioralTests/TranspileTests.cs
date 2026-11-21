@@ -2491,6 +2491,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckShadowedVarMethodCallLHS() => CheckTarget("ShadowedVarMethodCallLHS");
 
     [TestMethod]
+    public void CheckShapeWitnessSamePackage() => CheckTarget("ShapeWitnessSamePackage");
+
+    [TestMethod]
     public void CheckSharedEmbeddedInterfaceMember() => CheckTarget("SharedEmbeddedInterfaceMember");
 
     [TestMethod]

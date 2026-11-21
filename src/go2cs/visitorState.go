@@ -442,6 +442,9 @@ type Visitor struct {
 	// func literals the same way, so a `var x T` inside a closure reads the enclosing declaration's
 	// companion.
 	currentFuncArrayDimsNames map[*types.TypeParam]string
+	// shapeWitnessTypeOwner is the generic named type whose declaration is being emitted, so a field naming a witness
+	// carrier (`Index[T]`) passes the declaring type's own witness parameter (shapeWitness.go).
+	shapeWitnessTypeOwner *types.Named
 	// closedConstraintsRecorded holds the (type argument, closed constraint) pairs
 	// recordClosedConstraintImplementation has recorded, so each records once. It is also what
 	// ends the recursion of a SELF-referential constraint, whose recording renders the closed
