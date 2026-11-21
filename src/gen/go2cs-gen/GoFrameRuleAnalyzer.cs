@@ -72,6 +72,17 @@ public sealed class GoFrameRuleAnalyzer : DiagnosticAnalyzer
                     if (span.End > root.FullSpan.End || root.FindNode(span, getInnermostNodeForTie: true) is not IdentifierNameSyntax identifier || identifier.Span != span)
                         continue;
 
+                    // A list is keyed by a hash and an IDE can hold a stale one, so the span must still name a frame.
+                    ITypeSymbol? type = analysis.SemanticModel.GetSymbolInfo(identifier, analysis.CancellationToken).Symbol switch
+                    {
+                        ILocalSymbol local => local.Type,
+                        IParameterSymbol parameter => parameter.Type,
+                        _ => null
+                    };
+
+                    if (!SymbolEqualityComparer.Default.Equals(type, frame))
+                        continue;
+
                     GoFrameRuleGenerator.Bound bound = GoFrameRuleGenerator.Classify(analysis.SemanticModel, identifier, frame, analysis.CancellationToken);
 
                     if (bound is { Known: true, Use: { } use })
